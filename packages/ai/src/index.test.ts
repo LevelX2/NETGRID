@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 import { applyAction, createGame, getLegalActions, getPlayerView, replayEvents } from "@netrunner/engine";
 import {
   assertAiInputIsSideSafe,
+  buildObservedFacts,
   buildAiDecisionInput,
   chooseAiAction,
   chooseCorpAction,
   chooseRunnerAction,
-  simulateAiGame
+  simulateAiGame,
+  simulateAiSoak
 } from "./index";
 import type { CardInstanceId, GameState, LegalAction, Side } from "@netrunner/shared";
 
@@ -184,6 +186,66 @@ describe("MVP 0.3 AI simulation harness", () => {
       expect(JSON.stringify(summary)).not.toContain("cardInstances");
       expect(JSON.stringify(summary)).not.toContain("v08_project_agenda_1");
     }
+  });
+});
+
+describe("MVP 0.9 stronger AI", () => {
+  it("adds side-safe evidence and quality metrics to V0.8 simulations", () => {
+    const summary = simulateAiGame({
+      seed: "ai-v09-metrics",
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      agendaPointsToWin: 7,
+      runnerDifficulty: "hard",
+      corpDifficulty: "hard",
+      maxActions: 160
+    });
+
+    expect(summary.cardPoolVersion).toBe("0.8.0");
+    expect(summary.errors).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    expect(summary.metrics.illegalActions).toBe(0);
+    expect(summary.metrics.timeoutRate).toBe(0);
+    expect(summary.metrics.reasonCodeCoverage.length).toBeGreaterThanOrEqual(4);
+    expect(summary.metrics.actionTypeCoverage.length).toBeGreaterThanOrEqual(4);
+    expect(summary.actionSequence.every((entry) => entry.confidence >= 0 && entry.evidence.length > 0)).toBe(true);
+    expect(JSON.stringify(summary)).not.toContain("cardInstances");
+    expect(JSON.stringify(summary)).not.toContain("v08_project_agenda_1");
+  });
+
+  it("keeps hidden-state variants from changing visible decisions", () => {
+    const state = toRunnerTurn(createGame({ seed: "ai-v09-hidden", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008", agendaPointsToWin: 7 }));
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "hard", profileId: "runner-ai-v0.9-hard" });
+    const variant = {
+      ...input,
+      eventTail: input.eventTail.map((event) => ({ ...event, stateHashAfter: "fnv1a:hiddenvariant" }))
+    };
+
+    expect(chooseRunnerAction(variant)).toEqual(chooseRunnerAction(input));
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("reconstructs observed facts without private decklists", () => {
+    const state = createGame({ seed: "ai-v09-observed", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008", agendaPointsToWin: 7 });
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v0.9-normal" });
+    const facts = buildObservedFacts(input);
+
+    expect(facts.publicServers).toContain("rd");
+    expect(facts.agendaPoints.own).toBe(0);
+    expect(JSON.stringify(facts)).not.toContain("cardInstances");
+    expect(JSON.stringify(facts)).not.toContain("v08_burst_credit_event");
+  });
+
+  it("runs the V0.9 soak matrix with holdout accounting", () => {
+    const soak = simulateAiSoak({ maxActions: 60 });
+
+    expect(soak.aggregate.seeds).toBe(27);
+    expect(soak.aggregate.illegalActions).toBe(0);
+    expect(soak.aggregate.replayFailures).toBe(0);
+    expect(soak.aggregate.timeoutRate).toBe(0);
+    expect(soak.aggregate.reasonCodeCoverage.length).toBeGreaterThanOrEqual(4);
+    expect(soak.aggregate.holdoutSeeds).toEqual(["ai-v09-holdout-001", "ai-v09-holdout-002", "ai-v09-holdout-003"]);
+    expect(JSON.stringify(soak)).not.toContain("cardInstances");
   });
 });
 

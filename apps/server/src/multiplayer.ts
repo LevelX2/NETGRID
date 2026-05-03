@@ -748,7 +748,7 @@ export class MultiplayerService {
       const controller = record.match.aiControllers?.[side];
       const input = buildAiDecisionInput(record.gameState, side, {
         difficulty: controller?.difficulty ?? "normal",
-        profileId: controller?.profileId ?? `${side}-server-ai-v0.3`,
+        profileId: controller?.profileId ?? `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
         decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${side}`,
         actionNumber: record.gameState.stateVersion
       });
@@ -923,12 +923,12 @@ function controllersForMode(
   if (mode === "human_runner_vs_corp_ai") {
     return {
       runner: { controllerId: "runner-human", side: "runner", type: "human_remote", displayName: "Runner" },
-      corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI", difficulty: difficulties.corpDifficulty, profileId: "corp-ai-v0.3" }
+      corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI", difficulty: difficulties.corpDifficulty, profileId: `corp-ai-v0.9-${difficulties.corpDifficulty}` }
     };
   }
   if (mode === "human_corp_vs_runner_ai") {
     return {
-      runner: { controllerId: "runner-ai", side: "runner", type: "ai", displayName: "Runner KI", difficulty: difficulties.runnerDifficulty, profileId: "runner-ai-v0.3" },
+      runner: { controllerId: "runner-ai", side: "runner", type: "ai", displayName: "Runner KI", difficulty: difficulties.runnerDifficulty, profileId: `runner-ai-v0.9-${difficulties.runnerDifficulty}` },
       corp: { controllerId: "corp-human", side: "corp", type: "human_remote", displayName: "Corp" }
     };
   }

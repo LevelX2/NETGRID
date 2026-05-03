@@ -410,6 +410,10 @@ export type AiDecision = {
   consideredActionIds: string[];
   fallbackUsed: boolean;
   confidence?: number;
+  evidence?: string[];
+  timeoutUsed?: boolean;
+  profileId?: string;
+  difficulty?: AiDifficulty;
   reason?: string;
 };
 

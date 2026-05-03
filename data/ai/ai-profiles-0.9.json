@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-profiles-v0.9",
   "id": "ai-profiles-0.9",
-  "status": "requirements_freeze",
+  "status": "implemented_v0.9",
   "profiles": [
     {
       "profileId": "runner-ai-v0.9-easy",

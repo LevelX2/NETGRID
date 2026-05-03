@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.9 stronger AI requirements are complete. V0.9 implementation is unblocked.
+MVP 0.9 stronger AI is complete. Next recommended scope is a later V1.0/stabilization/operations decision.
 
 ## Status
 
@@ -120,6 +120,16 @@ MVP 0.9 stronger AI requirements are complete.
 
 `ready_for_implementation: true`
 
+MVP 0.9 stronger AI implementation is complete and locally verified.
+
+`ready_for_hardening: true`
+
+MVP 0.9 validation, hardening and documentation are complete.
+
+`MVP_0.9_done: true`
+
+`ready_for_later_V1_0_or_stabilization_scope_decision: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -150,6 +160,8 @@ Gate flow:
 22. MVP 0.8 implementation/playable starter-slice: pass.
 23. MVP 0.8 validation, hardening and documentation: pass.
 24. MVP 0.9 requirements/stronger AI freeze: pass.
+25. MVP 0.9 implementation/stronger AI: pass.
+26. MVP 0.9 validation, hardening and documentation: pass.
 
 ## Phase 1 files created or updated
 
@@ -891,6 +903,54 @@ The V0.9 detailed plan was later refined for requirements-freeze readiness with 
 
 V0.9 is frozen as a stronger-AI phase on the completed V0.8 starter slice. It may add roles, profiles, scorers, explanations, metrics, lifecycle guards and soaks, but no cards, official assets, FullState AI, LLM rules actor, V1.0 or public platform features.
 
+## MVP 0.9 Implementation files created or updated
+
+- `packages/ai/src/index.ts`
+- `packages/ai/src/index.test.ts`
+- `packages/shared/src/index.ts`
+- `apps/server/src/multiplayer.ts`
+- `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`
+- `docs/derived/MVP_0.9_IMPLEMENTATION_REVIEW.md`
+
+## MVP 0.9 Implementation checks
+
+- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
+- `corepack pnpm --filter @netrunner/ai test`: pass, 15 tests.
+- `corepack pnpm --filter @netrunner/server test`: pass, 12 tests.
+- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
+- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 20 tests.
+- V0.9 Soak smoke: pass, 27 runs, 0 illegal actions, 0 replay failures, fallback rate 0.02, timeout rate 0.
+
+## MVP 0.9 Implementation gate
+
+`ready_for_hardening: true`
+
+V0.9 now has role-aware Runner and Corp scorers, difficulty profiles, side-safe evidence and explanations, ObservedFacts, simulation metrics and a multi-seed soak helper. The AI remains LegalActions-only and does not use FullState, hidden opponent data or an LLM as rules actor.
+
+## MVP 0.9 Final files created or updated
+
+- `docs/derived/MVP_0.9_FINAL_REVIEW.md`
+- `docs/derived/MVP_0.9_IMPLEMENTATION_REVIEW.md`
+- `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.9 Final checks
+
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 60 package tests plus 20 root spec tests.
+- `corepack pnpm build`: pass.
+- V0.9 Soak smoke: pass.
+
+## MVP 0.9 Final gate
+
+`MVP_0.9_done: true`
+
+Next recommended scope: later V1.0/stabilization/operations decision. V1.0, V0.10 and public platform features were not started in this thread.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -937,7 +997,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Current gate: V0.9 Implementation. V0.9 Requirements are complete and `ready_for_implementation: true`.
+Current gate: V0.9 complete. Next recommended scope is a later V1.0/stabilization/operations decision; V1.0 is not started in this thread.
 
 Detailed planning artifacts available:
 

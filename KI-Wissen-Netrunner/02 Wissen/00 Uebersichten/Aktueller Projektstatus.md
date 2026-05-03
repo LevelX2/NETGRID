@@ -51,6 +51,7 @@
 - MVP 0.8 Requirements wurden eingefroren: lokaler/fiktiver Starterset-Slice mit 14 neuen Karten, expliziten Resolvernamen, Manifestpflicht, Szenarioabdeckung, Visibility-, Replay/StateHash-, KI-Smoke-, Decklegalitäts- und Performance-Gates. Gate-Ergebnis: `ready_for_implementation: true`.
 - MVP 0.8 wurde implementiert, validiert und dokumentiert: 14 lokale/fiktive neue Karten, explizite Runner-Event-, Corp-Operation- und Root-Rez-Resolver, V0.8-Katalog-/Deck-Snapshots, Server-Default-Matchsetup auf V0.8, AI-Smokes und vollständige Regression. Final Gate: `MVP_0.8_done: true`; `ready_for_MVP_0.9_requirements: true`.
 - MVP 0.9 Requirements wurden eingefroren: stärkere KI mit side-sicherem Input-Vertrag, rollenbewussten Scorern, Difficulty-Profilen, Reason-Code-/Explanation-Safety, ObservedFacts, Soak-Matrix, Holdout-Seeds und Tuning-Change-Control. Gate-Ergebnis: `ready_for_implementation: true`.
+- MVP 0.9 wurde implementiert, validiert und dokumentiert: rollenbewusste Runner-/Corp-Scorer, Difficulty-Profile, side-sichere Evidence und Explanations, ObservedFacts, Simulation-Metriken, Soak-Helfer und Server-V0.9-Profile. Final Gate: `MVP_0.9_done: true`.
 
 ## Teilweise umgesetzt
 
@@ -66,14 +67,14 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1- bis MVP-0.8-Arbeitsschritt ist offen.
-- Der nächste gate-basierte Schritt ist V0.9 Implementierung auf Basis des eingefrorenen stärkeren KI-Scopes.
+- Der nächste empfohlene Scope ist eine spätere V1.0-/Stabilisierung-/Betriebsentscheidung. V1.0 wird in diesem Thread nicht begonnen.
 - Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Requirements, UI-Spezifikationen, Testmatrix und Requirements Review sind eingefroren.
 - V0.5 darf keine Karte automatisch spielbar machen; V0.6 darf keinen Matchstart ohne validierte Deck-Snapshots erlauben.
 - V0.7 darf echte Kartenabbilder nur nach separater Quellen-, Nutzungs- und Asset-Freigabe anzeigen; bis dahin bleiben generische Platzhalterkarten Standard. Hidden Cards dürfen auch im Bildmodus keine echten Kartenrücken, Bild-URLs, unterscheidbaren Ladezustände oder DOM-Metadaten erhalten.
 - V0.8 ist abgeschlossen. Weitere Karten oder Mechanikgruppen dürfen nicht durch Importstatus, Katalogdaten oder Deckeditor-Freigaben spielbar werden, sondern brauchen weiterhin eigenes Resolver-, Manifest-, Test-, Visibility-, Replay/StateHash- und KI-Smoke-Gate.
-- V0.9 ist als KI-Qualitätsphase requirements-gefroren; sie darf keine Kartenpool- oder UI-Hauptphase werden und keine KI mit FullState, verdeckten gegnerischen Informationen oder LLM-Regelakteur einführen.
+- V0.9 ist abgeschlossen. Weitere KI-Arbeit darf den LegalActions-/PlayerView-/side-gefilterten-Event-Vertrag nicht aufweichen und keine FullState-, verdeckte Gegnerdaten- oder LLM-Regelakteur-Pfade einführen.
 - V0.5-Importdaten dürfen keine Engine-, KI-, Deckvalidierungs- oder Matchstart-Freigabe auslösen. `deck_legal` setzt `playable` voraus.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 

@@ -110,6 +110,12 @@ Die V0.9-Requirements für stärkere KI wurden abgeleitet und reviewfähig einge
 
 Erstellt wurden `docs/derived/MVP_0.9_REQUIREMENTS.md`, `docs/derived/AI_HEURISTICS_0.9_SPEC.md`, `docs/derived/AI_DIFFICULTY_0.9_SPEC.md`, `docs/derived/AI_EXPLANATION_0.9_SPEC.md`, `docs/derived/AI_SOAK_TEST_0.9_SPEC.md`, `docs/derived/MVP_0.9_TEST_MATRIX.md`, `docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md`, `data/ai/*.json`, vier `data/scenarios/ai-v09-*.json` und `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`. Check: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
 
+## [2026-05-03] phase-0.9-final | MVP 0.9 stärkere KI abgeschlossen
+
+MVP 0.9 wurde implementiert, validiert und final dokumentiert. Umgesetzt wurden rollenbewusste Runner- und Corp-Scorer, Difficulty-Profile für Easy/Normal/Hard ohne erweiterten Informationszugriff, side-sichere Evidence und Explanations, ObservedFacts aus side-gefilterten Events, Qualitätsmetriken in Simulationssummaries, ein V0.9-Soak-Helfer sowie Server-V0.9-Profil-IDs.
+
+Checks: `corepack pnpm --filter @netrunner/ai typecheck`, `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm --filter @netrunner/server test`, `corepack pnpm --filter @netrunner/shared typecheck`, `corepack pnpm --filter @netrunner/server typecheck` und Root-Artefakt-/Visibility-Specs bestanden. V0.9-Soak-Smoke: 27 Läufe, 0 IllegalActions, 0 ReplayFailures, FallbackRate 0,02, TimeoutRate 0. Gate-Ergebnis nach finalem Workspace-Lauf: `MVP_0.9_done: true`.
+
 Erstellt wurde `docs/derived/POST_MVP_0.4_ROADMAP.md` sowie die Wissensseite `Roadmap nach MVP 0.4`. Nächster Gate-Schritt ist `MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog`.
 
 ## [2026-05-03] planung | V0.5 und V0.6 detailliert ausgearbeitet

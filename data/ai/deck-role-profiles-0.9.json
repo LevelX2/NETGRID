@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-deck-role-profiles-v0.9",
   "id": "deck-role-profiles-0.9",
-  "status": "requirements_freeze",
+  "status": "implemented_v0.9",
   "derivedFrom": [
     "data/ai/card-role-manifest-0.9.json",
     "data/decks/deck-snapshots-0.8.json"

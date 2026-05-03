@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-card-role-manifest-v0.9",
   "id": "card-role-manifest-0.9",
-  "status": "requirements_freeze",
+  "status": "implemented_v0.9",
   "source": "manual_project_roles",
   "derivedFrom": [
     "data/manifests/card-implementation-manifest-0.8.json",
