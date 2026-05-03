@@ -92,6 +92,12 @@ Checks: `corepack pnpm --filter @netrunner/engine test`, `corepack pnpm --filter
 
 Die Folge-Roadmap wurde nach MVP 0.4 produktnäher neu geordnet. Kartenimport und Kartenkatalog werden V0.5, Deckeditor- und Match-Setup-Fundament V0.6, UI-Neugestaltung und Designgestaltung V0.7, Basisset-/Starterset-Spielbarkeit V0.8 und bessere KI V0.9 zugeordnet. Die UI-Neugestaltung wurde bewusst nach V0.7 gelegt, weil dazu noch Analysen laufen.
 
+## [2026-05-03] phase-0.8-req | MVP 0.8 Requirements eingefroren
+
+Die V0.8-Requirements für den spielbaren Base-/Starterset-Slice wurden abgeleitet und reviewfähig eingefroren. Der gewählte Pfad ist ein lokaler/fiktiver Starterset-Slice mit 14 neuen spielbaren Karten. Damage, Resources, Traces, Identitätsfähigkeiten, Multiaccess, Hosting, Viren, Prevention und Replacement bleiben außerhalb des Hauptslice.
+
+Erstellt wurden `docs/derived/MVP_0.8_REQUIREMENTS.md`, `docs/derived/PLAYABLE_CARD_SLICE_0.8_SPEC.md`, `docs/derived/RULE_MECHANICS_0.8_SPEC.md`, `docs/derived/CARD_IMPLEMENTATION_0.8_SPEC.md`, `docs/derived/MVP_0.8_TEST_MATRIX.md`, `docs/derived/MVP_0.8_REQUIREMENTS_REVIEW.md`, V0.8-Karten-/Deck-/Manifest-Artefakte und vier V0.8-Szenario-Fixtures. Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
+
 Erstellt wurde `docs/derived/POST_MVP_0.4_ROADMAP.md` sowie die Wissensseite `Roadmap nach MVP 0.4`. Nächster Gate-Schritt ist `MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog`.
 
 ## [2026-05-03] planung | V0.5 und V0.6 detailliert ausgearbeitet

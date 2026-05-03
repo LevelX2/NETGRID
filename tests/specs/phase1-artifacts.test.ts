@@ -59,6 +59,7 @@ const REQUIRED_MVP_0_4_SCENARIOS = [
 const REQUIRED_MVP_0_5_MUST_IDS = Array.from({ length: 10 }, (_, index) => `V05-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_6_MUST_IDS = Array.from({ length: 11 }, (_, index) => `V06-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_7_MUST_IDS = Array.from({ length: 16 }, (_, index) => `V07-MUST-${String(index + 1).padStart(3, "0")}`);
+const REQUIRED_MVP_0_8_MUST_IDS = Array.from({ length: 21 }, (_, index) => `V08-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_REQUIREMENTS.md",
   "docs/derived/UI_REDESIGN_0.7_SPEC.md",
@@ -70,6 +71,29 @@ const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_IMPLEMENTATION_REVIEW.md",
   "docs/derived/MVP_0.7_FINAL_REVIEW.md",
   "tests/specs/ui-redesign-0.7-acceptance-tests.todo.md"
+];
+
+const REQUIRED_MVP_0_8_DOCS = [
+  "docs/derived/MVP_0.8_REQUIREMENTS.md",
+  "docs/derived/PLAYABLE_CARD_SLICE_0.8_SPEC.md",
+  "docs/derived/RULE_MECHANICS_0.8_SPEC.md",
+  "docs/derived/CARD_IMPLEMENTATION_0.8_SPEC.md",
+  "docs/derived/MVP_0.8_TEST_MATRIX.md",
+  "docs/derived/MVP_0.8_REQUIREMENTS_REVIEW.md",
+  "tests/specs/playable-card-slice-0.8-acceptance-tests.todo.md"
+];
+
+const MVP_0_8_DATA_FILES = [
+  "data/cards/demo-cards-0.8.json",
+  "data/decks/demo-decks-0.8.json",
+  "data/manifests/card-implementation-manifest-0.8.json"
+];
+
+const REQUIRED_MVP_0_8_SCENARIOS = [
+  "v08-starter-runner-economy-draw.json",
+  "v08-starter-icebreaker-run.json",
+  "v08-starter-corp-economy-score.json",
+  "v08-starter-tag-tax-smoke.json"
 ];
 
 describe("Phase 1 derived artifacts", () => {
@@ -303,6 +327,73 @@ describe("Phase 1 derived artifacts", () => {
     expect(review).toContain("ready_for_implementation: true");
     expect(implementationReview).toContain("ready_for_hardening: true");
     expect(finalReview).toContain("MVP_0.7_done: true");
+  });
+
+  it("keeps MVP 0.8 playable starter-slice requirements frozen and mapped", () => {
+    for (const file of REQUIRED_MVP_0_8_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+    for (const file of MVP_0_8_DATA_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.8_REQUIREMENTS.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.8_TEST_MATRIX.md", "utf8");
+    const review = readFileSync("docs/derived/MVP_0.8_REQUIREMENTS_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_8_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(requirements).toContain("source_mode: local_original");
+    expect(requirements).toContain("ready_for_implementation: true");
+    expect(review).toContain("ready_for_implementation: true");
+
+    const manifest = JSON.parse(readFileSync("data/manifests/card-implementation-manifest-0.8.json", "utf8")) as {
+      cards: Array<{
+        cardCode: string;
+        status: string;
+        sourceMode?: string;
+        resolver?: string;
+        roleTags?: string[];
+        unitTests?: string[];
+        scenarioTests?: string[];
+        visibilityTests?: string[];
+        replayTests?: string[];
+        aiSmokeTests?: string[];
+      }>;
+    };
+    const playableCards = manifest.cards.filter((card) => card.status === "playable_mvp");
+    expect(playableCards.length).toBe(14);
+    expect(playableCards.every((card) => card.sourceMode === "local_original")).toBe(true);
+    expect(playableCards.every((card) => card.resolver && card.roleTags?.length)).toBe(true);
+    expect(
+      playableCards.every(
+        (card) => card.unitTests?.length && card.scenarioTests?.length && card.visibilityTests?.length && card.replayTests?.length && card.aiSmokeTests?.length
+      )
+    ).toBe(true);
+
+    const scenarioDir = "data/scenarios";
+    const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
+    const scenarioCoveredCards = new Set<string>();
+    for (const file of REQUIRED_MVP_0_8_SCENARIOS) {
+      expect(present, file).toContain(file);
+      const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as {
+        id?: string;
+        baselineId?: string;
+        requirementIds?: string[];
+        coversCards?: string[];
+        expected?: unknown;
+      };
+      expect(scenario.id, file).toMatch(/^SCN-V08-\d{3}$/);
+      expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.8");
+      expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
+      expect(scenario.expected, file).toBeDefined();
+      for (const cardId of scenario.coversCards ?? []) scenarioCoveredCards.add(cardId);
+    }
+    for (const card of playableCards) {
+      expect(scenarioCoveredCards.has(card.cardCode), card.cardCode).toBe(true);
+    }
   });
 });
 

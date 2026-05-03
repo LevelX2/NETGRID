@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.7 UI redesign validation, hardening and documentation are complete. V0.8 requirements are unblocked.
+MVP 0.8 playable base/starter-set slice requirements are complete. V0.8 implementation is unblocked.
 
 ## Status
 
@@ -94,7 +94,11 @@ MVP 0.7 validation, hardening and documentation are complete.
 
 `ready_for_MVP_0.8_requirements: true`
 
-MVP 0.8 playable base/starter-set slice detailed planning is complete as a future gated phase.
+MVP 0.8 playable base/starter-set slice requirements are complete.
+
+`ready_for_implementation: true`
+
+MVP 0.8 playable base/starter-set slice detailed planning is complete and the requirements freeze is now complete.
 
 `MVP_0.8_detailed_plan_available: true`
 
@@ -128,6 +132,7 @@ Gate flow:
 18. MVP 0.7 requirements/design freeze: pass.
 19. MVP 0.7 implementation: pass.
 20. MVP 0.7 validation, hardening and documentation: pass.
+21. MVP 0.8 requirements/playable starter-slice freeze: pass.
 
 ## Phase 1 files created or updated
 
@@ -703,7 +708,39 @@ V0.7 now has a light Design-C-oriented shell, Entry preflight, Card Display sett
 
 `ready_for_MVP_0.8_requirements: true`
 
-Next gate: V0.8 Requirements for a small playable base/starter-set slice. V0.8 remains constrained by manifest, resolver, test, visibility, replay/StateHash and AI-smoke gates per playable card. V1.0 and public platform features remain out of scope.
+Next gate: V0.8 Implementation for the frozen local starter slice. V0.8 remains constrained by manifest, resolver, test, visibility, replay/StateHash and AI-smoke gates per playable card. V1.0 and public platform features remain out of scope.
+
+## MVP 0.8 Requirements files created or updated
+
+- `docs/derived/MVP_0.8_REQUIREMENTS.md`
+- `docs/derived/PLAYABLE_CARD_SLICE_0.8_SPEC.md`
+- `docs/derived/RULE_MECHANICS_0.8_SPEC.md`
+- `docs/derived/CARD_IMPLEMENTATION_0.8_SPEC.md`
+- `docs/derived/MVP_0.8_TEST_MATRIX.md`
+- `docs/derived/MVP_0.8_REQUIREMENTS_REVIEW.md`
+- `data/cards/demo-cards-0.8.json`
+- `data/decks/demo-decks-0.8.json`
+- `data/manifests/card-implementation-manifest-0.8.json`
+- `data/scenarios/v08-starter-runner-economy-draw.json`
+- `data/scenarios/v08-starter-icebreaker-run.json`
+- `data/scenarios/v08-starter-corp-economy-score.json`
+- `data/scenarios/v08-starter-tag-tax-smoke.json`
+- `tests/specs/playable-card-slice-0.8-acceptance-tests.todo.md`
+- `tests/specs/phase1-artifacts.test.ts`
+
+## MVP 0.8 Requirements checks
+
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 14 artifact tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 48 package tests plus 19 root spec tests.
+- `corepack pnpm build`: pass.
+
+## MVP 0.8 Requirements gate
+
+`ready_for_implementation: true`
+
+V0.8 is frozen as a small local/fictitious playable starter slice. The slice contains 14 local original cards and avoids Damage, Resources, Traces, identities, Multiaccess, Hosting, Viruses, Prevention and Replacement. Every new playable card must remain backed by manifest, explicit resolver, unit test, scenario, visibility test, replay/StateHash and AI smoke. Import-only cards remain data and cannot start matches.
 
 ## MVP 0.8 Detailed Planning files created or updated
 
@@ -776,7 +813,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Current gate: V0.8 Requirements. V0.7 is complete and `ready_for_MVP_0.8_requirements: true`.
+Current gate: V0.8 Implementation. V0.8 Requirements are complete and `ready_for_implementation: true`.
 
 Detailed planning artifacts available:
 

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "demo-decks-v0.8",
+  "id": "demo-decks-0.8",
+  "status": "frozen_for_v0.8_requirements",
+  "decks": [
+    {
+      "id": "demo_runner_008",
+      "name": "Runner Demo Deck 08 - Starter Pressure",
+      "side": "runner",
+      "identity": "runner_identity_001",
+      "cards": [
+        { "id": "simple_economy_event", "quantity": 3 },
+        { "id": "simple_run_event", "quantity": 2 },
+        { "id": "simple_draw_event", "quantity": 2 },
+        { "id": "simple_setup_hardware", "quantity": 1 },
+        { "id": "simple_fracter", "quantity": 1 },
+        { "id": "efficient_fracter", "quantity": 2 },
+        { "id": "simple_decoder", "quantity": 1 },
+        { "id": "simple_killer", "quantity": 1 },
+        { "id": "v08_burst_credit_event", "quantity": 3 },
+        { "id": "v08_deep_draw_event", "quantity": 3 },
+        { "id": "v08_overclock_run_event", "quantity": 2 },
+        { "id": "v08_memory_chip", "quantity": 2 },
+        { "id": "v08_steady_fracter", "quantity": 2 },
+        { "id": "v08_precise_decoder", "quantity": 1 },
+        { "id": "v08_adaptive_killer", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "demo_corp_008",
+      "name": "Corp Demo Deck 08 - Starter Score Grid",
+      "side": "corp",
+      "identity": "corp_identity_001",
+      "cards": [
+        { "id": "simple_agenda", "quantity": 2 },
+        { "id": "simple_priority_agenda", "quantity": 1 },
+        { "id": "v08_project_agenda", "quantity": 3 },
+        { "id": "simple_economy_operation", "quantity": 2 },
+        { "id": "simple_draw_operation", "quantity": 1 },
+        { "id": "simple_economy_asset", "quantity": 1 },
+        { "id": "simple_upgrade", "quantity": 1 },
+        { "id": "simple_barrier_ice", "quantity": 1 },
+        { "id": "simple_code_gate_ice", "quantity": 1 },
+        { "id": "simple_sentry_ice", "quantity": 1 },
+        { "id": "simple_tag_ice", "quantity": 1 },
+        { "id": "simple_taxing_barrier_ice", "quantity": 1 },
+        { "id": "v08_credit_surge_operation", "quantity": 3 },
+        { "id": "v08_archive_planning_operation", "quantity": 2 },
+        { "id": "v08_cashout_asset", "quantity": 2 },
+        { "id": "v08_wall_ice", "quantity": 2 },
+        { "id": "v08_gate_ice", "quantity": 2 },
+        { "id": "v08_watchdog_ice", "quantity": 2 }
+      ]
+    }
+  ]
+}

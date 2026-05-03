@@ -48,6 +48,7 @@
 - MVP 0.6 Validierung, Hardening und Dokumentation sind abgeschlossen. Final Gate: `MVP_0.6_done: true`.
 - MVP 0.7 Requirements/Design Freeze ist abgeschlossen. Die UI-Neugestaltung ist auf Design C als Hauptstruktur, Design D als Run-/Encounter-Fokus und Design B als einklappbare Diagnose-Schicht eingefroren. Gate-Ergebnis: `ready_for_implementation: true`.
 - MVP 0.7 UI-Neugestaltung wurde implementiert, validiert und dokumentiert: helle Clean-High-Contrast-Oberfläche, Entry-Preflight, Card Display Settings, image-ready generische CardView, Card Preview, RunTimeline, LegalActionsPanel, UndoPanel, EventLogPanel und Diagnostics Drawer. Final Gate: `MVP_0.7_done: true`; `ready_for_MVP_0.8_requirements: true`.
+- MVP 0.8 Requirements wurden eingefroren: lokaler/fiktiver Starterset-Slice mit 14 neuen Karten, expliziten Resolvernamen, Manifestpflicht, Szenarioabdeckung, Visibility-, Replay/StateHash-, KI-Smoke-, Decklegalitäts- und Performance-Gates. Gate-Ergebnis: `ready_for_implementation: true`.
 
 ## Teilweise umgesetzt
 
@@ -63,13 +64,13 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1/0.2/0.3/0.4-Arbeitsschritt ist offen.
-- Der nächste gate-basierte Schritt ist V0.8 Requirements für einen kleinen spielbaren Base-/Starterset-Slice.
+- Der nächste gate-basierte Schritt ist V0.8 Implementierung für den eingefrorenen lokalen Starterset-Slice.
 - Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Requirements, UI-Spezifikationen, Testmatrix und Requirements Review sind eingefroren.
 - V0.5 darf keine Karte automatisch spielbar machen; V0.6 darf keinen Matchstart ohne validierte Deck-Snapshots erlauben.
 - V0.7 darf echte Kartenabbilder nur nach separater Quellen-, Nutzungs- und Asset-Freigabe anzeigen; bis dahin bleiben generische Platzhalterkarten Standard. Hidden Cards dürfen auch im Bildmodus keine echten Kartenrücken, Bild-URLs, unterscheidbaren Ladezustände oder DOM-Metadaten erhalten.
-- V0.8 ist durch das bestandene V0.7-Gate freigegeben, bleibt aber eine streng gegatete Spielbarkeitsphase; Importstatus, Katalogdaten oder Deckeditor-Freigaben dürfen weiterhin keine Karte ohne Resolver- und Testgate spielbar machen.
+- V0.8 ist durch das bestandene V0.7-Gate und den Requirements Freeze freigegeben, bleibt aber eine streng gegatete Spielbarkeitsphase; Importstatus, Katalogdaten oder Deckeditor-Freigaben dürfen weiterhin keine Karte ohne Resolver- und Testgate spielbar machen.
 - V0.9 bleibt eine spätere, durch V0.8 gegatete KI-Qualitätsphase; sie darf keine Kartenpool- oder UI-Hauptphase werden und keine KI mit FullState, verdeckten gegnerischen Informationen oder LLM-Regelakteur einführen.
 - V0.5-Importdaten dürfen keine Engine-, KI-, Deckvalidierungs- oder Matchstart-Freigabe auslösen. `deck_legal` setzt `playable` voraus.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
