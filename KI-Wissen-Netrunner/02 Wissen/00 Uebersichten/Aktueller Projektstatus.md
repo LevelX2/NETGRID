@@ -57,6 +57,7 @@
 - S01 wurde als Sonderphase für Spielende, Ergebnisfenster, Spielziel, private Matchserie und Audio umgesetzt: `GameResultSummary`, Ergebnisfenster mit Perspektivtext, side-sichere Statistik, Spielziel-Auswahl `Regelmatch · 7 Agendapunkte`/`Einzelspiel · Deckziel`/`Private Matchserie · Seitenwechsel`, private Zwei-Spiel-Serie mit Seitenwechsel und opt-in Web-Audio-Effekte.
 - V0.92 wurde als Mechanik-Inventar-, Requirements- und Spezifikationsgate abgeschlossen: menschliche und maschinenlesbare Mechanik-Coverage, M1-Requirements, M1-Effect-/Timing-Spezifikation, Testmatrix, Requirements Review und Final Review liegen vor. Gate-Ergebnis: `MVP_0.92_done: true`; `ready_for_MVP_0.93_implementation: true`.
 - V0.93 wurde als M1-Engine-Fundament abgeschlossen: additive Shared-/Engine-Typen für Effects, Abilities, Choices und Eventklassifikation, `pendingChoice` in GameState/PlayerView, Choice-Revalidierung, Breaker Pump/Break als Ability-Pilot, side-sichere Server-/WebSocket-/Reconnect-Payloads und AI-LegalActions-Smoke sind umgesetzt. Gate-Ergebnis: `MVP_0.93_done: true`; `M2_requirements_ready: true`.
+- Die detaillierte Planung für V0.94 und V0.95 liegt vor. Die Annahmenprüfung bestätigt V0.94 als Damage-/Flatline-Gate mit engem Game-End-Grundvertrag und V0.95 als Resource-/Tag-Interaktionsgate. V0.94 startet keinen vollen M2-Block; V0.95 startet kein Trace/Link/Bidding.
 
 ## Teilweise umgesetzt
 
@@ -72,7 +73,7 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1- bis MVP-0.9-Arbeitsschritt ist offen.
-- Der nächste empfohlene Scope braucht eine neue Gate-Entscheidung. M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten; Mulligan, Damage, Trace, Resources, Multiaccess, Identity-Abilities und Prevention sind weiterhin nicht spielbar.
+- Der nächste empfohlene Scope ist V0.94 Requirements Freeze für Damage/Flatline, sofern die Reihenfolge nicht ausdrücklich geändert wird. M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten; Mulligan, Trace, Resources, Multiaccess, Identity-Abilities und Prevention sind weiterhin nicht spielbar. Resources sind für V0.95 geplant.
 - Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Requirements, UI-Spezifikationen, Testmatrix und Requirements Review sind eingefroren.
@@ -81,7 +82,7 @@
 - V0.8 ist abgeschlossen. Weitere Karten oder Mechanikgruppen dürfen nicht durch Importstatus, Katalogdaten oder Deckeditor-Freigaben spielbar werden, sondern brauchen weiterhin eigenes Resolver-, Manifest-, Test-, Visibility-, Replay/StateHash- und KI-Smoke-Gate.
 - V0.9 ist abgeschlossen. Weitere KI-Arbeit darf den LegalActions-/PlayerView-/side-gefilterten-Event-Vertrag nicht aufweichen und keine FullState-, verdeckte Gegnerdaten- oder LLM-Regelakteur-Pfade einführen.
 - V0.91 Requirements sind eingefroren und private lokale Scan-/Asset-Nutzung ist als Projektentscheidung dokumentiert. NetrunnerDB ist nur technische Kandidatenquelle für Bildmetadaten; Null-Signal-Primärquellen geben Card Art, Frames und Card Backs nicht pauschal frei. Bilder dürfen ausschließlich als private lokale Anzeige-Artefakte genutzt werden und dürfen keine Engine-, KI-, Deck-, Replay-, StateHash- oder Match-State-Daten beeinflussen.
-- V0.92 und V0.93 sind abgeschlossen. M2 ist nur spezifiziert; Damage, Trace, Resources, Mulligan, Multiaccess, Identity-Abilities und Prevention bleiben weiterhin nicht spielbar.
+- V0.92 und V0.93 sind abgeschlossen. V0.94/V0.95 sind geplant, aber nicht implementiert; Damage, Trace, Resources, Mulligan, Multiaccess, Identity-Abilities und Prevention bleiben weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - S01-Mehrspiel-Serien sind als private Zwei-Spiel-Hülle umgesetzt. Der Seitenwechsel erfolgt über ein neues Einzelspiel mit neuem privaten Session-/Join-Kontext; öffentliche Turnier-, Ranking- und Matchmaking-Funktionen bleiben ausgeschlossen.
 - V0.5-Importdaten dürfen keine Engine-, KI-, Deckvalidierungs- oder Matchstart-Freigabe auslösen. `deck_legal` setzt `playable` voraus.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.

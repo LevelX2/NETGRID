@@ -41,5 +41,8 @@
 - `docs/derived/MVP_0.93_REQUIREMENTS.md`: umgesetzte V0.93-Anforderungen für das M1-Engine-Fundament und M2 als Requirements-only Scope.
 - `docs/derived/SETUP_GAME_END_0.93_SPEC.md`: M2-Spezifikation für Setup, Mulligan, Siegwerte, Deckout/Flatline-Vorbereitung, Identity Setup und Archives/facedown.
 - `docs/derived/MVP_0.93_FINAL_REVIEW.md`: Final Review für V0.93 mit Checkliste, Grenzen und Gate-Ergebnis.
+- `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`: Annahmenprüfung und Reihenfolgeentscheidung für Damage/Flatline und Resources.
+- `docs/derived/MVP_0.94_DETAILED_PLAN.md`: detaillierte Planung für V0.94 Damage und Flatline.
+- `docs/derived/MVP_0.95_DETAILED_PLAN.md`: detaillierte Planung für V0.95 Resources und Tag-Interaktion.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.

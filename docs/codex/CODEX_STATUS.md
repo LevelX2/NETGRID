@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V0.93 M1 Engine foundation and M2 requirements are complete; the next scope needs a separate gated decision.
+V0.94/V0.95 detailed planning is available; the next implementation scope needs a separate gated requirements decision.
 
 ## Status
 
@@ -154,6 +154,12 @@ MVP 0.93 M1 Engine foundation is implemented and M2 Setup/Game-End requirements 
 
 `M2_requirements_ready: true`
 
+MVP 0.94 and MVP 0.95 detailed planning is complete.
+
+`MVP_0.94_detailed_plan_available: true`
+
+`MVP_0.95_detailed_plan_available: true`
+
 S01 requirements, result modal, private match series, audio and test matrix are complete.
 
 `S01_requirements_freeze_done: true`
@@ -199,6 +205,7 @@ Gate flow:
 27. MVP 0.91 requirements/card image asset gate freeze: pass for private local scans/assets only.
 28. MVP 0.92 mechanics inventory and M1 requirements/specification gate: pass.
 29. MVP 0.93 M1 Engine foundation and M2 requirements: pass.
+30. MVP 0.94/V0.95 detailed planning: pass.
 
 ## Phase 1 files created or updated
 
@@ -1091,6 +1098,24 @@ Checks:
 - `corepack pnpm lint`: pass after regenerated `.next` type output.
 - `corepack pnpm typecheck`: pass after regenerated `.next` type output.
 
+## MVP 0.94/V0.95 Detailed Planning files created or updated
+
+- `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
+- `docs/derived/MVP_0.94_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.94/V0.95 Planning decision
+
+`MVP_0.94_detailed_plan_available: true`
+
+`MVP_0.95_detailed_plan_available: true`
+
+The assumption review confirms the existing sequence with one sharpening: V0.94 remains the Damage/Flatline gate, but must include a narrow Game-End reason contract for Flatline before any Damage implementation. Full M2 work such as Mulligan, Identity Setup and Archives/Multiaccess remains outside V0.94. V0.95 remains the Runner Resource and tag-interaction gate, but must not introduce Trace, Link or Bidding. Both plans include explicit test matrices for Visibility, Replay/StateHash, Undo, WebSocket/Reconnect, AI and no-scope regression gates.
+
 ## S01 Requirements and implementation files created or updated
 
 - `docs/derived/S01_DETAILED_PLAN.md`
@@ -1180,8 +1205,10 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.91: card image asset gate and private local image import/display after V0.9.
 - V0.92: mechanics inventory and M1 requirements/specification gate.
 - V0.93: M1 Engine foundation and M2 requirements.
+- V0.94: Damage and Flatline, with narrow Game-End reason contract.
+- V0.95: Runner Resources and tag-interaction.
 
-Current gate: V0.93 is complete. The next scope needs a separate gated decision. M2 implementation may start later from `SETUP_GAME_END_0.93_SPEC.md`, but Mulligan, Damage, Trace, Resources, Multiaccess, Identity-Abilities and Prevention are still not playable.
+Current gate: V0.94/V0.95 detailed planning is complete. The next scope should be V0.94 Requirements Freeze for Damage/Flatline, unless the project owner explicitly changes the sequence. Mulligan, Trace, Resources, Multiaccess, Identity-Abilities and Prevention are still not playable; Resources are planned for V0.95 only.
 
 Detailed planning artifacts available:
 
@@ -1202,6 +1229,9 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.93_REQUIREMENTS.md`
 - `docs/derived/SETUP_GAME_END_0.93_SPEC.md`
 - `docs/derived/MVP_0.93_FINAL_REVIEW.md`
+- `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
+- `docs/derived/MVP_0.94_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.95_DETAILED_PLAN.md`
 
 UI design exploration artifacts available:
 

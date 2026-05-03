@@ -1,6 +1,6 @@
 # Mechanik-Komplettierungsplan
 
-Status: detaillierte Planungsfassung, keine Implementierung
+Status: detaillierte Planungsfassung; V0.94/V0.95-Detailpläne liegen vor
 Stand: 2026-05-03
 Arbeitsbasis:
 
@@ -475,6 +475,14 @@ Die wichtigste Abschlussregel: Es darf keine Karte `playable` oder `deck_legal` 
 | V0.91 Assets vermischen sich mit Match-State | Hidden-Info- oder StateHash-Problem. | Bilder bleiben reine lokale Anzeige-Artefakte. |
 
 ## 12. Nächster konkreter Planungsschritt
+
+Aktueller Anschluss nach V0.93:
+
+- `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
+- `docs/derived/MVP_0.94_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+
+Der nächste empfohlene Gate-Schritt ist V0.94 Requirements Freeze für Damage/Flatline. V0.95 Resources folgt danach, sofern die Reihenfolge nicht ausdrücklich geändert wird.
 
 Empfohlener nächster reiner Planungsprompt:
 
