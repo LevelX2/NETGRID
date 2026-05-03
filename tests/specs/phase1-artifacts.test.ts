@@ -61,6 +61,28 @@ const REQUIRED_MVP_0_6_MUST_IDS = Array.from({ length: 11 }, (_, index) => `V06-
 const REQUIRED_MVP_0_7_MUST_IDS = Array.from({ length: 16 }, (_, index) => `V07-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_8_MUST_IDS = Array.from({ length: 21 }, (_, index) => `V08-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_9_MUST_IDS = Array.from({ length: 15 }, (_, index) => `V09-MUST-${String(index + 1).padStart(3, "0")}`);
+const REQUIRED_MVP_0_92_MUST_IDS = [
+  "M092-M0-STATUS-001",
+  "M092-M0-STATUS-002",
+  "M092-M0-COVERAGE-001",
+  "M092-M0-COVERAGE-002",
+  "M092-M0-COVERAGE-003",
+  "M092-M1-EFFECT-001",
+  "M092-M1-EFFECT-002",
+  "M092-M1-EFFECT-003",
+  "M092-M1-ABILITY-001",
+  "M092-M1-ABILITY-002",
+  "M092-M1-TIMING-001",
+  "M092-M1-TIMING-002",
+  "M092-M1-CHOICE-001",
+  "M092-M1-CHOICE-002",
+  "M092-M1-VISIBILITY-001",
+  "M092-M1-VISIBILITY-002",
+  "M092-M1-REPLAY-001",
+  "M092-M1-AI-001",
+  "M092-M1-MP-001",
+  "M092-M1-GATE-001"
+];
 const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_REQUIREMENTS.md",
   "docs/derived/UI_REDESIGN_0.7_SPEC.md",
@@ -93,6 +115,15 @@ const REQUIRED_MVP_0_9_DOCS = [
   "docs/derived/MVP_0.9_TEST_MATRIX.md",
   "docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md",
   "tests/specs/ai-quality-0.9-acceptance-tests.todo.md"
+];
+
+const REQUIRED_MVP_0_92_DOCS = [
+  "docs/derived/MVP_0.92_REQUIREMENTS.md",
+  "docs/derived/MECHANICS_COVERAGE_MATRIX.md",
+  "docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md",
+  "docs/derived/MECHANIC_M1_TEST_MATRIX.md",
+  "docs/derived/MVP_0.92_REQUIREMENTS_REVIEW.md",
+  "docs/derived/MVP_0.92_FINAL_REVIEW.md"
 ];
 
 const MVP_0_8_DATA_FILES = [
@@ -515,6 +546,45 @@ describe("Phase 1 derived artifacts", () => {
       expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
       expect(scenario.expected, file).toBeDefined();
     }
+  });
+
+  it("keeps MVP 0.92 mechanics inventory and M1 requirements frozen", () => {
+    for (const file of REQUIRED_MVP_0_92_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.92_REQUIREMENTS.md", "utf8");
+    const spec = readFileSync("docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MECHANIC_M1_TEST_MATRIX.md", "utf8");
+    const review = readFileSync("docs/derived/MVP_0.92_REQUIREMENTS_REVIEW.md", "utf8");
+    const finalReview = readFileSync("docs/derived/MVP_0.92_FINAL_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_92_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+    }
+    expect(spec).toContain("EffectDefinition");
+    expect(spec).toContain("PendingChoice");
+    expect(testMatrix).toContain("V093-T001");
+    expect(testMatrix).toContain("M092-M1-CHOICE-002");
+    expect(review).toContain("ready_for_MVP_0.93_implementation: true");
+    expect(finalReview).toContain("MVP_0.92_done: true");
+
+    const coverage = JSON.parse(readFileSync("data/rules/mechanics-coverage-0.92.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      v091AssetDecision?: Record<string, unknown>;
+      mechanics?: Array<{ mechanicId?: string; currentStatus?: string; targetGate?: string }>;
+      deviationNormalization?: Array<{ deviationId?: string; normalizedStatus?: string }>;
+    };
+
+    expect(coverage.gateAssertions?.m1ReadyForImplementation).toBe(true);
+    expect(coverage.gateAssertions?.noV094PlusMechanicsImplemented).toBe(true);
+    expect(coverage.gateAssertions?.m2RequirementsOnly).toBe(true);
+    expect(coverage.v091AssetDecision?.status).toBe("private_local_assets_allowed");
+    expect(coverage.v091AssetDecision?.blocksMechanicsWork).toBe(false);
+    expect(coverage.mechanics?.length).toBeGreaterThanOrEqual(20);
+    expect(coverage.mechanics?.some((mechanic) => mechanic.mechanicId === "mechanic.effects.general_kernel" && mechanic.targetGate === "v0.93")).toBe(true);
+    expect(coverage.mechanics?.some((mechanic) => mechanic.mechanicId === "mechanic.setup.mulligan" && mechanic.currentStatus === "open")).toBe(true);
+    expect(coverage.deviationNormalization?.find((entry) => entry.deviationId === "DEV-004")?.normalizedStatus).toBe("open");
   });
 });
 

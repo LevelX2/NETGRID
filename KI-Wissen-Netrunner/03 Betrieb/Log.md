@@ -227,3 +227,9 @@ Die Sonderphase S01 wurde für Spielende, Ergebnisfenster, Spielziel und Audio g
 Technisch ergänzt wurden side-sichere `GameResultSummary`-Payloads im Multiplayer-Service, `match_finished` mit Ergebnisstatistik, eine Startauswahl zwischen Regelmatch mit 7 Agendapunkten und Einzelspiel mit Deckziel, ein Ergebnisfenster mit Perspektivtext und aggregierten Statistiken sowie opt-in Audioeffekte über lokale Web-Audio-Synthese. Mehrspiel-Serien mit automatischem Seitenwechsel bleiben als S01.x-Folgeausbau getrennt, weil sie Session-Seiten, Reconnect-Tokens und WebSocket-Kontexte berühren.
 
 Checks: `corepack pnpm --filter @netrunner/server test`, `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Der Build meldet weiterhin die bekannte Turbopack-NFT-Warnung zur bestehenden `card-images`-Route, kompiliert aber erfolgreich.
+
+## [2026-05-03] phase-0.92-final | Mechanik-Inventar und M1-Spezifikation abgeschlossen
+
+V0.92 wurde als Requirements- und Spezifikationsgate abgeschlossen. Erstellt wurden `MVP_0.92_REQUIREMENTS.md`, `MECHANICS_COVERAGE_MATRIX.md`, das maschinenlesbare Artefakt `data/rules/mechanics-coverage-0.92.json`, `MECHANIC_M1_EFFECT_TIMING_SPEC.md`, `MECHANIC_M1_TEST_MATRIX.md`, Requirements Review und Final Review.
+
+Die V0.91-Assetentscheidung ist nun konsistent eingeordnet: private lokale Kartenscans/lokale Kartenbilder sind fuer dieses private lokale Projekt als reine Anzeige-Artefakte erlaubt. Oeffentliche Distribution, offizielle Logos, standalone Card Frames, Card Backs, externe Kartendatenbank-Abhaengigkeiten sowie Engine-/KI-/GameState-/Replay-/StateHash-Nutzung bleiben ausgeschlossen. Gate-Ergebnis: `MVP_0.92_done: true`; `ready_for_MVP_0.93_implementation: true`.

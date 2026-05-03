@@ -2,7 +2,7 @@
 
 ## Current phase
 
-S01 Spielende, Ergebnisfenster, Spielziel und Audio core implementation is complete and locally verified.
+V0.92 Mechanik-Inventar und M1-Spezifikationsgate is complete; V0.93 M1 implementation is the active next step.
 
 ## Status
 
@@ -138,9 +138,15 @@ MVP 0.91 card image asset gate requirements freeze is complete and testable.
 
 `MVP_0.91_requirements_freeze_done: true`
 
-`ready_for_implementation: false`
+`ready_for_implementation: true`
 
-Blocker: current primary-source review does not provide explicit permission to import, cache or display official full card images, card art, card frames or card backs in this web application.
+Decision: private local card scans and local card images are allowed for this private local project only. This does not allow public distribution, official logos, standalone card frames, card backs, external card database dependencies, or any Engine/AI/GameState/Replay/StateHash use of images.
+
+MVP 0.92 mechanics inventory, M1 requirements and M1 specification are complete.
+
+`MVP_0.92_done: true`
+
+`ready_for_MVP_0.93_implementation: true`
 
 S01 requirements, result modal, audio and test matrix are complete.
 
@@ -184,7 +190,8 @@ Gate flow:
 24. MVP 0.9 requirements/stronger AI freeze: pass.
 25. MVP 0.9 implementation/stronger AI: pass.
 26. MVP 0.9 validation, hardening and documentation: pass.
-27. MVP 0.91 requirements/card image asset gate freeze: blocked for implementation.
+27. MVP 0.91 requirements/card image asset gate freeze: pass for private local scans/assets only.
+28. MVP 0.92 mechanics inventory and M1 requirements/specification gate: pass.
 
 ## Phase 1 files created or updated
 
@@ -1006,9 +1013,31 @@ V0.91 remains a future gated phase after V0.9. This planning update does not imp
 
 `MVP_0.91_requirements_freeze_done: true`
 
-`ready_for_implementation: false`
+`ready_for_implementation: true`
 
-The technical and hidden-info requirements are testable, and every Must requirement has a test trail. Official card image use remains blocked: NetrunnerDB provides technical image metadata, but the reviewed primary sources do not grant explicit permission for this project to download, cache or display official full card images. Null Signal Games public visual asset permission does not include card art, card frames or card backs.
+The technical and hidden-info requirements are testable, and every Must requirement has a test trail. Public or general official card image use remains blocked: NetrunnerDB provides technical image metadata, but the reviewed primary sources do not grant explicit public permission for this project to download, cache or display official full card images. For this private local project, the project owner accepts private local use of own scans/local card front images as display-only artifacts. This is not a public license and excludes public distribution, official logos, standalone card frames, card backs, external card database dependencies, and any Engine/AI/GameState/Replay/StateHash use of images.
+
+## MVP 0.92 Requirements and final gate files created or updated
+
+- `docs/derived/MVP_0.92_REQUIREMENTS.md`
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `data/rules/mechanics-coverage-0.92.json`
+- `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`
+- `docs/derived/MECHANIC_M1_TEST_MATRIX.md`
+- `docs/derived/MVP_0.92_REQUIREMENTS_REVIEW.md`
+- `docs/derived/MVP_0.92_FINAL_REVIEW.md`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.92 Final gate
+
+`MVP_0.92_done: true`
+
+`ready_for_MVP_0.93_implementation: true`
+
+V0.92 normalizes the current mechanics inventory after V0.9/S01, adds a versioned machine-readable coverage artifact under `data/rules`, freezes M1 requirements for Effects, Abilities, Timing, Choices and Event classification, and keeps M2 as requirements-only follow-up scope. V0.92 does not implement runtime behavior, cards, images or V0.94+ mechanics.
 
 ## S01 Requirements and core implementation files created or updated
 
@@ -1080,8 +1109,8 @@ Remaining known limits:
 - JSON-File-Storage is intentionally simple; SQLite remains a later hardening target.
 - Localhost operation is the supported private MVP path. HTTPS/WSS are required outside localhost.
 - Public platform features, matchmaking, accounts, deckbuilder, chat and broad card pool remain out of scope.
-- Damage remains deferred to a V0.4.x sub-gate unless explicitly re-scoped after this final gate.
-- V0.91 official card image implementation is blocked until explicit source/usage permission or a documented private local usage decision exists.
+- Damage remains deferred to a later mechanics sub-gate and is not part of V0.93.
+- V0.91 private local scans/assets are allowed only as display artifacts for private local use. Public distribution, official logos, standalone card frames, card backs, external card database dependencies, and Engine/AI/GameState/Replay/StateHash image use remain excluded.
 
 ## Local tool notes
 
@@ -1098,9 +1127,11 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.7: UI redesign and visual design, intentionally delayed because design analyses are still running.
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
-- V0.91: card image asset gate and image import after V0.9.
+- V0.91: card image asset gate and private local image import/display after V0.9.
+- V0.92: mechanics inventory and M1 requirements/specification gate.
+- V0.93: M1 Engine foundation and M2 requirements.
 
-Current gate: V0.91 Requirements Freeze complete, but image implementation is blocked by the asset permission decision. Next recommended scope is either explicit V0.91 asset permission clarification or a later V1.0/stabilization/operations decision; V1.0 is not started in this thread.
+Current gate: V0.92 is complete. Next implementation scope is V0.93: add the M1 Engine foundation for Effects, Abilities, Timing, Choices and Event classification, and create M2 Setup/Game-End requirements only. No V0.94+ mechanic is started.
 
 Detailed planning artifacts available:
 
@@ -1113,6 +1144,11 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.91_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.91_REQUIREMENTS.md`
 - `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`
+- `docs/derived/MVP_0.92_REQUIREMENTS.md`
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`
+- `docs/derived/MECHANIC_M1_TEST_MATRIX.md`
+- `docs/derived/MVP_0.92_FINAL_REVIEW.md`
 
 UI design exploration artifacts available:
 
