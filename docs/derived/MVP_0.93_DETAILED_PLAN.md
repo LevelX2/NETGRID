@@ -15,7 +15,7 @@ V0.93 startet nur, wenn:
 
 - V0.92-Requirements und M1-Spezifikation abgeschlossen sind,
 - `MECHANICS_COVERAGE_MATRIX.md` den aktuellen Mechanikstand normalisiert,
-- alte V0.91-Assetänderungen entweder sauber abgeschlossen oder bewusst aus dem Mechanikbranch ausgeklammert sind,
+- die V0.91-Privatasset-Entscheidung dokumentiert ist und konkrete Assetdateien sauber abgeschlossen oder bewusst aus dem Mechanikbranch ausgeklammert sind,
 - bestehende Tests vor Beginn reproduzierbar laufen oder bekannte Fremdfehler dokumentiert sind,
 - der Zielbranch keine unbeabsichtigten Änderungen enthält.
 

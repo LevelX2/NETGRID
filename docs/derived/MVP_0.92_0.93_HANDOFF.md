@@ -14,6 +14,14 @@ Stand: 2026-05-03
 ## 2. Übergabe-Prompt für den nächsten Thread
 
 ```text
+Setze zu Beginn ein Goal:
+
+Goal:
+V0.92 und V0.93 für das private Netrunner-Projekt sauber umsetzen: zuerst V0.92 als Mechanik-Inventar-, Requirements- und Spezifikationsgate abschließen, danach V0.93 als M1-Engine-Fundament für Effects, Abilities, Timing, Choices und Eventklassifikation implementieren. M2 nur als Requirements planen, keine M2-Mechanik implementieren.
+
+Wichtige Projektentscheidung:
+Der Benutzer erlaubt für dieses private lokale Projekt die Nutzung eigener privater Kartenscans und lokaler Kartenbilder. Das gilt nur für den Privatgebrauch und nicht für öffentliche Distribution, offizielle Logos, offizielle Card Frames, Card Backs oder externe Kartendatenbank-Abhängigkeiten. Bitte V0.91 entsprechend als private lokale Asset-Entscheidung einordnen und sauber dokumentieren.
+
 Bitte setze V0.92 + V0.93 für das Netrunner-Projekt gemäß den bestehenden Projektregeln um.
 
 Arbeitsbasis zuerst lesen:
@@ -28,6 +36,15 @@ Arbeitsbasis zuerst lesen:
 - docs/derived/MVP_0.93_DETAILED_PLAN.md
 - docs/derived/MVP_0.92_0.93_HANDOFF.md
 
+Defaults:
+- V0.91-Assetstatus separat behandeln, aber als private lokale Scan-/Asset-Entscheidung dokumentieren.
+- Mechanikarbeit nicht durch V0.91 blockieren.
+- V0.92-Coverage-Matrix zusätzlich als `data/rules`-Artefakt anlegen.
+- `pendingChoice` in V0.93 additiv in Shared/GameState/PlayerView vorbereiten, ohne Mulligan/Trace spielbar zu machen.
+- Breaker-Aktionen intern als Ability-Pilot migrieren.
+- Öffentliche Action Types kompatibel halten.
+- StateHash-Rebaselines nur bei dokumentierter State-/Eventschema-Änderung erlauben.
+
 Ziel:
 1. V0.92 abschließen: Mechanik-Coverage-Matrix, M1-Requirements, M1-Effect/Timing-Spezifikation, M1-Testmatrix, Requirements Review und Final Review erstellen.
 2. Danach V0.93 umsetzen: M1-Shared-/Engine-Grundlage für Effects, Abilities, Timing, Choices und Eventklassifikation implementieren.
@@ -39,7 +56,7 @@ Grenzen:
 - Keine neue spielbare Karte hinzufügen.
 - Bestehende Actions und UI-Payloads kompatibel halten.
 - Fremde lokale Änderungen nicht zurücksetzen und nicht versehentlich mitcommitten.
-- V0.91-Kartenbild-Artefakte nur anfassen, wenn die Status-Reconciliation das ausdrücklich verlangt und die Änderungen klar getrennt bleiben.
+- Private lokale Assets nur projektintern behandeln, keine öffentlichen Asset-/Artwork-/Logo-/Card-Frame-Abhängigkeiten einführen.
 
 Priorität:
 - Engine-Korrektheit und Hidden-Info-Sicherheit vor Komfort.
@@ -52,7 +69,7 @@ Priorität:
 
 | Entscheidung | Empfohlene Vorgabe für den Umsetzungsthread |
 |---|---|
-| V0.91-Status widersprüchlich | Mechanikarbeit fortsetzen, aber Status als offen dokumentieren, solange keine Benutzerentscheidung zu privaten lokalen Bildern vorliegt. |
+| V0.91-Status | Als private lokale Scan-/Asset-Entscheidung dokumentieren; Mechanikarbeit dadurch nicht blockieren. |
 | Maschinenlesbare Mechanik-Matrix | Ja, zusätzlich zur Markdown-Matrix anlegen, sofern die vorhandenen Datenartefakt-Konventionen passen. |
 | Public Action API | Bestehende Action Types sichtbar behalten. Generische Ability-Struktur intern einführen. |
 | `trigger_ability` | Nur vorbereiten oder einsetzen, wenn wirklich nötig. Keine UI-Migration erzwingen. |
@@ -83,12 +100,11 @@ V0.93:
 - `docs/derived/MVP_0.93_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/MVP_0.93_FINAL_REVIEW.md`
 
-## 5. Klärpunkte für den Benutzer
+## 5. Nur bei Blockade erneut klären
 
-Diese Punkte sind nicht zwingend nötig, um die Planung zu verstehen, sollten aber vor oder zu Beginn der Umsetzung kurz bestätigt werden:
+Die Defaults aus diesem Handoff gelten als Startentscheidung. Der Umsetzungsthread soll nur stoppen oder nachfragen, wenn eine harte technische Blockade oder ein Sicherheitsrisiko auftaucht:
 
-1. Soll V0.91 im Status als privat-lokale Kartenbildentscheidung freigegeben werden, oder bleibt das Asset-Gate unabhängig blockiert/offen?
-2. Soll die V0.92-Coverage-Matrix als Pflichtdatenartefakt unter `data/rules` entstehen?
-3. Darf V0.93 `pendingChoice` bereits in Shared/GameState/PlayerView einführen, obwohl Mulligan und Trace noch nicht spielbar werden?
-4. Soll V0.93 bestehende Breaker-Aktionen intern auf Ability-Definitionen migrieren, während die öffentlichen Action Types gleich bleiben?
-5. Sollen StateHash-Rebaselines erlaubt sein, falls sich das interne Eventschema bewusst ändert, oder sollen bestehende Hashes möglichst hart erhalten bleiben?
+1. Wenn `data/rules/mechanics-coverage-0.92.json` nicht zu den vorhandenen Artefakt-Konventionen passt.
+2. Wenn `pendingChoice` trotz additiver Einführung bestehende Serialization, PlayerViews oder Multiplayer-Verträge brechen würde.
+3. Wenn die Breaker-Ability-Migration öffentliche Action Types oder UI-Payloads verändern müsste.
+4. Wenn StateHash-Änderungen auftreten, die nicht klar durch eine dokumentierte State- oder Eventschema-Änderung erklärbar sind.

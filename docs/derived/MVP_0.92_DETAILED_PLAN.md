@@ -9,6 +9,8 @@ V0.92 ist ein reines Planungs- und Requirements-Gate. Es konsolidiert den aktuel
 
 Die wichtigste Produktentscheidung lautet: V0.92 darf die Mechanikarbeit fachlich von V0.91 trennen, muss aber den widersprüchlichen V0.91-Status sichtbar machen. Der Kartenbild-Asset-Stand ist kein fachlicher Blocker für Mechaniken, darf aber nicht stillschweigend als erledigt oder als dauerhaft blockiert doppelt geführt werden.
 
+Nachtrag vom 2026-05-03: Der Benutzer erlaubt für dieses private lokale Projekt die Nutzung eigener privater Kartenscans und lokaler Kartenbilder. Diese Entscheidung gilt nur für den Privatgebrauch und nicht für öffentliche Distribution, offizielle Logos, offizielle Card Frames, Card Backs oder externe Kartendatenbank-Abhängigkeiten.
+
 ## 2. Arbeitsbasis
 
 Verbindliche Grundlage:
@@ -96,7 +98,7 @@ Aufgabe:
 
 Empfehlung:
 
-V0.92 sollte `status_unresolved` akzeptieren, aber im Final Review als offene Projektstatusentscheidung nennen. Die Mechanik-Roadmap hängt nicht von Kartenbildern ab.
+V0.92 sollte V0.91 als `private_local_assets_allowed` dokumentieren, diese Entscheidung aber strikt vom Mechanik-Gate trennen. Die Mechanik-Roadmap hängt nicht von Kartenbildern ab, und private Scans dürfen keine öffentlichen Asset-, Artwork-, Logo-, Card-Frame- oder Datenbank-Abhängigkeiten erzeugen.
 
 ### Schritt 2 - Mechanik-Coverage-Matrix erstellen
 
@@ -244,7 +246,7 @@ V0.92 ist fertig, wenn:
 
 | Entscheidung | Empfehlung | Blockiert V0.92? | Blockiert V0.93? |
 |---|---|---:|---:|
-| V0.91-Status: blockiert oder private lokale Assets erlaubt? | Für V0.92 als `status_unresolved` dokumentieren, getrennt von Mechanikarbeit. | nein | nein |
+| V0.91-Status: blockiert oder private lokale Assets erlaubt? | Als `private_local_assets_allowed` dokumentieren, strikt getrennt von Mechanikarbeit und ohne öffentliche Asset-Abhängigkeiten. | nein | nein |
 | Maschinenlesbare Coverage-Matrix? | Ja, `data/rules/mechanics-coverage-0.92.json` zusätzlich zur Markdown-Matrix. | nein | ja, wenn spätere Gates automatisiert geprüft werden sollen |
 | Public Action API sofort auf `trigger_ability` umstellen? | Nein. Bestehende Action Types kompatibel halten, generische Ability intern vorbereiten. | nein | ja, falls anders entschieden |
 | ChoiceRequest bereits in V0.93 implementieren? | Ja, aber nur als generische Grundlage ohne neue sichtbare Mechanik. | nein | ja |
