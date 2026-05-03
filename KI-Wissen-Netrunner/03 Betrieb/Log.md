@@ -219,3 +219,11 @@ Checks: `corepack pnpm --filter @netrunner/ai typecheck`, `corepack pnpm --filte
 Der V0.91 Requirements Freeze wurde nach dokumentiertem V0.9-Finalgate abgeleitet. Erstellt wurden Requirements, Asset-Gate-Spezifikation, Bildimport-Spezifikation, Display-Spezifikation, Testmatrix und Requirements Review sowie strukturierte Source-Registry und Asset-Policy unter `data/card-assets/`.
 
 Die aktuellen Primärquellen wurden geprüft: NetrunnerDB liefert technische Bildmetadaten, aber keine eigenständige Bildnutzungsfreigabe; Null Signal Games gibt ein separates Visual-Assets-Pack frei, nicht aber Card Art, Frames oder Card Backs. Ergebnis: `MVP_0.91_requirements_freeze_done: true`, aber `ready_for_implementation: false`. Es wurden keine Bilder heruntergeladen, keine offiziellen Assets genutzt und keine Implementierung geschrieben.
+
+## [2026-05-03] phase-s01-core | S01 Spielende, Ergebnisfenster und Audio umgesetzt
+
+Die Sonderphase S01 wurde für Spielende, Ergebnisfenster, Spielziel und Audio geplant und im sicheren Kern umgesetzt. Erstellt wurden Requirements, Result-Modal-Spezifikation, Audio-Spezifikation, Testmatrix und Requirements Review unter `docs/derived/S01_*.md`.
+
+Technisch ergänzt wurden side-sichere `GameResultSummary`-Payloads im Multiplayer-Service, `match_finished` mit Ergebnisstatistik, eine Startauswahl zwischen Regelmatch mit 7 Agendapunkten und Einzelspiel mit Deckziel, ein Ergebnisfenster mit Perspektivtext und aggregierten Statistiken sowie opt-in Audioeffekte über lokale Web-Audio-Synthese. Mehrspiel-Serien mit automatischem Seitenwechsel bleiben als S01.x-Folgeausbau getrennt, weil sie Session-Seiten, Reconnect-Tokens und WebSocket-Kontexte berühren.
+
+Checks: `corepack pnpm --filter @netrunner/server test`, `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Der Build meldet weiterhin die bekannte Turbopack-NFT-Warnung zur bestehenden `card-images`-Route, kompiliert aber erfolgreich.

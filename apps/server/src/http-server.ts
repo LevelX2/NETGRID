@@ -7,6 +7,7 @@ import {
   JsonFileMatchStorage,
   MultiplayerService,
   type ActionReceipt,
+  type GameResultSummary,
   type SafeErrorPayload,
   type SidePayload,
   type SubmitActionResult,
@@ -43,7 +44,7 @@ export type ServerWsMessage =
   | { type: "action_receipt"; payload: ActionReceipt }
   | { type: "opponent_status"; payload: SidePayload["opponentStatus"] }
   | { type: "undo_request"; payload: NonNullable<SidePayload["pendingUndo"]> }
-  | { type: "match_finished"; payload: { winner: SidePayload["winner"]; finalStateHash: string } }
+  | { type: "match_finished"; payload: { winner: SidePayload["winner"]; finalStateHash: string; resultSummary?: GameResultSummary } }
   | { type: "error"; payload: SafeErrorPayload }
   | { type: "pong"; payload: { clientTime: number; serverTime: number } };
 
@@ -316,7 +317,10 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       Object.assign(createInput, deckSelectionFromBody(body));
       if (typeof body.settings === "object" && body.settings) {
         const settings = body.settings as Record<string, unknown>;
-        if (typeof settings.agendaPointsToWin === "number") createInput.settings = { agendaPointsToWin: settings.agendaPointsToWin };
+        const nextSettings: Parameters<MultiplayerService["createMatch"]>[0]["settings"] = {};
+        if (typeof settings.agendaPointsToWin === "number") nextSettings.agendaPointsToWin = settings.agendaPointsToWin;
+        if (settings.matchFormat === "single_game" || settings.matchFormat === "rules_match") nextSettings.matchFormat = settings.matchFormat;
+        if (Object.keys(nextSettings).length > 0) createInput.settings = nextSettings;
       }
       const created = await service.createMatch(createInput);
       sendJson(response, 201, created);
@@ -414,7 +418,7 @@ function sendBootstrap(socket: WebSocket | undefined, payload: SidePayload): voi
   send(socket, { type: "event_log_update", payload: { events: payload.eventTail } });
   send(socket, { type: "opponent_status", payload: payload.opponentStatus });
   if (payload.pendingUndo) send(socket, { type: "undo_request", payload: payload.pendingUndo });
-  if (payload.winner && payload.finalStateHash) send(socket, { type: "match_finished", payload: { winner: payload.winner, finalStateHash: payload.finalStateHash } });
+  if (payload.winner && payload.finalStateHash) send(socket, { type: "match_finished", payload: { winner: payload.winner, finalStateHash: payload.finalStateHash, ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {}) } });
 }
 
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {

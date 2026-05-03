@@ -7,6 +7,7 @@
 - [[Quellenlage und Aktualitaet]]: vorhandene, fehlende und ergänzende Projektquellen.
 - [[Roadmap nach MVP 0.2]]: konsolidierte Roadmap ab V0.3 und Begründung der KI-/Simulationsphase.
 - [[Roadmap nach MVP 0.4]]: produktnähere Folge-Roadmap mit Kartenimport, Deckeditor, UI-Schnitt in V0.7, Basisset-Spielbarkeit, besserer KI und V0.91-Kartenbild-Asset-Gate.
+- S01: Sonderphase für Spielende, Ergebnisfenster, Spielziel und Audio; Repository-Artefakte unter `docs/derived/S01_*.md`.
 - [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]: Workflow für wiki-first Arbeit und Rückführung von Erkenntnissen.
 
 ## Kernwissen
@@ -34,3 +35,4 @@
 - `docs/derived/MVP_0.91_DETAILED_PLAN.md`: detaillierte spätere V0.91-Planung für Kartenbild-Asset-Gate und Bild-Import nach V0.9.
 - `docs/derived/MVP_0.91_REQUIREMENTS.md`: eingefrorene V0.91-Anforderungen; technisch testbar, aber Asset-Nutzung aktuell blockiert.
 - `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`: Quellen-, Nutzungs- und Asset-Policy-Grenzen für offizielle Kartenbilder.
+- `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl und Audio.

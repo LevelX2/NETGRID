@@ -32,6 +32,20 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("localImagePath");
   });
 
+  it("keeps the S01 result overlay side-safe and outside engine authority", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    expect(page).toContain("function GameOverModal");
+    expect(page).toContain("GameResultSummary");
+    expect(page).toContain("Du hast das Spiel gewonnen.");
+    expect(page).toContain("Du hast das Spiel verloren.");
+    expect(page).toContain("playResultSound");
+    expect(page).toContain("AudioSettings");
+    expect(page).toContain("Regelmatch · 7 Agendapunkte");
+    expect(page).not.toContain("resultSummary.cardInstances");
+    expect(page).not.toContain("resultSummary.privatePayload");
+    expect(page).not.toContain("resultSummary.sessionToken");
+  });
+
   it("renders the player chronicle without normal-mode technical event metadata", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const chronicle = readFileSync("apps/web/app/chronicle.ts", "utf8");

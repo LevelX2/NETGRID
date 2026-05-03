@@ -54,6 +54,7 @@
 - MVP 0.9 Requirements wurden eingefroren: stärkere KI mit side-sicherem Input-Vertrag, rollenbewussten Scorern, Difficulty-Profilen, Reason-Code-/Explanation-Safety, ObservedFacts, Soak-Matrix, Holdout-Seeds und Tuning-Change-Control. Gate-Ergebnis: `ready_for_implementation: true`.
 - MVP 0.9 wurde implementiert, validiert und dokumentiert: rollenbewusste Runner-/Corp-Scorer, Difficulty-Profile, side-sichere Evidence und Explanations, ObservedFacts, Simulation-Metriken, Soak-Helfer und Server-V0.9-Profile. Final Gate: `MVP_0.9_done: true`.
 - MVP 0.91 Requirements wurden eingefroren: Kartenbild-Asset-Gate, Quellen-/Nutzungsprüfung, Bild-Import-Spezifikation, Display-Spezifikation, Testmatrix, Requirements Review sowie strukturierte Source-Registry und Asset-Policy liegen vor. Gate-Ergebnis: `MVP_0.91_requirements_freeze_done: true`; `ready_for_implementation: false`, weil keine positive Primärquellenfreigabe für offiziellen Kartenbild-Download, lokalen Cache oder Anzeige dokumentiert ist.
+- S01 wurde als Sonderphase für Spielende, Ergebnisfenster, Spielziel und Audio geplant und im sicheren Kern umgesetzt: `GameResultSummary`, Ergebnisfenster mit Perspektivtext, side-sichere Statistik, Spielziel-Auswahl `Regelmatch · 7 Agendapunkte`/`Einzelspiel · Deckziel` und opt-in Web-Audio-Effekte.
 
 ## Teilweise umgesetzt
 
@@ -78,6 +79,7 @@
 - V0.8 ist abgeschlossen. Weitere Karten oder Mechanikgruppen dürfen nicht durch Importstatus, Katalogdaten oder Deckeditor-Freigaben spielbar werden, sondern brauchen weiterhin eigenes Resolver-, Manifest-, Test-, Visibility-, Replay/StateHash- und KI-Smoke-Gate.
 - V0.9 ist abgeschlossen. Weitere KI-Arbeit darf den LegalActions-/PlayerView-/side-gefilterten-Event-Vertrag nicht aufweichen und keine FullState-, verdeckte Gegnerdaten- oder LLM-Regelakteur-Pfade einführen.
 - V0.91 Requirements sind eingefroren, aber die Implementierung ist blockiert. NetrunnerDB ist nur technische Kandidatenquelle für Bildmetadaten; Null-Signal-Primärquellen geben Card Art, Frames und Card Backs nicht pauschal frei. Offizielle Kartenbilder dürfen erst nach expliziter Asset-Freigabe oder dokumentierter privater lokaler Nutzungsentscheidung als lokale Anzeige-Artefakte genutzt werden und dürfen keine Engine-, KI-, Deck-, Replay-, StateHash- oder Match-State-Daten beeinflussen.
+- S01-Mehrspiel-Serien mit automatischem Seitenwechsel bleiben ein separater Folgeausbau, weil sie Session-Seiten, Reconnect-Tokens und WebSocket-Kontexte betreffen. Der umgesetzte S01-Kern betrifft Ergebnisfenster, Statistik, Spielziel-Auswahl und Audio.
 - V0.5-Importdaten dürfen keine Engine-, KI-, Deckvalidierungs- oder Matchstart-Freigabe auslösen. `deck_legal` setzt `playable` voraus.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 

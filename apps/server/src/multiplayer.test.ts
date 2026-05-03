@@ -22,6 +22,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.deckMetadata?.opponent.deckHash).toBe("fnv1a:d77d0873");
     expect(stored?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
     expect(stored?.match.settings.agendaPointsToWin).toBe(7);
+    expect(stored?.match.settings.matchFormat).toBe("rules_match");
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
     expect(JSON.stringify(created)).not.toContain("simple_priority_agenda");
     expect(JSON.stringify(created)).not.toContain("cardInstances");
@@ -258,7 +259,7 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("plays a private two-player match through to a Runner win", async () => {
-    const match = await joinedMatch("mp-win-1", { agendaPointsToWin: 2 });
+    const match = await joinedMatch("mp-win-1", { agendaPointsToWin: 2, matchFormat: "single_game" });
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "end-turn");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
@@ -268,6 +269,26 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(steal.actorPayload.winner).toBe("runner");
     expect(steal.actorPayload.matchStatus).toBe("finished");
     expect(steal.actorPayload.finalStateHash).toMatch(/^fnv1a:/);
+    expect(steal.actorPayload.resultSummary).toMatchObject({
+      winner: "runner",
+      viewerOutcome: "won",
+      reason: "agenda_points",
+      matchFormat: "single_game",
+      agendaPointsToWin: 2,
+      runnerAgendaPoints: 3,
+      corpAgendaPoints: 0,
+      runCount: 1,
+      successfulRunCount: 1,
+      stolenAgendaCount: 1,
+      scoredAgendaCount: 0
+    });
+    expect(steal.actorPayload.resultSummary?.actionCount).toBeGreaterThanOrEqual(5);
+    expect(JSON.stringify(steal.actorPayload.resultSummary)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(steal.actorPayload.resultSummary)).not.toContain("cardInstances");
+
+    const corpPayload = await bootstrap(match.service, match.matchId, match.corp);
+    expect(corpPayload.resultSummary?.viewerOutcome).toBe("lost");
+    expect(corpPayload.legalActions).toEqual([]);
   });
 
   it("sends side-filtered bootstrap messages over WebSocket", async () => {

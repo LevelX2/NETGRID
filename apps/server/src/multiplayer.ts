@@ -25,11 +25,33 @@ import { defaultAgendaPointsToWin, resolveDeckSetup, setupUsesExpandedRules, set
 export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 export type HostSideSelection = Side | "random";
 export type MatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
+export type MatchFormat = "single_game" | "rules_match";
 export type TokenKind = "join" | "session" | "reconnect";
 export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
 
 export type MatchSettings = {
   agendaPointsToWin: number;
+  matchFormat: MatchFormat;
+};
+
+export type GameResultReason = "agenda_points" | "corp_deck_empty" | "draw" | "unknown";
+
+export type GameResultSummary = {
+  winner: Side | "draw";
+  viewerOutcome: "won" | "lost" | "draw";
+  reason: GameResultReason;
+  matchFormat: MatchFormat;
+  agendaPointsToWin: number;
+  runnerAgendaPoints: number;
+  corpAgendaPoints: number;
+  actionCount: number;
+  runCount: number;
+  successfulRunCount: number;
+  stolenAgendaCount: number;
+  scoredAgendaCount: number;
+  startedAt: string;
+  finishedAt: string;
+  finalStateHash: string;
 };
 
 export type MatchRecord = {
@@ -155,6 +177,7 @@ export type SidePayload = {
   pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
   winner?: Side | "draw";
   finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 export type SafeErrorPayload = {
@@ -176,6 +199,9 @@ export type CreateMatchResult = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  winner?: Side | "draw";
+  finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 export type JoinMatchResult = {
@@ -187,6 +213,9 @@ export type JoinMatchResult = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  winner?: Side | "draw";
+  finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 export type ReconnectResult = JoinMatchResult & {
@@ -317,7 +346,10 @@ export class MultiplayerService {
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const deckSetup = resolveDeckSetup(input);
-    const settings: MatchSettings = { agendaPointsToWin: input.settings?.agendaPointsToWin ?? defaultAgendaPointsToWin(deckSetup) };
+    const settings: MatchSettings = {
+      agendaPointsToWin: input.settings?.agendaPointsToWin ?? defaultAgendaPointsToWin(deckSetup),
+      matchFormat: input.settings?.matchFormat ?? "rules_match"
+    };
     const baseline = baselineForMode(mode, deckSetup);
     const controllers = controllersForMode(mode, hostSide, {
       runnerDifficulty: input.runnerDifficulty ?? "normal",
@@ -392,7 +424,10 @@ export class MultiplayerService {
       baseline,
       playerView: payload.playerView,
       legalActions: payload.legalActions,
-      matchVersion: record.match.matchVersion
+      matchVersion: record.match.matchVersion,
+      ...(payload.winner ? { winner: payload.winner } : {}),
+      ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
+      ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
     };
   }
 
@@ -445,7 +480,10 @@ export class MultiplayerService {
       webSocketUrl: this.webSocketUrl(),
       playerView: payload.playerView,
       legalActions: payload.legalActions,
-      matchVersion: record.match.matchVersion
+      matchVersion: record.match.matchVersion,
+      ...(payload.winner ? { winner: payload.winner } : {}),
+      ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
+      ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
     };
   }
 
@@ -485,7 +523,10 @@ export class MultiplayerService {
       playerView: payload.playerView,
       legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
-      eventTail: payload.eventTail
+      eventTail: payload.eventTail,
+      ...(payload.winner ? { winner: payload.winner } : {}),
+      ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
+      ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
     };
   }
 
@@ -726,6 +767,8 @@ export class MultiplayerService {
     const pendingUndo = record.pendingUndo
       ? { ...record.pendingUndo, needsResponse: record.pendingUndo.requestedBy !== side }
       : undefined;
+    const finalStateHash = record.gameState.winner ? hashState(record.gameState) : undefined;
+    const resultSummary = record.gameState.winner && finalStateHash ? resultSummaryFor(record, side, finalStateHash) : undefined;
     return {
       matchId: record.match.matchId,
       matchStatus: record.match.status,
@@ -736,7 +779,8 @@ export class MultiplayerService {
       eventTail: record.eventLog.slice(-20).map((event) => event.publicPayload),
       opponentStatus: { side: opposite(side), connected: this.isAiSide(record, opposite(side)) || (opponent?.connected ?? false) },
       ...(pendingUndo ? { pendingUndo } : {}),
-      ...(record.gameState.winner ? { winner: record.gameState.winner, finalStateHash: hashState(record.gameState) } : {})
+      ...(record.gameState.winner && finalStateHash ? { winner: record.gameState.winner, finalStateHash } : {}),
+      ...(resultSummary ? { resultSummary } : {})
     };
   }
 
@@ -889,6 +933,39 @@ function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): Eve
 
 function isHiddenInfoBarrier(event: GameEvent): boolean {
   return ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(event.type);
+}
+
+function resultSummaryFor(record: StoredMatch, viewerSide: Side, finalStateHash: string): GameResultSummary | undefined {
+  const winner = record.gameState.winner;
+  if (!winner) return undefined;
+  const runnerAgendaPoints = getPlayerView(record.gameState, "runner").own.agendaPoints;
+  const corpAgendaPoints = getPlayerView(record.gameState, "corp").own.agendaPoints;
+  const actionEvents = record.eventLog.filter((event) => event.publicPayload.type !== "game_created");
+  const countType = (type: string) => actionEvents.filter((event) => event.publicPayload.type === type).length;
+  return {
+    winner,
+    viewerOutcome: winner === "draw" ? "draw" : winner === viewerSide ? "won" : "lost",
+    reason: resultReason(winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
+    matchFormat: record.match.settings.matchFormat,
+    agendaPointsToWin: record.match.settings.agendaPointsToWin,
+    runnerAgendaPoints,
+    corpAgendaPoints,
+    actionCount: actionEvents.length,
+    runCount: countType("start_run"),
+    successfulRunCount: countType("access_card"),
+    stolenAgendaCount: countType("steal_agenda"),
+    scoredAgendaCount: countType("score_agenda"),
+    startedAt: record.match.createdAt,
+    finishedAt: record.match.updatedAt,
+    finalStateHash
+  };
+}
+
+function resultReason(winner: Side | "draw", runnerAgendaPoints: number, corpAgendaPoints: number, agendaPointsToWin: number): GameResultReason {
+  if (winner === "draw") return "draw";
+  if (runnerAgendaPoints >= agendaPointsToWin || corpAgendaPoints >= agendaPointsToWin) return "agenda_points";
+  if (winner === "runner") return "corp_deck_empty";
+  return "unknown";
 }
 
 function safeError(code: string, message: string, state?: GameState, side?: Side): SafeErrorPayload {

@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.91 card image asset gate requirements freeze is complete, but official card image implementation is blocked pending explicit asset permission or a documented private local usage decision.
+S01 Spielende, Ergebnisfenster, Spielziel und Audio core implementation is complete and locally verified.
 
 ## Status
 
@@ -141,6 +141,16 @@ MVP 0.91 card image asset gate requirements freeze is complete and testable.
 `ready_for_implementation: false`
 
 Blocker: current primary-source review does not provide explicit permission to import, cache or display official full card images, card art, card frames or card backs in this web application.
+
+S01 requirements, result modal, audio and test matrix are complete.
+
+`S01_requirements_freeze_done: true`
+
+S01 core implementation is complete and locally verified: side-safe `GameResultSummary`, result modal, game-goal selector and opt-in synthesized audio.
+
+`S01_core_implemented: true`
+
+`S01_core_verified: true`
 
 ## Goal
 
@@ -999,6 +1009,48 @@ V0.91 remains a future gated phase after V0.9. This planning update does not imp
 `ready_for_implementation: false`
 
 The technical and hidden-info requirements are testable, and every Must requirement has a test trail. Official card image use remains blocked: NetrunnerDB provides technical image metadata, but the reviewed primary sources do not grant explicit permission for this project to download, cache or display official full card images. Null Signal Games public visual asset permission does not include card art, card frames or card backs.
+
+## S01 Requirements and core implementation files created or updated
+
+- `docs/derived/S01_DETAILED_PLAN.md`
+- `docs/derived/S01_REQUIREMENTS.md`
+- `docs/derived/S01_RESULT_MODAL_SPEC.md`
+- `docs/derived/S01_AUDIO_SPEC.md`
+- `docs/derived/S01_TEST_MATRIX.md`
+- `docs/derived/S01_REQUIREMENTS_REVIEW.md`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/http-server.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `apps/web/app/page.tsx`
+- `apps/web/app/globals.css`
+- `tests/specs/visibility-contract.test.ts`
+
+## S01 core implementation gate
+
+`S01_core_implemented: true`
+
+`S01_core_verified: true`
+
+Implemented scope:
+
+- Server-side side-safe `GameResultSummary` for finished games.
+- WebSocket `match_finished` payload now carries the result summary.
+- Startscreen offers `Regelmatch · 7 Agendapunkte` and `Einzelspiel · Deckziel`.
+- Web UI shows a result modal with perspective text, safe statistics, final StateHash and abstract local CSS background graphic.
+- Audio effects are opt-in, locally synthesized and not part of Engine, Replay or StateHash.
+
+Checks:
+
+- `corepack pnpm --filter @netrunner/server test`: pass, 12 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 60 package tests plus 24 root spec tests.
+- `corepack pnpm build`: pass. Known Turbopack NFT warning remains for the pre-existing `card-images` route trace.
+
+Deferred:
+
+- Multi-game private series with automatic side swap remains a future S01.x follow-up because it touches session side assignment, reconnect tokens and WebSocket contexts.
 
 ## Phase 2 implemented scope
 

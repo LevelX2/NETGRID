@@ -25,6 +25,8 @@ import {
   Trash2,
   Upload,
   UserPlus,
+  Volume2,
+  VolumeX,
   X,
   ZoomIn
 } from "lucide-react";
@@ -41,14 +43,34 @@ import {
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
 const SESSION_KEY = "netrunner-mvp-0-3-session";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
+const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_004_snapshot_v0_6";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
 
 type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
+type MatchFormat = "single_game" | "rules_match";
 type AiDifficulty = "easy" | "normal" | "hard";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type EntryTab = "play" | "catalog" | "decks";
+
+type GameResultSummary = {
+  winner: Winner;
+  viewerOutcome: "won" | "lost" | "draw";
+  reason: "agenda_points" | "corp_deck_empty" | "draw" | "unknown";
+  matchFormat: MatchFormat;
+  agendaPointsToWin: number;
+  runnerAgendaPoints: number;
+  corpAgendaPoints: number;
+  actionCount: number;
+  runCount: number;
+  successfulRunCount: number;
+  stolenAgendaCount: number;
+  scoredAgendaCount: number;
+  startedAt: string;
+  finishedAt: string;
+  finalStateHash: string;
+};
 
 type ClientPayload = {
   matchId: string;
@@ -68,6 +90,7 @@ type ClientPayload = {
   };
   winner?: Winner;
   finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 type SessionInfo = {
@@ -86,7 +109,7 @@ type ServerMessage =
   | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
   | { type: "opponent_status"; payload: ClientPayload["opponentStatus"] }
   | { type: "undo_request"; payload: NonNullable<ClientPayload["pendingUndo"]> }
-  | { type: "match_finished"; payload: { winner: Winner; finalStateHash: string } }
+  | { type: "match_finished"; payload: { winner: Winner; finalStateHash: string; resultSummary?: GameResultSummary } }
   | { type: "error"; payload: { code: string; message: string; playerView?: PlayerView } }
   | { type: "action_receipt"; payload: { accepted: boolean; stateVersionAfter: number; errorCode?: string } }
   | { type: "choice_request"; payload: { choice: null } }
@@ -103,6 +126,9 @@ type CreateMatchResponse = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  winner?: Winner;
+  finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 type JoinMatchResponse = {
@@ -115,6 +141,9 @@ type JoinMatchResponse = {
   legalActions: LegalAction[];
   matchVersion: number;
   eventTail?: PublicGameEvent[];
+  winner?: Winner;
+  finalStateHash?: string;
+  resultSummary?: GameResultSummary;
   error?: { message: string };
 };
 
@@ -420,6 +449,7 @@ export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [gameMode, setGameMode] = useState<GameMode>("human_vs_human");
+  const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [displayName, setDisplayName] = useState("Runner");
@@ -462,7 +492,12 @@ export default function Page() {
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
   const [focusedCard, setFocusedCard] = useState<VisibleCard | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.45);
+  const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const resultAudioPrimedRef = useRef(false);
+  const lastAudioResultKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -504,6 +539,22 @@ export default function Page() {
     if (!localDecksLoaded) return;
     window.localStorage.setItem(DECK_STORAGE_KEY, JSON.stringify(localDecks));
   }, [localDecks, localDecksLoaded]);
+
+  useEffect(() => {
+    const storedAudio = window.localStorage.getItem(AUDIO_STORAGE_KEY);
+    if (!storedAudio) return;
+    try {
+      const parsed = JSON.parse(storedAudio) as { enabled?: boolean; volume?: number };
+      setAudioEnabled(Boolean(parsed.enabled));
+      if (typeof parsed.volume === "number") setAudioVolume(Math.min(1, Math.max(0, parsed.volume)));
+    } catch {
+      window.localStorage.removeItem(AUDIO_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(AUDIO_STORAGE_KEY, JSON.stringify({ enabled: audioEnabled, volume: audioVolume }));
+  }, [audioEnabled, audioVolume]);
 
   useEffect(() => {
     if (!session) return;
@@ -611,6 +662,24 @@ export default function Page() {
   const previewCard = focusedCard ?? activeView?.run?.encounteredIce ?? activeView?.own.gripOrHq.find((card) => card.known) ?? activeView?.own.rig?.find((card) => card.known) ?? null;
   const enrichCard = (card: VisibleCard) => enrichVisibleCard(card, catalogDetailsById);
   const enrichedPreviewCard = previewCard ? enrichCard(previewCard) : null;
+  const resultSummary = payload?.resultSummary ?? null;
+  const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
+  const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
+  const effectiveAgendaTarget = matchFormat === "rules_match" ? 7 : effectiveCorpSnapshot?.validation.agendaPoints ?? undefined;
+
+  useEffect(() => {
+    if (!resultKey || !resultSummary) {
+      resultAudioPrimedRef.current = true;
+      return;
+    }
+    if (!resultAudioPrimedRef.current) {
+      lastAudioResultKeyRef.current = resultKey;
+      return;
+    }
+    if (!audioEnabled || lastAudioResultKeyRef.current === resultKey) return;
+    lastAudioResultKeyRef.current = resultKey;
+    playResultSound(resultSummary.viewerOutcome, audioVolume);
+  }, [audioEnabled, audioVolume, resultKey, resultSummary]);
 
   const createMatch = async () => {
     setNotice("");
@@ -626,6 +695,10 @@ export default function Page() {
       mode: gameMode,
       runnerDifficulty,
       corpDifficulty,
+      settings: {
+        matchFormat,
+        ...(effectiveAgendaTarget ? { agendaPointsToWin: effectiveAgendaTarget } : {})
+      },
       ...matchDeckPayload()
     });
     const nextSession: SessionInfo = {
@@ -650,7 +723,7 @@ export default function Page() {
       runnerDifficulty,
       corpDifficulty,
       ...matchDeckPayload(),
-      agendaPointsToWin: effectiveCorpSnapshot?.validation.agendaPoints ?? 7,
+      agendaPointsToWin: effectiveAgendaTarget ?? 7,
       maxActions: 120
     });
     setSimulation(result.summary);
@@ -958,7 +1031,17 @@ export default function Page() {
       return;
     }
     if (message.type === "match_finished") {
-      setPayload((current) => (current ? { ...current, winner: message.payload.winner, finalStateHash: message.payload.finalStateHash, matchStatus: "finished" } : current));
+      setPayload((current) =>
+        current
+          ? {
+              ...current,
+              winner: message.payload.winner,
+              finalStateHash: message.payload.finalStateHash,
+              ...(message.payload.resultSummary ? { resultSummary: message.payload.resultSummary } : {}),
+              matchStatus: "finished"
+            }
+          : current
+      );
       return;
     }
     if (message.type === "error") {
@@ -1028,6 +1111,13 @@ export default function Page() {
                     <option value="human_runner_vs_corp_ai">Runner vs Corp-KI</option>
                     <option value="human_corp_vs_runner_ai">Corp vs Runner-KI</option>
                     <option value="ai_vs_ai">KI vs KI</option>
+                  </select>
+                </label>
+                <label>
+                  Spielziel
+                  <select value={matchFormat} onChange={(event) => setMatchFormat(event.target.value as MatchFormat)}>
+                    <option value="rules_match">Regelmatch · 7 Agendapunkte</option>
+                    <option value="single_game">Einzelspiel · Deckziel</option>
                   </select>
                 </label>
                 <label>
@@ -1110,6 +1200,7 @@ export default function Page() {
                 </label>
                 <DeckMetadataLine runner={effectiveRunnerSnapshot?.publicMetadata} corp={effectiveCorpSnapshot?.publicMetadata} />
                 <CardDisplaySettings mode={cardDisplayMode} onChange={setCardDisplayMode} />
+                <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={setAudioEnabled} onVolume={setAudioVolume} />
                 <BoardPreview displayMode={cardDisplayMode} />
                 <button className="button primary wide" onClick={createMatch}>
                   {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
@@ -1198,6 +1289,9 @@ export default function Page() {
         <Brand subtitle={`V0.7 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
+          <button className="button iconOnly" onClick={() => setAudioEnabled((current) => !current)} title={audioEnabled ? "Audio aus" : "Audio an"} aria-label={audioEnabled ? "Audio aus" : "Audio an"}>
+            {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
           {session.joinUrl ? (
             <button className="button" onClick={copyJoinLink} title="Join-Link kopieren">
               <Clipboard size={16} />
@@ -1296,6 +1390,16 @@ export default function Page() {
           <DiagnosticsDrawer open={diagnosticsOpen} payload={payload} connection={connection} />
         </aside>
       </div>
+      {showResultModal && resultSummary ? (
+        <GameOverModal
+          result={resultSummary}
+          side={session.side}
+          onDismiss={() => {
+            if (resultKey) setDismissedResultKey(resultKey);
+          }}
+          onNewMatch={leaveMatch}
+        />
+      ) : null}
     </main>
   );
 }
@@ -1312,6 +1416,58 @@ function Brand({ subtitle }: { subtitle: string }) {
       </div>
     </div>
   );
+}
+
+function GameOverModal({ result, side, onDismiss, onNewMatch }: { result: GameResultSummary; side: Side; onDismiss(): void; onNewMatch(): void }) {
+  const outcomeText =
+    result.viewerOutcome === "won"
+      ? "Du hast das Spiel gewonnen."
+      : result.viewerOutcome === "lost"
+        ? "Du hast das Spiel verloren."
+        : "Das Spiel endet unentschieden.";
+  return (
+    <div className={`gameOverOverlay ${result.viewerOutcome}`} role="dialog" aria-modal="true" aria-labelledby="game-over-title">
+      <div className="gameOverBackdrop" aria-hidden="true" />
+      <section className="gameOverPanel">
+        <div className="gameOverHero">
+          <p className="eyebrow">{result.matchFormat === "rules_match" ? "Regelmatch" : "Einzelspiel"}</p>
+          <h2 id="game-over-title">{outcomeText}</h2>
+          <p>{resultReasonLabel(result.reason)}</p>
+        </div>
+        <div className="gameOverStats">
+          <Stat label="Runner Agenda" value={result.runnerAgendaPoints} />
+          <Stat label="Corp Agenda" value={result.corpAgendaPoints} />
+          <Stat label="Zielwert" value={result.agendaPointsToWin} />
+          <Stat label="Aktionen" value={result.actionCount} />
+          <Stat label="Runs" value={result.runCount} />
+          <Stat label="Erfolgreich" value={result.successfulRunCount} />
+          <Stat label="Gestohlen" value={result.stolenAgendaCount} />
+          <Stat label="Gescored" value={result.scoredAgendaCount} />
+        </div>
+        <div className="gameOverFooter">
+          <div>
+            <span>{result.winner === "draw" ? "Draw" : result.winner === side ? "Deine Seite gewinnt" : "Gegenseite gewinnt"}</span>
+            <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
+          </div>
+          <div className="gameOverActions">
+            <button className="button" onClick={onDismiss}>
+              Board ansehen
+            </button>
+            <button className="button primary" onClick={onNewMatch}>
+              Neues Spiel
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function resultReasonLabel(reason: GameResultSummary["reason"]): string {
+  if (reason === "agenda_points") return "Das Agenda-Ziel wurde erreicht.";
+  if (reason === "corp_deck_empty") return "Die Corp konnte keine Karte mehr ziehen.";
+  if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
+  return "Das Spiel wurde abgeschlossen.";
 }
 
 function PreflightBar() {
@@ -1353,6 +1509,31 @@ function CardDisplaySettings({ mode, onChange, compact = false }: { mode: CardDi
           {!compact ? "Kompakt" : null}
         </button>
       </div>
+    </div>
+  );
+}
+
+function AudioSettings({
+  enabled,
+  volume,
+  onEnabled,
+  onVolume
+}: {
+  enabled: boolean;
+  volume: number;
+  onEnabled(value: boolean): void;
+  onVolume(value: number): void;
+}) {
+  return (
+    <div className="audioSettings">
+      <button className={`button ${enabled ? "primary" : ""}`} type="button" onClick={() => onEnabled(!enabled)} title={enabled ? "Audioeffekte ausschalten" : "Audioeffekte einschalten"}>
+        {enabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
+        Audio
+      </button>
+      <label>
+        Lautstärke
+        <input type="range" min={0} max={1} step={0.05} value={volume} onChange={(event) => onVolume(Number(event.target.value))} disabled={!enabled} />
+      </label>
     </div>
   );
 }
@@ -2226,7 +2407,8 @@ function valueLabel(label: string, value: number | undefined): string | null {
 }
 
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {
-  return {
+  const winner = response.winner ?? response.playerView.winner;
+  const payload: ClientPayload = {
     matchId: response.matchId,
     matchStatus: response.mode === "human_vs_human" ? (response.hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner") : "active",
     matchVersion: response.matchVersion,
@@ -2234,13 +2416,17 @@ function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientP
     playerView: response.playerView,
     legalActions: response.legalActions,
     eventTail: response.playerView.publicEvents,
-    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" },
-    ...(response.playerView.winner ? { winner: response.playerView.winner } : {})
+    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" }
   };
+  if (winner) payload.winner = winner;
+  if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
+  if (response.resultSummary) payload.resultSummary = response.resultSummary;
+  return payload;
 }
 
 function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
-  return {
+  const winner = response.winner ?? response.playerView.winner;
+  const payload: ClientPayload = {
     matchId: response.matchId,
     matchStatus: "active",
     matchVersion: response.matchVersion,
@@ -2248,9 +2434,12 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
     playerView: response.playerView,
     legalActions: response.legalActions,
     eventTail: response.eventTail ?? response.playerView.publicEvents,
-    opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false },
-    ...(response.playerView.winner ? { winner: response.playerView.winner } : {})
+    opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false }
   };
+  if (winner) payload.winner = winner;
+  if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
+  if (response.resultSummary) payload.resultSummary = response.resultSummary;
+  return payload;
 }
 
 async function bootstrap(session: SessionInfo): Promise<ClientPayload | null> {
@@ -2269,6 +2458,34 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body)
   });
   return (await response.json()) as T;
+}
+
+function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: number): void {
+  const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtor) return;
+  const context = new AudioCtor();
+  const safeVolume = Math.min(1, Math.max(0, volume));
+  const notes =
+    outcome === "won"
+      ? [523.25, 659.25, 783.99]
+      : outcome === "lost"
+        ? [392, 329.63, 261.63]
+        : [440, 493.88, 440];
+  notes.forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const start = context.currentTime + index * 0.11;
+    oscillator.type = outcome === "lost" ? "triangle" : "sine";
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, safeVolume * 0.12), start + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.17);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + 0.19);
+  });
+  window.setTimeout(() => void context.close(), 700);
 }
 
 function persistSession(session: SessionInfo) {
