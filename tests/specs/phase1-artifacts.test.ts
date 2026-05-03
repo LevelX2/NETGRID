@@ -84,9 +84,16 @@ const REQUIRED_MVP_0_8_DOCS = [
 ];
 
 const MVP_0_8_DATA_FILES = [
+  "data/rules/rules-baseline-0.8.json",
+  "data/card-import/card-snapshot-0.8.json",
   "data/cards/demo-cards-0.8.json",
+  "data/decks/deck-format-profiles-0.8.json",
+  "data/decks/deck-templates-0.8.json",
+  "data/decks/deck-snapshots-0.8.json",
   "data/decks/demo-decks-0.8.json",
-  "data/manifests/card-implementation-manifest-0.8.json"
+  "data/manifests/card-implementation-manifest-0.8.json",
+  "data/manifests/deck-validation-manifest-0.8.json",
+  "data/deviations/rule-deviations-0.8.json"
 ];
 
 const REQUIRED_MVP_0_8_SCENARIOS = [
@@ -393,6 +400,38 @@ describe("Phase 1 derived artifacts", () => {
     }
     for (const card of playableCards) {
       expect(scenarioCoveredCards.has(card.cardCode), card.cardCode).toBe(true);
+    }
+
+    const snapshot = JSON.parse(readFileSync("data/card-import/card-snapshot-0.8.json", "utf8")) as {
+      snapshotId?: string;
+      cards?: Array<{ catalogCardId: string; statuses: { playable: boolean; deck_legal: boolean } }>;
+    };
+    expect(snapshot.snapshotId).toBe("card-snapshot-0.8");
+    expect(snapshot.cards?.filter((card) => card.catalogCardId.startsWith("v08_")).length).toBe(14);
+    expect(snapshot.cards?.filter((card) => card.catalogCardId.startsWith("v08_")).every((card) => card.statuses.playable && card.statuses.deck_legal)).toBe(true);
+    expect(fnv1a(stableStringify(snapshot))).toBe(readFileSync("data/card-import/card-snapshot-0.8.hash", "utf8").trim());
+
+    const snapshotSet = JSON.parse(readFileSync("data/decks/deck-snapshots-0.8.json", "utf8")) as {
+      snapshots: Array<{
+        deckSnapshotId: string;
+        deckHash: string;
+        rulesBaselineId: string;
+        validation: { ok: boolean; agendaPoints: number | null };
+        publicMetadata: { deckHash: string; cards?: unknown };
+      }>;
+    };
+    const v08Snapshots = snapshotSet.snapshots.filter((snapshot) => snapshot.deckSnapshotId.endsWith("_snapshot_v0_8"));
+    expect(v08Snapshots.length).toBe(2);
+    expect(v08Snapshots.every((snapshot) => snapshot.rulesBaselineId === "rules-baseline-mvp-0.8")).toBe(true);
+    expect(v08Snapshots.every((snapshot) => snapshot.validation.ok)).toBe(true);
+    expect(v08Snapshots.every((snapshot) => !Object.hasOwn(snapshot.publicMetadata, "cards"))).toBe(true);
+    expect(v08Snapshots.find((snapshot) => snapshot.deckSnapshotId === "demo_corp_008_snapshot_v0_8")?.validation.agendaPoints).toBe(7);
+    for (const snapshot of v08Snapshots) {
+      const hashInput = structuredClone(snapshot);
+      hashInput.deckHash = "pending";
+      hashInput.publicMetadata.deckHash = "pending";
+      expect(snapshot.deckHash).toBe(fnv1a(stableStringify(hashInput)));
+      expect(snapshot.publicMetadata.deckHash).toBe(snapshot.deckHash);
     }
   });
 });

@@ -42,12 +42,14 @@ describe("Client visibility contract", () => {
     const payloads = [
       catalogListResponse(new URLSearchParams("status=blocked")).body,
       catalogDetailResponse("catalog_preview_operation_001").body,
+      catalogDetailResponse("v08_burst_credit_event").body,
       catalogStatusSummaryResponse().body
     ];
 
     const serialized = JSON.stringify(payloads);
     expect(serialized).toContain("catalog_preview_operation_001");
     expect(serialized).toContain("catalog_preview_resource_001");
+    expect(serialized).toContain("v08_burst_credit_event");
     expect(serialized).not.toContain("cardInstances");
     expect(serialized).not.toContain("privatePayload");
     expect(serialized).not.toContain("sessionToken");
@@ -60,6 +62,7 @@ describe("Client visibility contract", () => {
   it("keeps deck API payloads free of match and token data", () => {
     const serialized = JSON.stringify([deckTemplatesResponse().body, deckSnapshotsResponse().body]);
     expect(serialized).toContain("demo_runner_004_snapshot_v0_6");
+    expect(serialized).toContain("demo_runner_008_snapshot_v0_8");
     expect(serialized).not.toContain("cardInstances");
     expect(serialized).not.toContain("privatePayload");
     expect(serialized).not.toContain("sessionToken");

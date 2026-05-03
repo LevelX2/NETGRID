@@ -546,8 +546,8 @@ export default function Page() {
       name: `${template.name} Kopie`,
       side: template.side,
       identityCardId: template.identityCardId,
-      cardPoolSnapshotId: "card-snapshot-0.5",
-      formatProfileId: "local-demo-v0.6",
+      cardPoolSnapshotId: "card-snapshot-0.8",
+      formatProfileId: "local-demo-v0.8",
       cards: template.cards.map((entry) => ({ ...entry })),
       createdAt: now,
       updatedAt: now

@@ -32,9 +32,9 @@
       "side": "corp",
       "identity": "corp_identity_001",
       "cards": [
-        { "id": "simple_agenda", "quantity": 2 },
+        { "id": "simple_agenda", "quantity": 1 },
         { "id": "simple_priority_agenda", "quantity": 1 },
-        { "id": "v08_project_agenda", "quantity": 3 },
+        { "id": "v08_project_agenda", "quantity": 1 },
         { "id": "simple_economy_operation", "quantity": 2 },
         { "id": "simple_draw_operation", "quantity": 1 },
         { "id": "simple_economy_asset", "quantity": 1 },

@@ -44,7 +44,7 @@ export type CardInstanceId = string;
 export type ServerId = "hq" | "rd" | "archives" | `remote_${number}` | "new_remote";
 export type StateHash = string;
 export type Winner = Side | "draw";
-export type DemoDeckId = "demo_runner_001" | "demo_corp_001" | "demo_runner_004" | "demo_corp_004";
+export type DemoDeckId = "demo_runner_001" | "demo_corp_001" | "demo_runner_004" | "demo_corp_004" | "demo_runner_008" | "demo_corp_008";
 
 export type SubroutineType = "end_the_run" | "corp_gain_credit" | "runner_lose_credits" | "give_runner_tag";
 
@@ -106,14 +106,14 @@ export type DeckPublicMetadata = {
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
-  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
-  cardImplementationVersion: "0.1.0" | "0.4.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
-  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0";
-  aiControllerSchemaVersion?: "0.3.0" | "0.4.0";
-  simulationSchemaVersion?: "0.3.0" | "0.4.0";
+  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0";
+  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0";
+  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0";
+  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0";
 };
 
 export type PlayerController = {
@@ -131,8 +131,8 @@ export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
   baseline?: RulesBaseline;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -452,6 +452,18 @@ export const MVP_0_4_BASELINE: RulesBaseline = {
   simulationSchemaVersion: "0.4.0"
 };
 
+export const MVP_0_8_BASELINE: RulesBaseline = {
+  ...MVP_0_4_BASELINE,
+  cardTextSnapshotId: "mvp-0.8-demo",
+  engineSchemaVersion: "0.8.0",
+  cardImplementationVersion: "0.8.0",
+  deviationRegistryVersion: "0.8.0",
+  playerViewSchemaVersion: "0.8.0",
+  multiplayerSchemaVersion: "0.8.0",
+  aiControllerSchemaVersion: "0.8.0",
+  simulationSchemaVersion: "0.8.0"
+};
+
 export const DEMO_CARDS: CardDefinition[] = [
   {
     id: "runner_identity_001",
@@ -744,6 +756,192 @@ export const DEMO_CARDS: CardDefinition[] = [
     cost: 1,
     rulesText: "Spiele nur, wenn der Runner getaggt ist. Der Runner verliert 2 Credits.",
     mechanics: ["play_operation", "runner_is_tagged", "runner_lose_credits"]
+  },
+  {
+    id: "v08_burst_credit_event",
+    title: "Burst Credit Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Erhalte 6 Credits.",
+    mechanics: ["play_event", "gain_credits", "v08_local_original"]
+  },
+  {
+    id: "v08_deep_draw_event",
+    title: "Deep Draw Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Ziehe 3 Karten.",
+    mechanics: ["play_event", "draw_cards", "v08_local_original"]
+  },
+  {
+    id: "v08_overclock_run_event",
+    title: "Overclock Run Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 3 Credits.",
+    mechanics: ["play_event", "start_run", "successful_run_bonus", "v08_local_original"]
+  },
+  {
+    id: "v08_memory_chip",
+    title: "Memory Chip",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "+1 Memory Limit.",
+    mechanics: ["install_hardware", "modify_memory_limit", "v08_local_original"]
+  },
+  {
+    id: "v08_steady_fracter",
+    title: "Steady Fracter",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker", "fracter"],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    memoryCost: 1,
+    strength: 4,
+    rulesText: "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+    abilities: [
+      { id: "v08_steady_fracter_pump", type: "pump_strength", cost: { credits: 1 }, amount: 1, timingPoint: "run.encounter_ice" },
+      { id: "v08_steady_fracter_break_barrier", type: "break_subroutine", cost: { credits: 1 }, iceSubtype: "barrier", count: 1, timingPoint: "run.encounter_ice" }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "v08_local_original"]
+  },
+  {
+    id: "v08_precise_decoder",
+    title: "Precise Decoder",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker", "decoder"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    strength: 3,
+    rulesText: "1 Credit: +1 Stärke. 1 Credit: Brich 1 Code-Gate-Subroutine.",
+    abilities: [
+      { id: "v08_precise_decoder_pump", type: "pump_strength", cost: { credits: 1 }, amount: 1, timingPoint: "run.encounter_ice" },
+      { id: "v08_precise_decoder_break_code_gate", type: "break_subroutine", cost: { credits: 1 }, iceSubtype: "code_gate", count: 1, timingPoint: "run.encounter_ice" }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "v08_local_original"]
+  },
+  {
+    id: "v08_adaptive_killer",
+    title: "Adaptive Killer",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker", "killer"],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    memoryCost: 1,
+    strength: 3,
+    rulesText: "1 Credit: +1 Stärke. 1 Credit: Brich 1 Sentry-Subroutine.",
+    abilities: [
+      { id: "v08_adaptive_killer_pump", type: "pump_strength", cost: { credits: 1 }, amount: 1, timingPoint: "run.encounter_ice" },
+      { id: "v08_adaptive_killer_break_sentry", type: "break_subroutine", cost: { credits: 1 }, iceSubtype: "sentry", count: 1, timingPoint: "run.encounter_ice" }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "v08_local_original"]
+  },
+  {
+    id: "v08_credit_surge_operation",
+    title: "Credit Surge Operation",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Erhalte 7 Credits.",
+    mechanics: ["play_operation", "gain_credits", "v08_local_original"]
+  },
+  {
+    id: "v08_archive_planning_operation",
+    title: "Archive Planning Operation",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Ziehe 3 Karten.",
+    mechanics: ["play_operation", "draw_cards", "v08_local_original"]
+  },
+  {
+    id: "v08_project_agenda",
+    title: "Project Agenda",
+    side: "corp",
+    type: "agenda",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 3,
+    agendaPoints: 2,
+    rulesText: "Keine zusätzliche Fähigkeit.",
+    mechanics: ["install_remote", "advance", "score", "steal", "v08_local_original"]
+  },
+  {
+    id: "v08_cashout_asset",
+    title: "Cashout Asset",
+    side: "corp",
+    type: "asset",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 2,
+    trashCost: 4,
+    rulesText: "Wenn diese Karte gerezzt wird, erhält die Corp 4 Credits.",
+    mechanics: ["install_remote", "rez_asset", "gain_credits_on_rez", "trash_on_access", "v08_local_original"]
+  },
+  {
+    id: "v08_wall_ice",
+    title: "Wall ICE",
+    side: "corp",
+    type: "ice",
+    subtypes: ["barrier"],
+    implementationStatus: "playable_mvp",
+    rezCost: 5,
+    strength: 5,
+    rulesText: "End the run.",
+    subroutines: [{ id: "v08_wall_ice_etr", type: "end_the_run" }],
+    mechanics: ["install_ice", "rez_ice", "encounter_ice", "end_the_run", "v08_local_original"]
+  },
+  {
+    id: "v08_gate_ice",
+    title: "Gate ICE",
+    side: "corp",
+    type: "ice",
+    subtypes: ["code_gate"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 3,
+    rulesText: "Die Corp erhält 2 Credits. End the run.",
+    subroutines: [
+      { id: "v08_gate_ice_gain_credit", type: "corp_gain_credit", amount: 2 },
+      { id: "v08_gate_ice_etr", type: "end_the_run" }
+    ],
+    mechanics: ["install_ice", "rez_ice", "encounter_ice", "corp_gain_credit", "end_the_run", "v08_local_original"]
+  },
+  {
+    id: "v08_watchdog_ice",
+    title: "Watchdog ICE",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 3,
+    rulesText: "Gib dem Runner 1 Tag. End the run.",
+    subroutines: [
+      { id: "v08_watchdog_ice_tag", type: "give_runner_tag", amount: 1 },
+      { id: "v08_watchdog_ice_etr", type: "end_the_run" }
+    ],
+    mechanics: ["install_ice", "rez_ice", "encounter_ice", "give_runner_tag", "end_the_run", "v08_local_original"]
   }
 ];
 
@@ -813,6 +1011,55 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
       { id: "simple_sentry_ice", quantity: 2 },
       { id: "simple_tag_ice", quantity: 2 },
       { id: "simple_tag_punishment_operation", quantity: 2 }
+    ]
+  },
+  demo_runner_008: {
+    id: "demo_runner_008",
+    name: "Runner Demo Deck 08 - Starter Pressure",
+    side: "runner",
+    identity: "runner_identity_001",
+    cards: [
+      { id: "simple_economy_event", quantity: 3 },
+      { id: "simple_run_event", quantity: 2 },
+      { id: "simple_draw_event", quantity: 2 },
+      { id: "simple_setup_hardware", quantity: 1 },
+      { id: "simple_fracter", quantity: 1 },
+      { id: "efficient_fracter", quantity: 2 },
+      { id: "simple_decoder", quantity: 1 },
+      { id: "simple_killer", quantity: 1 },
+      { id: "v08_burst_credit_event", quantity: 3 },
+      { id: "v08_deep_draw_event", quantity: 3 },
+      { id: "v08_overclock_run_event", quantity: 2 },
+      { id: "v08_memory_chip", quantity: 2 },
+      { id: "v08_steady_fracter", quantity: 2 },
+      { id: "v08_precise_decoder", quantity: 1 },
+      { id: "v08_adaptive_killer", quantity: 1 }
+    ]
+  },
+  demo_corp_008: {
+    id: "demo_corp_008",
+    name: "Corp Demo Deck 08 - Starter Score Grid",
+    side: "corp",
+    identity: "corp_identity_001",
+    cards: [
+      { id: "simple_agenda", quantity: 1 },
+      { id: "simple_priority_agenda", quantity: 1 },
+      { id: "v08_project_agenda", quantity: 1 },
+      { id: "simple_economy_operation", quantity: 2 },
+      { id: "simple_draw_operation", quantity: 1 },
+      { id: "simple_economy_asset", quantity: 1 },
+      { id: "simple_upgrade", quantity: 1 },
+      { id: "simple_barrier_ice", quantity: 1 },
+      { id: "simple_code_gate_ice", quantity: 1 },
+      { id: "simple_sentry_ice", quantity: 1 },
+      { id: "simple_tag_ice", quantity: 1 },
+      { id: "simple_taxing_barrier_ice", quantity: 1 },
+      { id: "v08_credit_surge_operation", quantity: 3 },
+      { id: "v08_archive_planning_operation", quantity: 2 },
+      { id: "v08_cashout_asset", quantity: 2 },
+      { id: "v08_wall_ice", quantity: 2 },
+      { id: "v08_gate_ice", quantity: 2 },
+      { id: "v08_watchdog_ice", quantity: 2 }
     ]
   }
 };

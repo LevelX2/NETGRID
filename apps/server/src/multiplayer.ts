@@ -7,6 +7,7 @@ import {
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
   MVP_0_4_BASELINE,
+  MVP_0_8_BASELINE,
   type AiDifficulty,
   type DeckPublicMetadata,
   type GameEvent,
@@ -19,7 +20,7 @@ import {
   type RulesBaseline,
   type Side
 } from "@netrunner/shared";
-import { defaultAgendaPointsToWin, resolveDeckSetup, setupUsesExpandedRules, type MatchDeckSelectionInput, type ResolvedDeckSetup } from "./deck-setup";
+import { defaultAgendaPointsToWin, resolveDeckSetup, setupUsesExpandedRules, setupUsesMvp08Rules, type MatchDeckSelectionInput, type ResolvedDeckSetup } from "./deck-setup";
 
 export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 export type HostSideSelection = Side | "random";
@@ -909,6 +910,7 @@ function deterministicHostSide(seed: string): Side {
 }
 
 function baselineForMode(mode: MatchMode, deckSetup: ResolvedDeckSetup): RulesBaseline {
+  if (setupUsesMvp08Rules(deckSetup)) return MVP_0_8_BASELINE;
   if (setupUsesExpandedRules(deckSetup)) return MVP_0_4_BASELINE;
   return mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
 }

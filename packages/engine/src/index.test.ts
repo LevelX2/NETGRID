@@ -3,6 +3,7 @@ import {
   applyAction,
   checkWinConditions,
   createGame,
+  DEMO_CARDS_BY_ID,
   DEMO_DECKS,
   getLegalActions,
   getPlayerView,
@@ -276,6 +277,117 @@ describe("MVP 0.4 controlled card pool and tags", () => {
   });
 });
 
+describe("MVP 0.8 playable starter slice", () => {
+  it("creates V0.8 games with explicit starter decks and baseline", () => {
+    const state = createGame({
+      seed: "v08-starter",
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008"
+    });
+
+    expect(state.baseline.engineSchemaVersion).toBe("0.8.0");
+    expect(state.baseline.cardImplementationVersion).toBe("0.8.0");
+    expect(state.agendaPointsToWin).toBe(7);
+    expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe("card-snapshot-0.8");
+    expect(state.deckMetadata?.corp.formatProfileId).toBe("local-demo-v0.8");
+    expect(Object.values(state.cardInstances).some((card) => card.definitionId === "v08_burst_credit_event")).toBe(true);
+    expect(Object.values(state.cardInstances).some((card) => card.definitionId === "v08_watchdog_ice")).toBe(true);
+    expect(validateDeckDefinition(DEMO_DECKS.demo_runner_008, { expectedSide: "runner", allowedDeckIds: ["demo_runner_008"] }).ok).toBe(true);
+    expect(validateDeckDefinition(DEMO_DECKS.demo_corp_008, { expectedSide: "corp", allowedDeckIds: ["demo_corp_008"], minimumAgendaPoints: 7 }).ok).toBe(true);
+  });
+
+  it("resolves V0.8 runner event and install resolvers", () => {
+    let state = toRunnerTurn(createGame({ seed: "v08-runner-events", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    state.runner.credits = 10;
+    moveRunnerCardToGrip(state, "v08_burst_credit_event");
+    moveRunnerCardToGrip(state, "v08_deep_draw_event");
+    moveRunnerCardToGrip(state, "v08_memory_chip");
+
+    const beforeCredits = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "v08_burst_credit_event");
+    expect(state.runner.credits).toBe(beforeCredits + 5);
+
+    const beforeGrip = state.runner.grip.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "v08_deep_draw_event");
+    expect(state.runner.grip.length).toBe(beforeGrip + 2);
+
+    const beforeMemoryLimit = state.runner.memoryLimit;
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "v08_memory_chip");
+    expect(state.runner.memoryLimit).toBe(beforeMemoryLimit + 1);
+  });
+
+  it("uses V0.8 run events and breaker definitions through LegalActions", () => {
+    let state = toRunnerTurn(createGame({ seed: "v08-run-pressure", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    state.runner.credits = 10;
+    moveRunnerCardToGrip(state, "v08_overclock_run_event");
+    installRunnerProgramForTest(state, "v08_steady_fracter");
+    putCorpIceOnServer(state, "rd", "v08_wall_ice");
+    putCorpCardOnTopOfRd(state, "v08_credit_surge_operation");
+    state.corp.credits = 10;
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "v08_overclock_run_event" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v08_wall_ice");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "v08_steady_fracter");
+    state = apply(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "v08_steady_fracter");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const beforeAccessCredits = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.runner.credits).toBe(beforeAccessCredits + 3);
+    expect(state.run).toBeUndefined();
+  });
+
+  it("resolves V0.8 corp operations, asset rez and agenda scoring", () => {
+    let state = createGame({ seed: "v08-corp-economy", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    state.corp.clicks = 8;
+    moveCorpCardToHq(state, "v08_credit_surge_operation");
+    moveCorpCardToHq(state, "v08_archive_planning_operation");
+    moveCorpCardToHq(state, "v08_cashout_asset");
+    moveCorpCardToHq(state, "v08_project_agenda");
+
+    const beforeCredits = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "v08_credit_surge_operation");
+    expect(state.corp.credits).toBe(beforeCredits + 6);
+
+    const beforeHq = state.corp.hq.length;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "v08_archive_planning_operation");
+    expect(state.corp.hq.length).toBe(beforeHq + 2);
+
+    state = apply(state, "corp", (action) => action.type === "install_card" && sourceDefinition(state, action) === "v08_cashout_asset");
+    const beforeRezCredits = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v08_cashout_asset");
+    expect(state.corp.credits).toBe(beforeRezCredits + 2);
+
+    state = apply(state, "corp", (action) => action.type === "install_card" && sourceDefinition(state, action) === "v08_project_agenda");
+    state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "v08_project_agenda");
+    state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "v08_project_agenda");
+    state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "v08_project_agenda");
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "v08_project_agenda");
+
+    expect(agendaPoints(state, "corp")).toBe(2);
+  });
+
+  it("keeps V0.8 hidden ICE redacted until rez and applies tag subroutines", () => {
+    let state = toRunnerTurn(createGame({ seed: "v08-watchdog", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    putCorpIceOnServer(state, "rd", "v08_watchdog_ice");
+    state.corp.credits = 10;
+    state.runner.credits = 5;
+
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Watchdog ICE");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v08_watchdog_ice");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).toContain("Watchdog ICE");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.runner.tags).toBe(1);
+    expect(getPlayerView(state, "corp").opponent.tags).toBe(1);
+    expect(state.run).toBeUndefined();
+  });
+});
+
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
   const selected = mustAction(state, side, predicate);
   const result = applyAction(state, {
@@ -315,7 +427,7 @@ function sourceDefinition(state: GameState, action: LegalAction): string | undef
 
 function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
-  return ids.reduce((sum, id) => sum + (state.cardInstances[id]?.definitionId === "simple_agenda" ? 2 : 0), 0);
+  return ids.reduce((sum, id) => sum + (DEMO_CARDS_BY_ID[state.cardInstances[id]?.definitionId ?? ""]?.agendaPoints ?? 0), 0);
 }
 
 function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInstanceId {

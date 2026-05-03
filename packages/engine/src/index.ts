@@ -3,6 +3,7 @@ import {
   DEMO_DECKS,
   MVP_0_1_BASELINE,
   MVP_0_4_BASELINE,
+  MVP_0_8_BASELINE,
   type ActionType,
   type CardDefinition,
   type CardInstance,
@@ -38,7 +39,8 @@ export {
   MVP_0_1_BASELINE,
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
-  MVP_0_4_BASELINE
+  MVP_0_4_BASELINE,
+  MVP_0_8_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -73,6 +75,122 @@ const DEFAULT_CONTROLLERS: { runner: PlayerController; corp: PlayerController } 
   corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI" }
 };
 
+type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0";
+
+type RunnerEventResolver = {
+  name: string;
+  requiresServer?: boolean;
+  resolve: (state: GameState, legalAction: LegalAction) => void;
+};
+
+type CorpOperationResolver = {
+  name: string;
+  canPlay?: (state: GameState) => boolean;
+  resolve: (state: GameState) => void;
+};
+
+type CorpRootRezResolver = {
+  name: string;
+  resolve: (state: GameState) => void;
+};
+
+const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
+  simple_economy_event: {
+    name: "runner_event_gain_credits_4",
+    resolve: (state) => {
+      state.runner.credits += 4;
+    }
+  },
+  simple_draw_event: {
+    name: "runner_event_draw_2",
+    resolve: (state) => {
+      drawRunnerCard(state);
+      drawRunnerCard(state);
+    }
+  },
+  simple_run_event: {
+    name: "runner_event_run_success_2",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 2);
+    }
+  },
+  v08_burst_credit_event: {
+    name: "runner_event_gain_credits_6",
+    resolve: (state) => {
+      state.runner.credits += 6;
+    }
+  },
+  v08_deep_draw_event: {
+    name: "runner_event_draw_3",
+    resolve: (state) => {
+      drawRunnerCard(state);
+      drawRunnerCard(state);
+      drawRunnerCard(state);
+    }
+  },
+  v08_overclock_run_event: {
+    name: "runner_event_run_success_3",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 3);
+    }
+  }
+};
+
+const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
+  simple_economy_operation: {
+    name: "corp_operation_gain_credits_4",
+    resolve: (state) => {
+      state.corp.credits += 4;
+    }
+  },
+  simple_draw_operation: {
+    name: "corp_operation_draw_2",
+    resolve: (state) => {
+      drawCorpCard(state);
+      drawCorpCard(state);
+    }
+  },
+  simple_tag_punishment_operation: {
+    name: "corp_operation_tag_punishment_lose_2",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state) => {
+      if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+      state.runner.credits = Math.max(0, state.runner.credits - 2);
+    }
+  },
+  v08_credit_surge_operation: {
+    name: "corp_operation_gain_credits_7",
+    resolve: (state) => {
+      state.corp.credits += 7;
+    }
+  },
+  v08_archive_planning_operation: {
+    name: "corp_operation_draw_3",
+    resolve: (state) => {
+      drawCorpCard(state);
+      drawCorpCard(state);
+      drawCorpCard(state);
+    }
+  }
+};
+
+const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
+  simple_economy_asset: {
+    name: "corp_asset_rez_gain_3",
+    resolve: (state) => {
+      state.corp.credits += 3;
+    }
+  },
+  v08_cashout_asset: {
+    name: "corp_asset_rez_gain_4",
+    resolve: (state) => {
+      state.corp.credits += 4;
+    }
+  }
+};
+
 export function createGame(config: CreateGameConfig = {}): GameState {
   const seed = config.seed ?? "mvp-0.1-default-seed";
   const random = { counter: 0, records: [] as GameState["randomDrawRecords"] };
@@ -81,9 +199,9 @@ export function createGame(config: CreateGameConfig = {}): GameState {
   const corpDeckId = config.corpDeckId ?? "demo_corp_001";
   const runnerDeckDefinition = config.runnerDeck ?? DEMO_DECKS[runnerDeckId];
   const corpDeckDefinition = config.corpDeck ?? DEMO_DECKS[corpDeckId];
-  const expandedCardPool = usesExpandedCardPool(runnerDeckDefinition) || usesExpandedCardPool(corpDeckDefinition);
-  const runnerDeckMetadata = config.runnerDeckMetadata ?? metadataForDeck(runnerDeckDefinition, expandedCardPool);
-  const corpDeckMetadata = config.corpDeckMetadata ?? metadataForDeck(corpDeckDefinition, expandedCardPool);
+  const cardPoolVersion = cardPoolVersionForDecks(runnerDeckDefinition, corpDeckDefinition);
+  const runnerDeckMetadata = config.runnerDeckMetadata ?? metadataForDeck(runnerDeckDefinition, cardPoolVersion);
+  const corpDeckMetadata = config.corpDeckMetadata ?? metadataForDeck(corpDeckDefinition, cardPoolVersion);
 
   const runnerIdentity = createInstance("runner", runnerDeckDefinition.identity, 0, {
     side: "runner",
@@ -111,7 +229,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
 
   const state: GameState = {
     matchId: config.matchId ?? "local-demo-match",
-    baseline: config.baseline ?? (expandedCardPool ? MVP_0_4_BASELINE : MVP_0_1_BASELINE),
+    baseline: config.baseline ?? baselineForCardPoolVersion(cardPoolVersion),
     stateVersion: 0,
     seed,
     randomCounter: random.counter,
@@ -150,7 +268,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     cardInstances: instances,
     eventLog: [],
     winner: null,
-    agendaPointsToWin: config.agendaPointsToWin ?? (expandedCardPool ? 7 : 6),
+    agendaPointsToWin: config.agendaPointsToWin ?? (cardPoolVersion === "0.1.0" ? 6 : 7),
     deckMetadata: {
       runner: runnerDeckMetadata,
       corp: corpDeckMetadata
@@ -469,7 +587,7 @@ function corpMainActions(state: GameState): LegalAction[] {
   if (state.corp.rd.length > 0) actions.push(action(state, "corp", "draw_card", "Karte ziehen", "basic_action", [{ clicks: 1 }]));
   for (const id of state.corp.hq) {
     const definition = definitionFor(state, id);
-    if (definition.type === "operation" && state.corp.credits >= (definition.cost ?? 0) && (definition.id !== "simple_tag_punishment_operation" || state.runner.tags > 0)) {
+    if (definition.type === "operation" && state.corp.credits >= (definition.cost ?? 0) && canPlayCorpOperation(state, definition)) {
       actions.push(action(state, "corp", "play_operation", `${definition.title} spielen`, id, [{ clicks: 1, credits: definition.cost ?? 0 }], { cardId: id }));
     }
     if (definition.type === "ice") {
@@ -519,7 +637,9 @@ function runnerMainActions(state: GameState): LegalAction[] {
       actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
     }
     if (definition.type === "event" && state.runner.credits >= (definition.cost ?? 0)) {
-      if (definition.id === "simple_run_event") {
+      const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
+      if (!resolver) continue;
+      if (resolver.requiresServer) {
         for (const server of state.corp.servers) {
           actions.push(action(state, "runner", "play_event", `${definition.title} auf ${server.label}`, id, [{ clicks: 1, credits: definition.cost ?? 0 }], { cardId: id, serverId: server.id }));
         }
@@ -621,14 +741,7 @@ function performAction(state: GameState, legalAction: LegalAction): void {
         removeFromAllZones(state, cardId);
         state.corp.archives.push(cardId);
         state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "corp", zone: "archives" } };
-        if (definition.id === "simple_economy_operation") state.corp.credits += 4;
-        else if (definition.id === "simple_draw_operation") {
-          drawCorpCard(state);
-          drawCorpCard(state);
-        } else if (definition.id === "simple_tag_punishment_operation") {
-          if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
-          state.runner.credits = Math.max(0, state.runner.credits - 2);
-        }
+        resolveCorpOperation(state, definition);
       }
       return;
     case "install_card":
@@ -694,18 +807,9 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
   removeFromAllZones(state, cardId);
   state.runner.heap.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "runner", zone: "heap" } };
-  if (definition.id === "simple_economy_event") {
-    state.runner.credits += 4;
-    return;
-  }
-  if (definition.id === "simple_draw_event") {
-    drawRunnerCard(state);
-    drawRunnerCard(state);
-    return;
-  }
-  if (definition.id === "simple_run_event") {
-    startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 2);
-  }
+  const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
+  if (!resolver) throw new Error(`Kein Event-Resolver fuer ${definition.id}.`);
+  resolver.resolve(state, legalAction);
 }
 
 function installCard(state: GameState, legalAction: LegalAction): void {
@@ -767,8 +871,8 @@ function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
   const definition = definitionFor(state, cardId);
   spendCredits(state, "corp", definition.rezCost ?? 0);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), rezzed: true, faceup: true };
-  if (rootRez && definition.id === "simple_economy_asset") {
-    state.corp.credits += 3;
+  if (rootRez && CORP_ROOT_REZ_RESOLVERS[definition.id]) {
+    CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
     return;
   }
   if (rootRez) return;
@@ -1149,7 +1253,25 @@ function expandDeck(side: Side, cards: Array<{ id: string; quantity: number }>, 
   return ids;
 }
 
+function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefinition): CardPoolVersion {
+  if (usesMvp08CardPool(runnerDeck) || usesMvp08CardPool(corpDeck)) return "0.8.0";
+  if (usesExpandedCardPool(runnerDeck) || usesExpandedCardPool(corpDeck)) return "0.4.0";
+  return "0.1.0";
+}
+
+function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
+  if (version === "0.8.0") return MVP_0_8_BASELINE;
+  if (version === "0.4.0") return MVP_0_4_BASELINE;
+  return MVP_0_1_BASELINE;
+}
+
+function usesMvp08CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_008") || deck.id.includes("_0_8") || deck.id.includes("_v0_8")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v08_"));
+}
+
 function usesExpandedCardPool(deck: DeckDefinition): boolean {
+  if (usesMvp08CardPool(deck)) return true;
   if (deck.id.endsWith("_004") || deck.id.includes("_0_6")) return true;
   return deck.cards.some((card) =>
     [
@@ -1166,15 +1288,27 @@ function usesExpandedCardPool(deck: DeckDefinition): boolean {
   );
 }
 
-function metadataForDeck(deck: DeckDefinition, expandedCardPool: boolean): DeckPublicMetadata {
+function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion): DeckPublicMetadata {
+  const expandedCardPool = cardPoolVersion !== "0.1.0";
   return {
     side: deck.side,
     identityCardId: deck.identity,
     deckName: deck.name,
-    cardPoolSnapshotId: expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
-    formatProfileId: expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
+    cardPoolSnapshotId: cardPoolVersion === "0.8.0" ? "card-snapshot-0.8" : expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
+    formatProfileId: cardPoolVersion === "0.8.0" ? "local-demo-v0.8" : expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
     deckHash: `legacy:${deck.id}`
   };
+}
+
+function canPlayCorpOperation(state: GameState, definition: CardDefinition): boolean {
+  const resolver = CORP_OPERATION_RESOLVERS[definition.id];
+  return Boolean(resolver && (resolver.canPlay?.(state) ?? true));
+}
+
+function resolveCorpOperation(state: GameState, definition: CardDefinition): void {
+  const resolver = CORP_OPERATION_RESOLVERS[definition.id];
+  if (!resolver) throw new Error(`Kein Operation-Resolver fuer ${definition.id}.`);
+  resolver.resolve(state);
 }
 
 function createInstance(side: Side, definitionId: string, copy: number, zone: CardInstance["zone"]): CardInstance {

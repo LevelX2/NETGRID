@@ -1,6 +1,6 @@
-import cardSnapshotData from "../../../data/card-import/card-snapshot-0.5.json";
-import profilesData from "../../../data/decks/deck-format-profiles-0.6.json";
-import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
+import cardSnapshotData from "../../../data/card-import/card-snapshot-0.8.json";
+import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
+import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
 import { buildEngineDeck, validateDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type DeckValidationContext } from "@netrunner/decks";
 
 export type MatchDeckSelectionInput = {
@@ -17,8 +17,8 @@ export type ResolvedDeckSetup = {
   corpDeck: ReturnType<typeof buildEngineDeck>;
 };
 
-const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_001_snapshot_v0_6";
-const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_001_snapshot_v0_6";
+const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
+const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const cardsById = Object.fromEntries((cardSnapshotData.cards as DeckValidationContext["cardsById"][string][]).map((card) => [card.catalogCardId, card]));
 const profiles = profilesData.profiles as DeckFormatProfile[];
 const frozenSnapshots = snapshotsData.snapshots as DeckSnapshot[];
@@ -35,7 +35,14 @@ export function resolveDeckSetup(input: MatchDeckSelectionInput = {}): ResolvedD
 }
 
 export function setupUsesExpandedRules(setup: ResolvedDeckSetup): boolean {
-  return setup.runnerSnapshot.rulesBaselineId === "rules-baseline-mvp-0.4" || setup.corpSnapshot.rulesBaselineId === "rules-baseline-mvp-0.4";
+  return setupUsesMvp08Rules(setup) || setup.runnerSnapshot.rulesBaselineId === "rules-baseline-mvp-0.4" || setup.corpSnapshot.rulesBaselineId === "rules-baseline-mvp-0.4";
+}
+
+export function setupUsesMvp08Rules(setup: ResolvedDeckSetup): boolean {
+  return (
+    setup.runnerSnapshot.rulesBaselineId === "rules-baseline-mvp-0.8" ||
+    setup.corpSnapshot.rulesBaselineId === "rules-baseline-mvp-0.8"
+  );
 }
 
 export function defaultAgendaPointsToWin(setup: ResolvedDeckSetup): number {

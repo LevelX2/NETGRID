@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "deck-validation-manifest-v0.8",
+  "id": "deck-validation-manifest-0.8",
+  "status": "frozen_for_v0.8_requirements",
+  "gateAssertions": {
+    "allSnapshotsValid": true,
+    "allSnapshotsImmutable": true,
+    "noImportOnlyCardsDeckLegal": true,
+    "publicMetadataHasNoCardLists": true,
+    "v08SnapshotsUseRulesBaseline08": true
+  },
+  "snapshots": [
+    {
+      "deckSnapshotId": "demo_runner_008_snapshot_v0_8",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 27,
+        "agendaPoints": null
+      },
+      "publicMetadata": {
+        "side": "runner",
+        "identityCardId": "runner_identity_001",
+        "deckName": "Runner Demo Deck 08 - Starter Pressure",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:baf93410"
+      }
+    },
+    {
+      "deckSnapshotId": "demo_corp_008_snapshot_v0_8",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 26,
+        "agendaPoints": 7
+      },
+      "publicMetadata": {
+        "side": "corp",
+        "identityCardId": "corp_identity_001",
+        "deckName": "Corp Demo Deck 08 - Starter Score Grid",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:29b7fc41"
+      }
+    }
+  ]
+}

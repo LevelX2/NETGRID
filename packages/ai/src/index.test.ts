@@ -163,6 +163,28 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
   });
+
+  it("runs V0.8 starter decks through side-safe AI smokes", () => {
+    const summaries = ["ai-v08-starter-a", "ai-v08-starter-b", "ai-v08-starter-c"].map((seed) =>
+      simulateAiGame({
+        seed,
+        runnerDeckId: "demo_runner_008",
+        corpDeckId: "demo_corp_008",
+        agendaPointsToWin: 7,
+        maxActions: 180
+      })
+    );
+
+    for (const summary of summaries) {
+      expect(summary.cardPoolVersion).toBe("0.8.0");
+      expect(summary.errors).toEqual([]);
+      expect(summary.replayOk).toBe(true);
+      expect(summary.finalStateHash).toMatch(/^fnv1a:/);
+      expect(summary.actionSequence.every((entry) => entry.reasonCode.length > 0)).toBe(true);
+      expect(JSON.stringify(summary)).not.toContain("cardInstances");
+      expect(JSON.stringify(summary)).not.toContain("v08_project_agenda_1");
+    }
+  });
 });
 
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {

@@ -16,8 +16,8 @@ export type AiSimulationConfig = {
   corpDifficulty?: AiDifficulty;
   runnerProfileId?: string;
   corpProfileId?: string;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -42,7 +42,7 @@ export type AiSimulationSummary = {
     stateHashAfter: string;
   }>;
   errors: string[];
-  cardPoolVersion: "0.1.0" | "0.4.0";
+  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0";
 };
 
 const FORBIDDEN_AI_INPUT_FIELDS = [
@@ -229,12 +229,25 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
     replayErrors: replay.errors,
     actionSequence,
     errors,
-    cardPoolVersion: usesExpandedCardPool(config) ? "0.4.0" : "0.1.0"
+    cardPoolVersion: cardPoolVersionForSimulation(config)
   };
 }
 
-function usesExpandedCardPool(config: AiSimulationConfig): boolean {
-  return Boolean(config.runnerDeck || config.corpDeck || config.runnerDeckId === "demo_runner_004" || config.corpDeckId === "demo_corp_004");
+function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationSummary["cardPoolVersion"] {
+  if (
+    config.runnerDeck?.id.includes("_008") ||
+    config.runnerDeck?.id.includes("_v0_8") ||
+    config.corpDeck?.id.includes("_008") ||
+    config.corpDeck?.id.includes("_v0_8") ||
+    config.runnerDeck?.cards.some((card) => card.id.startsWith("v08_")) ||
+    config.corpDeck?.cards.some((card) => card.id.startsWith("v08_")) ||
+    config.runnerDeckId === "demo_runner_008" ||
+    config.corpDeckId === "demo_corp_008"
+  ) {
+    return "0.8.0";
+  }
+  if (config.runnerDeck || config.corpDeck || config.runnerDeckId === "demo_runner_004" || config.corpDeckId === "demo_corp_004") return "0.4.0";
+  return "0.1.0";
 }
 
 function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): AiDecision {

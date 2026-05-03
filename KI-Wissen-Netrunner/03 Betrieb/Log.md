@@ -98,6 +98,12 @@ Die V0.8-Requirements für den spielbaren Base-/Starterset-Slice wurden abgeleit
 
 Erstellt wurden `docs/derived/MVP_0.8_REQUIREMENTS.md`, `docs/derived/PLAYABLE_CARD_SLICE_0.8_SPEC.md`, `docs/derived/RULE_MECHANICS_0.8_SPEC.md`, `docs/derived/CARD_IMPLEMENTATION_0.8_SPEC.md`, `docs/derived/MVP_0.8_TEST_MATRIX.md`, `docs/derived/MVP_0.8_REQUIREMENTS_REVIEW.md`, V0.8-Karten-/Deck-/Manifest-Artefakte und vier V0.8-Szenario-Fixtures. Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
 
+## [2026-05-03] phase-0.8-final | MVP 0.8 spielbarer Starterset-Slice abgeschlossen
+
+MVP 0.8 wurde implementiert, validiert und final dokumentiert. Umgesetzt wurden 14 lokale/fiktive neue Karten mit expliziten Resolvern, V0.8-Katalog- und Deck-Snapshots, V0.8-Rule-Baseline, Server-Default-Matchsetup auf die V0.8-Snapshots, Katalog-/Deck-API-Anbindung und AI-Smokes über die neuen Starterdecks. Der Slice nutzt keine offiziellen Assets, externen APIs oder Kartentextauswertung als Regelquelle.
+
+Checks: Engine-, Server-, AI-, Decks- und Catalog-Pakettests, Phase-1-Artefakte, Visibility Contract, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Lokaler V0.8-Matchstart-/Deck-/Katalog-/AI-Smoke sowie Performance-Smoke bestanden. Gate-Ergebnis: `MVP_0.8_done: true`; `ready_for_MVP_0.9_requirements: true`.
+
 Erstellt wurde `docs/derived/POST_MVP_0.4_ROADMAP.md` sowie die Wissensseite `Roadmap nach MVP 0.4`. Nächster Gate-Schritt ist `MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog`.
 
 ## [2026-05-03] planung | V0.5 und V0.6 detailliert ausgearbeitet

@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.8 playable base/starter-set slice requirements are complete. V0.8 implementation is unblocked.
+MVP 0.8 playable base/starter-set slice is complete. V0.9 stronger AI requirements are unblocked.
 
 ## Status
 
@@ -98,6 +98,16 @@ MVP 0.8 playable base/starter-set slice requirements are complete.
 
 `ready_for_implementation: true`
 
+MVP 0.8 playable base/starter-set slice implementation is complete and locally verified.
+
+`ready_for_hardening: true`
+
+MVP 0.8 validation, hardening and documentation are complete.
+
+`MVP_0.8_done: true`
+
+`ready_for_MVP_0.9_requirements: true`
+
 MVP 0.8 playable base/starter-set slice detailed planning is complete and the requirements freeze is now complete.
 
 `MVP_0.8_detailed_plan_available: true`
@@ -133,6 +143,8 @@ Gate flow:
 19. MVP 0.7 implementation: pass.
 20. MVP 0.7 validation, hardening and documentation: pass.
 21. MVP 0.8 requirements/playable starter-slice freeze: pass.
+22. MVP 0.8 implementation/playable starter-slice: pass.
+23. MVP 0.8 validation, hardening and documentation: pass.
 
 ## Phase 1 files created or updated
 
@@ -742,6 +754,83 @@ Next gate: V0.8 Implementation for the frozen local starter slice. V0.8 remains 
 
 V0.8 is frozen as a small local/fictitious playable starter slice. The slice contains 14 local original cards and avoids Damage, Resources, Traces, identities, Multiaccess, Hosting, Viruses, Prevention and Replacement. Every new playable card must remain backed by manifest, explicit resolver, unit test, scenario, visibility test, replay/StateHash and AI smoke. Import-only cards remain data and cannot start matches.
 
+## MVP 0.8 Implementation files created or updated
+
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/engine/src/index.test.ts`
+- `packages/ai/src/index.ts`
+- `packages/ai/src/index.test.ts`
+- `packages/catalog/src/index.test.ts`
+- `packages/decks/src/index.test.ts`
+- `apps/server/src/deck-setup.ts`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `apps/web/app/api/cards/catalog-data.ts`
+- `apps/web/app/api/decks/deck-data.ts`
+- `apps/web/app/page.tsx`
+- `data/card-import/card-snapshot-0.8.json`
+- `data/card-import/card-snapshot-0.8.hash`
+- `data/decks/deck-format-profiles-0.8.json`
+- `data/decks/deck-templates-0.8.json`
+- `data/decks/deck-snapshots-0.8.json`
+- `data/deviations/rule-deviations-0.8.json`
+- `data/manifests/deck-validation-manifest-0.8.json`
+- `data/rules/rules-baseline-0.8.json`
+- `tests/specs/phase1-artifacts.test.ts`
+- `tests/specs/visibility-contract.test.ts`
+- `tests/specs/playable-card-slice-0.8-acceptance-tests.todo.md`
+- `docs/derived/MVP_0.8_IMPLEMENTATION_REVIEW.md`
+
+## MVP 0.8 Implementation checks
+
+- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
+- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine test`: pass, 20 tests.
+- `corepack pnpm --filter @netrunner/server test`: pass, 12 tests.
+- `corepack pnpm --filter @netrunner/ai test`: pass, 11 tests.
+- `corepack pnpm --filter @netrunner/decks test`: pass, 7 tests.
+- `corepack pnpm --filter @netrunner/catalog test`: pass, 6 tests.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 19 tests.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- V0.8 Matchstart-/Deck-/Katalog-/AI-Smoke: pass.
+- V0.8 Performance-Smoke: pass, 500 LegalAction/View-Probes in 3.31 ms and 80 Apply steps in 71.01 ms.
+
+## MVP 0.8 Implementation gate
+
+`ready_for_hardening: true`
+
+V0.8 now provides a playable local/fictitious starter slice with 14 new cards, explicit resolvers, V0.8 deck snapshots, V0.8 catalog/deck artifacts, server default match setup on V0.8 snapshots, and AI smokes over V0.8 decks. The implementation does not add official assets, external APIs, public platform features or the V0.9 stronger-AI scope.
+
+## MVP 0.8 Final files created or updated
+
+- `docs/derived/MVP_0.8_FINAL_REVIEW.md`
+- `docs/derived/MVP_0.8_IMPLEMENTATION_REVIEW.md`
+- `tests/specs/playable-card-slice-0.8-acceptance-tests.todo.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.8 Final checks
+
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass.
+- Engine, Server, AI, Decks and Catalog package tests: pass.
+- Phase-1 artifact and Visibility Contract root specs: pass.
+- Local V0.8 Matchstart, Deck, Catalog and AI smoke: pass.
+- Local V0.8 Performance smoke: pass.
+
+## MVP 0.8 Final gate
+
+`MVP_0.8_done: true`
+
+`ready_for_MVP_0.9_requirements: true`
+
+Next gate: V0.9 Requirements for stronger AI. V0.9 remains constrained to LegalActions, PlayerViews and side-filtered PublicEvents. FullState, hidden opponent information, LLM as rules actor, V1.0 and public platform features remain out of scope.
+
 ## MVP 0.8 Detailed Planning files created or updated
 
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`
@@ -813,7 +902,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Current gate: V0.8 Implementation. V0.8 Requirements are complete and `ready_for_implementation: true`.
+Current gate: V0.9 Requirements. V0.8 is complete and `ready_for_MVP_0.9_requirements: true`.
 
 Detailed planning artifacts available:
 

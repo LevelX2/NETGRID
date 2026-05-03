@@ -44,7 +44,9 @@ describe("MVP 0.2 multiplayer service", () => {
     const stored = await service.loadForTest(matchId);
 
     expect(stored?.match.status).toBe("active");
-    expect(stored?.match.baseline.multiplayerSchemaVersion).toBe("0.2.0");
+    expect(stored?.match.baseline.multiplayerSchemaVersion).toBe("0.8.0");
+    expect(stored?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
+    expect(stored?.match.deckSetup.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
     expect(stored?.tokens.every((token) => token.tokenHash.startsWith("sha256:"))).toBe(true);
     expect(created.hostSessionToken.length).toBeGreaterThanOrEqual(32);
     expect(created.hostReconnectToken.length).toBeGreaterThanOrEqual(32);

@@ -1,4 +1,4 @@
-import snapshotData from "../../../../../data/card-import/card-snapshot-0.5.json";
+import snapshotData from "../../../../../data/card-import/card-snapshot-0.8.json";
 import {
   assertCatalogPayloadSafe,
   computeSnapshotHash,
