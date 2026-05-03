@@ -58,6 +58,10 @@ MVP 0.5 card import and catalog requirements are complete.
 
 `ready_for_implementation: true`
 
+MVP 0.5 card import and catalog implementation is complete and locally verified.
+
+`ready_for_hardening: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -76,6 +80,7 @@ Gate flow:
 10. MVP 0.4 requirements: pass.
 11. MVP 0.4 implementation and validation: pass.
 12. MVP 0.5 executable requirements: pass.
+13. MVP 0.5 implementation: pass.
 
 ## Phase 1 files created or updated
 
@@ -408,6 +413,44 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 
 V0.5 uses only local versioned demo/project data and fiktive local catalog fixtures. Import remains catalog/status-only: no import path can make a card engine-playable, KI-usable, deck-legal or match-startable without the existing manifest, resolver, tests, Visibility, Replay/StateHash and KI-Smoke gates.
 
+## MVP 0.5 Implementation files created or updated
+
+- `packages/catalog/AGENTS.md`
+- `packages/catalog/package.json`
+- `packages/catalog/tsconfig.json`
+- `packages/catalog/src/index.ts`
+- `packages/catalog/src/index.test.ts`
+- `apps/web/app/api/cards/catalog-data.ts`
+- `apps/web/app/api/cards/catalog/route.ts`
+- `apps/web/app/api/cards/catalog/[id]/route.ts`
+- `apps/web/app/api/cards/status-summary/route.ts`
+- `apps/web/app/page.tsx`
+- `apps/web/app/globals.css`
+- `apps/web/package.json`
+- `tests/specs/visibility-contract.test.ts`
+- `docs/derived/MVP_0.5_IMPLEMENTATION_REVIEW.md`
+- `pnpm-lock.yaml`
+- updated V0.5 snapshot hash and derived catalog artifacts after German UI text cleanup
+
+## MVP 0.5 Implementation checks
+
+- `corepack pnpm install`: pass.
+- `corepack pnpm --filter @netrunner/catalog test`: pass, 5 Catalog tests.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 12 root spec tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 47 package tests plus 12 root spec tests.
+- `corepack pnpm build`: pass.
+- Catalog API smoke on `http://127.0.0.1:3000/api/cards/catalog?status=blocked`: pass.
+- Catalog detail smoke on `http://127.0.0.1:3000/api/cards/catalog/catalog_preview_operation_001`: pass.
+- Browser catalog smoke on `http://127.0.0.1:3000`: pass.
+
+## MVP 0.5 Implementation gate
+
+`ready_for_hardening: true`
+
+The implementation preserves the V0.5 safety boundary: catalog data is read-only and public-by-design, import-only cards stay non-playable, and no Engine, AI, deck-validation or match-start path consumes imported cards automatically.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -454,7 +497,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Next gate: MVP 0.5 implementation for card import and card catalog.
+Next gate: MVP 0.5 validation, hardening and documentation for card import and card catalog.
 
 Detailed planning artifacts available:
 

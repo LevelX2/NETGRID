@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@netrunner/ai": "workspace:*",
+    "@netrunner/catalog": "workspace:*",
     "@netrunner/engine": "workspace:*",
     "@netrunner/shared": "workspace:*",
     "lucide-react": "^1.14.0",

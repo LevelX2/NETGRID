@@ -2,7 +2,7 @@
   "schemaVersion": "catalog-index-v0.5",
   "id": "catalog-index-0.5",
   "snapshotId": "card-snapshot-0.5",
-  "snapshotHash": "fnv1a:de3054e3",
+  "snapshotHash": "fnv1a:a85f7985",
   "status": "frozen_for_v0.5_requirements",
   "cards": [
     {
@@ -548,8 +548,8 @@
     ]
   },
   "searchIndex": {
-    "catalog_preview_operation_001": "catalog preview operation corp operation fiktive katalogkarte fuer importtests. nicht implementiert und nicht decklegal.",
-    "catalog_preview_resource_001": "catalog preview resource runner resource fiktive katalogkarte mit absichtlich nicht unterstuetztem typ fuer blocked-status.",
+    "catalog_preview_operation_001": "catalog preview operation corp operation fiktive katalogkarte für importtests. nicht implementiert und nicht decklegal.",
+    "catalog_preview_resource_001": "catalog preview resource runner resource fiktive katalogkarte mit absichtlich nicht unterstütztem typ für blocked-status.",
     "corp_identity_001": "corp identity corp identity testidentität ohne aktive fähigkeit.",
     "efficient_fracter": "efficient fracter runner program icebreaker fracter 1 credit: +1 stärke. 1 credit: brich 1 barrier-subroutine.",
     "runner_identity_001": "runner identity runner identity testidentität ohne aktive fähigkeit.",

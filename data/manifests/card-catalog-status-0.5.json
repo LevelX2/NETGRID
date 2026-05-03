@@ -3,7 +3,7 @@
   "id": "card-catalog-status-0.5",
   "status": "frozen_for_v0.5_requirements",
   "snapshotId": "card-snapshot-0.5",
-  "snapshotHash": "fnv1a:de3054e3",
+  "snapshotHash": "fnv1a:a85f7985",
   "profileId": "local-demo-catalog-v0.5",
   "rules": {
     "importedDoesNotMeanPlayable": true,

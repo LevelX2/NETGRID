@@ -109,3 +109,9 @@ Für die spätere UI-Neugestaltung wurden vier explorative Designrichtungen mit 
 Die V0.5-Requirements für Kartenimport und Kartenkatalog wurden abgeleitet und reviewfähig eingefroren. Erstellt wurden Spezifikationen für Import, Katalog, Statusmodell, Testmatrix und Requirements Review. Die Datenartefakte umfassen Source Registry, lokalen Snapshot, Snapshot-Hash, Import-Report, Katalogindex und Statusmanifest. Als Snapshot-Basis dienen nur lokale versionierte Demo-/Projektdaten plus fiktive lokale Katalog-Fixtures zur ausführbaren Prüfung von `imported` ohne Spielbarkeit und `blocked`.
 
 Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`. V0.5-Implementierung darf starten; Import bleibt strikt getrennt von Engine-Spielbarkeit, KI, Deckvalidierung und Matchstart.
+
+## [2026-05-03] phase-0.5-impl | MVP 0.5 Card Catalog implementiert
+
+Die V0.5-Implementierung wurde umgesetzt. Neu ist das reine TypeScript-Paket `@netrunner/catalog` für Snapshot-Validierung, Hashing, Indexbildung, Suche, Statuszusammenfassung und sichere Katalogpayloads. Die Web-App stellt read-only Endpunkte unter `/api/cards/catalog`, `/api/cards/catalog/:id` und `/api/cards/status-summary` bereit und zeigt auf der Startseite eine funktionale Katalogansicht mit Suche, Side-/Statusfilter, Liste, Detail und Statusbadges.
+
+Checks: `corepack pnpm install`, `corepack pnpm --filter @netrunner/catalog test`, `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. API- und Browser-Smokes auf `http://127.0.0.1:3000` bestanden. Gate-Ergebnis: `ready_for_hardening: true`.

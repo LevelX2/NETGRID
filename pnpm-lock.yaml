@@ -48,6 +48,9 @@ importers:
       '@netrunner/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@netrunner/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
       '@netrunner/engine':
         specifier: workspace:*
         version: link:../../packages/engine
@@ -82,6 +85,8 @@ importers:
       '@netrunner/shared':
         specifier: workspace:*
         version: link:../shared
+
+  packages/catalog: {}
 
   packages/engine:
     dependencies:

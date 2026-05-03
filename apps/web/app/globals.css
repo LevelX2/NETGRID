@@ -176,6 +176,7 @@ select {
 .setup {
   display: grid;
   place-items: start center;
+  gap: 14px;
   padding: 32px 14px;
 }
 
@@ -228,6 +229,202 @@ select {
   margin: 0 14px 14px;
   color: var(--agenda);
   font-size: 13px;
+}
+
+.catalogPanel {
+  width: min(980px, 100%);
+}
+
+.catalogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.catalogHeader h2,
+.catalogDetail h3 {
+  margin: 0;
+}
+
+.catalogControls {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(120px, 160px) minmax(150px, 210px);
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.catalogControls label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.searchBox {
+  position: relative;
+}
+
+.searchBox svg {
+  position: absolute;
+  left: 10px;
+  bottom: 11px;
+  color: var(--muted);
+}
+
+.searchBox input {
+  padding-left: 34px;
+}
+
+.catalogLayout {
+  display: grid;
+  grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  min-height: 380px;
+}
+
+.catalogList {
+  max-height: 480px;
+  overflow: auto;
+  border-right: 1px solid var(--line);
+}
+
+.catalogItem {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.catalogItem:hover,
+.catalogItem.active {
+  background: #20282d;
+}
+
+.catalogItem strong,
+.catalogItem span {
+  overflow-wrap: anywhere;
+}
+
+.catalogItem > span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.catalogDetail {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  padding: 14px;
+}
+
+.catalogDetailHead {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sideBadge {
+  flex: 0 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 8px;
+  color: var(--text);
+  font-size: 12px;
+}
+
+.sideBadge.runner {
+  border-color: #2f7f69;
+  color: var(--runner);
+}
+
+.sideBadge.corp {
+  border-color: #8d4638;
+  color: var(--corp);
+}
+
+.statusBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.statusBadges.compact {
+  gap: 4px;
+}
+
+.statusBadge {
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 4px 7px;
+  color: var(--muted);
+  background: #12181d;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.statusBadge.playable,
+.statusBadge.deck_legal {
+  color: var(--ok);
+  border-color: #426d49;
+}
+
+.statusBadge.blocked {
+  color: var(--danger);
+  border-color: #704044;
+}
+
+.statusBadge.implemented {
+  color: var(--ice);
+  border-color: #42618c;
+}
+
+.catalogText {
+  margin: 0;
+  color: var(--text);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.catalogMetaGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 8px;
+}
+
+.catalogMetaGrid span {
+  display: grid;
+  gap: 3px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #12181d;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.catalogMetaGrid strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.catalogNotice {
+  margin: 0;
+}
+
+.catalogEmpty {
+  padding: 12px;
 }
 
 .simulationResult {
@@ -494,5 +691,16 @@ select {
 
   .serverGrid {
     grid-template-columns: 1fr;
+  }
+
+  .catalogControls,
+  .catalogLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .catalogList {
+    max-height: 300px;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
   }
 }

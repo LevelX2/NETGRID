@@ -26,7 +26,7 @@
       "setId": "v05-local-catalog-fixtures",
       "setName": "V0.5 Local Catalog Fixtures",
       "collectorNumber": "001",
-      "text": "Fiktive Katalogkarte fuer Importtests. Nicht implementiert und nicht decklegal.",
+      "text": "Fiktive Katalogkarte für Importtests. Nicht implementiert und nicht decklegal.",
       "displayOnlyText": true,
       "numeric": {
         "cost": 2,
@@ -62,7 +62,7 @@
       "setId": "v05-local-catalog-fixtures",
       "setName": "V0.5 Local Catalog Fixtures",
       "collectorNumber": "002",
-      "text": "Fiktive Katalogkarte mit absichtlich nicht unterstuetztem Typ fuer Blocked-Status.",
+      "text": "Fiktive Katalogkarte mit absichtlich nicht unterstütztem Typ für Blocked-Status.",
       "displayOnlyText": true,
       "numeric": {
         "cost": 1,

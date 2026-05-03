@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, Cable, Check, Clipboard, Link2, Play, RotateCcw, Shield, Sparkles, UserPlus, X } from "lucide-react";
+import { Bot, Cable, Check, Clipboard, Link2, ListFilter, Play, RotateCcw, Search, Shield, Sparkles, UserPlus, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
 
@@ -89,6 +89,52 @@ type AiSimulationSummary = {
   errors: string[];
 };
 
+type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "playable" | "deck_legal" | "blocked";
+
+type CatalogStatuses = Record<CatalogStatusKey, boolean>;
+
+type CatalogCardSummary = {
+  catalogCardId: string;
+  title: string;
+  side: Side;
+  type: string;
+  subtypes: string[];
+  faction: string;
+  setId: string;
+  statuses: CatalogStatuses;
+  blockReasons: string[];
+};
+
+type CatalogCardDetail = CatalogCardSummary & {
+  setName: string;
+  collectorNumber: string;
+  text: string;
+  numeric: Record<string, number | null>;
+  engineCardId: string | null;
+};
+
+type CatalogListResponse = {
+  snapshotId: string;
+  snapshotHash: string;
+  cards: CatalogCardSummary[];
+  filters: {
+    sides: Side[];
+    types: string[];
+    statuses: CatalogStatusKey[];
+  };
+  summary: Partial<Record<CatalogStatusKey, number>>;
+};
+
+const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
+  imported: "imported",
+  validated: "validated",
+  catalog_ready: "catalog_ready",
+  implemented: "implemented",
+  playable: "playable",
+  deck_legal: "deck_legal",
+  blocked: "blocked"
+};
+
 export default function Page() {
   const [mode, setMode] = useState<"host" | "join">("host");
   const [gameMode, setGameMode] = useState<GameMode>("human_vs_human");
@@ -104,6 +150,14 @@ export default function Page() {
   const [simulation, setSimulation] = useState<AiSimulationSummary | null>(null);
   const [connection, setConnection] = useState<"offline" | "connecting" | "online">("offline");
   const [notice, setNotice] = useState("");
+  const [catalogSearch, setCatalogSearch] = useState("");
+  const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
+  const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">("all");
+  const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
+  const [catalogFilters, setCatalogFilters] = useState<CatalogListResponse["filters"] | null>(null);
+  const [catalogSummary, setCatalogSummary] = useState<Partial<Record<CatalogStatusKey, number>>>({});
+  const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
+  const [catalogDetail, setCatalogDetail] = useState<CatalogCardDetail | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -132,6 +186,38 @@ export default function Page() {
     connectWebSocket(session);
     return () => socketRef.current?.close();
   }, [session?.matchId, session?.sessionToken]);
+
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (catalogSearch.trim()) params.set("q", catalogSearch.trim());
+    if (catalogSide !== "all") params.set("side", catalogSide);
+    if (catalogStatus !== "all") params.set("status", catalogStatus);
+    void fetch(`/api/cards/catalog?${params.toString()}`, { cache: "no-store" })
+      .then((response) => response.json() as Promise<CatalogListResponse>)
+      .then((data) => {
+        setCatalogCards(data.cards ?? []);
+        setCatalogFilters(data.filters ?? null);
+        setCatalogSummary(data.summary ?? {});
+        setSelectedCatalogId((current) => (current && data.cards?.some((card) => card.catalogCardId === current) ? current : data.cards?.[0]?.catalogCardId ?? null));
+      })
+      .catch(() => {
+        setCatalogCards([]);
+        setCatalogFilters(null);
+        setCatalogSummary({});
+        setSelectedCatalogId(null);
+      });
+  }, [catalogSearch, catalogSide, catalogStatus]);
+
+  useEffect(() => {
+    if (!selectedCatalogId) {
+      setCatalogDetail(null);
+      return;
+    }
+    void fetch(`/api/cards/catalog/${encodeURIComponent(selectedCatalogId)}`, { cache: "no-store" })
+      .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
+      .then((data) => setCatalogDetail(data.card ?? null))
+      .catch(() => setCatalogDetail(null));
+  }, [selectedCatalogId]);
 
   const activeView = payload?.playerView;
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
@@ -453,6 +539,20 @@ export default function Page() {
             )}
             {notice ? <p className="notice">{notice}</p> : null}
           </section>
+          <CatalogPanel
+            cards={catalogCards}
+            detail={catalogDetail}
+            filters={catalogFilters}
+            search={catalogSearch}
+            side={catalogSide}
+            status={catalogStatus}
+            summary={catalogSummary}
+            selectedId={selectedCatalogId}
+            onSearch={setCatalogSearch}
+            onSide={setCatalogSide}
+            onStatus={setCatalogStatus}
+            onSelect={setSelectedCatalogId}
+          />
         </div>
       </main>
     );
@@ -611,6 +711,138 @@ function Brand({ subtitle }: { subtitle: string }) {
         <h1>Netrunner</h1>
         <p>{subtitle}</p>
       </div>
+    </div>
+  );
+}
+
+function CatalogPanel({
+  cards,
+  detail,
+  filters,
+  search,
+  side,
+  status,
+  summary,
+  selectedId,
+  onSearch,
+  onSide,
+  onStatus,
+  onSelect
+}: {
+  cards: CatalogCardSummary[];
+  detail: CatalogCardDetail | null;
+  filters: CatalogListResponse["filters"] | null;
+  search: string;
+  side: Side | "all";
+  status: CatalogStatusKey | "all";
+  summary: Partial<Record<CatalogStatusKey, number>>;
+  selectedId: string | null;
+  onSearch(value: string): void;
+  onSide(value: Side | "all"): void;
+  onStatus(value: CatalogStatusKey | "all"): void;
+  onSelect(value: string): void;
+}) {
+  return (
+    <section className="catalogPanel panel">
+      <div className="catalogHeader">
+        <div>
+          <h2>Katalog</h2>
+          <p className="meta">
+            {cards.length} Karten · {summary.playable ?? 0} playable · {summary.blocked ?? 0} blocked
+          </p>
+        </div>
+        <ListFilter size={18} />
+      </div>
+      <div className="catalogControls">
+        <label className="searchBox">
+          <Search size={16} />
+          <input value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Suche" />
+        </label>
+        <label>
+          Seite
+          <select value={side} onChange={(event) => onSide(event.target.value as Side | "all")}>
+            <option value="all">Alle</option>
+            {(filters?.sides ?? ["runner", "corp"]).map((value) => (
+              <option value={value} key={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Status
+          <select value={status} onChange={(event) => onStatus(event.target.value as CatalogStatusKey | "all")}>
+            <option value="all">Alle</option>
+            {(filters?.statuses ?? Object.keys(CATALOG_STATUS_LABELS)).map((value) => (
+              <option value={value} key={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <div className="catalogLayout">
+        <div className="catalogList">
+          {cards.map((card) => (
+            <button className={`catalogItem ${selectedId === card.catalogCardId ? "active" : ""}`} key={card.catalogCardId} onClick={() => onSelect(card.catalogCardId)}>
+              <strong>{card.title}</strong>
+              <span>
+                {card.side} · {card.type}
+              </span>
+              <StatusBadges statuses={card.statuses} compact />
+            </button>
+          ))}
+          {cards.length === 0 ? <p className="meta catalogEmpty">Keine Treffer.</p> : null}
+        </div>
+        <article className="catalogDetail">
+          {detail ? (
+            <>
+              <div className="catalogDetailHead">
+                <div>
+                  <h3>{detail.title}</h3>
+                  <p className="meta">
+                    {detail.side} · {detail.type} · {detail.setName} #{detail.collectorNumber}
+                  </p>
+                </div>
+                <span className={`sideBadge ${detail.side}`}>{detail.side}</span>
+              </div>
+              <StatusBadges statuses={detail.statuses} />
+              <p className="catalogText">{detail.text}</p>
+              <div className="catalogMetaGrid">
+                {Object.entries(detail.numeric)
+                  .filter(([, value]) => value !== null)
+                  .map(([key, value]) => (
+                    <span key={key}>
+                      <strong>{value}</strong>
+                      {key}
+                    </span>
+                  ))}
+                <span>
+                  <strong>{detail.engineCardId ? "ja" : "nein"}</strong>
+                  engine
+                </span>
+              </div>
+              {detail.blockReasons.length > 0 ? <p className="notice catalogNotice">{detail.blockReasons.join(" ")}</p> : null}
+            </>
+          ) : (
+            <p className="meta">Keine Karte ausgewählt.</p>
+          )}
+        </article>
+      </div>
+    </section>
+  );
+}
+
+function StatusBadges({ statuses, compact = false }: { statuses: CatalogStatuses; compact?: boolean }) {
+  return (
+    <div className={`statusBadges ${compact ? "compact" : ""}`}>
+      {Object.entries(CATALOG_STATUS_LABELS)
+        .filter(([key]) => statuses[key as CatalogStatusKey])
+        .map(([key, label]) => (
+          <span className={`statusBadge ${key}`} key={key}>
+            {label}
+          </span>
+        ))}
     </div>
   );
 }
