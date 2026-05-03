@@ -110,8 +110,20 @@ Die V0.5-Requirements für Kartenimport und Kartenkatalog wurden abgeleitet und 
 
 Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`. V0.5-Implementierung darf starten; Import bleibt strikt getrennt von Engine-Spielbarkeit, KI, Deckvalidierung und Matchstart.
 
+## [2026-05-03] planung | V0.7 UI-Neugestaltung detailliert geplant
+
+Die Phase V0.7 wurde detailliert als UI-Neugestaltungs- und Designphase geplant. Primäre Referenz ist `docs/ui-designsets/03-design-c-clean-high-contrast/`; Design C wird als helle, lesbare, side-sichere Hauptstruktur verwendet. Der Plan umfasst Entry, RunnerBoard, CorpBoard, RunTimeline, CardView, LegalActionsPanel, ChoiceRequestPanel, EventLog, Undo/Reconnect, Diagnostics Drawer, Accessibility, Visual QA und Hidden-Info-Härtung.
+
+Der Wunsch nach späteren Originalkartenabbildern wurde als image-ready CardView-Strategie aufgenommen. Echte Kartenabbilder bleiben bis zu einer separaten Quellen-, Nutzungs- und Asset-Freigabe gesperrt; V0.7 nutzt Platzhalter und stabile `5 / 7`-Kartenflächen. Erstellt wurde `docs/derived/MVP_0.7_DETAILED_PLAN.md`.
+
 ## [2026-05-03] phase-0.5-impl | MVP 0.5 Card Catalog implementiert
 
 Die V0.5-Implementierung wurde umgesetzt. Neu ist das reine TypeScript-Paket `@netrunner/catalog` für Snapshot-Validierung, Hashing, Indexbildung, Suche, Statuszusammenfassung und sichere Katalogpayloads. Die Web-App stellt read-only Endpunkte unter `/api/cards/catalog`, `/api/cards/catalog/:id` und `/api/cards/status-summary` bereit und zeigt auf der Startseite eine funktionale Katalogansicht mit Suche, Side-/Statusfilter, Liste, Detail und Statusbadges.
 
 Checks: `corepack pnpm install`, `corepack pnpm --filter @netrunner/catalog test`, `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. API- und Browser-Smokes auf `http://127.0.0.1:3000` bestanden. Gate-Ergebnis: `ready_for_hardening: true`.
+
+## [2026-05-03] phase-0.5-final | MVP 0.5 final validiert
+
+MVP 0.5 wurde final validiert und dokumentiert. Der Final Review bestätigt: importierte Karten werden nicht automatisch spielbar, die Katalog-API gibt keine Match-/Token-/FullState-/Hidden-Info-Daten aus, bestehende Engine-/AI-/Server-/Visibility-/Replay-Gates bleiben grün und V0.7-UI-Redesign wurde nicht begonnen.
+
+Finale Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, Katalog-API-Smoke, Katalog-Payload-Leak-Scan und Browser-Katalog-Smoke bestanden. Gate-Ergebnis: `MVP_0.5_done: true`; `ready_for_MVP_0.6_requirements: true`.

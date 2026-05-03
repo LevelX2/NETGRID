@@ -33,10 +33,12 @@
 - Die Post-MVP-0.4-Roadmap wurde neu geschnitten: V0.5 Kartenimport/Kartenkatalog, V0.6 Deckeditor- und Match-Setup-Fundament, V0.7 UI-Neugestaltung und Designgestaltung, V0.8 Basisset-/Starterset-Spielbarkeit, V0.9 bessere KI.
 - Die detaillierten Planungen für V0.5 und V0.6 liegen vor, inklusive Bausteinen, Teststrategien, Härtungen, Optimierungen und Done-Kriterien.
 - Für die spätere UI-Neugestaltung liegen explorative Designsets und eine Realismusprüfung unter `docs/ui-designsets/` vor. Vorzugsrichtung: Design C als Hauptstruktur, Design D als Run-/Encounter-Fokus, Design B als Diagnose-Drawer.
+- Die detaillierte Planung für V0.7 liegt vor: UI-Neugestaltung und Designgestaltung auf Basis von `docs/ui-designsets/03-design-c-clean-high-contrast/`, mit image-ready CardView für spätere Originalkartenabbilder.
 - MVP 0.5 Requirements wurden eingefroren: Kartenimport-Spezifikation, Katalog-Spezifikation, Statusmodell, Testmatrix, Requirements Review, lokaler Snapshot, Import-Report, Katalogindex und Statusmanifest liegen vor.
 - MVP 0.5 Requirements Gate ist bestanden: `ready_for_implementation: true`. Der Snapshot nutzt nur lokale versionierte Demo-/Projektdaten plus fiktive lokale Katalog-Fixtures; Import bleibt strikt getrennt von Spielbarkeit.
 - MVP 0.5 Card Import und Card Catalog wurden implementiert: `@netrunner/catalog`, deterministische Snapshot-/Indexlogik, read-only Katalog-API, funktionale Katalogansicht, Visibility-Vertragstest und Browser-Smoke.
 - MVP 0.5 Implementierungsgate ist bestanden: `ready_for_hardening: true`.
+- MVP 0.5 Validierung, Hardening und Dokumentation sind abgeschlossen. Final Gate: `MVP_0.5_done: true`; `ready_for_MVP_0.6_requirements: true`.
 
 ## Teilweise umgesetzt
 
@@ -52,11 +54,12 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1/0.2/0.3/0.4-Arbeitsschritt ist offen.
-- Der nächste gate-basierte Schritt ist MVP 0.5 Validierung, Hardening und Dokumentation.
+- Der nächste gate-basierte Schritt ist MVP 0.6 Requirements Freeze: Deck Editor und Match Setup Foundation.
 - Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
-- UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Die erste Designanalyse liegt vor, ist aber noch keine verbindliche UI-Spezifikation.
+- UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Die Detailplanung liegt vor, Requirements und UI-Spezifikationen sind aber noch nicht eingefroren.
 - V0.5 darf keine Karte automatisch spielbar machen; V0.6 darf keinen Matchstart ohne validierte Deck-Snapshots erlauben.
+- V0.7 darf echte Kartenabbilder nur nach separater Quellen-, Nutzungs- und Asset-Freigabe anzeigen; bis dahin bleiben generische Platzhalterkarten Standard.
 - V0.5-Importdaten dürfen keine Engine-, KI-, Deckvalidierungs- oder Matchstart-Freigabe auslösen. `deck_legal` setzt `playable` voraus.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 

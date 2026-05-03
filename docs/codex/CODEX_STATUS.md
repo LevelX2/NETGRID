@@ -62,6 +62,12 @@ MVP 0.5 card import and catalog implementation is complete and locally verified.
 
 `ready_for_hardening: true`
 
+MVP 0.5 validation, hardening and documentation are complete.
+
+`MVP_0.5_done: true`
+
+`ready_for_MVP_0.6_requirements: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -81,6 +87,7 @@ Gate flow:
 11. MVP 0.4 implementation and validation: pass.
 12. MVP 0.5 executable requirements: pass.
 13. MVP 0.5 implementation: pass.
+14. MVP 0.5 validation, hardening and documentation: pass.
 
 ## Phase 1 files created or updated
 
@@ -451,6 +458,31 @@ V0.5 uses only local versioned demo/project data and fiktive local catalog fixtu
 
 The implementation preserves the V0.5 safety boundary: catalog data is read-only and public-by-design, import-only cards stay non-playable, and no Engine, AI, deck-validation or match-start path consumes imported cards automatically.
 
+## MVP 0.5 Final Review files created or updated
+
+- `docs/derived/MVP_0.5_FINAL_REVIEW.md`
+- `docs/derived/MVP_0.5_IMPLEMENTATION_REVIEW.md`
+- `README.md`
+- `tests/specs/card-import-0.5-acceptance-tests.todo.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/`
+
+## MVP 0.5 Final checks
+
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 47 package tests plus 12 root spec tests.
+- `corepack pnpm build`: pass.
+- Catalog API smoke: pass.
+- Catalog API hidden-info/token leak scan: pass.
+- Browser catalog smoke: pass on `http://127.0.0.1:3000`.
+
+## MVP 0.5 Final gate
+
+`MVP_0.5_done: true`
+
+`ready_for_MVP_0.6_requirements: true`
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -497,13 +529,14 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Next gate: MVP 0.5 validation, hardening and documentation for card import and card catalog.
+Next gate: MVP 0.6 requirements freeze for deck editor and match setup foundation.
 
 Detailed planning artifacts available:
 
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.7_DETAILED_PLAN.md`
 
 UI design exploration artifacts available:
 

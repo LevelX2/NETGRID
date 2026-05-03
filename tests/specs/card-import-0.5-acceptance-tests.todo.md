@@ -1,6 +1,6 @@
 # Card Import 0.5 Acceptance Tests
 
-Status: requirements frozen, implementation pending  
+Status: implemented and covered  
 Stand: 2026-05-03
 
 ## Artifact Tests
@@ -32,3 +32,10 @@ Stand: 2026-05-03
 
 - T-V05-REG-001: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestehen.
 - T-V05-REG-002: Bestehende Engine-, AI-, Multiplayer-, Visibility- und Replay/StateHash-Tests bleiben grün.
+
+## Implementierungszuordnung
+
+- Pakettests: `packages/catalog/src/index.test.ts`.
+- Artefakt- und Hash-Tests: `tests/specs/phase1-artifacts.test.ts`.
+- API-/Visibility-Vertrag: `tests/specs/visibility-contract.test.ts`.
+- Browser-Smoke: Katalogsuche und blocked-Karte auf `http://127.0.0.1:3000`.
