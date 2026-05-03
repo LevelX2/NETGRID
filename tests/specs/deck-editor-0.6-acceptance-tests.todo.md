@@ -1,6 +1,6 @@
 # Deck Editor 0.6 Acceptance Tests
 
-Status: implementation covered, final hardening pending
+Status: implemented and final-gate covered
 Stand: 2026-05-03
 
 ## Artifact Tests

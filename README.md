@@ -7,8 +7,9 @@ Private Netrunner-Webapplikation für einen schrittweise aufgebauten MVP:
 - MVP 0.3: Runner-KI, Corp-KI v2, Human-vs-KI in beide Richtungen und KI-vs-KI-Simulation.
 - MVP 0.4: kleiner interner Kartenpool, kuratierte V0.4-Decks, Hardware, einfaches Upgrade und Tags.
 - MVP 0.5: lokaler Kartenimport-Snapshot, Kartenkatalog, Statusmodell, read-only Katalog-API und funktionale Katalogansicht.
+- MVP 0.6: lokaler Deckeditor, Deckvalidierung v2, deterministische Deck-Snapshots und Match Setup mit revalidierten Snapshots.
 
-MVP 0.1 bis 0.5 sind abgeschlossen. Der aktuelle Stand unterstützt private Human-vs-Human-Partien, Human-vs-KI in beide Richtungen, KI-vs-KI-Simulationen, einen kleinen kontrollierten internen V0.4-Kartenpool sowie einen lokalen Kartenkatalog. Damage, freie Decks, offizielle Assets und öffentliche Plattformfunktionen bleiben außerhalb des aktuellen Scopes.
+MVP 0.1 bis 0.6 sind abgeschlossen. Der aktuelle Stand unterstützt private Human-vs-Human-Partien, Human-vs-KI in beide Richtungen, KI-vs-KI-Simulationen, einen kleinen kontrollierten internen V0.4-Kartenpool, lokalen Kartenkatalog, lokale Deckentwürfe, validierte Deck-Snapshots und Matchstart mit revalidierten Snapshot-Decks. Damage, offizielle Assets und öffentliche Plattformfunktionen bleiben außerhalb des aktuellen Scopes.
 
 ## Einstieg
 
@@ -60,5 +61,7 @@ corepack pnpm build
 ## Aktueller Stand
 
 MVP 0.1, 0.2, 0.3, 0.4 und 0.5 haben Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. Der aktuelle Stand ist eine private lokale Spiel-, Simulations- und Katalogbasis ohne öffentliche Plattformfunktionen.
+
+MVP 0.6 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. Der nächste empfohlene Gate-Schritt ist V0.7 Requirements/Design Freeze; V0.7-UI-Neugestaltung ist noch nicht begonnen.
 
 Lokaler Werkzeughinweis vom Setup: Auf dieser Maschine war beim Einrichten Node `v24.15.0` aktiv. Das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; falls `pnpm` nicht direkt im PATH liegt, verwende `corepack pnpm ...`.
