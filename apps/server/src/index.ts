@@ -1,4 +1,4 @@
-import { chooseCorpAction } from "@netrunner/ai";
+import { buildAiDecisionInput, chooseCorpAction } from "@netrunner/ai";
 import { applyAction, createGame, getLegalActions, getPlayerView } from "@netrunner/engine";
 import type { EngineResult, GameState, PlayerAction } from "@netrunner/shared";
 import { pathToFileURL } from "node:url";
@@ -25,14 +25,7 @@ export function submitLocalAction(state: GameState, action: PlayerAction): Engin
 export function runCorpAiStep(state: GameState): EngineResult | null {
   const legalActions = getLegalActions(state, "corp");
   if (legalActions.length === 0) return null;
-  const decision = chooseCorpAction({
-    side: "corp",
-    playerView: getPlayerView(state, "corp"),
-    publicEventLog: state.eventLog,
-    legalActions,
-    difficulty: "easy",
-    seed: state.seed
-  });
+  const decision = chooseCorpAction(buildAiDecisionInput(state, "corp", { difficulty: "easy", eventTail: state.eventLog.map((event) => event) }));
   if (!decision.actionId) return null;
   return applyAction(state, {
     matchId: state.matchId,

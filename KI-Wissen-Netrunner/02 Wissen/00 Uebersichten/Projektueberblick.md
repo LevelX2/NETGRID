@@ -13,6 +13,10 @@ Netrunner ist eine private Webapplikation für regelgeführtes, deterministische
 | MVP 0.1 Implementation | Human Runner gegen einfache Corp-KI mit festen Demo-Decks umsetzen. | Kein Human-vs-Human-Multiplayer. |
 | MVP 0.2 Requirements | Multiplayer-Anforderungen, WebSocket-Protokoll, Persistenz, Reconnect und Undo spezifizieren. | Erst nach MVP-0.1-Gate. |
 | MVP 0.2 Implementation | Private Human-vs-Human-Partien über Einladungslink ermöglichen. | Keine öffentliche Plattform, kein Matchmaking, kein breiter Kartenpool. |
+| MVP 0.3 Requirements | KI- und Simulationsphase ausführbar spezifizieren. | Noch keine Kartenpool-Erweiterung und keine LLM-KI. |
+| MVP 0.3 Implementation | Runner-KI, verbesserte Corp-KI, KI-vs-KI-Simulation, Controller-Modell und Erklärmodus umsetzen. | Abgeschlossen; KI nutzt nur PlayerViews, LegalActions und side-gefilterte Events. |
+| MVP 0.4 | Kontrollierte Kartenpool- und Regelbreite-Erweiterung. | Safe Card Batch, eingeschränkte Deckvalidierung und Tags; Damage nur späteres Teilgate. |
+| MVP 0.5+ | Replay-/UX-Qualität, Lern-Decks und privater Betrieb gestaffelt erweitern. | Keine Plattformfeatures ohne explizite Scope-Entscheidung. |
 
 ## Architekturgrundsätze
 
@@ -23,6 +27,8 @@ Netrunner ist eine private Webapplikation für regelgeführtes, deterministische
 - Jede erfolgreiche Transition erzeugt Event, StateVersion und StateHash.
 - Zufall wird über Seed, RandomCounter und RandomDrawRecords reproduzierbar.
 - Der Kartenpool bleibt für MVP 0.1 und 0.2 auf feste Demo-Decks begrenzt.
+- V0.3 bleibt ebenfalls beim vorhandenen Demo-Kartenpool und erweitert zuerst KI, Controller und Simulation.
+- V0.4 erweitert nur interne fiktive Karten mit Manifest-, Test-, Visibility- und Replay-Pflicht.
 
 ## Technisches Zielmodell
 

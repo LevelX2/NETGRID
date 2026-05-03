@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { chooseCorpAction } from "@netrunner/ai";
+import { buildAiDecisionInput, chooseCorpAction } from "@netrunner/ai";
 import { applyAction, createGame, getLegalActions, getPlayerView } from "@netrunner/engine";
 import type { GameState } from "@netrunner/shared";
 
@@ -39,14 +39,7 @@ export async function POST(request: Request) {
 
   if (body.kind === "corp_step") {
     const legalActions = getLegalActions(gameState, "corp");
-    const decision = chooseCorpAction({
-      side: "corp",
-      playerView: getPlayerView(gameState, "corp"),
-      publicEventLog: gameState.eventLog,
-      legalActions,
-      difficulty: "easy",
-      seed: gameState.seed
-    });
+    const decision = chooseCorpAction(buildAiDecisionInput(gameState, "corp", { difficulty: "easy" }));
     const selected = legalActions.find((action) => action.actionId === decision.actionId);
     if (!selected) return NextResponse.json(toClientPayload(gameState));
     const result = applyAction(gameState, {

@@ -1,11 +1,26 @@
 import { createHash, randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
+import { buildAiDecisionInput, chooseAiAction } from "@netrunner/ai";
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, replayEvents } from "@netrunner/engine";
-import { MVP_0_2_BASELINE, type GameEvent, type GameState, type LegalAction, type PlayerAction, type PlayerView, type PublicGameEvent, type Side } from "@netrunner/shared";
+import {
+  MVP_0_2_BASELINE,
+  MVP_0_3_BASELINE,
+  type AiDifficulty,
+  type GameEvent,
+  type GameState,
+  type LegalAction,
+  type PlayerAction,
+  type PlayerController,
+  type PlayerView,
+  type PublicGameEvent,
+  type RulesBaseline,
+  type Side
+} from "@netrunner/shared";
 
 export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 export type HostSideSelection = Side | "random";
+export type MatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
 export type TokenKind = "join" | "session" | "reconnect";
 export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
 
@@ -16,9 +31,11 @@ export type MatchSettings = {
 export type MatchRecord = {
   matchId: string;
   status: MatchStatus;
+  mode: MatchMode;
   matchVersion: number;
-  baseline: typeof MVP_0_2_BASELINE;
+  baseline: RulesBaseline;
   settings: MatchSettings;
+  aiControllers?: Partial<Record<Side, PlayerController>>;
   createdAt: string;
   updatedAt: string;
   winner?: Side | "draw";
@@ -142,9 +159,10 @@ export type CreateMatchResult = {
   hostSide: Side;
   hostSessionToken: string;
   hostReconnectToken: string;
-  joinUrl: string;
+  joinUrl?: string;
   webSocketUrl: string;
-  baseline: typeof MVP_0_2_BASELINE;
+  mode: MatchMode;
+  baseline: RulesBaseline;
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
@@ -270,25 +288,36 @@ export class MultiplayerService {
     this.now = options.now ?? (() => new Date().toISOString());
   }
 
-  async createMatch(input: { hostSide: HostSideSelection; displayName?: string; seed?: string; settings?: Partial<MatchSettings> }): Promise<CreateMatchResult> {
+  async createMatch(input: {
+    hostSide: HostSideSelection;
+    displayName?: string;
+    seed?: string;
+    settings?: Partial<MatchSettings>;
+    mode?: MatchMode;
+    runnerDifficulty?: AiDifficulty;
+    corpDifficulty?: AiDifficulty;
+  }): Promise<CreateMatchResult> {
     const seed = input.seed?.trim() || `match-${randomId("seed")}`;
     const matchId = randomId("match");
-    const hostSide = input.hostSide === "random" ? deterministicHostSide(seed) : input.hostSide;
+    const mode = input.mode ?? "human_vs_human";
+    const hostSide = mode === "human_runner_vs_corp_ai" ? "runner" : mode === "human_corp_vs_runner_ai" ? "corp" : input.hostSide === "random" ? deterministicHostSide(seed) : input.hostSide;
     const joinSide = opposite(hostSide);
     const now = this.now();
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
-    const joinToken = generateToken();
+    const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const settings: MatchSettings = { agendaPointsToWin: input.settings?.agendaPointsToWin ?? 6 };
+    const baseline = mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
+    const controllers = controllersForMode(mode, hostSide, {
+      runnerDifficulty: input.runnerDifficulty ?? "normal",
+      corpDifficulty: input.corpDifficulty ?? "normal"
+    });
     const gameState = createGame({
       matchId,
       seed,
-      baseline: MVP_0_2_BASELINE,
+      baseline,
       agendaPointsToWin: settings.agendaPointsToWin,
-      controllers: {
-        runner: { controllerId: "runner-human", side: "runner", type: "human_local", displayName: "Runner" },
-        corp: { controllerId: "corp-human", side: "corp", type: "human_local", displayName: "Corp" }
-      }
+      controllers
     });
 
     const session: SessionRecord = {
@@ -306,10 +335,12 @@ export class MultiplayerService {
     const record: StoredMatch = {
       match: {
         matchId,
-        status: hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner",
+        status: mode === "human_vs_human" ? (hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner") : "active",
+        mode,
         matchVersion: 1,
-        baseline: MVP_0_2_BASELINE,
+        baseline,
         settings,
+        ...(mode === "human_vs_human" ? {} : { aiControllers: aiControllersFor(controllers) }),
         createdAt: now,
         updatedAt: now
       },
@@ -317,7 +348,7 @@ export class MultiplayerService {
       tokens: [
         this.tokenRecord(matchId, hostSide, "session", hostSessionToken, now),
         this.tokenRecord(matchId, hostSide, "reconnect", hostReconnectToken, now),
-        this.tokenRecord(matchId, joinSide, "join", joinToken, now)
+        ...(joinToken ? [this.tokenRecord(matchId, joinSide, "join", joinToken, now)] : [])
       ],
       gameState,
       eventLog: gameState.eventLog.map((event) => toEventRecord(matchId, event, false)),
@@ -326,6 +357,7 @@ export class MultiplayerService {
       stateSnapshots: [this.snapshotFor(matchId, gameState, 1, "snap_initial", false)]
     };
 
+    this.runAiUntilNextHuman(record);
     await this.storage.save(record);
     const payload = this.payloadFor(record, hostSide);
     return {
@@ -333,9 +365,10 @@ export class MultiplayerService {
       hostSide,
       hostSessionToken,
       hostReconnectToken,
-      joinUrl: `${this.webBaseUrl}/?matchId=${encodeURIComponent(matchId)}&joinToken=${encodeURIComponent(joinToken)}`,
+      ...(joinToken ? { joinUrl: `${this.webBaseUrl}/?matchId=${encodeURIComponent(matchId)}&joinToken=${encodeURIComponent(joinToken)}` } : {}),
       webSocketUrl: this.webSocketUrl(),
-      baseline: MVP_0_2_BASELINE,
+      mode,
+      baseline,
       playerView: payload.playerView,
       legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion
@@ -543,6 +576,7 @@ export class MultiplayerService {
         record.match.status = "finished";
         record.match.winner = result.state.winner;
       }
+      this.runAiUntilNextHuman(record);
       await this.storage.save(record);
       const success: SubmitActionResult = {
         ok: true,
@@ -679,10 +713,59 @@ export class MultiplayerService {
       playerView,
       legalActions: getLegalActions(record.gameState, side),
       eventTail: record.eventLog.slice(-20).map((event) => event.publicPayload),
-      opponentStatus: { side: opposite(side), connected: opponent?.connected ?? false },
+      opponentStatus: { side: opposite(side), connected: this.isAiSide(record, opposite(side)) || (opponent?.connected ?? false) },
       ...(pendingUndo ? { pendingUndo } : {}),
       ...(record.gameState.winner ? { winner: record.gameState.winner, finalStateHash: hashState(record.gameState) } : {})
     };
+  }
+
+  private runAiUntilNextHuman(record: StoredMatch): void {
+    for (let count = 0; count < 40 && record.match.status === "active" && !record.gameState.winner && this.isAiSide(record, record.gameState.activeSide); count += 1) {
+      const side = record.gameState.activeSide;
+      const legalActions = getLegalActions(record.gameState, side);
+      if (legalActions.length === 0) return;
+      const controller = record.match.aiControllers?.[side];
+      const input = buildAiDecisionInput(record.gameState, side, {
+        difficulty: controller?.difficulty ?? "normal",
+        profileId: controller?.profileId ?? `${side}-server-ai-v0.3`,
+        decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${side}`,
+        actionNumber: record.gameState.stateVersion
+      });
+      const decision = chooseAiAction(input);
+      const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
+      if (!legalAction) return;
+      const snapshot = this.snapshotFor(record.match.matchId, record.gameState, record.match.matchVersion, `snap_before_${record.gameState.stateVersion + 1}`, false);
+      const result = applyAction(record.gameState, {
+        matchId: record.match.matchId,
+        side,
+        actionId: legalAction.actionId,
+        clientKnownStateVersion: record.gameState.stateVersion,
+        idempotencyKey: `ai-${side}-${record.gameState.stateVersion}`
+      });
+      if (!result.ok) return;
+      const event: GameEvent = {
+        ...result.event,
+        publicPayload: {
+          ...result.event.publicPayload,
+          aiReasonCode: decision.reasonCode,
+          aiExplanation: decision.explanation
+        }
+      };
+      const barrier = isHiddenInfoBarrier(event);
+      record.stateSnapshots.push({ ...snapshot, hiddenInfoBarrier: barrier });
+      record.gameState = result.state;
+      record.eventLog.push(toEventRecord(record.match.matchId, event, barrier));
+      record.match.matchVersion += 1;
+      record.match.updatedAt = this.now();
+      if (result.state.winner) {
+        record.match.status = "finished";
+        record.match.winner = result.state.winner;
+      }
+    }
+  }
+
+  private isAiSide(record: StoredMatch, side: Side): boolean {
+    return record.match.aiControllers?.[side]?.type === "ai";
   }
 
   private async mustLoad(matchId: string): Promise<StoredMatch | undefined> {
@@ -803,6 +886,36 @@ function opposite(side: Side): Side {
 function deterministicHostSide(seed: string): Side {
   const value = createHash("sha256").update(seed).digest()[0] ?? 0;
   return value % 2 === 0 ? "runner" : "corp";
+}
+
+function controllersForMode(
+  mode: MatchMode,
+  hostSide: Side,
+  difficulties: { runnerDifficulty: AiDifficulty; corpDifficulty: AiDifficulty }
+): { runner: PlayerController; corp: PlayerController } {
+  if (mode === "human_runner_vs_corp_ai") {
+    return {
+      runner: { controllerId: "runner-human", side: "runner", type: "human_remote", displayName: "Runner" },
+      corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI", difficulty: difficulties.corpDifficulty, profileId: "corp-ai-v0.3" }
+    };
+  }
+  if (mode === "human_corp_vs_runner_ai") {
+    return {
+      runner: { controllerId: "runner-ai", side: "runner", type: "ai", displayName: "Runner KI", difficulty: difficulties.runnerDifficulty, profileId: "runner-ai-v0.3" },
+      corp: { controllerId: "corp-human", side: "corp", type: "human_remote", displayName: "Corp" }
+    };
+  }
+  return {
+    runner: { controllerId: hostSide === "runner" ? "runner-host" : "runner-guest", side: "runner", type: "human_remote", displayName: "Runner" },
+    corp: { controllerId: hostSide === "corp" ? "corp-host" : "corp-guest", side: "corp", type: "human_remote", displayName: "Corp" }
+  };
+}
+
+function aiControllersFor(controllers: { runner: PlayerController; corp: PlayerController }): Partial<Record<Side, PlayerController>> {
+  const result: Partial<Record<Side, PlayerController>> = {};
+  if (controllers.runner.type === "ai") result.runner = controllers.runner;
+  if (controllers.corp.type === "ai") result.corp = controllers.corp;
+  return result;
 }
 
 function generateToken(): string {

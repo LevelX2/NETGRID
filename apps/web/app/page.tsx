@@ -1,13 +1,15 @@
 "use client";
 
-import { Cable, Check, Clipboard, Link2, Play, RotateCcw, Shield, Sparkles, UserPlus, X } from "lucide-react";
+import { Bot, Cable, Check, Clipboard, Link2, Play, RotateCcw, Shield, Sparkles, UserPlus, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
-const SESSION_KEY = "netrunner-mvp-0-2-session";
+const SESSION_KEY = "netrunner-mvp-0-3-session";
 
 type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
+type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
+type AiDifficulty = "easy" | "normal" | "hard";
 
 type ClientPayload = {
   matchId: string;
@@ -56,8 +58,9 @@ type CreateMatchResponse = {
   hostSide: Side;
   hostSessionToken: string;
   hostReconnectToken: string;
-  joinUrl: string;
+  joinUrl?: string;
   webSocketUrl: string;
+  mode: Exclude<GameMode, "ai_vs_ai">;
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
@@ -76,15 +79,29 @@ type JoinMatchResponse = {
   error?: { message: string };
 };
 
+type AiSimulationSummary = {
+  seed: string;
+  winner: Winner | "action_limit_reached";
+  actions: number;
+  turns: number;
+  finalStateHash: string;
+  replayOk: boolean;
+  errors: string[];
+};
+
 export default function Page() {
   const [mode, setMode] = useState<"host" | "join">("host");
+  const [gameMode, setGameMode] = useState<GameMode>("human_vs_human");
+  const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
+  const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [displayName, setDisplayName] = useState("Runner");
   const [hostSide, setHostSide] = useState<Side | "random">("runner");
-  const [seed, setSeed] = useState("mvp-0.2-private-demo");
+  const [seed, setSeed] = useState("mvp-0.3-ai-demo");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [payload, setPayload] = useState<ClientPayload | null>(null);
+  const [simulation, setSimulation] = useState<AiSimulationSummary | null>(null);
   const [connection, setConnection] = useState<"offline" | "connecting" | "online">("offline");
   const [notice, setNotice] = useState("");
   const socketRef = useRef<WebSocket | null>(null);
@@ -122,10 +139,18 @@ export default function Page() {
 
   const createMatch = async () => {
     setNotice("");
+    setSimulation(null);
+    if (gameMode === "ai_vs_ai") {
+      await runSimulation();
+      return;
+    }
     const created = await postJson<CreateMatchResponse>("/api/matches", {
-      hostSide,
+      hostSide: gameMode === "human_runner_vs_corp_ai" ? "runner" : gameMode === "human_corp_vs_runner_ai" ? "corp" : hostSide,
       displayName,
-      seed
+      seed,
+      mode: gameMode,
+      runnerDifficulty,
+      corpDifficulty
     });
     const nextSession: SessionInfo = {
       matchId: created.matchId,
@@ -133,13 +158,25 @@ export default function Page() {
       sessionToken: created.hostSessionToken,
       reconnectToken: created.hostReconnectToken,
       webSocketUrl: created.webSocketUrl,
-      joinUrl: created.joinUrl,
-      displayName
+      displayName,
+      ...(created.joinUrl ? { joinUrl: created.joinUrl } : {})
     };
     persistSession(nextSession);
     setSession(nextSession);
-    setPayload(fromInitialResponse(created, created.hostSide, created.joinUrl));
+    setPayload(fromInitialResponse(created, created.hostSide));
     setNotice("Match erstellt.");
+  };
+
+  const runSimulation = async () => {
+    setNotice("");
+    const result = await postJson<{ summary: AiSimulationSummary }>("/api/simulations/ai-vs-ai", {
+      seed,
+      runnerDifficulty,
+      corpDifficulty,
+      maxActions: 120
+    });
+    setSimulation(result.summary);
+    setNotice("Simulation abgeschlossen.");
   };
 
   const joinMatch = async () => {
@@ -226,6 +263,7 @@ export default function Page() {
     window.localStorage.removeItem(SESSION_KEY);
     setSession(null);
     setPayload(null);
+    setSimulation(null);
     setConnection("offline");
     setNotice("");
   };
@@ -321,7 +359,7 @@ export default function Page() {
     return (
       <main className="app">
         <header className="topbar">
-          <Brand subtitle="Privates Human-vs-Human-Match" />
+          <Brand subtitle="Private Matches und KI-Simulation" />
           <ConnectionBadge text={statusText} state={connection} />
         </header>
         <div className="setup">
@@ -338,25 +376,57 @@ export default function Page() {
             {mode === "host" ? (
               <div className="formGrid">
                 <label>
+                  Modus
+                  <select value={gameMode} onChange={(event) => setGameMode(event.target.value as GameMode)}>
+                    <option value="human_vs_human">Human vs Human</option>
+                    <option value="human_runner_vs_corp_ai">Runner vs Corp-KI</option>
+                    <option value="human_corp_vs_runner_ai">Corp vs Runner-KI</option>
+                    <option value="ai_vs_ai">KI vs KI</option>
+                  </select>
+                </label>
+                <label>
                   Name
                   <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
                 </label>
-                <label>
-                  Seite
-                  <select value={hostSide} onChange={(event) => setHostSide(event.target.value as Side | "random")}>
-                    <option value="runner">Runner</option>
-                    <option value="corp">Corp</option>
-                    <option value="random">Random</option>
-                  </select>
-                </label>
+                {gameMode === "human_vs_human" ? (
+                  <label>
+                    Seite
+                    <select value={hostSide} onChange={(event) => setHostSide(event.target.value as Side | "random")}>
+                      <option value="runner">Runner</option>
+                      <option value="corp">Corp</option>
+                      <option value="random">Random</option>
+                    </select>
+                  </label>
+                ) : null}
+                {gameMode === "human_corp_vs_runner_ai" || gameMode === "ai_vs_ai" ? (
+                  <label>
+                    Runner-KI
+                    <select value={runnerDifficulty} onChange={(event) => setRunnerDifficulty(event.target.value as AiDifficulty)}>
+                      <option value="easy">Easy</option>
+                      <option value="normal">Normal</option>
+                      <option value="hard">Hard</option>
+                    </select>
+                  </label>
+                ) : null}
+                {gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai" ? (
+                  <label>
+                    Corp-KI
+                    <select value={corpDifficulty} onChange={(event) => setCorpDifficulty(event.target.value as AiDifficulty)}>
+                      <option value="easy">Easy</option>
+                      <option value="normal">Normal</option>
+                      <option value="hard">Hard</option>
+                    </select>
+                  </label>
+                ) : null}
                 <label>
                   Seed
                   <input value={seed} onChange={(event) => setSeed(event.target.value)} />
                 </label>
                 <button className="button primary wide" onClick={createMatch}>
-                  <UserPlus size={16} />
-                  Match erstellen
+                  {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
+                  {gameMode === "ai_vs_ai" ? "Simulation starten" : "Match erstellen"}
                 </button>
+                {simulation ? <SimulationResult summary={simulation} /> : null}
               </div>
             ) : (
               <div className="formGrid">
@@ -388,7 +458,7 @@ export default function Page() {
   return (
     <main className="app">
       <header className="topbar">
-        <Brand subtitle={`MVP 0.2 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
+        <Brand subtitle={`MVP 0.3 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
           {session.joinUrl ? (
@@ -514,6 +584,7 @@ export default function Page() {
                 .map((event) => (
                   <div className="event" key={event.eventId}>
                     <strong>{String(event.publicPayload.label ?? event.type)}</strong>
+                    {event.publicPayload.aiReasonCode ? <span>{String(event.publicPayload.aiReasonCode)}</span> : null}
                     <small>
                       v{event.stateVersionAfter} · {event.stateHashAfter}
                     </small>
@@ -568,6 +639,24 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
+function SimulationResult({ summary }: { summary: AiSimulationSummary }) {
+  return (
+    <div className="simulationResult">
+      <div className="stats">
+        <Stat label="Actions" value={summary.actions} />
+        <Stat label="Turns" value={summary.turns} />
+      </div>
+      <p className="meta statusLine">
+        {summary.winner === "action_limit_reached" ? "Limit erreicht" : `${summary.winner === "runner" ? "Runner" : summary.winner === "corp" ? "Corp" : "Draw"} gewinnt`}
+        {" · "}
+        {summary.replayOk ? "Replay ok" : "Replay prüfen"}
+      </p>
+      <p className="meta hashLine">{summary.finalStateHash}</p>
+      {summary.errors.length > 0 ? <p className="notice">{summary.errors.join(", ")}</p> : null}
+    </div>
+  );
+}
+
 function Card({ card, compact = false }: { card: VisibleCard; compact?: boolean }) {
   const typeClass = card.type ? ` ${card.type}` : "";
   return (
@@ -580,18 +669,17 @@ function Card({ card, compact = false }: { card: VisibleCard; compact?: boolean 
   );
 }
 
-function fromInitialResponse(response: CreateMatchResponse, side: Side, joinUrl: string): ClientPayload {
+function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {
   return {
     matchId: response.matchId,
-    matchStatus: response.hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner",
+    matchStatus: response.mode === "human_vs_human" ? (response.hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner") : "active",
     matchVersion: response.matchVersion,
     side,
     playerView: response.playerView,
     legalActions: response.legalActions,
     eventTail: response.playerView.publicEvents,
-    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: false },
-    ...(response.playerView.winner ? { winner: response.playerView.winner } : {}),
-    ...(joinUrl ? {} : {})
+    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" },
+    ...(response.playerView.winner ? { winner: response.playerView.winner } : {})
   };
 }
 

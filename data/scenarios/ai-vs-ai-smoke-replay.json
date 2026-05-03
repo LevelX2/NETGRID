@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "scenario-v0.3",
+  "id": "SCN-AI-003",
+  "title": "AI vs AI smoke replay",
+  "requirementIds": ["V03-REQ-007", "V03-REQ-008", "V03-REQ-009"],
+  "seed": "ai-vs-ai-smoke-replay",
+  "config": {
+    "runnerDifficulty": "normal",
+    "corpDifficulty": "normal",
+    "maxActions": 120,
+    "agendaPointsToWin": 6
+  },
+  "expected": {
+    "replayOk": true,
+    "finalStateHashPrefix": "fnv1a:",
+    "summaryContainsFullState": false
+  }
+}

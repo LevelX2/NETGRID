@@ -23,26 +23,35 @@
 - MVP 0.2 Implementierungsgate ist bestanden: `ready_for_hardening: true`.
 - MVP 0.2 Validierung und Hardening wurden abgeschlossen. Gehärtet wurden Snapshot-/Undo-Semantik, WebSocket-Reconnect-Ersetzung und REST-Settings-Eingaben.
 - MVP 0.2 Final Gate ist bestanden: `MVP_0.2_done: true`.
+- Die Roadmap nach MVP 0.2 wurde konsolidiert. V0.3 ist als KI- und Simulationsphase eingeordnet; Kartenpool und Regelbreite folgen in V0.4.
+- Der detaillierte V0.3-Plan liegt vor: Runner-KI, Corp-KI v2, KI-vs-KI, Controller-Modell, Erklärmodus, Simulationstests und AI-Visibility-Gates.
+- Der detaillierte V0.4-Plan liegt vor: kontrollierte Kartenpool- und Regelbreite-Erweiterung mit Safe Card Batch, eingeschränkter Deckvalidierung, Tags als bevorzugter erster Regelgruppe und Damage nur als eigenes Teilgate.
+- MVP 0.3 wurde umgesetzt und final geprüft: side-neutrale AI-Inputs, Runner-KI, Corp-KI v2, KI-vs-KI-Simulation, Server-AI-Modi, AI-vs-AI-Simulations-API und Web-UI-Moduswahl.
+- MVP 0.3 Final Gate ist bestanden: `MVP_0.3_done: true`; nächster Gate-Schritt ist MVP 0.4 Requirements.
 
 ## Teilweise umgesetzt
 
 - Primäre Quellen wurden nach `docs/source/` kopiert, soweit vorhanden.
 - Ergänzende Dokumente liegen weiterhin unter `docs/` und sind als zusätzliche Arbeitsgrundlagen bekannt.
-- Paketmanifeste sind bewusst minimal und enthalten noch keine Framework-Abhängigkeiten für Web, Server oder Engine-Implementierung.
+- Die Paketmanifeste, Framework-Abhängigkeiten und Workspace-Skripte sind für den aktuellen MVP-0.2-Stand funktionsfähig.
 - Lokaler Werkzeugcheck ergab Node `v24.15.0`; das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; der direkte `pnpm`-Befehl war in der aktuellen Shell nicht im PATH.
 - Das nachgereichte Demo-Deck-Paket wurde einsortiert: `docs/source/Erstes Testdeck.txt`, `docs/source/Erstes Testdeck.md` und `data/decks/demo-decks.json`.
 - Die lokale Codex-Goal-Funktion wurde aktiviert und ist für die nächsten mehrphasigen Netrunner-Schritte vorgesehen.
 - Netrunner wurde in der lokalen Codex-Konfiguration als vertrauenswürdiges Projekt eingetragen.
-- Der vorbereitete Arbeitsbranch für den nächsten Thread ist `codex/mvp-0-1-requirements`.
+- Der historisch vorbereitete Arbeitsbranch `codex/mvp-0-1-requirements` enthält inzwischen nicht mehr den nächsten fachlichen Einstieg; aktueller Einstieg ist V0.3 Requirements.
 
 ## Offen
 
-- Kein gate-basierter MVP-0.1/0.2-Arbeitsschritt ist in diesem Threadziel offen.
+- Kein gate-basierter MVP-0.1/0.2/0.3-Arbeitsschritt ist offen.
+- Der nächste gate-basierte Schritt ist `MVP 0.4 Requirements Freeze`.
+- V0.4 ist durch `MVP_0.3_done: true` freigegeben, bleibt aber auf Safe Card Batch, eingeschränkte Deckvalidierung und Tags begrenzt; Damage wird als V0.4.x-Teilgate zurückgestellt.
+- V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
-- MVP 0.2 bleibt gesperrt, bis MVP 0.1 implementiert, validiert und gehärtet ist.
 
 ## Wichtige Grenzen
 
-- In Phase 2 darf nur MVP-0.1-Scope implementiert werden.
-- MVP 0.2 darf nicht über den privaten Multiplayer-Scope hinaus erweitert werden.
+- MVP 0.1 und MVP 0.2 sind abgeschlossen; spätere Änderungen dürfen deren Gates nicht durch Scope-Ausweitung aufweichen.
+- MVP 0.2 bleibt auf privaten Multiplayer begrenzt; öffentliche Plattformfunktionen brauchen eine spätere explizite Scope-Entscheidung.
+- MVP 0.3 erweitert keine Karten und keine offiziellen Mechaniken; KI darf nur aus `LegalActions`, PlayerViews und side-gefilterten Events entscheiden.
+- MVP 0.4 darf Karten und Mechaniken nur kontrolliert erweitern: interne fiktive Karten, Manifestpflicht, Testpflicht, Visibility-Gates und keine offiziellen Assets oder externen Kartendatenbanken. Damage bleibt vorerst außerhalb des Hauptscopes.
 - `data/` ist hier nicht pauschal ignoriert, weil es versionierte Regeln, Karten, Decks, Manifeste, Abweichungen und Szenarien aufnehmen soll.

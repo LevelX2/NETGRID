@@ -195,7 +195,28 @@ Nicht einplanen:
 
 ## 9. Erweiterungsroadmap nach MVP 0.2
 
-### 9.1 MVP 0.3 – Kartenpool und Regelbreite
+Aktueller konsolidierter Stand: `docs/derived/POST_MVP_0.2_ROADMAP.md` ist die führende abgeleitete Roadmap für die Zeit nach MVP 0.2. Die frühere Idee, V0.3 direkt als Kartenpool- und Regelbreite-Stufe zu führen, wurde nach dem MVP-0.2-Finalstand umsortiert.
+
+Begründung: Vor einer Kartenpool-Erweiterung soll V0.3 zuerst KI-vs-KI, Runner-KI, verbesserte Corp-KI, Erklärmodus und Simulationstests liefern. Dadurch entsteht eine stärkere Regressionsbasis für neue Karten und Mechaniken.
+
+### 9.1 MVP 0.3 – KI und Simulation
+
+Mögliche Themen:
+
+- side-neutrales AI-Input-Modell,
+- Controller-Abstraktion für Human, KI und Replay,
+- Runner-KI,
+- verbesserte Corp-KI,
+- KI-vs-KI-Simulationen,
+- Erklärmodus für KI-Entscheidungen,
+- Simulationstests mit Seed, Replay und StateHash,
+- AI-Visibility-Tests für Inputs, Erklärungen, Logs und Fehler.
+
+Voraussetzung: Die KI darf nur PlayerViews, LegalActions, side-gefilterte Events und explizit erlaubte Metadaten verwenden. Kein FullState und keine gegnerischen verdeckten Informationen.
+
+### 9.2 MVP 0.4 – Kartenpool und Regelbreite
+
+Der detaillierte V0.4-Plan liegt in `docs/derived/MVP_0.4_DETAILED_PLAN.md`.
 
 Mögliche Themen:
 
@@ -207,9 +228,15 @@ Mögliche Themen:
 - größere Demo-Decks,
 - Deckvalidierung mit eingeschränktem Kartenpool.
 
-Voraussetzung: Kartenimplementierungsleitfaden und Testmatrix werden eingehalten.
+Voraussetzung: Kartenimplementierungsleitfaden, Testmatrix und KI-/Simulation-Regressionsharness werden eingehalten.
 
-### 9.2 MVP 0.4 – Komfort und Stabilität
+Planungsentscheidung:
+
+- Zuerst Safe Card Batch und eingeschränkte Deckvalidierung.
+- Danach Tags als erste neue Regelgruppe.
+- Damage nur als eigenes Teilgate oder V0.4.x.
+
+### 9.3 MVP 0.5 – Komfort und Stabilität
 
 Mögliche Themen:
 
@@ -221,10 +248,14 @@ Mögliche Themen:
 - Keyboard Shortcuts,
 - verbesserte Mobile-Tauglichkeit.
 
-### 9.3 MVP 0.5+ – Plattformoptionen
+### 9.4 MVP 0.6+ – Kuratierte Lern-Decks, privater Betrieb und Plattformoptionen
 
 Nur nach expliziter Scope-Entscheidung:
 
+- kuratierte Lern-Decks,
+- eingeschränkte lokale Deckvalidierung,
+- SQLite-/Storage-Härtung,
+- private Deployment-Härtung,
 - Nutzerkonten,
 - Freundeslinks,
 - Match-Historie,

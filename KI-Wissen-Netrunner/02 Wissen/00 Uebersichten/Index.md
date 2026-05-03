@@ -5,12 +5,14 @@
 - [[Projektueberblick]]: Zielbild, Scope, Architekturgrundsätze und MVP-Phasen.
 - [[Aktueller Projektstatus]]: aktueller Stand von Workspace, Setup, Quellen und offenen Punkten.
 - [[Quellenlage und Aktualitaet]]: vorhandene, fehlende und ergänzende Projektquellen.
+- [[Roadmap nach MVP 0.2]]: konsolidierte Roadmap ab V0.3 und Begründung der KI-/Simulationsphase.
 - [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]: Workflow für wiki-first Arbeit und Rückführung von Erkenntnissen.
 
 ## Kernwissen
 
 - [[Projektueberblick]]: verdichtetes Projektbild für neue Threads.
 - [[Quellenlage und Aktualitaet]]: Quellenpriorität und bekannte Lücken.
+- [[Roadmap nach MVP 0.2]]: Folgephasen, V0.3-Scope und aktuelle Planungsentscheidung.
 
 ## Prozesse
 

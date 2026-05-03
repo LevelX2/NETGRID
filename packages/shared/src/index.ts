@@ -96,19 +96,25 @@ export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
   cardTextSnapshotId: "mvp-0.1-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0";
   cardImplementationVersion: "0.1.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0";
-  multiplayerSchemaVersion?: "0.2.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0";
+  aiControllerSchemaVersion?: "0.3.0";
+  simulationSchemaVersion?: "0.3.0";
 };
 
 export type PlayerController = {
   controllerId: string;
   side: Side;
-  type: "human_local" | "ai" | "replay";
+  type: "human_local" | "human_remote" | "ai" | "replay";
   displayName?: string;
+  profileId?: string;
+  difficulty?: AiDifficulty;
 };
+
+export type AiDifficulty = "easy" | "normal" | "hard";
 
 export type CreateGameConfig = {
   matchId?: string;
@@ -360,17 +366,25 @@ export type PlayerView = {
 };
 
 export type AiDecisionInput = {
-  side: "corp";
+  side: Side;
   playerView: PlayerView;
-  publicEventLog: PublicGameEvent[];
+  eventTail: PublicGameEvent[];
   legalActions: LegalAction[];
-  difficulty: "easy" | "normal" | "hard";
+  difficulty: AiDifficulty;
   seed: string;
+  decisionId: string;
+  actionNumber: number;
+  profileId: string;
 };
 
 export type AiDecision = {
   actionId: string;
-  reason: string;
+  reasonCode: string;
+  explanation: string;
+  consideredActionIds: string[];
+  fallbackUsed: boolean;
+  confidence?: number;
+  reason?: string;
 };
 
 export const MVP_0_1_BASELINE: RulesBaseline = {
@@ -388,6 +402,16 @@ export const MVP_0_2_BASELINE: RulesBaseline = {
   deviationRegistryVersion: "0.2.0",
   playerViewSchemaVersion: "0.2.0",
   multiplayerSchemaVersion: "0.2.0"
+};
+
+export const MVP_0_3_BASELINE: RulesBaseline = {
+  ...MVP_0_2_BASELINE,
+  engineSchemaVersion: "0.3.0",
+  deviationRegistryVersion: "0.3.0",
+  playerViewSchemaVersion: "0.3.0",
+  multiplayerSchemaVersion: "0.3.0",
+  aiControllerSchemaVersion: "0.3.0",
+  simulationSchemaVersion: "0.3.0"
 };
 
 export const DEMO_CARDS: CardDefinition[] = [

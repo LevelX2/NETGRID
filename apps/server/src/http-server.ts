@@ -2,6 +2,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
+import { simulateAiGame } from "@netrunner/ai";
 import {
   JsonFileMatchStorage,
   MultiplayerService,
@@ -12,6 +13,7 @@ import {
   type UndoResult
 } from "./multiplayer";
 import type { Side } from "@netrunner/shared";
+import type { AiDifficulty } from "@netrunner/shared";
 
 type ClientWsMessage =
   | { type: "join_match"; payload: { matchId: string; sessionToken: string; side: Side } }
@@ -305,14 +307,29 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       const createInput: Parameters<MultiplayerService["createMatch"]>[0] = {
         hostSide: body.hostSide === "runner" || body.hostSide === "corp" || body.hostSide === "random" ? body.hostSide : "runner"
       };
+      if (body.mode === "human_vs_human" || body.mode === "human_runner_vs_corp_ai" || body.mode === "human_corp_vs_runner_ai") createInput.mode = body.mode;
       if (typeof body.displayName === "string") createInput.displayName = body.displayName;
       if (typeof body.seed === "string") createInput.seed = body.seed;
+      if (isDifficulty(body.runnerDifficulty)) createInput.runnerDifficulty = body.runnerDifficulty;
+      if (isDifficulty(body.corpDifficulty)) createInput.corpDifficulty = body.corpDifficulty;
       if (typeof body.settings === "object" && body.settings) {
         const settings = body.settings as Record<string, unknown>;
         if (typeof settings.agendaPointsToWin === "number") createInput.settings = { agendaPointsToWin: settings.agendaPointsToWin };
       }
       const created = await service.createMatch(createInput);
       sendJson(response, 201, created);
+      return;
+    }
+
+    if (request.method === "POST" && url.pathname === "/api/simulations/ai-vs-ai") {
+      const body = await readJson(request);
+      const config: Parameters<typeof simulateAiGame>[0] = {};
+      if (typeof body.seed === "string") config.seed = body.seed;
+      if (typeof body.maxActions === "number") config.maxActions = Math.max(1, Math.min(500, Math.floor(body.maxActions)));
+      if (typeof body.agendaPointsToWin === "number") config.agendaPointsToWin = Math.max(1, Math.floor(body.agendaPointsToWin));
+      if (isDifficulty(body.runnerDifficulty)) config.runnerDifficulty = body.runnerDifficulty;
+      if (isDifficulty(body.corpDifficulty)) config.corpDifficulty = body.corpDifficulty;
+      sendJson(response, 200, { mode: "ai_vs_ai", summary: simulateAiGame(config) });
       return;
     }
 
@@ -414,4 +431,8 @@ function bearerToken(request: IncomingMessage): string | undefined {
 
 function opposite(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
+}
+
+function isDifficulty(value: unknown): value is AiDifficulty {
+  return value === "easy" || value === "normal" || value === "hard";
 }

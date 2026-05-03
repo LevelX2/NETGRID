@@ -230,6 +230,19 @@ select {
   font-size: 13px;
 }
 
+.simulationResult {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #12181d;
+}
+
+.hashLine {
+  overflow-wrap: anywhere;
+}
+
 .matchStrip {
   min-height: 36px;
   display: flex;
@@ -432,6 +445,13 @@ select {
 .event small {
   display: block;
   color: var(--muted);
+}
+
+.event span {
+  display: block;
+  margin-top: 4px;
+  color: var(--agenda);
+  font-size: 12px;
 }
 
 .winner {

@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.2 final gate passed.
+MVP 0.3 AI and simulation complete; MVP 0.4 requirements next.
 
 ## Status
 
@@ -32,6 +32,22 @@ MVP 0.2 validation, hardening and documentation are complete.
 
 `MVP_0.2_done: true`
 
+Post-MVP 0.2 roadmap and MVP 0.3 detailed planning are complete.
+
+`ready_for_MVP_0.3_requirements: true`
+
+MVP 0.4 detailed planning is complete as a future gated phase.
+
+`MVP_0.4_detailed_plan_available: true`
+
+`ready_for_MVP_0.4_requirements_after_MVP_0.3_done: true`
+
+MVP 0.3 requirements, implementation, validation and documentation are complete.
+
+`MVP_0.3_done: true`
+
+`ready_for_MVP_0.4_requirements: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -44,6 +60,10 @@ Gate flow:
 4. MVP 0.2 requirements: pass.
 5. MVP 0.2 implementation: pass.
 6. MVP 0.2 validation, hardening and documentation: pass.
+7. Post-MVP 0.2 roadmap planning: pass.
+8. MVP 0.3 requirements: pass.
+9. MVP 0.3 implementation and validation: pass.
+10. MVP 0.4 requirements: next.
 
 ## Phase 1 files created or updated
 
@@ -230,6 +250,73 @@ Phase 3 has validated and hardened MVP 0.2.
 
 `MVP_0.2_done: true`
 
+## Post-MVP 0.2 roadmap planning files created or updated
+
+- `docs/derived/POST_MVP_0.2_ROADMAP.md`
+- `docs/derived/MVP_0.3_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.4_DETAILED_PLAN.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.2.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Projektueberblick.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `docs/codex/CODEX_STATUS.md`
+
+## Post-MVP 0.2 roadmap decision
+
+V0.3 is the AI and simulation phase: Runner AI, improved Corp AI, AI-vs-AI, controller model, explanation mode, simulation tests and AI visibility gates.
+
+Card pool and rules breadth move to V0.4. V0.3 does not expand cards, official mechanics, platform features or deckbuilding.
+
+## MVP 0.4 planning decision
+
+V0.4 is the controlled card pool and rules breadth phase, gated by V0.3. It should start with a safe internal card batch and restricted deck validation, then add Tags as the preferred first new rule family. Damage is planned only as a separate sub-gate or V0.4.x because it touches hidden information, RandomDrawRecords, Undo barriers and AI visibility.
+
+V0.4 remains limited to internal fictional demo cards. Official card pools, external card database dependencies, official art, card frames, card backs, public platform features and free deckbuilding remain out of scope.
+
+## MVP 0.3 Requirements files created or updated
+
+- `docs/derived/MVP_0.3_REQUIREMENTS.md`
+- `docs/derived/AI_CONTROLLER_SPEC.md`
+- `docs/derived/AI_SIMULATION_TEST_MATRIX.md`
+- `docs/derived/MVP_0.3_REQUIREMENTS_REVIEW.md`
+- `data/rules/rules-baseline-0.3.json`
+- `data/scenarios/ai-runner-steals-rd-agenda.json`
+- `data/scenarios/ai-corp-scores-remote-agenda.json`
+- `data/scenarios/ai-vs-ai-smoke-replay.json`
+- `tests/specs/ai-simulation-acceptance-tests.todo.md`
+
+## MVP 0.3 Implementation files created or updated
+
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/ai/src/index.ts`
+- `packages/ai/src/index.test.ts`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/http-server.ts`
+- `apps/server/src/index.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `apps/web/app/api/game/route.ts`
+- `apps/web/app/page.tsx`
+- `apps/web/app/globals.css`
+- `docs/derived/MVP_0.3_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.3_FINAL_REVIEW.md`
+
+## MVP 0.3 Final checks
+
+- `corepack pnpm --filter @netrunner/ai test`: pass, 8 AI tests.
+- `corepack pnpm --filter @netrunner/server test`: pass, 11 tests.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 35 tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm build`: pass.
+
+## MVP 0.3 Final gate
+
+`MVP_0.3_done: true`
+
+`ready_for_MVP_0.4_requirements: true`
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -258,6 +345,7 @@ Remaining known limits:
 - JSON-File-Storage is intentionally simple; SQLite remains a later hardening target.
 - Localhost operation is the supported private MVP path. HTTPS/WSS are required outside localhost.
 - Public platform features, matchmaking, accounts, deckbuilder, chat and broad card pool remain out of scope.
+- V0.4 requirements are the next active gate. Damage remains deferred to a V0.4.x sub-gate unless explicitly re-scoped after the safe-card and tag gates.
 
 ## Local tool notes
 
@@ -267,4 +355,4 @@ Remaining known limits:
 
 ## Next step
 
-No gated MVP work remains in this thread goal. Future work should start from a new scoped phase or follow-up backlog item.
+Start MVP 0.4 Requirements Freeze from `docs/derived/MVP_0.4_DETAILED_PLAN.md`, constrained to Safe Card Batch, restricted deck validation and Tags; keep Damage deferred.

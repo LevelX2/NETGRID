@@ -63,3 +63,21 @@ Checks: `corepack pnpm --filter @netrunner/server test` mit 7 Multiplayer-Tests,
 Die MVP-0.2-Finalphase wurde abgeschlossen. Im Hardening wurden die Snapshot-/Undo-Semantik bereinigt, sodass Action-Snapshots in `stateSnapshots` und echte Undo-Anfragen in `undoSnapshots` liegen. Zusätzlich wurde die WebSocket-Reconnect-Ersetzung gehärtet: Das Close-Event einer ersetzten Verbindung kann die neue Verbindung nicht mehr als offline markieren. REST-Settings übernehmen `agendaPointsToWin` nur noch als Zahl.
 
 Finale Checks: `corepack pnpm --filter @netrunner/server test`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, Server-Health-Smoke, REST/WebSocket-Smoke und Next-Web-Smoke bestanden. Dokumentiert wurde `docs/derived/MVP_0.2_FINAL_REVIEW.md`. Gate-Ergebnis: `MVP_0.2_done: true`.
+
+## [2026-05-03] planung | Roadmap nach MVP 0.2 und V0.3-Plan konsolidiert
+
+Die Roadmap nach MVP 0.2 wurde aus den vorhandenen Quellen, Derived-Artefakten und Entwicklungserkenntnissen konsolidiert. Ein Quellenkonflikt wurde aufgelöst: V0.3 wird als KI- und Simulationsphase geführt; Kartenpool und Regelbreite wandern in V0.4. Begründung ist, dass KI-vs-KI, Runner-KI, verbesserte Corp-KI und Simulationstests die Regressionsbasis stärken, bevor neue Karten und Mechaniken hinzukommen.
+
+Erstellt wurden `docs/derived/POST_MVP_0.2_ROADMAP.md` und `docs/derived/MVP_0.3_DETAILED_PLAN.md`. Die lokale Wissensbasis wurde um `Roadmap nach MVP 0.2` ergänzt. Nächster empfohlener Gate-Schritt ist `MVP 0.3 Requirements Freeze`; Implementierung bleibt bis zu `ready_for_implementation: true` gesperrt.
+
+## [2026-05-03] planung | V0.4 Kartenpool und Regelbreite detailliert geplant
+
+Die Phase V0.4 wurde als kontrollierte Kartenpool- und Regelbreite-Erweiterung detailliert geplant. V0.4 bleibt durch V0.3 gegatet, damit Runner-KI, Corp-KI v2, KI-vs-KI-Simulation und AI-Visibility vor neuen Karten als Regressionsbasis bereitstehen. Der Plan staffelt V0.4 in Requirements/Baseline, Card-System-Härtung, Safe Card Batch, eingeschränkte Deckvalidierung, Tags als bevorzugte erste neue Regelgruppe und Damage nur als eigenes Teilgate oder V0.4.x.
+
+Erstellt wurde `docs/derived/MVP_0.4_DETAILED_PLAN.md`. Aktualisiert wurden die Post-MVP-Roadmap, das Roadmap-Arbeitsdokument, `CODEX_STATUS.md` und die lokale Wissensbasis.
+
+## [2026-05-03] phase-0.3-final | MVP 0.3 KI und Simulation abgeschlossen
+
+MVP 0.3 wurde requirements-gefroren, implementiert, getestet und final reviewt. Umgesetzt wurden side-neutrale AI-Inputs, Runner-KI, Corp-KI v2, deterministische KI-Entscheidungen mit Reason-Codes, KI-vs-KI-Simulation mit Replay/StateHash, Servermodi für Human-vs-KI in beide Richtungen, eine lokale AI-vs-AI-Simulations-API und eine Web-UI-Moduswahl.
+
+Checks: `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm --filter @netrunner/server test`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm lint` und `corepack pnpm build` bestanden. Gate-Ergebnis: `MVP_0.3_done: true`; `ready_for_MVP_0.4_requirements: true`.

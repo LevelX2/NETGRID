@@ -32,7 +32,8 @@ export {
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
   MVP_0_1_BASELINE,
-  MVP_0_2_BASELINE
+  MVP_0_2_BASELINE,
+  MVP_0_3_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -946,7 +947,7 @@ function visibleCorpCard(state: GameState, id: CardInstanceId, viewer: Side, are
   const visible = viewer === "corp" || instance.rezzed || accessed || state.corp.scoreArea.includes(id) || state.corp.archives.includes(id);
   if (!visible) {
     return {
-      instanceId: id,
+      instanceId: hiddenVisibleCardId(id),
       known: false,
       rezzed: false,
       advancementCounters: area === "root" ? instance.advancementCounters : 0
@@ -1007,6 +1008,15 @@ function deterministicNumber(input: string): number {
     hash = Math.imul(hash, 0x01000193);
   }
   return (hash >>> 0) / 0x100000000;
+}
+
+function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < id.length; index += 1) {
+    hash ^= id.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return `hidden_${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
 function shuffleIds(ids: CardInstanceId[], seed: string, purpose: string, random: { counter: number; records: GameState["randomDrawRecords"] }): CardInstanceId[] {

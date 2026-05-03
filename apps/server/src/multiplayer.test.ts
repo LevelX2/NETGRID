@@ -307,6 +307,8 @@ describe("MVP 0.2 multiplayer service", () => {
       const waitingUpdate = await waitForMessage(hostSocket, "state_update");
       expect(messagePayload(waitingUpdate).matchStatus).toBe("waiting_for_runner");
 
+      expect(created.joinUrl).toBeTruthy();
+      if (!created.joinUrl) throw new Error("Missing join URL");
       const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
       if (!joinToken) throw new Error("Missing join token");
       const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
@@ -328,6 +330,95 @@ describe("MVP 0.2 multiplayer service", () => {
       await handle.close();
     }
   });
+
+  it("runs Human Runner vs Corp AI matches without a second player", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-runner-service" });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "server-corp-ai",
+      corpDifficulty: "normal"
+    });
+
+    expect(created.mode).toBe("human_runner_vs_corp_ai");
+    expect(created.joinUrl).toBeUndefined();
+    expect(created.playerView.side).toBe("runner");
+    expect(created.playerView.activeSide).toBe("runner");
+    expect(created.matchVersion).toBeGreaterThan(1);
+    expect(created.legalActions.length).toBeGreaterThan(0);
+
+    const stored = await service.loadForTest(created.matchId);
+    expect(stored?.match.aiControllers?.corp?.type).toBe("ai");
+    expect(JSON.stringify(created)).not.toContain("cardInstances");
+    expect(JSON.stringify(created)).not.toContain("Simple Agenda");
+  });
+
+  it("runs Human Corp vs Runner AI through the same action pipeline", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-corp-service" });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "server-runner-ai",
+      runnerDifficulty: "normal"
+    });
+
+    const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in before).toBe(false);
+    if ("error" in before) throw new Error(before.error.message);
+    const mandatory = mustAction(before, (action) => action.type === "mandatory_draw");
+    const mandatoryResult = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: mandatory.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "corp-ai-mode-mandatory"
+    });
+    expect(mandatoryResult.ok).toBe(true);
+    if (!mandatoryResult.ok) throw new Error(mandatoryResult.error.message);
+
+    const afterMandatory = mandatoryResult.actorPayload;
+    const endTurn = mustAction(afterMandatory, (action) => action.type === "end_turn");
+    const endTurnResult = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: endTurn.actionId,
+      clientKnownStateVersion: afterMandatory.playerView.stateVersion,
+      idempotencyKey: "corp-ai-mode-end"
+    });
+    expect(endTurnResult.ok).toBe(true);
+    if (!endTurnResult.ok) throw new Error(endTurnResult.error.message);
+
+    expect(endTurnResult.actorPayload.playerView.stateVersion).toBeGreaterThan(afterMandatory.playerView.stateVersion + 1);
+    expect(endTurnResult.actorPayload.opponentStatus.connected).toBe(true);
+    expect(JSON.stringify(endTurnResult.actorPayload)).not.toContain("Simple Fracter");
+  });
+
+  it("exposes a side-safe AI-vs-AI simulation API", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-api-service" });
+    const handle = createNetrunnerHttpServer(service);
+    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    const address = handle.server.address();
+    if (!address || typeof address === "string") throw new Error("Missing server address");
+
+    try {
+      const response = await fetch(`http://127.0.0.1:${address.port}/api/simulations/ai-vs-ai`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ seed: "server-ai-sim", maxActions: 60 })
+      });
+      const payload = (await response.json()) as { summary?: { finalStateHash?: string; replayOk?: boolean; errors?: string[] } };
+      expect(response.status).toBe(200);
+      expect(payload.summary?.finalStateHash).toMatch(/^fnv1a:/);
+      expect(payload.summary?.replayOk).toBe(true);
+      expect(payload.summary?.errors).toEqual([]);
+      expect(JSON.stringify(payload)).not.toContain("cardInstances");
+      expect(JSON.stringify(payload)).not.toContain("sessionToken");
+    } finally {
+      await handle.close();
+    }
+  });
 });
 
 type PlayerSession = {
@@ -343,6 +434,8 @@ async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettin
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed, ...(settings ? { settings } : {}) });
+  expect(created.joinUrl).toBeTruthy();
+  if (!created.joinUrl) throw new Error("Missing join URL");
   const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
   expect(joinToken).toBeTruthy();
   if (!joinToken) throw new Error("Missing join token");
