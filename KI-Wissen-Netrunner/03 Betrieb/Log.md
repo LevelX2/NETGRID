@@ -57,3 +57,9 @@ Checks: JSON-Parse aller MVP-0.2-Datenartefakte erfolgreich, alle 24 Must-Requir
 Die MVP-0.2-Implementierung wurde innerhalb des freigegebenen privaten Multiplayer-Scopes umgesetzt. Entstanden sind REST-Endpunkte für Match-Erstellung, Join, Reconnect und Bootstrap, ein WebSocket-Protokoll für `join_match`, `submit_action`, Undo und Statusupdates, ein Storage-Port mit In-Memory- und JSON-File-Adapter, Hash-only Tokenpersistenz, MatchVersion/MatchStatus, per-Match-Lock, Idempotency, side-gefilterte Payloads und eine Next.js-UI für Host/Join, Join-Link, Actions, Connection-Banner und Undo.
 
 Checks: `corepack pnpm --filter @netrunner/server test` mit 7 Multiplayer-Tests, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm lint`, `corepack pnpm build`, Health-Smoke auf `http://127.0.0.1:8787/health`, REST/WebSocket-Smoke mit create/join/mandatory action und Runner-Leak-Scan, sowie Next-Web-Smoke auf `http://127.0.0.1:3000`. Gate-Ergebnis: `ready_for_hardening: true`. Nächster Schritt ist MVP-0.2-Validierung und Hardening.
+
+## [2026-05-03] phase-0.2-final | MVP 0.2 validiert und final gehärtet
+
+Die MVP-0.2-Finalphase wurde abgeschlossen. Im Hardening wurden die Snapshot-/Undo-Semantik bereinigt, sodass Action-Snapshots in `stateSnapshots` und echte Undo-Anfragen in `undoSnapshots` liegen. Zusätzlich wurde die WebSocket-Reconnect-Ersetzung gehärtet: Das Close-Event einer ersetzten Verbindung kann die neue Verbindung nicht mehr als offline markieren. REST-Settings übernehmen `agendaPointsToWin` nur noch als Zahl.
+
+Finale Checks: `corepack pnpm --filter @netrunner/server test`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, Server-Health-Smoke, REST/WebSocket-Smoke und Next-Web-Smoke bestanden. Dokumentiert wurde `docs/derived/MVP_0.2_FINAL_REVIEW.md`. Gate-Ergebnis: `MVP_0.2_done: true`.

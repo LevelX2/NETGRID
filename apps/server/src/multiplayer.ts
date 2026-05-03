@@ -525,15 +525,6 @@ export class MultiplayerService {
       const barrier = isHiddenInfoBarrier(result.event);
       const undoSnapshot = { ...snapshot, hiddenInfoBarrier: barrier };
       record.stateSnapshots.push(undoSnapshot);
-      record.undoSnapshots.push({
-        undoRequestId: randomId("undo_snap"),
-        matchId: input.matchId,
-        targetEventId: result.event.eventId,
-        snapshotId: undoSnapshot.snapshotId,
-        requestedBy: input.side,
-        status: "requested",
-        hiddenInfoSafe: !barrier
-      });
       record.gameState = result.state;
       record.eventLog.push(toEventRecord(input.matchId, result.event, barrier));
       const receipt = {

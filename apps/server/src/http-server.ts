@@ -219,7 +219,8 @@ export class NetrunnerRealtimeServer {
     const context = this.findContext(socket);
     if (!context) return;
     const bySide = this.connections.get(context.matchId);
-    if (bySide?.get(context.side)?.socket === socket) bySide.delete(context.side);
+    if (bySide?.get(context.side)?.socket !== socket) return;
+    bySide.delete(context.side);
     const disconnected = await this.service.setConnected(context.matchId, context.side, context.sessionToken, false);
     if (!("error" in disconnected)) this.sendOpponentStatus(context.matchId, opposite(context.side), { side: context.side, connected: false });
   }
@@ -295,7 +296,10 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       };
       if (typeof body.displayName === "string") createInput.displayName = body.displayName;
       if (typeof body.seed === "string") createInput.seed = body.seed;
-      if (typeof body.settings === "object" && body.settings) createInput.settings = body.settings as NonNullable<Parameters<MultiplayerService["createMatch"]>[0]["settings"]>;
+      if (typeof body.settings === "object" && body.settings) {
+        const settings = body.settings as Record<string, unknown>;
+        if (typeof settings.agendaPointsToWin === "number") createInput.settings = { agendaPointsToWin: settings.agendaPointsToWin };
+      }
       const created = await service.createMatch(createInput);
       sendJson(response, 201, created);
       return;

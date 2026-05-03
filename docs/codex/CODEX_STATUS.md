@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.2 validation and hardening may start.
+MVP 0.2 final gate passed.
 
 ## Status
 
@@ -28,6 +28,10 @@ MVP 0.2 private multiplayer implementation is complete and locally verified.
 
 `ready_for_hardening: true`
 
+MVP 0.2 validation, hardening and documentation are complete.
+
+`MVP_0.2_done: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -39,7 +43,7 @@ Gate flow:
 3. MVP 0.1 validation, hardening and documentation: pass.
 4. MVP 0.2 requirements: pass.
 5. MVP 0.2 implementation: pass.
-6. MVP 0.2 validation, hardening and documentation: next.
+6. MVP 0.2 validation, hardening and documentation: pass.
 
 ## Phase 1 files created or updated
 
@@ -200,7 +204,31 @@ Implementation has started and remains constrained to the private multiplayer sc
 
 `ready_for_hardening: true`
 
-Phase 3 may validate and harden MVP 0.2.
+Phase 3 has validated and hardened MVP 0.2.
+
+## MVP 0.2 Final Review files created or updated
+
+- `docs/derived/MVP_0.2_FINAL_REVIEW.md`
+- `apps/server/src/http-server.ts`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/`
+
+## MVP 0.2 Final checks
+
+- `corepack pnpm --filter @netrunner/server test`: pass, 7 Multiplayer tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass.
+- Multiplayer server health smoke: pass on `http://127.0.0.1:8787/health`.
+- REST/WebSocket smoke: pass for create, join, host WebSocket, runner WebSocket, Corp mandatory action, and Runner hidden-info leak scan.
+- Next web smoke: pass on `http://127.0.0.1:3000`.
+
+## MVP 0.2 Final gate
+
+`MVP_0.2_done: true`
 
 ## Phase 2 implemented scope
 
@@ -225,11 +253,11 @@ Phase 3 may validate and harden MVP 0.2.
 
 No MVP-0.1 blocker remains.
 
-MVP-0.2 hardening risks:
+Remaining known limits:
 
-- UI smoke is HTTP/REST/WebSocket-based, not screenshot-based yet.
 - JSON-File-Storage is intentionally simple; SQLite remains a later hardening target.
-- Hidden-info filtering now covers WebSocket, reconnect, undo and errors, but Phase 3 should keep it as the primary regression focus.
+- Localhost operation is the supported private MVP path. HTTPS/WSS are required outside localhost.
+- Public platform features, matchmaking, accounts, deckbuilder, chat and broad card pool remain out of scope.
 
 ## Local tool notes
 
@@ -239,4 +267,4 @@ MVP-0.2 hardening risks:
 
 ## Next step
 
-Start MVP 0.2 validation and hardening. Re-run full checks, inspect hidden-info surfaces, update final documentation, KI-Wissen and external implementation log, then decide the MVP-0.2 gate.
+No gated MVP work remains in this thread goal. Future work should start from a new scoped phase or follow-up backlog item.

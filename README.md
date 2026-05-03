@@ -55,6 +55,6 @@ corepack pnpm build
 
 ## Aktueller Stand
 
-MVP 0.1 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. MVP 0.2 hat Requirements-Gate bestanden und die private Multiplayer-Implementierung ist als Hardening-Kandidat umgesetzt.
+MVP 0.1 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. MVP 0.2 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. Der aktuelle Stand ist ein privater lokaler Multiplayer-MVP ohne öffentliche Plattformfunktionen.
 
 Lokaler Werkzeughinweis vom Setup: Auf dieser Maschine war beim Einrichten Node `v24.15.0` aktiv. Das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; falls `pnpm` nicht direkt im PATH liegt, verwende `corepack pnpm ...`.

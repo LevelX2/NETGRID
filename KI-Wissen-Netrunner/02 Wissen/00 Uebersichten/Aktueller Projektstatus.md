@@ -21,6 +21,8 @@
 - MVP 0.2 private Multiplayer-Implementierung wurde umgesetzt: REST-Start/Join/Reconnect/Bootstrap, WebSocket-Protokoll, JSON-Storage-Port, Hash-only Tokens, per-Match-Lock, Idempotency, Reconnect, Undo-Barrieren, Multiplayer-Tests und Next.js-Host/Join-UI.
 - MVP 0.2 Implementierungschecks sind grün: `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm lint`, `corepack pnpm build`, Server-Health-Smoke, REST/WebSocket-Smoke und Next-Web-Smoke.
 - MVP 0.2 Implementierungsgate ist bestanden: `ready_for_hardening: true`.
+- MVP 0.2 Validierung und Hardening wurden abgeschlossen. Gehärtet wurden Snapshot-/Undo-Semantik, WebSocket-Reconnect-Ersetzung und REST-Settings-Eingaben.
+- MVP 0.2 Final Gate ist bestanden: `MVP_0.2_done: true`.
 
 ## Teilweise umgesetzt
 
@@ -35,7 +37,7 @@
 
 ## Offen
 
-- MVP 0.2 Validierung, Hardening, Finaldokumentation und Gate-Entscheidung stehen als nächste Phase aus.
+- Kein gate-basierter MVP-0.1/0.2-Arbeitsschritt ist in diesem Threadziel offen.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 - MVP 0.2 bleibt gesperrt, bis MVP 0.1 implementiert, validiert und gehärtet ist.
 

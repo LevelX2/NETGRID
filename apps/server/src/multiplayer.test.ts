@@ -258,6 +258,24 @@ describe("MVP 0.2 multiplayer service", () => {
       const update = await waitForMessage(socket, "state_update");
       expect(JSON.stringify(update)).not.toContain("hostSessionToken");
       expect(JSON.stringify(update)).not.toContain("Simple Agenda");
+
+      const replacement = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+      await waitForOpen(replacement);
+      const oldClosed = waitForMessage(socket, "error");
+      replacement.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide }
+        })
+      );
+      await waitForMessage(replacement, "state_update");
+      const oldMessage = await oldClosed;
+      expect(JSON.stringify(oldMessage)).toContain("reconnected_elsewhere");
+      socket.close();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const stored = await service.loadForTest(created.matchId);
+      expect(stored?.sessions.find((session) => session.side === created.hostSide)?.connected).toBe(true);
+      replacement.close();
     } finally {
       socket.close();
       await handle.close();
