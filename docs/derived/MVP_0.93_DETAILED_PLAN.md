@@ -1,6 +1,6 @@
 # MVP 0.93 Detailed Plan - M1-Umsetzung und M2-Requirements
 
-Status: detaillierte Planungsfassung, keine aktuelle Implementierung
+Status: detaillierte Planungsfassung; Umsetzung und Final Review liegen vor
 Stand: 2026-05-03
 
 ## 1. Kurzentscheidung

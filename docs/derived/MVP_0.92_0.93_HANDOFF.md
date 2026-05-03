@@ -1,7 +1,9 @@
 # MVP 0.92 + 0.93 Handoff
 
-Status: Übergabeplanung für einen neuen Umsetzungsthread
+Status: Übergabeplanung; in diesem Thread erfüllt
 Stand: 2026-05-03
+
+Hinweis: V0.92 ist abgeschlossen und V0.93 wurde umgesetzt. Der frühere Übergabe-Prompt bleibt als Herkunfts- und Scope-Dokument erhalten.
 
 ## 1. Empfohlene Reihenfolge
 

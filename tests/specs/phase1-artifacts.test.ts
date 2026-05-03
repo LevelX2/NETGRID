@@ -83,6 +83,28 @@ const REQUIRED_MVP_0_92_MUST_IDS = [
   "M092-M1-MP-001",
   "M092-M1-GATE-001"
 ];
+const REQUIRED_MVP_0_93_MUST_IDS = [
+  "M093-M1-SHARED-001",
+  "M093-M1-EFFECT-001",
+  "M093-M1-EFFECT-002",
+  "M093-M1-ABILITY-001",
+  "M093-M1-ACTION-001",
+  "M093-M1-CHOICE-001",
+  "M093-M1-CHOICE-002",
+  "M093-M1-VISIBILITY-001",
+  "M093-M1-REPLAY-001",
+  "M093-M1-MP-001",
+  "M093-M1-AI-001",
+  "M093-M1-NOSCOPE-001",
+  "M093-M2-SETUP-001",
+  "M093-M2-MULLIGAN-001",
+  "M093-M2-WIN-001",
+  "M093-M2-DECKOUT-001",
+  "M093-M2-FLATLINE-001",
+  "M093-M2-IDENTITY-001",
+  "M093-M2-ARCHIVES-001",
+  "M093-GATE-001"
+];
 const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_REQUIREMENTS.md",
   "docs/derived/UI_REDESIGN_0.7_SPEC.md",
@@ -124,6 +146,15 @@ const REQUIRED_MVP_0_92_DOCS = [
   "docs/derived/MECHANIC_M1_TEST_MATRIX.md",
   "docs/derived/MVP_0.92_REQUIREMENTS_REVIEW.md",
   "docs/derived/MVP_0.92_FINAL_REVIEW.md"
+];
+
+const REQUIRED_MVP_0_93_DOCS = [
+  "docs/derived/MVP_0.93_REQUIREMENTS.md",
+  "docs/derived/SETUP_GAME_END_0.93_SPEC.md",
+  "docs/derived/MVP_0.93_TEST_MATRIX.md",
+  "docs/derived/MVP_0.93_REQUIREMENTS_REVIEW.md",
+  "docs/derived/MVP_0.93_IMPLEMENTATION_REVIEW.md",
+  "docs/derived/MVP_0.93_FINAL_REVIEW.md"
 ];
 
 const MVP_0_8_DATA_FILES = [
@@ -585,6 +616,31 @@ describe("Phase 1 derived artifacts", () => {
     expect(coverage.mechanics?.some((mechanic) => mechanic.mechanicId === "mechanic.effects.general_kernel" && mechanic.targetGate === "v0.93")).toBe(true);
     expect(coverage.mechanics?.some((mechanic) => mechanic.mechanicId === "mechanic.setup.mulligan" && mechanic.currentStatus === "open")).toBe(true);
     expect(coverage.deviationNormalization?.find((entry) => entry.deviationId === "DEV-004")?.normalizedStatus).toBe("open");
+  });
+
+  it("keeps MVP 0.93 M1 implementation gate and M2 requirements documented", () => {
+    for (const file of REQUIRED_MVP_0_93_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.93_REQUIREMENTS.md", "utf8");
+    const setupSpec = readFileSync("docs/derived/SETUP_GAME_END_0.93_SPEC.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.93_TEST_MATRIX.md", "utf8");
+    const requirementsReview = readFileSync("docs/derived/MVP_0.93_REQUIREMENTS_REVIEW.md", "utf8");
+    const implementationReview = readFileSync("docs/derived/MVP_0.93_IMPLEMENTATION_REVIEW.md", "utf8");
+    const finalReview = readFileSync("docs/derived/MVP_0.93_FINAL_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_93_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(setupSpec).toContain("Mulligan");
+    expect(setupSpec).toContain("nicht implementiert");
+    expect(requirementsReview).toContain("ready_for_MVP_0.93_implementation: true");
+    expect(implementationReview).toContain("ready_for_hardening: true");
+    expect(implementationReview).toContain("PublicGameEvent.visibilityClass");
+    expect(finalReview).toContain("MVP_0.93_done: true");
+    expect(finalReview).toContain("M2_requirements_ready: true");
   });
 });
 

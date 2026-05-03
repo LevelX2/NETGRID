@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V0.92 Mechanik-Inventar und M1-Spezifikationsgate is complete; V0.93 M1 implementation is the active next step.
+V0.93 M1 Engine foundation and M2 requirements are complete; the next scope needs a separate gated decision.
 
 ## Status
 
@@ -148,15 +148,21 @@ MVP 0.92 mechanics inventory, M1 requirements and M1 specification are complete.
 
 `ready_for_MVP_0.93_implementation: true`
 
-S01 requirements, result modal, audio and test matrix are complete.
+MVP 0.93 M1 Engine foundation is implemented and M2 Setup/Game-End requirements are complete.
+
+`MVP_0.93_done: true`
+
+`M2_requirements_ready: true`
+
+S01 requirements, result modal, private match series, audio and test matrix are complete.
 
 `S01_requirements_freeze_done: true`
 
-S01 core implementation is complete and locally verified: side-safe `GameResultSummary`, result modal, game-goal selector and opt-in synthesized audio.
+S01 implementation is complete and locally verified for the current scope: side-safe `GameResultSummary`, result modal, game-goal selector, private two-game side-swap series and opt-in synthesized audio.
 
-`S01_core_implemented: true`
+`S01_implemented: true`
 
-`S01_core_verified: true`
+`S01_verified: true`
 
 ## Goal
 
@@ -192,6 +198,7 @@ Gate flow:
 26. MVP 0.9 validation, hardening and documentation: pass.
 27. MVP 0.91 requirements/card image asset gate freeze: pass for private local scans/assets only.
 28. MVP 0.92 mechanics inventory and M1 requirements/specification gate: pass.
+29. MVP 0.93 M1 Engine foundation and M2 requirements: pass.
 
 ## Phase 1 files created or updated
 
@@ -1039,11 +1046,57 @@ The technical and hidden-info requirements are testable, and every Must requirem
 
 V0.92 normalizes the current mechanics inventory after V0.9/S01, adds a versioned machine-readable coverage artifact under `data/rules`, freezes M1 requirements for Effects, Abilities, Timing, Choices and Event classification, and keeps M2 as requirements-only follow-up scope. V0.92 does not implement runtime behavior, cards, images or V0.94+ mechanics.
 
-## S01 Requirements and core implementation files created or updated
+## MVP 0.93 Requirements, implementation and final gate files created or updated
+
+- `docs/derived/MVP_0.93_REQUIREMENTS.md`
+- `docs/derived/SETUP_GAME_END_0.93_SPEC.md`
+- `docs/derived/MVP_0.93_TEST_MATRIX.md`
+- `docs/derived/MVP_0.93_REQUIREMENTS_REVIEW.md`
+- `docs/derived/MVP_0.93_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.93_FINAL_REVIEW.md`
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/engine/src/index.test.ts`
+- `packages/ai/src/index.test.ts`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/http-server.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.93 Final gate
+
+`MVP_0.93_done: true`
+
+`M2_requirements_ready: true`
+
+V0.93 adds additive Shared/Engine contracts for Effects, Abilities, Timing, Choices and Event classification. `pendingChoice` is prepared in GameState and side-filtered PlayerViews without enabling Mulligan or Trace. Breaker Pump/Break now carry internal Ability metadata while keeping public Action Types compatible. PublicEvents can carry `visibilityClass`, and server Bootstrap/WebSocket/Reconnect plus AI inputs were checked for side safety. M2 Setup/Game-End, Mulligan, 7-point standard, legacy win values, Deckout/Flatline preparation, Identity Setup and Archives/facedown are requirements only.
+
+Checks:
+
+- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
+- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 25 tests.
+- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 16 tests.
+- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 14 tests.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 17 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass, known Turbopack NFT warning remains for the existing `card-images` route trace.
+- `corepack pnpm lint`: pass after regenerated `.next` type output.
+- `corepack pnpm typecheck`: pass after regenerated `.next` type output.
+
+## S01 Requirements and implementation files created or updated
 
 - `docs/derived/S01_DETAILED_PLAN.md`
 - `docs/derived/S01_REQUIREMENTS.md`
 - `docs/derived/S01_RESULT_MODAL_SPEC.md`
+- `docs/derived/S01_MATCH_SERIES_SPEC.md`
 - `docs/derived/S01_AUDIO_SPEC.md`
 - `docs/derived/S01_TEST_MATRIX.md`
 - `docs/derived/S01_REQUIREMENTS_REVIEW.md`
@@ -1054,32 +1107,29 @@ V0.92 normalizes the current mechanics inventory after V0.9/S01, adds a versione
 - `apps/web/app/globals.css`
 - `tests/specs/visibility-contract.test.ts`
 
-## S01 core implementation gate
+## S01 implementation gate
 
-`S01_core_implemented: true`
+`S01_implemented: true`
 
-`S01_core_verified: true`
+`S01_verified: true`
 
 Implemented scope:
 
 - Server-side side-safe `GameResultSummary` for finished games.
 - WebSocket `match_finished` payload now carries the result summary.
-- Startscreen offers `Regelmatch · 7 Agendapunkte` and `Einzelspiel · Deckziel`.
+- Startscreen offers `Regelmatch · 7 Agendapunkte`, `Einzelspiel · Deckziel` and `Private Matchserie · Seitenwechsel`.
+- Private `two_game_side_swap` series creates a second game with side swap and side-safe standings.
 - Web UI shows a result modal with perspective text, safe statistics, final StateHash and abstract local CSS background graphic.
 - Audio effects are opt-in, locally synthesized and not part of Engine, Replay or StateHash.
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/server test`: pass, 12 tests.
+- `corepack pnpm --filter @netrunner/server test`: pass, 13 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
-- `corepack pnpm test`: pass, 60 package tests plus 24 root spec tests.
+- `corepack pnpm test`: pass, 68 package tests plus 25 root spec tests.
 - `corepack pnpm build`: pass. Known Turbopack NFT warning remains for the pre-existing `card-images` route trace.
-
-Deferred:
-
-- Multi-game private series with automatic side swap remains a future S01.x follow-up because it touches session side assignment, reconnect tokens and WebSocket contexts.
 
 ## Phase 2 implemented scope
 
@@ -1131,7 +1181,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.92: mechanics inventory and M1 requirements/specification gate.
 - V0.93: M1 Engine foundation and M2 requirements.
 
-Current gate: V0.92 is complete. Next implementation scope is V0.93: add the M1 Engine foundation for Effects, Abilities, Timing, Choices and Event classification, and create M2 Setup/Game-End requirements only. No V0.94+ mechanic is started.
+Current gate: V0.93 is complete. The next scope needs a separate gated decision. M2 implementation may start later from `SETUP_GAME_END_0.93_SPEC.md`, but Mulligan, Damage, Trace, Resources, Multiaccess, Identity-Abilities and Prevention are still not playable.
 
 Detailed planning artifacts available:
 
@@ -1149,6 +1199,9 @@ Detailed planning artifacts available:
 - `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`
 - `docs/derived/MECHANIC_M1_TEST_MATRIX.md`
 - `docs/derived/MVP_0.92_FINAL_REVIEW.md`
+- `docs/derived/MVP_0.93_REQUIREMENTS.md`
+- `docs/derived/SETUP_GAME_END_0.93_SPEC.md`
+- `docs/derived/MVP_0.93_FINAL_REVIEW.md`
 
 UI design exploration artifacts available:
 

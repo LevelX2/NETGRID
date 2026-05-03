@@ -233,3 +233,17 @@ Checks: `corepack pnpm --filter @netrunner/server test`, `corepack pnpm exec vit
 V0.92 wurde als Requirements- und Spezifikationsgate abgeschlossen. Erstellt wurden `MVP_0.92_REQUIREMENTS.md`, `MECHANICS_COVERAGE_MATRIX.md`, das maschinenlesbare Artefakt `data/rules/mechanics-coverage-0.92.json`, `MECHANIC_M1_EFFECT_TIMING_SPEC.md`, `MECHANIC_M1_TEST_MATRIX.md`, Requirements Review und Final Review.
 
 Die V0.91-Assetentscheidung ist nun konsistent eingeordnet: private lokale Kartenscans/lokale Kartenbilder sind fuer dieses private lokale Projekt als reine Anzeige-Artefakte erlaubt. Oeffentliche Distribution, offizielle Logos, standalone Card Frames, Card Backs, externe Kartendatenbank-Abhaengigkeiten sowie Engine-/KI-/GameState-/Replay-/StateHash-Nutzung bleiben ausgeschlossen. Gate-Ergebnis: `MVP_0.92_done: true`; `ready_for_MVP_0.93_implementation: true`.
+
+## [2026-05-03] phase-s01-series | S01 private Matchserie umgesetzt
+
+Die offenen S01-Punkte zur privaten Matchserie wurden umgesetzt. `two_game_side_swap` modelliert eine private Zwei-Spiel-Serie oberhalb der Engine: Spiel 1 endet normal durch Engine-Wincondition, der Server speichert side-sichere Serienmetadaten und `series-next` erzeugt Spiel 2 mit Seitenwechsel, neuem Session-/Join-Kontext und identischen Deck-Snapshots/Settings.
+
+Die UI bietet jetzt `Private Matchserie · Seitenwechsel`, zeigt Serienstand im Ergebnisfenster und kann das nächste Serienspiel starten. Engine, Replay und StateHash bleiben pro Einzelspiel unverändert; öffentliche Turnier-, Ranking- und Matchmaking-Funktionen wurden nicht eingeführt.
+
+## [2026-05-03] phase-0.93-final | M1-Engine-Fundament umgesetzt
+
+V0.93 wurde umgesetzt und final dokumentiert. Die Shared-/Engine-Verträge enthalten jetzt additive Typen für Effects, Ability-Metadaten, Costs, Choices und Eventklassifikation. `pendingChoice` ist in GameState und PlayerView vorbereitet, wird side-sicher gefiltert und in `applyAction` gegen Side, ChoiceId, StateVersion, Optionen und Auswahlanzahl revalidiert.
+
+Breaker Pump/Break bleiben öffentlich `pump_breaker` und `break_subroutine`, tragen intern aber `abilityRef`, `effectRef` und Target-Metadaten. PublicEvents können `visibilityClass` tragen; Server Bootstrap, Reconnect und WebSocket serialisieren offene Choices nur für die zuständige Seite. M2 wurde in `SETUP_GAME_END_0.93_SPEC.md` nur spezifiziert: Mulligan, 7-Punkte-Standard, Legacy-Siegwerte, Deckout-/Flatline-Vorbereitung, Identity Setup und Archives/facedown sind nicht spielbar.
+
+Checks: Shared/Engine/Server/AI-Typechecks bestanden. Engine-Test: 25 Tests bestanden. AI-Test: 16 Tests bestanden. Server-Test: 14 Tests bestanden. Artefakt- und Visibility-Specs bestanden. `corepack pnpm test`, `corepack pnpm build`, `corepack pnpm lint` und `corepack pnpm typecheck` bestanden; beim Build bleibt die bekannte Turbopack-NFT-Warnung zur bestehenden `card-images`-Route. Gate-Ergebnis: `MVP_0.93_done: true`; `M2_requirements_ready: true`.
