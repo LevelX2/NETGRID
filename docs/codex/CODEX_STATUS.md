@@ -425,3 +425,8 @@ Detailed planning artifacts available:
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
+
+UI design exploration artifacts available:
+
+- `docs/ui-designsets/README.md`
+- `docs/ui-designsets/REALISM_REVIEW.md`

@@ -99,3 +99,7 @@ Erstellt wurde `docs/derived/POST_MVP_0.4_ROADMAP.md` sowie die Wissensseite `Ro
 Die Phasen V0.5 und V0.6 wurden detailliert geplant. V0.5 fokussiert Kartenimport, lokale Snapshots, Katalogschema, Statusmodell, Manifest-Abgleich, read-only Katalog-API, funktionale Katalogansicht und harte Trennung zwischen importiert und spielbar. V0.6 fokussiert Deckmodell v2, Deck-Snapshots, Deckvalidierung, funktionalen Deckeditor, Import/Export, Matchstart mit Deckauswahl, Replay/StateHash-Schutz und Hidden-Info-sichere Deck-Metadaten.
 
 Erstellt wurden `docs/derived/MVP_0.5_DETAILED_PLAN.md` und `docs/derived/MVP_0.6_DETAILED_PLAN.md`. Beide Pläne enthalten Teststrategien, kritische Härtungen, Performance-/Optimierungspunkte, Risiken und Done-Kriterien. Nächster Gate-Schritt bleibt `MVP 0.5 Requirements Freeze`.
+
+## [2026-05-03] design | UI-Designsets und Realismusprüfung abgelegt
+
+Für die spätere UI-Neugestaltung wurden vier explorative Designrichtungen mit Einstiegs-, Runner- und Corp-Screens unter `docs/ui-designsets/` abgelegt und bewertet. Die Realismusprüfung empfiehlt Design C als robuste MVP-Hauptstruktur, Design D als Run-/Encounter-Fokus, Design A als dunkle Variante und Design B nur als einklappbare Diagnose-/Playtest-Schicht.
