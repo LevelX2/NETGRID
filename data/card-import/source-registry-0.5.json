@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "source-registry-v0.5",
+  "id": "source-registry-0.5",
+  "status": "frozen_for_v0.5_requirements",
+  "sources": [
+    {
+      "sourceId": "mvp-0.1-demo-cards",
+      "kind": "local_versioned_project_data",
+      "path": "data/cards/demo-cards.json",
+      "allowedUses": [
+        "snapshot",
+        "catalog",
+        "status_crosscheck"
+      ],
+      "disallowedUses": [
+        "runtime_external_fetch",
+        "rules_parser",
+        "asset_import"
+      ],
+      "copyrightNote": "Fiktive Demo-Karten fuer die Entwicklung; keine offiziellen Kartentexte, Artworks, Logos, Frames oder Card Backs."
+    },
+    {
+      "sourceId": "mvp-0.4-demo-cards",
+      "kind": "local_versioned_project_data",
+      "path": "data/cards/demo-cards-0.4.json",
+      "allowedUses": [
+        "snapshot",
+        "catalog",
+        "status_crosscheck"
+      ],
+      "disallowedUses": [
+        "runtime_external_fetch",
+        "rules_parser",
+        "asset_import"
+      ],
+      "copyrightNote": "Fiktive interne Demo-Karten; keine offiziellen Kartentexte, Artworks, Logos, Frames oder Card Backs."
+    },
+    {
+      "sourceId": "v05-local-catalog-fixtures",
+      "kind": "local_fictional_catalog_fixture",
+      "path": "data/card-import/card-snapshot-0.5.json",
+      "allowedUses": [
+        "catalog_status_tests",
+        "ui_smoke_non_playable_card"
+      ],
+      "disallowedUses": [
+        "runtime_external_fetch",
+        "asset_import",
+        "engine_resolver",
+        "deck_legal_default",
+        "match_start"
+      ],
+      "copyrightNote": "Fiktive interne Katalog-Fixtures; keine offiziellen Kartentexte oder Assets."
+    }
+  ]
+}

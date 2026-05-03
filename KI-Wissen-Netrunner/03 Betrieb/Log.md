@@ -103,3 +103,9 @@ Erstellt wurden `docs/derived/MVP_0.5_DETAILED_PLAN.md` und `docs/derived/MVP_0.
 ## [2026-05-03] design | UI-Designsets und Realismusprüfung abgelegt
 
 Für die spätere UI-Neugestaltung wurden vier explorative Designrichtungen mit Einstiegs-, Runner- und Corp-Screens unter `docs/ui-designsets/` abgelegt und bewertet. Die Realismusprüfung empfiehlt Design C als robuste MVP-Hauptstruktur, Design D als Run-/Encounter-Fokus, Design A als dunkle Variante und Design B nur als einklappbare Diagnose-/Playtest-Schicht.
+
+## [2026-05-03] phase-0.5-req | MVP 0.5 Requirements eingefroren
+
+Die V0.5-Requirements für Kartenimport und Kartenkatalog wurden abgeleitet und reviewfähig eingefroren. Erstellt wurden Spezifikationen für Import, Katalog, Statusmodell, Testmatrix und Requirements Review. Die Datenartefakte umfassen Source Registry, lokalen Snapshot, Snapshot-Hash, Import-Report, Katalogindex und Statusmanifest. Als Snapshot-Basis dienen nur lokale versionierte Demo-/Projektdaten plus fiktive lokale Katalog-Fixtures zur ausführbaren Prüfung von `imported` ohne Spielbarkeit und `blocked`.
+
+Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`. V0.5-Implementierung darf starten; Import bleibt strikt getrennt von Engine-Spielbarkeit, KI, Deckvalidierung und Matchstart.

@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.4 controlled card pool and tags complete.
+MVP 0.5 executable requirements complete. V0.5 card import and catalog implementation may start.
 
 ## Status
 
@@ -54,6 +54,10 @@ MVP 0.4 requirements, implementation, validation and documentation are complete.
 
 `ready_for_next_scope_decision: true`
 
+MVP 0.5 card import and catalog requirements are complete.
+
+`ready_for_implementation: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -71,6 +75,7 @@ Gate flow:
 9. MVP 0.3 implementation and validation: pass.
 10. MVP 0.4 requirements: pass.
 11. MVP 0.4 implementation and validation: pass.
+12. MVP 0.5 executable requirements: pass.
 
 ## Phase 1 files created or updated
 
@@ -372,6 +377,37 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 
 `ready_for_next_scope_decision: true`
 
+## MVP 0.5 Requirements files created or updated
+
+- `docs/derived/MVP_0.5_REQUIREMENTS.md`
+- `docs/derived/CARD_IMPORT_0.5_SPEC.md`
+- `docs/derived/CARD_CATALOG_0.5_SPEC.md`
+- `docs/derived/CARD_STATUS_0.5_SPEC.md`
+- `docs/derived/MVP_0.5_TEST_MATRIX.md`
+- `docs/derived/MVP_0.5_REQUIREMENTS_REVIEW.md`
+- `data/card-import/source-registry-0.5.json`
+- `data/card-import/card-snapshot-0.5.json`
+- `data/card-import/card-snapshot-0.5.hash`
+- `data/card-import/import-report-0.5.json`
+- `data/card-import/catalog-index-0.5.json`
+- `data/manifests/card-catalog-status-0.5.json`
+- `tests/specs/card-import-0.5-acceptance-tests.todo.md`
+- `tests/specs/phase1-artifacts.test.ts`
+
+## MVP 0.5 Requirements checks
+
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 9 artifact tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 42 package tests plus 11 root spec tests.
+- `corepack pnpm build`: pass.
+
+## MVP 0.5 Requirements gate
+
+`ready_for_implementation: true`
+
+V0.5 uses only local versioned demo/project data and fiktive local catalog fixtures. Import remains catalog/status-only: no import path can make a card engine-playable, KI-usable, deck-legal or match-startable without the existing manifest, resolver, tests, Visibility, Replay/StateHash and KI-Smoke gates.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -418,7 +454,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Next gate: MVP 0.5 requirements freeze for card import and card catalog.
+Next gate: MVP 0.5 implementation for card import and card catalog.
 
 Detailed planning artifacts available:
 

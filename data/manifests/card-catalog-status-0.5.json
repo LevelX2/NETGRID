@@ -1,0 +1,460 @@
+{
+  "schemaVersion": "card-catalog-status-manifest-v0.5",
+  "id": "card-catalog-status-0.5",
+  "status": "frozen_for_v0.5_requirements",
+  "snapshotId": "card-snapshot-0.5",
+  "snapshotHash": "fnv1a:de3054e3",
+  "profileId": "local-demo-catalog-v0.5",
+  "rules": {
+    "importedDoesNotMeanPlayable": true,
+    "implementedRequiresManifest": true,
+    "playableRequiresManifestTestsVisibilityReplayAndAiSmoke": true,
+    "deckLegalRequiresPlayable": true,
+    "catalogApiIsReadOnly": true
+  },
+  "cards": [
+    {
+      "catalogCardId": "catalog_preview_operation_001",
+      "engineCardId": null,
+      "title": "Catalog Preview Operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "playable": false,
+        "deck_legal": false,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": null
+    },
+    {
+      "catalogCardId": "catalog_preview_resource_001",
+      "engineCardId": null,
+      "title": "Catalog Preview Resource",
+      "side": "runner",
+      "type": "resource",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "playable": false,
+        "deck_legal": false,
+        "blocked": true
+      },
+      "blockReasons": [
+        "Card type resource is catalog-only in V0.5 and has no engine resolver."
+      ],
+      "manifestStatus": null
+    },
+    {
+      "catalogCardId": "corp_identity_001",
+      "engineCardId": "corp_identity_001",
+      "title": "Corp Identity",
+      "side": "corp",
+      "type": "identity",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "efficient_fracter",
+      "engineCardId": "efficient_fracter",
+      "title": "Efficient Fracter",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "runner_identity_001",
+      "engineCardId": "runner_identity_001",
+      "title": "Runner Identity",
+      "side": "runner",
+      "type": "identity",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_agenda",
+      "engineCardId": "simple_agenda",
+      "title": "Simple Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_barrier_ice",
+      "engineCardId": "simple_barrier_ice",
+      "title": "Simple Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_code_gate_ice",
+      "engineCardId": "simple_code_gate_ice",
+      "title": "Simple Code Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_decoder",
+      "engineCardId": "simple_decoder",
+      "title": "Simple Decoder",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_draw_event",
+      "engineCardId": "simple_draw_event",
+      "title": "Simple Draw Event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_draw_operation",
+      "engineCardId": "simple_draw_operation",
+      "title": "Simple Draw Operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_economy_asset",
+      "engineCardId": "simple_economy_asset",
+      "title": "Simple Economy Asset",
+      "side": "corp",
+      "type": "asset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_economy_event",
+      "engineCardId": "simple_economy_event",
+      "title": "Simple Economy Event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_economy_operation",
+      "engineCardId": "simple_economy_operation",
+      "title": "Simple Economy Operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_fracter",
+      "engineCardId": "simple_fracter",
+      "title": "Simple Fracter",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_killer",
+      "engineCardId": "simple_killer",
+      "title": "Simple Killer",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_priority_agenda",
+      "engineCardId": "simple_priority_agenda",
+      "title": "Simple Priority Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_run_event",
+      "engineCardId": "simple_run_event",
+      "title": "Simple Run Event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_sentry_ice",
+      "engineCardId": "simple_sentry_ice",
+      "title": "Simple Sentry ICE",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_setup_hardware",
+      "engineCardId": "simple_setup_hardware",
+      "title": "Simple Setup Hardware",
+      "side": "runner",
+      "type": "hardware",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_tag_ice",
+      "engineCardId": "simple_tag_ice",
+      "title": "Simple Tag ICE",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_tag_punishment_operation",
+      "engineCardId": "simple_tag_punishment_operation",
+      "title": "Simple Tag Punishment Operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_taxing_barrier_ice",
+      "engineCardId": "simple_taxing_barrier_ice",
+      "title": "Simple Taxing Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    },
+    {
+      "catalogCardId": "simple_upgrade",
+      "engineCardId": "simple_upgrade",
+      "title": "Simple Upgrade",
+      "side": "corp",
+      "type": "upgrade",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "manifestStatus": "playable_mvp"
+    }
+  ],
+  "summary": {
+    "imported": 24,
+    "validated": 24,
+    "catalog_ready": 24,
+    "blocked": 1,
+    "implemented": 22,
+    "playable": 22,
+    "deck_legal": 22
+  }
+}

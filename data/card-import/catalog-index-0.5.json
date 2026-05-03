@@ -1,0 +1,585 @@
+{
+  "schemaVersion": "catalog-index-v0.5",
+  "id": "catalog-index-0.5",
+  "snapshotId": "card-snapshot-0.5",
+  "snapshotHash": "fnv1a:de3054e3",
+  "status": "frozen_for_v0.5_requirements",
+  "cards": [
+    {
+      "catalogCardId": "catalog_preview_operation_001",
+      "title": "Catalog Preview Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "v05-local-catalog-fixtures",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "playable": false,
+        "deck_legal": false,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "catalog_preview_resource_001",
+      "title": "Catalog Preview Resource",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "v05-local-catalog-fixtures",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "playable": false,
+        "deck_legal": false,
+        "blocked": true
+      },
+      "blockReasons": [
+        "Card type resource is catalog-only in V0.5 and has no engine resolver."
+      ]
+    },
+    {
+      "catalogCardId": "corp_identity_001",
+      "title": "Corp Identity",
+      "side": "corp",
+      "type": "identity",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "efficient_fracter",
+      "title": "Efficient Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "fracter"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "runner_identity_001",
+      "title": "Runner Identity",
+      "side": "runner",
+      "type": "identity",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_agenda",
+      "title": "Simple Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_barrier_ice",
+      "title": "Simple Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_code_gate_ice",
+      "title": "Simple Code Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_decoder",
+      "title": "Simple Decoder",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "decoder"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_draw_event",
+      "title": "Simple Draw Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_draw_operation",
+      "title": "Simple Draw Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_economy_asset",
+      "title": "Simple Economy Asset",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_economy_event",
+      "title": "Simple Economy Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_economy_operation",
+      "title": "Simple Economy Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_fracter",
+      "title": "Simple Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "fracter"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_killer",
+      "title": "Simple Killer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_priority_agenda",
+      "title": "Simple Priority Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_run_event",
+      "title": "Simple Run Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_sentry_ice",
+      "title": "Simple Sentry ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_setup_hardware",
+      "title": "Simple Setup Hardware",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_tag_ice",
+      "title": "Simple Tag ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_tag_punishment_operation",
+      "title": "Simple Tag Punishment Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_taxing_barrier_ice",
+      "title": "Simple Taxing Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    },
+    {
+      "catalogCardId": "simple_upgrade",
+      "title": "Simple Upgrade",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": []
+    }
+  ],
+  "byId": {
+    "catalog_preview_operation_001": 0,
+    "catalog_preview_resource_001": 1,
+    "corp_identity_001": 2,
+    "efficient_fracter": 3,
+    "runner_identity_001": 4,
+    "simple_agenda": 5,
+    "simple_barrier_ice": 6,
+    "simple_code_gate_ice": 7,
+    "simple_decoder": 8,
+    "simple_draw_event": 9,
+    "simple_draw_operation": 10,
+    "simple_economy_asset": 11,
+    "simple_economy_event": 12,
+    "simple_economy_operation": 13,
+    "simple_fracter": 14,
+    "simple_killer": 15,
+    "simple_priority_agenda": 16,
+    "simple_run_event": 17,
+    "simple_sentry_ice": 18,
+    "simple_setup_hardware": 19,
+    "simple_tag_ice": 20,
+    "simple_tag_punishment_operation": 21,
+    "simple_taxing_barrier_ice": 22,
+    "simple_upgrade": 23
+  },
+  "filters": {
+    "sides": [
+      "corp",
+      "runner"
+    ],
+    "types": [
+      "agenda",
+      "asset",
+      "event",
+      "hardware",
+      "ice",
+      "identity",
+      "operation",
+      "program",
+      "resource",
+      "upgrade"
+    ],
+    "factions": [
+      "neutral_demo"
+    ],
+    "sets": [
+      "mvp-0.1-demo",
+      "mvp-0.4-demo",
+      "v05-local-catalog-fixtures"
+    ],
+    "statuses": [
+      "imported",
+      "validated",
+      "catalog_ready",
+      "implemented",
+      "playable",
+      "deck_legal",
+      "blocked"
+    ]
+  },
+  "searchIndex": {
+    "catalog_preview_operation_001": "catalog preview operation corp operation fiktive katalogkarte fuer importtests. nicht implementiert und nicht decklegal.",
+    "catalog_preview_resource_001": "catalog preview resource runner resource fiktive katalogkarte mit absichtlich nicht unterstuetztem typ fuer blocked-status.",
+    "corp_identity_001": "corp identity corp identity testidentität ohne aktive fähigkeit.",
+    "efficient_fracter": "efficient fracter runner program icebreaker fracter 1 credit: +1 stärke. 1 credit: brich 1 barrier-subroutine.",
+    "runner_identity_001": "runner identity runner identity testidentität ohne aktive fähigkeit.",
+    "simple_agenda": "simple agenda corp agenda keine zusätzliche fähigkeit.",
+    "simple_barrier_ice": "simple barrier ice corp ice barrier end the run.",
+    "simple_code_gate_ice": "simple code gate ice corp ice code_gate die corp erhält 1 credit. end the run.",
+    "simple_decoder": "simple decoder runner program icebreaker decoder 1 credit: +1 stärke. 1 credit: brich 1 code-gate-subroutine.",
+    "simple_draw_event": "simple draw event runner event ziehe 2 karten.",
+    "simple_draw_operation": "simple draw operation corp operation ziehe 2 karten.",
+    "simple_economy_asset": "simple economy asset corp asset wenn diese karte gerezzt wird, erhält die corp 3 credits.",
+    "simple_economy_event": "simple economy event runner event erhalte 4 credits.",
+    "simple_economy_operation": "simple economy operation corp operation erhalte 4 credits.",
+    "simple_fracter": "simple fracter runner program icebreaker fracter 1 credit: +1 stärke. 1 credit: brich 1 barrier-subroutine.",
+    "simple_killer": "simple killer runner program icebreaker killer 1 credit: +1 stärke. 1 credit: brich 1 sentry-subroutine.",
+    "simple_priority_agenda": "simple priority agenda corp agenda keine zusätzliche fähigkeit.",
+    "simple_run_event": "simple run event runner event mache einen run auf einen server deiner wahl. wenn der run erfolgreich ist, erhältst du 2 credits.",
+    "simple_sentry_ice": "simple sentry ice corp ice sentry der runner verliert 2 credits, falls möglich. end the run.",
+    "simple_setup_hardware": "simple setup hardware runner hardware +1 memory limit.",
+    "simple_tag_ice": "simple tag ice corp ice sentry gib dem runner 1 tag. end the run.",
+    "simple_tag_punishment_operation": "simple tag punishment operation corp operation spiele nur, wenn der runner getaggt ist. der runner verliert 2 credits.",
+    "simple_taxing_barrier_ice": "simple taxing barrier ice corp ice barrier der runner verliert 1 credit. end the run.",
+    "simple_upgrade": "simple upgrade corp upgrade einfache root-karte ohne aktive fähigkeit."
+  },
+  "statusSummary": {
+    "imported": 24,
+    "validated": 24,
+    "catalog_ready": 24,
+    "blocked": 1,
+    "implemented": 22,
+    "playable": 22,
+    "deck_legal": 22
+  }
+}

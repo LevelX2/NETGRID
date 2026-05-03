@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "import-report-v0.5",
+  "id": "import-report-0.5",
+  "snapshotId": "card-snapshot-0.5",
+  "snapshotHash": "fnv1a:de3054e3",
+  "generatedAt": "2026-05-03T00:00:00.000+02:00",
+  "sourceRegistryId": "source-registry-0.5",
+  "counts": {
+    "sources": 3,
+    "cardsTotal": 24,
+    "imported": 24,
+    "validated": 24,
+    "catalogReady": 24,
+    "implemented": 22,
+    "playable": 22,
+    "deckLegal": 22,
+    "blocked": 1
+  },
+  "warnings": [
+    {
+      "code": "catalog_fixture_not_playable",
+      "cardId": "catalog_preview_operation_001",
+      "message": "Katalog-Fixture ist absichtlich nicht implementiert und nicht decklegal."
+    }
+  ],
+  "errors": [],
+  "gateAssertions": {
+    "noRuntimeExternalFetch": true,
+    "noOfficialAssets": true,
+    "cardTextDisplayOnly": true,
+    "importDoesNotGrantPlayability": true,
+    "deckLegalRequiresPlayable": true
+  }
+}
