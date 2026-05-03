@@ -31,3 +31,9 @@ Vor dem Start eines neuen Threads wurde der Arbeitsbranch `codex/mvp-0-1-require
 Die Phase `MVP 0.1 executable requirements` wurde auf dem Branch `codex/mvp-0-1-requirements` aus den priorisierten Quellen abgeleitet. Entstanden sind reviewfähige Derived-Dokumente für Requirements, Engine-API, GameState, Timing/Run-Modell, Deviation Registry, Acceptance Criteria, Testmatrix, offene Fragen, Konflikte und Requirements Review. Zusätzlich wurden versionierte JSON-Artefakte für RulesBaseline, Demo-Karten, Demo-Decks, Card-Manifest, Regelabweichungen und sechs Szenario-Fixtures erstellt.
 
 Gate-Ergebnis: `ready_for_implementation: true`. Lokale Checks: JSON-Parse aller neuen Datenartefakte erfolgreich, alle 42 Must-Requirements mit Test-/Szenarioabdeckung, alle 13 `playable_mvp`-Karten mit Unit- und Szenario-/Integrationstest-Zuordnung. MVP 0.2 wurde nur für Zukunftskompatibilität gelesen und bleibt bis zum bestandenen MVP-0.1-Gate gesperrt.
+
+## [2026-05-03] phase-2 | MVP 0.1 lokal implementiert
+
+Die Phase `MVP 0.1 implementation` wurde als erster spielbarer lokaler Stand umgesetzt. Implementiert wurden Shared Types und Demo-Kartenkonstanten, eine reine TypeScript-Engine mit deterministischem Setup, LegalActions, `applyAction`-Revalidierung, GameState-Invarianten, Run/Encounter/Access/Score-Kern, PlayerViews, PublicEvents, Replay und StateHash. Ergänzt wurden eine einfache Corp-KI, eine minimale lokale Server-Adapter-Schicht und eine Next.js-Weboberfläche für Human Runner gegen Corp-KI.
+
+Checks: `corepack pnpm install`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Der Testlauf umfasst Engine-, KI- und Artefakt-/Szenario-Vertragstests. Die lokale Weboberfläche antwortete auf `http://127.0.0.1:3000`. Nächster Schritt ist Phase 3: Validierung, Hardening, Dokumentation und MVP-0.1-Finalreview.

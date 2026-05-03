@@ -12,6 +12,8 @@
 - MVP 0.1 Requirements wurden aus den priorisierten Quellen abgeleitet und als reviewfähige Derived-Artefakte eingefroren.
 - Versionierte MVP-0.1-Datenartefakte für RulesBaseline, Demo-Karten, Demo-Decks, Card-Manifest, Abweichungen und sechs Szenarien liegen vor.
 - Phase-1-Gate ist bestanden: `ready_for_implementation: true`.
+- MVP 0.1 wurde in einer ersten lokalen spielbaren Fassung implementiert: Shared Types, reine Engine, LegalActions/PlayerActions, PlayerViews, EventLog, Replay/StateHash, einfache Corp-KI, minimale Next.js-UI und lokale Server-Kompatibilität.
+- Phase-2-Checks sind grün: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`; lokaler Web-Smoke auf `http://127.0.0.1:3000` antwortet.
 
 ## Teilweise umgesetzt
 
@@ -26,9 +28,8 @@
 
 ## Offen
 
-- Engine, UI, Server, KI und ausführbare Tests sind noch nicht implementiert.
-- Abhängigkeiten wurden noch nicht installiert.
-- Vor der nächsten technischen Phase Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
+- Phase 3 Validierung, Hardening, Abschlussdokumentation und MVP-0.1-Finalreview stehen noch aus.
+- Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 - MVP 0.2 bleibt gesperrt, bis MVP 0.1 implementiert, validiert und gehärtet ist.
 
 ## Wichtige Grenzen
