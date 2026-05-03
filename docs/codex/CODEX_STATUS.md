@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.6 deck editor and match setup validation, hardening and documentation are complete.
+MVP 0.7 UI requirements and design freeze are complete. V0.7 implementation is unblocked.
 
 ## Status
 
@@ -80,6 +80,10 @@ MVP 0.6 validation, hardening and documentation are complete.
 
 `MVP_0.6_done: true`
 
+MVP 0.7 UI requirements and design freeze are complete.
+
+`ready_for_implementation: true`
+
 MVP 0.8 playable base/starter-set slice detailed planning is complete as a future gated phase.
 
 `MVP_0.8_detailed_plan_available: true`
@@ -111,6 +115,7 @@ Gate flow:
 15. MVP 0.6 executable requirements: pass.
 16. MVP 0.6 implementation: pass.
 17. MVP 0.6 validation, hardening and documentation: pass.
+18. MVP 0.7 requirements/design freeze: pass.
 
 ## Phase 1 files created or updated
 
@@ -604,7 +609,36 @@ V0.6 now supports local deck models, validation v2, deterministic snapshots, ser
 
 `MVP_0.6_done: true`
 
-Next recommended gate: V0.7 Requirements/Design Freeze. V0.7 implementation, UI redesign, official assets, public platform features, account system, matchmaking and rankings remain out of this thread's implementation scope.
+Next gate was V0.7 Requirements/Design Freeze. V0.7 implementation is now unblocked by the current thread goal. Official assets, public platform features, account system, matchmaking and rankings remain out of scope.
+
+## MVP 0.7 Requirements files created or updated
+
+- `docs/derived/MVP_0.7_REQUIREMENTS.md`
+- `docs/derived/UI_REDESIGN_0.7_SPEC.md`
+- `docs/derived/RUN_ENCOUNTER_UI_0.7_SPEC.md`
+- `docs/derived/CARD_VIEW_0.7_SPEC.md`
+- `docs/derived/ACCESSIBILITY_0.7_SPEC.md`
+- `docs/derived/MVP_0.7_TEST_MATRIX.md`
+- `docs/derived/MVP_0.7_REQUIREMENTS_REVIEW.md`
+- `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.7 Requirements checks
+
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 13 artifact tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 48 package tests plus 17 root spec tests.
+- `corepack pnpm build`: pass.
+
+## MVP 0.7 Requirements gate
+
+`ready_for_implementation: true`
+
+V0.7 is frozen as a UI redesign/design phase. Design C is the main structure, Design D is limited to run/encounter focus, and Design B is limited to an optional diagnostics drawer. V0.7 must preserve existing V0.1-V0.6 features, may not add gameplay scope, and may not load official or external card assets without a separate asset gate.
 
 ## MVP 0.8 Detailed Planning files created or updated
 
@@ -677,7 +711,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Next gate: V0.7 Requirements/Design Freeze. Do not start V0.7 implementation without a separate requirements gate.
+Current gate: V0.7 implementation, validation, hardening and documentation. V0.7 Requirements/Design Freeze is complete and `ready_for_implementation: true`.
 
 Detailed planning artifacts available:
 

@@ -171,3 +171,9 @@ Checks: `corepack pnpm --filter @netrunner/decks test`, `corepack pnpm --filter 
 MVP 0.6 wurde final validiert und dokumentiert. Der Final Review bestätigt: Decks werden editierbar, aber Matches starten nur mit validierten und serverseitig revalidierten Snapshots; importierte oder nicht spielbare Karten blockieren Matchstart; gegnerische Decklisten bleiben privat und nur erlaubte Metadaten werden angezeigt.
 
 Finale Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, Deck-API-Smoke, Deckvalidierungs-Smoke, Matchstart-Smoke mit V0.6-Snapshots und Browser-Smoke für Deckeditor/Match Setup bestanden. Gate-Ergebnis: `MVP_0.6_done: true`. Nächster empfohlener Scope ist V0.7 Requirements/Design Freeze; V0.7 wurde nicht implementiert.
+
+## [2026-05-03] phase-0.7-req | MVP 0.7 Requirements und Design Freeze
+
+Der V0.7 Requirements/Design Freeze wurde aus der V0.7-Detailplanung, den UI-Designsets und der Realismusprüfung abgeleitet. Eingefroren wurden Design C als Hauptstruktur, Design D als Run-/Encounter-Fokus und Design B als einklappbare Diagnose-/Playtest-Schicht. Echte Kartenabbilder, offizielle Logos, Card Frames und Card Backs bleiben bis zu einer separaten Asset-Freigabe gesperrt.
+
+Erstellt wurden `docs/derived/MVP_0.7_REQUIREMENTS.md`, `docs/derived/UI_REDESIGN_0.7_SPEC.md`, `docs/derived/RUN_ENCOUNTER_UI_0.7_SPEC.md`, `docs/derived/CARD_VIEW_0.7_SPEC.md`, `docs/derived/ACCESSIBILITY_0.7_SPEC.md`, `docs/derived/MVP_0.7_TEST_MATRIX.md`, `docs/derived/MVP_0.7_REQUIREMENTS_REVIEW.md` und `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`. Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.

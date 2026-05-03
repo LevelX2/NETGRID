@@ -46,6 +46,7 @@
 - MVP 0.6 Deck Editor und Match Setup Foundation wurden implementiert: reines Deck-Paket, lokale Decks, Validierung v2, deterministische Snapshots, Server-Matchstart-Revalidierung, safe Deckmetadaten, Web-Deck-API sowie funktionaler Deckeditor und Match-Setup-Auswahl.
 - MVP 0.6 Implementierungsgate ist bestanden: `ready_for_hardening: true`.
 - MVP 0.6 Validierung, Hardening und Dokumentation sind abgeschlossen. Final Gate: `MVP_0.6_done: true`.
+- MVP 0.7 Requirements/Design Freeze ist abgeschlossen. Die UI-Neugestaltung ist auf Design C als Hauptstruktur, Design D als Run-/Encounter-Fokus und Design B als einklappbare Diagnose-Schicht eingefroren. Gate-Ergebnis: `ready_for_implementation: true`.
 
 ## Teilweise umgesetzt
 
@@ -61,10 +62,10 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1/0.2/0.3/0.4-Arbeitsschritt ist offen.
-- Der nächste empfohlene gate-basierte Schritt ist V0.7 Requirements/Design Freeze. V0.7-Implementierung wurde noch nicht begonnen.
+- Der nächste gate-basierte Schritt ist V0.7 Implementierung, Validierung, Hardening und Dokumentation.
 - Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
-- UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Die Detailplanung liegt vor, Requirements und UI-Spezifikationen sind aber noch nicht eingefroren.
+- UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Requirements, UI-Spezifikationen, Testmatrix und Requirements Review sind eingefroren.
 - V0.5 darf keine Karte automatisch spielbar machen; V0.6 darf keinen Matchstart ohne validierte Deck-Snapshots erlauben.
 - V0.7 darf echte Kartenabbilder nur nach separater Quellen-, Nutzungs- und Asset-Freigabe anzeigen; bis dahin bleiben generische Platzhalterkarten Standard. Hidden Cards dürfen auch im Bildmodus keine echten Kartenrücken, Bild-URLs, unterscheidbaren Ladezustände oder DOM-Metadaten erhalten.
 - V0.8 bleibt eine spätere, durch V0.7 gegatete Spielbarkeitsphase; Importstatus, Katalogdaten oder Deckeditor-Freigaben dürfen weiterhin keine Karte ohne Resolver- und Testgate spielbar machen.

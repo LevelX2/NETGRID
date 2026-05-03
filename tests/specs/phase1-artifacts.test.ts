@@ -58,6 +58,17 @@ const REQUIRED_MVP_0_4_SCENARIOS = [
 
 const REQUIRED_MVP_0_5_MUST_IDS = Array.from({ length: 10 }, (_, index) => `V05-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_6_MUST_IDS = Array.from({ length: 11 }, (_, index) => `V06-MUST-${String(index + 1).padStart(3, "0")}`);
+const REQUIRED_MVP_0_7_MUST_IDS = Array.from({ length: 16 }, (_, index) => `V07-MUST-${String(index + 1).padStart(3, "0")}`);
+const REQUIRED_MVP_0_7_DOCS = [
+  "docs/derived/MVP_0.7_REQUIREMENTS.md",
+  "docs/derived/UI_REDESIGN_0.7_SPEC.md",
+  "docs/derived/RUN_ENCOUNTER_UI_0.7_SPEC.md",
+  "docs/derived/CARD_VIEW_0.7_SPEC.md",
+  "docs/derived/ACCESSIBILITY_0.7_SPEC.md",
+  "docs/derived/MVP_0.7_TEST_MATRIX.md",
+  "docs/derived/MVP_0.7_REQUIREMENTS_REVIEW.md",
+  "tests/specs/ui-redesign-0.7-acceptance-tests.todo.md"
+];
 
 describe("Phase 1 derived artifacts", () => {
   it("keeps all MVP 0.1 JSON data artifacts parseable", () => {
@@ -265,6 +276,26 @@ describe("Phase 1 derived artifacts", () => {
       expect(requirements, requirementId).toContain(requirementId);
       expect(testMatrix, requirementId).toContain(requirementId);
     }
+    expect(review).toContain("ready_for_implementation: true");
+  });
+
+  it("keeps MVP 0.7 UI requirements frozen and mapped to test coverage", () => {
+    for (const file of REQUIRED_MVP_0_7_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.7_REQUIREMENTS.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.7_TEST_MATRIX.md", "utf8");
+    const review = readFileSync("docs/derived/MVP_0.7_REQUIREMENTS_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_7_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(requirements).toContain("Design C");
+    expect(requirements).toContain("Design D");
+    expect(requirements).toContain("Design B");
+    expect(requirements).toContain("ready_for_implementation: true");
     expect(review).toContain("ready_for_implementation: true");
   });
 });
