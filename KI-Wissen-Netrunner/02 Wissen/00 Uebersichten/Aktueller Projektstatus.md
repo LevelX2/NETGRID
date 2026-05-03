@@ -18,6 +18,9 @@
 - MVP 0.1 ist final reviewt: `MVP_0.1_done: true`, `ready_for_MVP_0.2_requirements: true`.
 - MVP 0.2 Requirements wurden abgeleitet: REST, WebSocket-Protokoll, Storage, Token/Sessions, Reconnect, Undo, Testmatrix, Baseline 0.2 und Multiplayer-Szenarien.
 - MVP 0.2 Requirements Gate ist bestanden: `ready_for_implementation: true`.
+- MVP 0.2 private Multiplayer-Implementierung wurde umgesetzt: REST-Start/Join/Reconnect/Bootstrap, WebSocket-Protokoll, JSON-Storage-Port, Hash-only Tokens, per-Match-Lock, Idempotency, Reconnect, Undo-Barrieren, Multiplayer-Tests und Next.js-Host/Join-UI.
+- MVP 0.2 Implementierungschecks sind grün: `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm lint`, `corepack pnpm build`, Server-Health-Smoke, REST/WebSocket-Smoke und Next-Web-Smoke.
+- MVP 0.2 Implementierungsgate ist bestanden: `ready_for_hardening: true`.
 
 ## Teilweise umgesetzt
 
@@ -32,12 +35,12 @@
 
 ## Offen
 
-- MVP 0.2 Implementierung steht als nächste Phase aus.
+- MVP 0.2 Validierung, Hardening, Finaldokumentation und Gate-Entscheidung stehen als nächste Phase aus.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 - MVP 0.2 bleibt gesperrt, bis MVP 0.1 implementiert, validiert und gehärtet ist.
 
 ## Wichtige Grenzen
 
 - In Phase 2 darf nur MVP-0.1-Scope implementiert werden.
-- MVP 0.2 darf nicht vor bestandenem oder ausdrücklich dokumentiertem MVP-0.1-Gate begonnen werden.
+- MVP 0.2 darf nicht über den privaten Multiplayer-Scope hinaus erweitert werden.
 - `data/` ist hier nicht pauschal ignoriert, weil es versionierte Regeln, Karten, Decks, Manifeste, Abweichungen und Szenarien aufnehmen soll.

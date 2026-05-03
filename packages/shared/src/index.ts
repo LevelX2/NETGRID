@@ -96,9 +96,11 @@ export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
   cardTextSnapshotId: "mvp-0.1-demo";
-  engineSchemaVersion: "0.1.0";
+  engineSchemaVersion: "0.1.0" | "0.2.0";
   cardImplementationVersion: "0.1.0";
-  deviationRegistryVersion: "0.1.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0";
+  multiplayerSchemaVersion?: "0.2.0";
 };
 
 export type PlayerController = {
@@ -378,6 +380,14 @@ export const MVP_0_1_BASELINE: RulesBaseline = {
   engineSchemaVersion: "0.1.0",
   cardImplementationVersion: "0.1.0",
   deviationRegistryVersion: "0.1.0"
+};
+
+export const MVP_0_2_BASELINE: RulesBaseline = {
+  ...MVP_0_1_BASELINE,
+  engineSchemaVersion: "0.2.0",
+  deviationRegistryVersion: "0.2.0",
+  playerViewSchemaVersion: "0.2.0",
+  multiplayerSchemaVersion: "0.2.0"
 };
 
 export const DEMO_CARDS: CardDefinition[] = [

@@ -5,8 +5,11 @@ describe("Client visibility contract", () => {
   it("keeps the browser page away from full GameState and engine authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     expect(page).not.toContain("@netrunner/engine");
+    expect(page).not.toContain("@netrunner/server");
     expect(page).not.toContain("GameState");
-    expect(page).toContain("/api/game");
+    expect(page).toContain("state_update");
+    expect(page).toContain("submit_action");
+    expect(page).toContain("PlayerView");
   });
 
   it("returns PlayerView payloads from the web game API", () => {

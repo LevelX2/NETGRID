@@ -1,17 +1,17 @@
 :root {
   color-scheme: dark;
-  --bg: #11100e;
-  --panel: #1d1b18;
-  --panel-soft: #26231f;
-  --line: #3a352f;
-  --text: #f3eee7;
-  --muted: #b8afa3;
-  --runner: #3cc7a1;
-  --corp: #e1664f;
-  --agenda: #d9b85f;
-  --ice: #69a8ff;
+  --bg: #101316;
+  --panel: #181d21;
+  --panel-soft: #20282d;
+  --line: #33404a;
+  --text: #edf3f6;
+  --muted: #a9b5bb;
+  --runner: #42c8a3;
+  --corp: #f06a5b;
+  --agenda: #d8bd5f;
+  --ice: #74a9ff;
   --danger: #ff7a7a;
-  --ok: #82d173;
+  --ok: #86d47f;
 }
 
 * {
@@ -28,7 +28,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -45,7 +46,7 @@ input {
   gap: 16px;
   padding: 14px 18px;
   border-bottom: 1px solid var(--line);
-  background: #161411;
+  background: #13181c;
 }
 
 .brand {
@@ -96,6 +97,17 @@ input {
   padding: 0 10px;
 }
 
+input,
+select {
+  min-width: 0;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--panel);
+  padding: 0 10px;
+}
+
 .button {
   height: 36px;
   display: inline-flex;
@@ -122,6 +134,119 @@ input {
 .button.corp {
   background: #4a251f;
   border-color: #8d4638;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.wide {
+  width: 100%;
+}
+
+.connection {
+  min-width: 102px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: var(--panel);
+  font-size: 13px;
+}
+
+.connection.online {
+  color: var(--ok);
+  border-color: #426d49;
+}
+
+.connection.connecting {
+  color: var(--agenda);
+  border-color: #6b5d31;
+}
+
+.connection.offline {
+  color: var(--danger);
+  border-color: #704044;
+}
+
+.setup {
+  display: grid;
+  place-items: start center;
+  padding: 32px 14px;
+}
+
+.setupPanel {
+  width: min(540px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+
+.tab {
+  height: 42px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  color: var(--muted);
+  background: #151a1f;
+  cursor: pointer;
+}
+
+.tab:last-child {
+  border-right: 0;
+}
+
+.tab.active {
+  color: var(--text);
+  background: var(--panel-soft);
+}
+
+.formGrid {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.formGrid label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.notice {
+  margin: 0 14px 14px;
+  color: var(--agenda);
+  font-size: 13px;
+}
+
+.matchStrip {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  background: #11171b;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.matchStrip span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .main {
@@ -170,7 +295,7 @@ input {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #171511;
+  background: #12181d;
 }
 
 .stat strong {
@@ -206,7 +331,7 @@ input {
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #171511;
+  background: #12181d;
 }
 
 .server h3 {
@@ -221,7 +346,7 @@ input {
   gap: 6px;
   align-content: flex-start;
   padding: 6px;
-  border: 1px dashed #403b34;
+  border: 1px dashed #3d4a54;
   border-radius: 6px;
 }
 
@@ -242,12 +367,12 @@ input {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #221f1a;
+  background: #192128;
   overflow-wrap: anywhere;
 }
 
 .card.hidden {
-  background: repeating-linear-gradient(135deg, #201d19 0, #201d19 8px, #29251f 8px, #29251f 16px);
+  background: repeating-linear-gradient(135deg, #171d22 0, #171d22 8px, #202930 8px, #202930 16px);
 }
 
 .card.agenda {
@@ -301,7 +426,7 @@ input {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #171511;
+  background: #12181d;
 }
 
 .event small {
@@ -312,6 +437,26 @@ input {
 .winner {
   color: var(--ok);
   font-weight: 700;
+}
+
+.boardSection {
+  margin-top: 14px;
+}
+
+.splitButtons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.undoBox {
+  display: grid;
+  gap: 6px;
+}
+
+.statusLine {
+  margin-top: 10px;
 }
 
 @media (max-width: 1080px) {

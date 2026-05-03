@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.2 implementation may start.
+MVP 0.2 validation and hardening may start.
 
 ## Status
 
@@ -20,6 +20,14 @@ Phase 3, MVP 0.1 validation, hardening and documentation, is complete.
 
 `ready_for_MVP_0.2_requirements: true`
 
+MVP 0.2 requirements are complete.
+
+`ready_for_implementation: true`
+
+MVP 0.2 private multiplayer implementation is complete and locally verified.
+
+`ready_for_hardening: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -30,7 +38,8 @@ Gate flow:
 2. MVP 0.1 implementation: pass.
 3. MVP 0.1 validation, hardening and documentation: pass.
 4. MVP 0.2 requirements: pass.
-5. MVP 0.2 implementation: next.
+5. MVP 0.2 implementation: pass.
+6. MVP 0.2 validation, hardening and documentation: next.
 
 ## Phase 1 files created or updated
 
@@ -156,7 +165,42 @@ High-severity finding fixed: browser UI no longer imports the Engine or stores f
 
 `ready_for_implementation: true`
 
-Implementation may start in the private multiplayer scope only.
+Implementation has started and remains constrained to the private multiplayer scope only.
+
+## MVP 0.2 Implementation files created or updated
+
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/http-server.ts`
+- `apps/server/src/index.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `apps/server/package.json`
+- `apps/web/app/page.tsx`
+- `apps/web/app/globals.css`
+- `tests/specs/visibility-contract.test.ts`
+- `tests/specs/multiplayer-acceptance-tests.todo.md`
+- `docs/derived/MVP_0.2_IMPLEMENTATION_REVIEW.md`
+- `README.md`
+- `.gitignore`
+- `pnpm-lock.yaml`
+
+## MVP 0.2 Implementation checks
+
+- `corepack pnpm --filter @netrunner/server test`: pass, 7 Multiplayer tests.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm build`: pass.
+- Multiplayer server health smoke: pass on `http://127.0.0.1:8787/health`.
+- REST/WebSocket smoke: pass for create, join, host WebSocket, runner WebSocket, Corp mandatory action, and Runner hidden-info leak scan.
+- Next web smoke: pass on `http://127.0.0.1:3000`.
+
+## MVP 0.2 Implementation gate
+
+`ready_for_hardening: true`
+
+Phase 3 may validate and harden MVP 0.2.
 
 ## Phase 2 implemented scope
 
@@ -181,11 +225,11 @@ Implementation may start in the private multiplayer scope only.
 
 No MVP-0.1 blocker remains.
 
-MVP-0.2 implementation risks:
+MVP-0.2 hardening risks:
 
-- Storage, token/session security, per-match locking, idempotency, WebSocket payload filtering, reconnect and undo must be specified before implementation.
-- Hidden-info filtering must be extended from PlayerViews/PublicEvents/API to WebSocket, reconnect, undo, errors and logs.
-- The 6-point demo win condition must remain explicit until deck composition changes.
+- UI smoke is HTTP/REST/WebSocket-based, not screenshot-based yet.
+- JSON-File-Storage is intentionally simple; SQLite remains a later hardening target.
+- Hidden-info filtering now covers WebSocket, reconnect, undo and errors, but Phase 3 should keep it as the primary regression focus.
 
 ## Local tool notes
 
@@ -195,4 +239,4 @@ MVP-0.2 implementation risks:
 
 ## Next step
 
-Start MVP 0.2 implementation. Keep the card pool unchanged and implement storage, token/session security, WebSocket protocol, reconnect, undo and multiplayer visibility tests before UI polish.
+Start MVP 0.2 validation and hardening. Re-run full checks, inspect hidden-info surfaces, update final documentation, KI-Wissen and external implementation log, then decide the MVP-0.2 gate.

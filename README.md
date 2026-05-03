@@ -5,7 +5,7 @@ Private Netrunner-Webapplikation für einen schrittweise aufgebauten MVP:
 - MVP 0.1: Human Runner gegen einfache Corp-KI mit festen Demo-Decks.
 - MVP 0.2: privates Human-vs-Human-Multiplayer über dieselbe Engine.
 
-MVP 0.1 ist als erster spielbarer Stand abgeschlossen: eine lokale Human-Runner-vs-Corp-KI-Partie mit festen Demo-Decks, deterministischer Engine, LegalActions/PlayerActions, PlayerViews, EventLog, Replay/StateHash, Visibility-Tests und einfacher Next.js-Weboberfläche. Der vollständige GameState bleibt serverseitig; der Browser erhält nur Runner-PlayerView-Payloads.
+MVP 0.1 ist als erster spielbarer Stand abgeschlossen: eine lokale Human-Runner-vs-Corp-KI-Partie mit festen Demo-Decks, deterministischer Engine, LegalActions/PlayerActions, PlayerViews, EventLog, Replay/StateHash, Visibility-Tests und einfacher Next.js-Weboberfläche. MVP 0.2 ist als privater Human-vs-Human-Multiplayer implementiert: Host/Join-Link, WebSocket-Spiel, Reconnect, Undo, Hash-only Tokens, JSON-Storage und side-gefilterte PlayerViews.
 
 ## Einstieg
 
@@ -31,10 +31,18 @@ Die verbindlichen Quellen liegen unter `docs/source/`, soweit bereits vorhanden.
 
 ```powershell
 corepack pnpm install
+corepack pnpm -F @netrunner/server dev
 corepack pnpm -F @netrunner/web dev
 ```
 
-Die Weboberfläche läuft standardmäßig unter `http://127.0.0.1:3000`.
+Der Multiplayer-Server läuft standardmäßig unter `http://127.0.0.1:8787`. Die Weboberfläche läuft standardmäßig unter `http://127.0.0.1:3000` und nutzt `NEXT_PUBLIC_NETRUNNER_SERVER_URL`, falls der Server nicht auf dem Default-Port läuft.
+
+Für ein privates Match im lokalen Netz:
+
+- Host öffnet `http://127.0.0.1:3000`, erstellt ein Match und kopiert den Join-Link.
+- Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link.
+- Außerhalb von localhost HTTPS/WSS verwenden und Tokens wie Passwörter behandeln.
+- Runtime-Storage liegt unter `data/runtime/` und ist nicht versioniert; bei längerer Nutzung regelmäßig sichern.
 
 ## Checks
 
@@ -47,6 +55,6 @@ corepack pnpm build
 
 ## Aktueller Stand
 
-MVP 0.1 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. MVP 0.2 darf als Requirements-Phase beginnen; die Multiplayer-Implementierung bleibt bis zum 0.2-Requirements-Gate gesperrt.
+MVP 0.1 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. MVP 0.2 hat Requirements-Gate bestanden und die private Multiplayer-Implementierung ist als Hardening-Kandidat umgesetzt.
 
 Lokaler Werkzeughinweis vom Setup: Auf dieser Maschine war beim Einrichten Node `v24.15.0` aktiv. Das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; falls `pnpm` nicht direkt im PATH liegt, verwende `corepack pnpm ...`.

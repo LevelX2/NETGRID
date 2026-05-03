@@ -1,0 +1,835 @@
+import { createHash, randomBytes } from "node:crypto";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+import { applyAction, createGame, getLegalActions, getPlayerView, hashState, replayEvents } from "@netrunner/engine";
+import { MVP_0_2_BASELINE, type GameEvent, type GameState, type LegalAction, type PlayerAction, type PlayerView, type PublicGameEvent, type Side } from "@netrunner/shared";
+
+export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
+export type HostSideSelection = Side | "random";
+export type TokenKind = "join" | "session" | "reconnect";
+export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
+
+export type MatchSettings = {
+  agendaPointsToWin: number;
+};
+
+export type MatchRecord = {
+  matchId: string;
+  status: MatchStatus;
+  matchVersion: number;
+  baseline: typeof MVP_0_2_BASELINE;
+  settings: MatchSettings;
+  createdAt: string;
+  updatedAt: string;
+  winner?: Side | "draw";
+};
+
+export type SessionRecord = {
+  sessionId: string;
+  matchId: string;
+  side: Side;
+  displayName: string;
+  sessionTokenHash: string;
+  reconnectTokenHash: string;
+  connected: boolean;
+  createdAt: string;
+  lastSeenAt: string;
+};
+
+export type TokenRecord = {
+  tokenId: string;
+  matchId: string;
+  kind: TokenKind;
+  allowedSide: Side;
+  tokenHash: string;
+  createdAt: string;
+  expiresAt?: string;
+  revokedAt?: string;
+  usedAt?: string;
+};
+
+export type StateSnapshot = {
+  snapshotId: string;
+  matchId: string;
+  stateVersion: number;
+  matchVersion: number;
+  stateHash: string;
+  gameState: GameState;
+  createdAt: string;
+  hiddenInfoBarrier: boolean;
+};
+
+export type EventRecord = {
+  eventId: string;
+  matchId: string;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  stateHashAfter: string;
+  publicPayload: PublicGameEvent;
+  privatePayloadLocalOnly: boolean;
+  hiddenInfoBarrier: boolean;
+};
+
+export type ActionReceipt = {
+  idempotencyKey: string;
+  matchId: string;
+  side: Side;
+  accepted: boolean;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  stateHashAfter: string;
+  errorCode?: string;
+};
+
+export type UndoSnapshot = {
+  undoRequestId: string;
+  matchId: string;
+  targetEventId: string;
+  snapshotId: string;
+  requestedBy: Side;
+  status: UndoStatus;
+  hiddenInfoSafe: boolean;
+};
+
+export type PendingUndoRequest = {
+  undoRequestId: string;
+  requestedBy: Side;
+  targetEventId: string;
+  reason?: string;
+};
+
+export type StoredMatch = {
+  match: MatchRecord;
+  sessions: SessionRecord[];
+  tokens: TokenRecord[];
+  gameState: GameState;
+  eventLog: EventRecord[];
+  actionReceipts: ActionReceipt[];
+  undoSnapshots: UndoSnapshot[];
+  stateSnapshots: StateSnapshot[];
+  pendingUndo?: PendingUndoRequest;
+};
+
+export type MultiplayerStorage = {
+  load(matchId: string): Promise<StoredMatch | undefined>;
+  save(record: StoredMatch): Promise<void>;
+  list?(): Promise<StoredMatch[]>;
+};
+
+export type SidePayload = {
+  matchId: string;
+  matchStatus: MatchStatus;
+  matchVersion: number;
+  side: Side;
+  playerView: PlayerView;
+  legalActions: LegalAction[];
+  eventTail: PublicGameEvent[];
+  opponentStatus: { side: Side; connected: boolean };
+  pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
+  winner?: Side | "draw";
+  finalStateHash?: string;
+};
+
+export type SafeErrorPayload = {
+  code: string;
+  message: string;
+  currentStateVersion?: number;
+  playerView?: PlayerView;
+};
+
+export type CreateMatchResult = {
+  matchId: string;
+  hostSide: Side;
+  hostSessionToken: string;
+  hostReconnectToken: string;
+  joinUrl: string;
+  webSocketUrl: string;
+  baseline: typeof MVP_0_2_BASELINE;
+  playerView: PlayerView;
+  legalActions: LegalAction[];
+  matchVersion: number;
+};
+
+export type JoinMatchResult = {
+  matchId: string;
+  sessionToken: string;
+  reconnectToken: string;
+  side: Side;
+  webSocketUrl: string;
+  playerView: PlayerView;
+  legalActions: LegalAction[];
+  matchVersion: number;
+};
+
+export type ReconnectResult = JoinMatchResult & {
+  eventTail: PublicGameEvent[];
+};
+
+export type SubmitActionResult =
+  | {
+      ok: true;
+      receipt: ActionReceipt;
+      actorPayload: SidePayload;
+      opponentPayload: SidePayload;
+      publicEvent?: PublicGameEvent;
+    }
+  | {
+      ok: false;
+      receipt?: ActionReceipt;
+      error: SafeErrorPayload;
+      payload?: SidePayload;
+    };
+
+export type UndoResult =
+  | {
+      ok: true;
+      requesterPayload: SidePayload;
+      opponentPayload: SidePayload;
+      undoRequest?: PendingUndoRequest;
+    }
+  | {
+      ok: false;
+      error: SafeErrorPayload;
+      payload?: SidePayload;
+    };
+
+export class InMemoryMatchStorage implements MultiplayerStorage {
+  private readonly records = new Map<string, StoredMatch>();
+
+  async load(matchId: string): Promise<StoredMatch | undefined> {
+    const record = this.records.get(matchId);
+    return record ? clone(record) : undefined;
+  }
+
+  async save(record: StoredMatch): Promise<void> {
+    this.records.set(record.match.matchId, clone(record));
+  }
+
+  async list(): Promise<StoredMatch[]> {
+    return [...this.records.values()].map((record) => clone(record));
+  }
+}
+
+export class JsonFileMatchStorage implements MultiplayerStorage {
+  private readonly records = new Map<string, StoredMatch>();
+  private readonly ready: Promise<void>;
+
+  constructor(private readonly filePath: string) {
+    this.ready = this.loadFromDisk();
+  }
+
+  async load(matchId: string): Promise<StoredMatch | undefined> {
+    await this.ready;
+    const record = this.records.get(matchId);
+    return record ? clone(record) : undefined;
+  }
+
+  async save(record: StoredMatch): Promise<void> {
+    await this.ready;
+    this.records.set(record.match.matchId, clone(record));
+    await this.flush();
+  }
+
+  async list(): Promise<StoredMatch[]> {
+    await this.ready;
+    return [...this.records.values()].map((record) => clone(record));
+  }
+
+  private async loadFromDisk(): Promise<void> {
+    try {
+      const content = await readFile(this.filePath, "utf8");
+      const parsed = JSON.parse(content) as { matches?: StoredMatch[] };
+      for (const record of parsed.matches ?? []) this.records.set(record.match.matchId, record);
+    } catch (error) {
+      if (!isNodeError(error) || error.code !== "ENOENT") throw error;
+      await mkdir(dirname(this.filePath), { recursive: true });
+      await this.flush();
+    }
+  }
+
+  private async flush(): Promise<void> {
+    await mkdir(dirname(this.filePath), { recursive: true });
+    await writeFile(this.filePath, `${JSON.stringify({ matches: [...this.records.values()] }, null, 2)}\n`, "utf8");
+  }
+}
+
+export class MultiplayerService {
+  private readonly locks = new Map<string, Promise<void>>();
+  private readonly tokenSalt: string;
+  private readonly webBaseUrl: string;
+  private readonly serverBaseUrl: string;
+  private readonly now: () => string;
+
+  constructor(
+    private readonly storage: MultiplayerStorage = new InMemoryMatchStorage(),
+    options: { tokenSalt?: string; publicWebBaseUrl?: string; publicServerBaseUrl?: string; now?: () => string } = {}
+  ) {
+    this.tokenSalt = options.tokenSalt ?? process.env.NETRUNNER_TOKEN_SALT ?? "local-dev-netrunner-token-salt";
+    this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? process.env.NETRUNNER_WEB_BASE_URL ?? "http://127.0.0.1:3000");
+    this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? process.env.NETRUNNER_SERVER_BASE_URL ?? "http://127.0.0.1:8787");
+    this.now = options.now ?? (() => new Date().toISOString());
+  }
+
+  async createMatch(input: { hostSide: HostSideSelection; displayName?: string; seed?: string; settings?: Partial<MatchSettings> }): Promise<CreateMatchResult> {
+    const seed = input.seed?.trim() || `match-${randomId("seed")}`;
+    const matchId = randomId("match");
+    const hostSide = input.hostSide === "random" ? deterministicHostSide(seed) : input.hostSide;
+    const joinSide = opposite(hostSide);
+    const now = this.now();
+    const hostSessionToken = generateToken();
+    const hostReconnectToken = generateToken();
+    const joinToken = generateToken();
+    const settings: MatchSettings = { agendaPointsToWin: input.settings?.agendaPointsToWin ?? 6 };
+    const gameState = createGame({
+      matchId,
+      seed,
+      baseline: MVP_0_2_BASELINE,
+      agendaPointsToWin: settings.agendaPointsToWin,
+      controllers: {
+        runner: { controllerId: "runner-human", side: "runner", type: "human_local", displayName: "Runner" },
+        corp: { controllerId: "corp-human", side: "corp", type: "human_local", displayName: "Corp" }
+      }
+    });
+
+    const session: SessionRecord = {
+      sessionId: randomId("session"),
+      matchId,
+      side: hostSide,
+      displayName: input.displayName?.trim() || (hostSide === "runner" ? "Runner" : "Corp"),
+      sessionTokenHash: this.hashToken(hostSessionToken),
+      reconnectTokenHash: this.hashToken(hostReconnectToken),
+      connected: false,
+      createdAt: now,
+      lastSeenAt: now
+    };
+
+    const record: StoredMatch = {
+      match: {
+        matchId,
+        status: hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner",
+        matchVersion: 1,
+        baseline: MVP_0_2_BASELINE,
+        settings,
+        createdAt: now,
+        updatedAt: now
+      },
+      sessions: [session],
+      tokens: [
+        this.tokenRecord(matchId, hostSide, "session", hostSessionToken, now),
+        this.tokenRecord(matchId, hostSide, "reconnect", hostReconnectToken, now),
+        this.tokenRecord(matchId, joinSide, "join", joinToken, now)
+      ],
+      gameState,
+      eventLog: gameState.eventLog.map((event) => toEventRecord(matchId, event, false)),
+      actionReceipts: [],
+      undoSnapshots: [],
+      stateSnapshots: [this.snapshotFor(matchId, gameState, 1, "snap_initial", false)]
+    };
+
+    await this.storage.save(record);
+    const payload = this.payloadFor(record, hostSide);
+    return {
+      matchId,
+      hostSide,
+      hostSessionToken,
+      hostReconnectToken,
+      joinUrl: `${this.webBaseUrl}/?matchId=${encodeURIComponent(matchId)}&joinToken=${encodeURIComponent(joinToken)}`,
+      webSocketUrl: this.webSocketUrl(),
+      baseline: MVP_0_2_BASELINE,
+      playerView: payload.playerView,
+      legalActions: payload.legalActions,
+      matchVersion: record.match.matchVersion
+    };
+  }
+
+  async getJoinInfo(matchId: string, token?: string): Promise<{ matchId: string; status: MatchStatus; availableSide?: Side } | SafeErrorPayload> {
+    const record = await this.mustLoad(matchId);
+    if (!record) return safeError("not_found", "Dieses private Match ist nicht verfügbar.");
+    if (!token) return { matchId, status: record.match.status };
+    const tokenRecord = this.findToken(record, token, "join");
+    if (!tokenRecord) return safeError("invalid_token", "Der Join-Link ist nicht gültig oder abgelaufen.");
+    return { matchId, status: record.match.status, availableSide: tokenRecord.allowedSide };
+  }
+
+  async joinMatch(matchId: string, input: { token: string; displayName?: string }): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
+    const record = await this.mustLoad(matchId);
+    if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+    const tokenRecord = this.findToken(record, input.token, "join");
+    if (!tokenRecord) return { error: safeError("invalid_token", "Der Join-Link ist nicht gültig oder abgelaufen.") };
+    if (record.sessions.some((session) => session.side === tokenRecord.allowedSide)) {
+      return { error: safeError("side_taken", "Dieses private Match ist für diesen Link nicht mehr verfügbar.") };
+    }
+
+    const now = this.now();
+    const sessionToken = generateToken();
+    const reconnectToken = generateToken();
+    record.sessions.push({
+      sessionId: randomId("session"),
+      matchId,
+      side: tokenRecord.allowedSide,
+      displayName: input.displayName?.trim() || (tokenRecord.allowedSide === "runner" ? "Runner" : "Corp"),
+      sessionTokenHash: this.hashToken(sessionToken),
+      reconnectTokenHash: this.hashToken(reconnectToken),
+      connected: false,
+      createdAt: now,
+      lastSeenAt: now
+    });
+    record.tokens = record.tokens.map((candidate) => (candidate.tokenId === tokenRecord.tokenId ? { ...candidate, usedAt: now } : candidate));
+    record.tokens.push(this.tokenRecord(matchId, tokenRecord.allowedSide, "session", sessionToken, now));
+    record.tokens.push(this.tokenRecord(matchId, tokenRecord.allowedSide, "reconnect", reconnectToken, now));
+    record.match.status = "active";
+    record.match.matchVersion += 1;
+    record.match.updatedAt = now;
+    await this.storage.save(record);
+
+    const payload = this.payloadFor(record, tokenRecord.allowedSide);
+    return {
+      matchId,
+      sessionToken,
+      reconnectToken,
+      side: tokenRecord.allowedSide,
+      webSocketUrl: this.webSocketUrl(),
+      playerView: payload.playerView,
+      legalActions: payload.legalActions,
+      matchVersion: record.match.matchVersion
+    };
+  }
+
+  async reconnectMatch(matchId: string, input: { side: Side; reconnectToken: string; displayName?: string }): Promise<ReconnectResult | { error: SafeErrorPayload }> {
+    const record = await this.mustLoad(matchId);
+    if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+    const session = record.sessions.find((candidate) => candidate.side === input.side && candidate.reconnectTokenHash === this.hashToken(input.reconnectToken));
+    if (!session) return { error: safeError("invalid_token", "Reconnect ist nicht möglich.") };
+
+    const now = this.now();
+    const sessionToken = generateToken();
+    const reconnectToken = generateToken();
+    record.sessions = record.sessions.map((candidate) =>
+      candidate.sessionId === session.sessionId
+        ? {
+            ...candidate,
+            displayName: input.displayName?.trim() || candidate.displayName,
+            sessionTokenHash: this.hashToken(sessionToken),
+            reconnectTokenHash: this.hashToken(reconnectToken),
+            lastSeenAt: now
+          }
+        : candidate
+    );
+    record.tokens.push(this.tokenRecord(matchId, input.side, "session", sessionToken, now));
+    record.tokens.push(this.tokenRecord(matchId, input.side, "reconnect", reconnectToken, now));
+    record.match.matchVersion += 1;
+    record.match.updatedAt = now;
+    await this.storage.save(record);
+
+    const payload = this.payloadFor(record, input.side);
+    return {
+      matchId,
+      sessionToken,
+      reconnectToken,
+      side: input.side,
+      webSocketUrl: this.webSocketUrl(),
+      playerView: payload.playerView,
+      legalActions: payload.legalActions,
+      matchVersion: record.match.matchVersion,
+      eventTail: payload.eventTail
+    };
+  }
+
+  async bootstrap(matchId: string, side: Side, sessionToken: string): Promise<SidePayload | { error: SafeErrorPayload }> {
+    const record = await this.mustLoad(matchId);
+    if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+    const session = this.authenticate(record, side, sessionToken);
+    if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+    session.lastSeenAt = this.now();
+    await this.storage.save(record);
+    return this.payloadFor(record, side);
+  }
+
+  async setConnected(matchId: string, side: Side, sessionToken: string, connected: boolean): Promise<SidePayload | { error: SafeErrorPayload }> {
+    const record = await this.mustLoad(matchId);
+    if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+    const session = this.authenticate(record, side, sessionToken);
+    if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+    session.connected = connected;
+    session.lastSeenAt = this.now();
+    record.match.matchVersion += 1;
+    record.match.updatedAt = this.now();
+    await this.storage.save(record);
+    return this.payloadFor(record, side);
+  }
+
+  async submitAction(input: {
+    matchId: string;
+    side: Side;
+    sessionToken: string;
+    actionId: string;
+    clientKnownStateVersion: number;
+    idempotencyKey: string;
+    selectedTargets?: Record<string, string>;
+    selectedChoices?: Record<string, unknown>;
+  }): Promise<SubmitActionResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (record.match.status !== "active") {
+        return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv."), payload: this.payloadFor(record, input.side) };
+      }
+
+      const duplicate = record.actionReceipts.find((receipt) => receipt.side === input.side && receipt.idempotencyKey === input.idempotencyKey);
+      if (duplicate) {
+        return {
+          ok: true,
+          receipt: duplicate,
+          actorPayload: this.payloadFor(record, input.side),
+          opponentPayload: this.payloadFor(record, opposite(input.side))
+        };
+      }
+
+      if (input.clientKnownStateVersion !== record.gameState.stateVersion) {
+        const receipt = this.receiptFor(record, input.side, input.idempotencyKey, false, "stale_state");
+        record.actionReceipts.push(receipt);
+        await this.storage.save(record);
+        return {
+          ok: false,
+          receipt,
+          error: safeError("stale_state", "Der Spielzustand ist veraltet.", record.gameState, input.side),
+          payload: this.payloadFor(record, input.side)
+        };
+      }
+
+      const action: PlayerAction = {
+        matchId: input.matchId,
+        side: input.side,
+        actionId: input.actionId,
+        clientKnownStateVersion: input.clientKnownStateVersion,
+        idempotencyKey: input.idempotencyKey,
+        ...(input.selectedTargets ? { selectedTargets: input.selectedTargets } : {}),
+        ...(input.selectedChoices ? { selectedChoices: input.selectedChoices } : {})
+      };
+      const snapshot = this.snapshotFor(input.matchId, record.gameState, record.match.matchVersion, `snap_before_${record.gameState.stateVersion + 1}`, false);
+      const result = applyAction(record.gameState, action);
+      if (!result.ok) {
+        const receipt = this.receiptFor(record, input.side, input.idempotencyKey, false, result.error.code);
+        record.actionReceipts.push(receipt);
+        await this.storage.save(record);
+        return {
+          ok: false,
+          receipt,
+          error: safeError(result.error.code, "Diese Aktion ist nicht legal.", record.gameState, input.side),
+          payload: this.payloadFor(record, input.side)
+        };
+      }
+
+      const barrier = isHiddenInfoBarrier(result.event);
+      const undoSnapshot = { ...snapshot, hiddenInfoBarrier: barrier };
+      record.stateSnapshots.push(undoSnapshot);
+      record.undoSnapshots.push({
+        undoRequestId: randomId("undo_snap"),
+        matchId: input.matchId,
+        targetEventId: result.event.eventId,
+        snapshotId: undoSnapshot.snapshotId,
+        requestedBy: input.side,
+        status: "requested",
+        hiddenInfoSafe: !barrier
+      });
+      record.gameState = result.state;
+      record.eventLog.push(toEventRecord(input.matchId, result.event, barrier));
+      const receipt = {
+        idempotencyKey: input.idempotencyKey,
+        matchId: input.matchId,
+        side: input.side,
+        accepted: true,
+        stateVersionBefore: result.event.stateVersionBefore,
+        stateVersionAfter: result.event.stateVersionAfter,
+        stateHashAfter: result.stateHash
+      };
+      record.actionReceipts.push(receipt);
+      record.match.matchVersion += 1;
+      record.match.updatedAt = this.now();
+      if (result.state.winner) {
+        record.match.status = "finished";
+        record.match.winner = result.state.winner;
+      }
+      await this.storage.save(record);
+      const success: SubmitActionResult = {
+        ok: true,
+        receipt,
+        actorPayload: this.payloadFor(record, input.side),
+        opponentPayload: this.payloadFor(record, opposite(input.side))
+      };
+      const publicEvent = result.publicEvents.at(-1);
+      if (publicEvent) success.publicEvent = publicEvent;
+      return success;
+    });
+  }
+
+  async requestUndo(input: { matchId: string; side: Side; sessionToken: string; targetEventId: string; reason?: string }): Promise<UndoResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (record.match.status !== "active") return { ok: false, error: safeError("match_not_active", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+      const targetIndex = record.eventLog.findIndex((event) => event.eventId === input.targetEventId);
+      if (targetIndex < 0) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+      const blocked = record.eventLog.slice(targetIndex).some((event) => event.hiddenInfoBarrier);
+      if (blocked) {
+        const blockedSnapshot: UndoSnapshot = {
+          undoRequestId: randomId("undo"),
+          matchId: input.matchId,
+          targetEventId: input.targetEventId,
+          snapshotId: "blocked",
+          requestedBy: input.side,
+          status: "blocked",
+          hiddenInfoSafe: false
+        };
+        record.undoSnapshots.push(blockedSnapshot);
+        await this.storage.save(record);
+        return { ok: false, error: safeError("undo_blocked", "Undo ist nach verdeckter Information nicht möglich."), payload: this.payloadFor(record, input.side) };
+      }
+      const snapshot = record.stateSnapshots.find((candidate) => candidate.snapshotId === `snap_before_${record.eventLog[targetIndex]?.stateVersionAfter}`);
+      if (!snapshot) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+      const undoRequest: PendingUndoRequest = {
+        undoRequestId: randomId("undo"),
+        requestedBy: input.side,
+        targetEventId: input.targetEventId,
+        ...(input.reason ? { reason: input.reason.slice(0, 160) } : {})
+      };
+      record.pendingUndo = undoRequest;
+      record.undoSnapshots.push({
+        undoRequestId: undoRequest.undoRequestId,
+        matchId: input.matchId,
+        targetEventId: input.targetEventId,
+        snapshotId: snapshot.snapshotId,
+        requestedBy: input.side,
+        status: "requested",
+        hiddenInfoSafe: true
+      });
+      record.match.matchVersion += 1;
+      record.match.updatedAt = this.now();
+      await this.storage.save(record);
+      return {
+        ok: true,
+        requesterPayload: this.payloadFor(record, input.side),
+        opponentPayload: this.payloadFor(record, opposite(input.side)),
+        undoRequest
+      };
+    });
+  }
+
+  async acceptUndo(input: { matchId: string; side: Side; sessionToken: string; undoRequestId: string }): Promise<UndoResult> {
+    return this.resolveUndo(input, "accepted");
+  }
+
+  async declineUndo(input: { matchId: string; side: Side; sessionToken: string; undoRequestId: string }): Promise<UndoResult> {
+    return this.resolveUndo(input, "declined");
+  }
+
+  async replayMatch(matchId: string): Promise<{ ok: boolean; finalStateHash: string; errors: string[] }> {
+    const record = await this.mustLoad(matchId);
+    if (!record) return { ok: false, finalStateHash: "", errors: ["Match not found."] };
+    const initial = record.stateSnapshots[0]?.gameState;
+    if (!initial) return { ok: false, finalStateHash: hashState(record.gameState), errors: ["Initial snapshot missing."] };
+    const replay = replayEvents(initial, record.gameState.eventLog);
+    return { ok: replay.ok, finalStateHash: replay.actualFinalStateHash, errors: replay.errors };
+  }
+
+  async loadForTest(matchId: string): Promise<StoredMatch | undefined> {
+    return this.storage.load(matchId);
+  }
+
+  private async resolveUndo(input: { matchId: string; side: Side; sessionToken: string; undoRequestId: string }, status: "accepted" | "declined"): Promise<UndoResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      const pending = record.pendingUndo;
+      if (!pending || pending.undoRequestId !== input.undoRequestId || pending.requestedBy === input.side) {
+        return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+      }
+      const undoRecord = record.undoSnapshots.find((candidate) => candidate.undoRequestId === input.undoRequestId);
+      if (!undoRecord) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+      undoRecord.status = status;
+      delete record.pendingUndo;
+      if (status === "accepted") {
+        const snapshot = record.stateSnapshots.find((candidate) => candidate.snapshotId === undoRecord.snapshotId);
+        if (!snapshot) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+        const targetIndex = record.eventLog.findIndex((event) => event.eventId === undoRecord.targetEventId);
+        record.gameState = clone(snapshot.gameState);
+        record.eventLog = targetIndex >= 0 ? record.eventLog.slice(0, targetIndex) : record.eventLog;
+        record.actionReceipts = record.actionReceipts.filter((receipt) => receipt.stateVersionAfter <= snapshot.stateVersion);
+        record.stateSnapshots = record.stateSnapshots.filter((candidate) => candidate.stateVersion <= snapshot.stateVersion);
+      }
+      record.match.matchVersion += 1;
+      record.match.updatedAt = this.now();
+      await this.storage.save(record);
+      return {
+        ok: true,
+        requesterPayload: this.payloadFor(record, pending.requestedBy),
+        opponentPayload: this.payloadFor(record, opposite(pending.requestedBy))
+      };
+    });
+  }
+
+  private payloadFor(record: StoredMatch, side: Side): SidePayload {
+    const playerView = getPlayerView(record.gameState, side);
+    const opponent = record.sessions.find((session) => session.side === opposite(side));
+    const pendingUndo = record.pendingUndo
+      ? { ...record.pendingUndo, needsResponse: record.pendingUndo.requestedBy !== side }
+      : undefined;
+    return {
+      matchId: record.match.matchId,
+      matchStatus: record.match.status,
+      matchVersion: record.match.matchVersion,
+      side,
+      playerView,
+      legalActions: getLegalActions(record.gameState, side),
+      eventTail: record.eventLog.slice(-20).map((event) => event.publicPayload),
+      opponentStatus: { side: opposite(side), connected: opponent?.connected ?? false },
+      ...(pendingUndo ? { pendingUndo } : {}),
+      ...(record.gameState.winner ? { winner: record.gameState.winner, finalStateHash: hashState(record.gameState) } : {})
+    };
+  }
+
+  private async mustLoad(matchId: string): Promise<StoredMatch | undefined> {
+    return this.storage.load(matchId);
+  }
+
+  private authenticate(record: StoredMatch, side: Side, sessionToken: string): SessionRecord | undefined {
+    const hash = this.hashToken(sessionToken);
+    return record.sessions.find((session) => session.side === side && session.sessionTokenHash === hash);
+  }
+
+  private findToken(record: StoredMatch, token: string, kind: TokenKind): TokenRecord | undefined {
+    const hash = this.hashToken(token);
+    return record.tokens.find((candidate) => candidate.kind === kind && candidate.tokenHash === hash && !candidate.revokedAt && !candidate.usedAt);
+  }
+
+  private tokenRecord(matchId: string, side: Side, kind: TokenKind, token: string, now: string): TokenRecord {
+    return {
+      tokenId: randomId("token"),
+      matchId,
+      kind,
+      allowedSide: side,
+      tokenHash: this.hashToken(token),
+      createdAt: now
+    };
+  }
+
+  private hashToken(token: string): string {
+    return `sha256:${createHash("sha256").update(`${this.tokenSalt}:${token}`).digest("hex")}`;
+  }
+
+  private receiptFor(record: StoredMatch, side: Side, idempotencyKey: string, accepted: boolean, errorCode?: string): ActionReceipt {
+    return {
+      idempotencyKey,
+      matchId: record.match.matchId,
+      side,
+      accepted,
+      stateVersionBefore: record.gameState.stateVersion,
+      stateVersionAfter: record.gameState.stateVersion,
+      stateHashAfter: hashState(record.gameState),
+      ...(errorCode ? { errorCode } : {})
+    };
+  }
+
+  private snapshotFor(matchId: string, gameState: GameState, matchVersion: number, snapshotId: string, hiddenInfoBarrier: boolean): StateSnapshot {
+    return {
+      snapshotId,
+      matchId,
+      stateVersion: gameState.stateVersion,
+      matchVersion,
+      stateHash: hashState(gameState),
+      gameState: clone(gameState),
+      createdAt: this.now(),
+      hiddenInfoBarrier
+    };
+  }
+
+  private webSocketUrl(): string {
+    return `${this.serverBaseUrl.replace(/^http:/, "ws:").replace(/^https:/, "wss:")}/ws`;
+  }
+
+  private async withMatchLock<T>(matchId: string, work: () => Promise<T>): Promise<T> {
+    const previous = this.locks.get(matchId) ?? Promise.resolve();
+    let release: () => void = () => undefined;
+    const current = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const lock = previous.then(() => current);
+    this.locks.set(matchId, lock);
+    await previous;
+    try {
+      return await work();
+    } finally {
+      release();
+      if (this.locks.get(matchId) === lock) this.locks.delete(matchId);
+    }
+  }
+}
+
+function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): EventRecord {
+  const publicPayload: PublicGameEvent = {
+    eventId: event.eventId,
+    type: event.type,
+    stateVersionBefore: event.stateVersionBefore,
+    stateVersionAfter: event.stateVersionAfter,
+    stateHashAfter: event.stateHashAfter,
+    publicPayload: event.publicPayload
+  };
+  return {
+    eventId: event.eventId,
+    matchId,
+    stateVersionBefore: event.stateVersionBefore,
+    stateVersionAfter: event.stateVersionAfter,
+    stateHashAfter: event.stateHashAfter,
+    publicPayload,
+    privatePayloadLocalOnly: Boolean(event.privatePayload),
+    hiddenInfoBarrier: barrier
+  };
+}
+
+function isHiddenInfoBarrier(event: GameEvent): boolean {
+  return ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(event.type);
+}
+
+function safeError(code: string, message: string, state?: GameState, side?: Side): SafeErrorPayload {
+  return {
+    code,
+    message,
+    ...(state ? { currentStateVersion: state.stateVersion } : {}),
+    ...(state && side ? { playerView: getPlayerView(state, side) } : {})
+  };
+}
+
+function opposite(side: Side): Side {
+  return side === "runner" ? "corp" : "runner";
+}
+
+function deterministicHostSide(seed: string): Side {
+  const value = createHash("sha256").update(seed).digest()[0] ?? 0;
+  return value % 2 === 0 ? "runner" : "corp";
+}
+
+function generateToken(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+function randomId(prefix: string): string {
+  return `${prefix}_${randomBytes(8).toString("hex")}`;
+}
+
+function clone<T>(value: T): T {
+  return structuredClone(value) as T;
+}
+
+function trimTrailingSlash(value: string): string {
+  return value.replace(/\/+$/, "");
+}
+
+function isNodeError(error: unknown): error is NodeJS.ErrnoException {
+  return error instanceof Error && "code" in error;
+}

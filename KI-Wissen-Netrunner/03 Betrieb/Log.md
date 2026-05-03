@@ -51,3 +51,9 @@ Gate-Ergebnis: `MVP_0.1_done: true`; `ready_for_MVP_0.2_requirements: true`. MVP
 Nach bestandenem MVP-0.1-Gate wurden die Requirements für MVP 0.2 abgeleitet. Der Scope bleibt private Human-vs-Human-Partie über dieselbe Engine und unveränderte Demo-Decks. Erstellt wurden Spezifikationen für MVP-0.2-Requirements, REST API, WebSocket-Protokoll, Storage, Token-/Session-Security, Reconnect/Undo, Multiplayer-Testmatrix, Requirements Review, Baseline `0.2.0` und vier Multiplayer-Szenarien.
 
 Checks: JSON-Parse aller MVP-0.2-Datenartefakte erfolgreich, alle 24 Must-Requirements mit Testabdeckung, `corepack pnpm typecheck` und `corepack pnpm test` bestanden. Gate-Ergebnis: `ready_for_implementation: true`. MVP 0.2 darf im privaten Multiplayer-Scope implementiert werden; Kartenpool-Erweiterung bleibt gesperrt.
+
+## [2026-05-03] phase-0.2-impl | MVP 0.2 private Multiplayer-Implementierung umgesetzt
+
+Die MVP-0.2-Implementierung wurde innerhalb des freigegebenen privaten Multiplayer-Scopes umgesetzt. Entstanden sind REST-Endpunkte für Match-Erstellung, Join, Reconnect und Bootstrap, ein WebSocket-Protokoll für `join_match`, `submit_action`, Undo und Statusupdates, ein Storage-Port mit In-Memory- und JSON-File-Adapter, Hash-only Tokenpersistenz, MatchVersion/MatchStatus, per-Match-Lock, Idempotency, side-gefilterte Payloads und eine Next.js-UI für Host/Join, Join-Link, Actions, Connection-Banner und Undo.
+
+Checks: `corepack pnpm --filter @netrunner/server test` mit 7 Multiplayer-Tests, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm lint`, `corepack pnpm build`, Health-Smoke auf `http://127.0.0.1:8787/health`, REST/WebSocket-Smoke mit create/join/mandatory action und Runner-Leak-Scan, sowie Next-Web-Smoke auf `http://127.0.0.1:3000`. Gate-Ergebnis: `ready_for_hardening: true`. Nächster Schritt ist MVP-0.2-Validierung und Hardening.

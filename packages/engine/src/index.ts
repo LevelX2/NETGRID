@@ -31,7 +31,8 @@ export {
   DEMO_CARDS,
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
-  MVP_0_1_BASELINE
+  MVP_0_1_BASELINE,
+  MVP_0_2_BASELINE
 } from "@netrunner/shared";
 
 export type {

@@ -22,6 +22,7 @@ data/runtime/
 data/local/
 tmp*/
 *.log
+*.tsbuildinfo
 
 .DS_Store
 Thumbs.db
