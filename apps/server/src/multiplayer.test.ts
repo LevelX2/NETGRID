@@ -1,10 +1,44 @@
 import { describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
+import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import { createNetrunnerHttpServer } from "./http-server";
 import { InMemoryMatchStorage, MultiplayerService, type JoinMatchResult, type MatchSettings, type SidePayload } from "./multiplayer";
+import type { DeckSnapshot } from "@netrunner/decks";
 import type { LegalAction, Side } from "@netrunner/shared";
 
 describe("MVP 0.2 multiplayer service", () => {
+  it("starts V0.6 matches from validated immutable deck snapshots without exposing opponent decklists", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "deck-v06-service" });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "deck-v06-match",
+      runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6",
+      corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+    });
+    const stored = await service.loadForTest(created.matchId);
+
+    expect(created.baseline.engineSchemaVersion).toBe("0.4.0");
+    expect(created.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:b6bc479a");
+    expect(created.playerView.deckMetadata?.opponent.deckHash).toBe("fnv1a:d77d0873");
+    expect(stored?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
+    expect(stored?.match.settings.agendaPointsToWin).toBe(7);
+    expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
+    expect(JSON.stringify(created)).not.toContain("simple_priority_agenda");
+    expect(JSON.stringify(created)).not.toContain("cardInstances");
+
+    const invalidSnapshot = structuredClone(snapshotsData.snapshots.find((snapshot) => snapshot.deckSnapshotId === "demo_runner_004_snapshot_v0_6")) as DeckSnapshot | undefined;
+    if (!invalidSnapshot) throw new Error("Missing runner snapshot");
+    invalidSnapshot.cards.push({ cardId: "catalog_preview_resource_001", quantity: 1 });
+    await expect(
+      service.createMatch({
+        hostSide: "runner",
+        seed: "deck-v06-invalid",
+        runnerDeckSnapshot: invalidSnapshot,
+        corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+      })
+    ).rejects.toThrow("deck_snapshot_invalid");
+  });
+
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {
     const { service, created, runner, matchId, joinToken } = await joinedMatch();
     const stored = await service.loadForTest(matchId);

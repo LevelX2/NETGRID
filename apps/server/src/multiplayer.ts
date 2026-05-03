@@ -6,7 +6,9 @@ import { applyAction, createGame, getLegalActions, getPlayerView, hashState, rep
 import {
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
+  MVP_0_4_BASELINE,
   type AiDifficulty,
+  type DeckPublicMetadata,
   type GameEvent,
   type GameState,
   type LegalAction,
@@ -17,6 +19,7 @@ import {
   type RulesBaseline,
   type Side
 } from "@netrunner/shared";
+import { defaultAgendaPointsToWin, resolveDeckSetup, setupUsesExpandedRules, type MatchDeckSelectionInput, type ResolvedDeckSetup } from "./deck-setup";
 
 export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 export type HostSideSelection = Side | "random";
@@ -35,6 +38,12 @@ export type MatchRecord = {
   matchVersion: number;
   baseline: RulesBaseline;
   settings: MatchSettings;
+  deckSetup: {
+    runnerSnapshotId: string;
+    corpSnapshotId: string;
+    runner: DeckPublicMetadata;
+    corp: DeckPublicMetadata;
+  };
   aiControllers?: Partial<Record<Side, PlayerController>>;
   createdAt: string;
   updatedAt: string;
@@ -296,7 +305,7 @@ export class MultiplayerService {
     mode?: MatchMode;
     runnerDifficulty?: AiDifficulty;
     corpDifficulty?: AiDifficulty;
-  }): Promise<CreateMatchResult> {
+  } & MatchDeckSelectionInput): Promise<CreateMatchResult> {
     const seed = input.seed?.trim() || `match-${randomId("seed")}`;
     const matchId = randomId("match");
     const mode = input.mode ?? "human_vs_human";
@@ -306,8 +315,9 @@ export class MultiplayerService {
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
-    const settings: MatchSettings = { agendaPointsToWin: input.settings?.agendaPointsToWin ?? 6 };
-    const baseline = mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
+    const deckSetup = resolveDeckSetup(input);
+    const settings: MatchSettings = { agendaPointsToWin: input.settings?.agendaPointsToWin ?? defaultAgendaPointsToWin(deckSetup) };
+    const baseline = baselineForMode(mode, deckSetup);
     const controllers = controllersForMode(mode, hostSide, {
       runnerDifficulty: input.runnerDifficulty ?? "normal",
       corpDifficulty: input.corpDifficulty ?? "normal"
@@ -317,7 +327,11 @@ export class MultiplayerService {
       seed,
       baseline,
       agendaPointsToWin: settings.agendaPointsToWin,
-      controllers
+      controllers,
+      runnerDeck: deckSetup.runnerDeck,
+      corpDeck: deckSetup.corpDeck,
+      runnerDeckMetadata: deckSetup.runnerSnapshot.publicMetadata,
+      corpDeckMetadata: deckSetup.corpSnapshot.publicMetadata
     });
 
     const session: SessionRecord = {
@@ -340,6 +354,12 @@ export class MultiplayerService {
         matchVersion: 1,
         baseline,
         settings,
+        deckSetup: {
+          runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
+          corpSnapshotId: deckSetup.corpSnapshot.deckSnapshotId,
+          runner: deckSetup.runnerSnapshot.publicMetadata,
+          corp: deckSetup.corpSnapshot.publicMetadata
+        },
         ...(mode === "human_vs_human" ? {} : { aiControllers: aiControllersFor(controllers) }),
         createdAt: now,
         updatedAt: now
@@ -886,6 +906,11 @@ function opposite(side: Side): Side {
 function deterministicHostSide(seed: string): Side {
   const value = createHash("sha256").update(seed).digest()[0] ?? 0;
   return value % 2 === 0 ? "runner" : "corp";
+}
+
+function baselineForMode(mode: MatchMode, deckSetup: ResolvedDeckSetup): RulesBaseline {
+  if (setupUsesExpandedRules(deckSetup)) return MVP_0_4_BASELINE;
+  return mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
 }
 
 function controllersForMode(

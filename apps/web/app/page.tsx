@@ -1,11 +1,14 @@
 "use client";
 
-import { Bot, Cable, Check, Clipboard, Link2, ListFilter, Play, RotateCcw, Search, Shield, Sparkles, UserPlus, X } from "lucide-react";
+import { Bot, Cable, Check, Clipboard, CopyPlus, Download, Link2, ListFilter, Play, Plus, RotateCcw, Save, Search, Shield, Sparkles, Trash2, Upload, UserPlus, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
+import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
 const SESSION_KEY = "netrunner-mvp-0-3-session";
+const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
+const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_004_snapshot_v0_6";
+const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
 
 type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
@@ -125,6 +128,74 @@ type CatalogListResponse = {
   summary: Partial<Record<CatalogStatusKey, number>>;
 };
 
+type DeckCardEntry = {
+  cardId: string;
+  quantity: number;
+};
+
+type EditableDeck = {
+  deckId: string;
+  deckVersion: string;
+  name: string;
+  side: Side;
+  identityCardId: string;
+  cardPoolSnapshotId: string;
+  formatProfileId: string;
+  cards: DeckCardEntry[];
+  createdAt: string;
+  updatedAt: string;
+  notes?: string;
+};
+
+type DeckTemplate = {
+  templateId: string;
+  sourceDeckId: string;
+  name: string;
+  side: Side;
+  identityCardId: string;
+  editableCopyAllowed: boolean;
+  cards: DeckCardEntry[];
+};
+
+type DeckValidationResult = {
+  ok: boolean;
+  errors: string[];
+  warnings: string[];
+  totalCards: number;
+  agendaPoints: number | null;
+};
+
+type DeckSnapshot = {
+  deckSnapshotId: string;
+  sourceDeckId: string;
+  deckVersion: string;
+  name: string;
+  side: Side;
+  identityCardId: string;
+  cardPoolSnapshotId: string;
+  formatProfileId: string;
+  rulesBaselineId: string;
+  immutable: boolean;
+  cards: DeckCardEntry[];
+  validation: DeckValidationResult;
+  publicMetadata: DeckPublicMetadata;
+  deckHash: string;
+};
+
+type DeckSnapshotsResponse = {
+  snapshots: DeckSnapshot[];
+};
+
+type DeckTemplatesResponse = {
+  templates: DeckTemplate[];
+};
+
+type DeckValidationResponse = {
+  validation: DeckValidationResult;
+  snapshot: DeckSnapshot | null;
+  error?: { message: string };
+};
+
 const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
   imported: "imported",
   validated: "validated",
@@ -158,6 +229,23 @@ export default function Page() {
   const [catalogSummary, setCatalogSummary] = useState<Partial<Record<CatalogStatusKey, number>>>({});
   const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
   const [catalogDetail, setCatalogDetail] = useState<CatalogCardDetail | null>(null);
+  const [allCatalogCards, setAllCatalogCards] = useState<CatalogCardSummary[]>([]);
+  const [deckSnapshots, setDeckSnapshots] = useState<DeckSnapshot[]>([]);
+  const [deckTemplates, setDeckTemplates] = useState<DeckTemplate[]>([]);
+  const [runnerDeckSource, setRunnerDeckSource] = useState<"snapshot" | "local">("snapshot");
+  const [corpDeckSource, setCorpDeckSource] = useState<"snapshot" | "local">("snapshot");
+  const [selectedRunnerSnapshotId, setSelectedRunnerSnapshotId] = useState(DEFAULT_RUNNER_SNAPSHOT_ID);
+  const [selectedCorpSnapshotId, setSelectedCorpSnapshotId] = useState(DEFAULT_CORP_SNAPSHOT_ID);
+  const [runnerLocalSnapshot, setRunnerLocalSnapshot] = useState<DeckSnapshot | null>(null);
+  const [corpLocalSnapshot, setCorpLocalSnapshot] = useState<DeckSnapshot | null>(null);
+  const [localDecks, setLocalDecks] = useState<EditableDeck[]>([]);
+  const [localDecksLoaded, setLocalDecksLoaded] = useState(false);
+  const [selectedLocalDeckId, setSelectedLocalDeckId] = useState<string | null>(null);
+  const [deckValidation, setDeckValidation] = useState<DeckValidationResult | null>(null);
+  const [validatedSnapshot, setValidatedSnapshot] = useState<DeckSnapshot | null>(null);
+  const [deckImportText, setDeckImportText] = useState("");
+  const [deckExportText, setDeckExportText] = useState("");
+  const [addCardId, setAddCardId] = useState("");
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -180,6 +268,25 @@ export default function Page() {
       else setNotice("Session konnte nicht geladen werden.");
     });
   }, []);
+
+  useEffect(() => {
+    const storedDecks = window.localStorage.getItem(DECK_STORAGE_KEY);
+    if (storedDecks) {
+      try {
+        const parsed = JSON.parse(storedDecks) as EditableDeck[];
+        setLocalDecks(parsed);
+        setSelectedLocalDeckId(parsed[0]?.deckId ?? null);
+      } catch {
+        window.localStorage.removeItem(DECK_STORAGE_KEY);
+      }
+    }
+    setLocalDecksLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!localDecksLoaded) return;
+    window.localStorage.setItem(DECK_STORAGE_KEY, JSON.stringify(localDecks));
+  }, [localDecks, localDecksLoaded]);
 
   useEffect(() => {
     if (!session) return;
@@ -219,9 +326,36 @@ export default function Page() {
       .catch(() => setCatalogDetail(null));
   }, [selectedCatalogId]);
 
+  useEffect(() => {
+    void fetch("/api/cards/catalog", { cache: "no-store" })
+      .then((response) => response.json() as Promise<CatalogListResponse>)
+      .then((data) => setAllCatalogCards(data.cards ?? []))
+      .catch(() => setAllCatalogCards([]));
+    void fetch("/api/decks/snapshots", { cache: "no-store" })
+      .then((response) => response.json() as Promise<DeckSnapshotsResponse>)
+      .then((data) => {
+        setDeckSnapshots(data.snapshots ?? []);
+        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID)) setSelectedRunnerSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "runner")?.deckSnapshotId ?? "");
+        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID)) setSelectedCorpSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "corp")?.deckSnapshotId ?? "");
+      })
+      .catch(() => setDeckSnapshots([]));
+    void fetch("/api/decks/templates", { cache: "no-store" })
+      .then((response) => response.json() as Promise<DeckTemplatesResponse>)
+      .then((data) => setDeckTemplates(data.templates ?? []))
+      .catch(() => setDeckTemplates([]));
+  }, []);
+
   const activeView = payload?.playerView;
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
+  const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner");
+  const corpSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "corp");
+  const selectedRunnerSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
+  const selectedCorpSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedCorpSnapshotId) ?? corpSnapshots[0] ?? null;
+  const effectiveRunnerSnapshot = runnerDeckSource === "local" ? runnerLocalSnapshot : selectedRunnerSnapshot;
+  const effectiveCorpSnapshot = corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
+  const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
+  const playableCatalogCards = allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity");
 
   const createMatch = async () => {
     setNotice("");
@@ -236,7 +370,8 @@ export default function Page() {
       seed,
       mode: gameMode,
       runnerDifficulty,
-      corpDifficulty
+      corpDifficulty,
+      ...matchDeckPayload()
     });
     const nextSession: SessionInfo = {
       matchId: created.matchId,
@@ -259,14 +394,20 @@ export default function Page() {
       seed,
       runnerDifficulty,
       corpDifficulty,
-      runnerDeckId: "demo_runner_004",
-      corpDeckId: "demo_corp_004",
-      agendaPointsToWin: 7,
+      ...matchDeckPayload(),
+      agendaPointsToWin: effectiveCorpSnapshot?.validation.agendaPoints ?? 7,
       maxActions: 120
     });
     setSimulation(result.summary);
     setNotice("Simulation abgeschlossen.");
   };
+
+  function matchDeckPayload() {
+    return {
+      ...(runnerDeckSource === "local" && runnerLocalSnapshot ? { runnerDeckSnapshot: runnerLocalSnapshot } : { runnerDeckSnapshotId: selectedRunnerSnapshotId }),
+      ...(corpDeckSource === "local" && corpLocalSnapshot ? { corpDeckSnapshot: corpLocalSnapshot } : { corpDeckSnapshotId: selectedCorpSnapshotId })
+    };
+  }
 
   const joinMatch = async () => {
     setNotice("");
@@ -362,6 +503,141 @@ export default function Page() {
     await navigator.clipboard.writeText(session.joinUrl);
     setNotice("Join-Link kopiert.");
   };
+
+  const createDeckFromTemplate = (templateId: string) => {
+    const template = deckTemplates.find((candidate) => candidate.templateId === templateId);
+    if (!template) return;
+    const now = new Date().toISOString();
+    const deck: EditableDeck = {
+      deckId: `local_${template.sourceDeckId}_${crypto.randomUUID().slice(0, 8)}`,
+      deckVersion: "0.6.0-local",
+      name: `${template.name} Kopie`,
+      side: template.side,
+      identityCardId: template.identityCardId,
+      cardPoolSnapshotId: "card-snapshot-0.5",
+      formatProfileId: "local-demo-v0.6",
+      cards: template.cards.map((entry) => ({ ...entry })),
+      createdAt: now,
+      updatedAt: now
+    };
+    setLocalDecks((current) => [...current, deck]);
+    setSelectedLocalDeckId(deck.deckId);
+    clearDeckValidation();
+  };
+
+  const updateSelectedDeck = (nextDeck: EditableDeck) => {
+    setLocalDecks((current) => current.map((deck) => (deck.deckId === nextDeck.deckId ? { ...nextDeck, updatedAt: new Date().toISOString() } : deck)));
+    clearDeckValidation();
+  };
+
+  const updateDeckCardQuantity = (cardId: string, quantity: number) => {
+    if (!selectedLocalDeck) return;
+    updateSelectedDeck({
+      ...selectedLocalDeck,
+      cards: selectedLocalDeck.cards
+        .map((entry) => (entry.cardId === cardId ? { ...entry, quantity: Math.max(0, Math.floor(quantity)) } : entry))
+        .filter((entry) => entry.quantity > 0)
+    });
+  };
+
+  const addCardToDeck = () => {
+    if (!selectedLocalDeck || !addCardId) return;
+    const existing = selectedLocalDeck.cards.find((entry) => entry.cardId === addCardId);
+    updateSelectedDeck({
+      ...selectedLocalDeck,
+      cards: existing
+        ? selectedLocalDeck.cards.map((entry) => (entry.cardId === addCardId ? { ...entry, quantity: entry.quantity + 1 } : entry))
+        : [...selectedLocalDeck.cards, { cardId: addCardId, quantity: 1 }]
+    });
+  };
+
+  const duplicateSelectedDeck = () => {
+    if (!selectedLocalDeck) return;
+    const now = new Date().toISOString();
+    const copy = {
+      ...selectedLocalDeck,
+      deckId: `${selectedLocalDeck.deckId}_copy_${crypto.randomUUID().slice(0, 6)}`,
+      name: `${selectedLocalDeck.name} Kopie`,
+      createdAt: now,
+      updatedAt: now
+    };
+    setLocalDecks((current) => [...current, copy]);
+    setSelectedLocalDeckId(copy.deckId);
+    clearDeckValidation();
+  };
+
+  const deleteSelectedDeck = () => {
+    if (!selectedLocalDeck) return;
+    setLocalDecks((current) => {
+      const next = current.filter((deck) => deck.deckId !== selectedLocalDeck.deckId);
+      setSelectedLocalDeckId(next[0]?.deckId ?? null);
+      return next;
+    });
+    clearDeckValidation();
+  };
+
+  const validateSelectedDeck = async () => {
+    if (!selectedLocalDeck) return;
+    const result = await fetch("/api/decks/validate", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ deck: selectedLocalDeck })
+    }).then((response) => response.json() as Promise<DeckValidationResponse>);
+    if (result.error) {
+      setNotice(result.error.message);
+      return;
+    }
+    setDeckValidation(result.validation);
+    setValidatedSnapshot(result.snapshot);
+    setNotice(result.validation.ok ? "Deck validiert." : "Deck braucht noch Korrekturen.");
+  };
+
+  const useValidatedDeckForMatch = () => {
+    if (!validatedSnapshot) return;
+    if (validatedSnapshot.side === "runner") {
+      setRunnerLocalSnapshot(validatedSnapshot);
+      setRunnerDeckSource("local");
+    } else {
+      setCorpLocalSnapshot(validatedSnapshot);
+      setCorpDeckSource("local");
+    }
+    setNotice("Deck-Snapshot für Match Setup gesetzt.");
+  };
+
+  const exportSelectedDeck = () => {
+    if (!selectedLocalDeck) return;
+    setDeckExportText(`${JSON.stringify({ schemaVersion: "editable-deck-v0.6", deck: selectedLocalDeck }, null, 2)}\n`);
+  };
+
+  const importLocalDeck = () => {
+    let parsed: { deck?: EditableDeck };
+    try {
+      parsed = JSON.parse(deckImportText) as { deck?: EditableDeck };
+    } catch {
+      setNotice("Deck-Import konnte nicht gelesen werden.");
+      return;
+    }
+    if (!parsed.deck || (parsed.deck.side !== "runner" && parsed.deck.side !== "corp")) {
+      setNotice("Deck-Import konnte nicht gelesen werden.");
+      return;
+    }
+    const now = new Date().toISOString();
+    const imported = {
+      ...parsed.deck,
+      deckId: parsed.deck.deckId || `local_import_${crypto.randomUUID().slice(0, 8)}`,
+      createdAt: parsed.deck.createdAt || now,
+      updatedAt: now
+    };
+    setLocalDecks((current) => [...current.filter((deck) => deck.deckId !== imported.deckId), imported]);
+    setSelectedLocalDeckId(imported.deckId);
+    clearDeckValidation();
+    setNotice("Deck importiert.");
+  };
+
+  function clearDeckValidation() {
+    setDeckValidation(null);
+    setValidatedSnapshot(null);
+  }
 
   function connectWebSocket(nextSession: SessionInfo) {
     setConnection("connecting");
@@ -511,6 +787,47 @@ export default function Page() {
                   Seed
                   <input value={seed} onChange={(event) => setSeed(event.target.value)} />
                 </label>
+                <label>
+                  Runner-Deck
+                  <select
+                    value={runnerDeckSource === "local" && runnerLocalSnapshot ? "local" : selectedRunnerSnapshotId}
+                    onChange={(event) => {
+                      if (event.target.value === "local") setRunnerDeckSource("local");
+                      else {
+                        setRunnerDeckSource("snapshot");
+                        setSelectedRunnerSnapshotId(event.target.value);
+                      }
+                    }}
+                  >
+                    {runnerSnapshots.map((snapshot) => (
+                      <option value={snapshot.deckSnapshotId} key={snapshot.deckSnapshotId}>
+                        {snapshot.name}
+                      </option>
+                    ))}
+                    {runnerLocalSnapshot ? <option value="local">Lokaler Snapshot · {runnerLocalSnapshot.name}</option> : null}
+                  </select>
+                </label>
+                <label>
+                  Corp-Deck
+                  <select
+                    value={corpDeckSource === "local" && corpLocalSnapshot ? "local" : selectedCorpSnapshotId}
+                    onChange={(event) => {
+                      if (event.target.value === "local") setCorpDeckSource("local");
+                      else {
+                        setCorpDeckSource("snapshot");
+                        setSelectedCorpSnapshotId(event.target.value);
+                      }
+                    }}
+                  >
+                    {corpSnapshots.map((snapshot) => (
+                      <option value={snapshot.deckSnapshotId} key={snapshot.deckSnapshotId}>
+                        {snapshot.name}
+                      </option>
+                    ))}
+                    {corpLocalSnapshot ? <option value="local">Lokaler Snapshot · {corpLocalSnapshot.name}</option> : null}
+                  </select>
+                </label>
+                <DeckMetadataLine runner={effectiveRunnerSnapshot?.publicMetadata} corp={effectiveCorpSnapshot?.publicMetadata} />
                 <button className="button primary wide" onClick={createMatch}>
                   {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
                   {gameMode === "ai_vs_ai" ? "Simulation starten" : "Match erstellen"}
@@ -552,6 +869,30 @@ export default function Page() {
             onSide={setCatalogSide}
             onStatus={setCatalogStatus}
             onSelect={setSelectedCatalogId}
+          />
+          <DeckEditorPanel
+            templates={deckTemplates}
+            localDecks={localDecks}
+            selectedDeck={selectedLocalDeck}
+            validation={deckValidation}
+            validatedSnapshot={validatedSnapshot}
+            playableCards={playableCatalogCards}
+            addCardId={addCardId}
+            importText={deckImportText}
+            exportText={deckExportText}
+            onCreateFromTemplate={createDeckFromTemplate}
+            onSelectDeck={setSelectedLocalDeckId}
+            onUpdateDeck={updateSelectedDeck}
+            onUpdateQuantity={updateDeckCardQuantity}
+            onAddCardId={setAddCardId}
+            onAddCard={addCardToDeck}
+            onDuplicate={duplicateSelectedDeck}
+            onDelete={deleteSelectedDeck}
+            onValidate={validateSelectedDeck}
+            onUseForMatch={useValidatedDeckForMatch}
+            onExport={exportSelectedDeck}
+            onImportText={setDeckImportText}
+            onImport={importLocalDeck}
           />
         </div>
       </main>
@@ -676,6 +1017,12 @@ export default function Page() {
               <Stat label="Clicks" value={activeView.opponent.clicks} />
               <Stat label="Agenda" value={activeView.opponent.agendaPoints} />
             </div>
+            {activeView.deckMetadata ? (
+              <div className="deckMini">
+                <span>{activeView.deckMetadata.opponent.deckName}</span>
+                <small>{activeView.deckMetadata.opponent.deckHash}</small>
+              </div>
+            ) : null}
             <p className="meta statusLine">{payload.opponentStatus.connected ? "Verbunden" : "Offline"} · {activeView.timingPoint}</p>
           </section>
           <section className="section">
@@ -833,6 +1180,205 @@ function CatalogPanel({
   );
 }
 
+function DeckMetadataLine({ runner, corp }: { runner: DeckPublicMetadata | undefined; corp: DeckPublicMetadata | undefined }) {
+  if (!runner && !corp) return null;
+  return (
+    <div className="deckMetadataLine">
+      {runner ? (
+        <span>
+          Runner: {runner.deckName} · {runner.deckHash}
+        </span>
+      ) : null}
+      {corp ? (
+        <span>
+          Corp: {corp.deckName} · {corp.deckHash}
+        </span>
+      ) : null}
+    </div>
+  );
+}
+
+function DeckEditorPanel({
+  templates,
+  localDecks,
+  selectedDeck,
+  validation,
+  validatedSnapshot,
+  playableCards,
+  addCardId,
+  importText,
+  exportText,
+  onCreateFromTemplate,
+  onSelectDeck,
+  onUpdateDeck,
+  onUpdateQuantity,
+  onAddCardId,
+  onAddCard,
+  onDuplicate,
+  onDelete,
+  onValidate,
+  onUseForMatch,
+  onExport,
+  onImportText,
+  onImport
+}: {
+  templates: DeckTemplate[];
+  localDecks: EditableDeck[];
+  selectedDeck: EditableDeck | null;
+  validation: DeckValidationResult | null;
+  validatedSnapshot: DeckSnapshot | null;
+  playableCards: CatalogCardSummary[];
+  addCardId: string;
+  importText: string;
+  exportText: string;
+  onCreateFromTemplate(templateId: string): void;
+  onSelectDeck(deckId: string): void;
+  onUpdateDeck(deck: EditableDeck): void;
+  onUpdateQuantity(cardId: string, quantity: number): void;
+  onAddCardId(cardId: string): void;
+  onAddCard(): void;
+  onDuplicate(): void;
+  onDelete(): void;
+  onValidate(): void;
+  onUseForMatch(): void;
+  onExport(): void;
+  onImportText(value: string): void;
+  onImport(): void;
+}) {
+  const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
+  const cardTitle = (cardId: string) => playableCards.find((card) => card.catalogCardId === cardId)?.title ?? cardId;
+  return (
+    <section className="deckPanel panel">
+      <div className="catalogHeader">
+        <div>
+          <h2>Decks</h2>
+          <p className="meta">
+            {localDecks.length} lokal · {templates.length} Templates
+          </p>
+        </div>
+        <Save size={18} />
+      </div>
+      <div className="deckTemplateRow">
+        {templates.map((template) => (
+          <button className={`button ${template.side === "corp" ? "corp" : ""}`} key={template.templateId} onClick={() => onCreateFromTemplate(template.templateId)}>
+            <CopyPlus size={15} />
+            {template.name}
+          </button>
+        ))}
+      </div>
+      <div className="deckWorkspace">
+        <div className="deckEditor">
+          <label>
+            Lokales Deck
+            <select value={selectedDeck?.deckId ?? ""} onChange={(event) => onSelectDeck(event.target.value)} disabled={localDecks.length === 0}>
+              <option value="">Kein lokales Deck</option>
+              {localDecks.map((deck) => (
+                <option value={deck.deckId} key={deck.deckId}>
+                  {deck.name}
+                </option>
+              ))}
+            </select>
+          </label>
+          {selectedDeck ? (
+            <>
+              <div className="deckFormGrid">
+                <label>
+                  Name
+                  <input value={selectedDeck.name} onChange={(event) => onUpdateDeck({ ...selectedDeck, name: event.target.value })} />
+                </label>
+                <label>
+                  Seite
+                  <input value={selectedDeck.side} readOnly />
+                </label>
+                <label>
+                  Karten
+                  <input value={totalCards} readOnly />
+                </label>
+                <label>
+                  Notiz
+                  <input value={selectedDeck.notes ?? ""} onChange={(event) => onUpdateDeck({ ...selectedDeck, notes: event.target.value })} />
+                </label>
+              </div>
+              <div className="deckCardList">
+                {selectedDeck.cards.map((entry) => (
+                  <div className="deckCardRow" key={entry.cardId}>
+                    <span>{cardTitle(entry.cardId)}</span>
+                    <input type="number" min={0} max={9} value={entry.quantity} onChange={(event) => onUpdateQuantity(entry.cardId, Number(event.target.value))} />
+                  </div>
+                ))}
+              </div>
+              <div className="deckAddRow">
+                <select value={addCardId} onChange={(event) => onAddCardId(event.target.value)}>
+                  <option value="">Karte hinzufügen</option>
+                  {playableCards.map((card) => (
+                    <option value={card.catalogCardId} key={card.catalogCardId}>
+                      {card.title}
+                    </option>
+                  ))}
+                </select>
+                <button className="button" onClick={onAddCard} disabled={!addCardId}>
+                  <Plus size={15} />
+                  Hinzufügen
+                </button>
+              </div>
+              <div className="deckActions">
+                <button className="button primary" onClick={onValidate}>
+                  <Check size={15} />
+                  Validieren
+                </button>
+                <button className="button" onClick={onUseForMatch} disabled={!validatedSnapshot}>
+                  <Play size={15} />
+                  Für Match
+                </button>
+                <button className="button" onClick={onExport}>
+                  <Download size={15} />
+                  Export
+                </button>
+                <button className="button" onClick={onDuplicate}>
+                  <CopyPlus size={15} />
+                  Duplizieren
+                </button>
+                <button className="button" onClick={onDelete}>
+                  <Trash2 size={15} />
+                  Löschen
+                </button>
+              </div>
+              <DeckValidationSummary validation={validation} snapshot={validatedSnapshot} />
+              {exportText ? <textarea className="deckTextArea" value={exportText} readOnly /> : null}
+            </>
+          ) : (
+            <p className="meta deckEmpty">Erstelle eine Kopie aus einem Template oder importiere ein lokales Deck.</p>
+          )}
+        </div>
+        <div className="deckImportBox">
+          <h3>Import</h3>
+          <textarea className="deckTextArea" value={importText} onChange={(event) => onImportText(event.target.value)} placeholder='{"schemaVersion":"editable-deck-v0.6","deck":...}' />
+          <button className="button wide" onClick={onImport} disabled={!importText.trim()}>
+            <Upload size={15} />
+            Importieren
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function DeckValidationSummary({ validation, snapshot }: { validation: DeckValidationResult | null; snapshot: DeckSnapshot | null }) {
+  if (!validation) return null;
+  return (
+    <div className={`deckValidation ${validation.ok ? "ok" : "bad"}`}>
+      <strong>{validation.ok ? "Validiert" : "Nicht valide"}</strong>
+      <span>
+        {validation.totalCards} Karten{validation.agendaPoints !== null ? ` · ${validation.agendaPoints} Agenda Points` : ""}
+      </span>
+      {snapshot ? <small>{snapshot.deckHash}</small> : null}
+      {[...validation.errors, ...validation.warnings].map((message) => (
+        <small key={message}>{message}</small>
+      ))}
+    </div>
+  );
+}
+
 function StatusBadges({ statuses, compact = false }: { statuses: CatalogStatuses; compact?: boolean }) {
   return (
     <div className={`statusBadges ${compact ? "compact" : ""}`}>
@@ -862,6 +1408,12 @@ function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
         <Stat label="Agenda" value={view.own.agendaPoints} />
         <Stat label="Tags" value={visibleTags} />
       </div>
+      {view.deckMetadata ? (
+        <div className="deckMini">
+          <span>{view.deckMetadata.own.deckName}</span>
+          <small>{view.deckMetadata.own.deckHash}</small>
+        </div>
+      ) : null}
       <p className="meta statusLine">{view.activeSide === view.side ? "Aktiv" : "Wartet"} · {view.timingPoint}</p>
     </section>
   );

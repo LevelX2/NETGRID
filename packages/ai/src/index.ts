@@ -1,5 +1,5 @@
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, replayEvents } from "@netrunner/engine";
-import type { AiDecision, AiDecisionInput, AiDifficulty, GameState, LegalAction, PublicGameEvent, Side } from "@netrunner/shared";
+import type { AiDecision, AiDecisionInput, AiDifficulty, DeckDefinition, DeckPublicMetadata, GameState, LegalAction, PublicGameEvent, Side } from "@netrunner/shared";
 
 type RankedChoice = {
   action: LegalAction | undefined;
@@ -18,6 +18,10 @@ export type AiSimulationConfig = {
   corpProfileId?: string;
   runnerDeckId?: "demo_runner_001" | "demo_runner_004";
   corpDeckId?: "demo_corp_001" | "demo_corp_004";
+  runnerDeck?: DeckDefinition;
+  corpDeck?: DeckDefinition;
+  runnerDeckMetadata?: DeckPublicMetadata;
+  corpDeckMetadata?: DeckPublicMetadata;
 };
 
 export type AiSimulationSummary = {
@@ -149,6 +153,10 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
     agendaPointsToWin: config.agendaPointsToWin ?? 6,
     ...(config.runnerDeckId ? { runnerDeckId: config.runnerDeckId } : {}),
     ...(config.corpDeckId ? { corpDeckId: config.corpDeckId } : {}),
+    ...(config.runnerDeck ? { runnerDeck: config.runnerDeck } : {}),
+    ...(config.corpDeck ? { corpDeck: config.corpDeck } : {}),
+    ...(config.runnerDeckMetadata ? { runnerDeckMetadata: config.runnerDeckMetadata } : {}),
+    ...(config.corpDeckMetadata ? { corpDeckMetadata: config.corpDeckMetadata } : {}),
     controllers: {
       runner: {
         controllerId: "runner-ai",
@@ -221,8 +229,12 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
     replayErrors: replay.errors,
     actionSequence,
     errors,
-    cardPoolVersion: config.runnerDeckId === "demo_runner_004" || config.corpDeckId === "demo_corp_004" ? "0.4.0" : "0.1.0"
+    cardPoolVersion: usesExpandedCardPool(config) ? "0.4.0" : "0.1.0"
   };
+}
+
+function usesExpandedCardPool(config: AiSimulationConfig): boolean {
+  return Boolean(config.runnerDeck || config.corpDeck || config.runnerDeckId === "demo_runner_004" || config.corpDeckId === "demo_corp_004");
 }
 
 function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): AiDecision {

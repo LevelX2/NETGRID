@@ -26,6 +26,9 @@ importers:
       '@netrunner/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@netrunner/decks':
+        specifier: workspace:*
+        version: link:../../packages/decks
       '@netrunner/engine':
         specifier: workspace:*
         version: link:../../packages/engine
@@ -51,6 +54,9 @@ importers:
       '@netrunner/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
+      '@netrunner/decks':
+        specifier: workspace:*
+        version: link:../../packages/decks
       '@netrunner/engine':
         specifier: workspace:*
         version: link:../../packages/engine
@@ -87,6 +93,12 @@ importers:
         version: link:../shared
 
   packages/catalog: {}
+
+  packages/decks:
+    dependencies:
+      '@netrunner/catalog':
+        specifier: workspace:*
+        version: link:../catalog
 
   packages/engine:
     dependencies:

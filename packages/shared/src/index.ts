@@ -87,11 +87,20 @@ export type CardDefinition = {
 };
 
 export type DeckDefinition = {
-  id: DemoDeckId;
+  id: string;
   name: string;
   side: Side;
   identity: CardDefinitionId;
   cards: Array<{ id: CardDefinitionId; quantity: number }>;
+};
+
+export type DeckPublicMetadata = {
+  side: Side;
+  identityCardId: CardDefinitionId;
+  deckName: string;
+  cardPoolSnapshotId: string;
+  formatProfileId: string;
+  deckHash: string;
 };
 
 export type RulesBaseline = {
@@ -124,6 +133,10 @@ export type CreateGameConfig = {
   baseline?: RulesBaseline;
   runnerDeckId?: "demo_runner_001" | "demo_runner_004";
   corpDeckId?: "demo_corp_001" | "demo_corp_004";
+  runnerDeck?: DeckDefinition;
+  corpDeck?: DeckDefinition;
+  runnerDeckMetadata?: DeckPublicMetadata;
+  corpDeckMetadata?: DeckPublicMetadata;
   agendaPointsToWin?: number;
   controllers?: {
     runner: PlayerController;
@@ -235,6 +248,10 @@ export type GameState = {
   eventLog: GameEvent[];
   winner: Winner | null;
   agendaPointsToWin: number;
+  deckMetadata?: {
+    runner: DeckPublicMetadata;
+    corp: DeckPublicMetadata;
+  };
   run?: RunState;
 };
 
@@ -364,6 +381,10 @@ export type PlayerView = {
     phase: RunState["phase"];
     encounteredIce?: VisibleCard;
     successful: boolean;
+  };
+  deckMetadata?: {
+    own: DeckPublicMetadata;
+    opponent: DeckPublicMetadata;
   };
   publicEvents: PublicGameEvent[];
   legalActions: LegalAction[];

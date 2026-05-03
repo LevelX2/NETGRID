@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { catalogDetailResponse, catalogListResponse, catalogStatusSummaryResponse } from "../../apps/web/app/api/cards/catalog-data";
+import { deckSnapshotsResponse, deckTemplatesResponse } from "../../apps/web/app/api/decks/deck-data";
 
 describe("Client visibility contract", () => {
   it("keeps the browser page away from full GameState and engine authority", () => {
@@ -12,8 +13,9 @@ describe("Client visibility contract", () => {
     expect(page).toContain("submit_action");
     expect(page).toContain("PlayerView");
     expect(page).toContain("window.sessionStorage");
-    expect(page).not.toContain("window.localStorage.setItem");
-    expect(page).not.toContain("window.localStorage.getItem");
+    expect(page).toContain("DECK_STORAGE_KEY");
+    expect(page).not.toContain("window.localStorage.setItem(SESSION_KEY");
+    expect(page).not.toContain("window.localStorage.getItem(SESSION_KEY");
   });
 
   it("returns PlayerView payloads from the web game API", () => {
@@ -34,6 +36,18 @@ describe("Client visibility contract", () => {
     const serialized = JSON.stringify(payloads);
     expect(serialized).toContain("catalog_preview_operation_001");
     expect(serialized).toContain("catalog_preview_resource_001");
+    expect(serialized).not.toContain("cardInstances");
+    expect(serialized).not.toContain("privatePayload");
+    expect(serialized).not.toContain("sessionToken");
+    expect(serialized).not.toContain("reconnectToken");
+    expect(serialized).not.toContain("joinToken");
+    expect(serialized).not.toContain("stateSnapshots");
+    expect(serialized).not.toContain("undoSnapshots");
+  });
+
+  it("keeps deck API payloads free of match and token data", () => {
+    const serialized = JSON.stringify([deckTemplatesResponse().body, deckSnapshotsResponse().body]);
+    expect(serialized).toContain("demo_runner_004_snapshot_v0_6");
     expect(serialized).not.toContain("cardInstances");
     expect(serialized).not.toContain("privatePayload");
     expect(serialized).not.toContain("sessionToken");

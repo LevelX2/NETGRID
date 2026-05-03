@@ -10,6 +10,7 @@ import {
   type CorpServer,
   type CreateGameConfig,
   type DeckDefinition,
+  type DeckPublicMetadata,
   type DemoDeckId,
   type EngineError,
   type EngineResult,
@@ -48,6 +49,7 @@ export type {
   CorpServer,
   CreateGameConfig,
   DeckDefinition,
+  DeckPublicMetadata,
   DemoDeckId,
   EngineError,
   EngineResult,
@@ -77,9 +79,11 @@ export function createGame(config: CreateGameConfig = {}): GameState {
   const instances: Record<CardInstanceId, CardInstance> = {};
   const runnerDeckId = config.runnerDeckId ?? "demo_runner_001";
   const corpDeckId = config.corpDeckId ?? "demo_corp_001";
-  const runnerDeckDefinition = DEMO_DECKS[runnerDeckId];
-  const corpDeckDefinition = DEMO_DECKS[corpDeckId];
-  const expandedCardPool = runnerDeckId === "demo_runner_004" || corpDeckId === "demo_corp_004";
+  const runnerDeckDefinition = config.runnerDeck ?? DEMO_DECKS[runnerDeckId];
+  const corpDeckDefinition = config.corpDeck ?? DEMO_DECKS[corpDeckId];
+  const expandedCardPool = usesExpandedCardPool(runnerDeckDefinition) || usesExpandedCardPool(corpDeckDefinition);
+  const runnerDeckMetadata = config.runnerDeckMetadata ?? metadataForDeck(runnerDeckDefinition, expandedCardPool);
+  const corpDeckMetadata = config.corpDeckMetadata ?? metadataForDeck(corpDeckDefinition, expandedCardPool);
 
   const runnerIdentity = createInstance("runner", runnerDeckDefinition.identity, 0, {
     side: "runner",
@@ -146,7 +150,11 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     cardInstances: instances,
     eventLog: [],
     winner: null,
-    agendaPointsToWin: config.agendaPointsToWin ?? (expandedCardPool ? 7 : 6)
+    agendaPointsToWin: config.agendaPointsToWin ?? (expandedCardPool ? 7 : 6),
+    deckMetadata: {
+      runner: runnerDeckMetadata,
+      corp: corpDeckMetadata
+    }
   };
 
   const initialHash = hashState(state);
@@ -158,8 +166,10 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     stateHashAfter: initialHash,
     publicPayload: {
       baseline: state.baseline,
-      runnerDeckId,
-      corpDeckId,
+      runnerDeckId: runnerDeckDefinition.id,
+      corpDeckId: corpDeckDefinition.id,
+      runnerDeck: runnerDeckMetadata,
+      corpDeck: corpDeckMetadata,
       agendaPointsToWin: state.agendaPointsToWin
     }
   });
@@ -296,6 +306,14 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
         },
     servers: visibleServers,
     ...(run ? { run } : {}),
+    ...(state.deckMetadata
+      ? {
+          deckMetadata: {
+            own: side === "runner" ? state.deckMetadata.runner : state.deckMetadata.corp,
+            opponent: side === "runner" ? state.deckMetadata.corp : state.deckMetadata.runner
+          }
+        }
+      : {}),
     publicEvents: state.eventLog.map(toPublicEvent),
     legalActions: getLegalActions(state, side),
     winner: state.winner
@@ -345,7 +363,7 @@ export function validateDeckDefinition(
   deck: DeckDefinition,
   options: {
     expectedSide?: Side;
-    allowedDeckIds?: DemoDeckId[];
+    allowedDeckIds?: string[];
     minimumAgendaPoints?: number;
   } = {}
 ): ValidationResult {
@@ -1129,6 +1147,34 @@ function expandDeck(side: Side, cards: Array<{ id: string; quantity: number }>, 
     }
   }
   return ids;
+}
+
+function usesExpandedCardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_004") || deck.id.includes("_0_6")) return true;
+  return deck.cards.some((card) =>
+    [
+      "simple_draw_event",
+      "simple_setup_hardware",
+      "efficient_fracter",
+      "simple_priority_agenda",
+      "simple_draw_operation",
+      "simple_taxing_barrier_ice",
+      "simple_upgrade",
+      "simple_tag_ice",
+      "simple_tag_punishment_operation"
+    ].includes(card.id)
+  );
+}
+
+function metadataForDeck(deck: DeckDefinition, expandedCardPool: boolean): DeckPublicMetadata {
+  return {
+    side: deck.side,
+    identityCardId: deck.identity,
+    deckName: deck.name,
+    cardPoolSnapshotId: expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
+    formatProfileId: expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
+    deckHash: `legacy:${deck.id}`
+  };
 }
 
 function createInstance(side: Side, definitionId: string, copy: number, zone: CardInstance["zone"]): CardInstance {

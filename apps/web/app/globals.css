@@ -427,6 +427,174 @@ select {
   padding: 12px;
 }
 
+.deckPanel {
+  width: min(980px, 100%);
+}
+
+.deckMetadataLine {
+  grid-column: 1 / -1;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #12181d;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.deckTemplateRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.deckTemplateRow .button {
+  height: auto;
+  min-height: 36px;
+  justify-content: flex-start;
+  white-space: normal;
+  text-align: left;
+}
+
+.deckWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 320px);
+  gap: 12px;
+  padding: 14px;
+}
+
+.deckEditor,
+.deckImportBox {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.deckEditor label,
+.deckImportBox label {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.deckFormGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.deckCardList {
+  display: grid;
+  max-height: 280px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.deckCardRow,
+.deckAddRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 72px;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.deckCardRow:last-child {
+  border-bottom: 0;
+}
+
+.deckCardRow span {
+  overflow-wrap: anywhere;
+}
+
+.deckCardRow input {
+  text-align: center;
+}
+
+.deckAddRow {
+  grid-template-columns: minmax(0, 1fr) auto;
+  border: 0;
+  padding: 0;
+}
+
+.deckActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.deckValidation {
+  display: grid;
+  gap: 4px;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #12181d;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.deckValidation.ok {
+  border-color: #426d49;
+}
+
+.deckValidation.bad {
+  border-color: #704044;
+}
+
+.deckValidation strong {
+  color: var(--text);
+}
+
+.deckValidation small {
+  color: var(--muted);
+}
+
+.deckTextArea {
+  width: 100%;
+  min-height: 118px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 8px;
+  font: 12px Consolas, "Courier New", monospace;
+}
+
+.deckImportBox h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.deckEmpty {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #12181d;
+}
+
+.deckMini {
+  display: grid;
+  gap: 3px;
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.deckMini span {
+  color: var(--text);
+}
+
 .simulationResult {
   display: grid;
   gap: 8px;
@@ -694,7 +862,10 @@ select {
   }
 
   .catalogControls,
-  .catalogLayout {
+  .catalogLayout,
+  .deckWorkspace,
+  .deckCardRow,
+  .deckAddRow {
     grid-template-columns: 1fr;
   }
 

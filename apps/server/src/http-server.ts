@@ -12,6 +12,7 @@ import {
   type SubmitActionResult,
   type UndoResult
 } from "./multiplayer";
+import { defaultAgendaPointsToWin, resolveDeckSetup, type MatchDeckSelectionInput } from "./deck-setup";
 import type { Side } from "@netrunner/shared";
 import type { AiDifficulty } from "@netrunner/shared";
 
@@ -312,6 +313,7 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       if (typeof body.seed === "string") createInput.seed = body.seed;
       if (isDifficulty(body.runnerDifficulty)) createInput.runnerDifficulty = body.runnerDifficulty;
       if (isDifficulty(body.corpDifficulty)) createInput.corpDifficulty = body.corpDifficulty;
+      Object.assign(createInput, deckSelectionFromBody(body));
       if (typeof body.settings === "object" && body.settings) {
         const settings = body.settings as Record<string, unknown>;
         if (typeof settings.agendaPointsToWin === "number") createInput.settings = { agendaPointsToWin: settings.agendaPointsToWin };
@@ -329,8 +331,18 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       if (typeof body.agendaPointsToWin === "number") config.agendaPointsToWin = Math.max(1, Math.floor(body.agendaPointsToWin));
       if (isDifficulty(body.runnerDifficulty)) config.runnerDifficulty = body.runnerDifficulty;
       if (isDifficulty(body.corpDifficulty)) config.corpDifficulty = body.corpDifficulty;
-      if (body.runnerDeckId === "demo_runner_001" || body.runnerDeckId === "demo_runner_004") config.runnerDeckId = body.runnerDeckId;
-      if (body.corpDeckId === "demo_corp_001" || body.corpDeckId === "demo_corp_004") config.corpDeckId = body.corpDeckId;
+      const deckSelection = deckSelectionFromBody(body);
+      if (Object.keys(deckSelection).length > 0) {
+        const deckSetup = resolveDeckSetup(deckSelection);
+        config.runnerDeck = deckSetup.runnerDeck;
+        config.corpDeck = deckSetup.corpDeck;
+        config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
+        config.corpDeckMetadata = deckSetup.corpSnapshot.publicMetadata;
+        config.agendaPointsToWin = config.agendaPointsToWin ?? defaultAgendaPointsToWin(deckSetup);
+      } else {
+        if (body.runnerDeckId === "demo_runner_001" || body.runnerDeckId === "demo_runner_004") config.runnerDeckId = body.runnerDeckId;
+        if (body.corpDeckId === "demo_corp_001" || body.corpDeckId === "demo_corp_004") config.corpDeckId = body.corpDeckId;
+      }
       sendJson(response, 200, { mode: "ai_vs_ai", summary: simulateAiGame(config) });
       return;
     }
@@ -437,4 +449,13 @@ function opposite(side: Side): Side {
 
 function isDifficulty(value: unknown): value is AiDifficulty {
   return value === "easy" || value === "normal" || value === "hard";
+}
+
+function deckSelectionFromBody(body: Record<string, unknown>): MatchDeckSelectionInput {
+  const selection: MatchDeckSelectionInput = {};
+  if (typeof body.runnerDeckSnapshotId === "string") selection.runnerDeckSnapshotId = body.runnerDeckSnapshotId;
+  if (typeof body.corpDeckSnapshotId === "string") selection.corpDeckSnapshotId = body.corpDeckSnapshotId;
+  if (body.runnerDeckSnapshot && typeof body.runnerDeckSnapshot === "object") selection.runnerDeckSnapshot = body.runnerDeckSnapshot as NonNullable<MatchDeckSelectionInput["runnerDeckSnapshot"]>;
+  if (body.corpDeckSnapshot && typeof body.corpDeckSnapshot === "object") selection.corpDeckSnapshot = body.corpDeckSnapshot as NonNullable<MatchDeckSelectionInput["corpDeckSnapshot"]>;
+  return selection;
 }
