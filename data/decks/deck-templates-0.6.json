@@ -1,0 +1,177 @@
+{
+  "schemaVersion": "deck-templates-v0.6",
+  "id": "deck-templates-0.6",
+  "status": "frozen_for_v0.6_requirements",
+  "cardPoolSnapshotId": "card-snapshot-0.5",
+  "formatProfileId": "local-demo-v0.6",
+  "templates": [
+    {
+      "templateId": "demo_corp_001_template_v0_6",
+      "sourceDeckId": "demo_corp_001",
+      "name": "Corp Demo Deck 01 - Build & Score",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "editableCopyAllowed": true,
+      "versionedTemplate": true,
+      "cards": [
+        {
+          "cardId": "simple_agenda",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_economy_operation",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_economy_asset",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_barrier_ice",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_code_gate_ice",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_sentry_ice",
+          "quantity": 3
+        }
+      ]
+    },
+    {
+      "templateId": "demo_corp_004_template_v0_6",
+      "sourceDeckId": "demo_corp_004",
+      "name": "Corp Demo Deck 04 - Build, Tax & Tag",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "editableCopyAllowed": true,
+      "versionedTemplate": true,
+      "cards": [
+        {
+          "cardId": "simple_agenda",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_priority_agenda",
+          "quantity": 1
+        },
+        {
+          "cardId": "simple_economy_operation",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_draw_operation",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_economy_asset",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_upgrade",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_barrier_ice",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_taxing_barrier_ice",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_code_gate_ice",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_sentry_ice",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_tag_ice",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_tag_punishment_operation",
+          "quantity": 2
+        }
+      ]
+    },
+    {
+      "templateId": "demo_runner_001_template_v0_6",
+      "sourceDeckId": "demo_runner_001",
+      "name": "Runner Demo Deck 01 - Run & Steal",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "editableCopyAllowed": true,
+      "versionedTemplate": true,
+      "cards": [
+        {
+          "cardId": "simple_economy_event",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_run_event",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_fracter",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_decoder",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_killer",
+          "quantity": 2
+        }
+      ]
+    },
+    {
+      "templateId": "demo_runner_004_template_v0_6",
+      "sourceDeckId": "demo_runner_004",
+      "name": "Runner Demo Deck 04 - Setup & Pressure",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "editableCopyAllowed": true,
+      "versionedTemplate": true,
+      "cards": [
+        {
+          "cardId": "simple_economy_event",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_run_event",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_draw_event",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_setup_hardware",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_fracter",
+          "quantity": 2
+        },
+        {
+          "cardId": "efficient_fracter",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_decoder",
+          "quantity": 2
+        },
+        {
+          "cardId": "simple_killer",
+          "quantity": 2
+        }
+      ]
+    }
+  ]
+}

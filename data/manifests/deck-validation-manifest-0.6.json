@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "deck-validation-manifest-v0.6",
+  "id": "deck-validation-manifest-0.6",
+  "status": "frozen_for_v0.6_requirements",
+  "cardPoolSnapshotId": "card-snapshot-0.5",
+  "formatProfileId": "local-demo-v0.6",
+  "rules": {
+    "generalDeckModelBeyondDemoDeckId": true,
+    "editableDecksAreNotMatchDecks": true,
+    "matchStartRequiresValidatedImmutableSnapshots": true,
+    "opponentDecklistsPrivateByDefault": true,
+    "publicOpponentMetadataOnly": [
+      "side",
+      "identityCardId",
+      "deckName",
+      "cardPoolSnapshotId",
+      "formatProfileId",
+      "deckHash"
+    ],
+    "deckLegalRequiresPlayable": true,
+    "serverRevalidatesMatchStart": true
+  },
+  "snapshots": [
+    {
+      "deckSnapshotId": "demo_corp_001_snapshot_v0_6",
+      "sourceDeckId": "demo_corp_001",
+      "side": "corp",
+      "deckHash": "fnv1a:4d48ca27",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 18,
+        "agendaPoints": 6
+      },
+      "publicMetadata": {
+        "side": "corp",
+        "identityCardId": "corp_identity_001",
+        "deckName": "Corp Demo Deck 01 - Build & Score",
+        "cardPoolSnapshotId": "card-snapshot-0.5",
+        "formatProfileId": "local-demo-v0.6",
+        "deckHash": "fnv1a:4d48ca27"
+      }
+    },
+    {
+      "deckSnapshotId": "demo_corp_004_snapshot_v0_6",
+      "sourceDeckId": "demo_corp_004",
+      "side": "corp",
+      "deckHash": "fnv1a:d77d0873",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Uses MVP 0.4 expanded local demo card pool."
+        ],
+        "totalCards": 24,
+        "agendaPoints": 7
+      },
+      "publicMetadata": {
+        "side": "corp",
+        "identityCardId": "corp_identity_001",
+        "deckName": "Corp Demo Deck 04 - Build, Tax & Tag",
+        "cardPoolSnapshotId": "card-snapshot-0.5",
+        "formatProfileId": "local-demo-v0.6",
+        "deckHash": "fnv1a:d77d0873"
+      }
+    },
+    {
+      "deckSnapshotId": "demo_runner_001_snapshot_v0_6",
+      "sourceDeckId": "demo_runner_001",
+      "side": "runner",
+      "deckHash": "fnv1a:6ec6785c",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 12,
+        "agendaPoints": null
+      },
+      "publicMetadata": {
+        "side": "runner",
+        "identityCardId": "runner_identity_001",
+        "deckName": "Runner Demo Deck 01 - Run & Steal",
+        "cardPoolSnapshotId": "card-snapshot-0.5",
+        "formatProfileId": "local-demo-v0.6",
+        "deckHash": "fnv1a:6ec6785c"
+      }
+    },
+    {
+      "deckSnapshotId": "demo_runner_004_snapshot_v0_6",
+      "sourceDeckId": "demo_runner_004",
+      "side": "runner",
+      "deckHash": "fnv1a:b6bc479a",
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          "Uses MVP 0.4 expanded local demo card pool."
+        ],
+        "totalCards": 19,
+        "agendaPoints": null
+      },
+      "publicMetadata": {
+        "side": "runner",
+        "identityCardId": "runner_identity_001",
+        "deckName": "Runner Demo Deck 04 - Setup & Pressure",
+        "cardPoolSnapshotId": "card-snapshot-0.5",
+        "formatProfileId": "local-demo-v0.6",
+        "deckHash": "fnv1a:b6bc479a"
+      }
+    }
+  ],
+  "gateAssertions": {
+    "allSnapshotsValid": true,
+    "allSnapshotsImmutable": true,
+    "noImportOnlyCardsDeckLegal": true,
+    "publicMetadataHasNoCardLists": true,
+    "opponentDecklistsPrivateByDefault": true
+  }
+}

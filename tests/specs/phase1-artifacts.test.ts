@@ -42,6 +42,13 @@ const MVP_0_5_DATA_FILES = [
   "data/manifests/card-catalog-status-0.5.json"
 ];
 
+const MVP_0_6_DATA_FILES = [
+  "data/decks/deck-format-profiles-0.6.json",
+  "data/decks/deck-templates-0.6.json",
+  "data/decks/deck-snapshots-0.6.json",
+  "data/manifests/deck-validation-manifest-0.6.json"
+];
+
 const REQUIRED_MVP_0_4_SCENARIOS = [
   "v04-safe-card-batch-smoke.json",
   "v04-tag-runner-and-remove-tag.json",
@@ -50,6 +57,7 @@ const REQUIRED_MVP_0_4_SCENARIOS = [
 ];
 
 const REQUIRED_MVP_0_5_MUST_IDS = Array.from({ length: 10 }, (_, index) => `V05-MUST-${String(index + 1).padStart(3, "0")}`);
+const REQUIRED_MVP_0_6_MUST_IDS = Array.from({ length: 11 }, (_, index) => `V06-MUST-${String(index + 1).padStart(3, "0")}`);
 
 describe("Phase 1 derived artifacts", () => {
   it("keeps all MVP 0.1 JSON data artifacts parseable", () => {
@@ -204,6 +212,56 @@ describe("Phase 1 derived artifacts", () => {
     const review = readFileSync("docs/derived/MVP_0.5_REQUIREMENTS_REVIEW.md", "utf8");
 
     for (const requirementId of REQUIRED_MVP_0_5_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(review).toContain("ready_for_implementation: true");
+  });
+
+  it("keeps MVP 0.6 deck artifacts parseable and valid", () => {
+    for (const file of MVP_0_6_DATA_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+
+    const manifest = JSON.parse(readFileSync("data/manifests/deck-validation-manifest-0.6.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      snapshots: Array<{
+        validation: { ok: boolean };
+        publicMetadata: Record<string, unknown>;
+      }>;
+    };
+    expect(manifest.gateAssertions?.allSnapshotsValid).toBe(true);
+    expect(manifest.gateAssertions?.allSnapshotsImmutable).toBe(true);
+    expect(manifest.gateAssertions?.noImportOnlyCardsDeckLegal).toBe(true);
+    expect(manifest.gateAssertions?.publicMetadataHasNoCardLists).toBe(true);
+    expect(manifest.snapshots.every((snapshot) => snapshot.validation.ok)).toBe(true);
+    expect(manifest.snapshots.every((snapshot) => !Object.hasOwn(snapshot.publicMetadata, "cards"))).toBe(true);
+  });
+
+  it("keeps MVP 0.6 deck snapshot hashes deterministic", () => {
+    const snapshotSet = JSON.parse(readFileSync("data/decks/deck-snapshots-0.6.json", "utf8")) as {
+      snapshots: Array<{
+        deckHash: string;
+        publicMetadata: { deckHash: string };
+      }>;
+    };
+    expect(snapshotSet.snapshots.length).toBe(4);
+    for (const snapshot of snapshotSet.snapshots) {
+      const hashInput = structuredClone(snapshot);
+      hashInput.deckHash = "pending";
+      hashInput.publicMetadata.deckHash = "pending";
+      const expected = fnv1a(stableStringify(hashInput));
+      expect(snapshot.deckHash).toBe(expected);
+      expect(snapshot.publicMetadata.deckHash).toBe(expected);
+    }
+  });
+
+  it("maps every MVP 0.6 Must requirement to test coverage", () => {
+    const requirements = readFileSync("docs/derived/MVP_0.6_REQUIREMENTS.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.6_TEST_MATRIX.md", "utf8");
+    const review = readFileSync("docs/derived/MVP_0.6_REQUIREMENTS_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_6_MUST_IDS) {
       expect(requirements, requirementId).toContain(requirementId);
       expect(testMatrix, requirementId).toContain(requirementId);
     }

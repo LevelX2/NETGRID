@@ -39,6 +39,8 @@
 - MVP 0.5 Card Import und Card Catalog wurden implementiert: `@netrunner/catalog`, deterministische Snapshot-/Indexlogik, read-only Katalog-API, funktionale Katalogansicht, Visibility-Vertragstest und Browser-Smoke.
 - MVP 0.5 Implementierungsgate ist bestanden: `ready_for_hardening: true`.
 - MVP 0.5 Validierung, Hardening und Dokumentation sind abgeschlossen. Final Gate: `MVP_0.5_done: true`; `ready_for_MVP_0.6_requirements: true`.
+- MVP 0.6 Requirements wurden eingefroren: Deckeditor-Spezifikation, Deckvalidierung v2, Match-Setup-Spezifikation, Deck-Storage-Spezifikation, Testmatrix, Requirements Review, lokales Formatprofil, Decktemplates, vier validierte Deck-Snapshots und Validierungsmanifest liegen vor.
+- MVP 0.6 Requirements Gate ist bestanden: `ready_for_implementation: true`.
 
 ## Teilweise umgesetzt
 
@@ -54,7 +56,7 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1/0.2/0.3/0.4-Arbeitsschritt ist offen.
-- Der nächste gate-basierte Schritt ist MVP 0.6 Requirements Freeze: Deck Editor und Match Setup Foundation.
+- Der nächste gate-basierte Schritt ist MVP 0.6 Implementierung: Deckmodell, lokale Decks, Validierung v2, Snapshots, Deckeditor und Match Setup.
 - Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Die Detailplanung liegt vor, Requirements und UI-Spezifikationen sind aber noch nicht eingefroren.

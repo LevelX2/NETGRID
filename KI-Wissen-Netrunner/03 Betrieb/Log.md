@@ -127,3 +127,9 @@ Checks: `corepack pnpm install`, `corepack pnpm --filter @netrunner/catalog test
 MVP 0.5 wurde final validiert und dokumentiert. Der Final Review bestätigt: importierte Karten werden nicht automatisch spielbar, die Katalog-API gibt keine Match-/Token-/FullState-/Hidden-Info-Daten aus, bestehende Engine-/AI-/Server-/Visibility-/Replay-Gates bleiben grün und V0.7-UI-Redesign wurde nicht begonnen.
 
 Finale Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, Katalog-API-Smoke, Katalog-Payload-Leak-Scan und Browser-Katalog-Smoke bestanden. Gate-Ergebnis: `MVP_0.5_done: true`; `ready_for_MVP_0.6_requirements: true`.
+
+## [2026-05-03] phase-0.6-req | MVP 0.6 Requirements eingefroren
+
+Die V0.6-Requirements für Deck Editor und Match Setup Foundation wurden abgeleitet und reviewfähig eingefroren. Erstellt wurden Spezifikationen für Deckeditor, Deckvalidierung v2, Match Setup und Deck Storage sowie Testmatrix und Requirements Review. Die Datenartefakte umfassen lokales Formatprofil, Decktemplates, vier immutable Demo-Deck-Snapshots mit deterministischen Hashes und ein Validierungsmanifest.
+
+Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`. V0.6 darf implementiert werden; V0.7-UI-Redesign, offizielle Turnierlegalität, nicht implementierte Karten und öffentliche Plattformfunktionen bleiben ausgeschlossen.

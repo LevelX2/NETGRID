@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "deck-format-profiles-v0.6",
+  "id": "deck-format-profiles-0.6",
+  "status": "frozen_for_v0.6_requirements",
+  "profiles": [
+    {
+      "profileId": "local-demo-v0.6",
+      "name": "Local Demo V0.6",
+      "cardPoolSnapshotId": "card-snapshot-0.5",
+      "rulesBaselineIds": [
+        "rules-baseline-mvp-0.1",
+        "rules-baseline-mvp-0.4"
+      ],
+      "allowedCardStatuses": [
+        "playable",
+        "deck_legal"
+      ],
+      "maxCopiesPerCard": 3,
+      "minimumDeckCards": {
+        "runner": 12,
+        "corp": 18
+      },
+      "minimumAgendaPoints": {
+        "corp": 6
+      },
+      "requireIdentity": true,
+      "allowedIdentityCards": {
+        "runner": [
+          "runner_identity_001"
+        ],
+        "corp": [
+          "corp_identity_001"
+        ]
+      },
+      "hiddenInfoPolicy": {
+        "opponentDecklistPrivateByDefault": true,
+        "publicMetadataFields": [
+          "side",
+          "identityCardId",
+          "deckName",
+          "cardPoolSnapshotId",
+          "formatProfileId",
+          "deckHash"
+        ]
+      },
+      "nonGoals": [
+        "official_tournament_legality",
+        "rotation",
+        "banlist",
+        "full_influence_rules",
+        "cloud_sync"
+      ]
+    }
+  ]
+}

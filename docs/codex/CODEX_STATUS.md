@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.5 executable requirements complete. V0.5 card import and catalog implementation may start.
+MVP 0.6 deck editor and match setup requirements complete. V0.6 implementation may start.
 
 ## Status
 
@@ -68,6 +68,10 @@ MVP 0.5 validation, hardening and documentation are complete.
 
 `ready_for_MVP_0.6_requirements: true`
 
+MVP 0.6 deck editor and match setup requirements are complete.
+
+`ready_for_implementation: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -88,6 +92,7 @@ Gate flow:
 12. MVP 0.5 executable requirements: pass.
 13. MVP 0.5 implementation: pass.
 14. MVP 0.5 validation, hardening and documentation: pass.
+15. MVP 0.6 executable requirements: pass.
 
 ## Phase 1 files created or updated
 
@@ -483,6 +488,36 @@ The implementation preserves the V0.5 safety boundary: catalog data is read-only
 
 `ready_for_MVP_0.6_requirements: true`
 
+## MVP 0.6 Requirements files created or updated
+
+- `docs/derived/MVP_0.6_REQUIREMENTS.md`
+- `docs/derived/DECK_EDITOR_0.6_SPEC.md`
+- `docs/derived/DECK_VALIDATION_0.6_SPEC.md`
+- `docs/derived/MATCH_SETUP_0.6_SPEC.md`
+- `docs/derived/DECK_STORAGE_0.6_SPEC.md`
+- `docs/derived/MVP_0.6_TEST_MATRIX.md`
+- `docs/derived/MVP_0.6_REQUIREMENTS_REVIEW.md`
+- `data/decks/deck-format-profiles-0.6.json`
+- `data/decks/deck-templates-0.6.json`
+- `data/decks/deck-snapshots-0.6.json`
+- `data/manifests/deck-validation-manifest-0.6.json`
+- `tests/specs/deck-editor-0.6-acceptance-tests.todo.md`
+- `tests/specs/phase1-artifacts.test.ts`
+
+## MVP 0.6 Requirements checks
+
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 12 artifact tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 47 package tests plus 15 root spec tests.
+- `corepack pnpm build`: pass.
+
+## MVP 0.6 Requirements gate
+
+`ready_for_implementation: true`
+
+V0.6 starts from V0.5 catalog status and versioned demo decks. The requirements freeze defines a general deck model, local format profile, immutable deck snapshots, deterministic deck hashes, private opponent decklists by default, server-side match-start revalidation and functional deck editor/match setup scope only.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -529,7 +564,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Next gate: MVP 0.6 requirements freeze for deck editor and match setup foundation.
+Next gate: MVP 0.6 implementation for deck editor and match setup foundation.
 
 Detailed planning artifacts available:
 
