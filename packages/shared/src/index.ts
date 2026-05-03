@@ -335,8 +335,14 @@ export type VisibleCard = {
   definitionId?: CardDefinitionId;
   type?: CardType;
   subtypes?: string[];
+  rulesText?: string;
+  cost?: number;
+  installCost?: number;
+  memoryCost?: number;
+  rezCost?: number;
   rezzed?: boolean;
   advancementCounters?: number;
+  advancementRequirement?: number;
   strength?: number;
   agendaPoints?: number;
   trashCost?: number;

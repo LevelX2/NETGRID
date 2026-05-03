@@ -234,6 +234,39 @@ const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
   blocked: "blocked"
 };
 
+const CATALOG_NUMERIC_LABELS: Record<string, string> = {
+  cost: "Kosten",
+  installCost: "Install",
+  memoryCost: "MU",
+  strength: "Stärke",
+  rezCost: "Rez",
+  trashCost: "Trash",
+  advancementRequirement: "Fortschritt",
+  agendaPoints: "Agenda"
+};
+
+function catalogDetailLines(card: CatalogCardDetail): string[] {
+  const typeLine = [card.side, card.type, card.subtypes.join(" / ")].filter(Boolean).join(" · ");
+  const numberLine = Object.entries(CATALOG_NUMERIC_LABELS)
+    .map(([key, label]) => {
+      const value = card.numeric[key];
+      return value === null || value === undefined ? null : `${label} ${value}`;
+    })
+    .filter(Boolean)
+    .join(" · ");
+  return [typeLine, numberLine].filter(Boolean);
+}
+
+function revealedEventCardId(event: PublicGameEvent): string | null {
+  const cardId = event.publicPayload.cardDefinitionId;
+  return typeof cardId === "string" ? cardId : null;
+}
+
+function eventCardDetail(event: PublicGameEvent, detailsById: Record<string, CatalogCardDetail>): CatalogCardDetail | null {
+  const cardId = revealedEventCardId(event);
+  return cardId ? (detailsById[cardId] ?? null) : null;
+}
+
 export default function Page() {
   const [mode, setMode] = useState<"host" | "join">("host");
   const [gameMode, setGameMode] = useState<GameMode>("human_vs_human");
@@ -258,6 +291,7 @@ export default function Page() {
   const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
   const [catalogDetail, setCatalogDetail] = useState<CatalogCardDetail | null>(null);
   const [allCatalogCards, setAllCatalogCards] = useState<CatalogCardSummary[]>([]);
+  const [catalogDetailsById, setCatalogDetailsById] = useState<Record<string, CatalogCardDetail>>({});
   const [deckSnapshots, setDeckSnapshots] = useState<DeckSnapshot[]>([]);
   const [deckTemplates, setDeckTemplates] = useState<DeckTemplate[]>([]);
   const [runnerDeckSource, setRunnerDeckSource] = useState<"snapshot" | "local">("snapshot");
@@ -356,6 +390,32 @@ export default function Page() {
       .then((data) => setCatalogDetail(data.card ?? null))
       .catch(() => setCatalogDetail(null));
   }, [selectedCatalogId]);
+
+  useEffect(() => {
+    const missingIds = Array.from(new Set((payload?.eventTail ?? []).map(revealedEventCardId).filter((value): value is string => Boolean(value)))).filter((cardId) => !catalogDetailsById[cardId]);
+    if (missingIds.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      missingIds.map((cardId) =>
+        fetch(`/api/cards/catalog/${encodeURIComponent(cardId)}`, { cache: "no-store" })
+          .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
+          .then((data) => data.card)
+          .catch(() => null)
+      )
+    ).then((details) => {
+      if (cancelled) return;
+      setCatalogDetailsById((current) => {
+        const next = { ...current };
+        details.forEach((detail) => {
+          if (detail) next[detail.catalogCardId] = detail;
+        });
+        return next;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [payload?.eventTail, catalogDetailsById]);
 
   useEffect(() => {
     void fetch("/api/cards/catalog", { cache: "no-store" })
@@ -1033,7 +1093,7 @@ export default function Page() {
             ) : null}
             <p className="meta statusLine">{payload.opponentStatus.connected ? "Verbunden" : "Offline"} · {activeView.timingPoint}</p>
           </section>
-          <EventLogPanel events={payload.eventTail} />
+          <EventLogPanel events={payload.eventTail} cardDetailsById={catalogDetailsById} />
           <section className="section">
             <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
               <PanelRightOpen size={15} />
@@ -1258,7 +1318,7 @@ function CardPreviewPanel({ card, displayMode }: { card: VisibleCard | null; dis
   );
 }
 
-function EventLogPanel({ events }: { events: PublicGameEvent[] }) {
+function EventLogPanel({ events, cardDetailsById }: { events: PublicGameEvent[]; cardDetailsById: Record<string, CatalogCardDetail> }) {
   return (
     <section className="section">
       <h2>EventLog</h2>
@@ -1267,16 +1327,41 @@ function EventLogPanel({ events }: { events: PublicGameEvent[] }) {
           .slice()
           .reverse()
           .map((event) => (
-            <div className="event" key={event.eventId}>
-              <strong>{String(event.publicPayload.label ?? event.type)}</strong>
-              {event.publicPayload.aiReasonCode ? <span>{String(event.publicPayload.aiReasonCode)}</span> : null}
-              <small>
-                v{event.stateVersionAfter} · {event.stateHashAfter}
-              </small>
-            </div>
+            <EventLogEntry event={event} card={eventCardDetail(event, cardDetailsById)} key={event.eventId} />
           ))}
       </div>
     </section>
+  );
+}
+
+function EventLogEntry({ event, card }: { event: PublicGameEvent; card: CatalogCardDetail | null }) {
+  const fallbackTitle = typeof event.publicPayload.title === "string" ? event.publicPayload.title : null;
+  const cardTitle = card?.title ?? fallbackTitle;
+  const detailLines = card ? catalogDetailLines(card) : [];
+  const tooltipText = card ? [card.title, ...detailLines, card.text].filter(Boolean).join("\n") : cardTitle ?? undefined;
+  return (
+    <div className="event">
+      <strong>{String(event.publicPayload.label ?? event.type)}</strong>
+      {cardTitle ? (
+        <div className="eventCardLink" tabIndex={0} title={tooltipText}>
+          Karte: {cardTitle}
+          {card ? (
+            <div className="eventCardTooltip" role="tooltip">
+              <strong>{card.title}</strong>
+              {detailLines.map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+              <p>{card.text}</p>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {card?.text ? <span className="eventEffect">Effekt: {card.text}</span> : null}
+      {event.publicPayload.aiReasonCode ? <span className="eventReason">{String(event.publicPayload.aiReasonCode)}</span> : null}
+      <small>
+        v{event.stateVersionAfter} · {event.stateHashAfter}
+      </small>
+    </div>
   );
 }
 
@@ -1712,20 +1797,54 @@ function CardView({
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
+  const detailLines = card.known ? cardDetailLines(card) : [];
+  const tooltipText = card.known ? [card.title, ...detailLines, card.rulesText].filter(Boolean).join("\n") : undefined;
   return (
     <button
       type="button"
       className={`card${card.known ? typeClass : " hidden"}${modeClass}${preview ? " preview" : ""}`}
       onClick={() => onFocus?.(card)}
       aria-label={card.known ? `Karte ${card.title}` : "Verdeckte Karte"}
+      title={tooltipText}
     >
       <span className="cardArt" aria-hidden="true" />
       <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>
       {!isCompact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Redacted"}</span> : null}
+      {card.known && card.rulesText ? <span className="cardRulesPreview">{card.rulesText}</span> : null}
       {card.known && card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
       {card.known && card.strength !== undefined ? <span className="cardMeta">Stärke {card.strength}</span> : null}
+      {card.known && card.rulesText ? (
+        <span className="cardTooltip" role="tooltip">
+          <strong>{card.title}</strong>
+          {detailLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+          <span className="cardTooltipText">{card.rulesText}</span>
+        </span>
+      ) : null}
     </button>
   );
+}
+
+function cardDetailLines(card: VisibleCard): string[] {
+  const typeLine = [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ");
+  const numberLine = [
+    valueLabel("Kosten", card.cost),
+    valueLabel("Install", card.installCost),
+    valueLabel("MU", card.memoryCost),
+    valueLabel("Rez", card.rezCost),
+    valueLabel("Trash", card.trashCost),
+    valueLabel("Fortschritt", card.advancementRequirement),
+    valueLabel("Agenda", card.agendaPoints),
+    valueLabel("Stärke", card.strength)
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  return [typeLine, numberLine].filter(Boolean);
+}
+
+function valueLabel(label: string, value: number | undefined): string | null {
+  return value === undefined ? null : `${label} ${value}`;
 }
 
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {

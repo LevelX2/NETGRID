@@ -341,7 +341,7 @@ export function applyAction(state: GameState, playerAction: PlayerAction): Engin
 
   next.stateVersion = before + 1;
   const stateHash = hashState(next);
-  const event = buildEvent(before, next.stateVersion, stateHash, legalAction, playerAction);
+  const event = buildEvent(before, next.stateVersion, stateHash, next, legalAction, playerAction);
   next.eventLog.push(event);
 
   return {
@@ -1080,9 +1080,9 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   return parts.filter(Boolean).join(".");
 }
 
-function buildEvent(before: number, after: number, stateHashAfter: StateHash, legalAction: LegalAction, playerAction: PlayerAction): GameEvent {
+function buildEvent(before: number, after: number, stateHashAfter: StateHash, state: GameState, legalAction: LegalAction, playerAction: PlayerAction): GameEvent {
   const actor = legalAction.side;
-  const reveal = revealForPublicEvent(legalAction);
+  const reveal = revealForPublicEvent(state, legalAction);
   const publicPayload: Record<string, unknown> = {
     actor,
     actionType: legalAction.type,
@@ -1111,9 +1111,16 @@ function publicLabel(legalAction: LegalAction): string {
   return legalAction.label;
 }
 
-function revealForPublicEvent(legalAction: LegalAction): Record<string, unknown> {
-  if (["rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_event", "play_operation"].includes(legalAction.type) && typeof legalAction.source === "string") {
+function revealForPublicEvent(state: GameState, legalAction: LegalAction): Record<string, unknown> {
+  const revealsCard =
+    ["rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_event", "play_operation"].includes(legalAction.type) ||
+    (legalAction.side === "runner" && legalAction.type === "install_card");
+  if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.payload?.cardId ?? legalAction.source;
+    if (typeof cardId === "string" && state.cardInstances[cardId]) {
+      const definition = definitionFor(state, cardId);
+      return { cardDefinitionId: definition.id, title: definition.title };
+    }
     if (typeof cardId === "string" && DEMO_CARDS_BY_ID[cardId]) return { cardDefinitionId: cardId, title: DEMO_CARDS_BY_ID[cardId]?.title };
   }
   return {};
@@ -1140,8 +1147,14 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     definitionId: definition.id,
     type: definition.type,
     subtypes: definition.subtypes,
+    rulesText: definition.rulesText,
+    ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
+    ...(definition.installCost !== undefined ? { installCost: definition.installCost } : {}),
+    ...(definition.memoryCost !== undefined ? { memoryCost: definition.memoryCost } : {}),
+    ...(definition.rezCost !== undefined ? { rezCost: definition.rezCost } : {}),
     rezzed: instance.rezzed,
     advancementCounters: instance.advancementCounters,
+    ...(definition.advancementRequirement !== undefined ? { advancementRequirement: definition.advancementRequirement } : {}),
     ...(definition.strength !== undefined ? { strength: definition.strength + instance.strengthModifier } : {}),
     ...(definition.agendaPoints !== undefined ? { agendaPoints: definition.agendaPoints } : {}),
     ...(definition.trashCost !== undefined ? { trashCost: definition.trashCost } : {})
