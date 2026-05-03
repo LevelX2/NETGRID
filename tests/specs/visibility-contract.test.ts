@@ -18,6 +18,18 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("window.localStorage.getItem(SESSION_KEY");
   });
 
+  it("keeps the V0.7 UI shell image-ready but asset-gated", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    expect(page).toContain("function CardView");
+    expect(page).toContain("function RunTimeline");
+    expect(page).toContain("function LegalActionsPanel");
+    expect(page).toContain("function DiagnosticsDrawer");
+    expect(page).toContain("side-filtered");
+    expect(page).not.toContain("<img");
+    expect(page).not.toContain("imageAssetId");
+    expect(page).not.toContain("localImagePath");
+  });
+
   it("returns PlayerView payloads from the web game API", () => {
     const route = readFileSync("apps/web/app/api/game/route.ts", "utf8");
     expect(route).toContain("getPlayerView(state, \"runner\")");

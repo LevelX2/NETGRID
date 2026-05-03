@@ -177,3 +177,9 @@ Finale Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm t
 Der V0.7 Requirements/Design Freeze wurde aus der V0.7-Detailplanung, den UI-Designsets und der Realismusprüfung abgeleitet. Eingefroren wurden Design C als Hauptstruktur, Design D als Run-/Encounter-Fokus und Design B als einklappbare Diagnose-/Playtest-Schicht. Echte Kartenabbilder, offizielle Logos, Card Frames und Card Backs bleiben bis zu einer separaten Asset-Freigabe gesperrt.
 
 Erstellt wurden `docs/derived/MVP_0.7_REQUIREMENTS.md`, `docs/derived/UI_REDESIGN_0.7_SPEC.md`, `docs/derived/RUN_ENCOUNTER_UI_0.7_SPEC.md`, `docs/derived/CARD_VIEW_0.7_SPEC.md`, `docs/derived/ACCESSIBILITY_0.7_SPEC.md`, `docs/derived/MVP_0.7_TEST_MATRIX.md`, `docs/derived/MVP_0.7_REQUIREMENTS_REVIEW.md` und `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`. Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
+
+## [2026-05-03] phase-0.7-final | MVP 0.7 UI-Neugestaltung abgeschlossen
+
+MVP 0.7 wurde implementiert, validiert und final dokumentiert. Die Weboberfläche nutzt jetzt eine helle Clean-High-Contrast-Struktur mit Entry-Preflight, Card Display Settings, generischer image-ready CardView, Card Preview, RunTimeline, LegalActionsPanel, UndoPanel, EventLogPanel und Diagnostics Drawer. Der Browser bleibt weiterhin ohne Engine-Import und ohne FullState.
+
+Checks: `corepack pnpm --filter @netrunner/web typecheck`, Visibility Contract, Web-Build, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Lokale Headless-Smokes für Entry, RunnerBoard und CorpBoard bestanden. Gate-Ergebnis: `MVP_0.7_done: true`; `ready_for_MVP_0.8_requirements: true`.

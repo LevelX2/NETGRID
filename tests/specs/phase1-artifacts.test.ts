@@ -67,6 +67,8 @@ const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/ACCESSIBILITY_0.7_SPEC.md",
   "docs/derived/MVP_0.7_TEST_MATRIX.md",
   "docs/derived/MVP_0.7_REQUIREMENTS_REVIEW.md",
+  "docs/derived/MVP_0.7_IMPLEMENTATION_REVIEW.md",
+  "docs/derived/MVP_0.7_FINAL_REVIEW.md",
   "tests/specs/ui-redesign-0.7-acceptance-tests.todo.md"
 ];
 
@@ -287,6 +289,8 @@ describe("Phase 1 derived artifacts", () => {
     const requirements = readFileSync("docs/derived/MVP_0.7_REQUIREMENTS.md", "utf8");
     const testMatrix = readFileSync("docs/derived/MVP_0.7_TEST_MATRIX.md", "utf8");
     const review = readFileSync("docs/derived/MVP_0.7_REQUIREMENTS_REVIEW.md", "utf8");
+    const implementationReview = readFileSync("docs/derived/MVP_0.7_IMPLEMENTATION_REVIEW.md", "utf8");
+    const finalReview = readFileSync("docs/derived/MVP_0.7_FINAL_REVIEW.md", "utf8");
 
     for (const requirementId of REQUIRED_MVP_0_7_MUST_IDS) {
       expect(requirements, requirementId).toContain(requirementId);
@@ -297,6 +301,8 @@ describe("Phase 1 derived artifacts", () => {
     expect(requirements).toContain("Design B");
     expect(requirements).toContain("ready_for_implementation: true");
     expect(review).toContain("ready_for_implementation: true");
+    expect(implementationReview).toContain("ready_for_hardening: true");
+    expect(finalReview).toContain("MVP_0.7_done: true");
   });
 });
 

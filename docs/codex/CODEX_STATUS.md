@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.7 UI requirements and design freeze are complete. V0.7 implementation is unblocked.
+MVP 0.7 UI redesign validation, hardening and documentation are complete. V0.8 requirements are unblocked.
 
 ## Status
 
@@ -84,6 +84,16 @@ MVP 0.7 UI requirements and design freeze are complete.
 
 `ready_for_implementation: true`
 
+MVP 0.7 UI redesign implementation is complete and locally verified.
+
+`ready_for_hardening: true`
+
+MVP 0.7 validation, hardening and documentation are complete.
+
+`MVP_0.7_done: true`
+
+`ready_for_MVP_0.8_requirements: true`
+
 MVP 0.8 playable base/starter-set slice detailed planning is complete as a future gated phase.
 
 `MVP_0.8_detailed_plan_available: true`
@@ -116,6 +126,8 @@ Gate flow:
 16. MVP 0.6 implementation: pass.
 17. MVP 0.6 validation, hardening and documentation: pass.
 18. MVP 0.7 requirements/design freeze: pass.
+19. MVP 0.7 implementation: pass.
+20. MVP 0.7 validation, hardening and documentation: pass.
 
 ## Phase 1 files created or updated
 
@@ -640,6 +652,59 @@ Next gate was V0.7 Requirements/Design Freeze. V0.7 implementation is now unbloc
 
 V0.7 is frozen as a UI redesign/design phase. Design C is the main structure, Design D is limited to run/encounter focus, and Design B is limited to an optional diagnostics drawer. V0.7 must preserve existing V0.1-V0.6 features, may not add gameplay scope, and may not load official or external card assets without a separate asset gate.
 
+## MVP 0.7 Implementation files created or updated
+
+- `apps/web/app/page.tsx`
+- `apps/web/app/globals.css`
+- `tests/specs/visibility-contract.test.ts`
+- `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`
+- `docs/derived/MVP_0.7_IMPLEMENTATION_REVIEW.md`
+- `README.md`
+
+## MVP 0.7 Implementation checks
+
+- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 5 tests.
+- `corepack pnpm --filter @netrunner/web build`: pass.
+- Local Entry UI smoke on `http://127.0.0.1:3007`: pass.
+- Local RunnerBoard smoke through generated private Runner-vs-Corp-KI match: pass.
+- Local CorpBoard smoke through generated private Corp-vs-Runner-KI match: pass.
+
+## MVP 0.7 Implementation gate
+
+`ready_for_hardening: true`
+
+V0.7 now has a light Design-C-oriented shell, Entry preflight, Card Display settings, image-ready generic CardView, Card Preview, RunTimeline, LegalActionsPanel, UndoPanel, EventLogPanel and Diagnostics Drawer. The implementation keeps the browser off Engine and FullState paths.
+
+## MVP 0.7 Final files created or updated
+
+- `docs/derived/MVP_0.7_FINAL_REVIEW.md`
+- `docs/derived/MVP_0.7_IMPLEMENTATION_REVIEW.md`
+- `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`
+- `README.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.7 Final checks
+
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 48 package tests plus 18 root spec tests.
+- `corepack pnpm build`: pass.
+- Web typecheck: pass.
+- Visibility contract: pass.
+- Web build: pass.
+- Entry, RunnerBoard and CorpBoard UI smokes: pass.
+
+## MVP 0.7 Final gate
+
+`MVP_0.7_done: true`
+
+`ready_for_MVP_0.8_requirements: true`
+
+Next gate: V0.8 Requirements for a small playable base/starter-set slice. V0.8 remains constrained by manifest, resolver, test, visibility, replay/StateHash and AI-smoke gates per playable card. V1.0 and public platform features remain out of scope.
+
 ## MVP 0.8 Detailed Planning files created or updated
 
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`
@@ -711,7 +776,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Current gate: V0.7 implementation, validation, hardening and documentation. V0.7 Requirements/Design Freeze is complete and `ready_for_implementation: true`.
+Current gate: V0.8 Requirements. V0.7 is complete and `ready_for_MVP_0.8_requirements: true`.
 
 Detailed planning artifacts available:
 

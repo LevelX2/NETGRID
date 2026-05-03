@@ -1,6 +1,33 @@
 "use client";
 
-import { Bot, Cable, Check, Clipboard, CopyPlus, Download, Link2, ListFilter, Play, Plus, RotateCcw, Save, Search, Shield, Sparkles, Trash2, Upload, UserPlus, X } from "lucide-react";
+import {
+  Activity,
+  Bot,
+  Cable,
+  Check,
+  Clipboard,
+  CopyPlus,
+  Download,
+  Eye,
+  Image,
+  Keyboard,
+  Layers3,
+  Link2,
+  ListFilter,
+  PanelRightOpen,
+  Play,
+  Plus,
+  RotateCcw,
+  Save,
+  Search,
+  Shield,
+  Sparkles,
+  Trash2,
+  Upload,
+  UserPlus,
+  X,
+  ZoomIn
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
 
@@ -13,6 +40,7 @@ const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
 type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 type AiDifficulty = "easy" | "normal" | "hard";
+type CardDisplayMode = "placeholder" | "text-card" | "compact";
 
 type ClientPayload = {
   matchId: string;
@@ -246,6 +274,9 @@ export default function Page() {
   const [deckImportText, setDeckImportText] = useState("");
   const [deckExportText, setDeckExportText] = useState("");
   const [addCardId, setAddCardId] = useState("");
+  const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
+  const [focusedCard, setFocusedCard] = useState<VisibleCard | null>(null);
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
@@ -356,6 +387,7 @@ export default function Page() {
   const effectiveCorpSnapshot = corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const playableCatalogCards = allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity");
+  const previewCard = focusedCard ?? activeView?.run?.encounteredIce ?? activeView?.own.gripOrHq.find((card) => card.known) ?? activeView?.own.rig?.find((card) => card.known) ?? null;
 
   const createMatch = async () => {
     setNotice("");
@@ -724,10 +756,18 @@ export default function Page() {
     return (
       <main className="app">
         <header className="topbar">
-          <Brand subtitle="Private Matches und KI-Simulation" />
+          <Brand subtitle="V0.7 UI · private Matches" />
           <ConnectionBadge text={statusText} state={connection} />
         </header>
-        <div className="setup">
+        <div className="setup v07Entry">
+          <section className="entryHero">
+            <div>
+              <p className="eyebrow">Clean Board</p>
+              <h2>Private Netrunner-Konsole</h2>
+              <p className="meta">Design C als Hauptstruktur, Run-Fokus aus Design D und Diagnose nur im Drawer.</p>
+            </div>
+            <PreflightBar />
+          </section>
           <section className="setupPanel">
             <div className="tabs">
               <button className={`tab ${mode === "host" ? "active" : ""}`} onClick={() => setMode("host")}>
@@ -828,6 +868,8 @@ export default function Page() {
                   </select>
                 </label>
                 <DeckMetadataLine runner={effectiveRunnerSnapshot?.publicMetadata} corp={effectiveCorpSnapshot?.publicMetadata} />
+                <CardDisplaySettings mode={cardDisplayMode} onChange={setCardDisplayMode} />
+                <BoardPreview displayMode={cardDisplayMode} />
                 <button className="button primary wide" onClick={createMatch}>
                   {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
                   {gameMode === "ai_vs_ai" ? "Simulation starten" : "Match erstellen"}
@@ -902,7 +944,7 @@ export default function Page() {
   return (
     <main className="app">
       <header className="topbar">
-        <Brand subtitle={`MVP 0.3 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
+        <Brand subtitle={`V0.7 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
           {session.joinUrl ? (
@@ -926,58 +968,20 @@ export default function Page() {
         <span>{payload.matchStatus}</span>
         <span>Match {payload.matchId}</span>
         <span>Version {payload.matchVersion}</span>
+        <span>State {activeView.stateVersion}</span>
         <span>{notice}</span>
       </div>
 
       <div className="main">
-        <aside className="column panel">
+        <aside className="column panel sidePanel">
           <PlayerPanel view={activeView} title={session.side === "runner" ? "Runner" : "Corp"} />
-          <section className="section">
-            <h2>Aktionen</h2>
-            <div className="actions">
-              {payload.legalActions.map((action) => (
-                <button className="button actionButton primary" key={action.actionId} onClick={() => submitAction(action)} disabled={Boolean(payload.winner) || connection !== "online"}>
-                  <Play size={15} />
-                  {action.label}
-                </button>
-              ))}
-              {payload.legalActions.length === 0 ? <p className="meta">Keine Aktion im aktuellen Fenster.</p> : null}
-            </div>
-          </section>
-          <section className="section">
-            <h2>Undo</h2>
-            {payload.pendingUndo?.needsResponse ? (
-              <div className="undoBox">
-                <p className="meta">{payload.pendingUndo.requestedBy === "runner" ? "Runner" : "Corp"} fragt Undo an.</p>
-                <div className="splitButtons">
-                  <button className="button primary" onClick={() => resolveUndo(true)}>
-                    <Check size={15} />
-                    OK
-                  </button>
-                  <button className="button" onClick={() => resolveUndo(false)}>
-                    <X size={15} />
-                    Nein
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button className="button wide" onClick={requestUndo} disabled={!latestEventId || connection !== "online"}>
-                <RotateCcw size={15} />
-                Undo
-              </button>
-            )}
-          </section>
+          <LegalActionsPanel actions={payload.legalActions} disabled={Boolean(payload.winner) || connection !== "online"} onAction={submitAction} />
+          <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
         </aside>
 
-        <section className="board">
-          {activeView.run ? (
-            <div className="runBar">
-              <Shield size={18} />
-              <span>
-                Run auf <strong>{activeView.run.attackedServerId}</strong> · {activeView.run.phase}
-              </span>
-            </div>
-          ) : null}
+        <section className="board boardPanel">
+          <BoardHeader view={activeView} />
+          <RunTimeline view={activeView} />
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -991,25 +995,29 @@ export default function Page() {
               <article className="server" key={server.id}>
                 <h3>{server.label}</h3>
                 <div className="laneLabel">ICE</div>
-                <div className="lane">{server.ice.map((card) => <Card key={card.instanceId} card={card} compact />)}</div>
+                <div className="lane">{server.ice.map((card) => <CardView key={card.instanceId} card={card} compact displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
                 <div className="laneLabel">Root</div>
-                <div className="lane">{server.root.map((card) => <Card key={card.instanceId} card={card} compact />)}</div>
+                <div className="lane">{server.root.map((card) => <CardView key={card.instanceId} card={card} compact displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
               </article>
             ))}
           </div>
           <section className="section panel boardSection">
             <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
-            <div className="cards">{activeView.own.gripOrHq.map((card) => <Card key={card.instanceId} card={card} />)}</div>
+            <div className="cards">{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={card} displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
           </section>
           {activeView.own.rig ? (
             <section className="section panel boardSection">
               <h2>Rig</h2>
-              <div className="cards">{activeView.own.rig.map((card) => <Card key={card.instanceId} card={card} />)}</div>
+              <div className="cards">{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={card} displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
             </section>
           ) : null}
         </section>
 
-        <aside className="log panel">
+        <aside className="log panel rightRail">
+          <section className="section">
+            <CardDisplaySettings mode={cardDisplayMode} onChange={setCardDisplayMode} compact />
+          </section>
+          <CardPreviewPanel card={previewCard} displayMode={cardDisplayMode} />
           <section className="section">
             <h2>Gegenseite</h2>
             <div className="stats">
@@ -1025,23 +1033,14 @@ export default function Page() {
             ) : null}
             <p className="meta statusLine">{payload.opponentStatus.connected ? "Verbunden" : "Offline"} · {activeView.timingPoint}</p>
           </section>
+          <EventLogPanel events={payload.eventTail} />
           <section className="section">
-            <h2>EventLog</h2>
-            <div className="events">
-              {payload.eventTail
-                .slice()
-                .reverse()
-                .map((event) => (
-                  <div className="event" key={event.eventId}>
-                    <strong>{String(event.publicPayload.label ?? event.type)}</strong>
-                    {event.publicPayload.aiReasonCode ? <span>{String(event.publicPayload.aiReasonCode)}</span> : null}
-                    <small>
-                      v{event.stateVersionAfter} · {event.stateHashAfter}
-                    </small>
-                  </div>
-                ))}
-            </div>
+            <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
+              <PanelRightOpen size={15} />
+              Diagnostics
+            </button>
           </section>
+          <DiagnosticsDrawer open={diagnosticsOpen} payload={payload} connection={connection} />
         </aside>
       </div>
     </main>
@@ -1059,6 +1058,257 @@ function Brand({ subtitle }: { subtitle: string }) {
         <p>{subtitle}</p>
       </div>
     </div>
+  );
+}
+
+function PreflightBar() {
+  const checks = [
+    { icon: <Shield size={15} />, label: "Hidden-Info safe" },
+    { icon: <Activity size={15} />, label: "Replay ready" },
+    { icon: <Layers3 size={15} />, label: "Decks validiert" }
+  ];
+  return (
+    <div className="preflightBar">
+      {checks.map((check) => (
+        <span key={check.label}>
+          {check.icon}
+          {check.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function CardDisplaySettings({ mode, onChange, compact = false }: { mode: CardDisplayMode; onChange(value: CardDisplayMode): void; compact?: boolean }) {
+  return (
+    <div className={`cardDisplaySettings ${compact ? "compact" : ""}`}>
+      <div>
+        <span className="settingsTitle">Card Display</span>
+        {!compact ? <span className="meta">Lokale Anzeigeoption, kein Match-State</span> : null}
+      </div>
+      <div className="segmented" role="group" aria-label="Card Display Mode">
+        <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Platzhalterkarten">
+          <Image size={15} />
+          {!compact ? "Bild" : null}
+        </button>
+        <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Text-Fallback">
+          <Keyboard size={15} />
+          {!compact ? "Text" : null}
+        </button>
+        <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompakte Karten">
+          <ZoomIn size={15} />
+          {!compact ? "Kompakt" : null}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function BoardPreview({ displayMode }: { displayMode: CardDisplayMode }) {
+  const previewCards: VisibleCard[] = [
+    { instanceId: "preview-runner", known: true, title: "Demo Program", type: "program", subtypes: ["Icebreaker"], strength: 2 },
+    { instanceId: "preview-corp", known: true, title: "Demo ICE", type: "ice", subtypes: ["Barrier"], strength: 3 },
+    { instanceId: "preview-hidden", known: false }
+  ];
+  return (
+    <div className="boardPreview" aria-label="Board Preview">
+      {previewCards.map((card) => (
+        <CardView key={card.instanceId} card={card} displayMode={displayMode} compact />
+      ))}
+    </div>
+  );
+}
+
+function BoardHeader({ view }: { view: PlayerView }) {
+  return (
+    <div className={`boardHeader ${view.side}`}>
+      <div>
+        <p className="eyebrow">{view.side === "runner" ? "Runner View" : "Corp View"}</p>
+        <h2>{view.activeSide === view.side ? "Dein Fenster" : "Gegenseite aktiv"}</h2>
+      </div>
+      <div className="zoneCounts">
+        <span>{view.side === "runner" ? "Stack" : "R&D"} {view.own.stackOrRdCount}</span>
+        <span>{view.side === "runner" ? "Grip" : "HQ"} {view.own.gripOrHq.length}</span>
+        <span>{view.side === "runner" ? "Heap" : "Archives"} {view.own.heapOrArchives.length}</span>
+        <span>Gegnerhand {view.opponent.handCount}</span>
+      </div>
+    </div>
+  );
+}
+
+function RunTimeline({ view }: { view: PlayerView }) {
+  const phase = view.run?.phase;
+  const steps = ["target", "approach_ice", "encounter_ice", "break", "access", "complete"] as const;
+  const labels: Record<(typeof steps)[number], string> = {
+    target: "Ziel",
+    approach_ice: "Approach",
+    encounter_ice: "Encounter",
+    break: "Break",
+    access: "Access",
+    complete: "Ergebnis"
+  };
+  return (
+    <div className={`runTimeline ${view.run ? "active" : ""}`}>
+      <div className="runTimelineHead">
+        <Shield size={18} />
+        <span>{view.run ? `Run auf ${view.run.attackedServerId}` : "Kein aktiver Run"}</span>
+      </div>
+      <div className="runSteps">
+        {steps.map((step) => (
+          <span className={phase === step || (!phase && step === "target") ? "current" : ""} key={step}>
+            {labels[step]}
+          </span>
+        ))}
+      </div>
+      {view.run?.encounteredIce ? (
+        <div className="encounterFocus">
+          <span>Encounter</span>
+          <strong>{view.run.encounteredIce.known ? view.run.encounteredIce.title : "Verdecktes ICE"}</strong>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function LegalActionsPanel({ actions, disabled, onAction }: { actions: LegalAction[]; disabled: boolean; onAction(action: LegalAction): void }) {
+  const grouped = actions.reduce<Record<string, LegalAction[]>>((acc, action) => {
+    const group = action.type.replaceAll("_", " ");
+    acc[group] = [...(acc[group] ?? []), action];
+    return acc;
+  }, {});
+  return (
+    <section className="section">
+      <h2>LegalActions</h2>
+      <div className="actions">
+        {Object.entries(grouped).map(([group, groupActions]) => (
+          <div className="actionGroup" key={group}>
+            <span>{group}</span>
+            {groupActions.map((action) => (
+              <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled}>
+                <Play size={15} />
+                {action.label}
+              </button>
+            ))}
+          </div>
+        ))}
+        {actions.length === 0 ? <p className="meta">Keine Aktion im aktuellen Fenster.</p> : null}
+      </div>
+    </section>
+  );
+}
+
+function UndoPanel({
+  pendingUndo,
+  latestEventId,
+  connection,
+  onRequest,
+  onResolve
+}: {
+  pendingUndo: ClientPayload["pendingUndo"] | undefined;
+  latestEventId: string | undefined;
+  connection: "offline" | "connecting" | "online";
+  onRequest(): void;
+  onResolve(accepted: boolean): void;
+}) {
+  return (
+    <section className="section">
+      <h2>Undo</h2>
+      {pendingUndo?.needsResponse ? (
+        <div className="undoBox">
+          <p className="meta">{pendingUndo.requestedBy === "runner" ? "Runner" : "Corp"} fragt Undo an.</p>
+          <div className="splitButtons">
+            <button className="button primary" onClick={() => onResolve(true)}>
+              <Check size={15} />
+              OK
+            </button>
+            <button className="button" onClick={() => onResolve(false)}>
+              <X size={15} />
+              Nein
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button className="button wide" onClick={onRequest} disabled={!latestEventId || connection !== "online"}>
+          <RotateCcw size={15} />
+          Undo
+        </button>
+      )}
+    </section>
+  );
+}
+
+function CardPreviewPanel({ card, displayMode }: { card: VisibleCard | null; displayMode: CardDisplayMode }) {
+  return (
+    <section className="section cardPreviewPanel">
+      <div className="sectionTitleLine">
+        <h2>Preview</h2>
+        <Eye size={16} />
+      </div>
+      {card ? (
+        <>
+          <CardView card={card} displayMode={displayMode} preview />
+          <p className="meta">
+            {card.known ? [card.type, card.subtypes?.join(" / "), card.strength !== undefined ? `Stärke ${card.strength}` : ""].filter(Boolean).join(" · ") : "Redacted"}
+          </p>
+        </>
+      ) : (
+        <p className="meta">Fokussiere eine bekannte Karte.</p>
+      )}
+    </section>
+  );
+}
+
+function EventLogPanel({ events }: { events: PublicGameEvent[] }) {
+  return (
+    <section className="section">
+      <h2>EventLog</h2>
+      <div className="events">
+        {events
+          .slice()
+          .reverse()
+          .map((event) => (
+            <div className="event" key={event.eventId}>
+              <strong>{String(event.publicPayload.label ?? event.type)}</strong>
+              {event.publicPayload.aiReasonCode ? <span>{String(event.publicPayload.aiReasonCode)}</span> : null}
+              <small>
+                v{event.stateVersionAfter} · {event.stateHashAfter}
+              </small>
+            </div>
+          ))}
+      </div>
+    </section>
+  );
+}
+
+function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; payload: ClientPayload; connection: "offline" | "connecting" | "online" }) {
+  if (!open) return null;
+  const hash = payload.finalStateHash ?? payload.eventTail.at(-1)?.stateHashAfter ?? payload.playerView.publicEvents.at(-1)?.stateHashAfter ?? "pending";
+  return (
+    <section className="section diagnosticsDrawer">
+      <h2>Diagnostics</h2>
+      <dl>
+        <div>
+          <dt>Connection</dt>
+          <dd>{connection}</dd>
+        </div>
+        <div>
+          <dt>StateVersion</dt>
+          <dd>{payload.playerView.stateVersion}</dd>
+        </div>
+        <div>
+          <dt>MatchVersion</dt>
+          <dd>{payload.matchVersion}</dd>
+        </div>
+        <div>
+          <dt>StateHash</dt>
+          <dd>{hash}</dd>
+        </div>
+        <div>
+          <dt>Visibility</dt>
+          <dd>side-filtered</dd>
+        </div>
+      </dl>
+    </section>
   );
 }
 
@@ -1446,15 +1696,35 @@ function SimulationResult({ summary }: { summary: AiSimulationSummary }) {
   );
 }
 
-function Card({ card, compact = false }: { card: VisibleCard; compact?: boolean }) {
-  const typeClass = card.type ? ` ${card.type}` : "";
+function CardView({
+  card,
+  compact = false,
+  preview = false,
+  displayMode,
+  onFocus
+}: {
+  card: VisibleCard;
+  compact?: boolean;
+  preview?: boolean;
+  displayMode: CardDisplayMode;
+  onFocus?(card: VisibleCard): void;
+}) {
+  const typeClass = card.known && card.type ? ` ${card.type}` : "";
+  const isCompact = compact || displayMode === "compact";
+  const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   return (
-    <div className={`card${card.known ? typeClass : " hidden"}`}>
+    <button
+      type="button"
+      className={`card${card.known ? typeClass : " hidden"}${modeClass}${preview ? " preview" : ""}`}
+      onClick={() => onFocus?.(card)}
+      aria-label={card.known ? `Karte ${card.title}` : "Verdeckte Karte"}
+    >
+      <span className="cardArt" aria-hidden="true" />
       <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>
-      {!compact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Hidden"}</span> : null}
-      {card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
-      {card.strength !== undefined ? <span className="cardMeta">Stärke {card.strength}</span> : null}
-    </div>
+      {!isCompact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Redacted"}</span> : null}
+      {card.known && card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
+      {card.known && card.strength !== undefined ? <span className="cardMeta">Stärke {card.strength}</span> : null}
+    </button>
   );
 }
 
