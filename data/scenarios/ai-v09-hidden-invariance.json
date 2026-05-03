@@ -1,0 +1,15 @@
+{
+  "id": "SCN-V09-003",
+  "name": "AI hidden-state invariance",
+  "baselineId": "rules-baseline-mvp-0.8",
+  "requirementIds": ["V09-MUST-002", "V09-MUST-004", "V09-MUST-007", "V09-MUST-012"],
+  "coversTests": ["V09-T002", "V09-T004", "V09-T007", "V09-T012"],
+  "runnerDeckId": "demo_runner_008",
+  "corpDeckId": "demo_corp_008",
+  "seed": "ai-v09-hidden-invariance",
+  "expected": {
+    "sameVisibleProjectionSameDecision": true,
+    "observedFactsDoNotContainPrivateDecklists": true,
+    "explanationsDoNotContainHiddenIds": true
+  }
+}

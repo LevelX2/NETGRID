@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.8 playable base/starter-set slice is complete. V0.9 stronger AI requirements are unblocked.
+MVP 0.9 stronger AI requirements are complete. V0.9 implementation is unblocked.
 
 ## Status
 
@@ -116,6 +116,10 @@ MVP 0.9 stronger AI detailed planning is complete as a future gated phase after 
 
 `MVP_0.9_detailed_plan_available: true`
 
+MVP 0.9 stronger AI requirements are complete.
+
+`ready_for_implementation: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -145,6 +149,7 @@ Gate flow:
 21. MVP 0.8 requirements/playable starter-slice freeze: pass.
 22. MVP 0.8 implementation/playable starter-slice: pass.
 23. MVP 0.8 validation, hardening and documentation: pass.
+24. MVP 0.9 requirements/stronger AI freeze: pass.
 
 ## Phase 1 files created or updated
 
@@ -856,6 +861,36 @@ V0.9 remains a future gated phase after V0.8. This planning update does not impl
 
 The V0.9 detailed plan was later refined for requirements-freeze readiness with traceable Must/Should/Could IDs, measurable AI quality metrics, hidden-state-invariance tests, AI controller lifecycle, ObservedFacts, tuning change-control, holdout seeds and coverage heatmaps.
 
+## MVP 0.9 Requirements files created or updated
+
+- `docs/derived/MVP_0.9_REQUIREMENTS.md`
+- `docs/derived/AI_HEURISTICS_0.9_SPEC.md`
+- `docs/derived/AI_DIFFICULTY_0.9_SPEC.md`
+- `docs/derived/AI_EXPLANATION_0.9_SPEC.md`
+- `docs/derived/AI_SOAK_TEST_0.9_SPEC.md`
+- `docs/derived/MVP_0.9_TEST_MATRIX.md`
+- `docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md`
+- `data/ai/card-role-manifest-0.9.json`
+- `data/ai/deck-role-profiles-0.9.json`
+- `data/ai/ai-profiles-0.9.json`
+- `data/ai/ai-soak-seeds-0.9.json`
+- `data/scenarios/ai-v09-runner-setup-run.json`
+- `data/scenarios/ai-v09-corp-score-remote.json`
+- `data/scenarios/ai-v09-hidden-invariance.json`
+- `data/scenarios/ai-v09-soak-matrix.json`
+- `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`
+- `tests/specs/phase1-artifacts.test.ts`
+
+## MVP 0.9 Requirements checks
+
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 15 artifact tests.
+
+## MVP 0.9 Requirements gate
+
+`ready_for_implementation: true`
+
+V0.9 is frozen as a stronger-AI phase on the completed V0.8 starter slice. It may add roles, profiles, scorers, explanations, metrics, lifecycle guards and soaks, but no cards, official assets, FullState AI, LLM rules actor, V1.0 or public platform features.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -902,7 +937,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Current gate: V0.9 Requirements. V0.8 is complete and `ready_for_MVP_0.9_requirements: true`.
+Current gate: V0.9 Implementation. V0.9 Requirements are complete and `ready_for_implementation: true`.
 
 Detailed planning artifacts available:
 

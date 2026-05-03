@@ -1,0 +1,16 @@
+{
+  "id": "SCN-V09-002",
+  "name": "Corp scoring remote and rez decisions",
+  "baselineId": "rules-baseline-mvp-0.8",
+  "requirementIds": ["V09-MUST-002", "V09-MUST-003", "V09-MUST-011", "V09-MUST-012"],
+  "coversTests": ["V09-T002", "V09-T003", "V09-T011", "V09-T012"],
+  "runnerDeckId": "demo_runner_008",
+  "corpDeckId": "demo_corp_008",
+  "seed": "ai-v09-corp-score-remote",
+  "expected": {
+    "corpUsesLegalActionsOnly": true,
+    "scoresLegalAgendaWhenAvailable": true,
+    "usesRemoteAndIcePlansFromOwnVisibleInformation": true,
+    "rezExplanationDoesNotLeakToRunner": true
+  }
+}

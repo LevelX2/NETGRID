@@ -1,0 +1,16 @@
+{
+  "id": "SCN-V09-001",
+  "name": "Runner setup and run pressure",
+  "baselineId": "rules-baseline-mvp-0.8",
+  "requirementIds": ["V09-MUST-002", "V09-MUST-003", "V09-MUST-010", "V09-MUST-012"],
+  "coversTests": ["V09-T002", "V09-T003", "V09-T010", "V09-T012"],
+  "runnerDeckId": "demo_runner_008",
+  "corpDeckId": "demo_corp_008",
+  "seed": "ai-v09-runner-setup-run",
+  "expected": {
+    "runnerUsesLegalActionsOnly": true,
+    "prefersVisibleSetupBeforeRiskyRun": true,
+    "usesRunPressureWhenRigOrEconomySupportsIt": true,
+    "reasonCodesAreSideSafe": true
+  }
+}

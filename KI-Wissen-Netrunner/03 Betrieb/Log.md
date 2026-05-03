@@ -104,6 +104,12 @@ MVP 0.8 wurde implementiert, validiert und final dokumentiert. Umgesetzt wurden 
 
 Checks: Engine-, Server-, AI-, Decks- und Catalog-Pakettests, Phase-1-Artefakte, Visibility Contract, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Lokaler V0.8-Matchstart-/Deck-/Katalog-/AI-Smoke sowie Performance-Smoke bestanden. Gate-Ergebnis: `MVP_0.8_done: true`; `ready_for_MVP_0.9_requirements: true`.
 
+## [2026-05-03] phase-0.9-req | MVP 0.9 Requirements eingefroren
+
+Die V0.9-Requirements für stärkere KI wurden abgeleitet und reviewfähig eingefroren. Der Scope bleibt eine KI-Qualitätsphase auf dem bestandenen V0.8-Starterset-Slice: rollenbewusste Scorer, Difficulty-Profile, Reason-Code- und Explanation-Safety, ObservedFacts, Soak-Matrix, Holdout-Seeds und Tuning-Change-Control. Neue Karten, neue Mechaniken, FullState-KI, LLM als Regelakteur und öffentliche Plattformfunktionen bleiben ausgeschlossen.
+
+Erstellt wurden `docs/derived/MVP_0.9_REQUIREMENTS.md`, `docs/derived/AI_HEURISTICS_0.9_SPEC.md`, `docs/derived/AI_DIFFICULTY_0.9_SPEC.md`, `docs/derived/AI_EXPLANATION_0.9_SPEC.md`, `docs/derived/AI_SOAK_TEST_0.9_SPEC.md`, `docs/derived/MVP_0.9_TEST_MATRIX.md`, `docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md`, `data/ai/*.json`, vier `data/scenarios/ai-v09-*.json` und `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`. Check: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
+
 Erstellt wurde `docs/derived/POST_MVP_0.4_ROADMAP.md` sowie die Wissensseite `Roadmap nach MVP 0.4`. Nächster Gate-Schritt ist `MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog`.
 
 ## [2026-05-03] planung | V0.5 und V0.6 detailliert ausgearbeitet

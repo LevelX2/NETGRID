@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "ai-card-role-manifest-v0.9",
+  "id": "card-role-manifest-0.9",
+  "status": "requirements_freeze",
+  "source": "manual_project_roles",
+  "derivedFrom": [
+    "data/manifests/card-implementation-manifest-0.8.json",
+    "data/decks/deck-snapshots-0.8.json"
+  ],
+  "gateAssertions": {
+    "manualRolesOnly": true,
+    "noCardTextParsing": true,
+    "noHiddenOpponentDecklists": true,
+    "rolesDoNotGrantPlayability": true
+  },
+  "cards": [
+    { "cardId": "simple_economy_event", "side": "runner", "roles": ["economy", "event"], "riskTags": ["public_play"] },
+    { "cardId": "simple_run_event", "side": "runner", "roles": ["run_pressure", "event"], "riskTags": ["run"] },
+    { "cardId": "simple_draw_event", "side": "runner", "roles": ["draw", "setup"], "riskTags": ["hidden_zone_change"] },
+    { "cardId": "simple_setup_hardware", "side": "runner", "roles": ["memory", "setup"], "riskTags": ["install_runner"] },
+    { "cardId": "simple_fracter", "side": "runner", "roles": ["breaker_fracter"], "riskTags": ["encounter"] },
+    { "cardId": "simple_decoder", "side": "runner", "roles": ["breaker_decoder"], "riskTags": ["encounter"] },
+    { "cardId": "simple_killer", "side": "runner", "roles": ["breaker_killer"], "riskTags": ["encounter"] },
+    { "cardId": "efficient_fracter", "side": "runner", "roles": ["breaker_fracter", "efficient_breaker"], "riskTags": ["encounter"] },
+    { "cardId": "v08_burst_credit_event", "side": "runner", "roles": ["economy", "tempo"], "riskTags": ["public_play"] },
+    { "cardId": "v08_deep_draw_event", "side": "runner", "roles": ["draw", "setup"], "riskTags": ["hidden_zone_change"] },
+    { "cardId": "v08_overclock_run_event", "side": "runner", "roles": ["run_pressure", "economy"], "riskTags": ["run"] },
+    { "cardId": "v08_memory_chip", "side": "runner", "roles": ["memory", "setup"], "riskTags": ["install_runner"] },
+    { "cardId": "v08_steady_fracter", "side": "runner", "roles": ["breaker_fracter"], "riskTags": ["encounter"] },
+    { "cardId": "v08_precise_decoder", "side": "runner", "roles": ["breaker_decoder"], "riskTags": ["encounter"] },
+    { "cardId": "v08_adaptive_killer", "side": "runner", "roles": ["breaker_killer"], "riskTags": ["encounter"] },
+    { "cardId": "simple_agenda", "side": "corp", "roles": ["agenda_2pt", "score_plan"], "riskTags": ["hidden_until_score_or_access"] },
+    { "cardId": "simple_priority_agenda", "side": "corp", "roles": ["agenda_3pt", "score_plan"], "riskTags": ["hidden_until_score_or_access"] },
+    { "cardId": "simple_economy_operation", "side": "corp", "roles": ["economy_operation"], "riskTags": ["public_play"] },
+    { "cardId": "simple_draw_operation", "side": "corp", "roles": ["draw_operation", "setup"], "riskTags": ["hidden_zone_change"] },
+    { "cardId": "simple_economy_asset", "side": "corp", "roles": ["economy_asset", "asset_trash_target"], "riskTags": ["hidden_root"] },
+    { "cardId": "simple_upgrade", "side": "corp", "roles": ["upgrade", "remote_support"], "riskTags": ["hidden_root"] },
+    { "cardId": "simple_barrier_ice", "side": "corp", "roles": ["barrier_ice", "etr_ice"], "riskTags": ["hidden_ice"] },
+    { "cardId": "simple_code_gate_ice", "side": "corp", "roles": ["code_gate_ice", "etr_ice"], "riskTags": ["hidden_ice"] },
+    { "cardId": "simple_sentry_ice", "side": "corp", "roles": ["sentry_ice", "etr_ice"], "riskTags": ["hidden_ice"] },
+    { "cardId": "simple_tag_ice", "side": "corp", "roles": ["tag_ice", "sentry_ice"], "riskTags": ["hidden_ice", "tag"] },
+    { "cardId": "simple_taxing_barrier_ice", "side": "corp", "roles": ["barrier_ice", "taxing_ice"], "riskTags": ["hidden_ice"] },
+    { "cardId": "simple_tag_punishment_operation", "side": "corp", "roles": ["tag_punishment"], "riskTags": ["public_play", "tag"] },
+    { "cardId": "v08_credit_surge_operation", "side": "corp", "roles": ["economy_operation", "tempo"], "riskTags": ["public_play"] },
+    { "cardId": "v08_archive_planning_operation", "side": "corp", "roles": ["draw_operation", "setup"], "riskTags": ["hidden_zone_change"] },
+    { "cardId": "v08_project_agenda", "side": "corp", "roles": ["agenda_2pt", "score_plan"], "riskTags": ["hidden_until_score_or_access"] },
+    { "cardId": "v08_cashout_asset", "side": "corp", "roles": ["economy_asset", "asset_trash_target"], "riskTags": ["hidden_root"] },
+    { "cardId": "v08_wall_ice", "side": "corp", "roles": ["barrier_ice", "etr_ice"], "riskTags": ["hidden_ice"] },
+    { "cardId": "v08_gate_ice", "side": "corp", "roles": ["code_gate_ice", "taxing_ice", "etr_ice"], "riskTags": ["hidden_ice"] },
+    { "cardId": "v08_watchdog_ice", "side": "corp", "roles": ["sentry_ice", "tag_ice", "etr_ice"], "riskTags": ["hidden_ice", "tag"] }
+  ]
+}

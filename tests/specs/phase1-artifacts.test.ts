@@ -60,6 +60,7 @@ const REQUIRED_MVP_0_5_MUST_IDS = Array.from({ length: 10 }, (_, index) => `V05-
 const REQUIRED_MVP_0_6_MUST_IDS = Array.from({ length: 11 }, (_, index) => `V06-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_7_MUST_IDS = Array.from({ length: 16 }, (_, index) => `V07-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_8_MUST_IDS = Array.from({ length: 21 }, (_, index) => `V08-MUST-${String(index + 1).padStart(3, "0")}`);
+const REQUIRED_MVP_0_9_MUST_IDS = Array.from({ length: 15 }, (_, index) => `V09-MUST-${String(index + 1).padStart(3, "0")}`);
 const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_REQUIREMENTS.md",
   "docs/derived/UI_REDESIGN_0.7_SPEC.md",
@@ -83,6 +84,17 @@ const REQUIRED_MVP_0_8_DOCS = [
   "tests/specs/playable-card-slice-0.8-acceptance-tests.todo.md"
 ];
 
+const REQUIRED_MVP_0_9_DOCS = [
+  "docs/derived/MVP_0.9_REQUIREMENTS.md",
+  "docs/derived/AI_HEURISTICS_0.9_SPEC.md",
+  "docs/derived/AI_DIFFICULTY_0.9_SPEC.md",
+  "docs/derived/AI_EXPLANATION_0.9_SPEC.md",
+  "docs/derived/AI_SOAK_TEST_0.9_SPEC.md",
+  "docs/derived/MVP_0.9_TEST_MATRIX.md",
+  "docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md",
+  "tests/specs/ai-quality-0.9-acceptance-tests.todo.md"
+];
+
 const MVP_0_8_DATA_FILES = [
   "data/rules/rules-baseline-0.8.json",
   "data/card-import/card-snapshot-0.8.json",
@@ -101,6 +113,20 @@ const REQUIRED_MVP_0_8_SCENARIOS = [
   "v08-starter-icebreaker-run.json",
   "v08-starter-corp-economy-score.json",
   "v08-starter-tag-tax-smoke.json"
+];
+
+const MVP_0_9_DATA_FILES = [
+  "data/ai/card-role-manifest-0.9.json",
+  "data/ai/deck-role-profiles-0.9.json",
+  "data/ai/ai-profiles-0.9.json",
+  "data/ai/ai-soak-seeds-0.9.json"
+];
+
+const REQUIRED_MVP_0_9_SCENARIOS = [
+  "ai-v09-runner-setup-run.json",
+  "ai-v09-corp-score-remote.json",
+  "ai-v09-hidden-invariance.json",
+  "ai-v09-soak-matrix.json"
 ];
 
 describe("Phase 1 derived artifacts", () => {
@@ -432,6 +458,62 @@ describe("Phase 1 derived artifacts", () => {
       hashInput.publicMetadata.deckHash = "pending";
       expect(snapshot.deckHash).toBe(fnv1a(stableStringify(hashInput)));
       expect(snapshot.publicMetadata.deckHash).toBe(snapshot.deckHash);
+    }
+  });
+
+  it("keeps MVP 0.9 stronger AI requirements frozen and mapped", () => {
+    for (const file of REQUIRED_MVP_0_9_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+    for (const file of MVP_0_9_DATA_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.9_REQUIREMENTS.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.9_TEST_MATRIX.md", "utf8");
+    const review = readFileSync("docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_9_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(requirements).toContain("ready_for_implementation: true");
+    expect(review).toContain("ready_for_implementation: true");
+    expect(requirements).toContain("LegalActions");
+    expect(requirements).not.toContain("ready_for_MVP_1.0");
+
+    const roleManifest = JSON.parse(readFileSync("data/ai/card-role-manifest-0.9.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      cards?: Array<{ cardId: string; side: string; roles?: string[] }>;
+    };
+    expect(roleManifest.gateAssertions?.manualRolesOnly).toBe(true);
+    expect(roleManifest.gateAssertions?.noCardTextParsing).toBe(true);
+    expect(roleManifest.gateAssertions?.rolesDoNotGrantPlayability).toBe(true);
+    expect(roleManifest.cards?.filter((card) => card.cardId.startsWith("v08_")).length).toBe(14);
+    expect(roleManifest.cards?.every((card) => (card.side === "runner" || card.side === "corp") && card.roles?.length)).toBe(true);
+
+    const profiles = JSON.parse(readFileSync("data/ai/ai-profiles-0.9.json", "utf8")) as {
+      profiles?: Array<{ difficulty: string; side: string }>;
+      changeControl?: Record<string, boolean>;
+    };
+    expect(profiles.profiles?.length).toBe(6);
+    expect(new Set(profiles.profiles?.map((profile) => profile.difficulty))).toEqual(new Set(["easy", "normal", "hard"]));
+    expect(profiles.changeControl?.holdoutSeedsAreNotTuningSeeds).toBe(true);
+
+    const scenarioDir = "data/scenarios";
+    const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
+    for (const file of REQUIRED_MVP_0_9_SCENARIOS) {
+      expect(present, file).toContain(file);
+      const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as {
+        id?: string;
+        baselineId?: string;
+        requirementIds?: string[];
+        expected?: unknown;
+      };
+      expect(scenario.id, file).toMatch(/^SCN-V09-\d{3}$/);
+      expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.8");
+      expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
+      expect(scenario.expected, file).toBeDefined();
     }
   });
 });

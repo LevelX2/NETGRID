@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "ai-soak-seeds-v0.9",
+  "id": "ai-soak-seeds-0.9",
+  "status": "requirements_freeze",
+  "tuningSeeds": [
+    "ai-v09-tune-001",
+    "ai-v09-tune-002",
+    "ai-v09-tune-003",
+    "ai-v09-tune-004",
+    "ai-v09-tune-005",
+    "ai-v09-tune-006"
+  ],
+  "holdoutSeeds": [
+    "ai-v09-holdout-001",
+    "ai-v09-holdout-002",
+    "ai-v09-holdout-003"
+  ],
+  "matrix": {
+    "runnerDeckId": "demo_runner_008",
+    "corpDeckId": "demo_corp_008",
+    "agendaPointsToWin": 7,
+    "difficulties": ["easy", "normal", "hard"],
+    "maxActions": 220
+  }
+}
