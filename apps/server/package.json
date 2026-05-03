@@ -1,0 +1,11 @@
+{
+  "name": "@netrunner/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netrunner/ai": "workspace:*",
+    "@netrunner/engine": "workspace:*",
+    "@netrunner/shared": "workspace:*"
+  }
+}

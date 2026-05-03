@@ -1,0 +1,9 @@
+{
+  "name": "@netrunner/web",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@netrunner/shared": "workspace:*"
+  }
+}
