@@ -9,7 +9,15 @@ const CARD_IMAGES: Record<string, string> = {
   back_corp: path.join("generated-backs", "corp_back.png"),
   back_runner: path.join("generated-backs", "runner_back.png"),
   simple_agenda: path.join("generated-agendas", "simple_agenda.png"),
+  simple_economy_asset: path.join("generated-assets", "simple_economy_asset.png"),
+  simple_draw_event: path.join("generated-events", "simple_draw_event.png"),
+  simple_economy_event: path.join("generated-events", "simple_economy_event.png"),
+  simple_run_event: path.join("generated-events", "simple_run_event.png"),
   simple_priority_agenda: path.join("generated-agendas", "simple_priority_agenda.png"),
+  v08_burst_credit_event: path.join("generated-events", "v08_burst_credit_event.png"),
+  v08_cashout_asset: path.join("generated-assets", "v08_cashout_asset.png"),
+  v08_deep_draw_event: path.join("generated-events", "v08_deep_draw_event.png"),
+  v08_overclock_run_event: path.join("generated-events", "v08_overclock_run_event.png"),
   v08_project_agenda: path.join("generated-agendas", "v08_project_agenda.png")
 };
 

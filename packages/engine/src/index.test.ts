@@ -98,11 +98,25 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_agenda", title: "Simple Agenda", serverLabel: "R&D" });
+    expect(state.eventLog.at(-1)?.publicPayload.accessedCardId).toBeUndefined();
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
 
     expect(agendaPoints(state, "runner")).toBe(2);
     expect(state.run).toBeUndefined();
     expect(getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload.actionType).toBe("steal_agenda");
+  });
+
+  it("reveals the randomly accessed HQ card in the access event", () => {
+    let state = toRunnerTurn(createGame({ seed: "access-hq" }));
+    const accessedId = moveCorpCardToHq(state, "simple_economy_operation");
+    keepOnlyCorpHqCard(state, accessedId);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation", title: "Simple Economy Operation", serverLabel: "HQ" });
+    expect(state.eventLog.at(-1)?.publicPayload.accessedCardId).toBeUndefined();
   });
 
   it("lets the Runner break Barrier ICE and access R&D", () => {
@@ -120,6 +134,8 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
 
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation", title: "Simple Economy Operation", serverLabel: "R&D" });
+    expect(state.eventLog.at(-1)?.publicPayload.accessedCardId).toBeUndefined();
     expect(state.run).toBeUndefined();
     expect(state.timingPoint).toBe("runner_action.main");
   });
@@ -580,6 +596,15 @@ function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceI
   state.corp.hq.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
   return id;
+}
+
+function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {
+  const movedToRd = state.corp.hq.filter((cardId) => cardId !== id);
+  state.corp.hq = [id];
+  for (const cardId of movedToRd) {
+    state.corp.rd.push(cardId);
+    state.cardInstances[cardId] = { ...state.cardInstances[cardId]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+  }
 }
 
 function putCorpCardOnTopOfRd(state: GameState, definitionId: string): CardInstanceId {

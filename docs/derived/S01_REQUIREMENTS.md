@@ -2,11 +2,11 @@
 
 Status: Requirements Freeze
 Stand: 2026-05-03
-Phase: Sonderphase 01 - Spielende, Ergebnisfenster, Spielziel und Audio
+Phase: Sonderphase 01 - Spielende, Ergebnisfenster, Spielziel, private Matchserie und Audio
 
 ## Kurzentscheidung
 
-S01 ergänzt den bestehenden Matchflow um ein sichtbares Spielende mit Ergebnisfenster, side-sicherer Statistik, Startauswahl für das Spielziel und optionale Audioeffekte.
+S01 ergänzt den bestehenden Matchflow um ein sichtbares Spielende mit Ergebnisfenster, side-sicherer Statistik, Startauswahl für das Spielziel, eine private Zwei-Spiel-Serie mit Seitenwechsel und optionale Audioeffekte.
 
 Die Engine bleibt die einzige Regelautorität. Der Server erzeugt nur side-sichere Ergebnisdaten. Die UI zeigt Ergebnis, Statistik, Hintergrundgrafik und Audio als reine Präsentation.
 
@@ -17,7 +17,9 @@ S01 umfasst:
 - Ergebnisfenster bei Spielende,
 - Perspektivtext für Sieg, Niederlage und Unentschieden,
 - sichere Ergebnisstatistik,
-- Startauswahl `Regelmatch · 7 Agendapunkte` oder `Einzelspiel · Deckziel`,
+- Startauswahl `Regelmatch · 7 Agendapunkte`, `Einzelspiel · Deckziel` oder `Private Matchserie · Seitenwechsel`,
+- private Matchserie `two_game_side_swap` als Hülle über zwei Einzelspiele,
+- Folgespiel-Erstellung mit Seitenwechsel und neuem privaten Join-Link,
 - Audio-Opt-in mit Lautstärke,
 - Tests für Ergebnisdaten, Visibility und UI-Bindung.
 
@@ -30,9 +32,9 @@ S01 baut nicht:
 - öffentliche Plattformfunktionen,
 - offizielle Assets, Logos, Card Frames oder Card Backs,
 - FullState im Browser,
-- mehrspielige Serienautomatik mit Seitenwechsel.
+- öffentliche Serien-, Turnier-, Ranking- oder Matchmaking-Funktionen.
 
-Mehrspielige Serien bleiben ein separater Folgeausbau, weil Seitenwechsel Session-, Token-, Reconnect- und WebSocket-Kontexte berührt.
+Die private Serie wechselt Seiten durch ein neues Einzelspiel. Laufende Sessions werden nicht im bestehenden Spiel umgeschrieben.
 
 ## Must-Anforderungen
 
@@ -46,6 +48,8 @@ Mehrspielige Serien bleiben ein separater Folgeausbau, weil Seitenwechsel Sessio
 | S01-MUST-006 | Kein Gameplay-Einfluss | Ergebnisgrafik, Audio und Statistik beeinflussen Engine, LegalActions, Replay und StateHash nicht. | S01-T006 |
 | S01-MUST-007 | Visibility-Schutz | Ergebnispayloads, Modal, Reconnect und Fehler enthalten keine Hidden Cards, Tokens, Decklisten oder `cardInstances`. | S01-T007 |
 | S01-MUST-008 | Regression | `lint`, `typecheck`, `test`, `build` bleiben grün. | S01-T008 |
+| S01-MUST-009 | Private Matchserie | `two_game_side_swap` erzeugt nach Spiel 1 ein Folgespiel mit Seitenwechsel. | S01-T009 |
+| S01-MUST-010 | Serienstand | Ergebnisfenster zeigt side-sicheren Serienstand und Serienstatus. | S01-T010 |
 
 ## Gate
 

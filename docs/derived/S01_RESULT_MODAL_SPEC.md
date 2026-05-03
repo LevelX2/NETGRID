@@ -34,6 +34,15 @@ Das Fenster zeigt:
 - gescorte Agendas,
 - gekürzten finalen StateHash.
 
+Bei `two_game_side_swap` zeigt das Fenster zusätzlich:
+
+- aktuelles Serienspiel,
+- geplante Spielanzahl,
+- eigene Serien-Siege,
+- Gegenseite-Siege,
+- Draws,
+- Status oder Verfügbarkeit des nächsten Serienspiels.
+
 ## Datenregeln
 
 Das Modal darf keine FullState-Daten, `cardInstances`, privaten Payloads, Tokens, verdeckten Kartentitel oder privaten Decklisten lesen oder anzeigen.

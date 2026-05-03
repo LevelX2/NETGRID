@@ -211,7 +211,7 @@ select {
   top: 0;
   z-index: 20;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   padding: 4px;
   border: 1px solid var(--line);
@@ -227,7 +227,8 @@ select {
 }
 
 .entryContent > .catalogPanel,
-.entryContent > .deckPanel {
+.entryContent > .deckPanel,
+.entryContent > .optionsPanel {
   width: 100%;
 }
 
@@ -362,6 +363,7 @@ select {
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--panel-soft);
+  user-select: none;
 }
 
 .catalogTypeFilters legend {
@@ -384,6 +386,7 @@ select {
   background: var(--panel);
   padding: 0 9px;
   cursor: pointer;
+  user-select: none;
 }
 
 .typeFilterActions button:hover {
@@ -408,6 +411,8 @@ select {
   color: var(--text);
   background: var(--panel);
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .typeToggle.checked {
@@ -424,6 +429,7 @@ select {
   border: 0;
   background: transparent;
   accent-color: var(--runner);
+  cursor: pointer;
 }
 
 .typeToggle span {
@@ -442,7 +448,9 @@ select {
 
 .catalogList {
   max-height: 480px;
+  min-height: 0;
   overflow: auto;
+  scrollbar-gutter: stable;
   border-right: 1px solid var(--line);
 }
 
@@ -892,6 +900,24 @@ select {
   font-size: 15px;
 }
 
+.serverTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.serverCount {
+  flex: 0 0 auto;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  background: #f7fafc;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .lane {
   min-height: 68px;
   display: flex;
@@ -1167,26 +1193,34 @@ select {
 
 .chronicleCardName {
   position: relative;
-  display: inline;
+  display: inline-block;
   max-width: 100%;
   padding: 1px 5px;
   border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line) 35%);
   border-radius: 6px;
   background: color-mix(in srgb, var(--chronicle-accent), white 88%);
   color: color-mix(in srgb, var(--chronicle-accent), black 38%);
+  font: inherit;
+  font-weight: inherit;
   line-height: 1.25;
   outline: 0;
   overflow-wrap: anywhere;
+  appearance: none;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
 }
 
 .chronicleCardName.hasDetail {
-  cursor: help;
+  cursor: pointer;
 }
 
 .chronicleCardName:focus {
   text-decoration: underline;
+}
+
+.chronicleCardName:disabled,
+.chronicleCardLine:disabled {
+  cursor: default;
 }
 
 .chronicleCategory {
@@ -1242,10 +1276,12 @@ select {
   background: color-mix(in srgb, var(--chronicle-card), white 93%);
   cursor: help;
   color: color-mix(in srgb, var(--chronicle-card), black 38%);
+  font: inherit;
   font-size: 12px;
   line-height: 1.35;
   outline: 0;
   overflow-wrap: anywhere;
+  appearance: none;
 }
 
 .chronicleCardLine:focus {
@@ -1327,6 +1363,94 @@ select {
   font-weight: 700;
 }
 
+.accessRevealOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 76;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(9 14 18 / 0.5);
+}
+
+.accessRevealBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(9 14 18 / 0.18);
+}
+
+.accessRevealPanel {
+  position: relative;
+  width: min(760px, 100%);
+  max-height: min(720px, calc(100vh - 40px));
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border: 1px solid #b8c8d8;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgb(15 33 50 / 0.34);
+  overflow: auto;
+}
+
+.accessRevealHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.accessRevealHeader h2 {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.12;
+}
+
+.accessRevealHeader p:last-child {
+  margin: 5px 0 0;
+  color: var(--muted);
+}
+
+.accessRevealBody {
+  display: grid;
+  grid-template-columns: minmax(170px, 230px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.accessRevealCard .card.preview {
+  min-height: 0;
+}
+
+.accessRevealDecision {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.accessRevealDecision > strong {
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.accessRevealDecision > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.accessRevealActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.button.dangerButton {
+  border-color: #e6a1aa;
+  background: #fff0f2;
+  color: var(--danger);
+}
+
 .gameOverOverlay {
   position: fixed;
   inset: 0;
@@ -1393,6 +1517,39 @@ select {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
   gap: 8px;
+}
+
+.seriesStrip {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.seriesStrip div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.seriesStrip span {
+  font-weight: 800;
+}
+
+.seriesStrip small,
+.seriesScore {
+  color: var(--muted);
+}
+
+.seriesScore {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 12px;
 }
 
 .gameOverFooter {
@@ -1621,6 +1778,16 @@ select,
   background: #ffffff;
   color: var(--runner);
   font-weight: 700;
+}
+
+.optionsPanel {
+  max-width: 760px;
+}
+
+.optionsContent {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
 }
 
 .cardDisplaySettings {
@@ -1922,9 +2089,29 @@ select,
   object-fit: cover;
 }
 
+.lane .card,
 .lane .card.withImage {
   flex: 0 0 76px;
   width: 76px;
+  max-width: 76px;
+}
+
+.lane .card {
+  height: 106px;
+}
+
+.lane .cardTitle {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+.lane .cardRulesPreview,
+.lane .cardMeta {
+  display: none;
 }
 
 .cardArt {
@@ -1962,6 +2149,12 @@ select,
 
 .cardPreviewPanel .card {
   margin-top: 8px;
+}
+
+.cardPreviewPanel .card.preview .cardRulesPreview {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
 }
 
 .cardRulesDetail {
@@ -2043,6 +2236,14 @@ select,
     flex-direction: column;
   }
 
+  .seriesStrip {
+    flex-direction: column;
+  }
+
+  .seriesScore {
+    justify-content: flex-start;
+  }
+
   .audioSettings {
     grid-template-columns: 1fr;
   }
@@ -2053,6 +2254,33 @@ select,
 
   .gameOverOverlay {
     padding: 14px;
+  }
+
+  .accessRevealOverlay {
+    padding: 12px;
+  }
+
+  .accessRevealPanel {
+    max-height: calc(100vh - 24px);
+    padding: 14px;
+  }
+
+  .accessRevealHeader {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .accessRevealBody {
+    grid-template-columns: 1fr;
+  }
+
+  .accessRevealCard {
+    width: min(230px, 100%);
+    justify-self: center;
+  }
+
+  .accessRevealActions .button {
+    flex: 1 1 150px;
   }
 
   .gameOverHero h2 {

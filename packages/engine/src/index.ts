@@ -421,6 +421,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           tags: state.runner.tags,
           handCount: state.corp.hq.length,
           deckCount: state.corp.rd.length,
+          discardCount: state.corp.archives.length,
           scoreArea: state.corp.scoreArea.map((id) => visibleOwnCard(state, id))
         }
       : {
@@ -430,6 +431,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           tags: state.runner.tags,
           handCount: state.runner.grip.length,
           deckCount: state.runner.stack.length,
+          discardCount: state.runner.heap.length,
           scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id))
         },
     servers: visibleServers,
@@ -848,7 +850,7 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       continueRun(state);
       return;
     case "access_card":
-      accessCurrentCard(state);
+      accessCurrentCard(state, legalAction);
       return;
     case "steal_agenda":
       stealAgenda(state, mustRun(state).accessedCardId ?? "");
@@ -1029,7 +1031,7 @@ function enterAccess(state: GameState): void {
   state.activeSide = "runner";
 }
 
-function accessCurrentCard(state: GameState): void {
+function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   const run = mustRun(state);
   const server = mustServer(state, run.attackedServerId);
   let cardId: string | undefined;
@@ -1041,6 +1043,7 @@ function accessCurrentCard(state: GameState): void {
     finishRun(state, true);
     return;
   }
+  legalAction.payload = { ...(legalAction.payload ?? {}), accessedCardId: cardId, serverId: server.id };
   state.run = { ...run, accessedCardId: cardId };
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
@@ -1330,7 +1333,12 @@ function publicLabel(legalAction: LegalAction): string {
 
 function publicContextForAction(state: GameState, legalAction: LegalAction): Record<string, unknown> {
   const context: Record<string, unknown> = {};
-  const cardId = typeof legalAction.payload?.cardId === "string" ? legalAction.payload.cardId : undefined;
+  const cardId =
+    typeof legalAction.payload?.cardId === "string"
+      ? legalAction.payload.cardId
+      : typeof legalAction.payload?.accessedCardId === "string"
+        ? legalAction.payload.accessedCardId
+        : undefined;
   const sourceCardId = typeof legalAction.source === "string" && state.cardInstances[legalAction.source] ? legalAction.source : undefined;
   const serverLabel = publicServerLabelForCard(state, cardId) ?? publicServerLabel(state, legalAction.payload?.serverId);
   const agendaId = cardId ?? sourceCardId;
@@ -1375,7 +1383,7 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
     ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_event", "play_operation"].includes(legalAction.type) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
-    const cardId = legalAction.type === "access_card" ? state.run?.accessedCardId : legalAction.payload?.cardId ?? legalAction.source;
+    const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;
     if (typeof cardId === "string" && state.cardInstances[cardId]) {
       const definition = definitionFor(state, cardId);
       return { cardDefinitionId: definition.id, title: definition.title };

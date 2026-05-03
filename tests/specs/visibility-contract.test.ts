@@ -41,6 +41,9 @@ describe("Client visibility contract", () => {
     expect(page).toContain("playResultSound");
     expect(page).toContain("AudioSettings");
     expect(page).toContain("Regelmatch · 7 Agendapunkte");
+    expect(page).toContain("Private Matchserie · Seitenwechsel");
+    expect(page).toContain("Nächstes Serienspiel");
+    expect(page).toContain("seriesAudioOutcome");
     expect(page).not.toContain("resultSummary.cardInstances");
     expect(page).not.toContain("resultSummary.privatePayload");
     expect(page).not.toContain("resultSummary.sessionToken");
@@ -57,6 +60,11 @@ describe("Client visibility contract", () => {
     expect(page).toContain("chronicle-${item.category}");
     expect(page).toContain("chronicleCardName");
     expect(page).toContain("displayMode={cardDisplayMode}");
+    expect(page).toContain("onFocusCard={focusCard}");
+    expect(page).toContain("visibleCardFromCatalogDetail");
+    expect(page).toContain("function AccessRevealModal");
+    expect(page).toContain("accessRevealFromLatestEvent");
+    expect(page).toContain("Du hast auf eine Karte in");
     expect(page).not.toContain("chronicleEntry ${item.category}");
     expect(page).not.toContain("<h2>EventLog</h2>");
     expect(page).not.toContain("function EventLogPanel");

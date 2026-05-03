@@ -13,3 +13,5 @@ Stand: 2026-05-03
 | S01-T006 | Audio | Browserseite enthält `AudioSettings` und `playResultSound` ohne Engine-Import. |
 | S01-T007 | Visibility | ResultSummary enthält keine `cardInstances`, Tokens oder private Payloads. |
 | S01-T008 | Regression | Projektweite Checks bleiben grün. |
+| S01-T009 | Matchserie | `two_game_side_swap` speichert Serienmetadaten, erzeugt nach Spielende ein zweites Spiel und wechselt die Seite des anfragenden Spielers. |
+| S01-T010 | Serienstand | `GameResultSummary.series` enthält nur side-sichere Aggregationen: Spielnummer, Zielanzahl, eigene Siege, Gegenseite-Siege, Draws und Folgespiel-Verfügbarkeit. |

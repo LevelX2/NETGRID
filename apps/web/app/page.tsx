@@ -21,6 +21,7 @@ import {
   Save,
   Search,
   Shield,
+  SlidersHorizontal,
   Sparkles,
   Trash2,
   Upload,
@@ -49,10 +50,24 @@ const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
 
 type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
-type MatchFormat = "single_game" | "rules_match";
+type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 type AiDifficulty = "easy" | "normal" | "hard";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
-type EntryTab = "play" | "catalog" | "decks";
+type EntryTab = "play" | "catalog" | "decks" | "options";
+
+type SeriesResultSummary = {
+  seriesId: string;
+  mode: "two_game_side_swap";
+  status: "active" | "between_games" | "finished";
+  gameNumber: number;
+  gamesPlanned: number;
+  viewerPlayer: "player_a" | "player_b";
+  viewerWins: number;
+  opponentWins: number;
+  draws: number;
+  nextAvailable: boolean;
+  nextMatchId?: string;
+};
 
 type GameResultSummary = {
   winner: Winner;
@@ -70,6 +85,7 @@ type GameResultSummary = {
   startedAt: string;
   finishedAt: string;
   finalStateHash: string;
+  series?: SeriesResultSummary;
 };
 
 type ClientPayload = {
@@ -199,6 +215,19 @@ type CatalogListResponse = {
 
 type DisplayVisibleCard = VisibleCard & {
   imageUrl?: string;
+};
+
+type FocusedCard = {
+  card: VisibleCard;
+  hiddenSide?: Side;
+};
+
+type AccessReveal = {
+  eventId: string;
+  serverLabel: string;
+  card: DisplayVisibleCard;
+  actions: LegalAction[];
+  trashStatus: string;
 };
 
 type DeckCardEntry = {
@@ -332,7 +361,19 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   agendaPoints: "Agenda"
 };
 
-const LOCAL_CARD_IMAGE_IDS = new Set(["simple_agenda", "simple_priority_agenda", "v08_project_agenda"]);
+const LOCAL_CARD_IMAGE_IDS = new Set([
+  "simple_agenda",
+  "simple_draw_event",
+  "simple_economy_asset",
+  "simple_economy_event",
+  "simple_priority_agenda",
+  "simple_run_event",
+  "v08_burst_credit_event",
+  "v08_cashout_asset",
+  "v08_deep_draw_event",
+  "v08_overclock_run_event",
+  "v08_project_agenda"
+]);
 
 function localCardImageUrl(cardId: string): string | undefined {
   return LOCAL_CARD_IMAGE_IDS.has(cardId) || cardId.startsWith("onr_v1_") ? `/api/card-images/${encodeURIComponent(cardId)}` : undefined;
@@ -399,9 +440,75 @@ function enrichVisibleCard(card: VisibleCard, detailsById: Record<string, Catalo
   return enriched;
 }
 
+function visibleCardFromCatalogDetail(card: CatalogCardDetail): DisplayVisibleCard {
+  const visible: DisplayVisibleCard = {
+    instanceId: `chronicle-${card.catalogCardId}`,
+    known: true,
+    title: card.title,
+    definitionId: card.catalogCardId,
+    subtypes: card.subtypes,
+    rulesText: card.text
+  };
+  visible.type = card.type as NonNullable<VisibleCard["type"]>;
+  const imageUrl = localCardImageUrl(card.catalogCardId);
+  if (imageUrl) visible.imageUrl = imageUrl;
+  addNumeric(visible, "cost", undefined, card.numeric.cost);
+  addNumeric(visible, "installCost", undefined, card.numeric.installCost);
+  addNumeric(visible, "memoryCost", undefined, card.numeric.memoryCost);
+  addNumeric(visible, "strength", undefined, card.numeric.strength);
+  addNumeric(visible, "rezCost", undefined, card.numeric.rezCost);
+  addNumeric(visible, "trashCost", undefined, card.numeric.trashCost);
+  addNumeric(visible, "advancementRequirement", undefined, card.numeric.advancementRequirement);
+  addNumeric(visible, "agendaPoints", undefined, card.numeric.agendaPoints);
+  return visible;
+}
+
 function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "installCost" | "memoryCost" | "strength" | "rezCost" | "trashCost" | "advancementRequirement" | "agendaPoints">, current: number | undefined, fallback: number | null | undefined): void {
   if (current !== undefined || fallback === null || fallback === undefined) return;
   target[key] = fallback;
+}
+
+function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[]): AccessReveal | null {
+  if (!event || event.publicPayload.actionType !== "access_card") return null;
+  const cardId = payloadString(event.publicPayload, "cardDefinitionId");
+  const title = payloadString(event.publicPayload, "title");
+  if (!cardId || !title) return null;
+  const detail = detailsById[cardId] ?? null;
+  const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
+  const serverLabel = payloadString(event.publicPayload, "serverLabel") ?? "einen Server";
+  const actions = legalActions.filter((action) => ["steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
+  return {
+    eventId: event.eventId,
+    serverLabel,
+    card,
+    actions,
+    trashStatus: accessTrashStatus(card, actions)
+  };
+}
+
+function visibleCardFromPublicEvent(event: PublicGameEvent, cardId: string, title: string): DisplayVisibleCard {
+  const card: DisplayVisibleCard = {
+    instanceId: `access-${event.eventId}-${cardId}`,
+    known: true,
+    title,
+    definitionId: cardId
+  };
+  const imageUrl = localCardImageUrl(cardId);
+  if (imageUrl) card.imageUrl = imageUrl;
+  return card;
+}
+
+function payloadString(payload: Record<string, unknown>, key: string): string | null {
+  const value = payload[key];
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function accessTrashStatus(card: DisplayVisibleCard, actions: LegalAction[]): string {
+  if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
+  if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
+  if (actions.some((action) => action.type === "decline_trash")) return "Trashen ist aktuell nicht möglich. Du kannst den Zugriff abschließen.";
+  if (card.type === "operation" || card.type === "event") return "Diese Karte kann nicht getrasht werden. Der Zugriff ist abgeschlossen.";
+  return "Für diese Karte ist aktuell keine weitere Zugriffentscheidung offen.";
 }
 
 function catalogTypeKeysForCard(card: Pick<CatalogCardSummary, "type" | "subtypes">): CatalogTypeFilterKey[] {
@@ -443,6 +550,31 @@ function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): 
   const iceLane = { label: "ICE" as const, cards: server.ice };
   const rootLane = { label: "Root" as const, cards: server.root };
   return side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane];
+}
+
+function opponentSide(side: Side): Side {
+  return side === "runner" ? "corp" : "runner";
+}
+
+function sideLabel(side: Side): string {
+  return side === "corp" ? "Corp" : "Runner";
+}
+
+function centralServerCardCount(view: PlayerView, serverId: PlayerView["servers"][number]["id"]): number | null {
+  switch (serverId) {
+    case "hq":
+      return view.side === "corp" ? view.own.gripOrHq.length : view.opponent.handCount;
+    case "rd":
+      return view.side === "corp" ? view.own.stackOrRdCount : view.opponent.deckCount;
+    case "archives":
+      return view.side === "corp" ? view.own.heapOrArchives.length : view.opponent.discardCount;
+    default:
+      return null;
+  }
+}
+
+function formatCardCount(count: number): string {
+  return `${count} ${count === 1 ? "Karte" : "Karten"}`;
 }
 
 export default function Page() {
@@ -490,11 +622,13 @@ export default function Page() {
   const [deckExportText, setDeckExportText] = useState("");
   const [addCardId, setAddCardId] = useState("");
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
-  const [focusedCard, setFocusedCard] = useState<VisibleCard | null>(null);
+  const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
+  const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioVolume, setAudioVolume] = useState(0.45);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
+  const [seriesTransitioning, setSeriesTransitioning] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
@@ -659,13 +793,24 @@ export default function Page() {
   const effectiveCorpSnapshot = corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const playableCatalogCards = allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity");
-  const previewCard = focusedCard ?? activeView?.run?.encounteredIce ?? activeView?.own.gripOrHq.find((card) => card.known) ?? activeView?.own.rig?.find((card) => card.known) ?? null;
+  const gripPreviewCard = activeView?.own.gripOrHq.find((card) => card.known) ?? null;
+  const rigPreviewCard = activeView?.own.rig?.find((card) => card.known) ?? null;
+  const previewSelection =
+    focusedCard ??
+    (activeView?.run?.encounteredIce ? { card: activeView.run.encounteredIce, hiddenSide: "corp" as const } : null) ??
+    (gripPreviewCard ? { card: gripPreviewCard } : null) ??
+    (rigPreviewCard ? { card: rigPreviewCard } : null);
+  const previewCard = previewSelection?.card ?? null;
+  const previewHiddenSide = previewSelection?.hiddenSide;
   const enrichCard = (card: VisibleCard) => enrichVisibleCard(card, catalogDetailsById);
   const enrichedPreviewCard = previewCard ? enrichCard(previewCard) : null;
+  const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) => setFocusedCard({ card, ...(hiddenSide ? { hiddenSide } : {}) });
+  const accessReveal = payload ? accessRevealFromLatestEvent(payload.eventTail.at(-1), catalogDetailsById, payload.legalActions) : null;
+  const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
-  const effectiveAgendaTarget = matchFormat === "rules_match" ? 7 : effectiveCorpSnapshot?.validation.agendaPoints ?? undefined;
+  const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
 
   useEffect(() => {
     if (!resultKey || !resultSummary) {
@@ -678,7 +823,7 @@ export default function Page() {
     }
     if (!audioEnabled || lastAudioResultKeyRef.current === resultKey) return;
     lastAudioResultKeyRef.current = resultKey;
-    playResultSound(resultSummary.viewerOutcome, audioVolume);
+    playResultSound(seriesAudioOutcome(resultSummary), audioVolume);
   }, [audioEnabled, audioVolume, resultKey, resultSummary]);
 
   const createMatch = async () => {
@@ -714,6 +859,39 @@ export default function Page() {
     setSession(nextSession);
     setPayload(fromInitialResponse(created, created.hostSide));
     setNotice("Match erstellt.");
+  };
+
+  const startNextSeriesGame = async () => {
+    if (!session || !resultSummary?.series?.nextAvailable || seriesTransitioning) return;
+    setSeriesTransitioning(true);
+    setNotice("");
+    try {
+      const next = await postJson<CreateMatchResponse & { error?: { message: string } }>(`/api/matches/${encodeURIComponent(session.matchId)}/series-next`, {
+        side: session.side,
+        sessionToken: session.sessionToken,
+        displayName: session.displayName
+      });
+      if (next.error) {
+        setNotice(next.error.message);
+        return;
+      }
+      const nextSession: SessionInfo = {
+        matchId: next.matchId,
+        side: next.hostSide,
+        sessionToken: next.hostSessionToken,
+        reconnectToken: next.hostReconnectToken,
+        webSocketUrl: next.webSocketUrl,
+        displayName: session.displayName,
+        ...(next.joinUrl ? { joinUrl: next.joinUrl } : {})
+      };
+      persistSession(nextSession);
+      setSession(nextSession);
+      setPayload(fromInitialResponse(next, next.hostSide));
+      setDismissedResultKey(null);
+      setNotice(next.joinUrl ? "Nächstes Serienspiel erstellt. Teile den neuen Join-Link." : "Nächstes Serienspiel erstellt.");
+    } finally {
+      setSeriesTransitioning(false);
+    }
   };
 
   const runSimulation = async () => {
@@ -823,6 +1001,7 @@ export default function Page() {
     setPayload(null);
     setSimulation(null);
     setConnection("offline");
+    setSeriesTransitioning(false);
     setNotice("");
   };
 
@@ -1080,6 +1259,10 @@ export default function Page() {
               <Layers3 size={16} />
               Decks
             </button>
+            <button className={`entryTab ${entryTab === "options" ? "active" : ""}`} onClick={() => setEntryTab("options")} type="button" aria-current={entryTab === "options" ? "page" : undefined}>
+              <SlidersHorizontal size={16} />
+              Optionen
+            </button>
           </nav>
           <section className="entryHero">
             <div>
@@ -1118,6 +1301,7 @@ export default function Page() {
                   <select value={matchFormat} onChange={(event) => setMatchFormat(event.target.value as MatchFormat)}>
                     <option value="rules_match">Regelmatch · 7 Agendapunkte</option>
                     <option value="single_game">Einzelspiel · Deckziel</option>
+                    <option value="two_game_side_swap">Private Matchserie · Seitenwechsel</option>
                   </select>
                 </label>
                 <label>
@@ -1199,9 +1383,6 @@ export default function Page() {
                   </select>
                 </label>
                 <DeckMetadataLine runner={effectiveRunnerSnapshot?.publicMetadata} corp={effectiveCorpSnapshot?.publicMetadata} />
-                <CardDisplaySettings mode={cardDisplayMode} onChange={setCardDisplayMode} />
-                <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={setAudioEnabled} onVolume={setAudioVolume} />
-                <BoardPreview displayMode={cardDisplayMode} />
                 <button className="button primary wide" onClick={createMatch}>
                   {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
                   {gameMode === "ai_vs_ai" ? "Simulation starten" : "Match erstellen"}
@@ -1277,6 +1458,16 @@ export default function Page() {
             onImport={importLocalDeck}
           />
           ) : null}
+          {entryTab === "options" ? (
+            <OptionsPanel
+              audioEnabled={audioEnabled}
+              audioVolume={audioVolume}
+              cardDisplayMode={cardDisplayMode}
+              onAudioEnabled={setAudioEnabled}
+              onAudioVolume={setAudioVolume}
+              onCardDisplayMode={setCardDisplayMode}
+            />
+          ) : null}
           </div>
         </div>
       </main>
@@ -1319,7 +1510,7 @@ export default function Page() {
 
       <div className="main">
         <aside className="column panel sidePanel">
-          <PlayerPanel view={activeView} title={session.side === "runner" ? "Runner" : "Corp"} />
+          <OpponentPanel view={activeView} connected={payload.opponentStatus.connected} />
           <LegalActionsPanel actions={payload.legalActions} disabled={Boolean(payload.winner) || connection !== "online"} onAction={submitAction} />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
         </aside>
@@ -1336,27 +1527,33 @@ export default function Page() {
             </div>
           ) : null}
           <div className="serverGrid">
-            {activeView.servers.map((server) => (
-              <article className="server" key={server.id}>
-                <h3>{server.label}</h3>
-                {serverLanesForSide(activeView.side, server).map((lane) => (
-                  <div className="serverLaneGroup" key={lane.label}>
-                    <div className="laneLabel">{lane.label}</div>
-                    <div className="lane">{lane.cards.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} compact displayMode={cardDisplayMode} hiddenSide="corp" onFocus={setFocusedCard} />)}</div>
-                  </div>
-                ))}
-              </article>
-            ))}
+            {activeView.servers.map((server) => {
+              const cardCount = centralServerCardCount(activeView, server.id);
+              return (
+                <article className="server" key={server.id}>
+                  <h3 className="serverTitle">
+                    <span>{server.label}</span>
+                    {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
+                  </h3>
+                  {serverLanesForSide(activeView.side, server).map((lane) => (
+                    <div className="serverLaneGroup" key={lane.label}>
+                      <div className="laneLabel">{lane.label}</div>
+                      <div className="lane">{lane.cards.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} compact displayMode={cardDisplayMode} hiddenSide="corp" onFocus={focusCard} />)}</div>
+                    </div>
+                  ))}
+                </article>
+              );
+            })}
           </div>
           {activeView.own.rig ? (
             <section className="section panel boardSection">
               <h2>Rig</h2>
-              <div className="cards">{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
+              <div className="cards">{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} onFocus={focusCard} />)}</div>
             </section>
           ) : null}
           <section className="section panel boardSection">
             <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
-            <div className="cards">{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} hiddenSide={activeView.side} onFocus={setFocusedCard} />)}</div>
+            <div className="cards">{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} hiddenSide={activeView.side} onFocus={focusCard} />)}</div>
           </section>
         </section>
 
@@ -1364,23 +1561,9 @@ export default function Page() {
           <section className="section">
             <CardDisplaySettings mode={cardDisplayMode} onChange={setCardDisplayMode} compact />
           </section>
-          <CardPreviewPanel card={enrichedPreviewCard} displayMode={cardDisplayMode} />
-          <section className="section">
-            <h2>Gegenseite</h2>
-            <div className="stats">
-              <Stat label="Credits" value={activeView.opponent.credits} />
-              <Stat label="Clicks" value={activeView.opponent.clicks} />
-              <Stat label="Agenda" value={activeView.opponent.agendaPoints} />
-            </div>
-            {activeView.deckMetadata ? (
-              <div className="deckMini">
-                <span>{activeView.deckMetadata.opponent.deckName}</span>
-                <small>{activeView.deckMetadata.opponent.deckHash}</small>
-              </div>
-            ) : null}
-            <p className="meta statusLine">{payload.opponentStatus.connected ? "Verbunden" : "Offline"} · {activeView.timingPoint}</p>
-          </section>
-          <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} />
+          <CardPreviewPanel card={enrichedPreviewCard} displayMode={cardDisplayMode} {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})} />
+          <PlayerPanel view={activeView} title={sideLabel(activeView.side)} />
+          <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocusCard={focusCard} />
           <section className="section">
             <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
               <PanelRightOpen size={15} />
@@ -1398,6 +1581,17 @@ export default function Page() {
             if (resultKey) setDismissedResultKey(resultKey);
           }}
           onNewMatch={leaveMatch}
+          nextSeriesPending={seriesTransitioning}
+          {...(resultSummary.series?.nextAvailable ? { onNextSeriesGame: startNextSeriesGame } : {})}
+        />
+      ) : null}
+      {showAccessReveal && accessReveal ? (
+        <AccessRevealModal
+          reveal={accessReveal}
+          displayMode={cardDisplayMode}
+          disabled={Boolean(payload.winner) || connection !== "online"}
+          onAction={submitAction}
+          onDismiss={() => setDismissedAccessEventId(accessReveal.eventId)}
         />
       ) : null}
     </main>
@@ -1418,19 +1612,115 @@ function Brand({ subtitle }: { subtitle: string }) {
   );
 }
 
-function GameOverModal({ result, side, onDismiss, onNewMatch }: { result: GameResultSummary; side: Side; onDismiss(): void; onNewMatch(): void }) {
+function AccessRevealModal({
+  reveal,
+  displayMode,
+  disabled,
+  onAction,
+  onDismiss
+}: {
+  reveal: AccessReveal;
+  displayMode: CardDisplayMode;
+  disabled: boolean;
+  onAction(action: LegalAction): void;
+  onDismiss(): void;
+}) {
+  const primaryActions = reveal.actions.filter((action) => action.type !== "decline_trash");
+  const declineAction = reveal.actions.find((action) => action.type === "decline_trash") ?? null;
+  const runAction = (action: LegalAction) => {
+    onAction(action);
+    onDismiss();
+  };
+
+  return (
+    <div className="accessRevealOverlay" role="dialog" aria-modal="true" aria-labelledby="access-reveal-title">
+      <div className="accessRevealBackdrop" aria-hidden="true" />
+      <section className="accessRevealPanel">
+        <div className="accessRevealHeader">
+          <div>
+            <p className="eyebrow">Access</p>
+            <h2 id="access-reveal-title">Zugriff auf {reveal.serverLabel}</h2>
+            <p>Du hast auf eine Karte in {reveal.serverLabel} zugegriffen.</p>
+          </div>
+          <button className="button iconOnly" onClick={onDismiss} aria-label="Fenster schließen" title="Schließen">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="accessRevealBody">
+          <div className="accessRevealCard">
+            <CardView card={reveal.card} displayMode={displayMode} preview />
+          </div>
+          <div className="accessRevealDecision">
+            <strong>{reveal.card.title}</strong>
+            <p>{reveal.trashStatus}</p>
+            {reveal.card.rulesText ? (
+              <div className="cardRulesDetail">
+                <strong>Regeltext</strong>
+                <span>{reveal.card.rulesText}</span>
+              </div>
+            ) : null}
+            <div className="accessRevealActions">
+              {primaryActions.map((action) => (
+                <button className={`button primary ${action.type === "trash_accessed_card" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
+                  {action.type === "trash_accessed_card" ? <Trash2 size={15} /> : <Shield size={15} />}
+                  {accessDecisionLabel(action)}
+                </button>
+              ))}
+              {declineAction ? (
+                <button className="button" onClick={() => runAction(declineAction)} disabled={disabled}>
+                  <Check size={15} />
+                  {accessDecisionLabel(declineAction)}
+                </button>
+              ) : null}
+              {reveal.actions.length === 0 ? (
+                <button className="button" onClick={onDismiss}>
+                  <Check size={15} />
+                  Verstanden
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function accessDecisionLabel(action: LegalAction): string {
+  if (action.type === "steal_agenda") return "Agenda stehlen";
+  if (action.type === "trash_accessed_card") return "Trashen";
+  if (action.type === "decline_trash") return "Nicht trashen";
+  return action.label;
+}
+
+function GameOverModal({
+  result,
+  side,
+  onDismiss,
+  onNewMatch,
+  onNextSeriesGame,
+  nextSeriesPending = false
+}: {
+  result: GameResultSummary;
+  side: Side;
+  onDismiss(): void;
+  onNewMatch(): void;
+  onNextSeriesGame?: () => void;
+  nextSeriesPending?: boolean;
+}) {
   const outcomeText =
     result.viewerOutcome === "won"
       ? "Du hast das Spiel gewonnen."
       : result.viewerOutcome === "lost"
         ? "Du hast das Spiel verloren."
         : "Das Spiel endet unentschieden.";
+  const seriesText = result.series ? seriesStatusText(result.series) : null;
   return (
     <div className={`gameOverOverlay ${result.viewerOutcome}`} role="dialog" aria-modal="true" aria-labelledby="game-over-title">
       <div className="gameOverBackdrop" aria-hidden="true" />
       <section className="gameOverPanel">
         <div className="gameOverHero">
-          <p className="eyebrow">{result.matchFormat === "rules_match" ? "Regelmatch" : "Einzelspiel"}</p>
+          <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
           <h2 id="game-over-title">{outcomeText}</h2>
           <p>{resultReasonLabel(result.reason)}</p>
         </div>
@@ -1444,6 +1734,19 @@ function GameOverModal({ result, side, onDismiss, onNewMatch }: { result: GameRe
           <Stat label="Gestohlen" value={result.stolenAgendaCount} />
           <Stat label="Gescored" value={result.scoredAgendaCount} />
         </div>
+        {result.series ? (
+          <div className="seriesStrip">
+            <div>
+              <span>Serienspiel {result.series.gameNumber}/{result.series.gamesPlanned}</span>
+              <small>{seriesText}</small>
+            </div>
+            <div className="seriesScore">
+              <span>Du {result.series.viewerWins}</span>
+              <span>Gegenseite {result.series.opponentWins}</span>
+              <span>Draws {result.series.draws}</span>
+            </div>
+          </div>
+        ) : null}
         <div className="gameOverFooter">
           <div>
             <span>{result.winner === "draw" ? "Draw" : result.winner === side ? "Deine Seite gewinnt" : "Gegenseite gewinnt"}</span>
@@ -1453,6 +1756,11 @@ function GameOverModal({ result, side, onDismiss, onNewMatch }: { result: GameRe
             <button className="button" onClick={onDismiss}>
               Board ansehen
             </button>
+            {onNextSeriesGame ? (
+              <button className="button primary" onClick={onNextSeriesGame} disabled={nextSeriesPending}>
+                {nextSeriesPending ? "Erstelle..." : "Nächstes Serienspiel"}
+              </button>
+            ) : null}
             <button className="button primary" onClick={onNewMatch}>
               Neues Spiel
             </button>
@@ -1463,11 +1771,26 @@ function GameOverModal({ result, side, onDismiss, onNewMatch }: { result: GameRe
   );
 }
 
+function matchFormatLabel(format: MatchFormat): string {
+  if (format === "two_game_side_swap") return "Private Matchserie";
+  if (format === "rules_match") return "Regelmatch";
+  return "Einzelspiel";
+}
+
 function resultReasonLabel(reason: GameResultSummary["reason"]): string {
   if (reason === "agenda_points") return "Das Agenda-Ziel wurde erreicht.";
   if (reason === "corp_deck_empty") return "Die Corp konnte keine Karte mehr ziehen.";
   if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
   return "Das Spiel wurde abgeschlossen.";
+}
+
+function seriesStatusText(series: SeriesResultSummary): string {
+  if (series.status === "finished") {
+    if (series.viewerWins > series.opponentWins) return "Du hast die Matchserie gewonnen.";
+    if (series.viewerWins < series.opponentWins) return "Du hast die Matchserie verloren.";
+    return "Die Matchserie endet unentschieden.";
+  }
+  return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
 }
 
 function PreflightBar() {
@@ -1485,6 +1808,39 @@ function PreflightBar() {
         </span>
       ))}
     </div>
+  );
+}
+
+function OptionsPanel({
+  audioEnabled,
+  audioVolume,
+  cardDisplayMode,
+  onAudioEnabled,
+  onAudioVolume,
+  onCardDisplayMode
+}: {
+  audioEnabled: boolean;
+  audioVolume: number;
+  cardDisplayMode: CardDisplayMode;
+  onAudioEnabled(value: boolean): void;
+  onAudioVolume(value: number): void;
+  onCardDisplayMode(value: CardDisplayMode): void;
+}) {
+  return (
+    <section className="optionsPanel panel">
+      <div className="catalogHeader">
+        <div>
+          <h2>Optionen</h2>
+          <p className="meta">Darstellung und Audio</p>
+        </div>
+        <SlidersHorizontal size={18} />
+      </div>
+      <div className="optionsContent">
+        <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
+        <BoardPreview displayMode={cardDisplayMode} />
+        <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
+      </div>
+    </section>
   );
 }
 
@@ -1532,7 +1888,7 @@ function AudioSettings({
       </button>
       <label>
         Lautstärke
-        <input type="range" min={0} max={1} step={0.05} value={volume} onChange={(event) => onVolume(Number(event.target.value))} disabled={!enabled} />
+        <input type="range" min={0} max={1} step={0.05} value={volume} onChange={(event) => onVolume(Number(event.target.value))} />
       </label>
     </div>
   );
@@ -1559,12 +1915,6 @@ function BoardHeader({ view }: { view: PlayerView }) {
       <div>
         <p className="eyebrow">{view.side === "runner" ? "Runner View" : "Corp View"}</p>
         <h2>{view.activeSide === view.side ? "Dein Fenster" : "Gegenseite aktiv"}</h2>
-      </div>
-      <div className="zoneCounts">
-        <span>{view.side === "runner" ? "Stack" : "R&D"} {view.own.stackOrRdCount}</span>
-        <span>{view.side === "runner" ? "Grip" : "HQ"} {view.own.gripOrHq.length}</span>
-        <span>{view.side === "runner" ? "Heap" : "Archives"} {view.own.heapOrArchives.length}</span>
-        <span>Gegnerhand {view.opponent.handCount}</span>
       </div>
     </div>
   );
@@ -1672,7 +2022,8 @@ function UndoPanel({
   );
 }
 
-function CardPreviewPanel({ card, displayMode }: { card: DisplayVisibleCard | null; displayMode: CardDisplayMode }) {
+function CardPreviewPanel({ card, displayMode, hiddenSide }: { card: DisplayVisibleCard | null; displayMode: CardDisplayMode; hiddenSide?: Side }) {
+  const showSupplementalDetails = Boolean(card?.known && (displayMode === "compact" || (displayMode === "placeholder" && card.imageUrl)));
   return (
     <section className="section cardPreviewPanel">
       <div className="sectionTitleLine">
@@ -1681,15 +2032,17 @@ function CardPreviewPanel({ card, displayMode }: { card: DisplayVisibleCard | nu
       </div>
       {card ? (
         <>
-          <CardView card={card} displayMode={displayMode} preview />
-          <p className="meta">
-            {card.known ? [card.type, card.subtypes?.join(" / "), card.strength !== undefined ? `Stärke ${card.strength}` : ""].filter(Boolean).join(" · ") : "Redacted"}
-          </p>
-          {card.known && card.rulesText ? (
-            <div className="cardRulesDetail">
-              <strong>Regeltext</strong>
-              <span>{card.rulesText}</span>
-            </div>
+          <CardView card={card} displayMode={displayMode} {...(hiddenSide ? { hiddenSide } : {})} preview />
+          {showSupplementalDetails ? (
+            <>
+              <p className="meta">{[card.type, card.subtypes?.join(" / "), card.strength !== undefined ? `Stärke ${card.strength}` : ""].filter(Boolean).join(" · ")}</p>
+              {card.rulesText ? (
+                <div className="cardRulesDetail">
+                  <strong>Regeltext</strong>
+                  <span>{card.rulesText}</span>
+                </div>
+              ) : null}
+            </>
           ) : null}
         </>
       ) : (
@@ -1703,12 +2056,14 @@ function ChroniclePanel({
   events,
   side,
   cardDetailsById,
-  displayMode
+  displayMode,
+  onFocusCard
 }: {
   events: PublicGameEvent[];
   side: Side;
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
+  onFocusCard(card: DisplayVisibleCard): void;
 }) {
   const entries = events
     .slice()
@@ -1739,7 +2094,7 @@ function ChroniclePanel({
           return (
             <Fragment key={entry.item.id}>
               {group !== previousGroup ? <div className="chronicleGroup">{group}</div> : null}
-              <ChronicleEntry item={entry.item} card={entry.card} displayMode={displayMode} />
+              <ChronicleEntry item={entry.item} card={entry.card} displayMode={displayMode} onFocusCard={onFocusCard} />
             </Fragment>
           );
         })}
@@ -1748,9 +2103,20 @@ function ChroniclePanel({
   );
 }
 
-function ChronicleEntry({ item, card, displayMode }: { item: ChronicleItem; card: CatalogCardDetail | null; displayMode: CardDisplayMode }) {
+function ChronicleEntry({
+  item,
+  card,
+  displayMode,
+  onFocusCard
+}: {
+  item: ChronicleItem;
+  card: CatalogCardDetail | null;
+  displayMode: CardDisplayMode;
+  onFocusCard(card: DisplayVisibleCard): void;
+}) {
   const tooltipText = card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle;
   const titleContainsCard = Boolean(item.cardTitle && item.title.includes(item.cardTitle));
+  const previewCard = card ? visibleCardFromCatalogDetail(card) : null;
   return (
     <article className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility}`}>
       <div className="chronicleRail" aria-hidden="true">
@@ -1759,7 +2125,7 @@ function ChronicleEntry({ item, card, displayMode }: { item: ChronicleItem; card
       <div className="chronicleContent">
         <div className="chronicleTopLine">
           <strong>
-            <ChronicleTitle item={item} card={card} displayMode={displayMode} />
+            <ChronicleTitle item={item} card={card} previewCard={previewCard} displayMode={displayMode} onFocusCard={onFocusCard} />
           </strong>
           <span className="chronicleCategory">{CHRONICLE_CATEGORY_LABELS[item.category]}</span>
         </div>
@@ -1772,10 +2138,10 @@ function ChronicleEntry({ item, card, displayMode }: { item: ChronicleItem; card
           </div>
         ) : null}
         {item.cardTitle && !titleContainsCard ? (
-          <div className="chronicleCardLine" tabIndex={card ? 0 : -1} title={tooltipText}>
+          <button className="chronicleCardLine" type="button" disabled={!previewCard} onClick={() => previewCard && onFocusCard(previewCard)} title={tooltipText}>
             Karte: {item.cardTitle}
             <ChronicleCardHover card={card} item={item} displayMode={displayMode} />
-          </div>
+          </button>
         ) : null}
         {item.cardText ? <p className="chronicleEffect">Effekt: {item.cardText}</p> : null}
       </div>
@@ -1783,17 +2149,30 @@ function ChronicleEntry({ item, card, displayMode }: { item: ChronicleItem; card
   );
 }
 
-function ChronicleTitle({ item, card, displayMode }: { item: ChronicleItem; card: CatalogCardDetail | null; displayMode: CardDisplayMode }) {
+function ChronicleTitle({
+  item,
+  card,
+  previewCard,
+  displayMode,
+  onFocusCard
+}: {
+  item: ChronicleItem;
+  card: CatalogCardDetail | null;
+  previewCard: DisplayVisibleCard | null;
+  displayMode: CardDisplayMode;
+  onFocusCard(card: DisplayVisibleCard): void;
+}) {
   if (!item.cardTitle) return <>{item.title}</>;
   const index = item.title.indexOf(item.cardTitle);
   if (index < 0) return <>{item.title}</>;
+  const title = card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle;
   return (
     <>
       {item.title.slice(0, index)}
-      <span className={`chronicleCardName ${card ? "hasDetail" : ""}`} tabIndex={card ? 0 : -1} title={card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle}>
+      <button className={`chronicleCardName ${previewCard ? "hasDetail" : ""}`} type="button" disabled={!previewCard} onClick={() => previewCard && onFocusCard(previewCard)} title={title}>
         {item.cardTitle}
         <ChronicleCardHover card={card} item={item} displayMode={displayMode} />
-      </span>
+      </button>
       {item.title.slice(index + item.cardTitle.length)}
     </>
   );
@@ -1920,6 +2299,28 @@ function CatalogPanel({
   onClearTypeFilters(): void;
 }) {
   const catalogImageUrl = detail ? localCardImageUrl(detail.catalogCardId) : undefined;
+  const detailRef = useRef<HTMLElement | null>(null);
+  const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const detailElement = detailRef.current;
+    if (!detailElement) return;
+    const syncListHeight = () => {
+      if (!window.matchMedia("(min-width: 1081px)").matches) {
+        setCatalogListHeight(null);
+        return;
+      }
+      setCatalogListHeight(Math.max(380, Math.ceil(detailElement.getBoundingClientRect().height)));
+    };
+    syncListHeight();
+    const observer = new ResizeObserver(syncListHeight);
+    observer.observe(detailElement);
+    window.addEventListener("resize", syncListHeight);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", syncListHeight);
+    };
+  }, [detail?.catalogCardId]);
 
   return (
     <section className="catalogPanel panel">
@@ -1982,7 +2383,7 @@ function CatalogPanel({
         </fieldset>
       </div>
       <div className="catalogLayout">
-        <div className="catalogList">
+        <div className="catalogList" style={catalogListHeight ? { maxHeight: `${catalogListHeight}px` } : undefined}>
           {cards.map((card) => (
             <button className={`catalogItem ${selectedId === card.catalogCardId ? "active" : ""}`} key={card.catalogCardId} onClick={() => onSelect(card.catalogCardId)}>
               <strong>{card.title}</strong>
@@ -1994,7 +2395,7 @@ function CatalogPanel({
           ))}
           {cards.length === 0 ? <p className="meta catalogEmpty">Keine Treffer.</p> : null}
         </div>
-        <article className="catalogDetail">
+        <article className="catalogDetail" ref={detailRef}>
           {detail ? (
             <>
               <div className="catalogDetailHead">
@@ -2255,6 +2656,28 @@ function ConnectionBadge({ text, state }: { text: string; state: "offline" | "co
   return <span className={`connection ${state}`}>{text}</span>;
 }
 
+function OpponentPanel({ view, connected }: { view: PlayerView; connected: boolean }) {
+  const side = opponentSide(view.side);
+  return (
+    <section className="section">
+      <h2>{sideLabel(side)}</h2>
+      <div className="stats">
+        <Stat label="Credits" value={view.opponent.credits} />
+        <Stat label="Clicks" value={view.opponent.clicks} />
+        <Stat label="Agenda" value={view.opponent.agendaPoints} />
+        {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} /> : null}
+      </div>
+      {view.deckMetadata ? (
+        <div className="deckMini">
+          <span>{view.deckMetadata.opponent.deckName}</span>
+          <small>{view.deckMetadata.opponent.deckHash}</small>
+        </div>
+      ) : null}
+      <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {view.activeSide === side ? "Aktiv" : "Wartet"}</p>
+    </section>
+  );
+}
+
 function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
   const visibleTags = view.side === "runner" ? view.own.tags : view.opponent.tags;
   return (
@@ -2317,7 +2740,7 @@ function CardView({
   preview?: boolean;
   displayMode: CardDisplayMode;
   hiddenSide?: Side;
-  onFocus?(card: DisplayVisibleCard): void;
+  onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
 }) {
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
@@ -2327,6 +2750,7 @@ function CardView({
   const detailLines = card.known ? cardDetailLines(card) : [];
   const tooltipText = card.known ? [card.title, ...detailLines, card.rulesText].filter(Boolean).join("\n") : undefined;
   const tooltipId = card.known && card.rulesText ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const nativeTitle = tooltipId ? undefined : tooltipText;
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
   const cardBackUrl = !card.known && displayMode === "placeholder" && hiddenSide ? cardBackImageUrl(hiddenSide) : undefined;
   const visualImageUrl = cardImageUrl ?? cardBackUrl;
@@ -2348,12 +2772,12 @@ function CardView({
       ref={cardRef}
       type="button"
       className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}`}
-      onClick={() => onFocus?.(card)}
+      onClick={() => onFocus?.(card, hiddenSide)}
       onFocus={updateTooltipPlacement}
       onPointerEnter={updateTooltipPlacement}
       aria-label={card.known ? `Karte ${card.title}` : "Verdeckte Karte"}
       aria-describedby={tooltipId}
-      title={tooltipText}
+      title={nativeTitle}
     >
       {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : <span className="cardArt" aria-hidden="true" />}
       {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
@@ -2458,6 +2882,13 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body)
   });
   return (await response.json()) as T;
+}
+
+function seriesAudioOutcome(result: GameResultSummary): GameResultSummary["viewerOutcome"] {
+  if (result.series?.status !== "finished") return result.viewerOutcome;
+  if (result.series.viewerWins > result.series.opponentWins) return "won";
+  if (result.series.viewerWins < result.series.opponentWins) return "lost";
+  return "draw";
 }
 
 function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: number): void {

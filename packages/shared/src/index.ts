@@ -470,6 +470,7 @@ export type PlayerView = {
     tags: number;
     handCount: number;
     deckCount: number;
+    discardCount: number;
     scoreArea: VisibleCard[];
   };
   servers: Array<{

@@ -134,6 +134,24 @@ describe("formatChronicleEvent", () => {
     expect(item.importance).toBe("critical");
     expect(item.chips).toContain("+2 Agenda");
   });
+
+  it("names accessed cards when the access event reveals one", () => {
+    const item = formatChronicleEvent(
+      makeEvent("access_card", {
+        actor: "runner",
+        title: "Simple Economy Operation",
+        serverLabel: "HQ"
+      }),
+      "runner",
+      {
+        cardTitle: "Simple Economy Operation"
+      }
+    );
+
+    expect(item.title).toBe("Du hast auf Simple Economy Operation zugegriffen.");
+    expect(item.cardTitle).toBe("Simple Economy Operation");
+    expect(item.chips).toContain("HQ");
+  });
 });
 
 function makeEvent(actionType: string, payload: Record<string, unknown> = {}): PublicGameEvent {
