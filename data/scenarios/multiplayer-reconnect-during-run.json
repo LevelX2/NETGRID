@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "multiplayer-scenario-v0.2",
+  "id": "SCN-MP-002",
+  "name": "Reconnect during run restores side-safe pending state",
+  "baselineId": "rules-baseline-mvp-0.2",
+  "coversRequirements": ["MR-007", "MR-016", "MR-017", "MR-010"],
+  "steps": [
+    { "type": "create_and_join_match" },
+    { "type": "runner_start_run", "server": "rd" },
+    { "type": "corp_rez_choice_pending" },
+    { "type": "disconnect", "side": "corp" },
+    { "type": "reconnect", "side": "corp" }
+  ],
+  "expected": {
+    "corpReceivesSameRezChoice": true,
+    "runnerDoesNotReceiveCorpHqTitles": true,
+    "oldCorpConnectionReplaced": true
+  }
+}

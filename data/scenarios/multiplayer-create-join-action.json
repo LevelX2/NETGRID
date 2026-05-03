@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "multiplayer-scenario-v0.2",
+  "id": "SCN-MP-001",
+  "name": "Host creates private match, joiner joins, Runner submits action",
+  "baselineId": "rules-baseline-mvp-0.2",
+  "coversRequirements": ["MR-002", "MR-003", "MR-004", "MR-008", "MR-022"],
+  "steps": [
+    { "type": "create_match", "hostSide": "runner" },
+    { "type": "join_match", "side": "corp" },
+    { "type": "ws_join", "side": "runner" },
+    { "type": "ws_join", "side": "corp" },
+    { "type": "submit_action", "side": "runner", "action": "gain_credit" }
+  ],
+  "expected": {
+    "runnerReceivesOnlyRunnerView": true,
+    "corpReceivesOnlyCorpView": true,
+    "stateVersionIncrementsOnce": true,
+    "joinTokenNotReturnedAgain": true
+  }
+}

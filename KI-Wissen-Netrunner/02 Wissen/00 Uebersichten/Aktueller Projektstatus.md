@@ -16,6 +16,8 @@
 - Phase-2-Checks sind grün: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`; lokaler Web-Smoke auf `http://127.0.0.1:3000` antwortet.
 - Phase 3 Hardening ist abgeschlossen. Ein Full-State-Leak-Risiko in der ersten Browser-UI wurde behoben: Der GameState liegt jetzt serverseitig in der Next-API, der Browser erhält nur Runner-PlayerView-Payloads.
 - MVP 0.1 ist final reviewt: `MVP_0.1_done: true`, `ready_for_MVP_0.2_requirements: true`.
+- MVP 0.2 Requirements wurden abgeleitet: REST, WebSocket-Protokoll, Storage, Token/Sessions, Reconnect, Undo, Testmatrix, Baseline 0.2 und Multiplayer-Szenarien.
+- MVP 0.2 Requirements Gate ist bestanden: `ready_for_implementation: true`.
 
 ## Teilweise umgesetzt
 
@@ -30,7 +32,7 @@
 
 ## Offen
 
-- MVP 0.2 Requirements stehen als nächste Phase aus.
+- MVP 0.2 Implementierung steht als nächste Phase aus.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 - MVP 0.2 bleibt gesperrt, bis MVP 0.1 implementiert, validiert und gehärtet ist.
 

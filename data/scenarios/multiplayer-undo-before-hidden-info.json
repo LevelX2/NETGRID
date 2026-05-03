@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "multiplayer-scenario-v0.2",
+  "id": "SCN-MP-003",
+  "name": "Undo before hidden information is accepted and restores snapshot",
+  "baselineId": "rules-baseline-mvp-0.2",
+  "coversRequirements": ["MR-018", "MR-019"],
+  "steps": [
+    { "type": "create_and_join_match" },
+    { "type": "runner_submit_action", "action": "gain_credit" },
+    { "type": "request_undo", "requestedBy": "runner", "target": "before_gain_credit" },
+    { "type": "accept_undo", "side": "corp" }
+  ],
+  "expected": {
+    "snapshotRestored": true,
+    "stateVersionChanges": true,
+    "bothPlayersReceiveFilteredViews": true
+  }
+}

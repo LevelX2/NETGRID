@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.2 requirements may start.
+MVP 0.2 implementation may start.
 
 ## Status
 
@@ -29,8 +29,8 @@ Gate flow:
 1. MVP 0.1 executable requirements: pass.
 2. MVP 0.1 implementation: pass.
 3. MVP 0.1 validation, hardening and documentation: pass.
-4. MVP 0.2 requirements: next.
-5. MVP 0.2 implementation: blocked until MVP 0.2 requirements gate passes.
+4. MVP 0.2 requirements: pass.
+5. MVP 0.2 implementation: next.
 
 ## Phase 1 files created or updated
 
@@ -128,6 +128,36 @@ Docs:
 
 High-severity finding fixed: browser UI no longer imports the Engine or stores full GameState. Full GameState is held server-side in `apps/web/app/api/game/route.ts`; the client receives only Runner PlayerView, LegalActions, PublicEvents and `canRunCorp`.
 
+## MVP 0.2 Requirements files created or updated
+
+- `docs/derived/MVP_0.2_REQUIREMENTS.md`
+- `docs/derived/MULTIPLAYER_API_SPEC.md`
+- `docs/derived/WEBSOCKET_PROTOCOL_SPEC.md`
+- `docs/derived/STORAGE_SCHEMA.md`
+- `docs/derived/TOKEN_AND_SESSION_SECURITY.md`
+- `docs/derived/RECONNECT_AND_UNDO_SPEC.md`
+- `docs/derived/MULTIPLAYER_TEST_MATRIX.md`
+- `docs/derived/MVP_0.2_REQUIREMENTS_REVIEW.md`
+- `data/rules/rules-baseline-0.2.json`
+- `data/scenarios/multiplayer-create-join-action.json`
+- `data/scenarios/multiplayer-reconnect-during-run.json`
+- `data/scenarios/multiplayer-undo-before-hidden-info.json`
+- `data/scenarios/multiplayer-undo-after-hidden-info-blocked.json`
+- `tests/specs/multiplayer-acceptance-tests.todo.md`
+
+## MVP 0.2 Requirements checks
+
+- JSON parse check: pass for 5 MVP-0.2 JSON artifacts.
+- Must requirement coverage check: pass, 24 Must requirements, 0 missing coverage IDs.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 19 tests.
+
+## MVP 0.2 Requirements gate
+
+`ready_for_implementation: true`
+
+Implementation may start in the private multiplayer scope only.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -151,7 +181,7 @@ High-severity finding fixed: browser UI no longer imports the Engine or stores f
 
 No MVP-0.1 blocker remains.
 
-MVP-0.2 risks to handle in the next requirements phase:
+MVP-0.2 implementation risks:
 
 - Storage, token/session security, per-match locking, idempotency, WebSocket payload filtering, reconnect and undo must be specified before implementation.
 - Hidden-info filtering must be extended from PlayerViews/PublicEvents/API to WebSocket, reconnect, undo, errors and logs.
@@ -165,4 +195,4 @@ MVP-0.2 risks to handle in the next requirements phase:
 
 ## Next step
 
-Start MVP 0.2 Requirements. Do not implement MVP 0.2 until the 0.2 requirements review is `ready_for_implementation: true`.
+Start MVP 0.2 implementation. Keep the card pool unchanged and implement storage, token/session security, WebSocket protocol, reconnect, undo and multiplayer visibility tests before UI polish.

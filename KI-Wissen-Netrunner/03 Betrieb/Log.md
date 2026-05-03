@@ -45,3 +45,9 @@ Die Phase `MVP 0.1 validation, hardening and documentation` wurde abgeschlossen.
 Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` mit 18 Tests, `corepack pnpm build` und Web-API-Smoke bestanden. Der API-Smoke bestätigte, dass `/api/game` keine `cardInstances`, keine versteckte `Simple Agenda` und kein unrezzed `Simple Barrier ICE` ausliefert. Dokumentiert wurden `docs/derived/MVP_0.1_FINAL_REVIEW.md` und `docs/derived/MVP_0.2_READINESS_REVIEW.md`.
 
 Gate-Ergebnis: `MVP_0.1_done: true`; `ready_for_MVP_0.2_requirements: true`. MVP 0.2 darf als Requirements-Phase beginnen, aber noch nicht implementiert werden.
+
+## [2026-05-03] phase-0.2-req | MVP 0.2 Requirements abgeleitet
+
+Nach bestandenem MVP-0.1-Gate wurden die Requirements für MVP 0.2 abgeleitet. Der Scope bleibt private Human-vs-Human-Partie über dieselbe Engine und unveränderte Demo-Decks. Erstellt wurden Spezifikationen für MVP-0.2-Requirements, REST API, WebSocket-Protokoll, Storage, Token-/Session-Security, Reconnect/Undo, Multiplayer-Testmatrix, Requirements Review, Baseline `0.2.0` und vier Multiplayer-Szenarien.
+
+Checks: JSON-Parse aller MVP-0.2-Datenartefakte erfolgreich, alle 24 Must-Requirements mit Testabdeckung, `corepack pnpm typecheck` und `corepack pnpm test` bestanden. Gate-Ergebnis: `ready_for_implementation: true`. MVP 0.2 darf im privaten Multiplayer-Scope implementiert werden; Kartenpool-Erweiterung bleibt gesperrt.

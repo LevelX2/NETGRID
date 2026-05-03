@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "multiplayer-scenario-v0.2",
+  "id": "SCN-MP-004",
+  "name": "Undo after hidden information is blocked",
+  "baselineId": "rules-baseline-mvp-0.2",
+  "coversRequirements": ["MR-020", "MR-010"],
+  "steps": [
+    { "type": "create_and_join_match" },
+    { "type": "runner_access_rd" },
+    { "type": "request_undo", "requestedBy": "runner", "target": "before_access" }
+  ],
+  "expected": {
+    "undoBlocked": true,
+    "blockReasonIsGeneric": true,
+    "blockedPayloadDoesNotRevealAccessedCardIdentity": true
+  }
+}

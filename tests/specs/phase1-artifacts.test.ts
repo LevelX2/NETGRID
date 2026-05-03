@@ -10,13 +10,20 @@ const DATA_FILES = [
   "data/deviations/rule-deviations.json"
 ];
 
-const REQUIRED_SCENARIOS = [
+const REQUIRED_MVP_0_1_SCENARIOS = [
   "runner-steals-rd-agenda.json",
   "runner-breaks-ice-and-accesses-rd.json",
   "runner-fails-on-end-the-run.json",
   "corp-scores-remote-agenda.json",
   "visibility-runner-view-no-corp-leak.json",
   "replay-full-demo-game-statehash.json"
+];
+
+const REQUIRED_MVP_0_2_SCENARIOS = [
+  "multiplayer-create-join-action.json",
+  "multiplayer-reconnect-during-run.json",
+  "multiplayer-undo-before-hidden-info.json",
+  "multiplayer-undo-after-hidden-info-blocked.json"
 ];
 
 describe("Phase 1 derived artifacts", () => {
@@ -29,9 +36,11 @@ describe("Phase 1 derived artifacts", () => {
   it("keeps required MVP 0.1 scenario fixtures present and mapped to requirements", () => {
     const scenarioDir = "data/scenarios";
     const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
-    expect(present.sort()).toEqual(REQUIRED_SCENARIOS.slice().sort());
+    for (const file of REQUIRED_MVP_0_1_SCENARIOS) {
+      expect(present, file).toContain(file);
+    }
 
-    for (const file of REQUIRED_SCENARIOS) {
+    for (const file of REQUIRED_MVP_0_1_SCENARIOS) {
       const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as {
         id?: string;
         baselineId?: string;
@@ -45,6 +54,26 @@ describe("Phase 1 derived artifacts", () => {
       expect(scenario.coversRequirements?.length, file).toBeGreaterThan(0);
       expect(scenario.coversTests?.length, file).toBeGreaterThan(0);
       expect(Array.isArray(scenario.actions), file).toBe(true);
+      expect(scenario.expected, file).toBeDefined();
+    }
+  });
+
+  it("keeps MVP 0.2 multiplayer scenario fixtures present and mapped", () => {
+    const scenarioDir = "data/scenarios";
+    const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
+    for (const file of REQUIRED_MVP_0_2_SCENARIOS) {
+      expect(present, file).toContain(file);
+      const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as {
+        id?: string;
+        baselineId?: string;
+        coversRequirements?: string[];
+        steps?: unknown[];
+        expected?: unknown;
+      };
+      expect(scenario.id, file).toMatch(/^SCN-MP-\d{3}$/);
+      expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.2");
+      expect(scenario.coversRequirements?.length, file).toBeGreaterThan(0);
+      expect(Array.isArray(scenario.steps), file).toBe(true);
       expect(scenario.expected, file).toBeDefined();
     }
   });
