@@ -37,3 +37,11 @@ Gate-Ergebnis: `ready_for_implementation: true`. Lokale Checks: JSON-Parse aller
 Die Phase `MVP 0.1 implementation` wurde als erster spielbarer lokaler Stand umgesetzt. Implementiert wurden Shared Types und Demo-Kartenkonstanten, eine reine TypeScript-Engine mit deterministischem Setup, LegalActions, `applyAction`-Revalidierung, GameState-Invarianten, Run/Encounter/Access/Score-Kern, PlayerViews, PublicEvents, Replay und StateHash. Ergänzt wurden eine einfache Corp-KI, eine minimale lokale Server-Adapter-Schicht und eine Next.js-Weboberfläche für Human Runner gegen Corp-KI.
 
 Checks: `corepack pnpm install`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Der Testlauf umfasst Engine-, KI- und Artefakt-/Szenario-Vertragstests. Die lokale Weboberfläche antwortete auf `http://127.0.0.1:3000`. Nächster Schritt ist Phase 3: Validierung, Hardening, Dokumentation und MVP-0.1-Finalreview.
+
+## [2026-05-03] phase-3 | MVP 0.1 validiert und gehärtet
+
+Die Phase `MVP 0.1 validation, hardening and documentation` wurde abgeschlossen. Beim Hardening wurde ein hohes Hidden-Info-Risiko gefunden: Die erste Browser-UI führte die Engine direkt im Client aus und hielt dadurch den vollständigen GameState im Browser. Das wurde behoben, indem der GameState in eine serverseitige Next-API verschoben wurde. Die Browserseite nutzt jetzt nur noch `/api/game` und erhält Runner-PlayerView, LegalActions, PublicEvents und `canRunCorp`.
+
+Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` mit 18 Tests, `corepack pnpm build` und Web-API-Smoke bestanden. Der API-Smoke bestätigte, dass `/api/game` keine `cardInstances`, keine versteckte `Simple Agenda` und kein unrezzed `Simple Barrier ICE` ausliefert. Dokumentiert wurden `docs/derived/MVP_0.1_FINAL_REVIEW.md` und `docs/derived/MVP_0.2_READINESS_REVIEW.md`.
+
+Gate-Ergebnis: `MVP_0.1_done: true`; `ready_for_MVP_0.2_requirements: true`. MVP 0.2 darf als Requirements-Phase beginnen, aber noch nicht implementiert werden.

@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.1 validation, hardening and documentation may start.
+MVP 0.2 requirements may start.
 
 ## Status
 
@@ -14,6 +14,12 @@ Phase 2, MVP 0.1 implementation, is implemented and locally verified.
 
 `ready_for_hardening: true`
 
+Phase 3, MVP 0.1 validation, hardening and documentation, is complete.
+
+`MVP_0.1_done: true`
+
+`ready_for_MVP_0.2_requirements: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -22,8 +28,9 @@ Gate flow:
 
 1. MVP 0.1 executable requirements: pass.
 2. MVP 0.1 implementation: pass.
-3. MVP 0.1 validation, hardening and documentation: next.
-4. MVP 0.2 requirements and implementation: blocked until MVP 0.1 gate passes.
+3. MVP 0.1 validation, hardening and documentation: pass.
+4. MVP 0.2 requirements: next.
+5. MVP 0.2 implementation: blocked until MVP 0.2 requirements gate passes.
 
 ## Phase 1 files created or updated
 
@@ -98,6 +105,29 @@ Docs:
 - `corepack pnpm build`: pass, including Next.js production build.
 - Local web smoke: pass, `http://127.0.0.1:3000` answered with HTTP 200.
 
+## Phase 3 files created or updated
+
+- `docs/derived/MVP_0.1_FINAL_REVIEW.md`
+- `docs/derived/MVP_0.2_READINESS_REVIEW.md`
+- `apps/web/app/api/game/route.ts`
+- `apps/web/app/page.tsx`
+- `tests/specs/visibility-contract.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `README.md`
+- `KI-Wissen-Netrunner/`
+
+## Phase 3 checks
+
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 18 tests.
+- `corepack pnpm build`: pass.
+- Web API visibility smoke: pass. `/api/game` returned HTTP 200 and did not contain `cardInstances`, hidden `Simple Agenda`, or hidden unrezzed `Simple Barrier ICE`.
+
+## Phase 3 hardening result
+
+High-severity finding fixed: browser UI no longer imports the Engine or stores full GameState. Full GameState is held server-side in `apps/web/app/api/game/route.ts`; the client receives only Runner PlayerView, LegalActions, PublicEvents and `canRunCorp`.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -119,12 +149,12 @@ Docs:
 
 ## Blockers
 
-No Phase-2 blocker remains.
+No MVP-0.1 blocker remains.
 
-Hardening risks to watch during Phase 3:
+MVP-0.2 risks to handle in the next requirements phase:
 
-- Hidden-info filtering must be implemented early and tested continuously.
-- Run/Encounter/Access state machine is the highest complexity area.
+- Storage, token/session security, per-match locking, idempotency, WebSocket payload filtering, reconnect and undo must be specified before implementation.
+- Hidden-info filtering must be extended from PlayerViews/PublicEvents/API to WebSocket, reconnect, undo, errors and logs.
 - The 6-point demo win condition must remain explicit until deck composition changes.
 
 ## Local tool notes
@@ -135,4 +165,4 @@ Hardening risks to watch during Phase 3:
 
 ## Next step
 
-Start Phase 3: validation, hardening, documentation and MVP-0.1 final review. Do not start MVP 0.2 until MVP 0.1 final gate passes.
+Start MVP 0.2 Requirements. Do not implement MVP 0.2 until the 0.2 requirements review is `ready_for_implementation: true`.

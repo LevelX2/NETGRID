@@ -1,59 +1,68 @@
 "use client";
 
 import { Bot, Coins, Cpu, Play, RotateCcw, Shield, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
-import { chooseCorpAction } from "@netrunner/ai";
-import { applyAction, createGame, getLegalActions, getPlayerView } from "@netrunner/engine";
-import type { GameState, LegalAction, PlayerView, VisibleCard } from "@netrunner/shared";
+import { useEffect, useState } from "react";
+import type { LegalAction, PlayerView, VisibleCard } from "@netrunner/shared";
 
-function makeGame(seed: string): GameState {
-  let state = createGame({ seed, matchId: "web-local-demo" });
-  const mandatory = getLegalActions(state, "corp").find((action) => action.type === "mandatory_draw");
-  if (mandatory) {
-    const result = applyAction(state, {
-      matchId: state.matchId,
-      side: "corp",
-      actionId: mandatory.actionId,
-      clientKnownStateVersion: state.stateVersion
-    });
-    if (result.ok) state = result.state;
-  }
-  return state;
-}
+type ClientPayload = {
+  view: PlayerView;
+  canRunCorp: boolean;
+  error?: string;
+};
 
 export default function Page() {
   const [seed, setSeed] = useState("mvp-0.1-web-demo");
-  const [state, setState] = useState<GameState>(() => makeGame("mvp-0.1-web-demo"));
-  const runnerView = useMemo(() => getPlayerView(state, "runner"), [state]);
-  const corpView = useMemo(() => getPlayerView(state, "corp"), [state]);
+  const [payload, setPayload] = useState<ClientPayload | null>(null);
+
+  useEffect(() => {
+    void refresh();
+  }, []);
+
+  const refresh = async () => {
+    const response = await fetch("/api/game", { cache: "no-store" });
+    setPayload((await response.json()) as ClientPayload);
+  };
+
+  const postGame = async (body: unknown) => {
+    const response = await fetch("/api/game", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    setPayload((await response.json()) as ClientPayload);
+  };
 
   const runAction = (action: LegalAction) => {
-    const result = applyAction(state, {
-      matchId: state.matchId,
-      side: action.side,
+    if (!payload) return;
+    void postGame({
+      kind: "runner_action",
       actionId: action.actionId,
-      clientKnownStateVersion: state.stateVersion,
-      idempotencyKey: `web-${state.stateVersion}-${action.actionId}`
+      stateVersion: payload.view.stateVersion
     });
-    if (result.ok) setState(result.state);
   };
 
-  const runCorp = () => {
-    const legalActions = getLegalActions(state, "corp");
-    if (legalActions.length === 0) return;
-    const decision = chooseCorpAction({
-      side: "corp",
-      playerView: corpView,
-      publicEventLog: corpView.publicEvents,
-      legalActions,
-      difficulty: "easy",
-      seed: state.seed
-    });
-    const action = legalActions.find((candidate) => candidate.actionId === decision.actionId);
-    if (action) runAction(action);
-  };
+  const runCorp = () => void postGame({ kind: "corp_step" });
+  const reset = () => void postGame({ kind: "new", seed });
 
-  const reset = () => setState(makeGame(seed));
+  if (!payload) {
+    return (
+      <main className="app">
+        <header className="topbar">
+          <div className="brand">
+            <div className="mark">
+              <Sparkles size={18} />
+            </div>
+            <div>
+              <h1>Netrunner MVP 0.1</h1>
+              <p>Runner vs Corp-KI</p>
+            </div>
+          </div>
+        </header>
+      </main>
+    );
+  }
+
+  const runnerView = payload.view;
 
   return (
     <main className="app">
@@ -73,7 +82,7 @@ export default function Page() {
             <RotateCcw size={16} />
             Neu
           </button>
-          <button className="button corp" onClick={runCorp} disabled={state.activeSide !== "corp" || Boolean(state.winner)} title="Corp ausführen">
+          <button className="button corp" onClick={runCorp} disabled={!payload.canRunCorp} title="Corp ausführen">
             <Bot size={16} />
             Corp
           </button>
@@ -87,7 +96,7 @@ export default function Page() {
             <h2>Aktionen</h2>
             <div className="actions">
               {runnerView.legalActions.map((action) => (
-                <button className="button actionButton primary" key={action.actionId} onClick={() => runAction(action)} disabled={Boolean(state.winner)}>
+                <button className="button actionButton primary" key={action.actionId} onClick={() => runAction(action)} disabled={Boolean(runnerView.winner)}>
                   <Play size={15} />
                   {action.label}
                 </button>
@@ -106,10 +115,10 @@ export default function Page() {
               </span>
             </div>
           ) : null}
-          {state.winner ? (
+          {runnerView.winner ? (
             <div className="runBar">
               <Cpu size={18} />
-              <span className="winner">{state.winner === "runner" ? "Runner" : state.winner === "corp" ? "Corp" : "Draw"} gewinnt.</span>
+              <span className="winner">{runnerView.winner === "runner" ? "Runner" : runnerView.winner === "corp" ? "Corp" : "Draw"} gewinnt.</span>
             </div>
           ) : null}
           <div className="serverGrid">
@@ -134,7 +143,26 @@ export default function Page() {
         </section>
 
         <aside className="log panel">
-          <PlayerPanel view={corpView} title="Corp" tone="corp" />
+          <section className="section">
+            <h2>Corp</h2>
+            <div className="stats">
+              <div className="stat">
+                <strong>{runnerView.opponent.credits}</strong>
+                <span>Credits</span>
+              </div>
+              <div className="stat">
+                <strong>{runnerView.opponent.clicks}</strong>
+                <span>Clicks</span>
+              </div>
+              <div className="stat">
+                <strong>{runnerView.opponent.agendaPoints}</strong>
+                <span>Agenda</span>
+              </div>
+            </div>
+            <p className="meta" style={{ marginTop: 10, color: "var(--corp)" }}>
+              {payload.canRunCorp ? "Aktiv" : "Wartet"} · {runnerView.timingPoint}
+            </p>
+          </section>
           <section className="section">
             <h2>EventLog</h2>
             <div className="events">

@@ -5,7 +5,7 @@ Private Netrunner-Webapplikation für einen schrittweise aufgebauten MVP:
 - MVP 0.1: Human Runner gegen einfache Corp-KI mit festen Demo-Decks.
 - MVP 0.2: privates Human-vs-Human-Multiplayer über dieselbe Engine.
 
-MVP 0.1 ist als erster spielbarer Stand implementiert: eine lokale Human-Runner-vs-Corp-KI-Partie mit festen Demo-Decks, deterministischer Engine, LegalActions/PlayerActions, PlayerViews, EventLog, Replay/StateHash, Visibility-Tests und einfacher Next.js-Weboberfläche.
+MVP 0.1 ist als erster spielbarer Stand abgeschlossen: eine lokale Human-Runner-vs-Corp-KI-Partie mit festen Demo-Decks, deterministischer Engine, LegalActions/PlayerActions, PlayerViews, EventLog, Replay/StateHash, Visibility-Tests und einfacher Next.js-Weboberfläche. Der vollständige GameState bleibt serverseitig; der Browser erhält nur Runner-PlayerView-Payloads.
 
 ## Einstieg
 
@@ -47,6 +47,6 @@ corepack pnpm build
 
 ## Aktueller Stand
 
-Phase 1 Requirements ist abgeschlossen und committed. Phase 2 MVP-0.1-Implementierung ist umgesetzt und lokal grün geprüft. Phase 3 Validierung, Hardening und Abschlussdokumentation ist der nächste Gate-Schritt.
+MVP 0.1 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. MVP 0.2 darf als Requirements-Phase beginnen; die Multiplayer-Implementierung bleibt bis zum 0.2-Requirements-Gate gesperrt.
 
 Lokaler Werkzeughinweis vom Setup: Auf dieser Maschine war beim Einrichten Node `v24.15.0` aktiv. Das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; falls `pnpm` nicht direkt im PATH liegt, verwende `corepack pnpm ...`.
