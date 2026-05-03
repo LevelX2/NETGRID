@@ -30,6 +30,8 @@
 - MVP 0.3 Final Gate ist bestanden: `MVP_0.3_done: true`; nächster Gate-Schritt ist MVP 0.4 Requirements.
 - MVP 0.4 wurde umgesetzt und final geprüft: versionierte 0.4-Artefakte, kleiner interner Kartenpool, V0.4-Demo-Decks, kuratierte Deckvalidierung, Hardware, einfaches Upgrade, Tags, Remove-Tag, Tag-Punishment und V0.4-AI-Simulation.
 - MVP 0.4 Final Gate ist bestanden: `MVP_0.4_done: true`; der nächste Schritt braucht eine neue Scope-Entscheidung.
+- Die Post-MVP-0.4-Roadmap wurde neu geschnitten: V0.5 Kartenimport/Kartenkatalog, V0.6 Deckeditor- und Match-Setup-Fundament, V0.7 UI-Neugestaltung und Designgestaltung, V0.8 Basisset-/Starterset-Spielbarkeit, V0.9 bessere KI.
+- Die detaillierten Planungen für V0.5 und V0.6 liegen vor, inklusive Bausteinen, Teststrategien, Härtungen, Optimierungen und Done-Kriterien.
 
 ## Teilweise umgesetzt
 
@@ -45,9 +47,11 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1/0.2/0.3/0.4-Arbeitsschritt ist offen.
-- Der nächste Schritt ist eine Scope-Entscheidung: V0.4.x Damage, V0.5 Replay/UX, V0.2.1 Storage-/Betriebshärtung oder ein anderer klar begrenzter Folgeschnitt.
+- Der nächste gate-basierte Schritt ist MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog.
 - Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
+- UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet, weil dazu noch Analysen laufen.
+- V0.5 darf keine Karte automatisch spielbar machen; V0.6 darf keinen Matchstart ohne validierte Deck-Snapshots erlauben.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 
 ## Wichtige Grenzen

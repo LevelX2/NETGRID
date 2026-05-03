@@ -87,3 +87,15 @@ Checks: `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm --filter @ne
 MVP 0.4 wurde requirements-gefroren, implementiert, getestet und final reviewt. Umgesetzt wurden versionierte 0.4-Artefakte, ein kleiner interner fiktiver Kartenpool, V0.4-Demo-Decks, kuratierte Deckvalidierung, Hardware mit Memory-Erhöhung, ein einfaches Corp-Upgrade, Tags, `remove_tag`, Tag-Punishment und V0.4-KI-Simulation. Damage wurde bewusst nicht implementiert und bleibt ein späteres Teilgate.
 
 Checks: `corepack pnpm --filter @netrunner/engine test`, `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm lint` und `corepack pnpm build` bestanden. Gate-Ergebnis: `MVP_0.4_done: true`; `ready_for_next_scope_decision: true`.
+
+## [2026-05-03] planung | Post-MVP-0.4-Roadmap neu geschnitten
+
+Die Folge-Roadmap wurde nach MVP 0.4 produktnäher neu geordnet. Kartenimport und Kartenkatalog werden V0.5, Deckeditor- und Match-Setup-Fundament V0.6, UI-Neugestaltung und Designgestaltung V0.7, Basisset-/Starterset-Spielbarkeit V0.8 und bessere KI V0.9 zugeordnet. Die UI-Neugestaltung wurde bewusst nach V0.7 gelegt, weil dazu noch Analysen laufen.
+
+Erstellt wurde `docs/derived/POST_MVP_0.4_ROADMAP.md` sowie die Wissensseite `Roadmap nach MVP 0.4`. Nächster Gate-Schritt ist `MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog`.
+
+## [2026-05-03] planung | V0.5 und V0.6 detailliert ausgearbeitet
+
+Die Phasen V0.5 und V0.6 wurden detailliert geplant. V0.5 fokussiert Kartenimport, lokale Snapshots, Katalogschema, Statusmodell, Manifest-Abgleich, read-only Katalog-API, funktionale Katalogansicht und harte Trennung zwischen importiert und spielbar. V0.6 fokussiert Deckmodell v2, Deck-Snapshots, Deckvalidierung, funktionalen Deckeditor, Import/Export, Matchstart mit Deckauswahl, Replay/StateHash-Schutz und Hidden-Info-sichere Deck-Metadaten.
+
+Erstellt wurden `docs/derived/MVP_0.5_DETAILED_PLAN.md` und `docs/derived/MVP_0.6_DETAILED_PLAN.md`. Beide Pläne enthalten Teststrategien, kritische Härtungen, Performance-/Optimierungspunkte, Risiken und Done-Kriterien. Nächster Gate-Schritt bleibt `MVP 0.5 Requirements Freeze`.

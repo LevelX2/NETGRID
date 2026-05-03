@@ -51,4 +51,4 @@ MVP 0.4 ist abgeschlossen. Die Anwendung hat jetzt einen kleinen kontrollierten 
 
 `ready_for_next_scope_decision: true`
 
-Der nächste fachliche Schritt sollte nicht automatisch weitere Regelbreite hinzufügen, sondern zuerst bewusst entscheiden, ob V0.4.x Damage, V0.5 Replay/UX oder ein anderer Härtungsstrang folgt.
+Die Scope-Entscheidung wurde nachgelagert in `docs/derived/POST_MVP_0.4_ROADMAP.md` getroffen. Der nächste Gate-Schritt ist MVP 0.5 Kartenimport und Kartenkatalog; UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet.

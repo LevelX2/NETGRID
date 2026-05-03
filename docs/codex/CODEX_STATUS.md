@@ -410,4 +410,18 @@ Remaining known limits:
 
 ## Next step
 
-Next scope decision: choose between V0.4.x Damage, V0.5 Replay/UX, V0.2.1 storage/private operations hardening, or another explicitly scoped follow-up.
+The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap:
+
+- V0.5: card import and card catalog.
+- V0.6: deck editor and match setup foundation.
+- V0.7: UI redesign and visual design, intentionally delayed because design analyses are still running.
+- V0.8: playable base/starter-set slice.
+- V0.9: stronger AI.
+
+Next gate: MVP 0.5 requirements freeze for card import and card catalog.
+
+Detailed planning artifacts available:
+
+- `docs/derived/POST_MVP_0.4_ROADMAP.md`
+- `docs/derived/MVP_0.5_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.6_DETAILED_PLAN.md`

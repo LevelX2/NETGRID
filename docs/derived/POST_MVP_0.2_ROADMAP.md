@@ -51,10 +51,12 @@ Begründung:
 | V0.2.1 | Nachlaufende Härtung des privaten Multiplayer-Stands | SQLite-Entscheidung oder Migrationsplan, screenshotbasierter UI-Smoke, private Betriebsnotizen, Log-/Token-Härtung falls nötig | Neue Karten, neue KI, Plattformfeatures |
 | V0.3 | KI- und Simulationsgrundlage | Runner-KI, verbesserte Corp-KI, KI-vs-KI, Controller-Modell, Erklärmodus, Simulationstests, AI-Visibility-Gates | Kartenpool-Erweiterung, LLM-KI, Deckbuilder |
 | V0.4 | Kartenpool und Regelbreite kontrolliert erweitern | zusätzliche Basisaktionen, weitere ICE-/Breaker-Varianten, einfache Assets/Upgrades, ggf. erste Tags oder Damage in eng begrenztem Umfang, größere Demo-Decks | breite offizielle Kartenpools, freie Deckwahl, komplexe Viren/Hosting/Replacement-Systeme |
-| V0.5 | Replay, Bedienbarkeit und Lernqualität | bessere Replay-UI, Save/Resume im UI, verständlichere Fehler, Run-Flow-Hilfen, Erklär-/Analyseansichten, Keyboard Shortcuts | öffentliche Replay-Plattform, Zuschauer als Standardfeature |
-| V0.6 | Kuratierte Lern-Decks und eingeschränkte Deckvalidierung | feste Lern-Deckpaare, eingeschränkte lokale Deckvalidierung, versionierter Kartenpool, Manifest-Abgleich | freier Deckbuilder mit Formaten, Rotation, Einfluss als voller Produktumfang |
-| V0.7 | Privater Betrieb und Persistenzhärtung | SQLite als Standard oder sauberer Migrationspfad, Backups, Docker/private Server-Doku, HTTPS/WSS-Betrieb, Recovery-Tests | Hochverfügbarkeit, horizontale Skalierung, öffentlicher Betrieb |
-| V1.0 | Private stabile Netrunner-Plattform | Human-vs-KI, KI-vs-Human, Human-vs-Human, KI-vs-KI, Replays, größerer kuratierter Kartenpool, gute Testsuite, private Hostingfähigkeit | öffentliche Plattform nur nach neuer Scope-Entscheidung |
+| V0.5 | Kartenimport und Kartenkatalog | Import-Schema, lokaler Kartensnapshot, Kartenbrowser, Basis-/Starterset als Datenbestand, Importvalidierung, Manifest-Abgleich | automatische Regelumsetzung, große UI-Neugestaltung |
+| V0.6 | Deckeditor- und Match-Setup-Fundament | Deck speichern/laden, Import/Export, Deckvalidierung, Matchstart mit Deckauswahl, spielbar/nicht-spielbar Kennzeichnung | finale Designgestaltung, vollständiger Deckbuilder-Komfort |
+| V0.7 | UI-Neugestaltung und Designgestaltung | neues Spielbrett, Matchfluss, Run-Flow, Action-Panel, Karten-/Deckansichten, Replay-/Log-Darstellung, KI-Erklärungen | neue Regelbreite als Hauptziel, ungetestete Kartenfreigabe |
+| V0.8 | Basisset-/Starterset-Spielbarkeit | ausgewählter spielbarer Slice aus importiertem Datenbestand, Damage/Resources/Traces/Identitäten nur als Teilgates | vollständiges Basisset auf einmal, Freitext-Regelinterpretation |
+| V0.9 | Bessere KI | deck- und rollenbewusste Heuristiken, Schwierigkeitsgrade, Risikoabschätzung, Simulationen, bessere Reason-Codes | KI mit FullState, LLM-KI als Regelakteur |
+| V1.0 | Private stabile Netrunner-Plattform | Human-vs-KI, KI-vs-Human, Human-vs-Human, KI-vs-KI, Deckeditor, Kartenkatalog, Replays, private Hostingfähigkeit | öffentliche Plattform nur nach neuer Scope-Entscheidung |
 
 ## 5. V0.2.1 als optionaler Härtungsstrang
 
@@ -110,59 +112,75 @@ Planungsentscheidung:
 - Tags sind die bevorzugte erste neue Regelgruppe.
 - Damage wird nur als eigenes Teilgate oder V0.4.x umgesetzt, weil es Hidden Information, RandomDrawRecords, Undo-Barrieren und AI-Visibility berührt.
 
-## 8. V0.5: Replay, Bedienbarkeit und Lernqualität
+## 8. Post-MVP-0.4-Roadmap
 
-V0.5 ist der Punkt, an dem die Anwendung für wiederholte private Nutzung deutlich angenehmer wird.
+Nach abgeschlossenem MVP 0.4 wurde die Folge-Roadmap produktnäher neu geschnitten. Die UI- und Design-Neugestaltung wird bewusst nach V0.7 gelegt, weil dazu noch Analysen laufen.
 
-Mögliche Inhalte:
+Der detaillierte aktuelle Plan liegt in `docs/derived/POST_MVP_0.4_ROADMAP.md`.
 
-- bessere Board-Visualisierung ohne Regelduplikate im Client,
-- Replay-UI mit sichtgefilterten Ansichten,
-- Save/Resume im UI auf Basis der vorhandenen Persistenz,
-- verständlichere, aber side-sichere Fehler,
-- Run-Flow-Hilfen für Approach, Encounter, Break und Access,
-- KI-Erklärungen als Lernhilfe,
-- Keyboard Shortcuts und bessere Desktop-Ergonomie.
+### V0.5: Kartenimport und Kartenkatalog
 
-Mobile Optimierung bleibt bis dahin "nice to have", aber nicht Gate.
+V0.5 schafft eine saubere lokale Kartendatenbasis:
 
-## 9. V0.6: Kuratierte Lern-Decks
+- Import-Schema,
+- lokaler versionierter Kartensnapshot,
+- Kartenbrowser,
+- Basis-/Starterset als Datenbestand,
+- Importvalidierung,
+- Manifest-Abgleich.
 
-V0.6 erweitert den kontrollierten Kartenpool nicht beliebig, sondern über kuratierte Lern-Decks.
+Importierte Karten werden dadurch nicht automatisch spielbar.
 
-Mögliche Lern-Deckpaare:
+### V0.6: Deckeditor- und Match-Setup-Fundament
 
-- Runner 1: Criminal / Run & Money
-- Runner 2: Shaper / Setup & Breaker Suite
-- Corp 1: Weyland / Build & Score
-- Corp 2: Haas-Bioroid / Efficient ICE & Remote
+V0.6 macht Decks als eigenes Produktobjekt nutzbar:
 
-Zurückstellen:
+- Deck speichern/laden,
+- Import/Export,
+- Deckvalidierung,
+- Matchstart mit Deckauswahl,
+- Kennzeichnung spielbarer und nicht spielbarer Karten.
 
-- Jinteki mit stärkerem Schadens- und Bluff-Fokus,
-- NBN mit Tags und Tag-Punishment,
-- komplexe Virusmechaniken,
-- komplexe Hosting-Mechaniken,
-- breite Kartenpools.
+Die UI bleibt hier funktional; die große Gestaltung folgt in V0.7.
 
-## 10. V0.7 und V1.0
+### V0.7: UI-Neugestaltung und Designgestaltung
 
-V0.7 stabilisiert privaten Betrieb: Storage, Backups, Docker, HTTPS/WSS, Recovery und private Deployments.
+V0.7 nutzt die laufenden Analysen und bündelt:
+
+- neues Spielbrett,
+- Matchfluss,
+- Run-Flow,
+- Action-Panel,
+- Karten-/Deckansichten,
+- Replay-/Log-Darstellung,
+- KI-Erklärungen,
+- visuelle Richtung und Designsystem.
+
+### V0.8: Basisset-/Starterset-Spielbarkeit
+
+V0.8 macht aus dem importierten Datenbestand einen kuratierten spielbaren Slice. Damage, Resources, Traces, Identitätsfähigkeiten und weitere Mechaniken werden nur als getrennte Teilgates aufgenommen.
+
+### V0.9: Bessere KI
+
+V0.9 verbessert die KI über deck- und rollenbewusste Heuristiken, Schwierigkeitsgrade, Risikoabschätzung, Simulationen und bessere Reason-Codes, ohne verdeckte Informationen zu verwenden.
+
+## 9. V1.0
 
 V1.0 ist erreicht, wenn die Anwendung als private, stabile Netrunner-Plattform taugt:
 
 - Human-vs-KI in beide Richtungen,
 - Human-vs-Human privat,
 - KI-vs-KI und Simulationen,
-- Replays und Debugging,
-- kuratierter größerer Kartenpool,
+- Kartenkatalog und Deckeditor,
+- Replays, Logs und Debugging,
+- kuratierter spielbarer Kartenpool,
 - robuste Tests,
 - private Hostingfähigkeit,
 - dokumentierte Scope-Grenzen.
 
 Öffentliche Plattformfunktionen wie Matchmaking, Accounts, öffentliche Lobbies, Ranglisten, Chat, Zuschauer und Moderation bleiben bis zu einer expliziten Scope-Entscheidung außerhalb der Roadmap-Gates.
 
-## 11. Release-Gates ab V0.3
+## 10. Release-Gates ab V0.3
 
 | Gate | Muss bestehen |
 |---|---|
@@ -173,7 +191,7 @@ V1.0 ist erreicht, wenn die Anwendung als private, stabile Netrunner-Plattform t
 | Tests | Jede neue Funktion hat Unit-/Integration-/Szenarioabdeckung entsprechend Risiko. |
 | Scope | Keine Kartenpool-, Plattform- oder UI-Ausweitung ohne dokumentierte Scope-Entscheidung. |
 
-## 12. Entscheidungsbedarf vor V0.3-Requirements
+## 11. Historischer Entscheidungsbedarf vor V0.3-Requirements
 
 Vor dem V0.3-Requirements-Freeze sind folgende Entscheidungen zu treffen oder bewusst als Annahme zu dokumentieren:
 
@@ -186,12 +204,12 @@ Vor dem V0.3-Requirements-Freeze sind folgende Entscheidungen zu treffen oder be
 | V03-O-005 | UI-Modi | Minimal: Human Runner vs Corp AI, Human Corp vs Runner AI, KI-vs-KI Demo. |
 | V03-O-006 | Kartenpool | Für V0.3 unverändert auf Demo-Decks lassen. |
 
-## 13. Nächster empfohlener Schritt
+## 12. Nächster empfohlener Schritt
 
 Der nächste gate-basierte Schritt ist:
 
 ```text
-MVP 0.3 Requirements Freeze: KI- und Simulationsphase
+MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog
 ```
 
-Diese Phase soll aus `docs/derived/MVP_0.3_DETAILED_PLAN.md` ausführbare Anforderungen, AI-Controller-Spezifikation, Simulationstestmatrix, Szenario-Fixtures und Akzeptanzkriterien ableiten. Implementierung beginnt erst nach `ready_for_implementation: true`.
+Diese Phase soll aus `docs/derived/POST_MVP_0.4_ROADMAP.md` ausführbare Anforderungen für Import-Schema, lokale Snapshots, Kartenkatalog, Manifest-Abgleich und Importvalidierung ableiten. Implementierung beginnt erst nach `ready_for_implementation: true`.

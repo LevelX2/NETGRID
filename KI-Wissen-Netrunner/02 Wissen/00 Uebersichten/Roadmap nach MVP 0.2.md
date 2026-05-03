@@ -25,10 +25,12 @@ Die konsolidierte Entscheidung lautet: **V0.3 ist KI und Simulation; Kartenpool 
 | V0.2.1 | Optionaler Multiplayer-Nachlauf | SQLite-/Storage-Entscheidung, UI-Smokes, private Betriebsnotizen, Log-/Token-Härtung falls nötig. |
 | V0.3 | KI und Simulation | Runner-KI, Corp-KI v2, KI-vs-KI, Controller-Modell, Erklärmodus, Simulationstests, AI-Visibility-Gates. |
 | V0.4 | Kartenpool und Regelbreite | Weitere einfache Karten und Mechaniken, größere Demo-Decks, weiterhin streng kontrolliert und testgetrieben. |
-| V0.5 | Replay, Bedienbarkeit und Lernqualität | Bessere Replay-UI, Run-Hilfen, Save/Resume im UI, verständlichere Fehler, KI-Erklärungen als Lernhilfe. |
-| V0.6 | Kuratierte Lern-Decks | Feste Lern-Deckpaare, eingeschränkte lokale Deckvalidierung, versionierter Kartenpool. |
-| V0.7 | Privater Betrieb | SQLite als Standard oder Migrationspfad, Backups, Docker/private Server-Doku, HTTPS/WSS, Recovery-Tests. |
-| V1.0 | Private stabile Plattform | Human-vs-KI, Human-vs-Human, KI-vs-KI, Replays, größerer kuratierter Kartenpool, robuste Tests, private Hostingfähigkeit. |
+| V0.5 | Kartenimport und Kartenkatalog | Import-Schema, lokaler Kartensnapshot, Kartenbrowser, Basis-/Starterset als Datenbestand, Importvalidierung, Manifest-Abgleich. |
+| V0.6 | Deckeditor- und Match-Setup-Fundament | Deck speichern/laden, Import/Export, Deckvalidierung, Deckauswahl beim Matchstart, spielbar/nicht-spielbar Kennzeichnung. |
+| V0.7 | UI-Neugestaltung und Designgestaltung | Neues Spielbrett, Matchfluss, Run-Flow, Action-Panel, Karten-/Deckansichten, Replay-/Log-Darstellung, KI-Erklärungen und visuelle Richtung. |
+| V0.8 | Basisset-/Starterset-Spielbarkeit | Ausgewählter spielbarer Slice aus importiertem Datenbestand; Damage, Resources, Traces und Identitäten nur als Teilgates. |
+| V0.9 | Bessere KI | Deck- und rollenbewusste Heuristiken, Schwierigkeitsgrade, Risikoabschätzung, Simulationen und bessere Reason-Codes. |
+| V1.0 | Private stabile Plattform | Human-vs-KI, Human-vs-Human, KI-vs-KI, Deckeditor, Kartenkatalog, Replays, kuratierter Kartenpool und private Hostingfähigkeit. |
 
 ## V0.3-Kern
 
@@ -57,6 +59,7 @@ V0.3 soll liefern:
 ## Wichtige Dokumente
 
 - `docs/derived/POST_MVP_0.2_ROADMAP.md`
+- `docs/derived/POST_MVP_0.4_ROADMAP.md`
 - `docs/derived/MVP_0.3_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.4_DETAILED_PLAN.md`
 - `docs/codex/CODEX_STATUS.md`
@@ -77,6 +80,8 @@ Empfohlene Staffelung:
 
 V0.4 verwendet weiterhin interne fiktive Demo-Karten. Offizielle Karten, externe Kartendatenbanken, Artworks, Card Frames, Card Backs und freier Deckbau bleiben außerhalb des V0.4-Scopes.
 
-## Nächster Schritt
+## Post-MVP-0.4-Entscheidung
 
-Nächster gate-basierter Schritt ist der **MVP 0.3 Requirements Freeze**. Dabei sollen aus dem detaillierten Plan ausführbare Anforderungen, AI-Controller-Spezifikation, Simulationstestmatrix, Szenario-Fixtures und Akzeptanzkriterien abgeleitet werden. Implementierung beginnt erst nach einem Requirements Review mit `ready_for_implementation: true`.
+MVP 0.3 und MVP 0.4 sind inzwischen abgeschlossen. Die UI- und Design-Neugestaltung wird bewusst nach V0.7 gelegt, weil dazu noch Analysen laufen. V0.5 fokussiert Kartenimport und Kartenkatalog; V0.6 legt Deckeditor- und Match-Setup-Fundamente.
+
+Nächster gate-basierter Schritt ist **MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog**. Dabei sollen aus `docs/derived/POST_MVP_0.4_ROADMAP.md` ausführbare Anforderungen für Import-Schema, lokale Snapshots, Kartenkatalog, Manifest-Abgleich und Importvalidierung abgeleitet werden.

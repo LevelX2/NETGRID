@@ -16,7 +16,10 @@ Netrunner ist eine private Webapplikation für regelgeführtes, deterministische
 | MVP 0.3 Requirements | KI- und Simulationsphase ausführbar spezifizieren. | Noch keine Kartenpool-Erweiterung und keine LLM-KI. |
 | MVP 0.3 Implementation | Runner-KI, verbesserte Corp-KI, KI-vs-KI-Simulation, Controller-Modell und Erklärmodus umsetzen. | Abgeschlossen; KI nutzt nur PlayerViews, LegalActions und side-gefilterte Events. |
 | MVP 0.4 | Kontrollierte Kartenpool- und Regelbreite-Erweiterung. | Abgeschlossen: Safe Card Batch, eingeschränkte Deckvalidierung, Hardware, einfaches Upgrade und Tags; Damage nur späteres Teilgate. |
-| MVP 0.5+ | Replay-/UX-Qualität, Lern-Decks und privater Betrieb gestaffelt erweitern. | Keine Plattformfeatures ohne explizite Scope-Entscheidung. |
+| MVP 0.5 | Kartenimport und Kartenkatalog. | Importierte Karten werden nicht automatisch spielbar. |
+| MVP 0.6 | Deckeditor- und Match-Setup-Fundament. | Keine finale UI-Neugestaltung; kein Matchstart ohne validierte Deck-Snapshots. |
+| MVP 0.7 | UI-Neugestaltung und Designgestaltung. | Keine ungetestete Regel- oder Kartenpool-Erweiterung. |
+| MVP 0.8+ | Basisset-/Starterset-Spielbarkeit, bessere KI und private Plattformhärtung gestaffelt erweitern. | Keine Plattformfeatures ohne explizite Scope-Entscheidung. |
 
 ## Architekturgrundsätze
 
@@ -29,6 +32,7 @@ Netrunner ist eine private Webapplikation für regelgeführtes, deterministische
 - Der Kartenpool bleibt für MVP 0.1 und 0.2 auf feste Demo-Decks begrenzt.
 - V0.3 bleibt ebenfalls beim vorhandenen Demo-Kartenpool und erweitert zuerst KI, Controller und Simulation.
 - V0.4 erweitert nur interne fiktive Karten mit Manifest-, Test-, Visibility- und Replay-Pflicht.
+- Ab V0.5 sind Kartenimport, Deckeditor und Match-Setup getrennte Produktbausteine; UI-Neugestaltung ist bewusst V0.7.
 
 ## Technisches Zielmodell
 
