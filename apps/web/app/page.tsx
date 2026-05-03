@@ -40,7 +40,7 @@ type SessionInfo = {
 };
 
 type ServerMessage =
-  | { type: "state_update"; payload: { matchVersion: number; playerView: PlayerView } }
+  | { type: "state_update"; payload: { matchStatus: MatchStatus; matchVersion: number; playerView: PlayerView } }
   | { type: "legal_actions"; payload: { legalActions: LegalAction[] } }
   | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
   | { type: "opponent_status"; payload: ClientPayload["opponentStatus"] }
@@ -270,7 +270,12 @@ export default function Page() {
     if (message.type === "state_update") {
       setPayload((current) => {
         if (!current) return null;
-        const next = { ...current, matchVersion: message.payload.matchVersion, playerView: message.payload.playerView };
+        const next = {
+          ...current,
+          matchStatus: message.payload.matchStatus,
+          matchVersion: message.payload.matchVersion,
+          playerView: message.payload.playerView
+        };
         if (message.payload.playerView.winner) return { ...next, winner: message.payload.playerView.winner };
         const { winner: _winner, finalStateHash: _finalStateHash, ...withoutWinner } = next;
         return withoutWinner;

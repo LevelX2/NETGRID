@@ -33,7 +33,7 @@ type ClientWsMessage =
   | { type: "ping"; payload: { clientTime: number } };
 
 export type ServerWsMessage =
-  | { type: "state_update"; payload: { matchVersion: number; playerView: SidePayload["playerView"] } }
+  | { type: "state_update"; payload: { matchStatus: SidePayload["matchStatus"]; matchVersion: number; playerView: SidePayload["playerView"] } }
   | { type: "legal_actions"; payload: { stateVersion: number; legalActions: SidePayload["legalActions"] } }
   | { type: "choice_request"; payload: { choice: null } }
   | { type: "event_log_update"; payload: { events: SidePayload["eventTail"] } }
@@ -172,7 +172,7 @@ export class NetrunnerRealtimeServer {
     bySide.set(payload.side, { socket, context: payload });
     this.connections.set(payload.matchId, bySide);
     sendBootstrap(socket, connected);
-    this.sendOpponentStatus(payload.matchId, opposite(payload.side), connected.opponentStatus);
+    await this.sendOpponentBootstrap(payload.matchId, opposite(payload.side), connected.opponentStatus);
   }
 
   private async handleSubmitAction(
@@ -232,6 +232,17 @@ export class NetrunnerRealtimeServer {
 
   private sendOpponentStatus(matchId: string, side: Side, status: SidePayload["opponentStatus"]): void {
     send(this.connection(matchId, side)?.socket, { type: "opponent_status", payload: status });
+  }
+
+  private async sendOpponentBootstrap(matchId: string, side: Side, fallbackStatus: SidePayload["opponentStatus"]): Promise<void> {
+    const opponent = this.connection(matchId, side);
+    if (!opponent) return;
+    const payload = await this.service.bootstrap(matchId, side, opponent.context.sessionToken);
+    if ("error" in payload) {
+      send(opponent.socket, { type: "opponent_status", payload: fallbackStatus });
+      return;
+    }
+    sendBootstrap(opponent.socket, payload);
   }
 
   private connection(matchId: string, side: Side): Connection | undefined {
@@ -366,7 +377,7 @@ function sendJson(response: ServerResponse, status: number, payload: unknown): v
 }
 
 function sendBootstrap(socket: WebSocket | undefined, payload: SidePayload): void {
-  send(socket, { type: "state_update", payload: { matchVersion: payload.matchVersion, playerView: payload.playerView } });
+  send(socket, { type: "state_update", payload: { matchStatus: payload.matchStatus, matchVersion: payload.matchVersion, playerView: payload.playerView } });
   send(socket, { type: "legal_actions", payload: { stateVersion: payload.playerView.stateVersion, legalActions: payload.legalActions } });
   send(socket, { type: "choice_request", payload: { choice: null } });
   send(socket, { type: "event_log_update", payload: { events: payload.eventTail } });

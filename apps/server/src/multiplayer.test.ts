@@ -281,6 +281,53 @@ describe("MVP 0.2 multiplayer service", () => {
       await handle.close();
     }
   });
+
+  it("broadcasts active match status to the host when the second player joins by WebSocket", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ws-status-test",
+      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicServerBaseUrl: "http://127.0.0.1:0"
+    });
+    const created = await service.createMatch({ hostSide: "corp", seed: "ws-status" });
+    const handle = createNetrunnerHttpServer(service);
+    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    const address = handle.server.address();
+    if (!address || typeof address === "string") throw new Error("Missing server address");
+    const hostSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+    let runnerSocket: WebSocket | undefined;
+
+    try {
+      await waitForOpen(hostSocket);
+      hostSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: "corp" }
+        })
+      );
+      const waitingUpdate = await waitForMessage(hostSocket, "state_update");
+      expect(messagePayload(waitingUpdate).matchStatus).toBe("waiting_for_runner");
+
+      const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+      if (!joinToken) throw new Error("Missing join token");
+      const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+      if ("error" in joined) throw new Error(joined.error.message);
+
+      runnerSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+      await waitForOpen(runnerSocket);
+      runnerSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: created.matchId, sessionToken: joined.sessionToken, side: "runner" }
+        })
+      );
+      const activeUpdate = await waitForMessage(hostSocket, "state_update");
+      expect(messagePayload(activeUpdate).matchStatus).toBe("active");
+    } finally {
+      hostSocket.close();
+      runnerSocket?.close();
+      await handle.close();
+    }
+  });
 });
 
 type PlayerSession = {
@@ -367,4 +414,8 @@ function waitForMessage(socket: WebSocket, type: string): Promise<unknown> {
     });
     socket.once("error", reject);
   });
+}
+
+function messagePayload(message: unknown): { matchStatus?: string } {
+  return (message as { payload?: { matchStatus?: string } }).payload ?? {};
 }
