@@ -16,6 +16,8 @@ export type AiSimulationConfig = {
   corpDifficulty?: AiDifficulty;
   runnerProfileId?: string;
   corpProfileId?: string;
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004";
 };
 
 export type AiSimulationSummary = {
@@ -36,6 +38,7 @@ export type AiSimulationSummary = {
     stateHashAfter: string;
   }>;
   errors: string[];
+  cardPoolVersion: "0.1.0" | "0.4.0";
 };
 
 const FORBIDDEN_AI_INPUT_FIELDS = [
@@ -105,6 +108,7 @@ export function chooseRunnerAction(input: AiDecisionInput): AiDecision {
           byType(input, "pump_breaker", "runner.pump_breaker", "Ein Breaker kann legal gepumpt werden."),
           byType(input, "continue_run", "runner.continue_run", "Der Run wird fortgesetzt."),
           byType(input, "install_card", "runner.install_breaker", "Eine Runner-Karte kann legal installiert werden."),
+          byType(input, "remove_tag", "runner.remove_tag", "Der Runner entfernt einen öffentlichen Tag."),
           byType(input, "gain_credit", "runner.economy_basic_credit", "Der Runner nimmt einen Credit."),
           byType(input, "play_event", "runner.play_simple_event", "Ein Event kann legal gespielt werden."),
           runnerRun(input),
@@ -118,6 +122,7 @@ export function chooseRunnerAction(input: AiDecisionInput): AiDecision {
           byType(input, "break_subroutine", "runner.break_subroutine", "Eine Subroutine kann legal gebrochen werden."),
           byType(input, "pump_breaker", "runner.pump_breaker", "Ein Breaker kann legal gepumpt werden."),
           byType(input, "continue_run", "runner.continue_run", "Der Run wird fortgesetzt."),
+          byType(input, "remove_tag", "runner.remove_tag", "Der Runner entfernt einen öffentlichen Tag."),
           byType(input, "play_event", "runner.play_simple_event", "Ein Event kann legal gespielt werden."),
           byType(input, "install_card", "runner.install_breaker", "Eine Runner-Karte kann legal installiert werden."),
           runnerRun(input),
@@ -142,6 +147,8 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
   let state = createGame({
     seed,
     agendaPointsToWin: config.agendaPointsToWin ?? 6,
+    ...(config.runnerDeckId ? { runnerDeckId: config.runnerDeckId } : {}),
+    ...(config.corpDeckId ? { corpDeckId: config.corpDeckId } : {}),
     controllers: {
       runner: {
         controllerId: "runner-ai",
@@ -213,7 +220,8 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
     replayOk: replay.ok,
     replayErrors: replay.errors,
     actionSequence,
-    errors
+    errors,
+    cardPoolVersion: config.runnerDeckId === "demo_runner_004" || config.corpDeckId === "demo_corp_004" ? "0.4.0" : "0.1.0"
   };
 }
 

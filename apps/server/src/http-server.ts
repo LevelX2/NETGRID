@@ -329,6 +329,8 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       if (typeof body.agendaPointsToWin === "number") config.agendaPointsToWin = Math.max(1, Math.floor(body.agendaPointsToWin));
       if (isDifficulty(body.runnerDifficulty)) config.runnerDifficulty = body.runnerDifficulty;
       if (isDifficulty(body.corpDifficulty)) config.corpDifficulty = body.corpDifficulty;
+      if (body.runnerDeckId === "demo_runner_001" || body.runnerDeckId === "demo_runner_004") config.runnerDeckId = body.runnerDeckId;
+      if (body.corpDeckId === "demo_corp_001" || body.corpDeckId === "demo_corp_004") config.corpDeckId = body.corpDeckId;
       sendJson(response, 200, { mode: "ai_vs_ai", summary: simulateAiGame(config) });
       return;
     }

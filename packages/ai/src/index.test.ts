@@ -81,6 +81,18 @@ describe("MVP 0.3 Runner AI", () => {
     expect(easy.actionId).toBe(gain.actionId);
     expect(normal.actionId).toBe(run.actionId);
   });
+
+  it("prioritizes removing public tags when legal", () => {
+    const state = toRunnerTurn(createGame({ seed: "ai-remove-tag" }));
+    state.runner.tags = 1;
+    state.runner.credits = 2;
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+
+    const decision = chooseRunnerAction(input);
+
+    expect(input.legalActions.find((action) => action.actionId === decision.actionId)?.type).toBe("remove_tag");
+    expect(decision.explanation).not.toContain("Simple Tag Punishment Operation");
+  });
 });
 
 describe("MVP 0.3 Corp AI v2", () => {
@@ -135,6 +147,21 @@ describe("MVP 0.3 AI simulation harness", () => {
       state = result.state;
     }
     expect(replayEvents(initial, state.eventLog).ok).toBe(true);
+  });
+
+  it("runs V0.4 expanded decks through the simulation harness", () => {
+    const summary = simulateAiGame({
+      seed: "ai-v04-expanded",
+      runnerDeckId: "demo_runner_004",
+      corpDeckId: "demo_corp_004",
+      agendaPointsToWin: 7,
+      maxActions: 140
+    });
+
+    expect(summary.cardPoolVersion).toBe("0.4.0");
+    expect(summary.errors).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    expect(summary.finalStateHash).toMatch(/^fnv1a:/);
   });
 });
 
@@ -214,4 +241,5 @@ function removeEverywhere(state: GameState, id: string): void {
   state.runner.heap = state.runner.heap.filter((cardId) => cardId !== id);
   state.runner.scoreArea = state.runner.scoreArea.filter((cardId) => cardId !== id);
   state.runner.rig.programs = state.runner.rig.programs.filter((cardId) => cardId !== id);
+  state.runner.rig.hardware = state.runner.rig.hardware.filter((cardId) => cardId !== id);
 }

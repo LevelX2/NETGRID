@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "card-implementation-manifest-v0.4",
+  "id": "mvp-0.4-card-implementation-manifest",
+  "status": "frozen_for_implementation",
+  "extends": "data/manifests/card-implementation-manifest.json",
+  "cards": [
+    {
+      "cardCode": "simple_draw_event",
+      "title": "Simple Draw Event",
+      "status": "playable_mvp",
+      "implementedAbilities": ["play event", "draw 2 cards", "move to heap"],
+      "requirementIds": ["V04-REQ-005"],
+      "unitTests": ["T-V04-CARD-001"],
+      "scenarioTests": ["SCN-V04-001"],
+      "visibilityTests": ["T-V04-DATA-002"],
+      "replayTests": ["T-V04-CARD-001"]
+    },
+    {
+      "cardCode": "simple_setup_hardware",
+      "title": "Simple Setup Hardware",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install hardware", "increase memory limit by 1"],
+      "requirementIds": ["V04-REQ-006"],
+      "unitTests": ["T-V04-CARD-002"],
+      "scenarioTests": ["SCN-V04-001"],
+      "visibilityTests": ["T-V04-CARD-002"],
+      "replayTests": ["T-V04-CARD-002"]
+    },
+    {
+      "cardCode": "efficient_fracter",
+      "title": "Efficient Fracter",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install program", "pump strength", "break barrier subroutine"],
+      "requirementIds": ["V04-REQ-005"],
+      "unitTests": ["T-V04-CARD-001"],
+      "scenarioTests": ["SCN-V04-001"],
+      "visibilityTests": ["T-V04-DATA-002"],
+      "replayTests": ["T-V04-CARD-001"]
+    },
+    {
+      "cardCode": "simple_priority_agenda",
+      "title": "Simple Priority Agenda",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install remote", "advance to 4", "score for 3", "steal for 3"],
+      "requirementIds": ["V04-REQ-005"],
+      "unitTests": ["T-V04-CARD-001"],
+      "scenarioTests": ["SCN-V04-001"],
+      "visibilityTests": ["T-V04-DATA-002"],
+      "replayTests": ["T-V04-CARD-001"]
+    },
+    {
+      "cardCode": "simple_draw_operation",
+      "title": "Simple Draw Operation",
+      "status": "playable_mvp",
+      "implementedAbilities": ["play operation", "draw 2 cards", "move to archives"],
+      "requirementIds": ["V04-REQ-005"],
+      "unitTests": ["T-V04-CARD-001"],
+      "scenarioTests": ["SCN-V04-001"],
+      "visibilityTests": ["T-V04-DATA-002"],
+      "replayTests": ["T-V04-CARD-001"]
+    },
+    {
+      "cardCode": "simple_taxing_barrier_ice",
+      "title": "Simple Taxing Barrier ICE",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install ice", "rez", "runner loses 1 credit", "end the run"],
+      "requirementIds": ["V04-REQ-005"],
+      "unitTests": ["T-V04-CARD-001"],
+      "scenarioTests": ["SCN-V04-001"],
+      "visibilityTests": ["T-V04-DATA-002"],
+      "replayTests": ["T-V04-CARD-001"]
+    },
+    {
+      "cardCode": "simple_upgrade",
+      "title": "Simple Upgrade",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install remote root", "rez", "trash on access"],
+      "requirementIds": ["V04-REQ-007"],
+      "unitTests": ["T-V04-CARD-003"],
+      "scenarioTests": ["SCN-V04-001"],
+      "visibilityTests": ["T-V04-CARD-003"],
+      "replayTests": ["T-V04-CARD-003"]
+    },
+    {
+      "cardCode": "simple_tag_ice",
+      "title": "Simple Tag ICE",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install ice", "rez", "give runner 1 tag", "end the run"],
+      "requirementIds": ["V04-REQ-008"],
+      "unitTests": ["T-V04-TAG-001"],
+      "scenarioTests": ["SCN-V04-002"],
+      "visibilityTests": ["T-V04-TAG-001"],
+      "replayTests": ["T-V04-TAG-001"]
+    },
+    {
+      "cardCode": "simple_tag_punishment_operation",
+      "title": "Simple Tag Punishment Operation",
+      "status": "playable_mvp",
+      "implementedAbilities": ["play only if runner tagged", "runner loses up to 2 credits", "move to archives"],
+      "requirementIds": ["V04-REQ-010"],
+      "unitTests": ["T-V04-TAG-003"],
+      "scenarioTests": ["SCN-V04-003"],
+      "visibilityTests": ["T-V04-TAG-003"],
+      "replayTests": ["T-V04-TAG-003"]
+    }
+  ]
+}

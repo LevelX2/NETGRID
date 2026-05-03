@@ -4,8 +4,10 @@ Private Netrunner-Webapplikation für einen schrittweise aufgebauten MVP:
 
 - MVP 0.1: Human Runner gegen einfache Corp-KI mit festen Demo-Decks.
 - MVP 0.2: privates Human-vs-Human-Multiplayer über dieselbe Engine.
+- MVP 0.3: Runner-KI, Corp-KI v2, Human-vs-KI in beide Richtungen und KI-vs-KI-Simulation.
+- MVP 0.4: kleiner interner Kartenpool, kuratierte V0.4-Decks, Hardware, einfaches Upgrade und Tags.
 
-MVP 0.1 ist als erster spielbarer Stand abgeschlossen: eine lokale Human-Runner-vs-Corp-KI-Partie mit festen Demo-Decks, deterministischer Engine, LegalActions/PlayerActions, PlayerViews, EventLog, Replay/StateHash, Visibility-Tests und einfacher Next.js-Weboberfläche. MVP 0.2 ist als privater Human-vs-Human-Multiplayer implementiert: Host/Join-Link, WebSocket-Spiel, Reconnect, Undo, Hash-only Tokens, JSON-Storage und side-gefilterte PlayerViews.
+MVP 0.1 bis 0.4 sind abgeschlossen. Der aktuelle Stand unterstützt private Human-vs-Human-Partien, Human-vs-KI in beide Richtungen, KI-vs-KI-Simulationen sowie einen kleinen kontrollierten internen V0.4-Kartenpool. Damage, freie Decks, offizielle Assets und öffentliche Plattformfunktionen bleiben außerhalb des aktuellen Scopes.
 
 ## Einstieg
 
@@ -41,6 +43,7 @@ Für ein privates Match im lokalen Netz:
 
 - Host öffnet `http://127.0.0.1:3000`, erstellt ein Match und kopiert den Join-Link.
 - Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link.
+- Für KI-Partien kann in der Startansicht Runner vs Corp-KI, Corp vs Runner-KI oder KI vs KI gewählt werden.
 - Außerhalb von localhost HTTPS/WSS verwenden und Tokens wie Passwörter behandeln.
 - Runtime-Storage liegt unter `data/runtime/` und ist nicht versioniert; bei längerer Nutzung regelmäßig sichern.
 
@@ -55,6 +58,6 @@ corepack pnpm build
 
 ## Aktueller Stand
 
-MVP 0.1 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. MVP 0.2 hat Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. Der aktuelle Stand ist ein privater lokaler Multiplayer-MVP ohne öffentliche Plattformfunktionen.
+MVP 0.1, 0.2, 0.3 und 0.4 haben Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. Der aktuelle Stand ist eine private lokale Spiel- und Simulationsbasis ohne öffentliche Plattformfunktionen.
 
 Lokaler Werkzeughinweis vom Setup: Auf dieser Maschine war beim Einrichten Node `v24.15.0` aktiv. Das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; falls `pnpm` nicht direkt im PATH liegt, verwende `corepack pnpm ...`.

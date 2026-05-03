@@ -299,7 +299,7 @@ select {
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   gap: 8px;
 }
 
@@ -398,6 +398,14 @@ select {
 
 .card.program {
   border-color: color-mix(in srgb, var(--runner), var(--line));
+}
+
+.card.hardware {
+  border-color: color-mix(in srgb, #c7e88a, var(--line));
+}
+
+.card.upgrade {
+  border-color: color-mix(in srgb, #caa7ff, var(--line));
 }
 
 .cardTitle {

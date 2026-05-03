@@ -2,12 +2,15 @@ import {
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
   MVP_0_1_BASELINE,
+  MVP_0_4_BASELINE,
   type ActionType,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
   type CorpServer,
   type CreateGameConfig,
+  type DeckDefinition,
+  type DemoDeckId,
   type EngineError,
   type EngineResult,
   type GameEvent,
@@ -33,7 +36,8 @@ export {
   DEMO_DECKS,
   MVP_0_1_BASELINE,
   MVP_0_2_BASELINE,
-  MVP_0_3_BASELINE
+  MVP_0_3_BASELINE,
+  MVP_0_4_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -43,6 +47,8 @@ export type {
   CardInstanceId,
   CorpServer,
   CreateGameConfig,
+  DeckDefinition,
+  DemoDeckId,
   EngineError,
   EngineResult,
   GameEvent,
@@ -69,20 +75,25 @@ export function createGame(config: CreateGameConfig = {}): GameState {
   const seed = config.seed ?? "mvp-0.1-default-seed";
   const random = { counter: 0, records: [] as GameState["randomDrawRecords"] };
   const instances: Record<CardInstanceId, CardInstance> = {};
+  const runnerDeckId = config.runnerDeckId ?? "demo_runner_001";
+  const corpDeckId = config.corpDeckId ?? "demo_corp_001";
+  const runnerDeckDefinition = DEMO_DECKS[runnerDeckId];
+  const corpDeckDefinition = DEMO_DECKS[corpDeckId];
+  const expandedCardPool = runnerDeckId === "demo_runner_004" || corpDeckId === "demo_corp_004";
 
-  const runnerIdentity = createInstance("runner", DEMO_DECKS.demo_runner_001.identity, 0, {
+  const runnerIdentity = createInstance("runner", runnerDeckDefinition.identity, 0, {
     side: "runner",
     zone: "rig"
   });
-  const corpIdentity = createInstance("corp", DEMO_DECKS.demo_corp_001.identity, 0, {
+  const corpIdentity = createInstance("corp", corpDeckDefinition.identity, 0, {
     side: "corp",
     zone: "scoreArea"
   });
   instances[runnerIdentity.instanceId] = runnerIdentity;
   instances[corpIdentity.instanceId] = corpIdentity;
 
-  const runnerDeck = expandDeck("runner", DEMO_DECKS.demo_runner_001.cards, instances);
-  const corpDeck = expandDeck("corp", DEMO_DECKS.demo_corp_001.cards, instances);
+  const runnerDeck = expandDeck("runner", runnerDeckDefinition.cards, instances);
+  const corpDeck = expandDeck("corp", corpDeckDefinition.cards, instances);
 
   const runnerStack = shuffleIds(runnerDeck, seed, "runner_stack_shuffle", random);
   const corpRd = shuffleIds(corpDeck, seed, "corp_rd_shuffle", random);
@@ -96,7 +107,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
 
   const state: GameState = {
     matchId: config.matchId ?? "local-demo-match",
-    baseline: config.baseline ?? MVP_0_1_BASELINE,
+    baseline: config.baseline ?? (expandedCardPool ? MVP_0_4_BASELINE : MVP_0_1_BASELINE),
     stateVersion: 0,
     seed,
     randomCounter: random.counter,
@@ -130,12 +141,12 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       stack: runnerStack,
       heap: [],
       scoreArea: [],
-      rig: { programs: [] }
+      rig: { programs: [], hardware: [] }
     },
     cardInstances: instances,
     eventLog: [],
     winner: null,
-    agendaPointsToWin: config.agendaPointsToWin ?? 6
+    agendaPointsToWin: config.agendaPointsToWin ?? (expandedCardPool ? 7 : 6)
   };
 
   const initialHash = hashState(state);
@@ -147,8 +158,8 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     stateHashAfter: initialHash,
     publicPayload: {
       baseline: state.baseline,
-      runnerDeckId: config.runnerDeckId ?? "demo_runner_001",
-      corpDeckId: config.corpDeckId ?? "demo_corp_001",
+      runnerDeckId,
+      corpDeckId,
       agendaPointsToWin: state.agendaPointsToWin
     }
   });
@@ -249,9 +260,10 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           stackOrRdCount: state.runner.stack.length,
           heapOrArchives: state.runner.heap.map((id) => visibleOwnCard(state, id)),
           scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id)),
-          rig: state.runner.rig.programs.map((id) => visibleOwnCard(state, id)),
+          rig: [...state.runner.rig.programs, ...state.runner.rig.hardware].map((id) => visibleOwnCard(state, id)),
           memoryUsed: state.runner.memoryUsed,
-          memoryLimit: state.runner.memoryLimit
+          memoryLimit: state.runner.memoryLimit,
+          tags: state.runner.tags
         }
       : {
           credits: state.corp.credits,
@@ -260,13 +272,15 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           gripOrHq: state.corp.hq.map((id) => visibleOwnCard(state, id)),
           stackOrRdCount: state.corp.rd.length,
           heapOrArchives: state.corp.archives.map((id) => visibleOwnCard(state, id)),
-          scoreArea: state.corp.scoreArea.map((id) => visibleOwnCard(state, id))
+          scoreArea: state.corp.scoreArea.map((id) => visibleOwnCard(state, id)),
+          tags: state.runner.tags
         },
     opponent: runnerSide
       ? {
           credits: state.corp.credits,
           clicks: state.corp.clicks,
           agendaPoints: agendaPoints(state, "corp"),
+          tags: state.runner.tags,
           handCount: state.corp.hq.length,
           deckCount: state.corp.rd.length,
           scoreArea: state.corp.scoreArea.map((id) => visibleOwnCard(state, id))
@@ -275,6 +289,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           credits: state.runner.credits,
           clicks: state.runner.clicks,
           agendaPoints: agendaPoints(state, "runner"),
+          tags: state.runner.tags,
           handCount: state.runner.grip.length,
           deckCount: state.runner.stack.length,
           scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id))
@@ -310,7 +325,8 @@ export function validateGameState(state: GameState): ValidationResult {
   for (const id of state.runner.stack) addPlacement(id, "runner.stack");
   for (const id of state.runner.heap) addPlacement(id, "runner.heap");
   for (const id of state.runner.scoreArea) addPlacement(id, "runner.scoreArea");
-  for (const id of state.runner.rig.programs) addPlacement(id, "runner.rig");
+  for (const id of state.runner.rig.programs) addPlacement(id, "runner.rig.programs");
+  for (const id of state.runner.rig.hardware) addPlacement(id, "runner.rig.hardware");
 
   for (const id of Object.keys(state.cardInstances)) {
     if (!placements.has(id)) errors.push(`CardInstance ${id} is not in any zone.`);
@@ -318,8 +334,47 @@ export function validateGameState(state: GameState): ValidationResult {
 
   if (state.corp.credits < 0 || state.runner.credits < 0) errors.push("Credits must not be negative.");
   if (state.corp.clicks < 0 || state.runner.clicks < 0) errors.push("Clicks must not be negative.");
+  if (state.runner.tags < 0) errors.push("Runner tags must not be negative.");
   if (state.runner.memoryUsed > state.runner.memoryLimit) errors.push("Runner memory limit exceeded.");
   if (state.run?.encounteredIceId && !state.cardInstances[state.run.encounteredIceId]) errors.push("Run references missing encountered ice.");
+
+  return { ok: errors.length === 0, errors };
+}
+
+export function validateDeckDefinition(
+  deck: DeckDefinition,
+  options: {
+    expectedSide?: Side;
+    allowedDeckIds?: DemoDeckId[];
+    minimumAgendaPoints?: number;
+  } = {}
+): ValidationResult {
+  const errors: string[] = [];
+  if (options.allowedDeckIds && !options.allowedDeckIds.includes(deck.id)) errors.push(`Deck ${deck.id} is not in the curated allowlist.`);
+  if (options.expectedSide && deck.side !== options.expectedSide) errors.push(`Deck ${deck.id} has side ${deck.side}, expected ${options.expectedSide}.`);
+
+  const identity = DEMO_CARDS_BY_ID[deck.identity];
+  if (!identity) errors.push(`Deck ${deck.id} references missing identity ${deck.identity}.`);
+  else {
+    if (identity.type !== "identity") errors.push(`Deck ${deck.id} identity ${deck.identity} is not an identity.`);
+    if (identity.side !== deck.side) errors.push(`Deck ${deck.id} identity ${deck.identity} has wrong side.`);
+  }
+
+  let agendaPointsTotal = 0;
+  for (const entry of deck.cards) {
+    const definition = DEMO_CARDS_BY_ID[entry.id];
+    if (!Number.isInteger(entry.quantity) || entry.quantity <= 0) errors.push(`Deck ${deck.id} has invalid quantity for ${entry.id}.`);
+    if (!definition) {
+      errors.push(`Deck ${deck.id} references unknown card ${entry.id}.`);
+      continue;
+    }
+    if (definition.side !== deck.side) errors.push(`Deck ${deck.id} includes wrong-side card ${entry.id}.`);
+    if (definition.implementationStatus !== "playable_mvp") errors.push(`Deck ${deck.id} includes non-playable card ${entry.id}.`);
+    agendaPointsTotal += (definition.agendaPoints ?? 0) * entry.quantity;
+  }
+  if (deck.side === "corp" && options.minimumAgendaPoints !== undefined && agendaPointsTotal < options.minimumAgendaPoints) {
+    errors.push(`Deck ${deck.id} has ${agendaPointsTotal} agenda points, expected at least ${options.minimumAgendaPoints}.`);
+  }
 
   return { ok: errors.length === 0, errors };
 }
@@ -396,7 +451,7 @@ function corpMainActions(state: GameState): LegalAction[] {
   if (state.corp.rd.length > 0) actions.push(action(state, "corp", "draw_card", "Karte ziehen", "basic_action", [{ clicks: 1 }]));
   for (const id of state.corp.hq) {
     const definition = definitionFor(state, id);
-    if (definition.type === "operation" && state.corp.credits >= (definition.cost ?? 0)) {
+    if (definition.type === "operation" && state.corp.credits >= (definition.cost ?? 0) && (definition.id !== "simple_tag_punishment_operation" || state.runner.tags > 0)) {
       actions.push(action(state, "corp", "play_operation", `${definition.title} spielen`, id, [{ clicks: 1, credits: definition.cost ?? 0 }], { cardId: id }));
     }
     if (definition.type === "ice") {
@@ -404,7 +459,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         actions.push(action(state, "corp", "install_card", `ICE vor ${server.label} installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: server.id, placement: "ice" }));
       }
     }
-    if (definition.type === "agenda" || definition.type === "asset") {
+    if (definition.type === "agenda" || definition.type === "asset" || definition.type === "upgrade") {
       actions.push(action(state, "corp", "install_card", `Karte in neuem Remote installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: "new_remote", placement: "root" }));
       for (const server of state.corp.servers.filter((candidate) => candidate.kind === "remote")) {
         actions.push(action(state, "corp", "install_card", `Karte in ${server.label} installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: server.id, placement: "root" }));
@@ -417,8 +472,8 @@ function corpMainActions(state: GameState): LegalAction[] {
       if (definition.type === "agenda") {
         if (state.corp.credits >= 1) actions.push(action(state, "corp", "advance_card", `Agenda in ${server.label} advancen`, id, [{ clicks: 1, credits: 1 }], { cardId: id }));
       }
-      if (definition.type === "asset" && !mustInstance(state.cardInstances, id).rezzed && state.corp.credits >= (definition.rezCost ?? 0)) {
-        actions.push(action(state, "corp", "rez_ice", `Asset in ${server.label} rezzen`, id, [{ credits: definition.rezCost ?? 0 }], { cardId: id, assetRez: true }));
+      if ((definition.type === "asset" || definition.type === "upgrade") && !mustInstance(state.cardInstances, id).rezzed && state.corp.credits >= (definition.rezCost ?? 0)) {
+        actions.push(action(state, "corp", "rez_ice", `Karte in ${server.label} rezzen`, id, [{ credits: definition.rezCost ?? 0 }], { cardId: id, rootRez: true }));
       }
     }
   }
@@ -434,9 +489,15 @@ function runnerMainActions(state: GameState): LegalAction[] {
   }
   actions.push(action(state, "runner", "gain_credit", "1 Credit nehmen", "basic_action", [{ clicks: 1 }]));
   if (state.runner.stack.length > 0) actions.push(action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [{ clicks: 1 }]));
+  if (state.runner.tags > 0 && state.runner.credits >= 2) {
+    actions.push(action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [{ clicks: 1, credits: 2 }]));
+  }
   for (const id of state.runner.grip) {
     const definition = definitionFor(state, id);
     if (definition.type === "program" && state.runner.credits >= (definition.installCost ?? 0) && state.runner.memoryUsed + (definition.memoryCost ?? 0) <= state.runner.memoryLimit) {
+      actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
+    }
+    if (definition.type === "hardware" && state.runner.credits >= (definition.installCost ?? 0)) {
       actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
     }
     if (definition.type === "event" && state.runner.credits >= (definition.cost ?? 0)) {
@@ -503,7 +564,7 @@ function runnerAccessActions(state: GameState): LegalAction[] {
   }
   const definition = definitionFor(state, run.accessedCardId);
   if (definition.type === "agenda") return [action(state, "runner", "steal_agenda", `${definition.title} stehlen`, run.accessedCardId)];
-  if (definition.type === "asset") {
+  if (definition.type === "asset" || definition.type === "upgrade") {
     const actions: LegalAction[] = [];
     if (state.runner.credits >= (definition.trashCost ?? 0)) {
       actions.push(action(state, "runner", "trash_accessed_card", `${definition.title} trashen`, run.accessedCardId, [{ credits: definition.trashCost ?? 0 }]));
@@ -538,11 +599,19 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       spendCredits(state, "corp", legalAction.costs[0]?.credits ?? 0);
       if (legalAction.payload?.cardId) {
         const cardId = String(legalAction.payload.cardId);
+        const definition = definitionFor(state, cardId);
         removeFromAllZones(state, cardId);
         state.corp.archives.push(cardId);
         state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "corp", zone: "archives" } };
+        if (definition.id === "simple_economy_operation") state.corp.credits += 4;
+        else if (definition.id === "simple_draw_operation") {
+          drawCorpCard(state);
+          drawCorpCard(state);
+        } else if (definition.id === "simple_tag_punishment_operation") {
+          if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+          state.runner.credits = Math.max(0, state.runner.credits - 2);
+        }
       }
-      state.corp.credits += 4;
       return;
     case "install_card":
       installCard(state, legalAction);
@@ -560,7 +629,7 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">);
       return;
     case "rez_ice":
-      rezCard(state, String(legalAction.payload?.cardId), legalAction.payload?.assetRez === true);
+      rezCard(state, String(legalAction.payload?.cardId), legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true);
       return;
     case "decline_rez":
       passApproachedIce(state);
@@ -588,6 +657,11 @@ function performAction(state: GameState, legalAction: LegalAction): void {
     case "decline_trash":
       finishRun(state, true);
       return;
+    case "remove_tag":
+      spendClick(state, "runner");
+      spendCredits(state, "runner", 2);
+      state.runner.tags = Math.max(0, state.runner.tags - 1);
+      return;
     case "end_turn":
       endTurn(state, legalAction.side);
       return;
@@ -606,6 +680,11 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
     state.runner.credits += 4;
     return;
   }
+  if (definition.id === "simple_draw_event") {
+    drawRunnerCard(state);
+    drawRunnerCard(state);
+    return;
+  }
   if (definition.id === "simple_run_event") {
     startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 2);
   }
@@ -618,8 +697,13 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   if (legalAction.side === "runner") {
     spendCredits(state, "runner", definition.installCost ?? 0);
     removeFromAllZones(state, cardId);
-    state.runner.rig.programs.push(cardId);
-    state.runner.memoryUsed += definition.memoryCost ?? 0;
+    if (definition.type === "hardware") {
+      state.runner.rig.hardware.push(cardId);
+      if (definition.mechanics.includes("modify_memory_limit")) state.runner.memoryLimit += 1;
+    } else {
+      state.runner.rig.programs.push(cardId);
+      state.runner.memoryUsed += definition.memoryCost ?? 0;
+    }
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "rig" } };
     return;
   }
@@ -661,14 +745,15 @@ function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, p
   }
 }
 
-function rezCard(state: GameState, cardId: string, assetRez: boolean): void {
+function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
   const definition = definitionFor(state, cardId);
   spendCredits(state, "corp", definition.rezCost ?? 0);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), rezzed: true, faceup: true };
-  if (assetRez && definition.id === "simple_economy_asset") {
+  if (rootRez && definition.id === "simple_economy_asset") {
     state.corp.credits += 3;
     return;
   }
+  if (rootRez) return;
   const run = mustRun(state);
   run.phase = "encounter_ice";
   run.encounteredIceId = cardId;
@@ -706,6 +791,7 @@ function continueRun(state: GameState): void {
     if (run.brokenSubroutineIndexes.includes(index) || ended) return;
     if (subroutine.type === "corp_gain_credit") state.corp.credits += subroutine.amount ?? 1;
     if (subroutine.type === "runner_lose_credits") state.runner.credits = Math.max(0, state.runner.credits - (subroutine.amount ?? 1));
+    if (subroutine.type === "give_runner_tag") state.runner.tags += subroutine.amount ?? 1;
     if (subroutine.type === "end_the_run") ended = true;
   });
   resetBreakerStrength(state);
@@ -761,7 +847,7 @@ function accessCurrentCard(state: GameState): void {
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
   const definition = definitionFor(state, cardId);
-  if (definition.type !== "agenda" && definition.type !== "asset") {
+  if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade") {
     finishRun(state, true);
   }
 }
@@ -1073,6 +1159,7 @@ function removeFromAllZones(state: GameState, cardId: string): void {
   state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
   state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
   state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
+  state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
 }
 
 function createRemote(state: GameState): CorpServer {

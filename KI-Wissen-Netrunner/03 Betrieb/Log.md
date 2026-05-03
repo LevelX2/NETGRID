@@ -81,3 +81,9 @@ Erstellt wurde `docs/derived/MVP_0.4_DETAILED_PLAN.md`. Aktualisiert wurden die 
 MVP 0.3 wurde requirements-gefroren, implementiert, getestet und final reviewt. Umgesetzt wurden side-neutrale AI-Inputs, Runner-KI, Corp-KI v2, deterministische KI-Entscheidungen mit Reason-Codes, KI-vs-KI-Simulation mit Replay/StateHash, Servermodi für Human-vs-KI in beide Richtungen, eine lokale AI-vs-AI-Simulations-API und eine Web-UI-Moduswahl.
 
 Checks: `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm --filter @netrunner/server test`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm lint` und `corepack pnpm build` bestanden. Gate-Ergebnis: `MVP_0.3_done: true`; `ready_for_MVP_0.4_requirements: true`.
+
+## [2026-05-03] phase-0.4-final | MVP 0.4 Kartenpool und Tags abgeschlossen
+
+MVP 0.4 wurde requirements-gefroren, implementiert, getestet und final reviewt. Umgesetzt wurden versionierte 0.4-Artefakte, ein kleiner interner fiktiver Kartenpool, V0.4-Demo-Decks, kuratierte Deckvalidierung, Hardware mit Memory-Erhöhung, ein einfaches Corp-Upgrade, Tags, `remove_tag`, Tag-Punishment und V0.4-KI-Simulation. Damage wurde bewusst nicht implementiert und bleibt ein späteres Teilgate.
+
+Checks: `corepack pnpm --filter @netrunner/engine test`, `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm lint` und `corepack pnpm build` bestanden. Gate-Ergebnis: `MVP_0.4_done: true`; `ready_for_next_scope_decision: true`.

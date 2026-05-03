@@ -35,16 +35,18 @@ export type ActionType =
   | "steal_agenda"
   | "trash_accessed_card"
   | "decline_trash"
+  | "remove_tag"
   | "end_turn";
 
-export type CardType = "identity" | "event" | "program" | "agenda" | "operation" | "asset" | "ice";
+export type CardType = "identity" | "event" | "program" | "hardware" | "agenda" | "operation" | "asset" | "upgrade" | "ice";
 export type CardDefinitionId = string;
 export type CardInstanceId = string;
 export type ServerId = "hq" | "rd" | "archives" | `remote_${number}` | "new_remote";
 export type StateHash = string;
 export type Winner = Side | "draw";
+export type DemoDeckId = "demo_runner_001" | "demo_corp_001" | "demo_runner_004" | "demo_corp_004";
 
-export type SubroutineType = "end_the_run" | "corp_gain_credit" | "runner_lose_credits";
+export type SubroutineType = "end_the_run" | "corp_gain_credit" | "runner_lose_credits" | "give_runner_tag";
 
 export type SubroutineDefinition = {
   id: string;
@@ -85,7 +87,7 @@ export type CardDefinition = {
 };
 
 export type DeckDefinition = {
-  id: "demo_runner_001" | "demo_corp_001";
+  id: DemoDeckId;
   name: string;
   side: Side;
   identity: CardDefinitionId;
@@ -95,14 +97,14 @@ export type DeckDefinition = {
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
-  cardTextSnapshotId: "mvp-0.1-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0";
-  cardImplementationVersion: "0.1.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0";
-  multiplayerSchemaVersion?: "0.2.0" | "0.3.0";
-  aiControllerSchemaVersion?: "0.3.0";
-  simulationSchemaVersion?: "0.3.0";
+  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
+  cardImplementationVersion: "0.1.0" | "0.4.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0";
+  aiControllerSchemaVersion?: "0.3.0" | "0.4.0";
+  simulationSchemaVersion?: "0.3.0" | "0.4.0";
 };
 
 export type PlayerController = {
@@ -120,8 +122,8 @@ export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
   baseline?: RulesBaseline;
-  runnerDeckId?: "demo_runner_001";
-  corpDeckId?: "demo_corp_001";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004";
   agendaPointsToWin?: number;
   controllers?: {
     runner: PlayerController;
@@ -168,6 +170,7 @@ export type CorpState = {
 
 export type RunnerRig = {
   programs: CardInstanceId[];
+  hardware: CardInstanceId[];
 };
 
 export type RunnerState = {
@@ -339,11 +342,13 @@ export type PlayerView = {
     rig?: VisibleCard[];
     memoryUsed?: number;
     memoryLimit?: number;
+    tags: number;
   };
   opponent: {
     credits: number;
     clicks: number;
     agendaPoints: number;
+    tags: number;
     handCount: number;
     deckCount: number;
     scoreArea: VisibleCard[];
@@ -412,6 +417,18 @@ export const MVP_0_3_BASELINE: RulesBaseline = {
   multiplayerSchemaVersion: "0.3.0",
   aiControllerSchemaVersion: "0.3.0",
   simulationSchemaVersion: "0.3.0"
+};
+
+export const MVP_0_4_BASELINE: RulesBaseline = {
+  ...MVP_0_3_BASELINE,
+  cardTextSnapshotId: "mvp-0.4-demo",
+  engineSchemaVersion: "0.4.0",
+  cardImplementationVersion: "0.4.0",
+  deviationRegistryVersion: "0.4.0",
+  playerViewSchemaVersion: "0.4.0",
+  multiplayerSchemaVersion: "0.4.0",
+  aiControllerSchemaVersion: "0.4.0",
+  simulationSchemaVersion: "0.4.0"
 };
 
 export const DEMO_CARDS: CardDefinition[] = [
@@ -589,6 +606,123 @@ export const DEMO_CARDS: CardDefinition[] = [
       { id: "simple_sentry_ice_etr", type: "end_the_run" }
     ],
     mechanics: ["install_ice", "rez_ice", "encounter_ice", "runner_lose_credits", "end_the_run"]
+  },
+  {
+    id: "simple_draw_event",
+    title: "Simple Draw Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Ziehe 2 Karten.",
+    mechanics: ["play_event", "draw_cards"]
+  },
+  {
+    id: "simple_setup_hardware",
+    title: "Simple Setup Hardware",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "+1 Memory Limit.",
+    mechanics: ["install_hardware", "modify_memory_limit"]
+  },
+  {
+    id: "efficient_fracter",
+    title: "Efficient Fracter",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker", "fracter"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    strength: 3,
+    rulesText: "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+    abilities: [
+      { id: "efficient_fracter_pump", type: "pump_strength", cost: { credits: 1 }, amount: 1, timingPoint: "run.encounter_ice" },
+      { id: "efficient_fracter_break_barrier", type: "break_subroutine", cost: { credits: 1 }, iceSubtype: "barrier", count: 1, timingPoint: "run.encounter_ice" }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine"]
+  },
+  {
+    id: "simple_priority_agenda",
+    title: "Simple Priority Agenda",
+    side: "corp",
+    type: "agenda",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 3,
+    rulesText: "Keine zusätzliche Fähigkeit.",
+    mechanics: ["install_remote", "advance", "score", "steal"]
+  },
+  {
+    id: "simple_draw_operation",
+    title: "Simple Draw Operation",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Ziehe 2 Karten.",
+    mechanics: ["play_operation", "draw_cards"]
+  },
+  {
+    id: "simple_taxing_barrier_ice",
+    title: "Simple Taxing Barrier ICE",
+    side: "corp",
+    type: "ice",
+    subtypes: ["barrier"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 4,
+    rulesText: "Der Runner verliert 1 Credit. End the run.",
+    subroutines: [
+      { id: "simple_taxing_barrier_ice_tax", type: "runner_lose_credits", amount: 1 },
+      { id: "simple_taxing_barrier_ice_etr", type: "end_the_run" }
+    ],
+    mechanics: ["install_ice", "rez_ice", "encounter_ice", "runner_lose_credits", "end_the_run"]
+  },
+  {
+    id: "simple_upgrade",
+    title: "Simple Upgrade",
+    side: "corp",
+    type: "upgrade",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 4,
+    rulesText: "Einfache Root-Karte ohne aktive Fähigkeit.",
+    mechanics: ["install_remote", "rez_upgrade", "trash_on_access"]
+  },
+  {
+    id: "simple_tag_ice",
+    title: "Simple Tag ICE",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 3,
+    strength: 2,
+    rulesText: "Gib dem Runner 1 Tag. End the run.",
+    subroutines: [
+      { id: "simple_tag_ice_tag", type: "give_runner_tag", amount: 1 },
+      { id: "simple_tag_ice_etr", type: "end_the_run" }
+    ],
+    mechanics: ["install_ice", "rez_ice", "encounter_ice", "give_runner_tag", "end_the_run"]
+  },
+  {
+    id: "simple_tag_punishment_operation",
+    title: "Simple Tag Punishment Operation",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Spiele nur, wenn der Runner getaggt ist. Der Runner verliert 2 Credits.",
+    mechanics: ["play_operation", "runner_is_tagged", "runner_lose_credits"]
   }
 ];
 
@@ -596,7 +730,7 @@ export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> = Object
   DEMO_CARDS.map((card) => [card.id, card])
 );
 
-export const DEMO_DECKS: Record<"demo_runner_001" | "demo_corp_001", DeckDefinition> = {
+export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
   demo_runner_001: {
     id: "demo_runner_001",
     name: "Runner Demo Deck 01 - Run & Steal",
@@ -622,6 +756,42 @@ export const DEMO_DECKS: Record<"demo_runner_001" | "demo_corp_001", DeckDefinit
       { id: "simple_barrier_ice", quantity: 3 },
       { id: "simple_code_gate_ice", quantity: 3 },
       { id: "simple_sentry_ice", quantity: 3 }
+    ]
+  },
+  demo_runner_004: {
+    id: "demo_runner_004",
+    name: "Runner Demo Deck 04 - Setup & Pressure",
+    side: "runner",
+    identity: "runner_identity_001",
+    cards: [
+      { id: "simple_economy_event", quantity: 3 },
+      { id: "simple_run_event", quantity: 3 },
+      { id: "simple_draw_event", quantity: 3 },
+      { id: "simple_setup_hardware", quantity: 2 },
+      { id: "simple_fracter", quantity: 2 },
+      { id: "efficient_fracter", quantity: 2 },
+      { id: "simple_decoder", quantity: 2 },
+      { id: "simple_killer", quantity: 2 }
+    ]
+  },
+  demo_corp_004: {
+    id: "demo_corp_004",
+    name: "Corp Demo Deck 04 - Build, Tax & Tag",
+    side: "corp",
+    identity: "corp_identity_001",
+    cards: [
+      { id: "simple_agenda", quantity: 2 },
+      { id: "simple_priority_agenda", quantity: 1 },
+      { id: "simple_economy_operation", quantity: 3 },
+      { id: "simple_draw_operation", quantity: 2 },
+      { id: "simple_economy_asset", quantity: 2 },
+      { id: "simple_upgrade", quantity: 2 },
+      { id: "simple_barrier_ice", quantity: 2 },
+      { id: "simple_taxing_barrier_ice", quantity: 2 },
+      { id: "simple_code_gate_ice", quantity: 2 },
+      { id: "simple_sentry_ice", quantity: 2 },
+      { id: "simple_tag_ice", quantity: 2 },
+      { id: "simple_tag_punishment_operation", quantity: 2 }
     ]
   }
 };

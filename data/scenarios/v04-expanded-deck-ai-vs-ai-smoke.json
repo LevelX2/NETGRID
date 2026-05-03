@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "scenario-v0.4",
+  "id": "SCN-V04-004",
+  "title": "V0.4 expanded deck AI vs AI smoke",
+  "requirementIds": ["V04-REQ-011", "V04-REQ-012"],
+  "config": {
+    "runnerDeckId": "demo_runner_004",
+    "corpDeckId": "demo_corp_004",
+    "agendaPointsToWin": 7,
+    "maxActions": 140
+  },
+  "expected": {
+    "noIllegalAiAction": true,
+    "replayOk": true,
+    "finalStateHashPrefix": "fnv1a:"
+  }
+}

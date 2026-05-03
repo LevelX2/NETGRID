@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "demo-cards-v0.4",
+  "id": "mvp-0.4-demo-cards",
+  "status": "frozen_for_implementation",
+  "copyrightNote": "Fiktive interne Demo-Karten; keine offiziellen Kartentexte, Artworks, Logos, Frames oder Card Backs.",
+  "extends": "data/cards/demo-cards.json",
+  "cards": [
+    { "id": "simple_draw_event", "title": "Simple Draw Event", "side": "runner", "type": "event", "cost": 0, "implementationStatus": "playable_mvp", "rulesText": "Ziehe 2 Karten.", "mechanics": ["play_event", "draw_cards"] },
+    { "id": "simple_setup_hardware", "title": "Simple Setup Hardware", "side": "runner", "type": "hardware", "installCost": 2, "implementationStatus": "playable_mvp", "rulesText": "+1 Memory Limit.", "mechanics": ["install_hardware", "modify_memory_limit"] },
+    { "id": "efficient_fracter", "title": "Efficient Fracter", "side": "runner", "type": "program", "subtypes": ["icebreaker", "fracter"], "installCost": 3, "memoryCost": 1, "strength": 3, "implementationStatus": "playable_mvp", "rulesText": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.", "mechanics": ["install_program", "memory", "pump_breaker", "break_subroutine"] },
+    { "id": "simple_priority_agenda", "title": "Simple Priority Agenda", "side": "corp", "type": "agenda", "advancementRequirement": 4, "agendaPoints": 3, "implementationStatus": "playable_mvp", "rulesText": "Keine zusätzliche Fähigkeit.", "mechanics": ["install_remote", "advance", "score", "steal"] },
+    { "id": "simple_draw_operation", "title": "Simple Draw Operation", "side": "corp", "type": "operation", "cost": 0, "implementationStatus": "playable_mvp", "rulesText": "Ziehe 2 Karten.", "mechanics": ["play_operation", "draw_cards"] },
+    { "id": "simple_taxing_barrier_ice", "title": "Simple Taxing Barrier ICE", "side": "corp", "type": "ice", "subtypes": ["barrier"], "rezCost": 4, "strength": 4, "implementationStatus": "playable_mvp", "rulesText": "Der Runner verliert 1 Credit. End the run.", "mechanics": ["install_ice", "rez_ice", "runner_lose_credits", "end_the_run"] },
+    { "id": "simple_upgrade", "title": "Simple Upgrade", "side": "corp", "type": "upgrade", "rezCost": 0, "trashCost": 4, "implementationStatus": "playable_mvp", "rulesText": "Einfache Root-Karte ohne aktive Fähigkeit.", "mechanics": ["install_remote", "rez_upgrade", "trash_on_access"] },
+    { "id": "simple_tag_ice", "title": "Simple Tag ICE", "side": "corp", "type": "ice", "subtypes": ["sentry"], "rezCost": 3, "strength": 2, "implementationStatus": "playable_mvp", "rulesText": "Gib dem Runner 1 Tag. End the run.", "mechanics": ["install_ice", "rez_ice", "give_runner_tag", "end_the_run"] },
+    { "id": "simple_tag_punishment_operation", "title": "Simple Tag Punishment Operation", "side": "corp", "type": "operation", "cost": 1, "implementationStatus": "playable_mvp", "rulesText": "Spiele nur, wenn der Runner getaggt ist. Der Runner verliert 2 Credits.", "mechanics": ["play_operation", "runner_is_tagged", "runner_lose_credits"] }
+  ]
+}

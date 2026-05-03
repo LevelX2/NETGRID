@@ -15,7 +15,7 @@ Netrunner ist eine private Webapplikation für regelgeführtes, deterministische
 | MVP 0.2 Implementation | Private Human-vs-Human-Partien über Einladungslink ermöglichen. | Keine öffentliche Plattform, kein Matchmaking, kein breiter Kartenpool. |
 | MVP 0.3 Requirements | KI- und Simulationsphase ausführbar spezifizieren. | Noch keine Kartenpool-Erweiterung und keine LLM-KI. |
 | MVP 0.3 Implementation | Runner-KI, verbesserte Corp-KI, KI-vs-KI-Simulation, Controller-Modell und Erklärmodus umsetzen. | Abgeschlossen; KI nutzt nur PlayerViews, LegalActions und side-gefilterte Events. |
-| MVP 0.4 | Kontrollierte Kartenpool- und Regelbreite-Erweiterung. | Safe Card Batch, eingeschränkte Deckvalidierung und Tags; Damage nur späteres Teilgate. |
+| MVP 0.4 | Kontrollierte Kartenpool- und Regelbreite-Erweiterung. | Abgeschlossen: Safe Card Batch, eingeschränkte Deckvalidierung, Hardware, einfaches Upgrade und Tags; Damage nur späteres Teilgate. |
 | MVP 0.5+ | Replay-/UX-Qualität, Lern-Decks und privater Betrieb gestaffelt erweitern. | Keine Plattformfeatures ohne explizite Scope-Entscheidung. |
 
 ## Architekturgrundsätze

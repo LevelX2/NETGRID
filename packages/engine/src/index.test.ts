@@ -3,10 +3,12 @@ import {
   applyAction,
   checkWinConditions,
   createGame,
+  DEMO_DECKS,
   getLegalActions,
   getPlayerView,
   hashState,
   replayEvents,
+  validateDeckDefinition,
   validateGameState
 } from "./index";
 import type { CardInstanceId, GameState, LegalAction, Side } from "@netrunner/shared";
@@ -181,6 +183,99 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
   });
 });
 
+describe("MVP 0.4 controlled card pool and tags", () => {
+  it("creates V0.4 games with explicit expanded demo decks without changing legacy defaults", () => {
+    const legacy = createGame({ seed: "legacy-default" });
+    const expanded = createGame({
+      seed: "v04-expanded",
+      runnerDeckId: "demo_runner_004",
+      corpDeckId: "demo_corp_004",
+      agendaPointsToWin: 7
+    });
+
+    expect(legacy.agendaPointsToWin).toBe(6);
+    expect(expanded.agendaPointsToWin).toBe(7);
+    expect(Object.values(expanded.cardInstances).some((card) => card.definitionId === "simple_setup_hardware")).toBe(true);
+    expect(Object.values(expanded.cardInstances).some((card) => card.definitionId === "simple_tag_ice")).toBe(true);
+    expect(validateDeckDefinition(DEMO_DECKS.demo_runner_004, { expectedSide: "runner", allowedDeckIds: ["demo_runner_004"] }).ok).toBe(true);
+    expect(validateDeckDefinition(DEMO_DECKS.demo_corp_004, { expectedSide: "corp", allowedDeckIds: ["demo_corp_004"], minimumAgendaPoints: 7 }).ok).toBe(true);
+    expect(validateDeckDefinition(DEMO_DECKS.demo_corp_004, { expectedSide: "runner" }).ok).toBe(false);
+    expect(validateDeckDefinition(DEMO_DECKS.demo_corp_001, { expectedSide: "corp", minimumAgendaPoints: 7 }).ok).toBe(false);
+  });
+
+  it("plays safe batch draw cards and installs hardware for memory", () => {
+    let state = toRunnerTurn(createGame({ seed: "v04-runner-safe", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
+    state.runner.credits = 10;
+    moveRunnerCardToGrip(state, "simple_draw_event");
+    moveRunnerCardToGrip(state, "simple_setup_hardware");
+
+    const beforeGrip = state.runner.grip.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "simple_draw_event");
+    expect(state.runner.grip.length).toBe(beforeGrip + 1);
+
+    const beforeMemoryLimit = state.runner.memoryLimit;
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_setup_hardware");
+    expect(state.runner.memoryLimit).toBe(beforeMemoryLimit + 1);
+    expect(state.runner.rig.hardware.map((id) => state.cardInstances[id]?.definitionId)).toContain("simple_setup_hardware");
+  });
+
+  it("rezzes and trashes a simple upgrade without leaking its title before access", () => {
+    let state = toRunnerTurn(createGame({ seed: "v04-upgrade", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
+    state.runner.credits = 10;
+    putCorpRootInRemote(state, "simple_upgrade");
+
+    let runnerView = getPlayerView(state, "runner");
+    expect(JSON.stringify(runnerView)).not.toContain("Simple Upgrade");
+
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 1;
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "simple_upgrade");
+    runnerView = getPlayerView(state, "runner");
+    expect(JSON.stringify(runnerView)).toContain("Simple Upgrade");
+
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 10;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "trash_accessed_card");
+    expect(state.corp.archives.map((id) => state.cardInstances[id]?.definitionId)).toContain("simple_upgrade");
+  });
+
+  it("applies tags from ICE and lets Runner remove one tag", () => {
+    let state = toRunnerTurn(createGame({ seed: "v04-tags", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
+    putCorpIceOnServer(state, "rd", "simple_tag_ice");
+    state.corp.credits = 5;
+    state.runner.credits = 5;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.runner.tags).toBe(1);
+    expect(getPlayerView(state, "corp").opponent.tags).toBe(1);
+
+    state.runner.clicks = 1;
+    state.runner.credits = 2;
+    state = apply(state, "runner", (action) => action.type === "remove_tag");
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.credits).toBe(0);
+  });
+
+  it("gates tag punishment operation on runner tags", () => {
+    let state = createGame({ seed: "v04-punishment", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 5;
+    moveCorpCardToHq(state, "simple_tag_punishment_operation");
+
+    expect(getLegalActions(state, "corp").some((action) => sourceDefinition(state, action) === "simple_tag_punishment_operation")).toBe(false);
+    state.runner.tags = 1;
+    state.runner.credits = 5;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "simple_tag_punishment_operation");
+    expect(state.runner.credits).toBe(3);
+  });
+});
+
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
   const selected = mustAction(state, side, predicate);
   const result = applyAction(state, {
@@ -207,6 +302,10 @@ function toRunnerTurn(state: GameState): GameState {
   let next = apply(state, "corp", (action) => action.type === "mandatory_draw");
   next = apply(next, "corp", (action) => action.type === "end_turn");
   return next;
+}
+
+function toRunnerTurnFromCorpMain(state: GameState): GameState {
+  return apply(state, "corp", (action) => action.type === "end_turn");
 }
 
 function sourceDefinition(state: GameState, action: LegalAction): string | undefined {
@@ -312,4 +411,5 @@ function removeEverywhere(state: GameState, id: string): void {
   state.runner.heap = state.runner.heap.filter((cardId) => cardId !== id);
   state.runner.scoreArea = state.runner.scoreArea.filter((cardId) => cardId !== id);
   state.runner.rig.programs = state.runner.rig.programs.filter((cardId) => cardId !== id);
+  state.runner.rig.hardware = state.runner.rig.hardware.filter((cardId) => cardId !== id);
 }

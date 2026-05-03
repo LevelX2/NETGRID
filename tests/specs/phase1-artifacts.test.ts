@@ -26,6 +26,21 @@ const REQUIRED_MVP_0_2_SCENARIOS = [
   "multiplayer-undo-after-hidden-info-blocked.json"
 ];
 
+const MVP_0_4_DATA_FILES = [
+  "data/rules/rules-baseline-0.4.json",
+  "data/cards/demo-cards-0.4.json",
+  "data/decks/demo-decks-0.4.json",
+  "data/manifests/card-implementation-manifest-0.4.json",
+  "data/deviations/rule-deviations-0.4.json"
+];
+
+const REQUIRED_MVP_0_4_SCENARIOS = [
+  "v04-safe-card-batch-smoke.json",
+  "v04-tag-runner-and-remove-tag.json",
+  "v04-tag-punishment-blocked-when-untagged.json",
+  "v04-expanded-deck-ai-vs-ai-smoke.json"
+];
+
 describe("Phase 1 derived artifacts", () => {
   it("keeps all MVP 0.1 JSON data artifacts parseable", () => {
     for (const file of DATA_FILES) {
@@ -85,5 +100,26 @@ describe("Phase 1 derived artifacts", () => {
     const playableCards = manifest.cards.filter((card) => card.status === "playable_mvp");
     expect(playableCards.length).toBe(13);
     expect(playableCards.every((card) => card.unitTests?.length && card.scenarioTests?.length)).toBe(true);
+  });
+
+  it("keeps MVP 0.4 data artifacts parseable and mapped", () => {
+    for (const file of MVP_0_4_DATA_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+    const scenarioDir = "data/scenarios";
+    const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
+    for (const file of REQUIRED_MVP_0_4_SCENARIOS) {
+      expect(present, file).toContain(file);
+      const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as { id?: string; requirementIds?: string[]; expected?: unknown };
+      expect(scenario.id, file).toMatch(/^SCN-V04-\d{3}$/);
+      expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
+      expect(scenario.expected, file).toBeDefined();
+    }
+    const manifest = JSON.parse(readFileSync("data/manifests/card-implementation-manifest-0.4.json", "utf8")) as {
+      cards: Array<{ status: string; unitTests?: string[]; scenarioTests?: string[]; visibilityTests?: string[]; replayTests?: string[] }>;
+    };
+    const playableCards = manifest.cards.filter((card) => card.status === "playable_mvp");
+    expect(playableCards.length).toBe(9);
+    expect(playableCards.every((card) => card.unitTests?.length && card.scenarioTests?.length && card.visibilityTests?.length && card.replayTests?.length)).toBe(true);
   });
 });

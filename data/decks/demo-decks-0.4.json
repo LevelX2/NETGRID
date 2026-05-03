@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "demo-decks-v0.4",
+  "id": "mvp-0.4-demo-decks",
+  "status": "frozen_for_implementation",
+  "extends": "data/decks/demo-decks.json",
+  "decks": [
+    {
+      "id": "demo_runner_004",
+      "name": "Runner Demo Deck 04 - Setup & Pressure",
+      "side": "runner",
+      "version": "0.4.0",
+      "legal": false,
+      "identity": "runner_identity_001",
+      "cards": [
+        { "id": "simple_economy_event", "quantity": 3 },
+        { "id": "simple_run_event", "quantity": 3 },
+        { "id": "simple_draw_event", "quantity": 3 },
+        { "id": "simple_setup_hardware", "quantity": 2 },
+        { "id": "simple_fracter", "quantity": 2 },
+        { "id": "efficient_fracter", "quantity": 2 },
+        { "id": "simple_decoder", "quantity": 2 },
+        { "id": "simple_killer", "quantity": 2 }
+      ]
+    },
+    {
+      "id": "demo_corp_004",
+      "name": "Corp Demo Deck 04 - Build, Tax & Tag",
+      "side": "corp",
+      "version": "0.4.0",
+      "legal": false,
+      "identity": "corp_identity_001",
+      "agendaPoints": 7,
+      "cards": [
+        { "id": "simple_agenda", "quantity": 2 },
+        { "id": "simple_priority_agenda", "quantity": 1 },
+        { "id": "simple_economy_operation", "quantity": 3 },
+        { "id": "simple_draw_operation", "quantity": 2 },
+        { "id": "simple_economy_asset", "quantity": 2 },
+        { "id": "simple_upgrade", "quantity": 2 },
+        { "id": "simple_barrier_ice", "quantity": 2 },
+        { "id": "simple_taxing_barrier_ice", "quantity": 2 },
+        { "id": "simple_code_gate_ice", "quantity": 2 },
+        { "id": "simple_sentry_ice", "quantity": 2 },
+        { "id": "simple_tag_ice", "quantity": 2 },
+        { "id": "simple_tag_punishment_operation", "quantity": 2 }
+      ]
+    }
+  ]
+}

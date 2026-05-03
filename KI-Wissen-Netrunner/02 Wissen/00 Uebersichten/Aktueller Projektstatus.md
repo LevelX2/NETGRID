@@ -28,6 +28,8 @@
 - Der detaillierte V0.4-Plan liegt vor: kontrollierte Kartenpool- und Regelbreite-Erweiterung mit Safe Card Batch, eingeschränkter Deckvalidierung, Tags als bevorzugter erster Regelgruppe und Damage nur als eigenes Teilgate.
 - MVP 0.3 wurde umgesetzt und final geprüft: side-neutrale AI-Inputs, Runner-KI, Corp-KI v2, KI-vs-KI-Simulation, Server-AI-Modi, AI-vs-AI-Simulations-API und Web-UI-Moduswahl.
 - MVP 0.3 Final Gate ist bestanden: `MVP_0.3_done: true`; nächster Gate-Schritt ist MVP 0.4 Requirements.
+- MVP 0.4 wurde umgesetzt und final geprüft: versionierte 0.4-Artefakte, kleiner interner Kartenpool, V0.4-Demo-Decks, kuratierte Deckvalidierung, Hardware, einfaches Upgrade, Tags, Remove-Tag, Tag-Punishment und V0.4-AI-Simulation.
+- MVP 0.4 Final Gate ist bestanden: `MVP_0.4_done: true`; der nächste Schritt braucht eine neue Scope-Entscheidung.
 
 ## Teilweise umgesetzt
 
@@ -42,9 +44,9 @@
 
 ## Offen
 
-- Kein gate-basierter MVP-0.1/0.2/0.3-Arbeitsschritt ist offen.
-- Der nächste gate-basierte Schritt ist `MVP 0.4 Requirements Freeze`.
-- V0.4 ist durch `MVP_0.3_done: true` freigegeben, bleibt aber auf Safe Card Batch, eingeschränkte Deckvalidierung und Tags begrenzt; Damage wird als V0.4.x-Teilgate zurückgestellt.
+- Kein gate-basierter MVP-0.1/0.2/0.3/0.4-Arbeitsschritt ist offen.
+- Der nächste Schritt ist eine Scope-Entscheidung: V0.4.x Damage, V0.5 Replay/UX, V0.2.1 Storage-/Betriebshärtung oder ein anderer klar begrenzter Folgeschnitt.
+- Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 

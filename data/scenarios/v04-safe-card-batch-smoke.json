@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "scenario-v0.4",
+  "id": "SCN-V04-001",
+  "title": "V0.4 safe card batch smoke",
+  "requirementIds": ["V04-REQ-005", "V04-REQ-006", "V04-REQ-007"],
+  "expected": {
+    "runnerDrawEventWorks": true,
+    "hardwareMemoryIncreaseWorks": true,
+    "upgradeAccessTrashWorks": true,
+    "replayStateHash": true
+  }
+}

@@ -173,6 +173,9 @@ export default function Page() {
       seed,
       runnerDifficulty,
       corpDifficulty,
+      runnerDeckId: "demo_runner_004",
+      corpDeckId: "demo_corp_004",
+      agendaPointsToWin: 7,
       maxActions: 120
     });
     setSimulation(result.summary);
@@ -617,6 +620,7 @@ function ConnectionBadge({ text, state }: { text: string; state: "offline" | "co
 }
 
 function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
+  const visibleTags = view.side === "runner" ? view.own.tags : view.opponent.tags;
   return (
     <section className="section">
       <h2>{title}</h2>
@@ -624,6 +628,7 @@ function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
         <Stat label="Credits" value={view.own.credits} />
         <Stat label="Clicks" value={view.own.clicks} />
         <Stat label="Agenda" value={view.own.agendaPoints} />
+        <Stat label="Tags" value={visibleTags} />
       </div>
       <p className="meta statusLine">{view.activeSide === view.side ? "Aktiv" : "Wartet"} · {view.timingPoint}</p>
     </section>
