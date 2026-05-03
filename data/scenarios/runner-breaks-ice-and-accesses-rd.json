@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "scenario-fixture-v0.1",
+  "id": "SCN-002",
+  "name": "Runner breaks rezzed ICE and accesses R&D",
+  "status": "frozen_for_implementation",
+  "baselineId": "rules-baseline-mvp-0.1",
+  "seed": "scenario-runner-breaks-ice-and-accesses-rd",
+  "agendaPointsToWin": 6,
+  "deckIds": {
+    "runner": "demo_runner_001",
+    "corp": "demo_corp_001"
+  },
+  "coversRequirements": ["REQ-020", "REQ-021", "REQ-022", "REQ-024", "REQ-025"],
+  "coversTests": ["T-RUN-002", "T-RUN-003", "T-RUN-004", "T-CARD-RUN-003", "T-CARD-CORP-004"],
+  "setup": {
+    "activeSide": "runner",
+    "phase": "runner_action_phase",
+    "timingPoint": "runner_action.main",
+    "runner": {
+      "credits": 8,
+      "clicks": 4,
+      "rig": ["simple_fracter"]
+    },
+    "corp": {
+      "credits": 5,
+      "rdTop": "simple_economy_operation",
+      "servers": [
+        {
+          "id": "rd",
+          "ice": [
+            { "card": "simple_barrier_ice", "rezzed": false }
+          ],
+          "root": []
+        }
+      ]
+    }
+  },
+  "actions": [
+    {
+      "step": 1,
+      "side": "runner",
+      "type": "start_run",
+      "actionId": "runner.start_run.rd",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "serverId": "rd" }
+    },
+    {
+      "step": 2,
+      "side": "corp",
+      "type": "rez_ice",
+      "actionId": "corp.rez_approached_ice",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 3,
+      "side": "runner",
+      "type": "pump_breaker",
+      "actionId": "runner.pump.simple_fracter",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "breaker": "simple_fracter", "ice": "approached" }
+    },
+    {
+      "step": 4,
+      "side": "runner",
+      "type": "break_subroutine",
+      "actionId": "runner.break_subroutine.simple_fracter",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "subroutine": "simple_barrier_ice_etr" }
+    },
+    {
+      "step": 5,
+      "side": "runner",
+      "type": "continue_run",
+      "actionId": "runner.continue_after_breaking",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 6,
+      "side": "runner",
+      "type": "access_card",
+      "actionId": "runner.access.current",
+      "clientKnownStateVersion": "current"
+    }
+  ],
+  "expected": {
+    "winner": null,
+    "runnerAgendaPoints": 0,
+    "corpAgendaPoints": 0,
+    "run": {
+      "successful": true,
+      "breachedServer": "rd",
+      "encounteredIce": "simple_barrier_ice",
+      "allEndTheRunSubroutinesBroken": true,
+      "ended": true
+    },
+    "credits": {
+      "runnerSpentAtLeast": 2,
+      "corpSpent": 3
+    },
+    "visibility": {
+      "runnerSeesRezzedIceTitleAfterRez": true,
+      "runnerNeverSeesNonAccessedRdCards": true
+    }
+  }
+}

@@ -2,85 +2,89 @@
 
 ## Current phase
 
-Repository setup and Codex guidance.
+MVP 0.1 implementation may start.
 
 ## Status
 
-Setup environment created. No Engine, UI, Server, AI, scenario, or test implementation has been written.
+Phase 1, MVP 0.1 executable requirements, is complete and reviewable.
 
-The local Codex `goals` feature is enabled for persistent `/goal` workflows. Use it for the next multi-phase Netrunner work, especially MVP 0.1 requirements, review, implementation, and hardening.
+`ready_for_implementation: true`
 
-## Files and areas created
+No Engine, UI, Server, AI, or executable test implementation has been written in Phase 1. The work so far is limited to derived documentation, versioned data artifacts, scenario fixtures, the acceptance-test TODO, Codex status, and project knowledge/status logs.
 
-- Root project guidance: `AGENTS.md`, `AGENTS.local.md`, `README.md`
-- Local project knowledge base: `KI-Wissen-Netrunner/`
-- Monorepo metadata: `package.json`, `pnpm-workspace.yaml`, `tsconfig.base.json`, `vitest.config.ts`
-- Environment template: `.env.example`
-- Ignore rules: `.gitignore`
-- Codex workflow area: `docs/codex/`
-- Expected source area: `docs/source/`
-- Derived-artifact area: `docs/derived/`
-- Versioned data artifact areas: `data/rules`, `data/cards`, `data/decks`, `data/manifests`, `data/deviations`, `data/scenarios`
-- Package shells: `packages/shared`, `packages/engine`, `packages/ai`
-- App shells: `apps/web`, `apps/server`
-- Test/spec shells: `tests/specs`, `tests/e2e`, `tests/fixtures`
-- Script shell: `scripts`
+## Goal
 
-## Source files present in `docs/source`
+Active thread goal: Netrunner gated MVP delivery.
 
-- `Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
-- `Netrunner_MVP_0.2_Plan.md`
-- `Erstes Testdeck.txt`
-- `Erstes Testdeck.md`
-- `Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`
+Gate flow:
 
-## Missing source files
+1. MVP 0.1 executable requirements: pass.
+2. MVP 0.1 implementation: next.
+3. MVP 0.1 validation, hardening and documentation: pending.
+4. MVP 0.2 requirements and implementation: blocked until MVP 0.1 gate passes.
 
-None known for the setup phase.
+## Phase 1 files created or updated
 
-## Data artifacts present
+Derived docs:
 
+- `docs/derived/MVP_0.1_REQUIREMENTS.md`
+- `docs/derived/ENGINE_API_SPEC.md`
+- `docs/derived/GAME_STATE_MODEL.md`
+- `docs/derived/TIMING_AND_RUN_MODEL.md`
+- `docs/derived/DEVIATION_REGISTRY.md`
+- `docs/derived/ACCEPTANCE_CRITERIA.md`
+- `docs/derived/TEST_MATRIX.md`
+- `docs/derived/OPEN_QUESTIONS.md`
+- `docs/derived/CONFLICT_MATRIX.md`
+- `docs/derived/REQUIREMENTS_REVIEW.md`
+
+Data artifacts:
+
+- `data/rules/rules-baseline.json`
+- `data/cards/demo-cards.json`
 - `data/decks/demo-decks.json`
+- `data/manifests/card-implementation-manifest.json`
+- `data/deviations/rule-deviations.json`
+- `data/scenarios/runner-steals-rd-agenda.json`
+- `data/scenarios/runner-breaks-ice-and-accesses-rd.json`
+- `data/scenarios/runner-fails-on-end-the-run.json`
+- `data/scenarios/corp-scores-remote-agenda.json`
+- `data/scenarios/visibility-runner-view-no-corp-leak.json`
+- `data/scenarios/replay-full-demo-game-statehash.json`
 
-`demo-decks.json` was positioned from the supplied first-demo-decks package. It has not yet been reviewed, normalized, or frozen as an executable MVP 0.1 derived artifact.
+Test spec:
 
-## Blockers for implementation
+- `tests/specs/acceptance-tests.todo.md`
 
-- MVP 0.1 executable requirements have not been derived yet.
-- Required data artifacts and scenario fixtures are not fully derived or reviewed yet.
-- Tests are not specified or implemented yet.
-- Dependencies are declared for setup, but `pnpm install` was not run in this phase.
-- Local tool check during setup found Node `v24.15.0`; this matches the project target Node 24 LTS.
-- `pnpm` was not available directly on PATH during setup. `corepack pnpm --version` works with `pnpm@10.33.2`.
+## Phase 1 checks
+
+- JSON parse check: pass for 11 JSON artifacts.
+- Must requirement coverage check: pass, 42 Must requirements, 0 missing coverage IDs.
+- Card manifest coverage check: pass, 13 `playable_mvp` cards, 0 missing unit/scenario coverage entries.
+
+## Important Phase 1 assumptions
+
+- Demo games use `agendaPointsToWin = 6` because the fixed Corp demo deck contains three 2-point agendas.
+- Mulligan, Jack-out, Multiaccess, Tags, Trace, Damage, Viren, Hosting, Prevention, Replacement and Interrupts are documented deviations, not MVP-0.1 implementation scope.
+- Concrete scenario StateHashes are generated and frozen during Phase 2 after the first green replay implementation.
+- MVP 0.2 was read only for future compatibility and did not expand MVP 0.1 scope.
+
+## Blockers
+
+No Phase-1 blocker remains.
+
+Implementation blockers to watch during Phase 2:
+
+- Hidden-info filtering must be implemented early and tested continuously.
+- Run/Encounter/Access state machine is the highest complexity area.
+- The 6-point demo win condition must remain explicit until deck composition changes.
 
 ## Local tool notes
 
 - Node target files exist: `.nvmrc` and `.node-version` both specify `24`.
 - Root `package.json` declares `pnpm@10.33.2` via `packageManager`.
-- Before dependency installation, use Node 24 LTS. If `pnpm` is not directly on PATH, use `corepack pnpm ...`.
-- Persistent `/goal` workflows are suitable for Netrunner because the project is explicitly split into gated phases.
+- If `pnpm` is not directly on PATH, use `corepack pnpm ...`.
 
-## Branch for next thread
+## Next step
 
-- Current intended working branch: `codex/mvp-0-1-requirements`
-- Purpose: start MVP 0.1 executable requirements only.
-- Do not implement Engine, UI, Server, AI, or tests before the requirements review gate.
-
-## Next recommended prompt
-
-```text
-Create or continue a persistent goal named "MVP 0.1 executable requirements".
-
-Read AGENTS.md and /docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md first.
-
-Primary sources:
-- /docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md
-- /docs/source/Erstes Testdeck.txt
-- /docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf
-
-Secondary source:
-- /docs/source/Netrunner_MVP_0.2_Plan.md only for future-compatibility awareness. Do not expand MVP 0.1 scope.
-
-Task:
-Turn the MVP 0.1 sources into executable requirements, data artifacts, scenario fixtures, and a test matrix. Do not implement code.
-```
+Start Phase 2: implement MVP 0.1 only, using the derived artifacts as the active implementation source. Do not start MVP 0.2 until MVP 0.1 validation and hardening gates pass.

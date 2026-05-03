@@ -9,6 +9,9 @@
 - Erwartete Ordner für `docs/source`, `docs/codex`, `docs/derived`, `data`, `packages`, `apps`, `tests` und `scripts` angelegt.
 - Root- und bereichsspezifische `AGENTS.md`-Dateien angelegt.
 - Git-Modell festgelegt: lokales Git ohne Remote, Integrationsbranch `main`.
+- MVP 0.1 Requirements wurden aus den priorisierten Quellen abgeleitet und als reviewfähige Derived-Artefakte eingefroren.
+- Versionierte MVP-0.1-Datenartefakte für RulesBaseline, Demo-Karten, Demo-Decks, Card-Manifest, Abweichungen und sechs Szenarien liegen vor.
+- Phase-1-Gate ist bestanden: `ready_for_implementation: true`.
 
 ## Teilweise umgesetzt
 
@@ -23,13 +26,13 @@
 
 ## Offen
 
-- MVP 0.1 Requirements, Datenartefakte, Szenarien und Testmatrix sind noch nicht abgeleitet.
-- Engine, UI, Server, KI und Tests sind noch nicht implementiert.
+- Engine, UI, Server, KI und ausführbare Tests sind noch nicht implementiert.
 - Abhängigkeiten wurden noch nicht installiert.
 - Vor der nächsten technischen Phase Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
+- MVP 0.2 bleibt gesperrt, bis MVP 0.1 implementiert, validiert und gehärtet ist.
 
 ## Wichtige Grenzen
 
-- In der Setup-Phase darf kein Spielcode geschrieben werden.
+- In Phase 2 darf nur MVP-0.1-Scope implementiert werden.
 - MVP 0.2 darf nicht vor bestandenem oder ausdrücklich dokumentiertem MVP-0.1-Gate begonnen werden.
 - `data/` ist hier nicht pauschal ignoriert, weil es versionierte Regeln, Karten, Decks, Manifeste, Abweichungen und Szenarien aufnehmen soll.

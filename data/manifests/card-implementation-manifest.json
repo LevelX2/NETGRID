@@ -1,0 +1,137 @@
+{
+  "schemaVersion": "card-implementation-manifest-v0.1",
+  "id": "mvp-0.1-card-implementation-manifest",
+  "status": "frozen_for_implementation",
+  "cards": [
+    {
+      "cardCode": "runner_identity_001",
+      "title": "Runner Identity",
+      "status": "playable_mvp",
+      "implementedAbilities": ["identity setup", "no active ability"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-002", "REQ-040"],
+      "unitTests": ["T-CARD-RUN-000"],
+      "scenarioTests": ["SCN-006"]
+    },
+    {
+      "cardCode": "simple_economy_event",
+      "title": "Simple Economy Event",
+      "status": "playable_mvp",
+      "implementedAbilities": ["play event", "gain 4 credits", "move to heap"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-018", "REQ-040"],
+      "unitTests": ["T-CARD-RUN-001"],
+      "scenarioTests": ["SCN-006"]
+    },
+    {
+      "cardCode": "simple_run_event",
+      "title": "Simple Run Event",
+      "status": "playable_mvp",
+      "implementedAbilities": ["play event", "choose server", "start run", "gain 2 credits if successful"],
+      "unsupportedAbilities": ["bypass", "multiaccess", "replacement effects"],
+      "requirementIds": ["REQ-019", "REQ-025", "REQ-040"],
+      "unitTests": ["T-CARD-RUN-002"],
+      "scenarioTests": ["SCN-002"]
+    },
+    {
+      "cardCode": "simple_fracter",
+      "title": "Simple Fracter",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install program", "1 credit pump", "1 credit break one barrier subroutine"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-016", "REQ-022", "REQ-040"],
+      "unitTests": ["T-CARD-RUN-003"],
+      "scenarioTests": ["SCN-002", "SCN-003"]
+    },
+    {
+      "cardCode": "simple_decoder",
+      "title": "Simple Decoder",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install program", "1 credit pump", "1 credit break one code gate subroutine"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-016", "REQ-022", "REQ-040"],
+      "unitTests": ["T-CARD-RUN-004"],
+      "scenarioTests": ["SCN-002"]
+    },
+    {
+      "cardCode": "simple_killer",
+      "title": "Simple Killer",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install program", "1 credit pump", "1 credit break one sentry subroutine"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-016", "REQ-022", "REQ-040"],
+      "unitTests": ["T-CARD-RUN-005"],
+      "scenarioTests": ["SCN-002"]
+    },
+    {
+      "cardCode": "corp_identity_001",
+      "title": "Corp Identity",
+      "status": "playable_mvp",
+      "implementedAbilities": ["identity setup", "no active ability"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-002", "REQ-040"],
+      "unitTests": ["T-CARD-CORP-000"],
+      "scenarioTests": ["SCN-006"]
+    },
+    {
+      "cardCode": "simple_agenda",
+      "title": "Simple Agenda",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install in remote", "advance to 3", "score for 2 points", "steal for 2 points"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-030", "REQ-031", "REQ-040"],
+      "unitTests": ["T-CARD-CORP-001"],
+      "scenarioTests": ["SCN-001", "SCN-004"]
+    },
+    {
+      "cardCode": "simple_economy_operation",
+      "title": "Simple Economy Operation",
+      "status": "playable_mvp",
+      "implementedAbilities": ["play operation", "gain 4 credits", "move to archives"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-018", "REQ-040"],
+      "unitTests": ["T-CARD-CORP-002"],
+      "scenarioTests": ["SCN-006"]
+    },
+    {
+      "cardCode": "simple_economy_asset",
+      "title": "Simple Economy Asset",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install in remote", "rez for 1", "gain 3 credits on rez", "trash for 3 on access"],
+      "unsupportedAbilities": ["recurring triggers", "hosted credits"],
+      "requirementIds": ["REQ-017", "REQ-028", "REQ-040"],
+      "unitTests": ["T-CARD-CORP-003"],
+      "scenarioTests": ["SCN-004"]
+    },
+    {
+      "cardCode": "simple_barrier_ice",
+      "title": "Simple Barrier ICE",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install protecting server", "rez for 3", "strength 3", "end the run subroutine"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-021", "REQ-023", "REQ-040"],
+      "unitTests": ["T-CARD-CORP-004"],
+      "scenarioTests": ["SCN-002", "SCN-003"]
+    },
+    {
+      "cardCode": "simple_code_gate_ice",
+      "title": "Simple Code Gate ICE",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install protecting server", "rez for 2", "strength 2", "corp gains 1 credit subroutine", "end the run subroutine"],
+      "unsupportedAbilities": [],
+      "requirementIds": ["REQ-021", "REQ-024", "REQ-040"],
+      "unitTests": ["T-CARD-CORP-005"],
+      "scenarioTests": ["SCN-002"]
+    },
+    {
+      "cardCode": "simple_sentry_ice",
+      "title": "Simple Sentry ICE",
+      "status": "playable_mvp",
+      "implementedAbilities": ["install protecting server", "rez for 4", "strength 3", "runner loses up to 2 credits subroutine", "end the run subroutine"],
+      "unsupportedAbilities": ["damage", "tags", "program trash"],
+      "requirementIds": ["REQ-021", "REQ-024", "REQ-040"],
+      "unitTests": ["T-CARD-CORP-006"],
+      "scenarioTests": ["SCN-002"]
+    }
+  ]
+}

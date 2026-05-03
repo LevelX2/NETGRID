@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "scenario-fixture-v0.1",
+  "id": "SCN-005",
+  "name": "Runner view does not leak Corp hidden information",
+  "status": "frozen_for_implementation",
+  "baselineId": "rules-baseline-mvp-0.1",
+  "seed": "scenario-visibility-runner-view-no-corp-leak",
+  "agendaPointsToWin": 6,
+  "deckIds": {
+    "runner": "demo_runner_001",
+    "corp": "demo_corp_001"
+  },
+  "coversRequirements": ["REQ-012", "REQ-034", "REQ-035"],
+  "coversTests": ["T-VIS-001", "T-VIS-003", "T-VIS-004", "T-VIS-006"],
+  "setup": {
+    "activeSide": "runner",
+    "phase": "runner_action_phase",
+    "timingPoint": "runner_action.main",
+    "runner": {
+      "credits": 5,
+      "clicks": 4,
+      "gripContains": ["simple_fracter", "simple_economy_event"]
+    },
+    "corp": {
+      "credits": 5,
+      "hqContains": ["simple_agenda", "simple_economy_operation", "simple_sentry_ice"],
+      "rdTop": "simple_agenda",
+      "servers": [
+        {
+          "id": "rd",
+          "ice": [
+            { "card": "simple_barrier_ice", "rezzed": false }
+          ],
+          "root": []
+        },
+        {
+          "id": "remote_1",
+          "ice": [],
+          "root": [
+            { "card": "simple_economy_asset", "rezzed": false },
+            { "card": "simple_agenda", "rezzed": false }
+          ]
+        }
+      ]
+    }
+  },
+  "actions": [
+    {
+      "step": 1,
+      "side": "runner",
+      "type": "inspect_player_view",
+      "actionId": "test.get_runner_view",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 2,
+      "side": "runner",
+      "type": "inspect_public_events",
+      "actionId": "test.get_public_events",
+      "clientKnownStateVersion": "current"
+    }
+  ],
+  "expected": {
+    "runnerView": {
+      "corpHqTitlesVisible": false,
+      "corpRdTitlesVisible": false,
+      "unrezzedIceTitlesVisible": false,
+      "unrezzedRemoteRootTitlesVisible": false,
+      "corpHqCountVisible": true,
+      "corpRdCountVisible": true,
+      "remoteRootCountVisible": true
+    },
+    "publicEvents": {
+      "containsHiddenCorpCardIds": false,
+      "containsHiddenCorpTitles": false
+    },
+    "errors": {
+      "containsHiddenCorpTitles": false
+    }
+  }
+}

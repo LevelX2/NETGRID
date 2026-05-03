@@ -1,0 +1,172 @@
+{
+  "schemaVersion": "rule-deviations-v0.1",
+  "id": "mvp-0.1-rule-deviations",
+  "status": "frozen_for_implementation",
+  "deviations": [
+    {
+      "id": "DEV-001",
+      "area": "deckbuilding",
+      "officialRuleRef": "CR 1.4",
+      "simplifiedBehavior": "Keine freie Deckwahl, keine Format-, Einfluss-, Mindestgroessen- oder Agenda-Dichte-Pruefung.",
+      "reason": "MVP 0.1 nutzt feste interne Demo-Decks.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x", "0.2.x"],
+      "removalCondition": "Freier Deckbau oder offizielle Decks werden eingefuehrt.",
+      "testCoverage": ["T-BASE-001", "T-SETUP-001"]
+    },
+    {
+      "id": "DEV-002",
+      "area": "card",
+      "officialRuleRef": "CR 1.8, CR 3",
+      "simplifiedBehavior": "Nur interne Demo-Karten mit playable_mvp-Manifeststatus.",
+      "reason": "Scope klein halten und keine offiziellen Assets oder Datenbankabhaengigkeiten nutzen.",
+      "affectedCards": ["all_demo_cards"],
+      "allowedInVersions": ["0.1.x", "0.2.x"],
+      "removalCondition": "Kartenpool wird kontrolliert erweitert.",
+      "testCoverage": ["T-CARD-000"]
+    },
+    {
+      "id": "DEV-003",
+      "area": "card",
+      "officialRuleRef": "CR 1.5, CR 3.1",
+      "simplifiedBehavior": "Demo-Identitaeten sind sichtbar, aber ohne aktive Faehigkeit.",
+      "reason": "Keine Identitaets-Sonderregeln im Demo-Pool.",
+      "affectedCards": ["runner_identity_001", "corp_identity_001"],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Echte Identitaeten mit getesteten Faehigkeiten werden genutzt.",
+      "testCoverage": ["T-CARD-RUN-000", "T-CARD-CORP-000"]
+    },
+    {
+      "id": "DEV-004",
+      "area": "turn",
+      "officialRuleRef": "CR 1.6.6a",
+      "simplifiedBehavior": "Kein Mulligan.",
+      "reason": "Deterministische Demo-Szenarien und kleiner Kartenpool.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Startentscheidung oder echte Deckvarianz wird abnahmerelevant.",
+      "testCoverage": ["T-SETUP-001"]
+    },
+    {
+      "id": "DEV-005",
+      "area": "turn",
+      "officialRuleRef": "CR 5, CR 6, CR 9, CR 11",
+      "simplifiedBehavior": "TimingPointIds existieren; viele Paid-/Triggerfenster bieten keine Actions.",
+      "reason": "MVP-Karten brauchen nur Rez- und Breaker-Fenster.",
+      "affectedCards": ["all_demo_cards"],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Karten benoetigen zusaetzliche Timingfenster.",
+      "testCoverage": ["T-TURN-001", "T-RUN-002"]
+    },
+    {
+      "id": "DEV-006",
+      "area": "run",
+      "officialRuleRef": "CR 9.2",
+      "simplifiedBehavior": "Nur Breaker-Pump/Break und ICE-Rez als Paid Abilities.",
+      "reason": "Keine weiteren Paid Abilities im Demo-Pool.",
+      "affectedCards": ["simple_fracter", "simple_decoder", "simple_killer"],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Weitere Paid Abilities werden spielbar.",
+      "testCoverage": ["T-RUN-004"]
+    },
+    {
+      "id": "DEV-007",
+      "area": "card",
+      "officialRuleRef": "CR 10.1, CR 10.4, CR 10.5",
+      "simplifiedBehavior": "Tags, Trace, Damage und Viren sind nicht implementiert; Sentry nutzt Credit Loss.",
+      "reason": "Komplexitaet ohne Bedarf im Demo-Pool.",
+      "affectedCards": ["simple_sentry_ice"],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Karten mit Tags, Trace, Damage oder Viren werden playable.",
+      "testCoverage": ["T-CARD-CORP-006"]
+    },
+    {
+      "id": "DEV-008",
+      "area": "card",
+      "officialRuleRef": "CR 9",
+      "simplifiedBehavior": "Prevention, Replacement und Interrupts sind nicht implementiert.",
+      "reason": "Kein Demo-Effekt benoetigt diese Schichten.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Entsprechende Karten werden playable.",
+      "testCoverage": ["T-ACTION-003"]
+    },
+    {
+      "id": "DEV-009",
+      "area": "card",
+      "officialRuleRef": "CR 1.13",
+      "simplifiedBehavior": "Hosting und Hosted Cards sind nicht implementiert.",
+      "reason": "Keine Demo-Karten mit Hosting.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Hosting-Karten werden playable.",
+      "testCoverage": ["T-STATE-001"]
+    },
+    {
+      "id": "DEV-010",
+      "area": "scoring",
+      "officialRuleRef": "CR 1.7.2a, CR 1.17",
+      "simplifiedBehavior": "Demo-Partien gewinnen bei agendaPointsToWin 6.",
+      "reason": "Corp-Demo-Deck enthaelt insgesamt 6 Agenda Points.",
+      "affectedCards": ["simple_agenda"],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Deck enthaelt genug Agenda Points fuer offiziellen 7-Punkte-Sieg oder Siegwert wird anders entschieden.",
+      "testCoverage": ["T-WIN-001", "T-WIN-002"]
+    },
+    {
+      "id": "DEV-011",
+      "area": "run",
+      "officialRuleRef": "CR 6.9.4c",
+      "simplifiedBehavior": "Jack-out ist nicht abnahmepflichtig.",
+      "reason": "Kernruns sollen deterministisch getestet werden.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Jack-out wird fuer UX oder Karten abnahmerelevant.",
+      "testCoverage": ["T-RUN-002"]
+    },
+    {
+      "id": "DEV-012",
+      "area": "access",
+      "officialRuleRef": "CR 7.3-7.5",
+      "simplifiedBehavior": "Kein Multiaccess; HQ und R&D greifen je einen Kandidaten zu.",
+      "reason": "Keine Demo-Karte erhoeht Access-Anzahl.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Multiaccess-Karten werden playable.",
+      "testCoverage": ["T-ACCESS-001"]
+    },
+    {
+      "id": "DEV-013",
+      "area": "access",
+      "officialRuleRef": "CR 7.5.2",
+      "simplifiedBehavior": "Archives wird MVP-einfach und side-sicher behandelt.",
+      "reason": "Keine Archives-Spezialkarten.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Archives-Spezialkarten oder facedown Archives werden relevant.",
+      "testCoverage": ["T-ACCESS-003"]
+    },
+    {
+      "id": "DEV-014",
+      "area": "ui",
+      "officialRuleRef": null,
+      "simplifiedBehavior": "Kein oeffentlicher Replay-Browser; nur lokaler EventLog-/Replay-Nachweis.",
+      "reason": "Plattformfunktion ist Nicht-Ziel.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x", "0.2.x"],
+      "removalCondition": "Replay-Plattform wird explizit geplant.",
+      "testCoverage": ["T-REPLAY-001"]
+    },
+    {
+      "id": "DEV-015",
+      "area": "ui",
+      "officialRuleRef": null,
+      "simplifiedBehavior": "Desktop-orientierte Debug-/Lern-UI reicht.",
+      "reason": "Engine-Korrektheit hat Vorrang vor UI-Politur.",
+      "affectedCards": [],
+      "allowedInVersions": ["0.1.x"],
+      "removalCondition": "Mobile oder polierte UI wird Abnahmekriterium.",
+      "testCoverage": ["T-UI-001"]
+    }
+  ]
+}

@@ -1,0 +1,223 @@
+{
+  "schemaVersion": "demo-cards-v0.1",
+  "id": "mvp-0.1-demo-cards",
+  "status": "frozen_for_implementation",
+  "copyrightNote": "Fiktive Demo-Karten fuer die Entwicklung; keine offiziellen Kartentexte, Artworks, Logos, Frames oder Card Backs.",
+  "sourceDocuments": [
+    "docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md",
+    "docs/source/Erstes Testdeck.txt"
+  ],
+  "cards": [
+    {
+      "id": "runner_identity_001",
+      "title": "Runner Identity",
+      "side": "runner",
+      "type": "identity",
+      "subtypes": [],
+      "implementationStatus": "playable_mvp",
+      "abilityEnabled": false,
+      "rulesText": "Testidentität ohne aktive Fähigkeit.",
+      "mechanics": ["identity_setup"]
+    },
+    {
+      "id": "simple_economy_event",
+      "title": "Simple Economy Event",
+      "side": "runner",
+      "type": "event",
+      "cost": 0,
+      "implementationStatus": "playable_mvp",
+      "rulesText": "Erhalte 4 Credits.",
+      "mechanics": ["play_event", "gain_credits"]
+    },
+    {
+      "id": "simple_run_event",
+      "title": "Simple Run Event",
+      "side": "runner",
+      "type": "event",
+      "cost": 0,
+      "implementationStatus": "playable_mvp",
+      "rulesText": "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 2 Credits.",
+      "mechanics": ["play_event", "start_run", "successful_run_bonus"]
+    },
+    {
+      "id": "simple_fracter",
+      "title": "Simple Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": ["icebreaker", "fracter"],
+      "installCost": 2,
+      "memoryCost": 1,
+      "strength": 2,
+      "implementationStatus": "playable_mvp",
+      "rulesText": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "abilities": [
+        {
+          "id": "simple_fracter_pump",
+          "type": "pump_strength",
+          "cost": { "credits": 1 },
+          "amount": 1,
+          "timingPoint": "run.encounter_ice"
+        },
+        {
+          "id": "simple_fracter_break_barrier",
+          "type": "break_subroutine",
+          "cost": { "credits": 1 },
+          "iceSubtype": "barrier",
+          "count": 1,
+          "timingPoint": "run.encounter_ice"
+        }
+      ],
+      "mechanics": ["install_program", "memory", "pump_breaker", "break_subroutine"]
+    },
+    {
+      "id": "simple_decoder",
+      "title": "Simple Decoder",
+      "side": "runner",
+      "type": "program",
+      "subtypes": ["icebreaker", "decoder"],
+      "installCost": 3,
+      "memoryCost": 1,
+      "strength": 2,
+      "implementationStatus": "playable_mvp",
+      "rulesText": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Code-Gate-Subroutine.",
+      "abilities": [
+        {
+          "id": "simple_decoder_pump",
+          "type": "pump_strength",
+          "cost": { "credits": 1 },
+          "amount": 1,
+          "timingPoint": "run.encounter_ice"
+        },
+        {
+          "id": "simple_decoder_break_code_gate",
+          "type": "break_subroutine",
+          "cost": { "credits": 1 },
+          "iceSubtype": "code_gate",
+          "count": 1,
+          "timingPoint": "run.encounter_ice"
+        }
+      ],
+      "mechanics": ["install_program", "memory", "pump_breaker", "break_subroutine"]
+    },
+    {
+      "id": "simple_killer",
+      "title": "Simple Killer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": ["icebreaker", "killer"],
+      "installCost": 3,
+      "memoryCost": 1,
+      "strength": 1,
+      "implementationStatus": "playable_mvp",
+      "rulesText": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Sentry-Subroutine.",
+      "abilities": [
+        {
+          "id": "simple_killer_pump",
+          "type": "pump_strength",
+          "cost": { "credits": 1 },
+          "amount": 1,
+          "timingPoint": "run.encounter_ice"
+        },
+        {
+          "id": "simple_killer_break_sentry",
+          "type": "break_subroutine",
+          "cost": { "credits": 1 },
+          "iceSubtype": "sentry",
+          "count": 1,
+          "timingPoint": "run.encounter_ice"
+        }
+      ],
+      "mechanics": ["install_program", "memory", "pump_breaker", "break_subroutine"]
+    },
+    {
+      "id": "corp_identity_001",
+      "title": "Corp Identity",
+      "side": "corp",
+      "type": "identity",
+      "subtypes": [],
+      "implementationStatus": "playable_mvp",
+      "abilityEnabled": false,
+      "rulesText": "Testidentität ohne aktive Fähigkeit.",
+      "mechanics": ["identity_setup"]
+    },
+    {
+      "id": "simple_agenda",
+      "title": "Simple Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "advancementRequirement": 3,
+      "agendaPoints": 2,
+      "implementationStatus": "playable_mvp",
+      "rulesText": "Keine zusätzliche Fähigkeit.",
+      "mechanics": ["install_remote", "advance", "score", "steal"]
+    },
+    {
+      "id": "simple_economy_operation",
+      "title": "Simple Economy Operation",
+      "side": "corp",
+      "type": "operation",
+      "cost": 0,
+      "implementationStatus": "playable_mvp",
+      "rulesText": "Erhalte 4 Credits.",
+      "mechanics": ["play_operation", "gain_credits"]
+    },
+    {
+      "id": "simple_economy_asset",
+      "title": "Simple Economy Asset",
+      "side": "corp",
+      "type": "asset",
+      "rezCost": 1,
+      "trashCost": 3,
+      "implementationStatus": "playable_mvp",
+      "rulesText": "Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.",
+      "mechanics": ["install_remote", "rez_asset", "gain_credits_on_rez", "trash_on_access"]
+    },
+    {
+      "id": "simple_barrier_ice",
+      "title": "Simple Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": ["barrier"],
+      "rezCost": 3,
+      "strength": 3,
+      "implementationStatus": "playable_mvp",
+      "subroutines": [
+        { "id": "simple_barrier_ice_etr", "type": "end_the_run" }
+      ],
+      "rulesText": "End the run.",
+      "mechanics": ["install_ice", "rez_ice", "encounter_ice", "end_the_run"]
+    },
+    {
+      "id": "simple_code_gate_ice",
+      "title": "Simple Code Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": ["code_gate"],
+      "rezCost": 2,
+      "strength": 2,
+      "implementationStatus": "playable_mvp",
+      "subroutines": [
+        { "id": "simple_code_gate_ice_gain_credit", "type": "corp_gain_credit", "amount": 1 },
+        { "id": "simple_code_gate_ice_etr", "type": "end_the_run" }
+      ],
+      "rulesText": "Die Corp erhält 1 Credit. End the run.",
+      "mechanics": ["install_ice", "rez_ice", "encounter_ice", "corp_gain_credit", "end_the_run"]
+    },
+    {
+      "id": "simple_sentry_ice",
+      "title": "Simple Sentry ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": ["sentry"],
+      "rezCost": 4,
+      "strength": 3,
+      "implementationStatus": "playable_mvp",
+      "subroutines": [
+        { "id": "simple_sentry_ice_credit_loss", "type": "runner_lose_credits", "amount": 2 },
+        { "id": "simple_sentry_ice_etr", "type": "end_the_run" }
+      ],
+      "rulesText": "Der Runner verliert 2 Credits, falls möglich. End the run.",
+      "mechanics": ["install_ice", "rez_ice", "encounter_ice", "runner_lose_credits", "end_the_run"]
+    }
+  ]
+}

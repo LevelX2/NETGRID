@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "scenario-fixture-v0.1",
+  "id": "SCN-003",
+  "name": "Runner fails on unbroken End the Run",
+  "status": "frozen_for_implementation",
+  "baselineId": "rules-baseline-mvp-0.1",
+  "seed": "scenario-runner-fails-on-end-the-run",
+  "agendaPointsToWin": 6,
+  "deckIds": {
+    "runner": "demo_runner_001",
+    "corp": "demo_corp_001"
+  },
+  "coversRequirements": ["REQ-020", "REQ-021", "REQ-023"],
+  "coversTests": ["T-RUN-002", "T-RUN-003", "T-RUN-005", "T-CARD-CORP-004"],
+  "setup": {
+    "activeSide": "runner",
+    "phase": "runner_action_phase",
+    "timingPoint": "runner_action.main",
+    "runner": {
+      "credits": 2,
+      "clicks": 4,
+      "rig": []
+    },
+    "corp": {
+      "credits": 5,
+      "rdTop": "simple_agenda",
+      "servers": [
+        {
+          "id": "rd",
+          "ice": [
+            { "card": "simple_barrier_ice", "rezzed": false }
+          ],
+          "root": []
+        }
+      ]
+    }
+  },
+  "actions": [
+    {
+      "step": 1,
+      "side": "runner",
+      "type": "start_run",
+      "actionId": "runner.start_run.rd",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "serverId": "rd" }
+    },
+    {
+      "step": 2,
+      "side": "corp",
+      "type": "rez_ice",
+      "actionId": "corp.rez_approached_ice",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 3,
+      "side": "runner",
+      "type": "continue_run",
+      "actionId": "runner.continue_without_breaking",
+      "clientKnownStateVersion": "current"
+    }
+  ],
+  "expected": {
+    "winner": null,
+    "runnerAgendaPoints": 0,
+    "corpAgendaPoints": 0,
+    "run": {
+      "successful": false,
+      "endedBySubroutine": "end_the_run",
+      "breachOccurred": false,
+      "ended": true
+    },
+    "zones": {
+      "runnerScoreAreaContains": [],
+      "corpRdTopRemains": "simple_agenda"
+    },
+    "visibility": {
+      "publicEventsDoNotRevealRdTop": true
+    }
+  }
+}

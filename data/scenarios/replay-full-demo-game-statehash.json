@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "scenario-fixture-v0.1",
+  "id": "SCN-006",
+  "name": "Replay full demo game reproduces final StateHash",
+  "status": "frozen_for_implementation",
+  "baselineId": "rules-baseline-mvp-0.1",
+  "seed": "scenario-replay-full-demo-game-statehash",
+  "agendaPointsToWin": 6,
+  "deckIds": {
+    "runner": "demo_runner_001",
+    "corp": "demo_corp_001"
+  },
+  "coversRequirements": ["REQ-002", "REQ-003", "REQ-005", "REQ-033", "REQ-039", "REQ-042"],
+  "coversTests": ["T-SETUP-001", "T-RANDOM-001", "T-EVENT-001", "T-REPLAY-001", "T-E2E-001"],
+  "setup": {
+    "activeSide": "runner",
+    "phase": "runner_action_phase",
+    "timingPoint": "runner_action.main",
+    "runner": {
+      "credits": 5,
+      "clicks": 4,
+      "gripContains": ["simple_economy_event", "simple_fracter", "simple_run_event"],
+      "stackKnownPrefix": ["simple_decoder", "simple_killer"]
+    },
+    "corp": {
+      "credits": 5,
+      "clicks": 0,
+      "hqContains": ["simple_barrier_ice", "simple_agenda", "simple_economy_operation"],
+      "rdKnownPrefix": ["simple_agenda", "simple_code_gate_ice", "simple_economy_asset"]
+    }
+  },
+  "actions": [
+    {
+      "step": 1,
+      "side": "runner",
+      "type": "play_event",
+      "actionId": "runner.play.simple_economy_event",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "simple_economy_event" }
+    },
+    {
+      "step": 2,
+      "side": "runner",
+      "type": "install_card",
+      "actionId": "runner.install.simple_fracter",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "simple_fracter" }
+    },
+    {
+      "step": 3,
+      "side": "runner",
+      "type": "play_event",
+      "actionId": "runner.play.simple_run_event",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "simple_run_event", "serverId": "rd" }
+    },
+    {
+      "step": 4,
+      "side": "runner",
+      "type": "access_card",
+      "actionId": "runner.access.current",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 5,
+      "side": "runner",
+      "type": "steal_agenda",
+      "actionId": "runner.steal_accessed_agenda",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 6,
+      "side": "runner",
+      "type": "end_turn",
+      "actionId": "runner.end_turn",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 7,
+      "side": "corp",
+      "type": "mandatory_draw",
+      "actionId": "engine.corp_mandatory_draw",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 8,
+      "side": "corp",
+      "type": "play_operation",
+      "actionId": "corp.play.simple_economy_operation",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "simple_economy_operation" }
+    },
+    {
+      "step": 9,
+      "side": "corp",
+      "type": "install_card",
+      "actionId": "corp.install.ice.rd",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "simple_barrier_ice", "serverId": "rd" }
+    },
+    {
+      "step": 10,
+      "side": "corp",
+      "type": "install_card",
+      "actionId": "corp.install.remote_agenda",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "simple_agenda", "serverId": "new_remote" }
+    }
+  ],
+  "expected": {
+    "winner": null,
+    "runnerAgendaPoints": 2,
+    "corpAgendaPoints": 0,
+    "eventLog": {
+      "everyEventHasStateVersionBefore": true,
+      "everyEventHasStateVersionAfter": true,
+      "everyEventHasStateHashAfter": true,
+      "randomDrawRecordsReplayed": true
+    },
+    "replay": {
+      "mode": "initialStatePlusEventLog",
+      "finalStateHashMustEqualOriginal": true,
+      "firstGreenRunMayPersistConcreteHash": true
+    },
+    "visibility": {
+      "replayPublicViewDoesNotRevealHiddenCards": true
+    }
+  }
+}

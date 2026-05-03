@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "rules-baseline-v1",
+  "id": "rules-baseline-mvp-0.1",
+  "name": "Netrunner MVP 0.1 rules baseline",
+  "status": "frozen_for_implementation",
+  "rulesVersion": "26.03",
+  "cardTextSource": "manual",
+  "cardTextSnapshotId": "mvp-0.1-demo",
+  "engineSchemaVersion": "0.1.0",
+  "cardImplementationVersion": "0.1.0",
+  "deviationRegistryVersion": "0.1.0",
+  "agendaPointsToWin": 6,
+  "sourceDocuments": [
+    "docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md",
+    "docs/source/Erstes Testdeck.txt",
+    "docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf"
+  ],
+  "officialRulesReferences": [
+    "CR 1.6 Starting the Game",
+    "CR 1.7 Ending the Game",
+    "CR 1.17 Score, Scoring and Stealing",
+    "CR 1.18 Advancing Cards",
+    "CR 4.6.6 Servers",
+    "CR 5 Turns",
+    "CR 6 Runs",
+    "CR 7 Accessing Cards and Breaching Servers",
+    "CR 8.1 Faceup and Facedown Status",
+    "CR 11 Timing Structure"
+  ],
+  "mvpAssumptions": [
+    "Fixed internal demo decks only.",
+    "Demo identities have no active abilities.",
+    "No mulligan in MVP 0.1.",
+    "Demo games use agendaPointsToWin 6 because the Corp demo deck contains 6 total agenda points.",
+    "TimingPointIds are explicit, but only demo-relevant windows create LegalActions."
+  ]
+}

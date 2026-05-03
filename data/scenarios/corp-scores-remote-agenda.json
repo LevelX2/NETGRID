@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "scenario-fixture-v0.1",
+  "id": "SCN-004",
+  "name": "Corp installs, advances and scores remote agenda",
+  "status": "frozen_for_implementation",
+  "baselineId": "rules-baseline-mvp-0.1",
+  "seed": "scenario-corp-scores-remote-agenda",
+  "agendaPointsToWin": 6,
+  "deckIds": {
+    "runner": "demo_runner_001",
+    "corp": "demo_corp_001"
+  },
+  "coversRequirements": ["REQ-017", "REQ-028", "REQ-031", "REQ-032"],
+  "coversTests": ["T-SCORE-001", "T-WIN-002", "T-CARD-CORP-001", "T-CARD-CORP-003"],
+  "setup": {
+    "activeSide": "corp",
+    "phase": "corp_action_phase",
+    "timingPoint": "corp_action.main",
+    "runner": {
+      "credits": 5,
+      "clicks": 0
+    },
+    "corp": {
+      "credits": 8,
+      "clicks": 3,
+      "hqContains": ["simple_agenda", "simple_economy_asset"],
+      "scoreAreaAgendaPoints": 4
+    }
+  },
+  "actions": [
+    {
+      "step": 1,
+      "side": "corp",
+      "type": "install_card",
+      "actionId": "corp.install.remote_agenda",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "simple_agenda", "serverId": "new_remote" }
+    },
+    {
+      "step": 2,
+      "side": "corp",
+      "type": "advance_card",
+      "actionId": "corp.advance.remote_agenda",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "installed_simple_agenda" }
+    },
+    {
+      "step": 3,
+      "side": "corp",
+      "type": "advance_card",
+      "actionId": "corp.advance.remote_agenda",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "installed_simple_agenda" }
+    },
+    {
+      "step": 4,
+      "side": "corp",
+      "type": "advance_card",
+      "actionId": "corp.advance.remote_agenda",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "installed_simple_agenda" },
+      "fixtureNote": "Implementation may perform this after a turn cycle if click accounting is tested end-to-end."
+    },
+    {
+      "step": 5,
+      "side": "corp",
+      "type": "score_agenda",
+      "actionId": "corp.score.remote_agenda",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "card": "installed_simple_agenda" }
+    }
+  ],
+  "expected": {
+    "winner": "corp",
+    "runnerAgendaPoints": 0,
+    "corpAgendaPoints": 6,
+    "zones": {
+      "corpScoreAreaContains": ["simple_agenda"],
+      "remoteNoLongerContainsScoredAgenda": true
+    },
+    "visibility": {
+      "runnerDidNotSeeAgendaTitleBeforeScore": true,
+      "publicEventsRevealScoredAgendaAfterScore": true
+    }
+  }
+}

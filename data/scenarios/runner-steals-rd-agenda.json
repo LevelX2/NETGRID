@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "scenario-fixture-v0.1",
+  "id": "SCN-001",
+  "name": "Runner steals agenda from unprotected R&D",
+  "status": "frozen_for_implementation",
+  "baselineId": "rules-baseline-mvp-0.1",
+  "seed": "scenario-runner-steals-rd-agenda",
+  "agendaPointsToWin": 6,
+  "deckIds": {
+    "runner": "demo_runner_001",
+    "corp": "demo_corp_001"
+  },
+  "coversRequirements": ["REQ-019", "REQ-025", "REQ-026", "REQ-030"],
+  "coversTests": ["T-RUN-001", "T-ACCESS-001", "T-SCORE-002"],
+  "setup": {
+    "activeSide": "runner",
+    "phase": "runner_action_phase",
+    "timingPoint": "runner_action.main",
+    "runner": {
+      "credits": 5,
+      "clicks": 4
+    },
+    "corp": {
+      "credits": 5,
+      "rdTop": "simple_agenda",
+      "servers": [
+        { "id": "rd", "ice": [], "root": [] }
+      ]
+    }
+  },
+  "actions": [
+    {
+      "step": 1,
+      "side": "runner",
+      "type": "start_run",
+      "actionId": "runner.start_run.rd",
+      "clientKnownStateVersion": "current",
+      "selectedTargets": { "serverId": "rd" }
+    },
+    {
+      "step": 2,
+      "side": "runner",
+      "type": "continue_run",
+      "actionId": "runner.continue_to_breach",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 3,
+      "side": "runner",
+      "type": "access_card",
+      "actionId": "runner.access.current",
+      "clientKnownStateVersion": "current"
+    },
+    {
+      "step": 4,
+      "side": "runner",
+      "type": "steal_agenda",
+      "actionId": "runner.steal_accessed_agenda",
+      "clientKnownStateVersion": "current"
+    }
+  ],
+  "expected": {
+    "winner": null,
+    "runnerAgendaPoints": 2,
+    "corpAgendaPoints": 0,
+    "run": {
+      "successful": true,
+      "breachedServer": "rd",
+      "ended": true
+    },
+    "zones": {
+      "runnerScoreAreaContains": ["simple_agenda"],
+      "corpRdDoesNotContainAccessedInstance": true
+    },
+    "visibility": {
+      "runnerNeverSeesNonAccessedRdCards": true,
+      "publicEventsDoNotRevealNonAccessedRdCards": true
+    }
+  }
+}
