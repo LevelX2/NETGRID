@@ -40,6 +40,11 @@ Eine gesonderte Bewertung der Umsetzungsrealistik liegt hier: [Realismusprüfung
 - [Runner, Entwurf](03-design-c-clean-high-contrast/runner-draft.png)
 - [Runner, korrigiert](03-design-c-clean-high-contrast/runner-corrected.png)
 - [Corp](03-design-c-clean-high-contrast/corp.png)
+- [Einstieg, kartenbildfreundlich](03-design-c-clean-high-contrast/entry-card-images.png)
+- [Runner, kartenbildfreundlich](03-design-c-clean-high-contrast/runner-card-images.png)
+- [Runner, kartenbildfreundlich korrigiert](03-design-c-clean-high-contrast/runner-card-images-corrected.png)
+- [Corp, kartenbildfreundlich](03-design-c-clean-high-contrast/corp-card-images.png)
+- [Corp, kartenbildfreundlich korrigiert](03-design-c-clean-high-contrast/corp-card-images-corrected.png)
 
 ### Set 4: Design D, Cinematic Dark
 
