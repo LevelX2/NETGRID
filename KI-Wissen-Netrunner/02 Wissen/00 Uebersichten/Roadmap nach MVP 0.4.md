@@ -8,6 +8,8 @@ MVP 0.3 und MVP 0.4 sind abgeschlossen. MVP 0.4 hat einen kleinen kontrollierten
 
 Die neue Planungsentscheidung lautet: **UI-Neugestaltung und Designgestaltung kommen in V0.7.** Bis dahin laufen Analysen; V0.5 und V0.6 sollen nicht durch ein großes UI-Redesign blockiert werden.
 
+Aktueller Fortschritt: V0.5 bis V0.9 sind abgeschlossen. V0.91 Requirements sind eingefroren, aber offizielle Kartenbilder bleiben blockiert, bis eine explizite Asset-Freigabe oder eine dokumentierte private lokale Nutzungsentscheidung vorliegt.
+
 ## Gestaffelte Roadmap
 
 | Version | Kernziel | Inhalt |
@@ -17,6 +19,7 @@ Die neue Planungsentscheidung lautet: **UI-Neugestaltung und Designgestaltung ko
 | V0.7 | UI-Neugestaltung und Designgestaltung | Neues Spielbrett, Matchfluss, Run-Flow, Action-Panel, Karten-/Deckansichten, Replay-/Log-Darstellung, KI-Erklärungen und visuelle Richtung. |
 | V0.8 | Basisset-/Starterset-Spielbarkeit | Ausgewählter spielbarer Slice aus importiertem Datenbestand; Damage, Resources, Traces und Identitäten nur als Teilgates. |
 | V0.9 | Bessere KI | Deck- und rollenbewusste Heuristiken, Schwierigkeitsgrade, Risikoabschätzung, Simulationen und bessere Reason-Codes. |
+| V0.91 | Kartenbild-Asset-Gate und Bild-Import | Quellen-/Nutzungsentscheidung, lokaler nicht versionierter Bildcache und Anzeige bekannter Kartenbilder ohne Gameplay-Einfluss. |
 | V1.0 | Private stabile Plattform | Human-vs-KI, Human-vs-Human, KI-vs-KI, Deckeditor, Kartenkatalog, Replays, kuratierter Kartenpool und private Hostingfähigkeit. |
 
 ## Leitprinzipien
@@ -28,10 +31,13 @@ Die neue Planungsentscheidung lautet: **UI-Neugestaltung und Designgestaltung ko
 - Der Deckeditor darf nicht implementierte Karten anzeigen, aber nicht für spielbare Decks freigeben.
 - V0.7 ist der bewusste UI- und Design-Schnitt; vorher nur funktionale UI-Anpassungen.
 - V0.8 braucht vor Kartenfreigabe harte Eingangsgates, Quellenentscheidung, Kandidaten-Scoring, Resolver-Registry und Per-Card-Deviation.
+- V0.91 kommt bewusst erst nach V0.9, damit echte Kartenbilder nicht mit Kartenpool-, KI- oder UI-Gates vermischt werden.
+- Kartenbilder sind lokale Anzeige-Artefakte, keine Regelquelle, kein Decklegalitätskriterium und kein Match-State.
+- Technische Bildmetadaten aus NetrunnerDB sind keine automatische Nutzungsfreigabe; Card Art, Frames und Card Backs bleiben ohne explizite Freigabe gesperrt.
 
 ## Nächster Schritt
 
-Nächster gate-basierter Schritt ist **MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog**.
+Nächster gate-basierter Schritt ist entweder die **V0.91 Asset-Nutzungsfreigabe** oder eine spätere **V1.0-/Stabilisierung-/Betriebsentscheidung**. V0.91 darf nicht implementiert werden, solange `ready_for_implementation: false` gilt.
 
 Wichtige Arbeitsgrundlage: `docs/derived/POST_MVP_0.4_ROADMAP.md`.
 
@@ -42,3 +48,4 @@ Detailpläne:
 - `docs/derived/MVP_0.7_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.9_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.91_DETAILED_PLAN.md`

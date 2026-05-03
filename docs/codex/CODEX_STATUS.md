@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.9 stronger AI is complete. Next recommended scope is a later V1.0/stabilization/operations decision.
+MVP 0.91 card image asset gate requirements freeze is complete, but official card image implementation is blocked pending explicit asset permission or a documented private local usage decision.
 
 ## Status
 
@@ -130,6 +130,18 @@ MVP 0.9 validation, hardening and documentation are complete.
 
 `ready_for_later_V1_0_or_stabilization_scope_decision: true`
 
+MVP 0.91 card image asset gate detailed planning is complete as a future gated phase after V0.9.
+
+`MVP_0.91_detailed_plan_available: true`
+
+MVP 0.91 card image asset gate requirements freeze is complete and testable.
+
+`MVP_0.91_requirements_freeze_done: true`
+
+`ready_for_implementation: false`
+
+Blocker: current primary-source review does not provide explicit permission to import, cache or display official full card images, card art, card frames or card backs in this web application.
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -162,6 +174,7 @@ Gate flow:
 24. MVP 0.9 requirements/stronger AI freeze: pass.
 25. MVP 0.9 implementation/stronger AI: pass.
 26. MVP 0.9 validation, hardening and documentation: pass.
+27. MVP 0.91 requirements/card image asset gate freeze: blocked for implementation.
 
 ## Phase 1 files created or updated
 
@@ -951,6 +964,42 @@ V0.9 now has role-aware Runner and Corp scorers, difficulty profiles, side-safe 
 
 Next recommended scope: later V1.0/stabilization/operations decision. V1.0, V0.10 and public platform features were not started in this thread.
 
+## MVP 0.91 Detailed Planning files created or updated
+
+- `docs/derived/MVP_0.91_DETAILED_PLAN.md`
+- `docs/derived/POST_MVP_0.4_ROADMAP.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `docs/codex/CODEX_STATUS.md`
+
+V0.91 remains a future gated phase after V0.9. This planning update does not implement image import, image display, cards, engine behavior, AI behavior, UI changes or server behavior. The scope is a separate card image asset gate: source and usage decision, local non-versioned image cache, deterministic image metadata, display only for known cards, fallback to text or placeholders, and hidden-info tests against image URLs, alt text, DOM metadata and distinguishable loading states.
+
+## MVP 0.91 Requirements files created or updated
+
+- `docs/derived/MVP_0.91_REQUIREMENTS.md`
+- `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`
+- `docs/derived/CARD_IMAGE_IMPORT_0.91_SPEC.md`
+- `docs/derived/CARD_IMAGE_DISPLAY_0.91_SPEC.md`
+- `docs/derived/MVP_0.91_TEST_MATRIX.md`
+- `docs/derived/MVP_0.91_REQUIREMENTS_REVIEW.md`
+- `data/card-assets/card-image-source-registry-0.91.json`
+- `data/card-assets/card-image-policy-0.91.json`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.91 Requirements gate
+
+`MVP_0.91_requirements_freeze_done: true`
+
+`ready_for_implementation: false`
+
+The technical and hidden-info requirements are testable, and every Must requirement has a test trail. Official card image use remains blocked: NetrunnerDB provides technical image metadata, but the reviewed primary sources do not grant explicit permission for this project to download, cache or display official full card images. Null Signal Games public visual asset permission does not include card art, card frames or card backs.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -980,6 +1029,7 @@ Remaining known limits:
 - Localhost operation is the supported private MVP path. HTTPS/WSS are required outside localhost.
 - Public platform features, matchmaking, accounts, deckbuilder, chat and broad card pool remain out of scope.
 - Damage remains deferred to a V0.4.x sub-gate unless explicitly re-scoped after this final gate.
+- V0.91 official card image implementation is blocked until explicit source/usage permission or a documented private local usage decision exists.
 
 ## Local tool notes
 
@@ -996,8 +1046,9 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.7: UI redesign and visual design, intentionally delayed because design analyses are still running.
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
+- V0.91: card image asset gate and image import after V0.9.
 
-Current gate: V0.9 complete. Next recommended scope is a later V1.0/stabilization/operations decision; V1.0 is not started in this thread.
+Current gate: V0.91 Requirements Freeze complete, but image implementation is blocked by the asset permission decision. Next recommended scope is either explicit V0.91 asset permission clarification or a later V1.0/stabilization/operations decision; V1.0 is not started in this thread.
 
 Detailed planning artifacts available:
 
@@ -1007,6 +1058,9 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.7_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.9_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.91_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.91_REQUIREMENTS.md`
+- `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`
 
 UI design exploration artifacts available:
 

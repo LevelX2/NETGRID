@@ -18,16 +18,63 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("window.localStorage.getItem(SESSION_KEY");
   });
 
-  it("keeps the V0.7 UI shell image-ready but asset-gated", () => {
+  it("keeps the V0.7 UI shell image-ready with local asset gates", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     expect(page).toContain("function CardView");
     expect(page).toContain("function RunTimeline");
     expect(page).toContain("function LegalActionsPanel");
     expect(page).toContain("function DiagnosticsDrawer");
     expect(page).toContain("side-filtered");
-    expect(page).not.toContain("<img");
+    expect(page).toContain("localCardImageUrl");
+    expect(page).toContain("cardBackImageUrl");
+    expect(page).toContain("src={visualImageUrl}");
     expect(page).not.toContain("imageAssetId");
     expect(page).not.toContain("localImagePath");
+  });
+
+  it("renders the player chronicle without normal-mode technical event metadata", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    const chronicle = readFileSync("apps/web/app/chronicle.ts", "utf8");
+
+    expect(page).toContain("function ChroniclePanel");
+    expect(page).toContain("function ChronicleTitle");
+    expect(page).toContain("Spielchronik");
+    expect(page).toContain("formatChronicleEvent");
+    expect(page).toContain("chronicle-${item.category}");
+    expect(page).toContain("chronicleCardName");
+    expect(page).toContain("displayMode={cardDisplayMode}");
+    expect(page).not.toContain("chronicleEntry ${item.category}");
+    expect(page).not.toContain("<h2>EventLog</h2>");
+    expect(page).not.toContain("function EventLogPanel");
+    expect(page).not.toContain("function EventLogEntry");
+    expect(page).not.toContain("v{event.stateVersionAfter}");
+    expect(page).not.toContain("event.publicPayload.aiReasonCode");
+    expect(chronicle).not.toContain("stateHashAfter");
+    expect(chronicle).not.toContain("stateVersionAfter");
+    expect(chronicle).not.toContain("actionId");
+    expect(chronicle).not.toContain("idempotencyKey");
+  });
+
+  it("keeps card rules text reachable in image display mode without hidden-card leaks", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    expect(page).toContain("Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus");
+    expect(page).toContain("cardRulesDetail");
+    expect(page).toContain("aria-describedby={tooltipId}");
+    expect(page).toContain("visibleKnownCardIds");
+    expect(page).toContain("enrichVisibleCard");
+    expect(page).toContain("card.known && card.definitionId");
+    expect(page).toContain("nearestTooltipBoundary");
+    expect(page).toContain('setTooltipPlacement(spaceBelow < 118');
+    expect(page).toContain('rulesText: "1 Credit: +1 Stärke.');
+    expect(page).toContain('title={tooltipText}');
+    expect(page).toContain('card.known && card.rulesText');
+  });
+
+  it("keeps Runner server lanes oriented with Root above ICE", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    expect(page).toContain("function serverLanesForSide");
+    expect(page).toContain('side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane]');
+    expect(page).toContain("serverLanesForSide(activeView.side, server)");
   });
 
   it("returns PlayerView payloads from the web game API", () => {

@@ -92,30 +92,6 @@ Checks: `corepack pnpm --filter @netrunner/engine test`, `corepack pnpm --filter
 
 Die Folge-Roadmap wurde nach MVP 0.4 produktnäher neu geordnet. Kartenimport und Kartenkatalog werden V0.5, Deckeditor- und Match-Setup-Fundament V0.6, UI-Neugestaltung und Designgestaltung V0.7, Basisset-/Starterset-Spielbarkeit V0.8 und bessere KI V0.9 zugeordnet. Die UI-Neugestaltung wurde bewusst nach V0.7 gelegt, weil dazu noch Analysen laufen.
 
-## [2026-05-03] phase-0.8-req | MVP 0.8 Requirements eingefroren
-
-Die V0.8-Requirements für den spielbaren Base-/Starterset-Slice wurden abgeleitet und reviewfähig eingefroren. Der gewählte Pfad ist ein lokaler/fiktiver Starterset-Slice mit 14 neuen spielbaren Karten. Damage, Resources, Traces, Identitätsfähigkeiten, Multiaccess, Hosting, Viren, Prevention und Replacement bleiben außerhalb des Hauptslice.
-
-Erstellt wurden `docs/derived/MVP_0.8_REQUIREMENTS.md`, `docs/derived/PLAYABLE_CARD_SLICE_0.8_SPEC.md`, `docs/derived/RULE_MECHANICS_0.8_SPEC.md`, `docs/derived/CARD_IMPLEMENTATION_0.8_SPEC.md`, `docs/derived/MVP_0.8_TEST_MATRIX.md`, `docs/derived/MVP_0.8_REQUIREMENTS_REVIEW.md`, V0.8-Karten-/Deck-/Manifest-Artefakte und vier V0.8-Szenario-Fixtures. Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
-
-## [2026-05-03] phase-0.8-final | MVP 0.8 spielbarer Starterset-Slice abgeschlossen
-
-MVP 0.8 wurde implementiert, validiert und final dokumentiert. Umgesetzt wurden 14 lokale/fiktive neue Karten mit expliziten Resolvern, V0.8-Katalog- und Deck-Snapshots, V0.8-Rule-Baseline, Server-Default-Matchsetup auf die V0.8-Snapshots, Katalog-/Deck-API-Anbindung und AI-Smokes über die neuen Starterdecks. Der Slice nutzt keine offiziellen Assets, externen APIs oder Kartentextauswertung als Regelquelle.
-
-Checks: Engine-, Server-, AI-, Decks- und Catalog-Pakettests, Phase-1-Artefakte, Visibility Contract, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Lokaler V0.8-Matchstart-/Deck-/Katalog-/AI-Smoke sowie Performance-Smoke bestanden. Gate-Ergebnis: `MVP_0.8_done: true`; `ready_for_MVP_0.9_requirements: true`.
-
-## [2026-05-03] phase-0.9-req | MVP 0.9 Requirements eingefroren
-
-Die V0.9-Requirements für stärkere KI wurden abgeleitet und reviewfähig eingefroren. Der Scope bleibt eine KI-Qualitätsphase auf dem bestandenen V0.8-Starterset-Slice: rollenbewusste Scorer, Difficulty-Profile, Reason-Code- und Explanation-Safety, ObservedFacts, Soak-Matrix, Holdout-Seeds und Tuning-Change-Control. Neue Karten, neue Mechaniken, FullState-KI, LLM als Regelakteur und öffentliche Plattformfunktionen bleiben ausgeschlossen.
-
-Erstellt wurden `docs/derived/MVP_0.9_REQUIREMENTS.md`, `docs/derived/AI_HEURISTICS_0.9_SPEC.md`, `docs/derived/AI_DIFFICULTY_0.9_SPEC.md`, `docs/derived/AI_EXPLANATION_0.9_SPEC.md`, `docs/derived/AI_SOAK_TEST_0.9_SPEC.md`, `docs/derived/MVP_0.9_TEST_MATRIX.md`, `docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md`, `data/ai/*.json`, vier `data/scenarios/ai-v09-*.json` und `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`. Check: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
-
-## [2026-05-03] phase-0.9-final | MVP 0.9 stärkere KI abgeschlossen
-
-MVP 0.9 wurde implementiert, validiert und final dokumentiert. Umgesetzt wurden rollenbewusste Runner- und Corp-Scorer, Difficulty-Profile für Easy/Normal/Hard ohne erweiterten Informationszugriff, side-sichere Evidence und Explanations, ObservedFacts aus side-gefilterten Events, Qualitätsmetriken in Simulationssummaries, ein V0.9-Soak-Helfer sowie Server-V0.9-Profil-IDs.
-
-Checks: `corepack pnpm --filter @netrunner/ai typecheck`, `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm --filter @netrunner/server test`, `corepack pnpm --filter @netrunner/shared typecheck`, `corepack pnpm --filter @netrunner/server typecheck` und Root-Artefakt-/Visibility-Specs bestanden. V0.9-Soak-Smoke: 27 Läufe, 0 IllegalActions, 0 ReplayFailures, FallbackRate 0,02, TimeoutRate 0. Gate-Ergebnis nach finalem Workspace-Lauf: `MVP_0.9_done: true`.
-
 Erstellt wurde `docs/derived/POST_MVP_0.4_ROADMAP.md` sowie die Wissensseite `Roadmap nach MVP 0.4`. Nächster Gate-Schritt ist `MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog`.
 
 ## [2026-05-03] planung | V0.5 und V0.6 detailliert ausgearbeitet
@@ -207,3 +183,39 @@ Erstellt wurden `docs/derived/MVP_0.7_REQUIREMENTS.md`, `docs/derived/UI_REDESIG
 MVP 0.7 wurde implementiert, validiert und final dokumentiert. Die Weboberfläche nutzt jetzt eine helle Clean-High-Contrast-Struktur mit Entry-Preflight, Card Display Settings, generischer image-ready CardView, Card Preview, RunTimeline, LegalActionsPanel, UndoPanel, EventLogPanel und Diagnostics Drawer. Der Browser bleibt weiterhin ohne Engine-Import und ohne FullState.
 
 Checks: `corepack pnpm --filter @netrunner/web typecheck`, Visibility Contract, Web-Build, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Lokale Headless-Smokes für Entry, RunnerBoard und CorpBoard bestanden. Gate-Ergebnis: `MVP_0.7_done: true`; `ready_for_MVP_0.8_requirements: true`.
+
+## [2026-05-03] planung | V0.91 Kartenbild-Asset-Gate nach V0.9 eingeordnet
+
+Die gewünschte Bild-Import-Funktion wurde als eigene spätere Phase V0.91 nach V0.9 eingeordnet. Begründung: V0.8 soll zuerst den spielbaren Karten-/Deck-Slice stabilisieren, V0.9 danach die KI-Qualität auf dieser Basis härten; offizielle Kartenbilder würden vorher unnötig Lizenz-, Asset- und Hidden-Info-Risiken in laufende Karten-, UI- und KI-Gates mischen.
+
+Erstellt wurde `docs/derived/MVP_0.91_DETAILED_PLAN.md`. Aktualisiert wurden Roadmap, Status und Wissensindex. V0.91 bleibt ein separates Asset-Gate: Kartenbilder sind lokale Anzeige-Artefakte, kein Engine-, KI-, Deck-, Replay-, StateHash- oder Match-State-Input. Heruntergeladene Bilder werden nicht versioniert und Hidden Cards dürfen keine Bild-URLs, Alt-Texte, Asset-IDs oder unterscheidbaren Ladezustände erhalten.
+
+## [2026-05-03] phase-0.8-req | MVP 0.8 Requirements eingefroren
+
+Die V0.8-Requirements für den spielbaren Base-/Starterset-Slice wurden abgeleitet und reviewfähig eingefroren. Der gewählte Pfad ist ein lokaler/fiktiver Starterset-Slice mit 14 neuen spielbaren Karten. Damage, Resources, Traces, Identitätsfähigkeiten, Multiaccess, Hosting, Viren, Prevention und Replacement bleiben außerhalb des Hauptslice.
+
+Erstellt wurden `docs/derived/MVP_0.8_REQUIREMENTS.md`, `docs/derived/PLAYABLE_CARD_SLICE_0.8_SPEC.md`, `docs/derived/RULE_MECHANICS_0.8_SPEC.md`, `docs/derived/CARD_IMPLEMENTATION_0.8_SPEC.md`, `docs/derived/MVP_0.8_TEST_MATRIX.md`, `docs/derived/MVP_0.8_REQUIREMENTS_REVIEW.md`, V0.8-Karten-/Deck-/Manifest-Artefakte und vier V0.8-Szenario-Fixtures. Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
+
+## [2026-05-03] phase-0.8-final | MVP 0.8 spielbarer Starterset-Slice abgeschlossen
+
+MVP 0.8 wurde implementiert, validiert und final dokumentiert. Umgesetzt wurden 14 lokale/fiktive neue Karten mit expliziten Resolvern, V0.8-Katalog- und Deck-Snapshots, V0.8-Rule-Baseline, Server-Default-Matchsetup auf die V0.8-Snapshots, Katalog-/Deck-API-Anbindung und AI-Smokes über die neuen Starterdecks. Der Slice nutzt keine offiziellen Assets, externen APIs oder Kartentextauswertung als Regelquelle.
+
+Checks: Engine-, Server-, AI-, Decks- und Catalog-Pakettests, Phase-1-Artefakte, Visibility Contract, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Lokaler V0.8-Matchstart-/Deck-/Katalog-/AI-Smoke sowie Performance-Smoke bestanden. Gate-Ergebnis: `MVP_0.8_done: true`; `ready_for_MVP_0.9_requirements: true`.
+
+## [2026-05-03] phase-0.9-req | MVP 0.9 Requirements eingefroren
+
+Die V0.9-Requirements für stärkere KI wurden abgeleitet und reviewfähig eingefroren. Der Scope bleibt eine KI-Qualitätsphase auf dem bestandenen V0.8-Starterset-Slice: rollenbewusste Scorer, Difficulty-Profile, Reason-Code- und Explanation-Safety, ObservedFacts, Soak-Matrix, Holdout-Seeds und Tuning-Change-Control. Neue Karten, neue Mechaniken, FullState-KI, LLM als Regelakteur und öffentliche Plattformfunktionen bleiben ausgeschlossen.
+
+Erstellt wurden `docs/derived/MVP_0.9_REQUIREMENTS.md`, `docs/derived/AI_HEURISTICS_0.9_SPEC.md`, `docs/derived/AI_DIFFICULTY_0.9_SPEC.md`, `docs/derived/AI_EXPLANATION_0.9_SPEC.md`, `docs/derived/AI_SOAK_TEST_0.9_SPEC.md`, `docs/derived/MVP_0.9_TEST_MATRIX.md`, `docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md`, `data/ai/*.json`, vier `data/scenarios/ai-v09-*.json` und `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`. Check: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts` bestanden. Gate-Ergebnis: `ready_for_implementation: true`.
+
+## [2026-05-03] phase-0.9-final | MVP 0.9 stärkere KI abgeschlossen
+
+MVP 0.9 wurde implementiert, validiert und final dokumentiert. Umgesetzt wurden rollenbewusste Runner- und Corp-Scorer, Difficulty-Profile für Easy/Normal/Hard ohne erweiterten Informationszugriff, side-sichere Evidence und Explanations, ObservedFacts aus side-gefilterten Events, Qualitätsmetriken in Simulationssummaries, ein V0.9-Soak-Helfer sowie Server-V0.9-Profil-IDs.
+
+Checks: `corepack pnpm --filter @netrunner/ai typecheck`, `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm --filter @netrunner/server test`, `corepack pnpm --filter @netrunner/shared typecheck`, `corepack pnpm --filter @netrunner/server typecheck` und Root-Artefakt-/Visibility-Specs bestanden. V0.9-Soak-Smoke: 27 Läufe, 0 IllegalActions, 0 ReplayFailures, FallbackRate 0,02, TimeoutRate 0. Gate-Ergebnis nach finalem Workspace-Lauf: `MVP_0.9_done: true`.
+
+## [2026-05-03] phase-0.91-req | MVP 0.91 Kartenbild-Asset-Gate eingefroren
+
+Der V0.91 Requirements Freeze wurde nach dokumentiertem V0.9-Finalgate abgeleitet. Erstellt wurden Requirements, Asset-Gate-Spezifikation, Bildimport-Spezifikation, Display-Spezifikation, Testmatrix und Requirements Review sowie strukturierte Source-Registry und Asset-Policy unter `data/card-assets/`.
+
+Die aktuellen Primärquellen wurden geprüft: NetrunnerDB liefert technische Bildmetadaten, aber keine eigenständige Bildnutzungsfreigabe; Null Signal Games gibt ein separates Visual-Assets-Pack frei, nicht aber Card Art, Frames oder Card Backs. Ergebnis: `MVP_0.91_requirements_freeze_done: true`, aber `ready_for_implementation: false`. Es wurden keine Bilder heruntergeladen, keine offiziellen Assets genutzt und keine Implementierung geschrieben.

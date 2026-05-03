@@ -6,7 +6,7 @@
 - [[Aktueller Projektstatus]]: aktueller Stand von Workspace, Setup, Quellen und offenen Punkten.
 - [[Quellenlage und Aktualitaet]]: vorhandene, fehlende und ergänzende Projektquellen.
 - [[Roadmap nach MVP 0.2]]: konsolidierte Roadmap ab V0.3 und Begründung der KI-/Simulationsphase.
-- [[Roadmap nach MVP 0.4]]: produktnähere Folge-Roadmap mit Kartenimport, Deckeditor, UI-Schnitt in V0.7, Basisset-Spielbarkeit und besserer KI.
+- [[Roadmap nach MVP 0.4]]: produktnähere Folge-Roadmap mit Kartenimport, Deckeditor, UI-Schnitt in V0.7, Basisset-Spielbarkeit, besserer KI und V0.91-Kartenbild-Asset-Gate.
 - [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]: Workflow für wiki-first Arbeit und Rückführung von Erkenntnissen.
 
 ## Kernwissen
@@ -31,3 +31,6 @@
 - `docs/codex/CODEX_STATUS.md`: aktueller Codex-Setup- und Phasenstand.
 - `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`: Codex-Runbook für Setup, MVP 0.1 und MVP 0.2.
 - `docs/derived/MVP_0.9_DETAILED_PLAN.md`: detaillierte spätere V0.9-Planung für bessere KI nach V0.8.
+- `docs/derived/MVP_0.91_DETAILED_PLAN.md`: detaillierte spätere V0.91-Planung für Kartenbild-Asset-Gate und Bild-Import nach V0.9.
+- `docs/derived/MVP_0.91_REQUIREMENTS.md`: eingefrorene V0.91-Anforderungen; technisch testbar, aber Asset-Nutzung aktuell blockiert.
+- `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`: Quellen-, Nutzungs- und Asset-Policy-Grenzen für offizielle Kartenbilder.

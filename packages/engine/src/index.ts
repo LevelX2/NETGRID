@@ -1087,6 +1087,7 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, st
     actor,
     actionType: legalAction.type,
     label: publicLabel(legalAction),
+    ...publicContextForAction(state, legalAction),
     ...reveal
   };
   return {
@@ -1109,6 +1110,43 @@ function publicLabel(legalAction: LegalAction): string {
   if (legalAction.side === "corp" && legalAction.type === "install_card") return "Corp installiert eine Karte.";
   if (legalAction.side === "corp" && legalAction.type === "advance_card") return "Corp advanced eine Karte.";
   return legalAction.label;
+}
+
+function publicContextForAction(state: GameState, legalAction: LegalAction): Record<string, unknown> {
+  const context: Record<string, unknown> = {};
+  const cardId = typeof legalAction.payload?.cardId === "string" ? legalAction.payload.cardId : undefined;
+  const sourceCardId = typeof legalAction.source === "string" && state.cardInstances[legalAction.source] ? legalAction.source : undefined;
+  const serverLabel = publicServerLabelForCard(state, cardId) ?? publicServerLabel(state, legalAction.payload?.serverId);
+  const agendaId = cardId ?? sourceCardId;
+
+  if (serverLabel) context.serverLabel = serverLabel;
+  if (legalAction.type === "install_card") {
+    context.zoneLabel = legalAction.side === "runner" ? "Rig" : legalAction.payload?.placement === "ice" ? "ICE" : "Remote";
+  }
+  if (legalAction.type === "rez_ice") context.zoneLabel = legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true ? "Remote" : "ICE";
+  if (legalAction.type === "gain_credit" || legalAction.type === "draw_card" || legalAction.type === "remove_tag") context.amount = 1;
+  if (legalAction.type === "continue_run") context.result = state.run ? "continued" : "ended";
+  if (state.run?.phase) context.runPhase = state.run.phase;
+  if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {
+    const definition = definitionFor(state, agendaId);
+    if (definition.type === "agenda" && typeof definition.agendaPoints === "number") context.agendaPoints = definition.agendaPoints;
+  }
+  if (legalAction.side === "corp" && (legalAction.type === "install_card" || legalAction.type === "advance_card")) context.redactedKind = "installed_card";
+
+  return context;
+}
+
+function publicServerLabel(state: GameState, serverId: unknown): string | undefined {
+  if (typeof serverId !== "string") return undefined;
+  if (serverId === "new_remote") return "neuem Remote";
+  return state.corp.servers.find((server) => server.id === serverId)?.label;
+}
+
+function publicServerLabelForCard(state: GameState, cardId: string | undefined): string | undefined {
+  if (!cardId) return undefined;
+  const zone = state.cardInstances[cardId]?.zone;
+  const serverId = zone && "serverId" in zone ? zone.serverId : undefined;
+  return publicServerLabel(state, serverId);
 }
 
 function revealForPublicEvent(state: GameState, legalAction: LegalAction): Record<string, unknown> {

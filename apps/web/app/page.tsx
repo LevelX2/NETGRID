@@ -28,8 +28,15 @@ import {
   X,
   ZoomIn
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
+import {
+  CHRONICLE_CATEGORY_LABELS,
+  chronicleGroupLabel,
+  formatChronicleEvent,
+  type ChronicleCategory,
+  type ChronicleItem
+} from "./chronicle";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
 const SESSION_KEY = "netrunner-mvp-0-3-session";
@@ -41,6 +48,7 @@ type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finis
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 type AiDifficulty = "easy" | "normal" | "hard";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
+type EntryTab = "play" | "catalog" | "decks";
 
 type ClientPayload = {
   matchId: string;
@@ -124,6 +132,10 @@ type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemente
 
 type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
+type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "upgrade" | "operation" | "event" | "hardware" | "resource" | "program" | "identity";
+
+type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
+
 type CatalogCardSummary = {
   catalogCardId: string;
   title: string;
@@ -154,6 +166,10 @@ type CatalogListResponse = {
     statuses: CatalogStatusKey[];
   };
   summary: Partial<Record<CatalogStatusKey, number>>;
+};
+
+type DisplayVisibleCard = VisibleCard & {
+  imageUrl?: string;
 };
 
 type DeckCardEntry = {
@@ -234,6 +250,48 @@ const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
   blocked: "blocked"
 };
 
+const CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
+  { key: "ice", label: "ICE" },
+  { key: "agenda", label: "Agenda" },
+  { key: "icebreaker", label: "Icebrecher" },
+  { key: "asset", label: "Asset" },
+  { key: "upgrade", label: "Upgrade" },
+  { key: "operation", label: "Operation" },
+  { key: "event", label: "Event" },
+  { key: "hardware", label: "Hardware" },
+  { key: "resource", label: "Ressource" },
+  { key: "program", label: "Programm" },
+  { key: "identity", label: "Identität" }
+];
+
+const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
+  ice: true,
+  agenda: true,
+  icebreaker: true,
+  asset: true,
+  upgrade: true,
+  operation: true,
+  event: true,
+  hardware: true,
+  resource: true,
+  program: true,
+  identity: true
+};
+
+const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
+  ice: false,
+  agenda: false,
+  icebreaker: false,
+  asset: false,
+  upgrade: false,
+  operation: false,
+  event: false,
+  hardware: false,
+  resource: false,
+  program: false,
+  identity: false
+};
+
 const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   cost: "Kosten",
   installCost: "Install",
@@ -244,6 +302,16 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   advancementRequirement: "Fortschritt",
   agendaPoints: "Agenda"
 };
+
+const LOCAL_CARD_IMAGE_IDS = new Set(["simple_agenda", "simple_priority_agenda", "v08_project_agenda"]);
+
+function localCardImageUrl(cardId: string): string | undefined {
+  return LOCAL_CARD_IMAGE_IDS.has(cardId) || cardId.startsWith("onr_v1_") ? `/api/card-images/${encodeURIComponent(cardId)}` : undefined;
+}
+
+function cardBackImageUrl(side: Side): string {
+  return `/api/card-images/back_${side}`;
+}
 
 function catalogDetailLines(card: CatalogCardDetail): string[] {
   const typeLine = [card.side, card.type, card.subtypes.join(" / ")].filter(Boolean).join(" · ");
@@ -267,7 +335,89 @@ function eventCardDetail(event: PublicGameEvent, detailsById: Record<string, Cat
   return cardId ? (detailsById[cardId] ?? null) : null;
 }
 
+function visibleKnownCardIds(view: PlayerView | undefined): string[] {
+  if (!view) return [];
+  const cards = [
+    ...view.own.gripOrHq,
+    ...view.own.heapOrArchives,
+    ...view.own.scoreArea,
+    ...(view.own.rig ?? []),
+    ...view.opponent.scoreArea,
+    ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.run?.encounteredIce ? [view.run.encounteredIce] : [])
+  ];
+  return Array.from(new Set(cards.filter((card) => card.known && card.definitionId).map((card) => card.definitionId!)));
+}
+
+function enrichVisibleCard(card: VisibleCard, detailsById: Record<string, CatalogCardDetail>): DisplayVisibleCard {
+  if (!card.known || !card.definitionId) return card;
+  const detail = detailsById[card.definitionId];
+  const imageUrl = localCardImageUrl(card.definitionId);
+  const enriched: DisplayVisibleCard = {
+    ...card,
+    ...(imageUrl ? { imageUrl } : {})
+  };
+  if (!detail) return enriched;
+  enriched.rulesText = card.rulesText ?? detail.text;
+  addNumeric(enriched, "cost", card.cost, detail.numeric.cost);
+  addNumeric(enriched, "installCost", card.installCost, detail.numeric.installCost);
+  addNumeric(enriched, "memoryCost", card.memoryCost, detail.numeric.memoryCost);
+  addNumeric(enriched, "strength", card.strength, detail.numeric.strength);
+  addNumeric(enriched, "rezCost", card.rezCost, detail.numeric.rezCost);
+  addNumeric(enriched, "trashCost", card.trashCost, detail.numeric.trashCost);
+  addNumeric(enriched, "advancementRequirement", card.advancementRequirement, detail.numeric.advancementRequirement);
+  addNumeric(enriched, "agendaPoints", card.agendaPoints, detail.numeric.agendaPoints);
+  return enriched;
+}
+
+function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "installCost" | "memoryCost" | "strength" | "rezCost" | "trashCost" | "advancementRequirement" | "agendaPoints">, current: number | undefined, fallback: number | null | undefined): void {
+  if (current !== undefined || fallback === null || fallback === undefined) return;
+  target[key] = fallback;
+}
+
+function catalogTypeKeysForCard(card: Pick<CatalogCardSummary, "type" | "subtypes">): CatalogTypeFilterKey[] {
+  if (card.type === "program" && card.subtypes.some((subtype) => subtype.toLowerCase() === "icebreaker")) return ["icebreaker"];
+  switch (card.type) {
+    case "ice":
+    case "agenda":
+    case "asset":
+    case "upgrade":
+    case "operation":
+    case "event":
+    case "hardware":
+    case "resource":
+    case "program":
+    case "identity":
+      return [card.type];
+    default:
+      return [];
+  }
+}
+
+function catalogCardMatchesTypeFilters(card: CatalogCardSummary, filters: CatalogTypeFilterState): boolean {
+  const keys = catalogTypeKeysForCard(card);
+  if (keys.length === 0) return true;
+  return keys.some((key) => filters[key]);
+}
+
+function summarizeCatalogTypeFilters(cards: CatalogCardSummary[]): Partial<Record<CatalogTypeFilterKey, number>> {
+  const counts: Partial<Record<CatalogTypeFilterKey, number>> = {};
+  for (const card of cards) {
+    for (const key of catalogTypeKeysForCard(card)) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+}
+
+function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): Array<{ label: "ICE" | "Root"; cards: VisibleCard[] }> {
+  const iceLane = { label: "ICE" as const, cards: server.ice };
+  const rootLane = { label: "Root" as const, cards: server.root };
+  return side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane];
+}
+
 export default function Page() {
+  const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [gameMode, setGameMode] = useState<GameMode>("human_vs_human");
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
@@ -285,6 +435,7 @@ export default function Page() {
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">("all");
+  const [catalogTypeFilters, setCatalogTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
   const [catalogFilters, setCatalogFilters] = useState<CatalogListResponse["filters"] | null>(null);
   const [catalogSummary, setCatalogSummary] = useState<Partial<Record<CatalogStatusKey, number>>>({});
@@ -318,6 +469,7 @@ export default function Page() {
     const matchId = params.get("matchId");
     const token = params.get("joinToken");
     if (matchId && token) {
+      setEntryTab("play");
       setMode("join");
       setJoinMatchId(matchId);
       setJoinToken(token);
@@ -359,6 +511,9 @@ export default function Page() {
     return () => socketRef.current?.close();
   }, [session?.matchId, session?.sessionToken]);
 
+  const filteredCatalogCards = useMemo(() => catalogCards.filter((card) => catalogCardMatchesTypeFilters(card, catalogTypeFilters)), [catalogCards, catalogTypeFilters]);
+  const catalogTypeCounts = useMemo(() => summarizeCatalogTypeFilters(catalogCards), [catalogCards]);
+
   useEffect(() => {
     const params = new URLSearchParams();
     if (catalogSearch.trim()) params.set("q", catalogSearch.trim());
@@ -381,6 +536,10 @@ export default function Page() {
   }, [catalogSearch, catalogSide, catalogStatus]);
 
   useEffect(() => {
+    setSelectedCatalogId((current) => (current && filteredCatalogCards.some((card) => card.catalogCardId === current) ? current : filteredCatalogCards[0]?.catalogCardId ?? null));
+  }, [filteredCatalogCards]);
+
+  useEffect(() => {
     if (!selectedCatalogId) {
       setCatalogDetail(null);
       return;
@@ -392,7 +551,9 @@ export default function Page() {
   }, [selectedCatalogId]);
 
   useEffect(() => {
-    const missingIds = Array.from(new Set((payload?.eventTail ?? []).map(revealedEventCardId).filter((value): value is string => Boolean(value)))).filter((cardId) => !catalogDetailsById[cardId]);
+    const eventIds = (payload?.eventTail ?? []).map(revealedEventCardId).filter((value): value is string => Boolean(value));
+    const visibleIds = visibleKnownCardIds(payload?.playerView);
+    const missingIds = Array.from(new Set([...eventIds, ...visibleIds])).filter((cardId) => !catalogDetailsById[cardId]);
     if (missingIds.length === 0) return;
     let cancelled = false;
     void Promise.all(
@@ -415,7 +576,7 @@ export default function Page() {
     return () => {
       cancelled = true;
     };
-  }, [payload?.eventTail, catalogDetailsById]);
+  }, [payload?.eventTail, payload?.playerView, catalogDetailsById]);
 
   useEffect(() => {
     void fetch("/api/cards/catalog", { cache: "no-store" })
@@ -448,6 +609,8 @@ export default function Page() {
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const playableCatalogCards = allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity");
   const previewCard = focusedCard ?? activeView?.run?.encounteredIce ?? activeView?.own.gripOrHq.find((card) => card.known) ?? activeView?.own.rig?.find((card) => card.known) ?? null;
+  const enrichCard = (card: VisibleCard) => enrichVisibleCard(card, catalogDetailsById);
+  const enrichedPreviewCard = previewCard ? enrichCard(previewCard) : null;
 
   const createMatch = async () => {
     setNotice("");
@@ -693,6 +856,7 @@ export default function Page() {
       setCorpLocalSnapshot(validatedSnapshot);
       setCorpDeckSource("local");
     }
+    setEntryTab("play");
     setNotice("Deck-Snapshot für Match Setup gesetzt.");
   };
 
@@ -820,14 +984,31 @@ export default function Page() {
           <ConnectionBadge text={statusText} state={connection} />
         </header>
         <div className="setup v07Entry">
+          <nav className="entryTabs" aria-label="Startbereiche">
+            <button className={`entryTab ${entryTab === "play" ? "active" : ""}`} onClick={() => setEntryTab("play")} type="button" aria-current={entryTab === "play" ? "page" : undefined}>
+              <Play size={16} />
+              Spiel
+            </button>
+            <button className={`entryTab ${entryTab === "catalog" ? "active" : ""}`} onClick={() => setEntryTab("catalog")} type="button" aria-current={entryTab === "catalog" ? "page" : undefined}>
+              <ListFilter size={16} />
+              Katalog
+            </button>
+            <button className={`entryTab ${entryTab === "decks" ? "active" : ""}`} onClick={() => setEntryTab("decks")} type="button" aria-current={entryTab === "decks" ? "page" : undefined}>
+              <Layers3 size={16} />
+              Decks
+            </button>
+          </nav>
           <section className="entryHero">
             <div>
-              <p className="eyebrow">Clean Board</p>
+              <p className="eyebrow">Netrunner Lokal</p>
               <h2>Private Netrunner-Konsole</h2>
-              <p className="meta">Design C als Hauptstruktur, Run-Fokus aus Design D und Diagnose nur im Drawer.</p>
+              <p className="meta">Private Matches · lokale Decks · side-filtered</p>
             </div>
             <PreflightBar />
           </section>
+          {notice ? <p className="notice entryNotice">{notice}</p> : null}
+          <div className="entryContent">
+          {entryTab === "play" ? (
           <section className="setupPanel">
             <div className="tabs">
               <button className={`tab ${mode === "host" ? "active" : ""}`} onClick={() => setMode("host")}>
@@ -956,10 +1137,11 @@ export default function Page() {
                 </button>
               </div>
             )}
-            {notice ? <p className="notice">{notice}</p> : null}
           </section>
-          <CatalogPanel
-            cards={catalogCards}
+          ) : null}
+          {entryTab === "catalog" ? (
+            <CatalogPanel
+            cards={filteredCatalogCards}
             detail={catalogDetail}
             filters={catalogFilters}
             search={catalogSearch}
@@ -967,12 +1149,19 @@ export default function Page() {
             status={catalogStatus}
             summary={catalogSummary}
             selectedId={selectedCatalogId}
+            typeCounts={catalogTypeCounts}
+            typeFilters={catalogTypeFilters}
             onSearch={setCatalogSearch}
             onSide={setCatalogSide}
             onStatus={setCatalogStatus}
             onSelect={setSelectedCatalogId}
+            onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
+            onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
+            onClearTypeFilters={() => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })}
           />
-          <DeckEditorPanel
+          ) : null}
+          {entryTab === "decks" ? (
+            <DeckEditorPanel
             templates={deckTemplates}
             localDecks={localDecks}
             selectedDeck={selectedLocalDeck}
@@ -996,6 +1185,8 @@ export default function Page() {
             onImportText={setDeckImportText}
             onImport={importLocalDeck}
           />
+          ) : null}
+          </div>
         </div>
       </main>
     );
@@ -1041,7 +1232,7 @@ export default function Page() {
 
         <section className="board boardPanel">
           <BoardHeader view={activeView} />
-          <RunTimeline view={activeView} />
+          <RunTimeline view={activeView} cardDetailsById={catalogDetailsById} />
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -1054,30 +1245,32 @@ export default function Page() {
             {activeView.servers.map((server) => (
               <article className="server" key={server.id}>
                 <h3>{server.label}</h3>
-                <div className="laneLabel">ICE</div>
-                <div className="lane">{server.ice.map((card) => <CardView key={card.instanceId} card={card} compact displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
-                <div className="laneLabel">Root</div>
-                <div className="lane">{server.root.map((card) => <CardView key={card.instanceId} card={card} compact displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
+                {serverLanesForSide(activeView.side, server).map((lane) => (
+                  <div className="serverLaneGroup" key={lane.label}>
+                    <div className="laneLabel">{lane.label}</div>
+                    <div className="lane">{lane.cards.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} compact displayMode={cardDisplayMode} hiddenSide="corp" onFocus={setFocusedCard} />)}</div>
+                  </div>
+                ))}
               </article>
             ))}
           </div>
-          <section className="section panel boardSection">
-            <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
-            <div className="cards">{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={card} displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
-          </section>
           {activeView.own.rig ? (
             <section className="section panel boardSection">
               <h2>Rig</h2>
-              <div className="cards">{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={card} displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
+              <div className="cards">{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} onFocus={setFocusedCard} />)}</div>
             </section>
           ) : null}
+          <section className="section panel boardSection">
+            <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
+            <div className="cards">{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} hiddenSide={activeView.side} onFocus={setFocusedCard} />)}</div>
+          </section>
         </section>
 
         <aside className="log panel rightRail">
           <section className="section">
             <CardDisplaySettings mode={cardDisplayMode} onChange={setCardDisplayMode} compact />
           </section>
-          <CardPreviewPanel card={previewCard} displayMode={cardDisplayMode} />
+          <CardPreviewPanel card={enrichedPreviewCard} displayMode={cardDisplayMode} />
           <section className="section">
             <h2>Gegenseite</h2>
             <div className="stats">
@@ -1093,7 +1286,7 @@ export default function Page() {
             ) : null}
             <p className="meta statusLine">{payload.opponentStatus.connected ? "Verbunden" : "Offline"} · {activeView.timingPoint}</p>
           </section>
-          <EventLogPanel events={payload.eventTail} cardDetailsById={catalogDetailsById} />
+          <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} />
           <section className="section">
             <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
               <PanelRightOpen size={15} />
@@ -1147,15 +1340,15 @@ function CardDisplaySettings({ mode, onChange, compact = false }: { mode: CardDi
         {!compact ? <span className="meta">Lokale Anzeigeoption, kein Match-State</span> : null}
       </div>
       <div className="segmented" role="group" aria-label="Card Display Mode">
-        <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Platzhalterkarten">
+        <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus" aria-label="Bildmodus">
           <Image size={15} />
           {!compact ? "Bild" : null}
         </button>
-        <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Text-Fallback">
+        <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Text-Fallback mit Regeltext auf der Karte" aria-label="Text-Fallback">
           <Keyboard size={15} />
           {!compact ? "Text" : null}
         </button>
-        <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompakte Karten">
+        <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompakte Karten mit Regeltext im Tooltip" aria-label="Kompakte Karten">
           <ZoomIn size={15} />
           {!compact ? "Kompakt" : null}
         </button>
@@ -1166,14 +1359,14 @@ function CardDisplaySettings({ mode, onChange, compact = false }: { mode: CardDi
 
 function BoardPreview({ displayMode }: { displayMode: CardDisplayMode }) {
   const previewCards: VisibleCard[] = [
-    { instanceId: "preview-runner", known: true, title: "Demo Program", type: "program", subtypes: ["Icebreaker"], strength: 2 },
-    { instanceId: "preview-corp", known: true, title: "Demo ICE", type: "ice", subtypes: ["Barrier"], strength: 3 },
+    { instanceId: "preview-runner", known: true, title: "Demo Program", type: "program", subtypes: ["Icebreaker"], strength: 2, rulesText: "1 Credit: +1 Stärke. 1 Credit: Brich 1 ICE-Subroutine." },
+    { instanceId: "preview-corp", known: true, title: "Demo ICE", type: "ice", subtypes: ["Barrier"], strength: 3, rulesText: "End the run." },
     { instanceId: "preview-hidden", known: false }
   ];
   return (
     <div className="boardPreview" aria-label="Board Preview">
       {previewCards.map((card) => (
-        <CardView key={card.instanceId} card={card} displayMode={displayMode} compact />
+        <CardView key={card.instanceId} card={card} displayMode={displayMode} compact hiddenSide="corp" />
       ))}
     </div>
   );
@@ -1196,8 +1389,9 @@ function BoardHeader({ view }: { view: PlayerView }) {
   );
 }
 
-function RunTimeline({ view }: { view: PlayerView }) {
+function RunTimeline({ view, cardDetailsById }: { view: PlayerView; cardDetailsById: Record<string, CatalogCardDetail> }) {
   const phase = view.run?.phase;
+  const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
   const steps = ["target", "approach_ice", "encounter_ice", "break", "access", "complete"] as const;
   const labels: Record<(typeof steps)[number], string> = {
     target: "Ziel",
@@ -1220,10 +1414,10 @@ function RunTimeline({ view }: { view: PlayerView }) {
           </span>
         ))}
       </div>
-      {view.run?.encounteredIce ? (
+      {encounteredIce ? (
         <div className="encounterFocus">
           <span>Encounter</span>
-          <strong>{view.run.encounteredIce.known ? view.run.encounteredIce.title : "Verdecktes ICE"}</strong>
+          <strong>{encounteredIce.known ? [encounteredIce.title, encounteredIce.rulesText].filter(Boolean).join(" · ") : "Verdecktes ICE"}</strong>
         </div>
       ) : null}
     </div>
@@ -1297,7 +1491,7 @@ function UndoPanel({
   );
 }
 
-function CardPreviewPanel({ card, displayMode }: { card: VisibleCard | null; displayMode: CardDisplayMode }) {
+function CardPreviewPanel({ card, displayMode }: { card: DisplayVisibleCard | null; displayMode: CardDisplayMode }) {
   return (
     <section className="section cardPreviewPanel">
       <div className="sectionTitleLine">
@@ -1310,6 +1504,12 @@ function CardPreviewPanel({ card, displayMode }: { card: VisibleCard | null; dis
           <p className="meta">
             {card.known ? [card.type, card.subtypes?.join(" / "), card.strength !== undefined ? `Stärke ${card.strength}` : ""].filter(Boolean).join(" · ") : "Redacted"}
           </p>
+          {card.known && card.rulesText ? (
+            <div className="cardRulesDetail">
+              <strong>Regeltext</strong>
+              <span>{card.rulesText}</span>
+            </div>
+          ) : null}
         </>
       ) : (
         <p className="meta">Fokussiere eine bekannte Karte.</p>
@@ -1318,51 +1518,146 @@ function CardPreviewPanel({ card, displayMode }: { card: VisibleCard | null; dis
   );
 }
 
-function EventLogPanel({ events, cardDetailsById }: { events: PublicGameEvent[]; cardDetailsById: Record<string, CatalogCardDetail> }) {
+function ChroniclePanel({
+  events,
+  side,
+  cardDetailsById,
+  displayMode
+}: {
+  events: PublicGameEvent[];
+  side: Side;
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  displayMode: CardDisplayMode;
+}) {
+  const entries = events
+    .slice()
+    .reverse()
+    .map((event) => {
+      const card = eventCardDetail(event, cardDetailsById);
+      const item = formatChronicleEvent(event, side, {
+        cardTitle: card?.title ?? null,
+        cardText: card?.text ?? null,
+        cardType: card?.type ?? null,
+        cardDetailLines: card ? catalogDetailLines(card) : [],
+        agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null
+      });
+      return { card, item };
+    });
+
   return (
-    <section className="section">
-      <h2>EventLog</h2>
-      <div className="events">
-        {events
-          .slice()
-          .reverse()
-          .map((event) => (
-            <EventLogEntry event={event} card={eventCardDetail(event, cardDetailsById)} key={event.eventId} />
-          ))}
+    <section className="section chroniclePanel">
+      <div className="sectionTitleLine">
+        <h2>Spielchronik</h2>
+        <Activity size={16} />
+      </div>
+      <div className="chronicleList">
+        {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
+        {entries.map((entry, index) => {
+          const group = chronicleGroupLabel(entry.item);
+          const previousGroup = index > 0 ? chronicleGroupLabel(entries[index - 1]!.item) : null;
+          return (
+            <Fragment key={entry.item.id}>
+              {group !== previousGroup ? <div className="chronicleGroup">{group}</div> : null}
+              <ChronicleEntry item={entry.item} card={entry.card} displayMode={displayMode} />
+            </Fragment>
+          );
+        })}
       </div>
     </section>
   );
 }
 
-function EventLogEntry({ event, card }: { event: PublicGameEvent; card: CatalogCardDetail | null }) {
-  const fallbackTitle = typeof event.publicPayload.title === "string" ? event.publicPayload.title : null;
-  const cardTitle = card?.title ?? fallbackTitle;
-  const detailLines = card ? catalogDetailLines(card) : [];
-  const tooltipText = card ? [card.title, ...detailLines, card.text].filter(Boolean).join("\n") : cardTitle ?? undefined;
+function ChronicleEntry({ item, card, displayMode }: { item: ChronicleItem; card: CatalogCardDetail | null; displayMode: CardDisplayMode }) {
+  const tooltipText = card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle;
+  const titleContainsCard = Boolean(item.cardTitle && item.title.includes(item.cardTitle));
   return (
-    <div className="event">
-      <strong>{String(event.publicPayload.label ?? event.type)}</strong>
-      {cardTitle ? (
-        <div className="eventCardLink" tabIndex={0} title={tooltipText}>
-          Karte: {cardTitle}
-          {card ? (
-            <div className="eventCardTooltip" role="tooltip">
-              <strong>{card.title}</strong>
-              {detailLines.map((line) => (
-                <span key={line}>{line}</span>
-              ))}
-              <p>{card.text}</p>
-            </div>
-          ) : null}
+    <article className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility}`}>
+      <div className="chronicleRail" aria-hidden="true">
+        <ChronicleIcon category={item.category} />
+      </div>
+      <div className="chronicleContent">
+        <div className="chronicleTopLine">
+          <strong>
+            <ChronicleTitle item={item} card={card} displayMode={displayMode} />
+          </strong>
+          <span className="chronicleCategory">{CHRONICLE_CATEGORY_LABELS[item.category]}</span>
         </div>
-      ) : null}
-      {card?.text ? <span className="eventEffect">Effekt: {card.text}</span> : null}
-      {event.publicPayload.aiReasonCode ? <span className="eventReason">{String(event.publicPayload.aiReasonCode)}</span> : null}
-      <small>
-        v{event.stateVersionAfter} · {event.stateHashAfter}
-      </small>
-    </div>
+        {item.description ? <p className="chronicleDescription">{item.description}</p> : null}
+        {item.chips.length > 0 ? (
+          <div className="chronicleChips">
+            {item.chips.map((chip) => (
+              <span key={chip}>{chip}</span>
+            ))}
+          </div>
+        ) : null}
+        {item.cardTitle && !titleContainsCard ? (
+          <div className="chronicleCardLine" tabIndex={card ? 0 : -1} title={tooltipText}>
+            Karte: {item.cardTitle}
+            <ChronicleCardHover card={card} item={item} displayMode={displayMode} />
+          </div>
+        ) : null}
+        {item.cardText ? <p className="chronicleEffect">Effekt: {item.cardText}</p> : null}
+      </div>
+    </article>
   );
+}
+
+function ChronicleTitle({ item, card, displayMode }: { item: ChronicleItem; card: CatalogCardDetail | null; displayMode: CardDisplayMode }) {
+  if (!item.cardTitle) return <>{item.title}</>;
+  const index = item.title.indexOf(item.cardTitle);
+  if (index < 0) return <>{item.title}</>;
+  return (
+    <>
+      {item.title.slice(0, index)}
+      <span className={`chronicleCardName ${card ? "hasDetail" : ""}`} tabIndex={card ? 0 : -1} title={card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle}>
+        {item.cardTitle}
+        <ChronicleCardHover card={card} item={item} displayMode={displayMode} />
+      </span>
+      {item.title.slice(index + item.cardTitle.length)}
+    </>
+  );
+}
+
+function ChronicleCardHover({ card, item, displayMode }: { card: CatalogCardDetail | null; item: ChronicleItem; displayMode: CardDisplayMode }) {
+  if (!card) return null;
+  const imageUrl = displayMode === "placeholder" ? localCardImageUrl(card.catalogCardId) : undefined;
+  return (
+    <span className={`chronicleCardTooltip ${imageUrl ? "imageMode" : "textMode"}`} role="tooltip">
+      {imageUrl ? (
+        <img className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
+      ) : (
+        <>
+          <strong>{card.title}</strong>
+          {item.cardDetailLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+          <p>{card.text}</p>
+        </>
+      )}
+    </span>
+  );
+}
+
+function ChronicleIcon({ category }: { category: ChronicleCategory }) {
+  switch (category) {
+    case "turn":
+      return <Activity size={15} />;
+    case "economy":
+      return <Plus size={15} />;
+    case "card":
+      return <Layers3 size={15} />;
+    case "run":
+      return <Cable size={15} />;
+    case "agenda":
+      return <Shield size={15} />;
+    case "danger":
+      return <X size={15} />;
+    case "hidden":
+      return <Eye size={15} />;
+    case "system":
+    default:
+      return <PanelRightOpen size={15} />;
+  }
 }
 
 function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; payload: ClientPayload; connection: "offline" | "connecting" | "online" }) {
@@ -1386,7 +1681,11 @@ function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; paylo
         </div>
         <div>
           <dt>StateHash</dt>
-          <dd>{hash}</dd>
+          <dd>{shortDiagnosticsHash(hash)}</dd>
+        </div>
+        <div>
+          <dt>Sync</dt>
+          <dd>{connection === "online" ? "live" : "wartet"}</dd>
         </div>
         <div>
           <dt>Visibility</dt>
@@ -1395,6 +1694,11 @@ function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; paylo
       </dl>
     </section>
   );
+}
+
+function shortDiagnosticsHash(hash: string): string {
+  if (hash.length <= 18) return hash;
+  return `${hash.slice(0, 14)}…`;
 }
 
 function CatalogPanel({
@@ -1406,10 +1710,15 @@ function CatalogPanel({
   status,
   summary,
   selectedId,
+  typeCounts,
+  typeFilters,
   onSearch,
   onSide,
   onStatus,
-  onSelect
+  onSelect,
+  onTypeFilter,
+  onSelectAllTypes,
+  onClearTypeFilters
 }: {
   cards: CatalogCardSummary[];
   detail: CatalogCardDetail | null;
@@ -1419,11 +1728,18 @@ function CatalogPanel({
   status: CatalogStatusKey | "all";
   summary: Partial<Record<CatalogStatusKey, number>>;
   selectedId: string | null;
+  typeCounts: Partial<Record<CatalogTypeFilterKey, number>>;
+  typeFilters: CatalogTypeFilterState;
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
   onStatus(value: CatalogStatusKey | "all"): void;
   onSelect(value: string): void;
+  onTypeFilter(key: CatalogTypeFilterKey, selected: boolean): void;
+  onSelectAllTypes(): void;
+  onClearTypeFilters(): void;
 }) {
+  const catalogImageUrl = detail ? localCardImageUrl(detail.catalogCardId) : undefined;
+
   return (
     <section className="catalogPanel panel">
       <div className="catalogHeader">
@@ -1437,8 +1753,9 @@ function CatalogPanel({
       </div>
       <div className="catalogControls">
         <label className="searchBox">
+          <span>Suche</span>
           <Search size={16} />
-          <input value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Suche" />
+          <input value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Kartenname, Text, Subtyp" />
         </label>
         <label>
           Seite
@@ -1462,6 +1779,26 @@ function CatalogPanel({
             ))}
           </select>
         </label>
+        <fieldset className="catalogTypeFilters">
+          <legend>Haupttypen</legend>
+          <div className="typeFilterActions">
+            <button type="button" onClick={onSelectAllTypes}>
+              Alle
+            </button>
+            <button type="button" onClick={onClearTypeFilters}>
+              Keine
+            </button>
+          </div>
+          <div className="typeFilterGrid">
+            {CATALOG_TYPE_FILTERS.map((filter) => (
+              <label className={`typeToggle ${typeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
+                <input checked={typeFilters[filter.key]} onChange={(event) => onTypeFilter(filter.key, event.target.checked)} type="checkbox" />
+                <span>{filter.label}</span>
+                <small>{typeCounts[filter.key] ?? 0}</small>
+              </label>
+            ))}
+          </div>
+        </fieldset>
       </div>
       <div className="catalogLayout">
         <div className="catalogList">
@@ -1488,6 +1825,11 @@ function CatalogPanel({
                 </div>
                 <span className={`sideBadge ${detail.side}`}>{detail.side}</span>
               </div>
+              {catalogImageUrl ? (
+                <div className="catalogImagePreview">
+                  <img src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} />
+                </div>
+              ) : null}
               <StatusBadges statuses={detail.statuses} />
               <p className="catalogText">{detail.text}</p>
               <div className="catalogMetaGrid">
@@ -1786,35 +2128,60 @@ function CardView({
   compact = false,
   preview = false,
   displayMode,
+  hiddenSide,
   onFocus
 }: {
-  card: VisibleCard;
+  card: DisplayVisibleCard;
   compact?: boolean;
   preview?: boolean;
   displayMode: CardDisplayMode;
-  onFocus?(card: VisibleCard): void;
+  hiddenSide?: Side;
+  onFocus?(card: DisplayVisibleCard): void;
 }) {
+  const cardRef = useRef<HTMLButtonElement | null>(null);
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const detailLines = card.known ? cardDetailLines(card) : [];
   const tooltipText = card.known ? [card.title, ...detailLines, card.rulesText].filter(Boolean).join("\n") : undefined;
+  const tooltipId = card.known && card.rulesText ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
+  const cardBackUrl = !card.known && displayMode === "placeholder" && hiddenSide ? cardBackImageUrl(hiddenSide) : undefined;
+  const visualImageUrl = cardImageUrl ?? cardBackUrl;
+
+  const updateTooltipPlacement = () => {
+    const element = cardRef.current;
+    if (!element || !card.known || !card.rulesText) return;
+    const cardRect = element.getBoundingClientRect();
+    const boundary = nearestTooltipBoundary(element);
+    const boundaryTop = Math.max(0, boundary.top);
+    const boundaryBottom = Math.min(window.innerHeight, boundary.bottom);
+    const spaceBelow = boundaryBottom - cardRect.bottom;
+    const spaceAbove = cardRect.top - boundaryTop;
+    setTooltipPlacement(spaceBelow < 118 && spaceAbove > spaceBelow ? "above" : "below");
+  };
+
   return (
     <button
+      ref={cardRef}
       type="button"
-      className={`card${card.known ? typeClass : " hidden"}${modeClass}${preview ? " preview" : ""}`}
+      className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}`}
       onClick={() => onFocus?.(card)}
+      onFocus={updateTooltipPlacement}
+      onPointerEnter={updateTooltipPlacement}
       aria-label={card.known ? `Karte ${card.title}` : "Verdeckte Karte"}
+      aria-describedby={tooltipId}
       title={tooltipText}
     >
-      <span className="cardArt" aria-hidden="true" />
-      <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>
-      {!isCompact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Redacted"}</span> : null}
-      {card.known && card.rulesText ? <span className="cardRulesPreview">{card.rulesText}</span> : null}
-      {card.known && card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
-      {card.known && card.strength !== undefined ? <span className="cardMeta">Stärke {card.strength}</span> : null}
+      {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : <span className="cardArt" aria-hidden="true" />}
+      {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
+      {!visualImageUrl && !isCompact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Redacted"}</span> : null}
+      {!visualImageUrl && card.known && card.rulesText ? <span className="cardRulesPreview">{card.rulesText}</span> : null}
+      {!visualImageUrl && card.known && card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
+      {!visualImageUrl && card.known && card.strength !== undefined ? <span className="cardMeta">Stärke {card.strength}</span> : null}
       {card.known && card.rulesText ? (
-        <span className="cardTooltip" role="tooltip">
+        <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
           <strong>{card.title}</strong>
           {detailLines.map((line) => (
             <span key={line}>{line}</span>
@@ -1824,6 +2191,17 @@ function CardView({
       ) : null}
     </button>
   );
+}
+
+function nearestTooltipBoundary(element: HTMLElement): DOMRect {
+  let current = element.parentElement;
+  while (current) {
+    const style = window.getComputedStyle(current);
+    const overflow = `${style.overflow} ${style.overflowY} ${style.overflowX}`;
+    if (/(auto|scroll|hidden|clip)/.test(overflow)) return current.getBoundingClientRect();
+    current = current.parentElement;
+  }
+  return new DOMRect(0, 0, window.innerWidth, window.innerHeight);
 }
 
 function cardDetailLines(card: VisibleCard): string[] {

@@ -20,9 +20,12 @@ __pycache__/
 *.sqlite-*
 data/runtime/
 data/local/
+data/local-assets/
 tmp*/
 *.log
 *.tsbuildinfo
+
+docs/source/PrivateScans/
 
 .DS_Store
 Thumbs.db
