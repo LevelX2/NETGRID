@@ -10,6 +10,9 @@ describe("Client visibility contract", () => {
     expect(page).toContain("state_update");
     expect(page).toContain("submit_action");
     expect(page).toContain("PlayerView");
+    expect(page).toContain("window.sessionStorage");
+    expect(page).not.toContain("window.localStorage.setItem");
+    expect(page).not.toContain("window.localStorage.getItem");
   });
 
   it("returns PlayerView payloads from the web game API", () => {

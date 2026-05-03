@@ -100,7 +100,7 @@ export default function Page() {
       setDisplayName("Runner");
       return;
     }
-    const stored = window.localStorage.getItem(SESSION_KEY);
+    const stored = window.sessionStorage.getItem(SESSION_KEY);
     if (!stored) return;
     const parsed = JSON.parse(stored) as SessionInfo;
     setSession(parsed);
@@ -222,6 +222,7 @@ export default function Page() {
 
   const leaveMatch = () => {
     socketRef.current?.close();
+    window.sessionStorage.removeItem(SESSION_KEY);
     window.localStorage.removeItem(SESSION_KEY);
     setSession(null);
     setPayload(null);
@@ -241,6 +242,7 @@ export default function Page() {
     const socket = new WebSocket(nextSession.webSocketUrl);
     socketRef.current = socket;
     socket.onopen = () => {
+      if (socketRef.current !== socket) return;
       setConnection("online");
       socket.send(
         JSON.stringify({
@@ -253,9 +255,15 @@ export default function Page() {
         })
       );
     };
-    socket.onclose = () => setConnection("offline");
-    socket.onerror = () => setConnection("offline");
-    socket.onmessage = (event) => applyServerMessage(JSON.parse(event.data as string) as ServerMessage);
+    socket.onclose = () => {
+      if (socketRef.current === socket) setConnection("offline");
+    };
+    socket.onerror = () => {
+      if (socketRef.current === socket) setConnection("offline");
+    };
+    socket.onmessage = (event) => {
+      if (socketRef.current === socket) applyServerMessage(JSON.parse(event.data as string) as ServerMessage);
+    };
   }
 
   function applyServerMessage(message: ServerMessage) {
@@ -615,5 +623,6 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
 }
 
 function persistSession(session: SessionInfo) {
-  window.localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  window.localStorage.removeItem(SESSION_KEY);
 }
