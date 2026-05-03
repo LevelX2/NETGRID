@@ -15,12 +15,8 @@ import {
   type CatalogStatusKey
 } from "@netrunner/catalog";
 
-const snapshot = createRuntimeSnapshot();
-const snapshotHash = computeSnapshotHash(snapshot);
-const catalogIndex = createCatalogIndex(snapshot, snapshotHash);
-const validation = validateSnapshot(snapshot);
-
 export function catalogListResponse(searchParams: URLSearchParams) {
+  const { snapshot, snapshotHash, catalogIndex, validation } = createCatalogRuntime();
   if (!validation.ok) return safeCatalogError(500, "catalog_invalid", "Katalogdaten sind ungültig.");
   const query: CatalogQuery = {};
   const q = searchParams.get("q");
@@ -42,6 +38,7 @@ export function catalogListResponse(searchParams: URLSearchParams) {
 }
 
 export function catalogDetailResponse(catalogCardId: string) {
+  const { snapshot, snapshotHash, validation } = createCatalogRuntime();
   if (!validation.ok) return safeCatalogError(500, "catalog_invalid", "Katalogdaten sind ungültig.");
   const card = getCatalogCard(snapshot, catalogCardId);
   if (!card) return safeCatalogError(404, "catalog_card_not_found", "Karte wurde im Katalog nicht gefunden.");
@@ -49,6 +46,7 @@ export function catalogDetailResponse(catalogCardId: string) {
 }
 
 export function catalogStatusSummaryResponse() {
+  const { snapshot, snapshotHash, catalogIndex, validation } = createCatalogRuntime();
   if (!validation.ok) return safeCatalogError(500, "catalog_invalid", "Katalogdaten sind ungültig.");
   return safeCatalogPayload({
     snapshotId: snapshot.snapshotId,
@@ -78,6 +76,14 @@ function isType(value: string | null): value is CatalogCardType {
 
 function isStatus(value: string | null): value is CatalogStatusKey {
   return value === "imported" || value === "validated" || value === "catalog_ready" || value === "implemented" || value === "playable" || value === "deck_legal" || value === "blocked";
+}
+
+function createCatalogRuntime() {
+  const snapshot = createRuntimeSnapshot();
+  const snapshotHash = computeSnapshotHash(snapshot);
+  const catalogIndex = createCatalogIndex(snapshot, snapshotHash);
+  const validation = validateSnapshot(snapshot);
+  return { snapshot, snapshotHash, catalogIndex, validation };
 }
 
 function createRuntimeSnapshot(): CardSnapshot {
