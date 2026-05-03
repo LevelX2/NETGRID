@@ -1,0 +1,214 @@
+{
+  "schemaVersion": "demo-decks-v0.1",
+  "generatedAt": "2026-05-03T06:48:51.659016+00:00",
+  "copyrightNote": "Fiktive Demo-Karten fuer die Entwicklung; keine offiziellen Kartentexte.",
+  "decks": [
+    {
+      "id": "demo_runner_001",
+      "name": "Runner Demo Deck 01 - Run & Steal",
+      "side": "runner",
+      "purpose": "engine_test_and_tutorial",
+      "version": "0.1.0",
+      "legal": false,
+      "description": "Festes Runner-Demonstrationsdeck fuer die erste spielbare Version. Fokus auf Credits, Installation, Runs, Icebreaker und Agenda-Steals.",
+      "identity": {
+        "id": "runner_identity_001",
+        "title": "Runner Identity",
+        "type": "identity",
+        "quantity": 1,
+        "implemented": true,
+        "abilityEnabled": false
+      },
+      "cards": [
+        {
+          "id": "simple_economy_event",
+          "title": "Simple Economy Event",
+          "quantity": 3,
+          "type": "event",
+          "cost": 0,
+          "text": "Erhalte 4 Credits.",
+          "implemented": true,
+          "role": "economy"
+        },
+        {
+          "id": "simple_run_event",
+          "title": "Simple Run Event",
+          "quantity": 3,
+          "type": "event",
+          "cost": 0,
+          "text": "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 2 Credits.",
+          "implemented": true,
+          "role": "run_event"
+        },
+        {
+          "id": "simple_fracter",
+          "title": "Simple Fracter",
+          "quantity": 2,
+          "type": "program",
+          "subtypes": [
+            "icebreaker",
+            "fracter"
+          ],
+          "installCost": 2,
+          "memoryCost": 1,
+          "strength": 2,
+          "abilities": [
+            "1 Credit: +1 Stärke.",
+            "1 Credit: Brich 1 Barrier-Subroutine."
+          ],
+          "implemented": true,
+          "role": "icebreaker_barrier"
+        },
+        {
+          "id": "simple_decoder",
+          "title": "Simple Decoder",
+          "quantity": 2,
+          "type": "program",
+          "subtypes": [
+            "icebreaker",
+            "decoder"
+          ],
+          "installCost": 3,
+          "memoryCost": 1,
+          "strength": 2,
+          "abilities": [
+            "1 Credit: +1 Stärke.",
+            "1 Credit: Brich 1 Code-Gate-Subroutine."
+          ],
+          "implemented": true,
+          "role": "icebreaker_code_gate"
+        },
+        {
+          "id": "simple_killer",
+          "title": "Simple Killer",
+          "quantity": 2,
+          "type": "program",
+          "subtypes": [
+            "icebreaker",
+            "killer"
+          ],
+          "installCost": 3,
+          "memoryCost": 1,
+          "strength": 1,
+          "abilities": [
+            "1 Credit: +1 Stärke.",
+            "1 Credit: Brich 1 Sentry-Subroutine."
+          ],
+          "implemented": true,
+          "role": "icebreaker_sentry"
+        }
+      ],
+      "developmentNotes": [
+        "Technisches Testdeck, nicht turnierlegal.",
+        "Identitaetsfaehigkeit ist bewusst deaktiviert.",
+        "Alle Karten decken jeweils eine klar isolierte Kernmechanik ab."
+      ]
+    },
+    {
+      "id": "demo_corp_001",
+      "name": "Corp Demo Deck 01 - Build & Score",
+      "side": "corp",
+      "purpose": "engine_test_and_tutorial",
+      "version": "0.1.0",
+      "legal": false,
+      "description": "Festes Corp-Demonstrationsdeck fuer die erste spielbare Version. Fokus auf ICE, Remote-Server, Agendas, Advancement und Scoring.",
+      "identity": {
+        "id": "corp_identity_001",
+        "title": "Corp Identity",
+        "type": "identity",
+        "quantity": 1,
+        "implemented": true,
+        "abilityEnabled": false
+      },
+      "cards": [
+        {
+          "id": "simple_agenda",
+          "title": "Simple Agenda",
+          "quantity": 3,
+          "type": "agenda",
+          "advancementRequirement": 3,
+          "agendaPoints": 2,
+          "text": "Keine zusätzliche Fähigkeit.",
+          "implemented": true,
+          "role": "agenda"
+        },
+        {
+          "id": "simple_economy_operation",
+          "title": "Simple Economy Operation",
+          "quantity": 3,
+          "type": "operation",
+          "cost": 0,
+          "text": "Erhalte 4 Credits.",
+          "implemented": true,
+          "role": "economy_operation"
+        },
+        {
+          "id": "simple_economy_asset",
+          "title": "Simple Economy Asset",
+          "quantity": 3,
+          "type": "asset",
+          "rezCost": 1,
+          "trashCost": 3,
+          "text": "Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.",
+          "implemented": true,
+          "role": "economy_asset"
+        },
+        {
+          "id": "simple_barrier_ice",
+          "title": "Simple Barrier ICE",
+          "quantity": 3,
+          "type": "ice",
+          "subtypes": [
+            "barrier"
+          ],
+          "rezCost": 3,
+          "strength": 3,
+          "subroutines": [
+            "End the run."
+          ],
+          "implemented": true,
+          "role": "ice_barrier"
+        },
+        {
+          "id": "simple_code_gate_ice",
+          "title": "Simple Code Gate ICE",
+          "quantity": 3,
+          "type": "ice",
+          "subtypes": [
+            "code_gate"
+          ],
+          "rezCost": 2,
+          "strength": 2,
+          "subroutines": [
+            "Die Corp erhält 1 Credit.",
+            "End the run."
+          ],
+          "implemented": true,
+          "role": "ice_code_gate"
+        },
+        {
+          "id": "simple_sentry_ice",
+          "title": "Simple Sentry ICE",
+          "quantity": 3,
+          "type": "ice",
+          "subtypes": [
+            "sentry"
+          ],
+          "rezCost": 4,
+          "strength": 3,
+          "subroutines": [
+            "Der Runner verliert 2 Credits, falls möglich.",
+            "End the run."
+          ],
+          "implemented": true,
+          "role": "ice_sentry"
+        }
+      ],
+      "developmentNotes": [
+        "Technisches Testdeck, nicht turnierlegal.",
+        "Identitaetsfaehigkeit ist bewusst deaktiviert.",
+        "Siegwert sollte fuer MVP-Partien konfigurierbar sein, da drei Agendas nur sechs Punkte ergeben."
+      ]
+    }
+  ]
+}

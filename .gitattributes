@@ -1,6 +1,8 @@
 * text=auto
 
 .gitattributes text eol=lf
+.node-version text eol=lf
+.nvmrc text eol=lf
 *.md text eol=lf
 *.txt text eol=lf
 *.json text eol=lf

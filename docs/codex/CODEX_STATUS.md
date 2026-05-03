@@ -8,6 +8,8 @@ Repository setup and Codex guidance.
 
 Setup environment created. No Engine, UI, Server, AI, scenario, or test implementation has been written.
 
+The local Codex `goals` feature is enabled for persistent `/goal` workflows. Use it for the next multi-phase Netrunner work, especially MVP 0.1 requirements, review, implementation, and hardening.
+
 ## Files and areas created
 
 - Root project guidance: `AGENTS.md`, `AGENTS.local.md`, `README.md`
@@ -28,28 +30,41 @@ Setup environment created. No Engine, UI, Server, AI, scenario, or test implemen
 
 - `Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
 - `Netrunner_MVP_0.2_Plan.md`
+- `Erstes Testdeck.txt`
+- `Erstes Testdeck.md`
 - `Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`
 
 ## Missing source files
 
-- `Erstes Testdeck.txt`
+None known for the setup phase.
 
-The consolidated MVP 0.1 concept contains demo-deck material, but the separately named source file is still missing. Treat this as a blocker or explicit assumption before the MVP 0.1 requirements-freeze phase.
+## Data artifacts present
+
+- `data/decks/demo-decks.json`
+
+`demo-decks.json` was positioned from the supplied first-demo-decks package. It has not yet been reviewed, normalized, or frozen as an executable MVP 0.1 derived artifact.
 
 ## Blockers for implementation
 
 - MVP 0.1 executable requirements have not been derived yet.
-- Required data artifacts and scenario fixtures are not created yet.
+- Required data artifacts and scenario fixtures are not fully derived or reviewed yet.
 - Tests are not specified or implemented yet.
 - Dependencies are declared for setup, but `pnpm install` was not run in this phase.
-- Local tool check during setup found Node `v24.15.0`; the project target is Node 22.
-- `pnpm` was not available on PATH during setup. `corepack` was available.
+- Local tool check during setup found Node `v24.15.0`; this matches the project target Node 24 LTS.
+- `pnpm` was not available directly on PATH during setup. `corepack pnpm --version` works with `pnpm@10.33.2`.
 
 ## Local tool notes
 
-- Node target files exist: `.nvmrc` and `.node-version` both specify `22`.
+- Node target files exist: `.nvmrc` and `.node-version` both specify `24`.
 - Root `package.json` declares `pnpm@10.33.2` via `packageManager`.
-- Before dependency installation, activate Node 22 and make pnpm available through Corepack or another deliberate local toolchain setup.
+- Before dependency installation, use Node 24 LTS. If `pnpm` is not directly on PATH, use `corepack pnpm ...`.
+- Persistent `/goal` workflows are suitable for Netrunner because the project is explicitly split into gated phases.
+
+## Branch for next thread
+
+- Current intended working branch: `codex/mvp-0-1-requirements`
+- Purpose: start MVP 0.1 executable requirements only.
+- Do not implement Engine, UI, Server, AI, or tests before the requirements review gate.
 
 ## Next recommended prompt
 
@@ -60,7 +75,7 @@ Read AGENTS.md and /docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md first.
 
 Primary sources:
 - /docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md
-- /docs/source/Erstes Testdeck.txt, if available; otherwise document the missing source and use the consolidated 0.1 deck sections only with explicit assumption
+- /docs/source/Erstes Testdeck.txt
 - /docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf
 
 Secondary source:

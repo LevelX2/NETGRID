@@ -1,0 +1,167 @@
+Die ersten festen Decks sollten als interne Demo-Karten verstanden werden, nicht als turnierlegale offizielle Decks. Sie dienen dazu, die Engine, UI, KI und Tests kontrolliert aufzubauen. Das erste Paar ist:
+
+Runner: Runner Demo Deck 01 – Run & Steal
+Ausrichtung: Criminal-orientiert, Credits aufbauen, Runs durchführen, ICE mit Breakern überwinden, Agendas stehlen.
+
+Corp: Corp Demo Deck 01 – Build & Score
+Ausrichtung: Weyland-orientiert, ICE installieren und rezzen, Remote-Server bauen, Agendas installieren, advancen und scoren.
+
+## Runner Demo Deck 01 – Run & Steal
+
+| Karte | Anzahl | Typ | Zweck |
+|---|---:|---|---|
+| Runner Identity | 1 | Identity | Startidentität ohne aktive Sonderfähigkeit |
+| Simple Economy Event | 3 | Event | Sofortige Credits |
+| Simple Run Event | 3 | Event | Einfacher Run mit kleinem Bonus |
+| Simple Fracter | 2 | Program: Icebreaker – Fracter | Bricht Barrier-Subroutinen |
+| Simple Decoder | 2 | Program: Icebreaker – Decoder | Bricht Code-Gate-Subroutinen |
+| Simple Killer | 2 | Program: Icebreaker – Killer | Bricht Sentry-Subroutinen |
+
+### Runner Identity
+
+Arbeitstitel: Runner Identity
+Typ: Runner Identity
+Fähigkeit: deaktiviert
+Implementierungsstatus: sichtbar, aber ohne aktive Ability.
+
+Diese Karte ist nur notwendig, damit das Spiel eine saubere Runner-Seite initialisieren kann. Sie setzt keine Sonderregeln voraus. Für MVP 0.1 sollte sie in der UI ausdrücklich als Testidentität markiert werden.
+
+### Simple Economy Event
+
+Typ: Event
+Kosten: 0 Credits
+Text: „Erhalte 4 Credits.“
+Rolle: Economy.
+
+Diese Karte testet das einfache Spielen eines Events: Karte aus der Hand wählen, Kosten prüfen, Click ausgeben, Effekt ausführen, Karte in den Heap legen. Sie enthält keine Bedingungen, keine Trigger und keine verdeckte Information.
+
+### Simple Run Event
+
+Typ: Event
+Kosten: 0 Credits
+Text: „Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 2 Credits.“
+Rolle: Run-Event.
+
+Diese Karte testet den Übergang von einem Karteneffekt in eine Run-Sequenz. Die Engine muss einen Server auswählen lassen, den Run starten, Erfolg oder Fehlschlag speichern und nach dem Run den Bonus auswerten. Kein Bypass, kein Multiaccess, kein Replacement-Effekt.
+
+### Simple Fracter
+
+Typ: Program – Icebreaker – Fracter
+Installationskosten: 2 Credits
+Memory: 1 MU
+Stärke: 2
+Fähigkeiten:
+„1 Credit: +1 Stärke.“
+„1 Credit: Brich 1 Barrier-Subroutine.“
+
+Diese Karte ist der Standard-Breaker gegen Barriers. Sie testet Pump-Fähigkeiten, Stärkevergleich, Subroutinen-Auswahl und das Brechen einzelner Subroutinen.
+
+### Simple Decoder
+
+Typ: Program – Icebreaker – Decoder
+Installationskosten: 3 Credits
+Memory: 1 MU
+Stärke: 2
+Fähigkeiten:
+„1 Credit: +1 Stärke.“
+„1 Credit: Brich 1 Code-Gate-Subroutine.“
+
+Diese Karte ist der Standard-Breaker gegen Code Gates. Sie funktioniert analog zum Fracter, aber nur gegen ICE mit dem Subtyp Code Gate.
+
+### Simple Killer
+
+Typ: Program – Icebreaker – Killer
+Installationskosten: 3 Credits
+Memory: 1 MU
+Stärke: 1
+Fähigkeiten:
+„1 Credit: +1 Stärke.“
+„1 Credit: Brich 1 Sentry-Subroutine.“
+
+Diese Karte ist der Standard-Breaker gegen Sentries. Sie testet denselben Breaker-Ablauf, aber gegen potentiell strafendere Corp-ICE.
+
+## Corp Demo Deck 01 – Build & Score
+
+| Karte | Anzahl | Typ | Zweck |
+|---|---:|---|---|
+| Corp Identity | 1 | Identity | Startidentität ohne aktive Sonderfähigkeit |
+| Simple Agenda | 3 | Agenda | Installieren, advancen, scoren oder stehlen |
+| Simple Economy Operation | 3 | Operation | Sofortige Credits |
+| Simple Economy Asset | 3 | Asset | Remote-Installation, Rez, Trash-Kosten |
+| Simple Barrier ICE | 3 | ICE – Barrier | Einfacher Stopper |
+| Simple Code Gate ICE | 3 | ICE – Code Gate | Kleiner Tax-Effekt plus End-the-run |
+| Simple Sentry ICE | 3 | ICE – Sentry | Einfache Strafwirkung ohne Damage/Tags |
+
+### Corp Identity
+
+Arbeitstitel: Corp Identity
+Typ: Corp Identity
+Fähigkeit: deaktiviert
+Implementierungsstatus: sichtbar, aber ohne aktive Ability.
+
+Diese Identität initialisiert die Corp-Seite, ohne die Engine mit Fraktionsboni, Triggern oder Sonderregeln zu belasten.
+
+### Simple Agenda
+
+Typ: Agenda
+Advancement Requirement: 3
+Agenda Points: 2
+Text: keine zusätzliche Fähigkeit.
+Rolle: Basale Score-/Steal-Karte.
+
+Diese Karte testet die wichtigste Corp-Agenda-Schleife: installieren, Advancement-Token legen, Score-Bedingung prüfen, scoren. Auf Runner-Seite testet sie Agenda-Steal beim Zugriff. Für MVP-Partien sollte der Siegwert konfigurierbar sein, da drei Kopien mit je 2 Punkten nur 6 Agenda-Punkte ergeben.
+
+### Simple Economy Operation
+
+Typ: Operation
+Kosten: 0 Credits
+Text: „Erhalte 4 Credits.“
+Rolle: Corp-Economy.
+
+Diese Karte ist das Corp-Gegenstück zum Runner-Economy-Event. Sie testet das Spielen einer Operation, Credit-Änderungen und das Verschieben der Karte nach Archives.
+
+### Simple Economy Asset
+
+Typ: Asset
+Rez-Kosten: 1 Credit
+Trash-Kosten: 3 Credits
+Text: „Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.“
+Rolle: installierbare Remote-Economy.
+
+Diese Karte testet mehrere wichtige Corp-Mechaniken: verdeckt installieren, in einem Remote-Server liegen, später rezzen, beim Zugriff sichtbar sein und vom Runner gegen Trash-Kosten getrasht werden. Sie vermeidet wiederkehrende Trigger, Hosted Credits und komplizierte Aktivierungsfenster.
+
+### Simple Barrier ICE
+
+Typ: ICE – Barrier
+Rez-Kosten: 3 Credits
+Stärke: 3
+Subroutinen:
+„End the run.“
+
+Diese Karte ist der einfachste Corp-Stopper. Sie testet ICE-Installation, ICE-Rez, Encounter, Stärkevergleich, Barrier-Breaking und das Beenden eines Runs durch eine ungebrochene Subroutine.
+
+### Simple Code Gate ICE
+
+Typ: ICE – Code Gate
+Rez-Kosten: 2 Credits
+Stärke: 2
+Subroutinen:
+„Die Corp erhält 1 Credit.“
+„End the run.“
+
+Diese Karte testet ICE mit mehreren Subroutinen. Der Runner kann entscheiden, ob er nur die End-the-run-Subroutine bricht oder auch den kleinen Economy-Effekt verhindern will.
+
+### Simple Sentry ICE
+
+Typ: ICE – Sentry
+Rez-Kosten: 4 Credits
+Stärke: 3
+Subroutinen:
+„Der Runner verliert 2 Credits, falls möglich.“
+„End the run.“
+
+Diese Karte simuliert eine strafendere Sentry, ohne Damage, Tags oder Program-Trash einzuführen. Damit bleibt sie MVP-tauglich, erzeugt aber eine relevante Entscheidung: Killer installieren oder die Kosten riskieren.
+
+## Bewusste Vereinfachungen
+
+Diese ersten Karten sollten keine Tags, Traces, Viren, Damage-Effekte, Hosted Cards, Multiaccess, Bypass, Replacement-Effekte oder komplexe Paid-Ability-Fenster verwenden. Identitätsfähigkeiten bleiben deaktiviert. Die Karten sind vor allem Testinstrumente: Jede Karte deckt eine klar isolierte Mechanik ab, damit Fehler in Engine, UI oder KI leicht reproduzierbar bleiben.

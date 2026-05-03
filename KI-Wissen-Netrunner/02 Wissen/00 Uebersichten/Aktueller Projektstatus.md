@@ -15,15 +15,18 @@
 - Primäre Quellen wurden nach `docs/source/` kopiert, soweit vorhanden.
 - Ergänzende Dokumente liegen weiterhin unter `docs/` und sind als zusätzliche Arbeitsgrundlagen bekannt.
 - Paketmanifeste sind bewusst minimal und enthalten noch keine Framework-Abhängigkeiten für Web, Server oder Engine-Implementierung.
-- Lokaler Werkzeugcheck ergab Node `v24.15.0` statt Zielversion Node 22; `pnpm` war nicht im PATH, `corepack` war vorhanden.
+- Lokaler Werkzeugcheck ergab Node `v24.15.0`; das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; der direkte `pnpm`-Befehl war in der aktuellen Shell nicht im PATH.
+- Das nachgereichte Demo-Deck-Paket wurde einsortiert: `docs/source/Erstes Testdeck.txt`, `docs/source/Erstes Testdeck.md` und `data/decks/demo-decks.json`.
+- Die lokale Codex-Goal-Funktion wurde aktiviert und ist für die nächsten mehrphasigen Netrunner-Schritte vorgesehen.
+- Netrunner wurde in der lokalen Codex-Konfiguration als vertrauenswürdiges Projekt eingetragen.
+- Der vorbereitete Arbeitsbranch für den nächsten Thread ist `codex/mvp-0-1-requirements`.
 
 ## Offen
 
-- `docs/source/Erstes Testdeck.txt` fehlt als separate Quelle.
 - MVP 0.1 Requirements, Datenartefakte, Szenarien und Testmatrix sind noch nicht abgeleitet.
 - Engine, UI, Server, KI und Tests sind noch nicht implementiert.
 - Abhängigkeiten wurden noch nicht installiert.
-- Vor der nächsten technischen Phase Node 22 aktivieren und pnpm über Corepack oder eine bewusst gewählte lokale Installation verfügbar machen.
+- Vor der nächsten technischen Phase Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 
 ## Wichtige Grenzen
 

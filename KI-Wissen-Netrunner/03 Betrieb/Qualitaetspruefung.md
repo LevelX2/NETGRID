@@ -2,8 +2,8 @@
 
 ## Aktuelle Hinweise
 
-- Prüfen, ob `Erstes Testdeck.txt` nachgereicht oder als durch das konsolidierte MVP-0.1-Konzept ersetzt markiert werden soll.
-- Vor `pnpm install` Node 22 aktivieren; beim Setup war Node `v24.15.0` aktiv und `pnpm` nicht im PATH.
+- `data/decks/demo-decks.json` in der MVP-0.1-Requirements-Phase gegen `docs/source/Erstes Testdeck.txt` und das konsolidierte MVP-0.1-Konzept prüfen, bevor daraus ein eingefrorenes Datenartefakt wird.
+- Vor `pnpm install` Node 24 LTS verwenden; beim Setup war Node `v24.15.0` aktiv und `pnpm` nicht im PATH.
 - Vor der MVP-0.1-Requirements-Phase sicherstellen, dass `docs/codex/CODEX_STATUS.md` den aktuellen Quellenstand korrekt abbildet.
 - Nach jeder neuen Derived-Doc-Phase prüfen, ob `Index.md`, `Aktueller Projektstatus.md` und `Log.md` nachgezogen werden müssen.
 

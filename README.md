@@ -20,7 +20,7 @@ Die verbindlichen Quellen liegen unter `docs/source/`, soweit bereits vorhanden.
 
 ## Stack-Ziel
 
-- Node 22
+- Node 24 LTS
 - pnpm Workspaces
 - TypeScript strict
 - Vitest
@@ -31,4 +31,4 @@ Die verbindlichen Quellen liegen unter `docs/source/`, soweit bereits vorhanden.
 
 Noch keine Abhängigkeiten installieren oder Implementierung starten, solange die nächste Phase nicht ausdrücklich beauftragt ist. Der nächste sinnvolle Schritt ist die Requirements-Ableitung für MVP 0.1 aus den vorhandenen Quellen.
 
-Lokaler Werkzeughinweis vom Setup: Auf dieser Maschine war beim Einrichten Node `v24.15.0` aktiv und `pnpm` nicht im PATH. `corepack` ist vorhanden; für die nächste Phase sollte Node 22 aktiviert und pnpm über Corepack oder eine bewusst gewählte lokale Installation verfügbar gemacht werden.
+Lokaler Werkzeughinweis vom Setup: Auf dieser Maschine war beim Einrichten Node `v24.15.0` aktiv. Das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; falls `pnpm` nicht direkt im PATH liegt, verwende `corepack pnpm ...`.

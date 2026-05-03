@@ -322,7 +322,7 @@ Private Netrunner web application. MVP 0.1 is Human Runner vs simple Corp AI wit
 - No public platform features, matchmaking, rankings, deckbuilder, account system, tournament features, or broad card pool in MVP 0.1 or 0.2.
 
 ## Stack defaults
-- Node 22.
+- Node 24 LTS.
 - pnpm workspaces.
 - TypeScript strict.
 - Vitest.

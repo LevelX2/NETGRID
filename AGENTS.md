@@ -31,7 +31,7 @@ Zu Beginn projektbezogener Arbeit zuerst diese Dateien lesen:
 
 1. `docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md` für MVP 0.1.
 2. `docs/source/Netrunner_MVP_0.2_Plan.md` für MVP 0.2 nach bestandenem MVP-0.1-Gate.
-3. `docs/source/Erstes Testdeck.txt` für Demo-Karten und Demo-Decks, falls vorhanden.
+3. `docs/source/Erstes Testdeck.txt` für Demo-Karten und Demo-Decks.
 4. `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf` als Regelreferenz, nicht als Scope-Erweiterung.
 5. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md` für Codex-Workflow.
 6. Ergänzende Spezifikations-, Test-, Betriebs- und Planungsdokumente unter `docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/` und `docs/Netrunner_Detailliertes_Testkonzept_MVP_0_1_0_2.md`.
@@ -68,7 +68,7 @@ Alte Konzeptdateien, Zwischenstände oder frühere Prompts dürfen nicht als gle
 
 ## Stack-Defaults
 
-- Node 22.
+- Node 24 LTS.
 - pnpm Workspaces.
 - TypeScript strict.
 - Vitest.

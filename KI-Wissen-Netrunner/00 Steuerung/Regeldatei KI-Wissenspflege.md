@@ -23,7 +23,7 @@ Quellenpriorität:
 
 1. `docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
 2. `docs/source/Netrunner_MVP_0.2_Plan.md`, erst nach MVP-0.1-Gate als aktive Umsetzungsquelle
-3. `docs/source/Erstes Testdeck.txt`, falls vorhanden
+3. `docs/source/Erstes Testdeck.txt`
 4. `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf` als Regelreferenz, nicht als Scope-Erweiterung
 5. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`
 6. ergänzende Dokumente unter `docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/` und `docs/Netrunner_Detailliertes_Testkonzept_MVP_0_1_0_2.md`

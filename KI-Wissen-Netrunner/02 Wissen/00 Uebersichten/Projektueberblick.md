@@ -26,7 +26,7 @@ Netrunner ist eine private Webapplikation für regelgeführtes, deterministische
 
 ## Technisches Zielmodell
 
-- Node 22
+- Node 24 LTS
 - pnpm Workspaces
 - TypeScript strict
 - Vitest
