@@ -36,6 +36,8 @@ export type ActionType =
   | "trash_accessed_card"
   | "decline_trash"
   | "remove_tag"
+  | "resolve_choice"
+  | "trigger_ability"
   | "end_turn";
 
 export type CardType = "identity" | "event" | "program" | "hardware" | "agenda" | "operation" | "asset" | "upgrade" | "ice";
@@ -54,6 +56,85 @@ export type SubroutineDefinition = {
   amount?: number;
 };
 
+export type EventVisibilityClass = "public" | "private_to_side" | "hidden_info_barrier" | "replay_only";
+
+export type CostRequirement =
+  | { kind: "click"; amount: number }
+  | { kind: "credit"; amount: number; source?: "credit_pool" | "future_hosted" | "future_recurring" }
+  | { kind: "tag"; amount: number }
+  | { kind: "counter"; counterType: string; amount: number; sourceRef: string };
+
+export type AbilityKind = "paid" | "triggered" | "static" | "setup" | "future_interrupt" | "future_replacement";
+
+export type AbilityRef = {
+  sourceCardInstanceId: CardInstanceId;
+  abilityId: string;
+};
+
+export type EffectSource =
+  | { kind: "card"; cardInstanceId: CardInstanceId; abilityId?: string }
+  | { kind: "core_rule"; ruleId: string }
+  | { kind: "system"; systemId: string };
+
+export type EffectCommand =
+  | { type: "gain_credits"; side: Side; amount: number }
+  | { type: "spend_credits"; side: Side; amount: number }
+  | { type: "draw_card"; side: Side; amount?: number }
+  | { type: "add_tag"; amount: number }
+  | { type: "remove_tag"; amount: number }
+  | { type: "change_breaker_strength"; breakerId: CardInstanceId; amount: number }
+  | { type: "break_subroutine"; subroutineIndex: number }
+  | { type: "set_pending_choice"; choice: ChoiceRequest }
+  | { type: "complete_pending_choice"; choiceId: string }
+  | { type: "emit_event"; eventType: string; visibilityClass: EventVisibilityClass; publicPayload?: Record<string, unknown>; privatePayload?: Partial<Record<Side, Record<string, unknown>>> };
+
+export type ChoiceKind = "select_option" | "select_cards" | "bid_amount" | "confirm";
+
+export type ChoiceOption = {
+  id: string;
+  label: string;
+  publicLabel?: string;
+  value?: string | number | boolean;
+};
+
+export type ChoiceRequest = {
+  choiceId: string;
+  side: Side;
+  source: string;
+  prompt: string;
+  kind: ChoiceKind;
+  options: ChoiceOption[];
+  minSelections: number;
+  maxSelections: number;
+  stateVersion: number;
+  visibility: EventVisibilityClass;
+};
+
+export type PendingChoice = ChoiceRequest;
+
+export type VisibleChoiceRequest = Omit<ChoiceRequest, "side"> & {
+  side: Side;
+};
+
+export type ChoiceRequirement = {
+  choiceId: string;
+  minSelections: number;
+  maxSelections: number;
+  optionIds: string[];
+};
+
+export type EffectDefinition = {
+  effectId: string;
+  source: EffectSource;
+  controller: Side;
+  timing: TimingPointId;
+  costs: CostRequirement[];
+  targets: TargetRequirement[];
+  choices?: ChoiceRequirement[];
+  steps: EffectCommand[];
+  visibility: EventVisibilityClass;
+};
+
 export type AbilityDefinition = {
   id: string;
   type: "pump_strength" | "break_subroutine";
@@ -62,6 +143,10 @@ export type AbilityDefinition = {
   iceSubtype?: string;
   count?: number;
   timingPoint: TimingPointId;
+  kind?: AbilityKind;
+  allowedTimingPoints?: TimingPointId[];
+  effectRef?: string;
+  publicActionType?: ActionType;
 };
 
 export type CardDefinition = {
@@ -225,6 +310,7 @@ export type PublicGameEvent = {
   stateVersionBefore: number;
   stateVersionAfter: number;
   stateHashAfter: StateHash;
+  visibilityClass?: EventVisibilityClass;
   publicPayload: Record<string, unknown>;
 };
 
@@ -248,6 +334,7 @@ export type GameState = {
   eventLog: GameEvent[];
   winner: Winner | null;
   agendaPointsToWin: number;
+  pendingChoice?: PendingChoice;
   deckMetadata?: {
     runner: DeckPublicMetadata;
     corp: DeckPublicMetadata;
@@ -262,7 +349,13 @@ export type Cost = {
 
 export type TargetRequirement = {
   id: string;
-  kind: "card" | "server" | "subroutine";
+  kind: "card" | "server" | "subroutine" | "side";
+  zoneScope?: string[];
+  side?: Side;
+  visibility?: "known_to_actor" | "public" | "engine_only";
+  allowedServers?: ServerId[];
+  sourceIceRef?: CardInstanceId;
+  allowedSides?: Side[];
 };
 
 export type LegalAction = {
@@ -274,6 +367,9 @@ export type LegalAction = {
   timingPoint: TimingPointId;
   costs: Cost[];
   targetRequirements: TargetRequirement[];
+  choiceRequirements?: ChoiceRequirement[];
+  abilityRef?: AbilityRef;
+  effectRef?: string;
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
   payload?: Record<string, string | number | boolean>;
@@ -392,6 +488,7 @@ export type PlayerView = {
     own: DeckPublicMetadata;
     opponent: DeckPublicMetadata;
   };
+  pendingChoice?: VisibleChoiceRequest;
   publicEvents: PublicGameEvent[];
   legalActions: LegalAction[];
   winner: Winner | null;

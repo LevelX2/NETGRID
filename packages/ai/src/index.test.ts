@@ -10,7 +10,7 @@ import {
   simulateAiGame,
   simulateAiSoak
 } from "./index";
-import type { CardInstanceId, GameState, LegalAction, Side } from "@netrunner/shared";
+import type { CardInstanceId, ChoiceRequest, GameState, LegalAction, Side } from "@netrunner/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -51,6 +51,20 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(decision.actionId).toBe("z.event");
     expect(decision.fallbackUsed).toBe(true);
     expect(decision.reasonCode).toBe("fallback.first_legal_action");
+  });
+
+  it("keeps V0.93 pending choices inside the side-safe LegalActions contract", () => {
+    const state = toRunnerTurn(createGame({ seed: "ai-v093-choice" }));
+    state.pendingChoice = choiceRequest(state, "runner");
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.playerView.pendingChoice?.choiceId).toBe("choice_v093_runner");
+    expect(input.legalActions.map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(decision.actionId).toBe(input.legalActions[0]?.actionId);
+    expect(decision.fallbackUsed).toBe(true);
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(JSON.stringify(input)).not.toContain("cardInstances");
   });
 });
 
@@ -283,6 +297,21 @@ function putCorpCardOnTopOfRd(state: GameState, definitionId: string): CardInsta
   state.corp.rd.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
   return id;
+}
+
+function choiceRequest(state: GameState, side: Side): ChoiceRequest {
+  return {
+    choiceId: `choice_v093_${side}`,
+    side,
+    source: "ai_v093_choice",
+    prompt: "AI private choice",
+    kind: "select_option",
+    options: [{ id: "keep", label: "Keep option" }],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion,
+    visibility: "private_to_side"
+  };
 }
 
 function putCorpRootInRemote(state: GameState, definitionId: string, advancementCounters: number): CardInstanceId {

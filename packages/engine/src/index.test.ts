@@ -1,18 +1,21 @@
 import { describe, expect, it } from "vitest";
 import {
   applyAction,
+  applyEffectCommands,
   checkWinConditions,
   createGame,
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
+  eventVisibilityForAction,
   getLegalActions,
   getPlayerView,
   hashState,
+  isHiddenInfoBarrierEvent,
   replayEvents,
   validateDeckDefinition,
   validateGameState
 } from "./index";
-import type { CardInstanceId, GameState, LegalAction, Side } from "@netrunner/shared";
+import type { CardInstanceId, ChoiceRequest, GameState, LegalAction, Side } from "@netrunner/shared";
 
 describe("MVP 0.1 engine foundation", () => {
   it("creates deterministic games for the same seed", () => {
@@ -189,6 +192,113 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     const replay = replayEvents(initial, state.eventLog);
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+});
+
+describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
+  it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
+    const state = toRunnerTurn(createGame({ seed: "v093-choice" }));
+    state.pendingChoice = choiceRequest(state, "runner");
+
+    const runnerView = getPlayerView(state, "runner");
+    const corpView = getPlayerView(state, "corp");
+    const runnerActions = getLegalActions(state, "runner");
+
+    expect(runnerView.pendingChoice?.choiceId).toBe("choice_v093_runner");
+    expect(runnerView.pendingChoice?.options[0]?.label).toBe("Keep private option");
+    expect(corpView.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(corpView)).not.toContain("Keep private option");
+    expect(runnerActions.map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    expect(runnerActions.some((action) => action.type === "trigger_ability")).toBe(false);
+
+    const invalid = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: runnerActions[0]!.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: { choiceId: "choice_v093_runner", selectedOptionIds: ["illegal"] }
+    });
+    expect(invalid.ok).toBe(false);
+    if (!invalid.ok) expect(invalid.error.code).toBe("ERR_INVALID_CHOICE");
+
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: runnerActions[0]!.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: { choiceId: "choice_v093_runner", selectedOptionIds: ["keep"] }
+    });
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error(result.error.message);
+    expect(result.state.pendingChoice).toBeUndefined();
+    expect(result.event.visibilityClass).toBe("private_to_side");
+    expect(JSON.stringify(result.event.publicPayload)).not.toContain("Keep private option");
+    expect(JSON.stringify(result.event.publicPayload)).not.toContain("private prompt");
+    expect(replayEvents(state, [result.event]).ok).toBe(true);
+  });
+
+  it("keeps normal games free of generic V0.93 action types", () => {
+    const state = toRunnerTurn(createGame({ seed: "v093-no-visible-new-actions" }));
+    const actionTypes = getLegalActions(state, "runner").map((action) => action.type);
+
+    expect(actionTypes).not.toContain("resolve_choice");
+    expect(actionTypes).not.toContain("trigger_ability");
+  });
+
+  it("runs basic effect commands without mutating the original state", () => {
+    const state = createGame({ seed: "v093-effects" });
+    const beforeHash = hashState(state);
+    const next = applyEffectCommands(state, [
+      { type: "gain_credits", side: "runner", amount: 3 },
+      { type: "spend_credits", side: "runner", amount: 1 },
+      { type: "add_tag", amount: 2 },
+      { type: "remove_tag", amount: 1 }
+    ]);
+
+    expect(hashState(state)).toBe(beforeHash);
+    expect(next.runner.credits).toBe(state.runner.credits + 2);
+    expect(next.runner.tags).toBe(1);
+    expect(validateGameState(next).ok).toBe(true);
+  });
+
+  it("keeps breaker pump and break public action types while adding ability metadata", () => {
+    let state = toRunnerTurn(createGame({ seed: "v093-breaker-ability", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    state.runner.credits = 10;
+    installRunnerProgramForTest(state, "v08_steady_fracter");
+    putCorpIceOnServer(state, "rd", "v08_wall_ice");
+    state.corp.credits = 10;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v08_wall_ice");
+    const pump = mustAction(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "v08_steady_fracter");
+
+    expect(pump.abilityRef).toMatchObject({ sourceCardInstanceId: pump.source });
+    expect(pump.effectRef).toMatch(/^effect\./);
+    expect(pump.targetRequirements.some((target) => target.id === "encounteredIce" && target.visibility === "public")).toBe(true);
+
+    state = apply(state, "runner", (action) => action.actionId === pump.actionId);
+    const breaker = mustAction(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "v08_steady_fracter");
+
+    expect(breaker.abilityRef).toMatchObject({ sourceCardInstanceId: breaker.source });
+    expect(breaker.effectRef).toMatch(/^effect\./);
+    expect(breaker.type).toBe("break_subroutine");
+  });
+
+  it("classifies access as a hidden-info barrier event", () => {
+    let state = toRunnerTurn(createGame({ seed: "v093-event-classification", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    putCorpCardOnTopOfRd(state, "v08_project_agenda");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const access = mustAction(state, "runner", (action) => action.type === "access_card");
+    expect(eventVisibilityForAction(access)).toBe("hidden_info_barrier");
+
+    state = apply(state, "runner", (action) => action.actionId === access.actionId);
+    const event = state.eventLog.at(-1);
+    expect(event).toBeDefined();
+    if (!event) throw new Error("Missing access event");
+    expect(event.visibilityClass).toBe("hidden_info_barrier");
+    expect(isHiddenInfoBarrierEvent(event)).toBe(true);
   });
 });
 
@@ -436,6 +546,24 @@ function sourceDefinition(state: GameState, action: LegalAction): string | undef
 function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
   return ids.reduce((sum, id) => sum + (DEMO_CARDS_BY_ID[state.cardInstances[id]?.definitionId ?? ""]?.agendaPoints ?? 0), 0);
+}
+
+function choiceRequest(state: GameState, side: Side): ChoiceRequest {
+  return {
+    choiceId: `choice_v093_${side}`,
+    side,
+    source: "v093_test_choice",
+    prompt: "private prompt",
+    kind: "select_option",
+    options: [
+      { id: "keep", label: "Keep private option" },
+      { id: "ship", label: "Ship private option" }
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion,
+    visibility: "private_to_side"
+  };
 }
 
 function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInstanceId {

@@ -4,7 +4,7 @@ import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import { createNetrunnerHttpServer } from "./http-server";
 import { InMemoryMatchStorage, MultiplayerService, type JoinMatchResult, type MatchSettings, type SidePayload } from "./multiplayer";
 import type { DeckSnapshot } from "@netrunner/decks";
-import type { LegalAction, Side } from "@netrunner/shared";
+import type { ChoiceRequest, GameState, LegalAction, Side } from "@netrunner/shared";
 
 describe("MVP 0.2 multiplayer service", () => {
   it("starts V0.6 matches from validated immutable deck snapshots without exposing opponent decklists", async () => {
@@ -291,6 +291,62 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(corpPayload.legalActions).toEqual([]);
   });
 
+  it("creates the next private series game with a side swap and side-safe standings", async () => {
+    const match = await joinedMatch("series-side-swap", { agendaPointsToWin: 2, matchFormat: "two_game_side_swap" });
+    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
+    await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "end-turn");
+    await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
+    await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "access-rd");
+    const steal = await submit(match.service, match.matchId, match.runner, (action) => action.type === "steal_agenda", "steal");
+
+    expect(steal.actorPayload.resultSummary?.series).toMatchObject({
+      mode: "two_game_side_swap",
+      status: "between_games",
+      gameNumber: 1,
+      gamesPlanned: 2,
+      viewerWins: 1,
+      opponentWins: 0,
+      draws: 0,
+      nextAvailable: true
+    });
+
+    const next = await match.service.startNextSeriesGame(match.matchId, {
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      displayName: "Runner im Seitenwechsel"
+    });
+    expect("error" in next).toBe(false);
+    if ("error" in next) throw new Error(next.error.message);
+    expect(next.matchId).not.toBe(match.matchId);
+    expect(next.hostSide).toBe("corp");
+    expect(next.joinUrl).toBeTruthy();
+    expect(JSON.stringify(next)).not.toContain("cardInstances");
+
+    const oldRecord = await match.service.loadForTest(match.matchId);
+    const nextRecord = await match.service.loadForTest(next.matchId);
+    expect(oldRecord?.match.series?.nextMatchId).toBe(next.matchId);
+    expect(nextRecord?.match.settings.matchFormat).toBe("two_game_side_swap");
+    expect(nextRecord?.match.settings.agendaPointsToWin).toBe(2);
+    expect(nextRecord?.match.series).toMatchObject({
+      seriesId: oldRecord?.match.series?.seriesId,
+      status: "active",
+      gameNumber: 2,
+      gamesPlanned: 2,
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+      previousMatchId: match.matchId
+    });
+    expect(nextRecord?.match.series?.results).toHaveLength(1);
+
+    const duplicate = await match.service.startNextSeriesGame(match.matchId, {
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken
+    });
+    expect("error" in duplicate).toBe(true);
+    if (!("error" in duplicate)) throw new Error("Expected duplicate series-next rejection");
+    expect(duplicate.error.code).toBe("series_next_exists");
+  });
+
   it("sends side-filtered bootstrap messages over WebSocket", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-test",
@@ -333,6 +389,70 @@ describe("MVP 0.2 multiplayer service", () => {
       const stored = await service.loadForTest(created.matchId);
       expect(stored?.sessions.find((session) => session.side === created.hostSide)?.connected).toBe(true);
       replacement.close();
+    } finally {
+      socket.close();
+      await handle.close();
+    }
+  });
+
+  it("sends V0.93 pending choices only to the owning side over bootstrap, reconnect and WebSocket", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, {
+      tokenSalt: "ws-choice-test",
+      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicServerBaseUrl: "http://127.0.0.1:0"
+    });
+    const created = await service.createMatch({ hostSide: "runner", seed: "ws-choice" });
+    expect(created.joinUrl).toBeTruthy();
+    if (!created.joinUrl) throw new Error("Missing join URL");
+    const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+
+    const stored = await storage.load(created.matchId);
+    expect(stored).toBeDefined();
+    if (!stored) throw new Error("Missing stored match");
+    stored.gameState.pendingChoice = choiceRequest(stored.gameState, "runner");
+    await storage.save(stored);
+
+    const runnerBootstrap = await service.bootstrap(created.matchId, "runner", created.hostSessionToken);
+    const corpBootstrap = await service.bootstrap(created.matchId, "corp", joined.sessionToken);
+    expect("error" in runnerBootstrap).toBe(false);
+    expect("error" in corpBootstrap).toBe(false);
+    if ("error" in runnerBootstrap || "error" in corpBootstrap) throw new Error("Bootstrap failed");
+    expect(runnerBootstrap.pendingChoice?.choiceId).toBe("choice_v093_runner");
+    expect(corpBootstrap.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(corpBootstrap)).not.toContain("Runner private option");
+
+    const reconnected = await service.reconnectMatch(created.matchId, {
+      side: "runner",
+      reconnectToken: created.hostReconnectToken
+    });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.pendingChoice?.choiceId).toBe("choice_v093_runner");
+
+    const handle = createNetrunnerHttpServer(service);
+    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    const address = handle.server.address();
+    if (!address || typeof address === "string") throw new Error("Missing server address");
+    const socket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+
+    try {
+      await waitForOpen(socket);
+      socket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: created.matchId, sessionToken: reconnected.sessionToken, side: "runner" }
+        })
+      );
+      const choiceMessage = await waitForMessage(socket, "choice_request");
+      const choice = (choiceMessage as { payload?: { choice?: { choiceId?: string; options?: Array<{ label?: string }> } | null } }).payload?.choice;
+      expect(choice?.choiceId).toBe("choice_v093_runner");
+      expect(choice?.options?.[0]?.label).toBe("Runner private option");
+      expect(JSON.stringify(choiceMessage)).not.toContain("hostSessionToken");
     } finally {
       socket.close();
       await handle.close();
@@ -514,6 +634,21 @@ async function bootstrap(service: MultiplayerService, matchId: string, session: 
   expect("error" in payload).toBe(false);
   if ("error" in payload) throw new Error(payload.error.message);
   return payload;
+}
+
+function choiceRequest(state: GameState, side: Side): ChoiceRequest {
+  return {
+    choiceId: `choice_v093_${side}`,
+    side,
+    source: "server_v093_choice",
+    prompt: "Runner private prompt",
+    kind: "select_option",
+    options: [{ id: "keep", label: "Runner private option" }],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion,
+    visibility: "private_to_side"
+  };
 }
 
 async function submit(

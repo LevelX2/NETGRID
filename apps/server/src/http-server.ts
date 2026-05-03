@@ -39,7 +39,7 @@ type ClientWsMessage =
 export type ServerWsMessage =
   | { type: "state_update"; payload: { matchStatus: SidePayload["matchStatus"]; matchVersion: number; playerView: SidePayload["playerView"] } }
   | { type: "legal_actions"; payload: { stateVersion: number; legalActions: SidePayload["legalActions"] } }
-  | { type: "choice_request"; payload: { choice: null } }
+  | { type: "choice_request"; payload: { choice: SidePayload["pendingChoice"] | null } }
   | { type: "event_log_update"; payload: { events: SidePayload["eventTail"] } }
   | { type: "action_receipt"; payload: ActionReceipt }
   | { type: "opponent_status"; payload: SidePayload["opponentStatus"] }
@@ -319,7 +319,7 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
         const settings = body.settings as Record<string, unknown>;
         const nextSettings: Parameters<MultiplayerService["createMatch"]>[0]["settings"] = {};
         if (typeof settings.agendaPointsToWin === "number") nextSettings.agendaPointsToWin = settings.agendaPointsToWin;
-        if (settings.matchFormat === "single_game" || settings.matchFormat === "rules_match") nextSettings.matchFormat = settings.matchFormat;
+        if (settings.matchFormat === "single_game" || settings.matchFormat === "rules_match" || settings.matchFormat === "two_game_side_swap") nextSettings.matchFormat = settings.matchFormat;
         if (Object.keys(nextSettings).length > 0) createInput.settings = nextSettings;
       }
       const created = await service.createMatch(createInput);
@@ -386,6 +386,18 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
         sendJson(response, "error" in bootstrapped ? 403 : 200, bootstrapped);
         return;
       }
+      if (request.method === "POST" && action === "series-next") {
+        const body = await readJson(request);
+        const side = body.side === "corp" ? "corp" : "runner";
+        const sessionToken = bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : "");
+        const next = await service.startNextSeriesGame(matchId, {
+          side,
+          sessionToken,
+          ...(typeof body.displayName === "string" ? { displayName: body.displayName } : {})
+        });
+        sendJson(response, "error" in next ? 409 : 201, next);
+        return;
+      }
     }
 
     sendJson(response, 404, { error: { code: "not_found", message: "Route nicht gefunden." } });
@@ -414,7 +426,7 @@ function sendJson(response: ServerResponse, status: number, payload: unknown): v
 function sendBootstrap(socket: WebSocket | undefined, payload: SidePayload): void {
   send(socket, { type: "state_update", payload: { matchStatus: payload.matchStatus, matchVersion: payload.matchVersion, playerView: payload.playerView } });
   send(socket, { type: "legal_actions", payload: { stateVersion: payload.playerView.stateVersion, legalActions: payload.legalActions } });
-  send(socket, { type: "choice_request", payload: { choice: null } });
+  send(socket, { type: "choice_request", payload: { choice: payload.pendingChoice ?? null } });
   send(socket, { type: "event_log_update", payload: { events: payload.eventTail } });
   send(socket, { type: "opponent_status", payload: payload.opponentStatus });
   if (payload.pendingUndo) send(socket, { type: "undo_request", payload: payload.pendingUndo });

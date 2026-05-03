@@ -5,6 +5,7 @@ import {
   MVP_0_4_BASELINE,
   MVP_0_8_BASELINE,
   type ActionType,
+  type ChoiceRequest,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
@@ -15,6 +16,8 @@ import {
   type DemoDeckId,
   type EngineError,
   type EngineResult,
+  type EventVisibilityClass,
+  type EffectCommand,
   type GameEvent,
   type GameState,
   type LegalAction,
@@ -48,6 +51,7 @@ export type {
   CardDefinition,
   CardInstance,
   CardInstanceId,
+  ChoiceRequest,
   CorpServer,
   CreateGameConfig,
   DeckDefinition,
@@ -55,6 +59,8 @@ export type {
   DemoDeckId,
   EngineError,
   EngineResult,
+  EventVisibilityClass,
+  EffectCommand,
   GameEvent,
   GameState,
   LegalAction,
@@ -297,6 +303,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
 
 export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   if (state.winner || state.phase === "game_over") return [];
+  if (state.pendingChoice) return side === state.pendingChoice.side ? [choiceAction(state, state.pendingChoice)] : [];
   if (side !== state.activeSide && state.timingPoint !== "run.approach_ice") return [];
 
   if (state.timingPoint === "corp_draw.mandatory_draw") {
@@ -324,6 +331,9 @@ export function applyAction(state: GameState, playerAction: PlayerAction): Engin
   if (!legalAction) {
     return fail(state, playerAction.side === state.activeSide ? "ERR_UNKNOWN_ACTION" : "ERR_WRONG_SIDE", "Diese Aktion ist im aktuellen Fenster nicht legal.");
   }
+
+  const choiceError = validateChoiceAction(state.pendingChoice, legalAction, playerAction);
+  if (choiceError) return fail(state, "ERR_INVALID_CHOICE", choiceError);
 
   const next = cloneState(state);
   const before = state.stateVersion;
@@ -424,6 +434,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
         },
     servers: visibleServers,
     ...(run ? { run } : {}),
+    ...(state.pendingChoice?.side === side ? { pendingChoice: visibleChoice(state.pendingChoice) } : {}),
     ...(state.deckMetadata
       ? {
           deckMetadata: {
@@ -473,6 +484,13 @@ export function validateGameState(state: GameState): ValidationResult {
   if (state.runner.tags < 0) errors.push("Runner tags must not be negative.");
   if (state.runner.memoryUsed > state.runner.memoryLimit) errors.push("Runner memory limit exceeded.");
   if (state.run?.encounteredIceId && !state.cardInstances[state.run.encounteredIceId]) errors.push("Run references missing encountered ice.");
+  if (state.pendingChoice) {
+    if (state.pendingChoice.side !== "corp" && state.pendingChoice.side !== "runner") errors.push("PendingChoice has invalid side.");
+    if (state.pendingChoice.stateVersion !== state.stateVersion) errors.push("PendingChoice stateVersion must match current GameState.");
+    if (state.pendingChoice.minSelections < 0 || state.pendingChoice.maxSelections < state.pendingChoice.minSelections) errors.push("PendingChoice has invalid selection bounds.");
+    const optionIds = new Set(state.pendingChoice.options.map((option) => option.id));
+    if (optionIds.size !== state.pendingChoice.options.length) errors.push("PendingChoice option ids must be unique.");
+  }
 
   return { ok: errors.length === 0, errors };
 }
@@ -567,6 +585,33 @@ export function hashState(state: GameState): StateHash {
     hash = Math.imul(hash, 0x01000193);
   }
   return `fnv1a:${(hash >>> 0).toString(16).padStart(8, "0")}`;
+}
+
+export function applyEffectCommands(state: GameState, commands: EffectCommand[]): GameState {
+  const next = cloneState(state);
+  executeEffectCommands(next, commands);
+  const validation = validateGameState(next);
+  if (!validation.ok) throw new Error(validation.errors[0] ?? "Effect command left invalid state.");
+  return next;
+}
+
+export function eventVisibilityForAction(legalAction: LegalAction): EventVisibilityClass {
+  if (legalAction.type === "resolve_choice") {
+    const choiceVisibility = legalAction.payload?.choiceVisibility;
+    return choiceVisibility === "hidden_info_barrier" || choiceVisibility === "private_to_side" || choiceVisibility === "replay_only" || choiceVisibility === "public"
+      ? choiceVisibility
+      : "private_to_side";
+  }
+  if (["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(legalAction.type)) return "hidden_info_barrier";
+  if (["mandatory_draw", "draw_card"].includes(legalAction.type)) return "private_to_side";
+  if (legalAction.visibility === "public") return "public";
+  if (legalAction.type === "play_event") return "public";
+  return "private_to_side";
+}
+
+export function isHiddenInfoBarrierEvent(event: GameEvent): boolean {
+  if (event.visibilityClass === "hidden_info_barrier") return true;
+  return ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(event.type);
 }
 
 function corpMainActions(state: GameState): LegalAction[] {
@@ -679,14 +724,36 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breakerStrength = (breaker.strength ?? 0) + mustInstance(state.cardInstances, breakerId).strengthModifier;
     const pump = breaker.abilities?.find((ability) => ability.type === "pump_strength");
     if (pump && state.runner.credits >= pump.cost.credits) {
-      actions.push(action(state, "runner", "pump_breaker", `${breaker.title} pumpen`, breakerId, [{ credits: pump.cost.credits }], { breakerId, iceId: encounteredIceId }));
+      actions.push(
+        action(
+          state,
+          "runner",
+          "pump_breaker",
+          `${breaker.title} pumpen`,
+          breakerId,
+          [{ credits: pump.cost.credits }],
+          { breakerId, iceId: encounteredIceId },
+          abilityMetadata(breakerId, pump.id, encounteredIceId)
+        )
+      );
     }
     const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && ability.iceSubtype && iceDefinition.subtypes.includes(ability.iceSubtype));
     if (breakAbility && breakerStrength >= (iceDefinition.strength ?? 0) && state.runner.credits >= breakAbility.cost.credits) {
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
         if (!run.brokenSubroutineIndexes.includes(index)) {
-          actions.push(action(state, "runner", "break_subroutine", `${subroutine.id} brechen`, breakerId, [{ credits: breakAbility.cost.credits }], { breakerId, iceId: encounteredIceId, subroutineIndex: index }));
+          actions.push(
+            action(
+              state,
+              "runner",
+              "break_subroutine",
+              `${subroutine.id} brechen`,
+              breakerId,
+              [{ credits: breakAbility.cost.credits }],
+              { breakerId, iceId: encounteredIceId, subroutineIndex: index },
+              abilityMetadata(breakerId, breakAbility.id, encounteredIceId)
+            )
+          );
         }
       });
     }
@@ -766,12 +833,16 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       passApproachedIce(state);
       return;
     case "pump_breaker":
-      spendCredits(state, "runner", 1);
-      mustInstance(state.cardInstances, String(legalAction.payload?.breakerId)).strengthModifier += 1;
+      executeEffectCommands(state, [
+        { type: "spend_credits", side: "runner", amount: legalAction.costs[0]?.credits ?? 1 },
+        { type: "change_breaker_strength", breakerId: String(legalAction.payload?.breakerId), amount: 1 }
+      ]);
       return;
     case "break_subroutine":
-      spendCredits(state, "runner", 1);
-      mustRun(state).brokenSubroutineIndexes.push(Number(legalAction.payload?.subroutineIndex));
+      executeEffectCommands(state, [
+        { type: "spend_credits", side: "runner", amount: legalAction.costs[0]?.credits ?? 1 },
+        { type: "break_subroutine", subroutineIndex: Number(legalAction.payload?.subroutineIndex) }
+      ]);
       return;
     case "continue_run":
       continueRun(state);
@@ -793,9 +864,14 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       spendCredits(state, "runner", 2);
       state.runner.tags = Math.max(0, state.runner.tags - 1);
       return;
+    case "resolve_choice":
+      resolvePendingChoice(state, legalAction);
+      return;
     case "end_turn":
       endTurn(state, legalAction.side);
       return;
+    case "trigger_ability":
+      throw new Error("Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.");
   }
 }
 
@@ -1054,7 +1130,8 @@ function action(
   label: string,
   source: LegalAction["source"],
   costs: LegalAction["costs"] = [],
-  payload?: LegalAction["payload"]
+  payload?: LegalAction["payload"],
+  metadata: Partial<Pick<LegalAction, "abilityRef" | "effectRef" | "choiceRequirements" | "targetRequirements">> = {}
 ): LegalAction {
   return {
     actionId: makeActionId(type, side, payload, source),
@@ -1064,11 +1141,147 @@ function action(
     source,
     timingPoint: state.timingPoint,
     costs,
-    targetRequirements: [],
+    targetRequirements: metadata.targetRequirements ?? [],
     visibility: type.startsWith("rez") || type === "score_agenda" ? "public" : "private_to_actor",
     expiresAtStateVersion: state.stateVersion,
+    ...(metadata.choiceRequirements ? { choiceRequirements: metadata.choiceRequirements } : {}),
+    ...(metadata.abilityRef ? { abilityRef: metadata.abilityRef } : {}),
+    ...(metadata.effectRef ? { effectRef: metadata.effectRef } : {}),
     ...(payload ? { payload } : {})
   };
+}
+
+function choiceAction(state: GameState, choice: ChoiceRequest): LegalAction {
+  return action(
+    state,
+    choice.side,
+    "resolve_choice",
+    choice.prompt,
+    "game_rule",
+    [],
+    { choiceId: choice.choiceId, choiceVisibility: choice.visibility, choiceKind: choice.kind },
+    {
+      choiceRequirements: [
+        {
+          choiceId: choice.choiceId,
+          minSelections: choice.minSelections,
+          maxSelections: choice.maxSelections,
+          optionIds: choice.options.map((option) => option.id)
+        }
+      ]
+    }
+  );
+}
+
+function abilityMetadata(sourceCardInstanceId: CardInstanceId, abilityId: string, encounteredIceId?: CardInstanceId): Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements"> {
+  return {
+    abilityRef: { sourceCardInstanceId, abilityId },
+    effectRef: `effect.${abilityId}`,
+    targetRequirements: [
+      { id: "encounteredIce", kind: "card", visibility: "public" },
+      { id: "subroutine", kind: "subroutine", ...(encounteredIceId ? { sourceIceRef: encounteredIceId } : {}) }
+    ]
+  };
+}
+
+function visibleChoice(choice: ChoiceRequest): NonNullable<PlayerView["pendingChoice"]> {
+  return {
+    choiceId: choice.choiceId,
+    side: choice.side,
+    source: choice.source,
+    prompt: choice.prompt,
+    kind: choice.kind,
+    options: choice.options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
+      ...(option.value !== undefined ? { value: option.value } : {})
+    })),
+    minSelections: choice.minSelections,
+    maxSelections: choice.maxSelections,
+    stateVersion: choice.stateVersion,
+    visibility: choice.visibility
+  };
+}
+
+function validateChoiceAction(choice: ChoiceRequest | undefined, legalAction: LegalAction, playerAction: PlayerAction): string | undefined {
+  if (!choice) return legalAction.type === "resolve_choice" ? "Es ist keine Choice offen." : undefined;
+  if (legalAction.type !== "resolve_choice") return "Solange eine Choice offen ist, sind keine anderen Aktionen legal.";
+  if (playerAction.side !== choice.side) return "Diese Choice gehoert der anderen Seite.";
+  if (choice.stateVersion !== playerAction.clientKnownStateVersion) return "Diese Choice gehoert zu einem anderen Spielzustand.";
+  if (playerAction.selectedChoices?.choiceId !== choice.choiceId) return "Die ChoiceId ist ungueltig.";
+  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  if (selectedOptionIds.length < choice.minSelections || selectedOptionIds.length > choice.maxSelections) return "Die Anzahl der gewaehlten Optionen ist ungueltig.";
+  const optionIds = new Set(choice.options.map((option) => option.id));
+  if (selectedOptionIds.some((id) => !optionIds.has(id))) return "Eine gewaehlte Option ist nicht legal.";
+  if (new Set(selectedOptionIds).size !== selectedOptionIds.length) return "Eine Option wurde doppelt gewaehlt.";
+  return undefined;
+}
+
+function selectedChoiceIds(selectedChoices: PlayerAction["selectedChoices"]): string[] {
+  const raw =
+    selectedChoices?.selectedOptionIds ??
+    selectedChoices?.optionIds ??
+    selectedChoices?.options ??
+    selectedChoices?.selectedOptions;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((value): value is string => typeof value === "string");
+}
+
+function resolvePendingChoice(state: GameState, legalAction: LegalAction): void {
+  const choiceId = String(legalAction.payload?.choiceId ?? "");
+  if (!state.pendingChoice || state.pendingChoice.choiceId !== choiceId) throw new Error("Diese Choice ist nicht offen.");
+  delete state.pendingChoice;
+}
+
+function executeEffectCommands(state: GameState, commands: EffectCommand[]): void {
+  for (const command of commands) {
+    switch (command.type) {
+      case "gain_credits":
+        assertNonNegativeAmount(command.amount);
+        credits(state, command.side, command.amount);
+        break;
+      case "spend_credits":
+        assertNonNegativeAmount(command.amount);
+        spendCredits(state, command.side, command.amount);
+        break;
+      case "draw_card":
+        for (let count = 0; count < (command.amount ?? 1); count += 1) {
+          command.side === "corp" ? drawCorpCard(state) : drawRunnerCard(state);
+        }
+        break;
+      case "add_tag":
+        assertNonNegativeAmount(command.amount);
+        state.runner.tags += command.amount;
+        break;
+      case "remove_tag":
+        assertNonNegativeAmount(command.amount);
+        state.runner.tags = Math.max(0, state.runner.tags - command.amount);
+        break;
+      case "change_breaker_strength":
+        mustInstance(state.cardInstances, command.breakerId).strengthModifier += command.amount;
+        break;
+      case "break_subroutine": {
+        const run = mustRun(state);
+        if (!run.brokenSubroutineIndexes.includes(command.subroutineIndex)) run.brokenSubroutineIndexes.push(command.subroutineIndex);
+        break;
+      }
+      case "set_pending_choice":
+        if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+        state.pendingChoice = cloneState(command.choice);
+        break;
+      case "complete_pending_choice":
+        if (!state.pendingChoice || state.pendingChoice.choiceId !== command.choiceId) throw new Error("Diese Choice ist nicht offen.");
+        delete state.pendingChoice;
+        break;
+      case "emit_event":
+        throw new Error("Effect-Event-Emission wird in V0.93 nur spezifiziert, aber nicht vom State-Only-Executor geschrieben.");
+    }
+  }
+}
+
+function assertNonNegativeAmount(amount: number): void {
+  if (!Number.isFinite(amount) || amount < 0) throw new Error("Effect amount ist ungueltig.");
 }
 
 function makeActionId(type: ActionType, side: Side, payload: LegalAction["payload"] | undefined, source: LegalAction["source"]): string {
@@ -1083,6 +1296,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
 function buildEvent(before: number, after: number, stateHashAfter: StateHash, state: GameState, legalAction: LegalAction, playerAction: PlayerAction): GameEvent {
   const actor = legalAction.side;
   const reveal = revealForPublicEvent(state, legalAction);
+  const visibilityClass = eventVisibilityForAction(legalAction);
   const publicPayload: Record<string, unknown> = {
     actor,
     actionType: legalAction.type,
@@ -1096,6 +1310,7 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, st
     stateVersionBefore: before,
     stateVersionAfter: after,
     stateHashAfter,
+    visibilityClass,
     publicPayload,
     privatePayload: {
       [actor]: {
@@ -1107,6 +1322,7 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, st
 }
 
 function publicLabel(legalAction: LegalAction): string {
+  if (legalAction.type === "resolve_choice") return "Choice wurde beantwortet.";
   if (legalAction.side === "corp" && legalAction.type === "install_card") return "Corp installiert eine Karte.";
   if (legalAction.side === "corp" && legalAction.type === "advance_card") return "Corp advanced eine Karte.";
   return legalAction.label;
@@ -1125,6 +1341,11 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   }
   if (legalAction.type === "rez_ice") context.zoneLabel = legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true ? "Remote" : "ICE";
   if (legalAction.type === "gain_credit" || legalAction.type === "draw_card" || legalAction.type === "remove_tag") context.amount = 1;
+  if (legalAction.type === "resolve_choice") {
+    context.choiceKind = legalAction.payload?.choiceKind;
+    if (legalAction.payload?.choiceVisibility === "public") context.choiceId = legalAction.payload?.choiceId;
+    else context.redactedKind = "choice";
+  }
   if (legalAction.type === "continue_run") context.result = state.run ? "continued" : "ended";
   if (state.run?.phase) context.runPhase = state.run.phase;
   if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {
@@ -1151,10 +1372,10 @@ function publicServerLabelForCard(state: GameState, cardId: string | undefined):
 
 function revealForPublicEvent(state: GameState, legalAction: LegalAction): Record<string, unknown> {
   const revealsCard =
-    ["rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_event", "play_operation"].includes(legalAction.type) ||
+    ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_event", "play_operation"].includes(legalAction.type) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
-    const cardId = legalAction.payload?.cardId ?? legalAction.source;
+    const cardId = legalAction.type === "access_card" ? state.run?.accessedCardId : legalAction.payload?.cardId ?? legalAction.source;
     if (typeof cardId === "string" && state.cardInstances[cardId]) {
       const definition = definitionFor(state, cardId);
       return { cardDefinitionId: definition.id, title: definition.title };
@@ -1171,6 +1392,7 @@ function toPublicEvent(event: GameEvent): PublicGameEvent {
     stateVersionBefore: event.stateVersionBefore,
     stateVersionAfter: event.stateVersionAfter,
     stateHashAfter: event.stateHashAfter,
+    ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
     publicPayload: event.publicPayload
   };
 }
