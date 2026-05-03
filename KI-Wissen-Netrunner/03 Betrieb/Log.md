@@ -133,3 +133,9 @@ Finale Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm t
 Die V0.6-Requirements für Deck Editor und Match Setup Foundation wurden abgeleitet und reviewfähig eingefroren. Erstellt wurden Spezifikationen für Deckeditor, Deckvalidierung v2, Match Setup und Deck Storage sowie Testmatrix und Requirements Review. Die Datenartefakte umfassen lokales Formatprofil, Decktemplates, vier immutable Demo-Deck-Snapshots mit deterministischen Hashes und ein Validierungsmanifest.
 
 Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`. V0.6 darf implementiert werden; V0.7-UI-Redesign, offizielle Turnierlegalität, nicht implementierte Karten und öffentliche Plattformfunktionen bleiben ausgeschlossen.
+
+## [2026-05-03] qa | V0.6 Kartenlesbarkeit und EventLog gehärtet
+
+Im V0.6-QA-Lauf wurde die Spieloberfläche für bekannte Karten und öffentliche Kartenevents lesbarer gemacht. `VisibleCard` enthält jetzt für bekannte Karten display-only Kartentext und öffentliche Werte. Die Weboberfläche zeigt Effekt-Kurztext direkt auf bekannten Karten und Detailwerte per Hover/Fokus. Öffentliche Logeinträge für offen gespielte oder offenbarte Karten zeigen konkrete Karte und Effekttext über den Katalogdetail-Lookup.
+
+Hidden-Info-Grenze bleibt bestehen: verdeckte Corp-Installationen bleiben im EventLog anonym und unbekannte Karten erhalten keinen Kartentext oder Tooltip. Checks: `corepack pnpm install --frozen-lockfile`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, Server-Health-Smoke auf `http://127.0.0.1:8788/health` und Next-Web-Smoke auf `http://127.0.0.1:3000` bestanden.

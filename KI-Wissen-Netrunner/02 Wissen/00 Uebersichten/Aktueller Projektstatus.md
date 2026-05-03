@@ -41,6 +41,8 @@
 - MVP 0.5 Validierung, Hardening und Dokumentation sind abgeschlossen. Final Gate: `MVP_0.5_done: true`; `ready_for_MVP_0.6_requirements: true`.
 - MVP 0.6 Requirements wurden eingefroren: Deckeditor-Spezifikation, Deckvalidierung v2, Match-Setup-Spezifikation, Deck-Storage-Spezifikation, Testmatrix, Requirements Review, lokales Formatprofil, Decktemplates, vier validierte Deck-Snapshots und Validierungsmanifest liegen vor.
 - MVP 0.6 Requirements Gate ist bestanden: `ready_for_implementation: true`.
+- MVP 0.6 ist umgesetzt, final geprüft und dokumentiert. Der aktuelle Stand unterstützt lokale Deckentwürfe, validierte Deck-Snapshots und Matchstart mit revalidierten Snapshot-Decks.
+- Die V0.6-QA-Härtung für Kartenlesbarkeit ist abgeschlossen: bekannte Karten zeigen Effekt-Kurztext und Detailtooltip; öffentliche Logeinträge für offen gespielte oder offenbarte Karten zeigen Karte, Werte und Effekttext. Verdeckte Corp-Installationen bleiben anonym.
 
 ## Teilweise umgesetzt
 
@@ -56,7 +58,7 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1/0.2/0.3/0.4-Arbeitsschritt ist offen.
-- Der nächste gate-basierte Schritt ist MVP 0.6 Implementierung: Deckmodell, lokale Decks, Validierung v2, Snapshots, Deckeditor und Match Setup.
+- Der nächste gate-basierte Schritt ist V0.7 Requirements/Design Freeze für UI-Neugestaltung und visuelle Gestaltung.
 - Damage bleibt aktuell zurückgestellt und ist nicht Teil des bestandenen MVP-0.4-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Die Detailplanung liegt vor, Requirements und UI-Spezifikationen sind aber noch nicht eingefroren.

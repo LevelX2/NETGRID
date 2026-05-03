@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.6 deck editor and match setup requirements complete. V0.6 implementation may start.
+MVP 0.6 deck editor and match setup is complete. V0.6 QA card readability and event-log hardening is complete.
 
 ## Status
 
@@ -72,6 +72,14 @@ MVP 0.6 deck editor and match setup requirements are complete.
 
 `ready_for_implementation: true`
 
+MVP 0.6 deck editor and match setup implementation, validation, hardening and documentation are complete.
+
+`MVP_0.6_done: true`
+
+V0.6 QA hardening for visible card text, known-card tooltips and public event-log card explanations is complete.
+
+`ready_for_V0.7_requirements: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -93,6 +101,8 @@ Gate flow:
 13. MVP 0.5 implementation: pass.
 14. MVP 0.5 validation, hardening and documentation: pass.
 15. MVP 0.6 executable requirements: pass.
+16. MVP 0.6 implementation and validation: pass.
+17. V0.6 QA card readability and event-log hardening: pass.
 
 ## Phase 1 files created or updated
 
@@ -518,6 +528,30 @@ The implementation preserves the V0.5 safety boundary: catalog data is read-only
 
 V0.6 starts from V0.5 catalog status and versioned demo decks. The requirements freeze defines a general deck model, local format profile, immutable deck snapshots, deterministic deck hashes, private opponent decklists by default, server-side match-start revalidation and functional deck editor/match setup scope only.
 
+## V0.6 QA card readability and event-log hardening files updated
+
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/engine/src/index.test.ts`
+- `apps/web/app/page.tsx`
+- `apps/web/app/globals.css`
+
+## V0.6 QA card readability and event-log hardening checks
+
+- `corepack pnpm install --frozen-lockfile`: pass.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 47 package tests plus 16 root spec tests.
+- `corepack pnpm build`: pass.
+- `git diff --check`: pass, with line-ending warnings only for touched web files.
+- Server health smoke on `http://127.0.0.1:8788/health`: pass.
+- Next web smoke on `http://127.0.0.1:3000`: pass.
+- Event payload smoke: open Corp operations include `cardDefinitionId`; hidden Corp installs stay anonymous.
+
+## V0.6 QA hardening result
+
+Known visible cards now carry display-only rules text and public values in `VisibleCard`. The web UI shows a short card effect on known cards and a hover/focus detail panel with values. Public event-log entries for openly played/revealed cards show the concrete card and effect text via catalog detail lookup. Hidden Corp installs and unknown cards remain anonymized and do not receive card tooltips or effect text.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -564,7 +598,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Next gate: MVP 0.6 implementation for deck editor and match setup foundation.
+Next gate: V0.7 Requirements/Design Freeze for the UI redesign and visual design phase.
 
 Detailed planning artifacts available:
 

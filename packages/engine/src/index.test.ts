@@ -62,6 +62,7 @@ describe("MVP 0.1 turns and cards", () => {
     expect(state.runner.credits).toBe(beforeCredits + 4);
 
     state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_fracter");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "install_card", cardDefinitionId: "simple_fracter", title: "Simple Fracter" });
     state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_decoder");
     state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_killer");
 
@@ -81,6 +82,7 @@ describe("MVP 0.1 turns and cards", () => {
     const before = state.corp.credits;
     state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "simple_economy_operation");
     expect(state.corp.credits).toBe(before + 4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation", cardDefinitionId: "simple_economy_operation", title: "Simple Economy Operation" });
     expect(state.corp.archives.map((id) => state.cardInstances[id]?.definitionId)).toContain("simple_economy_operation");
   });
 });
@@ -155,16 +157,22 @@ describe("MVP 0.1 runs, access and scoring", () => {
 describe("MVP 0.1 visibility, replay and state hash", () => {
   it("does not leak hidden Corp card titles into the Runner view or public events", () => {
     let state = toRunnerTurn(createGame({ seed: "visibility" }));
+    moveRunnerCardToGrip(state, "simple_run_event");
     moveCorpCardToHq(state, "simple_agenda");
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpRootInRemote(state, "simple_economy_asset");
 
     const runnerView = getPlayerView(state, "runner");
     const serialized = JSON.stringify(runnerView);
+    const knownRunnerCard = runnerView.own.gripOrHq.find((card) => card.definitionId === "simple_run_event");
 
+    expect(knownRunnerCard?.rulesText).toBe("Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 2 Credits.");
     expect(serialized).not.toContain("Simple Agenda");
     expect(serialized).not.toContain("Simple Barrier ICE");
     expect(serialized).not.toContain("Simple Economy Asset");
+    expect(serialized).not.toContain("Keine zusätzliche Fähigkeit.");
+    expect(serialized).not.toContain("End the run.");
+    expect(serialized).not.toContain("Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.");
     expect(runnerView.servers.some((server) => server.ice.some((card) => !card.known))).toBe(true);
     expect(JSON.stringify(runnerView.publicEvents)).not.toContain("Simple Agenda");
   });
