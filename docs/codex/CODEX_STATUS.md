@@ -2,7 +2,7 @@
 
 ## Current phase
 
-MVP 0.6 deck editor and match setup requirements complete. V0.6 implementation may start.
+MVP 0.6 deck editor and match setup validation, hardening and documentation are complete.
 
 ## Status
 
@@ -72,6 +72,22 @@ MVP 0.6 deck editor and match setup requirements are complete.
 
 `ready_for_implementation: true`
 
+MVP 0.6 deck editor and match setup implementation is complete and locally verified.
+
+`ready_for_hardening: true`
+
+MVP 0.6 validation, hardening and documentation are complete.
+
+`MVP_0.6_done: true`
+
+MVP 0.8 playable base/starter-set slice detailed planning is complete as a future gated phase.
+
+`MVP_0.8_detailed_plan_available: true`
+
+MVP 0.9 stronger AI detailed planning is complete as a future gated phase after V0.8.
+
+`MVP_0.9_detailed_plan_available: true`
+
 ## Goal
 
 Active thread goal: Netrunner gated MVP delivery.
@@ -93,6 +109,8 @@ Gate flow:
 13. MVP 0.5 implementation: pass.
 14. MVP 0.5 validation, hardening and documentation: pass.
 15. MVP 0.6 executable requirements: pass.
+16. MVP 0.6 implementation: pass.
+17. MVP 0.6 validation, hardening and documentation: pass.
 
 ## Phase 1 files created or updated
 
@@ -518,6 +536,101 @@ The implementation preserves the V0.5 safety boundary: catalog data is read-only
 
 V0.6 starts from V0.5 catalog status and versioned demo decks. The requirements freeze defines a general deck model, local format profile, immutable deck snapshots, deterministic deck hashes, private opponent decklists by default, server-side match-start revalidation and functional deck editor/match setup scope only.
 
+## MVP 0.6 Implementation files created or updated
+
+- `packages/decks/`
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/ai/src/index.ts`
+- `apps/server/src/deck-setup.ts`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/http-server.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `apps/web/app/api/decks/`
+- `apps/web/app/page.tsx`
+- `apps/web/app/globals.css`
+- `tests/specs/visibility-contract.test.ts`
+- `tests/specs/deck-editor-0.6-acceptance-tests.todo.md`
+- `docs/derived/MVP_0.6_IMPLEMENTATION_REVIEW.md`
+- `pnpm-lock.yaml`
+
+## MVP 0.6 Implementation checks
+
+- `corepack pnpm install`: pass.
+- `corepack pnpm --filter @netrunner/decks test`: pass.
+- `corepack pnpm --filter @netrunner/server test`: pass.
+- `corepack pnpm --filter @netrunner/ai test`: pass.
+- `corepack pnpm --filter @netrunner/engine test`: pass.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass.
+- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass.
+- Deck API smoke on `http://127.0.0.1:3002/api/decks/snapshots`: pass.
+- Deck validation smoke on `http://127.0.0.1:3002/api/decks/validate`: pass.
+- Matchstart API smoke on `http://127.0.0.1:8797/api/matches`: pass, V0.6 snapshot match used public deck hashes and no opponent decklist.
+- Browser smoke on `http://127.0.0.1:3002`: pass, local deck copy validated and used for Match Setup.
+
+## MVP 0.6 Implementation gate
+
+`ready_for_hardening: true`
+
+V0.6 now supports local deck models, validation v2, deterministic snapshots, server-side match-start revalidation, safe public deck metadata and functional deckeditor/match-setup UI. V0.7 UI redesign, official art/assets, broad legality, public platform features and non-implemented card playability remain excluded.
+
+## MVP 0.6 Final files created or updated
+
+- `docs/derived/MVP_0.6_FINAL_REVIEW.md`
+- `docs/derived/MVP_0.6_IMPLEMENTATION_REVIEW.md`
+- `tests/specs/deck-editor-0.6-acceptance-tests.todo.md`
+- `README.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.6 Final checks
+
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass.
+- Deck API smoke: pass.
+- Deck validation smoke: pass.
+- Matchstart API smoke with V0.6 snapshots: pass.
+- Browser smoke for Deck Editor and Match Setup: pass.
+
+## MVP 0.6 Final gate
+
+`MVP_0.6_done: true`
+
+Next recommended gate: V0.7 Requirements/Design Freeze. V0.7 implementation, UI redesign, official assets, public platform features, account system, matchmaking and rankings remain out of this thread's implementation scope.
+
+## MVP 0.8 Detailed Planning files created or updated
+
+- `docs/derived/MVP_0.8_DETAILED_PLAN.md`
+- `docs/derived/POST_MVP_0.4_ROADMAP.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `docs/codex/CODEX_STATUS.md`
+
+V0.8 remains a future gated phase after V0.7. This planning update does not implement cards, engine behavior, UI changes or server behavior. The detailed plan now includes hard entry gates, source/usage decision for base/starter-set scope, candidate scoring, per-card deviation/approximation, resolver registry as a Must artifact, minimal AI role tags for V0.9, playability/balance smokes, Golden Hash review process and performance budgets for core engine/view/AI-smoke paths.
+
+## MVP 0.9 Detailed Planning files created or updated
+
+- `docs/derived/MVP_0.9_DETAILED_PLAN.md`
+- `docs/derived/POST_MVP_0.4_ROADMAP.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `docs/codex/CODEX_STATUS.md`
+
+V0.9 remains a future gated phase after V0.8. This planning update does not implement AI behavior, engine behavior, cards, UI changes or server behavior. The scope is stronger AI through visible-information-only heuristics, role metadata, risk scoring, difficulty profiles, bounded lookaheads, better reason codes and multi-seed soak/regression tests.
+
+The V0.9 detailed plan was later refined for requirements-freeze readiness with traceable Must/Should/Could IDs, measurable AI quality metrics, hidden-state-invariance tests, AI controller lifecycle, ObservedFacts, tuning change-control, holdout seeds and coverage heatmaps.
+
 ## Phase 2 implemented scope
 
 - Deterministic `createGame` with fixed Demo-Decks, seed, RandomCounter and RandomDrawRecords.
@@ -564,7 +677,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.8: playable base/starter-set slice.
 - V0.9: stronger AI.
 
-Next gate: MVP 0.6 implementation for deck editor and match setup foundation.
+Next gate: V0.7 Requirements/Design Freeze. Do not start V0.7 implementation without a separate requirements gate.
 
 Detailed planning artifacts available:
 
@@ -572,6 +685,8 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.7_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.8_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.9_DETAILED_PLAN.md`
 
 UI design exploration artifacts available:
 

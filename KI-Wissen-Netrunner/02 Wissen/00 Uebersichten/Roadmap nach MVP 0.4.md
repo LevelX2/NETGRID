@@ -27,6 +27,7 @@ Die neue Planungsentscheidung lautet: **UI-Neugestaltung und Designgestaltung ko
 - Eine Karte wird erst spielbar, wenn Manifest, Resolver, Tests, Visibility, Replay/StateHash und KI-Smoke bestehen.
 - Der Deckeditor darf nicht implementierte Karten anzeigen, aber nicht für spielbare Decks freigeben.
 - V0.7 ist der bewusste UI- und Design-Schnitt; vorher nur funktionale UI-Anpassungen.
+- V0.8 braucht vor Kartenfreigabe harte Eingangsgates, Quellenentscheidung, Kandidaten-Scoring, Resolver-Registry und Per-Card-Deviation.
 
 ## Nächster Schritt
 
@@ -38,3 +39,6 @@ Detailpläne:
 
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.7_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.8_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.9_DETAILED_PLAN.md`

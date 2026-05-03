@@ -30,3 +30,4 @@
 - `AGENTS.md`: verbindliche Codex-Regeln für das Repository.
 - `docs/codex/CODEX_STATUS.md`: aktueller Codex-Setup- und Phasenstand.
 - `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`: Codex-Runbook für Setup, MVP 0.1 und MVP 0.2.
+- `docs/derived/MVP_0.9_DETAILED_PLAN.md`: detaillierte spätere V0.9-Planung für bessere KI nach V0.8.

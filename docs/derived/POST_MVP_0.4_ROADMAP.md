@@ -108,10 +108,12 @@ V0.8 macht aus dem importierten Kartenbestand einen größeren, aber weiter kura
 Vorgehen:
 
 - Karten nach Mechanik-Risiko gruppieren.
+- Requirements-Freeze erst nach grünem V0.6-/V0.7-Gate und dokumentierter Quellen-/Nutzungsentscheidung.
+- Kandidaten über Engine-Aufwand, Hidden-Info-, UI-, KI-, Multiplayer-Risiko und Spielwert scoren.
 - Erst einfache Economy-, Draw-, Install-, Advance-, Run- und ICE/Breaker-Karten freigeben.
 - Damage nur einführen, wenn konkrete Karten es brauchen und das Damage-Gate besteht.
 - Resources, Traces, Identitätsfähigkeiten und weitere Typen nur als getrennte Teilgates.
-- Jede Karte erhält Manifest, Resolver, Unit-Test, Szenario, Visibility-Test, Replay/StateHash und KI-Smoke.
+- Jede Karte erhält Manifest, Resolver-Registry-Eintrag, Per-Card-Deviation, Unit-Test, Szenario, Visibility-Test, Replay/StateHash, KI-Smoke und minimale KI-Rollen-Tags für V0.9.
 
 Nicht-Ziel:
 
@@ -122,6 +124,10 @@ Das vollständige Basis-/Starterset wird nicht in einem Schritt spielbar gemacht
 Ziel:
 
 V0.9 macht die KI nicht nur regelkonform, sondern spürbar nützlicher zum Spielen, Testen und Lernen.
+
+Detailplanung:
+
+- `docs/derived/MVP_0.9_DETAILED_PLAN.md`
 
 Schwerpunkte:
 
@@ -162,3 +168,6 @@ V1.0 ist eine private stabile Plattform mit:
 
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.7_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.8_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.9_DETAILED_PLAN.md`

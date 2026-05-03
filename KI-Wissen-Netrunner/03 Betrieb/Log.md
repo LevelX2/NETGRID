@@ -116,6 +116,12 @@ Die Phase V0.7 wurde detailliert als UI-Neugestaltungs- und Designphase geplant.
 
 Der Wunsch nach späteren Originalkartenabbildern wurde als image-ready CardView-Strategie aufgenommen. Echte Kartenabbilder bleiben bis zu einer separaten Quellen-, Nutzungs- und Asset-Freigabe gesperrt; V0.7 nutzt Platzhalter und stabile `5 / 7`-Kartenflächen. Erstellt wurde `docs/derived/MVP_0.7_DETAILED_PLAN.md`.
 
+## [2026-05-03] planung | V0.7 Kartenbild-Zusatzdesigns analysiert
+
+Die zusätzlichen kartenbildfreundlichen Design-C-Bilder unter `docs/ui-designsets/03-design-c-clean-high-contrast/` wurden ausgewertet. Sie bestätigen Design C als Hauptstruktur, schärfen aber die V0.7-Planung: Card Display Modes, Card Preview, Zoom/Focus, Compact-Ansicht, Text-Fallback und Board Preview sind als konkrete Bausteine aufzunehmen.
+
+Der Plan wurde angepasst. Echte Kartenabbilder bleiben weiterhin durch ein separates Asset-Gate gesperrt. Hidden Cards dürfen auch im Bildmodus keine echten Kartenrücken, Bild-URLs, unterscheidbaren Ladezustände oder DOM-Metadaten erhalten. Betroffene Planungsdokumente: `docs/derived/MVP_0.7_DETAILED_PLAN.md` und `docs/ui-designsets/REALISM_REVIEW.md`.
+
 ## [2026-05-03] phase-0.5-impl | MVP 0.5 Card Catalog implementiert
 
 Die V0.5-Implementierung wurde umgesetzt. Neu ist das reine TypeScript-Paket `@netrunner/catalog` für Snapshot-Validierung, Hashing, Indexbildung, Suche, Statuszusammenfassung und sichere Katalogpayloads. Die Web-App stellt read-only Endpunkte unter `/api/cards/catalog`, `/api/cards/catalog/:id` und `/api/cards/status-summary` bereit und zeigt auf der Startseite eine funktionale Katalogansicht mit Suche, Side-/Statusfilter, Liste, Detail und Statusbadges.
@@ -133,3 +139,35 @@ Finale Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm t
 Die V0.6-Requirements für Deck Editor und Match Setup Foundation wurden abgeleitet und reviewfähig eingefroren. Erstellt wurden Spezifikationen für Deckeditor, Deckvalidierung v2, Match Setup und Deck Storage sowie Testmatrix und Requirements Review. Die Datenartefakte umfassen lokales Formatprofil, Decktemplates, vier immutable Demo-Deck-Snapshots mit deterministischen Hashes und ein Validierungsmanifest.
 
 Checks: `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Gate-Ergebnis: `ready_for_implementation: true`. V0.6 darf implementiert werden; V0.7-UI-Redesign, offizielle Turnierlegalität, nicht implementierte Karten und öffentliche Plattformfunktionen bleiben ausgeschlossen.
+
+## [2026-05-03] planung | V0.8 Basisset-/Starterset-Spielbarkeit detailliert geplant
+
+Die Phase V0.8 wurde als spätere, durch V0.7 gegatete Spielbarkeitsphase detailliert geplant. Der Scope ist ein kleiner, streng kuratierter spielbarer Basisset-/Starterset-Slice aus importiertem und validiertem Kartenbestand. Importierte Karten bleiben Daten, nicht Regelautorität; jede spielbare Karte braucht Manifest, expliziten Resolver, Unit-Test, Szenario, Visibility-Test, Replay/StateHash und KI-Smoke.
+
+Erstellt wurde `docs/derived/MVP_0.8_DETAILED_PLAN.md`. Die Roadmap- und Statusverweise wurden ergänzt. Damage, Resources, Traces, Identitätsfähigkeiten, Multiaccess, Hosting, Viren, Prevention und Replacement bleiben getrennte Teilgates und werden nicht als breite Komplettumsetzung in V0.8 übernommen.
+
+## [2026-05-03] planung | V0.9 bessere KI detailliert geplant
+
+Die Phase V0.9 wurde als spätere, durch V0.8 gegatete KI-Qualitätsphase detailliert geplant. Der Plan verbessert Runner- und Corp-KI über sichtbasierte Heuristiken, Karten- und Deckrollen, Risk Scoring, Difficulty-Stufen, begrenzte Lookaheads, bessere Reason-Codes, Lern-Erklärungen und Simulationen über mehrere Seeds, Decks und Matchups.
+
+Erstellt wurde `docs/derived/MVP_0.9_DETAILED_PLAN.md`. Roadmap, Status und Wissensbasis wurden verlinkt. V0.9 bleibt ausdrücklich keine Kartenpool- oder UI-Hauptphase; KI mit FullState, verdeckten gegnerischen Informationen oder LLM als Regelakteur bleibt ausgeschlossen.
+
+## [2026-05-03] planung | V0.8 Detailplanung nach Review gehärtet
+
+Die V0.8-Detailplanung wurde um zusätzliche Gates und Prüfpunkte ergänzt: harte Eingangsvoraussetzungen nach V0.6/V0.7, Quellen-/Nutzungsentscheidung für Basisset-/Starterset-Scope, Kandidaten-Scoring, Per-Card-Deviation/Approximation, Resolver-Registry als Must, minimale KI-Rollen für V0.9, Playability-/Balance-Smokes, Golden-Hash-Prozess und Performance-Budgets für zentrale Engine-, View- und KI-Smoke-Pfade.
+
+V0.9 wurde passend angeschlossen: Das spätere Rollenmanifest darf minimale V0.8-Rollen-Tags übernehmen, muss sie aber validieren und erweitern. Es bleibt ausgeschlossen, Rollen aus Kartentext zu interpretieren oder als Regelquelle zu nutzen.
+
+Nach Review wurde die V0.9-Planung für einen späteren Requirements-Freeze nachgeschärft: tracebare Must/Should/Could-IDs, messbare KI-Qualitätsmetriken, Hidden-State-Invarianztests, AI-Controller-Lifecycle, ObservedFacts-Modell, Tuning-Change-Control, Holdout-Seeds und Coverage-Heatmaps wurden ergänzt.
+
+## [2026-05-03] phase-0.6-impl | MVP 0.6 Deck Editor und Match Setup implementiert
+
+Die V0.6-Implementierung für Deck Editor und Match Setup Foundation wurde umgesetzt. Entstanden sind `@netrunner/decks` mit editierbaren Decks, Validierung v2, deterministischen Snapshots, Hashes und Import/Export, eine serverseitige Snapshot-Revalidierung beim Matchstart, erlaubte öffentliche Deckmetadaten in PlayerViews, AI-/Server-Unterstützung für Snapshot-Decks, Web-Deck-API sowie eine funktionale UI für lokale Deckkopien, Mengenbearbeitung, Validierung und Match-Deckauswahl.
+
+Checks: `corepack pnpm --filter @netrunner/decks test`, `corepack pnpm --filter @netrunner/server test`, `corepack pnpm --filter @netrunner/ai test`, `corepack pnpm --filter @netrunner/engine test`, `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`, `corepack pnpm --filter @netrunner/server typecheck`, `corepack pnpm --filter @netrunner/web typecheck`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. API-Smokes für Deck-Snapshots, Deckvalidierung und Matchstart sowie Browser-Smoke für lokale Deckkopie, Validierung und Match Setup bestanden. Gate-Ergebnis: `ready_for_hardening: true`. Nächster Schritt ist V0.6 Validierung, Hardening und Dokumentation.
+
+## [2026-05-03] phase-0.6-final | MVP 0.6 final validiert
+
+MVP 0.6 wurde final validiert und dokumentiert. Der Final Review bestätigt: Decks werden editierbar, aber Matches starten nur mit validierten und serverseitig revalidierten Snapshots; importierte oder nicht spielbare Karten blockieren Matchstart; gegnerische Decklisten bleiben privat und nur erlaubte Metadaten werden angezeigt.
+
+Finale Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build`, Deck-API-Smoke, Deckvalidierungs-Smoke, Matchstart-Smoke mit V0.6-Snapshots und Browser-Smoke für Deckeditor/Match Setup bestanden. Gate-Ergebnis: `MVP_0.6_done: true`. Nächster empfohlener Scope ist V0.7 Requirements/Design Freeze; V0.7 wurde nicht implementiert.
