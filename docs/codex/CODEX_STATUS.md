@@ -2,16 +2,17 @@
 
 ## Current phase
 
-V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
+V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist als nächster Zwischenrelease detailliert geplant. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 is planned as a presentation/orchestration release for live opponent action cues, AI pacing, board highlights and opt-in action audio. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
 Latest V1.0 final review artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`.
 Latest V1.0.1 planning artifact: `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`.
+Latest V1.0.2 planning artifact: `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`.
 
-Current planning decision needed: choose the next gated scope after V1.0.1. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
+Current selected next scope: V1.0.2 opponent action presentation and AI pacing requirements freeze. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
 
 ## Status
 
@@ -242,6 +243,10 @@ V1.0 Deck- und Match-Setup-Stabilisierung is complete and locally verified.
 V1.0.1 Deckbibliothek und Join-Deck-Handshake is complete and locally verified.
 
 `V1_0_1_deck_library_join_handshake_done: true`
+
+V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz detailed planning is complete.
+
+`V1_0_2_opponent_action_presentation_plan_available: true`
 
 Bestandsaufnahme 2026-05-04 is complete.
 
@@ -1694,7 +1699,7 @@ Remaining known limits:
 
 ## Next step
 
-The post-MVP-0.4 roadmap through V1.0 is complete:
+The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path are complete/planned as follows:
 
 - V0.5: card import and card catalog.
 - V0.6: deck editor and match setup foundation.
@@ -1711,12 +1716,14 @@ The post-MVP-0.4 roadmap through V1.0 is complete:
 - V0.98: Identity setup/modifiers and Hidden-Zone tools.
 - V0.99: Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity.
 - V1.0: Deck- und Match-Setup-Stabilisierung.
+- V1.0.1: Deckbibliothek und Join-Deck-Handshake.
+- V1.0.2: Gegner-Aktionsdarstellung und Ablauftransparenz, planned as next requirements freeze.
 
-Current gate: V1.0 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0.2 opponent action presentation requirements freeze is the selected next step. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
 Next planning decision:
 
-1. Choose the next gated scope after V1.0.
+1. Derive and freeze V1.0.2 requirements, presentation spec and test matrix.
 2. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
 3. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 4. Keep deployment and operations hardening behind explicit follow-up scope.
@@ -1729,6 +1736,7 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`
+- `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.7_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`

@@ -100,3 +100,4 @@
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`: Bestandsprüfung, Produktentscheidungen und Umsetzungsergebnis für V1.0 Deck- und Match-Setup-Stabilisierung.
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`: Final Review für V1.0 mit Browser-Smoke, Checks, Grenzen und Gate-Ergebnis.
 - `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`: Planung und Umsetzungsergebnis für lokale Deckbibliothek, explizites Speichern, gespeicherte Decks im Matchstart und Human-vs-Human-Join-Deck-Handshake.
+- `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`: Detailplanung für Live-Darstellung gegnerischer Aktionen, KI-Pacing, Board-Highlights und opt-in Aktionsaudio.
