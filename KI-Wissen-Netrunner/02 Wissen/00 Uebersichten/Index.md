@@ -65,5 +65,12 @@
 - `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.96-Trace-/Link-/Bidding-Slice.
 - `docs/derived/MVP_0.96_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.96.
 - `data/rules/mechanics-coverage-0.96.json`: maschinenlesbare Coverage nach V0.96; Trace/Link/Bidding ist `implemented_limited`, V0.97+-Mechaniken bleiben offen.
+- `docs/derived/MVP_0.97_REQUIREMENTS.md`: eingefrorene V0.97-Anforderungen für Run, Jack-out, Breach und Multiaccess.
+- `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`: V0.97-Spezifikation für Jack-out-Fenster, Breach-State, Access-Queue und Multiaccess-Sichtbarkeit.
+- `docs/derived/MVP_0.97_TEST_MATRIX.md`: V0.97-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
+- `docs/derived/MVP_0.97_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.97.
+- `docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.97-Run-/Breach-/Multiaccess-Slice.
+- `docs/derived/MVP_0.97_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.97.
+- `data/rules/mechanics-coverage-0.97.json`: maschinenlesbare Coverage nach V0.97; Run/Jack-out/Breach/Multiaccess ist `implemented_limited`, V0.98+-Mechaniken bleiben offen.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.

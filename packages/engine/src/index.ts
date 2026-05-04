@@ -7,6 +7,7 @@ import {
   MVP_0_94_BASELINE,
   MVP_0_95_BASELINE,
   MVP_0_96_BASELINE,
+  MVP_0_97_BASELINE,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -51,7 +52,8 @@ export {
   MVP_0_8_BASELINE,
   MVP_0_94_BASELINE,
   MVP_0_95_BASELINE,
-  MVP_0_96_BASELINE
+  MVP_0_96_BASELINE,
+  MVP_0_97_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -91,7 +93,7 @@ const DEFAULT_CONTROLLERS: { runner: PlayerController; corp: PlayerController } 
   corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI" }
 };
 
-type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
 
 type RunnerEventResolver = {
   name: string;
@@ -116,6 +118,10 @@ type DamageSummary = {
   cardsTrashed: number;
   flatline: boolean;
 };
+
+type ActiveRun = NonNullable<GameState["run"]>;
+type ActiveBreach = NonNullable<ActiveRun["breach"]>;
+type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_economy_event: {
@@ -157,6 +163,13 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     requiresServer: true,
     resolve: (state, legalAction) => {
       startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 3);
+    }
+  },
+  v097_deep_dive_event: {
+    name: "runner_event_run_multiaccess_2",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, undefined, 2);
     }
   }
 };
@@ -331,6 +344,7 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   if (state.timingPoint === "runner_action.main") return side === "runner" ? runnerMainActions(state) : [];
   if (state.timingPoint === "run.approach_ice") return side === "corp" ? corpApproachActions(state) : [];
   if (state.timingPoint === "run.encounter_ice") return side === "runner" ? runnerEncounterActions(state) : [];
+  if (state.timingPoint === "run.jack_out_window") return side === "runner" ? runnerMovementActions(state) : [];
   if (state.timingPoint === "access.resolve_card") return side === "runner" ? runnerAccessActions(state) : [];
   return [];
 }
@@ -396,6 +410,18 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
         attackedServerId: state.run.attackedServerId,
         phase: state.run.phase,
         ...(state.run.encounteredIceId ? { encounteredIce: visibleCorpCard(state, state.run.encounteredIceId, side, "ice") } : {}),
+        ...(state.run.accessedCardId ? { accessedCard: visibleCorpCard(state, state.run.accessedCardId, side, "root") } : {}),
+        ...(state.run.breach
+          ? {
+              breach: {
+                breachId: state.run.breach.breachId,
+                serverId: state.run.breach.serverId,
+                currentIndex: state.run.breach.currentIndex,
+                remainingCount: state.run.breach.queue.filter((entry) => entry.status === "pending").length,
+                completed: state.run.breach.completed
+              }
+            }
+          : {}),
         successful: state.run.successful
       }
     : undefined;
@@ -516,6 +542,24 @@ export function validateGameState(state: GameState): ValidationResult {
   }
   if (state.run?.encounteredIceId && !state.cardInstances[state.run.encounteredIceId]) errors.push("Run references missing encountered ice.");
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes)) errors.push("Run resolved subroutine index list is missing.");
+  if (state.run?.breach) {
+    if (state.run.phase !== "access") errors.push("Breach is only valid during access.");
+    if (state.run.breach.serverId !== state.run.attackedServerId) errors.push("Breach server must match attacked server.");
+    if (!state.run.breach.completed && (state.run.breach.currentIndex < 0 || state.run.breach.currentIndex >= state.run.breach.queue.length)) {
+      errors.push("Breach current index is invalid.");
+    }
+    const entryIds = new Set<string>();
+    for (const entry of state.run.breach.queue) {
+      if (entryIds.has(entry.entryId)) errors.push(`Breach entry ${entry.entryId} appears multiple times.`);
+      entryIds.add(entry.entryId);
+      if (!state.cardInstances[entry.cardInstanceId]) errors.push(`Breach references missing CardInstance ${entry.cardInstanceId}.`);
+      if (entry.serverId !== state.run.attackedServerId) errors.push("Breach entry server must match attacked server.");
+    }
+    const currentEntry = state.run.breach.queue[state.run.breach.currentIndex];
+    if (state.run.accessedCardId && currentEntry && currentEntry.cardInstanceId !== state.run.accessedCardId) {
+      errors.push("Accessed card must match the current breach entry.");
+    }
+  }
   if (state.trace) {
     if (!state.cardInstances[state.trace.sourceCardInstanceId]) errors.push("Trace references missing source card.");
     if (!Number.isInteger(state.trace.baseTraceStrength) || state.trace.baseTraceStrength < 0) errors.push("Trace base strength is invalid.");
@@ -656,6 +700,7 @@ export function eventVisibilityForAction(legalAction: LegalAction): EventVisibil
   if (legalAction.payload?.damageResolved === true) return "hidden_info_barrier";
   if (["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(legalAction.type)) return "hidden_info_barrier";
   if (["mandatory_draw", "draw_card"].includes(legalAction.type)) return "private_to_side";
+  if (legalAction.type === "jack_out") return "public";
   if (legalAction.visibility === "public") return "public";
   if (legalAction.type === "play_event") return "public";
   return "private_to_side";
@@ -846,6 +891,11 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   return actions;
 }
 
+function runnerMovementActions(state: GameState): LegalAction[] {
+  mustRun(state);
+  return [action(state, "runner", "jack_out", "Jack-out", "game_rule"), action(state, "runner", "continue_run", "Run fortsetzen", "game_rule")];
+}
+
 function runnerAccessActions(state: GameState): LegalAction[] {
   const run = mustRun(state);
   if (!run.accessedCardId) {
@@ -861,7 +911,7 @@ function runnerAccessActions(state: GameState): LegalAction[] {
     actions.push(action(state, "runner", "decline_trash", "Nicht trashen", "game_rule"));
     return actions;
   }
-  return [action(state, "runner", "decline_trash", "Access abschließen", "game_rule")];
+  return [action(state, "runner", "decline_trash", run.breach ? "Weiter accessen" : "Access abschließen", "game_rule")];
 }
 
 function performAction(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
@@ -910,6 +960,9 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       spendClick(state, "runner");
       startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">);
       return;
+    case "jack_out":
+      finishRun(state, false);
+      return;
     case "rez_ice":
       rezCard(state, String(legalAction.payload?.cardId), legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true);
       return;
@@ -944,7 +997,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       trashResource(state, String(legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? ""));
       return;
     case "decline_trash":
-      finishRun(state, true);
+      declineCurrentAccess(state);
       return;
     case "remove_tag":
       spendClick(state, "runner");
@@ -1011,7 +1064,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "serverRoot", serverId: server.id } };
 }
 
-function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, pendingSuccessBonusCredits?: number): void {
+function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, pendingSuccessBonusCredits?: number, accessCount = 1): void {
   const server = mustServer(state, serverId);
   state.phase = "run";
   state.activeSide = "runner";
@@ -1023,6 +1076,7 @@ function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, p
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
     successful: false,
+    accessCount: Math.max(1, Math.floor(accessCount)),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {})
   };
   if (server.ice.length > 0) {
@@ -1071,6 +1125,10 @@ function passApproachedIce(state: GameState): void {
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
+  if (run.phase === "movement") {
+    continueFromMovement(state);
+    return;
+  }
   if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
     if (run.phase === "access") {
       finishRun(state, true);
@@ -1196,6 +1254,21 @@ function movePastCurrentIce(state: GameState): void {
   const nextIndex = run.position.iceIndex + 1;
   if (nextIndex < server.ice.length) {
     const approachedIceId = mustArrayValue(server.ice, nextIndex, "Naechstes ICE fehlt.");
+    if (isV097OrLater(state)) {
+      const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
+      void _encounteredIceId;
+      state.run = {
+        ...runWithoutEncounter,
+        phase: "movement",
+        position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
+        approachedIceId,
+        brokenSubroutineIndexes: [],
+        resolvedSubroutineIndexes: []
+      };
+      state.timingPoint = "run.jack_out_window";
+      state.activeSide = "runner";
+      return;
+    }
     state.run = {
       ...run,
       phase: "approach_ice",
@@ -1208,19 +1281,136 @@ function movePastCurrentIce(state: GameState): void {
     state.activeSide = "corp";
     return;
   }
+  if (isV097OrLater(state)) {
+    const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
+    void _encounteredIceId;
+    state.run = { ...runWithoutEncounter, position: { kind: "server", serverId: server.id }, phase: "movement" };
+    state.timingPoint = "run.jack_out_window";
+    state.activeSide = "runner";
+    return;
+  }
   state.run = { ...run, position: { kind: "server", serverId: server.id }, phase: "access" };
+  enterAccess(state);
+}
+
+function continueFromMovement(state: GameState): void {
+  const run = mustRun(state);
+  if (run.position.kind === "ice") {
+    state.run = { ...run, phase: "approach_ice" };
+    state.timingPoint = "run.approach_ice";
+    state.activeSide = "corp";
+    return;
+  }
   enterAccess(state);
 }
 
 function enterAccess(state: GameState): void {
   const run = mustRun(state);
-  state.run = { ...run, phase: "access", successful: true };
+  if (isV097OrLater(state)) {
+    const breach = buildBreachState(state, run);
+    if (breach.queue.length === 0) {
+      finishRun(state, true);
+      return;
+    }
+    const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
+    void _accessedCardId;
+    state.run = { ...runWithoutAccessedCard, phase: "access", successful: true, breach };
+  } else {
+    state.run = { ...run, phase: "access", successful: true };
+  }
   state.timingPoint = "access.resolve_card";
   state.activeSide = "runner";
 }
 
+function buildBreachState(state: GameState, run: ActiveRun): ActiveBreach {
+  const server = mustServer(state, run.attackedServerId);
+  const accessCount = Math.max(1, run.accessCount ?? 1);
+  const queueIds = accessQueueIds(state, server, run, accessCount);
+  return {
+    breachId: `${run.runId}.breach`,
+    serverId: server.id,
+    accessMode: accessCount > 1 ? "multi" : "single",
+    queue: queueIds.map((cardId, index) => ({
+      entryId: `${run.runId}.breach.${index}`,
+      cardInstanceId: cardId,
+      serverId: server.id,
+      zone: accessQueueZone(server.id),
+      status: "pending",
+      hiddenInfo: isBreachEntryHidden(state, cardId)
+    })),
+    currentIndex: 0,
+    completed: false,
+    accessedSummaries: []
+  };
+}
+
+function accessQueueIds(state: GameState, server: CorpServer, run: ActiveRun, accessCount: number): CardInstanceId[] {
+  if (server.id === "rd") return state.corp.rd.slice(0, Math.min(accessCount, state.corp.rd.length));
+  if (server.id === "hq") return randomHqAccessQueue(state, run.runId, accessCount);
+  if (server.id === "archives") return state.corp.archives.slice();
+  return server.root.slice();
+}
+
+function accessQueueZone(serverId: Exclude<ServerId, "new_remote">): ActiveBreach["queue"][number]["zone"] {
+  if (serverId === "rd") return "rd";
+  if (serverId === "hq") return "hq";
+  if (serverId === "archives") return "archives";
+  return "remote_root";
+}
+
+function isBreachEntryHidden(state: GameState, cardId: CardInstanceId): boolean {
+  const instance = mustInstance(state.cardInstances, cardId);
+  return !instance.rezzed && !instance.faceup && !state.corp.archives.includes(cardId);
+}
+
+function randomHqAccessQueue(state: GameState, runId: string, accessCount: number): CardInstanceId[] {
+  const available = state.corp.hq.slice();
+  const selected: CardInstanceId[] = [];
+  const limit = Math.min(accessCount, available.length);
+  for (let index = 0; index < limit; index += 1) {
+    const value = nextRandom(state, `hq_multiaccess:${runId}:selection:${index}`);
+    const selectedIndex = Math.floor(value * available.length);
+    const cardId = mustArrayValue(available, selectedIndex, "HQ access selection missing.");
+    available.splice(selectedIndex, 1);
+    selected.push(cardId);
+  }
+  return selected;
+}
+
 function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   const run = mustRun(state);
+  if (run.breach) {
+    const breach = run.breach;
+    const entry = breach.queue[breach.currentIndex];
+    if (!entry || entry.status !== "pending") {
+      finishRun(state, true);
+      return;
+    }
+    const cardId = entry.cardInstanceId;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      accessedCardId: cardId,
+      serverId: breach.serverId,
+      breachId: breach.breachId,
+      accessIndex: breach.currentIndex
+    };
+    const updatedQueue = breach.queue.map((candidate, index) => (index === breach.currentIndex ? { ...candidate, status: "accessed" as const } : candidate));
+    state.run = {
+      ...run,
+      accessedCardId: cardId,
+      breach: {
+        ...breach,
+        queue: updatedQueue
+      }
+    };
+    const instance = mustInstance(state.cardInstances, cardId);
+    state.cardInstances[cardId] = { ...instance, faceup: true };
+    const definition = definitionFor(state, cardId);
+    if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade") {
+      completeCurrentBreachAccess(state, "accessed");
+    }
+    return;
+  }
   const server = mustServer(state, run.attackedServerId);
   let cardId: string | undefined;
   if (server.id === "rd") cardId = state.corp.rd[0];
@@ -1246,6 +1436,10 @@ function stealAgenda(state: GameState, cardId: string): void {
   removeFromAllZones(state, cardId);
   state.runner.scoreArea.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "scoreArea" } };
+  if (state.run?.breach) {
+    completeCurrentBreachAccess(state, "stolen");
+    return;
+  }
   finishRun(state, true);
 }
 
@@ -1255,7 +1449,70 @@ function trashAccessedCard(state: GameState, cardId: string): void {
   removeFromAllZones(state, cardId);
   state.corp.archives.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
+  if (state.run?.breach) {
+    completeCurrentBreachAccess(state, "trashed");
+    return;
+  }
   finishRun(state, true);
+}
+
+function declineCurrentAccess(state: GameState): void {
+  if (state.run?.breach) {
+    completeCurrentBreachAccess(state, "declined");
+    return;
+  }
+  finishRun(state, true);
+}
+
+function completeCurrentBreachAccess(state: GameState, status: BreachEntryStatus): void {
+  const run = mustRun(state);
+  const breach = run.breach;
+  if (!breach) {
+    finishRun(state, true);
+    return;
+  }
+  const current = breach.queue[breach.currentIndex];
+  if (!current) {
+    finishRun(state, true);
+    return;
+  }
+  const finalStatus: BreachEntryStatus = status === "pending" ? "accessed" : status;
+  const queue = breach.queue.map((entry, index) => (index === breach.currentIndex ? { ...entry, status: finalStatus } : entry));
+  const nextIndex = queue.findIndex((entry, index) => index > breach.currentIndex && entry.status === "pending");
+  const accessedSummaries = [
+    ...breach.accessedSummaries,
+    {
+      entryId: current.entryId,
+      status: finalStatus,
+      cardDefinitionId: definitionFor(state, current.cardInstanceId).id
+    }
+  ];
+  const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
+  void _accessedCardId;
+  if (nextIndex === -1) {
+    state.run = {
+      ...runWithoutAccessedCard,
+      breach: {
+        ...breach,
+        queue,
+        completed: true,
+        accessedSummaries
+      }
+    };
+    finishRun(state, true);
+    return;
+  }
+  state.run = {
+    ...runWithoutAccessedCard,
+    breach: {
+      ...breach,
+      queue,
+      currentIndex: nextIndex,
+      accessedSummaries
+    }
+  };
+  state.timingPoint = "access.resolve_card";
+  state.activeSide = "runner";
 }
 
 function trashResource(state: GameState, cardId: string): void {
@@ -1905,6 +2162,7 @@ function expandDeck(side: Side, cards: Array<{ id: string; quantity: number }>, 
 }
 
 function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefinition): CardPoolVersion {
+  if (usesMvp097CardPool(runnerDeck) || usesMvp097CardPool(corpDeck)) return "0.97.0";
   if (usesMvp096CardPool(runnerDeck) || usesMvp096CardPool(corpDeck)) return "0.96.0";
   if (usesMvp095CardPool(runnerDeck) || usesMvp095CardPool(corpDeck)) return "0.95.0";
   if (usesMvp094CardPool(runnerDeck) || usesMvp094CardPool(corpDeck)) return "0.94.0";
@@ -1914,12 +2172,18 @@ function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefin
 }
 
 function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
+  if (version === "0.97.0") return MVP_0_97_BASELINE;
   if (version === "0.96.0") return MVP_0_96_BASELINE;
   if (version === "0.95.0") return MVP_0_95_BASELINE;
   if (version === "0.94.0") return MVP_0_94_BASELINE;
   if (version === "0.8.0") return MVP_0_8_BASELINE;
   if (version === "0.4.0") return MVP_0_4_BASELINE;
   return MVP_0_1_BASELINE;
+}
+
+function usesMvp097CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_097") || deck.id.includes("_0_97") || deck.id.includes("_v0_97")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v097_"));
 }
 
 function usesMvp096CardPool(deck: DeckDefinition): boolean {
@@ -1969,7 +2233,9 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
     identityCardId: deck.identity,
     deckName: deck.name,
     cardPoolSnapshotId:
-      cardPoolVersion === "0.96.0"
+      cardPoolVersion === "0.97.0"
+        ? "card-snapshot-0.97"
+        : cardPoolVersion === "0.96.0"
         ? "card-snapshot-0.96"
         : cardPoolVersion === "0.95.0"
           ? "card-snapshot-0.95"
@@ -1981,7 +2247,9 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
                 ? "card-snapshot-0.5"
                 : "mvp-0.1-demo",
     formatProfileId:
-      cardPoolVersion === "0.96.0"
+      cardPoolVersion === "0.97.0"
+        ? "local-demo-v0.97"
+        : cardPoolVersion === "0.96.0"
         ? "local-demo-v0.96"
         : cardPoolVersion === "0.95.0"
           ? "local-demo-v0.95"
@@ -1994,6 +2262,14 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
                 : "legacy-demo",
     deckHash: `legacy:${deck.id}`
   };
+}
+
+function isV097OrLater(state: GameState): boolean {
+  const version = state.baseline.engineSchemaVersion.split(".").map((part) => Number(part));
+  const [major = 0, minor = 0, patch = 0] = version;
+  if (major !== 0) return major > 0;
+  if (minor !== 97) return minor > 97;
+  return patch >= 0;
 }
 
 function canPlayCorpOperation(state: GameState, definition: CardDefinition): boolean {

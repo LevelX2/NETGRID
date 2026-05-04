@@ -1,8 +1,8 @@
-# Mechanics Coverage Matrix 0.96
+# Mechanics Coverage Matrix 0.97
 
-Status: V0.96 Trace, Link und Bidding umgesetzt
+Status: V0.97 Run, Jack-out, Breach und Multiaccess umgesetzt
 Stand: 2026-05-04
-Maschinenlesbar: `data/rules/mechanics-coverage-0.96.json`
+Maschinenlesbar: `data/rules/mechanics-coverage-0.97.json`
 
 ## Zweck
 
@@ -26,7 +26,7 @@ Statuswerte:
 | `mechanic.visibility.hidden_info_contract` | PlayerViews, PublicEvents, KI, WebSocket, Reconnect, Undo | `implemented` | P0 | sehr hoch | Dauer-Gate | Sichtbarkeit ist Gate, nicht Komfort. Jede neue Mechanik braucht negative Leaktests. |
 | `mechanic.turns.basic_actions` | Clicks, Credits, Draw, Install, Play, Advance, Score, End Turn | `implemented_limited` | P0 | mittel | erledigt | Für den aktuellen lokalen Slice ausreichend; Discard/Handlimit bleibt offen. |
 | `mechanic.card_types.core` | Identity, Event, Program, Hardware, Resource, Agenda, Operation, Asset, Upgrade, ICE | `implemented_limited` | P0 | mittel | erledigt/weiterführend | Kartentypen existieren inklusive Resource; echte Identity-Abilities fehlen. |
-| `mechanic.runs.basic_run` | Run, Approach, Rez, Encounter, Continue, Access | `implemented_limited` | P0 | hoch | erledigt/V0.97 | Grundrun spielbar; Jack-out, Breach-Queue und Multiaccess bleiben spätere Gates. |
+| `mechanic.runs.basic_run` | Run, Approach, Rez, Encounter, Movement, Access | `implemented_limited` | P0 | hoch | erledigt/V0.97 | Grundrun spielbar; V0.97 ergänzt gated Movement vor dem nächsten ICE oder Server. |
 | `mechanic.abilities.breaker_paid` | Breaker Pump und Break | `implemented_limited` | P0 | hoch | V0.93 | Spielbar als direkte Actions; V0.93 migriert intern auf Ability-Pilot. |
 | `mechanic.effects.general_kernel` | Allgemeiner Effect-/Command-Kernel | `implemented_limited` | P0 | hoch | erledigt/V0.94 | V0.93 lieferte den additiven EffectCommand-Pfad; V0.94 nutzt ihn für Damage. |
 | `mechanic.timing.paid_ability_windows` | Allgemeine Timing-/Paid-Ability-Fenster | `implemented_limited` | P0 | hoch | erledigt/weiterführend | Freigegebene Timingpunkte existieren; keine vollständige Prioritätsmaschine. |
@@ -38,9 +38,9 @@ Statuswerte:
 | `mechanic.damage.flatline` | Net/Meat/Core Damage und Flatline | `implemented_limited` | P1 | sehr hoch | erledigt/V0.94 | Net/Meat-Damage und Flatline-Grund sind spielbar; Core-Damage und Prevention bleiben gesperrt. |
 | `mechanic.resources` | Runner Resources und Tag-Resource-Interaktion | `implemented_limited` | P1 | mittel | erledigt/V0.95 | Runner-Resources sind public installierte Boardkarten; Corp darf bei getaggtem Runner für 1 Klick und 2 Credits eine installierte Resource trashen. Hosting und komplexe Resource-Abilities fehlen. |
 | `mechanic.trace.link_bidding` | Trace, Link, Bidding | `implemented_limited` | P1 | sehr hoch | erledigt/V0.96 | Trace ist als öffentliche Corp-/Runner-Bid-Sequenz spielbar. Erfolg ist `traceStrength > runnerStrength`; einziger Erfolgseffekt ist `add_tag`. |
-| `mechanic.runs.jackout_multiaccess_breach` | Jack-out, Breach-Objekt, Multiaccess, Archives-Ausbau | `open` | P1 | sehr hoch | V0.97+ | Run-Herzstück, aber erst nach M1/M2 sicher. |
-| `mechanic.identities.abilities` | Setup-, passive und ausgelöste Identity-Fähigkeiten | `open` | P1 | hoch | V0.98+ | Identities existieren als Karten, aber ohne aktive Fähigkeit. |
-| `mechanic.hidden_zone_tools` | Search, Reveal, Expose, Arrange, Shuffle, Swap | `open` | P2 | sehr hoch | V0.98+ | Braucht Choice- und Visibility-Fundament. |
+| `mechanic.runs.jackout_multiaccess_breach` | Jack-out, Breach-Objekt, Multiaccess, Archives-Ausbau | `implemented_limited` | P1 | sehr hoch | erledigt/V0.97 | Jack-out ist im V0.97-Movement-Fenster spielbar. Successful Runs nutzen eine interne Breach-Queue; R&D/HQ-Multiaccess 2 ist über lokalen Harness freigegeben. |
+| `mechanic.identities.abilities` | Setup-, passive und ausgelöste Identity-Fähigkeiten | `open` | P1 | hoch | V0.98+ | Identities existieren als Karten, aber ohne aktive Fähigkeit. Nicht in V0.97 umgesetzt. |
+| `mechanic.hidden_zone_tools` | Search, Reveal, Expose, Arrange, Shuffle, Swap | `open` | P2 | sehr hoch | V0.98+ | Nicht in V0.97 umgesetzt; braucht eigene Hidden-Zone-Tool-Gates. |
 | `mechanic.hosting.viruses.counters` | Hosting, Hosted Cards, Viren, Purge, Counter-Familien | `open` | P2 | hoch | V0.99+ | Objektbeziehungen und Counter-API fehlen. |
 | `mechanic.event_modification` | Prevention, Avoid, Interrupts, Replacement | `open` | P2 | sehr hoch | V1.x | Erst nach stabilem Effect-/Choice-/Hidden-Info-Fundament. |
 | `mechanic.deckbuilding.formats` | Faction, Influence, Agenda-Dichte, Kopien, Rotation | `implemented_limited` | P2 | mittel | V1.x | Deck-Snapshots und lokale Profile existieren; offizielle Formatregeln sind nicht umgesetzt. |
@@ -61,9 +61,9 @@ Statuswerte:
 | DEV-008 Prevention/Replacement/Interrupt | open | Bewusst spätes Hochrisiko-Gate. |
 | DEV-009 Hosting/Hosted Cards | open | Keine Engine-Beziehungen oder Karten. |
 | DEV-010 Siegpunktwert | partial | 7 Punkte für neue Formate vorhanden, Legacy 6 bleibt dokumentiert. |
-| DEV-011 Jack Out | open | Nicht spielbar. |
-| DEV-012 Multiaccess | open | Nicht spielbar. |
-| DEV-013 Archives | partial | Einfaches Modell vorhanden, facedown/Access-Ausbau offen. |
+| DEV-011 Jack Out | partial | V0.97-Movement-Jack-out spielbar; vollständige Run-Timing-Matrix bleibt spätere Härtung. |
+| DEV-012 Multiaccess | partial | R&D/HQ-Multiaccess 2 über lokalen Harness spielbar; breite Access-Modifikatoren bleiben offen. |
+| DEV-013 Archives | partial | Einfaches Queue-Modell vorhanden; vollständiger facedown/Archives-Ausbau offen. |
 | DEV-014 Public Replay | out_of_scope | Öffentliche Replay-Plattform bleibt Produkt-Nichtziel. |
 | DEV-015 UI | partial | V0.7/S01 umgesetzt; UI bleibt nicht regelautoritativer Client. |
 

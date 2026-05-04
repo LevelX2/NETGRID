@@ -169,6 +169,32 @@ const REQUIRED_MVP_0_96_MUST_IDS = [
   "M096-NOSCOPE-001",
   "M096-GATE-001"
 ];
+const REQUIRED_MVP_0_97_MUST_IDS = [
+  "M097-SHARED-001",
+  "M097-RUN-001",
+  "M097-JACK-001",
+  "M097-JACK-002",
+  "M097-JACK-003",
+  "M097-BREACH-001",
+  "M097-BREACH-002",
+  "M097-ACCESS-001",
+  "M097-ACCESS-002",
+  "M097-RD-001",
+  "M097-HQ-001",
+  "M097-ARCHIVES-001",
+  "M097-REMOTE-001",
+  "M097-VISIBILITY-001",
+  "M097-EVENT-001",
+  "M097-UNDO-001",
+  "M097-REPLAY-001",
+  "M097-RANDOM-001",
+  "M097-AI-001",
+  "M097-MP-001",
+  "M097-CARD-001",
+  "M097-DECK-001",
+  "M097-NOSCOPE-001",
+  "M097-GATE-001"
+];
 const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_REQUIREMENTS.md",
   "docs/derived/UI_REDESIGN_0.7_SPEC.md",
@@ -256,6 +282,19 @@ const REQUIRED_MVP_0_96_FINAL_DOCS = [
   "docs/derived/MVP_0.96_FINAL_REVIEW.md"
 ];
 
+const REQUIRED_MVP_0_97_REQUIREMENTS_DOCS = [
+  "docs/derived/MVP_0.97_REQUIREMENTS.md",
+  "docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md",
+  "docs/derived/MVP_0.97_TEST_MATRIX.md",
+  "docs/derived/MVP_0.97_REQUIREMENTS_REVIEW.md"
+];
+
+const REQUIRED_MVP_0_97_FINAL_DOCS = [
+  ...REQUIRED_MVP_0_97_REQUIREMENTS_DOCS,
+  "docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md",
+  "docs/derived/MVP_0.97_FINAL_REVIEW.md"
+];
+
 const MVP_0_8_DATA_FILES = [
   "data/rules/rules-baseline-0.8.json",
   "data/card-import/card-snapshot-0.8.json",
@@ -319,6 +358,16 @@ const MVP_0_96_DATA_FILES = [
 ];
 
 const REQUIRED_MVP_0_96_SCENARIOS = ["v096-trace-link.json", "v096-multiplayer-trace-smoke.json"];
+
+const MVP_0_97_DATA_FILES = [
+  "data/rules/rules-baseline-0.97.json",
+  "data/cards/demo-cards-0.97.json",
+  "data/decks/demo-decks-0.97.json",
+  "data/manifests/card-implementation-manifest-0.97.json",
+  "data/rules/mechanics-coverage-0.97.json"
+];
+
+const REQUIRED_MVP_0_97_SCENARIOS = ["v097-run-breach-multiaccess.json", "v097-multiplayer-breach-smoke.json"];
 
 describe("Phase 1 derived artifacts", () => {
   it("keeps all MVP 0.1 JSON data artifacts parseable", () => {
@@ -909,6 +958,27 @@ describe("Phase 1 derived artifacts", () => {
     expect(requirementsReview).not.toContain("ready_for_MVP_0.97_implementation: true");
   });
 
+  it("keeps MVP 0.97 Run/Breach/Multiaccess requirements frozen and mapped", () => {
+    for (const file of REQUIRED_MVP_0_97_REQUIREMENTS_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.97_REQUIREMENTS.md", "utf8");
+    const spec = readFileSync("docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.97_TEST_MATRIX.md", "utf8");
+    const requirementsReview = readFileSync("docs/derived/MVP_0.97_REQUIREMENTS_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_97_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(spec).toContain("jack_out");
+    expect(spec).toContain("Access-Queue");
+    expect(spec).toContain("RandomDrawRecords");
+    expect(requirementsReview).toContain("ready_for_MVP_0.97_implementation: true");
+    expect(requirementsReview).not.toContain("ready_for_MVP_0.98_implementation: true");
+  });
+
   it("keeps MVP 0.95 Resources and tag-interaction implementation documented and gated", () => {
     for (const file of REQUIRED_MVP_0_95_FINAL_DOCS) {
       expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
@@ -1074,6 +1144,92 @@ describe("Phase 1 derived artifacts", () => {
       expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.96");
       expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
       expect(scenario.coversCards).toContain("v096_trace_probe_ice");
+      expect(scenario.expected, file).toBeDefined();
+    }
+  });
+
+  it("keeps MVP 0.97 Run/Breach/Multiaccess implementation documented and gated", () => {
+    for (const file of REQUIRED_MVP_0_97_FINAL_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+    for (const file of MVP_0_97_DATA_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+
+    const implementationReview = readFileSync("docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md", "utf8");
+    const finalReview = readFileSync("docs/derived/MVP_0.97_FINAL_REVIEW.md", "utf8");
+    expect(implementationReview).toContain("ready_for_hardening: true");
+    expect(finalReview).toContain("MVP_0.97_done: true");
+    expect(finalReview).toContain("ready_for_MVP_0.98_requirements_freeze: true");
+
+    const baseline = JSON.parse(readFileSync("data/rules/rules-baseline-0.97.json", "utf8")) as {
+      id?: string;
+      gateAssertions?: Record<string, boolean>;
+    };
+    expect(baseline.id).toBe("rules-baseline-mvp-0.97");
+    expect(baseline.gateAssertions?.jackOutOnlyInMovementWindow).toBe(true);
+    expect(baseline.gateAssertions?.breachQueueInternalOnly).toBe(true);
+    expect(baseline.gateAssertions?.multiaccessDoesNotRevealFutureQueuedCards).toBe(true);
+    expect(baseline.gateAssertions?.hqMultiaccessUsesSeededRandomWithoutReplacement).toBe(true);
+    expect(baseline.gateAssertions?.noV098PlusMechanicsEnabled).toBe(true);
+
+    const manifest = JSON.parse(readFileSync("data/manifests/card-implementation-manifest-0.97.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      cards: Array<{
+        cardCode: string;
+        status: string;
+        sourceMode?: string;
+        resolver?: string;
+        unitTests?: string[];
+        scenarioTests?: string[];
+        visibilityTests?: string[];
+        replayTests?: string[];
+        aiSmokeTests?: string[];
+        multiplayerSmokeTests?: string[];
+      }>;
+    };
+    expect(manifest.gateAssertions?.noV098PlusMechanicsEnabled).toBe(true);
+    const playable = manifest.cards.filter((card) => card.status === "playable_mvp");
+    expect(playable.map((card) => card.cardCode)).toEqual(["v097_deep_dive_event"]);
+    expect(
+      playable.every(
+        (card) =>
+          card.sourceMode === "local_original" &&
+          card.resolver &&
+          card.unitTests?.length &&
+          card.scenarioTests?.length &&
+          card.visibilityTests?.length &&
+          card.replayTests?.length &&
+          card.aiSmokeTests?.length &&
+          card.multiplayerSmokeTests?.length
+      )
+    ).toBe(true);
+
+    const coverage = JSON.parse(readFileSync("data/rules/mechanics-coverage-0.97.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      mechanics?: Array<{ mechanicId?: string; currentStatus?: string; targetGate?: string }>;
+    };
+    expect(coverage.gateAssertions?.v097RunBreachMultiaccessImplemented).toBe(true);
+    expect(coverage.gateAssertions?.noV098PlusMechanicsImplemented).toBe(true);
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.runs.jackout_multiaccess_breach")?.currentStatus).toBe("implemented_limited");
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.identities.abilities")?.currentStatus).toBe("open");
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.hosting.viruses.counters")?.currentStatus).toBe("open");
+
+    const scenarioDir = "data/scenarios";
+    const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
+    for (const file of REQUIRED_MVP_0_97_SCENARIOS) {
+      expect(present, file).toContain(file);
+      const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as {
+        id?: string;
+        baselineId?: string;
+        requirementIds?: string[];
+        coversCards?: string[];
+        expected?: unknown;
+      };
+      expect(scenario.id, file).toMatch(/^SCN-V097-\d{3}$/);
+      expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.97");
+      expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
+      expect(scenario.coversCards).toContain("v097_deep_dive_event");
       expect(scenario.expected, file).toBeDefined();
     }
   });

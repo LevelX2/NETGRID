@@ -13,6 +13,7 @@ export type TimingPointId =
   | "runner_action.main"
   | "run.approach_ice"
   | "run.encounter_ice"
+  | "run.jack_out_window"
   | "access.resolve_card"
   | "game.checkpoint";
 
@@ -26,6 +27,7 @@ export type ActionType =
   | "advance_card"
   | "score_agenda"
   | "start_run"
+  | "jack_out"
   | "rez_ice"
   | "decline_rez"
   | "pump_breaker"
@@ -56,7 +58,9 @@ export type DemoDeckId =
   | "demo_runner_008"
   | "demo_corp_008"
   | "demo_runner_096"
-  | "demo_corp_096";
+  | "demo_corp_096"
+  | "demo_runner_097"
+  | "demo_corp_097";
 
 export type DamageType = "net" | "meat" | "core";
 
@@ -210,14 +214,14 @@ export type DeckPublicMetadata = {
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
-  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo" | "mvp-0.95-demo" | "mvp-0.96-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
-  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
-  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
-  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
-  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo" | "mvp-0.95-demo" | "mvp-0.96-demo" | "mvp-0.97-demo";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
+  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
+  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
+  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
 };
 
 export type PlayerController = {
@@ -235,8 +239,8 @@ export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
   baseline?: RulesBaseline;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096" | "demo_runner_097";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096" | "demo_corp_097";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -308,7 +312,7 @@ export type RunnerState = {
 export type RunState = {
   runId: string;
   attackedServerId: Exclude<ServerId, "new_remote">;
-  phase: "approach_ice" | "encounter_ice" | "access";
+  phase: "approach_ice" | "encounter_ice" | "movement" | "access";
   position: { kind: "ice"; serverId: Exclude<ServerId, "new_remote">; iceIndex: number } | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> };
   approachedIceId?: CardInstanceId;
   encounteredIceId?: CardInstanceId;
@@ -317,6 +321,27 @@ export type RunState = {
   successful: boolean;
   accessedCardId?: CardInstanceId;
   pendingSuccessBonusCredits?: number;
+  accessCount?: number;
+  breach?: BreachState;
+};
+
+export type AccessQueueEntry = {
+  entryId: string;
+  cardInstanceId: CardInstanceId;
+  serverId: Exclude<ServerId, "new_remote">;
+  zone: "rd" | "hq" | "archives" | "remote_root";
+  status: "pending" | "accessed" | "stolen" | "trashed" | "declined" | "skipped";
+  hiddenInfo: boolean;
+};
+
+export type BreachState = {
+  breachId: string;
+  serverId: Exclude<ServerId, "new_remote">;
+  accessMode: "single" | "multi";
+  queue: AccessQueueEntry[];
+  currentIndex: number;
+  completed: boolean;
+  accessedSummaries: Array<{ entryId: string; status: AccessQueueEntry["status"]; cardDefinitionId?: CardDefinitionId }>;
 };
 
 export type TraceState = {
@@ -524,6 +549,14 @@ export type PlayerView = {
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
     encounteredIce?: VisibleCard;
+    accessedCard?: VisibleCard;
+    breach?: {
+      breachId: string;
+      serverId: Exclude<ServerId, "new_remote">;
+      currentIndex: number;
+      remainingCount: number;
+      completed: boolean;
+    };
     successful: boolean;
   };
   deckMetadata?: {
@@ -649,6 +682,18 @@ export const MVP_0_96_BASELINE: RulesBaseline = {
   multiplayerSchemaVersion: "0.96.0",
   aiControllerSchemaVersion: "0.96.0",
   simulationSchemaVersion: "0.96.0"
+};
+
+export const MVP_0_97_BASELINE: RulesBaseline = {
+  ...MVP_0_96_BASELINE,
+  cardTextSnapshotId: "mvp-0.97-demo",
+  engineSchemaVersion: "0.97.0",
+  cardImplementationVersion: "0.97.0",
+  deviationRegistryVersion: "0.97.0",
+  playerViewSchemaVersion: "0.97.0",
+  multiplayerSchemaVersion: "0.97.0",
+  aiControllerSchemaVersion: "0.97.0",
+  simulationSchemaVersion: "0.97.0"
 };
 
 export const DEMO_CARDS: CardDefinition[] = [
@@ -993,6 +1038,17 @@ export const DEMO_CARDS: CardDefinition[] = [
     mechanics: ["install_ice", "rez_ice", "encounter_ice", "trace", "link", "bid_amount", "add_tag", "v096_local_original"]
   },
   {
+    id: "v097_deep_dive_event",
+    title: "Deep Dive Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Make a run. If successful, access 1 additional card during the breach.",
+    mechanics: ["play_event", "start_run", "breach", "multiaccess", "v097_local_original"]
+  },
+  {
     id: "v08_burst_credit_event",
     title: "Burst Credit Event",
     side: "runner",
@@ -1327,6 +1383,41 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
       { id: "simple_barrier_ice", quantity: 1 },
       { id: "simple_tag_ice", quantity: 1 },
       { id: "v096_trace_probe_ice", quantity: 3 },
+      { id: "v08_credit_surge_operation", quantity: 2 }
+    ]
+  },
+  demo_runner_097: {
+    id: "demo_runner_097",
+    name: "Runner Demo Deck 0.97 - Breach Multiaccess Harness",
+    side: "runner",
+    identity: "runner_identity_001",
+    cards: [
+      { id: "simple_economy_event", quantity: 3 },
+      { id: "simple_run_event", quantity: 2 },
+      { id: "simple_draw_event", quantity: 2 },
+      { id: "simple_fracter", quantity: 1 },
+      { id: "simple_decoder", quantity: 1 },
+      { id: "simple_killer", quantity: 2 },
+      { id: "v08_burst_credit_event", quantity: 2 },
+      { id: "v095_safehouse_resource", quantity: 1 },
+      { id: "v097_deep_dive_event", quantity: 2 }
+    ]
+  },
+  demo_corp_097: {
+    id: "demo_corp_097",
+    name: "Corp Demo Deck 0.97 - Breach Queue Harness",
+    side: "corp",
+    identity: "corp_identity_001",
+    cards: [
+      { id: "simple_agenda", quantity: 1 },
+      { id: "simple_priority_agenda", quantity: 1 },
+      { id: "v08_project_agenda", quantity: 1 },
+      { id: "simple_economy_operation", quantity: 2 },
+      { id: "simple_economy_asset", quantity: 1 },
+      { id: "simple_upgrade", quantity: 1 },
+      { id: "simple_barrier_ice", quantity: 1 },
+      { id: "simple_tag_ice", quantity: 1 },
+      { id: "v096_trace_probe_ice", quantity: 1 },
       { id: "v08_credit_surge_operation", quantity: 2 }
     ]
   }

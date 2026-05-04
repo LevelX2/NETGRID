@@ -129,6 +129,34 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(runnerInput)).not.toContain("cardInstances");
     expect(JSON.stringify(runnerInput)).not.toContain("Simple Agenda");
   });
+
+  it("keeps V0.97 breach queues hidden and chooses access from LegalActions", () => {
+    let state = toRunnerTurn(
+      createGame({
+        seed: "ai-v097-breach",
+        runnerDeckId: "demo_runner_097",
+        corpDeckId: "demo_corp_097",
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 5;
+    moveRunnerCardToGrip(state, "v097_deep_dive_event");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "v097_deep_dive_event" && action.payload?.serverId === "rd");
+
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const decision = chooseRunnerAction(input);
+    const serialized = JSON.stringify(input);
+
+    expect(input.playerView.run?.breach?.remainingCount).toBe(2);
+    expect(input.legalActions.find((action) => action.actionId === decision.actionId)?.type).toBe("access_card");
+    expect(decision.reasonCode).toBe("runner.access.open_card");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(serialized).not.toContain("cardInstances");
+    expect(serialized).not.toContain("Simple Agenda");
+    expect(serialized).not.toContain("Simple Economy Operation");
+  });
 });
 
 describe("MVP 0.3 Runner AI", () => {
@@ -264,6 +292,22 @@ describe("MVP 0.3 AI simulation harness", () => {
       expect(JSON.stringify(summary)).not.toContain("cardInstances");
       expect(JSON.stringify(summary)).not.toContain("v08_project_agenda_1");
     }
+  });
+
+  it("runs V0.97 Run/Breach decks through side-safe AI smokes", () => {
+    const summary = simulateAiGame({
+      seed: "ai-v097-run-breach",
+      runnerDeckId: "demo_runner_097",
+      corpDeckId: "demo_corp_097",
+      agendaPointsToWin: 7,
+      maxActions: 180
+    });
+
+    expect(summary.cardPoolVersion).toBe("0.97.0");
+    expect(summary.errors).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    expect(summary.finalStateHash).toMatch(/^fnv1a:/);
+    expect(JSON.stringify(summary)).not.toContain("cardInstances");
   });
 });
 

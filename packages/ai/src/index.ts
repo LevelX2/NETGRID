@@ -96,8 +96,8 @@ export type AiSimulationConfig = {
   corpDifficulty?: AiDifficulty;
   runnerProfileId?: string;
   corpProfileId?: string;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096" | "demo_runner_097";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096" | "demo_corp_097";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -126,7 +126,7 @@ export type AiSimulationSummary = {
     stateHashAfter: string;
   }>;
   errors: string[];
-  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
   metrics: AiQualityMetrics;
 };
 
@@ -315,6 +315,18 @@ export function simulateAiSoak(config: Partial<AiSimulationConfig> = {}): AiSoak
 }
 
 function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationSummary["cardPoolVersion"] {
+  if (
+    config.runnerDeck?.id.includes("_097") ||
+    config.runnerDeck?.id.includes("_v0_97") ||
+    config.corpDeck?.id.includes("_097") ||
+    config.corpDeck?.id.includes("_v0_97") ||
+    config.runnerDeck?.cards.some((card) => card.id.startsWith("v097_")) ||
+    config.corpDeck?.cards.some((card) => card.id.startsWith("v097_")) ||
+    config.runnerDeckId === "demo_runner_097" ||
+    config.corpDeckId === "demo_corp_097"
+  ) {
+    return "0.97.0";
+  }
   if (
     config.runnerDeck?.id.includes("_096") ||
     config.runnerDeck?.id.includes("_v0_96") ||

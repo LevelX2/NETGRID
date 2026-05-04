@@ -490,6 +490,99 @@ describe("MVP 0.2 multiplayer service", () => {
     if (!undo.ok) throw new Error(undo.error.message);
   });
 
+  it("handles V0.97 Breach multiaccess through submit, idempotency, reconnect and undo barrier", async () => {
+    const match = await joinedV097BreachMatch("mp-v097-breach");
+    const before = await bootstrap(match.service, match.matchId, match.runner);
+    const deepDive = mustAction(before, (action) => action.type === "play_event" && action.payload?.serverId === "rd");
+
+    expect(JSON.stringify(before)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(before)).not.toContain("Simple Economy Operation");
+
+    const started = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: deepDive.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v097-deep-dive"
+    });
+
+    expect(started.ok).toBe(true);
+    if (!started.ok) throw new Error(started.error.message);
+    expect(started.publicEvent?.visibilityClass).toBe("public");
+    expect(started.actorPayload.playerView.run?.breach).toMatchObject({ serverId: "rd", remainingCount: 2 });
+    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Economy Operation");
+
+    const duplicate = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: deepDive.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v097-deep-dive"
+    });
+    expect(duplicate.ok).toBe(true);
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.receipt.stateVersionAfter).toBe(started.receipt.stateVersionAfter);
+
+    const stale = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: deepDive.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v097-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale-state rejection");
+    expect(stale.error.code).toBe("stale_state");
+
+    const reconnected = await match.service.reconnectMatch(match.matchId, {
+      side: "runner",
+      reconnectToken: match.runner.reconnectToken
+    });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.playerView.run?.breach?.remainingCount).toBe(2);
+    expect(JSON.stringify(reconnected)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(reconnected)).not.toContain("Simple Economy Operation");
+
+    const accessAction = reconnected.legalActions.find((action) => action.type === "access_card");
+    expect(accessAction).toBeDefined();
+    if (!accessAction) throw new Error("Missing access action");
+    const access = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: reconnected.sessionToken,
+      actionId: accessAction.actionId,
+      clientKnownStateVersion: reconnected.playerView.stateVersion,
+      idempotencyKey: "v097-access-first"
+    });
+
+    expect(access.ok).toBe(true);
+    if (!access.ok) throw new Error(access.error.message);
+    expect(access.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
+    expect(access.publicEvent?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation"
+    });
+    expect(JSON.stringify(access.publicEvent?.publicPayload)).not.toContain("Simple Agenda");
+    expect(access.actorPayload.playerView.run?.breach?.remainingCount).toBe(1);
+
+    const blocked = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnected.sessionToken,
+      targetEventId: `evt_${access.receipt.stateVersionAfter}`,
+      reason: "Breach access undo"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected undo_blocked");
+    expect(blocked.error.code).toBe("undo_blocked");
+  });
+
   it("reports V0.94 Flatline as a side-safe result reason", async () => {
     const match = await joinedV094DamageMatch("mp-v094-flatline", { emptyRunnerGrip: true });
 
@@ -1076,6 +1169,54 @@ async function joinedV096TraceMatch(seed: string) {
   };
 }
 
+async function joinedV097BreachMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  const gameState = toRunnerTurnEngine(
+    createGame({
+      matchId: created.matchId,
+      seed,
+      runnerDeckId: "demo_runner_097",
+      corpDeckId: "demo_corp_097",
+      agendaPointsToWin: 7
+    })
+  );
+  gameState.runner.credits = 5;
+  moveRunnerCardToGripForTest(gameState, "v097_deep_dive_event");
+  putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+  putCorpCardOnTopOfRdForTest(gameState, "simple_economy_operation");
+  record.gameState = gameState;
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v097_breach_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
 async function bootstrap(service: MultiplayerService, matchId: string, session: PlayerSession): Promise<SidePayload> {
   const payload = await service.bootstrap(matchId, session.side, session.sessionToken);
   expect("error" in payload).toBe(false);
@@ -1110,6 +1251,14 @@ function putCorpIceOnServerForTest(state: GameState, serverId: "hq" | "rd" | "ar
   removeEverywhereForTest(state, id);
   server.ice.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
+  return id;
+}
+
+function putCorpCardOnTopOfRdForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCardForTest(state, definitionId);
+  removeEverywhereForTest(state, id);
+  state.corp.rd.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
   return id;
 }
 
