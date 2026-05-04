@@ -1689,6 +1689,11 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
 - `docs/derived/MVP_0.94_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`
+- `docs/derived/MVP_0.96_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.97_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.98_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.99_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.95_REQUIREMENTS.md`
 - `docs/derived/RESOURCE_TAG_INTERACTION_0.95_SPEC.md`
 - `docs/derived/MVP_0.95_TEST_MATRIX.md`
