@@ -1,17 +1,75 @@
 :root {
   color-scheme: dark;
-  --bg: #101316;
-  --panel: #181d21;
-  --panel-soft: #20282d;
-  --line: #33404a;
-  --text: #edf3f6;
-  --muted: #a9b5bb;
-  --runner: #42c8a3;
-  --corp: #f06a5b;
-  --agenda: #d8bd5f;
-  --ice: #74a9ff;
-  --danger: #ff7a7a;
-  --ok: #86d47f;
+  --bg: #05070a;
+  --bg-gradient: linear-gradient(180deg, #05070a 0%, #070b10 48%, #0b1117 100%);
+  --panel: #101820;
+  --panel-soft: #18222d;
+  --line: #2b3a48;
+  --text: #edf6fb;
+  --muted: #9fb1bd;
+  --runner: #52d6b8;
+  --corp: #ff816f;
+  --agenda: #e4c764;
+  --ice: #7db5ff;
+  --danger: #ff8a95;
+  --ok: #90df96;
+  --focus: #75a7ff;
+  --topbar-bg: #080c10;
+  --mark-text: #06110f;
+  --mark-mid: #2f8a6c;
+  --button-bg: #15202a;
+  --button-hover-bg: #1c2a36;
+  --primary-bg: #173756;
+  --primary-border: #3d75b8;
+  --primary-text: #edf6fb;
+  --corp-button-bg: #3b211d;
+  --corp-button-border: #9b5549;
+  --corp-button-text: #ffd9d2;
+  --field-bg: #0d1319;
+  --panel-shadow: 0 10px 24px rgb(0 0 0 / 0.32);
+  --entry-tabs-bg: #0d1319;
+  --active-control-text: #dcecff;
+  --active-control-border: #3d75b8;
+  --settings-bg: #111923;
+  --system-chip-border: #31485c;
+  --system-chip-text: #c7d7e2;
+  --system-chip-bg: #0d1319;
+  --segmented-bg: #0d1319;
+  --segmented-active-text: #06110f;
+  --match-strip-bg: #0b1117;
+  --match-strip-text: #a8bac6;
+  --board-bg: #101820;
+  --zone-chip-bg: #111923;
+  --run-active-bg: #0e2232;
+  --run-active-border: #3d75b8;
+  --run-step-bg: #0d1319;
+  --section-bg: #111923;
+  --catalog-active-bg: #13263a;
+  --catalog-active-text: #dcecff;
+  --status-bg: #121b24;
+  --status-text: #b9c8d2;
+  --status-ok-bg: #102417;
+  --status-danger-bg: #2b1418;
+  --status-implemented-bg: #101d32;
+  --lane-bg: #0d1319;
+  --lane-border: #314456;
+  --card-bg: #111923;
+  --card-hidden-bg: #151d26;
+  --card-image-border: #409be8;
+  --card-image-bg: #061a35;
+  --card-shadow: 0 8px 18px rgb(0 0 0 / 0.28);
+  --card-art-bg: linear-gradient(135deg, #213446, #2a2219);
+  --card-art-text-bg: #233140;
+  --card-hidden-art-bg: repeating-linear-gradient(135deg, #17212b 0, #17212b 8px, #24313d 8px, #24313d 16px);
+  --tooltip-bg: #101820;
+  --tooltip-shadow: 0 12px 28px rgb(0 0 0 / 0.38);
+  --accent-mix-bg: #0b1117;
+  --accent-mix-text: #ffffff;
+  --access-modal-bg: #101820;
+  --access-modal-border: #30445a;
+  --access-modal-shadow: 0 24px 70px rgb(0 0 0 / 0.46);
+  --danger-button-bg: #32181d;
+  --danger-button-border: #8c4652;
   --chronicle-turn: #74a9ff;
   --chronicle-economy: #86d47f;
   --chronicle-card: #42c8a3;
@@ -30,7 +88,7 @@ html,
 body {
   min-height: 100%;
   margin: 0;
-  background: var(--bg);
+  background: var(--bg-gradient, var(--bg));
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
 }
@@ -58,7 +116,7 @@ select {
   gap: 16px;
   padding: 14px 18px;
   border-bottom: 1px solid var(--line);
-  background: #13181c;
+  background: var(--topbar-bg);
 }
 
 .brand {
@@ -74,7 +132,7 @@ select {
   display: grid;
   place-items: center;
   border-radius: 6px;
-  color: #11100e;
+  color: var(--mark-text);
   background: linear-gradient(135deg, var(--runner), var(--agenda), var(--corp));
 }
 
@@ -139,13 +197,15 @@ select {
 }
 
 .button.primary {
-  background: #20473c;
-  border-color: #2f7f69;
+  background: var(--primary-bg);
+  border-color: var(--primary-border);
+  color: var(--primary-text);
 }
 
 .button.corp {
-  background: #4a251f;
-  border-color: #8d4638;
+  background: var(--corp-button-bg);
+  border-color: var(--corp-button-border);
+  color: var(--corp-button-text);
 }
 
 .button:disabled {
@@ -273,7 +333,7 @@ select {
   border: 0;
   border-right: 1px solid var(--line);
   color: var(--muted);
-  background: #151a1f;
+  background: var(--entry-tabs-bg);
   cursor: pointer;
 }
 
@@ -469,7 +529,7 @@ select {
 
 .catalogItem:hover,
 .catalogItem.active {
-  background: #20282d;
+  background: var(--catalog-active-bg);
 }
 
 .catalogItem strong,
@@ -532,7 +592,7 @@ select {
   border-radius: 6px;
   padding: 4px 7px;
   color: var(--muted);
-  background: #12181d;
+  background: var(--section-bg);
   font-size: 11px;
   overflow-wrap: anywhere;
 }
@@ -572,7 +632,7 @@ select {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #12181d;
+  background: var(--section-bg);
   color: var(--muted);
   font-size: 12px;
 }
@@ -615,7 +675,7 @@ select {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #12181d;
+  background: var(--section-bg);
   color: var(--muted);
   font-size: 12px;
   overflow-wrap: anywhere;
@@ -714,7 +774,7 @@ select {
   padding: 9px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #12181d;
+  background: var(--section-bg);
   color: var(--muted);
   overflow-wrap: anywhere;
 }
@@ -756,7 +816,7 @@ select {
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #12181d;
+  background: var(--section-bg);
 }
 
 .deckMini {
@@ -778,7 +838,7 @@ select {
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #12181d;
+  background: var(--section-bg);
 }
 
 .hashLine {
@@ -856,7 +916,7 @@ select {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #12181d;
+  background: var(--section-bg);
 }
 
 .stat strong {
@@ -913,7 +973,7 @@ select {
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--muted);
-  background: #f7fafc;
+  background: var(--zone-chip-bg);
   font-size: 12px;
   font-weight: 700;
 }
@@ -925,7 +985,7 @@ select {
   gap: 6px;
   align-content: flex-start;
   padding: 6px;
-  border: 1px dashed #3d4a54;
+  border: 1px dashed var(--lane-border);
   border-radius: 6px;
   overflow: visible;
 }
@@ -949,7 +1009,7 @@ select {
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 7px;
-  background: #192128;
+  background: var(--card-bg);
   overflow-wrap: anywhere;
   outline: 0;
   z-index: 1;
@@ -962,7 +1022,7 @@ select {
 }
 
 .card.hidden {
-  background: repeating-linear-gradient(135deg, #171d22 0, #171d22 8px, #202930 8px, #202930 16px);
+  background: var(--card-hidden-art-bg);
 }
 
 .card.agenda {
@@ -1024,9 +1084,9 @@ select {
   padding: 10px;
   border: 1px solid color-mix(in srgb, var(--runner), var(--line));
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--tooltip-bg);
   color: var(--text);
-  box-shadow: 0 12px 28px rgb(34 47 62 / 0.22);
+  box-shadow: var(--tooltip-shadow);
   font-size: 12px;
   line-height: 1.35;
   opacity: 0;
@@ -1071,7 +1131,7 @@ select {
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #18231e;
+  background: color-mix(in srgb, var(--runner), var(--panel) 88%);
   margin-bottom: 12px;
 }
 
@@ -1168,8 +1228,8 @@ select {
   height: 30px;
   border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line) 42%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--chronicle-accent), white 86%);
-  color: color-mix(in srgb, var(--chronicle-accent), black 25%);
+  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 86%);
+  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 34%);
 }
 
 .chronicleContent {
@@ -1198,8 +1258,8 @@ select {
   padding: 1px 5px;
   border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line) 35%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chronicle-accent), white 88%);
-  color: color-mix(in srgb, var(--chronicle-accent), black 38%);
+  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 88%);
+  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 46%);
   font: inherit;
   font-weight: inherit;
   line-height: 1.25;
@@ -1228,8 +1288,8 @@ select {
   padding: 2px 7px;
   border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line));
   border-radius: 999px;
-  background: color-mix(in srgb, var(--chronicle-accent), white 88%);
-  color: color-mix(in srgb, var(--chronicle-accent), black 40%);
+  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 88%);
+  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 48%);
   font-size: 11px;
   font-weight: 700;
   line-height: 1.35;
@@ -1259,8 +1319,8 @@ select {
   padding: 2px 7px;
   border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line) 45%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--chronicle-accent), white 91%);
-  color: color-mix(in srgb, var(--chronicle-accent), black 50%);
+  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 91%);
+  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 55%);
   font-size: 12px;
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -1273,9 +1333,9 @@ select {
   padding: 5px 7px;
   border: 1px solid color-mix(in srgb, var(--chronicle-card), var(--line) 55%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chronicle-card), white 93%);
+  background: color-mix(in srgb, var(--chronicle-card), var(--accent-mix-bg) 93%);
   cursor: help;
-  color: color-mix(in srgb, var(--chronicle-card), black 38%);
+  color: color-mix(in srgb, var(--chronicle-card), var(--accent-mix-text) 46%);
   font: inherit;
   font-size: 12px;
   line-height: 1.35;
@@ -1306,10 +1366,10 @@ select {
   padding: 10px;
   border: 1px solid color-mix(in srgb, var(--ice), var(--line));
   border-radius: 7px;
-  background: #ffffff;
+  background: var(--tooltip-bg);
   color: var(--text);
   font-weight: 400;
-  box-shadow: 0 12px 28px rgb(34 47 62 / 0.22);
+  box-shadow: var(--tooltip-shadow);
   line-height: 1.35;
   opacity: 0;
   pointer-events: none;
@@ -1386,10 +1446,10 @@ select {
   display: grid;
   gap: 14px;
   padding: 18px;
-  border: 1px solid #b8c8d8;
+  border: 1px solid var(--access-modal-border);
   border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 24px 70px rgb(15 33 50 / 0.34);
+  background: var(--access-modal-bg);
+  box-shadow: var(--access-modal-shadow);
   overflow: auto;
 }
 
@@ -1446,8 +1506,8 @@ select {
 }
 
 .button.dangerButton {
-  border-color: #e6a1aa;
-  background: #fff0f2;
+  border-color: var(--danger-button-border);
+  background: var(--danger-button-bg);
   color: var(--danger);
 }
 
@@ -1621,9 +1681,10 @@ select {
 }
 
 /* V0.7 Clean High Contrast overrides */
-:root {
+:root[data-theme="white"] {
   color-scheme: light;
   --bg: #edf5f2;
+  --bg-gradient: linear-gradient(180deg, #edf5f2 0%, #f5f7fb 54%, #eef3f7 100%);
   --panel: #ffffff;
   --panel-soft: #e8f0f3;
   --line: #c9d5e2;
@@ -1636,6 +1697,62 @@ select {
   --danger: #b42335;
   --ok: #1d7a45;
   --focus: #245cff;
+  --topbar-bg: #fbfdfc;
+  --mark-text: #ffffff;
+  --mark-mid: #2f8a6c;
+  --button-bg: #f7fafc;
+  --button-hover-bg: #eef5ff;
+  --primary-bg: #e7f0ff;
+  --primary-border: #8bb5f5;
+  --primary-text: #0f3f8c;
+  --corp-button-bg: #fff0e7;
+  --corp-button-border: #dda174;
+  --corp-button-text: #8a3c10;
+  --field-bg: #ffffff;
+  --panel-shadow: 0 10px 24px rgba(42, 63, 88, 0.08);
+  --entry-tabs-bg: #f6f8fb;
+  --active-control-text: #0f3f8c;
+  --active-control-border: #bfd2e8;
+  --settings-bg: #f8fbff;
+  --system-chip-border: #bfd2e8;
+  --system-chip-text: #31516f;
+  --system-chip-bg: #ffffff;
+  --segmented-bg: #ffffff;
+  --segmented-active-text: #ffffff;
+  --match-strip-bg: #eaf1f8;
+  --match-strip-text: #4b5d72;
+  --board-bg: #ffffff;
+  --zone-chip-bg: #f7fafc;
+  --run-active-bg: #f3f8ff;
+  --run-active-border: #9bbff4;
+  --run-step-bg: #ffffff;
+  --section-bg: #f8fbff;
+  --catalog-active-bg: #eaf3ff;
+  --catalog-active-text: #0f3f8c;
+  --status-bg: #eef4fa;
+  --status-text: #4c5b6b;
+  --status-ok-bg: #e9f8ee;
+  --status-danger-bg: #fff0f2;
+  --status-implemented-bg: #ecf2ff;
+  --lane-bg: #ffffff;
+  --lane-border: #b9c8d8;
+  --card-bg: #ffffff;
+  --card-hidden-bg: #eef2f6;
+  --card-image-border: #0f80d7;
+  --card-image-bg: #061a35;
+  --card-shadow: 0 8px 18px rgba(9, 37, 78, 0.16);
+  --card-art-bg: linear-gradient(135deg, #dcecff, #fff7ea);
+  --card-art-text-bg: #d9e4ee;
+  --card-hidden-art-bg: repeating-linear-gradient(135deg, #d8dee6 0, #d8dee6 8px, #eef2f6 8px, #eef2f6 16px);
+  --tooltip-bg: #ffffff;
+  --tooltip-shadow: 0 12px 28px rgb(34 47 62 / 0.22);
+  --accent-mix-bg: #ffffff;
+  --accent-mix-text: #000000;
+  --access-modal-bg: #ffffff;
+  --access-modal-border: #b8c8d8;
+  --access-modal-shadow: 0 24px 70px rgb(15 33 50 / 0.34);
+  --danger-button-bg: #fff0f2;
+  --danger-button-border: #e6a1aa;
   --chronicle-turn: #3c6fc4;
   --chronicle-economy: #1d7a45;
   --chronicle-card: #08766a;
@@ -1648,7 +1765,7 @@ select {
 
 html,
 body {
-  background: linear-gradient(180deg, #edf5f2 0%, #f5f7fb 54%, #eef3f7 100%);
+  background: var(--bg-gradient, var(--bg));
 }
 
 button:focus-visible,
@@ -1660,41 +1777,41 @@ textarea:focus-visible {
 }
 
 .topbar {
-  background: #fbfdfc;
+  background: var(--topbar-bg);
   box-shadow: 0 1px 0 var(--line);
 }
 
 .mark {
-  color: #ffffff;
-  background: linear-gradient(135deg, var(--runner), #2f8a6c 48%, var(--corp));
+  color: var(--mark-text);
+  background: linear-gradient(135deg, var(--runner), var(--mark-mid) 48%, var(--corp));
 }
 
 .button {
-  background: #f7fafc;
+  background: var(--button-bg);
 }
 
 .button:hover {
   border-color: var(--runner);
-  background: #eef5ff;
+  background: var(--button-hover-bg);
 }
 
 .button.primary {
-  background: #e7f0ff;
-  border-color: #8bb5f5;
-  color: #0f3f8c;
+  background: var(--primary-bg);
+  border-color: var(--primary-border);
+  color: var(--primary-text);
 }
 
 .button.corp {
-  background: #fff0e7;
-  border-color: #dda174;
-  color: #8a3c10;
+  background: var(--corp-button-bg);
+  border-color: var(--corp-button-border);
+  color: var(--corp-button-text);
 }
 
 input,
 select,
 .seed,
 .deckTextArea {
-  background: #ffffff;
+  background: var(--field-bg);
 }
 
 .setup.v07Entry {
@@ -1745,7 +1862,7 @@ select,
   border: 1px solid #bfd2e8;
   border-radius: 6px;
   color: #31516f;
-  background: #ffffff;
+  background: var(--segmented-bg);
   font-size: 12px;
 }
 
@@ -1754,28 +1871,28 @@ select,
 .deckPanel,
 .panel {
   border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 10px 24px rgba(42, 63, 88, 0.08);
+  background: var(--panel);
+  box-shadow: var(--panel-shadow);
 }
 
 .entryTabs {
-  background: #f6f8fb;
-  box-shadow: 0 10px 24px rgba(42, 63, 88, 0.08);
+  background: var(--entry-tabs-bg);
+  box-shadow: var(--panel-shadow);
 }
 
 .entryTab.active {
-  color: #0f3f8c;
-  border-color: #bfd2e8;
-  background: #ffffff;
+  color: var(--active-control-text);
+  border-color: var(--active-control-border);
+  background: var(--panel);
 }
 
 .tabs,
 .tab {
-  background: #f6f8fb;
+  background: var(--entry-tabs-bg);
 }
 
 .tab.active {
-  background: #ffffff;
+  background: var(--panel);
   color: var(--runner);
   font-weight: 700;
 }
@@ -1790,6 +1907,7 @@ select,
   padding: 14px;
 }
 
+.colorSchemeSettings,
 .cardDisplaySettings {
   grid-column: 1 / -1;
   display: flex;
@@ -1800,7 +1918,7 @@ select,
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f8fbff;
+  background: var(--settings-bg);
 }
 
 .cardDisplaySettings.compact {
@@ -1818,7 +1936,7 @@ select,
   padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #f8fbff;
+  background: var(--settings-bg);
 }
 
 .audioSettings label {
@@ -1847,7 +1965,11 @@ select,
   padding: 4px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--board-bg);
+}
+
+.segmented.themeToggle {
+  grid-template-columns: repeat(2, minmax(84px, 1fr));
 }
 
 .segmented button {
@@ -1864,7 +1986,7 @@ select,
 }
 
 .segmented button.active {
-  color: #ffffff;
+  color: var(--segmented-active-text);
   background: var(--runner);
 }
 
@@ -1876,8 +1998,8 @@ select,
 }
 
 .matchStrip {
-  background: #eaf1f8;
-  color: #4b5d72;
+  background: var(--match-strip-bg);
+  color: var(--match-strip-text);
 }
 
 .main {
@@ -1904,7 +2026,7 @@ select,
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--board-bg);
 }
 
 .boardHeader.corp .eyebrow {
@@ -1922,7 +2044,7 @@ select,
   padding: 5px 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #f7fafc;
+  background: var(--zone-chip-bg);
   color: var(--muted);
   font-size: 12px;
 }
@@ -1933,12 +2055,12 @@ select,
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--board-bg);
 }
 
 .runTimeline.active {
-  border-color: #9bbff4;
-  background: #f3f8ff;
+  border-color: var(--run-active-border);
+  background: var(--run-active-bg);
 }
 
 .runTimelineHead {
@@ -1961,12 +2083,12 @@ select,
   border: 1px solid var(--line);
   border-radius: 6px;
   color: var(--muted);
-  background: #ffffff;
+  background: var(--board-bg);
   font-size: 12px;
 }
 
 .runSteps .current {
-  color: #ffffff;
+  color: var(--segmented-active-text);
   border-color: var(--runner);
   background: var(--runner);
 }
@@ -2005,36 +2127,36 @@ select,
 .catalogMetaGrid span,
 .deckEmpty,
 .event {
-  background: #f8fbff;
+  background: var(--section-bg);
 }
 
 .catalogItem:hover,
 .catalogItem.active {
-  background: #eaf3ff;
+  background: var(--catalog-active-bg);
 }
 
 .catalogItem.active strong {
-  color: #0f3f8c;
+  color: var(--catalog-active-text);
 }
 
 .statusBadge {
-  background: #eef4fa;
-  color: #4c5b6b;
+  background: var(--status-bg);
+  color: var(--status-text);
 }
 
 .statusBadge.playable,
 .statusBadge.deck_legal {
-  background: #e9f8ee;
+  background: var(--status-ok-bg);
   color: var(--ok);
 }
 
 .statusBadge.blocked {
-  background: #fff0f2;
+  background: var(--status-danger-bg);
   color: var(--danger);
 }
 
 .statusBadge.implemented {
-  background: #ecf2ff;
+  background: var(--status-implemented-bg);
   color: var(--ice);
 }
 
@@ -2043,8 +2165,8 @@ select,
 }
 
 .lane {
-  border-color: #b9c8d8;
-  background: #ffffff;
+  border-color: var(--lane-border);
+  background: var(--lane-bg);
 }
 
 .cards {
@@ -2059,7 +2181,7 @@ select,
   grid-template-rows: minmax(0, 1fr) auto auto auto;
   gap: 5px;
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--card-bg);
   text-align: left;
   cursor: pointer;
 }
@@ -2072,9 +2194,9 @@ select,
   grid-template-rows: 1fr;
   gap: 0;
   padding: 0;
-  border-color: #0f80d7;
-  background: #061a35;
-  box-shadow: 0 8px 18px rgba(9, 37, 78, 0.16);
+  border-color: var(--card-image-border);
+  background: var(--card-image-bg);
+  box-shadow: var(--card-shadow);
 }
 
 .card.withImage.preview {
@@ -2118,12 +2240,12 @@ select,
   display: block;
   min-height: 28px;
   border-radius: 5px;
-  background: linear-gradient(135deg, #dcecff, #fff7ea);
+  background: var(--card-art-bg);
 }
 
 .card.textCard .cardArt {
   min-height: 6px;
-  background: #d9e4ee;
+  background: var(--card-art-text-bg);
 }
 
 .card.compactCard {
@@ -2131,15 +2253,15 @@ select,
 }
 
 .card.hidden {
-  background: #eef2f6;
+  background: var(--card-hidden-bg);
 }
 
 .card.hidden.withImage {
-  background: #061a35;
+  background: var(--card-image-bg);
 }
 
 .card.hidden .cardArt {
-  background: repeating-linear-gradient(135deg, #d8dee6 0, #d8dee6 8px, #eef2f6 8px, #eef2f6 16px);
+  background: var(--card-hidden-art-bg);
 }
 
 .cardTitle,
@@ -2164,7 +2286,7 @@ select,
   padding: 9px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #f8fbff;
+  background: var(--section-bg);
   color: var(--text);
   font-size: 13px;
   line-height: 1.4;
@@ -2195,7 +2317,7 @@ select,
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: #f8fbff;
+  background: var(--section-bg);
 }
 
 .diagnosticsDrawer dt {
@@ -2230,6 +2352,7 @@ select,
   .topbar,
   .toolbar,
   .matchStrip,
+  .colorSchemeSettings,
   .cardDisplaySettings,
   .gameOverFooter {
     align-items: stretch;

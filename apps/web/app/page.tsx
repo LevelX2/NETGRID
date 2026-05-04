@@ -14,6 +14,7 @@ import {
   Layers3,
   Link2,
   ListFilter,
+  Moon,
   PanelRightOpen,
   Play,
   Plus,
@@ -23,6 +24,7 @@ import {
   Shield,
   SlidersHorizontal,
   Sparkles,
+  Sun,
   Trash2,
   Upload,
   UserPlus,
@@ -45,6 +47,7 @@ const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.
 const SESSION_KEY = "netrunner-mvp-0-3-session";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
 const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
+const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_004_snapshot_v0_6";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
 
@@ -53,6 +56,7 @@ type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_ru
 type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 type AiDifficulty = "easy" | "normal" | "hard";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
+type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
 
 type SeriesResultSummary = {
@@ -625,6 +629,8 @@ export default function Page() {
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
+  const [colorSchemeLoaded, setColorSchemeLoaded] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioVolume, setAudioVolume] = useState(0.45);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
@@ -654,6 +660,22 @@ export default function Page() {
       else setNotice("Session konnte nicht geladen werden.");
     });
   }, []);
+
+  useEffect(() => {
+    const storedScheme = window.localStorage.getItem(COLOR_SCHEME_STORAGE_KEY);
+    if (storedScheme === "black" || storedScheme === "white") {
+      document.documentElement.dataset.theme = storedScheme;
+      setColorScheme(storedScheme);
+    } else {
+      document.documentElement.dataset.theme = "black";
+    }
+    setColorSchemeLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = colorScheme;
+    if (colorSchemeLoaded) window.localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, colorScheme);
+  }, [colorScheme, colorSchemeLoaded]);
 
   useEffect(() => {
     const storedDecks = window.localStorage.getItem(DECK_STORAGE_KEY);
@@ -1240,7 +1262,7 @@ export default function Page() {
 
   if (!session || !payload || !activeView) {
     return (
-      <main className="app">
+      <main className="app" data-theme={colorScheme}>
         <header className="topbar">
           <Brand subtitle="V0.7 UI · private Matches" />
           <ConnectionBadge text={statusText} state={connection} />
@@ -1463,9 +1485,11 @@ export default function Page() {
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardDisplayMode={cardDisplayMode}
+              colorScheme={colorScheme}
               onAudioEnabled={setAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardDisplayMode={setCardDisplayMode}
+              onColorScheme={setColorScheme}
             />
           ) : null}
           </div>
@@ -1475,7 +1499,7 @@ export default function Page() {
   }
 
   return (
-    <main className="app">
+    <main className="app" data-theme={colorScheme}>
       <header className="topbar">
         <Brand subtitle={`V0.7 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
         <div className="toolbar">
@@ -1816,16 +1840,20 @@ function OptionsPanel({
   audioEnabled,
   audioVolume,
   cardDisplayMode,
+  colorScheme,
   onAudioEnabled,
   onAudioVolume,
-  onCardDisplayMode
+  onCardDisplayMode,
+  onColorScheme
 }: {
   audioEnabled: boolean;
   audioVolume: number;
   cardDisplayMode: CardDisplayMode;
+  colorScheme: ColorScheme;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
+  onColorScheme(value: ColorScheme): void;
 }) {
   return (
     <section className="optionsPanel panel">
@@ -1837,11 +1865,33 @@ function OptionsPanel({
         <SlidersHorizontal size={18} />
       </div>
       <div className="optionsContent">
+        <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
         <BoardPreview displayMode={cardDisplayMode} />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
       </div>
     </section>
+  );
+}
+
+function ColorSchemeSettings({ scheme, onChange }: { scheme: ColorScheme; onChange(value: ColorScheme): void }) {
+  return (
+    <div className="colorSchemeSettings">
+      <div>
+        <span className="settingsTitle">Farbschema</span>
+        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+      </div>
+      <div className="segmented themeToggle" role="group" aria-label="Farbschema">
+        <button className={scheme === "black" ? "active" : ""} onClick={() => onChange("black")} type="button" title="Schwarzes Farbschema" aria-label="Schwarzes Farbschema">
+          <Moon size={15} />
+          Schwarz
+        </button>
+        <button className={scheme === "white" ? "active" : ""} onClick={() => onChange("white")} type="button" title="Weißes Farbschema" aria-label="Weißes Farbschema">
+          <Sun size={15} />
+          Weiß
+        </button>
+      </div>
+    </div>
   );
 }
 
