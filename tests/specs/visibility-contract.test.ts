@@ -40,6 +40,13 @@ describe("Client visibility contract", () => {
     expect(page).toContain("Du hast das Spiel verloren.");
     expect(page).toContain("playResultSound");
     expect(page).toContain("AudioSettings");
+    expect(page).toContain("primeAudio");
+    expect(page).toContain("sharedAudioContext");
+    expect(page).toContain("audioMenuOpen");
+    expect(page).toContain("audioPopover");
+    expect(page).toContain("Runner-Rig");
+    expect(page).toContain("RunnerRigStrip");
+    expect(page).toContain("runnerRigStrip");
     expect(page).toContain("Regelmatch · 7 Agendapunkte");
     expect(page).toContain("Private Matchserie · Seitenwechsel");
     expect(page).toContain("Nächstes Serienspiel");
@@ -49,9 +56,34 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("resultSummary.sessionToken");
   });
 
-  it("keeps the V1.0.2 deck library and join handshake explicit without adding browser authority", () => {
+  it("keeps the V1.0.3 matchstart lobby explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.2"');
+    const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.3"');
+    expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
+    expect(matchStart).toContain("Mensch gegen KI");
+    expect(matchStart).toContain("KI gegen KI · Simulation");
+    expect(page).toContain("Seitenzuteilung");
+    expect(page).toContain("Deine Seite");
+    expect(matchStart).toContain("Auslosen");
+    expect(page).toContain("Match erstellen");
+    expect(page).toContain("Beitreten");
+    expect(page).toContain("Startbereitschaftslobby");
+    expect(page).toContain("showingStartLobby");
+    expect(page).toContain("Ich bin bereit");
+    expect(page).toContain("Bereitschaft zurücknehmen");
+    expect(page).toContain("Zurück zur Auswahl");
+    expect(page).toContain("returnToSetupFromLobby");
+    expect(page).toContain("Startet automatisch, sobald beide bereit sind.");
+    expect(page).toContain("Zielwert {start.agendaPointsToWin} Agenda-Punkte");
+    expect(page).toContain("Agenda-Punkte, die für den Spielsieg erreicht werden müssen.");
+    expect(page).toContain("LobbyChatMessage");
+    expect(page).toContain("serverLabelFromId");
+    expect(page).toContain('if (serverId === "hq") return "HQ"');
+    expect(page).toContain("netrunner.displayName");
+    expect(page).toContain("netrunner.recentSessions");
+    expect(page).toContain("Letzte Sitzung");
+    expect(page).toContain("Wieder verbinden");
     expect(page).toContain("Meine Decks");
     expect(page).toContain("Speichern");
     expect(page).toContain("Vorgefertigte Decks anzeigen");
@@ -66,6 +98,12 @@ describe("Client visibility contract", () => {
     expect(page).toContain("participantADecks");
     expect(page).toContain("participantBDecks");
     expect(page).toContain("pendingDeckHandshake");
+    expect(page).toContain("set_ready");
+    expect(page).toContain("cancel_countdown");
+    expect(page).toContain("send_lobby_chat");
+    expect(page).toContain("chatMessagesRef");
+    expect(page).toContain("element.scrollTop = element.scrollHeight");
+    expect(page).toContain("lobby_update");
     expect(page).toContain("validateDeckForMatch");
     expect(page).toContain("aiDeckPolicy");
     expect(page).toContain("viewerAgendaPoints");

@@ -107,3 +107,6 @@
 - `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.2.
 - `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`: Implementation Review für die umgesetzten V1.0.2-Cues, KI-Pacing, Highlights und Aktionsaudio.
 - `docs/derived/V1_0_2_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.2.
+- `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`: Planung und Umsetzungsergebnis für getrennte Matchstart-Entscheidungen, Auslosen, Startbereitschaftslobby und Lobbychat.
+- `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.3 Matchstart-UX.
+- `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`: gesammelte Kandidaten für den nächsten UX-Härtungsschritt nach V1.0.3, aktuell erstelltes Match zurücknehmen/ändern/neu erstellen, Match abbrechen/aufgeben, Gegnernamen sichtbarer anzeigen und deutschsprachige UI-Regelbegriffe per Glossar abgleichen.

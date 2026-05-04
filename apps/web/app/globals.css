@@ -252,6 +252,23 @@ select {
   border-color: #704044;
 }
 
+.audioMenu {
+  position: relative;
+}
+
+.audioPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 60;
+  width: min(280px, calc(100vw - 28px));
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--overlay-shadow);
+}
+
 .setup {
   display: grid;
   place-items: start center;
@@ -296,6 +313,24 @@ select {
 
 .entryNotice {
   width: min(980px, 100%);
+  margin: 0;
+}
+
+.resumeSessionPanel {
+  width: min(780px, 100%);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.resumeSessionPanel h2,
+.resumeSessionPanel p {
   margin: 0;
 }
 
@@ -1112,8 +1147,7 @@ select {
 }
 
 .deckHandshakeHint,
-.deckSaveStatus,
-.pendingLobbyBox {
+.deckSaveStatus {
   display: grid;
   align-items: center;
   min-height: 38px;
@@ -1124,12 +1158,6 @@ select {
   background: var(--section-bg);
   color: var(--muted);
   font-size: 12px;
-}
-
-.pendingLobbyBox {
-  width: min(1180px, 100%);
-  grid-template-columns: auto minmax(220px, 1fr) auto;
-  gap: 10px;
 }
 
 .deckSaveStatus.dirty {
@@ -2763,6 +2791,24 @@ select,
   margin-top: 8px;
 }
 
+.runnerRigStrip {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--section-bg);
+}
+
+.runnerRigStrip h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.miniCards {
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+}
+
 .cardPreviewPanel .card.preview .cardRulesPreview {
   display: block;
   -webkit-line-clamp: unset;
@@ -2986,6 +3032,125 @@ select,
   .chronicleCategory {
     justify-self: start;
   }
+}
+
+.startLobbyPanel {
+  width: min(980px, 100%);
+  box-sizing: border-box;
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.startLobbyHeader,
+.joinLinkRow,
+.lobbyActions,
+.lobbyChatInput {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.startLobbyHeader {
+  justify-content: space-between;
+}
+
+.startLobbyHeaderActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.startLobbyHeader h2 {
+  margin: 2px 0 0;
+  font-size: 20px;
+}
+
+.statusPill {
+  padding: 5px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.statusPill.online {
+  color: var(--ok);
+}
+
+.statusPill.connecting {
+  color: var(--agenda);
+}
+
+.joinLinkRow input,
+.lobbyChatInput input {
+  min-width: 0;
+  flex: 1;
+}
+
+.lobbyFacts,
+.lobbyParticipants,
+.readinessSummary {
+  display: grid;
+  gap: 10px;
+}
+
+.lobbyFacts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lobbyFacts span,
+.lobbyParticipantCard,
+.readinessSummary span {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: var(--panel-soft);
+}
+
+.readinessSummary {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.lobbyParticipants {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.lobbyParticipantCard {
+  display: grid;
+  gap: 5px;
+}
+
+.lobbyParticipantCard span,
+.countdownText,
+.lobbyChatMessages span,
+.muted {
+  color: var(--muted);
+}
+
+.lobbyChat {
+  display: grid;
+  gap: 10px;
+}
+
+.lobbyChatMessages {
+  display: grid;
+  gap: 6px;
+  max-height: 150px;
+  overflow: auto;
+}
+
+.lobbyChatMessages p {
+  margin: 0;
+  display: grid;
+  gap: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

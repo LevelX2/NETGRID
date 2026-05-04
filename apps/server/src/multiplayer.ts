@@ -37,7 +37,7 @@ import {
   type ResolvedParticipantDeckSetup
 } from "./deck-setup";
 
-export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "waiting_for_joiner_decks" | "active" | "finished";
+export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "waiting_for_joiner_decks" | "ready_check" | "countdown" | "active" | "finished";
 export type HostSideSelection = Side | "random";
 export type MatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
 export type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
@@ -46,6 +46,7 @@ export type TokenKind = "join" | "session" | "reconnect";
 export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
 export type SeriesPlayerSlot = "player_a" | "player_b";
 export type SeriesStatus = "active" | "between_games" | "finished";
+export type ConnectionQuality = "online" | "unstable" | "offline";
 
 export type MatchSettings = {
   agendaPointsToWin: number;
@@ -112,6 +113,52 @@ export type GameResultSummary = {
   finishedAt: string;
   finalStateHash: string;
   series?: SeriesResultSummary;
+};
+
+export type LobbyParticipantPayload = {
+  displayName: string;
+  side?: Side;
+  runnerDeckReady: boolean;
+  corpDeckReady: boolean;
+  connected: boolean;
+  connectionQuality: ConnectionQuality;
+  ready: boolean;
+};
+
+export type LobbyChatMessage = {
+  id: number;
+  side: Side;
+  displayName: string;
+  sentAt: string;
+  text: string;
+};
+
+export type MatchStartLobbyState = {
+  hostReady: boolean;
+  joinerReady: boolean;
+  countdownSeconds: 3 | 5 | 10;
+  countdownStartedAt?: string;
+  countdownEndsAt?: string;
+  agendaPointsToWin: number;
+  matchFormat: MatchFormat;
+  sideAssignment: {
+    runnerPlayer: SeriesPlayerSlot;
+    corpPlayer: SeriesPlayerSlot;
+  };
+  chatMessages: LobbyChatMessage[];
+};
+
+export type MatchStartLobbyPayload = {
+  hostReady: boolean;
+  joinerReady: boolean;
+  countdownSeconds: 3 | 5 | 10;
+  countdownStartedAt?: string;
+  countdownEndsAt?: string;
+  agendaPointsToWin: number;
+  matchFormat: MatchFormat;
+  sideAssignment: MatchStartLobbyState["sideAssignment"];
+  participants: Record<SeriesPlayerSlot, LobbyParticipantPayload>;
+  chatMessages: LobbyChatMessage[];
 };
 
 export type MatchRecord = {
@@ -229,6 +276,7 @@ export type StoredMatch = {
   sessions: SessionRecord[];
   tokens: TokenRecord[];
   gameState: GameState;
+  startLobby?: MatchStartLobbyState;
   privateDeckSnapshots?: {
     runner: DeckSnapshot;
     corp: DeckSnapshot;
@@ -277,10 +325,11 @@ export type LobbyPayload = {
   side: Side;
   eventTail: PublicGameEvent[];
   opponentStatus: { side: Side; connected: boolean };
-  pendingDeckHandshake: {
+  pendingDeckHandshake?: {
     required: boolean;
     message: string;
   };
+  startLobby?: MatchStartLobbyPayload;
 };
 
 export type ServicePayload = SidePayload | LobbyPayload;
@@ -306,6 +355,7 @@ export type CreateMatchResult = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  lobby?: MatchStartLobbyPayload;
   pendingChoice?: PlayerView["pendingChoice"];
   aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
@@ -322,6 +372,8 @@ export type JoinMatchResult = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  matchStatus?: MatchStatus;
+  lobby?: MatchStartLobbyPayload;
   pendingChoice?: PlayerView["pendingChoice"];
   aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
@@ -332,6 +384,19 @@ export type JoinMatchResult = {
 export type ReconnectResult = JoinMatchResult & {
   eventTail: PublicGameEvent[];
 };
+
+export type LobbyActionResult =
+  | {
+      ok: true;
+      actorPayload: LobbyPayload | SidePayload;
+      opponentPayload?: LobbyPayload | SidePayload;
+      activated?: boolean;
+    }
+  | {
+      ok: false;
+      error: SafeErrorPayload;
+      payload?: LobbyPayload | SidePayload;
+    };
 
 export type SubmitActionResult =
   | {
@@ -453,9 +518,12 @@ export class MultiplayerService {
 
   async createMatch(input: {
     hostSide: HostSideSelection;
+    playMode?: "human_vs_ai";
+    humanSide?: HostSideSelection;
     displayName?: string;
     seed?: string;
     settings?: Partial<MatchSettings>;
+    countdownSeconds?: number;
     series?: {
       seriesId: string;
       gameNumber: number;
@@ -472,7 +540,9 @@ export class MultiplayerService {
   } & MatchDeckSelectionInput): Promise<CreateMatchResult> {
     const seed = input.seed?.trim() || `match-${randomId("seed")}`;
     const matchId = randomId("match");
-    const mode = input.mode ?? "human_vs_human";
+    const requestedHumanSide = input.humanSide ?? input.hostSide;
+    const resolvedHumanSide = requestedHumanSide === "random" ? deterministicHostSide(seed) : requestedHumanSide;
+    const mode = input.playMode === "human_vs_ai" ? (resolvedHumanSide === "runner" ? "human_runner_vs_corp_ai" : "human_corp_vs_runner_ai") : input.mode ?? "human_vs_human";
     const hostSide = mode === "human_runner_vs_corp_ai" ? "runner" : mode === "human_corp_vs_runner_ai" ? "corp" : input.hostSide === "random" ? deterministicHostSide(seed) : input.hostSide;
     const joinSide = opposite(hostSide);
     const runnerPlayer = input.series?.runnerPlayer ?? (hostSide === "runner" ? "player_a" : "player_b");
@@ -485,14 +555,16 @@ export class MultiplayerService {
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const matchFormat = input.settings?.matchFormat ?? "rules_match";
+    const countdownSeconds = normalizeCountdownSeconds(input.countdownSeconds);
     const pendingDeckHandshake = mode === "human_vs_human" && Boolean(input.participantADecks) && !input.participantBDecks;
     if (pendingDeckHandshake) {
       const hostDeckPair = resolveParticipantDeckPair(input.participantADecks ?? legacyParticipantDeckPair(input));
+      const pendingAgendaPointsToWin = input.settings?.agendaPointsToWin ?? (matchFormat === "single_game" ? 0 : 7);
       const session: SessionRecord = {
         sessionId: randomId("session"),
         matchId,
         side: hostSide,
-        displayName: input.displayName?.trim() || (hostSide === "runner" ? "Runner" : "Corp"),
+        displayName: input.displayName?.trim() || "Teilnehmer A",
         sessionTokenHash: this.hashToken(hostSessionToken),
         reconnectTokenHash: this.hashToken(hostReconnectToken),
         connected: false,
@@ -508,7 +580,7 @@ export class MultiplayerService {
           seed,
           baseline: MVP_0_2_BASELINE,
           settings: {
-            agendaPointsToWin: input.settings?.agendaPointsToWin ?? 7,
+            agendaPointsToWin: pendingAgendaPointsToWin,
             matchFormat
           },
           deckSetup: {
@@ -552,12 +624,22 @@ export class MultiplayerService {
           }
         },
         gameState: undefined as unknown as GameState,
+        startLobby: {
+          hostReady: false,
+          joinerReady: false,
+          countdownSeconds,
+          agendaPointsToWin: pendingAgendaPointsToWin,
+          matchFormat,
+          sideAssignment: { runnerPlayer, corpPlayer },
+          chatMessages: []
+        },
         eventLog: [],
         actionReceipts: [],
         undoSnapshots: [],
         stateSnapshots: []
       };
       await this.storage.save(record);
+      const lobbyPayload = this.lobbyPayloadFor(record, hostSide);
       return {
         matchId,
         matchStatus: record.match.status,
@@ -571,13 +653,14 @@ export class MultiplayerService {
         baseline: record.match.baseline,
         playerView: undefined as unknown as PlayerView,
         legalActions: [],
-        matchVersion: record.match.matchVersion
+        matchVersion: record.match.matchVersion,
+        ...(lobbyPayload.startLobby ? { lobby: lobbyPayload.startLobby } : {})
       };
     }
     const participantDecks = resolveParticipantDeckSetup(input, { seed, ...(aiPlayer ? { aiPlayer } : {}), ...(aiDeckPolicy ? { aiDeckPolicy } : {}) });
     const deckSetup = deckSetupForParticipants(participantDecks, { runnerPlayer, corpPlayer });
     const settings: MatchSettings = {
-      agendaPointsToWin: input.settings?.agendaPointsToWin ?? (matchFormat === "two_game_side_swap" ? 7 : defaultAgendaPointsToWin(deckSetup)),
+      agendaPointsToWin: agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin, deckSetup),
       matchFormat
     };
     const baseline = baselineForMode(mode, deckSetup);
@@ -788,7 +871,7 @@ export class MultiplayerService {
       sessionId: randomId("session"),
       matchId,
       side: tokenRecord.allowedSide,
-      displayName: input.displayName?.trim() || (tokenRecord.allowedSide === "runner" ? "Runner" : "Corp"),
+      displayName: input.displayName?.trim() || "Teilnehmer B",
       sessionTokenHash: this.hashToken(sessionToken),
       reconnectTokenHash: this.hashToken(reconnectToken),
       connected: false,
@@ -816,12 +899,30 @@ export class MultiplayerService {
       } catch (error) {
         return { error: safeError("join_deck_invalid", deckErrorMessage(error)) };
       }
+    } else {
+      record.match.status = "active";
     }
-    record.match.status = "active";
     record.match.matchVersion += 1;
     record.match.updatedAt = now;
-    this.maybeRunAiAfterTransition(record);
+    if (record.match.status === "active") this.maybeRunAiAfterTransition(record);
     await this.storage.save(record);
+
+    const currentStatus = record.match.status as MatchStatus;
+    if (currentStatus === "ready_check" || currentStatus === "countdown" || !record.gameState) {
+      const lobbyPayload = this.lobbyPayloadFor(record, tokenRecord.allowedSide);
+      return {
+        matchId,
+        sessionToken,
+        reconnectToken,
+        side: tokenRecord.allowedSide,
+        webSocketUrl: this.webSocketUrl(),
+        playerView: undefined as unknown as PlayerView,
+        legalActions: [],
+        matchVersion: record.match.matchVersion,
+        matchStatus: record.match.status,
+        ...(lobbyPayload.startLobby ? { lobby: lobbyPayload.startLobby } : {})
+      };
+    }
 
     const payload = this.payloadFor(record, tokenRecord.allowedSide);
     return {
@@ -867,48 +968,154 @@ export class MultiplayerService {
     record.match.updatedAt = now;
     await this.storage.save(record);
 
-    const payload = this.payloadFor(record, input.side);
+    const payload = record.gameState && record.match.status !== "ready_check" && record.match.status !== "countdown" && record.match.status !== "waiting_for_joiner_decks" ? this.payloadFor(record, input.side) : this.lobbyPayloadFor(record, input.side);
     return {
       matchId,
       sessionToken,
       reconnectToken,
       side: input.side,
       webSocketUrl: this.webSocketUrl(),
-      playerView: payload.playerView,
-      legalActions: payload.legalActions,
+      playerView: isSidePayload(payload) ? payload.playerView : (undefined as unknown as PlayerView),
+      legalActions: isSidePayload(payload) ? payload.legalActions : [],
       matchVersion: record.match.matchVersion,
       eventTail: payload.eventTail,
-      ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
-      ...(payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
-      ...(payload.winner ? { winner: payload.winner } : {}),
-      ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
-      ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
+      matchStatus: payload.matchStatus,
+      ...(!isSidePayload(payload) && payload.startLobby ? { lobby: payload.startLobby } : {}),
+      ...(isSidePayload(payload) && payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(isSidePayload(payload) && payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
+      ...(isSidePayload(payload) && payload.winner ? { winner: payload.winner } : {}),
+      ...(isSidePayload(payload) && payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
+      ...(isSidePayload(payload) && payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
     };
   }
 
-  async bootstrap(matchId: string, side: Side, sessionToken: string): Promise<SidePayload | { error: SafeErrorPayload }> {
+  async bootstrap(matchId: string, side: Side, sessionToken: string): Promise<SidePayload | { error: SafeErrorPayload }>;
+  async bootstrap(matchId: string, side: Side, sessionToken: string, options: { allowLobby: true }): Promise<ServicePayload | { error: SafeErrorPayload }>;
+  async bootstrap(matchId: string, side: Side, sessionToken: string, options?: { allowLobby?: boolean }): Promise<ServicePayload | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
     const session = this.authenticate(record, side, sessionToken);
     if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
     session.lastSeenAt = this.now();
     await this.storage.save(record);
-    if (!record.gameState) return { error: safeError("match_pending", "Das Match wartet noch auf die Deckauswahl des Joiners.") };
+    if (!record.gameState || record.match.status === "ready_check" || record.match.status === "countdown" || record.match.status === "waiting_for_joiner_decks") {
+      const lobby = this.lobbyPayloadFor(record, side);
+      return options?.allowLobby ? lobby : ({ error: safeError("match_pending", "Das Match ist noch nicht aktiv.") } as { error: SafeErrorPayload });
+    }
     return this.payloadFor(record, side);
   }
 
-  async setConnected(matchId: string, side: Side, sessionToken: string, connected: boolean): Promise<SidePayload | { error: SafeErrorPayload }> {
+  async setConnected(matchId: string, side: Side, sessionToken: string, connected: boolean): Promise<ServicePayload | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
     const session = this.authenticate(record, side, sessionToken);
     if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
     session.connected = connected;
     session.lastSeenAt = this.now();
+    if (!connected && record.match.status === "countdown" && record.startLobby) {
+      this.cancelCountdownFor(record, side);
+    }
     record.match.matchVersion += 1;
     record.match.updatedAt = this.now();
     await this.storage.save(record);
-    if (!record.gameState) return { error: safeError("match_pending", "Das Match wartet noch auf die Deckauswahl des Joiners.") };
+    if (!record.gameState || record.match.status === "ready_check" || record.match.status === "countdown" || record.match.status === "waiting_for_joiner_decks") return this.lobbyPayloadFor(record, side);
     return this.payloadFor(record, side);
+  }
+
+  async setLobbyReady(input: { matchId: string; side: Side; sessionToken: string; ready: boolean }): Promise<LobbyActionResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (!record.startLobby || (record.match.status !== "ready_check" && record.match.status !== "countdown")) {
+        return { ok: false, error: safeError("lobby_not_available", "Die Startlobby ist aktuell nicht verfügbar.") };
+      }
+
+      this.setReadyFlagForSession(record, session, input.ready);
+      if (!input.ready) this.clearCountdown(record);
+      else if (record.startLobby.hostReady && record.startLobby.joinerReady && record.match.status !== "countdown") {
+        this.startLobbyCountdown(record);
+      }
+      record.match.matchVersion += 1;
+      record.match.updatedAt = this.now();
+      await this.storage.save(record);
+      return this.lobbyResultFor(record, input.side);
+    });
+  }
+
+  async cancelLobbyCountdown(input: { matchId: string; side: Side; sessionToken: string }): Promise<LobbyActionResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (!record.startLobby || (record.match.status !== "ready_check" && record.match.status !== "countdown")) {
+        return { ok: false, error: safeError("lobby_not_available", "Die Startlobby ist aktuell nicht verfügbar.") };
+      }
+
+      this.setReadyFlagForSession(record, session, false);
+      this.clearCountdown(record);
+      record.match.matchVersion += 1;
+      record.match.updatedAt = this.now();
+      await this.storage.save(record);
+      return this.lobbyResultFor(record, input.side);
+    });
+  }
+
+  async sendLobbyChat(input: { matchId: string; side: Side; sessionToken: string; text: string }): Promise<LobbyActionResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (!record.startLobby || (record.match.status !== "ready_check" && record.match.status !== "countdown")) {
+        return { ok: false, error: safeError("lobby_not_available", "Der Lobbychat ist aktuell nicht verfügbar.") };
+      }
+      const text = input.text.trim().slice(0, 300);
+      if (!text) return { ok: false, error: safeError("chat_empty", "Leere Chatnachrichten werden nicht gesendet."), payload: this.lobbyPayloadFor(record, input.side) };
+
+      const lastId = record.startLobby.chatMessages.at(-1)?.id ?? 0;
+      record.startLobby.chatMessages = [
+        ...record.startLobby.chatMessages.slice(-49),
+        {
+          id: lastId + 1,
+          side: input.side,
+          displayName: session.displayName,
+          sentAt: this.now(),
+          text
+        }
+      ];
+      record.match.matchVersion += 1;
+      record.match.updatedAt = this.now();
+      await this.storage.save(record);
+      return this.lobbyResultFor(record, input.side);
+    });
+  }
+
+  async activateLobbyCountdown(matchId: string): Promise<LobbyActionResult> {
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      if (!record.startLobby || record.match.status !== "countdown") {
+        return { ok: false, error: safeError("countdown_not_active", "Der Countdown läuft nicht.") };
+      }
+      if (new Date(record.startLobby.countdownEndsAt ?? "").getTime() > new Date(this.now()).getTime()) {
+        return { ok: false, error: safeError("countdown_not_due", "Der Countdown läuft noch."), payload: this.lobbyPayloadFor(record, record.sessions[0]?.side ?? "runner") };
+      }
+      if (!record.startLobby.hostReady || !record.startLobby.joinerReady) {
+        this.clearCountdown(record);
+        await this.storage.save(record);
+        return { ok: false, error: safeError("lobby_not_ready", "Beide Personen müssen bereit sein."), payload: this.lobbyPayloadFor(record, record.sessions[0]?.side ?? "runner") };
+      }
+
+      this.activateReadyLobby(record);
+      record.match.matchVersion += 1;
+      record.match.updatedAt = this.now();
+      this.maybeRunAiAfterTransition(record);
+      await this.storage.save(record);
+      return this.lobbyResultFor(record, record.sessions[0]?.side ?? "runner", true);
+    });
   }
 
   async submitAction(input: {
@@ -1185,22 +1392,10 @@ export class MultiplayerService {
     const corpPlayer: SeriesPlayerSlot = hostSide === "corp" ? "player_a" : "player_b";
     const deckSetup = deckSetupForParticipants(participants, { runnerPlayer, corpPlayer });
     const baseline = baselineForMode(record.match.mode, deckSetup);
-    const controllers = controllersForMode(record.match.mode, hostSide, { runnerDifficulty: "normal", corpDifficulty: "normal" });
-    const agendaPointsToWin =
-      record.match.settings.matchFormat === "two_game_side_swap" ? record.match.settings.agendaPointsToWin : record.match.settings.agendaPointsToWin || defaultAgendaPointsToWin(deckSetup);
-    const gameState = createGame({
-      matchId: record.match.matchId,
-      seed: record.match.seed ?? record.match.matchId,
-      baseline,
-      agendaPointsToWin,
-      controllers,
-      runnerDeck: deckSetup.runnerDeck,
-      corpDeck: deckSetup.corpDeck,
-      runnerDeckMetadata: deckSetup.runnerSnapshot.publicMetadata,
-      corpDeckMetadata: deckSetup.corpSnapshot.publicMetadata
-    });
-    record.gameState = gameState;
+    const agendaPointsToWin = agendaPointsToWinFor(record.match.settings.matchFormat, record.match.settings.agendaPointsToWin > 0 ? record.match.settings.agendaPointsToWin : undefined, deckSetup);
+    record.gameState = undefined as unknown as GameState;
     record.match.baseline = baseline;
+    record.match.status = "ready_check";
     record.match.settings = { ...record.match.settings, agendaPointsToWin };
     record.match.deckSetup = {
       runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
@@ -1219,8 +1414,17 @@ export class MultiplayerService {
       corp: clone(deckSetup.corpSnapshot),
       participants: privateParticipantDeckSetup(participants)
     };
-    record.eventLog = gameState.eventLog.map((event) => toEventRecord(record.match.matchId, event, false));
-    record.stateSnapshots = [this.snapshotFor(record.match.matchId, gameState, record.match.matchVersion, "snap_initial", false)];
+    record.startLobby = {
+      hostReady: false,
+      joinerReady: false,
+      countdownSeconds: record.startLobby?.countdownSeconds ?? 3,
+      agendaPointsToWin,
+      matchFormat: record.match.settings.matchFormat,
+      sideAssignment: { runnerPlayer, corpPlayer },
+      chatMessages: record.startLobby?.chatMessages ?? []
+    };
+    record.eventLog = [];
+    record.stateSnapshots = [];
   }
 
   private payloadFor(record: StoredMatch, side: Side): SidePayload {
@@ -1248,6 +1452,148 @@ export class MultiplayerService {
       ...(record.gameState.winner && finalStateHash ? { winner: record.gameState.winner, finalStateHash } : {}),
       ...(resultSummary ? { resultSummary } : {})
     };
+  }
+
+  private lobbyPayloadFor(record: StoredMatch, side: Side): LobbyPayload {
+    const lobby = record.startLobby;
+    const opponent = record.sessions.find((session) => session.side === opposite(side));
+    return {
+      matchId: record.match.matchId,
+      matchStatus: record.match.status,
+      matchVersion: record.match.matchVersion,
+      side,
+      eventTail: [],
+      opponentStatus: { side: opposite(side), connected: opponent?.connected ?? false },
+      ...(record.match.status === "waiting_for_joiner_decks"
+        ? {
+            pendingDeckHandshake: {
+              required: true,
+              message: "Die Lobby wartet auf die Deckauswahl von Teilnehmer B."
+            }
+          }
+        : {}),
+      ...(lobby && record.match.status !== "waiting_for_joiner_decks" ? { startLobby: this.publicStartLobbyFor(record, lobby) } : {})
+    };
+  }
+
+  private publicStartLobbyFor(record: StoredMatch, lobby: MatchStartLobbyState): MatchStartLobbyPayload {
+    return {
+      hostReady: lobby.hostReady,
+      joinerReady: lobby.joinerReady,
+      countdownSeconds: lobby.countdownSeconds,
+      ...(lobby.countdownStartedAt ? { countdownStartedAt: lobby.countdownStartedAt } : {}),
+      ...(lobby.countdownEndsAt ? { countdownEndsAt: lobby.countdownEndsAt } : {}),
+      agendaPointsToWin: lobby.agendaPointsToWin,
+      matchFormat: lobby.matchFormat,
+      sideAssignment: { ...lobby.sideAssignment },
+      participants: {
+        player_a: this.publicLobbyParticipantFor(record, lobby, "player_a"),
+        player_b: this.publicLobbyParticipantFor(record, lobby, "player_b")
+      },
+      chatMessages: lobby.chatMessages.map((message) => ({ ...message }))
+    };
+  }
+
+  private publicLobbyParticipantFor(record: StoredMatch, lobby: MatchStartLobbyState, player: SeriesPlayerSlot): LobbyParticipantPayload {
+    const side = sideForSeriesPlayer(lobby.sideAssignment, player);
+    const session = record.sessions.find((candidate) => candidate.side === side);
+    const decks = record.privateDeckSnapshots?.participants?.[player];
+    return {
+      displayName: session?.displayName ?? (player === "player_a" ? "Teilnehmer A" : "Teilnehmer B"),
+      side,
+      runnerDeckReady: Boolean(decks?.runner),
+      corpDeckReady: Boolean(decks?.corp),
+      connected: session?.connected ?? false,
+      connectionQuality: connectionQualityFor(session, this.now()),
+      ready: player === "player_a" ? lobby.hostReady : lobby.joinerReady
+    };
+  }
+
+  private lobbyResultFor(record: StoredMatch, actorSide: Side, activated = false): Extract<LobbyActionResult, { ok: true }> {
+    const actorPayload = activated || record.match.status === "active" ? this.payloadFor(record, actorSide) : this.lobbyPayloadFor(record, actorSide);
+    const opponentSide = opposite(actorSide);
+    const opponentPayload = record.sessions.some((session) => session.side === opponentSide)
+      ? activated || record.match.status === "active"
+        ? this.payloadFor(record, opponentSide)
+        : this.lobbyPayloadFor(record, opponentSide)
+      : undefined;
+    return {
+      ok: true,
+      actorPayload,
+      ...(opponentPayload ? { opponentPayload } : {}),
+      ...(activated ? { activated: true } : {})
+    };
+  }
+
+  private setReadyFlagForSession(record: StoredMatch, session: SessionRecord, ready: boolean): void {
+    if (!record.startLobby) return;
+    const player = playerSlotForSession(record, session);
+    if (player === "player_a") record.startLobby.hostReady = ready;
+    else record.startLobby.joinerReady = ready;
+  }
+
+  private cancelCountdownFor(record: StoredMatch, side: Side): void {
+    const session = record.sessions.find((candidate) => candidate.side === side);
+    if (session) this.setReadyFlagForSession(record, session, false);
+    this.clearCountdown(record);
+  }
+
+  private clearCountdown(record: StoredMatch): void {
+    if (!record.startLobby) return;
+    delete record.startLobby.countdownStartedAt;
+    delete record.startLobby.countdownEndsAt;
+    if (!record.gameState && record.match.status === "countdown") record.match.status = "ready_check";
+  }
+
+  private startLobbyCountdown(record: StoredMatch): void {
+    if (!record.startLobby) return;
+    const startedAt = this.now();
+    const endsAt = new Date(new Date(startedAt).getTime() + record.startLobby.countdownSeconds * 1000).toISOString();
+    record.startLobby.countdownStartedAt = startedAt;
+    record.startLobby.countdownEndsAt = endsAt;
+    record.match.status = "countdown";
+  }
+
+  private activateReadyLobby(record: StoredMatch): void {
+    const lobby = record.startLobby;
+    const participants = record.privateDeckSnapshots?.participants;
+    if (!lobby || !participants) throw new Error("lobby_not_ready");
+    const resolved: ResolvedParticipantDeckSetup = {
+      player_a: {
+        runnerSnapshot: clone(participants.player_a.runner),
+        corpSnapshot: clone(participants.player_a.corp),
+        runnerDeck: buildDeckFromSnapshot(participants.player_a.runner),
+        corpDeck: buildDeckFromSnapshot(participants.player_a.corp)
+      },
+      player_b: {
+        runnerSnapshot: clone(participants.player_b.runner),
+        corpSnapshot: clone(participants.player_b.corp),
+        runnerDeck: buildDeckFromSnapshot(participants.player_b.runner),
+        corpDeck: buildDeckFromSnapshot(participants.player_b.corp)
+      }
+    };
+    const hostSide = record.sessions[0]?.side ?? "runner";
+    const deckSetup = deckSetupForParticipants(resolved, lobby.sideAssignment);
+    const baseline = baselineForMode(record.match.mode, deckSetup);
+    const controllers = controllersForMode(record.match.mode, hostSide, { runnerDifficulty: "normal", corpDifficulty: "normal" });
+    const gameState = createGame({
+      matchId: record.match.matchId,
+      seed: record.match.seed ?? record.match.matchId,
+      baseline,
+      agendaPointsToWin: lobby.agendaPointsToWin,
+      controllers,
+      runnerDeck: deckSetup.runnerDeck,
+      corpDeck: deckSetup.corpDeck,
+      runnerDeckMetadata: deckSetup.runnerSnapshot.publicMetadata,
+      corpDeckMetadata: deckSetup.corpSnapshot.publicMetadata
+    });
+    record.gameState = gameState;
+    record.match.status = "active";
+    record.match.baseline = baseline;
+    record.match.settings = { ...record.match.settings, agendaPointsToWin: lobby.agendaPointsToWin, matchFormat: lobby.matchFormat };
+    record.eventLog = gameState.eventLog.map((event) => toEventRecord(record.match.matchId, event, false));
+    record.stateSnapshots = [this.snapshotFor(record.match.matchId, gameState, record.match.matchVersion, "snap_initial", false)];
+    delete record.startLobby;
   }
 
   private finalizeFinishedMatch(record: StoredMatch): void {
@@ -1429,6 +1775,35 @@ export class MultiplayerService {
       if (this.locks.get(matchId) === lock) this.locks.delete(matchId);
     }
   }
+}
+
+function isSidePayload(payload: ServicePayload): payload is SidePayload {
+  return "playerView" in payload;
+}
+
+function agendaPointsToWinFor(matchFormat: MatchFormat, explicit: number | undefined, deckSetup: ResolvedDeckSetup): number {
+  if (typeof explicit === "number" && Number.isFinite(explicit) && explicit > 0) return Math.floor(explicit);
+  if (matchFormat === "single_game") return defaultAgendaPointsToWin(deckSetup);
+  return 7;
+}
+
+function normalizeCountdownSeconds(value: number | undefined): 3 | 5 | 10 {
+  return value === 5 || value === 10 ? value : 3;
+}
+
+function sideForSeriesPlayer(assignment: MatchStartLobbyState["sideAssignment"], player: SeriesPlayerSlot): Side {
+  return assignment.runnerPlayer === player ? "runner" : "corp";
+}
+
+function playerSlotForSession(record: StoredMatch, session: SessionRecord): SeriesPlayerSlot {
+  return record.sessions[0]?.sessionId === session.sessionId ? "player_a" : "player_b";
+}
+
+function connectionQualityFor(session: SessionRecord | undefined, now: string): ConnectionQuality {
+  if (!session?.connected) return "offline";
+  const age = new Date(now).getTime() - new Date(session.lastSeenAt).getTime();
+  if (Number.isFinite(age) && age > 30_000) return "unstable";
+  return "online";
 }
 
 function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): EventRecord {

@@ -49,23 +49,37 @@ import {
   type BoardHighlight,
   type OpponentActionCue
 } from "./action-cues";
+import {
+  deriveMatchStart,
+  humanAiSideLabel,
+  playModeLabel,
+  sideSelectionLabel,
+  type HumanAiSideSelection,
+  type HumanSideSelection,
+  type PlayMode
+} from "./match-start";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
 const SESSION_KEY = "netrunner-mvp-0-3-session";
+const RECENT_SESSIONS_KEY = "netrunner.recentSessions";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
 const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
+const DISPLAY_NAME_STORAGE_KEY = "netrunner.displayName";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
+const RunIcon = Shield;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
-const APP_STATUS_LABEL = "V1.0.2";
+const APP_STATUS_LABEL = "V1.0.3";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
 };
 
-type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "waiting_for_joiner_decks" | "active" | "finished";
+let sharedAudioContext: AudioContext | null = null;
+
+type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "waiting_for_joiner_decks" | "ready_check" | "countdown" | "active" | "finished";
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 type AiDifficulty = "easy" | "normal" | "hard";
@@ -136,6 +150,51 @@ type ClientPayload = {
   resultSummary?: GameResultSummary;
 };
 
+type LobbyParticipant = {
+  displayName: string;
+  side?: Side;
+  runnerDeckReady: boolean;
+  corpDeckReady: boolean;
+  connected: boolean;
+  connectionQuality: "online" | "unstable" | "offline";
+  ready: boolean;
+};
+
+type LobbyChatMessage = {
+  id: number;
+  side: Side;
+  displayName: string;
+  sentAt: string;
+  text: string;
+};
+
+type MatchStartLobby = {
+  hostReady: boolean;
+  joinerReady: boolean;
+  countdownSeconds: 3 | 5 | 10;
+  countdownStartedAt?: string;
+  countdownEndsAt?: string;
+  agendaPointsToWin: number;
+  matchFormat: MatchFormat;
+  sideAssignment: { runnerPlayer: "player_a" | "player_b"; corpPlayer: "player_a" | "player_b" };
+  participants: Record<"player_a" | "player_b", LobbyParticipant>;
+  chatMessages: LobbyChatMessage[];
+};
+
+type LobbyClientPayload = {
+  matchId: string;
+  matchStatus: MatchStatus;
+  matchVersion: number;
+  side: Side;
+  eventTail: PublicGameEvent[];
+  opponentStatus: { side: Side; connected: boolean };
+  pendingDeckHandshake?: {
+    required: boolean;
+    message: string;
+  };
+  startLobby?: MatchStartLobby;
+};
+
 type SessionInfo = {
   matchId: string;
   side: Side;
@@ -147,8 +206,11 @@ type SessionInfo = {
   pendingDeckHandshake?: boolean;
 };
 
+type RecentSessionInfo = SessionInfo & { savedAt: string };
+
 type ServerMessage =
   | { type: "state_update"; payload: { matchStatus: MatchStatus; matchVersion: number; playerView: PlayerView } }
+  | { type: "lobby_update"; payload: LobbyClientPayload }
   | { type: "legal_actions"; payload: { legalActions: LegalAction[] } }
   | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
   | { type: "opponent_status"; payload: ClientPayload["opponentStatus"] }
@@ -170,9 +232,10 @@ type CreateMatchResponse = {
   joinUrl?: string;
   webSocketUrl: string;
   mode: Exclude<GameMode, "ai_vs_ai">;
-  playerView: PlayerView;
+  playerView?: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  lobby?: MatchStartLobby;
   aiTurnPresentation?: ClientPayload["aiTurnPresentation"];
   winner?: Winner;
   finalStateHash?: string;
@@ -186,9 +249,11 @@ type JoinMatchResponse = {
   sessionToken: string;
   reconnectToken: string;
   webSocketUrl: string;
-  playerView: PlayerView;
+  playerView?: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  matchStatus?: MatchStatus;
+  lobby?: MatchStartLobby;
   eventTail?: PublicGameEvent[];
   aiTurnPresentation?: ClientPayload["aiTurnPresentation"];
   winner?: Winner;
@@ -753,19 +818,23 @@ function formatCardCount(count: number): string {
 export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [mode, setMode] = useState<"host" | "join">("host");
-  const [gameMode, setGameMode] = useState<GameMode>("human_vs_human");
+  const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
+  const [humanSideSelection, setHumanSideSelection] = useState<HumanSideSelection>("random");
+  const [humanAiSideSelection, setHumanAiSideSelection] = useState<HumanAiSideSelection>("random");
   const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
   const [testSetupMode, setTestSetupMode] = useState(false);
-  const [displayName, setDisplayName] = useState("Runner");
-  const [hostSide, setHostSide] = useState<Side | "random">("runner");
+  const [displayName, setDisplayName] = useState("Teilnehmer A");
+  const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
   const [seed, setSeed] = useState("mvp-0.3-ai-demo");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [payload, setPayload] = useState<ClientPayload | null>(null);
+  const [lobby, setLobby] = useState<LobbyClientPayload | null>(null);
+  const [lobbyChatText, setLobbyChatText] = useState("");
   const [simulation, setSimulation] = useState<AiSimulationSummary | null>(null);
   const [connection, setConnection] = useState<"offline" | "connecting" | "online">("offline");
   const [notice, setNotice] = useState("");
@@ -817,6 +886,8 @@ export default function Page() {
   const [currentActionCue, setCurrentActionCue] = useState<OpponentActionCue | null>(null);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
+  const [audioMenuOpen, setAudioMenuOpen] = useState(false);
+  const [recentSession, setRecentSession] = useState<RecentSessionInfo | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
@@ -827,20 +898,31 @@ export default function Page() {
     const params = new URLSearchParams(window.location.search);
     const matchId = params.get("matchId");
     const token = params.get("joinToken");
+    const storedDisplayName = window.localStorage.getItem(DISPLAY_NAME_STORAGE_KEY)?.trim();
     if (matchId && token) {
       setEntryTab("play");
       setMode("join");
       setJoinMatchId(matchId);
       setJoinToken(token);
-      setDisplayName("Runner");
+      setDisplayName(storedDisplayName || "Teilnehmer B");
       return;
     }
+    if (storedDisplayName) setDisplayName(storedDisplayName);
     const stored = window.sessionStorage.getItem(SESSION_KEY);
-    if (!stored) return;
+    if (!stored) {
+      setRecentSession(loadRecentSession());
+      return;
+    }
     const parsed = JSON.parse(stored) as SessionInfo;
     setSession(parsed);
     void bootstrap(parsed).then((bootstrapped) => {
-      if (bootstrapped) setPayload(bootstrapped);
+      if (bootstrapped && "playerView" in bootstrapped) {
+        setPayload(bootstrapped);
+        setLobby(null);
+      } else if (bootstrapped) {
+        setLobby(bootstrapped);
+        setPayload(null);
+      }
       else setNotice("Session konnte nicht geladen werden.");
     });
   }, []);
@@ -913,10 +995,10 @@ export default function Page() {
   }, [audioEnabled, audioVolume]);
 
   useEffect(() => {
-    if (!session || session.pendingDeckHandshake) return;
+    if (!session) return;
     connectWebSocket(session);
     return () => socketRef.current?.close();
-  }, [session?.matchId, session?.sessionToken, session?.pendingDeckHandshake]);
+  }, [session?.matchId, session?.sessionToken]);
 
   const filteredCatalogCards = useMemo(() => catalogCards.filter((card) => catalogCardMatchesTypeFilters(card, catalogTypeFilters)), [catalogCards, catalogTypeFilters]);
   const catalogTypeCounts = useMemo(() => summarizeCatalogTypeFilters(catalogCards), [catalogCards]);
@@ -1025,7 +1107,11 @@ export default function Page() {
   const participantACorpMetadata = corpDeckSource === "local" ? deckMetadataFromEditable(corpLocalDeck) : selectedCorpSnapshot?.publicMetadata;
   const participantBRunnerMetadata = participantBRunnerDeckSource === "local" ? deckMetadataFromEditable(participantBRunnerLocalDeck) : selectedParticipantBRunnerSnapshot?.publicMetadata;
   const participantBCorpMetadata = participantBCorpDeckSource === "local" ? deckMetadataFromEditable(participantBCorpLocalDeck) : selectedParticipantBCorpSnapshot?.publicMetadata;
-  const hasAiOpponent = gameMode === "human_runner_vs_corp_ai" || gameMode === "human_corp_vs_runner_ai" || gameMode === "ai_vs_ai";
+  const matchStart = deriveMatchStart({ playMode, humanSideSelection, humanAiSideSelection });
+  const gameMode: GameMode = matchStart.isSimulation ? "ai_vs_ai" : matchStart.technicalMode ?? (playMode === "human_vs_ai" ? "human_runner_vs_corp_ai" : "human_vs_human");
+  const hasAiOpponent = matchStart.hasAiOpponent;
+  const isHumanVsHuman = playMode === "human_vs_human";
+  const isHumanVsAi = playMode === "human_vs_ai";
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const selectedDeckDirty = selectedLocalDeck ? savedDeckFingerprints[selectedLocalDeck.deckId] !== deckFingerprint(selectedLocalDeck) : false;
@@ -1154,7 +1240,7 @@ export default function Page() {
   const createMatch = async () => {
     setNotice("");
     setSimulation(null);
-    if (gameMode === "ai_vs_ai") {
+    if (matchStart.isSimulation) {
       await runSimulation();
       return;
     }
@@ -1166,16 +1252,16 @@ export default function Page() {
       return;
     }
     const created = await postJson<CreateMatchResponse>("/api/matches", {
-      hostSide: gameMode === "human_runner_vs_corp_ai" ? "runner" : gameMode === "human_corp_vs_runner_ai" ? "corp" : hostSide,
+      ...matchStart.createRequest,
       displayName,
       seed,
-      mode: gameMode,
       runnerDifficulty,
       corpDifficulty,
       ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
+      ...(isHumanVsHuman ? { countdownSeconds } : {}),
       settings: {
         matchFormat,
-        ...(effectiveAgendaTarget ? { agendaPointsToWin: effectiveAgendaTarget } : {})
+        ...(matchFormat === "single_game" ? {} : { agendaPointsToWin: 7 })
       },
       ...deckPayload
     });
@@ -1183,6 +1269,7 @@ export default function Page() {
       setNotice(created.error.message);
       return;
     }
+    rememberDisplayName(displayName);
     const nextSession: SessionInfo = {
       matchId: created.matchId,
       side: created.hostSide,
@@ -1195,13 +1282,15 @@ export default function Page() {
     };
     persistSession(nextSession);
     setSession(nextSession);
-    if (created.pendingDeckHandshake || !created.playerView) {
+    if (created.lobby || created.pendingDeckHandshake || !created.playerView) {
       setPayload(null);
-      setNotice("Lobby erstellt. Der Joiner wählt beim Beitritt eigene Decks.");
+      setLobby(lobbyFromInitialResponse(created, created.hostSide));
+      setNotice(`Lobby erstellt. Du startest als ${sideLabel(created.hostSide)}.`);
       return;
     }
     setPayload(fromInitialResponse(created, created.hostSide));
-    setNotice("Match erstellt.");
+    setLobby(null);
+    setNotice(`Match erstellt. Du startest als ${sideLabel(created.hostSide)}.`);
   };
 
   const startNextSeriesGame = async () => {
@@ -1230,6 +1319,7 @@ export default function Page() {
       persistSession(nextSession);
       setSession(nextSession);
       setPayload(fromInitialResponse(next, next.hostSide));
+      setLobby(null);
       setDismissedResultKey(null);
       setNotice(next.joinUrl ? "Nächstes Serienspiel erstellt. Teile den neuen Join-Link." : "Nächstes Serienspiel erstellt.");
     } finally {
@@ -1259,12 +1349,10 @@ export default function Page() {
   };
 
   async function matchDeckPayload() {
-    const current = await currentSideDeckPayload();
     if (gameMode === "ai_vs_ai") return await simulationDeckPayload();
     return {
-      ...current,
       participantADecks: await deckPairPayload(runnerDeckSource, selectedRunnerSnapshotId, selectedRunnerLocalDeckId, corpDeckSource, selectedCorpSnapshotId, selectedCorpLocalDeckId),
-      ...((gameMode === "human_vs_human" && testSetupMode) || (hasAiOpponent && aiDeckPolicy === "selected")
+      ...((isHumanVsHuman && testSetupMode) || (isHumanVsAi && aiDeckPolicy === "selected")
         ? {
             participantBDecks: await deckPairPayload(
               participantBRunnerDeckSource,
@@ -1291,11 +1379,11 @@ export default function Page() {
 
   async function currentSideDeckPayload() {
     const runnerSlot =
-      gameMode === "human_corp_vs_runner_ai" || (gameMode === "human_vs_human" && hostSide === "corp")
+      gameMode === "human_corp_vs_runner_ai" || (isHumanVsHuman && humanSideSelection === "corp")
         ? { source: participantBRunnerDeckSource, snapshotId: selectedParticipantBRunnerSnapshotId, localDeckId: selectedParticipantBRunnerLocalDeckId }
         : { source: runnerDeckSource, snapshotId: selectedRunnerSnapshotId, localDeckId: selectedRunnerLocalDeckId };
     const corpSlot =
-      gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai" || (gameMode === "human_vs_human" && hostSide !== "corp")
+      gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai" || (isHumanVsHuman && humanSideSelection !== "corp")
         ? { source: participantBCorpDeckSource, snapshotId: selectedParticipantBCorpSnapshotId, localDeckId: selectedParticipantBCorpLocalDeckId }
         : { source: corpDeckSource, snapshotId: selectedCorpSnapshotId, localDeckId: selectedCorpLocalDeckId };
     return {
@@ -1307,7 +1395,7 @@ export default function Page() {
   function currentCorpSnapshotForSetup(): DeckSnapshot | null {
     if ((gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai") && aiDeckPolicy === "fixed") return defaultCorpSnapshot;
     if ((gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai") && aiDeckPolicy === "seeded_random") return matchFormat === "single_game" ? null : defaultCorpSnapshot;
-    if (gameMode === "human_corp_vs_runner_ai" || (gameMode === "human_vs_human" && hostSide === "corp")) return corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
+    if (gameMode === "human_corp_vs_runner_ai" || (isHumanVsHuman && humanSideSelection === "corp")) return corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
     return participantBCorpDeckSource === "local" ? corpLocalSnapshot : selectedParticipantBCorpSnapshot;
   }
 
@@ -1353,6 +1441,7 @@ export default function Page() {
       setNotice(joined.error.message);
       return;
     }
+    rememberDisplayName(displayName);
     const nextSession: SessionInfo = {
       matchId: joined.matchId,
       side: joined.side,
@@ -1363,8 +1452,15 @@ export default function Page() {
     };
     persistSession(nextSession);
     setSession(nextSession);
+    if (joined.lobby || !joined.playerView) {
+      setPayload(null);
+      setLobby(lobbyFromJoinedResponse(joined));
+      setNotice(`Beigetreten. Du startest als ${sideLabel(joined.side)}.`);
+      return;
+    }
     setPayload(fromJoinedResponse(joined));
-    setNotice("Beigetreten.");
+    setLobby(null);
+    setNotice(`Beigetreten. Du startest als ${sideLabel(joined.side)}.`);
   };
 
   const reconnect = async () => {
@@ -1386,8 +1482,33 @@ export default function Page() {
     };
     persistSession(nextSession);
     setSession(nextSession);
-    setPayload(fromJoinedResponse(reconnected));
+    if (reconnected.lobby || !reconnected.playerView) {
+      setPayload(null);
+      setLobby(lobbyFromJoinedResponse(reconnected));
+    } else {
+      setPayload(fromJoinedResponse(reconnected));
+      setLobby(null);
+    }
     setNotice("Reconnect abgeschlossen.");
+  };
+
+  const resumeRecentSession = async () => {
+    if (!recentSession) return;
+    const nextSession: SessionInfo = { ...recentSession };
+    persistSession(nextSession);
+    setSession(nextSession);
+    setRecentSession(null);
+    setNotice("Letzte Sitzung wird wieder verbunden.");
+    const bootstrapped = await bootstrap(nextSession);
+    if (bootstrapped && "playerView" in bootstrapped) {
+      setPayload(bootstrapped);
+      setLobby(null);
+    } else if (bootstrapped) {
+      setPayload(null);
+      setLobby(bootstrapped);
+    } else {
+      setNotice("Letzte Sitzung konnte nicht geladen werden.");
+    }
   };
 
   const submitAction = (action: LegalAction) => {
@@ -1404,6 +1525,34 @@ export default function Page() {
         }
       })
     );
+  };
+
+  const setReady = (ready: boolean) => {
+    if (!session || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    socketRef.current.send(JSON.stringify({ type: "set_ready", payload: { ready } }));
+  };
+
+  const cancelCountdown = () => {
+    if (!session || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    socketRef.current.send(JSON.stringify({ type: "cancel_countdown", payload: {} }));
+  };
+
+  const returnToSetupFromLobby = () => {
+    if (session && socketRef.current?.readyState === WebSocket.OPEN) {
+      socketRef.current.send(JSON.stringify({ type: "set_ready", payload: { ready: false } }));
+      socketRef.current.send(JSON.stringify({ type: "cancel_countdown", payload: {} }));
+    }
+    leaveMatch();
+    setEntryTab("play");
+    setNotice("Zurück in der Auswahl. Du kannst Decks oder Startoptionen ändern und das Match neu erstellen.");
+  };
+
+  const sendLobbyChat = () => {
+    if (!session || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    const text = lobbyChatText.trim();
+    if (!text) return;
+    socketRef.current.send(JSON.stringify({ type: "send_lobby_chat", payload: { text } }));
+    setLobbyChatText("");
   };
 
   const advanceAi = (mode: "single_step" | "until_human" = "single_step") => {
@@ -1436,11 +1585,14 @@ export default function Page() {
   };
 
   const leaveMatch = () => {
+    const leavingSession = session;
     socketRef.current?.close();
     window.sessionStorage.removeItem(SESSION_KEY);
-    window.localStorage.removeItem(SESSION_KEY);
+    if (leavingSession) removeRecentSession(leavingSession);
+    setRecentSession(loadRecentSession());
     setSession(null);
     setPayload(null);
+    setLobby(null);
     setSimulation(null);
     setConnection("offline");
     setSeriesTransitioning(false);
@@ -1451,6 +1603,11 @@ export default function Page() {
     if (!session?.joinUrl) return;
     await navigator.clipboard.writeText(session.joinUrl);
     setNotice("Join-Link kopiert.");
+  };
+
+  const updateDisplayName = (value: string) => {
+    setDisplayName(value);
+    rememberDisplayName(value);
   };
 
   const createDeckFromTemplate = (templateId: string) => {
@@ -1682,9 +1839,28 @@ export default function Page() {
   }
 
   function applyServerMessage(message: ServerMessage) {
+    if (message.type === "lobby_update") {
+      setLobby(message.payload);
+      setPayload(null);
+      return;
+    }
     if (message.type === "state_update") {
       setPayload((current) => {
-        if (!current) return null;
+        if (!current) {
+          const nextFromLobby = lobby
+            ? {
+                matchId: lobby.matchId,
+                matchStatus: message.payload.matchStatus,
+                matchVersion: message.payload.matchVersion,
+                side: lobby.side,
+                playerView: message.payload.playerView,
+                legalActions: [],
+                eventTail: [],
+                opponentStatus: lobby.opponentStatus
+              }
+            : null;
+          return nextFromLobby;
+        }
         const next = {
           ...current,
           matchStatus: message.payload.matchStatus,
@@ -1695,6 +1871,7 @@ export default function Page() {
         const { winner: _winner, finalStateHash: _finalStateHash, ...withoutWinner } = next;
         return withoutWinner;
       });
+      setLobby(null);
       return;
     }
     if (message.type === "legal_actions") {
@@ -1750,6 +1927,11 @@ export default function Page() {
     if (connection === "connecting") return "Verbindet";
     return "Offline";
   }, [connection, session]);
+  const showingStartLobby = Boolean(session && lobby);
+  const updateAudioEnabled = (enabled: boolean) => {
+    if (enabled) primeAudio(audioVolume);
+    setAudioEnabled(enabled);
+  };
 
   if (!session || !payload || !activeView) {
     return (
@@ -1778,39 +1960,75 @@ export default function Page() {
             </button>
           </nav>
           {notice ? <p className="notice entryNotice">{notice}</p> : null}
-          {session?.pendingDeckHandshake && session.joinUrl ? (
-            <div className="pendingLobbyBox">
-              <strong>Lobby wartet auf Joiner-Decks.</strong>
-              <input value={session.joinUrl} readOnly aria-label="Join-Link" />
-              <button className="button" onClick={copyJoinLink} type="button">
-                <Clipboard size={15} />
-                Join-Link kopieren
-              </button>
-            </div>
+          {session && lobby ? (
+            <StartLobbyPanel
+              lobby={lobby}
+              joinUrl={session.joinUrl}
+              chatText={lobbyChatText}
+              connection={connection}
+              onReady={setReady}
+              onCancel={cancelCountdown}
+              onReturnToSetup={returnToSetupFromLobby}
+              onChatText={setLobbyChatText}
+              onSendChat={sendLobbyChat}
+              onCopyJoinLink={copyJoinLink}
+            />
           ) : null}
           <div className="entryContent">
-          {entryTab === "play" ? (
+          {entryTab === "play" && !showingStartLobby && !session && recentSession ? (
+            <section className="resumeSessionPanel">
+              <div>
+                <p className="eyebrow">Letzte Sitzung</p>
+                <h2>Match {recentSession.matchId}</h2>
+                <p className="meta">{sideLabel(recentSession.side)} · {recentSession.displayName}</p>
+              </div>
+              <button className="button primary" onClick={resumeRecentSession} type="button">
+                <Cable size={15} />
+                Wieder verbinden
+              </button>
+            </section>
+          ) : null}
+          {entryTab === "play" && !showingStartLobby ? (
           <section className="setupPanel">
             <div className="tabs">
               <button className={`tab ${mode === "host" ? "active" : ""}`} onClick={() => setMode("host")}>
-                Host
+                Match erstellen
               </button>
               <button className={`tab ${mode === "join" ? "active" : ""}`} onClick={() => setMode("join")}>
-                Join
+                Beitreten
               </button>
             </div>
 
             {mode === "host" ? (
               <div className="formGrid">
                 <label>
-                  Modus
-                  <select value={gameMode} onChange={(event) => setGameMode(event.target.value as GameMode)}>
-                    <option value="human_vs_human">Human vs Human</option>
-                    <option value="human_runner_vs_corp_ai">Runner vs Corp-KI</option>
-                    <option value="human_corp_vs_runner_ai">Corp vs Runner-KI</option>
-                    <option value="ai_vs_ai">KI vs KI</option>
+                  Spielart
+                  <select value={playMode} onChange={(event) => setPlayMode(event.target.value as PlayMode)}>
+                    <option value="human_vs_human">{playModeLabel("human_vs_human")}</option>
+                    <option value="human_vs_ai">{playModeLabel("human_vs_ai")}</option>
+                    <option value="ai_vs_ai">{playModeLabel("ai_vs_ai")}</option>
                   </select>
                 </label>
+                {isHumanVsHuman ? (
+                  <label>
+                    Seitenzuteilung
+                    <select value={humanSideSelection} onChange={(event) => setHumanSideSelection(event.target.value as HumanSideSelection)}>
+                      <option value="random">{sideSelectionLabel("random")}</option>
+                      <option value="runner">{sideSelectionLabel("runner")}</option>
+                      <option value="corp">{sideSelectionLabel("corp")}</option>
+                    </select>
+                  </label>
+                ) : null}
+                {isHumanVsAi ? (
+                  <label>
+                    Deine Seite
+                    <select value={humanAiSideSelection} onChange={(event) => setHumanAiSideSelection(event.target.value as HumanAiSideSelection)}>
+                      <option value="random">{humanAiSideLabel("random")}</option>
+                      <option value="runner">{humanAiSideLabel("runner")}</option>
+                      <option value="corp">{humanAiSideLabel("corp")}</option>
+                    </select>
+                  </label>
+                ) : null}
                 <label>
                   Spielziel
                   <select value={matchFormat} onChange={(event) => setMatchFormat(event.target.value as MatchFormat)}>
@@ -1821,25 +2039,25 @@ export default function Page() {
                 </label>
                 <label>
                   Name
-                  <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
+                  <input value={displayName} onChange={(event) => updateDisplayName(event.target.value)} />
                 </label>
-                {gameMode === "human_vs_human" ? (
+                {isHumanVsHuman ? (
                   <label>
-                    Seite
-                    <select value={hostSide} onChange={(event) => setHostSide(event.target.value as Side | "random")}>
-                      <option value="runner">Runner</option>
-                      <option value="corp">Corp</option>
-                      <option value="random">Random</option>
+                    Countdown
+                    <select value={countdownSeconds} onChange={(event) => setCountdownSeconds(Number(event.target.value) as 3 | 5 | 10)}>
+                      <option value={3}>3 Sekunden</option>
+                      <option value={5}>5 Sekunden</option>
+                      <option value={10}>10 Sekunden</option>
                     </select>
                   </label>
                 ) : null}
-                {gameMode === "human_vs_human" ? (
+                {isHumanVsHuman ? (
                   <label className={`deckBuilderToggle ${testSetupMode ? "checked" : ""}`}>
                     <input checked={testSetupMode} onChange={(event) => setTestSetupMode(event.target.checked)} type="checkbox" />
                     Testkonstellation · beide Teilnehmer festlegen
                   </label>
                 ) : null}
-                {gameMode === "human_corp_vs_runner_ai" || gameMode === "ai_vs_ai" ? (
+                {(isHumanVsAi && humanAiSideSelection !== "runner") || gameMode === "ai_vs_ai" ? (
                   <label>
                     Runner-KI
                     <select value={runnerDifficulty} onChange={(event) => setRunnerDifficulty(event.target.value as AiDifficulty)}>
@@ -1849,7 +2067,7 @@ export default function Page() {
                     </select>
                   </label>
                 ) : null}
-                {gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai" ? (
+                {(isHumanVsAi && humanAiSideSelection !== "corp") || gameMode === "ai_vs_ai" ? (
                   <label>
                     Corp-KI
                     <select value={corpDifficulty} onChange={(event) => setCorpDifficulty(event.target.value as AiDifficulty)}>
@@ -1896,10 +2114,10 @@ export default function Page() {
                     onSnapshot={setSelectedCorpSnapshotId}
                     onLocalDeck={setSelectedCorpLocalDeckId}
                   />
-                  {gameMode === "human_vs_human" && !testSetupMode ? (
+                  {isHumanVsHuman && !testSetupMode ? (
                     <p className="deckHandshakeHint">Teilnehmer B wählt eigene Decks beim Beitritt.</p>
                   ) : null}
-                  {(gameMode === "human_vs_human" && testSetupMode) || (hasAiOpponent && aiDeckPolicy === "selected") ? (
+                  {(isHumanVsHuman && testSetupMode) || (hasAiOpponent && aiDeckPolicy === "selected") ? (
                     <>
                       <DeckSlotSelect
                         label={hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
@@ -1932,7 +2150,7 @@ export default function Page() {
                   entries={[
                     { label: "A Runner", metadata: participantARunnerMetadata },
                     { label: "A Corp", metadata: participantACorpMetadata },
-                    ...(aiSlotDisabled || (gameMode === "human_vs_human" && !testSetupMode)
+                    ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
                       ? []
                       : [
                           { label: hasAiOpponent ? "KI Runner" : "B Runner", metadata: participantBRunnerMetadata },
@@ -1950,7 +2168,7 @@ export default function Page() {
               <div className="formGrid">
                 <label>
                   Name
-                  <input value={displayName} onChange={(event) => setDisplayName(event.target.value)} />
+                  <input value={displayName} onChange={(event) => updateDisplayName(event.target.value)} />
                 </label>
                 <label>
                   Match
@@ -2046,7 +2264,7 @@ export default function Page() {
               audioVolume={audioVolume}
               cardDisplayMode={cardDisplayMode}
               colorScheme={colorScheme}
-              onAudioEnabled={setAudioEnabled}
+              onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardDisplayMode={setCardDisplayMode}
               onColorScheme={setColorScheme}
@@ -2064,9 +2282,16 @@ export default function Page() {
         <Brand subtitle={`${APP_STATUS_LABEL} · ${session.side === "runner" ? "Runner" : "Corp"}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
-          <button className="button iconOnly" onClick={() => setAudioEnabled((current) => !current)} title={audioEnabled ? "Audio aus" : "Audio an"} aria-label={audioEnabled ? "Audio aus" : "Audio an"}>
-            {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-          </button>
+          <div className="audioMenu">
+            <button className="button iconOnly" onClick={() => setAudioMenuOpen((current) => !current)} title="Audio einstellen" aria-label="Audio einstellen" type="button">
+              {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            </button>
+            {audioMenuOpen ? (
+              <div className="audioPopover">
+                <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={updateAudioEnabled} onVolume={setAudioVolume} />
+              </div>
+            ) : null}
+          </div>
           {session.joinUrl ? (
             <button className="button" onClick={copyJoinLink} title="Join-Link kopieren">
               <Clipboard size={16} />
@@ -2109,6 +2334,7 @@ export default function Page() {
 
         <section className="board boardPanel">
           <BoardHeader view={activeView} highlighted={hasDecisionCue} />
+          <RunnerRigStrip view={activeView} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocus={focusCard} />
           <RunTimeline view={activeView} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} />
           {payload.winner ? (
             <div className="runBar">
@@ -2200,6 +2426,141 @@ function Brand({ subtitle }: { subtitle: string }) {
         <h1>Netrunner</h1>
         <p>{subtitle}</p>
       </div>
+    </div>
+  );
+}
+
+function StartLobbyPanel({
+  lobby,
+  joinUrl,
+  chatText,
+  connection,
+  onReady,
+  onCancel,
+  onReturnToSetup,
+  onChatText,
+  onSendChat,
+  onCopyJoinLink
+}: {
+  lobby: LobbyClientPayload;
+  joinUrl?: string | undefined;
+  chatText: string;
+  connection: "offline" | "connecting" | "online";
+  onReady: (ready: boolean) => void;
+  onCancel: () => void;
+  onReturnToSetup: () => void;
+  onChatText: (value: string) => void;
+  onSendChat: () => void;
+  onCopyJoinLink: () => void;
+}) {
+  const start = lobby.startLobby;
+  const selfPlayer = start ? playerSlotForSide(start, lobby.side) : "player_a";
+  const self = start?.participants[selfPlayer];
+  const opponentPlayer = selfPlayer === "player_a" ? "player_b" : "player_a";
+  const opponent = start?.participants[opponentPlayer];
+  const selfReady = self?.ready ?? false;
+  const countdownActive = lobby.matchStatus === "countdown" && Boolean(start?.countdownEndsAt);
+  const opponentReady = opponent?.ready ?? false;
+  const chatMessagesRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const element = chatMessagesRef.current;
+    if (element) element.scrollTop = element.scrollHeight;
+  }, [start?.chatMessages.length]);
+  return (
+    <section className="startLobbyPanel">
+      <div className="startLobbyHeader">
+        <div>
+          <p className="eyebrow">Startbereitschaftslobby</p>
+          <h2>{start ? `Du startest als ${sideLabel(lobby.side)}` : "Match erstellt"}</h2>
+        </div>
+        <div className="startLobbyHeaderActions">
+          <span className={`statusPill ${connection}`}>{connection === "online" ? "online" : connection === "connecting" ? "verbindet" : "offline"}</span>
+          <button className="button subtle" onClick={onReturnToSetup} type="button">
+            <RotateCcw size={15} />
+            Zurück zur Auswahl
+          </button>
+        </div>
+      </div>
+      {joinUrl && lobby.pendingDeckHandshake ? (
+        <div className="joinLinkRow">
+          <input value={joinUrl} readOnly aria-label="Join-Link" />
+          <button className="button" onClick={onCopyJoinLink} type="button">
+            <Clipboard size={15} />
+            Join-Link kopieren
+          </button>
+        </div>
+      ) : null}
+      {start ? (
+        <>
+          <div className="lobbyFacts">
+            <span>{matchFormatLabel(start.matchFormat)}</span>
+            <span title="Agenda-Punkte, die für den Spielsieg erreicht werden müssen.">Zielwert {start.agendaPointsToWin} Agenda-Punkte</span>
+            <span>Countdown {start.countdownSeconds}s</span>
+          </div>
+          <div className="lobbyParticipants">
+            <LobbyParticipantCard title="Du" participant={self} />
+            <LobbyParticipantCard title="Gegenüber" participant={opponent} />
+          </div>
+          <div className="readinessSummary">
+            <span>{selfReady ? "Du bist bereit." : "Du bist noch nicht bereit."}</span>
+            <span>{opponentReady ? "Gegenüber ist bereit." : "Gegenüber ist noch nicht bereit."}</span>
+          </div>
+          <div className="lobbyActions">
+            <button className="button primary" onClick={() => onReady(!selfReady)} type="button" disabled={connection !== "online"}>
+              <Check size={15} />
+              {selfReady ? "Bereitschaft zurücknehmen" : "Ich bin bereit"}
+            </button>
+            {countdownActive ? (
+              <button className="button" onClick={onCancel} type="button">
+                <X size={15} />
+                Countdown abbrechen
+              </button>
+            ) : null}
+            <span className="countdownText">{countdownActive ? `Countdown bis ${formatLobbyTime(start.countdownEndsAt)}` : "Startet automatisch, sobald beide bereit sind."}</span>
+          </div>
+          <div className="lobbyChat">
+            <div className="lobbyChatMessages" ref={chatMessagesRef}>
+              {start.chatMessages.length === 0 ? <p className="muted">Noch keine Nachrichten.</p> : null}
+              {start.chatMessages.map((message) => (
+                <p key={message.id}>
+                  <strong>{message.displayName}</strong>
+                  <span>{formatLobbyTime(message.sentAt)}</span>
+                  {message.text}
+                </p>
+              ))}
+            </div>
+            <div className="lobbyChatInput">
+              <input
+                value={chatText}
+                maxLength={300}
+                onChange={(event) => onChatText(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") onSendChat();
+                }}
+                placeholder="Kurze Nachricht"
+              />
+              <button className="button" onClick={onSendChat} type="button">
+                Senden
+              </button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <p className="muted">{lobby.pendingDeckHandshake?.message ?? "Die Lobby wird vorbereitet."}</p>
+      )}
+    </section>
+  );
+}
+
+function LobbyParticipantCard({ title, participant }: { title: string; participant?: LobbyParticipant | undefined }) {
+  return (
+    <div className="lobbyParticipantCard">
+      <strong>{title}</strong>
+      <span>{participant?.displayName ?? "Noch nicht verbunden"}</span>
+      <span>{participant?.side ? sideLabel(participant.side) : "Seite offen"}</span>
+      <span>{participant?.runnerDeckReady && participant.corpDeckReady ? "Decks geprüft" : "Decks offen"}</span>
+      <span>{participant?.ready ? "Status: bereit" : "Status: nicht bereit"}</span>
+      <span>{connectionQualityLabel(participant?.connectionQuality)}</span>
     </div>
   );
 }
@@ -2502,7 +2863,7 @@ function AudioSettings({
 }) {
   return (
     <div className="audioSettings">
-      <button className={`button ${enabled ? "primary" : ""}`} type="button" onClick={() => onEnabled(!enabled)} title={enabled ? "Audioeffekte ausschalten" : "Audioeffekte einschalten"}>
+      <button className={`button ${enabled ? "primary" : ""}`} type="button" onClick={() => onEnabled(!enabled)} title={enabled ? "Audioeffekte ausschalten" : "Audioeffekte einschalten · Testton"}>
         {enabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
         Audio
       </button>
@@ -2597,6 +2958,39 @@ function BoardHeader({ view, highlighted = false }: { view: PlayerView; highligh
   );
 }
 
+function RunnerRigStrip({
+  view,
+  cardDetailsById,
+  displayMode,
+  onFocus
+}: {
+  view: PlayerView;
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  displayMode: CardDisplayMode;
+  onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
+}) {
+  if (opponentSide(view.side) !== "runner") return null;
+  const runnerRig = view.opponent.rig ?? [];
+  return (
+    <section className="runnerRigStrip">
+      <div className="sectionTitleLine">
+        <h2>Runner-Rig</h2>
+        <RunIcon size={16} />
+      </div>
+      {runnerRig.length > 0 ? (
+        <div className="cards miniCards">
+          {runnerRig.map((card) => {
+            const displayCard = enrichVisibleCard(card, cardDetailsById);
+            return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} onFocus={onFocus} />;
+          })}
+        </div>
+      ) : (
+        <p className="meta">Keine installierten Runner-Karten.</p>
+      )}
+    </section>
+  );
+}
+
 function RunTimeline({ view, cardDetailsById, highlighted = false }: { view: PlayerView; cardDetailsById: Record<string, CatalogCardDetail>; highlighted?: boolean }) {
   const phase = view.run?.phase;
   const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
@@ -2612,8 +3006,8 @@ function RunTimeline({ view, cardDetailsById, highlighted = false }: { view: Pla
   return (
     <div className={`runTimeline ${view.run ? "active" : ""} ${highlighted ? "cueHighlight" : ""}`}>
       <div className="runTimelineHead">
-        <Shield size={18} />
-        <span>{view.run ? `Run auf ${view.run.attackedServerId}` : "Kein aktiver Run"}</span>
+        <RunIcon size={18} />
+        <span>{view.run ? `Run auf ${serverLabelFromId(view.run.attackedServerId)}` : "Kein aktiver Run"}</span>
       </div>
       <div className="runSteps">
         {steps.map((step) => (
@@ -2630,6 +3024,15 @@ function RunTimeline({ view, cardDetailsById, highlighted = false }: { view: Pla
       ) : null}
     </div>
   );
+}
+
+function serverLabelFromId(serverId: string): string {
+  if (serverId === "hq") return "HQ";
+  if (serverId === "rd") return "R&D";
+  if (serverId === "archives") return "Archives";
+  const remote = /^remote_(\d+)$/.exec(serverId);
+  if (remote?.[1]) return `Remote ${remote[1]}`;
+  return serverId;
 }
 
 function LegalActionsPanel({ actions, disabled, highlighted = false, onAction }: { actions: LegalAction[]; disabled: boolean; highlighted?: boolean; onAction(action: LegalAction): void }) {
@@ -3835,6 +4238,7 @@ function valueLabel(label: string, value: number | undefined): string | null {
 }
 
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {
+  if (!response.playerView) throw new Error("Match ist noch nicht aktiv.");
   const winner = response.winner ?? response.playerView.winner;
   const payload: ClientPayload = {
     matchId: response.matchId,
@@ -3854,6 +4258,7 @@ function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientP
 }
 
 function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
+  if (!response.playerView) throw new Error("Match ist noch nicht aktiv.");
   const winner = response.winner ?? response.playerView.winner;
   const payload: ClientPayload = {
     matchId: response.matchId,
@@ -3872,13 +4277,58 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
   return payload;
 }
 
-async function bootstrap(session: SessionInfo): Promise<ClientPayload | null> {
+function lobbyFromInitialResponse(response: CreateMatchResponse, side: Side): LobbyClientPayload {
+  return {
+    matchId: response.matchId,
+    matchStatus: response.matchStatus ?? "waiting_for_joiner_decks",
+    matchVersion: response.matchVersion,
+    side,
+    eventTail: [],
+    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: false },
+    ...(response.pendingDeckHandshake ? { pendingDeckHandshake: { required: true, message: "Die Lobby wartet auf die Deckauswahl von Teilnehmer B." } } : {}),
+    ...(response.lobby ? { startLobby: response.lobby } : {})
+  };
+}
+
+function lobbyFromJoinedResponse(response: JoinMatchResponse): LobbyClientPayload {
+  return {
+    matchId: response.matchId,
+    matchStatus: response.matchStatus ?? "ready_check",
+    matchVersion: response.matchVersion,
+    side: response.side,
+    eventTail: response.eventTail ?? [],
+    opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false },
+    ...(response.lobby ? { startLobby: response.lobby } : {})
+  };
+}
+
+async function bootstrap(session: SessionInfo): Promise<ClientPayload | LobbyClientPayload | null> {
   const response = await fetch(`${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/bootstrap?side=${session.side}`, {
     headers: { authorization: `Bearer ${session.sessionToken}` },
     cache: "no-store"
   });
   if (!response.ok) return null;
-  return (await response.json()) as ClientPayload;
+  return (await response.json()) as ClientPayload | LobbyClientPayload;
+}
+
+function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "player_b" {
+  return lobby.sideAssignment.runnerPlayer === "player_a" && side === "runner" ? "player_a" : lobby.sideAssignment.corpPlayer === "player_a" && side === "corp" ? "player_a" : "player_b";
+}
+
+function connectionQualityLabel(quality: LobbyParticipant["connectionQuality"] | undefined): string {
+  if (quality === "online") return "online";
+  if (quality === "unstable") return "instabil";
+  return "offline";
+}
+
+function formatLobbyTime(value: string | undefined): string {
+  if (!value) return "";
+  return new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(value));
+}
+
+function rememberDisplayName(name: string): void {
+  const trimmed = name.trim();
+  if (trimmed) window.localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, trimmed);
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
@@ -3897,10 +4347,21 @@ function seriesAudioOutcome(result: GameResultSummary): GameResultSummary["viewe
   return "draw";
 }
 
-function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: number): void {
+function primeAudio(volume: number): void {
+  playActionCueSound("choice", volume);
+}
+
+function audioContext(): AudioContext | null {
   const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioCtor) return;
-  const context = new AudioCtor();
+  if (!AudioCtor) return null;
+  if (!sharedAudioContext || sharedAudioContext.state === "closed") sharedAudioContext = new AudioCtor();
+  if (sharedAudioContext.state === "suspended") void sharedAudioContext.resume().catch(() => undefined);
+  return sharedAudioContext;
+}
+
+function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: number): void {
+  const context = audioContext();
+  if (!context) return;
   const safeVolume = Math.min(1, Math.max(0, volume));
   const notes =
     outcome === "won"
@@ -3922,13 +4383,11 @@ function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: nu
     oscillator.start(start);
     oscillator.stop(start + 0.19);
   });
-  window.setTimeout(() => void context.close(), 700);
 }
 
 function playActionCueSound(kind: ActionSoundKind, volume: number): void {
-  const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-  if (!AudioCtor) return;
-  const context = new AudioCtor();
+  const context = audioContext();
+  if (!context) return;
   const safeVolume = Math.min(1, Math.max(0, volume));
   const pattern = actionSoundPattern(kind);
   pattern.forEach((note, index) => {
@@ -3945,7 +4404,6 @@ function playActionCueSound(kind: ActionSoundKind, volume: number): void {
     oscillator.start(start);
     oscillator.stop(start + note.duration + 0.02);
   });
-  window.setTimeout(() => void context.close(), 520);
 }
 
 function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; duration: number; gain: number; type: OscillatorType }> {
@@ -4002,5 +4460,29 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
 
 function persistSession(session: SessionInfo) {
   window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  window.localStorage.removeItem(SESSION_KEY);
+  const recent = loadRecentSessions().filter((candidate) => !(candidate.matchId === session.matchId && candidate.side === session.side));
+  const next: RecentSessionInfo[] = [{ ...session, savedAt: new Date().toISOString() }, ...recent].slice(0, 4);
+  window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(next));
+}
+
+function loadRecentSession(): RecentSessionInfo | null {
+  return loadRecentSessions()[0] ?? null;
+}
+
+function loadRecentSessions(): RecentSessionInfo[] {
+  try {
+    const parsed = JSON.parse(window.localStorage.getItem(RECENT_SESSIONS_KEY) ?? "[]") as RecentSessionInfo[];
+    return parsed
+      .filter((session) => typeof session.matchId === "string" && (session.side === "runner" || session.side === "corp") && typeof session.reconnectToken === "string")
+      .sort((left, right) => right.savedAt.localeCompare(left.savedAt));
+  } catch {
+    window.localStorage.removeItem(RECENT_SESSIONS_KEY);
+    return [];
+  }
+}
+
+function removeRecentSession(session: SessionInfo): void {
+  const next = loadRecentSessions().filter((candidate) => !(candidate.matchId === session.matchId && candidate.side === session.side));
+  if (next.length > 0) window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(next));
+  else window.localStorage.removeItem(RECENT_SESSIONS_KEY);
 }

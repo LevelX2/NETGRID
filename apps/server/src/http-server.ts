@@ -9,7 +9,9 @@ import {
   type ActionReceipt,
   type AiTurnPresentationState,
   type GameResultSummary,
+  type LobbyPayload,
   type SafeErrorPayload,
+  type ServicePayload,
   type SidePayload,
   type SubmitActionResult,
   type UndoResult
@@ -35,11 +37,15 @@ type ClientWsMessage =
   | { type: "request_undo"; payload: { targetEventId: string; reason?: string } }
   | { type: "accept_undo"; payload: { undoRequestId: string } }
   | { type: "decline_undo"; payload: { undoRequestId: string } }
+  | { type: "set_ready"; payload: { ready: boolean } }
+  | { type: "cancel_countdown"; payload: Record<string, never> }
+  | { type: "send_lobby_chat"; payload: { text: string } }
   | { type: "advance_ai"; payload: { knownStateVersion?: number; knownMatchVersion?: number; mode?: "single_step" | "until_human" } }
   | { type: "ping"; payload: { clientTime: number } };
 
 export type ServerWsMessage =
   | { type: "state_update"; payload: { matchStatus: SidePayload["matchStatus"]; matchVersion: number; playerView: SidePayload["playerView"] } }
+  | { type: "lobby_update"; payload: LobbyPayload }
   | { type: "legal_actions"; payload: { stateVersion: number; legalActions: SidePayload["legalActions"] } }
   | { type: "choice_request"; payload: { choice: SidePayload["pendingChoice"] | null } }
   | { type: "event_log_update"; payload: { events: SidePayload["eventTail"] } }
@@ -71,6 +77,7 @@ export type NetrunnerServerHandle = {
 
 export class NetrunnerRealtimeServer {
   private readonly connections = new Map<string, Map<Side, Connection>>();
+  private readonly countdownTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private wss?: WebSocketServer;
 
   constructor(private readonly service: MultiplayerService) {}
@@ -125,6 +132,41 @@ export class NetrunnerRealtimeServer {
 
     if (message.type === "advance_ai") {
       await this.handleAdvanceAi(context, message.payload);
+      return;
+    }
+
+    if (message.type === "set_ready") {
+      await this.handleLobbyOperation(
+        this.service.setLobbyReady({
+          matchId: context.matchId,
+          side: context.side,
+          sessionToken: context.sessionToken,
+          ready: Boolean(message.payload.ready)
+        })
+      );
+      return;
+    }
+
+    if (message.type === "cancel_countdown") {
+      await this.handleLobbyOperation(
+        this.service.cancelLobbyCountdown({
+          matchId: context.matchId,
+          side: context.side,
+          sessionToken: context.sessionToken
+        })
+      );
+      return;
+    }
+
+    if (message.type === "send_lobby_chat") {
+      await this.handleLobbyOperation(
+        this.service.sendLobbyChat({
+          matchId: context.matchId,
+          side: context.side,
+          sessionToken: context.sessionToken,
+          text: typeof message.payload.text === "string" ? message.payload.text : ""
+        })
+      );
       return;
     }
 
@@ -184,6 +226,7 @@ export class NetrunnerRealtimeServer {
     bySide.set(payload.side, { socket, context: payload });
     this.connections.set(payload.matchId, bySide);
     sendBootstrap(socket, connected);
+    this.scheduleCountdownFromPayload(connected);
     await this.sendOpponentBootstrap(payload.matchId, opposite(payload.side), connected.opponentStatus);
   }
 
@@ -251,6 +294,17 @@ export class NetrunnerRealtimeServer {
     this.broadcastPayload(result.opponentPayload);
   }
 
+  private async handleLobbyOperation(operation: Promise<Awaited<ReturnType<MultiplayerService["setLobbyReady"]>>>): Promise<void> {
+    const result = await operation;
+    if (!result.ok) {
+      if (result.payload) this.broadcastPayload(result.payload);
+      return;
+    }
+    this.broadcastPayload(result.actorPayload);
+    if (result.opponentPayload) this.broadcastPayload(result.opponentPayload);
+    this.scheduleCountdownFromPayload(result.actorPayload);
+  }
+
   private async handleClose(socket: WebSocket): Promise<void> {
     const context = this.findContext(socket);
     if (!context) return;
@@ -258,10 +312,15 @@ export class NetrunnerRealtimeServer {
     if (bySide?.get(context.side)?.socket !== socket) return;
     bySide.delete(context.side);
     const disconnected = await this.service.setConnected(context.matchId, context.side, context.sessionToken, false);
-    if (!("error" in disconnected)) this.sendOpponentStatus(context.matchId, opposite(context.side), { side: context.side, connected: false });
+    if ("error" in disconnected) return;
+    if (isLobbyPayload(disconnected)) {
+      await this.sendOpponentBootstrap(context.matchId, opposite(context.side), { side: context.side, connected: false });
+      return;
+    }
+    this.sendOpponentStatus(context.matchId, opposite(context.side), { side: context.side, connected: false });
   }
 
-  private broadcastPayload(payload: SidePayload): void {
+  private broadcastPayload(payload: ServicePayload): void {
     const connection = this.connection(payload.matchId, payload.side);
     sendBootstrap(connection?.socket, payload);
   }
@@ -273,12 +332,33 @@ export class NetrunnerRealtimeServer {
   private async sendOpponentBootstrap(matchId: string, side: Side, fallbackStatus: SidePayload["opponentStatus"]): Promise<void> {
     const opponent = this.connection(matchId, side);
     if (!opponent) return;
-    const payload = await this.service.bootstrap(matchId, side, opponent.context.sessionToken);
+    const payload = await this.service.bootstrap(matchId, side, opponent.context.sessionToken, { allowLobby: true });
     if ("error" in payload) {
       send(opponent.socket, { type: "opponent_status", payload: fallbackStatus });
       return;
     }
     sendBootstrap(opponent.socket, payload);
+    this.scheduleCountdownFromPayload(payload);
+  }
+
+  private scheduleCountdownFromPayload(payload: ServicePayload): void {
+    if (!isLobbyPayload(payload) || payload.matchStatus !== "countdown" || !payload.startLobby?.countdownEndsAt) return;
+    const existing = this.countdownTimers.get(payload.matchId);
+    if (existing) clearTimeout(existing);
+    const delay = Math.max(0, new Date(payload.startLobby.countdownEndsAt).getTime() - Date.now());
+    const timer = setTimeout(() => void this.activateCountdown(payload.matchId), delay);
+    this.countdownTimers.set(payload.matchId, timer);
+  }
+
+  private async activateCountdown(matchId: string): Promise<void> {
+    this.countdownTimers.delete(matchId);
+    const result = await this.service.activateLobbyCountdown(matchId);
+    if (!result.ok) {
+      if (result.payload) this.broadcastPayload(result.payload);
+      return;
+    }
+    this.broadcastPayload(result.actorPayload);
+    if (result.opponentPayload) this.broadcastPayload(result.opponentPayload);
   }
 
   private connection(matchId: string, side: Side): Connection | undefined {
@@ -341,9 +421,14 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       const createInput: Parameters<MultiplayerService["createMatch"]>[0] = {
         hostSide: body.hostSide === "runner" || body.hostSide === "corp" || body.hostSide === "random" ? body.hostSide : "runner"
       };
+      if (body.playMode === "human_vs_ai") {
+        createInput.playMode = "human_vs_ai";
+        createInput.humanSide = body.humanSide === "runner" || body.humanSide === "corp" || body.humanSide === "random" ? body.humanSide : "random";
+      }
       if (body.mode === "human_vs_human" || body.mode === "human_runner_vs_corp_ai" || body.mode === "human_corp_vs_runner_ai") createInput.mode = body.mode;
       if (typeof body.displayName === "string") createInput.displayName = body.displayName;
       if (typeof body.seed === "string") createInput.seed = body.seed;
+      if (typeof body.countdownSeconds === "number") createInput.countdownSeconds = body.countdownSeconds;
       if (isDifficulty(body.runnerDifficulty)) createInput.runnerDifficulty = body.runnerDifficulty;
       if (isDifficulty(body.corpDifficulty)) createInput.corpDifficulty = body.corpDifficulty;
       if (isAiPacingMode(body.aiPacingMode)) createInput.aiPacingMode = body.aiPacingMode;
@@ -423,7 +508,7 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       if (request.method === "GET" && action === "bootstrap") {
         const side = url.searchParams.get("side") === "corp" ? "corp" : "runner";
         const sessionToken = bearerToken(request) ?? url.searchParams.get("sessionToken") ?? "";
-        const bootstrapped = await service.bootstrap(matchId, side, sessionToken);
+        const bootstrapped = await service.bootstrap(matchId, side, sessionToken, { allowLobby: true });
         sendJson(response, "error" in bootstrapped ? 403 : 200, bootstrapped);
         return;
       }
@@ -486,7 +571,11 @@ function sendJson(response: ServerResponse, status: number, payload: unknown): v
   response.end(JSON.stringify(payload));
 }
 
-function sendBootstrap(socket: WebSocket | undefined, payload: SidePayload): void {
+function sendBootstrap(socket: WebSocket | undefined, payload: ServicePayload): void {
+  if (isLobbyPayload(payload)) {
+    send(socket, { type: "lobby_update", payload });
+    return;
+  }
   send(socket, { type: "state_update", payload: { matchStatus: payload.matchStatus, matchVersion: payload.matchVersion, playerView: payload.playerView } });
   send(socket, { type: "legal_actions", payload: { stateVersion: payload.playerView.stateVersion, legalActions: payload.legalActions } });
   send(socket, { type: "choice_request", payload: { choice: payload.pendingChoice ?? null } });
@@ -495,6 +584,10 @@ function sendBootstrap(socket: WebSocket | undefined, payload: SidePayload): voi
   send(socket, { type: "ai_turn", payload: payload.aiTurnPresentation ?? null });
   if (payload.pendingUndo) send(socket, { type: "undo_request", payload: payload.pendingUndo });
   if (payload.winner && payload.finalStateHash) send(socket, { type: "match_finished", payload: { winner: payload.winner, finalStateHash: payload.finalStateHash, ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {}) } });
+}
+
+function isLobbyPayload(payload: ServicePayload): payload is LobbyPayload {
+  return !("playerView" in payload);
 }
 
 function send(socket: WebSocket | undefined, message: ServerWsMessage): void {

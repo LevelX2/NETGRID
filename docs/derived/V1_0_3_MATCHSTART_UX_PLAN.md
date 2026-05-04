@@ -1,6 +1,6 @@
 # V1.0.3 Matchstart-UX-Plan
 
-Status: Entwurf zur Prüfung
+Status: umgesetzt und lokal verifiziert
 Stand: 2026-05-04
 
 ## Zweck

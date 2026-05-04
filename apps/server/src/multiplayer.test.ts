@@ -180,15 +180,18 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(invalidJoin.error.message).not.toContain("corp");
   });
 
-  it("keeps normal Human-vs-Human matches pending until the joiner submits valid own decks", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "join-deck-handshake" });
+  it("keeps normal Human-vs-Human matches in the start lobby until both players are ready", async () => {
+    let now = "2026-05-04T20:00:00.000Z";
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "join-deck-handshake", now: () => now });
     const created = await service.createMatch({
-      hostSide: "runner",
+      hostSide: "random",
       seed: "join-deck-handshake",
       mode: "human_vs_human",
+      countdownSeconds: 5,
+      settings: { matchFormat: "single_game" },
       participantADecks: {
         runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
       }
     });
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
@@ -200,6 +203,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(pending?.match.status).toBe("waiting_for_joiner_decks");
     expect(pending?.gameState).toBeFalsy();
     expect(JSON.stringify(pending?.match.deckSetup)).not.toContain("cards");
+    expect(pending?.startLobby?.countdownSeconds).toBe(5);
 
     const missingDecks = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Joiner" });
     expect("error" in missingDecks).toBe(true);
@@ -214,12 +218,53 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
+    const readyCheck = await service.loadForTest(created.matchId);
+    expect(readyCheck?.match.status).toBe("ready_check");
+    expect(readyCheck?.gameState).toBeFalsy();
+    expect(readyCheck?.match.settings.agendaPointsToWin).toBe(7);
+    expect(joined.lobby?.agendaPointsToWin).toBe(7);
+    expect(joined.lobby?.hostReady).toBe(false);
+    expect(joined.lobby?.joinerReady).toBe(false);
+    expect(joined.lobby?.participants.player_a.runnerDeckReady).toBe(true);
+    expect(joined.lobby?.participants.player_b.corpDeckReady).toBe(true);
+    expect(JSON.stringify(joined.lobby)).not.toContain("deckName");
+    expect(JSON.stringify(joined.lobby)).not.toContain("deckHash");
+    expect(JSON.stringify(joined)).not.toContain("Simple Priority Agenda");
+    expect(JSON.stringify(joined)).not.toContain("cardInstances");
+
+    const chat = await service.sendLobbyChat({ matchId: created.matchId, side: created.hostSide, sessionToken: created.hostSessionToken, text: "  Hallo zum Start <b>  " });
+    expect(chat.ok).toBe(true);
+    if (!chat.ok) throw new Error(chat.error.message);
+    expect("startLobby" in chat.actorPayload ? chat.actorPayload.startLobby?.chatMessages.at(-1)?.text : "").toBe("Hallo zum Start <b>");
+    expect(JSON.stringify(chat.actorPayload)).not.toContain("sessionToken");
+    expect(JSON.stringify(chat.actorPayload)).not.toContain("deckHash");
+
+    const hostReady = await service.setLobbyReady({ matchId: created.matchId, side: created.hostSide, sessionToken: created.hostSessionToken, ready: true });
+    expect(hostReady.ok).toBe(true);
+    if (!hostReady.ok) throw new Error(hostReady.error.message);
+    const joinerReady = await service.setLobbyReady({ matchId: created.matchId, side: joined.side, sessionToken: joined.sessionToken, ready: true });
+    expect(joinerReady.ok).toBe(true);
+    if (!joinerReady.ok) throw new Error(joinerReady.error.message);
+    expect(joinerReady.actorPayload.matchStatus).toBe("countdown");
+
+    const countdown = await service.loadForTest(created.matchId);
+    expect(countdown?.match.status).toBe("countdown");
+    const cancelled = await service.cancelLobbyCountdown({ matchId: created.matchId, side: joined.side, sessionToken: joined.sessionToken });
+    expect(cancelled.ok).toBe(true);
+    if (!cancelled.ok) throw new Error(cancelled.error.message);
+    expect(cancelled.actorPayload.matchStatus).toBe("ready_check");
+    const restarted = await service.setLobbyReady({ matchId: created.matchId, side: joined.side, sessionToken: joined.sessionToken, ready: true });
+    expect(restarted.ok).toBe(true);
+    if (!restarted.ok) throw new Error(restarted.error.message);
+    expect(restarted.actorPayload.matchStatus).toBe("countdown");
+    now = "2026-05-04T20:00:05.000Z";
+    const activated = await service.activateLobbyCountdown(created.matchId);
+    expect(activated.ok).toBe(true);
+    if (!activated.ok) throw new Error(activated.error.message);
     const active = await service.loadForTest(created.matchId);
     expect(active?.match.status).toBe("active");
     expect(active?.gameState).toBeTruthy();
-    expect(joined.playerView.deckMetadata?.own.deckName).toBe("Corp Demo Deck 08 - Starter Score Grid");
-    expect(JSON.stringify(joined)).not.toContain("Simple Priority Agenda");
-    expect(JSON.stringify(joined)).not.toContain("cardInstances");
+    expect(active?.startLobby).toBeUndefined();
   });
 
   it("runs actions only through the server pipeline with idempotency and stale-state rejection", async () => {
@@ -1034,6 +1079,39 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(randomOne)).not.toContain("cardInstances");
   });
 
+  it("derives Human-vs-KI random side assignment server-side from the seed", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-random-side" });
+    const first = await service.createMatch({
+      hostSide: "random",
+      playMode: "human_vs_ai",
+      humanSide: "random",
+      seed: "human-ai-random-side",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      aiDeckPolicy: "fixed"
+    });
+    const second = await service.createMatch({
+      hostSide: "random",
+      playMode: "human_vs_ai",
+      humanSide: "random",
+      seed: "human-ai-random-side",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      aiDeckPolicy: "fixed"
+    });
+
+    expect(first.hostSide).toBe(second.hostSide);
+    expect(first.mode).toBe(second.mode);
+    expect(["human_runner_vs_corp_ai", "human_corp_vs_runner_ai"]).toContain(first.mode);
+    expect(first.matchStatus).toBe("active");
+    expect(first.aiTurnPresentation?.pacingMode).toBe("paced");
+    expect(JSON.stringify(first)).not.toContain("cardInstances");
+  });
+
   it("creates the next private series game with a side swap and side-safe standings", async () => {
     const match = await joinedMatch("series-side-swap", { agendaPointsToWin: 2, matchFormat: "two_game_side_swap" });
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
@@ -1329,6 +1407,88 @@ describe("MVP 0.2 multiplayer service", () => {
     } finally {
       hostSocket.close();
       runnerSocket?.close();
+      await handle.close();
+    }
+  });
+
+  it("keeps both browser tabs in the ready lobby after the joiner submits decks", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ws-join-deck-lobby",
+      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicServerBaseUrl: "http://127.0.0.1:0"
+    });
+    const created = await service.createMatch({
+      mode: "human_vs_human",
+      hostSide: "runner",
+      seed: "ws-join-deck-lobby",
+      countdownSeconds: 5,
+      settings: { matchFormat: "single_game" },
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
+      }
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+
+    const handle = createNetrunnerHttpServer(service);
+    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    const address = handle.server.address();
+    if (!address || typeof address === "string") throw new Error("Missing server address");
+    const hostSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+    let joinerSocket: WebSocket | undefined;
+
+    try {
+      await waitForOpen(hostSocket);
+      hostSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide }
+        })
+      );
+      const waitingUpdate = await waitForMessage(hostSocket, "lobby_update");
+      expect(messagePayload(waitingUpdate).matchStatus).toBe("waiting_for_joiner_decks");
+
+      const joinedResponse = await fetch(`http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          token: joinToken,
+          displayName: "Teilnehmer B",
+          runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+          corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        })
+      });
+      expect(joinedResponse.status).toBe(200);
+      const joined = (await joinedResponse.json()) as JoinMatchResult;
+      expect(joined.matchStatus).toBe("ready_check");
+      expect(joined.lobby?.hostReady).toBe(false);
+      expect(joined.lobby?.joinerReady).toBe(false);
+      expect(joined.lobby?.participants.player_b.runnerDeckReady).toBe(true);
+      expect(joined.lobby?.participants.player_b.corpDeckReady).toBe(true);
+      expect(joined.playerView).toBeFalsy();
+
+      joinerSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+      await waitForOpen(joinerSocket);
+      joinerSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: created.matchId, sessionToken: joined.sessionToken, side: joined.side }
+        })
+      );
+      const hostReadyUpdate = await waitForMessage(hostSocket, "lobby_update");
+      const hostPayload = messagePayload(hostReadyUpdate) as {
+        matchStatus?: string;
+        startLobby?: { participants?: { player_b?: { runnerDeckReady?: boolean; corpDeckReady?: boolean } } };
+      };
+      expect(hostPayload.matchStatus).toBe("ready_check");
+      expect(hostPayload.startLobby?.participants?.player_b?.runnerDeckReady).toBe(true);
+      expect(hostPayload.startLobby?.participants?.player_b?.corpDeckReady).toBe(true);
+      expect(JSON.stringify(hostPayload)).not.toContain("deckHash");
+      expect(JSON.stringify(hostPayload)).not.toContain("cardInstances");
+    } finally {
+      hostSocket.close();
+      joinerSocket?.close();
       await handle.close();
     }
   });
