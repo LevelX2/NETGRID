@@ -2,17 +2,23 @@
 
 ## Current phase
 
-V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist als nächster Zwischenrelease detailliert geplant. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
+V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 is planned as a presentation/orchestration release for live opponent action cues, AI pacing, board highlights and opt-in action audio. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
 Latest V1.0 final review artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`.
 Latest V1.0.1 planning artifact: `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`.
 Latest V1.0.2 planning artifact: `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`.
+Latest V1.0.2 requirements artifact: `docs/derived/V1_0_2_REQUIREMENTS.md`.
+Latest V1.0.2 presentation spec artifact: `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`.
+Latest V1.0.2 test matrix artifact: `docs/derived/V1_0_2_TEST_MATRIX.md`.
+Latest V1.0.2 requirements review artifact: `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`.
+Latest V1.0.2 implementation review artifact: `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`.
+Latest V1.0.2 final review artifact: `docs/derived/V1_0_2_FINAL_REVIEW.md`.
 
-Current selected next scope: V1.0.2 opponent action presentation and AI pacing requirements freeze. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
+Current selected next scope: decide the next gated step after V1.0.2. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
 
 ## Status
 
@@ -248,6 +254,18 @@ V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz detailed planning is comp
 
 `V1_0_2_opponent_action_presentation_plan_available: true`
 
+V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz requirements freeze is complete.
+
+`V1_0_2_requirements_freeze_done: true`
+
+V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz implementation is complete and locally verified.
+
+`V1_0_2_implemented: true`
+
+`V1_0_2_verified: true`
+
+`V1_0_2_done: true`
+
 Bestandsaufnahme 2026-05-04 is complete.
 
 `bestandsaufnahme_2026_05_04_done: true`
@@ -256,7 +274,18 @@ Deck/match stabilization inventory 2026-05-04 is complete.
 
 `deck_match_stabilization_inventory_2026_05_04_done: true`
 
-Current verification after V1.0.1 Deckbibliothek und Join-Deck-Handshake:
+Current verification after V1.0.2 implementation:
+
+- Implemented: side-safe opponent action cues, cue queue, board highlights, Human-vs-KI AI pacing, `advance_ai` authorization and opt-in action audio.
+- Requirements/spec/test/review coverage: pass, V1.0.2 Must requirements are covered by Web cue tests, Server multiplayer tests, visibility regression and build/type gates.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm test`: pass, 182 tests.
+- `corepack pnpm build`: pass.
+- Local smoke: Web `http://127.0.0.1:3000` HTTP 200; Server `http://127.0.0.1:8787/health` HTTP 200.
+- V1.0.2 gate: `V1_0_2_done: true`.
+
+Last code verification baseline from V1.0.1 Deckbibliothek und Join-Deck-Handshake:
 
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
@@ -275,6 +304,7 @@ Audit findings:
 - Deck Editor and Match Setup are functional for versioned V0.8 snapshots and private local O:NR runtime cards. V1.0 adds player-owned Runner/Corp deck pairs for private series and explicit KI deck policy.
 - V1.0.1 adds explicit local deck saving, direct saved-deck selection in Matchstart, folded templates, server-side revalidation from saved decks and a pending Human-vs-Human lobby that starts only after the Joiner submits valid Runner/Corp deck snapshots.
 - `data/ai/ai-deck-pool-1.0.1.json` documents the versioned KI `seeded_random` pool and excludes private local O:NR snapshots from random selection.
+- V1.0.2 implements opponent action cues, side-safe highlight rules, KI pacing modes, `advance_ai` authorization, reconnect/audio behavior and local smokes without expanding cards, mechanics, Engine authority, Replay or StateHash.
 
 ## Goal
 
@@ -1618,6 +1648,63 @@ Checks before final workspace-wide gates:
 - `corepack pnpm --filter @netrunner/server typecheck`: pass.
 - `corepack pnpm --filter @netrunner/server test`: pass, 21 tests.
 
+## V1.0.2 Requirements Freeze files created or updated
+
+- `docs/derived/V1_0_2_REQUIREMENTS.md`
+- `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`
+- `docs/derived/V1_0_2_TEST_MATRIX.md`
+- `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log 2026-05.md`
+
+## V1.0.2 Requirements Freeze decision
+
+`V1_0_2_requirements_freeze_done: true`
+
+`ready_for_implementation: true`
+
+V1.0.2 is frozen as a presentation/orchestration release. Implementation may add side-safe opponent action cues, local cue queue, board highlights, Human-vs-KI pacing, `advance_ai` authorization and opt-in local action audio. The scope does not add cards, official mechanics, Engine rule authority, public platform features, official assets, Replay changes or StateHash changes.
+
+## V1.0.2 Implementation files created or updated
+
+- `apps/web/app/action-cues.ts`
+- `apps/web/app/action-cues.test.ts`
+- `apps/web/app/page.tsx`
+- `apps/web/app/globals.css`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/http-server.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `tests/specs/visibility-contract.test.ts`
+- `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/V1_0_2_FINAL_REVIEW.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log 2026-05.md`
+
+## V1.0.2 Final gate
+
+`V1_0_2_implemented: true`
+
+`V1_0_2_verified: true`
+
+`V1_0_2_done: true`
+
+V1.0.2 implements side-safe opponent action cues, local cue queue, board highlights, Human-vs-KI pacing, `advance_ai` authorization and opt-in local action audio. The scope does not add cards, official mechanics, Engine rule authority, public platform features, official assets, Replay changes or StateHash changes.
+
+Checks:
+
+- `corepack pnpm --filter @netrunner/web test -- action-cues.test.ts`: pass.
+- `corepack pnpm --filter @netrunner/server test -- multiplayer.test.ts`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm test`: pass, 182 tests.
+- `corepack pnpm build`: pass.
+- Local Web smoke: pass, `http://127.0.0.1:3000`.
+- Local Server smoke: pass, `http://127.0.0.1:8787/health`.
+
 
 ## S01 Requirements and implementation files created or updated
 
@@ -1717,16 +1804,15 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V0.99: Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity.
 - V1.0: Deck- und Match-Setup-Stabilisierung.
 - V1.0.1: Deckbibliothek und Join-Deck-Handshake.
-- V1.0.2: Gegner-Aktionsdarstellung und Ablauftransparenz, planned as next requirements freeze.
+- V1.0.2: Gegner-Aktionsdarstellung und Ablauftransparenz, implementation complete and locally verified.
 
-Current gate: V1.0.2 opponent action presentation requirements freeze is the selected next step. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0.2 opponent action presentation is complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
-Next planning decision:
+Next scope decision:
 
-1. Derive and freeze V1.0.2 requirements, presentation spec and test matrix.
+1. Choose the next gated post-V1.0.2 scope before writing more implementation.
 2. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
 3. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
-4. Keep deployment and operations hardening behind explicit follow-up scope.
 
 M11+ mechanics, Prevention/Avoid/Interrupt/Replacement, Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates.
 
@@ -1737,6 +1823,12 @@ Detailed planning artifacts available:
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`
 - `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`
+- `docs/derived/V1_0_2_REQUIREMENTS.md`
+- `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`
+- `docs/derived/V1_0_2_TEST_MATRIX.md`
+- `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`
+- `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/V1_0_2_FINAL_REVIEW.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.7_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`

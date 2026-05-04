@@ -62,7 +62,8 @@
 - S01 wurde als Sonderphase für Spielende, Ergebnisfenster, Spielziel, private Matchserie und Audio umgesetzt: `GameResultSummary`, Ergebnisfenster mit Perspektivtext, side-sichere Statistik, Spielziel-Auswahl `Regelmatch · 7 Agendapunkte`/`Einzelspiel · Deckziel`/`Private Matchserie · Seitenwechsel`, private Zwei-Spiel-Serie mit Seitenwechsel und opt-in Web-Audio-Effekte.
 - V1.0 Deck- und Match-Setup-Stabilisierung ist umgesetzt und final geprüft: persönliche Runner-/Corp-Deckpaare für Teilnehmer A/B, stabile Serien-Deckzuordnung über den Seitenwechsel, KI-Deckpolitik `fixed`/`selected`/`seeded_random`, validierte Matchstart-Deckauswahl, O:NR-AI-/Multiplayer-Smokes, Manifest-/Review-Abgleich und Browser-Smoke.
 - V1.0.1 Deckbibliothek und Join-Deck-Handshake ist umgesetzt: lokale gespeicherte Decks sind der normale Deckeditor- und Matchstart-Fluss, Vorlagen sind eingeklappt, Speichern/Prüfen/Matchstart-Snapshot sind getrennt, Human-vs-Human startet als pending Lobby mit Joiner-Deckauswahl, und KI-Deckpolitik bleibt mit dokumentiertem `seeded_random`-Pool stabil.
-- V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist detailliert geplant: Live-Cues für gegnerische Aktionen, KI-Pacing statt unsichtbarem Bulk-KI-Zug, Board-Highlights, opt-in Aktionsaudio und lokale Interventions-/Choice-Hervorhebung ohne neue Regelautorität.
+- V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz hatte zuerst einen Requirements Freeze für Live-Cues, KI-Pacing, Board-Highlights, opt-in Aktionsaudio und lokale Interventions-/Choice-Hervorhebung ohne neue Regelautorität. Dieser Freeze ist durch die anschließende Implementierung erfüllt.
+- V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert: PublicEvent-basierte `OpponentActionCue`-Ableitung, redaction-sichere Highlights, Web-Overlay mit Queue, KI-Takt `fast`/`paced`/`manual`, autorisiertes `advance_ai`, lokale Entscheidungshervorhebung und opt-in Aktionsaudio. Gate-Ergebnis: `V1_0_2_done: true`.
 - V0.92 wurde als Mechanik-Inventar-, Requirements- und Spezifikationsgate abgeschlossen: menschliche und maschinenlesbare Mechanik-Coverage, M1-Requirements, M1-Effect-/Timing-Spezifikation, Testmatrix, Requirements Review und Final Review liegen vor. Gate-Ergebnis: `MVP_0.92_done: true`; `ready_for_MVP_0.93_implementation: true`.
 - V0.93 wurde als M1-Engine-Fundament abgeschlossen: additive Shared-/Engine-Typen für Effects, Abilities, Choices und Eventklassifikation, `pendingChoice` in GameState/PlayerView, Choice-Revalidierung, Breaker Pump/Break als Ability-Pilot, side-sichere Server-/WebSocket-/Reconnect-Payloads und AI-LegalActions-Smoke sind umgesetzt. Gate-Ergebnis: `MVP_0.93_done: true`; `M2_requirements_ready: true`.
 - Die detaillierte Planung für V0.94 und V0.95 liegt vor. Die Annahmenprüfung bestätigt V0.94 als Damage-/Flatline-Gate mit engem Game-End-Grundvertrag und V0.95 als Resource-/Tag-Interaktionsgate. V0.94 startet keinen vollen M2-Block; V0.95 startet kein Trace/Link/Bidding.
@@ -80,7 +81,7 @@
 - V0.99 Hosting, Viren, Purge, Counter-Familien, Recurring Credits und Bad Publicity sind umgesetzt und final dokumentiert. `v099_host_resource`, `v099_virus_program`, `v099_recurring_chip` und `v099_bad_publicity_operation` sind lokale/fiktive Harness-Karten. Hosting-Choices sind private Hidden-Info-Barrieren, Purge kostet 3 Corp-Klicks und entfernt nur Virus-Counter, Recurring Credits zahlen nur Runner-Programminstallkosten und Bad Publicity nur Runner-Run-Kosten. Gate-Ergebnis: `MVP_0.99_done: true`; `mechanics_completion_V0.94_to_V0.99_done: true`.
 - Lokaler privater O:NR-v1-Testzugang ist für privaten Gebrauch als erlaubter lokaler Datenpool eingeordnet: Engine-Harness-Tests für 45 lokal spielbare Karten sind vorhanden, Web-Katalog und Deck-Validierung können ein lokales ignoriertes Overlay lesen, lokale Bilder liegen unter ignorierten Asset-Pfaden, die serverseitige Deck-Revalidierung nutzt denselben Runtime-Kartenpool, und V1.0 ergänzt AI-/Multiplayer-Smokes sowie Manifest-/Review-Abgleich.
 - Die Deck-/Match-Stabilisierung vom 2026-05-04 ist dokumentiert: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`, `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md` und `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`.
-- Die Gegner-Aktionsdarstellung ist als nächster Zwischenrelease geplant: `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`.
+- Die Gegner-Aktionsdarstellung ist umgesetzt und final reviewt: `docs/derived/V1_0_2_REQUIREMENTS.md`, `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`, `docs/derived/V1_0_2_TEST_MATRIX.md`, `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_0_2_FINAL_REVIEW.md`.
 
 ## Teilweise umgesetzt
 
@@ -97,7 +98,7 @@
 
 - Kein gate-basierter MVP-0.1- bis MVP-0.9-Arbeitsschritt ist offen.
 - Kein gate-basierter V0.94- bis V0.99-Mechanikschritt ist offen.
-- Nächster ausgewählter Scope ist V1.0.2 Requirements Freeze für Gegner-Aktionsdarstellung und KI-Pacing.
+- Nächster ausgewählter Scope ist offen; V1.0.2 ist umgesetzt und abgeschlossen.
 - M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten. Mulligan, vollständiges Setup-/Deckout-/Archives-facedown-Modell und vollständige Spielende-Normalisierung bleiben offen.
 - Prevention, Avoid, Interrupt und Replacement sind weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - Core-Damage, Damage-Prevention, Avoid, Interrupt und Replacement bleiben zurückgestellt und sind nicht Teil des V0.94-Scopes.

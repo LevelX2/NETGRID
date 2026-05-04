@@ -101,3 +101,9 @@
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`: Final Review für V1.0 mit Browser-Smoke, Checks, Grenzen und Gate-Ergebnis.
 - `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`: Planung und Umsetzungsergebnis für lokale Deckbibliothek, explizites Speichern, gespeicherte Decks im Matchstart und Human-vs-Human-Join-Deck-Handshake.
 - `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`: Detailplanung für Live-Darstellung gegnerischer Aktionen, KI-Pacing, Board-Highlights und opt-in Aktionsaudio.
+- `docs/derived/V1_0_2_REQUIREMENTS.md`: eingefrorene V1.0.2-Anforderungen für Gegner-Aktionsdarstellung, KI-Pacing, Cue-Queue, Board-Highlights und opt-in Audio.
+- `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`: V1.0.2-Spezifikation für `OpponentActionCue`, side-sichere Highlights, KI-Pacing und Audio-/Reconnect-Verhalten.
+- `docs/derived/V1_0_2_TEST_MATRIX.md`: V1.0.2-Testmatrix für Cue-Mapping, Redaction, KI-Pacing, Visibility, Browser-Smokes und Regression.
+- `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.2.
+- `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`: Implementation Review für die umgesetzten V1.0.2-Cues, KI-Pacing, Highlights und Aktionsaudio.
+- `docs/derived/V1_0_2_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.2.

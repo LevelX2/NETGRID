@@ -41,6 +41,7 @@ export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "waiting_f
 export type HostSideSelection = Side | "random";
 export type MatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
 export type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
+export type AiPacingMode = "fast" | "paced" | "manual";
 export type TokenKind = "join" | "session" | "reconnect";
 export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
 export type SeriesPlayerSlot = "player_a" | "player_b";
@@ -142,6 +143,7 @@ export type MatchRecord = {
     aiDeckPolicy?: AiDeckPolicy;
   };
   aiControllers?: Partial<Record<Side, PlayerController>>;
+  aiPacingMode?: AiPacingMode;
   series?: MatchSeriesState;
   createdAt: string;
   updatedAt: string;
@@ -256,9 +258,16 @@ export type SidePayload = {
   opponentStatus: { side: Side; connected: boolean };
   pendingChoice?: PlayerView["pendingChoice"];
   pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
+  aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
+};
+
+export type AiTurnPresentationState = {
+  activeAiSide?: Side;
+  canAdvanceAi: boolean;
+  pacingMode: AiPacingMode;
 };
 
 export type LobbyPayload = {
@@ -298,6 +307,7 @@ export type CreateMatchResult = {
   legalActions: LegalAction[];
   matchVersion: number;
   pendingChoice?: PlayerView["pendingChoice"];
+  aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
@@ -313,6 +323,7 @@ export type JoinMatchResult = {
   legalActions: LegalAction[];
   matchVersion: number;
   pendingChoice?: PlayerView["pendingChoice"];
+  aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
@@ -343,6 +354,19 @@ export type UndoResult =
       requesterPayload: SidePayload;
       opponentPayload: SidePayload;
       undoRequest?: PendingUndoRequest;
+    }
+  | {
+      ok: false;
+      error: SafeErrorPayload;
+      payload?: SidePayload;
+    };
+
+export type AdvanceAiResult =
+  | {
+      ok: true;
+      requesterPayload: SidePayload;
+      opponentPayload: SidePayload;
+      publicEvent?: PublicGameEvent;
     }
   | {
       ok: false;
@@ -444,6 +468,7 @@ export class MultiplayerService {
     mode?: MatchMode;
     runnerDifficulty?: AiDifficulty;
     corpDifficulty?: AiDifficulty;
+    aiPacingMode?: AiPacingMode;
   } & MatchDeckSelectionInput): Promise<CreateMatchResult> {
     const seed = input.seed?.trim() || `match-${randomId("seed")}`;
     const matchId = randomId("match");
@@ -454,6 +479,7 @@ export class MultiplayerService {
     const corpPlayer = input.series?.corpPlayer ?? (hostSide === "corp" ? "player_a" : "player_b");
     const aiPlayer = aiPlayerForMode(mode);
     const aiDeckPolicy = aiPlayer ? input.aiDeckPolicy ?? "selected" : undefined;
+    const aiPacingMode = input.aiPacingMode ?? (aiPlayer ? "paced" : undefined);
     const now = this.now();
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
@@ -492,6 +518,7 @@ export class MultiplayerService {
             corp: hostDeckPair.corpSnapshot.publicMetadata,
             participants: { player_a: publicParticipantDeckPair(hostDeckPair), player_b: publicParticipantDeckPair(hostDeckPair) }
           },
+          ...(aiPacingMode ? { aiPacingMode } : {}),
           ...(matchFormat === "two_game_side_swap"
             ? {
                 series: {
@@ -601,6 +628,7 @@ export class MultiplayerService {
           ...(aiDeckPolicy ? { aiDeckPolicy } : {})
         },
         ...(mode === "human_vs_human" ? {} : { aiControllers: aiControllersFor(controllers) }),
+        ...(aiPacingMode ? { aiPacingMode } : {}),
         ...(settings.matchFormat === "two_game_side_swap"
           ? {
               series: input.series
@@ -648,7 +676,7 @@ export class MultiplayerService {
       stateSnapshots: [this.snapshotFor(matchId, gameState, 1, "snap_initial", false)]
     };
 
-    this.runAiUntilNextHuman(record);
+    this.maybeRunAiAfterTransition(record);
     await this.storage.save(record);
     const payload = this.payloadFor(record, hostSide);
     return {
@@ -665,6 +693,7 @@ export class MultiplayerService {
       legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
       ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
       ...(payload.winner ? { winner: payload.winner } : {}),
       ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
       ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
@@ -712,6 +741,7 @@ export class MultiplayerService {
         mode: nextMode,
         ...(nextMode === "human_runner_vs_corp_ai" ? { corpDifficulty: aiDifficulty } : {}),
         ...(nextMode === "human_corp_vs_runner_ai" ? { runnerDifficulty: aiDifficulty } : {}),
+        ...(record.match.aiPacingMode ? { aiPacingMode: record.match.aiPacingMode } : {}),
         ...(record.match.deckSetup.aiDeckPolicy ? { aiDeckPolicy: record.match.deckSetup.aiDeckPolicy } : {}),
         settings: record.match.settings,
         participantADecks: participantDecks.player_a,
@@ -790,7 +820,7 @@ export class MultiplayerService {
     record.match.status = "active";
     record.match.matchVersion += 1;
     record.match.updatedAt = now;
-    this.runAiUntilNextHuman(record);
+    this.maybeRunAiAfterTransition(record);
     await this.storage.save(record);
 
     const payload = this.payloadFor(record, tokenRecord.allowedSide);
@@ -804,6 +834,7 @@ export class MultiplayerService {
       legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
       ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
       ...(payload.winner ? { winner: payload.winner } : {}),
       ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
       ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
@@ -848,6 +879,7 @@ export class MultiplayerService {
       matchVersion: record.match.matchVersion,
       eventTail: payload.eventTail,
       ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
       ...(payload.winner ? { winner: payload.winner } : {}),
       ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
       ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
@@ -964,7 +996,7 @@ export class MultiplayerService {
       if (result.state.winner) {
         this.finalizeFinishedMatch(record);
       }
-      this.runAiUntilNextHuman(record);
+      this.maybeRunAiAfterTransition(record);
       await this.storage.save(record);
       const success: SubmitActionResult = {
         ok: true,
@@ -975,6 +1007,52 @@ export class MultiplayerService {
       const publicEvent = result.publicEvents.at(-1);
       if (publicEvent) success.publicEvent = publicEvent;
       return success;
+    });
+  }
+
+  async advanceAi(input: {
+    matchId: string;
+    side: Side;
+    sessionToken: string;
+    knownStateVersion?: number;
+    knownMatchVersion?: number;
+    mode?: "single_step" | "until_human";
+  }): Promise<AdvanceAiResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (this.isAiSide(record, input.side)) return { ok: false, error: safeError("ai_session_forbidden", "Nur eine menschliche Session darf die KI fortsetzen.") };
+      if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
+      if (!this.isAiSide(record, record.gameState.activeSide)) {
+        return { ok: false, error: safeError("ai_not_active", "Aktuell ist keine KI am Zug.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+      if (input.knownStateVersion !== undefined && input.knownStateVersion !== record.gameState.stateVersion) {
+        return { ok: false, error: safeError("stale_state", "Der Spielzustand ist veraltet.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+      if (input.knownMatchVersion !== undefined && input.knownMatchVersion !== record.match.matchVersion) {
+        return { ok: false, error: safeError("stale_match", "Der Matchzustand ist veraltet.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+
+      const beforeEventCount = record.eventLog.length;
+      if (input.mode === "until_human") this.runAiUntilNextHuman(record);
+      else this.runAiStep(record);
+
+      if (record.eventLog.length === beforeEventCount) {
+        await this.storage.save(record);
+        return { ok: false, error: safeError("ai_no_action", "Die KI konnte aktuell keine Aktion ausführen.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+
+      await this.storage.save(record);
+      const result: AdvanceAiResult = {
+        ok: true,
+        requesterPayload: this.payloadFor(record, input.side),
+        opponentPayload: this.payloadFor(record, opposite(input.side))
+      };
+      const publicEvent = record.eventLog.at(-1)?.publicPayload;
+      if (publicEvent) result.publicEvent = publicEvent;
+      return result;
     });
   }
 
@@ -1154,6 +1232,7 @@ export class MultiplayerService {
       : undefined;
     const finalStateHash = record.gameState.winner ? hashState(record.gameState) : undefined;
     const resultSummary = record.gameState.winner && finalStateHash ? resultSummaryFor(record, side, finalStateHash) : undefined;
+    const aiTurnPresentation = this.aiTurnPresentationFor(record, side);
     return {
       matchId: record.match.matchId,
       matchStatus: record.match.status,
@@ -1165,6 +1244,7 @@ export class MultiplayerService {
       opponentStatus: { side: opposite(side), connected: this.isAiSide(record, opposite(side)) || (opponent?.connected ?? false) },
       ...(playerView.pendingChoice ? { pendingChoice: playerView.pendingChoice } : {}),
       ...(pendingUndo ? { pendingUndo } : {}),
+      ...(aiTurnPresentation ? { aiTurnPresentation } : {}),
       ...(record.gameState.winner && finalStateHash ? { winner: record.gameState.winner, finalStateHash } : {}),
       ...(resultSummary ? { resultSummary } : {})
     };
@@ -1201,52 +1281,72 @@ export class MultiplayerService {
     series.status = series.results.length >= series.gamesPlanned ? "finished" : "between_games";
   }
 
+  private maybeRunAiAfterTransition(record: StoredMatch): void {
+    if (record.match.aiPacingMode === "fast") this.runAiUntilNextHuman(record);
+  }
+
   private runAiUntilNextHuman(record: StoredMatch): void {
     let state = record.gameState;
     if (!state) return;
     for (let count = 0; count < 40 && record.match.status === "active" && !state.winner && this.isAiSide(record, state.activeSide); count += 1) {
-      const side = state.activeSide;
-      const legalActions = getLegalActions(state, side);
-      if (legalActions.length === 0) return;
-      const controller = record.match.aiControllers?.[side];
-      const input = buildAiDecisionInput(state, side, {
-        difficulty: controller?.difficulty ?? "normal",
-        profileId: controller?.profileId ?? `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
-        decisionId: `${record.match.matchId}:${state.stateVersion}:${side}`,
-        actionNumber: state.stateVersion
-      });
-      const decision = chooseAiAction(input);
-      const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
-      if (!legalAction) return;
-      const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
-      const result = applyAction(state, {
-        matchId: record.match.matchId,
-        side,
-        actionId: legalAction.actionId,
-        clientKnownStateVersion: state.stateVersion,
-        ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
-        idempotencyKey: `ai-${side}-${state.stateVersion}`
-      });
-      if (!result.ok) return;
-      const event: GameEvent = {
-        ...result.event,
-        publicPayload: {
-          ...result.event.publicPayload,
-          aiReasonCode: decision.reasonCode,
-          aiExplanation: decision.explanation
-        }
-      };
-      const barrier = isHiddenInfoBarrier(event);
-      record.stateSnapshots.push({ ...snapshot, hiddenInfoBarrier: barrier });
-      record.gameState = result.state;
-      state = result.state;
-      record.eventLog.push(toEventRecord(record.match.matchId, event, barrier));
-      record.match.matchVersion += 1;
-      record.match.updatedAt = this.now();
-      if (result.state.winner) {
-        this.finalizeFinishedMatch(record);
-      }
+      if (!this.runAiStep(record)) return;
+      state = record.gameState;
+      if (!state) return;
     }
+  }
+
+  private runAiStep(record: StoredMatch): boolean {
+    const state = record.gameState;
+    if (!state || record.match.status !== "active" || state.winner || !this.isAiSide(record, state.activeSide)) return false;
+    const side = state.activeSide;
+    const legalActions = getLegalActions(state, side);
+    if (legalActions.length === 0) return false;
+    const controller = record.match.aiControllers?.[side];
+    const input = buildAiDecisionInput(state, side, {
+      difficulty: controller?.difficulty ?? "normal",
+      profileId: controller?.profileId ?? `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+      decisionId: `${record.match.matchId}:${state.stateVersion}:${side}`,
+      actionNumber: state.stateVersion
+    });
+    const decision = chooseAiAction(input);
+    const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
+    if (!legalAction) return false;
+    const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
+    const result = applyAction(state, {
+      matchId: record.match.matchId,
+      side,
+      actionId: legalAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
+      idempotencyKey: `ai-${side}-${state.stateVersion}`
+    });
+    if (!result.ok) return false;
+    const event: GameEvent = {
+      ...result.event,
+      publicPayload: {
+        ...result.event.publicPayload,
+        aiReasonCode: decision.reasonCode,
+        aiExplanation: decision.explanation
+      }
+    };
+    const barrier = isHiddenInfoBarrier(event);
+    record.stateSnapshots.push({ ...snapshot, hiddenInfoBarrier: barrier });
+    record.gameState = result.state;
+    record.eventLog.push(toEventRecord(record.match.matchId, event, barrier));
+    record.match.matchVersion += 1;
+    record.match.updatedAt = this.now();
+    if (result.state.winner) this.finalizeFinishedMatch(record);
+    return true;
+  }
+
+  private aiTurnPresentationFor(record: StoredMatch, side: Side): AiTurnPresentationState | undefined {
+    if (!record.gameState || !record.match.aiControllers) return undefined;
+    const activeAiSide = this.isAiSide(record, record.gameState.activeSide) ? record.gameState.activeSide : undefined;
+    return {
+      ...(activeAiSide ? { activeAiSide } : {}),
+      canAdvanceAi: Boolean(record.match.status === "active" && activeAiSide && !this.isAiSide(record, side) && !record.gameState.winner),
+      pacingMode: record.match.aiPacingMode ?? "fast"
+    };
   }
 
   private isAiSide(record: StoredMatch, side: Side): boolean {

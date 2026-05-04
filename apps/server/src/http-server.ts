@@ -7,6 +7,7 @@ import {
   JsonFileMatchStorage,
   MultiplayerService,
   type ActionReceipt,
+  type AiTurnPresentationState,
   type GameResultSummary,
   type SafeErrorPayload,
   type SidePayload,
@@ -34,6 +35,7 @@ type ClientWsMessage =
   | { type: "request_undo"; payload: { targetEventId: string; reason?: string } }
   | { type: "accept_undo"; payload: { undoRequestId: string } }
   | { type: "decline_undo"; payload: { undoRequestId: string } }
+  | { type: "advance_ai"; payload: { knownStateVersion?: number; knownMatchVersion?: number; mode?: "single_step" | "until_human" } }
   | { type: "ping"; payload: { clientTime: number } };
 
 export type ServerWsMessage =
@@ -44,6 +46,7 @@ export type ServerWsMessage =
   | { type: "action_receipt"; payload: ActionReceipt }
   | { type: "opponent_status"; payload: SidePayload["opponentStatus"] }
   | { type: "undo_request"; payload: NonNullable<SidePayload["pendingUndo"]> }
+  | { type: "ai_turn"; payload: AiTurnPresentationState | null }
   | { type: "match_finished"; payload: { winner: SidePayload["winner"]; finalStateHash: string; resultSummary?: GameResultSummary } }
   | { type: "error"; payload: SafeErrorPayload }
   | { type: "pong"; payload: { clientTime: number; serverTime: number } };
@@ -117,6 +120,11 @@ export class NetrunnerRealtimeServer {
         return;
       }
       await this.handleSubmitAction(context, message.payload);
+      return;
+    }
+
+    if (message.type === "advance_ai") {
+      await this.handleAdvanceAi(context, message.payload);
       return;
     }
 
@@ -204,6 +212,30 @@ export class NetrunnerRealtimeServer {
 
     send(actor?.socket, { type: "action_receipt", payload: result.receipt });
     this.broadcastPayload(result.actorPayload);
+    this.broadcastPayload(result.opponentPayload);
+  }
+
+  private async handleAdvanceAi(
+    context: WsContext,
+    payload: Extract<ClientWsMessage, { type: "advance_ai" }>["payload"]
+  ): Promise<void> {
+    const result = await this.service.advanceAi({
+      matchId: context.matchId,
+      side: context.side,
+      sessionToken: context.sessionToken,
+      ...(typeof payload.knownStateVersion === "number" ? { knownStateVersion: payload.knownStateVersion } : {}),
+      ...(typeof payload.knownMatchVersion === "number" ? { knownMatchVersion: payload.knownMatchVersion } : {}),
+      ...(payload.mode === "until_human" || payload.mode === "single_step" ? { mode: payload.mode } : {})
+    });
+
+    const actor = this.connection(context.matchId, context.side);
+    if (!result.ok) {
+      send(actor?.socket, { type: "error", payload: result.error });
+      if (result.payload) sendBootstrap(actor?.socket, result.payload);
+      return;
+    }
+
+    this.broadcastPayload(result.requesterPayload);
     this.broadcastPayload(result.opponentPayload);
   }
 
@@ -314,6 +346,7 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       if (typeof body.seed === "string") createInput.seed = body.seed;
       if (isDifficulty(body.runnerDifficulty)) createInput.runnerDifficulty = body.runnerDifficulty;
       if (isDifficulty(body.corpDifficulty)) createInput.corpDifficulty = body.corpDifficulty;
+      if (isAiPacingMode(body.aiPacingMode)) createInput.aiPacingMode = body.aiPacingMode;
       Object.assign(createInput, deckSelectionFromBody(body));
       if (typeof body.settings === "object" && body.settings) {
         const settings = body.settings as Record<string, unknown>;
@@ -406,6 +439,28 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
         sendJson(response, "error" in next ? 409 : 201, next);
         return;
       }
+      if (request.method === "POST" && action === "ai-advance") {
+        const body = await readJson(request);
+        const side = body.side === "corp" ? "corp" : "runner";
+        const advanced = await service.advanceAi({
+          matchId,
+          side,
+          sessionToken: bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : ""),
+          ...(typeof body.knownStateVersion === "number" ? { knownStateVersion: body.knownStateVersion } : {}),
+          ...(typeof body.knownMatchVersion === "number" ? { knownMatchVersion: body.knownMatchVersion } : {}),
+          ...(body.mode === "until_human" || body.mode === "single_step" ? { mode: body.mode } : {})
+        });
+        if (advanced.ok) {
+          sendJson(response, 200, {
+            ok: true,
+            requesterPayload: advanced.requesterPayload,
+            ...(advanced.publicEvent ? { publicEvent: advanced.publicEvent } : {})
+          });
+        } else {
+          sendJson(response, 409, advanced);
+        }
+        return;
+      }
     }
 
     sendJson(response, 404, { error: { code: "not_found", message: "Route nicht gefunden." } });
@@ -437,6 +492,7 @@ function sendBootstrap(socket: WebSocket | undefined, payload: SidePayload): voi
   send(socket, { type: "choice_request", payload: { choice: payload.pendingChoice ?? null } });
   send(socket, { type: "event_log_update", payload: { events: payload.eventTail } });
   send(socket, { type: "opponent_status", payload: payload.opponentStatus });
+  send(socket, { type: "ai_turn", payload: payload.aiTurnPresentation ?? null });
   if (payload.pendingUndo) send(socket, { type: "undo_request", payload: payload.pendingUndo });
   if (payload.winner && payload.finalStateHash) send(socket, { type: "match_finished", payload: { winner: payload.winner, finalStateHash: payload.finalStateHash, ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {}) } });
 }
@@ -473,6 +529,10 @@ function opposite(side: Side): Side {
 
 function isDifficulty(value: unknown): value is AiDifficulty {
   return value === "easy" || value === "normal" || value === "hard";
+}
+
+function isAiPacingMode(value: unknown): value is NonNullable<Parameters<MultiplayerService["createMatch"]>[0]["aiPacingMode"]> {
+  return value === "fast" || value === "paced" || value === "manual";
 }
 
 function deckSelectionFromBody(body: Record<string, unknown>): MatchDeckSelectionInput {

@@ -49,9 +49,9 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("resultSummary.sessionToken");
   });
 
-  it("keeps the V1.0.1 deck library and join handshake explicit without adding browser authority", () => {
+  it("keeps the V1.0.2 deck library and join handshake explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.1"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.2"');
     expect(page).toContain("Meine Decks");
     expect(page).toContain("Speichern");
     expect(page).toContain("Vorgefertigte Decks anzeigen");

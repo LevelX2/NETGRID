@@ -1345,14 +1345,31 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.mode).toBe("human_runner_vs_corp_ai");
     expect(created.joinUrl).toBeUndefined();
     expect(created.playerView.side).toBe("runner");
-    expect(created.playerView.activeSide).toBe("runner");
-    expect(created.matchVersion).toBeGreaterThan(1);
-    expect(created.legalActions.length).toBeGreaterThan(0);
+    expect(created.playerView.activeSide).toBe("corp");
+    expect(created.matchVersion).toBe(1);
+    expect(created.aiTurnPresentation).toEqual({ activeAiSide: "corp", canAdvanceAi: true, pacingMode: "paced" });
+    expect(created.legalActions.length).toBe(0);
 
     const stored = await service.loadForTest(created.matchId);
     expect(stored?.match.aiControllers?.corp?.type).toBe("ai");
     expect(JSON.stringify(created)).not.toContain("cardInstances");
     expect(JSON.stringify(created)).not.toContain("Simple Agenda");
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: created.playerView.stateVersion,
+      knownMatchVersion: created.matchVersion,
+      mode: "single_step"
+    });
+    expect(advanced.ok).toBe(true);
+    if (!advanced.ok) throw new Error(advanced.error.message);
+    expect(advanced.requesterPayload.playerView.stateVersion).toBe(created.playerView.stateVersion + 1);
+    expect(advanced.requesterPayload.aiTurnPresentation?.activeAiSide).toBe("corp");
+    expect(advanced.publicEvent?.publicPayload.aiExplanation).toBeTruthy();
+    expect(JSON.stringify(advanced.requesterPayload)).not.toContain("cardInstances");
+    expect(JSON.stringify(advanced.requesterPayload)).not.toContain("Simple Agenda");
   });
 
   it("runs Human Corp vs Runner AI through the same action pipeline", async () => {
@@ -1392,9 +1409,110 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(endTurnResult.ok).toBe(true);
     if (!endTurnResult.ok) throw new Error(endTurnResult.error.message);
 
-    expect(endTurnResult.actorPayload.playerView.stateVersion).toBeGreaterThan(afterMandatory.playerView.stateVersion + 1);
+    expect(endTurnResult.actorPayload.playerView.stateVersion).toBe(afterMandatory.playerView.stateVersion + 1);
+    expect(endTurnResult.actorPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
     expect(endTurnResult.actorPayload.opponentStatus.connected).toBe(true);
     expect(JSON.stringify(endTurnResult.actorPayload)).not.toContain("Simple Fracter");
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: endTurnResult.actorPayload.playerView.stateVersion,
+      knownMatchVersion: endTurnResult.actorPayload.matchVersion
+    });
+    expect(advanced.ok).toBe(true);
+    if (!advanced.ok) throw new Error(advanced.error.message);
+    expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(endTurnResult.actorPayload.playerView.stateVersion);
+    expect(JSON.stringify(advanced.requesterPayload)).not.toContain("Simple Fracter");
+  });
+
+  it("rejects advance_ai when the session or version is wrong", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-advance-auth" });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "server-corp-ai-auth",
+      corpDifficulty: "normal"
+    });
+
+    const stale = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: created.playerView.stateVersion + 1
+    });
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale rejection");
+    expect(stale.error.code).toBe("stale_state");
+    expect(stale.payload?.side).toBe("runner");
+
+    const wrongToken = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: "wrong",
+      knownStateVersion: created.playerView.stateVersion
+    });
+    expect(wrongToken.ok).toBe(false);
+    if (wrongToken.ok) throw new Error("Expected token rejection");
+    expect(wrongToken.error.code).toBe("unauthorized");
+
+    const first = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: created.playerView.stateVersion,
+      knownMatchVersion: created.matchVersion,
+      mode: "until_human"
+    });
+    expect(first.ok).toBe(true);
+    if (!first.ok) throw new Error(first.error.message);
+    expect(first.requesterPayload.playerView.activeSide).toBe("runner");
+    expect(first.requesterPayload.aiTurnPresentation?.canAdvanceAi).toBe(false);
+  });
+
+  it("keeps REST ai-advance responses limited to the requesting human side", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-advance-rest" });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "server-corp-ai-rest",
+      corpDifficulty: "normal"
+    });
+    const handle = createNetrunnerHttpServer(service);
+    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    const address = handle.server.address();
+    if (!address || typeof address === "string") throw new Error("Missing server address");
+
+    try {
+      const response = await fetch(`http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/ai-advance`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          side: "runner",
+          sessionToken: created.hostSessionToken,
+          knownStateVersion: created.playerView.stateVersion,
+          knownMatchVersion: created.matchVersion,
+          mode: "single_step"
+        })
+      });
+      const payload = (await response.json()) as {
+        ok?: boolean;
+        requesterPayload?: SidePayload;
+        opponentPayload?: SidePayload;
+        publicEvent?: PublicGameEvent;
+      };
+
+      expect(response.status).toBe(200);
+      expect(payload.ok).toBe(true);
+      expect(payload.requesterPayload?.side).toBe("runner");
+      expect(payload.opponentPayload).toBeUndefined();
+      expect(payload.publicEvent?.publicPayload.aiExplanation).toBeTruthy();
+      expect(JSON.stringify(payload)).not.toContain("cardInstances");
+      expect(JSON.stringify(payload)).not.toContain("Simple Agenda");
+    } finally {
+      await handle.close();
+    }
   });
 
   it("exposes a side-safe AI-vs-AI simulation API", async () => {

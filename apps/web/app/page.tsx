@@ -40,8 +40,15 @@ import {
   chronicleGroupLabel,
   formatChronicleEvent,
   type ChronicleCategory,
+  type ChronicleContext,
   type ChronicleItem
 } from "./chronicle";
+import {
+  deriveOpponentActionCues,
+  type ActionSoundKind,
+  type BoardHighlight,
+  type OpponentActionCue
+} from "./action-cues";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
 const SESSION_KEY = "netrunner-mvp-0-3-session";
@@ -52,7 +59,7 @@ const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
-const APP_STATUS_LABEL = "V1.0.1";
+const APP_STATUS_LABEL = "V1.0.2";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -63,6 +70,7 @@ type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_ru
 type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
+type AiPacingMode = "fast" | "paced" | "manual";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
@@ -118,6 +126,11 @@ type ClientPayload = {
     reason?: string;
     needsResponse: boolean;
   };
+  aiTurnPresentation?: {
+    activeAiSide?: Side;
+    canAdvanceAi: boolean;
+    pacingMode: AiPacingMode;
+  };
   winner?: Winner;
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
@@ -140,6 +153,7 @@ type ServerMessage =
   | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
   | { type: "opponent_status"; payload: ClientPayload["opponentStatus"] }
   | { type: "undo_request"; payload: NonNullable<ClientPayload["pendingUndo"]> }
+  | { type: "ai_turn"; payload: ClientPayload["aiTurnPresentation"] | null }
   | { type: "match_finished"; payload: { winner: Winner; finalStateHash: string; resultSummary?: GameResultSummary } }
   | { type: "error"; payload: { code: string; message: string; playerView?: PlayerView } }
   | { type: "action_receipt"; payload: { accepted: boolean; stateVersionAfter: number; errorCode?: string } }
@@ -159,6 +173,7 @@ type CreateMatchResponse = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  aiTurnPresentation?: ClientPayload["aiTurnPresentation"];
   winner?: Winner;
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
@@ -175,6 +190,7 @@ type JoinMatchResponse = {
   legalActions: LegalAction[];
   matchVersion: number;
   eventTail?: PublicGameEvent[];
+  aiTurnPresentation?: ClientPayload["aiTurnPresentation"];
   winner?: Winner;
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
@@ -702,6 +718,34 @@ function centralServerCardCount(view: PlayerView, serverId: PlayerView["servers"
   }
 }
 
+function serverHighlighted(highlight: BoardHighlight | null, serverId: string): boolean {
+  if (!highlight) return false;
+  if (highlight.kind === "server" || highlight.kind === "run") return !highlight.serverId || highlight.serverId === serverId;
+  return false;
+}
+
+function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq" | "rd" | "archives" | "grip" | "stack" | "heap" | "rig" | "scoreArea"): boolean {
+  return Boolean(highlight?.kind === "zone" && highlight.side === side && highlight.zone === zone);
+}
+
+function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Record<string, CatalogCardDetail>): Record<string, Omit<ChronicleContext, "side">> {
+  return Object.fromEntries(
+    events.map((event) => {
+      const card = eventCardDetail(event, detailsById);
+      return [
+        event.eventId,
+        {
+          cardTitle: card?.title ?? null,
+          cardText: card?.text ?? null,
+          cardType: card?.type ?? null,
+          cardDetailLines: card ? catalogDetailLines(card) : [],
+          agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null
+        }
+      ];
+    })
+  );
+}
+
 function formatCardCount(count: number): string {
   return `${count} ${count === 1 ? "Karte" : "Karten"}`;
 }
@@ -768,11 +812,16 @@ export default function Page() {
   const [colorSchemeLoaded, setColorSchemeLoaded] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioVolume, setAudioVolume] = useState(0.45);
+  const [localAiPacingMode, setLocalAiPacingMode] = useState<AiPacingMode>("paced");
+  const [actionCueQueue, setActionCueQueue] = useState<OpponentActionCue[]>([]);
+  const [currentActionCue, setCurrentActionCue] = useState<OpponentActionCue | null>(null);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
+  const lastSeenCueEventIdRef = useRef<string | null>(null);
+  const pendingAiAdvanceKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1001,6 +1050,8 @@ export default function Page() {
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
+  const activeCueHighlight = currentActionCue?.highlight ?? null;
+  const hasDecisionCue = Boolean(currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length));
   const effectiveCurrentCorpSnapshot = currentCorpSnapshotForSetup();
   const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCurrentCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
 
@@ -1045,6 +1096,61 @@ export default function Page() {
     playResultSound(seriesAudioOutcome(resultSummary), audioVolume);
   }, [audioEnabled, audioVolume, resultKey, resultSummary]);
 
+  useEffect(() => {
+    lastSeenCueEventIdRef.current = payload?.eventTail.at(-1)?.eventId ?? null;
+    setActionCueQueue([]);
+    setCurrentActionCue(null);
+    pendingAiAdvanceKeyRef.current = null;
+  }, [session?.matchId, session?.sessionToken]);
+
+  useEffect(() => {
+    if (!payload) return;
+    const latestId = payload.eventTail.at(-1)?.eventId ?? null;
+    const lastSeen = lastSeenCueEventIdRef.current;
+    if (lastSeen === null) {
+      lastSeenCueEventIdRef.current = latestId;
+      return;
+    }
+    const cues = deriveOpponentActionCues({
+      viewerSide: payload.side,
+      playerView: payload.playerView,
+      events: payload.eventTail,
+      lastPresentedEventId: lastSeen,
+      contextByEventId: chronicleContextByEventId(payload.eventTail, catalogDetailsById)
+    });
+    lastSeenCueEventIdRef.current = latestId;
+    if (cues.length > 0) setActionCueQueue((current) => [...current, ...cues]);
+  }, [payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById]);
+
+  useEffect(() => {
+    if (currentActionCue || actionCueQueue.length === 0) return;
+    const [nextCue, ...rest] = actionCueQueue;
+    if (!nextCue) return;
+    setCurrentActionCue(nextCue);
+    setActionCueQueue(rest);
+  }, [actionCueQueue, currentActionCue]);
+
+  useEffect(() => {
+    if (!currentActionCue) return;
+    if (audioEnabled && currentActionCue.sound) playActionCueSound(currentActionCue.sound, audioVolume);
+    if (currentActionCue.requiresLocalAttention) return;
+    const timeout = window.setTimeout(() => setCurrentActionCue(null), currentActionCue.importance === "critical" ? 2300 : 1700);
+    return () => window.clearTimeout(timeout);
+  }, [audioEnabled, audioVolume, currentActionCue]);
+
+  useEffect(() => {
+    if (!payload?.aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online") return;
+    if (localAiPacingMode === "manual") return;
+    if (currentActionCue || actionCueQueue.length > 0) return;
+    const advanceKey = `${payload.matchId}:${payload.matchVersion}:${payload.playerView.stateVersion}:${localAiPacingMode}`;
+    if (pendingAiAdvanceKeyRef.current === advanceKey) return;
+    pendingAiAdvanceKeyRef.current = advanceKey;
+    const timeout = window.setTimeout(() => {
+      advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
+    }, localAiPacingMode === "fast" ? 120 : 650);
+    return () => window.clearTimeout(timeout);
+  }, [actionCueQueue.length, connection, currentActionCue, localAiPacingMode, payload?.aiTurnPresentation?.canAdvanceAi, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
+
   const createMatch = async () => {
     setNotice("");
     setSimulation(null);
@@ -1066,6 +1172,7 @@ export default function Page() {
       mode: gameMode,
       runnerDifficulty,
       corpDifficulty,
+      ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
       settings: {
         matchFormat,
         ...(effectiveAgendaTarget ? { agendaPointsToWin: effectiveAgendaTarget } : {})
@@ -1294,6 +1401,20 @@ export default function Page() {
           actionId: action.actionId,
           clientKnownStateVersion: payload.playerView.stateVersion,
           idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${crypto.randomUUID()}`
+        }
+      })
+    );
+  };
+
+  const advanceAi = (mode: "single_step" | "until_human" = "single_step") => {
+    if (!session || !payload || socketRef.current?.readyState !== WebSocket.OPEN || !payload.aiTurnPresentation?.canAdvanceAi) return;
+    socketRef.current.send(
+      JSON.stringify({
+        type: "advance_ai",
+        payload: {
+          knownStateVersion: payload.playerView.stateVersion,
+          knownMatchVersion: payload.matchVersion,
+          mode
         }
       })
     );
@@ -1586,6 +1707,15 @@ export default function Page() {
     }
     if (message.type === "opponent_status") {
       setPayload((current) => (current ? { ...current, opponentStatus: message.payload } : current));
+      return;
+    }
+    if (message.type === "ai_turn") {
+      setPayload((current) => {
+        if (!current) return current;
+        if (message.payload) return { ...current, aiTurnPresentation: message.payload };
+        const { aiTurnPresentation: _aiTurnPresentation, ...withoutAiTurn } = current;
+        return withoutAiTurn;
+      });
       return;
     }
     if (message.type === "undo_request") {
@@ -1961,17 +2091,25 @@ export default function Page() {
         <span>State {activeView.stateVersion}</span>
         <span>{notice}</span>
       </div>
+      <OpponentActionOverlay cue={currentActionCue} queued={actionCueQueue.length} onDismiss={() => setCurrentActionCue(null)} />
 
       <div className="main">
         <aside className="column panel sidePanel">
           <OpponentPanel view={activeView} connected={payload.opponentStatus.connected} />
-          <LegalActionsPanel actions={payload.legalActions} disabled={Boolean(payload.winner) || connection !== "online"} onAction={submitAction} />
+          <AiPacingControls
+            presentation={payload.aiTurnPresentation}
+            mode={localAiPacingMode}
+            connection={connection}
+            onMode={setLocalAiPacingMode}
+            onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
+          />
+          <LegalActionsPanel actions={payload.legalActions} disabled={Boolean(payload.winner) || connection !== "online"} highlighted={hasDecisionCue} onAction={submitAction} />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
         </aside>
 
         <section className="board boardPanel">
-          <BoardHeader view={activeView} />
-          <RunTimeline view={activeView} cardDetailsById={catalogDetailsById} />
+          <BoardHeader view={activeView} highlighted={hasDecisionCue} />
+          <RunTimeline view={activeView} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} />
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -1984,7 +2122,7 @@ export default function Page() {
             {activeView.servers.map((server) => {
               const cardCount = centralServerCardCount(activeView, server.id);
               return (
-                <article className="server" key={server.id}>
+                <article className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""}`} key={server.id}>
                   <h3 className="serverTitle">
                     <span>{server.label}</span>
                     {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
@@ -2002,12 +2140,12 @@ export default function Page() {
           {activeView.own.rig ? (
             <section className="section panel boardSection">
               <h2>Rig</h2>
-              <div className="cards">{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} onFocus={focusCard} />)}</div>
+              <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} onFocus={focusCard} />)}</div>
             </section>
           ) : null}
           <section className="section panel boardSection">
             <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
-            <div className="cards">{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} hiddenSide={activeView.side} onFocus={focusCard} />)}</div>
+            <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, activeView.side === "runner" ? "grip" : "hq") ? "cueHighlightSoft" : ""}`}>{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} hiddenSide={activeView.side} onFocus={focusCard} />)}</div>
           </section>
         </section>
 
@@ -2391,9 +2529,66 @@ function BoardPreview({ displayMode }: { displayMode: CardDisplayMode }) {
   );
 }
 
-function BoardHeader({ view }: { view: PlayerView }) {
+function OpponentActionOverlay({ cue, queued, onDismiss }: { cue: OpponentActionCue | null; queued: number; onDismiss(): void }) {
+  if (!cue) return null;
   return (
-    <div className={`boardHeader ${view.side}`}>
+    <aside className={`opponentCueOverlay importance-${cue.importance} visibility-${cue.visibility}`} aria-live="polite">
+      <div className="opponentCueIcon" aria-hidden="true">
+        {cue.source === "ai" ? <Bot size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
+      </div>
+      <div className="opponentCueText">
+        <span>{cue.requiresLocalAttention ? "Du bist gefragt" : cue.actorLabel}</span>
+        <strong>{cue.title}</strong>
+        {cue.description ? <p>{cue.description}</p> : null}
+      </div>
+      {queued > 0 ? <small>{queued} weitere</small> : null}
+      <button className="button iconOnly" onClick={onDismiss} aria-label="Hinweis schließen" title="Hinweis schließen" type="button">
+        <X size={15} />
+      </button>
+    </aside>
+  );
+}
+
+function AiPacingControls({
+  presentation,
+  mode,
+  connection,
+  onMode,
+  onAdvance
+}: {
+  presentation: ClientPayload["aiTurnPresentation"] | undefined;
+  mode: AiPacingMode;
+  connection: "offline" | "connecting" | "online";
+  onMode(mode: AiPacingMode): void;
+  onAdvance(): void;
+}) {
+  if (!presentation) return null;
+  const activeLabel = presentation.activeAiSide ? `${sideLabel(presentation.activeAiSide)}-KI ist am Zug` : "KI wartet";
+  return (
+    <section className="section aiPacingPanel">
+      <div className="sectionTitleLine">
+        <h2>KI-Takt</h2>
+        <Bot size={16} />
+      </div>
+      <p className="meta">{activeLabel}</p>
+      <div className="segmented aiPacingModes" role="group" aria-label="KI-Takt">
+        {(["paced", "manual", "fast"] as const).map((value) => (
+          <button className={mode === value ? "active" : ""} key={value} onClick={() => onMode(value)} type="button">
+            {value === "paced" ? "Takt" : value === "manual" ? "Schritt" : "Schnell"}
+          </button>
+        ))}
+      </div>
+      <button className="button wide primary" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
+        <Play size={15} />
+        KI fortsetzen
+      </button>
+    </section>
+  );
+}
+
+function BoardHeader({ view, highlighted = false }: { view: PlayerView; highlighted?: boolean }) {
+  return (
+    <div className={`boardHeader ${view.side} ${highlighted ? "cueHighlight" : ""}`}>
       <div>
         <p className="eyebrow">{view.side === "runner" ? "Runner View" : "Corp View"}</p>
         <h2>{view.activeSide === view.side ? "Dein Fenster" : "Gegenseite aktiv"}</h2>
@@ -2402,7 +2597,7 @@ function BoardHeader({ view }: { view: PlayerView }) {
   );
 }
 
-function RunTimeline({ view, cardDetailsById }: { view: PlayerView; cardDetailsById: Record<string, CatalogCardDetail> }) {
+function RunTimeline({ view, cardDetailsById, highlighted = false }: { view: PlayerView; cardDetailsById: Record<string, CatalogCardDetail>; highlighted?: boolean }) {
   const phase = view.run?.phase;
   const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
   const steps = ["target", "approach_ice", "encounter_ice", "break", "access", "complete"] as const;
@@ -2415,7 +2610,7 @@ function RunTimeline({ view, cardDetailsById }: { view: PlayerView; cardDetailsB
     complete: "Ergebnis"
   };
   return (
-    <div className={`runTimeline ${view.run ? "active" : ""}`}>
+    <div className={`runTimeline ${view.run ? "active" : ""} ${highlighted ? "cueHighlight" : ""}`}>
       <div className="runTimelineHead">
         <Shield size={18} />
         <span>{view.run ? `Run auf ${view.run.attackedServerId}` : "Kein aktiver Run"}</span>
@@ -2437,14 +2632,14 @@ function RunTimeline({ view, cardDetailsById }: { view: PlayerView; cardDetailsB
   );
 }
 
-function LegalActionsPanel({ actions, disabled, onAction }: { actions: LegalAction[]; disabled: boolean; onAction(action: LegalAction): void }) {
+function LegalActionsPanel({ actions, disabled, highlighted = false, onAction }: { actions: LegalAction[]; disabled: boolean; highlighted?: boolean; onAction(action: LegalAction): void }) {
   const grouped = actions.reduce<Record<string, LegalAction[]>>((acc, action) => {
     const group = action.type.replaceAll("_", " ");
     acc[group] = [...(acc[group] ?? []), action];
     return acc;
   }, {});
   return (
-    <section className="section">
+    <section className={`section ${highlighted ? "cueHighlight" : ""}`}>
       <h2>LegalActions</h2>
       <div className="actions">
         {Object.entries(grouped).map(([group, groupActions]) => (
@@ -3651,6 +3846,7 @@ function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientP
     eventTail: response.playerView.publicEvents,
     opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" }
   };
+  if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
   if (winner) payload.winner = winner;
   if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
   if (response.resultSummary) payload.resultSummary = response.resultSummary;
@@ -3669,6 +3865,7 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
     eventTail: response.eventTail ?? response.playerView.publicEvents,
     opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false }
   };
+  if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
   if (winner) payload.winner = winner;
   if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
   if (response.resultSummary) payload.resultSummary = response.resultSummary;
@@ -3726,6 +3923,81 @@ function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: nu
     oscillator.stop(start + 0.19);
   });
   window.setTimeout(() => void context.close(), 700);
+}
+
+function playActionCueSound(kind: ActionSoundKind, volume: number): void {
+  const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtor) return;
+  const context = new AudioCtor();
+  const safeVolume = Math.min(1, Math.max(0, volume));
+  const pattern = actionSoundPattern(kind);
+  pattern.forEach((note, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const start = context.currentTime + index * 0.075;
+    oscillator.type = note.type;
+    oscillator.frequency.setValueAtTime(note.frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, safeVolume * note.gain), start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + note.duration);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + note.duration + 0.02);
+  });
+  window.setTimeout(() => void context.close(), 520);
+}
+
+function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; duration: number; gain: number; type: OscillatorType }> {
+  switch (kind) {
+    case "draw":
+      return [{ frequency: 660, duration: 0.11, gain: 0.07, type: "sine" }];
+    case "credit":
+      return [{ frequency: 784, duration: 0.09, gain: 0.08, type: "triangle" }];
+    case "install_hidden":
+      return [{ frequency: 220, duration: 0.13, gain: 0.07, type: "triangle" }];
+    case "install_known":
+      return [{ frequency: 392, duration: 0.11, gain: 0.07, type: "sine" }];
+    case "play":
+      return [
+        { frequency: 440, duration: 0.09, gain: 0.06, type: "sine" },
+        { frequency: 554, duration: 0.1, gain: 0.05, type: "sine" }
+      ];
+    case "rez":
+      return [
+        { frequency: 196, duration: 0.09, gain: 0.07, type: "sawtooth" },
+        { frequency: 392, duration: 0.12, gain: 0.05, type: "sawtooth" }
+      ];
+    case "run":
+      return [
+        { frequency: 330, duration: 0.07, gain: 0.06, type: "square" },
+        { frequency: 494, duration: 0.08, gain: 0.05, type: "square" }
+      ];
+    case "access":
+      return [{ frequency: 587, duration: 0.14, gain: 0.07, type: "triangle" }];
+    case "agenda":
+      return [
+        { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
+        { frequency: 784, duration: 0.14, gain: 0.06, type: "sine" }
+      ];
+    case "trash":
+      return [{ frequency: 174, duration: 0.15, gain: 0.08, type: "triangle" }];
+    case "tag_or_damage":
+      return [
+        { frequency: 247, duration: 0.08, gain: 0.08, type: "square" },
+        { frequency: 220, duration: 0.1, gain: 0.06, type: "square" }
+      ];
+    case "choice":
+      return [{ frequency: 880, duration: 0.12, gain: 0.07, type: "sine" }];
+    case "game_end":
+      return [
+        { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
+        { frequency: 659, duration: 0.1, gain: 0.06, type: "sine" }
+      ];
+    case "turn":
+    default:
+      return [{ frequency: 330, duration: 0.1, gain: 0.05, type: "sine" }];
+  }
 }
 
 function persistSession(session: SessionInfo) {
