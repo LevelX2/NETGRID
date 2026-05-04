@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
+import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
+import { createRuntimeCardsById } from "@netrunner/catalog";
+import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netrunner/decks";
 import { applyAction, createGame, getLegalActions, hashState } from "@netrunner/engine";
 import { createNetrunnerHttpServer } from "./http-server";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type SidePayload, type StateSnapshot } from "./multiplayer";
-import type { DeckSnapshot } from "@netrunner/decks";
 import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netrunner/shared";
 
 describe("MVP 0.2 multiplayer service", () => {
@@ -39,6 +41,79 @@ describe("MVP 0.2 multiplayer service", () => {
         corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
       })
     ).rejects.toThrow("deck_snapshot_invalid");
+  });
+
+  it("starts private local O:NR matches from the shared runtime card pool when the overlay is present", async () => {
+    const cardsById = createRuntimeCardsById();
+    if (!cardsById["onr_v1_079_bodyweight-synthetic-blood"]) return;
+
+    const profile = (profilesData08.profiles as DeckFormatProfile[]).find((candidate) => candidate.profileId === "local-demo-v0.8");
+    if (!profile) throw new Error("Missing V0.8 deck format profile");
+    const context = { cardsById, profile };
+    const now = "2026-05-04T19:30:00.000Z";
+    const runnerDeck: EditableDeck = {
+      deckId: "local_onr_runner_match_smoke",
+      deckVersion: "0.94.0-local-onr",
+      name: "O:NR Runner Match Smoke",
+      side: "runner",
+      identityCardId: "runner_identity_001",
+      cardPoolSnapshotId: "card-snapshot-0.8",
+      formatProfileId: "local-demo-v0.8",
+      cards: [
+        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 3 },
+        { cardId: "onr_v1_040_loony-goon", quantity: 3 },
+        { cardId: "onr_v1_014_codecracker", quantity: 3 },
+        { cardId: "simple_economy_event", quantity: 3 }
+      ],
+      createdAt: now,
+      updatedAt: now
+    };
+    const corpDeck: EditableDeck = {
+      deckId: "local_onr_corp_match_smoke",
+      deckVersion: "0.94.0-local-onr",
+      name: "O:NR Corp Match Smoke",
+      side: "corp",
+      identityCardId: "corp_identity_001",
+      cardPoolSnapshotId: "card-snapshot-0.8",
+      formatProfileId: "local-demo-v0.8",
+      cards: [
+        { cardId: "onr_v1_220_tycho-extension", quantity: 2 },
+        { cardId: "onr_v1_281_accounts-receivable", quantity: 2 },
+        { cardId: "onr_v1_282_annual-reviews", quantity: 2 },
+        { cardId: "onr_v1_230_cortical-scanner", quantity: 2 },
+        { cardId: "onr_v1_232_crystal-wall", quantity: 2 },
+        { cardId: "onr_v1_237_data-wall", quantity: 2 },
+        { cardId: "onr_v1_244_filter", quantity: 2 },
+        { cardId: "onr_v1_245_fire-wall", quantity: 2 },
+        { cardId: "simple_economy_operation", quantity: 2 }
+      ],
+      createdAt: now,
+      updatedAt: now
+    };
+    const runnerSnapshot = createDeckSnapshot(runnerDeck, context, { snapshotId: "local_onr_runner_match_smoke_snapshot", rulesBaselineId: "rules-baseline-mvp-0.94" });
+    const corpSnapshot = createDeckSnapshot(corpDeck, context, { snapshotId: "local_onr_corp_match_smoke_snapshot", rulesBaselineId: "rules-baseline-mvp-0.94" });
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "onr-local-deck-service" });
+
+    expect(runnerSnapshot.validation.ok).toBe(true);
+    expect(corpSnapshot.validation.ok).toBe(true);
+
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "onr-local-server-match",
+      runnerDeckSnapshot: runnerSnapshot,
+      corpDeckSnapshot: corpSnapshot,
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+    });
+    const stored = await service.loadForTest(created.matchId);
+
+    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.playerView.deckMetadata?.own.deckName).toBe("O:NR Runner Match Smoke");
+    expect(created.playerView.deckMetadata?.opponent.deckName).toBe("O:NR Corp Match Smoke");
+    expect(stored?.match.deckSetup.runnerSnapshotId).toBe("local_onr_runner_match_smoke_snapshot");
+    expect(stored?.match.deckSetup.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
+    expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
+    expect(JSON.stringify(created)).not.toContain("onr_v1_220_tycho-extension");
+    expect(JSON.stringify(created)).not.toContain("cardInstances");
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {

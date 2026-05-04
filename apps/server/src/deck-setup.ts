@@ -1,6 +1,6 @@
-import cardSnapshotData from "../../../data/card-import/card-snapshot-0.8.json";
 import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
+import { createRuntimeCardsById } from "@netrunner/catalog";
 import { buildEngineDeck, validateDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type DeckValidationContext } from "@netrunner/decks";
 
 export type MatchDeckSelectionInput = {
@@ -19,7 +19,7 @@ export type ResolvedDeckSetup = {
 
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
-const cardsById = Object.fromEntries((cardSnapshotData.cards as DeckValidationContext["cardsById"][string][]).map((card) => [card.catalogCardId, card]));
+const cardsById = createRuntimeCardsById() as DeckValidationContext["cardsById"];
 const profiles = profilesData.profiles as DeckFormatProfile[];
 const frozenSnapshots = snapshotsData.snapshots as DeckSnapshot[];
 

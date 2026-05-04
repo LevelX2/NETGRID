@@ -52,6 +52,7 @@ const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_004_snapshot_v0_6";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
+const APP_STATUS_LABEL = "V0.99/S01";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -1389,7 +1390,7 @@ export default function Page() {
     return (
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
-          <Brand subtitle="V0.7 UI · private Matches" />
+          <Brand subtitle={`${APP_STATUS_LABEL} · private Matches`} />
           <ConnectionBadge text={statusText} state={connection} />
         </header>
         <div className="setup v07Entry">
@@ -1617,7 +1618,7 @@ export default function Page() {
   return (
     <main className="app" data-theme={colorScheme}>
       <header className="topbar">
-        <Brand subtitle={`V0.7 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
+        <Brand subtitle={`${APP_STATUS_LABEL} · ${session.side === "runner" ? "Runner" : "Corp"}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
           <button className="button iconOnly" onClick={() => setAudioEnabled((current) => !current)} title={audioEnabled ? "Audio aus" : "Audio an"} aria-label={audioEnabled ? "Audio aus" : "Audio an"}>

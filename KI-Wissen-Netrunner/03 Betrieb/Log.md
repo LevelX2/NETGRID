@@ -339,3 +339,17 @@ Eine vollständige Bestandsaufnahme wurde erstellt und in `docs/derived/BESTANDS
 Wichtigster Befund: Der versionierte Stand ist grün, aber der lokale private O:NR-v1-Testzugang war noch nicht sauber eingeordnet. Engine-Harness-Tests und Web-Overlay-Pfade existieren, serverseitiger Matchstart, AI-/Multiplayer-Smokes, versioniertes Manifest und Final Review fehlen dafür noch. Das ist als nächste Scope-Entscheidung dokumentiert.
 
 Testlücke behoben: `vitest.config.ts` enthält jetzt `app/**/*.test.ts`, sodass `apps/web/app/chronicle.test.ts` im normalen Web-Testlauf ausgeführt wird. Checks nach Korrektur: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` mit 170 Tests und `corepack pnpm build` bestanden. Die bekannte Turbopack-NFT-Warnung der `card-images`-Route bleibt als Härtungspunkt.
+
+## [2026-05-04] planung | V1.0 Deck- und Match-Setup-Stabilisierung vorbereitet
+
+Die Deck-/Match-Bestandsprüfung nach V0.99/S01 wurde dokumentiert. Befund: Der V0.6-Deckeditor ist für versionierte V0.8-Snapshots funktional, Matchstart und Server-Revalidierung sind für ein globales Runner-/Corp-Deckpaar umgesetzt, und S01 bietet private Zwei-Spiel-Serien mit Seitenwechsel. Nicht sauber modelliert sind persönliche Runner-/Corp-Deckpaare pro Teilnehmer, KI-Deckpolitik, deterministische Random-Deck-Auswahl und eine mögliche Serienwertung über aggregierte Agenda-Punkte.
+
+Wichtigster Widerspruch: Das lokale O:NR-v1-Overlay kann in Web-Katalog und Web-Deckvalidierung erscheinen, der serverseitige Matchstart revalidiert aber nur gegen den versionierten Kartenpool. Erstellt wurde `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`; README, Codex-Status, Wissensindex und aktueller Projektstatus verweisen darauf. Die sichtbare Web-Kopfzeile wurde von V0.7 auf V0.99/S01 aktualisiert.
+
+## [2026-05-04] implementierung | O:NR in privaten lokalen Datenpool aufgenommen
+
+Der lokale O:NR-v1-Testzugang wurde für privaten Gebrauch als erlaubter lokaler Datenpool eingeordnet. Der Runtime-Kartenpool wird nun zentral über `@netrunner/catalog` aufgelöst und von Web-Katalog, Web-Deckvalidierung und serverseitiger Deck-Revalidierung gemeinsam genutzt. Damit können lokal als `playable` und `deck_legal` markierte O:NR-Karten in validierten lokalen Deck-Snapshots auch den serverautoritativen Matchstart erreichen.
+
+Ergänzt wurde ein Server-Matchstart-Smoke mit lokalen O:NR-Deck-Snapshots. Die Nutzung bleibt privat/lokal; ignorierte O:NR-Katalog- und Bilddaten werden nicht versioniert und nicht öffentlich freigegeben. Offen bleiben AI-/Multiplayer-Smokes, lokales Manifest/Review und die Deckpaar-/KI-Deckpolitik für private Serien.
+
+Checks: `corepack pnpm install`, `corepack pnpm --filter @netrunner/catalog test`, `corepack pnpm --filter @netrunner/server test`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build` und `corepack pnpm lint` bestanden. Der Gesamttestlauf umfasst 171 Tests. Beim Build bleibt die bekannte Turbopack-NFT-Warnung zur bestehenden `card-images`-Route.

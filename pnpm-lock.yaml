@@ -26,6 +26,9 @@ importers:
       '@netrunner/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@netrunner/catalog':
+        specifier: workspace:*
+        version: link:../../packages/catalog
       '@netrunner/decks':
         specifier: workspace:*
         version: link:../../packages/decks

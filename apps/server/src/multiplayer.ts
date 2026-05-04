@@ -8,6 +8,7 @@ import {
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
   MVP_0_4_BASELINE,
+  MVP_0_94_BASELINE,
   MVP_0_8_BASELINE,
   type AiDifficulty,
   type DeckPublicMetadata,
@@ -1216,9 +1217,17 @@ function deterministicHostSide(seed: string): Side {
 }
 
 function baselineForMode(mode: MatchMode, deckSetup: ResolvedDeckSetup): RulesBaseline {
+  if (setupUsesMvp094Rules(deckSetup)) return MVP_0_94_BASELINE;
   if (setupUsesMvp08Rules(deckSetup)) return MVP_0_8_BASELINE;
   if (setupUsesExpandedRules(deckSetup)) return MVP_0_4_BASELINE;
   return mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
+}
+
+function setupUsesMvp094Rules(setup: ResolvedDeckSetup): boolean {
+  return (
+    setup.runnerSnapshot.rulesBaselineId === "rules-baseline-mvp-0.94" ||
+    setup.corpSnapshot.rulesBaselineId === "rules-baseline-mvp-0.94"
+  );
 }
 
 function controllersForMode(

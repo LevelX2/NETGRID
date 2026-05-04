@@ -13,9 +13,10 @@ Umgesetzt sind:
 - Lokaler Kartenkatalog, lokaler Deckeditor, validierte Deck-Snapshots und Match Setup.
 - V0.94 bis V0.99 als enge Mechanik-Gates: Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viren, Purge, Recurring Credits und Bad Publicity.
 - S01: Ergebnisfenster, Spielziel-Auswahl, private Zwei-Spiel-Serie mit Seitenwechsel und opt-in Audio.
-- Eine lokale, nicht versionierte O:NR-v1-Testumgebung ist vorhanden. Sie ist privat/lokal, nutzt ignorierte Daten unter `data/local/` und `data/local-assets/`, und ist noch kein vollständig integrierter öffentlicher oder versionierter Kartenpool.
+- Eine lokale, nicht versionierte O:NR-v1-Testumgebung ist für privaten Gebrauch in den erlaubten lokalen Datenpool aufgenommen. Sie nutzt ignorierte Daten unter `data/local/` und `data/local-assets/`, bleibt privat/lokal und ist kein öffentlicher oder versionierter Kartenpool.
 
 Die aktuelle Bestandsaufnahme liegt unter `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
+Der aktuelle Deck-/Match-Befund und der vorgeschlagene nächste Stabilisierungsschnitt liegen unter `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
 
 ## Wichtige Grenzen
 
@@ -79,12 +80,14 @@ Zuletzt geprüft am 2026-05-04:
 
 - `corepack pnpm lint`: bestanden.
 - `corepack pnpm typecheck`: bestanden.
-- `corepack pnpm test`: bestanden, 170 Tests inklusive Web-Chronicle-Test, Pakettests und Root-Specs.
+- `corepack pnpm test`: bestanden, 171 Tests inklusive Web-Chronicle-Test, O:NR-Server-Matchstart-Smoke, Pakettests und Root-Specs.
 - `corepack pnpm build`: bestanden. Die bekannte Turbopack-NFT-Warnung zur `card-images`-Route bleibt bestehen.
 
 ## Nächste Entscheidungen
 
-Der nächste saubere Planungsschritt ist keine automatische neue Implementierung, sondern eine Scope-Entscheidung:
+Der empfohlene nächste Versionsschnitt ist **V1.0 Deck- und Match-Setup-Stabilisierung**. Vor neuer Karten- oder Mechanikbreite sollten zuerst diese Entscheidungen fallen:
 
-- O:NR-v1-Testzugang formal einordnen: engine-only lassen, sauber in Server/Deck/AI/Multiplayer integrieren oder wieder aus dem versionierten Spielbarkeitskern herausnehmen.
-- Danach V1.0-/Stabilisierungsscope wählen: privater Betrieb/SQLite/UI-Smokes, Setup/Mulligan/Deckout, M11 Prevention/Avoid/Interrupt/Replacement oder weiterer O:NR-Kartenausbau.
+- O:NR-v1-Testzugang weiter härten: private lokale Server-/Deck-Integration ist gewollt; AI-/Multiplayer-Smokes und Final Review müssen folgen.
+- Matchserien sauber modellieren: je Teilnehmer Runner- und Corp-Deck festlegen, statt nur ein globales Runner-/Corp-Deck zu verwenden.
+- KI-Deckpolitik entscheiden: festes Standard-Deckpaar, explizit gewähltes KI-Deckpaar oder deterministisch zufällige Auswahl aus legalen Snapshots.
+- Serienwertung festlegen: Siege/Draws als Minimum, aggregierte Agenda-Punkte nur mit expliziter Tie-Breaker-Entscheidung.

@@ -45,7 +45,7 @@ export function deckValidationResponse(deck: EditableDeck) {
   const validation = validateEditableDeck(deck, context);
   return safeDeckPayload({
     validation,
-    snapshot: validation.ok ? createDeckSnapshot(deck, context, { rulesBaselineId: deck.deckVersion.startsWith("0.1") ? "rules-baseline-mvp-0.1" : "rules-baseline-mvp-0.4" }) : null
+    snapshot: validation.ok ? createDeckSnapshot(deck, context, { rulesBaselineId: rulesBaselineForDeck(deck) }) : null
   });
 }
 
@@ -62,4 +62,11 @@ function contextForSnapshot(snapshot: DeckSnapshot) {
 
 function contextForProfile(deckProfile: DeckFormatProfile): DeckValidationContext {
   return { cardsById: createRuntimeCardsById(), profile: deckProfile };
+}
+
+function rulesBaselineForDeck(deck: EditableDeck): string {
+  if (deck.cards.some((entry) => entry.cardId.startsWith("onr_v1_") || entry.cardId.startsWith("v094_"))) return "rules-baseline-mvp-0.94";
+  if (deck.cards.some((entry) => entry.cardId.startsWith("v08_")) || deck.cardPoolSnapshotId === "card-snapshot-0.8") return "rules-baseline-mvp-0.8";
+  if (deck.deckVersion.startsWith("0.1")) return "rules-baseline-mvp-0.1";
+  return "rules-baseline-mvp-0.4";
 }

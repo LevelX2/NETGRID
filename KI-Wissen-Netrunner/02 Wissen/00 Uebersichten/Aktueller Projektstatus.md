@@ -5,7 +5,7 @@
 - Bestandsaufnahme vom 2026-05-04 abgeschlossen und in `docs/derived/BESTANDSAUFNAHME_2026-05-04.md` dokumentiert.
 - README und Codex-Status wurden auf den tatsächlichen Stand V0.99/S01 aktualisiert.
 - Testentdeckung korrigiert: `apps/web/app/chronicle.test.ts` läuft jetzt über den normalen Web-Testbefehl.
-- Aktuelle Gates am 2026-05-04: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Der normale Testlauf umfasst nach der Korrektur 170 Tests.
+- Aktuelle Gates am 2026-05-04: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Der normale Testlauf umfasst nach der O:NR-Datenpool-Integration 171 Tests.
 - Projektordner unter `C:\Projekte\Netrunner` vorhanden.
 - Repository-Setup-Struktur und Codex-Führungsdateien angelegt.
 - Lokale KI-Wissensbasis `KI-Wissen-Netrunner/` angelegt.
@@ -75,7 +75,8 @@
 - V0.98 Identities, Modifier und Hidden-Zone-Tools sind umgesetzt und final dokumentiert. V0.98a setzt lokale/fiktive Runner-/Corp-Identities mit Setup-Credits, Usage-Markern, Runner-Link und statischem Memory-Modifier um; V0.98b setzt Search, Reveal, Expose, Arrange, Shuffle und Swap als enge side-sichere Harnesses um. Search/Arrange verwenden private Choices und Hidden-Info-Barrieren, Search-Shuffle nutzt RandomDrawRecords, Reveal/Expose sind bewusste PublicEvents und Swap leakt keine HQ-/R&D-Titel. Gate-Ergebnis: `MVP_0.98_done: true`; `ready_for_MVP_0.99_requirements_freeze: true`.
 - V0.99 Requirements Freeze ist abgeschlossen. `MVP_0.99_REQUIREMENTS.md`, `COUNTER_HOSTING_0.99_SPEC.md`, `VIRUS_PURGE_0.99_SPEC.md`, `RECURRING_BAD_PUBLICITY_0.99_SPEC.md`, `MVP_0.99_TEST_MATRIX.md` und `MVP_0.99_REQUIREMENTS_REVIEW.md` frieren V0.99 als enges Counter-/Hosting-/Virus-/Purge-/Recurring-/Bad-Publicity-Gate ein. V0.99e-Spezialcounter bleibt ohne konkreten Kartenbedarf gesperrt.
 - V0.99 Hosting, Viren, Purge, Counter-Familien, Recurring Credits und Bad Publicity sind umgesetzt und final dokumentiert. `v099_host_resource`, `v099_virus_program`, `v099_recurring_chip` und `v099_bad_publicity_operation` sind lokale/fiktive Harness-Karten. Hosting-Choices sind private Hidden-Info-Barrieren, Purge kostet 3 Corp-Klicks und entfernt nur Virus-Counter, Recurring Credits zahlen nur Runner-Programminstallkosten und Bad Publicity nur Runner-Run-Kosten. Gate-Ergebnis: `MVP_0.99_done: true`; `mechanics_completion_V0.94_to_V0.99_done: true`.
-- Lokaler privater O:NR-v1-Testzugang existiert als teilweise integrierter Sonderstand: Engine-Harness-Tests für 45 lokal spielbare Karten sind vorhanden, Web-Katalog und Deck-Validierung können ein lokales ignoriertes Overlay lesen, lokale Bilder liegen unter ignorierten Asset-Pfaden. Dieser Stand ist noch kein vollständig integrierter serverseitiger Matchstart-Scope.
+- Lokaler privater O:NR-v1-Testzugang ist für privaten Gebrauch als erlaubter lokaler Datenpool eingeordnet: Engine-Harness-Tests für 45 lokal spielbare Karten sind vorhanden, Web-Katalog und Deck-Validierung können ein lokales ignoriertes Overlay lesen, lokale Bilder liegen unter ignorierten Asset-Pfaden, und die serverseitige Deck-Revalidierung nutzt denselben Runtime-Kartenpool. AI-/Multiplayer-Smokes und Final Review fehlen noch.
+- Die Deck-/Match-Bestandsprüfung vom 2026-05-04 ist dokumentiert: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md` schlägt V1.0 als Stabilisierungsschnitt für Deckeditor, Matchstart, KI-Deckpolitik und private Zwei-Spiel-Serien vor.
 
 ## Teilweise umgesetzt
 
@@ -92,7 +93,9 @@
 
 - Kein gate-basierter MVP-0.1- bis MVP-0.9-Arbeitsschritt ist offen.
 - Kein gate-basierter V0.94- bis V0.99-Mechanikschritt ist offen.
-- Nächste Scope-Entscheidung ist offen: lokaler privater O:NR-v1-Testzugang formal gate-basiert integrieren, engine-only/lokal experimentell lassen oder aus dem versionierten Spielbarkeitskern entfernen.
+- Nächste Scope-Entscheidung ist offen: V1.0 Deck- und Match-Setup-Stabilisierung vor weiterer Karten-/Mechanikbreite umsetzen oder zurückstellen.
+- Für V1.0 offen: O:NR-v1-Testzugang weiter härten, insbesondere AI-/Multiplayer-Smokes, lokales Manifest/Review und klare Privatnutzungsdokumentation.
+- Für V1.0 offen: private Serien brauchen ein explizites Teilnehmermodell mit Runner-/Corp-Deckpaar pro Teilnehmer und eine klare KI-Deckpolitik.
 - M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten. Mulligan, vollständiges Setup-/Deckout-/Archives-facedown-Modell und vollständige Spielende-Normalisierung bleiben offen.
 - Prevention, Avoid, Interrupt und Replacement sind weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - Core-Damage, Damage-Prevention, Avoid, Interrupt und Replacement bleiben zurückgestellt und sind nicht Teil des V0.94-Scopes.
