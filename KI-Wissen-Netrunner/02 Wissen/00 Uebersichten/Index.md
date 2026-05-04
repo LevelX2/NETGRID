@@ -58,6 +58,8 @@
 - `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.95-Resource-/Tag-Slice.
 - `docs/derived/MVP_0.95_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.95.
 - `data/rules/mechanics-coverage-0.95.json`: maschinenlesbare Coverage nach V0.95; Resources sind `implemented_limited`, V0.96+-Mechaniken bleiben offen.
+- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`: historischer Planungsreview für die spätere V0.94- bis V0.99-Mechanikfolge.
+- `docs/derived/MVP_0.96_DETAILED_PLAN.md`: historischer Detailplan für V0.96 Trace, Link und Bidding.
 - `docs/derived/MVP_0.96_REQUIREMENTS.md`: eingefrorene V0.96-Anforderungen für Trace, Link und Bidding.
 - `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`: V0.96-Spezifikation für Trace-Start, Corp-Bid, Runner-Bid, Ergebnis, Sichtbarkeit und No-Scope-Grenzen.
 - `docs/derived/MVP_0.96_TEST_MATRIX.md`: V0.96-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
@@ -65,6 +67,7 @@
 - `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.96-Trace-/Link-/Bidding-Slice.
 - `docs/derived/MVP_0.96_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.96.
 - `data/rules/mechanics-coverage-0.96.json`: maschinenlesbare Coverage nach V0.96; Trace/Link/Bidding ist `implemented_limited`, V0.97+-Mechaniken bleiben offen.
+- `docs/derived/MVP_0.97_DETAILED_PLAN.md`: historischer Detailplan für V0.97 Run, Jack-out, Breach und Multiaccess.
 - `docs/derived/MVP_0.97_REQUIREMENTS.md`: eingefrorene V0.97-Anforderungen für Run, Jack-out, Breach und Multiaccess.
 - `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`: V0.97-Spezifikation für Jack-out-Fenster, Breach-State, Access-Queue und Multiaccess-Sichtbarkeit.
 - `docs/derived/MVP_0.97_TEST_MATRIX.md`: V0.97-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
@@ -72,6 +75,7 @@
 - `docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.97-Run-/Breach-/Multiaccess-Slice.
 - `docs/derived/MVP_0.97_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.97.
 - `data/rules/mechanics-coverage-0.97.json`: maschinenlesbare Coverage nach V0.97; Run/Jack-out/Breach/Multiaccess ist `implemented_limited`, V0.98+-Mechaniken bleiben offen.
+- `docs/derived/MVP_0.98_DETAILED_PLAN.md`: historischer Detailplan für V0.98 Identity/Modifier und Hidden-Zone-Tools.
 - `docs/derived/MVP_0.98_REQUIREMENTS.md`: eingefrorene V0.98-Anforderungen für Identity/Modifier und Hidden-Zone-Tools.
 - `docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md`: V0.98a-Spezifikation für Identity-Fähigkeiten, Setup-Marker und statische Modifier.
 - `docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md`: V0.98b-Spezifikation für Search, Reveal, Expose, Arrange, Shuffle und Swap.
@@ -80,6 +84,7 @@
 - `docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.98-Identity-/Hidden-Zone-Slice.
 - `docs/derived/MVP_0.98_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.98.
 - `data/rules/mechanics-coverage-0.98.json`: maschinenlesbare Coverage nach V0.98; Identity/Modifier und Hidden-Zone-Tools sind `implemented_limited`, V0.99 war zu diesem Zeitpunkt noch offen.
+- `docs/derived/MVP_0.99_DETAILED_PLAN.md`: historischer Detailplan für V0.99 Hosting, Viren, Purge und Counter-Familien.
 - `docs/derived/MVP_0.99_REQUIREMENTS.md`: eingefrorene V0.99-Anforderungen für Counter, Hosting, Viren, Purge, Recurring Credits und Bad Publicity.
 - `docs/derived/COUNTER_HOSTING_0.99_SPEC.md`: V0.99a/b-Spezifikation für Counter-Felder, `hostedOn`, Hosting-Choice, Host-Trash-Kaskade und Sichtbarkeit.
 - `docs/derived/VIRUS_PURGE_0.99_SPEC.md`: V0.99c-Spezifikation für Virus-Counter und Corp-`purge_virus_counters`.
