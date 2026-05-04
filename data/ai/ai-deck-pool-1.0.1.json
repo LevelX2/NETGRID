@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "ai-deck-pool-v1.0.1",
+  "id": "ai-deck-pool-1.0.1",
+  "status": "frozen_for_v1_0_1_seeded_random",
+  "description": "Versionierter KI-Deckpool fuer deterministische seeded_random Auswahl. Private lokale O:NR-Snapshots sind hier bewusst nicht enthalten.",
+  "entries": [
+    {
+      "snapshotId": "demo_runner_008_snapshot_v0_8",
+      "side": "runner",
+      "tags": ["starter", "runner_ai_safe", "normal", "series_safe"]
+    },
+    {
+      "snapshotId": "demo_corp_008_snapshot_v0_8",
+      "side": "corp",
+      "tags": ["starter", "corp_ai_safe", "normal", "series_safe"]
+    }
+  ]
+}

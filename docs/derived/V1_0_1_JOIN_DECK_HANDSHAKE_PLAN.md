@@ -1,6 +1,6 @@
 # V1.0.1 Deckbibliothek und Join-Deck-Handshake
 
-Status: planned
+Status: implemented_locally_verified
 Stand: 2026-05-04
 
 ## Zweck
@@ -326,3 +326,31 @@ Pflichttests:
 - Hidden-Info- und Replay-/StateHash-Verträge bleiben grün.
 - Browser-Smoke mit zwei Fenstern oder zwei Sessions ist bestanden.
 - `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestehen.
+
+## Umsetzungsergebnis 2026-05-04
+
+Umgesetzt:
+
+- Web-Deckbereich ist als `Meine Decks` ausgerichtet.
+- Lokale Decks haben einen sichtbaren `Speichern`-Button und Status für ungespeicherte Änderungen, geprüft/gültig und geprüft/nicht matchstartfähig.
+- Validierung prüft nur; Matchstart und Join validieren gespeicherte lokale Decks erneut und senden daraus unveränderliche Snapshots.
+- Vorlagen liegen in einem eingeklappten Bereich `Vorgefertigte Decks anzeigen`; Auswahl erzeugt ein eigenes gespeichertes Deck.
+- Matchstart zeigt gespeicherte lokale Runner-/Corp-Decks direkt in den Deckslots.
+- Human-vs-Human-Default erzeugt eine pending Lobby mit Host-Deckpaar; der Joiner wählt beim Beitritt eigene Runner-/Corp-Decks.
+- Das Match startet erst nach validiertem Joiner-Deckpaar.
+- Testkonstellationen mit Teilnehmer-B-Deckslots bleiben über `Testkonstellation · beide Teilnehmer festlegen` getrennt.
+- Human-vs-KI behält `fixed`, `selected` und `seeded_random`; KI-Deckslots sind nur bei `selected` editierbar.
+- `data/ai/ai-deck-pool-1.0.1.json` dokumentiert den KI-Random-Pool und schließt private lokale O:NR-Snapshots aus zufälliger KI-Auswahl aus.
+- Hidden-Info-Vertrag bleibt erhalten: Decklisten bleiben nur in privaten Snapshots/Engine-Input und erscheinen nicht in PlayerViews, JoinInfo oder öffentlichen Payloads.
+
+Checks:
+
+- `corepack pnpm typecheck`: bestanden.
+- `corepack pnpm test`: bestanden, 176 Tests.
+- `corepack pnpm lint`: bestanden.
+- `corepack pnpm build`: bestanden.
+- Browser-Smoke: bestanden für Deck aus Vorlage, Änderung, explizites Speichern, Reload, Auswahl im Matchstart, Human-vs-KI-Start, Host-Lobby, Joiner-Deckauswahl und aktiven Matchstart nach Join-Deck-Handshake.
+
+Bekannte Restpunkte:
+
+- Lokale Deckbibliothek bleibt bewusst browserlokal; kein Account-, Cloud- oder Sync-Modell.

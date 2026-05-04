@@ -752,6 +752,20 @@ select {
   background: var(--settings-bg);
 }
 
+.deckTemplateBox {
+  border-bottom: 1px solid var(--line);
+}
+
+.deckTemplateBox summary {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  color: var(--muted);
+  cursor: pointer;
+  font-weight: 800;
+}
+
 .deckCreateRow .button,
 .deckTemplateRow .button {
   height: auto;
@@ -1093,6 +1107,40 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.deckHandshakeHint,
+.deckSaveStatus,
+.pendingLobbyBox {
+  display: grid;
+  align-items: center;
+  min-height: 38px;
+  margin: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--section-bg);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.pendingLobbyBox {
+  width: min(1180px, 100%);
+  grid-template-columns: auto minmax(220px, 1fr) auto;
+  gap: 10px;
+}
+
+.deckSaveStatus.dirty {
+  border-color: var(--focus);
+  color: var(--text);
+}
+
+.deckSaveStatus.ok {
+  border-color: #426d49;
+}
+
+.deckSaveStatus.bad {
+  border-color: #704044;
 }
 
 .deckValidation {

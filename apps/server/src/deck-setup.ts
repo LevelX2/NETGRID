@@ -1,5 +1,6 @@
 import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
+import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import { createHash } from "node:crypto";
 import { createRuntimeCardsById } from "@netrunner/catalog";
 import { buildEngineDeck, validateDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type DeckValidationContext } from "@netrunner/decks";
@@ -45,6 +46,7 @@ const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const cardsById = createRuntimeCardsById() as DeckValidationContext["cardsById"];
 const profiles = profilesData.profiles as DeckFormatProfile[];
 const frozenSnapshots = snapshotsData.snapshots as DeckSnapshot[];
+const aiDeckPool = aiDeckPoolData.entries as Array<{ snapshotId: string; side: "runner" | "corp"; tags: string[] }>;
 
 export function resolveDeckSetup(input: MatchDeckSelectionInput = {}, options: { seed?: string; aiDeckPolicy?: AiDeckPolicy } = {}): ResolvedDeckSetup {
   if (options.aiDeckPolicy === "fixed") return pairToDeckSetup(resolveParticipantPair({}));
@@ -88,6 +90,10 @@ export function deckSetupForParticipants(
     runnerDeck: runnerOwner.runnerDeck,
     corpDeck: corpOwner.corpDeck
   });
+}
+
+export function resolveParticipantDeckPair(input: ParticipantDeckPairInput): ResolvedParticipantDeckPair {
+  return resolveParticipantPair(input);
 }
 
 function pairToDeckSetup(pair: ResolvedParticipantDeckPair): ResolvedDeckSetup {
@@ -157,7 +163,7 @@ function resolveSnapshot(side: "runner" | "corp", supplied: DeckSnapshot | undef
 
 function deterministicSnapshotId(side: "runner" | "corp", seed: string, salt: string): string {
   const candidates = frozenSnapshots
-    .filter((candidate) => candidate.side === side && candidate.validation.ok)
+    .filter((candidate) => candidate.side === side && candidate.validation.ok && aiDeckPool.some((entry) => entry.side === side && entry.snapshotId === candidate.deckSnapshotId))
     .map((candidate) => candidate.deckSnapshotId)
     .sort();
   if (candidates.length === 0) return side === "runner" ? DEFAULT_RUNNER_SNAPSHOT_ID : DEFAULT_CORP_SNAPSHOT_ID;

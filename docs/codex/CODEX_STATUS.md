@@ -2,15 +2,16 @@
 
 ## Current phase
 
-V1.0 Deck- und Match-Setup-Stabilisierung ist lokal umgesetzt und verifiziert.
+V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
 Latest V1.0 final review artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`.
+Latest V1.0.1 planning artifact: `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`.
 
-Current planning decision needed: choose the next gated scope after V1.0. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0 AI/multiplayer smokes, manifest/review checks and hidden-info regressions.
+Current planning decision needed: choose the next gated scope after V1.0.1. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
 
 ## Status
 
@@ -238,6 +239,10 @@ V1.0 Deck- und Match-Setup-Stabilisierung is complete and locally verified.
 
 `V1_0_deck_match_stabilization_done: true`
 
+V1.0.1 Deckbibliothek und Join-Deck-Handshake is complete and locally verified.
+
+`V1_0_1_deck_library_join_handshake_done: true`
+
 Bestandsaufnahme 2026-05-04 is complete.
 
 `bestandsaufnahme_2026_05_04_done: true`
@@ -246,13 +251,13 @@ Deck/match stabilization inventory 2026-05-04 is complete.
 
 `deck_match_stabilization_inventory_2026_05_04_done: true`
 
-Current verification after V1.0 Deck- und Match-Setup-Stabilisierung:
+Current verification after V1.0.1 Deckbibliothek und Join-Deck-Handshake:
 
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
-- `corepack pnpm test`: pass, 175 tests including V1.0 deck-series/KI-policy smokes, Web Chronicle test discovery and O:NR AI/multiplayer smokes.
+- `corepack pnpm test`: pass, 176 tests including V1.0.1 Join-Deck-Handshake, V1.0 deck-series/KI-policy smokes, Web Chronicle test discovery and O:NR AI/multiplayer smokes.
 - `corepack pnpm build`: pass, previous Turbopack NFT warning for the `card-images` route trace is resolved by fixed repo-relative data paths.
-- Browser smoke: pass. Template deck copied, modified, validated, used for match setup and started in Runner-vs-Corp-KI.
+- Browser smoke: pass for V1.0.1. Verified deck-from-template creation, editing, explicit save, reload persistence, saved-deck Matchstart, Human-vs-KI start, Human-vs-Human pending lobby creation, Joiner saved-deck selection and active match start after Join-Deck-Handshake.
 
 Audit findings:
 
@@ -263,6 +268,8 @@ Audit findings:
 - Local private O:NR-v1 data under ignored `data/local/` and `data/local-assets/` is present on this machine. It remains private/local and not versioned.
 - O:NR-v1 playable test access is accepted for private local use. Engine harness, Web overlay, server deck revalidation, AI/multiplayer smokes and manifest/review checks are covered for the private local scope.
 - Deck Editor and Match Setup are functional for versioned V0.8 snapshots and private local O:NR runtime cards. V1.0 adds player-owned Runner/Corp deck pairs for private series and explicit KI deck policy.
+- V1.0.1 adds explicit local deck saving, direct saved-deck selection in Matchstart, folded templates, server-side revalidation from saved decks and a pending Human-vs-Human lobby that starts only after the Joiner submits valid Runner/Corp deck snapshots.
+- `data/ai/ai-deck-pool-1.0.1.json` documents the versioned KI `seeded_random` pool and excludes private local O:NR snapshots from random selection.
 
 ## Goal
 

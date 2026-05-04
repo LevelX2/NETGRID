@@ -180,6 +180,48 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(invalidJoin.error.message).not.toContain("corp");
   });
 
+  it("keeps normal Human-vs-Human matches pending until the joiner submits valid own decks", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "join-deck-handshake" });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "join-deck-handshake",
+      mode: "human_vs_human",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      }
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const pending = await service.loadForTest(created.matchId);
+
+    expect(created.matchStatus).toBe("waiting_for_joiner_decks");
+    expect(created.pendingDeckHandshake).toBe(true);
+    expect(pending?.match.status).toBe("waiting_for_joiner_decks");
+    expect(pending?.gameState).toBeFalsy();
+    expect(JSON.stringify(pending?.match.deckSetup)).not.toContain("cards");
+
+    const missingDecks = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Joiner" });
+    expect("error" in missingDecks).toBe(true);
+    if (!("error" in missingDecks)) throw new Error("Expected deck requirement error");
+    expect(missingDecks.error.code).toBe("join_runner_deck_missing");
+
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Joiner",
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+    });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    const active = await service.loadForTest(created.matchId);
+    expect(active?.match.status).toBe("active");
+    expect(active?.gameState).toBeTruthy();
+    expect(joined.playerView.deckMetadata?.own.deckName).toBe("Corp Demo Deck 08 - Starter Score Grid");
+    expect(JSON.stringify(joined)).not.toContain("Simple Priority Agenda");
+    expect(JSON.stringify(joined)).not.toContain("cardInstances");
+  });
+
   it("runs actions only through the server pipeline with idempotency and stale-state rejection", async () => {
     const { service, corp, matchId } = await joinedMatch();
     const before = await bootstrap(service, matchId, corp);

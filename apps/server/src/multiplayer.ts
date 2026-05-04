@@ -2,7 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { buildAiDecisionInput, chooseAiAction } from "@netrunner/ai";
-import type { DeckSnapshot } from "@netrunner/decks";
+import { buildEngineDeck, type DeckSnapshot } from "@netrunner/decks";
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, replayEvents } from "@netrunner/engine";
 import {
   MVP_0_2_BASELINE,
@@ -26,6 +26,7 @@ import {
   deckSetupForParticipants,
   defaultAgendaPointsToWin,
   resolveParticipantDeckSetup,
+  resolveParticipantDeckPair,
   setupUsesExpandedRules,
   setupUsesMvp08Rules,
   type AiDeckPolicy,
@@ -36,7 +37,7 @@ import {
   type ResolvedParticipantDeckSetup
 } from "./deck-setup";
 
-export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
+export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "waiting_for_joiner_decks" | "active" | "finished";
 export type HostSideSelection = Side | "random";
 export type MatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
 export type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
@@ -117,6 +118,7 @@ export type MatchRecord = {
   status: MatchStatus;
   mode: MatchMode;
   matchVersion: number;
+  seed?: string;
   baseline: RulesBaseline;
   settings: MatchSettings;
   deckSetup: {
@@ -259,6 +261,21 @@ export type SidePayload = {
   resultSummary?: GameResultSummary;
 };
 
+export type LobbyPayload = {
+  matchId: string;
+  matchStatus: MatchStatus;
+  matchVersion: number;
+  side: Side;
+  eventTail: PublicGameEvent[];
+  opponentStatus: { side: Side; connected: boolean };
+  pendingDeckHandshake: {
+    required: boolean;
+    message: string;
+  };
+};
+
+export type ServicePayload = SidePayload | LobbyPayload;
+
 export type SafeErrorPayload = {
   code: string;
   message: string;
@@ -268,6 +285,8 @@ export type SafeErrorPayload = {
 
 export type CreateMatchResult = {
   matchId: string;
+  matchStatus: MatchStatus;
+  pendingDeckHandshake?: boolean;
   hostSide: Side;
   hostSessionToken: string;
   hostReconnectToken: string;
@@ -439,9 +458,97 @@ export class MultiplayerService {
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
+    const matchFormat = input.settings?.matchFormat ?? "rules_match";
+    const pendingDeckHandshake = mode === "human_vs_human" && Boolean(input.participantADecks) && !input.participantBDecks;
+    if (pendingDeckHandshake) {
+      const hostDeckPair = resolveParticipantDeckPair(input.participantADecks ?? legacyParticipantDeckPair(input));
+      const session: SessionRecord = {
+        sessionId: randomId("session"),
+        matchId,
+        side: hostSide,
+        displayName: input.displayName?.trim() || (hostSide === "runner" ? "Runner" : "Corp"),
+        sessionTokenHash: this.hashToken(hostSessionToken),
+        reconnectTokenHash: this.hashToken(hostReconnectToken),
+        connected: false,
+        createdAt: now,
+        lastSeenAt: now
+      };
+      const record: StoredMatch = {
+        match: {
+          matchId,
+          status: "waiting_for_joiner_decks",
+          mode,
+          matchVersion: 1,
+          seed,
+          baseline: MVP_0_2_BASELINE,
+          settings: {
+            agendaPointsToWin: input.settings?.agendaPointsToWin ?? 7,
+            matchFormat
+          },
+          deckSetup: {
+            runnerSnapshotId: hostDeckPair.runnerSnapshot.deckSnapshotId,
+            corpSnapshotId: hostDeckPair.corpSnapshot.deckSnapshotId,
+            runner: hostDeckPair.runnerSnapshot.publicMetadata,
+            corp: hostDeckPair.corpSnapshot.publicMetadata,
+            participants: { player_a: publicParticipantDeckPair(hostDeckPair), player_b: publicParticipantDeckPair(hostDeckPair) }
+          },
+          ...(matchFormat === "two_game_side_swap"
+            ? {
+                series: {
+                  seriesId: input.series?.seriesId ?? randomId("series"),
+                  mode: "two_game_side_swap",
+                  status: "active",
+                  gameNumber: input.series?.gameNumber ?? 1,
+                  gamesPlanned: input.series?.gamesPlanned ?? 2,
+                  runnerPlayer,
+                  corpPlayer,
+                  results: clone(input.series?.previousResults ?? []),
+                  ...(input.series?.previousMatchId ? { previousMatchId: input.series.previousMatchId } : {})
+                }
+              }
+            : {}),
+          createdAt: now,
+          updatedAt: now
+        },
+        sessions: [session],
+        tokens: [
+          this.tokenRecord(matchId, hostSide, "session", hostSessionToken, now),
+          this.tokenRecord(matchId, hostSide, "reconnect", hostReconnectToken, now),
+          ...(joinToken ? [this.tokenRecord(matchId, joinSide, "join", joinToken, now)] : [])
+        ],
+        privateDeckSnapshots: {
+          runner: clone(hostDeckPair.runnerSnapshot),
+          corp: clone(hostDeckPair.corpSnapshot),
+          participants: {
+            player_a: { runner: clone(hostDeckPair.runnerSnapshot), corp: clone(hostDeckPair.corpSnapshot) },
+            player_b: { runner: clone(hostDeckPair.runnerSnapshot), corp: clone(hostDeckPair.corpSnapshot) }
+          }
+        },
+        gameState: undefined as unknown as GameState,
+        eventLog: [],
+        actionReceipts: [],
+        undoSnapshots: [],
+        stateSnapshots: []
+      };
+      await this.storage.save(record);
+      return {
+        matchId,
+        matchStatus: record.match.status,
+        pendingDeckHandshake: true,
+        hostSide,
+        hostSessionToken,
+        hostReconnectToken,
+        ...(joinToken ? { joinUrl: `${this.webBaseUrl}/?matchId=${encodeURIComponent(matchId)}&joinToken=${encodeURIComponent(joinToken)}` } : {}),
+        webSocketUrl: this.webSocketUrl(),
+        mode,
+        baseline: record.match.baseline,
+        playerView: undefined as unknown as PlayerView,
+        legalActions: [],
+        matchVersion: record.match.matchVersion
+      };
+    }
     const participantDecks = resolveParticipantDeckSetup(input, { seed, ...(aiPlayer ? { aiPlayer } : {}), ...(aiDeckPolicy ? { aiDeckPolicy } : {}) });
     const deckSetup = deckSetupForParticipants(participantDecks, { runnerPlayer, corpPlayer });
-    const matchFormat = input.settings?.matchFormat ?? "rules_match";
     const settings: MatchSettings = {
       agendaPointsToWin: input.settings?.agendaPointsToWin ?? (matchFormat === "two_game_side_swap" ? 7 : defaultAgendaPointsToWin(deckSetup)),
       matchFormat
@@ -481,6 +588,7 @@ export class MultiplayerService {
         status: mode === "human_vs_human" ? (hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner") : "active",
         mode,
         matchVersion: 1,
+        seed,
         baseline,
         settings,
         deckSetup: {
@@ -545,6 +653,7 @@ export class MultiplayerService {
     const payload = this.payloadFor(record, hostSide);
     return {
       matchId,
+      matchStatus: record.match.status,
       hostSide,
       hostSessionToken,
       hostReconnectToken,
@@ -575,7 +684,7 @@ export class MultiplayerService {
       if (!series || record.match.settings.matchFormat !== "two_game_side_swap") {
         return { error: safeError("series_not_available", "Für dieses Match ist keine private Matchserie aktiv.") };
       }
-      if (record.match.status !== "finished" || !record.gameState.winner) {
+      if (record.match.status !== "finished" || !record.gameState?.winner) {
         return { error: safeError("series_game_not_finished", "Das nächste Serienspiel ist erst nach Spielende verfügbar.") };
       }
 
@@ -633,7 +742,7 @@ export class MultiplayerService {
     return { matchId, status: record.match.status, availableSide: tokenRecord.allowedSide };
   }
 
-  async joinMatch(matchId: string, input: { token: string; displayName?: string }): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
+  async joinMatch(matchId: string, input: { token: string; displayName?: string } & ParticipantDeckPairInput): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
     const tokenRecord = this.findToken(record, input.token, "join");
@@ -659,9 +768,29 @@ export class MultiplayerService {
     record.tokens = record.tokens.map((candidate) => (candidate.tokenId === tokenRecord.tokenId ? { ...candidate, usedAt: now } : candidate));
     record.tokens.push(this.tokenRecord(matchId, tokenRecord.allowedSide, "session", sessionToken, now));
     record.tokens.push(this.tokenRecord(matchId, tokenRecord.allowedSide, "reconnect", reconnectToken, now));
+    if (record.match.status === "waiting_for_joiner_decks") {
+      const joinerDecks: ParticipantDeckPairInput = {
+        ...(input.runnerDeckSnapshotId ? { runnerDeckSnapshotId: input.runnerDeckSnapshotId } : {}),
+        ...(input.corpDeckSnapshotId ? { corpDeckSnapshotId: input.corpDeckSnapshotId } : {}),
+        ...(input.runnerDeckSnapshot ? { runnerDeckSnapshot: input.runnerDeckSnapshot } : {}),
+        ...(input.corpDeckSnapshot ? { corpDeckSnapshot: input.corpDeckSnapshot } : {})
+      };
+      if (!joinerDecks.runnerDeckSnapshot && !joinerDecks.runnerDeckSnapshotId) {
+        return { error: safeError("join_runner_deck_missing", "Bitte wähle ein Runner-Deck für den Beitritt.") };
+      }
+      if (!joinerDecks.corpDeckSnapshot && !joinerDecks.corpDeckSnapshotId) {
+        return { error: safeError("join_corp_deck_missing", "Bitte wähle ein Corp-Deck für den Beitritt.") };
+      }
+      try {
+        this.activatePendingDeckHandshake(record, joinerDecks);
+      } catch (error) {
+        return { error: safeError("join_deck_invalid", deckErrorMessage(error)) };
+      }
+    }
     record.match.status = "active";
     record.match.matchVersion += 1;
     record.match.updatedAt = now;
+    this.runAiUntilNextHuman(record);
     await this.storage.save(record);
 
     const payload = this.payloadFor(record, tokenRecord.allowedSide);
@@ -732,6 +861,7 @@ export class MultiplayerService {
     if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
     session.lastSeenAt = this.now();
     await this.storage.save(record);
+    if (!record.gameState) return { error: safeError("match_pending", "Das Match wartet noch auf die Deckauswahl des Joiners.") };
     return this.payloadFor(record, side);
   }
 
@@ -745,6 +875,7 @@ export class MultiplayerService {
     record.match.matchVersion += 1;
     record.match.updatedAt = this.now();
     await this.storage.save(record);
+    if (!record.gameState) return { error: safeError("match_pending", "Das Match wartet noch auf die Deckauswahl des Joiners.") };
     return this.payloadFor(record, side);
   }
 
@@ -764,8 +895,9 @@ export class MultiplayerService {
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
       if (record.match.status !== "active") {
-        return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv."), payload: this.payloadFor(record, input.side) };
+        return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
       }
+      if (!record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match wartet noch auf vollständige Deckauswahl.") };
 
       const duplicate = record.actionReceipts.find((receipt) => receipt.side === input.side && receipt.idempotencyKey === input.idempotencyKey);
       if (duplicate) {
@@ -852,7 +984,7 @@ export class MultiplayerService {
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
-      if (record.match.status !== "active") return { ok: false, error: safeError("match_not_active", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+      if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Undo ist aktuell nicht möglich.") };
       const targetIndex = record.eventLog.findIndex((event) => event.eventId === input.targetEventId);
       if (targetIndex < 0) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
       const blocked = record.eventLog.slice(targetIndex).some((event) => event.hiddenInfoBarrier);
@@ -911,6 +1043,7 @@ export class MultiplayerService {
   async replayMatch(matchId: string): Promise<{ ok: boolean; finalStateHash: string; errors: string[] }> {
     const record = await this.mustLoad(matchId);
     if (!record) return { ok: false, finalStateHash: "", errors: ["Match not found."] };
+    if (!record.gameState) return { ok: false, finalStateHash: "", errors: ["Match is not active."] };
     const initial = record.stateSnapshots[0]?.gameState;
     if (!initial) return { ok: false, finalStateHash: hashState(record.gameState), errors: ["Initial snapshot missing."] };
     const replay = replayEvents(initial, record.gameState.eventLog);
@@ -927,6 +1060,7 @@ export class MultiplayerService {
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (!record.gameState) return { ok: false, error: safeError("match_not_active", "Undo ist aktuell nicht möglich.") };
       const pending = record.pendingUndo;
       if (!pending || pending.undoRequestId !== input.undoRequestId || pending.requestedBy === input.side) {
         return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
@@ -955,7 +1089,64 @@ export class MultiplayerService {
     });
   }
 
+  private activatePendingDeckHandshake(record: StoredMatch, joinerDecks: ParticipantDeckPairInput): void {
+    const hostDecks = record.privateDeckSnapshots?.participants?.player_a;
+    if (!hostDecks) throw new Error("host_decks_missing");
+    const joinerPair = resolveParticipantDeckPair(joinerDecks);
+    const participants: ResolvedParticipantDeckSetup = {
+      player_a: {
+        runnerSnapshot: clone(hostDecks.runner),
+        corpSnapshot: clone(hostDecks.corp),
+        runnerDeck: buildDeckFromSnapshot(hostDecks.runner),
+        corpDeck: buildDeckFromSnapshot(hostDecks.corp)
+      },
+      player_b: joinerPair
+    };
+    const hostSide = record.sessions[0]?.side ?? "runner";
+    const runnerPlayer: SeriesPlayerSlot = hostSide === "runner" ? "player_a" : "player_b";
+    const corpPlayer: SeriesPlayerSlot = hostSide === "corp" ? "player_a" : "player_b";
+    const deckSetup = deckSetupForParticipants(participants, { runnerPlayer, corpPlayer });
+    const baseline = baselineForMode(record.match.mode, deckSetup);
+    const controllers = controllersForMode(record.match.mode, hostSide, { runnerDifficulty: "normal", corpDifficulty: "normal" });
+    const agendaPointsToWin =
+      record.match.settings.matchFormat === "two_game_side_swap" ? record.match.settings.agendaPointsToWin : record.match.settings.agendaPointsToWin || defaultAgendaPointsToWin(deckSetup);
+    const gameState = createGame({
+      matchId: record.match.matchId,
+      seed: record.match.seed ?? record.match.matchId,
+      baseline,
+      agendaPointsToWin,
+      controllers,
+      runnerDeck: deckSetup.runnerDeck,
+      corpDeck: deckSetup.corpDeck,
+      runnerDeckMetadata: deckSetup.runnerSnapshot.publicMetadata,
+      corpDeckMetadata: deckSetup.corpSnapshot.publicMetadata
+    });
+    record.gameState = gameState;
+    record.match.baseline = baseline;
+    record.match.settings = { ...record.match.settings, agendaPointsToWin };
+    record.match.deckSetup = {
+      runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
+      corpSnapshotId: deckSetup.corpSnapshot.deckSnapshotId,
+      runner: deckSetup.runnerSnapshot.publicMetadata,
+      corp: deckSetup.corpSnapshot.publicMetadata,
+      assignment: { runnerPlayer, corpPlayer },
+      participants: publicParticipantDeckSetup(participants)
+    };
+    if (record.match.series) {
+      record.match.series.runnerPlayer = runnerPlayer;
+      record.match.series.corpPlayer = corpPlayer;
+    }
+    record.privateDeckSnapshots = {
+      runner: clone(deckSetup.runnerSnapshot),
+      corp: clone(deckSetup.corpSnapshot),
+      participants: privateParticipantDeckSetup(participants)
+    };
+    record.eventLog = gameState.eventLog.map((event) => toEventRecord(record.match.matchId, event, false));
+    record.stateSnapshots = [this.snapshotFor(record.match.matchId, gameState, record.match.matchVersion, "snap_initial", false)];
+  }
+
   private payloadFor(record: StoredMatch, side: Side): SidePayload {
+    if (!record.gameState) throw new Error("match_not_active");
     const playerView = getPlayerView(record.gameState, side);
     const opponent = record.sessions.find((session) => session.side === opposite(side));
     const pendingUndo = record.pendingUndo
@@ -980,7 +1171,7 @@ export class MultiplayerService {
   }
 
   private finalizeFinishedMatch(record: StoredMatch): void {
-    if (!record.gameState.winner) return;
+    if (!record.gameState?.winner) return;
     record.match.status = "finished";
     record.match.winner = record.gameState.winner;
     this.finalizeSeriesGame(record);
@@ -988,12 +1179,13 @@ export class MultiplayerService {
 
   private finalizeSeriesGame(record: StoredMatch): void {
     const series = record.match.series;
-    const winner = record.gameState.winner;
-    if (!series || !winner) return;
-    const finalStateHash = hashState(record.gameState);
+    const state = record.gameState;
+    const winner = state?.winner;
+    if (!series || !state || !winner) return;
+    const finalStateHash = hashState(state);
     if (!series.results.some((result) => result.matchId === record.match.matchId)) {
-      const runnerAgendaPoints = getPlayerView(record.gameState, "runner").own.agendaPoints;
-      const corpAgendaPoints = getPlayerView(record.gameState, "corp").own.agendaPoints;
+      const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
+      const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
       series.results.push({
         matchId: record.match.matchId,
         gameNumber: series.gameNumber,
@@ -1010,28 +1202,30 @@ export class MultiplayerService {
   }
 
   private runAiUntilNextHuman(record: StoredMatch): void {
-    for (let count = 0; count < 40 && record.match.status === "active" && !record.gameState.winner && this.isAiSide(record, record.gameState.activeSide); count += 1) {
-      const side = record.gameState.activeSide;
-      const legalActions = getLegalActions(record.gameState, side);
+    let state = record.gameState;
+    if (!state) return;
+    for (let count = 0; count < 40 && record.match.status === "active" && !state.winner && this.isAiSide(record, state.activeSide); count += 1) {
+      const side = state.activeSide;
+      const legalActions = getLegalActions(state, side);
       if (legalActions.length === 0) return;
       const controller = record.match.aiControllers?.[side];
-      const input = buildAiDecisionInput(record.gameState, side, {
+      const input = buildAiDecisionInput(state, side, {
         difficulty: controller?.difficulty ?? "normal",
         profileId: controller?.profileId ?? `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
-        decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${side}`,
-        actionNumber: record.gameState.stateVersion
+        decisionId: `${record.match.matchId}:${state.stateVersion}:${side}`,
+        actionNumber: state.stateVersion
       });
       const decision = chooseAiAction(input);
       const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
       if (!legalAction) return;
-      const snapshot = this.snapshotFor(record.match.matchId, record.gameState, record.match.matchVersion, `snap_before_${record.gameState.stateVersion + 1}`, false);
-      const result = applyAction(record.gameState, {
+      const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
+      const result = applyAction(state, {
         matchId: record.match.matchId,
         side,
         actionId: legalAction.actionId,
-        clientKnownStateVersion: record.gameState.stateVersion,
+        clientKnownStateVersion: state.stateVersion,
         ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
-        idempotencyKey: `ai-${side}-${record.gameState.stateVersion}`
+        idempotencyKey: `ai-${side}-${state.stateVersion}`
       });
       if (!result.ok) return;
       const event: GameEvent = {
@@ -1045,6 +1239,7 @@ export class MultiplayerService {
       const barrier = isHiddenInfoBarrier(event);
       record.stateSnapshots.push({ ...snapshot, hiddenInfoBarrier: barrier });
       record.gameState = result.state;
+      state = result.state;
       record.eventLog.push(toEventRecord(record.match.matchId, event, barrier));
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
@@ -1088,6 +1283,7 @@ export class MultiplayerService {
   }
 
   private receiptFor(record: StoredMatch, side: Side, idempotencyKey: string, accepted: boolean, errorCode?: string): ActionReceipt {
+    if (!record.gameState) throw new Error("match_not_active");
     return {
       idempotencyKey,
       matchId: record.match.matchId,
@@ -1162,16 +1358,17 @@ function isHiddenInfoBarrier(event: GameEvent): boolean {
 }
 
 function resultSummaryFor(record: StoredMatch, viewerSide: Side, finalStateHash: string): GameResultSummary | undefined {
-  const winner = record.gameState.winner;
+  const state = record.gameState;
+  const winner = state?.winner;
   if (!winner) return undefined;
-  const runnerAgendaPoints = getPlayerView(record.gameState, "runner").own.agendaPoints;
-  const corpAgendaPoints = getPlayerView(record.gameState, "corp").own.agendaPoints;
+  const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
+  const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
   const actionEvents = record.eventLog.filter((event) => event.publicPayload.type !== "game_created");
   const countType = (type: string) => actionEvents.filter((event) => event.publicPayload.type === type).length;
   return {
     winner,
     viewerOutcome: winner === "draw" ? "draw" : winner === viewerSide ? "won" : "lost",
-    reason: resultReason(record.gameState, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
+    reason: resultReason(state, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
     matchFormat: record.match.settings.matchFormat,
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
     runnerAgendaPoints,
@@ -1256,9 +1453,30 @@ function privateParticipantDeckSetup(participants: ResolvedParticipantDeckSetup)
   };
 }
 
+function buildDeckFromSnapshot(snapshot: DeckSnapshot): ReturnType<typeof buildEngineDeck> {
+  return buildEngineDeck(snapshot);
+}
+
+function legacyParticipantDeckPair(input: MatchDeckSelectionInput): ParticipantDeckPairInput {
+  return {
+    ...(input.runnerDeckSnapshotId ? { runnerDeckSnapshotId: input.runnerDeckSnapshotId } : {}),
+    ...(input.corpDeckSnapshotId ? { corpDeckSnapshotId: input.corpDeckSnapshotId } : {}),
+    ...(input.runnerDeckSnapshot ? { runnerDeckSnapshot: input.runnerDeckSnapshot } : {}),
+    ...(input.corpDeckSnapshot ? { corpDeckSnapshot: input.corpDeckSnapshot } : {})
+  };
+}
+
+function deckErrorMessage(error: unknown): string {
+  const code = error instanceof Error ? error.message : String(error);
+  if (code === "deck_snapshot_wrong_side") return "Das gewählte Deck hat die falsche Seite.";
+  if (code === "deck_snapshot_not_validated" || code === "deck_snapshot_invalid") return "Das gewählte Deck ist nicht matchstartfähig. Bitte prüfe die Validierungsfehler.";
+  if (code === "deck_snapshot_not_found") return "Das gewählte Deck wurde nicht gefunden.";
+  return "Die gewählten Decks sind nicht matchstartfähig.";
+}
+
 function participantDeckInputsForRecord(record: StoredMatch): Record<SeriesPlayerSlot, ParticipantDeckPairInput> {
   const participants = record.privateDeckSnapshots?.participants;
-  if (participants) {
+  if (participants?.player_a && participants.player_b) {
     return {
       player_a: { runnerDeckSnapshot: clone(participants.player_a.runner), corpDeckSnapshot: clone(participants.player_a.corp) },
       player_b: { runnerDeckSnapshot: clone(participants.player_b.runner), corpDeckSnapshot: clone(participants.player_b.corp) }

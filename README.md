@@ -4,7 +4,7 @@ Private Netrunner-Webapplikation für regelgeführtes, deterministisches Spiel, 
 
 ## Aktueller Stand
 
-Der versionierte Projektstand ist bis **V1.0 Deck- und Match-Setup-Stabilisierung** umgesetzt und lokal grün geprüft.
+Der versionierte Projektstand ist bis **V1.0.1 Deckbibliothek und Join-Deck-Handshake** umgesetzt und lokal grün geprüft.
 
 Umgesetzt sind:
 
@@ -14,10 +14,12 @@ Umgesetzt sind:
 - V0.94 bis V0.99 als enge Mechanik-Gates: Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viren, Purge, Recurring Credits und Bad Publicity.
 - S01: Ergebnisfenster, Spielziel-Auswahl, private Zwei-Spiel-Serie mit Seitenwechsel und opt-in Audio.
 - V1.0: explizite Deckslots für Teilnehmer A/B mit Runner-/Corp-Deckpaaren, stabile Serien-Deckzuordnung über Seitenwechsel, KI-Deckpolitik `fixed`/`selected`/`seeded_random` und validierte Matchstart-Deckauswahl.
+- V1.0.1: lokale Deckbibliothek als normaler Arbeitsfluss, explizites Speichern, gespeicherte Decks direkt im Matchstart, eingeklappte Vorlagen und Human-vs-Human-Join-Deck-Handshake.
 - Eine lokale, nicht versionierte O:NR-v1-Testumgebung ist für privaten Gebrauch in den erlaubten lokalen Datenpool aufgenommen. Sie nutzt ignorierte Daten unter `data/local/` und `data/local-assets/`, bleibt privat/lokal und ist kein öffentlicher oder versionierter Kartenpool.
 
 Die aktuelle Bestandsaufnahme liegt unter `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Der V1.0-Plan und Final Review liegen unter `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md` und `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`.
+Der V1.0.1-Plan liegt unter `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`.
 
 ## Wichtige Grenzen
 
@@ -63,7 +65,7 @@ Der Multiplayer-Server läuft standardmäßig unter `http://127.0.0.1:8787`. Die
 Für ein privates Match im lokalen Netz:
 
 - Host öffnet `http://127.0.0.1:3000`, erstellt ein Match und kopiert den Join-Link.
-- Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link.
+- Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link und wählt beim Beitritt eigene gespeicherte Runner-/Corp-Decks.
 - KI-Partien können in der Startansicht als Runner vs Corp-KI, Corp vs Runner-KI oder KI vs KI gestartet werden.
 - Außerhalb von localhost HTTPS/WSS verwenden und Tokens wie Passwörter behandeln.
 - Runtime-Storage liegt unter `data/runtime/` und ist nicht versioniert; bei längerer Nutzung regelmäßig sichern.
@@ -77,16 +79,16 @@ corepack pnpm test
 corepack pnpm build
 ```
 
-Zuletzt geprüft am 2026-05-04:
+Zuletzt geprüft am 2026-05-04 für V1.0.1:
 
 - `corepack pnpm lint`: bestanden.
 - `corepack pnpm typecheck`: bestanden.
-- `corepack pnpm test`: bestanden, 175 Tests inklusive Web-Chronicle-Test, V1.0-Deckserien-/KI-Policy-Smokes, O:NR-AI-/Multiplayer-Smokes, Pakettests und Root-Specs.
+- `corepack pnpm test`: bestanden, 176 Pakettests plus 39 Root-Specs inklusive V1.0.1-Join-Deck-Handshake, Web-Chronicle-Test, V1.0-Deckserien-/KI-Policy-Smokes, O:NR-AI-/Multiplayer-Smokes und Visibility-Verträgen.
 - `corepack pnpm build`: bestanden. Die frühere Turbopack-NFT-Warnung zur `card-images`-Route ist durch feste repo-relative Datenpfade behoben.
 
 ## Nächste Entscheidungen
 
-V1.0 ist abgeschlossen. Vor neuer Karten- oder Mechanikbreite sollte der nächste Scope wieder als eigenes Gate festgelegt werden:
+V1.0.1 ist abgeschlossen. Vor neuer Karten- oder Mechanikbreite sollte der nächste Scope wieder als eigenes Gate festgelegt werden:
 
 - Weitere Karten oder offizielle Mechaniken nur mit eigenem Resolver-, Manifest-, Visibility-, Replay/StateHash-, AI- und Multiplayer-Gate.
 - Vollständige offizielle Deckbuilding-/Formatregeln, Accounts, Cloud-Decks, öffentliche Decklisten, Matchmaking, Rankings und Turnierlegalität bleiben außerhalb von V1.0.

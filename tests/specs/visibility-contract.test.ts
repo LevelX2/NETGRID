@@ -49,17 +49,24 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("resultSummary.sessionToken");
   });
 
-  it("keeps the V1.0 deck and match setup explicit without adding browser authority", () => {
+  it("keeps the V1.0.1 deck library and join handshake explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.1"');
+    expect(page).toContain("Meine Decks");
+    expect(page).toContain("Speichern");
+    expect(page).toContain("Vorgefertigte Decks anzeigen");
     expect(page).toContain("Teilnehmer A · Runner-Deck");
     expect(page).toContain("Teilnehmer A · Corp-Deck");
-    expect(page).toContain("Teilnehmer B/KI · Runner-Deck");
-    expect(page).toContain("Teilnehmer B/KI · Corp-Deck");
+    expect(page).toContain("Teilnehmer B wählt eigene Decks beim Beitritt.");
+    expect(page).toContain("Dein Runner-Deck");
+    expect(page).toContain("Mit Decks beitreten");
+    expect(page).toContain("Testkonstellation · beide Teilnehmer festlegen");
     expect(page).toContain("KI-Decks");
     expect(page).toContain("Deterministisch zufällig");
     expect(page).toContain("participantADecks");
     expect(page).toContain("participantBDecks");
+    expect(page).toContain("pendingDeckHandshake");
+    expect(page).toContain("validateDeckForMatch");
     expect(page).toContain("aiDeckPolicy");
     expect(page).toContain("viewerAgendaPoints");
     expect(page).toContain("opponentAgendaPoints");

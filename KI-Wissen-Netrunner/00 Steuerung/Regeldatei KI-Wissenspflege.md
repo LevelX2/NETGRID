@@ -44,7 +44,8 @@ Bei Abweichungen zwischen älterer Dokumentation und aktuellem Workspace-Stand w
 - Bei weitreichenden oder unklar zuzuordnenden Änderungen wird die Einordnung vorab im Chat transparent gemacht.
 - Statuswissen und Chronik bleiben getrennt:
   - `Aktueller Projektstatus` zeigt den verdichteten Ist-Stand.
-  - `Log.md` bleibt eine zeitliche Chronik in umgekehrt chronologischer Reihenfolge: neueste Einträge stehen oben, ältere Einträge folgen darunter.
+  - `Log.md` bleibt der kurze Einstieg und Index für die monatlichen Logarchive.
+  - Monatliche Logarchive unter `03 Betrieb/` enthalten die vollständige zeitliche Chronik in umgekehrt chronologischer Reihenfolge: neueste Einträge stehen oben, ältere Einträge folgen darunter.
 
 ## Logregel
 
@@ -59,7 +60,7 @@ Das Projektlog dokumentiert:
 
 Routine-Schritte, einzelne Toolaufrufe und reine Zwischenstände bleiben normalerweise draußen.
 
-Neue Logeinträge werden oberhalb aller älteren Einträge einsortiert; bei gleichem Datum stehen neuere Einträge oberhalb der vorherigen Einträge dieses Datums. Ältere Einträge dürfen zur Einhaltung dieser Reihenfolge nach unten verschoben werden, inhaltlich aber nicht stillschweigend verändert werden.
+Neue Logeinträge werden im Archiv des jeweiligen Kalendermonats oberhalb aller älteren Einträge dieses Monats einsortiert; bei gleichem Datum stehen neuere Einträge oberhalb der vorherigen Einträge dieses Datums. Ältere Einträge dürfen zur Einhaltung dieser Reihenfolge nach unten verschoben werden, inhaltlich aber nicht stillschweigend verändert werden. `Log.md` wird nur gepflegt, wenn neue Monatsarchive hinzukommen oder sich die Archivstruktur ändert.
 
 ## Projektbesonderheiten
 
