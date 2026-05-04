@@ -1,7 +1,7 @@
 # Roadmap nach MVP 0.4
 
-Status: Planungsentscheidung nach bestandenem MVP 0.4
-Stand: 2026-05-03
+Status: Planungsentscheidung nach bestandenem MVP 0.4; Mechanikdetailplanung bis V0.99 ergänzt
+Stand: 2026-05-04
 Basis: `MVP_0.4_done: true`, Commit `5a1887d Complete MVP 0.4 card pool tags`
 
 ## 1. Kurzentscheidung
@@ -19,6 +19,8 @@ Empfohlene Reihenfolge:
 5. V0.9: Bessere KI.
 6. V0.91: Kartenbild-Asset-Gate und Bild-Import.
 7. V1.0: Private stabile Plattform.
+
+Nachtrag 2026-05-04: Nach Abschluss von V0.92 und V0.93 liegt die Mechanikdetailplanung für V0.94 bis V0.99 vor. Diese Versionen schieben sich als gate-orientierte Mechanikfolge vor eine mögliche V1.0-Stabilisierung: Damage/Flatline, Resources, Trace/Link, Run/Breach/Multiaccess, Identity/Hidden-Zone-Tools sowie Counter/Hosting/Virus/Purge.
 
 ## 2. Leitentscheidungen
 
@@ -195,3 +197,12 @@ V1.0 ist eine private stabile Plattform mit:
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.9_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.91_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.92_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.93_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.94_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.96_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.97_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.98_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.99_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`

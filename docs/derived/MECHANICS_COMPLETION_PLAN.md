@@ -1,7 +1,7 @@
 # Mechanik-Komplettierungsplan
 
-Status: detaillierte Planungsfassung; V0.94/V0.95-Detailpläne liegen vor
-Stand: 2026-05-03
+Status: detaillierte Planungsfassung; V0.94-V0.99-Detailpläne liegen vor
+Stand: 2026-05-04
 Arbeitsbasis:
 
 - `docs/codex/CODEX_STATUS.md`
@@ -481,33 +481,39 @@ Aktueller Anschluss nach V0.93:
 - `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
 - `docs/derived/MVP_0.94_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.96_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.97_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.98_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.99_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`
 
-Der nächste empfohlene Gate-Schritt ist V0.94 Requirements Freeze für Damage/Flatline. V0.95 Resources folgt danach, sofern die Reihenfolge nicht ausdrücklich geändert wird.
+Der nächste empfohlene Gate-Schritt ist V0.94 Requirements Freeze für Damage/Flatline. V0.95 bis V0.99 sind detailliert geplant, aber nicht implementierungsfreigegeben. Jede Version braucht vor der Umsetzung weiterhin Requirements, Spec, Testmatrix und Requirements Review.
 
-Empfohlener nächster reiner Planungsprompt:
+Empfohlener nächster Requirements-Prompt:
 
 ```text
-Erstelle den Requirements-Freeze für M0/M1: Mechanik-Inventar und allgemeines Timing-/Ability-/Effect-Fundament. Nicht implementieren.
+Erstelle den Requirements-Freeze für V0.94: Damage und Flatline. Nicht implementieren.
 
 Lies:
 - AGENTS.md
 - docs/codex/CODEX_STATUS.md
 - docs/derived/MECHANICS_COMPLETION_PLAN.md
-- docs/derived/DEVIATION_REGISTRY.md
-- docs/derived/MVP_0.8_FINAL_REVIEW.md
-- docs/derived/MVP_0.9_FINAL_REVIEW.md
+- docs/derived/MECHANICS_COVERAGE_MATRIX.md
+- docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md
+- docs/derived/SETUP_GAME_END_0.93_SPEC.md
+- docs/derived/MVP_0.94_DETAILED_PLAN.md
+- docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md
 - docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf
 
 Erstelle:
-- docs/derived/MECHANICS_COVERAGE_MATRIX.md
-- docs/derived/MECHANIC_M1_REQUIREMENTS.md
-- docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md
-- docs/derived/MECHANIC_M1_TEST_MATRIX.md
-- docs/derived/MECHANIC_M1_REQUIREMENTS_REVIEW.md
+- docs/derived/MVP_0.94_REQUIREMENTS.md
+- docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md
+- docs/derived/MVP_0.94_TEST_MATRIX.md
+- docs/derived/MVP_0.94_REQUIREMENTS_REVIEW.md
 
 Regeln:
 - Keine Engine-, UI-, Server-, KI- oder Testimplementierung.
-- Mechanik-Coverage muss alte Deviations gegen den aktuellen V0.9-Stand normalisieren.
-- Jede spätere Mechanik muss Abhängigkeiten, Risiko, Visibility-Gates und Testpflichten bekommen.
-- Kein Kartentextparser und keine automatische Spielbarkeit durch Import.
+- Damage muss RandomDrawRecords, Hidden-Info-Barrieren, Replay/StateHash, Undo, AI und Multiplayer abdecken.
+- Flatline darf nur als enger Game-End-Grundvertrag mitgenommen werden; kein voller M2-Block.
+- Keine Trace-, Resource-, Mulligan-, Multiaccess-, Identity-, Hosting-, Virus-, Prevention- oder Replacement-Mechanik freischalten.
 ```

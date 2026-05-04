@@ -51,5 +51,10 @@
 - `docs/derived/MVP_0.94_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.94.
 - `data/rules/mechanics-coverage-0.94.json`: maschinenlesbare Coverage nach V0.94; Damage/Flatline ist `implemented_limited`, V0.95+-Mechaniken bleiben offen.
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`: detaillierte Planung für V0.95 Resources und Tag-Interaktion.
+- `docs/derived/MVP_0.96_DETAILED_PLAN.md`: detaillierte Planung für V0.96 Trace, Link und Bidding.
+- `docs/derived/MVP_0.97_DETAILED_PLAN.md`: detaillierte Planung für V0.97 Run, Jack-out, Breach und Multiaccess.
+- `docs/derived/MVP_0.98_DETAILED_PLAN.md`: detaillierte Planung für V0.98 Identitätsfähigkeiten und Hidden-Zone-Manipulation.
+- `docs/derived/MVP_0.99_DETAILED_PLAN.md`: detaillierte Planung für V0.99 Hosting, Viren, Purge und Counter-Familien.
+- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`: Querreview für Abdeckung, Integration und Testplanung von M3 bis M10.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.

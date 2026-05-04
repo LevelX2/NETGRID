@@ -254,6 +254,12 @@ Die Annahmen für die nächsten Mechanikgates wurden gegen V0.93, die Mechanik-C
 
 V0.95 wird als Resource-/Tag-Interaktionsgate geplant. Es ergänzt Runner-Resources als Kartentyp und Boardbereich sowie tag-basiertes Resource-Trash, ohne Trace, Link/Bidding, Prevention, Hosting oder neue Counterfamilien zu starten. Erstellt wurden `MVP_0.94_0.95_ASSUMPTION_REVIEW.md`, `MVP_0.94_DETAILED_PLAN.md` und `MVP_0.95_DETAILED_PLAN.md`. Beide Pläne enthalten explizite Testmatrizen für Visibility, Replay/StateHash, Undo, WebSocket/Reconnect, AI und No-Scope-Regression.
 
+## [2026-05-04] planung | V0.94 bis V0.99 für M3-M10 detailliert geplant
+
+Die Mechanikplanung ab V0.94 wurde auf M3 bis M10 vervollständigt. V0.94 und V0.95 wurden als vorhandene Detailpläne geprüft; neu erstellt wurden `MVP_0.96_DETAILED_PLAN.md`, `MVP_0.97_DETAILED_PLAN.md`, `MVP_0.98_DETAILED_PLAN.md`, `MVP_0.99_DETAILED_PLAN.md` und `MVP_0.94_0.99_PLANNING_REVIEW.md`.
+
+Die Planungsentscheidung bleibt gate-orientiert: V0.94 ist der nächste Requirements-Freeze für Damage/Flatline. V0.96 plant Trace/Link/Bidding über `pendingChoice`, V0.97 vertieft Run/Breach/Multiaccess, V0.98 trennt Identity-/Modifier-Arbeit von Hidden-Zone-Tools, und V0.99 staffelt Counter, Hosting, Virus/Purge, Recurring Credits und Bad Publicity. Alle Pläne enthalten explizite Integrations- und Testpflichten für LegalActions, `applyAction`, Visibility, Replay/StateHash, Undo, WebSocket/Reconnect, AI und Manifest-Gates.
+
 ## [2026-05-04] requirements | V0.94 Damage/Flatline eingefroren
 
 Der Requirements Freeze für V0.94 ist erstellt. Die CR-v26.03-Regelreferenz wurde gezielt für Damage und Flatline abgeglichen: Meat und Net Damage trashen zufällig Karten aus dem Runner-Grip; mehrere Damage-Punkte wählen ohne Replacement und werden fachlich gleichzeitig getrasht; Flatline tritt ein, wenn der Runner mehr Damage nimmt, als Karten im Grip liegen.
@@ -265,3 +271,21 @@ Erstellt wurden `MVP_0.94_REQUIREMENTS.md`, `DAMAGE_FLATLINE_0.94_SPEC.md`, `MVP
 V0.94 wurde umgesetzt und final dokumentiert. Neu sind side-sichere `GameEndReason`-Werte, Net-/Meat-Damage über freigegebene Engine-Pfade, RandomDrawRecords für zufälliges Grip-Trashing, `hidden_info_barrier`-Events, Undo-Barrieren nach Damage und Flatline als enger Game-End-Grund. Die lokale fiktive Karte `v094_neural_sentry_ice` dient als manifestierter Damage-Harness und aktiviert keine offiziellen Karten, Assets oder externen Datenquellen.
 
 Erstellt bzw. aktualisiert wurden `MVP_0.94_IMPLEMENTATION_REVIEW.md`, `MVP_0.94_FINAL_REVIEW.md`, `data/rules/rules-baseline-0.94.json`, `data/cards/demo-cards-0.94.json`, `data/decks/demo-decks-0.94.json`, `data/manifests/card-implementation-manifest-0.94.json`, `data/rules/mechanics-coverage-0.94.json` und zwei V0.94-Szenario-Fixtures. Checks: Shared/Engine/Server/AI-Typechecks, Engine-/AI-/Server-Tests, Artefakt- und Visibility-Specs sowie `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden; beim Build bleibt die bekannte Turbopack-NFT-Warnung zur bestehenden `card-images`-Route. Gate-Ergebnis: `MVP_0.94_done: true`; `ready_for_MVP_0.95_requirements_freeze: true`.
+
+## [2026-05-04] implementation | Privater O:NR-v1-Testzugang nach V0.94 aktualisiert
+
+Nach V0.94 wurden die lokal importierten privaten O:NR-v1-Limited-Karten gegen die aktuell implementierten Engine-Mechaniken geprüft. 41 manuell verifizierte Karten sind nun als lokale private `implemented/playable/deck_legal`-Testkarten zugänglich: einfache Runner-Draw-/Economy-Events, simple Code-Gate-/Sentry-Breaker, WuTech Mem Chip, Tycho Extension, Corp-Draw-/Economy-/Tagged-Operationen, Meat-Damage-Operationen sowie ICE mit `End the run` und/oder Net Damage.
+
+Die lokalen Dateien `card-snapshot-onr-v1-limited.local.json`, `catalog-index-onr-v1-limited.local.json`, `import-report-onr-v1-limited.local.json` und `test-access-onr-v1-limited.local.json` wurden im ignorierten `data/local/`-Bereich aktualisiert. Sechs frühere Kandidaten bleiben wegen fehlender Mechaniken katalog-only (`Dupré`, `Evil Twin`, `Grubb`, `Banpei`, `Cortical Scrub`, `TKO 2.0`). Sechs Karten bleiben wegen lokaler Asset-/Titel-Zuordnungskonflikte blockiert (`Data Darts`, `Data Raven`, `Data Wall`, `Data Wall 2.0`, `Rock Is Strong`, `Datapool by Zetatech`). Engine-Test: `corepack pnpm --filter @netrunner/engine test -- --run` bestanden.
+
+Nach erneuter visueller Prüfung sind die lokalen Asset-/Titel-Zuordnungskonflikte beseitigt. Dadurch wurden `Data Wall`, `Data Wall 2.0`, `Rock Is Strong` und `Datapool by Zetatech` zusätzlich aktiviert; der private O:NR-v1-Testzugang umfasst nun 45 `implemented/playable/deck_legal` Karten. `Data Darts` und `Data Raven` bleiben wegen fehlender Mechaniken katalog-only.
+
+## [2026-05-04] local-data | O:NR v1 Limited Scan-Zuordnungen repariert
+
+Die lokalen Scan-/Bildzuordnungen im ignorierten `data/local/`- und `data/local-assets/`-Bereich wurden für `Data Darts`, `Data Naga`, `Data Raven`, `Data Wall`, `Data Wall 2.0`, `Rock Is Strong`, `Datapool by Zetatech` und `Rockerboy Promotion` repariert. Der lokale Snapshot, Katalogindex, Importreport und die Testzugangsdatei melden nun `blocked: 0`; die Reparatur macht die Karten nicht automatisch engine-implementiert, spielbar oder decklegal.
+
+## [2026-05-04] implementation | Web-Kartenpool-Runtime konsolidiert
+
+Die Web-seitige Zusammensetzung des Kartenpools wurde aus Katalog-API und Deckvalidierung in `apps/web/app/api/card-pool-runtime.ts` zusammengeführt. Beide Pfade nutzen nun denselben Basis-Snapshot plus privaten lokalen O:NR-v1-Overlay, wodurch lokale testzugängliche Karten nicht mehr doppelt gepflegt werden müssen. Die Bildroute bleibt ein separater Anzeigeauflöser und ist keine Kartenpool- oder Regelautorität.
+
+Checks: Web-Typecheck, Visibility-Regressionstest, kompletter `corepack pnpm test` und Web-Build bestanden. Beim Build bleibt die bekannte Turbopack-NFT-Warnung zur bestehenden `card-images`-Route.

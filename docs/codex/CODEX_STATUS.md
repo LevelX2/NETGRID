@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V0.94 Damage/Flatline is implemented, verified and final-reviewed. V0.95 is the next gated scope for a separate Requirements Freeze; later mechanics remain planned only and are not implementation-freigegeben.
+V0.94 Damage/Flatline is implemented, verified and final-reviewed. V0.95 is the next gated scope for a separate Requirements Freeze; V0.96-V0.99 remain detailed planning only and are not implementation-freigegeben.
 
 ## Status
 
@@ -160,6 +160,18 @@ MVP 0.94 and MVP 0.95 detailed planning is complete.
 
 `MVP_0.95_detailed_plan_available: true`
 
+MVP 0.96 through MVP 0.99 detailed planning is complete.
+
+`MVP_0.96_detailed_plan_available: true`
+
+`MVP_0.97_detailed_plan_available: true`
+
+`MVP_0.98_detailed_plan_available: true`
+
+`MVP_0.99_detailed_plan_available: true`
+
+`MVP_0.94_0.99_planning_review_available: true`
+
 MVP 0.94 Damage/Flatline requirements freeze is complete.
 
 `MVP_0.94_requirements_freeze_done: true`
@@ -218,8 +230,9 @@ Gate flow:
 28. MVP 0.92 mechanics inventory and M1 requirements/specification gate: pass.
 29. MVP 0.93 M1 Engine foundation and M2 requirements: pass.
 30. MVP 0.94/V0.95 detailed planning: pass.
-31. MVP 0.94 Damage/Flatline requirements freeze: pass.
-32. MVP 0.94 Damage/Flatline implementation, validation and final review: pass.
+31. MVP 0.96-V0.99 detailed planning: pass.
+32. MVP 0.94 Damage/Flatline requirements freeze: pass.
+33. MVP 0.94 Damage/Flatline implementation, validation and final review: pass.
 
 ## Phase 1 files created or updated
 
@@ -1112,23 +1125,39 @@ Checks:
 - `corepack pnpm lint`: pass after regenerated `.next` type output.
 - `corepack pnpm typecheck`: pass after regenerated `.next` type output.
 
-## MVP 0.94/V0.95 Detailed Planning files created or updated
+## MVP 0.94-V0.99 Detailed Planning files created or updated
 
 - `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
 - `docs/derived/MVP_0.94_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.96_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.97_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.98_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.99_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`
+- `docs/derived/MECHANICS_COMPLETION_PLAN.md`
+- `docs/derived/POST_MVP_0.4_ROADMAP.md`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
 - `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
 - `KI-Wissen-Netrunner/03 Betrieb/Log.md`
 
-## MVP 0.94/V0.95 Planning decision
+## MVP 0.94-V0.99 Planning decision
 
 `MVP_0.94_detailed_plan_available: true`
 
 `MVP_0.95_detailed_plan_available: true`
 
-The assumption review confirms the existing sequence with one sharpening: V0.94 remains the Damage/Flatline gate, but must include a narrow Game-End reason contract for Flatline before any Damage implementation. Full M2 work such as Mulligan, Identity Setup and Archives/Multiaccess remains outside V0.94. V0.95 remains the Runner Resource and tag-interaction gate, but must not introduce Trace, Link or Bidding. Both plans include explicit test matrices for Visibility, Replay/StateHash, Undo, WebSocket/Reconnect, AI and no-scope regression gates.
+`MVP_0.96_detailed_plan_available: true`
+
+`MVP_0.97_detailed_plan_available: true`
+
+`MVP_0.98_detailed_plan_available: true`
+
+`MVP_0.99_detailed_plan_available: true`
+
+The planning review confirms the sequence for M3-M10. V0.94 remains the Damage/Flatline gate and must include a narrow Game-End reason contract for Flatline before any Damage implementation. V0.95 remains the Runner Resource and tag-interaction gate, without Trace/Link/Bidding. V0.96 covers Trace, Link and Bidding through PendingChoice. V0.97 covers Jack-out, Breach and Multiaccess. V0.98 covers Identity abilities and Hidden-Zone manipulation in subgates. V0.99 covers Counter/Hosting/Virus/Purge and selected recurring or special resource families. Each detailed plan includes explicit test planning for Visibility, Replay/StateHash, Undo, WebSocket/Reconnect, AI and no-scope regression gates.
 
 ## MVP 0.94 Requirements Freeze files created or updated
 
@@ -1198,7 +1227,6 @@ Checks:
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass, 78 package tests plus 27 root spec tests.
 - `corepack pnpm build`: pass, known Turbopack NFT warning remains for the existing `card-images` route trace.
-
 
 ## S01 Requirements and implementation files created or updated
 
@@ -1291,8 +1319,16 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.93: M1 Engine foundation and M2 requirements.
 - V0.94: Damage and Flatline, with narrow Game-End reason contract.
 - V0.95: Runner Resources and tag-interaction.
+- V0.96: Trace, Link and Bidding.
+- V0.97: Run, Jack-out, Breach and Multiaccess.
+- V0.98: Identity abilities and Hidden-Zone manipulation.
+- V0.99: Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity.
 
-Current gate: V0.94 is complete and V0.95 Requirements Freeze is next. Damage and Flatline are playable only in the narrow V0.94 scope. V0.95+ mechanics remain planned only; Resources, Trace, Multiaccess, Identity-Abilities, Hosting, Viruses, Counter families and Prevention are still not playable until their respective gates are implemented.
+Current gate: V0.94 is complete and V0.95 Requirements Freeze is next. Damage and Flatline are playable only in the narrow V0.94 scope. V0.95-V0.99 remain planned only; Resources, Trace, Multiaccess, Identity-Abilities, Hosting, Viruses, Counter families and Prevention are still not playable until their respective gates are implemented.
+
+Local private O:NR v1 Limited test access after V0.94: 45 manually verified local cards are now available as engine-tested `playable_mvp` cards and marked `implemented/playable/deck_legal` in the ignored local snapshot/index/report. Six former candidates remain catalog-only due to missing mechanics (`Dupré`, `Evil Twin`, `Grubb`, `Banpei`, `Cortical Scrub`, `TKO 2.0`). The local asset/title mapping conflicts for `Data Darts`, `Data Raven`, `Data Wall`, `Data Wall 2.0`, `Rock Is Strong` and `Datapool by Zetatech` have been visually rechecked and repaired; `Data Wall`, `Data Wall 2.0`, `Rock Is Strong` and `Datapool by Zetatech` are now promoted, while `Data Darts` and `Data Raven` still require later mechanic gates.
+
+The Web-side card pool runtime is consolidated in `apps/web/app/api/card-pool-runtime.ts`: catalog APIs and deck validation now use the same base snapshot plus private local O:NR-v1 overlay. This removes parallel maintenance for local test-access cards while preserving Engine/manifest/test gates as the source of playability.
 
 Detailed planning artifacts available:
 
@@ -1316,6 +1352,11 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
 - `docs/derived/MVP_0.94_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.96_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.97_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.98_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.99_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`
 
 UI design exploration artifacts available:
 
