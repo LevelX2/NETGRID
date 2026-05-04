@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "demo-decks-v0.94",
+  "id": "demo-decks-0.94",
+  "status": "implemented_for_v0.94_final_gate",
+  "extends": "data/decks/demo-decks-0.8.json",
+  "decks": [
+    {
+      "id": "demo_runner_094",
+      "name": "Runner Demo Deck 0.94 - Damage Visibility Harness",
+      "side": "runner",
+      "identity": "runner_identity_001",
+      "cards": [
+        { "id": "simple_economy_event", "quantity": 3 },
+        { "id": "simple_run_event", "quantity": 2 },
+        { "id": "simple_draw_event", "quantity": 2 },
+        { "id": "simple_fracter", "quantity": 1 },
+        { "id": "simple_decoder", "quantity": 1 },
+        { "id": "simple_killer", "quantity": 1 },
+        { "id": "v08_burst_credit_event", "quantity": 2 },
+        { "id": "v08_deep_draw_event", "quantity": 2 },
+        { "id": "v08_overclock_run_event", "quantity": 1 },
+        { "id": "v08_memory_chip", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "demo_corp_094",
+      "name": "Corp Demo Deck 0.94 - Neural Sentry Harness",
+      "side": "corp",
+      "identity": "corp_identity_001",
+      "cards": [
+        { "id": "simple_agenda", "quantity": 1 },
+        { "id": "simple_priority_agenda", "quantity": 1 },
+        { "id": "v08_project_agenda", "quantity": 1 },
+        { "id": "simple_economy_operation", "quantity": 2 },
+        { "id": "simple_draw_operation", "quantity": 1 },
+        { "id": "simple_barrier_ice", "quantity": 1 },
+        { "id": "simple_code_gate_ice", "quantity": 1 },
+        { "id": "simple_sentry_ice", "quantity": 1 },
+        { "id": "v08_wall_ice", "quantity": 1 },
+        { "id": "v08_gate_ice", "quantity": 1 },
+        { "id": "v08_watchdog_ice", "quantity": 1 },
+        { "id": "v094_neural_sentry_ice", "quantity": 3 }
+      ]
+    }
+  ]
+}

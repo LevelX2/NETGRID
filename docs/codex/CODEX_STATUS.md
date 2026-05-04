@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V0.94/V0.95 detailed planning is available; the next implementation scope needs a separate gated requirements decision.
+V0.94 Damage/Flatline is implemented, verified and final-reviewed. V0.95 is the next gated scope for a separate Requirements Freeze; later mechanics remain planned only and are not implementation-freigegeben.
 
 ## Status
 
@@ -160,6 +160,18 @@ MVP 0.94 and MVP 0.95 detailed planning is complete.
 
 `MVP_0.95_detailed_plan_available: true`
 
+MVP 0.94 Damage/Flatline requirements freeze is complete.
+
+`MVP_0.94_requirements_freeze_done: true`
+
+`ready_for_MVP_0.94_implementation: true`
+
+MVP 0.94 Damage/Flatline implementation, validation and documentation are complete.
+
+`MVP_0.94_done: true`
+
+`ready_for_MVP_0.95_requirements_freeze: true`
+
 S01 requirements, result modal, private match series, audio and test matrix are complete.
 
 `S01_requirements_freeze_done: true`
@@ -206,6 +218,8 @@ Gate flow:
 28. MVP 0.92 mechanics inventory and M1 requirements/specification gate: pass.
 29. MVP 0.93 M1 Engine foundation and M2 requirements: pass.
 30. MVP 0.94/V0.95 detailed planning: pass.
+31. MVP 0.94 Damage/Flatline requirements freeze: pass.
+32. MVP 0.94 Damage/Flatline implementation, validation and final review: pass.
 
 ## Phase 1 files created or updated
 
@@ -1116,6 +1130,76 @@ Checks:
 
 The assumption review confirms the existing sequence with one sharpening: V0.94 remains the Damage/Flatline gate, but must include a narrow Game-End reason contract for Flatline before any Damage implementation. Full M2 work such as Mulligan, Identity Setup and Archives/Multiaccess remains outside V0.94. V0.95 remains the Runner Resource and tag-interaction gate, but must not introduce Trace, Link or Bidding. Both plans include explicit test matrices for Visibility, Replay/StateHash, Undo, WebSocket/Reconnect, AI and no-scope regression gates.
 
+## MVP 0.94 Requirements Freeze files created or updated
+
+- `docs/derived/MVP_0.94_REQUIREMENTS.md`
+- `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`
+- `docs/derived/MVP_0.94_TEST_MATRIX.md`
+- `docs/derived/MVP_0.94_REQUIREMENTS_REVIEW.md`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.94 Requirements Freeze decision
+
+`MVP_0.94_requirements_freeze_done: true`
+
+`ready_for_MVP_0.94_implementation: true`
+
+V0.94 is frozen as a narrow Damage/Flatline gate. Net and Meat Damage are in scope; Core Damage, Damage Prevention, Avoid, Interrupt and Replacement remain out of scope. Flatline is only a side-safe Game-End reason contract, not a full M2 setup implementation. Damage must use Seed, RandomCounter and RandomDrawRecords, classify events as `hidden_info_barrier`, block Undo after Damage and keep all PlayerView, PublicEvent, WebSocket, Reconnect, Undo, Error, Log, AI and UI payloads free of pre-Damage Grip leaks.
+
+## MVP 0.94 Final files created or updated
+
+- `docs/derived/MVP_0.94_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.94_FINAL_REVIEW.md`
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `data/rules/rules-baseline-0.94.json`
+- `data/cards/demo-cards-0.94.json`
+- `data/decks/demo-decks-0.94.json`
+- `data/manifests/card-implementation-manifest-0.94.json`
+- `data/rules/mechanics-coverage-0.94.json`
+- `data/scenarios/v094-damage-flatline.json`
+- `data/scenarios/v094-multiplayer-damage-smoke.json`
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/engine/src/index.test.ts`
+- `packages/ai/src/index.ts`
+- `packages/ai/src/index.test.ts`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `apps/web/app/page.tsx`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.94 Final gate
+
+`MVP_0.94_done: true`
+
+`ready_for_MVP_0.95_requirements_freeze: true`
+
+V0.94 implements Net/Meat Damage and Flatline as a narrow, high-safety mechanics gate. Damage can resolve through approved Engine paths only, uses RandomDrawRecords for random Grip trash, emits `hidden_info_barrier` events, blocks Undo across Damage and preserves deterministic Replay/StateHash. `gameEndReason: "flatline"` is side-safe in PlayerViews, Multiplayer Result Summary and Web UI. Core Damage, Prevention/Avoid/Interrupt/Replacement, Resources, Trace, Multiaccess, Identity abilities, Hosting, Viruses, Purge and Counter families remain unimplemented.
+
+Checks:
+
+- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
+- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 32 tests.
+- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 17 tests.
+- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 16 tests.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 18 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 78 package tests plus 27 root spec tests.
+- `corepack pnpm build`: pass, known Turbopack NFT warning remains for the existing `card-images` route trace.
+
+
 ## S01 Requirements and implementation files created or updated
 
 - `docs/derived/S01_DETAILED_PLAN.md`
@@ -1184,7 +1268,7 @@ Remaining known limits:
 - JSON-File-Storage is intentionally simple; SQLite remains a later hardening target.
 - Localhost operation is the supported private MVP path. HTTPS/WSS are required outside localhost.
 - Public platform features, matchmaking, accounts, deckbuilder, chat and broad card pool remain out of scope.
-- Damage remains deferred to a later mechanics sub-gate and is not part of V0.93.
+- V0.94 Damage/Flatline is implemented; Core Damage, Damage Prevention, Avoid, Interrupt and Replacement remain later gated mechanics.
 - V0.91 private local scans/assets are allowed only as display artifacts for private local use. Public distribution, official logos, standalone card frames, card backs, external card database dependencies, and Engine/AI/GameState/Replay/StateHash image use remain excluded.
 
 ## Local tool notes
@@ -1208,7 +1292,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.94: Damage and Flatline, with narrow Game-End reason contract.
 - V0.95: Runner Resources and tag-interaction.
 
-Current gate: V0.94/V0.95 detailed planning is complete. The next scope should be V0.94 Requirements Freeze for Damage/Flatline, unless the project owner explicitly changes the sequence. Mulligan, Trace, Resources, Multiaccess, Identity-Abilities and Prevention are still not playable; Resources are planned for V0.95 only.
+Current gate: V0.94 is complete and V0.95 Requirements Freeze is next. Damage and Flatline are playable only in the narrow V0.94 scope. V0.95+ mechanics remain planned only; Resources, Trace, Multiaccess, Identity-Abilities, Hosting, Viruses, Counter families and Prevention are still not playable until their respective gates are implemented.
 
 Detailed planning artifacts available:
 

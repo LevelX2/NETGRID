@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyAction, createGame, getLegalActions, getPlayerView, replayEvents } from "@netrunner/engine";
+import { applyAction, applyEffectCommands, createGame, getLegalActions, getPlayerView, replayEvents } from "@netrunner/engine";
 import {
   assertAiInputIsSideSafe,
   buildObservedFacts,
@@ -10,7 +10,7 @@ import {
   simulateAiGame,
   simulateAiSoak
 } from "./index";
-import type { CardInstanceId, ChoiceRequest, GameState, LegalAction, Side } from "@netrunner/shared";
+import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netrunner/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -65,6 +65,19 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(decision.fallbackUsed).toBe(true);
     expect(assertAiInputIsSideSafe(input)).toBe(true);
     expect(JSON.stringify(input)).not.toContain("cardInstances");
+  });
+
+  it("keeps V0.94 Damage board states side-safe for AI input", () => {
+    const state = applyEffectCommands(v094DamageGame("ai-v094-damage"), [{ type: "do_damage", damageType: "meat", amount: 2, source: "ai_v094_smoke" }]);
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const serialized = JSON.stringify(input);
+
+    expect(input.playerView.opponent.discardCount).toBe(2);
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(serialized).not.toContain("cardInstances");
+    expect(serialized).not.toContain("Simple Fracter");
+    expect(serialized).not.toContain("Simple Decoder");
+    expect(serialized).not.toContain("Simple Killer");
   });
 });
 
@@ -262,6 +275,43 @@ describe("MVP 0.9 stronger AI", () => {
     expect(JSON.stringify(soak)).not.toContain("cardInstances");
   });
 });
+
+const V094_RUNNER_DECK: DeckDefinition = {
+  id: "demo_runner_094",
+  name: "Runner Demo Deck 0.94 - AI Damage Harness",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_economy_event", quantity: 3 },
+    { id: "simple_run_event", quantity: 3 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_killer", quantity: 2 }
+  ]
+};
+
+const V094_CORP_DECK: DeckDefinition = {
+  id: "demo_corp_094",
+  name: "Corp Demo Deck 0.94 - AI Damage Harness",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_priority_agenda", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "v094_neural_sentry_ice", quantity: 3 },
+    { id: "simple_barrier_ice", quantity: 2 }
+  ]
+};
+
+function v094DamageGame(seed: string): GameState {
+  return createGame({
+    seed,
+    runnerDeck: V094_RUNNER_DECK,
+    corpDeck: V094_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
 
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
   const selected = mustAction(state, side, predicate);

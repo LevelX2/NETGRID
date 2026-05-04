@@ -72,7 +72,7 @@ type SeriesResultSummary = {
 type GameResultSummary = {
   winner: Winner;
   viewerOutcome: "won" | "lost" | "draw";
-  reason: "agenda_points" | "corp_deck_empty" | "draw" | "unknown";
+  reason: "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "unknown";
   matchFormat: MatchFormat;
   agendaPointsToWin: number;
   runnerAgendaPoints: number;
@@ -1780,6 +1780,7 @@ function matchFormatLabel(format: MatchFormat): string {
 function resultReasonLabel(reason: GameResultSummary["reason"]): string {
   if (reason === "agenda_points") return "Das Agenda-Ziel wurde erreicht.";
   if (reason === "corp_deck_empty") return "Die Corp konnte keine Karte mehr ziehen.";
+  if (reason === "flatline") return "Der Runner wurde flatlined.";
   if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
   return "Das Spiel wurde abgeschlossen.";
 }

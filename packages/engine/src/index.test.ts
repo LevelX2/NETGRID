@@ -15,7 +15,7 @@ import {
   validateDeckDefinition,
   validateGameState
 } from "./index";
-import type { CardInstanceId, ChoiceRequest, GameState, LegalAction, Side } from "@netrunner/shared";
+import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netrunner/shared";
 
 describe("MVP 0.1 engine foundation", () => {
   it("creates deterministic games for the same seed", () => {
@@ -119,6 +119,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(state.eventLog.at(-1)?.publicPayload.accessedCardId).toBeUndefined();
   });
 
+
   it("lets the Runner break Barrier ICE and access R&D", () => {
     let state = toRunnerTurn(createGame({ seed: "break-barrier" }));
     state.runner.credits = 10;
@@ -208,6 +209,109 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     const replay = replayEvents(initial, state.eventLog);
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+});
+
+describe("MVP 0.94 Damage and Flatline", () => {
+  it("resolves net damage from a local sentry as hidden-info barrier without public grip leaks", () => {
+    let state = toRunnerTurn(v094DamageGame("v094-net-damage"));
+    const beforeGripIds = state.runner.grip.slice();
+    putCorpIceOnServer(state, "rd", "v094_neural_sentry_ice");
+    state.corp.credits = 10;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v094_neural_sentry_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const event = state.eventLog.at(-1);
+    expect(event?.visibilityClass).toBe("hidden_info_barrier");
+    expect(event ? isHiddenInfoBarrierEvent(event) : false).toBe(true);
+    expect(event?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 1,
+      cardsTrashed: 1,
+      flatline: false
+    });
+    expect(JSON.stringify(event?.publicPayload)).not.toContain("runner_");
+    expect(state.runner.grip.length).toBe(beforeGripIds.length - 1);
+    expect(state.runner.heap.length).toBe(1);
+    expect(state.randomDrawRecords.at(-1)?.purpose).toContain("damage:");
+    expect(new Set([...state.runner.grip, ...state.runner.heap]).size).toBe(beforeGripIds.length);
+
+    const corpView = getPlayerView(state, "corp");
+    const serializedCorpView = JSON.stringify(corpView);
+    for (const cardId of beforeGripIds) {
+      const title = DEMO_CARDS_BY_ID[state.cardInstances[cardId]?.definitionId ?? ""]?.title;
+      if (title) expect(serializedCorpView).not.toContain(title);
+    }
+    expect(corpView.opponent.discardCount).toBe(1);
+  });
+
+  it("flatlines the Runner without randomly revealing grip cards when damage exceeds grip size", () => {
+    let state = toRunnerTurn(v094DamageGame("v094-flatline"));
+    emptyRunnerGripForTest(state);
+    putCorpIceOnServer(state, "rd", "v094_neural_sentry_ice");
+    state.corp.credits = 10;
+    const randomBefore = state.randomDrawRecords.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v094_neural_sentry_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.winner).toBe("corp");
+    expect(state.gameEndReason).toBe("flatline");
+    expect(state.phase).toBe("game_over");
+    expect(state.run).toBeUndefined();
+    expect(state.randomDrawRecords.length).toBe(randomBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      flatline: true,
+      cardsTrashed: 0,
+      gameEndReason: "flatline"
+    });
+    expect(getPlayerView(state, "runner").gameEndReason).toBe("flatline");
+  });
+
+  it("supports meat damage through the V0.94 EffectCommand path and rejects core damage", () => {
+    const state = v094DamageGame("v094-meat-effect");
+    const beforeHash = hashState(state);
+    const next = applyEffectCommands(state, [{ type: "do_damage", damageType: "meat", amount: 2, source: "v094_test_meat" }]);
+
+    expect(hashState(state)).toBe(beforeHash);
+    expect(next.runner.heap.length).toBe(2);
+    expect(next.runner.grip.length).toBe(state.runner.grip.length - 2);
+    expect(next.randomDrawRecords.slice(-2).every((record) => record.purpose.includes("damage:"))).toBe(true);
+    expect(new Set(next.runner.heap).size).toBe(2);
+    expect(() => applyEffectCommands(state, [{ type: "do_damage", damageType: "core", amount: 1, source: "v094_test_core" }])).toThrow("Core Damage");
+  });
+
+  it("replays damage and reproduces the final StateHash", () => {
+    let state = toRunnerTurn(v094DamageGame("v094-replay"));
+    putCorpIceOnServer(state, "rd", "v094_neural_sentry_ice");
+    state.corp.credits = 10;
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v094_neural_sentry_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("does not expose later mechanics while enabling Damage", () => {
+    const state = toRunnerTurn(v094DamageGame("v094-no-scope"));
+    const actionTypes = getLegalActions(state, "runner").map((action) => action.type);
+
+    expect(actionTypes).not.toContain("resolve_choice");
+    expect(actionTypes).not.toContain("trigger_ability");
+    expect(actionTypes).not.toContain("remove_tag");
+    expect(DEMO_CARDS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain("trace");
+    expect(DEMO_CARDS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain("resource");
+    expect(DEMO_CARDS_BY_ID.v094_neural_sentry_ice?.mechanics).not.toContain("prevention");
   });
 });
 
@@ -522,6 +626,45 @@ describe("MVP 0.8 playable starter slice", () => {
   });
 });
 
+const V094_RUNNER_DECK: DeckDefinition = {
+  id: "demo_runner_094",
+  name: "Runner Demo Deck 0.94 - Damage Harness",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_economy_event", quantity: 3 },
+    { id: "simple_run_event", quantity: 3 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_killer", quantity: 2 }
+  ]
+};
+
+const V094_CORP_DECK: DeckDefinition = {
+  id: "demo_corp_094",
+  name: "Corp Demo Deck 0.94 - Damage Harness",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_priority_agenda", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "simple_economy_asset", quantity: 2 },
+    { id: "v094_neural_sentry_ice", quantity: 3 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 }
+  ]
+};
+
+function v094DamageGame(seed: string): GameState {
+  return createGame({
+    seed,
+    runnerDeck: V094_RUNNER_DECK,
+    corpDeck: V094_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
   const selected = mustAction(state, side, predicate);
   const result = applyAction(state, {
@@ -598,6 +741,7 @@ function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceI
   return id;
 }
 
+
 function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {
   const movedToRd = state.corp.hq.filter((cardId) => cardId !== id);
   state.corp.hq = [id];
@@ -646,6 +790,14 @@ function installRunnerProgramForTest(state: GameState, definitionId: string): Ca
   state.runner.memoryUsed += 1;
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "rig" }, faceup: true, rezzed: true };
   return id;
+}
+
+function emptyRunnerGripForTest(state: GameState): void {
+  for (const id of state.runner.grip.slice()) {
+    removeEverywhere(state, id);
+    state.runner.heap.push(id);
+    state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "heap" }, faceup: true, rezzed: true };
+  }
 }
 
 function scoreTwoAgendasForTest(state: GameState): void {

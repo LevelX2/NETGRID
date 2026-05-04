@@ -126,7 +126,7 @@ export type AiSimulationSummary = {
     stateHashAfter: string;
   }>;
   errors: string[];
-  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0";
+  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0";
   metrics: AiQualityMetrics;
 };
 
@@ -314,6 +314,16 @@ export function simulateAiSoak(config: Partial<AiSimulationConfig> = {}): AiSoak
 }
 
 function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationSummary["cardPoolVersion"] {
+  if (
+    config.runnerDeck?.id.includes("_094") ||
+    config.runnerDeck?.id.includes("_v0_94") ||
+    config.corpDeck?.id.includes("_094") ||
+    config.corpDeck?.id.includes("_v0_94") ||
+    config.runnerDeck?.cards.some((card) => card.id.startsWith("v094_")) ||
+    config.corpDeck?.cards.some((card) => card.id.startsWith("v094_"))
+  ) {
+    return "0.94.0";
+  }
   if (
     config.runnerDeck?.id.includes("_008") ||
     config.runnerDeck?.id.includes("_v0_8") ||

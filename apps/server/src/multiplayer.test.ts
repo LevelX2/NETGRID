@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
+import { applyAction, createGame, getLegalActions, hashState } from "@netrunner/engine";
 import { createNetrunnerHttpServer } from "./http-server";
-import { InMemoryMatchStorage, MultiplayerService, type JoinMatchResult, type MatchSettings, type SidePayload } from "./multiplayer";
+import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type SidePayload, type StateSnapshot } from "./multiplayer";
 import type { DeckSnapshot } from "@netrunner/decks";
-import type { ChoiceRequest, GameState, LegalAction, Side } from "@netrunner/shared";
+import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netrunner/shared";
 
 describe("MVP 0.2 multiplayer service", () => {
   it("starts V0.6 matches from validated immutable deck snapshots without exposing opponent decklists", async () => {
@@ -246,6 +247,90 @@ describe("MVP 0.2 multiplayer service", () => {
     if (blocked.ok) throw new Error("Expected hidden-info barrier");
     expect(blocked.error.code).toBe("undo_blocked");
     expect(JSON.stringify(blocked.error)).not.toContain("Simple Agenda");
+  });
+
+  it("handles V0.94 Damage through submit, idempotency, reconnect and undo barriers", async () => {
+    const match = await joinedV094DamageMatch("mp-v094-damage");
+
+    const run = await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v094-run");
+    const duplicate = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: run.receipt.idempotencyKey,
+      clientKnownStateVersion: run.receipt.stateVersionBefore,
+      idempotencyKey: "v094-run"
+    });
+    expect(duplicate.ok).toBe(true);
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.receipt.stateVersionAfter).toBe(run.receipt.stateVersionAfter);
+
+    await submit(match.service, match.matchId, match.corp, (action) => action.type === "rez_ice" && action.label.includes("Neural Sentry"), "v094-rez");
+    const beforeDamage = await bootstrap(match.service, match.matchId, match.runner);
+    const continueAction = mustAction(beforeDamage, (action) => action.type === "continue_run");
+    const damage = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: continueAction.actionId,
+      clientKnownStateVersion: beforeDamage.playerView.stateVersion,
+      idempotencyKey: "v094-damage"
+    });
+
+    expect(damage.ok).toBe(true);
+    if (!damage.ok) throw new Error(damage.error.message);
+    expect(damage.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
+    expect(damage.publicEvent?.publicPayload).toMatchObject({ damageResolved: true, damageType: "net", cardsTrashed: 1 });
+    expect(damage.actorPayload.playerView.own.heapOrArchives).toHaveLength(1);
+    expect(damage.opponentPayload.playerView.opponent.discardCount).toBe(1);
+    expect(JSON.stringify(damage.opponentPayload)).not.toContain("Simple Fracter");
+    expect(JSON.stringify(damage.opponentPayload)).not.toContain("Simple Decoder");
+    expect(JSON.stringify(damage.opponentPayload)).not.toContain("Simple Killer");
+
+    const stale = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: continueAction.actionId,
+      clientKnownStateVersion: beforeDamage.playerView.stateVersion,
+      idempotencyKey: "v094-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale-state rejection");
+    expect(stale.error.code).toBe("stale_state");
+
+    const reconnected = await match.service.reconnectMatch(match.matchId, {
+      side: "corp",
+      reconnectToken: match.corp.reconnectToken
+    });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(JSON.stringify(reconnected)).not.toContain("Simple Decoder");
+    expect(reconnected.playerView.opponent.discardCount).toBe(1);
+
+    const blocked = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken,
+      targetEventId: `evt_${damage.receipt.stateVersionAfter}`,
+      reason: "Damage undo"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected Damage hidden-info barrier");
+    expect(blocked.error.code).toBe("undo_blocked");
+  });
+
+  it("reports V0.94 Flatline as a side-safe result reason", async () => {
+    const match = await joinedV094DamageMatch("mp-v094-flatline", { emptyRunnerGrip: true });
+
+    await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v094-flatline-run");
+    await submit(match.service, match.matchId, match.corp, (action) => action.type === "rez_ice" && action.label.includes("Neural Sentry"), "v094-flatline-rez");
+    const flatline = await submit(match.service, match.matchId, match.runner, (action) => action.type === "continue_run", "v094-flatline-damage");
+
+    expect(flatline.actorPayload.winner).toBe("corp");
+    expect(flatline.actorPayload.matchStatus).toBe("finished");
+    expect(flatline.actorPayload.resultSummary).toMatchObject({ winner: "corp", reason: "flatline" });
+    expect(JSON.stringify(flatline.actorPayload)).not.toContain("Simple Killer");
   });
 
   it("replays a multiplayer match to the stored final state hash", async () => {
@@ -604,6 +689,34 @@ type PlayerSession = {
   reconnectToken: string;
 };
 
+const V094_RUNNER_DECK: DeckDefinition = {
+  id: "demo_runner_094",
+  name: "Runner Demo Deck 0.94 - Multiplayer Damage Harness",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_economy_event", quantity: 3 },
+    { id: "simple_run_event", quantity: 3 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_killer", quantity: 2 }
+  ]
+};
+
+const V094_CORP_DECK: DeckDefinition = {
+  id: "demo_corp_094",
+  name: "Corp Demo Deck 0.94 - Multiplayer Damage Harness",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_priority_agenda", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "v094_neural_sentry_ice", quantity: 3 },
+    { id: "simple_barrier_ice", quantity: 2 }
+  ]
+};
+
 async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettings>) {
   const service = new MultiplayerService(new InMemoryMatchStorage(), {
     tokenSalt: "test-salt",
@@ -629,11 +742,149 @@ async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettin
   };
 }
 
+async function joinedV094DamageMatch(seed: string, options: { emptyRunnerGrip?: boolean } = {}) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  let gameState = toRunnerTurnEngine(createGame({ matchId: created.matchId, seed, runnerDeck: V094_RUNNER_DECK, corpDeck: V094_CORP_DECK, agendaPointsToWin: 7 }));
+  if (options.emptyRunnerGrip) emptyRunnerGripForTest(gameState);
+  putCorpIceOnServerForTest(gameState, "rd", "v094_neural_sentry_ice");
+  gameState.corp.credits = 10;
+  record.gameState = gameState;
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v094_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
 async function bootstrap(service: MultiplayerService, matchId: string, session: PlayerSession): Promise<SidePayload> {
   const payload = await service.bootstrap(matchId, session.side, session.sessionToken);
   expect("error" in payload).toBe(false);
   if ("error" in payload) throw new Error(payload.error.message);
   return payload;
+}
+
+function toRunnerTurnEngine(state: GameState): GameState {
+  let next = applyEngineAction(state, "corp", (action) => action.type === "mandatory_draw");
+  next = applyEngineAction(next, "corp", (action) => action.type === "end_turn");
+  return next;
+}
+
+function applyEngineAction(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
+  const selected = getLegalActions(state, side).find(predicate);
+  if (!selected) throw new Error(`Missing engine action for ${side}`);
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: selected.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}`
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
+
+function putCorpIceOnServerForTest(state: GameState, serverId: "hq" | "rd" | "archives" | `remote_${number}`, definitionId: string): CardInstanceId {
+  const id = findCardForTest(state, definitionId);
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) throw new Error("Missing server");
+  removeEverywhereForTest(state, id);
+  server.ice.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
+  return id;
+}
+
+function emptyRunnerGripForTest(state: GameState): void {
+  for (const id of state.runner.grip.slice()) {
+    removeEverywhereForTest(state, id);
+    state.runner.heap.push(id);
+    state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "heap" }, faceup: true, rezzed: true };
+  }
+}
+
+function findCardForTest(state: GameState, definitionId: string): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(([, card]) => card.definitionId === definitionId);
+  if (!entry) throw new Error(`Missing ${definitionId}`);
+  return entry[0];
+}
+
+function removeEverywhereForTest(state: GameState, cardId: string): void {
+  state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+  state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
+  state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
+  state.corp.scoreArea = state.corp.scoreArea.filter((id) => id !== cardId);
+  for (const server of state.corp.servers) {
+    server.ice = server.ice.filter((id) => id !== cardId);
+    server.root = server.root.filter((id) => id !== cardId);
+  }
+  state.runner.grip = state.runner.grip.filter((id) => id !== cardId);
+  state.runner.stack = state.runner.stack.filter((id) => id !== cardId);
+  state.runner.heap = state.runner.heap.filter((id) => id !== cardId);
+  state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
+  state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
+  state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
+}
+
+function toEventRecordForTest(matchId: string, event: GameEvent): EventRecord {
+  return {
+    eventId: event.eventId,
+    matchId,
+    stateVersionBefore: event.stateVersionBefore,
+    stateVersionAfter: event.stateVersionAfter,
+    stateHashAfter: event.stateHashAfter,
+    publicPayload: toPublicEventForTest(event),
+    privatePayloadLocalOnly: true,
+    hiddenInfoBarrier: false
+  };
+}
+
+function stateSnapshotForTest(matchId: string, state: GameState, matchVersion: number, snapshotId: string): StateSnapshot {
+  return {
+    snapshotId,
+    matchId,
+    stateVersion: state.stateVersion,
+    matchVersion,
+    stateHash: hashState(state),
+    gameState: structuredClone(state),
+    createdAt: "2026-05-04T00:00:00.000Z",
+    hiddenInfoBarrier: false
+  };
+}
+
+function toPublicEventForTest(event: GameEvent): PublicGameEvent {
+  return {
+    eventId: event.eventId,
+    type: event.type,
+    stateVersionBefore: event.stateVersionBefore,
+    stateVersionAfter: event.stateVersionAfter,
+    stateHashAfter: event.stateHashAfter,
+    ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
+    publicPayload: event.publicPayload
+  };
 }
 
 function choiceRequest(state: GameState, side: Side): ChoiceRequest {

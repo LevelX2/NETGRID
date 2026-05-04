@@ -37,7 +37,7 @@ export type MatchSettings = {
   matchFormat: MatchFormat;
 };
 
-export type GameResultReason = "agenda_points" | "corp_deck_empty" | "draw" | "unknown";
+export type GameResultReason = "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "unknown";
 
 export type SeriesGameResult = {
   matchId: string;
@@ -1125,7 +1125,7 @@ function resultSummaryFor(record: StoredMatch, viewerSide: Side, finalStateHash:
   return {
     winner,
     viewerOutcome: winner === "draw" ? "draw" : winner === viewerSide ? "won" : "lost",
-    reason: resultReason(winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
+    reason: resultReason(record.gameState, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
     matchFormat: record.match.settings.matchFormat,
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
     runnerAgendaPoints,
@@ -1182,10 +1182,11 @@ function oppositeSeriesPlayer(player: SeriesPlayerSlot): SeriesPlayerSlot {
   return player === "player_a" ? "player_b" : "player_a";
 }
 
-function resultReason(winner: Side | "draw", runnerAgendaPoints: number, corpAgendaPoints: number, agendaPointsToWin: number): GameResultReason {
+function resultReason(state: GameState, winner: Side | "draw", runnerAgendaPoints: number, corpAgendaPoints: number, agendaPointsToWin: number): GameResultReason {
   if (winner === "draw") return "draw";
+  if (state.gameEndReason === "flatline") return "flatline";
   if (runnerAgendaPoints >= agendaPointsToWin || corpAgendaPoints >= agendaPointsToWin) return "agenda_points";
-  if (winner === "runner") return "corp_deck_empty";
+  if (winner === "runner" || state.gameEndReason === "corp_deck_empty") return "corp_deck_empty";
   return "unknown";
 }
 

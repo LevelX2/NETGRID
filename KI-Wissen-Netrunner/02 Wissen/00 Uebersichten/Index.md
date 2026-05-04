@@ -43,6 +43,13 @@
 - `docs/derived/MVP_0.93_FINAL_REVIEW.md`: Final Review für V0.93 mit Checkliste, Grenzen und Gate-Ergebnis.
 - `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`: Annahmenprüfung und Reihenfolgeentscheidung für Damage/Flatline und Resources.
 - `docs/derived/MVP_0.94_DETAILED_PLAN.md`: detaillierte Planung für V0.94 Damage und Flatline.
+- `docs/derived/MVP_0.94_REQUIREMENTS.md`: eingefrorene V0.94-Anforderungen für Damage und Flatline.
+- `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`: V0.94-Spezifikation für Damage, Random Grip-Trash, Flatline und Sichtbarkeit.
+- `docs/derived/MVP_0.94_TEST_MATRIX.md`: V0.94-Testmatrix für Damage/Flatline.
+- `docs/derived/MVP_0.94_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.94.
+- `docs/derived/MVP_0.94_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.94-Damage-/Flatline-Slice.
+- `docs/derived/MVP_0.94_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.94.
+- `data/rules/mechanics-coverage-0.94.json`: maschinenlesbare Coverage nach V0.94; Damage/Flatline ist `implemented_limited`, V0.95+-Mechaniken bleiben offen.
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`: detaillierte Planung für V0.95 Resources und Tag-Interaktion.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.

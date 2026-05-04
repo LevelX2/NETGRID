@@ -1,0 +1,34 @@
+{
+  "id": "SCN-V094-001",
+  "name": "V0.94 Damage and Flatline engine harness",
+  "baselineId": "rules-baseline-mvp-0.94",
+  "requirementIds": [
+    "M094-DAMAGE-001",
+    "M094-RANDOM-001",
+    "M094-FLATLINE-001",
+    "M094-VISIBILITY-001",
+    "M094-REPLAY-001",
+    "M094-CARD-001"
+  ],
+  "coversCards": ["v094_neural_sentry_ice"],
+  "seed": "v094-damage-flatline",
+  "runnerDeckSnapshotId": "demo_runner_094_snapshot_v0_94",
+  "corpDeckSnapshotId": "demo_corp_094_snapshot_v0_94",
+  "steps": [
+    "Corp installs and rezzes Neural Sentry on R&D.",
+    "Runner continues through the encounter.",
+    "The first subroutine resolves net damage through the engine Damage path.",
+    "A separate empty-grip fixture resolves the same damage as Flatline."
+  ],
+  "expected": {
+    "legalActionsOnly": true,
+    "damageVisibilityClass": "hidden_info_barrier",
+    "publicPayloadRedacted": true,
+    "runnerHeapShowsTrashedCardsAfterDamage": true,
+    "corpViewDoesNotRevealPreDamageGrip": true,
+    "flatlineSetsWinner": "corp",
+    "flatlineGameEndReason": "flatline",
+    "randomDrawRecordsRequired": true,
+    "finalStateHash": "covered_by_engine_replay_test"
+  }
+}

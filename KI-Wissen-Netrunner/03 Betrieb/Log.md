@@ -253,3 +253,15 @@ Checks: Shared/Engine/Server/AI-Typechecks bestanden. Engine-Test: 25 Tests best
 Die Annahmen für die nächsten Mechanikgates wurden gegen V0.93, die Mechanik-Coverage, den Mechanik-Komplettierungsplan und die lokale CR-v26.03-Referenz geprüft. Ergebnis: Die Reihenfolge bleibt sinnvoll. V0.94 wird als Damage-/Flatline-Gate geplant, muss aber vor Damage einen engen Game-End-Grundvertrag für Flatline mitnehmen. Der volle M2-Block mit Mulligan, Identity Setup und Archives/Multiaccess bleibt weiterhin getrennt.
 
 V0.95 wird als Resource-/Tag-Interaktionsgate geplant. Es ergänzt Runner-Resources als Kartentyp und Boardbereich sowie tag-basiertes Resource-Trash, ohne Trace, Link/Bidding, Prevention, Hosting oder neue Counterfamilien zu starten. Erstellt wurden `MVP_0.94_0.95_ASSUMPTION_REVIEW.md`, `MVP_0.94_DETAILED_PLAN.md` und `MVP_0.95_DETAILED_PLAN.md`. Beide Pläne enthalten explizite Testmatrizen für Visibility, Replay/StateHash, Undo, WebSocket/Reconnect, AI und No-Scope-Regression.
+
+## [2026-05-04] requirements | V0.94 Damage/Flatline eingefroren
+
+Der Requirements Freeze für V0.94 ist erstellt. Die CR-v26.03-Regelreferenz wurde gezielt für Damage und Flatline abgeglichen: Meat und Net Damage trashen zufällig Karten aus dem Runner-Grip; mehrere Damage-Punkte wählen ohne Replacement und werden fachlich gleichzeitig getrasht; Flatline tritt ein, wenn der Runner mehr Damage nimmt, als Karten im Grip liegen.
+
+Erstellt wurden `MVP_0.94_REQUIREMENTS.md`, `DAMAGE_FLATLINE_0.94_SPEC.md`, `MVP_0.94_TEST_MATRIX.md` und `MVP_0.94_REQUIREMENTS_REVIEW.md`. Die Umsetzung ist freigegeben, bleibt aber eng: kein Core-Damage, keine Prevention/Avoid/Interrupt/Replacement, kein Mulligan, Trace, Resource, Multiaccess, Identity, Hosting, Virus oder Counter-Gate.
+
+## [2026-05-04] phase-0.94-final | Damage und Flatline umgesetzt
+
+V0.94 wurde umgesetzt und final dokumentiert. Neu sind side-sichere `GameEndReason`-Werte, Net-/Meat-Damage über freigegebene Engine-Pfade, RandomDrawRecords für zufälliges Grip-Trashing, `hidden_info_barrier`-Events, Undo-Barrieren nach Damage und Flatline als enger Game-End-Grund. Die lokale fiktive Karte `v094_neural_sentry_ice` dient als manifestierter Damage-Harness und aktiviert keine offiziellen Karten, Assets oder externen Datenquellen.
+
+Erstellt bzw. aktualisiert wurden `MVP_0.94_IMPLEMENTATION_REVIEW.md`, `MVP_0.94_FINAL_REVIEW.md`, `data/rules/rules-baseline-0.94.json`, `data/cards/demo-cards-0.94.json`, `data/decks/demo-decks-0.94.json`, `data/manifests/card-implementation-manifest-0.94.json`, `data/rules/mechanics-coverage-0.94.json` und zwei V0.94-Szenario-Fixtures. Checks: Shared/Engine/Server/AI-Typechecks, Engine-/AI-/Server-Tests, Artefakt- und Visibility-Specs sowie `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden; beim Build bleibt die bekannte Turbopack-NFT-Warnung zur bestehenden `card-images`-Route. Gate-Ergebnis: `MVP_0.94_done: true`; `ready_for_MVP_0.95_requirements_freeze: true`.

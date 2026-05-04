@@ -46,14 +46,18 @@ export type CardInstanceId = string;
 export type ServerId = "hq" | "rd" | "archives" | `remote_${number}` | "new_remote";
 export type StateHash = string;
 export type Winner = Side | "draw";
+export type GameEndReason = "agenda_points" | "corp_deck_empty" | "flatline" | "unknown";
 export type DemoDeckId = "demo_runner_001" | "demo_corp_001" | "demo_runner_004" | "demo_corp_004" | "demo_runner_008" | "demo_corp_008";
 
-export type SubroutineType = "end_the_run" | "corp_gain_credit" | "runner_lose_credits" | "give_runner_tag";
+export type DamageType = "net" | "meat" | "core";
+
+export type SubroutineType = "end_the_run" | "corp_gain_credit" | "runner_lose_credits" | "give_runner_tag" | "do_damage";
 
 export type SubroutineDefinition = {
   id: string;
   type: SubroutineType;
   amount?: number;
+  damageType?: DamageType;
 };
 
 export type EventVisibilityClass = "public" | "private_to_side" | "hidden_info_barrier" | "replay_only";
@@ -80,6 +84,7 @@ export type EffectCommand =
   | { type: "gain_credits"; side: Side; amount: number }
   | { type: "spend_credits"; side: Side; amount: number }
   | { type: "draw_card"; side: Side; amount?: number }
+  | { type: "do_damage"; damageType: DamageType; amount: number; source?: string }
   | { type: "add_tag"; amount: number }
   | { type: "remove_tag"; amount: number }
   | { type: "change_breaker_strength"; breakerId: CardInstanceId; amount: number }
@@ -191,14 +196,14 @@ export type DeckPublicMetadata = {
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
-  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0";
-  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0";
-  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0";
-  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0";
-  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0";
+  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
+  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
+  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
+  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
 };
 
 export type PlayerController = {
@@ -333,6 +338,7 @@ export type GameState = {
   cardInstances: Record<CardInstanceId, CardInstance>;
   eventLog: GameEvent[];
   winner: Winner | null;
+  gameEndReason?: GameEndReason;
   agendaPointsToWin: number;
   pendingChoice?: PendingChoice;
   deckMetadata?: {
@@ -493,6 +499,7 @@ export type PlayerView = {
   publicEvents: PublicGameEvent[];
   legalActions: LegalAction[];
   winner: Winner | null;
+  gameEndReason?: GameEndReason;
 };
 
 export type AiDecisionInput = {
@@ -570,6 +577,18 @@ export const MVP_0_8_BASELINE: RulesBaseline = {
   multiplayerSchemaVersion: "0.8.0",
   aiControllerSchemaVersion: "0.8.0",
   simulationSchemaVersion: "0.8.0"
+};
+
+export const MVP_0_94_BASELINE: RulesBaseline = {
+  ...MVP_0_8_BASELINE,
+  cardTextSnapshotId: "mvp-0.94-demo",
+  engineSchemaVersion: "0.94.0",
+  cardImplementationVersion: "0.94.0",
+  deviationRegistryVersion: "0.94.0",
+  playerViewSchemaVersion: "0.94.0",
+  multiplayerSchemaVersion: "0.94.0",
+  aiControllerSchemaVersion: "0.94.0",
+  simulationSchemaVersion: "0.94.0"
 };
 
 export const DEMO_CARDS: CardDefinition[] = [
@@ -864,6 +883,22 @@ export const DEMO_CARDS: CardDefinition[] = [
     cost: 1,
     rulesText: "Spiele nur, wenn der Runner getaggt ist. Der Runner verliert 2 Credits.",
     mechanics: ["play_operation", "runner_is_tagged", "runner_lose_credits"]
+  },
+  {
+    id: "v094_neural_sentry_ice",
+    title: "Neural Sentry ICE",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 3,
+    strength: 2,
+    rulesText: "Do 1 net damage. End the run.",
+    subroutines: [
+      { id: "v094_neural_sentry_ice_net_damage", type: "do_damage", amount: 1, damageType: "net" },
+      { id: "v094_neural_sentry_ice_etr", type: "end_the_run" }
+    ],
+    mechanics: ["install_ice", "rez_ice", "encounter_ice", "damage", "flatline", "end_the_run", "v094_local_original"]
   },
   {
     id: "v08_burst_credit_event",

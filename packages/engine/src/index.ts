@@ -4,6 +4,7 @@ import {
   MVP_0_1_BASELINE,
   MVP_0_4_BASELINE,
   MVP_0_8_BASELINE,
+  MVP_0_94_BASELINE,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -14,11 +15,13 @@ import {
   type DeckDefinition,
   type DeckPublicMetadata,
   type DemoDeckId,
+  type DamageType,
   type EngineError,
   type EngineResult,
   type EventVisibilityClass,
   type EffectCommand,
   type GameEvent,
+  type GameEndReason,
   type GameState,
   type LegalAction,
   type PlayerAction,
@@ -43,7 +46,8 @@ export {
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
   MVP_0_4_BASELINE,
-  MVP_0_8_BASELINE
+  MVP_0_8_BASELINE,
+  MVP_0_94_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -57,11 +61,13 @@ export type {
   DeckDefinition,
   DeckPublicMetadata,
   DemoDeckId,
+  DamageType,
   EngineError,
   EngineResult,
   EventVisibilityClass,
   EffectCommand,
   GameEvent,
+  GameEndReason,
   GameState,
   LegalAction,
   PlayerAction,
@@ -81,7 +87,7 @@ const DEFAULT_CONTROLLERS: { runner: PlayerController; corp: PlayerController } 
   corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI" }
 };
 
-type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0";
+type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0";
 
 type RunnerEventResolver = {
   name: string;
@@ -98,6 +104,13 @@ type CorpOperationResolver = {
 type CorpRootRezResolver = {
   name: string;
   resolve: (state: GameState) => void;
+};
+
+type DamageSummary = {
+  damageType: DamageType;
+  amount: number;
+  cardsTrashed: number;
+  flatline: boolean;
 };
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
@@ -447,7 +460,8 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
       : {}),
     publicEvents: state.eventLog.map(toPublicEvent),
     legalActions: getLegalActions(state, side),
-    winner: state.winner
+    winner: state.winner,
+    ...(state.gameEndReason ? { gameEndReason: state.gameEndReason } : {})
   };
 }
 
@@ -536,12 +550,19 @@ export function validateDeckDefinition(
 }
 
 export function checkWinConditions(state: GameState): Winner | null {
+  if (state.winner) {
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.gameEndReason ??= "unknown";
+    return state.winner;
+  }
   const runnerPoints = agendaPoints(state, "runner");
   const corpPoints = agendaPoints(state, "corp");
   if (runnerPoints >= state.agendaPointsToWin && corpPoints >= state.agendaPointsToWin) state.winner = "draw";
   else if (runnerPoints >= state.agendaPointsToWin) state.winner = "runner";
   else if (corpPoints >= state.agendaPointsToWin) state.winner = "corp";
   if (state.winner) {
+    state.gameEndReason = "agenda_points";
     state.phase = "game_over";
     state.timingPoint = "game.checkpoint";
   }
@@ -604,6 +625,7 @@ export function eventVisibilityForAction(legalAction: LegalAction): EventVisibil
       ? choiceVisibility
       : "private_to_side";
   }
+  if (legalAction.payload?.damageResolved === true) return "hidden_info_barrier";
   if (["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(legalAction.type)) return "hidden_info_barrier";
   if (["mandatory_draw", "draw_card"].includes(legalAction.type)) return "private_to_side";
   if (legalAction.visibility === "public") return "public";
@@ -613,6 +635,7 @@ export function eventVisibilityForAction(legalAction: LegalAction): EventVisibil
 
 export function isHiddenInfoBarrierEvent(event: GameEvent): boolean {
   if (event.visibilityClass === "hidden_info_barrier") return true;
+  if (event.publicPayload.damageResolved === true) return true;
   return ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(event.type);
 }
 
@@ -847,7 +870,7 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       ]);
       return;
     case "continue_run":
-      continueRun(state);
+      continueRun(state, legalAction);
       return;
     case "access_card":
       accessCurrentCard(state, legalAction);
@@ -976,7 +999,7 @@ function passApproachedIce(state: GameState): void {
   movePastCurrentIce(state);
 }
 
-function continueRun(state: GameState): void {
+function continueRun(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
     if (run.phase === "access") {
@@ -992,6 +1015,26 @@ function continueRun(state: GameState): void {
     if (subroutine.type === "corp_gain_credit") state.corp.credits += subroutine.amount ?? 1;
     if (subroutine.type === "runner_lose_credits") state.runner.credits = Math.max(0, state.runner.credits - (subroutine.amount ?? 1));
     if (subroutine.type === "give_runner_tag") state.runner.tags += subroutine.amount ?? 1;
+    if (subroutine.type === "do_damage") {
+      const damageType = subroutine.damageType ?? "net";
+      const summary = doDamage(state, {
+        damageId: `${run.runId}.${run.encounteredIceId}.${index}`,
+        damageType,
+        amount: subroutine.amount ?? 1,
+        source: `subroutine:${definition.id}:${subroutine.id}`
+      });
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          damageResolved: true,
+          damageType,
+          damageAmount: summary.amount,
+          cardsTrashed: summary.cardsTrashed,
+          flatline: summary.flatline
+        };
+      }
+      if (state.winner) return;
+    }
     if (subroutine.type === "end_the_run") ended = true;
   });
   resetBreakerStrength(state);
@@ -1101,6 +1144,7 @@ function drawCorpCard(state: GameState): void {
   const cardId = state.corp.rd.shift();
   if (!cardId) {
     state.winner = "runner";
+    state.gameEndReason = "corp_deck_empty";
     state.phase = "game_over";
     state.timingPoint = "game.checkpoint";
     return;
@@ -1114,6 +1158,46 @@ function drawRunnerCard(state: GameState): void {
   if (!cardId) return;
   state.runner.grip.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
+}
+
+function doDamage(
+  state: GameState,
+  request: {
+    damageId: string;
+    damageType: DamageType;
+    amount: number;
+    source: string;
+  }
+): DamageSummary {
+  if (request.damageType === "core") throw new Error("Core Damage ist in V0.94 nicht spielbar.");
+  assertPositiveIntegerAmount(request.amount);
+  if (request.amount > state.runner.grip.length) {
+    state.winner = "corp";
+    state.gameEndReason = "flatline";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "corp";
+    delete state.run;
+    return { damageType: request.damageType, amount: request.amount, cardsTrashed: 0, flatline: true };
+  }
+
+  const available = state.runner.grip.slice();
+  const selected: CardInstanceId[] = [];
+  for (let index = 0; index < request.amount; index += 1) {
+    const value = nextRandom(state, `damage:${request.damageId}:${request.damageType}:${request.source}:${request.amount}:selection:${index}`);
+    const selectedIndex = Math.floor(value * available.length);
+    const cardId = mustArrayValue(available, selectedIndex, "Damage-Auswahl fehlt.");
+    available.splice(selectedIndex, 1);
+    selected.push(cardId);
+  }
+
+  for (const cardId of selected) {
+    removeFromAllZones(state, cardId);
+    state.runner.heap.push(cardId);
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+  }
+
+  return { damageType: request.damageType, amount: request.amount, cardsTrashed: selected.length, flatline: false };
 }
 
 function scoreAgenda(state: GameState, cardId: string): void {
@@ -1253,6 +1337,14 @@ function executeEffectCommands(state: GameState, commands: EffectCommand[]): voi
           command.side === "corp" ? drawCorpCard(state) : drawRunnerCard(state);
         }
         break;
+      case "do_damage":
+        doDamage(state, {
+          damageId: `effect.${command.source ?? "unknown"}.${state.stateVersion}.${state.randomCounter}`,
+          damageType: command.damageType,
+          amount: command.amount,
+          source: command.source ?? "effect_command"
+        });
+        break;
       case "add_tag":
         assertNonNegativeAmount(command.amount);
         state.runner.tags += command.amount;
@@ -1285,6 +1377,10 @@ function executeEffectCommands(state: GameState, commands: EffectCommand[]): voi
 
 function assertNonNegativeAmount(amount: number): void {
   if (!Number.isFinite(amount) || amount < 0) throw new Error("Effect amount ist ungueltig.");
+}
+
+function assertPositiveIntegerAmount(amount: number): void {
+  if (!Number.isInteger(amount) || amount <= 0) throw new Error("Damage amount ist ungueltig.");
 }
 
 function makeActionId(type: ActionType, side: Side, payload: LegalAction["payload"] | undefined, source: LegalAction["source"]): string {
@@ -1355,6 +1451,14 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     else context.redactedKind = "choice";
   }
   if (legalAction.type === "continue_run") context.result = state.run ? "continued" : "ended";
+  if (legalAction.payload?.damageResolved === true) {
+    context.damageResolved = true;
+    context.damageType = legalAction.payload.damageType;
+    context.damageAmount = legalAction.payload.damageAmount;
+    context.cardsTrashed = legalAction.payload.cardsTrashed;
+    context.flatline = legalAction.payload.flatline;
+  }
+  if (state.winner && state.gameEndReason) context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
   if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {
     const definition = definitionFor(state, agendaId);
@@ -1444,6 +1548,7 @@ function visibleCorpCard(state: GameState, id: CardInstanceId, viewer: Side, are
   }
   return visibleOwnCard(state, id);
 }
+
 
 function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
@@ -1535,18 +1640,26 @@ function expandDeck(side: Side, cards: Array<{ id: string; quantity: number }>, 
 }
 
 function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefinition): CardPoolVersion {
+  if (usesMvp094CardPool(runnerDeck) || usesMvp094CardPool(corpDeck)) return "0.94.0";
   if (usesMvp08CardPool(runnerDeck) || usesMvp08CardPool(corpDeck)) return "0.8.0";
   if (usesExpandedCardPool(runnerDeck) || usesExpandedCardPool(corpDeck)) return "0.4.0";
   return "0.1.0";
 }
 
 function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
+  if (version === "0.94.0") return MVP_0_94_BASELINE;
   if (version === "0.8.0") return MVP_0_8_BASELINE;
   if (version === "0.4.0") return MVP_0_4_BASELINE;
   return MVP_0_1_BASELINE;
 }
 
+function usesMvp094CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_094") || deck.id.includes("_0_94") || deck.id.includes("_v0_94")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v094_"));
+}
+
 function usesMvp08CardPool(deck: DeckDefinition): boolean {
+  if (usesMvp094CardPool(deck)) return true;
   if (deck.id.endsWith("_008") || deck.id.includes("_0_8") || deck.id.includes("_v0_8")) return true;
   return deck.cards.some((card) => card.id.startsWith("v08_"));
 }
@@ -1575,8 +1688,8 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
     side: deck.side,
     identityCardId: deck.identity,
     deckName: deck.name,
-    cardPoolSnapshotId: cardPoolVersion === "0.8.0" ? "card-snapshot-0.8" : expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
-    formatProfileId: cardPoolVersion === "0.8.0" ? "local-demo-v0.8" : expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
+    cardPoolSnapshotId: cardPoolVersion === "0.94.0" ? "card-snapshot-0.94" : cardPoolVersion === "0.8.0" ? "card-snapshot-0.8" : expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
+    formatProfileId: cardPoolVersion === "0.94.0" ? "local-demo-v0.94" : cardPoolVersion === "0.8.0" ? "local-demo-v0.8" : expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
     deckHash: `legacy:${deck.id}`
   };
 }

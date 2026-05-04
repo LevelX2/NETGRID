@@ -105,6 +105,27 @@ const REQUIRED_MVP_0_93_MUST_IDS = [
   "M093-M2-ARCHIVES-001",
   "M093-GATE-001"
 ];
+const REQUIRED_MVP_0_94_MUST_IDS = [
+  "M094-SHARED-001",
+  "M094-GAMEEND-001",
+  "M094-DAMAGE-001",
+  "M094-DAMAGE-002",
+  "M094-DAMAGE-003",
+  "M094-RANDOM-001",
+  "M094-RANDOM-002",
+  "M094-FLATLINE-001",
+  "M094-FLATLINE-002",
+  "M094-VISIBILITY-001",
+  "M094-VISIBILITY-002",
+  "M094-HEAP-001",
+  "M094-UNDO-001",
+  "M094-REPLAY-001",
+  "M094-AI-001",
+  "M094-MP-001",
+  "M094-CARD-001",
+  "M094-NOSCOPE-001",
+  "M094-GATE-001"
+];
 const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_REQUIREMENTS.md",
   "docs/derived/UI_REDESIGN_0.7_SPEC.md",
@@ -157,6 +178,15 @@ const REQUIRED_MVP_0_93_DOCS = [
   "docs/derived/MVP_0.93_FINAL_REVIEW.md"
 ];
 
+const REQUIRED_MVP_0_94_DOCS = [
+  "docs/derived/MVP_0.94_REQUIREMENTS.md",
+  "docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md",
+  "docs/derived/MVP_0.94_TEST_MATRIX.md",
+  "docs/derived/MVP_0.94_REQUIREMENTS_REVIEW.md",
+  "docs/derived/MVP_0.94_IMPLEMENTATION_REVIEW.md",
+  "docs/derived/MVP_0.94_FINAL_REVIEW.md"
+];
+
 const MVP_0_8_DATA_FILES = [
   "data/rules/rules-baseline-0.8.json",
   "data/card-import/card-snapshot-0.8.json",
@@ -190,6 +220,16 @@ const REQUIRED_MVP_0_9_SCENARIOS = [
   "ai-v09-hidden-invariance.json",
   "ai-v09-soak-matrix.json"
 ];
+
+const MVP_0_94_DATA_FILES = [
+  "data/rules/rules-baseline-0.94.json",
+  "data/cards/demo-cards-0.94.json",
+  "data/decks/demo-decks-0.94.json",
+  "data/manifests/card-implementation-manifest-0.94.json",
+  "data/rules/mechanics-coverage-0.94.json"
+];
+
+const REQUIRED_MVP_0_94_SCENARIOS = ["v094-damage-flatline.json", "v094-multiplayer-damage-smoke.json"];
 
 describe("Phase 1 derived artifacts", () => {
   it("keeps all MVP 0.1 JSON data artifacts parseable", () => {
@@ -641,6 +681,100 @@ describe("Phase 1 derived artifacts", () => {
     expect(implementationReview).toContain("PublicGameEvent.visibilityClass");
     expect(finalReview).toContain("MVP_0.93_done: true");
     expect(finalReview).toContain("M2_requirements_ready: true");
+  });
+
+  it("keeps MVP 0.94 Damage/Flatline implementation documented and gated", () => {
+    for (const file of REQUIRED_MVP_0_94_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+    for (const file of MVP_0_94_DATA_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.94_REQUIREMENTS.md", "utf8");
+    const spec = readFileSync("docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.94_TEST_MATRIX.md", "utf8");
+    const requirementsReview = readFileSync("docs/derived/MVP_0.94_REQUIREMENTS_REVIEW.md", "utf8");
+    const implementationReview = readFileSync("docs/derived/MVP_0.94_IMPLEMENTATION_REVIEW.md", "utf8");
+    const finalReview = readFileSync("docs/derived/MVP_0.94_FINAL_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_94_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(spec).toContain("hidden_info_barrier");
+    expect(spec).toContain("RandomDrawRecords");
+    expect(requirementsReview).toContain("ready_for_MVP_0.94_implementation: true");
+    expect(implementationReview).toContain("ready_for_hardening: true");
+    expect(finalReview).toContain("MVP_0.94_done: true");
+
+    const baseline = JSON.parse(readFileSync("data/rules/rules-baseline-0.94.json", "utf8")) as {
+      id?: string;
+      gateAssertions?: Record<string, boolean>;
+    };
+    expect(baseline.id).toBe("rules-baseline-mvp-0.94");
+    expect(baseline.gateAssertions?.damageUsesRandomDrawRecords).toBe(true);
+    expect(baseline.gateAssertions?.flatlineReasonIsSideSafe).toBe(true);
+
+    const manifest = JSON.parse(readFileSync("data/manifests/card-implementation-manifest-0.94.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      cards: Array<{
+        cardCode: string;
+        status: string;
+        sourceMode?: string;
+        resolver?: string;
+        unitTests?: string[];
+        scenarioTests?: string[];
+        visibilityTests?: string[];
+        replayTests?: string[];
+        aiSmokeTests?: string[];
+        multiplayerSmokeTests?: string[];
+      }>;
+    };
+    expect(manifest.gateAssertions?.noV095PlusMechanicsEnabled).toBe(true);
+    const playable = manifest.cards.filter((card) => card.status === "playable_mvp");
+    expect(playable.map((card) => card.cardCode)).toEqual(["v094_neural_sentry_ice"]);
+    expect(
+      playable.every(
+        (card) =>
+          card.sourceMode === "local_original" &&
+          card.resolver &&
+          card.unitTests?.length &&
+          card.scenarioTests?.length &&
+          card.visibilityTests?.length &&
+          card.replayTests?.length &&
+          card.aiSmokeTests?.length &&
+          card.multiplayerSmokeTests?.length
+      )
+    ).toBe(true);
+
+    const coverage = JSON.parse(readFileSync("data/rules/mechanics-coverage-0.94.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      mechanics?: Array<{ mechanicId?: string; currentStatus?: string; targetGate?: string }>;
+    };
+    expect(coverage.gateAssertions?.v094DamageFlatlineImplemented).toBe(true);
+    expect(coverage.gateAssertions?.noV095PlusMechanicsImplemented).toBe(true);
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.damage.flatline")?.currentStatus).toBe("implemented_limited");
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.resources")?.currentStatus).toBe("open");
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.trace.link_bidding")?.currentStatus).toBe("open");
+
+    const scenarioDir = "data/scenarios";
+    const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
+    for (const file of REQUIRED_MVP_0_94_SCENARIOS) {
+      expect(present, file).toContain(file);
+      const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as {
+        id?: string;
+        baselineId?: string;
+        requirementIds?: string[];
+        coversCards?: string[];
+        expected?: unknown;
+      };
+      expect(scenario.id, file).toMatch(/^SCN-V094-\d{3}$/);
+      expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.94");
+      expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
+      expect(scenario.coversCards).toContain("v094_neural_sentry_ice");
+      expect(scenario.expected, file).toBeDefined();
+    }
   });
 });
 
