@@ -1,4 +1,3 @@
-import cardSnapshotData from "../../../../../data/card-import/card-snapshot-0.8.json";
 import profilesData from "../../../../../data/decks/deck-format-profiles-0.8.json";
 import snapshotsData from "../../../../../data/decks/deck-snapshots-0.8.json";
 import templatesData from "../../../../../data/decks/deck-templates-0.8.json";
@@ -13,11 +12,10 @@ import {
   type DeckValidationContext,
   type EditableDeck
 } from "@netrunner/decks";
+import { createRuntimeCardsById } from "../card-pool-runtime";
 
-const cardsById = Object.fromEntries((cardSnapshotData.cards as DeckValidationContext["cardsById"][string][]).map((card) => [card.catalogCardId, card]));
 const profiles = profilesData.profiles as DeckFormatProfile[];
 const profile = profiles.find((candidate) => candidate.profileId === "local-demo-v0.8") ?? profiles[0]!;
-const context = { cardsById, profile };
 const templates = templatesData.templates as DeckTemplate[];
 const snapshots = snapshotsData.snapshots as DeckSnapshot[];
 
@@ -43,6 +41,7 @@ export function deckSnapshotsResponse() {
 }
 
 export function deckValidationResponse(deck: EditableDeck) {
+  const context = contextForProfile(profile);
   const validation = validateEditableDeck(deck, context);
   return safeDeckPayload({
     validation,
@@ -58,5 +57,9 @@ function safeDeckPayload(payload: unknown) {
 
 function contextForSnapshot(snapshot: DeckSnapshot) {
   const snapshotProfile = profiles.find((candidate) => candidate.profileId === snapshot.formatProfileId) ?? profile;
-  return { cardsById, profile: snapshotProfile };
+  return contextForProfile(snapshotProfile);
+}
+
+function contextForProfile(deckProfile: DeckFormatProfile): DeckValidationContext {
+  return { cardsById: createRuntimeCardsById(), profile: deckProfile };
 }

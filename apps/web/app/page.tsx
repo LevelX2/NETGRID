@@ -14,6 +14,7 @@ import {
   Layers3,
   Link2,
   ListFilter,
+  Moon,
   PanelRightOpen,
   Play,
   Plus,
@@ -23,6 +24,7 @@ import {
   Shield,
   SlidersHorizontal,
   Sparkles,
+  Sun,
   Trash2,
   Upload,
   UserPlus,
@@ -45,14 +47,22 @@ const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.
 const SESSION_KEY = "netrunner-mvp-0-3-session";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
 const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
+const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_004_snapshot_v0_6";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
+const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
+const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
+const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
+  runner: "runner_identity_001",
+  corp: "corp_identity_001"
+};
 
 type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 type AiDifficulty = "easy" | "normal" | "hard";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
+type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
 
 type SeriesResultSummary = {
@@ -177,7 +187,7 @@ type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemente
 
 type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
-type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "upgrade" | "operation" | "event" | "hardware" | "resource" | "program" | "identity";
+type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "upgrade" | "operation" | "event" | "hardware" | "resource" | "program";
 
 type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
 
@@ -308,18 +318,25 @@ const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
   blocked: "blocked"
 };
 
-const CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
-  { key: "ice", label: "ICE" },
-  { key: "agenda", label: "Agenda" },
-  { key: "icebreaker", label: "Icebrecher" },
-  { key: "asset", label: "Asset" },
-  { key: "upgrade", label: "Upgrade" },
-  { key: "operation", label: "Operation" },
+const RUNNER_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
   { key: "event", label: "Event" },
   { key: "hardware", label: "Hardware" },
   { key: "resource", label: "Ressource" },
   { key: "program", label: "Programm" },
-  { key: "identity", label: "Identität" }
+  { key: "icebreaker", label: "Icebrecher" }
+];
+
+const CORP_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
+  { key: "ice", label: "ICE" },
+  { key: "agenda", label: "Agenda" },
+  { key: "asset", label: "Asset" },
+  { key: "upgrade", label: "Upgrade" },
+  { key: "operation", label: "Operation" }
+];
+
+const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Array<{ key: CatalogTypeFilterKey; label: string }> }> = [
+  { title: "Runner", side: "runner", filters: RUNNER_CATALOG_TYPE_FILTERS },
+  { title: "Corp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS }
 ];
 
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
@@ -332,8 +349,7 @@ const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   event: true,
   hardware: true,
   resource: true,
-  program: true,
-  identity: true
+  program: true
 };
 
 const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
@@ -346,8 +362,7 @@ const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
   event: false,
   hardware: false,
   resource: false,
-  program: false,
-  identity: false
+  program: false
 };
 
 const CATALOG_NUMERIC_LABELS: Record<string, string> = {
@@ -362,29 +377,65 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
 };
 
 const LOCAL_CARD_IMAGE_IDS = new Set([
+  "efficient_fracter",
   "simple_agenda",
+  "simple_barrier_ice",
+  "simple_code_gate_ice",
+  "simple_decoder",
   "simple_draw_event",
   "simple_economy_asset",
   "simple_economy_event",
+  "simple_fracter",
+  "simple_killer",
   "simple_priority_agenda",
   "simple_run_event",
+  "simple_sentry_ice",
+  "simple_tag_ice",
+  "simple_taxing_barrier_ice",
+  "v08_adaptive_killer",
   "v08_burst_credit_event",
   "v08_cashout_asset",
   "v08_deep_draw_event",
+  "v08_gate_ice",
   "v08_overclock_run_event",
-  "v08_project_agenda"
+  "v08_precise_decoder",
+  "v08_steady_fracter",
+  "v08_project_agenda",
+  "v08_wall_ice",
+  "v08_watchdog_ice"
 ]);
 
+const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-ice-strength-left";
+
 function localCardImageUrl(cardId: string): string | undefined {
-  return LOCAL_CARD_IMAGE_IDS.has(cardId) || cardId.startsWith("onr_v1_") ? `/api/card-images/${encodeURIComponent(cardId)}` : undefined;
+  const encodedCardId = encodeURIComponent(cardId);
+  if (LOCAL_CARD_IMAGE_IDS.has(cardId)) return `/api/card-images/${encodedCardId}?v=${LOCAL_CARD_IMAGE_VERSION}`;
+  if (cardId.startsWith("onr_v1_")) return `/api/card-images/${encodedCardId}`;
+  return undefined;
 }
 
 function cardBackImageUrl(side: Side): string {
   return `/api/card-images/back_${side}`;
 }
 
+function formatCatalogTerm(value: string): string {
+  if (value.toLowerCase() === "ice") return "ICE";
+  return value
+    .replace(/[_-]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+    .join(" ");
+}
+
+function formatCatalogTypeLine(card: Pick<CatalogCardSummary, "type" | "subtypes">): string {
+  const type = formatCatalogTerm(card.type);
+  const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
+  return [type, subtypes].filter(Boolean).join(" - ");
+}
+
 function catalogDetailLines(card: CatalogCardDetail): string[] {
-  const typeLine = [card.side, card.type, card.subtypes.join(" / ")].filter(Boolean).join(" · ");
+  const typeLine = [card.side, formatCatalogTypeLine(card)].filter(Boolean).join(" · ");
   const numberLine = Object.entries(CATALOG_NUMERIC_LABELS)
     .map(([key, label]) => {
       const value = card.numeric[key];
@@ -523,11 +574,14 @@ function catalogTypeKeysForCard(card: Pick<CatalogCardSummary, "type" | "subtype
     case "hardware":
     case "resource":
     case "program":
-    case "identity":
       return [card.type];
     default:
       return [];
   }
+}
+
+function isCatalogVisibleCard(card: CatalogCardSummary): boolean {
+  return card.type !== "identity";
 }
 
 function catalogCardMatchesTypeFilters(card: CatalogCardSummary, filters: CatalogTypeFilterState): boolean {
@@ -544,6 +598,38 @@ function summarizeCatalogTypeFilters(cards: CatalogCardSummary[]): Partial<Recor
     }
   }
   return counts;
+}
+
+function summarizeCatalogStatuses(cards: CatalogCardSummary[]): Partial<Record<CatalogStatusKey, number>> {
+  const counts: Partial<Record<CatalogStatusKey, number>> = {};
+  for (const card of cards) {
+    for (const key of Object.keys(CATALOG_STATUS_LABELS) as CatalogStatusKey[]) {
+      if (card.statuses[key]) counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+}
+
+function deckBuilderCardGroup(card: CatalogCardSummary | null): string {
+  if (!card) return "Unbekannte Karten";
+  const key = catalogTypeKeysForCard(card)[0];
+  const labels = [...RUNNER_CATALOG_TYPE_FILTERS, ...CORP_CATALOG_TYPE_FILTERS];
+  return labels.find((filter) => filter.key === key)?.label ?? formatCatalogTerm(card.type);
+}
+
+function deckBuilderMetricLine(detail: CatalogCardDetail | undefined): string {
+  if (!detail) return "";
+  return Object.entries(CATALOG_NUMERIC_LABELS)
+    .map(([key, label]) => {
+      const value = detail.numeric[key];
+      return value === null || value === undefined ? null : `${label} ${value}`;
+    })
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function deckBuilderCardTooltip(card: CatalogCardSummary, detail: CatalogCardDetail | undefined): string {
+  return [card.title, formatCatalogTypeLine(card), detail ? deckBuilderMetricLine(detail) : "", detail?.text ?? ""].filter(Boolean).join("\n");
 }
 
 function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): Array<{ label: "ICE" | "Root"; cards: VisibleCard[] }> {
@@ -567,7 +653,7 @@ function centralServerCardCount(view: PlayerView, serverId: PlayerView["servers"
     case "rd":
       return view.side === "corp" ? view.own.stackOrRdCount : view.opponent.deckCount;
     case "archives":
-      return view.side === "corp" ? view.own.heapOrArchives.length : view.opponent.discardCount;
+      return view.side === "corp" ? view.own.heapOrArchives.length : (view.opponent.discardCount ?? 0);
     default:
       return null;
   }
@@ -620,11 +706,12 @@ export default function Page() {
   const [validatedSnapshot, setValidatedSnapshot] = useState<DeckSnapshot | null>(null);
   const [deckImportText, setDeckImportText] = useState("");
   const [deckExportText, setDeckExportText] = useState("");
-  const [addCardId, setAddCardId] = useState("");
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
+  const [colorSchemeLoaded, setColorSchemeLoaded] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioVolume, setAudioVolume] = useState(0.45);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
@@ -654,6 +741,22 @@ export default function Page() {
       else setNotice("Session konnte nicht geladen werden.");
     });
   }, []);
+
+  useEffect(() => {
+    const storedScheme = window.localStorage.getItem(COLOR_SCHEME_STORAGE_KEY);
+    if (storedScheme === "black" || storedScheme === "white") {
+      document.documentElement.dataset.theme = storedScheme;
+      setColorScheme(storedScheme);
+    } else {
+      document.documentElement.dataset.theme = "black";
+    }
+    setColorSchemeLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = colorScheme;
+    if (colorSchemeLoaded) window.localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, colorScheme);
+  }, [colorScheme, colorSchemeLoaded]);
 
   useEffect(() => {
     const storedDecks = window.localStorage.getItem(DECK_STORAGE_KEY);
@@ -707,10 +810,11 @@ export default function Page() {
     void fetch(`/api/cards/catalog?${params.toString()}`, { cache: "no-store" })
       .then((response) => response.json() as Promise<CatalogListResponse>)
       .then((data) => {
-        setCatalogCards(data.cards ?? []);
+        const visibleCards = (data.cards ?? []).filter(isCatalogVisibleCard);
+        setCatalogCards(visibleCards);
         setCatalogFilters(data.filters ?? null);
-        setCatalogSummary(data.summary ?? {});
-        setSelectedCatalogId((current) => (current && data.cards?.some((card) => card.catalogCardId === current) ? current : data.cards?.[0]?.catalogCardId ?? null));
+        setCatalogSummary(summarizeCatalogStatuses(visibleCards));
+        setSelectedCatalogId((current) => (current && visibleCards.some((card) => card.catalogCardId === current) ? current : visibleCards[0]?.catalogCardId ?? null));
       })
       .catch(() => {
         setCatalogCards([]);
@@ -766,7 +870,7 @@ export default function Page() {
   useEffect(() => {
     void fetch("/api/cards/catalog", { cache: "no-store" })
       .then((response) => response.json() as Promise<CatalogListResponse>)
-      .then((data) => setAllCatalogCards(data.cards ?? []))
+      .then((data) => setAllCatalogCards((data.cards ?? []).filter(isCatalogVisibleCard)))
       .catch(() => setAllCatalogCards([]));
     void fetch("/api/decks/snapshots", { cache: "no-store" })
       .then((response) => response.json() as Promise<DeckSnapshotsResponse>)
@@ -792,7 +896,10 @@ export default function Page() {
   const effectiveRunnerSnapshot = runnerDeckSource === "local" ? runnerLocalSnapshot : selectedRunnerSnapshot;
   const effectiveCorpSnapshot = corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
-  const playableCatalogCards = allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity");
+  const playableCatalogCards = useMemo(
+    () => allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity"),
+    [allCatalogCards, selectedLocalDeck?.side]
+  );
   const gripPreviewCard = activeView?.own.gripOrHq.find((card) => card.known) ?? null;
   const rigPreviewCard = activeView?.own.rig?.find((card) => card.known) ?? null;
   const previewSelection =
@@ -811,6 +918,33 @@ export default function Page() {
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
   const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
+
+  useEffect(() => {
+    if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
+    const missingIds = playableCatalogCards.map((card) => card.catalogCardId).filter((cardId) => !catalogDetailsById[cardId]);
+    if (missingIds.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      missingIds.map((cardId) =>
+        fetch(`/api/cards/catalog/${encodeURIComponent(cardId)}`, { cache: "no-store" })
+          .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
+          .then((data) => data.card)
+          .catch(() => null)
+      )
+    ).then((details) => {
+      if (cancelled) return;
+      setCatalogDetailsById((current) => {
+        const next = { ...current };
+        details.forEach((detail) => {
+          if (detail) next[detail.catalogCardId] = detail;
+        });
+        return next;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [entryTab, playableCatalogCards, catalogDetailsById]);
 
   useEffect(() => {
     if (!resultKey || !resultSummary) {
@@ -1021,8 +1155,8 @@ export default function Page() {
       name: `${template.name} Kopie`,
       side: template.side,
       identityCardId: template.identityCardId,
-      cardPoolSnapshotId: "card-snapshot-0.8",
-      formatProfileId: "local-demo-v0.8",
+      cardPoolSnapshotId: DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
+      formatProfileId: DEFAULT_DECK_FORMAT_PROFILE_ID,
       cards: template.cards.map((entry) => ({ ...entry })),
       createdAt: now,
       updatedAt: now
@@ -1030,6 +1164,28 @@ export default function Page() {
     setLocalDecks((current) => [...current, deck]);
     setSelectedLocalDeckId(deck.deckId);
     clearDeckValidation();
+    setNotice("Deck-Kopie angelegt. Du kannst den Decknamen direkt ändern.");
+  };
+
+  const createEmptyDeck = (side: Side) => {
+    const now = new Date().toISOString();
+    const templateIdentity = deckTemplates.find((candidate) => candidate.side === side)?.identityCardId;
+    const deck: EditableDeck = {
+      deckId: `local_${side}_${crypto.randomUUID().slice(0, 8)}`,
+      deckVersion: "0.6.0-local",
+      name: side === "runner" ? "Neues Runner-Deck" : "Neues Corp-Deck",
+      side,
+      identityCardId: templateIdentity ?? DEFAULT_IDENTITY_BY_SIDE[side],
+      cardPoolSnapshotId: DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
+      formatProfileId: DEFAULT_DECK_FORMAT_PROFILE_ID,
+      cards: [],
+      createdAt: now,
+      updatedAt: now
+    };
+    setLocalDecks((current) => [...current, deck]);
+    setSelectedLocalDeckId(deck.deckId);
+    clearDeckValidation();
+    setNotice("Neues Deck angelegt. Füge Karten hinzu und validiere es vor dem Matchstart.");
   };
 
   const updateSelectedDeck = (nextDeck: EditableDeck) => {
@@ -1039,22 +1195,13 @@ export default function Page() {
 
   const updateDeckCardQuantity = (cardId: string, quantity: number) => {
     if (!selectedLocalDeck) return;
+    const nextQuantity = Math.max(0, Math.floor(quantity));
+    const existing = selectedLocalDeck.cards.some((entry) => entry.cardId === cardId);
     updateSelectedDeck({
       ...selectedLocalDeck,
-      cards: selectedLocalDeck.cards
-        .map((entry) => (entry.cardId === cardId ? { ...entry, quantity: Math.max(0, Math.floor(quantity)) } : entry))
-        .filter((entry) => entry.quantity > 0)
-    });
-  };
-
-  const addCardToDeck = () => {
-    if (!selectedLocalDeck || !addCardId) return;
-    const existing = selectedLocalDeck.cards.find((entry) => entry.cardId === addCardId);
-    updateSelectedDeck({
-      ...selectedLocalDeck,
-      cards: existing
-        ? selectedLocalDeck.cards.map((entry) => (entry.cardId === addCardId ? { ...entry, quantity: entry.quantity + 1 } : entry))
-        : [...selectedLocalDeck.cards, { cardId: addCardId, quantity: 1 }]
+      cards: (existing ? selectedLocalDeck.cards.map((entry) => (entry.cardId === cardId ? { ...entry, quantity: nextQuantity } : entry)) : [...selectedLocalDeck.cards, { cardId, quantity: nextQuantity }]).filter(
+        (entry) => entry.quantity > 0
+      )
     });
   };
 
@@ -1240,7 +1387,7 @@ export default function Page() {
 
   if (!session || !payload || !activeView) {
     return (
-      <main className="app">
+      <main className="app" data-theme={colorScheme}>
         <header className="topbar">
           <Brand subtitle="V0.7 UI · private Matches" />
           <ConnectionBadge text={statusText} state={connection} />
@@ -1264,14 +1411,6 @@ export default function Page() {
               Optionen
             </button>
           </nav>
-          <section className="entryHero">
-            <div>
-              <p className="eyebrow">Netrunner Lokal</p>
-              <h2>Private Netrunner-Konsole</h2>
-              <p className="meta">Private Matches · lokale Decks · side-filtered</p>
-            </div>
-            <PreflightBar />
-          </section>
           {notice ? <p className="notice entryNotice">{notice}</p> : null}
           <div className="entryContent">
           {entryTab === "play" ? (
@@ -1440,15 +1579,14 @@ export default function Page() {
             validation={deckValidation}
             validatedSnapshot={validatedSnapshot}
             playableCards={playableCatalogCards}
-            addCardId={addCardId}
+            cardDetailsById={catalogDetailsById}
             importText={deckImportText}
             exportText={deckExportText}
+            onCreateEmpty={createEmptyDeck}
             onCreateFromTemplate={createDeckFromTemplate}
             onSelectDeck={setSelectedLocalDeckId}
             onUpdateDeck={updateSelectedDeck}
             onUpdateQuantity={updateDeckCardQuantity}
-            onAddCardId={setAddCardId}
-            onAddCard={addCardToDeck}
             onDuplicate={duplicateSelectedDeck}
             onDelete={deleteSelectedDeck}
             onValidate={validateSelectedDeck}
@@ -1463,9 +1601,11 @@ export default function Page() {
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardDisplayMode={cardDisplayMode}
+              colorScheme={colorScheme}
               onAudioEnabled={setAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardDisplayMode={setCardDisplayMode}
+              onColorScheme={setColorScheme}
             />
           ) : null}
           </div>
@@ -1475,7 +1615,7 @@ export default function Page() {
   }
 
   return (
-    <main className="app">
+    <main className="app" data-theme={colorScheme}>
       <header className="topbar">
         <Brand subtitle={`V0.7 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
         <div className="toolbar">
@@ -1795,38 +1935,24 @@ function seriesStatusText(series: SeriesResultSummary): string {
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
 }
 
-function PreflightBar() {
-  const checks = [
-    { icon: <Shield size={15} />, label: "Hidden-Info safe" },
-    { icon: <Activity size={15} />, label: "Replay ready" },
-    { icon: <Layers3 size={15} />, label: "Decks validiert" }
-  ];
-  return (
-    <div className="preflightBar">
-      {checks.map((check) => (
-        <span key={check.label}>
-          {check.icon}
-          {check.label}
-        </span>
-      ))}
-    </div>
-  );
-}
-
 function OptionsPanel({
   audioEnabled,
   audioVolume,
   cardDisplayMode,
+  colorScheme,
   onAudioEnabled,
   onAudioVolume,
-  onCardDisplayMode
+  onCardDisplayMode,
+  onColorScheme
 }: {
   audioEnabled: boolean;
   audioVolume: number;
   cardDisplayMode: CardDisplayMode;
+  colorScheme: ColorScheme;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
+  onColorScheme(value: ColorScheme): void;
 }) {
   return (
     <section className="optionsPanel panel">
@@ -1838,11 +1964,49 @@ function OptionsPanel({
         <SlidersHorizontal size={18} />
       </div>
       <div className="optionsContent">
+        <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
         <BoardPreview displayMode={cardDisplayMode} />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
+        <SystemStatus />
       </div>
     </section>
+  );
+}
+
+function SystemStatus() {
+  return (
+    <div className="systemStatus">
+      <span>
+        <Shield size={15} />
+        Hidden-Info geschützt
+      </span>
+      <span>
+        <Activity size={15} />
+        Replay bereit
+      </span>
+    </div>
+  );
+}
+
+function ColorSchemeSettings({ scheme, onChange }: { scheme: ColorScheme; onChange(value: ColorScheme): void }) {
+  return (
+    <div className="colorSchemeSettings">
+      <div>
+        <span className="settingsTitle">Farbschema</span>
+        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+      </div>
+      <div className="segmented themeToggle" role="group" aria-label="Farbschema">
+        <button className={scheme === "black" ? "active" : ""} onClick={() => onChange("black")} type="button" title="Schwarzes Farbschema" aria-label="Schwarzes Farbschema">
+          <Moon size={15} />
+          Schwarz
+        </button>
+        <button className={scheme === "white" ? "active" : ""} onClick={() => onChange("white")} type="button" title="Weißes Farbschema" aria-label="Weißes Farbschema">
+          <Sun size={15} />
+          Weiß
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -2364,7 +2528,7 @@ function CatalogPanel({
           </select>
         </label>
         <fieldset className="catalogTypeFilters">
-          <legend>Haupttypen</legend>
+          <legend>Kartentypen</legend>
           <div className="typeFilterActions">
             <button type="button" onClick={onSelectAllTypes}>
               Alle
@@ -2373,13 +2537,20 @@ function CatalogPanel({
               Keine
             </button>
           </div>
-          <div className="typeFilterGrid">
-            {CATALOG_TYPE_FILTERS.map((filter) => (
-              <label className={`typeToggle ${typeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
-                <input checked={typeFilters[filter.key]} onChange={(event) => onTypeFilter(filter.key, event.target.checked)} type="checkbox" />
-                <span>{filter.label}</span>
-                <small>{typeCounts[filter.key] ?? 0}</small>
-              </label>
+          <div className="typeFilterGroups">
+            {CATALOG_TYPE_FILTER_GROUPS.map((group) => (
+              <div className={`typeFilterGroup ${group.side}`} key={group.title}>
+                <div className="typeFilterGroupTitle">{group.title}</div>
+                <div className="typeFilterGrid">
+                  {group.filters.map((filter) => (
+                    <label className={`typeToggle ${group.side} ${typeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
+                      <input checked={typeFilters[filter.key]} onChange={(event) => onTypeFilter(filter.key, event.target.checked)} type="checkbox" />
+                      <span>{filter.label}</span>
+                      <small>{typeCounts[filter.key] ?? 0}</small>
+                    </label>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </fieldset>
@@ -2390,7 +2561,7 @@ function CatalogPanel({
             <button className={`catalogItem ${selectedId === card.catalogCardId ? "active" : ""}`} key={card.catalogCardId} onClick={() => onSelect(card.catalogCardId)}>
               <strong>{card.title}</strong>
               <span>
-                {card.side} · {card.type}
+                {card.side} · {formatCatalogTypeLine(card)}
               </span>
               <StatusBadges statuses={card.statuses} compact />
             </button>
@@ -2404,7 +2575,7 @@ function CatalogPanel({
                 <div>
                   <h3>{detail.title}</h3>
                   <p className="meta">
-                    {detail.side} · {detail.type} · {detail.setName} #{detail.collectorNumber}
+                    {detail.side} · {formatCatalogTypeLine(detail)} · {detail.setName} #{detail.collectorNumber}
                   </p>
                 </div>
                 <span className={`sideBadge ${detail.side}`}>{detail.side}</span>
@@ -2466,15 +2637,14 @@ function DeckEditorPanel({
   validation,
   validatedSnapshot,
   playableCards,
-  addCardId,
+  cardDetailsById,
   importText,
   exportText,
+  onCreateEmpty,
   onCreateFromTemplate,
   onSelectDeck,
   onUpdateDeck,
   onUpdateQuantity,
-  onAddCardId,
-  onAddCard,
   onDuplicate,
   onDelete,
   onValidate,
@@ -2489,15 +2659,14 @@ function DeckEditorPanel({
   validation: DeckValidationResult | null;
   validatedSnapshot: DeckSnapshot | null;
   playableCards: CatalogCardSummary[];
-  addCardId: string;
+  cardDetailsById: Record<string, CatalogCardDetail>;
   importText: string;
   exportText: string;
+  onCreateEmpty(side: Side): void;
   onCreateFromTemplate(templateId: string): void;
   onSelectDeck(deckId: string): void;
   onUpdateDeck(deck: EditableDeck): void;
   onUpdateQuantity(cardId: string, quantity: number): void;
-  onAddCardId(cardId: string): void;
-  onAddCard(): void;
   onDuplicate(): void;
   onDelete(): void;
   onValidate(): void;
@@ -2506,8 +2675,45 @@ function DeckEditorPanel({
   onImportText(value: string): void;
   onImport(): void;
 }) {
+  const [builderSearch, setBuilderSearch] = useState("");
+  const [builderTypeFilters, setBuilderTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
+  const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [previewCardId, setPreviewCardId] = useState<string | null>(null);
   const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
-  const cardTitle = (cardId: string) => playableCards.find((card) => card.catalogCardId === cardId)?.title ?? cardId;
+  const deckQuantities = useMemo(() => new Map(selectedDeck?.cards.map((entry) => [entry.cardId, entry.quantity]) ?? []), [selectedDeck?.cards]);
+  const cardLookup = useMemo(() => new Map(playableCards.map((card) => [card.catalogCardId, card])), [playableCards]);
+  const builderTypeCounts = useMemo(() => summarizeCatalogTypeFilters(playableCards), [playableCards]);
+  const visibleTypeFilterGroups = selectedDeck ? CATALOG_TYPE_FILTER_GROUPS.filter((group) => group.side === selectedDeck.side) : CATALOG_TYPE_FILTER_GROUPS;
+  const libraryCards = useMemo(() => {
+    const search = builderSearch.trim().toLowerCase();
+    return playableCards
+      .filter((card) => {
+        if (builderOnlyInDeck && !deckQuantities.has(card.catalogCardId)) return false;
+        if (!catalogCardMatchesTypeFilters(card, builderTypeFilters)) return false;
+        if (!search) return true;
+        return [card.title, card.type, card.faction, ...card.subtypes].some((value) => value.toLowerCase().includes(search));
+      })
+      .sort((left, right) => deckBuilderCardGroup(left).localeCompare(deckBuilderCardGroup(right)) || left.title.localeCompare(right.title));
+  }, [builderOnlyInDeck, builderSearch, builderTypeFilters, deckQuantities, playableCards]);
+  const deckRows = useMemo(
+    () =>
+      (selectedDeck?.cards ?? [])
+        .map((entry) => ({ entry, card: cardLookup.get(entry.cardId) ?? null }))
+        .sort((left, right) => deckBuilderCardGroup(left.card).localeCompare(deckBuilderCardGroup(right.card)) || (left.card?.title ?? left.entry.cardId).localeCompare(right.card?.title ?? right.entry.cardId)),
+    [cardLookup, selectedDeck?.cards]
+  );
+  const previewCard = (previewCardId ? cardLookup.get(previewCardId) : null) ?? libraryCards[0] ?? deckRows[0]?.card ?? null;
+  const previewQuantity = previewCard ? deckQuantities.get(previewCard.catalogCardId) ?? 0 : 0;
+  const setVisibleBuilderTypes = (selected: boolean) => {
+    setBuilderTypeFilters((current) => {
+      const next = { ...current };
+      for (const group of visibleTypeFilterGroups) {
+        for (const filter of group.filters) next[filter.key] = selected;
+      }
+      return next;
+    });
+  };
   return (
     <section className="deckPanel panel">
       <div className="catalogHeader">
@@ -2517,7 +2723,33 @@ function DeckEditorPanel({
             {localDecks.length} lokal · {templates.length} Templates
           </p>
         </div>
-        <Save size={18} />
+        <div className="deckHeaderActions">
+          <button className={`button ${importOpen ? "primary" : ""}`} onClick={() => setImportOpen((current) => !current)} type="button" aria-expanded={importOpen}>
+            <Upload size={15} />
+            Import
+          </button>
+          <Save size={18} />
+        </div>
+      </div>
+      {importOpen ? (
+        <div className="deckImportBox deckImportInline">
+          <h3>Deck importieren</h3>
+          <textarea className="deckTextArea" value={importText} onChange={(event) => onImportText(event.target.value)} placeholder='{"schemaVersion":"editable-deck-v0.6","deck":...}' />
+          <button className="button wide" onClick={onImport} disabled={!importText.trim()}>
+            <Upload size={15} />
+            Importieren
+          </button>
+        </div>
+      ) : null}
+      <div className="deckCreateRow">
+        <button className="button" onClick={() => onCreateEmpty("runner")}>
+          <Plus size={15} />
+          Neues Runner-Deck
+        </button>
+        <button className="button corp" onClick={() => onCreateEmpty("corp")}>
+          <Plus size={15} />
+          Neues Corp-Deck
+        </button>
       </div>
       <div className="deckTemplateRow">
         {templates.map((template) => (
@@ -2529,24 +2761,28 @@ function DeckEditorPanel({
       </div>
       <div className="deckWorkspace">
         <div className="deckEditor">
-          <label>
-            Lokales Deck
-            <select value={selectedDeck?.deckId ?? ""} onChange={(event) => onSelectDeck(event.target.value)} disabled={localDecks.length === 0}>
-              <option value="">Kein lokales Deck</option>
-              {localDecks.map((deck) => (
-                <option value={deck.deckId} key={deck.deckId}>
-                  {deck.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="deckSelectGrid">
+            <label>
+              Deck auswählen
+              <select value={selectedDeck?.deckId ?? ""} onChange={(event) => onSelectDeck(event.target.value)} disabled={localDecks.length === 0}>
+                <option value="">Kein lokales Deck</option>
+                {localDecks.map((deck) => (
+                  <option value={deck.deckId} key={deck.deckId}>
+                    {deck.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {selectedDeck ? (
+              <label>
+                Deckname ändern
+                <input value={selectedDeck.name} onChange={(event) => onUpdateDeck({ ...selectedDeck, name: event.target.value })} />
+              </label>
+            ) : null}
+          </div>
           {selectedDeck ? (
             <>
               <div className="deckFormGrid">
-                <label>
-                  Name
-                  <input value={selectedDeck.name} onChange={(event) => onUpdateDeck({ ...selectedDeck, name: event.target.value })} />
-                </label>
                 <label>
                   Seite
                   <input value={selectedDeck.side} readOnly />
@@ -2560,27 +2796,104 @@ function DeckEditorPanel({
                   <input value={selectedDeck.notes ?? ""} onChange={(event) => onUpdateDeck({ ...selectedDeck, notes: event.target.value })} />
                 </label>
               </div>
-              <div className="deckCardList">
-                {selectedDeck.cards.map((entry) => (
-                  <div className="deckCardRow" key={entry.cardId}>
-                    <span>{cardTitle(entry.cardId)}</span>
-                    <input type="number" min={0} max={9} value={entry.quantity} onChange={(event) => onUpdateQuantity(entry.cardId, Number(event.target.value))} />
+              {previewCard ? (
+                <DeckBuilderPreview
+                  card={previewCard}
+                  detail={cardDetailsById[previewCard.catalogCardId]}
+                  quantity={previewQuantity}
+                  onAdd={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity + 1)}
+                  onRemove={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity - 1)}
+                />
+              ) : null}
+              <div className="deckBuilderGrid">
+                <section className="deckLibraryPanel">
+                  <div className="deckBuilderPanelHeader">
+                    <div>
+                      <h3>Kartenbibliothek</h3>
+                      <p className="meta">
+                        {libraryCards.length} von {playableCards.length} gültigen {sideLabel(selectedDeck.side)}-Karten
+                      </p>
+                    </div>
+                    <Search size={17} />
                   </div>
-                ))}
-              </div>
-              <div className="deckAddRow">
-                <select value={addCardId} onChange={(event) => onAddCardId(event.target.value)}>
-                  <option value="">Karte hinzufügen</option>
-                  {playableCards.map((card) => (
-                    <option value={card.catalogCardId} key={card.catalogCardId}>
-                      {card.title}
-                    </option>
-                  ))}
-                </select>
-                <button className="button" onClick={onAddCard} disabled={!addCardId}>
-                  <Plus size={15} />
-                  Hinzufügen
-                </button>
+                  <label className="deckBuilderSearch">
+                    Suche
+                    <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Typ, Subtyp" />
+                  </label>
+                  <div className="deckBuilderFilterLine">
+                    <label className={`deckBuilderToggle ${builderOnlyInDeck ? "checked" : ""}`}>
+                      <input checked={builderOnlyInDeck} onChange={(event) => setBuilderOnlyInDeck(event.target.checked)} type="checkbox" />
+                      Nur im Deck
+                    </label>
+                    <button type="button" onClick={() => setVisibleBuilderTypes(true)}>
+                      Alle Typen
+                    </button>
+                    <button type="button" onClick={() => setVisibleBuilderTypes(false)}>
+                      Keine Typen
+                    </button>
+                  </div>
+                  <div className="deckBuilderTypes">
+                    {visibleTypeFilterGroups.map((group) => (
+                      <div className={`typeFilterGroup ${group.side}`} key={group.title}>
+                        <div className="typeFilterGrid">
+                          {group.filters.map((filter) => (
+                            <label className={`typeToggle ${group.side} ${builderTypeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
+                              <input checked={builderTypeFilters[filter.key]} onChange={(event) => setBuilderTypeFilters((current) => ({ ...current, [filter.key]: event.target.checked }))} type="checkbox" />
+                              <span>{filter.label}</span>
+                              <small>{builderTypeCounts[filter.key] ?? 0}</small>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="deckLibraryList">
+                    {libraryCards.map((card) => (
+                      <DeckLibraryCard
+                        card={card}
+                        detail={cardDetailsById[card.catalogCardId]}
+                        key={card.catalogCardId}
+                        quantity={deckQuantities.get(card.catalogCardId) ?? 0}
+                        selected={previewCard?.catalogCardId === card.catalogCardId}
+                        onAdd={() => onUpdateQuantity(card.catalogCardId, (deckQuantities.get(card.catalogCardId) ?? 0) + 1)}
+                        onRemove={() => onUpdateQuantity(card.catalogCardId, (deckQuantities.get(card.catalogCardId) ?? 0) - 1)}
+                        onSelect={() => setPreviewCardId(card.catalogCardId)}
+                      />
+                    ))}
+                    {libraryCards.length === 0 ? <p className="meta deckEmpty">Keine passende Karte gefunden.</p> : null}
+                  </div>
+                </section>
+                <section className="deckListPanel">
+                  <div className="deckBuilderPanelHeader">
+                    <div>
+                      <h3>Deckliste</h3>
+                      <p className="meta">{totalCards} Karten im aktuellen Entwurf</p>
+                    </div>
+                    <Layers3 size={17} />
+                  </div>
+                  <div className="deckCardList">
+                    {deckRows.map((row, index) => {
+                      const group = deckBuilderCardGroup(row.card);
+                      const previousGroup = index > 0 ? deckBuilderCardGroup(deckRows[index - 1]?.card ?? null) : "";
+                      return (
+                        <Fragment key={row.entry.cardId}>
+                          {group !== previousGroup ? <div className="deckCardGroup">{group}</div> : null}
+                          <DeckListCard
+                            card={row.card}
+                            cardId={row.entry.cardId}
+                            detail={row.card ? cardDetailsById[row.card.catalogCardId] : undefined}
+                            quantity={row.entry.quantity}
+                            onIncrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity + 1)}
+                            onDecrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity - 1)}
+                            onRemove={() => onUpdateQuantity(row.entry.cardId, 0)}
+                            onSelect={() => setPreviewCardId(row.entry.cardId)}
+                          />
+                        </Fragment>
+                      );
+                    })}
+                    {deckRows.length === 0 ? <p className="meta deckEmpty">Dieses Deck ist noch leer.</p> : null}
+                  </div>
+                </section>
               </div>
               <div className="deckActions">
                 <button className="button primary" onClick={onValidate}>
@@ -2611,16 +2924,128 @@ function DeckEditorPanel({
             <p className="meta deckEmpty">Erstelle eine Kopie aus einem Template oder importiere ein lokales Deck.</p>
           )}
         </div>
-        <div className="deckImportBox">
-          <h3>Import</h3>
-          <textarea className="deckTextArea" value={importText} onChange={(event) => onImportText(event.target.value)} placeholder='{"schemaVersion":"editable-deck-v0.6","deck":...}' />
-          <button className="button wide" onClick={onImport} disabled={!importText.trim()}>
-            <Upload size={15} />
-            Importieren
-          </button>
-        </div>
       </div>
     </section>
+  );
+}
+
+function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card: CatalogCardSummary; detail: CatalogCardDetail | undefined; quantity: number; onAdd(): void; onRemove(): void }) {
+  const metrics = deckBuilderMetricLine(detail);
+  return (
+    <section className="deckBuilderPreview" aria-label="Kartenpreview">
+      <DeckCardThumb cardId={card.catalogCardId} title={card.title} large />
+      <div className="deckBuilderPreviewText">
+        <span>{deckBuilderCardGroup(card)}</span>
+        <strong>{card.title}</strong>
+        <small>{formatCatalogTypeLine(card)}</small>
+        {metrics ? <small>{metrics}</small> : null}
+        <p>{detail?.text ?? "Kartentext wird geladen."}</p>
+      </div>
+      <div className="deckQuantityControls preview">
+        <button className="deckQtyButton" onClick={onRemove} disabled={quantity <= 0} type="button" aria-label={`${card.title} entfernen`}>
+          -
+        </button>
+        <output>{quantity}</output>
+        <button className="deckQtyButton" onClick={onAdd} type="button" aria-label={`${card.title} hinzufügen`}>
+          +
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function DeckLibraryCard({
+  card,
+  detail,
+  quantity,
+  selected,
+  onAdd,
+  onRemove,
+  onSelect
+}: {
+  card: CatalogCardSummary;
+  detail: CatalogCardDetail | undefined;
+  quantity: number;
+  selected: boolean;
+  onAdd(): void;
+  onRemove(): void;
+  onSelect(): void;
+}) {
+  const metrics = deckBuilderMetricLine(detail);
+  const title = deckBuilderCardTooltip(card, detail);
+  return (
+    <article className={`deckLibraryCard ${quantity > 0 ? "inDeck" : ""} ${selected ? "selected" : ""}`} onClick={onSelect} title={title}>
+      <DeckCardThumb cardId={card.catalogCardId} title={card.title} />
+      <div className="deckBuilderCardText">
+        <strong>{card.title}</strong>
+        <span>{formatCatalogTypeLine(card)}</span>
+        {metrics ? <small>{metrics}</small> : null}
+        {detail?.text ? <p>{detail.text}</p> : null}
+      </div>
+      <div className="deckQuantityControls" aria-label={`${card.title} Menge`}>
+        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onRemove(); }} disabled={quantity <= 0} type="button" aria-label={`${card.title} entfernen`}>
+          -
+        </button>
+        <output>{quantity}</output>
+        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onAdd(); }} type="button" aria-label={`${card.title} hinzufügen`}>
+          +
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function DeckListCard({
+  card,
+  cardId,
+  detail,
+  quantity,
+  onIncrement,
+  onDecrement,
+  onRemove,
+  onSelect
+}: {
+  card: CatalogCardSummary | null;
+  cardId: string;
+  detail: CatalogCardDetail | undefined;
+  quantity: number;
+  onIncrement(): void;
+  onDecrement(): void;
+  onRemove(): void;
+  onSelect(): void;
+}) {
+  const title = card ? deckBuilderCardTooltip(card, detail) : cardId;
+  const metrics = deckBuilderMetricLine(detail);
+  return (
+    <article className="deckListCard" onClick={onSelect} title={title}>
+      <DeckCardThumb cardId={card?.catalogCardId ?? cardId} title={card?.title ?? cardId} />
+      <div className="deckBuilderCardText">
+        <strong>{card?.title ?? cardId}</strong>
+        <span>{card ? formatCatalogTypeLine(card) : "Nicht im gültigen Kartenpool"}</span>
+        {metrics ? <small>{metrics}</small> : null}
+      </div>
+      <div className="deckQuantityControls">
+        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onDecrement(); }} type="button" aria-label={`${card?.title ?? cardId} reduzieren`}>
+          -
+        </button>
+        <output>{quantity}</output>
+        <button className="deckQtyButton" onClick={(event) => { event.stopPropagation(); onIncrement(); }} type="button" aria-label={`${card?.title ?? cardId} erhöhen`}>
+          +
+        </button>
+        <button className="deckQtyButton remove" onClick={(event) => { event.stopPropagation(); onRemove(); }} type="button" aria-label={`${card?.title ?? cardId} entfernen`}>
+          <Trash2 size={13} />
+        </button>
+      </div>
+    </article>
+  );
+}
+
+function DeckCardThumb({ cardId, title, large = false }: { cardId: string; title: string; large?: boolean }) {
+  const imageUrl = localCardImageUrl(cardId);
+  return (
+    <span className={`deckCardThumb ${large ? "large" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
+      {imageUrl ? <img src={imageUrl} alt="" /> : <span>{title.slice(0, 1)}</span>}
+    </span>
   );
 }
 

@@ -113,7 +113,7 @@ type RunnerEventResolver = {
 type CorpOperationResolver = {
   name: string;
   canPlay?: (state: GameState) => boolean;
-  resolve: (state: GameState) => void;
+  resolve: (state: GameState, legalAction: LegalAction) => void;
 };
 
 type CorpRootRezResolver = {
@@ -211,6 +211,30 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     resolve: (state, legalAction) => {
       exposeCorpCardInServer(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, legalAction);
     }
+  },
+  "onr_v1_079_bodyweight-synthetic-blood": {
+    name: "onr_runner_event_draw_5",
+    resolve: (state) => {
+      drawRunnerCards(state, 5);
+    }
+  },
+  "onr_v1_095_jack-n-joe": {
+    name: "onr_runner_event_draw_3",
+    resolve: (state) => {
+      drawRunnerCards(state, 3);
+    }
+  },
+  "onr_v1_097_livewires-contacts": {
+    name: "onr_runner_event_gain_credits_3",
+    resolve: (state) => {
+      state.runner.credits += 3;
+    }
+  },
+  onr_v1_108_score: {
+    name: "onr_runner_event_gain_credits_9",
+    resolve: (state) => {
+      state.runner.credits += 9;
+    }
   }
 };
 
@@ -262,6 +286,87 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     resolve: (state) => {
       state.corp.credits += 3;
       state.corp.badPublicity += 1;
+    }
+  },
+  "onr_v1_281_accounts-receivable": {
+    name: "onr_corp_operation_gain_credits_9",
+    resolve: (state) => {
+      state.corp.credits += 9;
+    }
+  },
+  "onr_v1_282_annual-reviews": {
+    name: "onr_corp_operation_draw_3",
+    resolve: (state) => {
+      drawCorpCards(state, 3);
+    }
+  },
+  "onr_v1_285_closed-accounts": {
+    name: "onr_corp_operation_closed_accounts",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state) => {
+      requireRunnerTagged(state);
+      state.runner.credits = 0;
+    }
+  },
+  "onr_v1_287_datapool-by-zetatech": {
+    name: "onr_corp_operation_give_two_tags",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state) => {
+      requireRunnerTagged(state);
+      state.runner.tags += 2;
+    }
+  },
+  "onr_v1_288_day-shift": {
+    name: "onr_corp_operation_draw_2_gain_1",
+    resolve: (state) => {
+      drawCorpCards(state, 2);
+      state.corp.credits += 1;
+    }
+  },
+  "onr_v1_290_efficiency-experts": {
+    name: "onr_corp_operation_gain_credits_3",
+    resolve: (state) => {
+      state.corp.credits += 3;
+    }
+  },
+  "onr_v1_293_netwatch-credit-voucher": {
+    name: "onr_corp_operation_tag_runner_gain_1",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state) => {
+      requireRunnerTagged(state);
+      state.runner.tags += 1;
+      state.corp.credits += 1;
+    }
+  },
+  "onr_v1_295_night-shift": {
+    name: "onr_corp_operation_gain_2_draw_1",
+    resolve: (state) => {
+      state.corp.credits += 2;
+      drawCorpCard(state);
+    }
+  },
+  "onr_v1_301_punitive-counterstrike": {
+    name: "onr_corp_operation_meat_damage_2",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state, legalAction) => {
+      requireRunnerTagged(state);
+      resolveDamageOperation(state, legalAction, "meat", 2, "onr_v1_301_punitive-counterstrike");
+    }
+  },
+  "onr_v1_302_scorched-earth": {
+    name: "onr_corp_operation_meat_damage_4",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state, legalAction) => {
+      requireRunnerTagged(state);
+      resolveDamageOperation(state, legalAction, "meat", 4, "onr_v1_302_scorched-earth");
+    }
+  },
+  "onr_v1_307_urban-renewal": {
+    name: "onr_corp_operation_meat_damage_5",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state, legalAction) => {
+      requireRunnerTagged(state);
+      resolveDamageOperation(state, legalAction, "meat", 5, "onr_v1_307_urban-renewal");
     }
   }
 };
@@ -459,7 +564,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
     id: server.id,
     label: server.label,
     ice: server.ice.map((id) => visibleCorpCard(state, id, side, "ice")),
-    root: server.root.map((id) => visibleCorpCard(state, id, side, "root"))
+    root: server.id === "archives" ? visibleCorpArchives(state, side) : server.root.map((id) => visibleCorpCard(state, id, side, "root"))
   }));
 
   const run = state.run
@@ -1042,7 +1147,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         removeFromAllZones(state, cardId);
         state.corp.archives.push(cardId);
         state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "corp", zone: "archives" } };
-        resolveCorpOperation(state, definition);
+        resolveCorpOperation(state, definition, legalAction);
         if (definition.id === "v098_hq_rd_swap_operation") {
           legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "swap_hq_rd" };
         }
@@ -1254,10 +1359,11 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   }
   const definition = definitionFor(state, run.encounteredIceId);
   let ended = false;
+  const damageSummaries: DamageSummary[] = [];
   const subroutines = definition.subroutines ?? [];
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
-    if (!subroutine || run.brokenSubroutineIndexes.includes(index) || run.resolvedSubroutineIndexes.includes(index) || ended) continue;
+    if (!subroutine || state.winner || run.brokenSubroutineIndexes.includes(index) || run.resolvedSubroutineIndexes.includes(index) || ended) continue;
     if (subroutine.type === "corp_gain_credit") state.corp.credits += subroutine.amount ?? 1;
     if (subroutine.type === "runner_lose_credits") state.runner.credits = Math.max(0, state.runner.credits - (subroutine.amount ?? 1));
     if (subroutine.type === "give_runner_tag") state.runner.tags += subroutine.amount ?? 1;
@@ -1273,20 +1379,15 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         amount: subroutine.amount ?? 1,
         source: `subroutine:${definition.id}:${subroutine.id}`
       });
+      damageSummaries.push(summary);
       if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          damageResolved: true,
-          damageType,
-          damageAmount: summary.amount,
-          cardsTrashed: summary.cardsTrashed,
-          flatline: summary.flatline
-        };
+        setDamagePayload(legalAction, aggregateDamageSummaries(damageSummaries));
       }
       if (state.winner) return;
     }
     if (subroutine.type === "end_the_run") ended = true;
   }
+  if (state.winner) return;
   resetBreakerStrength(state);
   if (ended) {
     finishRun(state, false);
@@ -1695,11 +1796,19 @@ function drawCorpCard(state: GameState): void {
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "corp", zone: "hq" } };
 }
 
+function drawCorpCards(state: GameState, amount: number): void {
+  for (let index = 0; index < amount; index += 1) drawCorpCard(state);
+}
+
 function drawRunnerCard(state: GameState): void {
   const cardId = state.runner.stack.shift();
   if (!cardId) return;
   state.runner.grip.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
+}
+
+function drawRunnerCards(state: GameState, amount: number): void {
+  for (let index = 0; index < amount; index += 1) drawRunnerCard(state);
 }
 
 function doDamage(
@@ -1740,6 +1849,41 @@ function doDamage(
   }
 
   return { damageType: request.damageType, amount: request.amount, cardsTrashed: selected.length, flatline: false };
+}
+
+function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {
+  const first = mustArrayValue(summaries, 0, "Damage-Zusammenfassung fehlt.");
+  return {
+    damageType: first.damageType,
+    amount: summaries.reduce((total, summary) => total + summary.amount, 0),
+    cardsTrashed: summaries.reduce((total, summary) => total + summary.cardsTrashed, 0),
+    flatline: summaries.some((summary) => summary.flatline)
+  };
+}
+
+function setDamagePayload(legalAction: LegalAction, summary: DamageSummary): void {
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    damageResolved: true,
+    damageType: summary.damageType,
+    damageAmount: summary.amount,
+    cardsTrashed: summary.cardsTrashed,
+    flatline: summary.flatline
+  };
+}
+
+function resolveDamageOperation(state: GameState, legalAction: LegalAction, damageType: DamageType, amount: number, source: string): void {
+  const summary = doDamage(state, {
+    damageId: `${state.matchId}.${state.stateVersion}.${source}`,
+    damageType,
+    amount,
+    source: `operation:${source}`
+  });
+  setDamagePayload(legalAction, summary);
+}
+
+function requireRunnerTagged(state: GameState): void {
+  if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
 }
 
 function scoreAgenda(state: GameState, cardId: string): void {
@@ -2450,7 +2594,7 @@ function visibleCorpCard(state: GameState, id: CardInstanceId, viewer: Side, are
   const instance = mustInstance(state.cardInstances, id);
   const definition = definitionFor(state, id);
   const accessed = state.run?.accessedCardId === id;
-  const visible = viewer === "corp" || instance.rezzed || accessed || state.corp.scoreArea.includes(id) || state.corp.archives.includes(id);
+  const visible = viewer === "corp" || instance.rezzed || accessed || state.corp.scoreArea.includes(id) || (state.corp.archives.includes(id) && instance.faceup);
   if (!visible) {
     return {
       instanceId: hiddenVisibleCardId(id),
@@ -2460,6 +2604,12 @@ function visibleCorpCard(state: GameState, id: CardInstanceId, viewer: Side, are
     };
   }
   return visibleOwnCard(state, id);
+}
+
+function visibleCorpArchives(state: GameState, viewer: Side): VisibleCard[] {
+  return state.corp.archives
+    .filter((id) => viewer === "corp" || mustInstance(state.cardInstances, id).faceup)
+    .map((id) => visibleCorpCard(state, id, viewer, "root"));
 }
 
 
@@ -2743,7 +2893,7 @@ function usesMvp095CardPool(deck: DeckDefinition): boolean {
 
 function usesMvp094CardPool(deck: DeckDefinition): boolean {
   if (deck.id.endsWith("_094") || deck.id.includes("_0_94") || deck.id.includes("_v0_94")) return true;
-  return deck.cards.some((card) => card.id.startsWith("v094_"));
+  return deck.cards.some((card) => card.id.startsWith("v094_") || card.id.startsWith("onr_v1_"));
 }
 
 function usesMvp08CardPool(deck: DeckDefinition): boolean {
@@ -2837,10 +2987,10 @@ function canPlayCorpOperation(state: GameState, definition: CardDefinition): boo
   return Boolean(resolver && (resolver.canPlay?.(state) ?? true));
 }
 
-function resolveCorpOperation(state: GameState, definition: CardDefinition): void {
+function resolveCorpOperation(state: GameState, definition: CardDefinition, legalAction: LegalAction): void {
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
   if (!resolver) throw new Error(`Kein Operation-Resolver fuer ${definition.id}.`);
-  resolver.resolve(state);
+  resolver.resolve(state, legalAction);
 }
 
 function createInstance(side: Side, definitionId: string, copy: number, zone: CardInstance["zone"]): CardInstance {
