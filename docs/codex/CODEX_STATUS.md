@@ -2,7 +2,13 @@
 
 ## Current phase
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+Bestandsaufnahme und Dokumentenkonsolidierung nach V0.99/S01.
+
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+
+Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
+
+Current planning decision needed: local private O:NR-v1 test access must be explicitly scoped before further expansion. It currently has Engine harness tests and Web catalog/deck validation paths, but it is not a fully integrated server-authoritative match-start card pool.
 
 ## Status
 
@@ -225,6 +231,26 @@ S01 implementation is complete and locally verified for the current scope: side-
 `S01_implemented: true`
 
 `S01_verified: true`
+
+Bestandsaufnahme 2026-05-04 is complete.
+
+`bestandsaufnahme_2026_05_04_done: true`
+
+Current verification:
+
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, 170 tests after fixing Web Chronicle test discovery.
+- `corepack pnpm build`: pass, known Turbopack NFT warning remains for the `card-images` route trace.
+
+Audit findings:
+
+- README was stale and has been updated from V0.7/V0.8 planning to V0.99/S01 current state.
+- `vitest.config.ts` now includes `app/**/*.test.ts`, so `apps/web/app/chronicle.test.ts` runs in the normal Web package test command.
+- `docs/derived/MECHANICS_COMPLETION_PLAN.md` is now historical for M0 to M10; V0.94 to V0.99 are complete.
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md` is the current V0.99 matrix.
+- Local private O:NR-v1 data under ignored `data/local/` and `data/local-assets/` is present on this machine. It remains private/local and not versioned.
+- O:NR-v1 playable test access is partial: Engine harness and Web overlay exist, but server match-start integration, AI/multiplayer smokes, versioned manifest and final review are not complete.
 
 ## Goal
 
@@ -1636,9 +1662,10 @@ Remaining known limits:
 
 - JSON-File-Storage is intentionally simple; SQLite remains a later hardening target.
 - Localhost operation is the supported private MVP path. HTTPS/WSS are required outside localhost.
-- Public platform features, matchmaking, accounts, deckbuilder, chat and broad card pool remain out of scope.
+- Public platform features, matchmaking, accounts, broad/free deckbuilder, chat and broad card pool remain out of scope. The local V0.6+ deck editor is permitted only as private local deck/snapshot tooling.
 - V0.94 Damage/Flatline is implemented; Core Damage, Damage Prevention, Avoid, Interrupt and Replacement remain later gated mechanics.
 - V0.91 private local scans/assets are allowed only as display artifacts for private local use. Public distribution, official logos, standalone card frames, card backs, external card database dependencies, and Engine/AI/GameState/Replay/StateHash image use remain excluded.
+- Local O:NR-v1 playable test access is not yet a fully integrated product scope. It needs a separate decision and review before broader use.
 
 ## Local tool notes
 
@@ -1648,7 +1675,7 @@ Remaining known limits:
 
 ## Next step
 
-The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap:
+The post-MVP-0.4 roadmap through V0.99 is complete:
 
 - V0.5: card import and card catalog.
 - V0.6: deck editor and match setup foundation.
@@ -1665,7 +1692,14 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.98: Identity setup/modifiers and Hidden-Zone tools.
 - V0.99: Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity.
 
-Current gate: V0.99 implementation, validation and documentation are complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes. M11+ mechanics, Prevention/Avoid/Interrupt/Replacement, Set Aside, Remove from Game, Ownership/Control changes and full deckbuilding/format rules remain planned only until their own gates.
+Current gate: V0.99 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+
+Next planning decision:
+
+1. Decide whether local private O:NR-v1 test access becomes a formal gated scope, remains engine-only/local experimental access, or is removed from the versioned playability path.
+2. Choose the next stabilization or mechanics gate: V1.0 private hardening, M2 setup/mulligan/deckout, M11 Prevention/Avoid/Interrupt/Replacement, M12 deeper deckbuilding/format rules, or a small formal O:NR card slice.
+
+M11+ mechanics, Prevention/Avoid/Interrupt/Replacement, Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates.
 
 Detailed planning artifacts available:
 

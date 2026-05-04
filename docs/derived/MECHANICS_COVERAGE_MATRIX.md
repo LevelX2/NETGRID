@@ -6,7 +6,9 @@ Maschinenlesbar: `data/rules/mechanics-coverage-0.99.json`
 
 ## Zweck
 
-Diese Matrix normalisiert den aktuellen Mechanikstand nach V0.96. Sie ersetzt keine Regelreferenz, sondern ist das Gate-Artefakt, das spätere Mechanikarbeit vor verdeckten Alt-Deviations schützt.
+Diese Matrix normalisiert den aktuellen Mechanikstand nach V0.99. Sie ersetzt keine Regelreferenz, sondern ist das Gate-Artefakt, das spätere Mechanikarbeit vor verdeckten Alt-Deviations schützt.
+
+Hinweis nach Bestandsaufnahme 2026-05-04: Der lokale private O:NR-v1-Testzugang nutzt vorhandene Mechaniken in einem Engine-Harness und über lokale ignorierte Web-Overlay-Daten. Er erweitert diese Matrix nicht automatisch zu einem vollständigen offiziellen Kartenpool. Für reguläre Matchstart-Spielbarkeit braucht O:NR einen eigenen Gate- oder Stabilisierungsscope.
 
 Statuswerte:
 

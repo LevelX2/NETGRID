@@ -2,7 +2,7 @@
 
 ## Stand
 
-Stand dieser Übersicht: 2026-05-03.
+Stand dieser Übersicht: 2026-05-04.
 
 ## Vorhandene Primärquellen
 
@@ -22,6 +22,13 @@ Stand dieser Übersicht: 2026-05-03.
 - `data/decks/demo-decks.json`
 
 Diese Datei wurde aus dem nachgereichten Demo-Deck-Paket positioniert. Sie ist als vorhandene strukturierte Deckquelle zu behandeln, aber noch nicht als geprüfter oder eingefrorener Derived-Requirements-Stand.
+
+## Lokale Nicht Versionierte Quellen Und Artefakte
+
+- `data/local/card-import/onr-v1-limited/`
+- `data/local-assets/card-images/`
+
+Diese Ordner sind bewusst ignoriert und enthalten private lokale O:NR-v1-/O:NR-1996-Artefakte auf dieser Maschine. Sie dürfen nicht als versionierte Primärquelle behandelt werden. Für eine reguläre Projektphase braucht der O:NR-Testzugang ein eigenes Gate mit versionierter Scope-, Manifest-, Test- und Review-Dokumentation.
 
 ## Ergänzende Quellen im Repository
 

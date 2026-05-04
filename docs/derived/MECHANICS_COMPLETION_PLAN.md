@@ -1,7 +1,7 @@
 # Mechanik-Komplettierungsplan
 
-Status: detaillierte Planungsfassung; V0.94/V0.95-Detailpläne liegen vor
-Stand: 2026-05-03
+Status: historische Planungsfassung; M0 bis M10 wurden bis V0.99 umgesetzt
+Stand: aktualisiert durch Bestandsaufnahme 2026-05-04
 Arbeitsbasis:
 
 - `docs/codex/CODEX_STATUS.md`
@@ -15,6 +15,8 @@ Arbeitsbasis:
 - `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`
 
 ## 1. Kurzentscheidung
+
+Aktualisierung 2026-05-04: Dieser Plan hat seinen ursprünglichen Zweck erfüllt. Die hier geplante Sequenz M0 bis M10 wurde in V0.92 bis V0.99 umgesetzt und dokumentiert. Der Plan bleibt als historische Begründung der Gate-Reihenfolge erhalten. Für aktuelle Anschlussentscheidungen gilt `docs/derived/BESTANDSAUFNAHME_2026-05-04.md` zusammen mit `docs/derived/MECHANICS_COVERAGE_MATRIX.md`.
 
 Nach V0.9 ist die spielbare Engine stabil genug, um die noch fehlenden Regelmechaniken geplant und in kleinen Gates nachzuziehen. V0.91 ist ein getrenntes Kartenbild-Asset-Gate und darf nicht mit Mechanikarbeit vermischt werden.
 
@@ -474,17 +476,22 @@ Die wichtigste Abschlussregel: Es darf keine Karte `playable` oder `deck_legal` 
 | Deckeditor schaltet mechanisch blockierte Karten frei | Ungedeckte Regeln im Match. | Matchstart revalidiert Mechanik-Coverage und Manifeststatus. |
 | V0.91 Assets vermischen sich mit Match-State | Hidden-Info- oder StateHash-Problem. | Bilder bleiben reine lokale Anzeige-Artefakte. |
 
-## 12. Nächster konkreter Planungsschritt
+## 12. Aktueller Anschluss Nach V0.99
 
-Aktueller Anschluss nach V0.93:
+Die früher in diesem Abschnitt empfohlenen V0.94-/V0.95-Schritte sind erledigt. Aktueller Anschluss nach der Bestandsaufnahme 2026-05-04:
 
-- `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
-- `docs/derived/MVP_0.94_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/derived/MVP_0.99_FINAL_REVIEW.md`
+- `docs/derived/S01_REQUIREMENTS.md`
 
-Der nächste empfohlene Gate-Schritt ist V0.94 Requirements Freeze für Damage/Flatline. V0.95 Resources folgt danach, sofern die Reihenfolge nicht ausdrücklich geändert wird.
+Der nächste Schritt ist eine Scope-Entscheidung:
 
-Empfohlener nächster reiner Planungsprompt:
+1. O:NR-v1-Testzugang formal als lokalen privaten Gate-Scope integrieren, engine-only/lokal experimentell lassen oder entfernen.
+2. V1.0-/Stabilisierungsscope starten.
+3. M2 Setup/Mulligan/Deckout, M11 Prevention/Avoid/Interrupt/Replacement oder M12 tiefere Deckbuilding-/Formatregeln planen.
+
+Historischer Planungsprompt, inzwischen nicht mehr aktuell:
 
 ```text
 Erstelle den Requirements-Freeze für M0/M1: Mechanik-Inventar und allgemeines Timing-/Ability-/Effect-Fundament. Nicht implementieren.

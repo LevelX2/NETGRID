@@ -2,13 +2,15 @@
 
 ## Stand
 
-Stand: 2026-05-03.
+Stand: 2026-05-04.
 
 MVP 0.3 und MVP 0.4 sind abgeschlossen. MVP 0.4 hat einen kleinen kontrollierten Kartenpool, V0.4-Decks, kuratierte Deckvalidierung, Hardware, ein einfaches Upgrade, Tags, `remove_tag`, Tag-Punishment und KI-Simulation geliefert.
 
 Die neue Planungsentscheidung lautet: **UI-Neugestaltung und Designgestaltung kommen in V0.7.** Bis dahin laufen Analysen; V0.5 und V0.6 sollen nicht durch ein großes UI-Redesign blockiert werden.
 
-Aktueller Fortschritt: V0.5 bis V0.9 sind abgeschlossen. V0.91 Requirements sind eingefroren, aber offizielle Kartenbilder bleiben blockiert, bis eine explizite Asset-Freigabe oder eine dokumentierte private lokale Nutzungsentscheidung vorliegt.
+Aktueller Fortschritt: V0.5 bis V0.9, V0.91 Requirements, V0.92/V0.93, V0.94 bis V0.99 und S01 sind abgeschlossen. V0.91 erlaubt private lokale O:NR-1996-Frontbilder nur als Anzeige-Artefakte; öffentliche Assetnutzung, Card Backs, standalone Frames/Logos und Engine-/KI-/Replay-/StateHash-Einfluss bleiben ausgeschlossen.
+
+Nach der Bestandsaufnahme vom 2026-05-04 ist zusätzlich ein lokaler privater O:NR-v1-Testzugang sichtbar: Engine-Harness-Tests und Web-Overlay-Pfade existieren, aber serverseitiger Matchstart, AI-/Multiplayer-Smokes, versioniertes Manifest und Final Review fehlen noch. Das ist eine eigene Scope-Entscheidung vor weiterem Ausbau.
 
 ## Gestaffelte Roadmap
 
@@ -37,9 +39,17 @@ Aktueller Fortschritt: V0.5 bis V0.9 sind abgeschlossen. V0.91 Requirements sind
 
 ## Nächster Schritt
 
-Nächster gate-basierter Schritt ist entweder die **V0.91 Asset-Nutzungsfreigabe** oder eine spätere **V1.0-/Stabilisierung-/Betriebsentscheidung**. V0.91 darf nicht implementiert werden, solange `ready_for_implementation: false` gilt.
+Nächster gate-basierter Schritt ist eine **Scope-Entscheidung nach V0.99/S01**:
+
+- lokalen privaten O:NR-v1-Testzugang formal integrieren, engine-only/lokal experimentell lassen oder entfernen,
+- V1.0-/Stabilisierungsscope starten,
+- oder ein Mechanik-Folgegate wie M2 Setup/Mulligan/Deckout, M11 Prevention/Avoid/Interrupt/Replacement oder M12 tiefere Deckbuilding-/Formatregeln wählen.
+
+V0.91 ist für private lokale O:NR-1996-Frontbilder als Anzeige-Artefakte freigegeben, aber nicht für öffentliche Distribution oder Gameplay-Einfluss.
 
 Wichtige Arbeitsgrundlage: `docs/derived/POST_MVP_0.4_ROADMAP.md`.
+
+Aktuelle Bestandsaufnahme: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 
 Detailpläne:
 
