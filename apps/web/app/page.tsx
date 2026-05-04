@@ -381,35 +381,46 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
 };
 
 const LOCAL_CARD_IMAGE_IDS = new Set([
+  "corp_identity_001",
   "efficient_fracter",
+  "runner_identity_001",
   "simple_agenda",
   "simple_barrier_ice",
   "simple_code_gate_ice",
   "simple_decoder",
   "simple_draw_event",
+  "simple_draw_operation",
   "simple_economy_asset",
   "simple_economy_event",
+  "simple_economy_operation",
   "simple_fracter",
   "simple_killer",
   "simple_priority_agenda",
   "simple_run_event",
   "simple_sentry_ice",
+  "simple_setup_hardware",
   "simple_tag_ice",
+  "simple_tag_punishment_operation",
   "simple_taxing_barrier_ice",
+  "simple_upgrade",
   "v08_adaptive_killer",
+  "v08_archive_planning_operation",
   "v08_burst_credit_event",
   "v08_cashout_asset",
+  "v08_credit_surge_operation",
   "v08_deep_draw_event",
   "v08_gate_ice",
+  "v08_memory_chip",
   "v08_overclock_run_event",
   "v08_precise_decoder",
   "v08_steady_fracter",
   "v08_project_agenda",
   "v08_wall_ice",
-  "v08_watchdog_ice"
+  "v08_watchdog_ice",
+  "v094_neural_sentry_ice"
 ]);
 
-const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-ice-strength-left";
+const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-generated-card-art-1";
 
 function localCardImageUrl(cardId: string): string | undefined {
   const encodedCardId = encodeURIComponent(cardId);
