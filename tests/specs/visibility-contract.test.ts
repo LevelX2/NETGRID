@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { catalogDetailResponse, catalogListResponse, catalogStatusSummaryResponse } from "../../apps/web/app/api/cards/catalog-data";
-import { deckSnapshotsResponse, deckTemplatesResponse } from "../../apps/web/app/api/decks/deck-data";
+import { deckSnapshotsResponse, deckTemplatesResponse, deckValidationResponse } from "../../apps/web/app/api/decks/deck-data";
 
 describe("Client visibility contract", () => {
   it("keeps the browser page away from full GameState and engine authority", () => {
@@ -139,5 +139,33 @@ describe("Client visibility contract", () => {
     expect(serialized).not.toContain("joinToken");
     expect(serialized).not.toContain("stateSnapshots");
     expect(serialized).not.toContain("undoSnapshots");
+  });
+
+  it("validates locally playable O:NR cards through the deck API when the local overlay is present", () => {
+    if (catalogDetailResponse("onr_v1_079_bodyweight-synthetic-blood").status === 404) return;
+
+    const response = deckValidationResponse({
+      deckId: "local_onr_runner_validation_smoke",
+      deckVersion: "0.6.0-local",
+      name: "O:NR Runner Validation Smoke",
+      side: "runner",
+      identityCardId: "runner_identity_001",
+      cardPoolSnapshotId: "card-snapshot-0.8",
+      formatProfileId: "local-demo-v0.8",
+      cards: [
+        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 3 },
+        { cardId: "onr_v1_040_loony-goon", quantity: 3 },
+        { cardId: "simple_killer", quantity: 3 },
+        { cardId: "simple_economy_event", quantity: 3 }
+      ],
+      createdAt: "2026-05-04T00:00:00.000Z",
+      updatedAt: "2026-05-04T00:00:00.000Z"
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.validation.ok).toBe(true);
+    expect(response.body.validation.errors).toEqual([]);
+    expect(JSON.stringify(response.body)).not.toContain("Unknown card onr_v1_079_bodyweight-synthetic-blood");
+    expect(JSON.stringify(response.body)).not.toContain("Unknown card onr_v1_040_loony-goon");
   });
 });

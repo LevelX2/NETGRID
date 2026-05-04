@@ -591,6 +591,562 @@ export const MVP_0_94_BASELINE: RulesBaseline = {
   simulationSchemaVersion: "0.94.0"
 };
 
+const ONR_V1_LOCAL_PRIVATE = "onr_v1_limited_private_local";
+
+function onrBreaker(params: {
+  id: string;
+  title: string;
+  subtypes: string[];
+  installCost: number;
+  memoryCost: number;
+  strength: number;
+  breakCost: number;
+  pumpCost: number;
+  iceSubtype: string;
+  iceLabel: string;
+}): CardDefinition {
+  return {
+    id: params.id,
+    title: params.title,
+    side: "runner",
+    type: "program",
+    subtypes: params.subtypes,
+    implementationStatus: "playable_mvp",
+    installCost: params.installCost,
+    memoryCost: params.memoryCost,
+    strength: params.strength,
+    rulesText: `${params.breakCost} Credits: Break 1 ${params.iceLabel} subroutine. ${params.pumpCost} Credits: +1 strength.`,
+    abilities: [
+      { id: `${params.id}_pump`, type: "pump_strength", cost: { credits: params.pumpCost }, amount: 1, timingPoint: "run.encounter_ice" },
+      { id: `${params.id}_break`, type: "break_subroutine", cost: { credits: params.breakCost }, iceSubtype: params.iceSubtype, count: 1, timingPoint: "run.encounter_ice" }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", ONR_V1_LOCAL_PRIVATE]
+  };
+}
+
+function onrIce(params: {
+  id: string;
+  title: string;
+  subtypes: string[];
+  rezCost: number;
+  strength: number;
+  rulesText: string;
+  subroutines: SubroutineDefinition[];
+  mechanics?: string[];
+}): CardDefinition {
+  return {
+    id: params.id,
+    title: params.title,
+    side: "corp",
+    type: "ice",
+    subtypes: params.subtypes,
+    implementationStatus: "playable_mvp",
+    rezCost: params.rezCost,
+    strength: params.strength,
+    rulesText: params.rulesText,
+    subroutines: params.subroutines,
+    mechanics: ["install_ice", "rez_ice", "encounter_ice", ...(params.mechanics ?? []), ONR_V1_LOCAL_PRIVATE]
+  };
+}
+
+function onrEtr(id: string): SubroutineDefinition {
+  return { id, type: "end_the_run" };
+}
+
+function onrNetDamage(id: string, amount: number): SubroutineDefinition {
+  return { id, type: "do_damage", damageType: "net", amount };
+}
+
+const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
+  {
+    id: "onr_v1_079_bodyweight-synthetic-blood",
+    title: "Bodyweight™ Synthetic Blood",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 2,
+    rulesText: "Draw five cards.",
+    mechanics: ["play_event", "draw_cards", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_095_jack-n-joe",
+    title: "Jack 'n' Joe",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Draw three cards.",
+    mechanics: ["play_event", "draw_cards", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_097_livewires-contacts",
+    title: "Livewire's Contacts",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Gain 3 credits.",
+    mechanics: ["play_event", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_108_score",
+    title: "Score!",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 5,
+    rulesText: "Gain 9 credits.",
+    mechanics: ["play_event", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  onrBreaker({
+    id: "onr_v1_006_black-dahlia",
+    title: "Black Dahlia",
+    subtypes: ["icebreaker", "killer"],
+    installCost: 5,
+    memoryCost: 1,
+    strength: 10,
+    breakCost: 2,
+    pumpCost: 2,
+    iceSubtype: "sentry",
+    iceLabel: "sentry"
+  }),
+  onrBreaker({
+    id: "onr_v1_014_codecracker",
+    title: "Codecracker",
+    subtypes: ["icebreaker"],
+    installCost: 0,
+    memoryCost: 1,
+    strength: 2,
+    breakCost: 0,
+    pumpCost: 1,
+    iceSubtype: "code_gate",
+    iceLabel: "code gate"
+  }),
+  onrBreaker({
+    id: "onr_v1_016_cyfermaster",
+    title: "Cyfermaster™",
+    subtypes: ["icebreaker"],
+    installCost: 5,
+    memoryCost: 1,
+    strength: 4,
+    breakCost: 2,
+    pumpCost: 1,
+    iceSubtype: "code_gate",
+    iceLabel: "code gate"
+  }),
+  onrBreaker({
+    id: "onr_v1_040_loony-goon",
+    title: "Loony Goon",
+    subtypes: ["icebreaker", "killer"],
+    installCost: 0,
+    memoryCost: 1,
+    strength: 4,
+    breakCost: 1,
+    pumpCost: 1,
+    iceSubtype: "sentry",
+    iceLabel: "sentry"
+  }),
+  onrBreaker({
+    id: "onr_v1_060_shaka",
+    title: "Shaka",
+    subtypes: ["icebreaker", "killer"],
+    installCost: 2,
+    memoryCost: 1,
+    strength: 4,
+    breakCost: 1,
+    pumpCost: 2,
+    iceSubtype: "sentry",
+    iceLabel: "sentry"
+  }),
+  onrBreaker({
+    id: "onr_v1_072_wild-card",
+    title: "Wild Card",
+    subtypes: ["icebreaker", "killer"],
+    installCost: 0,
+    memoryCost: 1,
+    strength: 0,
+    breakCost: 0,
+    pumpCost: 3,
+    iceSubtype: "sentry",
+    iceLabel: "sentry"
+  }),
+  onrBreaker({
+    id: "onr_v1_073_wizards-book",
+    title: "Wizard's Book",
+    subtypes: ["icebreaker"],
+    installCost: 2,
+    memoryCost: 1,
+    strength: 5,
+    breakCost: 0,
+    pumpCost: 2,
+    iceSubtype: "code_gate",
+    iceLabel: "code gate"
+  }),
+  {
+    id: "onr_v1_145_wutech-mem-chip",
+    title: "WuTech Mem Chip",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["chip"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "+1 memory limit.",
+    mechanics: ["install_hardware", "modify_memory_limit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_220_tycho-extension",
+    title: "Tycho Extension",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 4,
+    rulesText: "No additional ability.",
+    mechanics: ["install_remote", "advance", "score", "steal", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_281_accounts-receivable",
+    title: "Accounts Receivable",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 5,
+    rulesText: "Gain 9 credits.",
+    mechanics: ["play_operation", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_282_annual-reviews",
+    title: "Annual Reviews",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Draw three cards.",
+    mechanics: ["play_operation", "draw_cards", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_285_closed-accounts",
+    title: "Closed Accounts",
+    side: "corp",
+    type: "operation",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Play only if Runner is tagged. Runner loses all credits.",
+    mechanics: ["play_operation", "runner_is_tagged", "runner_lose_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_287_datapool-by-zetatech",
+    title: "Datapool® by Zetatech",
+    side: "corp",
+    type: "operation",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Play only if Runner is tagged. Give Runner two tags.",
+    mechanics: ["play_operation", "runner_is_tagged", "give_runner_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_288_day-shift",
+    title: "Day Shift",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Draw two cards and gain 1 credit.",
+    mechanics: ["play_operation", "draw_cards", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_290_efficiency-experts",
+    title: "Efficiency Experts",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Gain 3 credits.",
+    mechanics: ["play_operation", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_293_netwatch-credit-voucher",
+    title: "Netwatch Credit Voucher",
+    side: "corp",
+    type: "operation",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Play only if Runner is tagged. Give Runner 1 tag and gain 1 credit.",
+    mechanics: ["play_operation", "runner_is_tagged", "give_runner_tag", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_295_night-shift",
+    title: "Night Shift",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Gain 2 credits and draw one card.",
+    mechanics: ["play_operation", "gain_credits", "draw_cards", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_301_punitive-counterstrike",
+    title: "Punitive Counterstrike",
+    side: "corp",
+    type: "operation",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Play only if Runner is tagged. Do 2 meat damage.",
+    mechanics: ["play_operation", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_302_scorched-earth",
+    title: "Scorched Earth",
+    side: "corp",
+    type: "operation",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    cost: 3,
+    rulesText: "Play only if Runner is tagged. Do 4 meat damage.",
+    mechanics: ["play_operation", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_307_urban-renewal",
+    title: "Urban Renewal",
+    side: "corp",
+    type: "operation",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    cost: 6,
+    rulesText: "Play only if Runner is tagged. Do 5 meat damage.",
+    mechanics: ["play_operation", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
+  },
+  onrIce({
+    id: "onr_v1_230_cortical-scanner",
+    title: "Cortical Scanner",
+    subtypes: ["code_gate"],
+    rezCost: 7,
+    strength: 3,
+    rulesText: "End the run. End the run. End the run.",
+    subroutines: [onrEtr("onr_v1_230_cortical_scanner_etr_1"), onrEtr("onr_v1_230_cortical_scanner_etr_2"), onrEtr("onr_v1_230_cortical_scanner_etr_3")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_232_crystal-wall",
+    title: "Crystal Wall",
+    subtypes: ["wall"],
+    rezCost: 4,
+    strength: 3,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_232_crystal_wall_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_237_data-wall",
+    title: "Data Wall",
+    subtypes: ["wall"],
+    rezCost: 1,
+    strength: 0,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_237_data_wall_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_238_data-wall-2-0",
+    title: "Data Wall 2.0",
+    subtypes: ["wall"],
+    rezCost: 2,
+    strength: 1,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_238_data_wall_2_0_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_239_endless-corridor",
+    title: "Endless Corridor",
+    subtypes: ["code_gate"],
+    rezCost: 4,
+    strength: 2,
+    rulesText: "End the run. End the run.",
+    subroutines: [onrEtr("onr_v1_239_endless_corridor_etr_1"), onrEtr("onr_v1_239_endless_corridor_etr_2")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_244_filter",
+    title: "Filter",
+    subtypes: ["code_gate"],
+    rezCost: 0,
+    strength: 0,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_244_filter_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_245_fire-wall",
+    title: "Fire Wall",
+    subtypes: ["wall"],
+    rezCost: 5,
+    strength: 4,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_245_fire_wall_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_252_keeper",
+    title: "Keeper",
+    subtypes: ["code_gate"],
+    rezCost: 4,
+    strength: 4,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_252_keeper_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_253_laser-wire",
+    title: "Laser Wire",
+    subtypes: ["wall"],
+    rezCost: 4,
+    strength: 2,
+    rulesText: "Do 1 net damage. End the run.",
+    subroutines: [onrNetDamage("onr_v1_253_laser_wire_net_damage", 1), onrEtr("onr_v1_253_laser_wire_etr")],
+    mechanics: ["damage", "flatline", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_256_mazer",
+    title: "Mazer",
+    subtypes: ["code_gate"],
+    rezCost: 5,
+    strength: 5,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_256_mazer_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_257_nerve-labyrinth",
+    title: "Nerve Labyrinth",
+    subtypes: ["code_gate"],
+    rezCost: 6,
+    strength: 4,
+    rulesText: "Do 2 net damage. End the run.",
+    subroutines: [onrNetDamage("onr_v1_257_nerve_labyrinth_net_damage", 2), onrEtr("onr_v1_257_nerve_labyrinth_etr")],
+    mechanics: ["damage", "flatline", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_259_in-the-face",
+    title: "π in the 'Face",
+    subtypes: ["sentry", "deckrash"],
+    rezCost: 5,
+    strength: 3,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_259_in_the_face_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_261_quandary",
+    title: "Quandary",
+    subtypes: ["code_gate"],
+    rezCost: 2,
+    strength: 2,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_261_quandary_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_262_razor-wire",
+    title: "Razor Wire",
+    subtypes: ["wall"],
+    rezCost: 6,
+    strength: 3,
+    rulesText: "Do 2 net damage. End the run.",
+    subroutines: [onrNetDamage("onr_v1_262_razor_wire_net_damage", 2), onrEtr("onr_v1_262_razor_wire_etr")],
+    mechanics: ["damage", "flatline", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_263_reinforced-wall",
+    title: "Reinforced Wall",
+    subtypes: ["wall"],
+    rezCost: 8,
+    strength: 4,
+    rulesText: "End the run. End the run.",
+    subroutines: [onrEtr("onr_v1_263_reinforced_wall_etr_1"), onrEtr("onr_v1_263_reinforced_wall_etr_2")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_265_rock-is-strong",
+    title: "Rock Is Strong",
+    subtypes: ["wall"],
+    rezCost: 6,
+    strength: 5,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_265_rock_is_strong_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_266_scramble",
+    title: "Scramble",
+    subtypes: ["code_gate"],
+    rezCost: 3,
+    strength: 3,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_266_scramble_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_269_shotgun-wire",
+    title: "Shotgun Wire",
+    subtypes: ["wall"],
+    rezCost: 8,
+    strength: 5,
+    rulesText: "Do 2 net damage. End the run.",
+    subroutines: [onrNetDamage("onr_v1_269_shotgun_wire_net_damage", 2), onrEtr("onr_v1_269_shotgun_wire_etr")],
+    mechanics: ["damage", "flatline", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_270_sleeper",
+    title: "Sleeper",
+    subtypes: ["code_gate"],
+    rezCost: 1,
+    strength: 1,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_270_sleeper_etr")],
+    mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_278_wall-of-ice",
+    title: "Wall of Ice",
+    subtypes: ["wall"],
+    rezCost: 13,
+    strength: 6,
+    rulesText: "Do 2 net damage. Do 2 net damage. End the run. End the run.",
+    subroutines: [
+      onrNetDamage("onr_v1_278_wall_of_ice_net_damage_1", 2),
+      onrNetDamage("onr_v1_278_wall_of_ice_net_damage_2", 2),
+      onrEtr("onr_v1_278_wall_of_ice_etr_1"),
+      onrEtr("onr_v1_278_wall_of_ice_etr_2")
+    ],
+    mechanics: ["damage", "flatline", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_279_wall-of-static",
+    title: "Wall of Static",
+    subtypes: ["wall"],
+    rezCost: 3,
+    strength: 2,
+    rulesText: "End the run.",
+    subroutines: [onrEtr("onr_v1_279_wall_of_static_etr")],
+    mechanics: ["end_the_run"]
+  })
+];
+
 export const DEMO_CARDS: CardDefinition[] = [
   {
     id: "runner_identity_001",
@@ -1085,7 +1641,8 @@ export const DEMO_CARDS: CardDefinition[] = [
       { id: "v08_watchdog_ice_etr", type: "end_the_run" }
     ],
     mechanics: ["install_ice", "rez_ice", "encounter_ice", "give_runner_tag", "end_the_run", "v08_local_original"]
-  }
+  },
+  ...ONR_V1_LIMITED_PLAYABLE_CARDS
 ];
 
 export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> = Object.fromEntries(
