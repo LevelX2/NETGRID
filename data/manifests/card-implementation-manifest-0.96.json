@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "card-implementation-manifest-v0.96",
+  "id": "mvp-0.96-card-implementation-manifest",
+  "status": "implemented_for_v0.96_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-0.95.json",
+  "sourceMode": "local_original",
+  "gateAssertions": {
+    "allPlayableCardsHaveResolver": true,
+    "allPlayableCardsHaveUnitScenarioVisibilityReplayAiAndMultiplayerCoverage": true,
+    "noOfficialCardsOrAssets": true,
+    "importDoesNotGrantPlayability": true,
+    "noV097PlusMechanicsEnabled": true
+  },
+  "cards": [
+    {
+      "cardCode": "v096_trace_probe_ice",
+      "title": "Trace Probe ICE",
+      "status": "playable_mvp",
+      "sourceMode": "local_original",
+      "resolver": "corp_ice_trace_add_tag",
+      "visibilityClass": "public_trace_bid_sequence",
+      "riskFlags": ["public_bid_choice", "credit_cost_revalidation", "tag_effect"],
+      "roleTags": ["trace", "tag_pressure", "sentry"],
+      "requirementIds": ["M096-TRACE-001", "M096-TRACE-002", "M096-TRACE-007", "M096-VISIBILITY-001", "M096-REPLAY-001", "M096-CARD-001"],
+      "unitTests": ["V096-T002", "V096-T003", "V096-T004", "V096-T005", "V096-T006", "V096-T007", "V096-T008", "V096-T009", "V096-T012", "V096-T017"],
+      "scenarioTests": ["SCN-V096-001", "SCN-V096-002"],
+      "visibilityTests": ["V096-T010", "V096-T011"],
+      "replayTests": ["V096-T012"],
+      "aiSmokeTests": ["V096-T014"],
+      "multiplayerSmokeTests": ["V096-T013", "V096-T015"]
+    }
+  ]
+}

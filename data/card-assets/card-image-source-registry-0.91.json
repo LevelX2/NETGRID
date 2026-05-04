@@ -1,0 +1,130 @@
+{
+  "schemaVersion": "0.91.1",
+  "artifactType": "card_image_source_registry",
+  "status": "private_local_onr_1996_source_scope_accepted",
+  "generatedFor": "MVP 0.91 card image asset gate",
+  "sourceCheckedAt": "2026-05-03",
+  "noImagesDownloaded": true,
+  "noOfficialAssetsIncluded": true,
+  "sources": [
+    {
+      "sourceId": "project_owner_physical_onr_1996_collection",
+      "kind": "private_primary_physical_source",
+      "owner": "project_owner",
+      "technicalUse": "preferred_private_scan_source",
+      "usageFinding": "The project owner states that the Original Netrunner 1996 cards are physically owned and will be used only privately and with family.",
+      "decision": "allowed_for_private_local_front_scan_cache",
+      "allowedForV091": true,
+      "allowedAssets": [
+        "front_scans_only"
+      ],
+      "excludedAssets": [
+        "card_backs",
+        "standalone_frames",
+        "standalone_logos"
+      ],
+      "notes": [
+        "No image files are versioned.",
+        "Self-scans or local files supplied by the project owner are preferred over public scraping."
+      ]
+    },
+    {
+      "sourceId": "reddit_original_netrunner_mpc_formatted",
+      "kind": "community_archive_index",
+      "url": "https://www.reddit.com/r/Netrunner/comments/hu282l/original_netrunner_mpcformatted/",
+      "owner": "community",
+      "technicalUse": "candidate_gap_fill_or_quality_reference",
+      "usageFinding": "Community thread points to prepared Original Netrunner scans for Limited 1.0, Unlimited 2.0, Proteus 2.1, Classic 2.2 and some promo/Silent Impact material. The thread describes sources such as EmergencyShutdown.net, Wayback copies of NetrunnerOnline and fresh community scans.",
+      "decision": "allowed_for_private_local_reference_only",
+      "allowedForV091": true,
+      "conditions": [
+        "private_local_family_use_only",
+        "no_public_redistribution",
+        "no_versioned_binary_assets",
+        "no_card_backs",
+        "preserve_legal_notices_if_present"
+      ]
+    },
+    {
+      "sourceId": "netrunneronline_wayback_archive",
+      "kind": "historical_archive_candidate",
+      "url": "https://www.netrunneronline.com/",
+      "owner": "historical_community_site",
+      "technicalUse": "candidate_historical_reference",
+      "usageFinding": "Historical community references identify NetrunnerOnline and Wayback copies as a source for Original Netrunner card images and data. It is not treated as a public license.",
+      "decision": "candidate_private_reference_only",
+      "allowedForV091": false,
+      "blockReasons": [
+        "requires_manual_source_validation",
+        "not_a_license"
+      ]
+    },
+    {
+      "sourceId": "emergencyshutdown_archive",
+      "kind": "historical_archive_candidate",
+      "url": "https://emergencyshutdown.net/",
+      "owner": "historical_community_site",
+      "technicalUse": "candidate_historical_reference",
+      "usageFinding": "Community threads identify EmergencyShutdown.net as a former full Original Netrunner database with images, but the site is currently not a stable live source.",
+      "decision": "candidate_private_reference_only",
+      "allowedForV091": false,
+      "blockReasons": [
+        "site_unavailable_or_unstable",
+        "requires_wayback_or_mirror_validation",
+        "not_a_license"
+      ]
+    },
+    {
+      "sourceId": "ccg_trader_onr_set_database",
+      "kind": "set_and_card_database_reference",
+      "url": "https://www.ccgtrader.net/games/netrunner-ccg/",
+      "owner": "CCG Trader",
+      "technicalUse": "set_list_and_card_identity_reference",
+      "usageFinding": "CCG Trader provides a current database page for Original Netrunner CCG sets and confirms set names and card counts.",
+      "decision": "allowed_for_metadata_reference_only",
+      "allowedForV091": true,
+      "allowedAssets": [
+        "metadata_reference"
+      ],
+      "excludedAssets": [
+        "bulk_card_images"
+      ]
+    },
+    {
+      "sourceId": "netrunnerdb_api_v3_printings",
+      "kind": "android_netrunner_api_schema_reference",
+      "url": "https://api.netrunnerdb.com/api/docs/printings%2Fall_printings",
+      "owner": "NetrunnerDB / Null Signal Games",
+      "technicalUse": "not_selected_for_onr_1996",
+      "usageFinding": "NetrunnerDB image metadata is useful for Android: Netrunner, not the selected Original Netrunner 1996 scope.",
+      "decision": "not_selected_for_current_scope",
+      "allowedForV091": false
+    },
+    {
+      "sourceId": "null_signal_visual_assets",
+      "kind": "primary_asset_guidelines",
+      "url": "https://nullsignal.games/about/nsg-visual-assets/",
+      "owner": "Null Signal Games",
+      "technicalUse": "policy_reference_only",
+      "usageFinding": "Null Signal public visual asset permission excludes card art, card frames and card backs; it is not relevant as a positive source for Original Netrunner 1996 scans.",
+      "decision": "not_selected_for_current_scope",
+      "allowedForV091": false
+    }
+  ],
+  "selectedSource": "project_owner_physical_onr_1996_collection",
+  "secondaryPrivateReferenceSources": [
+    "reddit_original_netrunner_mpc_formatted",
+    "ccg_trader_onr_set_database"
+  ],
+  "decision": {
+    "decision": "private_local_usage_decision_accepted",
+    "originalNetrunner1996FrontImagesAllowed": true,
+    "selfScanAllowed": true,
+    "approvedCommunityArchiveDownloadAllowed": true,
+    "localCacheAllowed": true,
+    "versionImageUrlsAllowed": false,
+    "publicRedistributionAllowed": false,
+    "cardBacksAllowed": false,
+    "readyForImplementation": true
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": "0.91.1",
+  "artifactType": "card_image_policy",
+  "policyId": "card-image-policy-0.91-private-local-onr-1996",
+  "status": "private_local_usage_decision_accepted",
+  "generatedFor": "MVP 0.91 card image asset gate",
+  "decidedAt": "2026-05-03",
+  "decisionOwner": "project_owner",
+  "readyForImplementation": true,
+  "decisionSummary": "The project owner accepts private local use of Original Netrunner 1996 WotC card front images for personal and family use only, based on ownership of the physical cards. This is not a public license and does not allow redistribution.",
+  "assetScope": {
+    "allowedGame": "Original Netrunner CCG",
+    "allowedPublisher": "Wizards of the Coast",
+    "allowedYears": [
+      1996,
+      1999
+    ],
+    "allowedSets": [
+      "Limited 1.0",
+      "Unlimited 2.0",
+      "Proteus 2.1",
+      "Classic 2.2",
+      "owned_promos_if_physically_owned"
+    ],
+    "allowedSides": [
+      "corp",
+      "runner"
+    ],
+    "allowedAssetKind": "front_scan_only",
+    "requiresPhysicalOwnershipOrPrivateFamilyUse": true
+  },
+  "assetUse": {
+    "originalNetrunner1996FrontImagesAllowed": true,
+    "officialCardImagesAllowedBroadly": false,
+    "officialLogosAllowedStandalone": false,
+    "officialCardFramesAllowedStandalone": false,
+    "officialCardBacksAllowed": false,
+    "embeddedOriginalFrameInFullFrontScanAllowed": true,
+    "downloadAllowedFromApprovedCommunityArchive": true,
+    "selfScanAllowed": true,
+    "localCacheAllowed": true,
+    "remoteRuntimeFetchAllowed": false,
+    "imageUrlVersioningAllowed": false,
+    "publicRedistributionAllowed": false,
+    "familyLocalUseAllowed": true,
+    "internetOrCloudPublicationAllowed": false,
+    "printAndPlayPdfExtractionAllowed": false,
+    "removeOrCropLegalNoticesAllowed": false
+  },
+  "allowedCurrentDisplayModes": [
+    "placeholder",
+    "text-card",
+    "compact",
+    "preview",
+    "zoom",
+    "hidden",
+    "redacted",
+    "image-ready-with-local-cache"
+  ],
+  "allowedSourceTypes": [
+    "self_scans_from_physical_collection",
+    "private_local_files_supplied_by_project_owner",
+    "approved_community_archive_for_gap_fill_or_quality_comparison"
+  ],
+  "blockedAssetKinds": [
+    "official_card_backs",
+    "standalone_card_frames",
+    "standalone_logos",
+    "android_netrunner_ffg_front_images_without_separate_decision",
+    "null_signal_games_front_images_without_separate_decision",
+    "publicly_redistributed_binary_card_images",
+    "versioned_binary_card_images",
+    "per_card_remote_image_url_manifest"
+  ],
+  "futureCacheRequirements": {
+    "path": "data/local-assets/card-images/onr-1996/",
+    "mustBeVersioned": false,
+    "requiresGitIgnore": true,
+    "requiresPositivePolicyBeforeCreation": true,
+    "mayContainOriginalNetrunner1996FrontImagesNow": true,
+    "mayContainCardBacksNow": false,
+    "mayContainStandaloneFramesNow": false,
+    "manifestMayStoreLocalAssetIds": true,
+    "manifestMayStoreRemoteSourceUrls": false
+  },
+  "runtimeBoundaries": {
+    "engine": "forbidden",
+    "ai": "forbidden",
+    "legalActions": "forbidden",
+    "playerActions": "forbidden",
+    "gameState": "forbidden",
+    "publicEvents": "forbidden",
+    "replays": "forbidden",
+    "logs": "forbidden",
+    "stateHash": "forbidden",
+    "deckValidation": "forbidden",
+    "matchStartEligibility": "forbidden"
+  },
+  "hiddenInfoPolicy": {
+    "hiddenCardsMayHaveImageUrl": false,
+    "hiddenCardsMayHaveAssetId": false,
+    "hiddenCardsMayHaveTitleAltText": false,
+    "hiddenCardsMayHaveTitleAttribute": false,
+    "hiddenCardsMayHaveDefinitionId": false,
+    "hiddenCardsMayHaveDomMetadata": false,
+    "hiddenCardsMayHaveDistinguishableLoadingState": false,
+    "hiddenPlaceholderMustBeUniform": true
+  },
+  "fallbackPolicy": {
+    "knownCardFallbackOrder": [
+      "local_approved_onr_1996_front_image",
+      "text_card",
+      "generic_known_card_placeholder",
+      "generic_error_placeholder_without_url"
+    ],
+    "hiddenCardFallbackOrder": [
+      "uniform_hidden_placeholder"
+    ]
+  },
+  "requiredBeforePublicOrSharedDistribution": [
+    "explicit_rightsholder_permission",
+    "public_license_or_written_permission",
+    "separate_distribution_review",
+    "updated_policy_with_public_distribution_allowed"
+  ]
+}

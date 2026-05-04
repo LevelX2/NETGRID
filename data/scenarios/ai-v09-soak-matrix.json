@@ -1,0 +1,17 @@
+{
+  "id": "SCN-V09-004",
+  "name": "AI quality soak matrix",
+  "baselineId": "rules-baseline-mvp-0.8",
+  "requirementIds": ["V09-MUST-009", "V09-MUST-013", "V09-MUST-014", "V09-MUST-015"],
+  "coversTests": ["V09-T009", "V09-T013", "V09-T014", "V09-T015"],
+  "runnerDeckId": "demo_runner_008",
+  "corpDeckId": "demo_corp_008",
+  "seedSetId": "ai-soak-seeds-0.9",
+  "expected": {
+    "illegalActions": 0,
+    "replayOk": true,
+    "hiddenInfoLeaks": 0,
+    "summaryIncludesCoverage": true,
+    "holdoutSeedsSeparated": true
+  }
+}

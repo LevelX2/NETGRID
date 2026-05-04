@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "demo-cards-v0.94",
+  "id": "demo-cards-0.94",
+  "status": "implemented_for_v0.94_final_gate",
+  "extends": "data/cards/demo-cards-0.8.json",
+  "sourceMode": "local_original",
+  "assetPolicy": "no official art, logos, frames, card backs or external image dependencies",
+  "cards": [
+    {
+      "id": "v094_neural_sentry_ice",
+      "title": "Neural Sentry",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": ["sentry"],
+      "resolver": "corp_ice_sentry_net_damage_etr",
+      "roles": ["damage_ice", "sentry", "flatline_harness"],
+      "deviation": "local_original",
+      "status": "playable_mvp",
+      "mechanics": ["damage", "flatline"],
+      "subroutines": [
+        {
+          "id": "v094_neural_sentry_ice_net_damage",
+          "type": "do_damage",
+          "damageType": "net",
+          "amount": 1
+        },
+        {
+          "id": "v094_neural_sentry_ice_etr",
+          "type": "end_the_run"
+        }
+      ]
+    }
+  ]
+}

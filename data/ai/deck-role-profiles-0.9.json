@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "ai-deck-role-profiles-v0.9",
+  "id": "deck-role-profiles-0.9",
+  "status": "implemented_v0.9",
+  "derivedFrom": [
+    "data/ai/card-role-manifest-0.9.json",
+    "data/decks/deck-snapshots-0.8.json"
+  ],
+  "profiles": [
+    {
+      "deckSnapshotId": "demo_runner_008_snapshot_v0_8",
+      "side": "runner",
+      "publicRoleTags": ["setup_runner", "pressure_runner", "breaker_suite_complete", "economy_dense", "draw_dense"],
+      "privateForSide": "runner",
+      "roleCounts": {
+        "economy": 8,
+        "draw": 5,
+        "run_pressure": 4,
+        "memory": 3,
+        "breaker_fracter": 4,
+        "breaker_decoder": 2,
+        "breaker_killer": 2
+      }
+    },
+    {
+      "deckSnapshotId": "demo_corp_008_snapshot_v0_8",
+      "side": "corp",
+      "publicRoleTags": ["scoring_remote", "taxing_ice", "tag_pressure", "operation_economy", "asset_economy", "central_defense"],
+      "privateForSide": "corp",
+      "roleCounts": {
+        "agenda": 3,
+        "economy_operation": 5,
+        "draw_operation": 3,
+        "economy_asset": 3,
+        "barrier_ice": 4,
+        "code_gate_ice": 3,
+        "sentry_ice": 4,
+        "tag_ice": 4
+      }
+    }
+  ]
+}

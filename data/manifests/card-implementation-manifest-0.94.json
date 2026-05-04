@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "card-implementation-manifest-v0.94",
+  "id": "mvp-0.94-card-implementation-manifest",
+  "status": "implemented_for_v0.94_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-0.8.json",
+  "sourceMode": "local_original",
+  "gateAssertions": {
+    "allPlayableCardsHaveResolver": true,
+    "allPlayableCardsHaveUnitScenarioVisibilityReplayAiAndMultiplayerCoverage": true,
+    "noOfficialCardsOrAssets": true,
+    "importDoesNotGrantPlayability": true,
+    "noV095PlusMechanicsEnabled": true
+  },
+  "cards": [
+    {
+      "cardCode": "v094_neural_sentry_ice",
+      "title": "Neural Sentry",
+      "status": "playable_mvp",
+      "sourceMode": "local_original",
+      "resolver": "corp_ice_sentry_net_damage_etr",
+      "visibilityClass": "corp_hidden_until_rez_or_access_then_damage_hidden_info_barrier",
+      "riskFlags": ["hidden_ice", "encounter", "damage", "flatline", "random_grip_trash", "undo_barrier"],
+      "roleTags": ["damage_ice", "sentry", "flatline_harness"],
+      "requirementIds": ["M094-DAMAGE-001", "M094-VISIBILITY-001", "M094-REPLAY-001", "M094-CARD-001"],
+      "unitTests": ["V094-T002", "V094-T006", "V094-T009", "V094-T012", "V094-T017"],
+      "scenarioTests": ["SCN-V094-001", "SCN-V094-002"],
+      "visibilityTests": ["V094-T009", "V094-T010"],
+      "replayTests": ["V094-T012"],
+      "aiSmokeTests": ["V094-T014"],
+      "multiplayerSmokeTests": ["V094-T011", "V094-T015"]
+    }
+  ]
+}

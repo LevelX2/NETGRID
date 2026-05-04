@@ -1,0 +1,32 @@
+{
+  "id": "SCN-V095-002",
+  "name": "V0.95 Multiplayer Resource trash side-safety smoke",
+  "baselineId": "rules-baseline-mvp-0.95",
+  "requirementIds": [
+    "M095-MP-001",
+    "M095-UNDO-001",
+    "M095-VISIBILITY-001",
+    "M095-AI-001",
+    "M095-CARD-001"
+  ],
+  "coversCards": ["v095_safehouse_resource"],
+  "seed": "v095-multiplayer-resource-smoke",
+  "runnerDeckSnapshotId": "demo_runner_095_snapshot_v0_95",
+  "corpDeckSnapshotId": "demo_corp_095_snapshot_v0_95",
+  "steps": [
+    "Server fixture starts from a side-safe state with installed Safehouse Resource and tagged Runner.",
+    "Corp submits legal trash_resource.",
+    "Duplicate idempotency request returns the same receipt.",
+    "Stale retry is rejected.",
+    "Runner reconnect receives only side-filtered public Resource-trash state.",
+    "Undo request after Resource-trash is allowed because no hidden-info barrier was crossed."
+  ],
+  "expected": {
+    "submitOk": true,
+    "idempotencyStable": true,
+    "staleStateRejected": true,
+    "reconnectSideSafe": true,
+    "undoAllowedAfterPublicResourceTrash": true,
+    "hiddenZonesNotLeaked": true
+  }
+}

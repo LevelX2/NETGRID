@@ -1,4 +1,6 @@
-import snapshotData from "../../../../../data/card-import/card-snapshot-0.5.json";
+import snapshotData from "../../../../../data/card-import/card-snapshot-0.8.json";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 import {
   assertCatalogPayloadSafe,
   computeSnapshotHash,
@@ -13,12 +15,8 @@ import {
   type CatalogStatusKey
 } from "@netrunner/catalog";
 
-const snapshot = snapshotData as CardSnapshot;
-const snapshotHash = computeSnapshotHash(snapshot);
-const catalogIndex = createCatalogIndex(snapshot, snapshotHash);
-const validation = validateSnapshot(snapshot);
-
 export function catalogListResponse(searchParams: URLSearchParams) {
+  const { snapshot, snapshotHash, catalogIndex, validation } = createCatalogRuntime();
   if (!validation.ok) return safeCatalogError(500, "catalog_invalid", "Katalogdaten sind ungültig.");
   const query: CatalogQuery = {};
   const q = searchParams.get("q");
@@ -40,6 +38,7 @@ export function catalogListResponse(searchParams: URLSearchParams) {
 }
 
 export function catalogDetailResponse(catalogCardId: string) {
+  const { snapshot, snapshotHash, validation } = createCatalogRuntime();
   if (!validation.ok) return safeCatalogError(500, "catalog_invalid", "Katalogdaten sind ungültig.");
   const card = getCatalogCard(snapshot, catalogCardId);
   if (!card) return safeCatalogError(404, "catalog_card_not_found", "Karte wurde im Katalog nicht gefunden.");
@@ -47,6 +46,7 @@ export function catalogDetailResponse(catalogCardId: string) {
 }
 
 export function catalogStatusSummaryResponse() {
+  const { snapshot, snapshotHash, catalogIndex, validation } = createCatalogRuntime();
   if (!validation.ok) return safeCatalogError(500, "catalog_invalid", "Katalogdaten sind ungültig.");
   return safeCatalogPayload({
     snapshotId: snapshot.snapshotId,
@@ -76,4 +76,50 @@ function isType(value: string | null): value is CatalogCardType {
 
 function isStatus(value: string | null): value is CatalogStatusKey {
   return value === "imported" || value === "validated" || value === "catalog_ready" || value === "implemented" || value === "playable" || value === "deck_legal" || value === "blocked";
+}
+
+function createCatalogRuntime() {
+  const snapshot = createRuntimeSnapshot();
+  const snapshotHash = computeSnapshotHash(snapshot);
+  const catalogIndex = createCatalogIndex(snapshot, snapshotHash);
+  const validation = validateSnapshot(snapshot);
+  return { snapshot, snapshotHash, catalogIndex, validation };
+}
+
+function createRuntimeSnapshot(): CardSnapshot {
+  const baseSnapshot = snapshotData as CardSnapshot;
+  const localOnrSnapshot = readLocalOnrSnapshot();
+  if (!localOnrSnapshot) return baseSnapshot;
+
+  return {
+    ...baseSnapshot,
+    snapshotId: `${baseSnapshot.snapshotId}+${localOnrSnapshot.snapshotId}`,
+    status: `${baseSnapshot.status}+private_local_onr_v1_overlay`,
+    copyrightNote: `${baseSnapshot.copyrightNote} Private lokale O:NR-v1-Katalogdaten werden nur als Anzeige-Overlay geladen und bleiben nicht decklegal.`,
+    normalization: {
+      ...baseSnapshot.normalization,
+      textPolicy: `${baseSnapshot.normalization.textPolicy} Lokale O:NR-v1-Texte bleiben Anzeigeinformation und sind kein Regelparser.`,
+      assetPolicy: `${baseSnapshot.normalization.assetPolicy} Lokale O:NR-v1-Bilder werden nur aus data/local-assets gelesen.`
+    },
+    cards: [...baseSnapshot.cards, ...localOnrSnapshot.cards]
+  };
+}
+
+function readLocalOnrSnapshot(): CardSnapshot | null {
+  for (const candidate of localSnapshotCandidates()) {
+    if (!existsSync(candidate)) continue;
+    return JSON.parse(readFileSync(candidate, "utf8")) as CardSnapshot;
+  }
+  return null;
+}
+
+function localSnapshotCandidates(): string[] {
+  const relative = path.join("data", "local", "card-import", "onr-v1-limited", "card-snapshot-onr-v1-limited.local.json");
+  return Array.from(
+    new Set([
+      path.resolve(process.cwd(), relative),
+      path.resolve(process.cwd(), "..", relative),
+      path.resolve(process.cwd(), "..", "..", relative)
+    ])
+  );
 }

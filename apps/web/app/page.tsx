@@ -1,18 +1,92 @@
 "use client";
 
-import { Bot, Cable, Check, Clipboard, CopyPlus, Download, Link2, ListFilter, Play, Plus, RotateCcw, Save, Search, Shield, Sparkles, Trash2, Upload, UserPlus, X } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Activity,
+  Bot,
+  Cable,
+  Check,
+  Clipboard,
+  CopyPlus,
+  Download,
+  Eye,
+  Image,
+  Keyboard,
+  Layers3,
+  Link2,
+  ListFilter,
+  PanelRightOpen,
+  Play,
+  Plus,
+  RotateCcw,
+  Save,
+  Search,
+  Shield,
+  SlidersHorizontal,
+  Sparkles,
+  Trash2,
+  Upload,
+  UserPlus,
+  Volume2,
+  VolumeX,
+  X,
+  ZoomIn
+} from "lucide-react";
+import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
+import {
+  CHRONICLE_CATEGORY_LABELS,
+  chronicleGroupLabel,
+  formatChronicleEvent,
+  type ChronicleCategory,
+  type ChronicleItem
+} from "./chronicle";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
 const SESSION_KEY = "netrunner-mvp-0-3-session";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
+const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_004_snapshot_v0_6";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
 
 type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
+type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 type AiDifficulty = "easy" | "normal" | "hard";
+type CardDisplayMode = "placeholder" | "text-card" | "compact";
+type EntryTab = "play" | "catalog" | "decks" | "options";
+
+type SeriesResultSummary = {
+  seriesId: string;
+  mode: "two_game_side_swap";
+  status: "active" | "between_games" | "finished";
+  gameNumber: number;
+  gamesPlanned: number;
+  viewerPlayer: "player_a" | "player_b";
+  viewerWins: number;
+  opponentWins: number;
+  draws: number;
+  nextAvailable: boolean;
+  nextMatchId?: string;
+};
+
+type GameResultSummary = {
+  winner: Winner;
+  viewerOutcome: "won" | "lost" | "draw";
+  reason: "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "unknown";
+  matchFormat: MatchFormat;
+  agendaPointsToWin: number;
+  runnerAgendaPoints: number;
+  corpAgendaPoints: number;
+  actionCount: number;
+  runCount: number;
+  successfulRunCount: number;
+  stolenAgendaCount: number;
+  scoredAgendaCount: number;
+  startedAt: string;
+  finishedAt: string;
+  finalStateHash: string;
+  series?: SeriesResultSummary;
+};
 
 type ClientPayload = {
   matchId: string;
@@ -32,6 +106,7 @@ type ClientPayload = {
   };
   winner?: Winner;
   finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 type SessionInfo = {
@@ -50,7 +125,7 @@ type ServerMessage =
   | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
   | { type: "opponent_status"; payload: ClientPayload["opponentStatus"] }
   | { type: "undo_request"; payload: NonNullable<ClientPayload["pendingUndo"]> }
-  | { type: "match_finished"; payload: { winner: Winner; finalStateHash: string } }
+  | { type: "match_finished"; payload: { winner: Winner; finalStateHash: string; resultSummary?: GameResultSummary } }
   | { type: "error"; payload: { code: string; message: string; playerView?: PlayerView } }
   | { type: "action_receipt"; payload: { accepted: boolean; stateVersionAfter: number; errorCode?: string } }
   | { type: "choice_request"; payload: { choice: null } }
@@ -67,6 +142,9 @@ type CreateMatchResponse = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  winner?: Winner;
+  finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 type JoinMatchResponse = {
@@ -79,6 +157,9 @@ type JoinMatchResponse = {
   legalActions: LegalAction[];
   matchVersion: number;
   eventTail?: PublicGameEvent[];
+  winner?: Winner;
+  finalStateHash?: string;
+  resultSummary?: GameResultSummary;
   error?: { message: string };
 };
 
@@ -95,6 +176,10 @@ type AiSimulationSummary = {
 type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "playable" | "deck_legal" | "blocked";
 
 type CatalogStatuses = Record<CatalogStatusKey, boolean>;
+
+type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "upgrade" | "operation" | "event" | "hardware" | "resource" | "program" | "identity";
+
+type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
 
 type CatalogCardSummary = {
   catalogCardId: string;
@@ -126,6 +211,23 @@ type CatalogListResponse = {
     statuses: CatalogStatusKey[];
   };
   summary: Partial<Record<CatalogStatusKey, number>>;
+};
+
+type DisplayVisibleCard = VisibleCard & {
+  imageUrl?: string;
+};
+
+type FocusedCard = {
+  card: VisibleCard;
+  hiddenSide?: Side;
+};
+
+type AccessReveal = {
+  eventId: string;
+  serverLabel: string;
+  card: DisplayVisibleCard;
+  actions: LegalAction[];
+  trashStatus: string;
 };
 
 type DeckCardEntry = {
@@ -206,6 +308,48 @@ const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
   blocked: "blocked"
 };
 
+const CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
+  { key: "ice", label: "ICE" },
+  { key: "agenda", label: "Agenda" },
+  { key: "icebreaker", label: "Icebrecher" },
+  { key: "asset", label: "Asset" },
+  { key: "upgrade", label: "Upgrade" },
+  { key: "operation", label: "Operation" },
+  { key: "event", label: "Event" },
+  { key: "hardware", label: "Hardware" },
+  { key: "resource", label: "Ressource" },
+  { key: "program", label: "Programm" },
+  { key: "identity", label: "Identität" }
+];
+
+const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
+  ice: true,
+  agenda: true,
+  icebreaker: true,
+  asset: true,
+  upgrade: true,
+  operation: true,
+  event: true,
+  hardware: true,
+  resource: true,
+  program: true,
+  identity: true
+};
+
+const NO_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
+  ice: false,
+  agenda: false,
+  icebreaker: false,
+  asset: false,
+  upgrade: false,
+  operation: false,
+  event: false,
+  hardware: false,
+  resource: false,
+  program: false,
+  identity: false
+};
+
 const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   cost: "Kosten",
   installCost: "Install",
@@ -216,6 +360,28 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   advancementRequirement: "Fortschritt",
   agendaPoints: "Agenda"
 };
+
+const LOCAL_CARD_IMAGE_IDS = new Set([
+  "simple_agenda",
+  "simple_draw_event",
+  "simple_economy_asset",
+  "simple_economy_event",
+  "simple_priority_agenda",
+  "simple_run_event",
+  "v08_burst_credit_event",
+  "v08_cashout_asset",
+  "v08_deep_draw_event",
+  "v08_overclock_run_event",
+  "v08_project_agenda"
+]);
+
+function localCardImageUrl(cardId: string): string | undefined {
+  return LOCAL_CARD_IMAGE_IDS.has(cardId) || cardId.startsWith("onr_v1_") ? `/api/card-images/${encodeURIComponent(cardId)}` : undefined;
+}
+
+function cardBackImageUrl(side: Side): string {
+  return `/api/card-images/back_${side}`;
+}
 
 function catalogDetailLines(card: CatalogCardDetail): string[] {
   const typeLine = [card.side, card.type, card.subtypes.join(" / ")].filter(Boolean).join(" · ");
@@ -239,9 +405,183 @@ function eventCardDetail(event: PublicGameEvent, detailsById: Record<string, Cat
   return cardId ? (detailsById[cardId] ?? null) : null;
 }
 
+function visibleKnownCardIds(view: PlayerView | undefined): string[] {
+  if (!view) return [];
+  const cards = [
+    ...view.own.gripOrHq,
+    ...view.own.heapOrArchives,
+    ...view.own.scoreArea,
+    ...(view.own.rig ?? []),
+    ...view.opponent.scoreArea,
+    ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.run?.encounteredIce ? [view.run.encounteredIce] : [])
+  ];
+  return Array.from(new Set(cards.filter((card) => card.known && card.definitionId).map((card) => card.definitionId!)));
+}
+
+function enrichVisibleCard(card: VisibleCard, detailsById: Record<string, CatalogCardDetail>): DisplayVisibleCard {
+  if (!card.known || !card.definitionId) return card;
+  const detail = detailsById[card.definitionId];
+  const imageUrl = localCardImageUrl(card.definitionId);
+  const enriched: DisplayVisibleCard = {
+    ...card,
+    ...(imageUrl ? { imageUrl } : {})
+  };
+  if (!detail) return enriched;
+  enriched.rulesText = card.rulesText ?? detail.text;
+  addNumeric(enriched, "cost", card.cost, detail.numeric.cost);
+  addNumeric(enriched, "installCost", card.installCost, detail.numeric.installCost);
+  addNumeric(enriched, "memoryCost", card.memoryCost, detail.numeric.memoryCost);
+  addNumeric(enriched, "strength", card.strength, detail.numeric.strength);
+  addNumeric(enriched, "rezCost", card.rezCost, detail.numeric.rezCost);
+  addNumeric(enriched, "trashCost", card.trashCost, detail.numeric.trashCost);
+  addNumeric(enriched, "advancementRequirement", card.advancementRequirement, detail.numeric.advancementRequirement);
+  addNumeric(enriched, "agendaPoints", card.agendaPoints, detail.numeric.agendaPoints);
+  return enriched;
+}
+
+function visibleCardFromCatalogDetail(card: CatalogCardDetail): DisplayVisibleCard {
+  const visible: DisplayVisibleCard = {
+    instanceId: `chronicle-${card.catalogCardId}`,
+    known: true,
+    title: card.title,
+    definitionId: card.catalogCardId,
+    subtypes: card.subtypes,
+    rulesText: card.text
+  };
+  visible.type = card.type as NonNullable<VisibleCard["type"]>;
+  const imageUrl = localCardImageUrl(card.catalogCardId);
+  if (imageUrl) visible.imageUrl = imageUrl;
+  addNumeric(visible, "cost", undefined, card.numeric.cost);
+  addNumeric(visible, "installCost", undefined, card.numeric.installCost);
+  addNumeric(visible, "memoryCost", undefined, card.numeric.memoryCost);
+  addNumeric(visible, "strength", undefined, card.numeric.strength);
+  addNumeric(visible, "rezCost", undefined, card.numeric.rezCost);
+  addNumeric(visible, "trashCost", undefined, card.numeric.trashCost);
+  addNumeric(visible, "advancementRequirement", undefined, card.numeric.advancementRequirement);
+  addNumeric(visible, "agendaPoints", undefined, card.numeric.agendaPoints);
+  return visible;
+}
+
+function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "installCost" | "memoryCost" | "strength" | "rezCost" | "trashCost" | "advancementRequirement" | "agendaPoints">, current: number | undefined, fallback: number | null | undefined): void {
+  if (current !== undefined || fallback === null || fallback === undefined) return;
+  target[key] = fallback;
+}
+
+function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[]): AccessReveal | null {
+  if (!event || event.publicPayload.actionType !== "access_card") return null;
+  const cardId = payloadString(event.publicPayload, "cardDefinitionId");
+  const title = payloadString(event.publicPayload, "title");
+  if (!cardId || !title) return null;
+  const detail = detailsById[cardId] ?? null;
+  const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
+  const serverLabel = payloadString(event.publicPayload, "serverLabel") ?? "einen Server";
+  const actions = legalActions.filter((action) => ["steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
+  return {
+    eventId: event.eventId,
+    serverLabel,
+    card,
+    actions,
+    trashStatus: accessTrashStatus(card, actions)
+  };
+}
+
+function visibleCardFromPublicEvent(event: PublicGameEvent, cardId: string, title: string): DisplayVisibleCard {
+  const card: DisplayVisibleCard = {
+    instanceId: `access-${event.eventId}-${cardId}`,
+    known: true,
+    title,
+    definitionId: cardId
+  };
+  const imageUrl = localCardImageUrl(cardId);
+  if (imageUrl) card.imageUrl = imageUrl;
+  return card;
+}
+
+function payloadString(payload: Record<string, unknown>, key: string): string | null {
+  const value = payload[key];
+  return typeof value === "string" && value.trim() ? value : null;
+}
+
+function accessTrashStatus(card: DisplayVisibleCard, actions: LegalAction[]): string {
+  if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
+  if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
+  if (actions.some((action) => action.type === "decline_trash")) return "Trashen ist aktuell nicht möglich. Du kannst den Zugriff abschließen.";
+  if (card.type === "operation" || card.type === "event") return "Diese Karte kann nicht getrasht werden. Der Zugriff ist abgeschlossen.";
+  return "Für diese Karte ist aktuell keine weitere Zugriffentscheidung offen.";
+}
+
+function catalogTypeKeysForCard(card: Pick<CatalogCardSummary, "type" | "subtypes">): CatalogTypeFilterKey[] {
+  if (card.type === "program" && card.subtypes.some((subtype) => subtype.toLowerCase() === "icebreaker")) return ["icebreaker"];
+  switch (card.type) {
+    case "ice":
+    case "agenda":
+    case "asset":
+    case "upgrade":
+    case "operation":
+    case "event":
+    case "hardware":
+    case "resource":
+    case "program":
+    case "identity":
+      return [card.type];
+    default:
+      return [];
+  }
+}
+
+function catalogCardMatchesTypeFilters(card: CatalogCardSummary, filters: CatalogTypeFilterState): boolean {
+  const keys = catalogTypeKeysForCard(card);
+  if (keys.length === 0) return true;
+  return keys.some((key) => filters[key]);
+}
+
+function summarizeCatalogTypeFilters(cards: CatalogCardSummary[]): Partial<Record<CatalogTypeFilterKey, number>> {
+  const counts: Partial<Record<CatalogTypeFilterKey, number>> = {};
+  for (const card of cards) {
+    for (const key of catalogTypeKeysForCard(card)) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+}
+
+function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): Array<{ label: "ICE" | "Root"; cards: VisibleCard[] }> {
+  const iceLane = { label: "ICE" as const, cards: server.ice };
+  const rootLane = { label: "Root" as const, cards: server.root };
+  return side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane];
+}
+
+function opponentSide(side: Side): Side {
+  return side === "runner" ? "corp" : "runner";
+}
+
+function sideLabel(side: Side): string {
+  return side === "corp" ? "Corp" : "Runner";
+}
+
+function centralServerCardCount(view: PlayerView, serverId: PlayerView["servers"][number]["id"]): number | null {
+  switch (serverId) {
+    case "hq":
+      return view.side === "corp" ? view.own.gripOrHq.length : view.opponent.handCount;
+    case "rd":
+      return view.side === "corp" ? view.own.stackOrRdCount : view.opponent.deckCount;
+    case "archives":
+      return view.side === "corp" ? view.own.heapOrArchives.length : view.opponent.discardCount;
+    default:
+      return null;
+  }
+}
+
+function formatCardCount(count: number): string {
+  return `${count} ${count === 1 ? "Karte" : "Karten"}`;
+}
+
 export default function Page() {
+  const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [gameMode, setGameMode] = useState<GameMode>("human_vs_human");
+  const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [displayName, setDisplayName] = useState("Runner");
@@ -257,6 +597,7 @@ export default function Page() {
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">("all");
+  const [catalogTypeFilters, setCatalogTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
   const [catalogFilters, setCatalogFilters] = useState<CatalogListResponse["filters"] | null>(null);
   const [catalogSummary, setCatalogSummary] = useState<Partial<Record<CatalogStatusKey, number>>>({});
@@ -280,13 +621,24 @@ export default function Page() {
   const [deckImportText, setDeckImportText] = useState("");
   const [deckExportText, setDeckExportText] = useState("");
   const [addCardId, setAddCardId] = useState("");
+  const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
+  const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
+  const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
+  const [audioVolume, setAudioVolume] = useState(0.45);
+  const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
+  const [seriesTransitioning, setSeriesTransitioning] = useState(false);
   const socketRef = useRef<WebSocket | null>(null);
+  const resultAudioPrimedRef = useRef(false);
+  const lastAudioResultKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const matchId = params.get("matchId");
     const token = params.get("joinToken");
     if (matchId && token) {
+      setEntryTab("play");
       setMode("join");
       setJoinMatchId(matchId);
       setJoinToken(token);
@@ -323,10 +675,29 @@ export default function Page() {
   }, [localDecks, localDecksLoaded]);
 
   useEffect(() => {
+    const storedAudio = window.localStorage.getItem(AUDIO_STORAGE_KEY);
+    if (!storedAudio) return;
+    try {
+      const parsed = JSON.parse(storedAudio) as { enabled?: boolean; volume?: number };
+      setAudioEnabled(Boolean(parsed.enabled));
+      if (typeof parsed.volume === "number") setAudioVolume(Math.min(1, Math.max(0, parsed.volume)));
+    } catch {
+      window.localStorage.removeItem(AUDIO_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(AUDIO_STORAGE_KEY, JSON.stringify({ enabled: audioEnabled, volume: audioVolume }));
+  }, [audioEnabled, audioVolume]);
+
+  useEffect(() => {
     if (!session) return;
     connectWebSocket(session);
     return () => socketRef.current?.close();
   }, [session?.matchId, session?.sessionToken]);
+
+  const filteredCatalogCards = useMemo(() => catalogCards.filter((card) => catalogCardMatchesTypeFilters(card, catalogTypeFilters)), [catalogCards, catalogTypeFilters]);
+  const catalogTypeCounts = useMemo(() => summarizeCatalogTypeFilters(catalogCards), [catalogCards]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -350,6 +721,10 @@ export default function Page() {
   }, [catalogSearch, catalogSide, catalogStatus]);
 
   useEffect(() => {
+    setSelectedCatalogId((current) => (current && filteredCatalogCards.some((card) => card.catalogCardId === current) ? current : filteredCatalogCards[0]?.catalogCardId ?? null));
+  }, [filteredCatalogCards]);
+
+  useEffect(() => {
     if (!selectedCatalogId) {
       setCatalogDetail(null);
       return;
@@ -361,26 +736,9 @@ export default function Page() {
   }, [selectedCatalogId]);
 
   useEffect(() => {
-    void fetch("/api/cards/catalog", { cache: "no-store" })
-      .then((response) => response.json() as Promise<CatalogListResponse>)
-      .then((data) => setAllCatalogCards(data.cards ?? []))
-      .catch(() => setAllCatalogCards([]));
-    void fetch("/api/decks/snapshots", { cache: "no-store" })
-      .then((response) => response.json() as Promise<DeckSnapshotsResponse>)
-      .then((data) => {
-        setDeckSnapshots(data.snapshots ?? []);
-        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID)) setSelectedRunnerSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "runner")?.deckSnapshotId ?? "");
-        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID)) setSelectedCorpSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "corp")?.deckSnapshotId ?? "");
-      })
-      .catch(() => setDeckSnapshots([]));
-    void fetch("/api/decks/templates", { cache: "no-store" })
-      .then((response) => response.json() as Promise<DeckTemplatesResponse>)
-      .then((data) => setDeckTemplates(data.templates ?? []))
-      .catch(() => setDeckTemplates([]));
-  }, []);
-
-  useEffect(() => {
-    const missingIds = Array.from(new Set((payload?.eventTail ?? []).map(revealedEventCardId).filter((value): value is string => Boolean(value)))).filter((cardId) => !catalogDetailsById[cardId]);
+    const eventIds = (payload?.eventTail ?? []).map(revealedEventCardId).filter((value): value is string => Boolean(value));
+    const visibleIds = visibleKnownCardIds(payload?.playerView);
+    const missingIds = Array.from(new Set([...eventIds, ...visibleIds])).filter((cardId) => !catalogDetailsById[cardId]);
     if (missingIds.length === 0) return;
     let cancelled = false;
     void Promise.all(
@@ -403,7 +761,26 @@ export default function Page() {
     return () => {
       cancelled = true;
     };
-  }, [payload?.eventTail, catalogDetailsById]);
+  }, [payload?.eventTail, payload?.playerView, catalogDetailsById]);
+
+  useEffect(() => {
+    void fetch("/api/cards/catalog", { cache: "no-store" })
+      .then((response) => response.json() as Promise<CatalogListResponse>)
+      .then((data) => setAllCatalogCards(data.cards ?? []))
+      .catch(() => setAllCatalogCards([]));
+    void fetch("/api/decks/snapshots", { cache: "no-store" })
+      .then((response) => response.json() as Promise<DeckSnapshotsResponse>)
+      .then((data) => {
+        setDeckSnapshots(data.snapshots ?? []);
+        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID)) setSelectedRunnerSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "runner")?.deckSnapshotId ?? "");
+        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID)) setSelectedCorpSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "corp")?.deckSnapshotId ?? "");
+      })
+      .catch(() => setDeckSnapshots([]));
+    void fetch("/api/decks/templates", { cache: "no-store" })
+      .then((response) => response.json() as Promise<DeckTemplatesResponse>)
+      .then((data) => setDeckTemplates(data.templates ?? []))
+      .catch(() => setDeckTemplates([]));
+  }, []);
 
   const activeView = payload?.playerView;
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
@@ -416,6 +793,38 @@ export default function Page() {
   const effectiveCorpSnapshot = corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const playableCatalogCards = allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity");
+  const gripPreviewCard = activeView?.own.gripOrHq.find((card) => card.known) ?? null;
+  const rigPreviewCard = activeView?.own.rig?.find((card) => card.known) ?? null;
+  const previewSelection =
+    focusedCard ??
+    (activeView?.run?.encounteredIce ? { card: activeView.run.encounteredIce, hiddenSide: "corp" as const } : null) ??
+    (gripPreviewCard ? { card: gripPreviewCard } : null) ??
+    (rigPreviewCard ? { card: rigPreviewCard } : null);
+  const previewCard = previewSelection?.card ?? null;
+  const previewHiddenSide = previewSelection?.hiddenSide;
+  const enrichCard = (card: VisibleCard) => enrichVisibleCard(card, catalogDetailsById);
+  const enrichedPreviewCard = previewCard ? enrichCard(previewCard) : null;
+  const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) => setFocusedCard({ card, ...(hiddenSide ? { hiddenSide } : {}) });
+  const accessReveal = payload ? accessRevealFromLatestEvent(payload.eventTail.at(-1), catalogDetailsById, payload.legalActions) : null;
+  const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
+  const resultSummary = payload?.resultSummary ?? null;
+  const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
+  const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
+  const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
+
+  useEffect(() => {
+    if (!resultKey || !resultSummary) {
+      resultAudioPrimedRef.current = true;
+      return;
+    }
+    if (!resultAudioPrimedRef.current) {
+      lastAudioResultKeyRef.current = resultKey;
+      return;
+    }
+    if (!audioEnabled || lastAudioResultKeyRef.current === resultKey) return;
+    lastAudioResultKeyRef.current = resultKey;
+    playResultSound(seriesAudioOutcome(resultSummary), audioVolume);
+  }, [audioEnabled, audioVolume, resultKey, resultSummary]);
 
   const createMatch = async () => {
     setNotice("");
@@ -431,6 +840,10 @@ export default function Page() {
       mode: gameMode,
       runnerDifficulty,
       corpDifficulty,
+      settings: {
+        matchFormat,
+        ...(effectiveAgendaTarget ? { agendaPointsToWin: effectiveAgendaTarget } : {})
+      },
       ...matchDeckPayload()
     });
     const nextSession: SessionInfo = {
@@ -448,6 +861,39 @@ export default function Page() {
     setNotice("Match erstellt.");
   };
 
+  const startNextSeriesGame = async () => {
+    if (!session || !resultSummary?.series?.nextAvailable || seriesTransitioning) return;
+    setSeriesTransitioning(true);
+    setNotice("");
+    try {
+      const next = await postJson<CreateMatchResponse & { error?: { message: string } }>(`/api/matches/${encodeURIComponent(session.matchId)}/series-next`, {
+        side: session.side,
+        sessionToken: session.sessionToken,
+        displayName: session.displayName
+      });
+      if (next.error) {
+        setNotice(next.error.message);
+        return;
+      }
+      const nextSession: SessionInfo = {
+        matchId: next.matchId,
+        side: next.hostSide,
+        sessionToken: next.hostSessionToken,
+        reconnectToken: next.hostReconnectToken,
+        webSocketUrl: next.webSocketUrl,
+        displayName: session.displayName,
+        ...(next.joinUrl ? { joinUrl: next.joinUrl } : {})
+      };
+      persistSession(nextSession);
+      setSession(nextSession);
+      setPayload(fromInitialResponse(next, next.hostSide));
+      setDismissedResultKey(null);
+      setNotice(next.joinUrl ? "Nächstes Serienspiel erstellt. Teile den neuen Join-Link." : "Nächstes Serienspiel erstellt.");
+    } finally {
+      setSeriesTransitioning(false);
+    }
+  };
+
   const runSimulation = async () => {
     setNotice("");
     const result = await postJson<{ summary: AiSimulationSummary }>("/api/simulations/ai-vs-ai", {
@@ -455,7 +901,7 @@ export default function Page() {
       runnerDifficulty,
       corpDifficulty,
       ...matchDeckPayload(),
-      agendaPointsToWin: effectiveCorpSnapshot?.validation.agendaPoints ?? 7,
+      agendaPointsToWin: effectiveAgendaTarget ?? 7,
       maxActions: 120
     });
     setSimulation(result.summary);
@@ -555,6 +1001,7 @@ export default function Page() {
     setPayload(null);
     setSimulation(null);
     setConnection("offline");
+    setSeriesTransitioning(false);
     setNotice("");
   };
 
@@ -574,8 +1021,8 @@ export default function Page() {
       name: `${template.name} Kopie`,
       side: template.side,
       identityCardId: template.identityCardId,
-      cardPoolSnapshotId: "card-snapshot-0.5",
-      formatProfileId: "local-demo-v0.6",
+      cardPoolSnapshotId: "card-snapshot-0.8",
+      formatProfileId: "local-demo-v0.8",
       cards: template.cards.map((entry) => ({ ...entry })),
       createdAt: now,
       updatedAt: now
@@ -661,6 +1108,7 @@ export default function Page() {
       setCorpLocalSnapshot(validatedSnapshot);
       setCorpDeckSource("local");
     }
+    setEntryTab("play");
     setNotice("Deck-Snapshot für Match Setup gesetzt.");
   };
 
@@ -762,7 +1210,17 @@ export default function Page() {
       return;
     }
     if (message.type === "match_finished") {
-      setPayload((current) => (current ? { ...current, winner: message.payload.winner, finalStateHash: message.payload.finalStateHash, matchStatus: "finished" } : current));
+      setPayload((current) =>
+        current
+          ? {
+              ...current,
+              winner: message.payload.winner,
+              finalStateHash: message.payload.finalStateHash,
+              ...(message.payload.resultSummary ? { resultSummary: message.payload.resultSummary } : {}),
+              matchStatus: "finished"
+            }
+          : current
+      );
       return;
     }
     if (message.type === "error") {
@@ -784,10 +1242,39 @@ export default function Page() {
     return (
       <main className="app">
         <header className="topbar">
-          <Brand subtitle="Private Matches und KI-Simulation" />
+          <Brand subtitle="V0.7 UI · private Matches" />
           <ConnectionBadge text={statusText} state={connection} />
         </header>
-        <div className="setup">
+        <div className="setup v07Entry">
+          <nav className="entryTabs" aria-label="Startbereiche">
+            <button className={`entryTab ${entryTab === "play" ? "active" : ""}`} onClick={() => setEntryTab("play")} type="button" aria-current={entryTab === "play" ? "page" : undefined}>
+              <Play size={16} />
+              Spiel
+            </button>
+            <button className={`entryTab ${entryTab === "catalog" ? "active" : ""}`} onClick={() => setEntryTab("catalog")} type="button" aria-current={entryTab === "catalog" ? "page" : undefined}>
+              <ListFilter size={16} />
+              Katalog
+            </button>
+            <button className={`entryTab ${entryTab === "decks" ? "active" : ""}`} onClick={() => setEntryTab("decks")} type="button" aria-current={entryTab === "decks" ? "page" : undefined}>
+              <Layers3 size={16} />
+              Decks
+            </button>
+            <button className={`entryTab ${entryTab === "options" ? "active" : ""}`} onClick={() => setEntryTab("options")} type="button" aria-current={entryTab === "options" ? "page" : undefined}>
+              <SlidersHorizontal size={16} />
+              Optionen
+            </button>
+          </nav>
+          <section className="entryHero">
+            <div>
+              <p className="eyebrow">Netrunner Lokal</p>
+              <h2>Private Netrunner-Konsole</h2>
+              <p className="meta">Private Matches · lokale Decks · side-filtered</p>
+            </div>
+            <PreflightBar />
+          </section>
+          {notice ? <p className="notice entryNotice">{notice}</p> : null}
+          <div className="entryContent">
+          {entryTab === "play" ? (
           <section className="setupPanel">
             <div className="tabs">
               <button className={`tab ${mode === "host" ? "active" : ""}`} onClick={() => setMode("host")}>
@@ -807,6 +1294,14 @@ export default function Page() {
                     <option value="human_runner_vs_corp_ai">Runner vs Corp-KI</option>
                     <option value="human_corp_vs_runner_ai">Corp vs Runner-KI</option>
                     <option value="ai_vs_ai">KI vs KI</option>
+                  </select>
+                </label>
+                <label>
+                  Spielziel
+                  <select value={matchFormat} onChange={(event) => setMatchFormat(event.target.value as MatchFormat)}>
+                    <option value="rules_match">Regelmatch · 7 Agendapunkte</option>
+                    <option value="single_game">Einzelspiel · Deckziel</option>
+                    <option value="two_game_side_swap">Private Matchserie · Seitenwechsel</option>
                   </select>
                 </label>
                 <label>
@@ -914,10 +1409,11 @@ export default function Page() {
                 </button>
               </div>
             )}
-            {notice ? <p className="notice">{notice}</p> : null}
           </section>
-          <CatalogPanel
-            cards={catalogCards}
+          ) : null}
+          {entryTab === "catalog" ? (
+            <CatalogPanel
+            cards={filteredCatalogCards}
             detail={catalogDetail}
             filters={catalogFilters}
             search={catalogSearch}
@@ -925,12 +1421,19 @@ export default function Page() {
             status={catalogStatus}
             summary={catalogSummary}
             selectedId={selectedCatalogId}
+            typeCounts={catalogTypeCounts}
+            typeFilters={catalogTypeFilters}
             onSearch={setCatalogSearch}
             onSide={setCatalogSide}
             onStatus={setCatalogStatus}
             onSelect={setSelectedCatalogId}
+            onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
+            onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
+            onClearTypeFilters={() => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })}
           />
-          <DeckEditorPanel
+          ) : null}
+          {entryTab === "decks" ? (
+            <DeckEditorPanel
             templates={deckTemplates}
             localDecks={localDecks}
             selectedDeck={selectedLocalDeck}
@@ -954,6 +1457,18 @@ export default function Page() {
             onImportText={setDeckImportText}
             onImport={importLocalDeck}
           />
+          ) : null}
+          {entryTab === "options" ? (
+            <OptionsPanel
+              audioEnabled={audioEnabled}
+              audioVolume={audioVolume}
+              cardDisplayMode={cardDisplayMode}
+              onAudioEnabled={setAudioEnabled}
+              onAudioVolume={setAudioVolume}
+              onCardDisplayMode={setCardDisplayMode}
+            />
+          ) : null}
+          </div>
         </div>
       </main>
     );
@@ -962,9 +1477,12 @@ export default function Page() {
   return (
     <main className="app">
       <header className="topbar">
-        <Brand subtitle={`MVP 0.3 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
+        <Brand subtitle={`V0.7 · ${session.side === "runner" ? "Runner" : "Corp"}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
+          <button className="button iconOnly" onClick={() => setAudioEnabled((current) => !current)} title={audioEnabled ? "Audio aus" : "Audio an"} aria-label={audioEnabled ? "Audio aus" : "Audio an"}>
+            {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          </button>
           {session.joinUrl ? (
             <button className="button" onClick={copyJoinLink} title="Join-Link kopieren">
               <Clipboard size={16} />
@@ -986,58 +1504,20 @@ export default function Page() {
         <span>{payload.matchStatus}</span>
         <span>Match {payload.matchId}</span>
         <span>Version {payload.matchVersion}</span>
+        <span>State {activeView.stateVersion}</span>
         <span>{notice}</span>
       </div>
 
       <div className="main">
-        <aside className="column panel">
-          <PlayerPanel view={activeView} title={session.side === "runner" ? "Runner" : "Corp"} />
-          <section className="section">
-            <h2>Aktionen</h2>
-            <div className="actions">
-              {payload.legalActions.map((action) => (
-                <button className="button actionButton primary" key={action.actionId} onClick={() => submitAction(action)} disabled={Boolean(payload.winner) || connection !== "online"}>
-                  <Play size={15} />
-                  {action.label}
-                </button>
-              ))}
-              {payload.legalActions.length === 0 ? <p className="meta">Keine Aktion im aktuellen Fenster.</p> : null}
-            </div>
-          </section>
-          <section className="section">
-            <h2>Undo</h2>
-            {payload.pendingUndo?.needsResponse ? (
-              <div className="undoBox">
-                <p className="meta">{payload.pendingUndo.requestedBy === "runner" ? "Runner" : "Corp"} fragt Undo an.</p>
-                <div className="splitButtons">
-                  <button className="button primary" onClick={() => resolveUndo(true)}>
-                    <Check size={15} />
-                    OK
-                  </button>
-                  <button className="button" onClick={() => resolveUndo(false)}>
-                    <X size={15} />
-                    Nein
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button className="button wide" onClick={requestUndo} disabled={!latestEventId || connection !== "online"}>
-                <RotateCcw size={15} />
-                Undo
-              </button>
-            )}
-          </section>
+        <aside className="column panel sidePanel">
+          <OpponentPanel view={activeView} connected={payload.opponentStatus.connected} />
+          <LegalActionsPanel actions={payload.legalActions} disabled={Boolean(payload.winner) || connection !== "online"} onAction={submitAction} />
+          <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
         </aside>
 
-        <section className="board">
-          {activeView.run ? (
-            <div className="runBar">
-              <Shield size={18} />
-              <span>
-                Run auf <strong>{activeView.run.attackedServerId}</strong> · {activeView.run.phase}
-              </span>
-            </div>
-          ) : null}
+        <section className="board boardPanel">
+          <BoardHeader view={activeView} />
+          <RunTimeline view={activeView} cardDetailsById={catalogDetailsById} />
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -1047,57 +1527,73 @@ export default function Page() {
             </div>
           ) : null}
           <div className="serverGrid">
-            {activeView.servers.map((server) => (
-              <article className="server" key={server.id}>
-                <h3>{server.label}</h3>
-                <div className="laneLabel">ICE</div>
-                <div className="lane">{server.ice.map((card) => <Card key={card.instanceId} card={card} compact />)}</div>
-                <div className="laneLabel">Root</div>
-                <div className="lane">{server.root.map((card) => <Card key={card.instanceId} card={card} compact />)}</div>
-              </article>
-            ))}
+            {activeView.servers.map((server) => {
+              const cardCount = centralServerCardCount(activeView, server.id);
+              return (
+                <article className="server" key={server.id}>
+                  <h3 className="serverTitle">
+                    <span>{server.label}</span>
+                    {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
+                  </h3>
+                  {serverLanesForSide(activeView.side, server).map((lane) => (
+                    <div className="serverLaneGroup" key={lane.label}>
+                      <div className="laneLabel">{lane.label}</div>
+                      <div className="lane">{lane.cards.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} compact displayMode={cardDisplayMode} hiddenSide="corp" onFocus={focusCard} />)}</div>
+                    </div>
+                  ))}
+                </article>
+              );
+            })}
           </div>
-          <section className="section panel boardSection">
-            <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
-            <div className="cards">{activeView.own.gripOrHq.map((card) => <Card key={card.instanceId} card={card} />)}</div>
-          </section>
           {activeView.own.rig ? (
             <section className="section panel boardSection">
               <h2>Rig</h2>
-              <div className="cards">{activeView.own.rig.map((card) => <Card key={card.instanceId} card={card} />)}</div>
+              <div className="cards">{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} onFocus={focusCard} />)}</div>
             </section>
           ) : null}
+          <section className="section panel boardSection">
+            <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
+            <div className="cards">{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} hiddenSide={activeView.side} onFocus={focusCard} />)}</div>
+          </section>
         </section>
 
-        <aside className="log panel">
+        <aside className="log panel rightRail">
           <section className="section">
-            <h2>Gegenseite</h2>
-            <div className="stats">
-              <Stat label="Credits" value={activeView.opponent.credits} />
-              <Stat label="Clicks" value={activeView.opponent.clicks} />
-              <Stat label="Agenda" value={activeView.opponent.agendaPoints} />
-            </div>
-            {activeView.deckMetadata ? (
-              <div className="deckMini">
-                <span>{activeView.deckMetadata.opponent.deckName}</span>
-                <small>{activeView.deckMetadata.opponent.deckHash}</small>
-              </div>
-            ) : null}
-            <p className="meta statusLine">{payload.opponentStatus.connected ? "Verbunden" : "Offline"} · {activeView.timingPoint}</p>
+            <CardDisplaySettings mode={cardDisplayMode} onChange={setCardDisplayMode} compact />
           </section>
+          <CardPreviewPanel card={enrichedPreviewCard} displayMode={cardDisplayMode} {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})} />
+          <PlayerPanel view={activeView} title={sideLabel(activeView.side)} />
+          <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocusCard={focusCard} />
           <section className="section">
-            <h2>EventLog</h2>
-            <div className="events">
-              {payload.eventTail
-                .slice()
-                .reverse()
-                .map((event) => (
-                  <EventLogEntry event={event} card={eventCardDetail(event, catalogDetailsById)} key={event.eventId} />
-                ))}
-            </div>
+            <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
+              <PanelRightOpen size={15} />
+              Diagnostics
+            </button>
           </section>
+          <DiagnosticsDrawer open={diagnosticsOpen} payload={payload} connection={connection} />
         </aside>
       </div>
+      {showResultModal && resultSummary ? (
+        <GameOverModal
+          result={resultSummary}
+          side={session.side}
+          onDismiss={() => {
+            if (resultKey) setDismissedResultKey(resultKey);
+          }}
+          onNewMatch={leaveMatch}
+          nextSeriesPending={seriesTransitioning}
+          {...(resultSummary.series?.nextAvailable ? { onNextSeriesGame: startNextSeriesGame } : {})}
+        />
+      ) : null}
+      {showAccessReveal && accessReveal ? (
+        <AccessRevealModal
+          reveal={accessReveal}
+          displayMode={cardDisplayMode}
+          disabled={Boolean(payload.winner) || connection !== "online"}
+          onAction={submitAction}
+          onDismiss={() => setDismissedAccessEventId(accessReveal.eventId)}
+        />
+      ) : null}
     </main>
   );
 }
@@ -1116,6 +1612,657 @@ function Brand({ subtitle }: { subtitle: string }) {
   );
 }
 
+function AccessRevealModal({
+  reveal,
+  displayMode,
+  disabled,
+  onAction,
+  onDismiss
+}: {
+  reveal: AccessReveal;
+  displayMode: CardDisplayMode;
+  disabled: boolean;
+  onAction(action: LegalAction): void;
+  onDismiss(): void;
+}) {
+  const primaryActions = reveal.actions.filter((action) => action.type !== "decline_trash");
+  const declineAction = reveal.actions.find((action) => action.type === "decline_trash") ?? null;
+  const runAction = (action: LegalAction) => {
+    onAction(action);
+    onDismiss();
+  };
+
+  return (
+    <div className="accessRevealOverlay" role="dialog" aria-modal="true" aria-labelledby="access-reveal-title">
+      <div className="accessRevealBackdrop" aria-hidden="true" />
+      <section className="accessRevealPanel">
+        <div className="accessRevealHeader">
+          <div>
+            <p className="eyebrow">Access</p>
+            <h2 id="access-reveal-title">Zugriff auf {reveal.serverLabel}</h2>
+            <p>Du hast auf eine Karte in {reveal.serverLabel} zugegriffen.</p>
+          </div>
+          <button className="button iconOnly" onClick={onDismiss} aria-label="Fenster schließen" title="Schließen">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="accessRevealBody">
+          <div className="accessRevealCard">
+            <CardView card={reveal.card} displayMode={displayMode} preview />
+          </div>
+          <div className="accessRevealDecision">
+            <strong>{reveal.card.title}</strong>
+            <p>{reveal.trashStatus}</p>
+            {reveal.card.rulesText ? (
+              <div className="cardRulesDetail">
+                <strong>Regeltext</strong>
+                <span>{reveal.card.rulesText}</span>
+              </div>
+            ) : null}
+            <div className="accessRevealActions">
+              {primaryActions.map((action) => (
+                <button className={`button primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
+                  {action.type === "trash_accessed_card" || action.type === "trash_resource" ? <Trash2 size={15} /> : <Shield size={15} />}
+                  {accessDecisionLabel(action)}
+                </button>
+              ))}
+              {declineAction ? (
+                <button className="button" onClick={() => runAction(declineAction)} disabled={disabled}>
+                  <Check size={15} />
+                  {accessDecisionLabel(declineAction)}
+                </button>
+              ) : null}
+              {reveal.actions.length === 0 ? (
+                <button className="button" onClick={onDismiss}>
+                  <Check size={15} />
+                  Verstanden
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function accessDecisionLabel(action: LegalAction): string {
+  if (action.type === "steal_agenda") return "Agenda stehlen";
+  if (action.type === "trash_accessed_card") return "Trashen";
+  if (action.type === "trash_resource") return "Resource trashen";
+  if (action.type === "decline_trash") return "Nicht trashen";
+  return action.label;
+}
+
+function GameOverModal({
+  result,
+  side,
+  onDismiss,
+  onNewMatch,
+  onNextSeriesGame,
+  nextSeriesPending = false
+}: {
+  result: GameResultSummary;
+  side: Side;
+  onDismiss(): void;
+  onNewMatch(): void;
+  onNextSeriesGame?: () => void;
+  nextSeriesPending?: boolean;
+}) {
+  const outcomeText =
+    result.viewerOutcome === "won"
+      ? "Du hast das Spiel gewonnen."
+      : result.viewerOutcome === "lost"
+        ? "Du hast das Spiel verloren."
+        : "Das Spiel endet unentschieden.";
+  const seriesText = result.series ? seriesStatusText(result.series) : null;
+  return (
+    <div className={`gameOverOverlay ${result.viewerOutcome}`} role="dialog" aria-modal="true" aria-labelledby="game-over-title">
+      <div className="gameOverBackdrop" aria-hidden="true" />
+      <section className="gameOverPanel">
+        <div className="gameOverHero">
+          <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
+          <h2 id="game-over-title">{outcomeText}</h2>
+          <p>{resultReasonLabel(result.reason)}</p>
+        </div>
+        <div className="gameOverStats">
+          <Stat label="Runner Agenda" value={result.runnerAgendaPoints} />
+          <Stat label="Corp Agenda" value={result.corpAgendaPoints} />
+          <Stat label="Zielwert" value={result.agendaPointsToWin} />
+          <Stat label="Aktionen" value={result.actionCount} />
+          <Stat label="Runs" value={result.runCount} />
+          <Stat label="Erfolgreich" value={result.successfulRunCount} />
+          <Stat label="Gestohlen" value={result.stolenAgendaCount} />
+          <Stat label="Gescored" value={result.scoredAgendaCount} />
+        </div>
+        {result.series ? (
+          <div className="seriesStrip">
+            <div>
+              <span>Serienspiel {result.series.gameNumber}/{result.series.gamesPlanned}</span>
+              <small>{seriesText}</small>
+            </div>
+            <div className="seriesScore">
+              <span>Du {result.series.viewerWins}</span>
+              <span>Gegenseite {result.series.opponentWins}</span>
+              <span>Draws {result.series.draws}</span>
+            </div>
+          </div>
+        ) : null}
+        <div className="gameOverFooter">
+          <div>
+            <span>{result.winner === "draw" ? "Draw" : result.winner === side ? "Deine Seite gewinnt" : "Gegenseite gewinnt"}</span>
+            <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
+          </div>
+          <div className="gameOverActions">
+            <button className="button" onClick={onDismiss}>
+              Board ansehen
+            </button>
+            {onNextSeriesGame ? (
+              <button className="button primary" onClick={onNextSeriesGame} disabled={nextSeriesPending}>
+                {nextSeriesPending ? "Erstelle..." : "Nächstes Serienspiel"}
+              </button>
+            ) : null}
+            <button className="button primary" onClick={onNewMatch}>
+              Neues Spiel
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function matchFormatLabel(format: MatchFormat): string {
+  if (format === "two_game_side_swap") return "Private Matchserie";
+  if (format === "rules_match") return "Regelmatch";
+  return "Einzelspiel";
+}
+
+function resultReasonLabel(reason: GameResultSummary["reason"]): string {
+  if (reason === "agenda_points") return "Das Agenda-Ziel wurde erreicht.";
+  if (reason === "corp_deck_empty") return "Die Corp konnte keine Karte mehr ziehen.";
+  if (reason === "flatline") return "Der Runner wurde flatlined.";
+  if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
+  return "Das Spiel wurde abgeschlossen.";
+}
+
+function seriesStatusText(series: SeriesResultSummary): string {
+  if (series.status === "finished") {
+    if (series.viewerWins > series.opponentWins) return "Du hast die Matchserie gewonnen.";
+    if (series.viewerWins < series.opponentWins) return "Du hast die Matchserie verloren.";
+    return "Die Matchserie endet unentschieden.";
+  }
+  return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
+}
+
+function PreflightBar() {
+  const checks = [
+    { icon: <Shield size={15} />, label: "Hidden-Info safe" },
+    { icon: <Activity size={15} />, label: "Replay ready" },
+    { icon: <Layers3 size={15} />, label: "Decks validiert" }
+  ];
+  return (
+    <div className="preflightBar">
+      {checks.map((check) => (
+        <span key={check.label}>
+          {check.icon}
+          {check.label}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+function OptionsPanel({
+  audioEnabled,
+  audioVolume,
+  cardDisplayMode,
+  onAudioEnabled,
+  onAudioVolume,
+  onCardDisplayMode
+}: {
+  audioEnabled: boolean;
+  audioVolume: number;
+  cardDisplayMode: CardDisplayMode;
+  onAudioEnabled(value: boolean): void;
+  onAudioVolume(value: number): void;
+  onCardDisplayMode(value: CardDisplayMode): void;
+}) {
+  return (
+    <section className="optionsPanel panel">
+      <div className="catalogHeader">
+        <div>
+          <h2>Optionen</h2>
+          <p className="meta">Darstellung und Audio</p>
+        </div>
+        <SlidersHorizontal size={18} />
+      </div>
+      <div className="optionsContent">
+        <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
+        <BoardPreview displayMode={cardDisplayMode} />
+        <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
+      </div>
+    </section>
+  );
+}
+
+function CardDisplaySettings({ mode, onChange, compact = false }: { mode: CardDisplayMode; onChange(value: CardDisplayMode): void; compact?: boolean }) {
+  return (
+    <div className={`cardDisplaySettings ${compact ? "compact" : ""}`}>
+      <div>
+        <span className="settingsTitle">Card Display</span>
+        {!compact ? <span className="meta">Lokale Anzeigeoption, kein Match-State</span> : null}
+      </div>
+      <div className="segmented" role="group" aria-label="Card Display Mode">
+        <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus" aria-label="Bildmodus">
+          <Image size={15} />
+          {!compact ? "Bild" : null}
+        </button>
+        <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Text-Fallback mit Regeltext auf der Karte" aria-label="Text-Fallback">
+          <Keyboard size={15} />
+          {!compact ? "Text" : null}
+        </button>
+        <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompakte Karten mit Regeltext im Tooltip" aria-label="Kompakte Karten">
+          <ZoomIn size={15} />
+          {!compact ? "Kompakt" : null}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function AudioSettings({
+  enabled,
+  volume,
+  onEnabled,
+  onVolume
+}: {
+  enabled: boolean;
+  volume: number;
+  onEnabled(value: boolean): void;
+  onVolume(value: number): void;
+}) {
+  return (
+    <div className="audioSettings">
+      <button className={`button ${enabled ? "primary" : ""}`} type="button" onClick={() => onEnabled(!enabled)} title={enabled ? "Audioeffekte ausschalten" : "Audioeffekte einschalten"}>
+        {enabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
+        Audio
+      </button>
+      <label>
+        Lautstärke
+        <input type="range" min={0} max={1} step={0.05} value={volume} onChange={(event) => onVolume(Number(event.target.value))} />
+      </label>
+    </div>
+  );
+}
+
+function BoardPreview({ displayMode }: { displayMode: CardDisplayMode }) {
+  const previewCards: VisibleCard[] = [
+    { instanceId: "preview-runner", known: true, title: "Demo Program", type: "program", subtypes: ["Icebreaker"], strength: 2, rulesText: "1 Credit: +1 Stärke. 1 Credit: Brich 1 ICE-Subroutine." },
+    { instanceId: "preview-corp", known: true, title: "Demo ICE", type: "ice", subtypes: ["Barrier"], strength: 3, rulesText: "End the run." },
+    { instanceId: "preview-hidden", known: false }
+  ];
+  return (
+    <div className="boardPreview" aria-label="Board Preview">
+      {previewCards.map((card) => (
+        <CardView key={card.instanceId} card={card} displayMode={displayMode} compact hiddenSide="corp" />
+      ))}
+    </div>
+  );
+}
+
+function BoardHeader({ view }: { view: PlayerView }) {
+  return (
+    <div className={`boardHeader ${view.side}`}>
+      <div>
+        <p className="eyebrow">{view.side === "runner" ? "Runner View" : "Corp View"}</p>
+        <h2>{view.activeSide === view.side ? "Dein Fenster" : "Gegenseite aktiv"}</h2>
+      </div>
+    </div>
+  );
+}
+
+function RunTimeline({ view, cardDetailsById }: { view: PlayerView; cardDetailsById: Record<string, CatalogCardDetail> }) {
+  const phase = view.run?.phase;
+  const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
+  const steps = ["target", "approach_ice", "encounter_ice", "break", "access", "complete"] as const;
+  const labels: Record<(typeof steps)[number], string> = {
+    target: "Ziel",
+    approach_ice: "Approach",
+    encounter_ice: "Encounter",
+    break: "Break",
+    access: "Access",
+    complete: "Ergebnis"
+  };
+  return (
+    <div className={`runTimeline ${view.run ? "active" : ""}`}>
+      <div className="runTimelineHead">
+        <Shield size={18} />
+        <span>{view.run ? `Run auf ${view.run.attackedServerId}` : "Kein aktiver Run"}</span>
+      </div>
+      <div className="runSteps">
+        {steps.map((step) => (
+          <span className={phase === step || (!phase && step === "target") ? "current" : ""} key={step}>
+            {labels[step]}
+          </span>
+        ))}
+      </div>
+      {encounteredIce ? (
+        <div className="encounterFocus">
+          <span>Encounter</span>
+          <strong>{encounteredIce.known ? [encounteredIce.title, encounteredIce.rulesText].filter(Boolean).join(" · ") : "Verdecktes ICE"}</strong>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function LegalActionsPanel({ actions, disabled, onAction }: { actions: LegalAction[]; disabled: boolean; onAction(action: LegalAction): void }) {
+  const grouped = actions.reduce<Record<string, LegalAction[]>>((acc, action) => {
+    const group = action.type.replaceAll("_", " ");
+    acc[group] = [...(acc[group] ?? []), action];
+    return acc;
+  }, {});
+  return (
+    <section className="section">
+      <h2>LegalActions</h2>
+      <div className="actions">
+        {Object.entries(grouped).map(([group, groupActions]) => (
+          <div className="actionGroup" key={group}>
+            <span>{group}</span>
+            {groupActions.map((action) => (
+              <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled}>
+                <Play size={15} />
+                {action.label}
+              </button>
+            ))}
+          </div>
+        ))}
+        {actions.length === 0 ? <p className="meta">Keine Aktion im aktuellen Fenster.</p> : null}
+      </div>
+    </section>
+  );
+}
+
+function UndoPanel({
+  pendingUndo,
+  latestEventId,
+  connection,
+  onRequest,
+  onResolve
+}: {
+  pendingUndo: ClientPayload["pendingUndo"] | undefined;
+  latestEventId: string | undefined;
+  connection: "offline" | "connecting" | "online";
+  onRequest(): void;
+  onResolve(accepted: boolean): void;
+}) {
+  return (
+    <section className="section">
+      <h2>Undo</h2>
+      {pendingUndo?.needsResponse ? (
+        <div className="undoBox">
+          <p className="meta">{pendingUndo.requestedBy === "runner" ? "Runner" : "Corp"} fragt Undo an.</p>
+          <div className="splitButtons">
+            <button className="button primary" onClick={() => onResolve(true)}>
+              <Check size={15} />
+              OK
+            </button>
+            <button className="button" onClick={() => onResolve(false)}>
+              <X size={15} />
+              Nein
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button className="button wide" onClick={onRequest} disabled={!latestEventId || connection !== "online"}>
+          <RotateCcw size={15} />
+          Undo
+        </button>
+      )}
+    </section>
+  );
+}
+
+function CardPreviewPanel({ card, displayMode, hiddenSide }: { card: DisplayVisibleCard | null; displayMode: CardDisplayMode; hiddenSide?: Side }) {
+  const showSupplementalDetails = Boolean(card?.known && (displayMode === "compact" || (displayMode === "placeholder" && card.imageUrl)));
+  return (
+    <section className="section cardPreviewPanel">
+      <div className="sectionTitleLine">
+        <h2>Preview</h2>
+        <Eye size={16} />
+      </div>
+      {card ? (
+        <>
+          <CardView card={card} displayMode={displayMode} {...(hiddenSide ? { hiddenSide } : {})} preview />
+          {showSupplementalDetails ? (
+            <>
+              <p className="meta">{[card.type, card.subtypes?.join(" / "), card.strength !== undefined ? `Stärke ${card.strength}` : ""].filter(Boolean).join(" · ")}</p>
+              {card.rulesText ? (
+                <div className="cardRulesDetail">
+                  <strong>Regeltext</strong>
+                  <span>{card.rulesText}</span>
+                </div>
+              ) : null}
+            </>
+          ) : null}
+        </>
+      ) : (
+        <p className="meta">Fokussiere eine bekannte Karte.</p>
+      )}
+    </section>
+  );
+}
+
+function ChroniclePanel({
+  events,
+  side,
+  cardDetailsById,
+  displayMode,
+  onFocusCard
+}: {
+  events: PublicGameEvent[];
+  side: Side;
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  displayMode: CardDisplayMode;
+  onFocusCard(card: DisplayVisibleCard): void;
+}) {
+  const entries = events
+    .slice()
+    .reverse()
+    .map((event) => {
+      const card = eventCardDetail(event, cardDetailsById);
+      const item = formatChronicleEvent(event, side, {
+        cardTitle: card?.title ?? null,
+        cardText: card?.text ?? null,
+        cardType: card?.type ?? null,
+        cardDetailLines: card ? catalogDetailLines(card) : [],
+        agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null
+      });
+      return { card, item };
+    });
+
+  return (
+    <section className="section chroniclePanel">
+      <div className="sectionTitleLine">
+        <h2>Spielchronik</h2>
+        <Activity size={16} />
+      </div>
+      <div className="chronicleList">
+        {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
+        {entries.map((entry, index) => {
+          const group = chronicleGroupLabel(entry.item);
+          const previousGroup = index > 0 ? chronicleGroupLabel(entries[index - 1]!.item) : null;
+          return (
+            <Fragment key={entry.item.id}>
+              {group !== previousGroup ? <div className="chronicleGroup">{group}</div> : null}
+              <ChronicleEntry item={entry.item} card={entry.card} displayMode={displayMode} onFocusCard={onFocusCard} />
+            </Fragment>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function ChronicleEntry({
+  item,
+  card,
+  displayMode,
+  onFocusCard
+}: {
+  item: ChronicleItem;
+  card: CatalogCardDetail | null;
+  displayMode: CardDisplayMode;
+  onFocusCard(card: DisplayVisibleCard): void;
+}) {
+  const tooltipText = card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle;
+  const titleContainsCard = Boolean(item.cardTitle && item.title.includes(item.cardTitle));
+  const previewCard = card ? visibleCardFromCatalogDetail(card) : null;
+  return (
+    <article className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility}`}>
+      <div className="chronicleRail" aria-hidden="true">
+        <ChronicleIcon category={item.category} />
+      </div>
+      <div className="chronicleContent">
+        <div className="chronicleTopLine">
+          <strong>
+            <ChronicleTitle item={item} card={card} previewCard={previewCard} displayMode={displayMode} onFocusCard={onFocusCard} />
+          </strong>
+          <span className="chronicleCategory">{CHRONICLE_CATEGORY_LABELS[item.category]}</span>
+        </div>
+        {item.description ? <p className="chronicleDescription">{item.description}</p> : null}
+        {item.chips.length > 0 ? (
+          <div className="chronicleChips">
+            {item.chips.map((chip) => (
+              <span key={chip}>{chip}</span>
+            ))}
+          </div>
+        ) : null}
+        {item.cardTitle && !titleContainsCard ? (
+          <button className="chronicleCardLine" type="button" disabled={!previewCard} onClick={() => previewCard && onFocusCard(previewCard)} title={tooltipText}>
+            Karte: {item.cardTitle}
+            <ChronicleCardHover card={card} item={item} displayMode={displayMode} />
+          </button>
+        ) : null}
+        {item.cardText ? <p className="chronicleEffect">Effekt: {item.cardText}</p> : null}
+      </div>
+    </article>
+  );
+}
+
+function ChronicleTitle({
+  item,
+  card,
+  previewCard,
+  displayMode,
+  onFocusCard
+}: {
+  item: ChronicleItem;
+  card: CatalogCardDetail | null;
+  previewCard: DisplayVisibleCard | null;
+  displayMode: CardDisplayMode;
+  onFocusCard(card: DisplayVisibleCard): void;
+}) {
+  if (!item.cardTitle) return <>{item.title}</>;
+  const index = item.title.indexOf(item.cardTitle);
+  if (index < 0) return <>{item.title}</>;
+  const title = card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle;
+  return (
+    <>
+      {item.title.slice(0, index)}
+      <button className={`chronicleCardName ${previewCard ? "hasDetail" : ""}`} type="button" disabled={!previewCard} onClick={() => previewCard && onFocusCard(previewCard)} title={title}>
+        {item.cardTitle}
+        <ChronicleCardHover card={card} item={item} displayMode={displayMode} />
+      </button>
+      {item.title.slice(index + item.cardTitle.length)}
+    </>
+  );
+}
+
+function ChronicleCardHover({ card, item, displayMode }: { card: CatalogCardDetail | null; item: ChronicleItem; displayMode: CardDisplayMode }) {
+  if (!card) return null;
+  const imageUrl = displayMode === "placeholder" ? localCardImageUrl(card.catalogCardId) : undefined;
+  return (
+    <span className={`chronicleCardTooltip ${imageUrl ? "imageMode" : "textMode"}`} role="tooltip">
+      {imageUrl ? (
+        <img className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
+      ) : (
+        <>
+          <strong>{card.title}</strong>
+          {item.cardDetailLines.map((line) => (
+            <span key={line}>{line}</span>
+          ))}
+          <p>{card.text}</p>
+        </>
+      )}
+    </span>
+  );
+}
+
+function ChronicleIcon({ category }: { category: ChronicleCategory }) {
+  switch (category) {
+    case "turn":
+      return <Activity size={15} />;
+    case "economy":
+      return <Plus size={15} />;
+    case "card":
+      return <Layers3 size={15} />;
+    case "run":
+      return <Cable size={15} />;
+    case "agenda":
+      return <Shield size={15} />;
+    case "danger":
+      return <X size={15} />;
+    case "hidden":
+      return <Eye size={15} />;
+    case "system":
+    default:
+      return <PanelRightOpen size={15} />;
+  }
+}
+
+function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; payload: ClientPayload; connection: "offline" | "connecting" | "online" }) {
+  if (!open) return null;
+  const hash = payload.finalStateHash ?? payload.eventTail.at(-1)?.stateHashAfter ?? payload.playerView.publicEvents.at(-1)?.stateHashAfter ?? "pending";
+  return (
+    <section className="section diagnosticsDrawer">
+      <h2>Diagnostics</h2>
+      <dl>
+        <div>
+          <dt>Connection</dt>
+          <dd>{connection}</dd>
+        </div>
+        <div>
+          <dt>StateVersion</dt>
+          <dd>{payload.playerView.stateVersion}</dd>
+        </div>
+        <div>
+          <dt>MatchVersion</dt>
+          <dd>{payload.matchVersion}</dd>
+        </div>
+        <div>
+          <dt>StateHash</dt>
+          <dd>{shortDiagnosticsHash(hash)}</dd>
+        </div>
+        <div>
+          <dt>Sync</dt>
+          <dd>{connection === "online" ? "live" : "wartet"}</dd>
+        </div>
+        <div>
+          <dt>Visibility</dt>
+          <dd>side-filtered</dd>
+        </div>
+      </dl>
+    </section>
+  );
+}
+
+function shortDiagnosticsHash(hash: string): string {
+  if (hash.length <= 18) return hash;
+  return `${hash.slice(0, 14)}…`;
+}
+
 function CatalogPanel({
   cards,
   detail,
@@ -1125,10 +2272,15 @@ function CatalogPanel({
   status,
   summary,
   selectedId,
+  typeCounts,
+  typeFilters,
   onSearch,
   onSide,
   onStatus,
-  onSelect
+  onSelect,
+  onTypeFilter,
+  onSelectAllTypes,
+  onClearTypeFilters
 }: {
   cards: CatalogCardSummary[];
   detail: CatalogCardDetail | null;
@@ -1138,11 +2290,40 @@ function CatalogPanel({
   status: CatalogStatusKey | "all";
   summary: Partial<Record<CatalogStatusKey, number>>;
   selectedId: string | null;
+  typeCounts: Partial<Record<CatalogTypeFilterKey, number>>;
+  typeFilters: CatalogTypeFilterState;
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
   onStatus(value: CatalogStatusKey | "all"): void;
   onSelect(value: string): void;
+  onTypeFilter(key: CatalogTypeFilterKey, selected: boolean): void;
+  onSelectAllTypes(): void;
+  onClearTypeFilters(): void;
 }) {
+  const catalogImageUrl = detail ? localCardImageUrl(detail.catalogCardId) : undefined;
+  const detailRef = useRef<HTMLElement | null>(null);
+  const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
+
+  useEffect(() => {
+    const detailElement = detailRef.current;
+    if (!detailElement) return;
+    const syncListHeight = () => {
+      if (!window.matchMedia("(min-width: 1081px)").matches) {
+        setCatalogListHeight(null);
+        return;
+      }
+      setCatalogListHeight(Math.max(380, Math.ceil(detailElement.getBoundingClientRect().height)));
+    };
+    syncListHeight();
+    const observer = new ResizeObserver(syncListHeight);
+    observer.observe(detailElement);
+    window.addEventListener("resize", syncListHeight);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", syncListHeight);
+    };
+  }, [detail?.catalogCardId]);
+
   return (
     <section className="catalogPanel panel">
       <div className="catalogHeader">
@@ -1156,8 +2337,9 @@ function CatalogPanel({
       </div>
       <div className="catalogControls">
         <label className="searchBox">
+          <span>Suche</span>
           <Search size={16} />
-          <input value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Suche" />
+          <input value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Kartenname, Text, Subtyp" />
         </label>
         <label>
           Seite
@@ -1181,9 +2363,29 @@ function CatalogPanel({
             ))}
           </select>
         </label>
+        <fieldset className="catalogTypeFilters">
+          <legend>Haupttypen</legend>
+          <div className="typeFilterActions">
+            <button type="button" onClick={onSelectAllTypes}>
+              Alle
+            </button>
+            <button type="button" onClick={onClearTypeFilters}>
+              Keine
+            </button>
+          </div>
+          <div className="typeFilterGrid">
+            {CATALOG_TYPE_FILTERS.map((filter) => (
+              <label className={`typeToggle ${typeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
+                <input checked={typeFilters[filter.key]} onChange={(event) => onTypeFilter(filter.key, event.target.checked)} type="checkbox" />
+                <span>{filter.label}</span>
+                <small>{typeCounts[filter.key] ?? 0}</small>
+              </label>
+            ))}
+          </div>
+        </fieldset>
       </div>
       <div className="catalogLayout">
-        <div className="catalogList">
+        <div className="catalogList" style={catalogListHeight ? { maxHeight: `${catalogListHeight}px` } : undefined}>
           {cards.map((card) => (
             <button className={`catalogItem ${selectedId === card.catalogCardId ? "active" : ""}`} key={card.catalogCardId} onClick={() => onSelect(card.catalogCardId)}>
               <strong>{card.title}</strong>
@@ -1195,7 +2397,7 @@ function CatalogPanel({
           ))}
           {cards.length === 0 ? <p className="meta catalogEmpty">Keine Treffer.</p> : null}
         </div>
-        <article className="catalogDetail">
+        <article className="catalogDetail" ref={detailRef}>
           {detail ? (
             <>
               <div className="catalogDetailHead">
@@ -1207,6 +2409,11 @@ function CatalogPanel({
                 </div>
                 <span className={`sideBadge ${detail.side}`}>{detail.side}</span>
               </div>
+              {catalogImageUrl ? (
+                <div className="catalogImagePreview">
+                  <img src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} />
+                </div>
+              ) : null}
               <StatusBadges statuses={detail.statuses} />
               <p className="catalogText">{detail.text}</p>
               <div className="catalogMetaGrid">
@@ -1451,6 +2658,28 @@ function ConnectionBadge({ text, state }: { text: string; state: "offline" | "co
   return <span className={`connection ${state}`}>{text}</span>;
 }
 
+function OpponentPanel({ view, connected }: { view: PlayerView; connected: boolean }) {
+  const side = opponentSide(view.side);
+  return (
+    <section className="section">
+      <h2>{sideLabel(side)}</h2>
+      <div className="stats">
+        <Stat label="Credits" value={view.opponent.credits} />
+        <Stat label="Clicks" value={view.opponent.clicks} />
+        <Stat label="Agenda" value={view.opponent.agendaPoints} />
+        {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} /> : null}
+      </div>
+      {view.deckMetadata ? (
+        <div className="deckMini">
+          <span>{view.deckMetadata.opponent.deckName}</span>
+          <small>{view.deckMetadata.opponent.deckHash}</small>
+        </div>
+      ) : null}
+      <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {view.activeSide === side ? "Aktiv" : "Wartet"}</p>
+    </section>
+  );
+}
+
 function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
   const visibleTags = view.side === "runner" ? view.own.tags : view.opponent.tags;
   return (
@@ -1482,37 +2711,6 @@ function Stat({ label, value }: { label: string; value: number }) {
   );
 }
 
-function EventLogEntry({ event, card }: { event: PublicGameEvent; card: CatalogCardDetail | null }) {
-  const fallbackTitle = typeof event.publicPayload.title === "string" ? event.publicPayload.title : null;
-  const cardTitle = card?.title ?? fallbackTitle;
-  const detailLines = card ? catalogDetailLines(card) : [];
-  const tooltipText = card ? [card.title, ...detailLines, card.text].filter(Boolean).join("\n") : cardTitle ?? undefined;
-  return (
-    <div className="event">
-      <strong>{String(event.publicPayload.label ?? event.type)}</strong>
-      {cardTitle ? (
-        <div className="eventCardLink" tabIndex={0} title={tooltipText}>
-          Karte: {cardTitle}
-          {card ? (
-            <div className="eventCardTooltip" role="tooltip">
-              <strong>{card.title}</strong>
-              {detailLines.map((line) => (
-                <span key={line}>{line}</span>
-              ))}
-              <p>{card.text}</p>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-      {card?.text ? <span className="eventEffect">Effekt: {card.text}</span> : null}
-      {event.publicPayload.aiReasonCode ? <span className="eventReason">{String(event.publicPayload.aiReasonCode)}</span> : null}
-      <small>
-        v{event.stateVersionAfter} · {event.stateHashAfter}
-      </small>
-    </div>
-  );
-}
-
 function SimulationResult({ summary }: { summary: AiSimulationSummary }) {
   return (
     <div className="simulationResult">
@@ -1531,28 +2729,86 @@ function SimulationResult({ summary }: { summary: AiSimulationSummary }) {
   );
 }
 
-function Card({ card, compact = false }: { card: VisibleCard; compact?: boolean }) {
-  const typeClass = card.type ? ` ${card.type}` : "";
+function CardView({
+  card,
+  compact = false,
+  preview = false,
+  displayMode,
+  hiddenSide,
+  onFocus
+}: {
+  card: DisplayVisibleCard;
+  compact?: boolean;
+  preview?: boolean;
+  displayMode: CardDisplayMode;
+  hiddenSide?: Side;
+  onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+}) {
+  const cardRef = useRef<HTMLButtonElement | null>(null);
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
+  const typeClass = card.known && card.type ? ` ${card.type}` : "";
+  const isCompact = compact || displayMode === "compact";
+  const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const detailLines = card.known ? cardDetailLines(card) : [];
   const tooltipText = card.known ? [card.title, ...detailLines, card.rulesText].filter(Boolean).join("\n") : undefined;
+  const tooltipId = card.known && card.rulesText ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const nativeTitle = tooltipId ? undefined : tooltipText;
+  const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
+  const cardBackUrl = !card.known && displayMode === "placeholder" && hiddenSide ? cardBackImageUrl(hiddenSide) : undefined;
+  const visualImageUrl = cardImageUrl ?? cardBackUrl;
+
+  const updateTooltipPlacement = () => {
+    const element = cardRef.current;
+    if (!element || !card.known || !card.rulesText) return;
+    const cardRect = element.getBoundingClientRect();
+    const boundary = nearestTooltipBoundary(element);
+    const boundaryTop = Math.max(0, boundary.top);
+    const boundaryBottom = Math.min(window.innerHeight, boundary.bottom);
+    const spaceBelow = boundaryBottom - cardRect.bottom;
+    const spaceAbove = cardRect.top - boundaryTop;
+    setTooltipPlacement(spaceBelow < 118 && spaceAbove > spaceBelow ? "above" : "below");
+  };
+
   return (
-    <div className={`card${compact ? " compact" : ""}${card.known ? typeClass : " hidden"}`} tabIndex={card.known ? 0 : undefined} title={tooltipText}>
-      <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>
-      {!compact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Hidden"}</span> : null}
-      {card.known && card.rulesText ? <span className="cardRulesPreview">{card.rulesText}</span> : null}
-      {card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
-      {card.strength !== undefined ? <span className="cardMeta">Stärke {card.strength}</span> : null}
+    <button
+      ref={cardRef}
+      type="button"
+      className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}`}
+      onClick={() => onFocus?.(card, hiddenSide)}
+      onFocus={updateTooltipPlacement}
+      onPointerEnter={updateTooltipPlacement}
+      aria-label={card.known ? `Karte ${card.title}` : "Verdeckte Karte"}
+      aria-describedby={tooltipId}
+      title={nativeTitle}
+    >
+      {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : <span className="cardArt" aria-hidden="true" />}
+      {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
+      {!visualImageUrl && !isCompact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Redacted"}</span> : null}
+      {!visualImageUrl && card.known && card.rulesText ? <span className="cardRulesPreview">{card.rulesText}</span> : null}
+      {!visualImageUrl && card.known && card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
+      {!visualImageUrl && card.known && card.strength !== undefined ? <span className="cardMeta">Stärke {card.strength}</span> : null}
       {card.known && card.rulesText ? (
-        <div className="cardTooltip" role="tooltip">
+        <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
           <strong>{card.title}</strong>
           {detailLines.map((line) => (
             <span key={line}>{line}</span>
           ))}
-          <p>{card.rulesText}</p>
-        </div>
+          <span className="cardTooltipText">{card.rulesText}</span>
+        </span>
       ) : null}
-    </div>
+    </button>
   );
+}
+
+function nearestTooltipBoundary(element: HTMLElement): DOMRect {
+  let current = element.parentElement;
+  while (current) {
+    const style = window.getComputedStyle(current);
+    const overflow = `${style.overflow} ${style.overflowY} ${style.overflowX}`;
+    if (/(auto|scroll|hidden|clip)/.test(overflow)) return current.getBoundingClientRect();
+    current = current.parentElement;
+  }
+  return new DOMRect(0, 0, window.innerWidth, window.innerHeight);
 }
 
 function cardDetailLines(card: VisibleCard): string[] {
@@ -1577,7 +2833,8 @@ function valueLabel(label: string, value: number | undefined): string | null {
 }
 
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {
-  return {
+  const winner = response.winner ?? response.playerView.winner;
+  const payload: ClientPayload = {
     matchId: response.matchId,
     matchStatus: response.mode === "human_vs_human" ? (response.hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner") : "active",
     matchVersion: response.matchVersion,
@@ -1585,13 +2842,17 @@ function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientP
     playerView: response.playerView,
     legalActions: response.legalActions,
     eventTail: response.playerView.publicEvents,
-    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" },
-    ...(response.playerView.winner ? { winner: response.playerView.winner } : {})
+    opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" }
   };
+  if (winner) payload.winner = winner;
+  if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
+  if (response.resultSummary) payload.resultSummary = response.resultSummary;
+  return payload;
 }
 
 function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
-  return {
+  const winner = response.winner ?? response.playerView.winner;
+  const payload: ClientPayload = {
     matchId: response.matchId,
     matchStatus: "active",
     matchVersion: response.matchVersion,
@@ -1599,9 +2860,12 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
     playerView: response.playerView,
     legalActions: response.legalActions,
     eventTail: response.eventTail ?? response.playerView.publicEvents,
-    opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false },
-    ...(response.playerView.winner ? { winner: response.playerView.winner } : {})
+    opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false }
   };
+  if (winner) payload.winner = winner;
+  if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
+  if (response.resultSummary) payload.resultSummary = response.resultSummary;
+  return payload;
 }
 
 async function bootstrap(session: SessionInfo): Promise<ClientPayload | null> {
@@ -1620,6 +2884,41 @@ async function postJson<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body)
   });
   return (await response.json()) as T;
+}
+
+function seriesAudioOutcome(result: GameResultSummary): GameResultSummary["viewerOutcome"] {
+  if (result.series?.status !== "finished") return result.viewerOutcome;
+  if (result.series.viewerWins > result.series.opponentWins) return "won";
+  if (result.series.viewerWins < result.series.opponentWins) return "lost";
+  return "draw";
+}
+
+function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: number): void {
+  const AudioCtor = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+  if (!AudioCtor) return;
+  const context = new AudioCtor();
+  const safeVolume = Math.min(1, Math.max(0, volume));
+  const notes =
+    outcome === "won"
+      ? [523.25, 659.25, 783.99]
+      : outcome === "lost"
+        ? [392, 329.63, 261.63]
+        : [440, 493.88, 440];
+  notes.forEach((frequency, index) => {
+    const oscillator = context.createOscillator();
+    const gain = context.createGain();
+    const start = context.currentTime + index * 0.11;
+    oscillator.type = outcome === "lost" ? "triangle" : "sine";
+    oscillator.frequency.setValueAtTime(frequency, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(Math.max(0.0001, safeVolume * 0.12), start + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.17);
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + 0.19);
+  });
+  window.setTimeout(() => void context.close(), 700);
 }
 
 function persistSession(session: SessionInfo) {

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "demo-cards-v0.97",
+  "id": "demo-cards-0.97",
+  "status": "implemented_for_v0.97_final_gate",
+  "extends": "data/cards/demo-cards-0.96.json",
+  "sourceMode": "local_original",
+  "assetPolicy": "no official art, logos, frames, card backs or external image dependencies",
+  "cards": [
+    {
+      "id": "v097_deep_dive_event",
+      "title": "Deep Dive Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "resolver": "runner_event_run_multiaccess_2",
+      "roles": ["run_pressure", "breach", "multiaccess"],
+      "deviation": "local_original",
+      "status": "playable_mvp",
+      "cost": 1,
+      "mechanics": ["play_event", "start_run", "breach", "multiaccess"],
+      "rulesText": "Make a run. If successful, access 1 additional card during the breach."
+    }
+  ]
+}

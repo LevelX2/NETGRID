@@ -1,0 +1,21 @@
+{
+  "id": "SCN-V08-004",
+  "name": "V0.8 Corp ICE tax and tag smoke",
+  "baselineId": "rules-baseline-mvp-0.8",
+  "requirementIds": ["V08-MUST-006", "V08-MUST-007", "V08-MUST-008", "V08-MUST-009", "V08-MUST-010"],
+  "coversCards": ["v08_wall_ice", "v08_gate_ice", "v08_watchdog_ice"],
+  "seed": "v08-starter-tag-tax-smoke",
+  "runnerDeckSnapshotId": "demo_runner_008_snapshot_v0_8",
+  "corpDeckSnapshotId": "demo_corp_008_snapshot_v0_8",
+  "steps": [
+    "Corp installs and rezzes V0.8 ICE.",
+    "Runner encounters barrier, code gate and sentry lines.",
+    "Unbroken subroutines resolve tax, tag and end-the-run effects."
+  ],
+  "expected": {
+    "iceHiddenUntilRez": true,
+    "tagPublicCounterChangesOnly": true,
+    "aiUsesOnlyLegalActions": true,
+    "finalStateHash": "pending_after_implementation"
+  }
+}

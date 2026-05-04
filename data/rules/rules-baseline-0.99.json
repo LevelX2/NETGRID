@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "rules-baseline-v0.99",
+  "id": "rules-baseline-mvp-0.99",
+  "status": "implemented_for_v0.99_final_gate",
+  "rulesVersion": "26.03",
+  "cardTextSource": "manual_local_original",
+  "cardTextSnapshotId": "mvp-0.99-demo",
+  "engineSchemaVersion": "0.99.0",
+  "cardImplementationVersion": "0.99.0",
+  "deviationRegistryVersion": "0.99.0",
+  "playerViewSchemaVersion": "0.99.0",
+  "multiplayerSchemaVersion": "0.99.0",
+  "aiSchemaVersion": "0.99.0",
+  "simulationSchemaVersion": "0.99.0",
+  "scope": {
+    "implementedMechanics": [
+      "generic_card_counters",
+      "direct_hosting",
+      "hosted_program_choice",
+      "host_trash_cascade",
+      "virus_counters",
+      "corp_purge_virus_counters",
+      "recurring_credits",
+      "bad_publicity",
+      "bad_publicity_run_fund"
+    ],
+    "carriedForward": [
+      "identity_setup",
+      "static_identity_modifier",
+      "hidden_zone_tools",
+      "jack_out",
+      "breach_queue",
+      "trace",
+      "link",
+      "runner_resources",
+      "damage_flatline"
+    ],
+    "notImplemented": [
+      "prevention",
+      "avoid",
+      "interrupt",
+      "replacement",
+      "set_aside",
+      "remove_from_game",
+      "ownership_control_change",
+      "full_hosting_rule_matrix",
+      "full_deckbuilding_format_rules"
+    ]
+  },
+  "gateAssertions": {
+    "genericCountersValidatedAsNonNegativeIntegers": true,
+    "hostingIsDirectAndAcyclic": true,
+    "hostingChoiceUsesSidePrivatePendingChoice": true,
+    "hostTrashCascadesHostedProgramToHeap": true,
+    "purgeCostsThreeCorpClicks": true,
+    "purgeRemovesOnlyVirusCounters": true,
+    "recurringCreditsRefreshWithoutAccumulation": true,
+    "badPublicityFundCreatedAtRunStart": true,
+    "badPublicityFundClearedAtRunEnd": true,
+    "replayAndStateHashDeterministic": true,
+    "noM11PlusMechanicsEnabled": true,
+    "noOfficialAssets": true,
+    "imagesDoNotAffectEngineAiGameStateReplayOrStateHash": true,
+    "importDoesNotGrantPlayability": true
+  },
+  "notes": [
+    "V0.99 is split internally into V0.99a Counter, V0.99b Hosting, V0.99c Virus/Purge and V0.99d Recurring Credits/Bad Publicity.",
+    "All V0.99 cards are local fictional harness cards and do not use official Netrunner card text, art, frames, logos or external databases.",
+    "Bad Publicity is limited to Runner run costs in V0.99 and is not used for Trace bids."
+  ]
+}

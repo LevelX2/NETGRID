@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "card-implementation-manifest-v0.95",
+  "id": "mvp-0.95-card-implementation-manifest",
+  "status": "implemented_for_v0.95_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-0.94.json",
+  "sourceMode": "local_original",
+  "gateAssertions": {
+    "allPlayableCardsHaveResolver": true,
+    "allPlayableCardsHaveUnitScenarioVisibilityReplayAiAndMultiplayerCoverage": true,
+    "noOfficialCardsOrAssets": true,
+    "importDoesNotGrantPlayability": true,
+    "noV096PlusMechanicsEnabled": true
+  },
+  "cards": [
+    {
+      "cardCode": "v095_safehouse_resource",
+      "title": "Safehouse Resource",
+      "status": "playable_mvp",
+      "sourceMode": "local_original",
+      "resolver": "runner_install_public_resource",
+      "visibilityClass": "public_installed_runner_resource",
+      "riskFlags": ["public_board_card", "tag_interaction", "corp_basic_action_trash"],
+      "roleTags": ["resource", "setup"],
+      "requirementIds": ["M095-INSTALL-001", "M095-TRASH-001", "M095-VISIBILITY-001", "M095-REPLAY-001", "M095-CARD-001"],
+      "unitTests": ["V095-T002", "V095-T004", "V095-T005", "V095-T006", "V095-T007", "V095-T008", "V095-T015"],
+      "scenarioTests": ["SCN-V095-001", "SCN-V095-002"],
+      "visibilityTests": ["V095-T003", "V095-T009", "V095-T013"],
+      "replayTests": ["V095-T008"],
+      "aiSmokeTests": ["V095-T011"],
+      "multiplayerSmokeTests": ["V095-T010", "V095-T012", "V095-T013"]
+    }
+  ]
+}

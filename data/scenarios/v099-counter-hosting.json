@@ -1,0 +1,25 @@
+{
+  "id": "SCN-V099-001",
+  "baselineId": "rules-baseline-mvp-0.99",
+  "title": "Counter and Hosting stay side-safe, direct and replayable",
+  "requirementIds": ["M099A-SHARED-001", "M099A-COUNTER-001", "M099A-VISIBILITY-001", "M099A-REPLAY-001", "M099B-HOSTING-001", "M099B-HOSTING-002", "M099B-HOSTING-003", "M099B-HOSTING-004", "M099B-HOSTING-005", "M099B-HOSTING-006", "M099B-HOSTING-007", "M099-CARD-001", "M099-NOSCOPE-001"],
+  "coversTests": ["V099-T001", "V099-T002", "V099-T003", "V099-T004", "V099-T005", "V099-T006", "V099-T017", "V099-T018"],
+  "coversCards": ["v099_host_resource", "v099_virus_program"],
+  "steps": [
+    "Create a game with demo_runner_099 and demo_corp_099.",
+    "Runner installs Host Resource with a program in grip.",
+    "Runner receives a private hosting Choice; Corp payloads do not include candidate titles.",
+    "Runner resolves the Choice and the program receives a direct hostedOn relation.",
+    "Validation rejects self-hosting, missing-host and cycle states.",
+    "Corp trashes the tagged Runner host resource and hosted program is moved to heap with the host.",
+    "Replay reproduces the final StateHash."
+  ],
+  "expected": {
+    "counterFieldsAreAdditive": true,
+    "hostingChoiceSidePrivate": true,
+    "hostingDirectAndAcyclic": true,
+    "hostTrashCascadesHostedProgram": true,
+    "stateHashDeterministic": true,
+    "noM11PlusMechanics": true
+  }
+}

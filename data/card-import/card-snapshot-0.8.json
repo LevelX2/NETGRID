@@ -1,0 +1,1916 @@
+{
+  "schemaVersion": "card-snapshot-v0.5",
+  "snapshotId": "card-snapshot-0.8",
+  "status": "frozen_for_v0.8_requirements",
+  "createdAt": "2026-05-03T16:20:00.000+02:00",
+  "sourceRegistryId": "source-registry-0.5",
+  "copyrightNote": "Lokale fiktive Demo- und Katalogdaten; keine offiziellen Kartentexte, Artworks, Logos, Frames oder Card Backs.",
+  "normalization": {
+    "algorithm": "v0.5-canonical-json-fnv1a",
+    "sortOrder": [
+      "catalogCardId"
+    ],
+    "textPolicy": "Kartentext ist Anzeigeinformation und niemals Parser-Input.",
+    "assetPolicy": "Asset-Felder werden in V0.5 nicht importiert oder verwendet."
+  },
+  "cards": [
+    {
+      "catalogCardId": "catalog_preview_operation_001",
+      "sourceCardId": "catalog_preview_operation_001",
+      "engineCardId": null,
+      "title": "Catalog Preview Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "v05-local-catalog-fixtures",
+      "setName": "V0.5 Local Catalog Fixtures",
+      "collectorNumber": "001",
+      "text": "Fiktive Katalogkarte für Importtests. Nicht implementiert und nicht decklegal.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "playable": false,
+        "deck_legal": false,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": null
+    },
+    {
+      "catalogCardId": "catalog_preview_resource_001",
+      "sourceCardId": "catalog_preview_resource_001",
+      "engineCardId": null,
+      "title": "Catalog Preview Resource",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "v05-local-catalog-fixtures",
+      "setName": "V0.5 Local Catalog Fixtures",
+      "collectorNumber": "002",
+      "text": "Fiktive Katalogkarte mit absichtlich nicht unterstütztem Typ für Blocked-Status.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "playable": false,
+        "deck_legal": false,
+        "blocked": true
+      },
+      "blockReasons": [
+        "Card type resource is catalog-only in V0.5 and has no engine resolver."
+      ],
+      "implementationManifest": null
+    },
+    {
+      "catalogCardId": "corp_identity_001",
+      "sourceCardId": "corp_identity_001",
+      "engineCardId": "corp_identity_001",
+      "title": "Corp Identity",
+      "side": "corp",
+      "type": "identity",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "003",
+      "text": "Testidentität ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-CORP-000"
+        ],
+        "scenarioTests": [
+          "SCN-006"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "efficient_fracter",
+      "sourceCardId": "efficient_fracter",
+      "engineCardId": "efficient_fracter",
+      "title": "Efficient Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "fracter"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "004",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-CARD-001"
+        ],
+        "scenarioTests": [
+          "SCN-V04-001"
+        ],
+        "visibilityTests": [
+          "T-V04-DATA-002"
+        ],
+        "replayTests": [
+          "T-V04-CARD-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "runner_identity_001",
+      "sourceCardId": "runner_identity_001",
+      "engineCardId": "runner_identity_001",
+      "title": "Runner Identity",
+      "side": "runner",
+      "type": "identity",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "005",
+      "text": "Testidentität ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-RUN-000"
+        ],
+        "scenarioTests": [
+          "SCN-006"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_agenda",
+      "sourceCardId": "simple_agenda",
+      "engineCardId": "simple_agenda",
+      "title": "Simple Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "006",
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-CORP-001"
+        ],
+        "scenarioTests": [
+          "SCN-001",
+          "SCN-004"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_barrier_ice",
+      "sourceCardId": "simple_barrier_ice",
+      "engineCardId": "simple_barrier_ice",
+      "title": "Simple Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "007",
+      "text": "End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-CORP-004"
+        ],
+        "scenarioTests": [
+          "SCN-002",
+          "SCN-003"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_code_gate_ice",
+      "sourceCardId": "simple_code_gate_ice",
+      "engineCardId": "simple_code_gate_ice",
+      "title": "Simple Code Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "008",
+      "text": "Die Corp erhält 1 Credit. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 2,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-CORP-005"
+        ],
+        "scenarioTests": [
+          "SCN-002"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_decoder",
+      "sourceCardId": "simple_decoder",
+      "engineCardId": "simple_decoder",
+      "title": "Simple Decoder",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "decoder"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "009",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Code-Gate-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-RUN-004"
+        ],
+        "scenarioTests": [
+          "SCN-002"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_draw_event",
+      "sourceCardId": "simple_draw_event",
+      "engineCardId": "simple_draw_event",
+      "title": "Simple Draw Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "010",
+      "text": "Ziehe 2 Karten.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-CARD-001"
+        ],
+        "scenarioTests": [
+          "SCN-V04-001"
+        ],
+        "visibilityTests": [
+          "T-V04-DATA-002"
+        ],
+        "replayTests": [
+          "T-V04-CARD-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "simple_draw_operation",
+      "sourceCardId": "simple_draw_operation",
+      "engineCardId": "simple_draw_operation",
+      "title": "Simple Draw Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "011",
+      "text": "Ziehe 2 Karten.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-CARD-001"
+        ],
+        "scenarioTests": [
+          "SCN-V04-001"
+        ],
+        "visibilityTests": [
+          "T-V04-DATA-002"
+        ],
+        "replayTests": [
+          "T-V04-CARD-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "simple_economy_asset",
+      "sourceCardId": "simple_economy_asset",
+      "engineCardId": "simple_economy_asset",
+      "title": "Simple Economy Asset",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "012",
+      "text": "Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 1,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-CORP-003"
+        ],
+        "scenarioTests": [
+          "SCN-004"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_economy_event",
+      "sourceCardId": "simple_economy_event",
+      "engineCardId": "simple_economy_event",
+      "title": "Simple Economy Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "013",
+      "text": "Erhalte 4 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-RUN-001"
+        ],
+        "scenarioTests": [
+          "SCN-006"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_economy_operation",
+      "sourceCardId": "simple_economy_operation",
+      "engineCardId": "simple_economy_operation",
+      "title": "Simple Economy Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "014",
+      "text": "Erhalte 4 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-CORP-002"
+        ],
+        "scenarioTests": [
+          "SCN-006"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_fracter",
+      "sourceCardId": "simple_fracter",
+      "engineCardId": "simple_fracter",
+      "title": "Simple Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "fracter"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "015",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-RUN-003"
+        ],
+        "scenarioTests": [
+          "SCN-002",
+          "SCN-003"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_killer",
+      "sourceCardId": "simple_killer",
+      "engineCardId": "simple_killer",
+      "title": "Simple Killer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "016",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Sentry-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 1,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-RUN-005"
+        ],
+        "scenarioTests": [
+          "SCN-002"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_priority_agenda",
+      "sourceCardId": "simple_priority_agenda",
+      "engineCardId": "simple_priority_agenda",
+      "title": "Simple Priority Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "017",
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 3
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-CARD-001"
+        ],
+        "scenarioTests": [
+          "SCN-V04-001"
+        ],
+        "visibilityTests": [
+          "T-V04-DATA-002"
+        ],
+        "replayTests": [
+          "T-V04-CARD-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "simple_run_event",
+      "sourceCardId": "simple_run_event",
+      "engineCardId": "simple_run_event",
+      "title": "Simple Run Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "018",
+      "text": "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 2 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-RUN-002"
+        ],
+        "scenarioTests": [
+          "SCN-002"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_sentry_ice",
+      "sourceCardId": "simple_sentry_ice",
+      "engineCardId": "simple_sentry_ice",
+      "title": "Simple Sentry ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.1-demo",
+      "setName": "MVP 0.1 Demo Cards",
+      "collectorNumber": "019",
+      "text": "Der Runner verliert 2 Credits, falls möglich. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.1",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-CARD-CORP-006"
+        ],
+        "scenarioTests": [
+          "SCN-002"
+        ],
+        "visibilityTests": [],
+        "replayTests": []
+      }
+    },
+    {
+      "catalogCardId": "simple_setup_hardware",
+      "sourceCardId": "simple_setup_hardware",
+      "engineCardId": "simple_setup_hardware",
+      "title": "Simple Setup Hardware",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "020",
+      "text": "+1 Memory Limit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-CARD-002"
+        ],
+        "scenarioTests": [
+          "SCN-V04-001"
+        ],
+        "visibilityTests": [
+          "T-V04-CARD-002"
+        ],
+        "replayTests": [
+          "T-V04-CARD-002"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "simple_tag_ice",
+      "sourceCardId": "simple_tag_ice",
+      "engineCardId": "simple_tag_ice",
+      "title": "Simple Tag ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "021",
+      "text": "Gib dem Runner 1 Tag. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-TAG-001"
+        ],
+        "scenarioTests": [
+          "SCN-V04-002"
+        ],
+        "visibilityTests": [
+          "T-V04-TAG-001"
+        ],
+        "replayTests": [
+          "T-V04-TAG-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "simple_tag_punishment_operation",
+      "sourceCardId": "simple_tag_punishment_operation",
+      "engineCardId": "simple_tag_punishment_operation",
+      "title": "Simple Tag Punishment Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "022",
+      "text": "Spiele nur, wenn der Runner getaggt ist. Der Runner verliert 2 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-TAG-003"
+        ],
+        "scenarioTests": [
+          "SCN-V04-003"
+        ],
+        "visibilityTests": [
+          "T-V04-TAG-003"
+        ],
+        "replayTests": [
+          "T-V04-TAG-003"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "simple_taxing_barrier_ice",
+      "sourceCardId": "simple_taxing_barrier_ice",
+      "engineCardId": "simple_taxing_barrier_ice",
+      "title": "Simple Taxing Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "023",
+      "text": "Der Runner verliert 1 Credit. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-CARD-001"
+        ],
+        "scenarioTests": [
+          "SCN-V04-001"
+        ],
+        "visibilityTests": [
+          "T-V04-DATA-002"
+        ],
+        "replayTests": [
+          "T-V04-CARD-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "simple_upgrade",
+      "sourceCardId": "simple_upgrade",
+      "engineCardId": "simple_upgrade",
+      "title": "Simple Upgrade",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.4-demo",
+      "setName": "MVP 0.4 Demo Cards",
+      "collectorNumber": "024",
+      "text": "Einfache Root-Karte ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.4",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V04-CARD-003"
+        ],
+        "scenarioTests": [
+          "SCN-V04-001"
+        ],
+        "visibilityTests": [
+          "T-V04-CARD-003"
+        ],
+        "replayTests": [
+          "T-V04-CARD-003"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_adaptive_killer",
+      "sourceCardId": "v08_adaptive_killer",
+      "engineCardId": "v08_adaptive_killer",
+      "title": "Adaptive Killer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-007",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Sentry-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-007"
+        ],
+        "scenarioTests": [
+          "SCN-V08-002"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-002"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-002"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_archive_planning_operation",
+      "sourceCardId": "v08_archive_planning_operation",
+      "engineCardId": "v08_archive_planning_operation",
+      "title": "Archive Planning Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-009",
+      "text": "Ziehe 3 Karten.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-009"
+        ],
+        "scenarioTests": [
+          "SCN-V08-003"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-003"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-003"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_burst_credit_event",
+      "sourceCardId": "v08_burst_credit_event",
+      "engineCardId": "v08_burst_credit_event",
+      "title": "Burst Credit Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-001",
+      "text": "Erhalte 6 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-001"
+        ],
+        "scenarioTests": [
+          "SCN-V08-001"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-001"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_cashout_asset",
+      "sourceCardId": "v08_cashout_asset",
+      "engineCardId": "v08_cashout_asset",
+      "title": "Cashout Asset",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-011",
+      "text": "Wenn diese Karte gerezzt wird, erhält die Corp 4 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 2,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-011"
+        ],
+        "scenarioTests": [
+          "SCN-V08-003"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-004"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-003"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_credit_surge_operation",
+      "sourceCardId": "v08_credit_surge_operation",
+      "engineCardId": "v08_credit_surge_operation",
+      "title": "Credit Surge Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-008",
+      "text": "Erhalte 7 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-008"
+        ],
+        "scenarioTests": [
+          "SCN-V08-003"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-003"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-003"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_deep_draw_event",
+      "sourceCardId": "v08_deep_draw_event",
+      "engineCardId": "v08_deep_draw_event",
+      "title": "Deep Draw Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-002",
+      "text": "Ziehe 3 Karten.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-002"
+        ],
+        "scenarioTests": [
+          "SCN-V08-001"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-001"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_gate_ice",
+      "sourceCardId": "v08_gate_ice",
+      "engineCardId": "v08_gate_ice",
+      "title": "Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-013",
+      "text": "Die Corp erhält 2 Credits. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-013"
+        ],
+        "scenarioTests": [
+          "SCN-V08-004"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-005"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-004"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_memory_chip",
+      "sourceCardId": "v08_memory_chip",
+      "engineCardId": "v08_memory_chip",
+      "title": "Memory Chip",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-004",
+      "text": "+1 Memory Limit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-004"
+        ],
+        "scenarioTests": [
+          "SCN-V08-001"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-001"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-001"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_overclock_run_event",
+      "sourceCardId": "v08_overclock_run_event",
+      "engineCardId": "v08_overclock_run_event",
+      "title": "Overclock Run Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-003",
+      "text": "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 3 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-003"
+        ],
+        "scenarioTests": [
+          "SCN-V08-002"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-002"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-002"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_precise_decoder",
+      "sourceCardId": "v08_precise_decoder",
+      "engineCardId": "v08_precise_decoder",
+      "title": "Precise Decoder",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "decoder"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-006",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Code-Gate-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-006"
+        ],
+        "scenarioTests": [
+          "SCN-V08-002"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-002"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-002"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_project_agenda",
+      "sourceCardId": "v08_project_agenda",
+      "engineCardId": "v08_project_agenda",
+      "title": "Project Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-010",
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-010"
+        ],
+        "scenarioTests": [
+          "SCN-V08-003"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-004"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-003"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_steady_fracter",
+      "sourceCardId": "v08_steady_fracter",
+      "engineCardId": "v08_steady_fracter",
+      "title": "Steady Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "fracter"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-005",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 4,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-005"
+        ],
+        "scenarioTests": [
+          "SCN-V08-002"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-002"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-002"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_wall_ice",
+      "sourceCardId": "v08_wall_ice",
+      "engineCardId": "v08_wall_ice",
+      "title": "Wall ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-012",
+      "text": "End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 5,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-012"
+        ],
+        "scenarioTests": [
+          "SCN-V08-004"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-005"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-004"
+        ]
+      }
+    },
+    {
+      "catalogCardId": "v08_watchdog_ice",
+      "sourceCardId": "v08_watchdog_ice",
+      "engineCardId": "v08_watchdog_ice",
+      "title": "Watchdog ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "faction": "neutral_demo",
+      "setId": "mvp-0.8-demo",
+      "setName": "MVP 0.8 Local Starter Slice",
+      "collectorNumber": "V08-014",
+      "text": "Gib dem Runner 1 Tag. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "playable": true,
+        "deck_legal": true,
+        "blocked": false
+      },
+      "blockReasons": [],
+      "implementationManifest": {
+        "manifestVersion": "card-implementation-manifest-v0.8",
+        "status": "playable_mvp",
+        "unitTests": [
+          "T-V08-CARD-014"
+        ],
+        "scenarioTests": [
+          "SCN-V08-004"
+        ],
+        "visibilityTests": [
+          "T-V08-VIS-005"
+        ],
+        "replayTests": [
+          "T-V08-REPLAY-004"
+        ]
+      }
+    }
+  ]
+}

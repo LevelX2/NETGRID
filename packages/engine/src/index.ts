@@ -3,18 +3,31 @@ import {
   DEMO_DECKS,
   MVP_0_1_BASELINE,
   MVP_0_4_BASELINE,
+  MVP_0_8_BASELINE,
+  MVP_0_94_BASELINE,
+  MVP_0_95_BASELINE,
+  MVP_0_96_BASELINE,
+  MVP_0_97_BASELINE,
+  MVP_0_98_BASELINE,
+  MVP_0_99_BASELINE,
   type ActionType,
+  type ChoiceRequest,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
+  type CounterType,
   type CorpServer,
   type CreateGameConfig,
   type DeckDefinition,
   type DeckPublicMetadata,
   type DemoDeckId,
+  type DamageType,
   type EngineError,
   type EngineResult,
+  type EventVisibilityClass,
+  type EffectCommand,
   type GameEvent,
+  type GameEndReason,
   type GameState,
   type LegalAction,
   type PlayerAction,
@@ -23,6 +36,7 @@ import {
   type PublicGameEvent,
   type ReplayResult,
   type RulesBaseline,
+  type ModifierKind,
   type ServerId,
   type Side,
   type StateHash,
@@ -38,7 +52,14 @@ export {
   MVP_0_1_BASELINE,
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
-  MVP_0_4_BASELINE
+  MVP_0_4_BASELINE,
+  MVP_0_8_BASELINE,
+  MVP_0_94_BASELINE,
+  MVP_0_95_BASELINE,
+  MVP_0_96_BASELINE,
+  MVP_0_97_BASELINE,
+  MVP_0_98_BASELINE,
+  MVP_0_99_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -46,14 +67,20 @@ export type {
   CardDefinition,
   CardInstance,
   CardInstanceId,
+  ChoiceRequest,
+  CounterType,
   CorpServer,
   CreateGameConfig,
   DeckDefinition,
   DeckPublicMetadata,
   DemoDeckId,
+  DamageType,
   EngineError,
   EngineResult,
+  EventVisibilityClass,
+  EffectCommand,
   GameEvent,
+  GameEndReason,
   GameState,
   LegalAction,
   PlayerAction,
@@ -73,6 +100,187 @@ const DEFAULT_CONTROLLERS: { runner: PlayerController; corp: PlayerController } 
   corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI" }
 };
 
+type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
+
+type RunnerEventResolver = {
+  name: string;
+  requiresServer?: boolean;
+  canPlay?: (state: GameState) => boolean;
+  canPlayForServer?: (state: GameState, serverId: Exclude<ServerId, "new_remote">) => boolean;
+  resolve: (state: GameState, legalAction: LegalAction) => void;
+};
+
+type CorpOperationResolver = {
+  name: string;
+  canPlay?: (state: GameState) => boolean;
+  resolve: (state: GameState) => void;
+};
+
+type CorpRootRezResolver = {
+  name: string;
+  resolve: (state: GameState) => void;
+};
+
+type DamageSummary = {
+  damageType: DamageType;
+  amount: number;
+  cardsTrashed: number;
+  flatline: boolean;
+};
+
+type ActiveRun = NonNullable<GameState["run"]>;
+type ActiveBreach = NonNullable<ActiveRun["breach"]>;
+type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
+
+const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
+  simple_economy_event: {
+    name: "runner_event_gain_credits_4",
+    resolve: (state) => {
+      state.runner.credits += 4;
+    }
+  },
+  simple_draw_event: {
+    name: "runner_event_draw_2",
+    resolve: (state) => {
+      drawRunnerCard(state);
+      drawRunnerCard(state);
+    }
+  },
+  simple_run_event: {
+    name: "runner_event_run_success_2",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 2);
+    }
+  },
+  v08_burst_credit_event: {
+    name: "runner_event_gain_credits_6",
+    resolve: (state) => {
+      state.runner.credits += 6;
+    }
+  },
+  v08_deep_draw_event: {
+    name: "runner_event_draw_3",
+    resolve: (state) => {
+      drawRunnerCard(state);
+      drawRunnerCard(state);
+      drawRunnerCard(state);
+    }
+  },
+  v08_overclock_run_event: {
+    name: "runner_event_run_success_3",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 3);
+    }
+  },
+  v097_deep_dive_event: {
+    name: "runner_event_run_multiaccess_2",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, undefined, 2);
+    }
+  },
+  v098_stack_search_event: {
+    name: "runner_event_search_stack_program",
+    canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
+    resolve: (state, legalAction) => {
+      startRunnerStackSearchChoice(state);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "search_stack" };
+    }
+  },
+  v098_stack_arrange_event: {
+    name: "runner_event_arrange_stack_top_2",
+    canPlay: (state) => state.runner.stack.length >= 2,
+    resolve: (state, legalAction) => {
+      startRunnerStackArrangeChoice(state);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "arrange_stack" };
+    }
+  },
+  v098_reveal_top_event: {
+    name: "runner_event_reveal_stack_top",
+    canPlay: (state) => state.runner.stack.length > 0,
+    resolve: (state, legalAction) => {
+      revealRunnerStackTop(state, legalAction);
+    }
+  },
+  v098_expose_event: {
+    name: "runner_event_expose_unrezzed_server_card",
+    requiresServer: true,
+    canPlayForServer: (state, serverId) => exposedCorpCardInServer(state, serverId) !== undefined,
+    resolve: (state, legalAction) => {
+      exposeCorpCardInServer(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, legalAction);
+    }
+  }
+};
+
+const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
+  simple_economy_operation: {
+    name: "corp_operation_gain_credits_4",
+    resolve: (state) => {
+      state.corp.credits += 4;
+    }
+  },
+  simple_draw_operation: {
+    name: "corp_operation_draw_2",
+    resolve: (state) => {
+      drawCorpCard(state);
+      drawCorpCard(state);
+    }
+  },
+  simple_tag_punishment_operation: {
+    name: "corp_operation_tag_punishment_lose_2",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state) => {
+      if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+      state.runner.credits = Math.max(0, state.runner.credits - 2);
+    }
+  },
+  v08_credit_surge_operation: {
+    name: "corp_operation_gain_credits_7",
+    resolve: (state) => {
+      state.corp.credits += 7;
+    }
+  },
+  v08_archive_planning_operation: {
+    name: "corp_operation_draw_3",
+    resolve: (state) => {
+      drawCorpCard(state);
+      drawCorpCard(state);
+      drawCorpCard(state);
+    }
+  },
+  v098_hq_rd_swap_operation: {
+    name: "corp_operation_swap_hq_rd",
+    canPlay: (state) => state.corp.hq.length > 1 && state.corp.rd.length > 0,
+    resolve: (state) => {
+      swapCorpHqAndRdTop(state);
+    }
+  },
+  v099_bad_publicity_operation: {
+    name: "corp_operation_bad_publicity_credit",
+    resolve: (state) => {
+      state.corp.credits += 3;
+      state.corp.badPublicity += 1;
+    }
+  }
+};
+
+const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
+  simple_economy_asset: {
+    name: "corp_asset_rez_gain_3",
+    resolve: (state) => {
+      state.corp.credits += 3;
+    }
+  },
+  v08_cashout_asset: {
+    name: "corp_asset_rez_gain_4",
+    resolve: (state) => {
+      state.corp.credits += 4;
+    }
+  }
+};
+
 export function createGame(config: CreateGameConfig = {}): GameState {
   const seed = config.seed ?? "mvp-0.1-default-seed";
   const random = { counter: 0, records: [] as GameState["randomDrawRecords"] };
@@ -81,9 +289,9 @@ export function createGame(config: CreateGameConfig = {}): GameState {
   const corpDeckId = config.corpDeckId ?? "demo_corp_001";
   const runnerDeckDefinition = config.runnerDeck ?? DEMO_DECKS[runnerDeckId];
   const corpDeckDefinition = config.corpDeck ?? DEMO_DECKS[corpDeckId];
-  const expandedCardPool = usesExpandedCardPool(runnerDeckDefinition) || usesExpandedCardPool(corpDeckDefinition);
-  const runnerDeckMetadata = config.runnerDeckMetadata ?? metadataForDeck(runnerDeckDefinition, expandedCardPool);
-  const corpDeckMetadata = config.corpDeckMetadata ?? metadataForDeck(corpDeckDefinition, expandedCardPool);
+  const cardPoolVersion = cardPoolVersionForDecks(runnerDeckDefinition, corpDeckDefinition);
+  const runnerDeckMetadata = config.runnerDeckMetadata ?? metadataForDeck(runnerDeckDefinition, cardPoolVersion);
+  const corpDeckMetadata = config.corpDeckMetadata ?? metadataForDeck(corpDeckDefinition, cardPoolVersion);
 
   const runnerIdentity = createInstance("runner", runnerDeckDefinition.identity, 0, {
     side: "runner",
@@ -111,7 +319,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
 
   const state: GameState = {
     matchId: config.matchId ?? "local-demo-match",
-    baseline: config.baseline ?? (expandedCardPool ? MVP_0_4_BASELINE : MVP_0_1_BASELINE),
+    baseline: config.baseline ?? baselineForCardPoolVersion(cardPoolVersion),
     stateVersion: 0,
     seed,
     randomCounter: random.counter,
@@ -145,17 +353,20 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       stack: runnerStack,
       heap: [],
       scoreArea: [],
-      rig: { programs: [], hardware: [] }
+      rig: { programs: [], hardware: [], resources: [] }
     },
     cardInstances: instances,
     eventLog: [],
     winner: null,
-    agendaPointsToWin: config.agendaPointsToWin ?? (expandedCardPool ? 7 : 6),
+    agendaPointsToWin: config.agendaPointsToWin ?? (cardPoolVersion === "0.1.0" ? 6 : 7),
     deckMetadata: {
       runner: runnerDeckMetadata,
       corp: corpDeckMetadata
     }
   };
+
+  applyIdentityStaticModifiers(state);
+  applyIdentitySetupAbilities(state);
 
   const initialHash = hashState(state);
   state.eventLog.push({
@@ -179,6 +390,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
 
 export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   if (state.winner || state.phase === "game_over") return [];
+  if (state.pendingChoice) return side === state.pendingChoice.side ? [choiceAction(state, state.pendingChoice)] : [];
   if (side !== state.activeSide && state.timingPoint !== "run.approach_ice") return [];
 
   if (state.timingPoint === "corp_draw.mandatory_draw") {
@@ -189,6 +401,7 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   if (state.timingPoint === "runner_action.main") return side === "runner" ? runnerMainActions(state) : [];
   if (state.timingPoint === "run.approach_ice") return side === "corp" ? corpApproachActions(state) : [];
   if (state.timingPoint === "run.encounter_ice") return side === "runner" ? runnerEncounterActions(state) : [];
+  if (state.timingPoint === "run.jack_out_window") return side === "runner" ? runnerMovementActions(state) : [];
   if (state.timingPoint === "access.resolve_card") return side === "runner" ? runnerAccessActions(state) : [];
   return [];
 }
@@ -207,12 +420,16 @@ export function applyAction(state: GameState, playerAction: PlayerAction): Engin
     return fail(state, playerAction.side === state.activeSide ? "ERR_UNKNOWN_ACTION" : "ERR_WRONG_SIDE", "Diese Aktion ist im aktuellen Fenster nicht legal.");
   }
 
+  const choiceError = validateChoiceAction(state.pendingChoice, legalAction, playerAction);
+  if (choiceError) return fail(state, "ERR_INVALID_CHOICE", choiceError);
+
   const next = cloneState(state);
   const before = state.stateVersion;
 
   try {
-    performAction(next, legalAction);
+    performAction(next, legalAction, playerAction);
     checkWinConditions(next);
+    next.stateVersion = before + 1;
     const validation = validateGameState(next);
     if (!validation.ok) {
       return fail(state, "ERR_INVARIANT_FAILED", `Der Spielzustand ist ungültig: ${validation.errors[0] ?? "unbekannter Fehler"}`);
@@ -221,7 +438,6 @@ export function applyAction(state: GameState, playerAction: PlayerAction): Engin
     return fail(state, "ERR_INVALID_TARGET", error instanceof Error ? error.message : "Die Aktion konnte nicht ausgeführt werden.");
   }
 
-  next.stateVersion = before + 1;
   const stateHash = hashState(next);
   const event = buildEvent(before, next.stateVersion, stateHash, next, legalAction, playerAction);
   next.eventLog.push(event);
@@ -251,6 +467,19 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
         attackedServerId: state.run.attackedServerId,
         phase: state.run.phase,
         ...(state.run.encounteredIceId ? { encounteredIce: visibleCorpCard(state, state.run.encounteredIceId, side, "ice") } : {}),
+        ...(state.run.accessedCardId ? { accessedCard: visibleCorpCard(state, state.run.accessedCardId, side, "root") } : {}),
+        ...(state.run.breach
+          ? {
+              breach: {
+                breachId: state.run.breach.breachId,
+                serverId: state.run.breach.serverId,
+                currentIndex: state.run.breach.currentIndex,
+                remainingCount: state.run.breach.queue.filter((entry) => entry.status === "pending").length,
+                completed: state.run.breach.completed
+              }
+            }
+          : {}),
+        ...(state.run.badPublicityCredits !== undefined ? { badPublicityCredits: state.run.badPublicityCredits } : {}),
         successful: state.run.successful
       }
     : undefined;
@@ -270,7 +499,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           stackOrRdCount: state.runner.stack.length,
           heapOrArchives: state.runner.heap.map((id) => visibleOwnCard(state, id)),
           scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id)),
-          rig: [...state.runner.rig.programs, ...state.runner.rig.hardware].map((id) => visibleOwnCard(state, id)),
+          rig: [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].map((id) => visibleOwnCard(state, id)),
           memoryUsed: state.runner.memoryUsed,
           memoryLimit: state.runner.memoryLimit,
           tags: state.runner.tags
@@ -293,19 +522,23 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           tags: state.runner.tags,
           handCount: state.corp.hq.length,
           deckCount: state.corp.rd.length,
+          discardCount: state.corp.archives.length,
           scoreArea: state.corp.scoreArea.map((id) => visibleOwnCard(state, id))
         }
-      : {
+        : {
           credits: state.runner.credits,
           clicks: state.runner.clicks,
           agendaPoints: agendaPoints(state, "runner"),
           tags: state.runner.tags,
           handCount: state.runner.grip.length,
           deckCount: state.runner.stack.length,
-          scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id))
+          discardCount: state.runner.heap.length,
+          scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id)),
+          rig: [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].map((id) => visibleOwnCard(state, id))
         },
     servers: visibleServers,
     ...(run ? { run } : {}),
+    ...(state.pendingChoice?.side === side ? { pendingChoice: visibleChoice(state.pendingChoice) } : {}),
     ...(state.deckMetadata
       ? {
           deckMetadata: {
@@ -316,7 +549,8 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
       : {}),
     publicEvents: state.eventLog.map(toPublicEvent),
     legalActions: getLegalActions(state, side),
-    winner: state.winner
+    winner: state.winner,
+    ...(state.gameEndReason ? { gameEndReason: state.gameEndReason } : {})
   };
 }
 
@@ -345,6 +579,7 @@ export function validateGameState(state: GameState): ValidationResult {
   for (const id of state.runner.scoreArea) addPlacement(id, "runner.scoreArea");
   for (const id of state.runner.rig.programs) addPlacement(id, "runner.rig.programs");
   for (const id of state.runner.rig.hardware) addPlacement(id, "runner.rig.hardware");
+  for (const id of state.runner.rig.resources) addPlacement(id, "runner.rig.resources");
 
   for (const id of Object.keys(state.cardInstances)) {
     if (!placements.has(id)) errors.push(`CardInstance ${id} is not in any zone.`);
@@ -352,9 +587,83 @@ export function validateGameState(state: GameState): ValidationResult {
 
   if (state.corp.credits < 0 || state.runner.credits < 0) errors.push("Credits must not be negative.");
   if (state.corp.clicks < 0 || state.runner.clicks < 0) errors.push("Clicks must not be negative.");
+  if (!Number.isInteger(state.corp.badPublicity) || state.corp.badPublicity < 0) errors.push("Corp bad publicity must be a non-negative integer.");
   if (state.runner.tags < 0) errors.push("Runner tags must not be negative.");
+  if (!Number.isInteger(state.runner.memoryLimit) || state.runner.memoryLimit < 0) errors.push("Runner memory limit must be a non-negative integer.");
+  if (!Number.isInteger(state.runner.memoryUsed) || state.runner.memoryUsed < 0) errors.push("Runner memory used must be a non-negative integer.");
   if (state.runner.memoryUsed > state.runner.memoryLimit) errors.push("Runner memory limit exceeded.");
+  for (const id of state.runner.rig.programs) {
+    if (definitionFor(state, id).type !== "program") errors.push(`Runner rig program slot contains non-program ${id}.`);
+  }
+  for (const id of state.runner.rig.hardware) {
+    if (definitionFor(state, id).type !== "hardware") errors.push(`Runner rig hardware slot contains non-hardware ${id}.`);
+  }
+  for (const id of state.runner.rig.resources) {
+    if (definitionFor(state, id).type !== "resource") errors.push(`Runner rig resource slot contains non-resource ${id}.`);
+  }
+  for (const [id, instance] of Object.entries(state.cardInstances)) {
+    for (const [counterType, amount] of Object.entries(instance.counters ?? {})) {
+      if (!Number.isInteger(amount) || amount < 0) errors.push(`Counter ${counterType} on ${id} must be a non-negative integer.`);
+    }
+    if (instance.hostedOn) {
+      if (instance.hostedOn === id) errors.push(`CardInstance ${id} cannot host itself.`);
+      if (!state.cardInstances[instance.hostedOn]) errors.push(`CardInstance ${id} references missing host ${instance.hostedOn}.`);
+      if (hasHostingCycle(state, id)) errors.push(`CardInstance ${id} has a hosting cycle.`);
+    }
+  }
   if (state.run?.encounteredIceId && !state.cardInstances[state.run.encounteredIceId]) errors.push("Run references missing encountered ice.");
+  if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes)) errors.push("Run resolved subroutine index list is missing.");
+  if (state.run?.breach) {
+    if (state.run.phase !== "access") errors.push("Breach is only valid during access.");
+    if (state.run.breach.serverId !== state.run.attackedServerId) errors.push("Breach server must match attacked server.");
+    if (!state.run.breach.completed && (state.run.breach.currentIndex < 0 || state.run.breach.currentIndex >= state.run.breach.queue.length)) {
+      errors.push("Breach current index is invalid.");
+    }
+    const entryIds = new Set<string>();
+    for (const entry of state.run.breach.queue) {
+      if (entryIds.has(entry.entryId)) errors.push(`Breach entry ${entry.entryId} appears multiple times.`);
+      entryIds.add(entry.entryId);
+      if (!state.cardInstances[entry.cardInstanceId]) errors.push(`Breach references missing CardInstance ${entry.cardInstanceId}.`);
+      if (entry.serverId !== state.run.attackedServerId) errors.push("Breach entry server must match attacked server.");
+    }
+    const currentEntry = state.run.breach.queue[state.run.breach.currentIndex];
+    if (state.run.accessedCardId && currentEntry && currentEntry.cardInstanceId !== state.run.accessedCardId) {
+      errors.push("Accessed card must match the current breach entry.");
+    }
+  }
+  if (state.trace) {
+    if (!state.cardInstances[state.trace.sourceCardInstanceId]) errors.push("Trace references missing source card.");
+    if (!Number.isInteger(state.trace.baseTraceStrength) || state.trace.baseTraceStrength < 0) errors.push("Trace base strength is invalid.");
+    if (state.trace.successEffect.type !== "add_tag" || state.trace.successEffect.amount !== 1) errors.push("Trace success effect is outside V0.96 scope.");
+    if (!state.pendingChoice) errors.push("Trace requires an open PendingChoice.");
+    if (state.trace.status === "corp_bid" && state.pendingChoice?.side !== "corp") errors.push("Corp trace bid requires Corp choice.");
+    if (state.trace.status === "runner_bid") {
+      if (state.pendingChoice?.side !== "runner") errors.push("Runner trace bid requires Runner choice.");
+      if (state.trace.corpBid === undefined || state.trace.traceStrength === undefined || state.trace.runnerLink === undefined) errors.push("Runner trace bid is missing Corp bid context.");
+    }
+  }
+  if (state.identityAbilityUsage) {
+    for (const side of ["corp", "runner"] as const) {
+      const usage = state.identityAbilityUsage[side];
+      if (!usage) continue;
+      const setupAbilities = Array.isArray(usage.setupAbilities) ? usage.setupAbilities : [];
+      const usedThisTurn = Array.isArray(usage.usedThisTurn) ? usage.usedThisTurn : [];
+      if (!Array.isArray(usage.setupAbilities) || !Array.isArray(usage.usedThisTurn)) errors.push(`Identity usage for ${side} must contain ability arrays.`);
+      if (!Number.isInteger(usage.turn) || usage.turn < 0) errors.push(`Identity usage for ${side} has invalid turn.`);
+      if (new Set(setupAbilities).size !== setupAbilities.length) errors.push(`Identity setup usage for ${side} must be unique.`);
+      if (new Set(usedThisTurn).size !== usedThisTurn.length) errors.push(`Identity turn usage for ${side} must be unique.`);
+      if (![...setupAbilities, ...usedThisTurn].every((id) => typeof id === "string" && id.length > 0)) {
+        errors.push(`Identity usage for ${side} has invalid ability ids.`);
+      }
+    }
+  }
+  if (state.pendingChoice) {
+    if (state.pendingChoice.side !== "corp" && state.pendingChoice.side !== "runner") errors.push("PendingChoice has invalid side.");
+    if (state.pendingChoice.stateVersion !== state.stateVersion) errors.push("PendingChoice stateVersion must match current GameState.");
+    if (state.pendingChoice.minSelections < 0 || state.pendingChoice.maxSelections < state.pendingChoice.minSelections) errors.push("PendingChoice has invalid selection bounds.");
+    const optionIds = new Set(state.pendingChoice.options.map((option) => option.id));
+    if (optionIds.size !== state.pendingChoice.options.length) errors.push("PendingChoice option ids must be unique.");
+  }
 
   return { ok: errors.length === 0, errors };
 }
@@ -398,12 +707,19 @@ export function validateDeckDefinition(
 }
 
 export function checkWinConditions(state: GameState): Winner | null {
+  if (state.winner) {
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.gameEndReason ??= "unknown";
+    return state.winner;
+  }
   const runnerPoints = agendaPoints(state, "runner");
   const corpPoints = agendaPoints(state, "corp");
   if (runnerPoints >= state.agendaPointsToWin && corpPoints >= state.agendaPointsToWin) state.winner = "draw";
   else if (runnerPoints >= state.agendaPointsToWin) state.winner = "runner";
   else if (corpPoints >= state.agendaPointsToWin) state.winner = "corp";
   if (state.winner) {
+    state.gameEndReason = "agenda_points";
     state.phase = "game_over";
     state.timingPoint = "game.checkpoint";
   }
@@ -451,6 +767,40 @@ export function hashState(state: GameState): StateHash {
   return `fnv1a:${(hash >>> 0).toString(16).padStart(8, "0")}`;
 }
 
+export function applyEffectCommands(state: GameState, commands: EffectCommand[]): GameState {
+  const next = cloneState(state);
+  executeEffectCommands(next, commands);
+  const validation = validateGameState(next);
+  if (!validation.ok) throw new Error(validation.errors[0] ?? "Effect command left invalid state.");
+  return next;
+}
+
+export function eventVisibilityForAction(legalAction: LegalAction): EventVisibilityClass {
+  if (legalAction.type === "resolve_choice") {
+    const choiceVisibility = legalAction.payload?.choiceVisibility;
+    return choiceVisibility === "hidden_info_barrier" || choiceVisibility === "private_to_side" || choiceVisibility === "replay_only" || choiceVisibility === "public"
+      ? choiceVisibility
+      : "private_to_side";
+  }
+  if (legalAction.payload?.traceStarted === true) return "public";
+  if (legalAction.payload?.damageResolved === true) return "hidden_info_barrier";
+  if (legalAction.payload?.hiddenZoneBarrier === true) return "hidden_info_barrier";
+  if (["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(legalAction.type)) return "hidden_info_barrier";
+  if (["mandatory_draw", "draw_card"].includes(legalAction.type)) return "private_to_side";
+  if (legalAction.type === "purge_virus_counters") return "public";
+  if (legalAction.type === "jack_out") return "public";
+  if (legalAction.visibility === "public") return "public";
+  if (legalAction.type === "play_event") return "public";
+  return "private_to_side";
+}
+
+export function isHiddenInfoBarrierEvent(event: GameEvent): boolean {
+  if (event.visibilityClass === "hidden_info_barrier") return true;
+  if (event.publicPayload.damageResolved === true) return true;
+  if (event.publicPayload.hiddenZoneBarrier === true) return true;
+  return ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(event.type);
+}
+
 function corpMainActions(state: GameState): LegalAction[] {
   const actions: LegalAction[] = [];
   for (const server of state.corp.servers) {
@@ -465,11 +815,33 @@ function corpMainActions(state: GameState): LegalAction[] {
     actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
     return actions;
   }
+  if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
+    actions.push(
+      action(state, "corp", "purge_virus_counters", "Virus-Counter purgen", "basic_action", [{ clicks: 3 }], { purgedCounterType: "virus" }, { targetRequirements: [] })
+    );
+  }
   actions.push(action(state, "corp", "gain_credit", "1 Credit nehmen", "basic_action", [{ clicks: 1 }]));
   if (state.corp.rd.length > 0) actions.push(action(state, "corp", "draw_card", "Karte ziehen", "basic_action", [{ clicks: 1 }]));
+  if (state.runner.tags > 0 && state.corp.credits >= 2) {
+    for (const id of state.runner.rig.resources) {
+      const definition = definitionFor(state, id);
+      actions.push(
+        action(
+          state,
+          "corp",
+          "trash_resource",
+          `${definition.title} trashen`,
+          "basic_action",
+          [{ clicks: 1, credits: 2 }],
+          { cardId: id, resourceId: id },
+          { targetRequirements: [{ id: "resource", kind: "card", side: "runner", zoneScope: ["runner.rig.resources"], visibility: "public" }] }
+        )
+      );
+    }
+  }
   for (const id of state.corp.hq) {
     const definition = definitionFor(state, id);
-    if (definition.type === "operation" && state.corp.credits >= (definition.cost ?? 0) && (definition.id !== "simple_tag_punishment_operation" || state.runner.tags > 0)) {
+    if (definition.type === "operation" && state.corp.credits >= (definition.cost ?? 0) && canPlayCorpOperation(state, definition)) {
       actions.push(action(state, "corp", "play_operation", `${definition.title} spielen`, id, [{ clicks: 1, credits: definition.cost ?? 0 }], { cardId: id }));
     }
     if (definition.type === "ice") {
@@ -512,15 +884,37 @@ function runnerMainActions(state: GameState): LegalAction[] {
   }
   for (const id of state.runner.grip) {
     const definition = definitionFor(state, id);
-    if (definition.type === "program" && state.runner.credits >= (definition.installCost ?? 0) && state.runner.memoryUsed + (definition.memoryCost ?? 0) <= state.runner.memoryLimit) {
+    if (
+      definition.type === "program" &&
+      availableRunnerProgramInstallCredits(state) >= (definition.installCost ?? 0) &&
+      state.runner.memoryUsed + (definition.memoryCost ?? 0) <= state.runner.memoryLimit
+    ) {
       actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
     }
     if (definition.type === "hardware" && state.runner.credits >= (definition.installCost ?? 0)) {
       actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
     }
+    if (definition.type === "resource" && state.runner.credits >= (definition.installCost ?? 0)) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "install_card",
+          `${definition.title} installieren`,
+          id,
+          [{ clicks: 1, credits: definition.installCost ?? 0 }],
+          { cardId: id },
+          { targetRequirements: [{ id: "resourceCard", kind: "card", side: "runner", zoneScope: ["runner.grip"], visibility: "known_to_actor" }] }
+        )
+      );
+    }
     if (definition.type === "event" && state.runner.credits >= (definition.cost ?? 0)) {
-      if (definition.id === "simple_run_event") {
+      const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
+      if (!resolver) continue;
+      if (resolver.canPlay && !resolver.canPlay(state)) continue;
+      if (resolver.requiresServer) {
         for (const server of state.corp.servers) {
+          if (resolver.canPlayForServer && !resolver.canPlayForServer(state, server.id)) continue;
           actions.push(action(state, "runner", "play_event", `${definition.title} auf ${server.label}`, id, [{ clicks: 1, credits: definition.cost ?? 0 }], { cardId: id, serverId: server.id }));
         }
       } else {
@@ -558,21 +952,48 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breaker = definitionFor(state, breakerId);
     const breakerStrength = (breaker.strength ?? 0) + mustInstance(state.cardInstances, breakerId).strengthModifier;
     const pump = breaker.abilities?.find((ability) => ability.type === "pump_strength");
-    if (pump && state.runner.credits >= pump.cost.credits) {
-      actions.push(action(state, "runner", "pump_breaker", `${breaker.title} pumpen`, breakerId, [{ credits: pump.cost.credits }], { breakerId, iceId: encounteredIceId }));
+    if (pump && availableRunnerRunCredits(state) >= pump.cost.credits) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "pump_breaker",
+          `${breaker.title} pumpen`,
+          breakerId,
+          [{ credits: pump.cost.credits }],
+          { breakerId, iceId: encounteredIceId },
+          abilityMetadata(breakerId, pump.id, encounteredIceId)
+        )
+      );
     }
     const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && ability.iceSubtype && iceDefinition.subtypes.includes(ability.iceSubtype));
-    if (breakAbility && breakerStrength >= (iceDefinition.strength ?? 0) && state.runner.credits >= breakAbility.cost.credits) {
+    if (breakAbility && breakerStrength >= (iceDefinition.strength ?? 0) && availableRunnerRunCredits(state) >= breakAbility.cost.credits) {
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
-        if (!run.brokenSubroutineIndexes.includes(index)) {
-          actions.push(action(state, "runner", "break_subroutine", `${subroutine.id} brechen`, breakerId, [{ credits: breakAbility.cost.credits }], { breakerId, iceId: encounteredIceId, subroutineIndex: index }));
+        if (!run.brokenSubroutineIndexes.includes(index) && !run.resolvedSubroutineIndexes.includes(index)) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "break_subroutine",
+              `${subroutine.id} brechen`,
+              breakerId,
+              [{ credits: breakAbility.cost.credits }],
+              { breakerId, iceId: encounteredIceId, subroutineIndex: index },
+              abilityMetadata(breakerId, breakAbility.id, encounteredIceId)
+            )
+          );
         }
       });
     }
   }
   actions.push(action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"));
   return actions;
+}
+
+function runnerMovementActions(state: GameState): LegalAction[] {
+  mustRun(state);
+  return [action(state, "runner", "jack_out", "Jack-out", "game_rule"), action(state, "runner", "continue_run", "Run fortsetzen", "game_rule")];
 }
 
 function runnerAccessActions(state: GameState): LegalAction[] {
@@ -590,10 +1011,10 @@ function runnerAccessActions(state: GameState): LegalAction[] {
     actions.push(action(state, "runner", "decline_trash", "Nicht trashen", "game_rule"));
     return actions;
   }
-  return [action(state, "runner", "decline_trash", "Access abschließen", "game_rule")];
+  return [action(state, "runner", "decline_trash", run.breach ? "Weiter accessen" : "Access abschließen", "game_rule")];
 }
 
-function performAction(state: GameState, legalAction: LegalAction): void {
+function performAction(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
   switch (legalAction.type) {
     case "mandatory_draw":
       drawCorpCard(state);
@@ -621,13 +1042,12 @@ function performAction(state: GameState, legalAction: LegalAction): void {
         removeFromAllZones(state, cardId);
         state.corp.archives.push(cardId);
         state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "corp", zone: "archives" } };
-        if (definition.id === "simple_economy_operation") state.corp.credits += 4;
-        else if (definition.id === "simple_draw_operation") {
-          drawCorpCard(state);
-          drawCorpCard(state);
-        } else if (definition.id === "simple_tag_punishment_operation") {
-          if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
-          state.runner.credits = Math.max(0, state.runner.credits - 2);
+        resolveCorpOperation(state, definition);
+        if (definition.id === "v098_hq_rd_swap_operation") {
+          legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "swap_hq_rd" };
+        }
+        if (definition.id === "v099_bad_publicity_operation") {
+          legalAction.payload = { ...(legalAction.payload ?? {}), badPublicityAfter: state.corp.badPublicity };
         }
       }
       return;
@@ -646,6 +1066,9 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       spendClick(state, "runner");
       startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">);
       return;
+    case "jack_out":
+      finishRun(state, false);
+      return;
     case "rez_ice":
       rezCard(state, String(legalAction.payload?.cardId), legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true);
       return;
@@ -653,18 +1076,22 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       passApproachedIce(state);
       return;
     case "pump_breaker":
-      spendCredits(state, "runner", 1);
-      mustInstance(state.cardInstances, String(legalAction.payload?.breakerId)).strengthModifier += 1;
+      spendRunnerRunCredits(state, legalAction.costs[0]?.credits ?? 1);
+      executeEffectCommands(state, [
+        { type: "change_breaker_strength", breakerId: String(legalAction.payload?.breakerId), amount: 1 }
+      ]);
       return;
     case "break_subroutine":
-      spendCredits(state, "runner", 1);
-      mustRun(state).brokenSubroutineIndexes.push(Number(legalAction.payload?.subroutineIndex));
+      spendRunnerRunCredits(state, legalAction.costs[0]?.credits ?? 1);
+      executeEffectCommands(state, [
+        { type: "break_subroutine", subroutineIndex: Number(legalAction.payload?.subroutineIndex) }
+      ]);
       return;
     case "continue_run":
-      continueRun(state);
+      continueRun(state, legalAction);
       return;
     case "access_card":
-      accessCurrentCard(state);
+      accessCurrentCard(state, legalAction);
       return;
     case "steal_agenda":
       stealAgenda(state, mustRun(state).accessedCardId ?? "");
@@ -672,17 +1099,31 @@ function performAction(state: GameState, legalAction: LegalAction): void {
     case "trash_accessed_card":
       trashAccessedCard(state, mustRun(state).accessedCardId ?? "");
       return;
+    case "trash_resource":
+      trashResource(state, String(legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? ""));
+      return;
     case "decline_trash":
-      finishRun(state, true);
+      declineCurrentAccess(state);
       return;
     case "remove_tag":
       spendClick(state, "runner");
       spendCredits(state, "runner", 2);
       state.runner.tags = Math.max(0, state.runner.tags - 1);
       return;
+    case "purge_virus_counters": {
+      spendClicks(state, "corp", 3);
+      const purged = purgeVirusCounters(state);
+      legalAction.payload = { ...(legalAction.payload ?? {}), purgedVirusCounters: purged, purgedCounterType: "virus" };
+      return;
+    }
+    case "resolve_choice":
+      resolvePendingChoice(state, legalAction, playerAction);
+      return;
     case "end_turn":
       endTurn(state, legalAction.side);
       return;
+    case "trigger_ability":
+      throw new Error("Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.");
   }
 }
 
@@ -694,18 +1135,9 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
   removeFromAllZones(state, cardId);
   state.runner.heap.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "runner", zone: "heap" } };
-  if (definition.id === "simple_economy_event") {
-    state.runner.credits += 4;
-    return;
-  }
-  if (definition.id === "simple_draw_event") {
-    drawRunnerCard(state);
-    drawRunnerCard(state);
-    return;
-  }
-  if (definition.id === "simple_run_event") {
-    startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 2);
-  }
+  const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
+  if (!resolver) throw new Error(`Kein Event-Resolver fuer ${definition.id}.`);
+  resolver.resolve(state, legalAction);
 }
 
 function installCard(state: GameState, legalAction: LegalAction): void {
@@ -713,16 +1145,23 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   const definition = definitionFor(state, cardId);
   spendClick(state, legalAction.side);
   if (legalAction.side === "runner") {
-    spendCredits(state, "runner", definition.installCost ?? 0);
+    spendRunnerInstallCredits(state, definition.installCost ?? 0, definition.type);
     removeFromAllZones(state, cardId);
     if (definition.type === "hardware") {
       state.runner.rig.hardware.push(cardId);
       if (definition.mechanics.includes("modify_memory_limit")) state.runner.memoryLimit += 1;
-    } else {
+      if ((definition.recurringCredits ?? 0) > 0) setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
+    } else if (definition.type === "program") {
       state.runner.rig.programs.push(cardId);
       state.runner.memoryUsed += definition.memoryCost ?? 0;
+      if (definition.mechanics.includes("virus")) addCardCounter(state, cardId, "virus", 1);
+    } else if (definition.type === "resource") {
+      state.runner.rig.resources.push(cardId);
+    } else {
+      throw new Error("Nur Programme, Hardware und Resources koennen vom Runner installiert werden.");
     }
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "rig" } };
+    if (definition.id === "v099_host_resource") startRunnerHostingChoice(state, cardId, legalAction);
     return;
   }
 
@@ -740,7 +1179,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "serverRoot", serverId: server.id } };
 }
 
-function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, pendingSuccessBonusCredits?: number): void {
+function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, pendingSuccessBonusCredits?: number, accessCount = 1): void {
   const server = mustServer(state, serverId);
   state.phase = "run";
   state.activeSide = "runner";
@@ -750,7 +1189,10 @@ function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, p
     phase: "approach_ice",
     position: server.ice.length > 0 ? { kind: "ice", serverId: server.id, iceIndex: 0 } : { kind: "server", serverId: server.id },
     brokenSubroutineIndexes: [],
+    resolvedSubroutineIndexes: [],
     successful: false,
+    accessCount: Math.max(1, Math.floor(accessCount)),
+    ...(isV099OrLater(state) ? { badPublicityCredits: state.corp.badPublicity } : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {})
   };
   if (server.ice.length > 0) {
@@ -767,8 +1209,8 @@ function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
   const definition = definitionFor(state, cardId);
   spendCredits(state, "corp", definition.rezCost ?? 0);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), rezzed: true, faceup: true };
-  if (rootRez && definition.id === "simple_economy_asset") {
-    state.corp.credits += 3;
+  if (rootRez && CORP_ROOT_REZ_RESOLVERS[definition.id]) {
+    CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
     return;
   }
   if (rootRez) return;
@@ -776,6 +1218,7 @@ function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
   run.phase = "encounter_ice";
   run.encounteredIceId = cardId;
   run.brokenSubroutineIndexes = [];
+  run.resolvedSubroutineIndexes = [];
   state.timingPoint = "run.encounter_ice";
   state.activeSide = "runner";
 }
@@ -787,6 +1230,8 @@ function passApproachedIce(state: GameState): void {
   if (ice.rezzed) {
     run.phase = "encounter_ice";
     run.encounteredIceId = run.approachedIceId;
+    run.brokenSubroutineIndexes = [];
+    run.resolvedSubroutineIndexes = [];
     state.timingPoint = "run.encounter_ice";
     state.activeSide = "runner";
     return;
@@ -794,8 +1239,12 @@ function passApproachedIce(state: GameState): void {
   movePastCurrentIce(state);
 }
 
-function continueRun(state: GameState): void {
+function continueRun(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
+  if (run.phase === "movement") {
+    continueFromMovement(state);
+    return;
+  }
   if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
     if (run.phase === "access") {
       finishRun(state, true);
@@ -805,19 +1254,113 @@ function continueRun(state: GameState): void {
   }
   const definition = definitionFor(state, run.encounteredIceId);
   let ended = false;
-  (definition.subroutines ?? []).forEach((subroutine, index) => {
-    if (run.brokenSubroutineIndexes.includes(index) || ended) return;
+  const subroutines = definition.subroutines ?? [];
+  for (let index = 0; index < subroutines.length; index += 1) {
+    const subroutine = subroutines[index];
+    if (!subroutine || run.brokenSubroutineIndexes.includes(index) || run.resolvedSubroutineIndexes.includes(index) || ended) continue;
     if (subroutine.type === "corp_gain_credit") state.corp.credits += subroutine.amount ?? 1;
     if (subroutine.type === "runner_lose_credits") state.runner.credits = Math.max(0, state.runner.credits - (subroutine.amount ?? 1));
     if (subroutine.type === "give_runner_tag") state.runner.tags += subroutine.amount ?? 1;
+    if (subroutine.type === "initiate_trace") {
+      startTraceFromSubroutine(state, run.encounteredIceId, index, subroutine, legalAction);
+      return;
+    }
+    if (subroutine.type === "do_damage") {
+      const damageType = subroutine.damageType ?? "net";
+      const summary = doDamage(state, {
+        damageId: `${run.runId}.${run.encounteredIceId}.${index}`,
+        damageType,
+        amount: subroutine.amount ?? 1,
+        source: `subroutine:${definition.id}:${subroutine.id}`
+      });
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          damageResolved: true,
+          damageType,
+          damageAmount: summary.amount,
+          cardsTrashed: summary.cardsTrashed,
+          flatline: summary.flatline
+        };
+      }
+      if (state.winner) return;
+    }
     if (subroutine.type === "end_the_run") ended = true;
-  });
+  }
   resetBreakerStrength(state);
   if (ended) {
     finishRun(state, false);
     return;
   }
   movePastCurrentIce(state);
+}
+
+function startTraceFromSubroutine(
+  state: GameState,
+  sourceCardInstanceId: CardInstanceId,
+  subroutineIndex: number,
+  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
+  legalAction?: LegalAction
+): void {
+  if (state.trace || state.pendingChoice) throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
+  const baseTraceStrength = subroutine.baseTraceStrength ?? subroutine.amount ?? 0;
+  if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0) throw new Error("Trace strength ist ungueltig.");
+  const successEffect = subroutine.traceSuccessEffect;
+  if (!successEffect || successEffect.type !== "add_tag" || successEffect.amount !== 1) throw new Error("Dieser Trace-Effekt ist in V0.96 nicht freigegeben.");
+
+  const run = mustRun(state);
+  if (!run.resolvedSubroutineIndexes.includes(subroutineIndex)) run.resolvedSubroutineIndexes.push(subroutineIndex);
+  const sourceDefinition = definitionFor(state, sourceCardInstanceId);
+  const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
+  state.trace = {
+    traceId,
+    sourceCardInstanceId,
+    sourceDefinitionId: sourceDefinition.id,
+    subroutineIndex,
+    baseTraceStrength,
+    status: "corp_bid",
+    successEffect
+  };
+  state.pendingChoice = traceBidChoice(state, "corp", traceId, `Corp Trace-Bid wählen (Base Trace ${baseTraceStrength})`, state.corp.credits);
+  state.activeSide = "corp";
+  state.timingPoint = "run.encounter_ice";
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceStarted: true,
+      traceId,
+      sourceCardId: sourceCardInstanceId,
+      sourceDefinitionId: sourceDefinition.id,
+      baseTraceStrength
+    };
+  }
+}
+
+function traceBidChoice(
+  state: GameState,
+  side: Side,
+  traceId: string,
+  prompt: string,
+  maxBid: number
+): ChoiceRequest {
+  const boundedMax = Math.max(0, Math.floor(maxBid));
+  return {
+    choiceId: `${traceId}.${side}.bid.${state.stateVersion + 1}`,
+    side,
+    source: `trace:${traceId}`,
+    prompt,
+    kind: "bid_amount",
+    options: Array.from({ length: boundedMax + 1 }, (_, amount) => ({
+      id: `bid_${amount}`,
+      label: `${amount} Credits`,
+      publicLabel: `${amount} Credits`,
+      value: amount
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
 }
 
 function movePastCurrentIce(state: GameState): void {
@@ -827,30 +1370,163 @@ function movePastCurrentIce(state: GameState): void {
   const nextIndex = run.position.iceIndex + 1;
   if (nextIndex < server.ice.length) {
     const approachedIceId = mustArrayValue(server.ice, nextIndex, "Naechstes ICE fehlt.");
+    if (isV097OrLater(state)) {
+      const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
+      void _encounteredIceId;
+      state.run = {
+        ...runWithoutEncounter,
+        phase: "movement",
+        position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
+        approachedIceId,
+        brokenSubroutineIndexes: [],
+        resolvedSubroutineIndexes: []
+      };
+      state.timingPoint = "run.jack_out_window";
+      state.activeSide = "runner";
+      return;
+    }
     state.run = {
       ...run,
       phase: "approach_ice",
       position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
       approachedIceId,
-      brokenSubroutineIndexes: []
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: []
     };
     state.timingPoint = "run.approach_ice";
     state.activeSide = "corp";
+    return;
+  }
+  if (isV097OrLater(state)) {
+    const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
+    void _encounteredIceId;
+    state.run = { ...runWithoutEncounter, position: { kind: "server", serverId: server.id }, phase: "movement" };
+    state.timingPoint = "run.jack_out_window";
+    state.activeSide = "runner";
     return;
   }
   state.run = { ...run, position: { kind: "server", serverId: server.id }, phase: "access" };
   enterAccess(state);
 }
 
+function continueFromMovement(state: GameState): void {
+  const run = mustRun(state);
+  if (run.position.kind === "ice") {
+    state.run = { ...run, phase: "approach_ice" };
+    state.timingPoint = "run.approach_ice";
+    state.activeSide = "corp";
+    return;
+  }
+  enterAccess(state);
+}
+
 function enterAccess(state: GameState): void {
   const run = mustRun(state);
-  state.run = { ...run, phase: "access", successful: true };
+  if (isV097OrLater(state)) {
+    const breach = buildBreachState(state, run);
+    if (breach.queue.length === 0) {
+      finishRun(state, true);
+      return;
+    }
+    const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
+    void _accessedCardId;
+    state.run = { ...runWithoutAccessedCard, phase: "access", successful: true, breach };
+  } else {
+    state.run = { ...run, phase: "access", successful: true };
+  }
   state.timingPoint = "access.resolve_card";
   state.activeSide = "runner";
 }
 
-function accessCurrentCard(state: GameState): void {
+function buildBreachState(state: GameState, run: ActiveRun): ActiveBreach {
+  const server = mustServer(state, run.attackedServerId);
+  const accessCount = Math.max(1, run.accessCount ?? 1);
+  const queueIds = accessQueueIds(state, server, run, accessCount);
+  return {
+    breachId: `${run.runId}.breach`,
+    serverId: server.id,
+    accessMode: accessCount > 1 ? "multi" : "single",
+    queue: queueIds.map((cardId, index) => ({
+      entryId: `${run.runId}.breach.${index}`,
+      cardInstanceId: cardId,
+      serverId: server.id,
+      zone: accessQueueZone(server.id),
+      status: "pending",
+      hiddenInfo: isBreachEntryHidden(state, cardId)
+    })),
+    currentIndex: 0,
+    completed: false,
+    accessedSummaries: []
+  };
+}
+
+function accessQueueIds(state: GameState, server: CorpServer, run: ActiveRun, accessCount: number): CardInstanceId[] {
+  if (server.id === "rd") return state.corp.rd.slice(0, Math.min(accessCount, state.corp.rd.length));
+  if (server.id === "hq") return randomHqAccessQueue(state, run.runId, accessCount);
+  if (server.id === "archives") return state.corp.archives.slice();
+  return server.root.slice();
+}
+
+function accessQueueZone(serverId: Exclude<ServerId, "new_remote">): ActiveBreach["queue"][number]["zone"] {
+  if (serverId === "rd") return "rd";
+  if (serverId === "hq") return "hq";
+  if (serverId === "archives") return "archives";
+  return "remote_root";
+}
+
+function isBreachEntryHidden(state: GameState, cardId: CardInstanceId): boolean {
+  const instance = mustInstance(state.cardInstances, cardId);
+  return !instance.rezzed && !instance.faceup && !state.corp.archives.includes(cardId);
+}
+
+function randomHqAccessQueue(state: GameState, runId: string, accessCount: number): CardInstanceId[] {
+  const available = state.corp.hq.slice();
+  const selected: CardInstanceId[] = [];
+  const limit = Math.min(accessCount, available.length);
+  for (let index = 0; index < limit; index += 1) {
+    const value = nextRandom(state, `hq_multiaccess:${runId}:selection:${index}`);
+    const selectedIndex = Math.floor(value * available.length);
+    const cardId = mustArrayValue(available, selectedIndex, "HQ access selection missing.");
+    available.splice(selectedIndex, 1);
+    selected.push(cardId);
+  }
+  return selected;
+}
+
+function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   const run = mustRun(state);
+  if (run.breach) {
+    const breach = run.breach;
+    const entry = breach.queue[breach.currentIndex];
+    if (!entry || entry.status !== "pending") {
+      finishRun(state, true);
+      return;
+    }
+    const cardId = entry.cardInstanceId;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      accessedCardId: cardId,
+      serverId: breach.serverId,
+      breachId: breach.breachId,
+      accessIndex: breach.currentIndex
+    };
+    const updatedQueue = breach.queue.map((candidate, index) => (index === breach.currentIndex ? { ...candidate, status: "accessed" as const } : candidate));
+    state.run = {
+      ...run,
+      accessedCardId: cardId,
+      breach: {
+        ...breach,
+        queue: updatedQueue
+      }
+    };
+    const instance = mustInstance(state.cardInstances, cardId);
+    state.cardInstances[cardId] = { ...instance, faceup: true };
+    const definition = definitionFor(state, cardId);
+    if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade") {
+      completeCurrentBreachAccess(state, "accessed");
+    }
+    return;
+  }
   const server = mustServer(state, run.attackedServerId);
   let cardId: string | undefined;
   if (server.id === "rd") cardId = state.corp.rd[0];
@@ -861,6 +1537,7 @@ function accessCurrentCard(state: GameState): void {
     finishRun(state, true);
     return;
   }
+  legalAction.payload = { ...(legalAction.payload ?? {}), accessedCardId: cardId, serverId: server.id };
   state.run = { ...run, accessedCardId: cardId };
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
@@ -875,6 +1552,10 @@ function stealAgenda(state: GameState, cardId: string): void {
   removeFromAllZones(state, cardId);
   state.runner.scoreArea.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "scoreArea" } };
+  if (state.run?.breach) {
+    completeCurrentBreachAccess(state, "stolen");
+    return;
+  }
   finishRun(state, true);
 }
 
@@ -884,7 +1565,93 @@ function trashAccessedCard(state: GameState, cardId: string): void {
   removeFromAllZones(state, cardId);
   state.corp.archives.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
+  if (state.run?.breach) {
+    completeCurrentBreachAccess(state, "trashed");
+    return;
+  }
   finishRun(state, true);
+}
+
+function declineCurrentAccess(state: GameState): void {
+  if (state.run?.breach) {
+    completeCurrentBreachAccess(state, "declined");
+    return;
+  }
+  finishRun(state, true);
+}
+
+function completeCurrentBreachAccess(state: GameState, status: BreachEntryStatus): void {
+  const run = mustRun(state);
+  const breach = run.breach;
+  if (!breach) {
+    finishRun(state, true);
+    return;
+  }
+  const current = breach.queue[breach.currentIndex];
+  if (!current) {
+    finishRun(state, true);
+    return;
+  }
+  const finalStatus: BreachEntryStatus = status === "pending" ? "accessed" : status;
+  const queue = breach.queue.map((entry, index) => (index === breach.currentIndex ? { ...entry, status: finalStatus } : entry));
+  const nextIndex = queue.findIndex((entry, index) => index > breach.currentIndex && entry.status === "pending");
+  const accessedSummaries = [
+    ...breach.accessedSummaries,
+    {
+      entryId: current.entryId,
+      status: finalStatus,
+      cardDefinitionId: definitionFor(state, current.cardInstanceId).id
+    }
+  ];
+  const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
+  void _accessedCardId;
+  if (nextIndex === -1) {
+    state.run = {
+      ...runWithoutAccessedCard,
+      breach: {
+        ...breach,
+        queue,
+        completed: true,
+        accessedSummaries
+      }
+    };
+    finishRun(state, true);
+    return;
+  }
+  state.run = {
+    ...runWithoutAccessedCard,
+    breach: {
+      ...breach,
+      queue,
+      currentIndex: nextIndex,
+      accessedSummaries
+    }
+  };
+  state.timingPoint = "access.resolve_card";
+  state.activeSide = "runner";
+}
+
+function trashResource(state: GameState, cardId: string): void {
+  if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+  if (!state.runner.rig.resources.includes(cardId)) throw new Error("Diese Resource ist nicht installiert.");
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "resource") throw new Error("Nur installierte Resources koennen getrasht werden.");
+  spendClick(state, "corp");
+  spendCredits(state, "corp", 2);
+  const hostedIds = hostedCardsOn(state, cardId);
+  removeFromAllZones(state, cardId);
+  state.runner.heap.push(cardId);
+  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+  for (const hostedId of hostedIds) {
+    const hostedDefinition = definitionFor(state, hostedId);
+    removeFromAllZones(state, hostedId);
+    state.runner.heap.push(hostedId);
+    state.runner.memoryUsed = Math.max(0, state.runner.memoryUsed - (hostedDefinition.memoryCost ?? 0));
+    const hostedInstance = mustInstance(state.cardInstances, hostedId);
+    const { hostedOn: _hostedOn, ...withoutHost } = hostedInstance;
+    void _hostedOn;
+    state.cardInstances[hostedId] = { ...withoutHost, faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+  }
 }
 
 function finishRun(state: GameState, successful: boolean): void {
@@ -912,12 +1679,14 @@ function endTurn(state: GameState, side: Side): void {
   state.timingPoint = "runner_action.main";
   state.runner.clicks = 4;
   state.corp.clicks = 0;
+  refreshRecurringCredits(state, "runner");
 }
 
 function drawCorpCard(state: GameState): void {
   const cardId = state.corp.rd.shift();
   if (!cardId) {
     state.winner = "runner";
+    state.gameEndReason = "corp_deck_empty";
     state.phase = "game_over";
     state.timingPoint = "game.checkpoint";
     return;
@@ -931,6 +1700,46 @@ function drawRunnerCard(state: GameState): void {
   if (!cardId) return;
   state.runner.grip.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
+}
+
+function doDamage(
+  state: GameState,
+  request: {
+    damageId: string;
+    damageType: DamageType;
+    amount: number;
+    source: string;
+  }
+): DamageSummary {
+  if (request.damageType === "core") throw new Error("Core Damage ist in V0.94 nicht spielbar.");
+  assertPositiveIntegerAmount(request.amount);
+  if (request.amount > state.runner.grip.length) {
+    state.winner = "corp";
+    state.gameEndReason = "flatline";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "corp";
+    delete state.run;
+    return { damageType: request.damageType, amount: request.amount, cardsTrashed: 0, flatline: true };
+  }
+
+  const available = state.runner.grip.slice();
+  const selected: CardInstanceId[] = [];
+  for (let index = 0; index < request.amount; index += 1) {
+    const value = nextRandom(state, `damage:${request.damageId}:${request.damageType}:${request.source}:${request.amount}:selection:${index}`);
+    const selectedIndex = Math.floor(value * available.length);
+    const cardId = mustArrayValue(available, selectedIndex, "Damage-Auswahl fehlt.");
+    available.splice(selectedIndex, 1);
+    selected.push(cardId);
+  }
+
+  for (const cardId of selected) {
+    removeFromAllZones(state, cardId);
+    state.runner.heap.push(cardId);
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+  }
+
+  return { damageType: request.damageType, amount: request.amount, cardsTrashed: selected.length, flatline: false };
 }
 
 function scoreAgenda(state: GameState, cardId: string): void {
@@ -950,7 +1759,8 @@ function action(
   label: string,
   source: LegalAction["source"],
   costs: LegalAction["costs"] = [],
-  payload?: LegalAction["payload"]
+  payload?: LegalAction["payload"],
+  metadata: Partial<Pick<LegalAction, "abilityRef" | "effectRef" | "choiceRequirements" | "targetRequirements">> = {}
 ): LegalAction {
   return {
     actionId: makeActionId(type, side, payload, source),
@@ -960,11 +1770,488 @@ function action(
     source,
     timingPoint: state.timingPoint,
     costs,
-    targetRequirements: [],
-    visibility: type.startsWith("rez") || type === "score_agenda" ? "public" : "private_to_actor",
+    targetRequirements: metadata.targetRequirements ?? [],
+    visibility: type.startsWith("rez") || type === "score_agenda" || type === "trash_resource" || (side === "runner" && type === "install_card") ? "public" : "private_to_actor",
     expiresAtStateVersion: state.stateVersion,
+    ...(metadata.choiceRequirements ? { choiceRequirements: metadata.choiceRequirements } : {}),
+    ...(metadata.abilityRef ? { abilityRef: metadata.abilityRef } : {}),
+    ...(metadata.effectRef ? { effectRef: metadata.effectRef } : {}),
     ...(payload ? { payload } : {})
   };
+}
+
+function choiceAction(state: GameState, choice: ChoiceRequest): LegalAction {
+  return action(
+    state,
+    choice.side,
+    "resolve_choice",
+    choice.prompt,
+    "game_rule",
+    [],
+    { choiceId: choice.choiceId, choiceVisibility: choice.visibility, choiceKind: choice.kind },
+    {
+      choiceRequirements: [
+        {
+          choiceId: choice.choiceId,
+          minSelections: choice.minSelections,
+          maxSelections: choice.maxSelections,
+          optionIds: choice.options.map((option) => option.id)
+        }
+      ]
+    }
+  );
+}
+
+function abilityMetadata(sourceCardInstanceId: CardInstanceId, abilityId: string, encounteredIceId?: CardInstanceId): Pick<LegalAction, "abilityRef" | "effectRef" | "targetRequirements"> {
+  return {
+    abilityRef: { sourceCardInstanceId, abilityId },
+    effectRef: `effect.${abilityId}`,
+    targetRequirements: [
+      { id: "encounteredIce", kind: "card", visibility: "public" },
+      { id: "subroutine", kind: "subroutine", ...(encounteredIceId ? { sourceIceRef: encounteredIceId } : {}) }
+    ]
+  };
+}
+
+function visibleChoice(choice: ChoiceRequest): NonNullable<PlayerView["pendingChoice"]> {
+  return {
+    choiceId: choice.choiceId,
+    side: choice.side,
+    source: choice.source,
+    prompt: choice.prompt,
+    kind: choice.kind,
+    options: choice.options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
+      ...(option.value !== undefined ? { value: option.value } : {})
+    })),
+    minSelections: choice.minSelections,
+    maxSelections: choice.maxSelections,
+    stateVersion: choice.stateVersion,
+    visibility: choice.visibility
+  };
+}
+
+function validateChoiceAction(choice: ChoiceRequest | undefined, legalAction: LegalAction, playerAction: PlayerAction): string | undefined {
+  if (!choice) return legalAction.type === "resolve_choice" ? "Es ist keine Choice offen." : undefined;
+  if (legalAction.type !== "resolve_choice") return "Solange eine Choice offen ist, sind keine anderen Aktionen legal.";
+  if (playerAction.side !== choice.side) return "Diese Choice gehoert der anderen Seite.";
+  if (choice.stateVersion !== playerAction.clientKnownStateVersion) return "Diese Choice gehoert zu einem anderen Spielzustand.";
+  if (playerAction.selectedChoices?.choiceId !== choice.choiceId) return "Die ChoiceId ist ungueltig.";
+  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  if (selectedOptionIds.length < choice.minSelections || selectedOptionIds.length > choice.maxSelections) return "Die Anzahl der gewaehlten Optionen ist ungueltig.";
+  const optionIds = new Set(choice.options.map((option) => option.id));
+  if (selectedOptionIds.some((id) => !optionIds.has(id))) return "Eine gewaehlte Option ist nicht legal.";
+  if (new Set(selectedOptionIds).size !== selectedOptionIds.length) return "Eine Option wurde doppelt gewaehlt.";
+  return undefined;
+}
+
+function selectedChoiceIds(selectedChoices: PlayerAction["selectedChoices"]): string[] {
+  const raw =
+    selectedChoices?.selectedOptionIds ??
+    selectedChoices?.optionIds ??
+    selectedChoices?.options ??
+    selectedChoices?.selectedOptions;
+  if (!Array.isArray(raw)) return [];
+  return raw.filter((value): value is string => typeof value === "string");
+}
+
+function resolvePendingChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choiceId = String(legalAction.payload?.choiceId ?? "");
+  if (!state.pendingChoice || state.pendingChoice.choiceId !== choiceId) throw new Error("Diese Choice ist nicht offen.");
+  if (state.trace) {
+    if (state.trace.status === "corp_bid") {
+      resolveTraceCorpBid(state, legalAction, playerAction);
+      return;
+    }
+    resolveTraceRunnerBid(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v098.search_stack")) {
+    resolveRunnerStackSearchChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v098.arrange_stack_top2")) {
+    resolveRunnerStackArrangeChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v099.host_program")) {
+    resolveRunnerHostingChoice(state, legalAction, playerAction);
+    return;
+  }
+  delete state.pendingChoice;
+}
+
+function startRunnerStackSearchChoice(state: GameState): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = state.runner.stack
+    .filter((cardId) => definitionFor(state, cardId).type === "program")
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (options.length === 0) throw new Error("Keine suchbare Programmkarte im Stack.");
+  state.pendingChoice = {
+    choiceId: `v098_search_stack_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v098.search_stack:${state.stateVersion + 1}`,
+    prompt: "Stack durchsuchen",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+}
+
+function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Search-Choice offen.");
+  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!cardId || !state.runner.stack.includes(cardId)) throw new Error("Die gewaehlte Karte liegt nicht im Stack.");
+  if (definitionFor(state, cardId).type !== "program") throw new Error("Nur Programme sind in dieser Search-Harness legal.");
+  removeFromAllZones(state, cardId);
+  state.runner.grip.push(cardId);
+  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
+  shuffleRunnerStack(state, `v098_search_stack:${choice.choiceId}:shuffle`);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "search_stack",
+    selectedCount: 1,
+    shuffled: true
+  };
+}
+
+function startRunnerStackArrangeChoice(state: GameState): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const topCards = state.runner.stack.slice(0, 2);
+  if (topCards.length < 2) throw new Error("Nicht genug Karten fuer Arrange.");
+  state.pendingChoice = {
+    choiceId: `v098_arrange_stack_top2_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v098.arrange_stack_top2:${state.stateVersion + 1}`,
+    prompt: "Top 2 Karten anordnen",
+    kind: "select_cards",
+    options: topCards.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: topCards.length,
+    maxSelections: topCards.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+}
+
+function resolveRunnerStackArrangeChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Arrange-Choice offen.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const topCards = state.runner.stack.slice(0, choice.options.length);
+  if (selectedIds.length !== topCards.length) throw new Error("Die Arrange-Auswahl ist unvollstaendig.");
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length || topCards.some((cardId) => !selectedSet.has(cardId))) throw new Error("Die Arrange-Auswahl enthaelt ungueltige Karten.");
+  state.runner.stack = [...selectedIds, ...state.runner.stack.slice(topCards.length)];
+  for (const cardId of selectedIds) {
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "stack" } };
+  }
+  delete state.pendingChoice;
+  legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "arrange_stack", arrangedCount: selectedIds.length };
+}
+
+function startRunnerHostingChoice(state: GameState, hostId: CardInstanceId, legalAction: LegalAction): void {
+  const host = mustInstance(state.cardInstances, hostId);
+  if (host.definitionId !== "v099_host_resource" || !state.runner.rig.resources.includes(hostId)) throw new Error("Diese Karte kann in V0.99 nicht hosten.");
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = state.runner.grip
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return definition.type === "program" && state.runner.memoryUsed + (definition.memoryCost ?? 0) <= state.runner.memoryLimit;
+    })
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (options.length === 0) return;
+  state.pendingChoice = {
+    choiceId: `v099_host_program_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v099.host_program:${hostId}:${state.stateVersion + 1}`,
+    prompt: "Programm hosten",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "host_program", hostId };
+}
+
+function resolveRunnerHostingChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Hosting-Choice offen.");
+  const sourceParts = choice.source.split(":");
+  const hostId = sourceParts[1];
+  if (!hostId || !state.runner.rig.resources.includes(hostId)) throw new Error("Der Host ist nicht mehr installiert.");
+  const hostDefinition = definitionFor(state, hostId);
+  if (hostDefinition.id !== "v099_host_resource") throw new Error("Diese Karte kann in V0.99 nicht hosten.");
+  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!cardId || !state.runner.grip.includes(cardId)) throw new Error("Die gewählte Karte liegt nicht in der Grip.");
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program") throw new Error("Nur Programme können in dieser Hosting-Harness gehostet werden.");
+  if (state.runner.memoryUsed + (definition.memoryCost ?? 0) > state.runner.memoryLimit) throw new Error("Nicht genug Memory für das gehostete Programm.");
+  setHostedOn(state, cardId, hostId);
+  removeFromAllZones(state, cardId);
+  state.runner.rig.programs.push(cardId);
+  state.runner.memoryUsed += definition.memoryCost ?? 0;
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+    hostedOn: hostId
+  };
+  delete state.pendingChoice;
+  legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "host_program", hostedCount: 1, hostId };
+}
+
+function selectedChoiceCardIds(choice: ChoiceRequest, playerAction: PlayerAction): CardInstanceId[] {
+  return selectedChoiceIds(playerAction.selectedChoices).map((optionId) => {
+    const option = choice.options.find((candidate) => candidate.id === optionId);
+    if (typeof option?.value !== "string") throw new Error("Die gewaehlte Kartenoption ist ungueltig.");
+    return option.value;
+  });
+}
+
+function shuffleRunnerStack(state: GameState, purpose: string): void {
+  const random = { counter: state.randomCounter, records: state.randomDrawRecords };
+  state.runner.stack = shuffleIds(state.runner.stack, state.seed, purpose, random);
+  state.randomCounter = random.counter;
+}
+
+function revealRunnerStackTop(state: GameState, legalAction: LegalAction): void {
+  const cardId = state.runner.stack[0];
+  if (!cardId) throw new Error("Der Stack ist leer.");
+  const definition = definitionFor(state, cardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: definition.id
+  };
+}
+
+function exposedCorpCardInServer(state: GameState, serverId: Exclude<ServerId, "new_remote">): CardInstanceId | undefined {
+  const server = mustServer(state, serverId);
+  return [...server.root, ...server.ice].find((cardId) => {
+    const instance = mustInstance(state.cardInstances, cardId);
+    return !instance.rezzed;
+  });
+}
+
+function exposeCorpCardInServer(state: GameState, serverId: Exclude<ServerId, "new_remote">, legalAction: LegalAction): void {
+  const cardId = exposedCorpCardInServer(state, serverId);
+  if (!cardId) throw new Error("In diesem Server liegt keine unrezzed installierte Corp-Karte.");
+  const definition = definitionFor(state, cardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    publicRevealKind: "expose",
+    publicRevealDefinitionId: definition.id
+  };
+}
+
+function swapCorpHqAndRdTop(state: GameState): void {
+  const hqCardId = state.corp.hq[0];
+  const rdCardId = state.corp.rd[0];
+  if (!hqCardId || !rdCardId) throw new Error("HQ und R&D brauchen je eine Karte fuer Swap.");
+  state.corp.hq[0] = rdCardId;
+  state.corp.rd[0] = hqCardId;
+  state.cardInstances[hqCardId] = { ...mustInstance(state.cardInstances, hqCardId), zone: { side: "corp", zone: "rd" } };
+  state.cardInstances[rdCardId] = { ...mustInstance(state.cardInstances, rdCardId), zone: { side: "corp", zone: "hq" } };
+}
+
+function resolveTraceCorpBid(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const trace = state.trace;
+  if (!trace || trace.status !== "corp_bid") throw new Error("Es ist kein Corp-Trace-Bid offen.");
+  const bid = selectedBidAmount(state.pendingChoice, playerAction);
+  spendCredits(state, "corp", bid);
+  const traceStrength = trace.baseTraceStrength + bid;
+  const runnerLink = calculateRunnerLink(state);
+  state.trace = {
+    ...trace,
+    status: "runner_bid",
+    corpBid: bid,
+    traceStrength,
+    runnerLink
+  };
+  state.pendingChoice = traceBidChoice(state, "runner", trace.traceId, `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`, state.runner.credits);
+  state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "corp_bid",
+    baseTraceStrength: trace.baseTraceStrength,
+    corpBid: bid,
+    traceStrength,
+    runnerLink
+  };
+}
+
+function resolveTraceRunnerBid(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const trace = state.trace;
+  if (!trace || trace.status !== "runner_bid") throw new Error("Es ist kein Runner-Trace-Bid offen.");
+  const bid = selectedBidAmount(state.pendingChoice, playerAction);
+  spendCredits(state, "runner", bid);
+  const runnerLink = trace.runnerLink ?? calculateRunnerLink(state);
+  const traceStrength = trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
+  const runnerStrength = runnerLink + bid;
+  const successful = traceStrength > runnerStrength;
+  const tagsAdded = successful ? trace.successEffect.amount : 0;
+  if (successful) state.runner.tags += tagsAdded;
+  delete state.pendingChoice;
+  delete state.trace;
+  if (state.run) {
+    state.timingPoint = "run.encounter_ice";
+    state.activeSide = "runner";
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "runner_bid",
+    baseTraceStrength: trace.baseTraceStrength,
+    corpBid: trace.corpBid ?? 0,
+    traceStrength,
+    runnerLink,
+    runnerBid: bid,
+    runnerStrength,
+    traceSuccessful: successful,
+    tagsAdded
+  };
+}
+
+function selectedBidAmount(choice: ChoiceRequest | undefined, playerAction: PlayerAction): number {
+  if (!choice) throw new Error("Es ist keine Bid-Choice offen.");
+  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const selected = choice.options.find((option) => option.id === selectedOptionId);
+  const amount = typeof selected?.value === "number" ? selected.value : Number.NaN;
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Der Trace-Bid ist ungueltig.");
+  return amount;
+}
+
+function calculateRunnerLink(state: GameState): number {
+  const identity = definitionFor(state, state.runner.identity);
+  const baseLink = identity.baseLink ?? 0;
+  if (!Number.isInteger(baseLink) || baseLink < 0) throw new Error("Runner-Link ist ungueltig.");
+  const modifier = identityModifierAmount(state, "runner", "base_link", "static");
+  const link = baseLink + modifier;
+  if (!Number.isInteger(link) || link < 0) throw new Error("Runner-Link ist ungueltig.");
+  return link;
+}
+
+function applyIdentityStaticModifiers(state: GameState): void {
+  const memoryModifier = identityModifierAmount(state, "runner", "memory_limit", "static");
+  state.runner.memoryLimit += memoryModifier;
+  if (!Number.isInteger(state.runner.memoryLimit) || state.runner.memoryLimit < 0) {
+    throw new Error("Runner-Memory-Limit ist ungueltig.");
+  }
+}
+
+function applyIdentitySetupAbilities(state: GameState): void {
+  for (const side of ["corp", "runner"] as const) {
+    const identity = identityDefinition(state, side);
+    for (const modifier of identity.modifiers ?? []) {
+      if (modifier.duration !== "setup" || modifier.kind !== "starting_credits" || modifier.side !== side) continue;
+      if (!Number.isInteger(modifier.amount) || modifier.amount < 0) throw new Error("Setup-Credit-Modifier ist ungueltig.");
+      credits(state, side, modifier.amount);
+      recordIdentitySetupAbility(state, side, modifier.modifierId);
+    }
+  }
+}
+
+function identityModifierAmount(state: GameState, side: Side, kind: ModifierKind, duration: "setup" | "static"): number {
+  const identity = identityDefinition(state, side);
+  return (identity.modifiers ?? [])
+    .filter((modifier) => modifier.side === side && modifier.kind === kind && modifier.duration === duration)
+    .reduce((sum, modifier) => {
+      if (!Number.isInteger(modifier.amount)) throw new Error("Identity-Modifier ist ungueltig.");
+      return sum + modifier.amount;
+    }, 0);
+}
+
+function identityDefinition(state: GameState, side: Side): CardDefinition {
+  return definitionFor(state, side === "runner" ? state.runner.identity : state.corp.identity);
+}
+
+function recordIdentitySetupAbility(state: GameState, side: Side, modifierId: string): void {
+  const usage = (state.identityAbilityUsage ??= {});
+  const sideUsage = (usage[side] ??= { setupAbilities: [], turn: 0, usedThisTurn: [] });
+  if (!sideUsage.setupAbilities.includes(modifierId)) sideUsage.setupAbilities.push(modifierId);
+}
+
+function executeEffectCommands(state: GameState, commands: EffectCommand[]): void {
+  for (const command of commands) {
+    switch (command.type) {
+      case "gain_credits":
+        assertNonNegativeAmount(command.amount);
+        credits(state, command.side, command.amount);
+        break;
+      case "spend_credits":
+        assertNonNegativeAmount(command.amount);
+        spendCredits(state, command.side, command.amount);
+        break;
+      case "draw_card":
+        for (let count = 0; count < (command.amount ?? 1); count += 1) {
+          command.side === "corp" ? drawCorpCard(state) : drawRunnerCard(state);
+        }
+        break;
+      case "do_damage":
+        doDamage(state, {
+          damageId: `effect.${command.source ?? "unknown"}.${state.stateVersion}.${state.randomCounter}`,
+          damageType: command.damageType,
+          amount: command.amount,
+          source: command.source ?? "effect_command"
+        });
+        break;
+      case "add_tag":
+        assertNonNegativeAmount(command.amount);
+        state.runner.tags += command.amount;
+        break;
+      case "remove_tag":
+        assertNonNegativeAmount(command.amount);
+        state.runner.tags = Math.max(0, state.runner.tags - command.amount);
+        break;
+      case "change_breaker_strength":
+        mustInstance(state.cardInstances, command.breakerId).strengthModifier += command.amount;
+        break;
+      case "break_subroutine": {
+        const run = mustRun(state);
+        if (!run.brokenSubroutineIndexes.includes(command.subroutineIndex)) run.brokenSubroutineIndexes.push(command.subroutineIndex);
+        break;
+      }
+      case "set_pending_choice":
+        if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+        state.pendingChoice = cloneState(command.choice);
+        break;
+      case "complete_pending_choice":
+        if (!state.pendingChoice || state.pendingChoice.choiceId !== command.choiceId) throw new Error("Diese Choice ist nicht offen.");
+        delete state.pendingChoice;
+        break;
+      case "emit_event":
+        throw new Error("Effect-Event-Emission wird in V0.93 nur spezifiziert, aber nicht vom State-Only-Executor geschrieben.");
+    }
+  }
+}
+
+function assertNonNegativeAmount(amount: number): void {
+  if (!Number.isFinite(amount) || amount < 0) throw new Error("Effect amount ist ungueltig.");
+}
+
+function assertPositiveIntegerAmount(amount: number): void {
+  if (!Number.isInteger(amount) || amount <= 0) throw new Error("Damage amount ist ungueltig.");
 }
 
 function makeActionId(type: ActionType, side: Side, payload: LegalAction["payload"] | undefined, source: LegalAction["source"]): string {
@@ -979,10 +2266,12 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
 function buildEvent(before: number, after: number, stateHashAfter: StateHash, state: GameState, legalAction: LegalAction, playerAction: PlayerAction): GameEvent {
   const actor = legalAction.side;
   const reveal = revealForPublicEvent(state, legalAction);
+  const visibilityClass = eventVisibilityForAction(legalAction);
   const publicPayload: Record<string, unknown> = {
     actor,
     actionType: legalAction.type,
     label: publicLabel(legalAction),
+    ...publicContextForAction(state, legalAction),
     ...reveal
   };
   return {
@@ -991,6 +2280,7 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, st
     stateVersionBefore: before,
     stateVersionAfter: after,
     stateHashAfter,
+    visibilityClass,
     publicPayload,
     privatePayload: {
       [actor]: {
@@ -1002,17 +2292,112 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, st
 }
 
 function publicLabel(legalAction: LegalAction): string {
+  if (legalAction.type === "resolve_choice") return "Choice wurde beantwortet.";
   if (legalAction.side === "corp" && legalAction.type === "install_card") return "Corp installiert eine Karte.";
   if (legalAction.side === "corp" && legalAction.type === "advance_card") return "Corp advanced eine Karte.";
   return legalAction.label;
 }
 
+function publicContextForAction(state: GameState, legalAction: LegalAction): Record<string, unknown> {
+  const context: Record<string, unknown> = {};
+  const cardId =
+    typeof legalAction.payload?.cardId === "string"
+      ? legalAction.payload.cardId
+      : typeof legalAction.payload?.accessedCardId === "string"
+        ? legalAction.payload.accessedCardId
+        : undefined;
+  const sourceCardId = typeof legalAction.source === "string" && state.cardInstances[legalAction.source] ? legalAction.source : undefined;
+  const serverLabel = publicServerLabelForCard(state, cardId) ?? publicServerLabel(state, legalAction.payload?.serverId);
+  const agendaId = cardId ?? sourceCardId;
+
+  if (serverLabel) context.serverLabel = serverLabel;
+  if (legalAction.type === "install_card") {
+    const definition = cardId ? definitionFor(state, cardId) : undefined;
+    context.zoneLabel = legalAction.side === "runner" ? (definition?.type === "resource" ? "Resource" : "Rig") : legalAction.payload?.placement === "ice" ? "ICE" : "Remote";
+  }
+  if (legalAction.type === "trash_resource") context.zoneLabel = "Resource";
+  if (legalAction.type === "rez_ice") context.zoneLabel = legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true ? "Remote" : "ICE";
+  if (legalAction.type === "gain_credit" || legalAction.type === "draw_card" || legalAction.type === "remove_tag") context.amount = 1;
+  if (legalAction.type === "resolve_choice") {
+    context.choiceKind = legalAction.payload?.choiceKind;
+    if (legalAction.payload?.choiceVisibility === "public") context.choiceId = legalAction.payload?.choiceId;
+    else context.redactedKind = "choice";
+    for (const key of [
+      "traceId",
+      "traceStep",
+      "baseTraceStrength",
+      "corpBid",
+      "traceStrength",
+      "runnerLink",
+      "runnerBid",
+      "runnerStrength",
+      "traceSuccessful",
+      "tagsAdded"
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
+  if (legalAction.type === "continue_run") context.result = state.run ? "continued" : "ended";
+  if (legalAction.payload?.traceStarted === true) {
+    context.traceStarted = true;
+    context.traceId = legalAction.payload.traceId;
+    context.sourceCardId = legalAction.payload.sourceCardId;
+    context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
+    context.baseTraceStrength = legalAction.payload.baseTraceStrength;
+  }
+  if (legalAction.payload?.damageResolved === true) {
+    context.damageResolved = true;
+    context.damageType = legalAction.payload.damageType;
+    context.damageAmount = legalAction.payload.damageAmount;
+    context.cardsTrashed = legalAction.payload.cardsTrashed;
+    context.flatline = legalAction.payload.flatline;
+  }
+  if (legalAction.type === "purge_virus_counters") {
+    context.purgedCounterType = "virus";
+    context.purgedVirusCounters = legalAction.payload?.purgedVirusCounters ?? 0;
+  }
+  if (legalAction.payload?.hiddenZoneBarrier === true) {
+    context.hiddenZoneBarrier = true;
+    context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
+    context.redactedKind = "hidden_zone";
+  }
+  if (legalAction.payload?.publicRevealKind) context.revealKind = legalAction.payload.publicRevealKind;
+  if (typeof legalAction.payload?.badPublicityAfter === "number") context.badPublicityAfter = legalAction.payload.badPublicityAfter;
+  if (state.winner && state.gameEndReason) context.gameEndReason = state.gameEndReason;
+  if (state.run?.phase) context.runPhase = state.run.phase;
+  if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {
+    const definition = definitionFor(state, agendaId);
+    if (definition.type === "agenda" && typeof definition.agendaPoints === "number") context.agendaPoints = definition.agendaPoints;
+  }
+  if (legalAction.side === "corp" && (legalAction.type === "install_card" || legalAction.type === "advance_card")) context.redactedKind = "installed_card";
+
+  return context;
+}
+
+function publicServerLabel(state: GameState, serverId: unknown): string | undefined {
+  if (typeof serverId !== "string") return undefined;
+  if (serverId === "new_remote") return "neuem Remote";
+  return state.corp.servers.find((server) => server.id === serverId)?.label;
+}
+
+function publicServerLabelForCard(state: GameState, cardId: string | undefined): string | undefined {
+  if (!cardId) return undefined;
+  const zone = state.cardInstances[cardId]?.zone;
+  const serverId = zone && "serverId" in zone ? zone.serverId : undefined;
+  return publicServerLabel(state, serverId);
+}
+
 function revealForPublicEvent(state: GameState, legalAction: LegalAction): Record<string, unknown> {
+  if (typeof legalAction.payload?.publicRevealDefinitionId === "string") {
+    const definition = DEMO_CARDS_BY_ID[legalAction.payload.publicRevealDefinitionId];
+    if (definition) return { cardDefinitionId: definition.id, title: definition.title };
+  }
   const revealsCard =
-    ["rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_event", "play_operation"].includes(legalAction.type) ||
+    ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation"].includes(legalAction.type) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
-    const cardId = legalAction.payload?.cardId ?? legalAction.source;
+    const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;
     if (typeof cardId === "string" && state.cardInstances[cardId]) {
       const definition = definitionFor(state, cardId);
       return { cardDefinitionId: definition.id, title: definition.title };
@@ -1029,6 +2414,7 @@ function toPublicEvent(event: GameEvent): PublicGameEvent {
     stateVersionBefore: event.stateVersionBefore,
     stateVersionAfter: event.stateVersionAfter,
     stateHashAfter: event.stateHashAfter,
+    ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
     publicPayload: event.publicPayload
   };
 }
@@ -1048,12 +2434,15 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(definition.installCost !== undefined ? { installCost: definition.installCost } : {}),
     ...(definition.memoryCost !== undefined ? { memoryCost: definition.memoryCost } : {}),
     ...(definition.rezCost !== undefined ? { rezCost: definition.rezCost } : {}),
+    ...(definition.baseLink !== undefined ? { baseLink: definition.baseLink } : {}),
     rezzed: instance.rezzed,
     advancementCounters: instance.advancementCounters,
     ...(definition.advancementRequirement !== undefined ? { advancementRequirement: definition.advancementRequirement } : {}),
     ...(definition.strength !== undefined ? { strength: definition.strength + instance.strengthModifier } : {}),
     ...(definition.agendaPoints !== undefined ? { agendaPoints: definition.agendaPoints } : {}),
-    ...(definition.trashCost !== undefined ? { trashCost: definition.trashCost } : {})
+    ...(definition.trashCost !== undefined ? { trashCost: definition.trashCost } : {}),
+    ...(instance.counters ? { counters: cloneCounters(instance.counters) } : {}),
+    ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {})
   };
 }
 
@@ -1073,6 +2462,7 @@ function visibleCorpCard(state: GameState, id: CardInstanceId, viewer: Side, are
   return visibleOwnCard(state, id);
 }
 
+
 function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
   return ids.reduce((sum, id) => sum + (definitionFor(state, id).agendaPoints ?? 0), 0);
@@ -1081,6 +2471,79 @@ function agendaPoints(state: GameState, side: Side): number {
 function credits(state: GameState, side: Side, amount: number): void {
   if (side === "corp") state.corp.credits += amount;
   else state.runner.credits += amount;
+}
+
+function cloneCounters(counters: Partial<Record<CounterType, number>>): Partial<Record<CounterType, number>> {
+  return Object.fromEntries(Object.entries(counters).filter(([, amount]) => typeof amount === "number" && amount > 0)) as Partial<Record<CounterType, number>>;
+}
+
+function cardCounter(state: GameState, cardId: CardInstanceId, counterType: CounterType): number {
+  return mustInstance(state.cardInstances, cardId).counters?.[counterType] ?? 0;
+}
+
+function setCardCounter(state: GameState, cardId: CardInstanceId, counterType: CounterType, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Counter amount ist ungueltig.");
+  const instance = mustInstance(state.cardInstances, cardId);
+  const counters = { ...(instance.counters ?? {}) };
+  if (amount === 0) delete counters[counterType];
+  else counters[counterType] = amount;
+  const { counters: _counters, ...withoutCounters } = instance;
+  void _counters;
+  state.cardInstances[cardId] = Object.keys(counters).length > 0 ? { ...withoutCounters, counters } : withoutCounters;
+}
+
+function addCardCounter(state: GameState, cardId: CardInstanceId, counterType: CounterType, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Counter amount ist ungueltig.");
+  setCardCounter(state, cardId, counterType, cardCounter(state, cardId, counterType) + amount);
+}
+
+function spendCardCounter(state: GameState, cardId: CardInstanceId, counterType: CounterType, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Counter amount ist ungueltig.");
+  const current = cardCounter(state, cardId, counterType);
+  if (current < amount) throw new Error("Nicht genug Counter vorhanden.");
+  setCardCounter(state, cardId, counterType, current - amount);
+}
+
+function totalCounters(state: GameState, counterType: CounterType): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => sum + cardCounter(state, cardId, counterType), 0);
+}
+
+function purgeVirusCounters(state: GameState): number {
+  const total = totalCounters(state, "virus");
+  if (total <= 0) throw new Error("Es gibt keine Virus-Counter zu purgen.");
+  for (const cardId of Object.keys(state.cardInstances)) {
+    setCardCounter(state, cardId, "virus", 0);
+  }
+  return total;
+}
+
+function hostedCardsOn(state: GameState, hostId: CardInstanceId): CardInstanceId[] {
+  return Object.entries(state.cardInstances)
+    .filter(([, instance]) => instance.hostedOn === hostId)
+    .map(([cardId]) => cardId)
+    .sort();
+}
+
+function setHostedOn(state: GameState, cardId: CardInstanceId, hostId: CardInstanceId): void {
+  if (cardId === hostId) throw new Error("Eine Karte kann nicht auf sich selbst gehostet werden.");
+  if (!state.cardInstances[hostId]) throw new Error("Host-Karte fehlt.");
+  let current: CardInstanceId | undefined = hostId;
+  while (current) {
+    if (current === cardId) throw new Error("Hosting-Zyklus ist nicht erlaubt.");
+    current = state.cardInstances[current]?.hostedOn;
+  }
+  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), hostedOn: hostId };
+}
+
+function hasHostingCycle(state: GameState, cardId: CardInstanceId): boolean {
+  const seen = new Set<CardInstanceId>([cardId]);
+  let current = state.cardInstances[cardId]?.hostedOn;
+  while (current) {
+    if (seen.has(current)) return true;
+    seen.add(current);
+    current = state.cardInstances[current]?.hostedOn;
+  }
+  return false;
 }
 
 function spendCredits(state: GameState, side: Side, amount: number): void {
@@ -1094,6 +2557,57 @@ function spendCredits(state: GameState, side: Side, amount: number): void {
   state.runner.credits -= amount;
 }
 
+function availableRunnerProgramInstallCredits(state: GameState): number {
+  return state.runner.credits + runnerRecurringCredits(state);
+}
+
+function runnerRecurringCredits(state: GameState): number {
+  return state.runner.rig.hardware.reduce((sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"), 0);
+}
+
+function spendRunnerInstallCredits(state: GameState, amount: number, cardType: CardDefinition["type"]): void {
+  if (amount <= 0) return;
+  if (cardType !== "program") {
+    spendCredits(state, "runner", amount);
+    return;
+  }
+  if (availableRunnerProgramInstallCredits(state) < amount) throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
+  let remaining = amount;
+  for (const cardId of state.runner.rig.hardware) {
+    if (remaining <= 0) break;
+    const available = cardCounter(state, cardId, "recurring_credit");
+    const spent = Math.min(available, remaining);
+    if (spent > 0) {
+      spendCardCounter(state, cardId, "recurring_credit", spent);
+      remaining -= spent;
+    }
+  }
+  spendCredits(state, "runner", remaining);
+}
+
+function availableRunnerRunCredits(state: GameState): number {
+  return state.runner.credits + (state.run?.badPublicityCredits ?? 0);
+}
+
+function spendRunnerRunCredits(state: GameState, amount: number): void {
+  if (amount <= 0) return;
+  if (availableRunnerRunCredits(state) < amount) throw new Error("Der Runner kann die Run-Kosten nicht bezahlen.");
+  const run = mustRun(state);
+  const fromBadPublicity = Math.min(run.badPublicityCredits ?? 0, amount);
+  if (fromBadPublicity > 0) {
+    run.badPublicityCredits = (run.badPublicityCredits ?? 0) - fromBadPublicity;
+  }
+  spendCredits(state, "runner", amount - fromBadPublicity);
+}
+
+function refreshRecurringCredits(state: GameState, side: Side): void {
+  if (side !== "runner" || !isV099OrLater(state)) return;
+  for (const cardId of state.runner.rig.hardware) {
+    const definition = definitionFor(state, cardId);
+    if ((definition.recurringCredits ?? 0) > 0) setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
+  }
+}
+
 function spendClick(state: GameState, side: Side): void {
   if (side === "corp") {
     if (state.corp.clicks <= 0) throw new Error("Die Corp hat keine Clicks mehr.");
@@ -1102,6 +2616,17 @@ function spendClick(state: GameState, side: Side): void {
   }
   if (state.runner.clicks <= 0) throw new Error("Der Runner hat keine Clicks mehr.");
   state.runner.clicks -= 1;
+}
+
+function spendClicks(state: GameState, side: Side, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Click amount ist ungueltig.");
+  if (side === "corp") {
+    if (state.corp.clicks < amount) throw new Error("Die Corp hat nicht genug Clicks.");
+    state.corp.clicks -= amount;
+    return;
+  }
+  if (state.runner.clicks < amount) throw new Error("Der Runner hat nicht genug Clicks.");
+  state.runner.clicks -= amount;
 }
 
 function randomHqAccess(state: GameState): CardInstanceId | undefined {
@@ -1162,7 +2687,73 @@ function expandDeck(side: Side, cards: Array<{ id: string; quantity: number }>, 
   return ids;
 }
 
+function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefinition): CardPoolVersion {
+  if (usesMvp099CardPool(runnerDeck) || usesMvp099CardPool(corpDeck)) return "0.99.0";
+  if (usesMvp098CardPool(runnerDeck) || usesMvp098CardPool(corpDeck)) return "0.98.0";
+  if (usesMvp097CardPool(runnerDeck) || usesMvp097CardPool(corpDeck)) return "0.97.0";
+  if (usesMvp096CardPool(runnerDeck) || usesMvp096CardPool(corpDeck)) return "0.96.0";
+  if (usesMvp095CardPool(runnerDeck) || usesMvp095CardPool(corpDeck)) return "0.95.0";
+  if (usesMvp094CardPool(runnerDeck) || usesMvp094CardPool(corpDeck)) return "0.94.0";
+  if (usesMvp08CardPool(runnerDeck) || usesMvp08CardPool(corpDeck)) return "0.8.0";
+  if (usesExpandedCardPool(runnerDeck) || usesExpandedCardPool(corpDeck)) return "0.4.0";
+  return "0.1.0";
+}
+
+function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
+  if (version === "0.99.0") return MVP_0_99_BASELINE;
+  if (version === "0.98.0") return MVP_0_98_BASELINE;
+  if (version === "0.97.0") return MVP_0_97_BASELINE;
+  if (version === "0.96.0") return MVP_0_96_BASELINE;
+  if (version === "0.95.0") return MVP_0_95_BASELINE;
+  if (version === "0.94.0") return MVP_0_94_BASELINE;
+  if (version === "0.8.0") return MVP_0_8_BASELINE;
+  if (version === "0.4.0") return MVP_0_4_BASELINE;
+  return MVP_0_1_BASELINE;
+}
+
+function usesMvp099CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_099") || deck.id.includes("_0_99") || deck.id.includes("_v0_99")) return true;
+  if (deck.identity.startsWith("v099_")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v099_"));
+}
+
+function usesMvp098CardPool(deck: DeckDefinition): boolean {
+  if (usesMvp099CardPool(deck)) return true;
+  if (deck.id.endsWith("_098") || deck.id.includes("_0_98") || deck.id.includes("_v0_98")) return true;
+  if (deck.identity.startsWith("v098_")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v098_"));
+}
+
+function usesMvp097CardPool(deck: DeckDefinition): boolean {
+  if (usesMvp098CardPool(deck)) return true;
+  if (deck.id.endsWith("_097") || deck.id.includes("_0_97") || deck.id.includes("_v0_97")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v097_"));
+}
+
+function usesMvp096CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_096") || deck.id.includes("_0_96") || deck.id.includes("_v0_96")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v096_"));
+}
+
+function usesMvp095CardPool(deck: DeckDefinition): boolean {
+  if (usesMvp096CardPool(deck)) return true;
+  if (deck.id.endsWith("_095") || deck.id.includes("_0_95") || deck.id.includes("_v0_95")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v095_"));
+}
+
+function usesMvp094CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_094") || deck.id.includes("_0_94") || deck.id.includes("_v0_94")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v094_"));
+}
+
+function usesMvp08CardPool(deck: DeckDefinition): boolean {
+  if (usesMvp094CardPool(deck)) return true;
+  if (deck.id.endsWith("_008") || deck.id.includes("_0_8") || deck.id.includes("_v0_8")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v08_"));
+}
+
 function usesExpandedCardPool(deck: DeckDefinition): boolean {
+  if (usesMvp08CardPool(deck)) return true;
   if (deck.id.endsWith("_004") || deck.id.includes("_0_6")) return true;
   return deck.cards.some((card) =>
     [
@@ -1179,15 +2770,77 @@ function usesExpandedCardPool(deck: DeckDefinition): boolean {
   );
 }
 
-function metadataForDeck(deck: DeckDefinition, expandedCardPool: boolean): DeckPublicMetadata {
+function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion): DeckPublicMetadata {
+  const expandedCardPool = cardPoolVersion !== "0.1.0";
   return {
     side: deck.side,
     identityCardId: deck.identity,
     deckName: deck.name,
-    cardPoolSnapshotId: expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
-    formatProfileId: expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
+    cardPoolSnapshotId:
+      cardPoolVersion === "0.99.0"
+        ? "card-snapshot-0.99"
+        : cardPoolVersion === "0.98.0"
+        ? "card-snapshot-0.98"
+        : cardPoolVersion === "0.97.0"
+        ? "card-snapshot-0.97"
+        : cardPoolVersion === "0.96.0"
+        ? "card-snapshot-0.96"
+        : cardPoolVersion === "0.95.0"
+          ? "card-snapshot-0.95"
+          : cardPoolVersion === "0.94.0"
+            ? "card-snapshot-0.94"
+            : cardPoolVersion === "0.8.0"
+              ? "card-snapshot-0.8"
+              : expandedCardPool
+                ? "card-snapshot-0.5"
+                : "mvp-0.1-demo",
+    formatProfileId:
+      cardPoolVersion === "0.99.0"
+        ? "local-demo-v0.99"
+        : cardPoolVersion === "0.98.0"
+        ? "local-demo-v0.98"
+        : cardPoolVersion === "0.97.0"
+        ? "local-demo-v0.97"
+        : cardPoolVersion === "0.96.0"
+        ? "local-demo-v0.96"
+        : cardPoolVersion === "0.95.0"
+          ? "local-demo-v0.95"
+          : cardPoolVersion === "0.94.0"
+            ? "local-demo-v0.94"
+            : cardPoolVersion === "0.8.0"
+              ? "local-demo-v0.8"
+              : expandedCardPool
+                ? "local-demo-v0.6"
+                : "legacy-demo",
     deckHash: `legacy:${deck.id}`
   };
+}
+
+function isV097OrLater(state: GameState): boolean {
+  return isVersionAtLeast(state, 97);
+}
+
+function isV099OrLater(state: GameState): boolean {
+  return isVersionAtLeast(state, 99);
+}
+
+function isVersionAtLeast(state: GameState, minorGate: number): boolean {
+  const version = state.baseline.engineSchemaVersion.split(".").map((part) => Number(part));
+  const [major = 0, minor = 0, patch = 0] = version;
+  if (major !== 0) return major > 0;
+  if (minor !== minorGate) return minor > minorGate;
+  return patch >= 0;
+}
+
+function canPlayCorpOperation(state: GameState, definition: CardDefinition): boolean {
+  const resolver = CORP_OPERATION_RESOLVERS[definition.id];
+  return Boolean(resolver && (resolver.canPlay?.(state) ?? true));
+}
+
+function resolveCorpOperation(state: GameState, definition: CardDefinition): void {
+  const resolver = CORP_OPERATION_RESOLVERS[definition.id];
+  if (!resolver) throw new Error(`Kein Operation-Resolver fuer ${definition.id}.`);
+  resolver.resolve(state);
 }
 
 function createInstance(side: Side, definitionId: string, copy: number, zone: CardInstance["zone"]): CardInstance {
@@ -1219,6 +2872,7 @@ function removeFromAllZones(state: GameState, cardId: string): void {
   state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
   state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
+  state.runner.rig.resources = state.runner.rig.resources.filter((id) => id !== cardId);
 }
 
 function createRemote(state: GameState): CorpServer {

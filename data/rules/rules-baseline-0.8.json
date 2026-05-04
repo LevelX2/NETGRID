@@ -1,0 +1,15 @@
+{
+  "schemaVersion": "rules-baseline-v0.8",
+  "id": "rules-baseline-mvp-0.8",
+  "status": "frozen_for_v0.8_requirements",
+  "rulesVersion": "26.03",
+  "cardTextSource": "manual_local_original",
+  "cardTextSnapshotId": "mvp-0.8-demo",
+  "engineSchemaVersion": "0.8.0",
+  "cardImplementationVersion": "0.8.0",
+  "deviationRegistryVersion": "0.8.0",
+  "notes": [
+    "Local fictional playable starter slice only.",
+    "Imported card data remains display/status data, not rule authority."
+  ]
+}

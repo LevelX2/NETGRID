@@ -1,0 +1,23 @@
+{
+  "id": "SCN-V097-001",
+  "baselineId": "rules-baseline-mvp-0.97",
+  "title": "Deep Dive breaches R&D with two queued accesses",
+  "requirementIds": ["M097-RUN-001", "M097-BREACH-001", "M097-ACCESS-001", "M097-RD-001", "M097-VISIBILITY-001", "M097-REPLAY-001", "M097-CARD-001"],
+  "coversTests": ["V097-T001", "V097-T003", "V097-T004", "V097-T007", "V097-T008"],
+  "coversCards": ["v097_deep_dive_event"],
+  "steps": [
+    "Runner plays Deep Dive Event targeting R&D.",
+    "Engine creates an internal BreachState with two queued R&D cards.",
+    "First access reveals only the first queued card.",
+    "The next queued card is not present in that public event.",
+    "Runner accesses and steals the second queued agenda.",
+    "Replay reproduces the final StateHash."
+  ],
+  "expected": {
+    "breachQueueLength": 2,
+    "futureAccessNotRevealedBeforeAccess": true,
+    "accessCardVisibilityClass": "hidden_info_barrier",
+    "stateHashDeterministic": true,
+    "noOfficialAssets": true
+  }
+}

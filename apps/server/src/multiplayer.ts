@@ -2,11 +2,13 @@ import { createHash, randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { buildAiDecisionInput, chooseAiAction } from "@netrunner/ai";
-import { applyAction, createGame, getLegalActions, getPlayerView, hashState, replayEvents } from "@netrunner/engine";
+import type { DeckSnapshot } from "@netrunner/decks";
+import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, replayEvents } from "@netrunner/engine";
 import {
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
   MVP_0_4_BASELINE,
+  MVP_0_8_BASELINE,
   type AiDifficulty,
   type DeckPublicMetadata,
   type GameEvent,
@@ -19,16 +21,80 @@ import {
   type RulesBaseline,
   type Side
 } from "@netrunner/shared";
-import { defaultAgendaPointsToWin, resolveDeckSetup, setupUsesExpandedRules, type MatchDeckSelectionInput, type ResolvedDeckSetup } from "./deck-setup";
+import { defaultAgendaPointsToWin, resolveDeckSetup, setupUsesExpandedRules, setupUsesMvp08Rules, type MatchDeckSelectionInput, type ResolvedDeckSetup } from "./deck-setup";
 
 export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 export type HostSideSelection = Side | "random";
 export type MatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
+export type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 export type TokenKind = "join" | "session" | "reconnect";
 export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
+export type SeriesPlayerSlot = "player_a" | "player_b";
+export type SeriesStatus = "active" | "between_games" | "finished";
 
 export type MatchSettings = {
   agendaPointsToWin: number;
+  matchFormat: MatchFormat;
+};
+
+export type GameResultReason = "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "unknown";
+
+export type SeriesGameResult = {
+  matchId: string;
+  gameNumber: number;
+  winner: Side | "draw";
+  runnerPlayer: SeriesPlayerSlot;
+  corpPlayer: SeriesPlayerSlot;
+  runnerAgendaPoints: number;
+  corpAgendaPoints: number;
+  finishedAt: string;
+  finalStateHash: string;
+};
+
+export type MatchSeriesState = {
+  seriesId: string;
+  mode: "two_game_side_swap";
+  status: SeriesStatus;
+  gameNumber: number;
+  gamesPlanned: number;
+  runnerPlayer: SeriesPlayerSlot;
+  corpPlayer: SeriesPlayerSlot;
+  results: SeriesGameResult[];
+  previousMatchId?: string;
+  nextMatchId?: string;
+};
+
+export type SeriesResultSummary = {
+  seriesId: string;
+  mode: "two_game_side_swap";
+  status: SeriesStatus;
+  gameNumber: number;
+  gamesPlanned: number;
+  viewerPlayer: SeriesPlayerSlot;
+  viewerWins: number;
+  opponentWins: number;
+  draws: number;
+  nextAvailable: boolean;
+  nextMatchId?: string;
+};
+
+export type GameResultSummary = {
+  winner: Side | "draw";
+  viewerOutcome: "won" | "lost" | "draw";
+  reason: GameResultReason;
+  matchFormat: MatchFormat;
+  agendaPointsToWin: number;
+  runnerAgendaPoints: number;
+  corpAgendaPoints: number;
+  actionCount: number;
+  runCount: number;
+  successfulRunCount: number;
+  stolenAgendaCount: number;
+  scoredAgendaCount: number;
+  startedAt: string;
+  finishedAt: string;
+  finalStateHash: string;
+  series?: SeriesResultSummary;
 };
 
 export type MatchRecord = {
@@ -45,6 +111,7 @@ export type MatchRecord = {
     corp: DeckPublicMetadata;
   };
   aiControllers?: Partial<Record<Side, PlayerController>>;
+  series?: MatchSeriesState;
   createdAt: string;
   updatedAt: string;
   winner?: Side | "draw";
@@ -129,6 +196,7 @@ export type StoredMatch = {
   sessions: SessionRecord[];
   tokens: TokenRecord[];
   gameState: GameState;
+  privateDeckSnapshots?: { runner: DeckSnapshot; corp: DeckSnapshot };
   eventLog: EventRecord[];
   actionReceipts: ActionReceipt[];
   undoSnapshots: UndoSnapshot[];
@@ -151,9 +219,11 @@ export type SidePayload = {
   legalActions: LegalAction[];
   eventTail: PublicGameEvent[];
   opponentStatus: { side: Side; connected: boolean };
+  pendingChoice?: PlayerView["pendingChoice"];
   pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
   winner?: Side | "draw";
   finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 export type SafeErrorPayload = {
@@ -175,6 +245,10 @@ export type CreateMatchResult = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  pendingChoice?: PlayerView["pendingChoice"];
+  winner?: Side | "draw";
+  finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 export type JoinMatchResult = {
@@ -186,6 +260,10 @@ export type JoinMatchResult = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   matchVersion: number;
+  pendingChoice?: PlayerView["pendingChoice"];
+  winner?: Side | "draw";
+  finalStateHash?: string;
+  resultSummary?: GameResultSummary;
 };
 
 export type ReconnectResult = JoinMatchResult & {
@@ -302,6 +380,15 @@ export class MultiplayerService {
     displayName?: string;
     seed?: string;
     settings?: Partial<MatchSettings>;
+    series?: {
+      seriesId: string;
+      gameNumber: number;
+      gamesPlanned: number;
+      runnerPlayer: SeriesPlayerSlot;
+      corpPlayer: SeriesPlayerSlot;
+      previousResults: SeriesGameResult[];
+      previousMatchId?: string;
+    };
     mode?: MatchMode;
     runnerDifficulty?: AiDifficulty;
     corpDifficulty?: AiDifficulty;
@@ -316,7 +403,11 @@ export class MultiplayerService {
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const deckSetup = resolveDeckSetup(input);
-    const settings: MatchSettings = { agendaPointsToWin: input.settings?.agendaPointsToWin ?? defaultAgendaPointsToWin(deckSetup) };
+    const matchFormat = input.settings?.matchFormat ?? "rules_match";
+    const settings: MatchSettings = {
+      agendaPointsToWin: input.settings?.agendaPointsToWin ?? (matchFormat === "two_game_side_swap" ? 7 : defaultAgendaPointsToWin(deckSetup)),
+      matchFormat
+    };
     const baseline = baselineForMode(mode, deckSetup);
     const controllers = controllersForMode(mode, hostSide, {
       runnerDifficulty: input.runnerDifficulty ?? "normal",
@@ -361,6 +452,32 @@ export class MultiplayerService {
           corp: deckSetup.corpSnapshot.publicMetadata
         },
         ...(mode === "human_vs_human" ? {} : { aiControllers: aiControllersFor(controllers) }),
+        ...(settings.matchFormat === "two_game_side_swap"
+          ? {
+              series: input.series
+                ? {
+                    seriesId: input.series.seriesId,
+                    mode: "two_game_side_swap",
+                    status: "active",
+                    gameNumber: input.series.gameNumber,
+                    gamesPlanned: input.series.gamesPlanned,
+                    runnerPlayer: input.series.runnerPlayer,
+                    corpPlayer: input.series.corpPlayer,
+                    results: clone(input.series.previousResults),
+                    ...(input.series.previousMatchId ? { previousMatchId: input.series.previousMatchId } : {})
+                  }
+                : {
+                    seriesId: randomId("series"),
+                    mode: "two_game_side_swap",
+                    status: "active",
+                    gameNumber: 1,
+                    gamesPlanned: 2,
+                    runnerPlayer: hostSide === "runner" ? "player_a" : "player_b",
+                    corpPlayer: hostSide === "corp" ? "player_a" : "player_b",
+                    results: []
+                  }
+            }
+          : {}),
         createdAt: now,
         updatedAt: now
       },
@@ -371,6 +488,7 @@ export class MultiplayerService {
         ...(joinToken ? [this.tokenRecord(matchId, joinSide, "join", joinToken, now)] : [])
       ],
       gameState,
+      privateDeckSnapshots: { runner: clone(deckSetup.runnerSnapshot), corp: clone(deckSetup.corpSnapshot) },
       eventLog: gameState.eventLog.map((event) => toEventRecord(matchId, event, false)),
       actionReceipts: [],
       undoSnapshots: [],
@@ -391,8 +509,74 @@ export class MultiplayerService {
       baseline,
       playerView: payload.playerView,
       legalActions: payload.legalActions,
-      matchVersion: record.match.matchVersion
+      matchVersion: record.match.matchVersion,
+      ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.winner ? { winner: payload.winner } : {}),
+      ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
+      ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
     };
+  }
+
+  async startNextSeriesGame(
+    matchId: string,
+    input: { side: Side; sessionToken: string; displayName?: string }
+  ): Promise<CreateMatchResult | { error: SafeErrorPayload }> {
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      const series = record.match.series;
+      if (!series || record.match.settings.matchFormat !== "two_game_side_swap") {
+        return { error: safeError("series_not_available", "Für dieses Match ist keine private Matchserie aktiv.") };
+      }
+      if (record.match.status !== "finished" || !record.gameState.winner) {
+        return { error: safeError("series_game_not_finished", "Das nächste Serienspiel ist erst nach Spielende verfügbar.") };
+      }
+
+      this.finalizeSeriesGame(record);
+      if (series.status === "finished" || series.results.length >= series.gamesPlanned) {
+        await this.storage.save(record);
+        return { error: safeError("series_finished", "Die private Matchserie ist bereits abgeschlossen.") };
+      }
+      if (series.nextMatchId) {
+        await this.storage.save(record);
+        return { error: safeError("series_next_exists", "Das nächste Serienspiel wurde bereits erstellt.") };
+      }
+
+      const requesterPlayer = seriesPlayerForSide(series, input.side);
+      const opponentPlayer = oppositeSeriesPlayer(requesterPlayer);
+      const nextHostSide = opposite(input.side);
+      const nextGameNumber = series.gameNumber + 1;
+      const nextMode = nextModeForSideSwap(record.match.mode);
+      const aiDifficulty = record.match.aiControllers?.runner?.difficulty ?? record.match.aiControllers?.corp?.difficulty ?? "normal";
+      const next = await this.createMatch({
+        hostSide: nextHostSide,
+        displayName: input.displayName ?? session.displayName,
+        seed: `${record.gameState.seed}:series-game-${nextGameNumber}`,
+        mode: nextMode,
+        ...(nextMode === "human_runner_vs_corp_ai" ? { corpDifficulty: aiDifficulty } : {}),
+        ...(nextMode === "human_corp_vs_runner_ai" ? { runnerDifficulty: aiDifficulty } : {}),
+        settings: record.match.settings,
+        ...(record.privateDeckSnapshots?.runner ? { runnerDeckSnapshot: record.privateDeckSnapshots.runner } : {}),
+        ...(record.privateDeckSnapshots?.corp ? { corpDeckSnapshot: record.privateDeckSnapshots.corp } : {}),
+        runnerDeckSnapshotId: record.match.deckSetup.runnerSnapshotId,
+        corpDeckSnapshotId: record.match.deckSetup.corpSnapshotId,
+        series: {
+          seriesId: series.seriesId,
+          gameNumber: nextGameNumber,
+          gamesPlanned: series.gamesPlanned,
+          runnerPlayer: nextHostSide === "runner" ? requesterPlayer : opponentPlayer,
+          corpPlayer: nextHostSide === "corp" ? requesterPlayer : opponentPlayer,
+          previousResults: series.results,
+          previousMatchId: record.match.matchId
+        }
+      });
+      series.nextMatchId = next.matchId;
+      record.match.updatedAt = this.now();
+      await this.storage.save(record);
+      return next;
+    });
   }
 
   async getJoinInfo(matchId: string, token?: string): Promise<{ matchId: string; status: MatchStatus; availableSide?: Side } | SafeErrorPayload> {
@@ -444,7 +628,11 @@ export class MultiplayerService {
       webSocketUrl: this.webSocketUrl(),
       playerView: payload.playerView,
       legalActions: payload.legalActions,
-      matchVersion: record.match.matchVersion
+      matchVersion: record.match.matchVersion,
+      ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.winner ? { winner: payload.winner } : {}),
+      ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
+      ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
     };
   }
 
@@ -484,7 +672,11 @@ export class MultiplayerService {
       playerView: payload.playerView,
       legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
-      eventTail: payload.eventTail
+      eventTail: payload.eventTail,
+      ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.winner ? { winner: payload.winner } : {}),
+      ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
+      ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {})
     };
   }
 
@@ -593,8 +785,7 @@ export class MultiplayerService {
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
       if (result.state.winner) {
-        record.match.status = "finished";
-        record.match.winner = result.state.winner;
+        this.finalizeFinishedMatch(record);
       }
       this.runAiUntilNextHuman(record);
       await this.storage.save(record);
@@ -725,6 +916,8 @@ export class MultiplayerService {
     const pendingUndo = record.pendingUndo
       ? { ...record.pendingUndo, needsResponse: record.pendingUndo.requestedBy !== side }
       : undefined;
+    const finalStateHash = record.gameState.winner ? hashState(record.gameState) : undefined;
+    const resultSummary = record.gameState.winner && finalStateHash ? resultSummaryFor(record, side, finalStateHash) : undefined;
     return {
       matchId: record.match.matchId,
       matchStatus: record.match.status,
@@ -734,9 +927,41 @@ export class MultiplayerService {
       legalActions: getLegalActions(record.gameState, side),
       eventTail: record.eventLog.slice(-20).map((event) => event.publicPayload),
       opponentStatus: { side: opposite(side), connected: this.isAiSide(record, opposite(side)) || (opponent?.connected ?? false) },
+      ...(playerView.pendingChoice ? { pendingChoice: playerView.pendingChoice } : {}),
       ...(pendingUndo ? { pendingUndo } : {}),
-      ...(record.gameState.winner ? { winner: record.gameState.winner, finalStateHash: hashState(record.gameState) } : {})
+      ...(record.gameState.winner && finalStateHash ? { winner: record.gameState.winner, finalStateHash } : {}),
+      ...(resultSummary ? { resultSummary } : {})
     };
+  }
+
+  private finalizeFinishedMatch(record: StoredMatch): void {
+    if (!record.gameState.winner) return;
+    record.match.status = "finished";
+    record.match.winner = record.gameState.winner;
+    this.finalizeSeriesGame(record);
+  }
+
+  private finalizeSeriesGame(record: StoredMatch): void {
+    const series = record.match.series;
+    const winner = record.gameState.winner;
+    if (!series || !winner) return;
+    const finalStateHash = hashState(record.gameState);
+    if (!series.results.some((result) => result.matchId === record.match.matchId)) {
+      const runnerAgendaPoints = getPlayerView(record.gameState, "runner").own.agendaPoints;
+      const corpAgendaPoints = getPlayerView(record.gameState, "corp").own.agendaPoints;
+      series.results.push({
+        matchId: record.match.matchId,
+        gameNumber: series.gameNumber,
+        winner,
+        runnerPlayer: series.runnerPlayer,
+        corpPlayer: series.corpPlayer,
+        runnerAgendaPoints,
+        corpAgendaPoints,
+        finishedAt: record.match.updatedAt,
+        finalStateHash
+      });
+    }
+    series.status = series.results.length >= series.gamesPlanned ? "finished" : "between_games";
   }
 
   private runAiUntilNextHuman(record: StoredMatch): void {
@@ -747,7 +972,7 @@ export class MultiplayerService {
       const controller = record.match.aiControllers?.[side];
       const input = buildAiDecisionInput(record.gameState, side, {
         difficulty: controller?.difficulty ?? "normal",
-        profileId: controller?.profileId ?? `${side}-server-ai-v0.3`,
+        profileId: controller?.profileId ?? `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
         decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${side}`,
         actionNumber: record.gameState.stateVersion
       });
@@ -760,6 +985,7 @@ export class MultiplayerService {
         side,
         actionId: legalAction.actionId,
         clientKnownStateVersion: record.gameState.stateVersion,
+        ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
         idempotencyKey: `ai-${side}-${record.gameState.stateVersion}`
       });
       if (!result.ok) return;
@@ -778,8 +1004,7 @@ export class MultiplayerService {
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
       if (result.state.winner) {
-        record.match.status = "finished";
-        record.match.winner = result.state.winner;
+        this.finalizeFinishedMatch(record);
       }
     }
   }
@@ -872,6 +1097,7 @@ function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): Eve
     stateVersionBefore: event.stateVersionBefore,
     stateVersionAfter: event.stateVersionAfter,
     stateHashAfter: event.stateHashAfter,
+    ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
     publicPayload: event.publicPayload
   };
   return {
@@ -887,7 +1113,82 @@ function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): Eve
 }
 
 function isHiddenInfoBarrier(event: GameEvent): boolean {
-  return ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(event.type);
+  return isHiddenInfoBarrierEvent(event);
+}
+
+function resultSummaryFor(record: StoredMatch, viewerSide: Side, finalStateHash: string): GameResultSummary | undefined {
+  const winner = record.gameState.winner;
+  if (!winner) return undefined;
+  const runnerAgendaPoints = getPlayerView(record.gameState, "runner").own.agendaPoints;
+  const corpAgendaPoints = getPlayerView(record.gameState, "corp").own.agendaPoints;
+  const actionEvents = record.eventLog.filter((event) => event.publicPayload.type !== "game_created");
+  const countType = (type: string) => actionEvents.filter((event) => event.publicPayload.type === type).length;
+  return {
+    winner,
+    viewerOutcome: winner === "draw" ? "draw" : winner === viewerSide ? "won" : "lost",
+    reason: resultReason(record.gameState, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
+    matchFormat: record.match.settings.matchFormat,
+    agendaPointsToWin: record.match.settings.agendaPointsToWin,
+    runnerAgendaPoints,
+    corpAgendaPoints,
+    actionCount: actionEvents.length,
+    runCount: countType("start_run"),
+    successfulRunCount: countType("access_card"),
+    stolenAgendaCount: countType("steal_agenda"),
+    scoredAgendaCount: countType("score_agenda"),
+    startedAt: record.match.createdAt,
+    finishedAt: record.match.updatedAt,
+    finalStateHash,
+    ...(record.match.series ? { series: seriesSummaryFor(record, viewerSide) } : {})
+  };
+}
+
+function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSummary {
+  const series = record.match.series;
+  if (!series) throw new Error("series_missing");
+  const viewerPlayer = seriesPlayerForSide(series, viewerSide);
+  const wins = { player_a: 0, player_b: 0 };
+  let draws = 0;
+  for (const result of series.results) {
+    const winningPlayer = winningSeriesPlayer(result);
+    if (winningPlayer === "draw") draws += 1;
+    else wins[winningPlayer] += 1;
+  }
+  const opponentPlayer = oppositeSeriesPlayer(viewerPlayer);
+  return {
+    seriesId: series.seriesId,
+    mode: series.mode,
+    status: series.status,
+    gameNumber: series.gameNumber,
+    gamesPlanned: series.gamesPlanned,
+    viewerPlayer,
+    viewerWins: wins[viewerPlayer],
+    opponentWins: wins[opponentPlayer],
+    draws,
+    nextAvailable: series.status === "between_games" && !series.nextMatchId,
+    ...(series.nextMatchId ? { nextMatchId: series.nextMatchId } : {})
+  };
+}
+
+function winningSeriesPlayer(result: SeriesGameResult): SeriesPlayerSlot | "draw" {
+  if (result.winner === "draw") return "draw";
+  return result.winner === "runner" ? result.runnerPlayer : result.corpPlayer;
+}
+
+function seriesPlayerForSide(series: MatchSeriesState, side: Side): SeriesPlayerSlot {
+  return side === "runner" ? series.runnerPlayer : series.corpPlayer;
+}
+
+function oppositeSeriesPlayer(player: SeriesPlayerSlot): SeriesPlayerSlot {
+  return player === "player_a" ? "player_b" : "player_a";
+}
+
+function resultReason(state: GameState, winner: Side | "draw", runnerAgendaPoints: number, corpAgendaPoints: number, agendaPointsToWin: number): GameResultReason {
+  if (winner === "draw") return "draw";
+  if (state.gameEndReason === "flatline") return "flatline";
+  if (runnerAgendaPoints >= agendaPointsToWin || corpAgendaPoints >= agendaPointsToWin) return "agenda_points";
+  if (winner === "runner" || state.gameEndReason === "corp_deck_empty") return "corp_deck_empty";
+  return "unknown";
 }
 
 function safeError(code: string, message: string, state?: GameState, side?: Side): SafeErrorPayload {
@@ -903,12 +1204,19 @@ function opposite(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
 }
 
+function nextModeForSideSwap(mode: MatchMode): MatchMode {
+  if (mode === "human_runner_vs_corp_ai") return "human_corp_vs_runner_ai";
+  if (mode === "human_corp_vs_runner_ai") return "human_runner_vs_corp_ai";
+  return "human_vs_human";
+}
+
 function deterministicHostSide(seed: string): Side {
   const value = createHash("sha256").update(seed).digest()[0] ?? 0;
   return value % 2 === 0 ? "runner" : "corp";
 }
 
 function baselineForMode(mode: MatchMode, deckSetup: ResolvedDeckSetup): RulesBaseline {
+  if (setupUsesMvp08Rules(deckSetup)) return MVP_0_8_BASELINE;
   if (setupUsesExpandedRules(deckSetup)) return MVP_0_4_BASELINE;
   return mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
 }
@@ -921,12 +1229,12 @@ function controllersForMode(
   if (mode === "human_runner_vs_corp_ai") {
     return {
       runner: { controllerId: "runner-human", side: "runner", type: "human_remote", displayName: "Runner" },
-      corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI", difficulty: difficulties.corpDifficulty, profileId: "corp-ai-v0.3" }
+      corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI", difficulty: difficulties.corpDifficulty, profileId: `corp-ai-v0.9-${difficulties.corpDifficulty}` }
     };
   }
   if (mode === "human_corp_vs_runner_ai") {
     return {
-      runner: { controllerId: "runner-ai", side: "runner", type: "ai", displayName: "Runner KI", difficulty: difficulties.runnerDifficulty, profileId: "runner-ai-v0.3" },
+      runner: { controllerId: "runner-ai", side: "runner", type: "ai", displayName: "Runner KI", difficulty: difficulties.runnerDifficulty, profileId: `runner-ai-v0.9-${difficulties.runnerDifficulty}` },
       corp: { controllerId: "corp-human", side: "corp", type: "human_remote", displayName: "Corp" }
     };
   }

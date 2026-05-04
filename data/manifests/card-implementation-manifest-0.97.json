@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "card-implementation-manifest-v0.97",
+  "id": "mvp-0.97-card-implementation-manifest",
+  "status": "implemented_for_v0.97_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-0.96.json",
+  "sourceMode": "local_original",
+  "gateAssertions": {
+    "allPlayableCardsHaveResolver": true,
+    "allPlayableCardsHaveUnitScenarioVisibilityReplayAiAndMultiplayerCoverage": true,
+    "noOfficialCardsOrAssets": true,
+    "importDoesNotGrantPlayability": true,
+    "noV098PlusMechanicsEnabled": true
+  },
+  "cards": [
+    {
+      "cardCode": "v097_deep_dive_event",
+      "title": "Deep Dive Event",
+      "status": "playable_mvp",
+      "sourceMode": "local_original",
+      "resolver": "runner_event_run_multiaccess_2",
+      "visibilityClass": "hidden_info_barrier_on_access_only",
+      "riskFlags": ["hidden_queue", "hq_seeded_random", "future_access_leak"],
+      "roleTags": ["run_pressure", "breach", "multiaccess"],
+      "requirementIds": ["M097-RUN-001", "M097-BREACH-001", "M097-RD-001", "M097-HQ-001", "M097-VISIBILITY-001", "M097-REPLAY-001", "M097-CARD-001"],
+      "unitTests": ["V097-T001", "V097-T002", "V097-T003", "V097-T004", "V097-T005"],
+      "scenarioTests": ["SCN-V097-001", "SCN-V097-002"],
+      "visibilityTests": ["V097-T003", "V097-T006", "V097-T010"],
+      "replayTests": ["V097-T004", "V097-T007"],
+      "aiSmokeTests": ["V097-T008"],
+      "multiplayerSmokeTests": ["V097-T009", "V097-T010"]
+    }
+  ]
+}

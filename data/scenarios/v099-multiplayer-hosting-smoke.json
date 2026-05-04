@@ -1,0 +1,26 @@
+{
+  "id": "SCN-V099-003",
+  "baselineId": "rules-baseline-mvp-0.99",
+  "title": "Multiplayer V0.99 Hosting remains side-safe through submit, reconnect and undo barrier",
+  "requirementIds": ["M099B-HOSTING-004", "M099B-HOSTING-007", "M099A-VISIBILITY-001", "M099A-REPLAY-001", "M099-CARD-001", "M099-DECK-001", "M099-GATE-001"],
+  "coversTests": ["V099-T004", "V099-T005", "V099-T019", "V099-T020"],
+  "coversCards": ["v099_host_resource"],
+  "steps": [
+    "A private multiplayer match is prepared with Host Resource and Simple Decoder in Runner grip.",
+    "Runner submits Host Resource install with an idempotency key.",
+    "Duplicate submit returns the stored receipt and stale submit is rejected.",
+    "Reconnect restores the Runner-only hosting Choice with private option labels.",
+    "Corp payloads do not contain the private program candidate before the Choice is resolved.",
+    "Runner resolves the Choice and the public event remains a hidden-info barrier.",
+    "After resolution the hosted program is openly visible in the Runner rig.",
+    "Undo targeting the hidden-zone hosting event is blocked."
+  ],
+  "expected": {
+    "submitWorks": true,
+    "idempotencyWorks": true,
+    "staleRejected": true,
+    "reconnectSideFiltered": true,
+    "hiddenZoneBarrierBlocksUndo": true,
+    "opponentPayloadDoesNotLeakChoiceCandidateBeforeResolve": true
+  }
+}

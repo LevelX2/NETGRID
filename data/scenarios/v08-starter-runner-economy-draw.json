@@ -1,0 +1,21 @@
+{
+  "id": "SCN-V08-001",
+  "name": "V0.8 Runner economy, draw and memory setup",
+  "baselineId": "rules-baseline-mvp-0.8",
+  "requirementIds": ["V08-MUST-006", "V08-MUST-007", "V08-MUST-008", "V08-MUST-009"],
+  "coversCards": ["v08_burst_credit_event", "v08_deep_draw_event", "v08_memory_chip"],
+  "seed": "v08-starter-runner-economy-draw",
+  "runnerDeckSnapshotId": "demo_runner_008_snapshot_v0_8",
+  "corpDeckSnapshotId": "demo_corp_008_snapshot_v0_8",
+  "steps": [
+    "Runner plays Burst Credit Event.",
+    "Runner plays Deep Draw Event.",
+    "Runner installs Memory Chip."
+  ],
+  "expected": {
+    "runnerCreditsIncrease": true,
+    "runnerGripChangesOnlyInRunnerView": true,
+    "runnerMemoryLimitIncreases": true,
+    "finalStateHash": "pending_after_implementation"
+  }
+}

@@ -132,6 +132,9 @@ Dateien:
 - [Einstieg](03-design-c-clean-high-contrast/entry.png)
 - [Runner, korrigiert](03-design-c-clean-high-contrast/runner-corrected.png)
 - [Corp](03-design-c-clean-high-contrast/corp.png)
+- [Einstieg, kartenbildfreundlich](03-design-c-clean-high-contrast/entry-card-images.png)
+- [Runner, kartenbildfreundlich korrigiert](03-design-c-clean-high-contrast/runner-card-images-corrected.png)
+- [Corp, kartenbildfreundlich korrigiert](03-design-c-clean-high-contrast/corp-card-images-corrected.png)
 
 ### Stärken
 
@@ -141,6 +144,8 @@ Dateien:
 - Corp-Screen trennt Corp-Hand, Serverbau, Runner Public Info und LegalActions gut.
 - Helle Oberfläche macht versteckte/öffentliche Zonen leichter unterscheidbar.
 - Korrigierter Runner-Screen nutzt generische Demo-Karten und reduziert Scope-Risiken deutlich.
+- Die kartenbildfreundlichen Varianten zeigen plausibel, wie echte Kartenabbilder später in stabile Kartenflächen, Card Preview, Zoom und Text-Fallback eingebunden werden können.
+- Card Display Optionen im Einstieg machen Bildkarten zu einer lokalen Anzeigepräferenz statt zu einer Spielregel.
 
 ### Fehlende oder problematische Bestandteile
 
@@ -150,6 +155,9 @@ Dateien:
 - Die Entry-Oberfläche ist sehr gut, könnte aber Reconnect und Copy-Link-Zustände noch genauer zeigen.
 - LegalActions brauchen Ziel- und Choice-Details: welches ICE, welche Subroutine, welche Karte wird installiert.
 - Corp-Screen braucht klarere Rez-/Unrezzed-Zustände und Advancement-Counter.
+- Die kartenbildfreundlichen Varianten erhöhen die Dichte und brauchen deshalb zwingend Text-Fallback, Zoom/Focus und ein großes Card Preview Panel.
+- Hidden Cards dürfen auch im Bildmodus keine echten Kartenrücken, Bild-URLs oder unterscheidbaren Assetzustände verwenden.
+- Einige Kartenbildbeispiele zeigen spätere Typen wie Resource. Diese dürfen nur angezeigt werden, wenn sie im aktuellen Kartenpool/PlayerView wirklich existieren.
 
 ### Realismus
 
@@ -168,6 +176,9 @@ Design C wird zur Haupt-UI:
 - Diagnose nur als schmaler Statusstreifen plus optionaler Drawer.
 - Alle Kartenlabels aus dem internen Demo-Kartenpool oder generische `Demo ...` Namen.
 - Kein Multiaccess-Text, solange die Engine ihn nicht ausdrücklich anbietet.
+- CardView von Anfang an bildfreundlich bauen: stabiles `5 / 7`-Format, Image/Text-Umschaltung, Zoom/Focus und generischer Platzhalter.
+- Echte Kartenbilder bleiben ein separates Asset-Gate; vor Freigabe lädt der Bildmodus nur eigene generische Platzhalter.
+- Card Preview ist wichtiger als viel Text auf kleinen Boardkarten.
 
 ## Design D: Cinematic Dark
 

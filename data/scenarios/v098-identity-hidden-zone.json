@@ -1,0 +1,25 @@
+{
+  "id": "SCN-V098-001",
+  "baselineId": "rules-baseline-mvp-0.98",
+  "title": "Identity setup and static modifiers are deterministic",
+  "requirementIds": ["M098A-IDENTITY-001", "M098A-SETUP-001", "M098A-MODIFIER-001", "M098A-LINK-001", "M098A-MEMORY-001", "M098A-USAGE-001", "M098B-REPLAY-001"],
+  "coversTests": ["V098-T001", "V098-T002", "V098-T003", "V098-T004", "V098-T005", "V098-T006"],
+  "coversCards": ["v098_runner_identity", "v098_corp_identity"],
+  "steps": [
+    "Create a game with demo_runner_098 and demo_corp_098.",
+    "Identity setup runs before the game_created StateHash.",
+    "Corp and Runner each gain exactly 1 setup credit.",
+    "Runner memory limit and link reflect the active identity values.",
+    "A second game with the same seed produces the same StateHash and RandomDrawRecords."
+  ],
+  "expected": {
+    "baselineId": "rules-baseline-mvp-0.98",
+    "runnerCredits": 6,
+    "corpCredits": 6,
+    "runnerMemoryLimit": 5,
+    "runnerLink": 1,
+    "setupUsageMarkersWritten": true,
+    "stateHashDeterministic": true,
+    "noOfficialAssets": true
+  }
+}

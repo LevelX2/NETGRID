@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import snapshotData from "../../../data/card-import/card-snapshot-0.5.json";
+import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
 import profilesData from "../../../data/decks/deck-format-profiles-0.6.json";
+import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import templatesData from "../../../data/decks/deck-templates-0.6.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
+import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import {
   buildEngineDeck,
   computeDeckHash,
@@ -23,6 +26,10 @@ const profile = profilesData.profiles[0] as DeckFormatProfile;
 const templates = templatesData.templates as DeckTemplate[];
 const snapshots = snapshotsData.snapshots as DeckSnapshot[];
 const context = { cardsById, profile };
+const cardsById08 = Object.fromEntries((snapshotData08.cards as CatalogCard[]).map((card) => [card.catalogCardId, card]));
+const profile08 = (profilesData08.profiles as DeckFormatProfile[]).find((candidate) => candidate.profileId === "local-demo-v0.8")!;
+const snapshots08 = snapshotsData08.snapshots as DeckSnapshot[];
+const context08 = { cardsById: cardsById08, profile: profile08 };
 
 describe("deck validation and snapshots", () => {
   it("validates every frozen V0.6 deck snapshot", () => {
@@ -74,5 +81,20 @@ describe("deck validation and snapshots", () => {
     const first = createDeckSnapshot(deck, context);
     const second = createDeckSnapshot(reversed, context);
     expect(first.deckHash).toBe(second.deckHash);
+  });
+
+  it("validates V0.8 starter snapshots and keeps public metadata decklist-free", () => {
+    const runner = snapshots08.find((candidate) => candidate.deckSnapshotId === "demo_runner_008_snapshot_v0_8")!;
+    const corp = snapshots08.find((candidate) => candidate.deckSnapshotId === "demo_corp_008_snapshot_v0_8")!;
+
+    expect(validateDeckSnapshot(runner, context08).ok).toBe(true);
+    expect(validateDeckSnapshot(corp, context08).ok).toBe(true);
+    expect(computeDeckHash(runner)).toBe(runner.deckHash);
+    expect(computeDeckHash(corp)).toBe(corp.deckHash);
+    expect(corp.validation.agendaPoints).toBe(7);
+    expect(runner.publicMetadata).not.toHaveProperty("cards");
+    expect(corp.publicMetadata).not.toHaveProperty("cards");
+    expect(buildEngineDeck(runner).id).toBe("demo_runner_008_snapshot_v0_8");
+    expect(buildEngineDeck(corp).cards.some((entry) => entry.id === "v08_project_agenda")).toBe(true);
   });
 });

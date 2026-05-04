@@ -17,7 +17,8 @@ Empfohlene Reihenfolge:
 3. V0.7: UI-Neugestaltung und Designgestaltung.
 4. V0.8: Spielbarer Basisset-/Starterset-Slice.
 5. V0.9: Bessere KI.
-6. V1.0: Private stabile Plattform.
+6. V0.91: Kartenbild-Asset-Gate und Bild-Import.
+7. V1.0: Private stabile Plattform.
 
 ## 2. Leitentscheidungen
 
@@ -38,6 +39,7 @@ Empfohlene Reihenfolge:
 | V0.7 | UI-Neugestaltung und Designgestaltung | neues Spielbrett, Matchfluss, Run-Flow, Action-Panel, Karten-/Deckansichten, Replay-/Log-Darstellung, KI-Erklärungen, visuelle Richtung | neue Regelbreite als Hauptziel, ungetestete Kartenfreigabe |
 | V0.8 | Basisset-/Starterset-Spielbarkeit | ausgewählter spielbarer Slice aus importiertem Datenbestand, Damage falls benötigt, Resources/Traces/Identitäten nur gezielt, Szenario- und Visibility-Gates | vollständiges Basisset auf einmal, Freitext-Regelinterpretation |
 | V0.9 | Bessere KI | deck- und rollenbewusste Heuristiken, Schwierigkeitsgrade, Risikoabschätzung, Simulationen über Kartenrollen, bessere Reason-Codes | KI mit FullState, LLM-KI als Regelakteur |
+| V0.91 | Kartenbild-Asset-Gate und Bild-Import | Quellen-/Nutzungsentscheidung, lokaler nicht versionierter Bildcache, Bildmetadaten, Anzeige bekannter Karten in Katalog, Deckeditor und CardView | neue Regeln, neue Kartenfreigabe, offizielle Card Backs oder Frames, Bilddaten im Match-State |
 | V1.0 | Private stabile Plattform | Human-vs-KI, KI-vs-Human, Human-vs-Human, KI-vs-KI, Deckeditor, Kartenkatalog, Replays, private Hostingfähigkeit | öffentliche Plattform ohne neue Scope-Entscheidung |
 
 ## 4. V0.5 Kartenimport und Kartenkatalog
@@ -108,10 +110,12 @@ V0.8 macht aus dem importierten Kartenbestand einen größeren, aber weiter kura
 Vorgehen:
 
 - Karten nach Mechanik-Risiko gruppieren.
+- Requirements-Freeze erst nach grünem V0.6-/V0.7-Gate und dokumentierter Quellen-/Nutzungsentscheidung.
+- Kandidaten über Engine-Aufwand, Hidden-Info-, UI-, KI-, Multiplayer-Risiko und Spielwert scoren.
 - Erst einfache Economy-, Draw-, Install-, Advance-, Run- und ICE/Breaker-Karten freigeben.
 - Damage nur einführen, wenn konkrete Karten es brauchen und das Damage-Gate besteht.
 - Resources, Traces, Identitätsfähigkeiten und weitere Typen nur als getrennte Teilgates.
-- Jede Karte erhält Manifest, Resolver, Unit-Test, Szenario, Visibility-Test, Replay/StateHash und KI-Smoke.
+- Jede Karte erhält Manifest, Resolver-Registry-Eintrag, Per-Card-Deviation, Unit-Test, Szenario, Visibility-Test, Replay/StateHash, KI-Smoke und minimale KI-Rollen-Tags für V0.9.
 
 Nicht-Ziel:
 
@@ -123,6 +127,10 @@ Ziel:
 
 V0.9 macht die KI nicht nur regelkonform, sondern spürbar nützlicher zum Spielen, Testen und Lernen.
 
+Detailplanung:
+
+- `docs/derived/MVP_0.9_DETAILED_PLAN.md`
+
 Schwerpunkte:
 
 - Deck- und Kartenrollen in der Bewertung.
@@ -131,7 +139,27 @@ Schwerpunkte:
 - KI-Erklärungen mit besseren Reason-Codes.
 - Soak- und Regressionstests über mehrere Decks und Seeds.
 
-## 9. V1.0 Zielbild
+## 9. V0.91 Kartenbild-Asset-Gate und Bild-Import
+
+Ziel:
+
+V0.91 ergänzt nach V0.9 offizielle oder externe Kartenbilder als rein lokales Anzeige-Feature. Die Phase wird bewusst nicht vor V0.9 umgesetzt, damit Kartenpool, Decks, UI und KI zuerst ohne Asset- und Lizenzrisiko stabil bleiben.
+
+Detailplanung:
+
+- `docs/derived/MVP_0.91_DETAILED_PLAN.md`
+
+Schwerpunkte:
+
+- Quellen-, Nutzungs- und Lizenzentscheidung als hartes Asset-Gate.
+- Importprogramm für Bildmetadaten und lokale Bilddateien.
+- Nicht versionierter lokaler Bildcache.
+- Anzeige bekannter Kartenbilder in Katalog, Deckeditor, Match-Setup, Card Preview, Zoom und Board.
+- Einheitliche generische Platzhalter für Hidden Cards.
+- Keine Bilddaten in Engine, KI, Replay, StateHash, LegalActions, PlayerActions oder Match-State.
+- Visibility-Tests gegen Bild-URL-, Alt-Text-, DOM- und Ladezustands-Leaks.
+
+## 10. V1.0 Zielbild
 
 V1.0 ist eine private stabile Plattform mit:
 
@@ -148,7 +176,7 @@ V1.0 ist eine private stabile Plattform mit:
 
 Öffentliche Lobbies, Accounts, Rankings, Matchmaking, Turnierfunktionen, Chat und breite öffentliche Plattformfunktionen bleiben außerhalb von V1.0, sofern sie nicht ausdrücklich neu gescopt werden.
 
-## 10. Offene Entscheidungen vor V0.5
+## 11. Offene Entscheidungen vor V0.5
 
 | ID | Entscheidung | Empfehlung |
 |---|---|---|
@@ -157,8 +185,13 @@ V1.0 ist eine private stabile Plattform mit:
 | POST04-O-003 | UI-Analysen | Ergebnisse sammeln und erst für V0.7 als Design-Requirements einfrieren. |
 | POST04-O-004 | Deckeditor-Tiefe in V0.6 | Funktionales Fundament ja; finale Gestaltung und Komfort in V0.7. |
 | POST04-O-005 | Damage | Nicht als V0.5-Hauptziel; in V0.8 aufnehmen, sobald konkrete Karten es verlangen. |
+| POST04-O-006 | Kartenbilder | Als V0.91 nach V0.9 führen; Umsetzung nur nach separater Quellen-, Nutzungs- und Asset-Freigabe. |
 
-## 11. Detailpläne
+## 12. Detailpläne
 
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.7_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.8_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.9_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.91_DETAILED_PLAN.md`

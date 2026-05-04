@@ -1,0 +1,149 @@
+{
+  "schemaVersion": "demo-cards-v0.8",
+  "id": "demo-cards-0.8",
+  "status": "frozen_for_v0.8_requirements",
+  "sourceMode": "local_original",
+  "assetPolicy": "no official art, logos, frames, card backs or external image dependencies",
+  "cards": [
+    {
+      "id": "v08_burst_credit_event",
+      "title": "Burst Credit Event",
+      "side": "runner",
+      "type": "event",
+      "resolver": "runner_event_gain_credits_6",
+      "roles": ["economy", "tempo"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_deep_draw_event",
+      "title": "Deep Draw Event",
+      "side": "runner",
+      "type": "event",
+      "resolver": "runner_event_draw_3",
+      "roles": ["draw", "setup"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_overclock_run_event",
+      "title": "Overclock Run Event",
+      "side": "runner",
+      "type": "event",
+      "resolver": "runner_event_run_success_3",
+      "roles": ["run_pressure", "economy"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_memory_chip",
+      "title": "Memory Chip",
+      "side": "runner",
+      "type": "hardware",
+      "resolver": "runner_install_memory_plus_1",
+      "roles": ["memory", "setup"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_steady_fracter",
+      "title": "Steady Fracter",
+      "side": "runner",
+      "type": "program",
+      "resolver": "runner_breaker_fracter",
+      "roles": ["breaker_fracter"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_precise_decoder",
+      "title": "Precise Decoder",
+      "side": "runner",
+      "type": "program",
+      "resolver": "runner_breaker_decoder",
+      "roles": ["breaker_decoder"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_adaptive_killer",
+      "title": "Adaptive Killer",
+      "side": "runner",
+      "type": "program",
+      "resolver": "runner_breaker_killer",
+      "roles": ["breaker_killer"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_credit_surge_operation",
+      "title": "Credit Surge Operation",
+      "side": "corp",
+      "type": "operation",
+      "resolver": "corp_operation_gain_credits_7",
+      "roles": ["economy", "tempo"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_archive_planning_operation",
+      "title": "Archive Planning Operation",
+      "side": "corp",
+      "type": "operation",
+      "resolver": "corp_operation_draw_3",
+      "roles": ["draw", "setup"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_project_agenda",
+      "title": "Project Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "resolver": "corp_agenda_3_2",
+      "roles": ["agenda_2pt", "score_plan"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_cashout_asset",
+      "title": "Cashout Asset",
+      "side": "corp",
+      "type": "asset",
+      "resolver": "corp_asset_rez_gain_4",
+      "roles": ["asset_economy", "trash_target"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_wall_ice",
+      "title": "Wall ICE",
+      "side": "corp",
+      "type": "ice",
+      "resolver": "corp_ice_barrier_etr",
+      "roles": ["defensive_ice", "barrier"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_gate_ice",
+      "title": "Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "resolver": "corp_ice_code_gate_tax_etr",
+      "roles": ["taxing_ice", "code_gate"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    },
+    {
+      "id": "v08_watchdog_ice",
+      "title": "Watchdog ICE",
+      "side": "corp",
+      "type": "ice",
+      "resolver": "corp_ice_sentry_tag_etr",
+      "roles": ["tag_ice", "sentry"],
+      "deviation": "local_original",
+      "status": "playable_mvp"
+    }
+  ]
+}

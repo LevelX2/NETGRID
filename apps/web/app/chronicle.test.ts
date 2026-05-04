@@ -1,0 +1,176 @@
+import { describe, expect, it } from "vitest";
+import type { PublicGameEvent, Side } from "@netrunner/shared";
+import { formatChronicleEvent } from "./chronicle";
+
+const ACTION_TYPES = [
+  "mandatory_draw",
+  "gain_credit",
+  "draw_card",
+  "install_card",
+  "play_event",
+  "play_operation",
+  "advance_card",
+  "score_agenda",
+  "start_run",
+  "rez_ice",
+  "decline_rez",
+  "pump_breaker",
+  "break_subroutine",
+  "continue_run",
+  "access_card",
+  "steal_agenda",
+  "trash_accessed_card",
+  "decline_trash",
+  "remove_tag",
+  "end_turn",
+  "game_created"
+] as const;
+
+describe("formatChronicleEvent", () => {
+  it("formats all current action types without technical metadata", () => {
+    for (const actionType of ACTION_TYPES) {
+      const item = formatChronicleEvent(makeEvent(actionType), "runner");
+      const serialized = JSON.stringify(item);
+
+      expect(item.title.length).toBeGreaterThan(8);
+      expect(serialized).not.toContain("fnv1a");
+      expect(serialized).not.toContain("stateHashAfter");
+      expect(serialized).not.toContain("stateVersionAfter");
+      expect(serialized).not.toContain("corp.play_operation");
+      expect(serialized).not.toContain("idempotencyKey");
+    }
+  });
+
+  it("redacts hidden Corp installs from the Runner perspective", () => {
+    const item = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "corp",
+        label: "Corp installiert eine Karte.",
+        redactedKind: "installed_card"
+      }),
+      "runner",
+      {
+        cardTitle: "Simple Agenda",
+        cardText: "2 Agenda-Punkte.",
+        cardDetailLines: ["Corp · agenda"]
+      }
+    );
+
+    expect(item.title).toBe("Die Corp hat eine verdeckte Karte installiert.");
+    expect(item.category).toBe("hidden");
+    expect(item.visibility).toBe("redacted");
+    expect(JSON.stringify(item)).not.toContain("Simple Agenda");
+    expect(item.cardTitle).toBeUndefined();
+    expect(item.cardText).toBeUndefined();
+    expect(item.cardDetailLines).toEqual([]);
+  });
+
+  it("uses Du-perspective for own Runner runs", () => {
+    const item = formatChronicleEvent(
+      makeEvent("start_run", {
+        actor: "runner",
+        label: "Run auf R&D",
+        serverLabel: "R&D"
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast einen Run auf R&D gestartet.");
+    expect(item.chips).toContain("Run");
+    expect(item.chips).toContain("R&D");
+  });
+
+  it("names visible Runner installs from the public label and Rig zone", () => {
+    const item = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        label: "Simple Killer installieren",
+        zoneLabel: "Rig"
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Simple Killer im Rig installiert.");
+    expect(item.cardTitle).toBe("Simple Killer");
+    expect(item.chips).toContain("Rig");
+  });
+
+  it("shows AI explanations as a human reason line without exposing the reason code", () => {
+    const item = formatChronicleEvent(
+      makeEvent("play_operation", {
+        actor: "corp",
+        title: "Simple Economy Operation",
+        aiReasonCode: "corp.economy.operation",
+        aiExplanation: "Credits verbessern Rez- und Score-Fenster."
+      }),
+      "runner",
+      {
+        cardTitle: "Simple Economy Operation",
+        cardText: "Erhalte 4 Credits."
+      }
+    );
+
+    expect(item.title).toBe("Die Corp-KI hat Simple Economy Operation gespielt und Credits erhalten.");
+    expect(item.description).toBe("Grund: Credits verbessern Rez- und Score-Fenster.");
+    expect(item.chips).toContain("KI");
+    expect(JSON.stringify(item)).not.toContain("corp.economy.operation");
+  });
+
+  it("highlights stolen agendas with visible agenda points", () => {
+    const item = formatChronicleEvent(
+      makeEvent("steal_agenda", {
+        actor: "runner",
+        title: "Project Agenda",
+        agendaPoints: 2
+      }),
+      "runner",
+      {
+        cardTitle: "Project Agenda"
+      }
+    );
+
+    expect(item.title).toBe("Du hast Project Agenda gestohlen und 2 Agenda-Punkte erhalten.");
+    expect(item.category).toBe("agenda");
+    expect(item.importance).toBe("critical");
+    expect(item.chips).toContain("+2 Agenda");
+  });
+
+  it("names accessed cards when the access event reveals one", () => {
+    const item = formatChronicleEvent(
+      makeEvent("access_card", {
+        actor: "runner",
+        title: "Simple Economy Operation",
+        serverLabel: "HQ"
+      }),
+      "runner",
+      {
+        cardTitle: "Simple Economy Operation"
+      }
+    );
+
+    expect(item.title).toBe("Du hast auf Simple Economy Operation zugegriffen.");
+    expect(item.cardTitle).toBe("Simple Economy Operation");
+    expect(item.chips).toContain("HQ");
+  });
+});
+
+function makeEvent(actionType: string, payload: Record<string, unknown> = {}): PublicGameEvent {
+  const actor = sideValue(payload.actor) ?? (actionType === "mandatory_draw" || actionType === "play_operation" ? "corp" : "runner");
+  return {
+    eventId: `evt_${actionType}`,
+    type: actionType,
+    stateVersionBefore: 4,
+    stateVersionAfter: 5,
+    stateHashAfter: "fnv1a:73fe4ee3",
+    publicPayload: {
+      actor,
+      actionType,
+      label: `${actor}.${actionType}`,
+      ...payload
+    }
+  };
+}
+
+function sideValue(value: unknown): Side | undefined {
+  return value === "corp" || value === "runner" ? value : undefined;
+}

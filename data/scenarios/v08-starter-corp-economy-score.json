@@ -1,0 +1,22 @@
+{
+  "id": "SCN-V08-003",
+  "name": "V0.8 Corp economy, asset and agenda score",
+  "baselineId": "rules-baseline-mvp-0.8",
+  "requirementIds": ["V08-MUST-006", "V08-MUST-007", "V08-MUST-008", "V08-MUST-009"],
+  "coversCards": ["v08_credit_surge_operation", "v08_archive_planning_operation", "v08_project_agenda", "v08_cashout_asset"],
+  "seed": "v08-starter-corp-economy-score",
+  "runnerDeckSnapshotId": "demo_runner_008_snapshot_v0_8",
+  "corpDeckSnapshotId": "demo_corp_008_snapshot_v0_8",
+  "steps": [
+    "Corp plays Credit Surge Operation.",
+    "Corp plays Archive Planning Operation.",
+    "Corp installs and rezzes Cashout Asset.",
+    "Corp advances and scores Project Agenda."
+  ],
+  "expected": {
+    "corpCreditsIncrease": true,
+    "corpDrawPrivateToCorp": true,
+    "agendaRevealOnScoreOnly": true,
+    "finalStateHash": "pending_after_implementation"
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "id": "SCN-V094-002",
+  "name": "V0.94 Multiplayer Damage side-safety smoke",
+  "baselineId": "rules-baseline-mvp-0.94",
+  "requirementIds": [
+    "M094-MP-001",
+    "M094-UNDO-001",
+    "M094-VISIBILITY-002",
+    "M094-AI-001",
+    "M094-CARD-001"
+  ],
+  "coversCards": ["v094_neural_sentry_ice"],
+  "seed": "v094-multiplayer-damage-smoke",
+  "runnerDeckSnapshotId": "demo_runner_094_snapshot_v0_94",
+  "corpDeckSnapshotId": "demo_corp_094_snapshot_v0_94",
+  "steps": [
+    "Runner submits a legal run action and duplicate idempotency request.",
+    "Corp rezzes Neural Sentry.",
+    "Runner submits the legal continue-run action that resolves damage.",
+    "A stale duplicate is rejected.",
+    "Corp reconnect receives only side-filtered damage results.",
+    "Undo across the damage event is blocked."
+  ],
+  "expected": {
+    "submitOk": true,
+    "idempotencyStable": true,
+    "staleStateRejected": true,
+    "reconnectSideSafe": true,
+    "undoBlockedAfterDamage": true,
+    "flatlineResultReasonSideSafe": true,
+    "preDamageGripNotLeaked": true
+  }
+}

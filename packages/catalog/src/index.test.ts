@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import snapshotData from "../../../data/card-import/card-snapshot-0.5.json";
+import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
 import {
   assertCatalogPayloadSafe,
@@ -12,6 +13,7 @@ import {
 } from "./index";
 
 const snapshot = snapshotData as CardSnapshot;
+const snapshot08 = snapshotData08 as CardSnapshot;
 
 describe("catalog import and status logic", () => {
   it("validates the local V0.5 snapshot", () => {
@@ -48,5 +50,20 @@ describe("catalog import and status logic", () => {
     expect(blocked?.statuses.blocked).toBe(true);
     expect(blocked?.blockReasons.length).toBeGreaterThan(0);
     expect(blocked?.statuses.deck_legal).toBe(false);
+  });
+
+  it("validates the V0.8 playable local starter slice without promoting import-only cards", () => {
+    expect(validateSnapshot(snapshot08)).toEqual({ ok: true, errors: [] });
+    expect(computeSnapshotHash(snapshot08)).toBe("fnv1a:b4c03f20");
+
+    const burst = getCatalogCard(snapshot08, "v08_burst_credit_event");
+    expect(burst?.engineCardId).toBe("v08_burst_credit_event");
+    expect(burst?.statuses.playable).toBe(true);
+    expect(burst?.statuses.deck_legal).toBe(true);
+    expect(burst?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v0.8");
+
+    const importOnly = getCatalogCard(snapshot08, "catalog_preview_operation_001");
+    expect(importOnly?.statuses.playable).toBe(false);
+    expect(importOnly?.statuses.deck_legal).toBe(false);
   });
 });

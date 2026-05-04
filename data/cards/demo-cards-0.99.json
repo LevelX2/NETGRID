@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "demo-cards-v0.99",
+  "id": "demo-cards-0.99",
+  "status": "implemented_for_v0.99_final_gate",
+  "extends": "data/cards/demo-cards-0.98.json",
+  "sourceMode": "local_original",
+  "assetPolicy": "no official art, logos, frames, card backs or external image dependencies",
+  "cards": [
+    {
+      "id": "v099_host_resource",
+      "title": "Host Resource",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [],
+      "resolver": "runner_install_host_resource_choice",
+      "roles": ["resource", "hosting", "hidden_zone_choice"],
+      "deviation": "local_original",
+      "status": "playable_mvp",
+      "installCost": 0,
+      "mechanics": ["install_resource", "resource", "hosting", "hidden_zone_choice"],
+      "rulesText": "When installed, host a program from your grip."
+    },
+    {
+      "id": "v099_virus_program",
+      "title": "Virus Program",
+      "side": "runner",
+      "type": "program",
+      "subtypes": ["virus"],
+      "resolver": "runner_install_virus_program_counter",
+      "roles": ["program", "virus", "counter"],
+      "deviation": "local_original",
+      "status": "playable_mvp",
+      "installCost": 1,
+      "memoryCost": 1,
+      "mechanics": ["install_program", "memory", "counter", "virus", "purge"],
+      "rulesText": "When installed, place 1 virus counter on this program."
+    },
+    {
+      "id": "v099_recurring_chip",
+      "title": "Recurring Chip",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "resolver": "runner_install_recurring_credit_hardware",
+      "roles": ["hardware", "recurring_credit", "program_install_support"],
+      "deviation": "local_original",
+      "status": "playable_mvp",
+      "installCost": 0,
+      "recurringCredits": 1,
+      "mechanics": ["install_hardware", "counter", "recurring_credit"],
+      "rulesText": "1 recurring credit. Use this credit to install a program."
+    },
+    {
+      "id": "v099_bad_publicity_operation",
+      "title": "Bad Publicity Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "resolver": "corp_operation_bad_publicity_credit",
+      "roles": ["operation", "economy", "bad_publicity"],
+      "deviation": "local_original",
+      "status": "playable_mvp",
+      "cost": 0,
+      "mechanics": ["play_operation", "gain_credits", "bad_publicity"],
+      "rulesText": "Gain 3 credits and take 1 bad publicity."
+    }
+  ]
+}

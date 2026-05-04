@@ -1,0 +1,21 @@
+{
+  "id": "SCN-V08-002",
+  "name": "V0.8 Runner breaker and overclock run",
+  "baselineId": "rules-baseline-mvp-0.8",
+  "requirementIds": ["V08-MUST-006", "V08-MUST-007", "V08-MUST-008", "V08-MUST-009"],
+  "coversCards": ["v08_overclock_run_event", "v08_steady_fracter", "v08_precise_decoder", "v08_adaptive_killer"],
+  "seed": "v08-starter-icebreaker-run",
+  "runnerDeckSnapshotId": "demo_runner_008_snapshot_v0_8",
+  "corpDeckSnapshotId": "demo_corp_008_snapshot_v0_8",
+  "steps": [
+    "Runner installs V0.8 breakers.",
+    "Runner starts Overclock Run Event.",
+    "Runner breaks matching ICE subroutines and resolves access."
+  ],
+  "expected": {
+    "legalActionsOnly": true,
+    "successfulRunBonusPossible": true,
+    "unrezzedCorpCardsStayHidden": true,
+    "finalStateHash": "pending_after_implementation"
+  }
+}

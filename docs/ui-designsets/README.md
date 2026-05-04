@@ -54,6 +54,14 @@ Eine gesonderte Bewertung der Umsetzungsrealistik liegt hier: [Realismusprüfung
 - [Corp, Entwurf](04-design-d-cinematic-dark/corp-draft.png)
 - [Corp, korrigiert](04-design-d-cinematic-dark/corp-corrected.png)
 
+### Logo-Exploration
+
+- [Übersicht](05-logo-exploration/README.md)
+- [Vorläufige Branding-Entscheidung: NETGRID](05-logo-exploration/BRANDING_DECISION.md)
+- [Logo-Marken](05-logo-exploration/logo-mark-exploration.png)
+- [Wordmark-Lockups](05-logo-exploration/wordmark-lockups.png)
+- [App-Icons](05-logo-exploration/app-icon-exploration.png)
+
 ## Hinweis zur Bewertung
 
 Bei Set 3 und Set 4 sind die korrigierten Varianten vorzuziehen, weil die Prompts dort stärker auf MVP-Scope, generische Demo-Karten und ausgeschlossene Mechaniken eingeschränkt wurden.
