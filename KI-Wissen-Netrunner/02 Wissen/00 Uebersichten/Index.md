@@ -96,3 +96,4 @@
 - `data/rules/mechanics-coverage-0.99.json`: maschinenlesbare Coverage nach V0.99; Hosting, Viren, Purge, Counter-Familien, Recurring Credits und Bad Publicity sind `implemented_limited`, M11+-Mechaniken bleiben offen.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.
+- `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`: aktuelle Bestandsaufnahme nach V0.99/S01 mit Teststand, Dokumentationsdrift, O:NR-Sonderstand und nächsten Planungsentscheidungen.

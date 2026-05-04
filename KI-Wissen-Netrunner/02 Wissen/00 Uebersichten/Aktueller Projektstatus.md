@@ -2,6 +2,10 @@
 
 ## Umgesetzt
 
+- Bestandsaufnahme vom 2026-05-04 abgeschlossen und in `docs/derived/BESTANDSAUFNAHME_2026-05-04.md` dokumentiert.
+- README und Codex-Status wurden auf den tatsächlichen Stand V0.99/S01 aktualisiert.
+- Testentdeckung korrigiert: `apps/web/app/chronicle.test.ts` läuft jetzt über den normalen Web-Testbefehl.
+- Aktuelle Gates am 2026-05-04: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden. Der normale Testlauf umfasst nach der Korrektur 170 Tests.
 - Projektordner unter `C:\Projekte\Netrunner` vorhanden.
 - Repository-Setup-Struktur und Codex-Führungsdateien angelegt.
 - Lokale KI-Wissensbasis `KI-Wissen-Netrunner/` angelegt.
@@ -71,6 +75,7 @@
 - V0.98 Identities, Modifier und Hidden-Zone-Tools sind umgesetzt und final dokumentiert. V0.98a setzt lokale/fiktive Runner-/Corp-Identities mit Setup-Credits, Usage-Markern, Runner-Link und statischem Memory-Modifier um; V0.98b setzt Search, Reveal, Expose, Arrange, Shuffle und Swap als enge side-sichere Harnesses um. Search/Arrange verwenden private Choices und Hidden-Info-Barrieren, Search-Shuffle nutzt RandomDrawRecords, Reveal/Expose sind bewusste PublicEvents und Swap leakt keine HQ-/R&D-Titel. Gate-Ergebnis: `MVP_0.98_done: true`; `ready_for_MVP_0.99_requirements_freeze: true`.
 - V0.99 Requirements Freeze ist abgeschlossen. `MVP_0.99_REQUIREMENTS.md`, `COUNTER_HOSTING_0.99_SPEC.md`, `VIRUS_PURGE_0.99_SPEC.md`, `RECURRING_BAD_PUBLICITY_0.99_SPEC.md`, `MVP_0.99_TEST_MATRIX.md` und `MVP_0.99_REQUIREMENTS_REVIEW.md` frieren V0.99 als enges Counter-/Hosting-/Virus-/Purge-/Recurring-/Bad-Publicity-Gate ein. V0.99e-Spezialcounter bleibt ohne konkreten Kartenbedarf gesperrt.
 - V0.99 Hosting, Viren, Purge, Counter-Familien, Recurring Credits und Bad Publicity sind umgesetzt und final dokumentiert. `v099_host_resource`, `v099_virus_program`, `v099_recurring_chip` und `v099_bad_publicity_operation` sind lokale/fiktive Harness-Karten. Hosting-Choices sind private Hidden-Info-Barrieren, Purge kostet 3 Corp-Klicks und entfernt nur Virus-Counter, Recurring Credits zahlen nur Runner-Programminstallkosten und Bad Publicity nur Runner-Run-Kosten. Gate-Ergebnis: `MVP_0.99_done: true`; `mechanics_completion_V0.94_to_V0.99_done: true`.
+- Lokaler privater O:NR-v1-Testzugang existiert als teilweise integrierter Sonderstand: Engine-Harness-Tests für 45 lokal spielbare Karten sind vorhanden, Web-Katalog und Deck-Validierung können ein lokales ignoriertes Overlay lesen, lokale Bilder liegen unter ignorierten Asset-Pfaden. Dieser Stand ist noch kein vollständig integrierter serverseitiger Matchstart-Scope.
 
 ## Teilweise umgesetzt
 
@@ -86,7 +91,10 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1- bis MVP-0.9-Arbeitsschritt ist offen.
-- Kein gate-basierter V0.94- bis V0.99-Mechanikschritt ist offen. M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten. Prevention, Avoid, Interrupt und Replacement sind weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
+- Kein gate-basierter V0.94- bis V0.99-Mechanikschritt ist offen.
+- Nächste Scope-Entscheidung ist offen: lokaler privater O:NR-v1-Testzugang formal gate-basiert integrieren, engine-only/lokal experimentell lassen oder aus dem versionierten Spielbarkeitskern entfernen.
+- M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten. Mulligan, vollständiges Setup-/Deckout-/Archives-facedown-Modell und vollständige Spielende-Normalisierung bleiben offen.
+- Prevention, Avoid, Interrupt und Replacement sind weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - Core-Damage, Damage-Prevention, Avoid, Interrupt und Replacement bleiben zurückgestellt und sind nicht Teil des V0.94-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Requirements, UI-Spezifikationen, Testmatrix und Requirements Review sind eingefroren.
@@ -95,9 +103,12 @@
 - V0.8 ist abgeschlossen. Weitere Karten oder Mechanikgruppen dürfen nicht durch Importstatus, Katalogdaten oder Deckeditor-Freigaben spielbar werden, sondern brauchen weiterhin eigenes Resolver-, Manifest-, Test-, Visibility-, Replay/StateHash- und KI-Smoke-Gate.
 - V0.9 ist abgeschlossen. Weitere KI-Arbeit darf den LegalActions-/PlayerView-/side-gefilterten-Event-Vertrag nicht aufweichen und keine FullState-, verdeckte Gegnerdaten- oder LLM-Regelakteur-Pfade einführen.
 - V0.91 Requirements sind eingefroren und private lokale Scan-/Asset-Nutzung ist als Projektentscheidung dokumentiert. NetrunnerDB ist nur technische Kandidatenquelle für Bildmetadaten; Null-Signal-Primärquellen geben Card Art, Frames und Card Backs nicht pauschal frei. Bilder dürfen ausschließlich als private lokale Anzeige-Artefakte genutzt werden und dürfen keine Engine-, KI-, Deck-, Replay-, StateHash- oder Match-State-Daten beeinflussen.
+- V0.91 ist praktisch teilweise durch lokale ignorierte O:NR-Bild-/Katalogpfade berührt. Es fehlt aber eine versionierte Implementierungs-/Final-Review, falls dieser Pfad als offizieller Projekt-Scope weitergeführt werden soll.
 - V0.92, V0.93, V0.94, V0.95, V0.96, V0.97, V0.98 und V0.99 sind abgeschlossen. Damage/Flatline, Resources, Trace/Link/Bidding, Run/Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viren, Purge, Counter-Familien, Recurring Credits und Bad Publicity sind nur in ihren engen Gates spielbar. Mulligan, Core-Damage, Prevention, Avoid, Interrupt, Replacement, Set Aside, Remove from Game, Ownership-/Control-Wechsel und vollständige Deckbuilding-/Formatregeln bleiben weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - S01-Mehrspiel-Serien sind als private Zwei-Spiel-Hülle umgesetzt. Der Seitenwechsel erfolgt über ein neues Einzelspiel mit neuem privaten Session-/Join-Kontext; öffentliche Turnier-, Ranking- und Matchmaking-Funktionen bleiben ausgeschlossen.
 - V0.5-Importdaten dürfen keine Engine-, KI-, Deckvalidierungs- oder Matchstart-Freigabe auslösen. `deck_legal` setzt `playable` voraus.
+- Die bekannte Turbopack-NFT-Warnung der `card-images`-Route bleibt ein Härtungspunkt; der Build besteht trotzdem.
+- Screenshot-/Browser-E2E-Smokes für die aktuelle UI, lokale Kartenbilder und Zwei-Fenster-Multiplayer wurden in der Bestandsaufnahme nicht neu ausgeführt.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.
 
 ## Wichtige Grenzen

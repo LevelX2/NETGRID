@@ -1,16 +1,30 @@
 # Netrunner
 
-Private Netrunner-Webapplikation für einen schrittweise aufgebauten MVP:
+Private Netrunner-Webapplikation für regelgeführtes, deterministisches Spiel, lokale Tests und spätere private Stabilisierung.
 
-- MVP 0.1: Human Runner gegen einfache Corp-KI mit festen Demo-Decks.
-- MVP 0.2: privates Human-vs-Human-Multiplayer über dieselbe Engine.
-- MVP 0.3: Runner-KI, Corp-KI v2, Human-vs-KI in beide Richtungen und KI-vs-KI-Simulation.
-- MVP 0.4: kleiner interner Kartenpool, kuratierte V0.4-Decks, Hardware, einfaches Upgrade und Tags.
-- MVP 0.5: lokaler Kartenimport-Snapshot, Kartenkatalog, Statusmodell, read-only Katalog-API und funktionale Katalogansicht.
-- MVP 0.6: lokaler Deckeditor, Deckvalidierung v2, deterministische Deck-Snapshots und Match Setup mit revalidierten Snapshots.
-- MVP 0.7: Clean-High-Contrast-UI, CardView/Preview, RunTimeline, LegalActionsPanel, Diagnostics Drawer und lokale Visual-Smokes.
+## Aktueller Stand
 
-MVP 0.1 bis 0.7 sind abgeschlossen. Der aktuelle Stand unterstützt private Human-vs-Human-Partien, Human-vs-KI in beide Richtungen, KI-vs-KI-Simulationen, einen kleinen kontrollierten internen V0.4-Kartenpool, lokalen Kartenkatalog, lokale Deckentwürfe, validierte Deck-Snapshots, Matchstart mit revalidierten Snapshot-Decks und eine helle V0.7-Spieloberfläche. Damage, offizielle Assets und öffentliche Plattformfunktionen bleiben außerhalb des aktuellen Scopes.
+Der versionierte Projektstand ist bis **V0.99** und **S01** umgesetzt und lokal grün geprüft.
+
+Umgesetzt sind:
+
+- Human Runner gegen Corp-KI, Human Corp gegen Runner-KI, KI-vs-KI-Simulation und privater Human-vs-Human-Multiplayer.
+- Serverautoritative Rules Engine mit `LegalActions`/`PlayerActions`, `applyAction`-Revalidierung, PlayerViews, PublicEvents, Replay und StateHash.
+- Lokaler Kartenkatalog, lokaler Deckeditor, validierte Deck-Snapshots und Match Setup.
+- V0.94 bis V0.99 als enge Mechanik-Gates: Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viren, Purge, Recurring Credits und Bad Publicity.
+- S01: Ergebnisfenster, Spielziel-Auswahl, private Zwei-Spiel-Serie mit Seitenwechsel und opt-in Audio.
+- Eine lokale, nicht versionierte O:NR-v1-Testumgebung ist vorhanden. Sie ist privat/lokal, nutzt ignorierte Daten unter `data/local/` und `data/local-assets/`, und ist noch kein vollständig integrierter öffentlicher oder versionierter Kartenpool.
+
+Die aktuelle Bestandsaufnahme liegt unter `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
+
+## Wichtige Grenzen
+
+- Die Engine bleibt die einzige Regelautorität.
+- UI, Server, KI und menschliche Spieler reichen nur Actions aus `LegalActions` ein.
+- Hidden Info darf nicht in PlayerViews, PublicEvents, KI-Input, WebSocket, Reconnect, Undo, Replay, Logs oder Clientfehler leaken.
+- Bilder, lokale Scans und Bildmetadaten sind reine Anzeige-Artefakte. Sie dürfen Engine, KI, Decklegalität, Replay, StateHash oder Match-State nicht beeinflussen.
+- Keine öffentliche Plattform: kein Matchmaking, keine Rankings, keine Accounts, keine Turniere.
+- Nicht allgemein umgesetzt sind unter anderem Mulligan, vollständiges Setup-/Deckout-/Archives-Modell, Prevention, Avoid, Interrupt, Replacement, Set Aside, Remove from Game, Ownership-/Control-Wechsel und vollständige offizielle Deckbuilding-/Formatregeln.
 
 ## Einstieg
 
@@ -18,19 +32,21 @@ Für Codex-Arbeit gelten zuerst:
 
 1. `AGENTS.md`
 2. `KI-Wissen-Netrunner/00 Projektstart.md`
-3. `docs/codex/CODEX_STATUS.md`
-4. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`
+3. `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+4. `docs/codex/CODEX_STATUS.md`
+5. `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`
 
-Die verbindlichen Quellen liegen unter `docs/source/`, soweit bereits vorhanden. Ergänzende Spezifikationen liegen weiterhin unter `docs/`.
+Die verbindlichen Quellen liegen unter `docs/source/`. Ergänzende und abgeleitete Spezifikationen liegen unter `docs/derived/`.
 
-## Stack-Ziel
+## Stack
 
 - Node 24 LTS
 - pnpm Workspaces
 - TypeScript strict
 - Vitest
-- Next.js/React für die Web-UI, sobald die Umsetzung beginnt
+- Next.js/React für die Web-UI
 - Reines TypeScript-Engine-Paket ohne UI-, Netzwerk-, Datenbank- oder KI-Abhängigkeiten
+- JSON-Storage im aktuellen privaten Stand; SQLite bleibt ein späterer Härtungskandidat
 
 ## Lokaler Start
 
@@ -46,7 +62,7 @@ Für ein privates Match im lokalen Netz:
 
 - Host öffnet `http://127.0.0.1:3000`, erstellt ein Match und kopiert den Join-Link.
 - Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link.
-- Für KI-Partien kann in der Startansicht Runner vs Corp-KI, Corp vs Runner-KI oder KI vs KI gewählt werden.
+- KI-Partien können in der Startansicht als Runner vs Corp-KI, Corp vs Runner-KI oder KI vs KI gestartet werden.
 - Außerhalb von localhost HTTPS/WSS verwenden und Tokens wie Passwörter behandeln.
 - Runtime-Storage liegt unter `data/runtime/` und ist nicht versioniert; bei längerer Nutzung regelmäßig sichern.
 
@@ -59,10 +75,16 @@ corepack pnpm test
 corepack pnpm build
 ```
 
-## Aktueller Stand
+Zuletzt geprüft am 2026-05-04:
 
-MVP 0.1 bis 0.7 haben Requirements, Implementierung, Validierung, Hardening und Final Review bestanden. Der aktuelle Stand ist eine private lokale Spiel-, Simulations-, Katalog-, Deck- und UI-Basis ohne öffentliche Plattformfunktionen.
+- `corepack pnpm lint`: bestanden.
+- `corepack pnpm typecheck`: bestanden.
+- `corepack pnpm test`: bestanden, 170 Tests inklusive Web-Chronicle-Test, Pakettests und Root-Specs.
+- `corepack pnpm build`: bestanden. Die bekannte Turbopack-NFT-Warnung zur `card-images`-Route bleibt bestehen.
 
-Der nächste empfohlene Gate-Schritt ist V0.8 Requirements für einen kleinen spielbaren Base-/Starterset-Slice. Importierte Karten bleiben dabei Daten, nicht Regelautorität.
+## Nächste Entscheidungen
 
-Lokaler Werkzeughinweis vom Setup: Auf dieser Maschine war beim Einrichten Node `v24.15.0` aktiv. Das passt zur Projektentscheidung für Node 24 LTS. `corepack pnpm --version` liefert `10.33.2`; falls `pnpm` nicht direkt im PATH liegt, verwende `corepack pnpm ...`.
+Der nächste saubere Planungsschritt ist keine automatische neue Implementierung, sondern eine Scope-Entscheidung:
+
+- O:NR-v1-Testzugang formal einordnen: engine-only lassen, sauber in Server/Deck/AI/Multiplayer integrieren oder wieder aus dem versionierten Spielbarkeitskern herausnehmen.
+- Danach V1.0-/Stabilisierungsscope wählen: privater Betrieb/SQLite/UI-Smokes, Setup/Mulligan/Deckout, M11 Prevention/Avoid/Interrupt/Replacement oder weiterer O:NR-Kartenausbau.
