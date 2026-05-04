@@ -60,7 +60,9 @@ export type DemoDeckId =
   | "demo_runner_096"
   | "demo_corp_096"
   | "demo_runner_097"
-  | "demo_corp_097";
+  | "demo_corp_097"
+  | "demo_runner_098"
+  | "demo_corp_098";
 
 export type DamageType = "net" | "meat" | "core";
 
@@ -86,6 +88,17 @@ export type CostRequirement =
   | { kind: "counter"; counterType: string; amount: number; sourceRef: string };
 
 export type AbilityKind = "paid" | "triggered" | "static" | "setup" | "future_interrupt" | "future_replacement";
+
+export type ModifierKind = "base_link" | "memory_limit" | "starting_credits";
+
+export type ModifierDefinition = {
+  modifierId: string;
+  kind: ModifierKind;
+  side: Side;
+  amount: number;
+  duration: "setup" | "static";
+  sourceAbilityId?: string;
+};
 
 export type AbilityRef = {
   sourceCardInstanceId: CardInstanceId;
@@ -190,6 +203,7 @@ export type CardDefinition = {
   agendaPoints?: number;
   rulesText: string;
   abilities?: AbilityDefinition[];
+  modifiers?: ModifierDefinition[];
   subroutines?: SubroutineDefinition[];
   mechanics: string[];
 };
@@ -214,14 +228,14 @@ export type DeckPublicMetadata = {
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
-  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo" | "mvp-0.95-demo" | "mvp-0.96-demo" | "mvp-0.97-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
-  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
-  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
-  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
-  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0";
+  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo" | "mvp-0.95-demo" | "mvp-0.96-demo" | "mvp-0.97-demo" | "mvp-0.98-demo";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
 };
 
 export type PlayerController = {
@@ -239,8 +253,8 @@ export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
   baseline?: RulesBaseline;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096" | "demo_runner_097";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096" | "demo_corp_097";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096" | "demo_runner_097" | "demo_runner_098";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096" | "demo_corp_097" | "demo_corp_098";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -404,6 +418,7 @@ export type GameState = {
   };
   run?: RunState;
   trace?: TraceState;
+  identityAbilityUsage?: Partial<Record<Side, { setupAbilities: string[]; turn: number; usedThisTurn: string[] }>>;
 };
 
 export type Cost = {
@@ -696,6 +711,18 @@ export const MVP_0_97_BASELINE: RulesBaseline = {
   simulationSchemaVersion: "0.97.0"
 };
 
+export const MVP_0_98_BASELINE: RulesBaseline = {
+  ...MVP_0_97_BASELINE,
+  cardTextSnapshotId: "mvp-0.98-demo",
+  engineSchemaVersion: "0.98.0",
+  cardImplementationVersion: "0.98.0",
+  deviationRegistryVersion: "0.98.0",
+  playerViewSchemaVersion: "0.98.0",
+  multiplayerSchemaVersion: "0.98.0",
+  aiControllerSchemaVersion: "0.98.0",
+  simulationSchemaVersion: "0.98.0"
+};
+
 export const DEMO_CARDS: CardDefinition[] = [
   {
     id: "runner_identity_001",
@@ -792,6 +819,34 @@ export const DEMO_CARDS: CardDefinition[] = [
     abilityEnabled: false,
     rulesText: "Testidentität ohne aktive Fähigkeit.",
     mechanics: ["identity_setup"]
+  },
+  {
+    id: "v098_runner_identity",
+    title: "Identity Lab Runner",
+    side: "runner",
+    type: "identity",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    abilityEnabled: true,
+    baseLink: 1,
+    rulesText: "Setup: Gain 1 credit. Static: +1 memory limit.",
+    modifiers: [
+      { modifierId: "v098_runner_identity_setup_credit", kind: "starting_credits", side: "runner", amount: 1, duration: "setup", sourceAbilityId: "v098_runner_identity_setup" },
+      { modifierId: "v098_runner_identity_memory", kind: "memory_limit", side: "runner", amount: 1, duration: "static", sourceAbilityId: "v098_runner_identity_static" }
+    ],
+    mechanics: ["identity_setup", "identity_ability", "static_modifier", "base_link", "modify_memory_limit", "v098_local_original"]
+  },
+  {
+    id: "v098_corp_identity",
+    title: "Identity Lab Corp",
+    side: "corp",
+    type: "identity",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    abilityEnabled: true,
+    rulesText: "Setup: Gain 1 credit.",
+    modifiers: [{ modifierId: "v098_corp_identity_setup_credit", kind: "starting_credits", side: "corp", amount: 1, duration: "setup", sourceAbilityId: "v098_corp_identity_setup" }],
+    mechanics: ["identity_setup", "identity_ability", "setup_modifier", "v098_local_original"]
   },
   {
     id: "simple_agenda",
@@ -1047,6 +1102,61 @@ export const DEMO_CARDS: CardDefinition[] = [
     cost: 1,
     rulesText: "Make a run. If successful, access 1 additional card during the breach.",
     mechanics: ["play_event", "start_run", "breach", "multiaccess", "v097_local_original"]
+  },
+  {
+    id: "v098_stack_search_event",
+    title: "Stack Search Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Search your stack for a program, add it to your grip, then shuffle your stack.",
+    mechanics: ["play_event", "search", "shuffle", "hidden_zone_tool", "v098_local_original"]
+  },
+  {
+    id: "v098_stack_arrange_event",
+    title: "Stack Arrange Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Look at the top 2 cards of your stack and arrange them in any order.",
+    mechanics: ["play_event", "look", "arrange", "hidden_zone_tool", "v098_local_original"]
+  },
+  {
+    id: "v098_reveal_top_event",
+    title: "Public Reveal Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Reveal the top card of your stack.",
+    mechanics: ["play_event", "reveal", "v098_local_original"]
+  },
+  {
+    id: "v098_expose_event",
+    title: "Expose Event",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Expose an unrezzed installed Corp card in the chosen server.",
+    mechanics: ["play_event", "expose", "reveal", "v098_local_original"]
+  },
+  {
+    id: "v098_hq_rd_swap_operation",
+    title: "HQ R&D Swap Operation",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Swap the top card of R&D with a card in HQ.",
+    mechanics: ["play_operation", "swap", "hidden_zone_tool", "v098_local_original"]
   },
   {
     id: "v08_burst_credit_event",
@@ -1314,7 +1424,7 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
       { id: "simple_run_event", quantity: 2 },
       { id: "simple_draw_event", quantity: 2 },
       { id: "simple_setup_hardware", quantity: 1 },
-      { id: "simple_fracter", quantity: 1 },
+      { id: "simple_fracter", quantity: 2 },
       { id: "efficient_fracter", quantity: 2 },
       { id: "simple_decoder", quantity: 1 },
       { id: "simple_killer", quantity: 1 },
@@ -1419,6 +1529,46 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
       { id: "simple_tag_ice", quantity: 1 },
       { id: "v096_trace_probe_ice", quantity: 1 },
       { id: "v08_credit_surge_operation", quantity: 2 }
+    ]
+  },
+  demo_runner_098: {
+    id: "demo_runner_098",
+    name: "Runner Demo Deck 0.98 - Identity Modifier Harness",
+    side: "runner",
+    identity: "v098_runner_identity",
+    cards: [
+      { id: "simple_economy_event", quantity: 3 },
+      { id: "simple_run_event", quantity: 2 },
+      { id: "simple_draw_event", quantity: 2 },
+      { id: "simple_fracter", quantity: 2 },
+      { id: "simple_decoder", quantity: 1 },
+      { id: "simple_killer", quantity: 2 },
+      { id: "v08_burst_credit_event", quantity: 2 },
+      { id: "v095_safehouse_resource", quantity: 1 },
+      { id: "v097_deep_dive_event", quantity: 2 },
+      { id: "v098_stack_search_event", quantity: 1 },
+      { id: "v098_stack_arrange_event", quantity: 1 },
+      { id: "v098_reveal_top_event", quantity: 1 },
+      { id: "v098_expose_event", quantity: 1 }
+    ]
+  },
+  demo_corp_098: {
+    id: "demo_corp_098",
+    name: "Corp Demo Deck 0.98 - Identity Modifier Harness",
+    side: "corp",
+    identity: "v098_corp_identity",
+    cards: [
+      { id: "simple_agenda", quantity: 1 },
+      { id: "simple_priority_agenda", quantity: 1 },
+      { id: "v08_project_agenda", quantity: 1 },
+      { id: "simple_economy_operation", quantity: 2 },
+      { id: "simple_economy_asset", quantity: 1 },
+      { id: "simple_upgrade", quantity: 1 },
+      { id: "simple_barrier_ice", quantity: 1 },
+      { id: "simple_tag_ice", quantity: 1 },
+      { id: "v096_trace_probe_ice", quantity: 1 },
+      { id: "v08_credit_surge_operation", quantity: 2 },
+      { id: "v098_hq_rd_swap_operation", quantity: 1 }
     ]
   }
 };

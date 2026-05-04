@@ -157,6 +157,35 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(serialized).not.toContain("Simple Agenda");
     expect(serialized).not.toContain("Simple Economy Operation");
   });
+
+  it("keeps V0.98 hidden-zone choices side-safe for AI inputs", () => {
+    let state = toRunnerTurn(
+      createGame({
+        seed: "ai-v098-hidden-zone",
+        runnerDeckId: "demo_runner_098",
+        corpDeckId: "demo_corp_098",
+        agendaPointsToWin: 7
+      })
+    );
+    moveRunnerCardToGrip(state, "v098_stack_search_event");
+    putRunnerCardOnTopOfStack(state, "simple_decoder");
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "v098_stack_search_event");
+
+    const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const runnerDecision = chooseRunnerAction(runnerInput);
+    const corpInput = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const corpSerialized = JSON.stringify(corpInput);
+
+    expect(runnerInput.playerView.pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(runnerInput.legalActions.find((action) => action.actionId === runnerDecision.actionId)?.type).toBe("resolve_choice");
+    expect(runnerDecision.reasonCode).toBe("runner.choice.resolve");
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+    expect(corpInput.playerView.pendingChoice).toBeUndefined();
+    expect(corpInput.legalActions).toEqual([]);
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
+    expect(corpSerialized).not.toContain("Simple Decoder");
+    expect(corpSerialized).not.toContain("cardInstances");
+  });
 });
 
 describe("MVP 0.3 Runner AI", () => {
@@ -304,6 +333,22 @@ describe("MVP 0.3 AI simulation harness", () => {
     });
 
     expect(summary.cardPoolVersion).toBe("0.97.0");
+    expect(summary.errors).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    expect(summary.finalStateHash).toMatch(/^fnv1a:/);
+    expect(JSON.stringify(summary)).not.toContain("cardInstances");
+  });
+
+  it("runs V0.98 Identity decks through side-safe AI smokes", () => {
+    const summary = simulateAiGame({
+      seed: "ai-v098-identity",
+      runnerDeckId: "demo_runner_098",
+      corpDeckId: "demo_corp_098",
+      agendaPointsToWin: 7,
+      maxActions: 180
+    });
+
+    expect(summary.cardPoolVersion).toBe("0.98.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -530,6 +575,14 @@ function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInsta
   removeEverywhere(state, id);
   state.runner.grip.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function putRunnerCardOnTopOfStack(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.stack.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "stack" }, faceup: true, rezzed: true };
   return id;
 }
 

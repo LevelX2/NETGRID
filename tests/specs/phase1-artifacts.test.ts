@@ -195,6 +195,33 @@ const REQUIRED_MVP_0_97_MUST_IDS = [
   "M097-NOSCOPE-001",
   "M097-GATE-001"
 ];
+const REQUIRED_MVP_0_98_MUST_IDS = [
+  "M098A-SHARED-001",
+  "M098A-IDENTITY-001",
+  "M098A-SETUP-001",
+  "M098A-MODIFIER-001",
+  "M098A-LINK-001",
+  "M098A-MEMORY-001",
+  "M098A-USAGE-001",
+  "M098A-VISIBILITY-001",
+  "M098B-CHOICE-001",
+  "M098B-SEARCH-001",
+  "M098B-REVEAL-001",
+  "M098B-EXPOSE-001",
+  "M098B-ARRANGE-001",
+  "M098B-SHUFFLE-001",
+  "M098B-SWAP-001",
+  "M098B-VISIBILITY-001",
+  "M098B-EVENT-001",
+  "M098B-UNDO-001",
+  "M098B-REPLAY-001",
+  "M098B-AI-001",
+  "M098B-MP-001",
+  "M098-CARD-001",
+  "M098-DECK-001",
+  "M098-NOSCOPE-001",
+  "M098-GATE-001"
+];
 const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_REQUIREMENTS.md",
   "docs/derived/UI_REDESIGN_0.7_SPEC.md",
@@ -295,6 +322,20 @@ const REQUIRED_MVP_0_97_FINAL_DOCS = [
   "docs/derived/MVP_0.97_FINAL_REVIEW.md"
 ];
 
+const REQUIRED_MVP_0_98_REQUIREMENTS_DOCS = [
+  "docs/derived/MVP_0.98_REQUIREMENTS.md",
+  "docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md",
+  "docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md",
+  "docs/derived/MVP_0.98_TEST_MATRIX.md",
+  "docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md"
+];
+
+const REQUIRED_MVP_0_98_FINAL_DOCS = [
+  ...REQUIRED_MVP_0_98_REQUIREMENTS_DOCS,
+  "docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md",
+  "docs/derived/MVP_0.98_FINAL_REVIEW.md"
+];
+
 const MVP_0_8_DATA_FILES = [
   "data/rules/rules-baseline-0.8.json",
   "data/card-import/card-snapshot-0.8.json",
@@ -368,6 +409,16 @@ const MVP_0_97_DATA_FILES = [
 ];
 
 const REQUIRED_MVP_0_97_SCENARIOS = ["v097-run-breach-multiaccess.json", "v097-multiplayer-breach-smoke.json"];
+
+const MVP_0_98_DATA_FILES = [
+  "data/rules/rules-baseline-0.98.json",
+  "data/cards/demo-cards-0.98.json",
+  "data/decks/demo-decks-0.98.json",
+  "data/manifests/card-implementation-manifest-0.98.json",
+  "data/rules/mechanics-coverage-0.98.json"
+];
+
+const REQUIRED_MVP_0_98_SCENARIOS = ["v098-identity-hidden-zone.json", "v098-hidden-zone-tools.json", "v098-multiplayer-hidden-zone-smoke.json"];
 
 describe("Phase 1 derived artifacts", () => {
   it("keeps all MVP 0.1 JSON data artifacts parseable", () => {
@@ -979,6 +1030,33 @@ describe("Phase 1 derived artifacts", () => {
     expect(requirementsReview).not.toContain("ready_for_MVP_0.98_implementation: true");
   });
 
+  it("keeps MVP 0.98 Identity/Hidden-Zone requirements frozen and mapped", () => {
+    for (const file of REQUIRED_MVP_0_98_REQUIREMENTS_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.98_REQUIREMENTS.md", "utf8");
+    const identitySpec = readFileSync("docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md", "utf8");
+    const hiddenSpec = readFileSync("docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.98_TEST_MATRIX.md", "utf8");
+    const requirementsReview = readFileSync("docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_98_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(identitySpec).toContain("ModifierDefinition");
+    expect(identitySpec).toContain("IdentityAbilityUsage");
+    expect(hiddenSpec).toContain("Search");
+    expect(hiddenSpec).toContain("Reveal");
+    expect(hiddenSpec).toContain("Expose");
+    expect(hiddenSpec).toContain("Arrange");
+    expect(hiddenSpec).toContain("Shuffle");
+    expect(hiddenSpec).toContain("Swap");
+    expect(requirementsReview).toContain("ready_for_MVP_0.98a_implementation: true");
+    expect(requirementsReview).not.toContain("ready_for_MVP_0.99_implementation: true");
+  });
+
   it("keeps MVP 0.95 Resources and tag-interaction implementation documented and gated", () => {
     for (const file of REQUIRED_MVP_0_95_FINAL_DOCS) {
       expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
@@ -1230,6 +1308,103 @@ describe("Phase 1 derived artifacts", () => {
       expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.97");
       expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
       expect(scenario.coversCards).toContain("v097_deep_dive_event");
+      expect(scenario.expected, file).toBeDefined();
+    }
+  });
+
+  it("keeps MVP 0.98 Identity/Hidden-Zone implementation documented and gated", () => {
+    for (const file of REQUIRED_MVP_0_98_FINAL_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+    for (const file of MVP_0_98_DATA_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+
+    const implementationReview = readFileSync("docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md", "utf8");
+    const finalReview = readFileSync("docs/derived/MVP_0.98_FINAL_REVIEW.md", "utf8");
+    expect(implementationReview).toContain("ready_for_hardening: true");
+    expect(finalReview).toContain("MVP_0.98_done: true");
+    expect(finalReview).toContain("ready_for_MVP_0.99_requirements_freeze: true");
+
+    const baseline = JSON.parse(readFileSync("data/rules/rules-baseline-0.98.json", "utf8")) as {
+      id?: string;
+      gateAssertions?: Record<string, boolean>;
+    };
+    expect(baseline.id).toBe("rules-baseline-mvp-0.98");
+    expect(baseline.gateAssertions?.identitySetupRunsOnceBeforeInitialHash).toBe(true);
+    expect(baseline.gateAssertions?.searchCandidatesVisibleOnlyToOwner).toBe(true);
+    expect(baseline.gateAssertions?.searchShuffleUsesRandomDrawRecords).toBe(true);
+    expect(baseline.gateAssertions?.hiddenZoneBarriersBlockUndo).toBe(true);
+    expect(baseline.gateAssertions?.noV099PlusMechanicsEnabled).toBe(true);
+
+    const manifest = JSON.parse(readFileSync("data/manifests/card-implementation-manifest-0.98.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      cards: Array<{
+        cardCode: string;
+        status: string;
+        sourceMode?: string;
+        resolver?: string;
+        unitTests?: string[];
+        scenarioTests?: string[];
+        visibilityTests?: string[];
+        replayTests?: string[];
+        aiSmokeTests?: string[];
+        multiplayerSmokeTests?: string[];
+      }>;
+    };
+    expect(manifest.gateAssertions?.noV099PlusMechanicsEnabled).toBe(true);
+    const playable = manifest.cards.filter((card) => card.status === "playable_mvp");
+    expect(playable.map((card) => card.cardCode).sort()).toEqual(
+      [
+        "v098_corp_identity",
+        "v098_expose_event",
+        "v098_hq_rd_swap_operation",
+        "v098_reveal_top_event",
+        "v098_runner_identity",
+        "v098_stack_arrange_event",
+        "v098_stack_search_event"
+      ].sort()
+    );
+    expect(
+      playable.every(
+        (card) =>
+          card.sourceMode === "local_original" &&
+          card.resolver &&
+          card.unitTests?.length &&
+          card.scenarioTests?.length &&
+          card.visibilityTests?.length &&
+          card.replayTests?.length &&
+          card.aiSmokeTests?.length &&
+          card.multiplayerSmokeTests?.length
+      )
+    ).toBe(true);
+
+    const coverage = JSON.parse(readFileSync("data/rules/mechanics-coverage-0.98.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      mechanics?: Array<{ mechanicId?: string; currentStatus?: string; targetGate?: string }>;
+    };
+    expect(coverage.gateAssertions?.v098IdentityModifiersImplemented).toBe(true);
+    expect(coverage.gateAssertions?.v098HiddenZoneToolsImplemented).toBe(true);
+    expect(coverage.gateAssertions?.noV099PlusMechanicsImplemented).toBe(true);
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.identities.abilities")?.currentStatus).toBe("implemented_limited");
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.hidden_zone_tools")?.currentStatus).toBe("implemented_limited");
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.hosting.viruses.counters")?.currentStatus).toBe("open");
+
+    const scenarioDir = "data/scenarios";
+    const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
+    for (const file of REQUIRED_MVP_0_98_SCENARIOS) {
+      expect(present, file).toContain(file);
+      const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as {
+        id?: string;
+        baselineId?: string;
+        requirementIds?: string[];
+        coversCards?: string[];
+        expected?: unknown;
+      };
+      expect(scenario.id, file).toMatch(/^SCN-V098-\d{3}$/);
+      expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.98");
+      expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
+      expect(scenario.coversCards?.length, file).toBeGreaterThan(0);
       expect(scenario.expected, file).toBeDefined();
     }
   });

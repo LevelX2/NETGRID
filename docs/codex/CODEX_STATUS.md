@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V0.97 Run/Jack-out/Breach/Multiaccess is implemented, documented and in final gate verification. V0.98 Identity/Hidden-Zone requirements are the next gated scope after the V0.97 commit; later mechanics remain planned only and are not implementation-freigegeben.
+V0.98 Identity/Modifier and Hidden-Zone-Tools implementation, validation and documentation are complete. V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity is the next gated scope after the V0.98 commit. V0.99+ mechanics remain unimplemented until their own gates.
 
 ## Status
 
@@ -195,6 +195,18 @@ MVP 0.97 Run, Jack-out, Breach and Multiaccess implementation, validation and do
 `MVP_0.97_done: true`
 
 `ready_for_MVP_0.98_requirements_freeze: true`
+
+MVP 0.98 Identity/Modifier and Hidden-Zone-Tools requirements freeze is complete.
+
+`MVP_0.98_requirements_freeze_done: true`
+
+`ready_for_MVP_0.98a_implementation: true`
+
+MVP 0.98 Identity/Modifier and Hidden-Zone-Tools implementation, validation and documentation are complete.
+
+`MVP_0.98_done: true`
+
+`ready_for_MVP_0.99_requirements_freeze: true`
 
 S01 requirements, result modal, private match series, audio and test matrix are complete.
 
@@ -1431,6 +1443,72 @@ Checks:
 - `corepack pnpm test`: pass.
 - `corepack pnpm build`: pass, known Turbopack NFT warning remains for the existing `card-images` route trace.
 
+## MVP 0.98 Requirements Freeze files created or updated
+
+- `docs/derived/MVP_0.98_REQUIREMENTS.md`
+- `docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md`
+- `docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md`
+- `docs/derived/MVP_0.98_TEST_MATRIX.md`
+- `docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.98 Requirements Freeze decision
+
+`MVP_0.98_requirements_freeze_done: true`
+
+`ready_for_MVP_0.98a_implementation: true`
+
+V0.98 is frozen as a two-step Identity/Hidden-Zone gate. V0.98a may implement local fictional Runner/Corp identity pilots, setup markers and central static modifiers. V0.98b may start only after V0.98a is green and is limited to narrow Search, Reveal, Expose, Arrange, Shuffle and Swap harnesses through the existing Choice, EventVisibility, RandomDrawRecords and Replay contracts. Hosting, Viruses, Purge, Counter families, Recurring Credits, Bad Publicity, Prevention, Avoid, Interrupt and Replacement remain unimplemented.
+
+## MVP 0.98 Final files created or updated
+
+- `docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.98_FINAL_REVIEW.md`
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `data/rules/rules-baseline-0.98.json`
+- `data/cards/demo-cards-0.98.json`
+- `data/decks/demo-decks-0.98.json`
+- `data/manifests/card-implementation-manifest-0.98.json`
+- `data/rules/mechanics-coverage-0.98.json`
+- `data/scenarios/v098-identity-hidden-zone.json`
+- `data/scenarios/v098-hidden-zone-tools.json`
+- `data/scenarios/v098-multiplayer-hidden-zone-smoke.json`
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/engine/src/index.test.ts`
+- `packages/ai/src/index.ts`
+- `packages/ai/src/index.test.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `tests/specs/phase1-artifacts.test.ts`
+
+## MVP 0.98 Final gate
+
+`MVP_0.98_done: true`
+
+`ready_for_MVP_0.99_requirements_freeze: true`
+
+V0.98 implements Identity setup/static modifiers and narrow Hidden-Zone-Tools as baseline-gated local harnesses. `v098_runner_identity`, `v098_corp_identity`, `v098_stack_search_event`, `v098_stack_arrange_event`, `v098_reveal_top_event`, `v098_expose_event` and `v098_hq_rd_swap_operation` are local fictional playable cards. Search/Arrange use side-private Choices and Hidden-Info barriers; Search-Shuffle uses RandomDrawRecords; Reveal/Expose are deliberate public events; Swap leaks no HQ/R&D titles and uses no randomness. Hosting, Viruses, Purge, Counter families, Bad Publicity, Recurring Credits and Prevention remain unimplemented.
+
+Checks:
+
+- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine test`: pass, 54 tests.
+- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
+- `corepack pnpm --filter @netrunner/ai test`: pass, 23 tests.
+- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm --filter @netrunner/server test`: pass, 20 tests.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 26 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass, known Turbopack NFT warning remains for the existing `card-images` route trace.
+
 
 ## S01 Requirements and implementation files created or updated
 
@@ -1526,7 +1604,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.96: Trace, Link and Bidding.
 - V0.97: Run, Jack-out, Breach and Multiaccess.
 
-Current gate: V0.97 implementation is complete and final verification is in progress. Damage/Flatline, Resources, Trace/Link/Bidding and Jack-out/Breach/Multiaccess are playable only in their narrow V0.94/V0.95/V0.96/V0.97 scopes. V0.98+ mechanics remain planned only. Active Identity-Abilities, Hidden-Zone-Tools, Hosting, Viruses, Counter families and Prevention are still not playable until their respective gates are implemented.
+Current gate: V0.98 implementation, validation and documentation are complete; V0.99 Requirements Freeze is next. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier and Hidden-Zone-Tools are playable only in their narrow V0.94/V0.95/V0.96/V0.97/V0.98 scopes. V0.99+ mechanics remain planned only. Hosting, Viruses, Counter families, Recurring Credits, Bad Publicity and Prevention are still not playable until their respective gates are implemented.
 
 Detailed planning artifacts available:
 
@@ -1571,6 +1649,14 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/MVP_0.97_FINAL_REVIEW.md`
 - `data/rules/mechanics-coverage-0.97.json`
+- `docs/derived/MVP_0.98_REQUIREMENTS.md`
+- `docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md`
+- `docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md`
+- `docs/derived/MVP_0.98_TEST_MATRIX.md`
+- `docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md`
+- `docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.98_FINAL_REVIEW.md`
+- `data/rules/mechanics-coverage-0.98.json`
 
 UI design exploration artifacts available:
 

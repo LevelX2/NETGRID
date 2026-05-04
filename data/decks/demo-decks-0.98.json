@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "demo-decks-v0.98",
+  "id": "demo-decks-0.98",
+  "status": "implemented_for_v0.98_final_gate",
+  "extends": "data/decks/demo-decks-0.97.json",
+  "decks": [
+    {
+      "id": "demo_runner_098",
+      "name": "Runner Demo Deck 0.98 - Identity Modifier Harness",
+      "side": "runner",
+      "identity": "v098_runner_identity",
+      "cards": [
+        { "id": "simple_economy_event", "quantity": 3 },
+        { "id": "simple_run_event", "quantity": 2 },
+        { "id": "simple_draw_event", "quantity": 2 },
+        { "id": "simple_fracter", "quantity": 2 },
+        { "id": "simple_decoder", "quantity": 1 },
+        { "id": "simple_killer", "quantity": 2 },
+        { "id": "v08_burst_credit_event", "quantity": 2 },
+        { "id": "v095_safehouse_resource", "quantity": 1 },
+        { "id": "v097_deep_dive_event", "quantity": 2 },
+        { "id": "v098_stack_search_event", "quantity": 1 },
+        { "id": "v098_stack_arrange_event", "quantity": 1 },
+        { "id": "v098_reveal_top_event", "quantity": 1 },
+        { "id": "v098_expose_event", "quantity": 1 }
+      ]
+    },
+    {
+      "id": "demo_corp_098",
+      "name": "Corp Demo Deck 0.98 - Identity Modifier Harness",
+      "side": "corp",
+      "identity": "v098_corp_identity",
+      "cards": [
+        { "id": "simple_agenda", "quantity": 1 },
+        { "id": "simple_priority_agenda", "quantity": 1 },
+        { "id": "v08_project_agenda", "quantity": 1 },
+        { "id": "simple_economy_operation", "quantity": 2 },
+        { "id": "simple_economy_asset", "quantity": 1 },
+        { "id": "simple_upgrade", "quantity": 1 },
+        { "id": "simple_barrier_ice", "quantity": 1 },
+        { "id": "simple_tag_ice", "quantity": 1 },
+        { "id": "v096_trace_probe_ice", "quantity": 1 },
+        { "id": "v08_credit_surge_operation", "quantity": 2 },
+        { "id": "v098_hq_rd_swap_operation", "quantity": 1 }
+      ]
+    }
+  ]
+}

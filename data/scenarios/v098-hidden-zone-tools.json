@@ -1,0 +1,27 @@
+{
+  "id": "SCN-V098-002",
+  "baselineId": "rules-baseline-mvp-0.98",
+  "title": "Hidden-zone tools stay side-safe and replayable",
+  "requirementIds": ["M098B-CHOICE-001", "M098B-SEARCH-001", "M098B-REVEAL-001", "M098B-EXPOSE-001", "M098B-ARRANGE-001", "M098B-SHUFFLE-001", "M098B-SWAP-001", "M098B-VISIBILITY-001", "M098B-EVENT-001", "M098B-REPLAY-001", "M098-NOSCOPE-001"],
+  "coversTests": ["V098-T007", "V098-T008", "V098-T009", "V098-T010", "V098-T011", "V098-T012", "V098-T013", "V098-T017"],
+  "coversCards": ["v098_stack_search_event", "v098_stack_arrange_event", "v098_reveal_top_event", "v098_expose_event", "v098_hq_rd_swap_operation"],
+  "steps": [
+    "Runner starts Stack Search and receives a private select_cards Choice.",
+    "Invalid side and invalid option attempts are rejected.",
+    "Resolving Search moves the selected program to grip and shuffles the remaining stack through RandomDrawRecords.",
+    "Runner arranges the top 2 cards of the stack through a private ordered Choice.",
+    "Runner reveals a top stack card through a public reveal event.",
+    "Runner exposes an unrezzed installed Corp card without changing faceup or rezzed state.",
+    "Corp plays HQ R&D Swap Operation and swaps hidden HQ/R&D cards without public title leaks.",
+    "Replay reproduces the final StateHash."
+  ],
+  "expected": {
+    "privateChoiceOptionsOnlyForOwner": true,
+    "publicEventsRedactPrivateChoices": true,
+    "revealExposePublicCardDataOnly": true,
+    "searchShuffleUsesRandomDrawRecords": true,
+    "swapUsesNoRandomness": true,
+    "stateHashDeterministic": true,
+    "noV099PlusMechanics": true
+  }
+}

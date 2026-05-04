@@ -699,6 +699,200 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
   });
 });
 
+describe("MVP 0.98a Identity and modifiers", () => {
+  it("creates deterministic V0.98 games with setup and static identity modifiers", () => {
+    const first = v098IdentityGame("v098-identity-setup");
+    const second = v098IdentityGame("v098-identity-setup");
+    const legacy = createGame({ seed: "v098-legacy-identity" });
+
+    expect(first.baseline.engineSchemaVersion).toBe("0.98.0");
+    expect(first.deckMetadata?.runner.cardPoolSnapshotId).toBe("card-snapshot-0.98");
+    expect(first.deckMetadata?.corp.formatProfileId).toBe("local-demo-v0.98");
+    expect(first.runner.credits).toBe(6);
+    expect(first.corp.credits).toBe(6);
+    expect(first.runner.memoryLimit).toBe(5);
+    expect(first.identityAbilityUsage?.corp?.setupAbilities).toEqual(["v098_corp_identity_setup_credit"]);
+    expect(first.identityAbilityUsage?.runner?.setupAbilities).toEqual(["v098_runner_identity_setup_credit"]);
+    expect(hashState(first)).toBe(hashState(second));
+    expect(first.randomDrawRecords).toEqual(second.randomDrawRecords);
+    expect(validateGameState(first).ok).toBe(true);
+
+    expect(legacy.baseline.engineSchemaVersion).toBe("0.1.0");
+    expect(legacy.runner.credits).toBe(5);
+    expect(legacy.corp.credits).toBe(5);
+    expect(legacy.runner.memoryLimit).toBe(4);
+    expect(legacy.identityAbilityUsage).toBeUndefined();
+  });
+
+  it("uses V0.98 runner base link during Trace bidding", () => {
+    let state = toRunnerTurn(v098IdentityGame("v098-link-trace"));
+    putCorpIceOnServer(state, "rd", "v096_trace_probe_ice");
+    state.corp.credits = 8;
+    state.runner.credits = 5;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v096_trace_probe_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+
+    expect(state.trace?.runnerLink).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      traceStep: "corp_bid",
+      runnerLink: 1
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Agenda");
+  });
+
+  it("applies static memory before installs and validates replay-safe state hashes", () => {
+    const state = v098IdentityGame("v098-memory-static");
+    const initialHash = hashState(state);
+
+    installRunnerProgramCopyForTest(state, "simple_fracter");
+    installRunnerProgramCopyForTest(state, "simple_fracter");
+    installRunnerProgramCopyForTest(state, "simple_decoder");
+    installRunnerProgramCopyForTest(state, "simple_killer");
+    installRunnerProgramCopyForTest(state, "simple_killer");
+
+    expect(state.runner.memoryLimit).toBe(5);
+    expect(state.runner.memoryUsed).toBe(5);
+    expect(validateGameState(state).ok).toBe(true);
+    expect(hashState(v098IdentityGame("v098-memory-static"))).toBe(initialHash);
+  });
+
+  it("does not expose V0.99+ mechanics while enabling identity modifiers", () => {
+    const state = toRunnerTurn(v098IdentityGame("v098-no-future-scope"));
+    const actionTypes = getLegalActions(state, "runner").map((action) => action.type);
+
+    expect(actionTypes).not.toContain("trigger_ability");
+    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).toContain("identity_ability");
+    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain("hosting");
+    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain("virus");
+    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain("purge");
+    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain("prevention");
+    expect(DEMO_CARDS_BY_ID.v098_runner_identity?.mechanics).not.toContain("replacement");
+  });
+
+  it("searches the Runner stack through a private Choice and deterministic shuffle", () => {
+    let state = toRunnerTurn(v098IdentityGame("v098-search-stack"));
+    moveRunnerCardToGrip(state, "v098_stack_search_event");
+    const selectedProgram = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const randomBefore = state.randomDrawRecords.length;
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "v098_stack_search_event");
+
+    expect(state.pendingChoice?.kind).toBe("select_cards");
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(getPlayerView(state, "runner").pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Simple Decoder");
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: "corp.resolve_choice.game_rule",
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: [`card_${selectedProgram}`] }
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const invalidChoice = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: mustAction(state, "runner", (action) => action.type === "resolve_choice").actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: ["card_not_in_choice"] }
+    });
+    expect(invalidChoice.ok).toBe(false);
+    if (!invalidChoice.ok) expect(invalidChoice.error.code).toBe("ERR_INVALID_CHOICE");
+
+    state = applyChoice(state, "runner", `card_${selectedProgram}`);
+
+    expect(state.runner.grip).toContain(selectedProgram);
+    expect(state.runner.stack).not.toContain(selectedProgram);
+    expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Decoder");
+    expect(replayEvents(initial, state.eventLog.slice(initial.eventLog.length)).ok).toBe(true);
+  });
+
+  it("arranges top stack cards privately without exposing order to the Corp", () => {
+    let state = toRunnerTurn(v098IdentityGame("v098-arrange-stack"));
+    moveRunnerCardToGrip(state, "v098_stack_arrange_event");
+    const first = putRunnerCardOnTopOfStack(state, "simple_economy_event");
+    const second = putRunnerCardOnTopOfStack(state, "simple_run_event");
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "v098_stack_arrange_event");
+
+    expect(getPlayerView(state, "runner").pendingChoice?.options.map((option) => option.label)).toEqual(["Simple Run Event", "Simple Economy Event"]);
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Simple Run Event");
+
+    state = applyChoices(state, "runner", [`card_${first}`, `card_${second}`]);
+
+    expect(state.runner.stack.slice(0, 2)).toEqual([first, second]);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Run Event");
+    expect(replayEvents(initial, state.eventLog.slice(initial.eventLog.length)).ok).toBe(true);
+  });
+
+  it("reveals and exposes only deliberate public card information", () => {
+    let revealState = toRunnerTurn(v098IdentityGame("v098-reveal-top"));
+    moveRunnerCardToGrip(revealState, "v098_reveal_top_event");
+    putRunnerCardOnTopOfStack(revealState, "simple_decoder");
+
+    revealState = apply(revealState, "runner", (action) => action.type === "play_event" && sourceDefinition(revealState, action) === "v098_reveal_top_event");
+
+    expect(revealState.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(revealState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      revealKind: "reveal",
+      cardDefinitionId: "simple_decoder",
+      title: "Simple Decoder"
+    });
+
+    let exposeState = toRunnerTurn(v098IdentityGame("v098-expose"));
+    moveRunnerCardToGrip(exposeState, "v098_expose_event");
+    const exposed = putCorpRootInRemote(exposeState, "simple_economy_asset");
+
+    exposeState = apply(
+      exposeState,
+      "runner",
+      (action) => action.type === "play_event" && sourceDefinition(exposeState, action) === "v098_expose_event" && action.payload?.serverId === "remote_1"
+    );
+
+    expect(exposeState.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(exposeState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      revealKind: "expose",
+      cardDefinitionId: "simple_economy_asset",
+      title: "Simple Economy Asset"
+    });
+    expect(exposeState.cardInstances[exposed]?.rezzed).toBe(false);
+    expect(getPlayerView(exposeState, "runner").servers.find((server) => server.id === "remote_1")?.root[0]?.known).toBe(false);
+  });
+
+  it("swaps Corp hidden zones without unrecorded randomness or public title leaks", () => {
+    let state = v098IdentityGame("v098-swap-hq-rd");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, "v098_hq_rd_swap_operation");
+    const hqCard = moveCorpCardToHq(state, "simple_economy_asset");
+    const rdCard = putCorpCardOnTopOfRd(state, "simple_agenda");
+    const randomBefore = state.randomDrawRecords.length;
+    const initial = structuredClone(state);
+
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "v098_hq_rd_swap_operation");
+
+    expect(state.corp.hq).toContain(rdCard);
+    expect(state.corp.rd[0]).toBe(hqCard);
+    expect(state.randomDrawRecords.length).toBe(randomBefore);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Agenda");
+    expect(replayEvents(initial, state.eventLog.slice(initial.eventLog.length)).ok).toBe(true);
+  });
+});
+
 describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
     const state = toRunnerTurn(createGame({ seed: "v093-choice" }));
@@ -1107,6 +1301,15 @@ function v097RunGame(seed: string): GameState {
   });
 }
 
+function v098IdentityGame(seed: string): GameState {
+  return createGame({
+    seed,
+    runnerDeckId: "demo_runner_098",
+    corpDeckId: "demo_corp_098",
+    agendaPointsToWin: 7
+  });
+}
+
 function installedResourceCorpTurn(seed: string): GameState {
   let state = toRunnerTurn(v095ResourceGame(seed));
   state.runner.credits = 6;
@@ -1136,14 +1339,18 @@ function apply(state: GameState, side: Side, predicate: (action: LegalAction) =>
 }
 
 function applyChoice(state: GameState, side: Side, selectedOptionId: string): GameState {
+  return applyChoices(state, side, [selectedOptionId]);
+}
+
+function applyChoices(state: GameState, side: Side, selectedOptionIds: string[]): GameState {
   const selected = mustAction(state, side, (action) => action.type === "resolve_choice");
   const result = applyAction(state, {
     matchId: state.matchId,
     side,
     actionId: selected.actionId,
     clientKnownStateVersion: state.stateVersion,
-    selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: [selectedOptionId] },
-    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionId}`
+    selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds },
+    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionIds.join(".")}`
   });
   expect(result.ok, result.ok ? "" : result.error.message).toBe(true);
   if (!result.ok) throw new Error(result.error.message);
@@ -1201,6 +1408,14 @@ function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInsta
   removeEverywhere(state, id);
   state.runner.grip.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function putRunnerCardOnTopOfStack(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.stack.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "stack" }, faceup: true, rezzed: true };
   return id;
 }
 
@@ -1266,6 +1481,20 @@ function putCorpRootInRemote(state: GameState, definitionId: string): CardInstan
 
 function installRunnerProgramForTest(state: GameState, definitionId: string): CardInstanceId {
   const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.rig.programs.push(id);
+  state.runner.memoryUsed += 1;
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "rig" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function installRunnerProgramCopyForTest(state: GameState, definitionId: string): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) => card.definitionId === definitionId && !state.runner.rig.programs.includes(id)
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing uninstalled ${definitionId}`);
+  const id = entry[0];
   removeEverywhere(state, id);
   state.runner.rig.programs.push(id);
   state.runner.memoryUsed += 1;

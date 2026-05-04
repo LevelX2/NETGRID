@@ -1,0 +1,25 @@
+{
+  "id": "SCN-V098-003",
+  "baselineId": "rules-baseline-mvp-0.98",
+  "title": "Multiplayer hidden-zone Search remains side-safe through submit, reconnect and undo barrier",
+  "requirementIds": ["M098B-CHOICE-001", "M098B-SEARCH-001", "M098B-VISIBILITY-001", "M098B-EVENT-001", "M098B-UNDO-001", "M098B-AI-001", "M098B-MP-001", "M098-CARD-001"],
+  "coversTests": ["V098-T014", "V098-T015", "V098-T016"],
+  "coversCards": ["v098_stack_search_event"],
+  "steps": [
+    "A private multiplayer match is prepared with Stack Search Event in Runner grip.",
+    "Runner submits Stack Search with an idempotency key.",
+    "Duplicate submit returns the stored receipt and stale submit is rejected.",
+    "Reconnect restores the Runner-only Search Choice with private option labels.",
+    "Corp payloads do not contain the private searched card title.",
+    "Runner resolves the Choice and the public event remains a hidden-info barrier.",
+    "Undo targeting the hidden-zone Search event is blocked."
+  ],
+  "expected": {
+    "submitWorks": true,
+    "idempotencyWorks": true,
+    "staleRejected": true,
+    "reconnectSideFiltered": true,
+    "hiddenZoneBarrierBlocksUndo": true,
+    "opponentPayloadDoesNotLeakSearchCandidate": true
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "rules-baseline-v0.98",
+  "id": "rules-baseline-mvp-0.98",
+  "status": "implemented_for_v0.98_final_gate",
+  "rulesVersion": "26.03",
+  "cardTextSource": "manual_local_original",
+  "cardTextSnapshotId": "mvp-0.98-demo",
+  "engineSchemaVersion": "0.98.0",
+  "cardImplementationVersion": "0.98.0",
+  "deviationRegistryVersion": "0.98.0",
+  "playerViewSchemaVersion": "0.98.0",
+  "multiplayerSchemaVersion": "0.98.0",
+  "aiSchemaVersion": "0.98.0",
+  "simulationSchemaVersion": "0.98.0",
+  "scope": {
+    "implementedMechanics": [
+      "identity_setup",
+      "identity_usage_marker",
+      "static_identity_modifier",
+      "base_link",
+      "memory_limit_modifier",
+      "search_own_hidden_zone",
+      "reveal",
+      "expose",
+      "arrange_hidden_zone",
+      "deterministic_shuffle_after_search",
+      "hidden_zone_swap"
+    ],
+    "carriedForward": [
+      "jack_out",
+      "breach_queue",
+      "rd_multiaccess",
+      "hq_multiaccess_without_replacement",
+      "trace",
+      "link",
+      "runner_resources",
+      "tag_based_resource_trash",
+      "net_damage",
+      "meat_damage",
+      "flatline_game_end_reason"
+    ],
+    "notImplemented": [
+      "hosting",
+      "virus",
+      "purge",
+      "counter_families",
+      "recurring_credits",
+      "bad_publicity",
+      "damage_prevention",
+      "avoid",
+      "interrupt",
+      "replacement",
+      "set_aside",
+      "remove_from_game",
+      "ownership_control_change"
+    ]
+  },
+  "gateAssertions": {
+    "identitySetupRunsOnceBeforeInitialHash": true,
+    "identityUsageMarkersStateHashSafe": true,
+    "staticModifiersAppliedByEngine": true,
+    "runnerLinkUsesIdentityValues": true,
+    "hiddenZoneChoicesUseLegalActions": true,
+    "searchCandidatesVisibleOnlyToOwner": true,
+    "searchShuffleUsesRandomDrawRecords": true,
+    "revealExposeAreDeliberatePublicEvents": true,
+    "arrangeDoesNotLeakPrivateOrder": true,
+    "swapDoesNotLeakHiddenCardTitles": true,
+    "hiddenZoneBarriersBlockUndo": true,
+    "replayAndStateHashDeterministic": true,
+    "noV099PlusMechanicsEnabled": true,
+    "noPreventionAvoidInterruptReplacement": true,
+    "noOfficialAssets": true,
+    "imagesDoNotAffectEngineAiGameStateReplayOrStateHash": true,
+    "importDoesNotGrantPlayability": true
+  },
+  "notes": [
+    "V0.98 is split internally into V0.98a Identity/Modifier and V0.98b Hidden-Zone-Tools.",
+    "All V0.98 cards are local fictional harness cards and do not use official Netrunner card text, art, frames, logos or external databases.",
+    "Search and Arrange expose private options only through side-owned PendingChoice data; public events are redacted hidden-info barriers."
+  ]
+}

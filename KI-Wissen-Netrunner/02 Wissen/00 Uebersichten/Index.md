@@ -72,5 +72,13 @@
 - `docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.97-Run-/Breach-/Multiaccess-Slice.
 - `docs/derived/MVP_0.97_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.97.
 - `data/rules/mechanics-coverage-0.97.json`: maschinenlesbare Coverage nach V0.97; Run/Jack-out/Breach/Multiaccess ist `implemented_limited`, V0.98+-Mechaniken bleiben offen.
+- `docs/derived/MVP_0.98_REQUIREMENTS.md`: eingefrorene V0.98-Anforderungen für Identity/Modifier und Hidden-Zone-Tools.
+- `docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md`: V0.98a-Spezifikation für Identity-Fähigkeiten, Setup-Marker und statische Modifier.
+- `docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md`: V0.98b-Spezifikation für Search, Reveal, Expose, Arrange, Shuffle und Swap.
+- `docs/derived/MVP_0.98_TEST_MATRIX.md`: V0.98-Testmatrix für Identity-, Hidden-Zone-, Visibility-, Replay/StateHash-, AI- und Multiplayer-Smokes.
+- `docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.98a.
+- `docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.98-Identity-/Hidden-Zone-Slice.
+- `docs/derived/MVP_0.98_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.98.
+- `data/rules/mechanics-coverage-0.98.json`: maschinenlesbare Coverage nach V0.98; Identity/Modifier und Hidden-Zone-Tools sind `implemented_limited`, V0.99+-Mechaniken bleiben offen.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.
