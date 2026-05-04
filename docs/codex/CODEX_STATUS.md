@@ -2,14 +2,15 @@
 
 ## Current phase
 
-Deck- und Match-Setup-Stabilisierung nach V0.99/S01.
+V1.0 Deck- und Match-Setup-Stabilisierung ist lokal umgesetzt und verifiziert.
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
+Latest V1.0 final review artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`.
 
-Current planning decision needed: V1.0 Deck- und Match-Setup-Stabilisierung should continue before further expansion. Local private O:NR-v1 test access is now accepted as part of the allowed private local data pool; remaining work is hardening the series deck model, KI deck policy, AI/multiplayer smokes and final review.
+Current planning decision needed: choose the next gated scope after V1.0. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0 AI/multiplayer smokes, manifest/review checks and hidden-info regressions.
 
 ## Status
 
@@ -233,6 +234,10 @@ S01 implementation is complete and locally verified for the current scope: side-
 
 `S01_verified: true`
 
+V1.0 Deck- und Match-Setup-Stabilisierung is complete and locally verified.
+
+`V1_0_deck_match_stabilization_done: true`
+
 Bestandsaufnahme 2026-05-04 is complete.
 
 `bestandsaufnahme_2026_05_04_done: true`
@@ -241,12 +246,13 @@ Deck/match stabilization inventory 2026-05-04 is complete.
 
 `deck_match_stabilization_inventory_2026_05_04_done: true`
 
-Current verification after deck/match inventory, UI label correction and private O:NR data-pool integration:
+Current verification after V1.0 Deck- und Match-Setup-Stabilisierung:
 
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
-- `corepack pnpm test`: pass, 171 tests including Web Chronicle test discovery and O:NR server match-start smoke.
-- `corepack pnpm build`: pass, known Turbopack NFT warning remains for the `card-images` route trace.
+- `corepack pnpm test`: pass, 175 tests including V1.0 deck-series/KI-policy smokes, Web Chronicle test discovery and O:NR AI/multiplayer smokes.
+- `corepack pnpm build`: pass, previous Turbopack NFT warning for the `card-images` route trace is resolved by fixed repo-relative data paths.
+- Browser smoke: pass. Template deck copied, modified, validated, used for match setup and started in Runner-vs-Corp-KI.
 
 Audit findings:
 
@@ -255,8 +261,8 @@ Audit findings:
 - `docs/derived/MECHANICS_COMPLETION_PLAN.md` is now historical for M0 to M10; V0.94 to V0.99 are complete.
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md` is the current V0.99 matrix.
 - Local private O:NR-v1 data under ignored `data/local/` and `data/local-assets/` is present on this machine. It remains private/local and not versioned.
-- O:NR-v1 playable test access is accepted for private local use. Engine harness and Web overlay exist; server deck revalidation now uses the same runtime card pool. AI/multiplayer smokes, versioned manifest and final review are still not complete.
-- Deck Editor and Match Setup are functional for versioned V0.8 snapshots and private local O:NR runtime cards, but the next clean scope should model player-owned Runner/Corp deck pairs for private series and define KI deck policy.
+- O:NR-v1 playable test access is accepted for private local use. Engine harness, Web overlay, server deck revalidation, AI/multiplayer smokes and manifest/review checks are covered for the private local scope.
+- Deck Editor and Match Setup are functional for versioned V0.8 snapshots and private local O:NR runtime cards. V1.0 adds player-owned Runner/Corp deck pairs for private series and explicit KI deck policy.
 
 ## Goal
 
@@ -1671,7 +1677,7 @@ Remaining known limits:
 - Public platform features, matchmaking, accounts, broad/free deckbuilder, chat and broad card pool remain out of scope. The local V0.6+ deck editor is permitted only as private local deck/snapshot tooling.
 - V0.94 Damage/Flatline is implemented; Core Damage, Damage Prevention, Avoid, Interrupt and Replacement remain later gated mechanics.
 - V0.91 private local scans/assets are allowed only as display artifacts for private local use. Public distribution, official logos, standalone card frames, card backs, external card database dependencies, and Engine/AI/GameState/Replay/StateHash image use remain excluded.
-- Local O:NR-v1 playable test access is allowed for private local use. It still needs AI/multiplayer smokes and final review before being considered fully hardened.
+- Local O:NR-v1 playable test access is allowed for private local use and is covered by V1.0 smokes/reviews for that private scope. It remains excluded from public distribution.
 
 ## Local tool notes
 
@@ -1681,7 +1687,7 @@ Remaining known limits:
 
 ## Next step
 
-The post-MVP-0.4 roadmap through V0.99 is complete:
+The post-MVP-0.4 roadmap through V1.0 is complete:
 
 - V0.5: card import and card catalog.
 - V0.6: deck editor and match setup foundation.
@@ -1697,15 +1703,16 @@ The post-MVP-0.4 roadmap through V0.99 is complete:
 - V0.97: Run, Jack-out, Breach and Multiaccess.
 - V0.98: Identity setup/modifiers and Hidden-Zone tools.
 - V0.99: Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity.
+- V1.0: Deck- und Match-Setup-Stabilisierung.
 
-Current gate: V0.99 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
 Next planning decision:
 
-1. Prefer V1.0 Deck- und Match-Setup-Stabilisierung before adding more gameplay breadth.
-2. Finish private local O:NR hardening: AI/multiplayer smokes, local manifest/review and clear private-only documentation.
-3. Define private-series deck ownership: each participant needs a Runner and Corp deck pair, especially for Human-vs-KI and two-game side-swap matches.
-4. Define KI deck policy: fixed defaults, explicitly selected KI decks, or seeded-random selection from server-legal snapshots.
+1. Choose the next gated scope after V1.0.
+2. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
+3. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
+4. Keep deployment and operations hardening behind explicit follow-up scope.
 
 M11+ mechanics, Prevention/Avoid/Interrupt/Replacement, Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates.
 
@@ -1714,6 +1721,7 @@ Detailed planning artifacts available:
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`
+- `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.7_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`

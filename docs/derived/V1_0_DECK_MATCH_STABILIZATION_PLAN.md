@@ -1,6 +1,6 @@
 # V1.0 Deck- und Match-Setup-Stabilisierung
 
-Status: implementation_started_private_onr_pool
+Status: implemented_locally_verified
 Stand: 2026-05-04
 
 ## Zweck
@@ -94,6 +94,36 @@ Aktuelle Grenzen:
 
 V1.0 soll keine neuen Regeln und keine neue Kartenbreite einführen. Der Schnitt soll den privaten Testbetrieb verlässlich machen.
 
+## Produktentscheidungen für die Umsetzung
+
+Stand 2026-05-04, als V1.0-Arbeitsannahmen festgelegt:
+
+1. Serienwertung: Die private Zwei-Spiel-Serie wird autoritativ nur nach Siegen, Niederlagen und Draws gewertet. Aggregierte Agenda-Punkte werden side-sicher angezeigt und gespeichert, aber in V1.0 nicht als Tie-Breaker verwendet. Bei gleicher Siegzahl endet die Serie als Draw.
+2. KI-Deckpolitik: KI-Gegner unterstützen drei Modi. `fixed` nutzt das feste V0.8-Standarddeckpaar. `selected` nutzt die explizit im Matchstart gewählten KI-Runner-/Corp-Decks. `seeded_random` wählt deterministisch aus serverseitig eingefrorenen, matchstartfähigen Snapshots; private lokale O:NR-Snapshots werden nur bei expliziter Auswahl verwendet, nicht zufällig.
+3. UI-Modell: Teilnehmer A ist die hostende/lokale Person, Teilnehmer B ist Gast oder KI. Die vier Slots heißen `Teilnehmer A · Runner-Deck`, `Teilnehmer A · Corp-Deck`, `Teilnehmer B · Runner-Deck` und `Teilnehmer B · Corp-Deck`; bei KI-Modi zeigt die UI Teilnehmer B als KI. Einzelspiele verwenden die Decks der aktuell zugewiesenen Seiten, Serien behalten die persönlichen Deckpaare und wechseln in Spiel 2 nur die Seite.
+
+## Umsetzungsergebnis 2026-05-04
+
+V1.0 ist implementiert und lokal verifiziert. Das Ergebnis ist zusätzlich in `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md` dokumentiert.
+
+Umgesetzt:
+
+- Matchstart akzeptiert explizite persönliche Deckpaare für Teilnehmer A und B.
+- Private Serien behalten diese persönlichen Runner-/Corp-Deckpaare über den Seitenwechsel.
+- Serienwertung bleibt bei Siegen/Niederlagen/Draws; aggregierte Agenda-Punkte werden side-sicher angezeigt und gespeichert.
+- KI-Deckpolitik unterstützt `fixed`, `selected` und `seeded_random`.
+- Deterministische KI-Random-Auswahl nutzt nur eingefrorene, validierte Snapshots.
+- Die Web-UI zeigt V1.0, vier Deckslots und bietet im Matchstart nur validierte versionierte Snapshots sowie validierte lokale Snapshots an.
+- Lokale O:NR-v1-Snapshots sind mit AI-/Multiplayer-Smokes, Manifest-/Review-Abgleich und Hidden-Info-Schutz gehärtet.
+- Browser-Smoke ausgeführt: Template kopieren, Deck ändern, validieren, für Match verwenden, Runner-vs-Corp-KI-Match starten.
+
+Checks:
+
+- `corepack pnpm lint`: bestanden.
+- `corepack pnpm typecheck`: bestanden.
+- `corepack pnpm test`: bestanden, 175 Tests.
+- `corepack pnpm build`: bestanden; die frühere Turbopack-NFT-Warnung zur `card-images`-Route ist durch feste repo-relative Datenpfade behoben.
+
 Must:
 
 - Sichtbare UI-Version auf aktuellen Stand bringen.
@@ -163,12 +193,8 @@ Pflichttests für V1.0:
 - Browser-Smoke: Deck aus Template kopieren, ändern, validieren, für Match verwenden, Spiel starten.
 - Visibility: PlayerViews, WebSocket, Reconnect, Undo, ResultSummary und Logs enthalten keine privaten Decklisten.
 
-## Gate-Vorschlag
+## Gate-Ergebnis
 
-`V1_0_deck_match_stabilization_ready_for_implementation` ist erst true, wenn die verbleibenden Produktentscheidungen getroffen sind:
+`V1_0_deck_match_stabilization_done: true`
 
-1. Wird die private Serie nach Siegen/Draws gewertet oder mit aggregierten Agenda-Punkten/Tie-Breaker erweitert?
-2. Darf die KI Decks zufällig wählen, und wenn ja deterministisch aus welchem Snapshot-Pool?
-3. Wie werden die vier Deckslots einer Serie in der UI benannt und vorausgewählt?
-
-Bereits entschieden: O:NR-v1 wird für privaten lokalen Gebrauch in den erlaubten Datenpool aufgenommen. Der konkrete erste Implementierungsschritt ist ein gemeinsamer Runtime-Kartenpool für Web und Server sowie ein serverseitiger Matchstart-Smoke mit lokalen O:NR-Deck-Snapshots.
+Die Produktentscheidungen sind getroffen, umgesetzt und lokal verifiziert. O:NR-v1 bleibt privater lokaler Testzugang; daraus folgt keine öffentliche Distribution und kein breiter offizieller Kartenpool.

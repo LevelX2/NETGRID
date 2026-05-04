@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
 import snapshotData from "../../../data/card-import/card-snapshot-0.5.json";
 import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
@@ -65,5 +66,33 @@ describe("catalog import and status logic", () => {
     const importOnly = getCatalogCard(snapshot08, "catalog_preview_operation_001");
     expect(importOnly?.statuses.playable).toBe(false);
     expect(importOnly?.statuses.deck_legal).toBe(false);
+  });
+
+  it("keeps private local O:NR playable deck-legal cards aligned with manifest and review coverage when present", () => {
+    const localSnapshotPath = "data/local/card-import/onr-v1-limited/card-snapshot-onr-v1-limited.local.json";
+    if (!existsSync(localSnapshotPath)) return;
+
+    const localSnapshot = JSON.parse(readFileSync(localSnapshotPath, "utf8")) as CardSnapshot;
+    expect(validateSnapshot(localSnapshot)).toEqual({ ok: true, errors: [] });
+
+    const playableDeckLegal = localSnapshot.cards.filter((card) => card.statuses.playable && card.statuses.deck_legal);
+    const missingManifest = playableDeckLegal.filter((card) => !card.implementationManifest).map((card) => card.catalogCardId);
+    const missingCoverage = playableDeckLegal
+      .filter((card) => {
+        const manifest = card.implementationManifest;
+        return !manifest || manifest.unitTests.length === 0 || manifest.scenarioTests.length === 0 || manifest.visibilityTests.length === 0 || manifest.replayTests.length === 0;
+      })
+      .map((card) => card.catalogCardId);
+    const reviewFiles = [
+      "data/local/card-import/onr-v1-limited/agenda-implementation-review.local.md",
+      "data/local/card-import/onr-v1-limited/asset-implementation-review.local.md",
+      "data/local/card-import/onr-v1-limited/agenda-text-review.local.md",
+      "data/local/card-import/onr-v1-limited/asset-text-review.local.md"
+    ];
+
+    expect(playableDeckLegal.length).toBeGreaterThan(0);
+    expect(missingManifest).toEqual([]);
+    expect(missingCoverage).toEqual([]);
+    expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 });

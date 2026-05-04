@@ -97,4 +97,5 @@
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.
 - `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`: aktuelle Bestandsaufnahme nach V0.99/S01 mit Teststand, Dokumentationsdrift, O:NR-Sonderstand und nächsten Planungsentscheidungen.
-- `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`: Bestandsprüfung und vorgeschlagener V1.0-Schnitt für Deckeditor, Matchstart, KI-Deckpolitik, O:NR-Entscheidung und private Matchserien.
+- `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`: Bestandsprüfung, Produktentscheidungen und Umsetzungsergebnis für V1.0 Deck- und Match-Setup-Stabilisierung.
+- `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`: Final Review für V1.0 mit Browser-Smoke, Checks, Grenzen und Gate-Ergebnis.

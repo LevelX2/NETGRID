@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
+import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { createRuntimeCardsById } from "@netrunner/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netrunner/decks";
@@ -114,6 +115,34 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
     expect(JSON.stringify(created)).not.toContain("onr_v1_220_tycho-extension");
     expect(JSON.stringify(created)).not.toContain("cardInstances");
+
+    expect(created.joinUrl).toBeTruthy();
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing O:NR join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "O:NR Corp" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    expect(joined.playerView.deckMetadata?.own.deckName).toBe("O:NR Corp Match Smoke");
+    expect(JSON.stringify(joined)).not.toContain("onr_v1_079_bodyweight-synthetic-blood");
+    expect(JSON.stringify(joined)).not.toContain("cardInstances");
+
+    const aiCreated = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "onr-local-ai-match",
+      participantADecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
+      participantBDecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
+      aiDeckPolicy: "selected",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+    });
+    const aiStored = await service.loadForTest(aiCreated.matchId);
+    expect(aiCreated.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(aiStored?.match.mode).toBe("human_runner_vs_corp_ai");
+    expect(aiStored?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_a", corpPlayer: "player_b" });
+    expect(aiStored?.match.deckSetup.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
+    expect(aiStored?.match.deckSetup.participants?.player_b.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
+    expect(JSON.stringify(aiCreated)).not.toContain("onr_v1_220_tycho-extension");
+    expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {
@@ -892,6 +921,77 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(corpPayload.legalActions).toEqual([]);
   });
 
+  it("applies the selected, fixed and deterministic random KI deck policies without exposing decklists", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-deck-policy" });
+    const participantADecks = {
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+    };
+    const participantBDecks = {
+      runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6",
+      corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+    };
+
+    const selected = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "ai-policy-selected",
+      participantADecks,
+      participantBDecks,
+      aiDeckPolicy: "selected"
+    });
+    const selectedRecord = await service.loadForTest(selected.matchId);
+    expect(selectedRecord?.match.deckSetup.aiDeckPolicy).toBe("selected");
+    expect(selectedRecord?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
+    expect(selectedRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
+    expect(selectedRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
+
+    const fixed = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "ai-policy-fixed",
+      participantADecks,
+      participantBDecks,
+      aiDeckPolicy: "fixed"
+    });
+    const fixedRecord = await service.loadForTest(fixed.matchId);
+    expect(fixedRecord?.match.deckSetup.aiDeckPolicy).toBe("fixed");
+    expect(fixedRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
+    expect(fixedRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
+    expect(fixedRecord?.match.deckSetup.participants?.player_b).toMatchObject({
+      runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpSnapshotId: "demo_corp_008_snapshot_v0_8"
+    });
+
+    const randomOne = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "ai-policy-random-seed",
+      participantADecks,
+      participantBDecks,
+      aiDeckPolicy: "seeded_random"
+    });
+    const randomTwo = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "ai-policy-random-seed",
+      participantADecks,
+      participantBDecks,
+      aiDeckPolicy: "seeded_random"
+    });
+    const randomRecordOne = await service.loadForTest(randomOne.matchId);
+    const randomRecordTwo = await service.loadForTest(randomTwo.matchId);
+    const validRunnerIds = (snapshotsData08.snapshots as DeckSnapshot[]).filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok).map((snapshot) => snapshot.deckSnapshotId);
+    const validCorpIds = (snapshotsData08.snapshots as DeckSnapshot[]).filter((snapshot) => snapshot.side === "corp" && snapshot.validation.ok).map((snapshot) => snapshot.deckSnapshotId);
+    expect(randomRecordOne?.match.deckSetup.aiDeckPolicy).toBe("seeded_random");
+    expect(randomRecordOne?.match.deckSetup.participants?.player_b).toEqual(randomRecordTwo?.match.deckSetup.participants?.player_b);
+    expect(validRunnerIds).toContain(randomRecordOne?.match.deckSetup.participants?.player_b.runnerSnapshotId);
+    expect(validCorpIds).toContain(randomRecordOne?.match.deckSetup.participants?.player_b.corpSnapshotId);
+    expect(randomRecordOne?.match.deckSetup.runnerSnapshotId).toBe(randomRecordOne?.match.deckSetup.participants?.player_b.runnerSnapshotId);
+    expect(JSON.stringify(randomRecordOne?.match.deckSetup)).not.toContain("cards");
+    expect(JSON.stringify(randomOne)).not.toContain("cardInstances");
+  });
+
   it("creates the next private series game with a side swap and side-safe standings", async () => {
     const match = await joinedMatch("series-side-swap", { agendaPointsToWin: 2, matchFormat: "two_game_side_swap" });
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
@@ -946,6 +1046,88 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in duplicate).toBe(true);
     if (!("error" in duplicate)) throw new Error("Expected duplicate series-next rejection");
     expect(duplicate.error.code).toBe("series_next_exists");
+  });
+
+  it("keeps personal Runner/Corp deck pairs across a private side-swap series", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "series-personal-decks",
+      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicServerBaseUrl: "http://127.0.0.1:8787"
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "series-personal-decks",
+      settings: { agendaPointsToWin: 2, matchFormat: "two_game_side_swap" },
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      }
+    });
+    if (!created.joinUrl) throw new Error("Missing join URL");
+    const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp B" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+
+    const firstRecord = await service.loadForTest(created.matchId);
+    expect(firstRecord?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_a", corpPlayer: "player_b" });
+    expect(firstRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
+    expect(firstRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
+    expect(firstRecord?.match.deckSetup.participants?.player_a).toMatchObject({
+      runnerSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpSnapshotId: "demo_corp_004_snapshot_v0_6"
+    });
+    expect(firstRecord?.match.deckSetup.participants?.player_b).toMatchObject({
+      runnerSnapshotId: "demo_runner_004_snapshot_v0_6",
+      corpSnapshotId: "demo_corp_008_snapshot_v0_8"
+    });
+    expect(JSON.stringify(firstRecord?.match.deckSetup)).not.toContain("cards");
+
+    const runner = { side: "runner" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    const corp = { side: "corp" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", "mandatory");
+    await submit(service, created.matchId, corp, (action) => action.type === "end_turn", "end-turn");
+    await submit(service, created.matchId, runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
+    await submit(service, created.matchId, runner, (action) => action.type === "access_card", "access-rd");
+    const steal = await submit(service, created.matchId, runner, (action) => action.type === "steal_agenda", "steal");
+    expect(steal.actorPayload.resultSummary?.series).toMatchObject({
+      viewerPlayer: "player_a",
+      viewerWins: 1,
+      opponentWins: 0,
+      viewerAgendaPoints: 3,
+      opponentAgendaPoints: 0
+    });
+
+    const next = await service.startNextSeriesGame(created.matchId, {
+      side: runner.side,
+      sessionToken: runner.sessionToken,
+      displayName: "Teilnehmer A"
+    });
+    expect("error" in next).toBe(false);
+    if ("error" in next) throw new Error(next.error.message);
+    const nextRecord = await service.loadForTest(next.matchId);
+    expect(next.hostSide).toBe("corp");
+    expect(next.playerView.deckMetadata?.own.deckHash).toBe(firstRecord?.match.deckSetup.participants?.player_a.corp.deckHash);
+    expect(next.playerView.deckMetadata?.opponent.deckHash).toBe(firstRecord?.match.deckSetup.participants?.player_b.runner.deckHash);
+    expect(nextRecord?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
+    expect(nextRecord?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
+    expect(nextRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
+    expect(nextRecord?.privateDeckSnapshots?.participants?.player_a.corp.deckSnapshotId).toBe("demo_corp_004_snapshot_v0_6");
+    expect(nextRecord?.privateDeckSnapshots?.participants?.player_b.runner.deckSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
+    expect(nextRecord?.match.series?.results[0]).toMatchObject({
+      winner: "runner",
+      runnerPlayer: "player_a",
+      corpPlayer: "player_b",
+      runnerAgendaPoints: 3,
+      corpAgendaPoints: 0
+    });
+    expect(JSON.stringify(next)).not.toContain("cardInstances");
+    expect(JSON.stringify(nextRecord?.match.deckSetup)).not.toContain("cards");
   });
 
   it("sends side-filtered bootstrap messages over WebSocket", async () => {

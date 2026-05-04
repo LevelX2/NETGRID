@@ -22,7 +22,19 @@ import {
   type RulesBaseline,
   type Side
 } from "@netrunner/shared";
-import { defaultAgendaPointsToWin, resolveDeckSetup, setupUsesExpandedRules, setupUsesMvp08Rules, type MatchDeckSelectionInput, type ResolvedDeckSetup } from "./deck-setup";
+import {
+  deckSetupForParticipants,
+  defaultAgendaPointsToWin,
+  resolveParticipantDeckSetup,
+  setupUsesExpandedRules,
+  setupUsesMvp08Rules,
+  type AiDeckPolicy,
+  type MatchDeckSelectionInput,
+  type ParticipantDeckPairInput,
+  type ResolvedDeckSetup,
+  type ResolvedParticipantDeckPair,
+  type ResolvedParticipantDeckSetup
+} from "./deck-setup";
 
 export type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finished";
 export type HostSideSelection = Side | "random";
@@ -75,6 +87,8 @@ export type SeriesResultSummary = {
   viewerWins: number;
   opponentWins: number;
   draws: number;
+  viewerAgendaPoints: number;
+  opponentAgendaPoints: number;
   nextAvailable: boolean;
   nextMatchId?: string;
 };
@@ -110,6 +124,20 @@ export type MatchRecord = {
     corpSnapshotId: string;
     runner: DeckPublicMetadata;
     corp: DeckPublicMetadata;
+    assignment?: {
+      runnerPlayer: SeriesPlayerSlot;
+      corpPlayer: SeriesPlayerSlot;
+    };
+    participants?: Record<
+      SeriesPlayerSlot,
+      {
+        runnerSnapshotId: string;
+        corpSnapshotId: string;
+        runner: DeckPublicMetadata;
+        corp: DeckPublicMetadata;
+      }
+    >;
+    aiDeckPolicy?: AiDeckPolicy;
   };
   aiControllers?: Partial<Record<Side, PlayerController>>;
   series?: MatchSeriesState;
@@ -197,7 +225,11 @@ export type StoredMatch = {
   sessions: SessionRecord[];
   tokens: TokenRecord[];
   gameState: GameState;
-  privateDeckSnapshots?: { runner: DeckSnapshot; corp: DeckSnapshot };
+  privateDeckSnapshots?: {
+    runner: DeckSnapshot;
+    corp: DeckSnapshot;
+    participants?: Record<SeriesPlayerSlot, { runner: DeckSnapshot; corp: DeckSnapshot }>;
+  };
   eventLog: EventRecord[];
   actionReceipts: ActionReceipt[];
   undoSnapshots: UndoSnapshot[];
@@ -399,11 +431,16 @@ export class MultiplayerService {
     const mode = input.mode ?? "human_vs_human";
     const hostSide = mode === "human_runner_vs_corp_ai" ? "runner" : mode === "human_corp_vs_runner_ai" ? "corp" : input.hostSide === "random" ? deterministicHostSide(seed) : input.hostSide;
     const joinSide = opposite(hostSide);
+    const runnerPlayer = input.series?.runnerPlayer ?? (hostSide === "runner" ? "player_a" : "player_b");
+    const corpPlayer = input.series?.corpPlayer ?? (hostSide === "corp" ? "player_a" : "player_b");
+    const aiPlayer = aiPlayerForMode(mode);
+    const aiDeckPolicy = aiPlayer ? input.aiDeckPolicy ?? "selected" : undefined;
     const now = this.now();
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
-    const deckSetup = resolveDeckSetup(input);
+    const participantDecks = resolveParticipantDeckSetup(input, { seed, ...(aiPlayer ? { aiPlayer } : {}), ...(aiDeckPolicy ? { aiDeckPolicy } : {}) });
+    const deckSetup = deckSetupForParticipants(participantDecks, { runnerPlayer, corpPlayer });
     const matchFormat = input.settings?.matchFormat ?? "rules_match";
     const settings: MatchSettings = {
       agendaPointsToWin: input.settings?.agendaPointsToWin ?? (matchFormat === "two_game_side_swap" ? 7 : defaultAgendaPointsToWin(deckSetup)),
@@ -450,7 +487,10 @@ export class MultiplayerService {
           runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
           corpSnapshotId: deckSetup.corpSnapshot.deckSnapshotId,
           runner: deckSetup.runnerSnapshot.publicMetadata,
-          corp: deckSetup.corpSnapshot.publicMetadata
+          corp: deckSetup.corpSnapshot.publicMetadata,
+          assignment: { runnerPlayer, corpPlayer },
+          participants: publicParticipantDeckSetup(participantDecks),
+          ...(aiDeckPolicy ? { aiDeckPolicy } : {})
         },
         ...(mode === "human_vs_human" ? {} : { aiControllers: aiControllersFor(controllers) }),
         ...(settings.matchFormat === "two_game_side_swap"
@@ -462,8 +502,8 @@ export class MultiplayerService {
                     status: "active",
                     gameNumber: input.series.gameNumber,
                     gamesPlanned: input.series.gamesPlanned,
-                    runnerPlayer: input.series.runnerPlayer,
-                    corpPlayer: input.series.corpPlayer,
+                    runnerPlayer,
+                    corpPlayer,
                     results: clone(input.series.previousResults),
                     ...(input.series.previousMatchId ? { previousMatchId: input.series.previousMatchId } : {})
                   }
@@ -473,8 +513,8 @@ export class MultiplayerService {
                     status: "active",
                     gameNumber: 1,
                     gamesPlanned: 2,
-                    runnerPlayer: hostSide === "runner" ? "player_a" : "player_b",
-                    corpPlayer: hostSide === "corp" ? "player_a" : "player_b",
+                    runnerPlayer,
+                    corpPlayer,
                     results: []
                   }
             }
@@ -489,7 +529,11 @@ export class MultiplayerService {
         ...(joinToken ? [this.tokenRecord(matchId, joinSide, "join", joinToken, now)] : [])
       ],
       gameState,
-      privateDeckSnapshots: { runner: clone(deckSetup.runnerSnapshot), corp: clone(deckSetup.corpSnapshot) },
+      privateDeckSnapshots: {
+        runner: clone(deckSetup.runnerSnapshot),
+        corp: clone(deckSetup.corpSnapshot),
+        participants: privateParticipantDeckSetup(participantDecks)
+      },
       eventLog: gameState.eventLog.map((event) => toEventRecord(matchId, event, false)),
       actionReceipts: [],
       undoSnapshots: [],
@@ -551,6 +595,7 @@ export class MultiplayerService {
       const nextGameNumber = series.gameNumber + 1;
       const nextMode = nextModeForSideSwap(record.match.mode);
       const aiDifficulty = record.match.aiControllers?.runner?.difficulty ?? record.match.aiControllers?.corp?.difficulty ?? "normal";
+      const participantDecks = participantDeckInputsForRecord(record);
       const next = await this.createMatch({
         hostSide: nextHostSide,
         displayName: input.displayName ?? session.displayName,
@@ -558,11 +603,10 @@ export class MultiplayerService {
         mode: nextMode,
         ...(nextMode === "human_runner_vs_corp_ai" ? { corpDifficulty: aiDifficulty } : {}),
         ...(nextMode === "human_corp_vs_runner_ai" ? { runnerDifficulty: aiDifficulty } : {}),
+        ...(record.match.deckSetup.aiDeckPolicy ? { aiDeckPolicy: record.match.deckSetup.aiDeckPolicy } : {}),
         settings: record.match.settings,
-        ...(record.privateDeckSnapshots?.runner ? { runnerDeckSnapshot: record.privateDeckSnapshots.runner } : {}),
-        ...(record.privateDeckSnapshots?.corp ? { corpDeckSnapshot: record.privateDeckSnapshots.corp } : {}),
-        runnerDeckSnapshotId: record.match.deckSetup.runnerSnapshotId,
-        corpDeckSnapshotId: record.match.deckSetup.corpSnapshotId,
+        participantADecks: participantDecks.player_a,
+        participantBDecks: participantDecks.player_b,
         series: {
           seriesId: series.seriesId,
           gameNumber: nextGameNumber,
@@ -1149,11 +1193,14 @@ function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSu
   if (!series) throw new Error("series_missing");
   const viewerPlayer = seriesPlayerForSide(series, viewerSide);
   const wins = { player_a: 0, player_b: 0 };
+  const agendaPoints = { player_a: 0, player_b: 0 };
   let draws = 0;
   for (const result of series.results) {
     const winningPlayer = winningSeriesPlayer(result);
     if (winningPlayer === "draw") draws += 1;
     else wins[winningPlayer] += 1;
+    agendaPoints[result.runnerPlayer] += result.runnerAgendaPoints;
+    agendaPoints[result.corpPlayer] += result.corpAgendaPoints;
   }
   const opponentPlayer = oppositeSeriesPlayer(viewerPlayer);
   return {
@@ -1166,6 +1213,8 @@ function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSu
     viewerWins: wins[viewerPlayer],
     opponentWins: wins[opponentPlayer],
     draws,
+    viewerAgendaPoints: agendaPoints[viewerPlayer],
+    opponentAgendaPoints: agendaPoints[opponentPlayer],
     nextAvailable: series.status === "between_games" && !series.nextMatchId,
     ...(series.nextMatchId ? { nextMatchId: series.nextMatchId } : {})
   };
@@ -1182,6 +1231,51 @@ function seriesPlayerForSide(series: MatchSeriesState, side: Side): SeriesPlayer
 
 function oppositeSeriesPlayer(player: SeriesPlayerSlot): SeriesPlayerSlot {
   return player === "player_a" ? "player_b" : "player_a";
+}
+
+function publicParticipantDeckSetup(participants: ResolvedParticipantDeckSetup): NonNullable<MatchRecord["deckSetup"]["participants"]> {
+  return {
+    player_a: publicParticipantDeckPair(participants.player_a),
+    player_b: publicParticipantDeckPair(participants.player_b)
+  };
+}
+
+function publicParticipantDeckPair(pair: ResolvedParticipantDeckPair): NonNullable<MatchRecord["deckSetup"]["participants"]>[SeriesPlayerSlot] {
+  return {
+    runnerSnapshotId: pair.runnerSnapshot.deckSnapshotId,
+    corpSnapshotId: pair.corpSnapshot.deckSnapshotId,
+    runner: pair.runnerSnapshot.publicMetadata,
+    corp: pair.corpSnapshot.publicMetadata
+  };
+}
+
+function privateParticipantDeckSetup(participants: ResolvedParticipantDeckSetup): NonNullable<NonNullable<StoredMatch["privateDeckSnapshots"]>["participants"]> {
+  return {
+    player_a: { runner: clone(participants.player_a.runnerSnapshot), corp: clone(participants.player_a.corpSnapshot) },
+    player_b: { runner: clone(participants.player_b.runnerSnapshot), corp: clone(participants.player_b.corpSnapshot) }
+  };
+}
+
+function participantDeckInputsForRecord(record: StoredMatch): Record<SeriesPlayerSlot, ParticipantDeckPairInput> {
+  const participants = record.privateDeckSnapshots?.participants;
+  if (participants) {
+    return {
+      player_a: { runnerDeckSnapshot: clone(participants.player_a.runner), corpDeckSnapshot: clone(participants.player_a.corp) },
+      player_b: { runnerDeckSnapshot: clone(participants.player_b.runner), corpDeckSnapshot: clone(participants.player_b.corp) }
+    };
+  }
+  const fallbackRunner = record.privateDeckSnapshots?.runner;
+  const fallbackCorp = record.privateDeckSnapshots?.corp;
+  if (fallbackRunner && fallbackCorp) {
+    return {
+      player_a: { runnerDeckSnapshot: clone(fallbackRunner), corpDeckSnapshot: clone(fallbackCorp) },
+      player_b: { runnerDeckSnapshot: clone(fallbackRunner), corpDeckSnapshot: clone(fallbackCorp) }
+    };
+  }
+  return {
+    player_a: { runnerDeckSnapshotId: record.match.deckSetup.runnerSnapshotId, corpDeckSnapshotId: record.match.deckSetup.corpSnapshotId },
+    player_b: { runnerDeckSnapshotId: record.match.deckSetup.runnerSnapshotId, corpDeckSnapshotId: record.match.deckSetup.corpSnapshotId }
+  };
 }
 
 function resultReason(state: GameState, winner: Side | "draw", runnerAgendaPoints: number, corpAgendaPoints: number, agendaPointsToWin: number): GameResultReason {
@@ -1209,6 +1303,10 @@ function nextModeForSideSwap(mode: MatchMode): MatchMode {
   if (mode === "human_runner_vs_corp_ai") return "human_corp_vs_runner_ai";
   if (mode === "human_corp_vs_runner_ai") return "human_runner_vs_corp_ai";
   return "human_vs_human";
+}
+
+function aiPlayerForMode(mode: MatchMode): SeriesPlayerSlot | undefined {
+  return mode === "human_vs_human" ? undefined : "player_b";
 }
 
 function deterministicHostSide(seed: string): Side {

@@ -48,11 +48,11 @@ const SESSION_KEY = "netrunner-mvp-0-3-session";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
 const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
-const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_004_snapshot_v0_6";
-const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_004_snapshot_v0_6";
+const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
+const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
-const APP_STATUS_LABEL = "V0.99/S01";
+const APP_STATUS_LABEL = "V1.0";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -62,6 +62,7 @@ type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "active" | "finis
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 type AiDifficulty = "easy" | "normal" | "hard";
+type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
@@ -76,6 +77,8 @@ type SeriesResultSummary = {
   viewerWins: number;
   opponentWins: number;
   draws: number;
+  viewerAgendaPoints: number;
+  opponentAgendaPoints: number;
   nextAvailable: boolean;
   nextMatchId?: string;
 };
@@ -671,6 +674,7 @@ export default function Page() {
   const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
+  const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
   const [displayName, setDisplayName] = useState("Runner");
   const [hostSide, setHostSide] = useState<Side | "random">("runner");
   const [seed, setSeed] = useState("mvp-0.3-ai-demo");
@@ -696,8 +700,12 @@ export default function Page() {
   const [deckTemplates, setDeckTemplates] = useState<DeckTemplate[]>([]);
   const [runnerDeckSource, setRunnerDeckSource] = useState<"snapshot" | "local">("snapshot");
   const [corpDeckSource, setCorpDeckSource] = useState<"snapshot" | "local">("snapshot");
+  const [participantBRunnerDeckSource, setParticipantBRunnerDeckSource] = useState<"snapshot" | "local">("snapshot");
+  const [participantBCorpDeckSource, setParticipantBCorpDeckSource] = useState<"snapshot" | "local">("snapshot");
   const [selectedRunnerSnapshotId, setSelectedRunnerSnapshotId] = useState(DEFAULT_RUNNER_SNAPSHOT_ID);
   const [selectedCorpSnapshotId, setSelectedCorpSnapshotId] = useState(DEFAULT_CORP_SNAPSHOT_ID);
+  const [selectedParticipantBRunnerSnapshotId, setSelectedParticipantBRunnerSnapshotId] = useState(DEFAULT_RUNNER_SNAPSHOT_ID);
+  const [selectedParticipantBCorpSnapshotId, setSelectedParticipantBCorpSnapshotId] = useState(DEFAULT_CORP_SNAPSHOT_ID);
   const [runnerLocalSnapshot, setRunnerLocalSnapshot] = useState<DeckSnapshot | null>(null);
   const [corpLocalSnapshot, setCorpLocalSnapshot] = useState<DeckSnapshot | null>(null);
   const [localDecks, setLocalDecks] = useState<EditableDeck[]>([]);
@@ -879,6 +887,8 @@ export default function Page() {
         setDeckSnapshots(data.snapshots ?? []);
         if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID)) setSelectedRunnerSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "runner")?.deckSnapshotId ?? "");
         if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID)) setSelectedCorpSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "corp")?.deckSnapshotId ?? "");
+        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID)) setSelectedParticipantBRunnerSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "runner")?.deckSnapshotId ?? "");
+        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID)) setSelectedParticipantBCorpSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "corp")?.deckSnapshotId ?? "");
       })
       .catch(() => setDeckSnapshots([]));
     void fetch("/api/decks/templates", { cache: "no-store" })
@@ -890,12 +900,19 @@ export default function Page() {
   const activeView = payload?.playerView;
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
-  const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner");
-  const corpSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "corp");
+  const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok);
+  const corpSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "corp" && snapshot.validation.ok);
+  const defaultCorpSnapshot = corpSnapshots.find((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID) ?? corpSnapshots[0] ?? null;
   const selectedRunnerSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
-  const selectedCorpSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedCorpSnapshotId) ?? corpSnapshots[0] ?? null;
-  const effectiveRunnerSnapshot = runnerDeckSource === "local" ? runnerLocalSnapshot : selectedRunnerSnapshot;
-  const effectiveCorpSnapshot = corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
+  const selectedCorpSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedCorpSnapshotId) ?? defaultCorpSnapshot;
+  const selectedParticipantBRunnerSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedParticipantBRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
+  const selectedParticipantBCorpSnapshot = deckSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedParticipantBCorpSnapshotId) ?? corpSnapshots[0] ?? null;
+  const participantARunnerSnapshot = runnerDeckSource === "local" ? runnerLocalSnapshot : selectedRunnerSnapshot;
+  const participantACorpSnapshot = corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
+  const participantBRunnerSnapshot = participantBRunnerDeckSource === "local" ? runnerLocalSnapshot : selectedParticipantBRunnerSnapshot;
+  const participantBCorpSnapshot = participantBCorpDeckSource === "local" ? corpLocalSnapshot : selectedParticipantBCorpSnapshot;
+  const hasAiOpponent = gameMode === "human_runner_vs_corp_ai" || gameMode === "human_corp_vs_runner_ai" || gameMode === "ai_vs_ai";
+  const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const playableCatalogCards = useMemo(
     () => allCatalogCards.filter((card) => card.statuses.playable && card.statuses.deck_legal && (!selectedLocalDeck || card.side === selectedLocalDeck.side) && card.type !== "identity"),
@@ -918,7 +935,8 @@ export default function Page() {
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
-  const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
+  const effectiveCurrentCorpSnapshot = currentCorpSnapshotForSetup();
+  const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCurrentCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -1036,7 +1054,7 @@ export default function Page() {
       runnerDifficulty,
       corpDifficulty,
       ...matchDeckPayload(),
-      agendaPointsToWin: effectiveAgendaTarget ?? 7,
+      ...(effectiveAgendaTarget ? { agendaPointsToWin: effectiveAgendaTarget } : {}),
       maxActions: 120
     });
     setSimulation(result.summary);
@@ -1044,10 +1062,66 @@ export default function Page() {
   };
 
   function matchDeckPayload() {
+    const current = currentSideDeckPayload();
+    if (gameMode === "ai_vs_ai") return simulationDeckPayload();
     return {
-      ...(runnerDeckSource === "local" && runnerLocalSnapshot ? { runnerDeckSnapshot: runnerLocalSnapshot } : { runnerDeckSnapshotId: selectedRunnerSnapshotId }),
-      ...(corpDeckSource === "local" && corpLocalSnapshot ? { corpDeckSnapshot: corpLocalSnapshot } : { corpDeckSnapshotId: selectedCorpSnapshotId })
+      ...current,
+      participantADecks: deckPairPayload(runnerDeckSource, selectedRunnerSnapshotId, corpDeckSource, selectedCorpSnapshotId),
+      ...(!hasAiOpponent || aiDeckPolicy === "selected"
+        ? {
+            participantBDecks: deckPairPayload(
+              participantBRunnerDeckSource,
+              selectedParticipantBRunnerSnapshotId,
+              participantBCorpDeckSource,
+              selectedParticipantBCorpSnapshotId
+            )
+          }
+        : {}),
+      ...(hasAiOpponent ? { aiDeckPolicy } : {})
     };
+  }
+
+  function simulationDeckPayload() {
+    if (aiDeckPolicy === "fixed" || aiDeckPolicy === "seeded_random") return { aiDeckPolicy };
+    return {
+      aiDeckPolicy,
+      ...deckSidePayload("runner", runnerDeckSource, selectedRunnerSnapshotId),
+      ...deckSidePayload("corp", participantBCorpDeckSource, selectedParticipantBCorpSnapshotId)
+    };
+  }
+
+  function currentSideDeckPayload() {
+    const runnerSlot =
+      gameMode === "human_corp_vs_runner_ai" || (gameMode === "human_vs_human" && hostSide === "corp")
+        ? { source: participantBRunnerDeckSource, snapshotId: selectedParticipantBRunnerSnapshotId }
+        : { source: runnerDeckSource, snapshotId: selectedRunnerSnapshotId };
+    const corpSlot =
+      gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai" || (gameMode === "human_vs_human" && hostSide !== "corp")
+        ? { source: participantBCorpDeckSource, snapshotId: selectedParticipantBCorpSnapshotId }
+        : { source: corpDeckSource, snapshotId: selectedCorpSnapshotId };
+    return {
+      ...deckSidePayload("runner", runnerSlot.source, runnerSlot.snapshotId),
+      ...deckSidePayload("corp", corpSlot.source, corpSlot.snapshotId)
+    };
+  }
+
+  function currentCorpSnapshotForSetup(): DeckSnapshot | null {
+    if ((gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai") && aiDeckPolicy === "fixed") return defaultCorpSnapshot;
+    if ((gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai") && aiDeckPolicy === "seeded_random") return matchFormat === "single_game" ? null : defaultCorpSnapshot;
+    if (gameMode === "human_corp_vs_runner_ai" || (gameMode === "human_vs_human" && hostSide === "corp")) return participantACorpSnapshot;
+    return participantBCorpSnapshot;
+  }
+
+  function deckPairPayload(runnerSource: "snapshot" | "local", runnerSnapshotId: string, corpSource: "snapshot" | "local", corpSnapshotId: string) {
+    return {
+      ...deckSidePayload("runner", runnerSource, runnerSnapshotId),
+      ...deckSidePayload("corp", corpSource, corpSnapshotId)
+    };
+  }
+
+  function deckSidePayload(side: Side, source: "snapshot" | "local", snapshotId: string) {
+    if (side === "runner") return source === "local" && runnerLocalSnapshot ? { runnerDeckSnapshot: runnerLocalSnapshot } : { runnerDeckSnapshotId: snapshotId };
+    return source === "local" && corpLocalSnapshot ? { corpDeckSnapshot: corpLocalSnapshot } : { corpDeckSnapshotId: snapshotId };
   }
 
   const joinMatch = async () => {
@@ -1482,47 +1556,68 @@ export default function Page() {
                   Seed
                   <input value={seed} onChange={(event) => setSeed(event.target.value)} />
                 </label>
-                <label>
-                  Runner-Deck
-                  <select
-                    value={runnerDeckSource === "local" && runnerLocalSnapshot ? "local" : selectedRunnerSnapshotId}
-                    onChange={(event) => {
-                      if (event.target.value === "local") setRunnerDeckSource("local");
-                      else {
-                        setRunnerDeckSource("snapshot");
-                        setSelectedRunnerSnapshotId(event.target.value);
-                      }
-                    }}
-                  >
-                    {runnerSnapshots.map((snapshot) => (
-                      <option value={snapshot.deckSnapshotId} key={snapshot.deckSnapshotId}>
-                        {snapshot.name}
-                      </option>
-                    ))}
-                    {runnerLocalSnapshot ? <option value="local">Lokaler Snapshot · {runnerLocalSnapshot.name}</option> : null}
-                  </select>
-                </label>
-                <label>
-                  Corp-Deck
-                  <select
-                    value={corpDeckSource === "local" && corpLocalSnapshot ? "local" : selectedCorpSnapshotId}
-                    onChange={(event) => {
-                      if (event.target.value === "local") setCorpDeckSource("local");
-                      else {
-                        setCorpDeckSource("snapshot");
-                        setSelectedCorpSnapshotId(event.target.value);
-                      }
-                    }}
-                  >
-                    {corpSnapshots.map((snapshot) => (
-                      <option value={snapshot.deckSnapshotId} key={snapshot.deckSnapshotId}>
-                        {snapshot.name}
-                      </option>
-                    ))}
-                    {corpLocalSnapshot ? <option value="local">Lokaler Snapshot · {corpLocalSnapshot.name}</option> : null}
-                  </select>
-                </label>
-                <DeckMetadataLine runner={effectiveRunnerSnapshot?.publicMetadata} corp={effectiveCorpSnapshot?.publicMetadata} />
+                {hasAiOpponent ? (
+                  <label>
+                    KI-Decks
+                    <select value={aiDeckPolicy} onChange={(event) => setAiDeckPolicy(event.target.value as AiDeckPolicy)}>
+                      <option value="selected">Explizit gewählte KI-Decks</option>
+                      <option value="fixed">Feste Standard-Decks</option>
+                      <option value="seeded_random">Deterministisch zufällig</option>
+                    </select>
+                  </label>
+                ) : null}
+                <div className="deckSlotGrid">
+                  <DeckSlotSelect
+                    label="Teilnehmer A · Runner-Deck"
+                    snapshots={runnerSnapshots}
+                    source={runnerDeckSource}
+                    selectedSnapshotId={selectedRunnerSnapshotId}
+                    localSnapshot={runnerLocalSnapshot}
+                    onSource={setRunnerDeckSource}
+                    onSnapshot={setSelectedRunnerSnapshotId}
+                  />
+                  <DeckSlotSelect
+                    label="Teilnehmer A · Corp-Deck"
+                    snapshots={corpSnapshots}
+                    source={corpDeckSource}
+                    selectedSnapshotId={selectedCorpSnapshotId}
+                    localSnapshot={corpLocalSnapshot}
+                    onSource={setCorpDeckSource}
+                    onSnapshot={setSelectedCorpSnapshotId}
+                  />
+                  <DeckSlotSelect
+                    label={hasAiOpponent ? "Teilnehmer B/KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
+                    snapshots={runnerSnapshots}
+                    source={participantBRunnerDeckSource}
+                    selectedSnapshotId={selectedParticipantBRunnerSnapshotId}
+                    localSnapshot={runnerLocalSnapshot}
+                    disabled={aiSlotDisabled}
+                    onSource={setParticipantBRunnerDeckSource}
+                    onSnapshot={setSelectedParticipantBRunnerSnapshotId}
+                  />
+                  <DeckSlotSelect
+                    label={hasAiOpponent ? "Teilnehmer B/KI · Corp-Deck" : "Teilnehmer B · Corp-Deck"}
+                    snapshots={corpSnapshots}
+                    source={participantBCorpDeckSource}
+                    selectedSnapshotId={selectedParticipantBCorpSnapshotId}
+                    localSnapshot={corpLocalSnapshot}
+                    disabled={aiSlotDisabled}
+                    onSource={setParticipantBCorpDeckSource}
+                    onSnapshot={setSelectedParticipantBCorpSnapshotId}
+                  />
+                </div>
+                <DeckMetadataLine
+                  entries={[
+                    { label: "A Runner", metadata: participantARunnerSnapshot?.publicMetadata },
+                    { label: "A Corp", metadata: participantACorpSnapshot?.publicMetadata },
+                    ...(aiSlotDisabled
+                      ? []
+                      : [
+                          { label: hasAiOpponent ? "B/KI Runner" : "B Runner", metadata: participantBRunnerSnapshot?.publicMetadata },
+                          { label: hasAiOpponent ? "B/KI Corp" : "B Corp", metadata: participantBCorpSnapshot?.publicMetadata }
+                        ])
+                  ]}
+                />
                 <button className="button primary wide" onClick={createMatch}>
                   {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
                   {gameMode === "ai_vs_ai" ? "Simulation starten" : "Match erstellen"}
@@ -1886,6 +1981,8 @@ function GameOverModal({
               <span>Du {result.series.viewerWins}</span>
               <span>Gegenseite {result.series.opponentWins}</span>
               <span>Draws {result.series.draws}</span>
+              <span>Agenda Du {result.series.viewerAgendaPoints}</span>
+              <span>Agenda Gegenseite {result.series.opponentAgendaPoints}</span>
             </div>
           </div>
         ) : null}
@@ -2613,20 +2710,60 @@ function CatalogPanel({
   );
 }
 
-function DeckMetadataLine({ runner, corp }: { runner: DeckPublicMetadata | undefined; corp: DeckPublicMetadata | undefined }) {
-  if (!runner && !corp) return null;
+function DeckSlotSelect({
+  label,
+  snapshots,
+  source,
+  selectedSnapshotId,
+  localSnapshot,
+  disabled = false,
+  onSource,
+  onSnapshot
+}: {
+  label: string;
+  snapshots: DeckSnapshot[];
+  source: "snapshot" | "local";
+  selectedSnapshotId: string;
+  localSnapshot: DeckSnapshot | null;
+  disabled?: boolean;
+  onSource(value: "snapshot" | "local"): void;
+  onSnapshot(value: string): void;
+}) {
+  return (
+    <label className="deckSlotSelect">
+      {label}
+      <select
+        value={source === "local" && localSnapshot ? "local" : selectedSnapshotId}
+        disabled={disabled}
+        onChange={(event) => {
+          if (event.target.value === "local") onSource("local");
+          else {
+            onSource("snapshot");
+            onSnapshot(event.target.value);
+          }
+        }}
+      >
+        {snapshots.map((snapshot) => (
+          <option value={snapshot.deckSnapshotId} key={snapshot.deckSnapshotId}>
+            {snapshot.name}
+          </option>
+        ))}
+        {localSnapshot ? <option value="local">Lokaler Snapshot · {localSnapshot.name}</option> : null}
+      </select>
+    </label>
+  );
+}
+
+function DeckMetadataLine({ entries }: { entries: Array<{ label: string; metadata: DeckPublicMetadata | undefined }> }) {
+  const visible = entries.filter((entry) => entry.metadata);
+  if (visible.length === 0) return null;
   return (
     <div className="deckMetadataLine">
-      {runner ? (
-        <span>
-          Runner: {runner.deckName} · {runner.deckHash}
+      {visible.map((entry) => (
+        <span key={entry.label}>
+          {entry.label}: {entry.metadata!.deckName} · {entry.metadata!.deckHash}
         </span>
-      ) : null}
-      {corp ? (
-        <span>
-          Corp: {corp.deckName} · {corp.deckHash}
-        </span>
-      ) : null}
+      ))}
     </div>
   );
 }

@@ -49,6 +49,24 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("resultSummary.sessionToken");
   });
 
+  it("keeps the V1.0 deck and match setup explicit without adding browser authority", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0"');
+    expect(page).toContain("Teilnehmer A · Runner-Deck");
+    expect(page).toContain("Teilnehmer A · Corp-Deck");
+    expect(page).toContain("Teilnehmer B/KI · Runner-Deck");
+    expect(page).toContain("Teilnehmer B/KI · Corp-Deck");
+    expect(page).toContain("KI-Decks");
+    expect(page).toContain("Deterministisch zufällig");
+    expect(page).toContain("participantADecks");
+    expect(page).toContain("participantBDecks");
+    expect(page).toContain("aiDeckPolicy");
+    expect(page).toContain("viewerAgendaPoints");
+    expect(page).toContain("opponentAgendaPoints");
+    expect(page).not.toContain("applyAction(");
+    expect(page).not.toContain("createGame(");
+  });
+
   it("renders the player chronicle without normal-mode technical event metadata", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const chronicle = readFileSync("apps/web/app/chronicle.ts", "utf8");

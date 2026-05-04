@@ -13,7 +13,7 @@ import {
   type SubmitActionResult,
   type UndoResult
 } from "./multiplayer";
-import { defaultAgendaPointsToWin, resolveDeckSetup, type MatchDeckSelectionInput } from "./deck-setup";
+import { defaultAgendaPointsToWin, resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
 import type { Side } from "@netrunner/shared";
 import type { AiDifficulty } from "@netrunner/shared";
 
@@ -337,7 +337,8 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
       if (isDifficulty(body.corpDifficulty)) config.corpDifficulty = body.corpDifficulty;
       const deckSelection = deckSelectionFromBody(body);
       if (Object.keys(deckSelection).length > 0) {
-        const deckSetup = resolveDeckSetup(deckSelection);
+        const aiDeckPolicy = aiDeckPolicyFromValue(body.aiDeckPolicy);
+        const deckSetup = resolveDeckSetup(deckSelection, { seed: config.seed ?? "ai-vs-ai-smoke", ...(aiDeckPolicy ? { aiDeckPolicy } : {}) });
         config.runnerDeck = deckSetup.runnerDeck;
         config.corpDeck = deckSetup.corpDeck;
         config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
@@ -469,9 +470,30 @@ function isDifficulty(value: unknown): value is AiDifficulty {
 
 function deckSelectionFromBody(body: Record<string, unknown>): MatchDeckSelectionInput {
   const selection: MatchDeckSelectionInput = {};
+  const aiDeckPolicy = aiDeckPolicyFromValue(body.aiDeckPolicy);
+  if (aiDeckPolicy) selection.aiDeckPolicy = aiDeckPolicy;
   if (typeof body.runnerDeckSnapshotId === "string") selection.runnerDeckSnapshotId = body.runnerDeckSnapshotId;
   if (typeof body.corpDeckSnapshotId === "string") selection.corpDeckSnapshotId = body.corpDeckSnapshotId;
   if (body.runnerDeckSnapshot && typeof body.runnerDeckSnapshot === "object") selection.runnerDeckSnapshot = body.runnerDeckSnapshot as NonNullable<MatchDeckSelectionInput["runnerDeckSnapshot"]>;
   if (body.corpDeckSnapshot && typeof body.corpDeckSnapshot === "object") selection.corpDeckSnapshot = body.corpDeckSnapshot as NonNullable<MatchDeckSelectionInput["corpDeckSnapshot"]>;
+  const participantADecks = deckPairFromBody(body.participantADecks);
+  const participantBDecks = deckPairFromBody(body.participantBDecks);
+  if (participantADecks) selection.participantADecks = participantADecks;
+  if (participantBDecks) selection.participantBDecks = participantBDecks;
   return selection;
+}
+
+function deckPairFromBody(value: unknown): ParticipantDeckPairInput | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const body = value as Record<string, unknown>;
+  const selection: ParticipantDeckPairInput = {};
+  if (typeof body.runnerDeckSnapshotId === "string") selection.runnerDeckSnapshotId = body.runnerDeckSnapshotId;
+  if (typeof body.corpDeckSnapshotId === "string") selection.corpDeckSnapshotId = body.corpDeckSnapshotId;
+  if (body.runnerDeckSnapshot && typeof body.runnerDeckSnapshot === "object") selection.runnerDeckSnapshot = body.runnerDeckSnapshot as NonNullable<ParticipantDeckPairInput["runnerDeckSnapshot"]>;
+  if (body.corpDeckSnapshot && typeof body.corpDeckSnapshot === "object") selection.corpDeckSnapshot = body.corpDeckSnapshot as NonNullable<ParticipantDeckPairInput["corpDeckSnapshot"]>;
+  return Object.keys(selection).length > 0 ? selection : undefined;
+}
+
+function aiDeckPolicyFromValue(value: unknown): AiDeckPolicy | undefined {
+  return value === "fixed" || value === "selected" || value === "seeded_random" ? value : undefined;
 }

@@ -258,7 +258,7 @@ select {
 }
 
 .setupPanel {
-  width: min(540px, 100%);
+  width: min(780px, 100%);
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
@@ -357,6 +357,17 @@ select {
   gap: 6px;
   color: var(--muted);
   font-size: 13px;
+}
+
+.deckSlotGrid {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.deckSlotSelect {
+  min-width: 0;
 }
 
 .notice {
@@ -2689,7 +2700,8 @@ select,
     grid-template-columns: 1fr;
   }
 
-  .deckSelectGrid {
+  .deckSelectGrid,
+  .deckSlotGrid {
     grid-template-columns: 1fr;
   }
 

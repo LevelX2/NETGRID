@@ -353,3 +353,11 @@ Der lokale O:NR-v1-Testzugang wurde für privaten Gebrauch als erlaubter lokaler
 Ergänzt wurde ein Server-Matchstart-Smoke mit lokalen O:NR-Deck-Snapshots. Die Nutzung bleibt privat/lokal; ignorierte O:NR-Katalog- und Bilddaten werden nicht versioniert und nicht öffentlich freigegeben. Offen bleiben AI-/Multiplayer-Smokes, lokales Manifest/Review und die Deckpaar-/KI-Deckpolitik für private Serien.
 
 Checks: `corepack pnpm install`, `corepack pnpm --filter @netrunner/catalog test`, `corepack pnpm --filter @netrunner/server test`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build` und `corepack pnpm lint` bestanden. Der Gesamttestlauf umfasst 171 Tests. Beim Build bleibt die bekannte Turbopack-NFT-Warnung zur bestehenden `card-images`-Route.
+
+## [2026-05-04] phase-v1.0-final | Deck- und Match-Setup stabilisiert
+
+V1.0 wurde umgesetzt und final dokumentiert. Die Produktentscheidungen sind festgelegt: Serien werden autoritativ nach Siegen/Niederlagen/Draws gewertet, aggregierte Agenda-Punkte werden gespeichert und angezeigt, aber nicht als Tie-Breaker genutzt. KI-Decks unterstützen `fixed`, `selected` und `seeded_random`. Die UI modelliert vier Slots: Teilnehmer A/B jeweils mit Runner- und Corp-Deck.
+
+Technisch neu sind persönliche Deckpaare in `participantADecks` und `participantBDecks`, side-swap-feste Serien-Folgespiele, deterministische KI-Random-Auswahl aus validierten eingefrorenen Snapshots, Matchstart-Angebote nur für validierte Snapshots sowie V1.0-Start-UI mit vier Deckslots. Der private lokale O:NR-v1-Pfad wurde mit AI-/Multiplayer-Smokes, Manifest-/Review-Abgleich und Hidden-Info-Regressionen gehärtet.
+
+Browser-Smoke bestanden: Deck aus Template kopiert, geändert, validiert, für Match Setup übernommen und Runner-vs-Corp-KI-Match gestartet. Erstellt wurde `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`; README, Codex-Status, V1.0-Plan, Wissensindex und aktueller Projektstatus wurden aktualisiert. Checks: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` mit 175 Tests und `corepack pnpm build` bestanden. Die frühere Turbopack-NFT-Warnung zur bestehenden `card-images`-Route ist durch feste repo-relative Datenpfade behoben.

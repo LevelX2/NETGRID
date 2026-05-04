@@ -381,7 +381,9 @@ function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationS
     config.corpDeck?.id.includes("_094") ||
     config.corpDeck?.id.includes("_v0_94") ||
     config.runnerDeck?.cards.some((card) => card.id.startsWith("v094_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("v094_"))
+    config.corpDeck?.cards.some((card) => card.id.startsWith("v094_")) ||
+    config.runnerDeck?.cards.some((card) => card.id.startsWith("onr_v1_")) ||
+    config.corpDeck?.cards.some((card) => card.id.startsWith("onr_v1_"))
   ) {
     return "0.94.0";
   }
