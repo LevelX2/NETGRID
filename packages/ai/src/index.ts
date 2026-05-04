@@ -96,8 +96,8 @@ export type AiSimulationConfig = {
   corpDifficulty?: AiDifficulty;
   runnerProfileId?: string;
   corpProfileId?: string;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -126,7 +126,7 @@ export type AiSimulationSummary = {
     stateHashAfter: string;
   }>;
   errors: string[];
-  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0";
+  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
   metrics: AiQualityMetrics;
 };
 
@@ -243,6 +243,7 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
       side,
       actionId: action.actionId,
       clientKnownStateVersion: state.stateVersion,
+      ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
       idempotencyKey: `ai-sim-${index}`
     });
     if (!result.ok) {
@@ -315,6 +316,28 @@ export function simulateAiSoak(config: Partial<AiSimulationConfig> = {}): AiSoak
 
 function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationSummary["cardPoolVersion"] {
   if (
+    config.runnerDeck?.id.includes("_096") ||
+    config.runnerDeck?.id.includes("_v0_96") ||
+    config.corpDeck?.id.includes("_096") ||
+    config.corpDeck?.id.includes("_v0_96") ||
+    config.runnerDeck?.cards.some((card) => card.id.startsWith("v096_")) ||
+    config.corpDeck?.cards.some((card) => card.id.startsWith("v096_")) ||
+    config.runnerDeckId === "demo_runner_096" ||
+    config.corpDeckId === "demo_corp_096"
+  ) {
+    return "0.96.0";
+  }
+  if (
+    config.runnerDeck?.id.includes("_095") ||
+    config.runnerDeck?.id.includes("_v0_95") ||
+    config.corpDeck?.id.includes("_095") ||
+    config.corpDeck?.id.includes("_v0_95") ||
+    config.runnerDeck?.cards.some((card) => card.id.startsWith("v095_")) ||
+    config.corpDeck?.cards.some((card) => card.id.startsWith("v095_"))
+  ) {
+    return "0.95.0";
+  }
+  if (
     config.runnerDeck?.id.includes("_094") ||
     config.runnerDeck?.id.includes("_v0_94") ||
     config.corpDeck?.id.includes("_094") ||
@@ -346,8 +369,10 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
     .filter((candidate) => candidate.action && candidate.score > 200)
     .sort((left, right) => right.score - left.score || compareAction(left.action!, right.action!))[0];
   if (choice?.action) {
+    const selectedChoices = selectedChoicesForDecision(input, choice.action);
     return {
       actionId: choice.action.actionId,
+      ...(selectedChoices ? { selectedChoices } : {}),
       reasonCode: choice.reasonCode,
       explanation: choice.explanation,
       consideredActionIds,
@@ -376,8 +401,10 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
       reason: "fallback.no_legal_action"
     };
   }
+  const selectedChoices = selectedChoicesForDecision(input, fallback);
   return {
     actionId: fallback.actionId,
+    ...(selectedChoices ? { selectedChoices } : {}),
     reasonCode: "fallback.first_legal_action",
     explanation: "Die erste stabile LegalAction wird als Fallback gewählt.",
     consideredActionIds,
@@ -389,6 +416,45 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
     confidence: 0.2,
     reason: "fallback.first_legal_action"
   };
+}
+
+function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction): AiDecision["selectedChoices"] | undefined {
+  const choice = input.playerView.pendingChoice;
+  if (action.type !== "resolve_choice" || !choice) return undefined;
+  if (choice.kind !== "bid_amount") {
+    const firstOption = choice.options[0];
+    return firstOption ? { choiceId: choice.choiceId, selectedOptionIds: [firstOption.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
+
+  const bidOptions = choice.options
+    .map((option) => ({ id: option.id, amount: typeof option.value === "number" ? option.value : Number.NaN }))
+    .filter((option) => Number.isInteger(option.amount) && option.amount >= 0)
+    .sort((left, right) => left.amount - right.amount);
+  const maxBid = bidOptions.at(-1)?.amount ?? 0;
+  let desired = 0;
+  if (input.side === "corp") {
+    desired = input.difficulty === "hard" ? Math.min(2, maxBid) : input.difficulty === "normal" ? Math.min(1, maxBid) : 0;
+  } else {
+    const traceContext = latestTraceContext(input);
+    const tieBid = Math.max(0, (traceContext.traceStrength ?? 0) - (traceContext.runnerLink ?? 0));
+    desired = input.difficulty === "easy" ? 0 : Math.min(maxBid, tieBid);
+  }
+  const selected = bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
+  return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+}
+
+function latestTraceContext(input: AiDecisionInput): { traceStrength?: number; runnerLink?: number } {
+  for (const event of input.eventTail.slice().reverse()) {
+    const traceStrength = event.publicPayload.traceStrength;
+    const runnerLink = event.publicPayload.runnerLink;
+    if (typeof traceStrength === "number" || typeof runnerLink === "number") {
+      return {
+        ...(typeof traceStrength === "number" ? { traceStrength } : {}),
+        ...(typeof runnerLink === "number" ? { runnerLink } : {})
+      };
+    }
+  }
+  return {};
 }
 
 function scoreActions(input: AiDecisionInput, side: Side): RankedChoice[] {
@@ -405,6 +471,12 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
   const evidence = [`difficulty:${input.difficulty}`, `credits:${features.credits}`, `clicks:${features.clicks}`];
 
   switch (action.type) {
+    case "resolve_choice":
+      score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : 620;
+      reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "runner.trace.bid_visible_amount" : "runner.choice.resolve";
+      explanation = "Der Runner beantwortet eine sichtbare legale Choice.";
+      evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+      break;
     case "steal_agenda":
       score = 1000;
       reasonCode = "runner.access.steal_agenda";
@@ -499,6 +571,12 @@ function scoreCorpAction(input: AiDecisionInput, features: AiFeatures, action: L
   const evidence = [`difficulty:${input.difficulty}`, `credits:${features.credits}`, `clicks:${features.clicks}`];
 
   switch (action.type) {
+    case "resolve_choice":
+      score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : 620;
+      reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "corp.trace.bid_visible_amount" : "corp.choice.resolve";
+      explanation = "Die Corp beantwortet eine sichtbare legale Choice.";
+      evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+      break;
     case "mandatory_draw":
       score = 1000;
       reasonCode = "corp.mandatory_draw";

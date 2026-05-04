@@ -62,7 +62,9 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(input.playerView.pendingChoice?.choiceId).toBe("choice_v093_runner");
     expect(input.legalActions.map((action) => action.type)).toEqual(["resolve_choice"]);
     expect(decision.actionId).toBe(input.legalActions[0]?.actionId);
-    expect(decision.fallbackUsed).toBe(true);
+    expect(decision.fallbackUsed).toBe(false);
+    expect(decision.reasonCode).toBe("runner.choice.resolve");
+    expect(decision.selectedChoices).toEqual({ choiceId: "choice_v093_runner", selectedOptionIds: ["keep"] });
     expect(assertAiInputIsSideSafe(input)).toBe(true);
     expect(JSON.stringify(input)).not.toContain("cardInstances");
   });
@@ -96,6 +98,36 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(serialized).not.toContain("Simple Fracter");
     expect(serialized).not.toContain("Simple Decoder");
     expect(serialized).not.toContain("Simple Killer");
+  });
+
+  it("chooses V0.96 Trace bids from side-safe PlayerView choices", () => {
+    let state = traceCorpBidState("ai-v096-trace");
+    const corpInput = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const corpDecision = chooseCorpAction(corpInput);
+
+    expect(corpDecision.actionId).toBe(corpInput.legalActions[0]?.actionId);
+    expect(corpDecision.reasonCode).toBe("corp.trace.bid_visible_amount");
+    expect(corpDecision.selectedChoices).toEqual({ choiceId: state.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] });
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
+
+    const corpResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: corpDecision.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      ...(corpDecision.selectedChoices ? { selectedChoices: corpDecision.selectedChoices } : {})
+    });
+    expect(corpResult.ok).toBe(true);
+    if (!corpResult.ok) throw new Error(corpResult.error.message);
+    state = corpResult.state;
+
+    const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "hard" });
+    const runnerDecision = chooseRunnerAction(runnerInput);
+    expect(runnerDecision.reasonCode).toBe("runner.trace.bid_visible_amount");
+    expect(runnerDecision.selectedChoices).toEqual({ choiceId: state.pendingChoice?.choiceId, selectedOptionIds: ["bid_3"] });
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+    expect(JSON.stringify(runnerInput)).not.toContain("cardInstances");
+    expect(JSON.stringify(runnerInput)).not.toContain("Simple Agenda");
   });
 });
 
@@ -187,6 +219,7 @@ describe("MVP 0.3 AI simulation harness", () => {
         side,
         actionId: action.actionId,
         clientKnownStateVersion: state.stateVersion,
+        ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
         idempotencyKey: `ai-smoke-${step}`
       });
       expect(result.ok).toBe(true);
@@ -384,6 +417,23 @@ function installedResourceCorpTurn(seed: string): GameState {
   return state;
 }
 
+function traceCorpBidState(seed: string): GameState {
+  let state = toRunnerTurn(
+    createGame({
+      seed,
+      runnerDeckId: "demo_runner_096",
+      corpDeckId: "demo_corp_096",
+      agendaPointsToWin: 7
+    })
+  );
+  putCorpIceOnServer(state, "rd", "v096_trace_probe_ice");
+  state.corp.credits = 8;
+  state.runner.credits = 5;
+  state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+  state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v096_trace_probe_ice");
+  return apply(state, "runner", (action) => action.type === "continue_run");
+}
+
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
   const selected = mustAction(state, side, predicate);
   const result = applyAction(state, {
@@ -417,6 +467,17 @@ function putCorpCardOnTopOfRd(state: GameState, definitionId: string): CardInsta
   removeEverywhere(state, id);
   state.corp.rd.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+  return id;
+}
+
+function putCorpIceOnServer(state: GameState, serverId: "hq" | "rd" | "archives" | `remote_${number}`, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  expect(server).toBeDefined();
+  if (!server) throw new Error("Missing server");
+  removeEverywhere(state, id);
+  server.ice.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
   return id;
 }
 

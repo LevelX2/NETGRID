@@ -48,17 +48,29 @@ export type ServerId = "hq" | "rd" | "archives" | `remote_${number}` | "new_remo
 export type StateHash = string;
 export type Winner = Side | "draw";
 export type GameEndReason = "agenda_points" | "corp_deck_empty" | "flatline" | "unknown";
-export type DemoDeckId = "demo_runner_001" | "demo_corp_001" | "demo_runner_004" | "demo_corp_004" | "demo_runner_008" | "demo_corp_008";
+export type DemoDeckId =
+  | "demo_runner_001"
+  | "demo_corp_001"
+  | "demo_runner_004"
+  | "demo_corp_004"
+  | "demo_runner_008"
+  | "demo_corp_008"
+  | "demo_runner_096"
+  | "demo_corp_096";
 
 export type DamageType = "net" | "meat" | "core";
 
-export type SubroutineType = "end_the_run" | "corp_gain_credit" | "runner_lose_credits" | "give_runner_tag" | "do_damage";
+export type TraceSuccessEffect = { type: "add_tag"; amount: number };
+
+export type SubroutineType = "end_the_run" | "corp_gain_credit" | "runner_lose_credits" | "give_runner_tag" | "do_damage" | "initiate_trace";
 
 export type SubroutineDefinition = {
   id: string;
   type: SubroutineType;
   amount?: number;
   damageType?: DamageType;
+  baseTraceStrength?: number;
+  traceSuccessEffect?: TraceSuccessEffect;
 };
 
 export type EventVisibilityClass = "public" | "private_to_side" | "hidden_info_barrier" | "replay_only";
@@ -167,6 +179,7 @@ export type CardDefinition = {
   installCost?: number;
   memoryCost?: number;
   strength?: number;
+  baseLink?: number;
   rezCost?: number;
   trashCost?: number;
   advancementRequirement?: number;
@@ -197,14 +210,14 @@ export type DeckPublicMetadata = {
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
-  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo" | "mvp-0.95-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
-  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
-  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
-  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
-  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
+  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo" | "mvp-0.95-demo" | "mvp-0.96-demo";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
+  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
 };
 
 export type PlayerController = {
@@ -222,8 +235,8 @@ export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
   baseline?: RulesBaseline;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -300,9 +313,26 @@ export type RunState = {
   approachedIceId?: CardInstanceId;
   encounteredIceId?: CardInstanceId;
   brokenSubroutineIndexes: number[];
+  resolvedSubroutineIndexes: number[];
   successful: boolean;
   accessedCardId?: CardInstanceId;
   pendingSuccessBonusCredits?: number;
+};
+
+export type TraceState = {
+  traceId: string;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  subroutineIndex?: number;
+  baseTraceStrength: number;
+  status: "corp_bid" | "runner_bid";
+  successEffect: TraceSuccessEffect;
+  corpBid?: number;
+  traceStrength?: number;
+  runnerLink?: number;
+  runnerBid?: number;
+  runnerStrength?: number;
+  successful?: boolean;
 };
 
 export type RandomDrawRecord = {
@@ -348,6 +378,7 @@ export type GameState = {
     corp: DeckPublicMetadata;
   };
   run?: RunState;
+  trace?: TraceState;
 };
 
 export type Cost = {
@@ -444,6 +475,7 @@ export type VisibleCard = {
   installCost?: number;
   memoryCost?: number;
   rezCost?: number;
+  baseLink?: number;
   rezzed?: boolean;
   advancementCounters?: number;
   advancementRequirement?: number;
@@ -519,6 +551,7 @@ export type AiDecisionInput = {
 
 export type AiDecision = {
   actionId: string;
+  selectedChoices?: PlayerAction["selectedChoices"];
   reasonCode: string;
   explanation: string;
   consideredActionIds: string[];
@@ -606,6 +639,18 @@ export const MVP_0_95_BASELINE: RulesBaseline = {
   simulationSchemaVersion: "0.95.0"
 };
 
+export const MVP_0_96_BASELINE: RulesBaseline = {
+  ...MVP_0_95_BASELINE,
+  cardTextSnapshotId: "mvp-0.96-demo",
+  engineSchemaVersion: "0.96.0",
+  cardImplementationVersion: "0.96.0",
+  deviationRegistryVersion: "0.96.0",
+  playerViewSchemaVersion: "0.96.0",
+  multiplayerSchemaVersion: "0.96.0",
+  aiControllerSchemaVersion: "0.96.0",
+  simulationSchemaVersion: "0.96.0"
+};
+
 export const DEMO_CARDS: CardDefinition[] = [
   {
     id: "runner_identity_001",
@@ -615,6 +660,7 @@ export const DEMO_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     abilityEnabled: false,
+    baseLink: 0,
     rulesText: "Testidentität ohne aktive Fähigkeit.",
     mechanics: ["identity_setup"]
   },
@@ -927,6 +973,26 @@ export const DEMO_CARDS: CardDefinition[] = [
     mechanics: ["install_resource", "resource", "trash_resource", "tag_interaction", "v095_local_original"]
   },
   {
+    id: "v096_trace_probe_ice",
+    title: "Trace Probe ICE",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry"],
+    implementationStatus: "playable_mvp",
+    rezCost: 3,
+    strength: 2,
+    rulesText: "Trace 2. If successful, give the Runner 1 tag.",
+    subroutines: [
+      {
+        id: "v096_trace_probe_ice_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 2,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["install_ice", "rez_ice", "encounter_ice", "trace", "link", "bid_amount", "add_tag", "v096_local_original"]
+  },
+  {
     id: "v08_burst_credit_event",
     title: "Burst Credit Event",
     side: "runner",
@@ -1229,6 +1295,39 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
       { id: "v08_wall_ice", quantity: 2 },
       { id: "v08_gate_ice", quantity: 2 },
       { id: "v08_watchdog_ice", quantity: 2 }
+    ]
+  },
+  demo_runner_096: {
+    id: "demo_runner_096",
+    name: "Runner Demo Deck 0.96 - Trace Bidding Harness",
+    side: "runner",
+    identity: "runner_identity_001",
+    cards: [
+      { id: "simple_economy_event", quantity: 3 },
+      { id: "simple_run_event", quantity: 2 },
+      { id: "simple_draw_event", quantity: 2 },
+      { id: "simple_fracter", quantity: 1 },
+      { id: "simple_decoder", quantity: 1 },
+      { id: "simple_killer", quantity: 2 },
+      { id: "v08_burst_credit_event", quantity: 2 },
+      { id: "v095_safehouse_resource", quantity: 1 }
+    ]
+  },
+  demo_corp_096: {
+    id: "demo_corp_096",
+    name: "Corp Demo Deck 0.96 - Trace Probe Harness",
+    side: "corp",
+    identity: "corp_identity_001",
+    cards: [
+      { id: "simple_agenda", quantity: 1 },
+      { id: "simple_priority_agenda", quantity: 1 },
+      { id: "v08_project_agenda", quantity: 1 },
+      { id: "simple_economy_operation", quantity: 2 },
+      { id: "simple_economy_asset", quantity: 1 },
+      { id: "simple_barrier_ice", quantity: 1 },
+      { id: "simple_tag_ice", quantity: 1 },
+      { id: "v096_trace_probe_ice", quantity: 3 },
+      { id: "v08_credit_surge_operation", quantity: 2 }
     ]
   }
 };

@@ -58,5 +58,12 @@
 - `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.95-Resource-/Tag-Slice.
 - `docs/derived/MVP_0.95_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.95.
 - `data/rules/mechanics-coverage-0.95.json`: maschinenlesbare Coverage nach V0.95; Resources sind `implemented_limited`, V0.96+-Mechaniken bleiben offen.
+- `docs/derived/MVP_0.96_REQUIREMENTS.md`: eingefrorene V0.96-Anforderungen für Trace, Link und Bidding.
+- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`: V0.96-Spezifikation für Trace-Start, Corp-Bid, Runner-Bid, Ergebnis, Sichtbarkeit und No-Scope-Grenzen.
+- `docs/derived/MVP_0.96_TEST_MATRIX.md`: V0.96-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
+- `docs/derived/MVP_0.96_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.96.
+- `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.96-Trace-/Link-/Bidding-Slice.
+- `docs/derived/MVP_0.96_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.96.
+- `data/rules/mechanics-coverage-0.96.json`: maschinenlesbare Coverage nach V0.96; Trace/Link/Bidding ist `implemented_limited`, V0.97+-Mechaniken bleiben offen.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.

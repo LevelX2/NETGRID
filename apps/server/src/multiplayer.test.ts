@@ -391,6 +391,105 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(undo.undoRequest?.targetEventId).toBe(`evt_${trashed.receipt.stateVersionAfter}`);
   });
 
+  it("handles V0.96 Trace bids through submit, idempotency, reconnect and undo", async () => {
+    const match = await joinedV096TraceMatch("mp-v096-trace");
+    const corpChoice = await bootstrap(match.service, match.matchId, match.corp);
+    const runnerBefore = await bootstrap(match.service, match.matchId, match.runner);
+    const corpAction = mustAction(corpChoice, (action) => action.type === "resolve_choice");
+
+    expect(corpChoice.pendingChoice?.kind).toBe("bid_amount");
+    expect(runnerBefore.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(runnerBefore)).not.toContain("Trace Probe ICE_");
+
+    const corpBid = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken,
+      actionId: corpAction.actionId,
+      clientKnownStateVersion: corpChoice.playerView.stateVersion,
+      selectedChoices: { choiceId: corpChoice.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] },
+      idempotencyKey: "v096-corp-bid"
+    });
+
+    expect(corpBid.ok).toBe(true);
+    if (!corpBid.ok) throw new Error(corpBid.error.message);
+    expect(corpBid.publicEvent?.visibilityClass).toBe("public");
+    expect(corpBid.publicEvent?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      traceStep: "corp_bid",
+      corpBid: 1,
+      traceStrength: 3
+    });
+    expect(corpBid.opponentPayload.pendingChoice?.kind).toBe("bid_amount");
+
+    const duplicate = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken,
+      actionId: corpAction.actionId,
+      clientKnownStateVersion: corpChoice.playerView.stateVersion,
+      selectedChoices: { choiceId: corpChoice.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] },
+      idempotencyKey: "v096-corp-bid"
+    });
+    expect(duplicate.ok).toBe(true);
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.receipt.stateVersionAfter).toBe(corpBid.receipt.stateVersionAfter);
+
+    const stale = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken,
+      actionId: corpAction.actionId,
+      clientKnownStateVersion: corpChoice.playerView.stateVersion,
+      selectedChoices: { choiceId: corpChoice.pendingChoice?.choiceId, selectedOptionIds: ["bid_1"] },
+      idempotencyKey: "v096-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale-state rejection");
+    expect(stale.error.code).toBe("stale_state");
+
+    const reconnectedRunner = await match.service.reconnectMatch(match.matchId, {
+      side: "runner",
+      reconnectToken: match.runner.reconnectToken
+    });
+    expect("error" in reconnectedRunner).toBe(false);
+    if ("error" in reconnectedRunner) throw new Error(reconnectedRunner.error.message);
+    expect(reconnectedRunner.pendingChoice?.kind).toBe("bid_amount");
+    expect(JSON.stringify(reconnectedRunner)).not.toContain("Simple Agenda");
+
+    const runnerAction = reconnectedRunner.legalActions.find((action) => action.type === "resolve_choice");
+    expect(runnerAction).toBeDefined();
+    if (!runnerAction) throw new Error("Missing Runner trace bid action");
+    const runnerBid = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: reconnectedRunner.sessionToken,
+      actionId: runnerAction.actionId,
+      clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
+      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: ["bid_0"] },
+      idempotencyKey: "v096-runner-bid"
+    });
+
+    expect(runnerBid.ok).toBe(true);
+    if (!runnerBid.ok) throw new Error(runnerBid.error.message);
+    expect(runnerBid.publicEvent?.publicPayload).toMatchObject({
+      traceStep: "runner_bid",
+      traceSuccessful: true,
+      tagsAdded: 1
+    });
+    expect(runnerBid.actorPayload.playerView.own.tags).toBe(1);
+
+    const undo = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnectedRunner.sessionToken,
+      targetEventId: `evt_${runnerBid.receipt.stateVersionAfter}`,
+      reason: "Trace bid undo"
+    });
+    expect(undo.ok).toBe(true);
+    if (!undo.ok) throw new Error(undo.error.message);
+  });
+
   it("reports V0.94 Flatline as a side-safe result reason", async () => {
     const match = await joinedV094DamageMatch("mp-v094-flatline", { emptyRunnerGrip: true });
 
@@ -914,6 +1013,56 @@ async function joinedV095ResourceMatch(seed: string) {
   record.match.settings.agendaPointsToWin = 7;
   record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
   record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v095_resource_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
+async function joinedV096TraceMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  let gameState = toRunnerTurnEngine(
+    createGame({
+      matchId: created.matchId,
+      seed,
+      runnerDeckId: "demo_runner_096",
+      corpDeckId: "demo_corp_096",
+      agendaPointsToWin: 7
+    })
+  );
+  putCorpIceOnServerForTest(gameState, "rd", "v096_trace_probe_ice");
+  gameState.corp.credits = 8;
+  gameState.runner.credits = 5;
+  gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+  gameState = applyEngineAction(gameState, "corp", (action) => action.type === "rez_ice" && action.label.includes("Trace Probe"));
+  gameState = applyEngineAction(gameState, "runner", (action) => action.type === "continue_run");
+  record.gameState = gameState;
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v096_trace_ready")];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;

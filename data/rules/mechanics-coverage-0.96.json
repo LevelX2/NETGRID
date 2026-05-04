@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "0.96.0",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-0.96",
+  "generatedFor": "MVP 0.96 Trace/Link/Bidding final gate",
+  "generatedAt": "2026-05-04",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-0.95.json",
+  "gateAssertions": {
+    "v096TraceLinkBiddingImplemented": true,
+    "traceBidsArePublicChoices": true,
+    "traceStrictGreaterThanRunnerStrength": true,
+    "traceSuccessEffectLimitedToAddTag": true,
+    "traceBidsDoNotCreateHiddenInfoBarrier": true,
+    "traceIntroducesNoRandomness": true,
+    "noV097PlusMechanicsImplemented": true,
+    "noPreventionAvoidInterruptReplacement": true,
+    "noOfficialAssetsOrExternalCardDatabaseDependency": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.trace.link_bidding",
+      "label": "Trace, Link und Bidding",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.96",
+      "currentScopeNote": "Trace ist als öffentliche Bid-Sequenz spielbar: Corp bietet zuerst, Runner danach; Erfolg ist strict greater-than und der freigegebene Erfolgseffekt ist add_tag.",
+      "coverage": ["unit", "scenario", "visibility", "undo", "ai", "multiplayer", "replay", "state_hash"],
+      "knownDeviations": ["DEV-007"]
+    },
+    {
+      "mechanicId": "mechanic.choices.pending_choice",
+      "label": "PendingChoice/ChoiceRequest",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.96",
+      "currentScopeNote": "PendingChoice trägt nun echte bid_amount-Entscheidungen für Trace; Mulligan bleibt gesperrt.",
+      "coverage": ["unit", "visibility", "multiplayer", "ai"]
+    },
+    {
+      "mechanicId": "mechanic.tags.basic",
+      "label": "Tags, Remove Tag, einfache Tag-Punishment, Resource-Trash und Trace-Tag",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.96",
+      "currentScopeNote": "Tags sind öffentliche Runner-Marker. V0.96 ergänzt add_tag als eng freigegebenen Trace-Erfolgseffekt.",
+      "coverage": ["unit", "scenario", "visibility", "ai", "multiplayer"]
+    },
+    {
+      "mechanicId": "mechanic.resources",
+      "label": "Runner Resources und Tag-Resource-Interaktion",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.95",
+      "currentScopeNote": "Unverändert aus V0.95: Runner-Resources sind public installierte Boardkarten; komplexe Resource-Abilities und Hosting bleiben gesperrt."
+    },
+    {
+      "mechanicId": "mechanic.damage.flatline",
+      "label": "Damage und Flatline",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.94",
+      "currentScopeNote": "Unverändert aus V0.94: Net- und Meat-Damage spielbar, Core-Damage und Prevention gesperrt."
+    },
+    {
+      "mechanicId": "mechanic.runs.jackout_multiaccess_breach",
+      "label": "Jack-out, Breach und Multiaccess",
+      "currentStatus": "open",
+      "targetGate": "v0.97",
+      "currentScopeNote": "Nicht in V0.96 implementiert."
+    },
+    {
+      "mechanicId": "mechanic.identities.abilities",
+      "label": "Identity Abilities",
+      "currentStatus": "open",
+      "targetGate": "v0.98",
+      "currentScopeNote": "Base Link 0 ist als Identity-Wert sichtbar; aktive Identity-Fähigkeiten bleiben nicht spielbar."
+    },
+    {
+      "mechanicId": "mechanic.hidden_zone_tools",
+      "label": "Hidden-Zone-Tools",
+      "currentStatus": "open",
+      "targetGate": "v0.98",
+      "currentScopeNote": "Nicht in V0.96 implementiert."
+    },
+    {
+      "mechanicId": "mechanic.hosting.viruses.counters",
+      "label": "Hosting, Viren, Purge und Counter-Familien",
+      "currentStatus": "open",
+      "targetGate": "v0.99",
+      "currentScopeNote": "Nicht in V0.96 implementiert."
+    },
+    {
+      "mechanicId": "mechanic.event_modification",
+      "label": "Prevention, Avoid, Interrupts und Replacement",
+      "currentStatus": "open",
+      "targetGate": "v1.x",
+      "currentScopeNote": "Explizit nicht vor M11/V1.x implementiert."
+    }
+  ],
+  "deviationNormalization": [
+    {
+      "deviationId": "DEV-007",
+      "normalizedStatus": "partial",
+      "mechanicIds": ["mechanic.tags.basic", "mechanic.damage.flatline", "mechanic.resources", "mechanic.trace.link_bidding"],
+      "note": "Tags, V0.94 Damage, V0.95 Resources und V0.96 Trace/Link/Bidding sind in engen Gates umgesetzt; Virus-Anteile bleiben offen."
+    }
+  ]
+}

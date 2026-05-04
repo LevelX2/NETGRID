@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V0.95 Resources and tag-interaction are implemented, verified and final-reviewed. V0.96 Trace/Link/Bidding is the next gated scope for a separate Requirements Freeze; later mechanics remain planned only and are not implementation-freigegeben.
+V0.96 Trace/Link/Bidding is implemented, verified and final-reviewed. V0.97 Run/Jack-out/Breach/Multiaccess is the next gated scope for a separate Requirements Freeze; later mechanics remain planned only and are not implementation-freigegeben.
 
 ## Status
 
@@ -1284,6 +1284,76 @@ Checks:
 - `corepack pnpm test`: pass.
 - `corepack pnpm build`: pass.
 
+## MVP 0.96 Requirements Freeze files created or updated
+
+- `docs/derived/MVP_0.96_REQUIREMENTS.md`
+- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`
+- `docs/derived/MVP_0.96_TEST_MATRIX.md`
+- `docs/derived/MVP_0.96_REQUIREMENTS_REVIEW.md`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.96 Requirements Freeze decision
+
+`MVP_0.96_requirements_freeze_done: true`
+
+`ready_for_MVP_0.96_implementation: true`
+
+V0.96 is frozen as a narrow Trace/Link/Bidding gate. The CR v26.03 reference check confirms the sequence: Corp bids first to increase Trace-Strength, Runner bids second to increase Link-Strength, and the trace succeeds only when Trace-Strength exceeds Runner-Strength. The first playable success effect is limited to `add_tag`. Trace choices are public bid amounts, but pending choices remain side-filtered in PlayerViews and reconnect payloads. Trace-Damage, Resource-specific trace effects, Jack-out/Breach/Multiaccess, Identity-Abilities, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families and Prevention remain unimplemented.
+
+## MVP 0.96 Final files created or updated
+
+- `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.96_FINAL_REVIEW.md`
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `data/rules/rules-baseline-0.96.json`
+- `data/cards/demo-cards-0.96.json`
+- `data/decks/demo-decks-0.96.json`
+- `data/manifests/card-implementation-manifest-0.96.json`
+- `data/rules/mechanics-coverage-0.96.json`
+- `data/scenarios/v096-trace-link.json`
+- `data/scenarios/v096-multiplayer-trace-smoke.json`
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/engine/src/index.test.ts`
+- `packages/ai/src/index.ts`
+- `packages/ai/src/index.test.ts`
+- `apps/server/src/multiplayer.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.96 Final gate
+
+`MVP_0.96_done: true`
+
+`ready_for_MVP_0.97_requirements_freeze: true`
+
+V0.96 implements Trace/Link/Bidding as a narrow public-choice mechanics gate. `v096_trace_probe_ice` is a local fictional Trace harness. Trace starts from a manifestierter ICE-Subroutine, Corp bids first, Runner bids second, both bids pay exact credits, and success is strict greater-than. The only success effect is `add_tag`. Trace choices and results are public, do not create a Hidden-Info barrier and preserve deterministic Replay/StateHash without new RandomDrawRecords. Jack-out/Breach/Multiaccess, active Identity-Abilities, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Bad Publicity, Recurring Credits and Prevention remain unimplemented.
+
+Checks:
+
+- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
+- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
+- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 41 tests.
+- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 19 tests.
+- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 18 tests.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 22 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass, known Turbopack NFT warning remains for the existing `card-images` route trace.
+
 
 ## S01 Requirements and implementation files created or updated
 
@@ -1376,8 +1446,9 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.93: M1 Engine foundation and M2 requirements.
 - V0.94: Damage and Flatline, with narrow Game-End reason contract.
 - V0.95: Runner Resources and tag-interaction.
+- V0.96: Trace, Link and Bidding.
 
-Current gate: V0.95 is complete and V0.96 Requirements Freeze is next. Damage/Flatline and Resources are playable only in their narrow V0.94/V0.95 scopes. V0.96+ mechanics remain planned only; Trace, Multiaccess, Identity-Abilities, Hosting, Viruses, Counter families and Prevention are still not playable until their respective gates are implemented.
+Current gate: V0.96 is complete and V0.97 Requirements Freeze is next. Damage/Flatline, Resources and Trace/Link/Bidding are playable only in their narrow V0.94/V0.95/V0.96 scopes. V0.97+ mechanics remain planned only. Jack-out, Breach, Multiaccess, active Identity-Abilities, Hidden-Zone-Tools, Hosting, Viruses, Counter families and Prevention are still not playable until their respective gates are implemented.
 
 Detailed planning artifacts available:
 
@@ -1408,6 +1479,13 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/MVP_0.95_FINAL_REVIEW.md`
 - `data/rules/mechanics-coverage-0.95.json`
+- `docs/derived/MVP_0.96_REQUIREMENTS.md`
+- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`
+- `docs/derived/MVP_0.96_TEST_MATRIX.md`
+- `docs/derived/MVP_0.96_REQUIREMENTS_REVIEW.md`
+- `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.96_FINAL_REVIEW.md`
+- `data/rules/mechanics-coverage-0.96.json`
 
 UI design exploration artifacts available:
 

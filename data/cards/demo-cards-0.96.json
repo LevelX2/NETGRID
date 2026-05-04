@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "demo-cards-v0.96",
+  "id": "demo-cards-0.96",
+  "status": "implemented_for_v0.96_final_gate",
+  "extends": "data/cards/demo-cards-0.95.json",
+  "sourceMode": "local_original",
+  "assetPolicy": "no official art, logos, frames, card backs or external image dependencies",
+  "cards": [
+    {
+      "id": "v096_trace_probe_ice",
+      "title": "Trace Probe ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": ["sentry"],
+      "resolver": "corp_ice_trace_add_tag",
+      "roles": ["trace", "tag_pressure", "sentry"],
+      "deviation": "local_original",
+      "status": "playable_mvp",
+      "rezCost": 3,
+      "strength": 2,
+      "subroutines": [
+        {
+          "id": "v096_trace_probe_ice_trace",
+          "type": "initiate_trace",
+          "baseTraceStrength": 2,
+          "traceSuccessEffect": { "type": "add_tag", "amount": 1 }
+        }
+      ],
+      "mechanics": ["trace", "link", "bid_amount", "trace_success_add_tag"],
+      "rulesText": "Trace 2. If successful, give the Runner 1 tag."
+    }
+  ]
+}

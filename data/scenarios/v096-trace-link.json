@@ -1,0 +1,23 @@
+{
+  "id": "SCN-V096-001",
+  "baselineId": "rules-baseline-mvp-0.96",
+  "title": "Trace Probe resolves Corp and Runner bids",
+  "requirementIds": ["M096-TRACE-001", "M096-TRACE-002", "M096-TRACE-003", "M096-TRACE-004", "M096-TRACE-005", "M096-TRACE-007", "M096-TRACE-008", "M096-REPLAY-001"],
+  "coversTests": ["V096-T002", "V096-T003", "V096-T005", "V096-T007", "V096-T008", "V096-T012"],
+  "coversCards": ["v096_trace_probe_ice"],
+  "steps": [
+    "Runner starts a run on R&D.",
+    "Corp rezzes Trace Probe ICE.",
+    "Runner continues the encounter and starts Trace 2.",
+    "Corp bids 1 credit.",
+    "Runner bids 0 credits.",
+    "Trace succeeds and gives the Runner 1 tag."
+  ],
+  "expected": {
+    "traceSuccessCondition": "baseTraceStrength + corpBid > runnerLink + runnerBid",
+    "tagDelta": 1,
+    "randomDrawRecordsDelta": 0,
+    "publicTraceEventsOnly": true,
+    "stateHashDeterministic": true
+  }
+}

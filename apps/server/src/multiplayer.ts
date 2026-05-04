@@ -985,6 +985,7 @@ export class MultiplayerService {
         side,
         actionId: legalAction.actionId,
         clientKnownStateVersion: record.gameState.stateVersion,
+        ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
         idempotencyKey: `ai-${side}-${record.gameState.stateVersion}`
       });
       if (!result.ok) return;

@@ -6,6 +6,7 @@ import {
   MVP_0_8_BASELINE,
   MVP_0_94_BASELINE,
   MVP_0_95_BASELINE,
+  MVP_0_96_BASELINE,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -49,7 +50,8 @@ export {
   MVP_0_4_BASELINE,
   MVP_0_8_BASELINE,
   MVP_0_94_BASELINE,
-  MVP_0_95_BASELINE
+  MVP_0_95_BASELINE,
+  MVP_0_96_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -89,7 +91,7 @@ const DEFAULT_CONTROLLERS: { runner: PlayerController; corp: PlayerController } 
   corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI" }
 };
 
-type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
+type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0";
 
 type RunnerEventResolver = {
   name: string;
@@ -354,8 +356,9 @@ export function applyAction(state: GameState, playerAction: PlayerAction): Engin
   const before = state.stateVersion;
 
   try {
-    performAction(next, legalAction);
+    performAction(next, legalAction, playerAction);
     checkWinConditions(next);
+    next.stateVersion = before + 1;
     const validation = validateGameState(next);
     if (!validation.ok) {
       return fail(state, "ERR_INVARIANT_FAILED", `Der Spielzustand ist ungültig: ${validation.errors[0] ?? "unbekannter Fehler"}`);
@@ -364,7 +367,6 @@ export function applyAction(state: GameState, playerAction: PlayerAction): Engin
     return fail(state, "ERR_INVALID_TARGET", error instanceof Error ? error.message : "Die Aktion konnte nicht ausgeführt werden.");
   }
 
-  next.stateVersion = before + 1;
   const stateHash = hashState(next);
   const event = buildEvent(before, next.stateVersion, stateHash, next, legalAction, playerAction);
   next.eventLog.push(event);
@@ -513,6 +515,18 @@ export function validateGameState(state: GameState): ValidationResult {
     if (definitionFor(state, id).type !== "resource") errors.push(`Runner rig resource slot contains non-resource ${id}.`);
   }
   if (state.run?.encounteredIceId && !state.cardInstances[state.run.encounteredIceId]) errors.push("Run references missing encountered ice.");
+  if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes)) errors.push("Run resolved subroutine index list is missing.");
+  if (state.trace) {
+    if (!state.cardInstances[state.trace.sourceCardInstanceId]) errors.push("Trace references missing source card.");
+    if (!Number.isInteger(state.trace.baseTraceStrength) || state.trace.baseTraceStrength < 0) errors.push("Trace base strength is invalid.");
+    if (state.trace.successEffect.type !== "add_tag" || state.trace.successEffect.amount !== 1) errors.push("Trace success effect is outside V0.96 scope.");
+    if (!state.pendingChoice) errors.push("Trace requires an open PendingChoice.");
+    if (state.trace.status === "corp_bid" && state.pendingChoice?.side !== "corp") errors.push("Corp trace bid requires Corp choice.");
+    if (state.trace.status === "runner_bid") {
+      if (state.pendingChoice?.side !== "runner") errors.push("Runner trace bid requires Runner choice.");
+      if (state.trace.corpBid === undefined || state.trace.traceStrength === undefined || state.trace.runnerLink === undefined) errors.push("Runner trace bid is missing Corp bid context.");
+    }
+  }
   if (state.pendingChoice) {
     if (state.pendingChoice.side !== "corp" && state.pendingChoice.side !== "runner") errors.push("PendingChoice has invalid side.");
     if (state.pendingChoice.stateVersion !== state.stateVersion) errors.push("PendingChoice stateVersion must match current GameState.");
@@ -638,6 +652,7 @@ export function eventVisibilityForAction(legalAction: LegalAction): EventVisibil
       ? choiceVisibility
       : "private_to_side";
   }
+  if (legalAction.payload?.traceStarted === true) return "public";
   if (legalAction.payload?.damageResolved === true) return "hidden_info_barrier";
   if (["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(legalAction.type)) return "hidden_info_barrier";
   if (["mandatory_draw", "draw_card"].includes(legalAction.type)) return "private_to_side";
@@ -810,7 +825,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     if (breakAbility && breakerStrength >= (iceDefinition.strength ?? 0) && state.runner.credits >= breakAbility.cost.credits) {
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
-        if (!run.brokenSubroutineIndexes.includes(index)) {
+        if (!run.brokenSubroutineIndexes.includes(index) && !run.resolvedSubroutineIndexes.includes(index)) {
           actions.push(
             action(
               state,
@@ -849,7 +864,7 @@ function runnerAccessActions(state: GameState): LegalAction[] {
   return [action(state, "runner", "decline_trash", "Access abschließen", "game_rule")];
 }
 
-function performAction(state: GameState, legalAction: LegalAction): void {
+function performAction(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
   switch (legalAction.type) {
     case "mandatory_draw":
       drawCorpCard(state);
@@ -937,7 +952,7 @@ function performAction(state: GameState, legalAction: LegalAction): void {
       state.runner.tags = Math.max(0, state.runner.tags - 1);
       return;
     case "resolve_choice":
-      resolvePendingChoice(state, legalAction);
+      resolvePendingChoice(state, legalAction, playerAction);
       return;
     case "end_turn":
       endTurn(state, legalAction.side);
@@ -1006,6 +1021,7 @@ function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, p
     phase: "approach_ice",
     position: server.ice.length > 0 ? { kind: "ice", serverId: server.id, iceIndex: 0 } : { kind: "server", serverId: server.id },
     brokenSubroutineIndexes: [],
+    resolvedSubroutineIndexes: [],
     successful: false,
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {})
   };
@@ -1032,6 +1048,7 @@ function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
   run.phase = "encounter_ice";
   run.encounteredIceId = cardId;
   run.brokenSubroutineIndexes = [];
+  run.resolvedSubroutineIndexes = [];
   state.timingPoint = "run.encounter_ice";
   state.activeSide = "runner";
 }
@@ -1043,6 +1060,8 @@ function passApproachedIce(state: GameState): void {
   if (ice.rezzed) {
     run.phase = "encounter_ice";
     run.encounteredIceId = run.approachedIceId;
+    run.brokenSubroutineIndexes = [];
+    run.resolvedSubroutineIndexes = [];
     state.timingPoint = "run.encounter_ice";
     state.activeSide = "runner";
     return;
@@ -1061,11 +1080,17 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   }
   const definition = definitionFor(state, run.encounteredIceId);
   let ended = false;
-  (definition.subroutines ?? []).forEach((subroutine, index) => {
-    if (run.brokenSubroutineIndexes.includes(index) || ended) return;
+  const subroutines = definition.subroutines ?? [];
+  for (let index = 0; index < subroutines.length; index += 1) {
+    const subroutine = subroutines[index];
+    if (!subroutine || run.brokenSubroutineIndexes.includes(index) || run.resolvedSubroutineIndexes.includes(index) || ended) continue;
     if (subroutine.type === "corp_gain_credit") state.corp.credits += subroutine.amount ?? 1;
     if (subroutine.type === "runner_lose_credits") state.runner.credits = Math.max(0, state.runner.credits - (subroutine.amount ?? 1));
     if (subroutine.type === "give_runner_tag") state.runner.tags += subroutine.amount ?? 1;
+    if (subroutine.type === "initiate_trace") {
+      startTraceFromSubroutine(state, run.encounteredIceId, index, subroutine, legalAction);
+      return;
+    }
     if (subroutine.type === "do_damage") {
       const damageType = subroutine.damageType ?? "net";
       const summary = doDamage(state, {
@@ -1087,13 +1112,81 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       if (state.winner) return;
     }
     if (subroutine.type === "end_the_run") ended = true;
-  });
+  }
   resetBreakerStrength(state);
   if (ended) {
     finishRun(state, false);
     return;
   }
   movePastCurrentIce(state);
+}
+
+function startTraceFromSubroutine(
+  state: GameState,
+  sourceCardInstanceId: CardInstanceId,
+  subroutineIndex: number,
+  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
+  legalAction?: LegalAction
+): void {
+  if (state.trace || state.pendingChoice) throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
+  const baseTraceStrength = subroutine.baseTraceStrength ?? subroutine.amount ?? 0;
+  if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0) throw new Error("Trace strength ist ungueltig.");
+  const successEffect = subroutine.traceSuccessEffect;
+  if (!successEffect || successEffect.type !== "add_tag" || successEffect.amount !== 1) throw new Error("Dieser Trace-Effekt ist in V0.96 nicht freigegeben.");
+
+  const run = mustRun(state);
+  if (!run.resolvedSubroutineIndexes.includes(subroutineIndex)) run.resolvedSubroutineIndexes.push(subroutineIndex);
+  const sourceDefinition = definitionFor(state, sourceCardInstanceId);
+  const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
+  state.trace = {
+    traceId,
+    sourceCardInstanceId,
+    sourceDefinitionId: sourceDefinition.id,
+    subroutineIndex,
+    baseTraceStrength,
+    status: "corp_bid",
+    successEffect
+  };
+  state.pendingChoice = traceBidChoice(state, "corp", traceId, `Corp Trace-Bid wählen (Base Trace ${baseTraceStrength})`, state.corp.credits);
+  state.activeSide = "corp";
+  state.timingPoint = "run.encounter_ice";
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceStarted: true,
+      traceId,
+      sourceCardId: sourceCardInstanceId,
+      sourceDefinitionId: sourceDefinition.id,
+      baseTraceStrength
+    };
+  }
+}
+
+function traceBidChoice(
+  state: GameState,
+  side: Side,
+  traceId: string,
+  prompt: string,
+  maxBid: number
+): ChoiceRequest {
+  const boundedMax = Math.max(0, Math.floor(maxBid));
+  return {
+    choiceId: `${traceId}.${side}.bid.${state.stateVersion + 1}`,
+    side,
+    source: `trace:${traceId}`,
+    prompt,
+    kind: "bid_amount",
+    options: Array.from({ length: boundedMax + 1 }, (_, amount) => ({
+      id: `bid_${amount}`,
+      label: `${amount} Credits`,
+      publicLabel: `${amount} Credits`,
+      value: amount
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
 }
 
 function movePastCurrentIce(state: GameState): void {
@@ -1108,7 +1201,8 @@ function movePastCurrentIce(state: GameState): void {
       phase: "approach_ice",
       position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
       approachedIceId,
-      brokenSubroutineIndexes: []
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: []
     };
     state.timingPoint = "run.approach_ice";
     state.activeSide = "corp";
@@ -1378,10 +1472,93 @@ function selectedChoiceIds(selectedChoices: PlayerAction["selectedChoices"]): st
   return raw.filter((value): value is string => typeof value === "string");
 }
 
-function resolvePendingChoice(state: GameState, legalAction: LegalAction): void {
+function resolvePendingChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
   const choiceId = String(legalAction.payload?.choiceId ?? "");
   if (!state.pendingChoice || state.pendingChoice.choiceId !== choiceId) throw new Error("Diese Choice ist nicht offen.");
+  if (state.trace) {
+    if (state.trace.status === "corp_bid") {
+      resolveTraceCorpBid(state, legalAction, playerAction);
+      return;
+    }
+    resolveTraceRunnerBid(state, legalAction, playerAction);
+    return;
+  }
   delete state.pendingChoice;
+}
+
+function resolveTraceCorpBid(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const trace = state.trace;
+  if (!trace || trace.status !== "corp_bid") throw new Error("Es ist kein Corp-Trace-Bid offen.");
+  const bid = selectedBidAmount(state.pendingChoice, playerAction);
+  spendCredits(state, "corp", bid);
+  const traceStrength = trace.baseTraceStrength + bid;
+  const runnerLink = calculateRunnerLink(state);
+  state.trace = {
+    ...trace,
+    status: "runner_bid",
+    corpBid: bid,
+    traceStrength,
+    runnerLink
+  };
+  state.pendingChoice = traceBidChoice(state, "runner", trace.traceId, `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`, state.runner.credits);
+  state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "corp_bid",
+    baseTraceStrength: trace.baseTraceStrength,
+    corpBid: bid,
+    traceStrength,
+    runnerLink
+  };
+}
+
+function resolveTraceRunnerBid(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const trace = state.trace;
+  if (!trace || trace.status !== "runner_bid") throw new Error("Es ist kein Runner-Trace-Bid offen.");
+  const bid = selectedBidAmount(state.pendingChoice, playerAction);
+  spendCredits(state, "runner", bid);
+  const runnerLink = trace.runnerLink ?? calculateRunnerLink(state);
+  const traceStrength = trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
+  const runnerStrength = runnerLink + bid;
+  const successful = traceStrength > runnerStrength;
+  const tagsAdded = successful ? trace.successEffect.amount : 0;
+  if (successful) state.runner.tags += tagsAdded;
+  delete state.pendingChoice;
+  delete state.trace;
+  if (state.run) {
+    state.timingPoint = "run.encounter_ice";
+    state.activeSide = "runner";
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "runner_bid",
+    baseTraceStrength: trace.baseTraceStrength,
+    corpBid: trace.corpBid ?? 0,
+    traceStrength,
+    runnerLink,
+    runnerBid: bid,
+    runnerStrength,
+    traceSuccessful: successful,
+    tagsAdded
+  };
+}
+
+function selectedBidAmount(choice: ChoiceRequest | undefined, playerAction: PlayerAction): number {
+  if (!choice) throw new Error("Es ist keine Bid-Choice offen.");
+  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const selected = choice.options.find((option) => option.id === selectedOptionId);
+  const amount = typeof selected?.value === "number" ? selected.value : Number.NaN;
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Der Trace-Bid ist ungueltig.");
+  return amount;
+}
+
+function calculateRunnerLink(state: GameState): number {
+  const identity = definitionFor(state, state.runner.identity);
+  const baseLink = identity.baseLink ?? 0;
+  if (!Number.isInteger(baseLink) || baseLink < 0) throw new Error("Runner-Link ist ungueltig.");
+  return baseLink;
 }
 
 function executeEffectCommands(state: GameState, commands: EffectCommand[]): void {
@@ -1514,8 +1691,30 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.choiceKind = legalAction.payload?.choiceKind;
     if (legalAction.payload?.choiceVisibility === "public") context.choiceId = legalAction.payload?.choiceId;
     else context.redactedKind = "choice";
+    for (const key of [
+      "traceId",
+      "traceStep",
+      "baseTraceStrength",
+      "corpBid",
+      "traceStrength",
+      "runnerLink",
+      "runnerBid",
+      "runnerStrength",
+      "traceSuccessful",
+      "tagsAdded"
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
   }
   if (legalAction.type === "continue_run") context.result = state.run ? "continued" : "ended";
+  if (legalAction.payload?.traceStarted === true) {
+    context.traceStarted = true;
+    context.traceId = legalAction.payload.traceId;
+    context.sourceCardId = legalAction.payload.sourceCardId;
+    context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
+    context.baseTraceStrength = legalAction.payload.baseTraceStrength;
+  }
   if (legalAction.payload?.damageResolved === true) {
     context.damageResolved = true;
     context.damageType = legalAction.payload.damageType;
@@ -1589,6 +1788,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(definition.installCost !== undefined ? { installCost: definition.installCost } : {}),
     ...(definition.memoryCost !== undefined ? { memoryCost: definition.memoryCost } : {}),
     ...(definition.rezCost !== undefined ? { rezCost: definition.rezCost } : {}),
+    ...(definition.baseLink !== undefined ? { baseLink: definition.baseLink } : {}),
     rezzed: instance.rezzed,
     advancementCounters: instance.advancementCounters,
     ...(definition.advancementRequirement !== undefined ? { advancementRequirement: definition.advancementRequirement } : {}),
@@ -1705,6 +1905,7 @@ function expandDeck(side: Side, cards: Array<{ id: string; quantity: number }>, 
 }
 
 function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefinition): CardPoolVersion {
+  if (usesMvp096CardPool(runnerDeck) || usesMvp096CardPool(corpDeck)) return "0.96.0";
   if (usesMvp095CardPool(runnerDeck) || usesMvp095CardPool(corpDeck)) return "0.95.0";
   if (usesMvp094CardPool(runnerDeck) || usesMvp094CardPool(corpDeck)) return "0.94.0";
   if (usesMvp08CardPool(runnerDeck) || usesMvp08CardPool(corpDeck)) return "0.8.0";
@@ -1713,6 +1914,7 @@ function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefin
 }
 
 function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
+  if (version === "0.96.0") return MVP_0_96_BASELINE;
   if (version === "0.95.0") return MVP_0_95_BASELINE;
   if (version === "0.94.0") return MVP_0_94_BASELINE;
   if (version === "0.8.0") return MVP_0_8_BASELINE;
@@ -1720,7 +1922,13 @@ function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
   return MVP_0_1_BASELINE;
 }
 
+function usesMvp096CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_096") || deck.id.includes("_0_96") || deck.id.includes("_v0_96")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v096_"));
+}
+
 function usesMvp095CardPool(deck: DeckDefinition): boolean {
+  if (usesMvp096CardPool(deck)) return true;
   if (deck.id.endsWith("_095") || deck.id.includes("_0_95") || deck.id.includes("_v0_95")) return true;
   return deck.cards.some((card) => card.id.startsWith("v095_"));
 }
@@ -1761,9 +1969,29 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
     identityCardId: deck.identity,
     deckName: deck.name,
     cardPoolSnapshotId:
-      cardPoolVersion === "0.95.0" ? "card-snapshot-0.95" : cardPoolVersion === "0.94.0" ? "card-snapshot-0.94" : cardPoolVersion === "0.8.0" ? "card-snapshot-0.8" : expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
+      cardPoolVersion === "0.96.0"
+        ? "card-snapshot-0.96"
+        : cardPoolVersion === "0.95.0"
+          ? "card-snapshot-0.95"
+          : cardPoolVersion === "0.94.0"
+            ? "card-snapshot-0.94"
+            : cardPoolVersion === "0.8.0"
+              ? "card-snapshot-0.8"
+              : expandedCardPool
+                ? "card-snapshot-0.5"
+                : "mvp-0.1-demo",
     formatProfileId:
-      cardPoolVersion === "0.95.0" ? "local-demo-v0.95" : cardPoolVersion === "0.94.0" ? "local-demo-v0.94" : cardPoolVersion === "0.8.0" ? "local-demo-v0.8" : expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
+      cardPoolVersion === "0.96.0"
+        ? "local-demo-v0.96"
+        : cardPoolVersion === "0.95.0"
+          ? "local-demo-v0.95"
+          : cardPoolVersion === "0.94.0"
+            ? "local-demo-v0.94"
+            : cardPoolVersion === "0.8.0"
+              ? "local-demo-v0.8"
+              : expandedCardPool
+                ? "local-demo-v0.6"
+                : "legacy-demo",
     deckHash: `legacy:${deck.id}`
   };
 }
