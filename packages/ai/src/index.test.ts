@@ -79,6 +79,24 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(serialized).not.toContain("Simple Decoder");
     expect(serialized).not.toContain("Simple Killer");
   });
+
+  it("keeps V0.95 Resource trash decisions LegalActions-only and side-safe", () => {
+    const state = installedResourceCorpTurn("ai-v095-resource");
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const decision = chooseCorpAction(input);
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+    const serialized = JSON.stringify(input);
+
+    expect(input.legalActions.some((action) => action.type === "trash_resource")).toBe(true);
+    expect(selected?.type).toBe("trash_resource");
+    expect(decision.reasonCode).toBe("corp.tag.trash_visible_resource");
+    expect(input.playerView.opponent.rig?.some((card) => card.definitionId === "v095_safehouse_resource")).toBe(true);
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(serialized).not.toContain("cardInstances");
+    expect(serialized).not.toContain("Simple Fracter");
+    expect(serialized).not.toContain("Simple Decoder");
+    expect(serialized).not.toContain("Simple Killer");
+  });
 });
 
 describe("MVP 0.3 Runner AI", () => {
@@ -304,6 +322,36 @@ const V094_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const V095_RUNNER_DECK: DeckDefinition = {
+  id: "demo_runner_095",
+  name: "Runner Demo Deck 0.95 - AI Resource Harness",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_economy_event", quantity: 3 },
+    { id: "simple_run_event", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_killer", quantity: 2 },
+    { id: "v095_safehouse_resource", quantity: 2 }
+  ]
+};
+
+const V095_CORP_DECK: DeckDefinition = {
+  id: "demo_corp_095",
+  name: "Corp Demo Deck 0.95 - AI Resource Trash Harness",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_priority_agenda", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "simple_economy_asset", quantity: 2 },
+    { id: "simple_tag_ice", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 }
+  ]
+};
+
 function v094DamageGame(seed: string): GameState {
   return createGame({
     seed,
@@ -311,6 +359,29 @@ function v094DamageGame(seed: string): GameState {
     corpDeck: V094_CORP_DECK,
     agendaPointsToWin: 7
   });
+}
+
+function v095ResourceGame(seed: string): GameState {
+  return createGame({
+    seed,
+    runnerDeck: V095_RUNNER_DECK,
+    corpDeck: V095_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function installedResourceCorpTurn(seed: string): GameState {
+  let state = toRunnerTurn(v095ResourceGame(seed));
+  state.runner.credits = 6;
+  moveRunnerCardToGrip(state, "v095_safehouse_resource");
+  state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "v095_safehouse_resource");
+  state.activeSide = "corp";
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.corp.clicks = 3;
+  state.corp.credits = 5;
+  state.runner.tags = 1;
+  return state;
 }
 
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
@@ -347,6 +418,19 @@ function putCorpCardOnTopOfRd(state: GameState, definitionId: string): CardInsta
   state.corp.rd.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
   return id;
+}
+
+function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.grip.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function sourceDefinition(state: GameState, action: LegalAction): string | undefined {
+  if (typeof action.source !== "string" || action.source === "basic_action" || action.source === "game_rule") return undefined;
+  return state.cardInstances[action.source]?.definitionId;
 }
 
 function choiceRequest(state: GameState, side: Side): ChoiceRequest {
@@ -405,4 +489,5 @@ function removeEverywhere(state: GameState, id: string): void {
   state.runner.scoreArea = state.runner.scoreArea.filter((cardId) => cardId !== id);
   state.runner.rig.programs = state.runner.rig.programs.filter((cardId) => cardId !== id);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((cardId) => cardId !== id);
+  state.runner.rig.resources = state.runner.rig.resources.filter((cardId) => cardId !== id);
 }

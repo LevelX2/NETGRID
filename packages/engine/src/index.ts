@@ -5,6 +5,7 @@ import {
   MVP_0_4_BASELINE,
   MVP_0_8_BASELINE,
   MVP_0_94_BASELINE,
+  MVP_0_95_BASELINE,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -47,7 +48,8 @@ export {
   MVP_0_3_BASELINE,
   MVP_0_4_BASELINE,
   MVP_0_8_BASELINE,
-  MVP_0_94_BASELINE
+  MVP_0_94_BASELINE,
+  MVP_0_95_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -87,7 +89,7 @@ const DEFAULT_CONTROLLERS: { runner: PlayerController; corp: PlayerController } 
   corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI" }
 };
 
-type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0";
+type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
 
 type RunnerEventResolver = {
   name: string;
@@ -282,7 +284,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       stack: runnerStack,
       heap: [],
       scoreArea: [],
-      rig: { programs: [], hardware: [] }
+      rig: { programs: [], hardware: [], resources: [] }
     },
     cardInstances: instances,
     eventLog: [],
@@ -411,7 +413,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           stackOrRdCount: state.runner.stack.length,
           heapOrArchives: state.runner.heap.map((id) => visibleOwnCard(state, id)),
           scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id)),
-          rig: [...state.runner.rig.programs, ...state.runner.rig.hardware].map((id) => visibleOwnCard(state, id)),
+          rig: [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].map((id) => visibleOwnCard(state, id)),
           memoryUsed: state.runner.memoryUsed,
           memoryLimit: state.runner.memoryLimit,
           tags: state.runner.tags
@@ -437,7 +439,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           discardCount: state.corp.archives.length,
           scoreArea: state.corp.scoreArea.map((id) => visibleOwnCard(state, id))
         }
-      : {
+        : {
           credits: state.runner.credits,
           clicks: state.runner.clicks,
           agendaPoints: agendaPoints(state, "runner"),
@@ -445,7 +447,8 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           handCount: state.runner.grip.length,
           deckCount: state.runner.stack.length,
           discardCount: state.runner.heap.length,
-          scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id))
+          scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id)),
+          rig: [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].map((id) => visibleOwnCard(state, id))
         },
     servers: visibleServers,
     ...(run ? { run } : {}),
@@ -490,6 +493,7 @@ export function validateGameState(state: GameState): ValidationResult {
   for (const id of state.runner.scoreArea) addPlacement(id, "runner.scoreArea");
   for (const id of state.runner.rig.programs) addPlacement(id, "runner.rig.programs");
   for (const id of state.runner.rig.hardware) addPlacement(id, "runner.rig.hardware");
+  for (const id of state.runner.rig.resources) addPlacement(id, "runner.rig.resources");
 
   for (const id of Object.keys(state.cardInstances)) {
     if (!placements.has(id)) errors.push(`CardInstance ${id} is not in any zone.`);
@@ -499,6 +503,15 @@ export function validateGameState(state: GameState): ValidationResult {
   if (state.corp.clicks < 0 || state.runner.clicks < 0) errors.push("Clicks must not be negative.");
   if (state.runner.tags < 0) errors.push("Runner tags must not be negative.");
   if (state.runner.memoryUsed > state.runner.memoryLimit) errors.push("Runner memory limit exceeded.");
+  for (const id of state.runner.rig.programs) {
+    if (definitionFor(state, id).type !== "program") errors.push(`Runner rig program slot contains non-program ${id}.`);
+  }
+  for (const id of state.runner.rig.hardware) {
+    if (definitionFor(state, id).type !== "hardware") errors.push(`Runner rig hardware slot contains non-hardware ${id}.`);
+  }
+  for (const id of state.runner.rig.resources) {
+    if (definitionFor(state, id).type !== "resource") errors.push(`Runner rig resource slot contains non-resource ${id}.`);
+  }
   if (state.run?.encounteredIceId && !state.cardInstances[state.run.encounteredIceId]) errors.push("Run references missing encountered ice.");
   if (state.pendingChoice) {
     if (state.pendingChoice.side !== "corp" && state.pendingChoice.side !== "runner") errors.push("PendingChoice has invalid side.");
@@ -655,6 +668,23 @@ function corpMainActions(state: GameState): LegalAction[] {
   }
   actions.push(action(state, "corp", "gain_credit", "1 Credit nehmen", "basic_action", [{ clicks: 1 }]));
   if (state.corp.rd.length > 0) actions.push(action(state, "corp", "draw_card", "Karte ziehen", "basic_action", [{ clicks: 1 }]));
+  if (state.runner.tags > 0 && state.corp.credits >= 2) {
+    for (const id of state.runner.rig.resources) {
+      const definition = definitionFor(state, id);
+      actions.push(
+        action(
+          state,
+          "corp",
+          "trash_resource",
+          `${definition.title} trashen`,
+          "basic_action",
+          [{ clicks: 1, credits: 2 }],
+          { cardId: id, resourceId: id },
+          { targetRequirements: [{ id: "resource", kind: "card", side: "runner", zoneScope: ["runner.rig.resources"], visibility: "public" }] }
+        )
+      );
+    }
+  }
   for (const id of state.corp.hq) {
     const definition = definitionFor(state, id);
     if (definition.type === "operation" && state.corp.credits >= (definition.cost ?? 0) && canPlayCorpOperation(state, definition)) {
@@ -705,6 +735,20 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     if (definition.type === "hardware" && state.runner.credits >= (definition.installCost ?? 0)) {
       actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
+    }
+    if (definition.type === "resource" && state.runner.credits >= (definition.installCost ?? 0)) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "install_card",
+          `${definition.title} installieren`,
+          id,
+          [{ clicks: 1, credits: definition.installCost ?? 0 }],
+          { cardId: id },
+          { targetRequirements: [{ id: "resourceCard", kind: "card", side: "runner", zoneScope: ["runner.grip"], visibility: "known_to_actor" }] }
+        )
+      );
     }
     if (definition.type === "event" && state.runner.credits >= (definition.cost ?? 0)) {
       const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
@@ -881,6 +925,9 @@ function performAction(state: GameState, legalAction: LegalAction): void {
     case "trash_accessed_card":
       trashAccessedCard(state, mustRun(state).accessedCardId ?? "");
       return;
+    case "trash_resource":
+      trashResource(state, String(legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? ""));
+      return;
     case "decline_trash":
       finishRun(state, true);
       return;
@@ -923,9 +970,13 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     if (definition.type === "hardware") {
       state.runner.rig.hardware.push(cardId);
       if (definition.mechanics.includes("modify_memory_limit")) state.runner.memoryLimit += 1;
-    } else {
+    } else if (definition.type === "program") {
       state.runner.rig.programs.push(cardId);
       state.runner.memoryUsed += definition.memoryCost ?? 0;
+    } else if (definition.type === "resource") {
+      state.runner.rig.resources.push(cardId);
+    } else {
+      throw new Error("Nur Programme, Hardware und Resources koennen vom Runner installiert werden.");
     }
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "rig" } };
     return;
@@ -1113,6 +1164,18 @@ function trashAccessedCard(state: GameState, cardId: string): void {
   finishRun(state, true);
 }
 
+function trashResource(state: GameState, cardId: string): void {
+  if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+  if (!state.runner.rig.resources.includes(cardId)) throw new Error("Diese Resource ist nicht installiert.");
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "resource") throw new Error("Nur installierte Resources koennen getrasht werden.");
+  spendClick(state, "corp");
+  spendCredits(state, "corp", 2);
+  removeFromAllZones(state, cardId);
+  state.runner.heap.push(cardId);
+  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+}
+
 function finishRun(state: GameState, successful: boolean): void {
   const bonus = successful ? state.run?.pendingSuccessBonusCredits ?? 0 : 0;
   state.runner.credits += bonus;
@@ -1229,7 +1292,7 @@ function action(
     timingPoint: state.timingPoint,
     costs,
     targetRequirements: metadata.targetRequirements ?? [],
-    visibility: type.startsWith("rez") || type === "score_agenda" ? "public" : "private_to_actor",
+    visibility: type.startsWith("rez") || type === "score_agenda" || type === "trash_resource" || (side === "runner" && type === "install_card") ? "public" : "private_to_actor",
     expiresAtStateVersion: state.stateVersion,
     ...(metadata.choiceRequirements ? { choiceRequirements: metadata.choiceRequirements } : {}),
     ...(metadata.abilityRef ? { abilityRef: metadata.abilityRef } : {}),
@@ -1441,8 +1504,10 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
 
   if (serverLabel) context.serverLabel = serverLabel;
   if (legalAction.type === "install_card") {
-    context.zoneLabel = legalAction.side === "runner" ? "Rig" : legalAction.payload?.placement === "ice" ? "ICE" : "Remote";
+    const definition = cardId ? definitionFor(state, cardId) : undefined;
+    context.zoneLabel = legalAction.side === "runner" ? (definition?.type === "resource" ? "Resource" : "Rig") : legalAction.payload?.placement === "ice" ? "ICE" : "Remote";
   }
+  if (legalAction.type === "trash_resource") context.zoneLabel = "Resource";
   if (legalAction.type === "rez_ice") context.zoneLabel = legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true ? "Remote" : "ICE";
   if (legalAction.type === "gain_credit" || legalAction.type === "draw_card" || legalAction.type === "remove_tag") context.amount = 1;
   if (legalAction.type === "resolve_choice") {
@@ -1484,7 +1549,7 @@ function publicServerLabelForCard(state: GameState, cardId: string | undefined):
 
 function revealForPublicEvent(state: GameState, legalAction: LegalAction): Record<string, unknown> {
   const revealsCard =
-    ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_event", "play_operation"].includes(legalAction.type) ||
+    ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation"].includes(legalAction.type) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;
@@ -1640,6 +1705,7 @@ function expandDeck(side: Side, cards: Array<{ id: string; quantity: number }>, 
 }
 
 function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefinition): CardPoolVersion {
+  if (usesMvp095CardPool(runnerDeck) || usesMvp095CardPool(corpDeck)) return "0.95.0";
   if (usesMvp094CardPool(runnerDeck) || usesMvp094CardPool(corpDeck)) return "0.94.0";
   if (usesMvp08CardPool(runnerDeck) || usesMvp08CardPool(corpDeck)) return "0.8.0";
   if (usesExpandedCardPool(runnerDeck) || usesExpandedCardPool(corpDeck)) return "0.4.0";
@@ -1647,10 +1713,16 @@ function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefin
 }
 
 function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
+  if (version === "0.95.0") return MVP_0_95_BASELINE;
   if (version === "0.94.0") return MVP_0_94_BASELINE;
   if (version === "0.8.0") return MVP_0_8_BASELINE;
   if (version === "0.4.0") return MVP_0_4_BASELINE;
   return MVP_0_1_BASELINE;
+}
+
+function usesMvp095CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_095") || deck.id.includes("_0_95") || deck.id.includes("_v0_95")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v095_"));
 }
 
 function usesMvp094CardPool(deck: DeckDefinition): boolean {
@@ -1688,8 +1760,10 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
     side: deck.side,
     identityCardId: deck.identity,
     deckName: deck.name,
-    cardPoolSnapshotId: cardPoolVersion === "0.94.0" ? "card-snapshot-0.94" : cardPoolVersion === "0.8.0" ? "card-snapshot-0.8" : expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
-    formatProfileId: cardPoolVersion === "0.94.0" ? "local-demo-v0.94" : cardPoolVersion === "0.8.0" ? "local-demo-v0.8" : expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
+    cardPoolSnapshotId:
+      cardPoolVersion === "0.95.0" ? "card-snapshot-0.95" : cardPoolVersion === "0.94.0" ? "card-snapshot-0.94" : cardPoolVersion === "0.8.0" ? "card-snapshot-0.8" : expandedCardPool ? "card-snapshot-0.5" : "mvp-0.1-demo",
+    formatProfileId:
+      cardPoolVersion === "0.95.0" ? "local-demo-v0.95" : cardPoolVersion === "0.94.0" ? "local-demo-v0.94" : cardPoolVersion === "0.8.0" ? "local-demo-v0.8" : expandedCardPool ? "local-demo-v0.6" : "legacy-demo",
     deckHash: `legacy:${deck.id}`
   };
 }
@@ -1734,6 +1808,7 @@ function removeFromAllZones(state: GameState, cardId: string): void {
   state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
   state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
+  state.runner.rig.resources = state.runner.rig.resources.filter((id) => id !== cardId);
 }
 
 function createRemote(state: GameState): CorpServer {

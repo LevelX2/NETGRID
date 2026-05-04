@@ -320,6 +320,77 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(blocked.error.code).toBe("undo_blocked");
   });
 
+  it("handles V0.95 Resource trash through submit, idempotency, reconnect and undo", async () => {
+    const match = await joinedV095ResourceMatch("mp-v095-resource");
+    const beforeTrash = await bootstrap(match.service, match.matchId, match.corp);
+    const trashAction = mustAction(beforeTrash, (action) => action.type === "trash_resource");
+
+    const trashed = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken,
+      actionId: trashAction.actionId,
+      clientKnownStateVersion: beforeTrash.playerView.stateVersion,
+      idempotencyKey: "v095-trash"
+    });
+
+    expect(trashed.ok).toBe(true);
+    if (!trashed.ok) throw new Error(trashed.error.message);
+    expect(trashed.publicEvent?.visibilityClass).toBe("public");
+    expect(trashed.publicEvent?.publicPayload).toMatchObject({
+      actionType: "trash_resource",
+      cardDefinitionId: "v095_safehouse_resource",
+      title: "Safehouse Resource"
+    });
+    expect(trashed.actorPayload.playerView.opponent.discardCount).toBe(1);
+    expect(trashed.opponentPayload.playerView.own.heapOrArchives.some((card) => card.definitionId === "v095_safehouse_resource")).toBe(true);
+    expect(JSON.stringify(trashed.actorPayload)).not.toContain("Simple Fracter");
+
+    const duplicate = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken,
+      actionId: trashAction.actionId,
+      clientKnownStateVersion: beforeTrash.playerView.stateVersion,
+      idempotencyKey: "v095-trash"
+    });
+    expect(duplicate.ok).toBe(true);
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.receipt.stateVersionAfter).toBe(trashed.receipt.stateVersionAfter);
+
+    const stale = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken,
+      actionId: trashAction.actionId,
+      clientKnownStateVersion: beforeTrash.playerView.stateVersion,
+      idempotencyKey: "v095-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale-state rejection");
+    expect(stale.error.code).toBe("stale_state");
+
+    const reconnected = await match.service.reconnectMatch(match.matchId, {
+      side: "runner",
+      reconnectToken: match.runner.reconnectToken
+    });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.playerView.own.heapOrArchives.some((card) => card.definitionId === "v095_safehouse_resource")).toBe(true);
+    expect(JSON.stringify(reconnected)).not.toContain("Simple Decoder");
+
+    const undo = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnected.sessionToken,
+      targetEventId: `evt_${trashed.receipt.stateVersionAfter}`,
+      reason: "Resource trash undo"
+    });
+    expect(undo.ok).toBe(true);
+    if (!undo.ok) throw new Error(undo.error.message);
+    expect(undo.undoRequest?.targetEventId).toBe(`evt_${trashed.receipt.stateVersionAfter}`);
+  });
+
   it("reports V0.94 Flatline as a side-safe result reason", async () => {
     const match = await joinedV094DamageMatch("mp-v094-flatline", { emptyRunnerGrip: true });
 
@@ -717,6 +788,36 @@ const V094_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const V095_RUNNER_DECK: DeckDefinition = {
+  id: "demo_runner_095",
+  name: "Runner Demo Deck 0.95 - Multiplayer Resource Harness",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_economy_event", quantity: 3 },
+    { id: "simple_run_event", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_killer", quantity: 2 },
+    { id: "v095_safehouse_resource", quantity: 2 }
+  ]
+};
+
+const V095_CORP_DECK: DeckDefinition = {
+  id: "demo_corp_095",
+  name: "Corp Demo Deck 0.95 - Multiplayer Resource Trash Harness",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_priority_agenda", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "simple_economy_asset", quantity: 2 },
+    { id: "simple_tag_ice", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 }
+  ]
+};
+
 async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettings>) {
   const service = new MultiplayerService(new InMemoryMatchStorage(), {
     tokenSalt: "test-salt",
@@ -781,6 +882,51 @@ async function joinedV094DamageMatch(seed: string, options: { emptyRunnerGrip?: 
   };
 }
 
+async function joinedV095ResourceMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  let gameState = toRunnerTurnEngine(createGame({ matchId: created.matchId, seed, runnerDeck: V095_RUNNER_DECK, corpDeck: V095_CORP_DECK, agendaPointsToWin: 7 }));
+  gameState.runner.credits = 6;
+  moveRunnerCardToGripForTest(gameState, "v095_safehouse_resource");
+  gameState = applyEngineAction(gameState, "runner", (action) => action.type === "install_card" && action.label.includes("Safehouse Resource"));
+  gameState.activeSide = "corp";
+  gameState.phase = "corp_action_phase";
+  gameState.timingPoint = "corp_action.main";
+  gameState.corp.clicks = 3;
+  gameState.corp.credits = 5;
+  gameState.runner.tags = 1;
+  record.gameState = gameState;
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v095_resource_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
 async function bootstrap(service: MultiplayerService, matchId: string, session: PlayerSession): Promise<SidePayload> {
   const payload = await service.bootstrap(matchId, session.side, session.sessionToken);
   expect("error" in payload).toBe(false);
@@ -818,6 +964,14 @@ function putCorpIceOnServerForTest(state: GameState, serverId: "hq" | "rd" | "ar
   return id;
 }
 
+function moveRunnerCardToGripForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCardForTest(state, definitionId);
+  removeEverywhereForTest(state, id);
+  state.runner.grip.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  return id;
+}
+
 function emptyRunnerGripForTest(state: GameState): void {
   for (const id of state.runner.grip.slice()) {
     removeEverywhereForTest(state, id);
@@ -847,6 +1001,7 @@ function removeEverywhereForTest(state: GameState, cardId: string): void {
   state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
   state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
+  state.runner.rig.resources = state.runner.rig.resources.filter((id) => id !== cardId);
 }
 
 function toEventRecordForTest(matchId: string, event: GameEvent): EventRecord {

@@ -315,6 +315,107 @@ describe("MVP 0.94 Damage and Flatline", () => {
   });
 });
 
+describe("MVP 0.95 Resources and tag interaction", () => {
+  it("installs a local Resource through LegalActions and shows it publicly", () => {
+    let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
+    state.runner.credits = 6;
+    moveRunnerCardToGrip(state, "v095_safehouse_resource");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "v095_safehouse_resource");
+
+    expect(state.baseline.engineSchemaVersion).toBe("0.95.0");
+    expect(state.runner.credits).toBe(4);
+    expect(state.runner.rig.resources.map((id) => state.cardInstances[id]?.definitionId)).toEqual(["v095_safehouse_resource"]);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: "v095_safehouse_resource",
+      title: "Safehouse Resource",
+      zoneLabel: "Resource"
+    });
+
+    const runnerView = getPlayerView(state, "runner");
+    const corpView = getPlayerView(state, "corp");
+    expect(runnerView.own.rig?.some((card) => card.definitionId === "v095_safehouse_resource")).toBe(true);
+    expect(corpView.opponent.rig?.some((card) => card.definitionId === "v095_safehouse_resource")).toBe(true);
+    expect(JSON.stringify(corpView)).not.toContain("Simple Fracter");
+  });
+
+  it("lets the Corp trash an installed Resource only while the Runner is tagged", () => {
+    let state = installedResourceCorpTurn("v095-trash-resource");
+    const resourceId = state.runner.rig.resources[0]!;
+    const beforeHash = hashState(state);
+
+    state = apply(state, "corp", (action) => action.type === "trash_resource" && action.payload?.resourceId === resourceId);
+
+    expect(hashState(state)).not.toBe(beforeHash);
+    expect(state.corp.clicks).toBe(2);
+    expect(state.corp.credits).toBe(3);
+    expect(state.runner.rig.resources).toHaveLength(0);
+    expect(state.runner.heap).toContain(resourceId);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(isHiddenInfoBarrierEvent(state.eventLog.at(-1)!)).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trash_resource",
+      cardDefinitionId: "v095_safehouse_resource",
+      title: "Safehouse Resource",
+      zoneLabel: "Resource"
+    });
+  });
+
+  it("rejects Resource trash without tags, stale state or installed Resource target", () => {
+    const tagged = installedResourceCorpTurn("v095-trash-revalidate");
+    const trashAction = mustAction(tagged, "corp", (action) => action.type === "trash_resource");
+    const untagged = structuredClone(tagged);
+    untagged.runner.tags = 0;
+
+    expect(getLegalActions(untagged, "corp").some((action) => action.type === "trash_resource")).toBe(false);
+    expect(
+      applyAction(untagged, {
+        matchId: untagged.matchId,
+        side: "corp",
+        actionId: trashAction.actionId,
+        clientKnownStateVersion: untagged.stateVersion
+      }).ok
+    ).toBe(false);
+    expect(
+      applyAction(tagged, {
+        matchId: tagged.matchId,
+        side: "corp",
+        actionId: trashAction.actionId,
+        clientKnownStateVersion: tagged.stateVersion - 1
+      })
+    ).toMatchObject({ ok: false, error: { code: "ERR_STALE_STATE" } });
+
+    const missingTarget = structuredClone(tagged);
+    removeEverywhere(missingTarget, String(trashAction.payload?.resourceId));
+    expect(getLegalActions(missingTarget, "corp").some((action) => action.type === "trash_resource")).toBe(false);
+  });
+
+  it("replays Resource install and trash with deterministic StateHash and no new randomness", () => {
+    const initial = installedResourceCorpTurn("v095-replay-resource");
+    const randomBefore = initial.randomDrawRecords.length;
+    let state = apply(initial, "corp", (action) => action.type === "trash_resource");
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(state.randomDrawRecords.length).toBe(randomBefore);
+  });
+
+  it("does not expose V0.96+ mechanics while enabling Resources", () => {
+    const state = toRunnerTurn(v095ResourceGame("v095-no-scope"));
+    const actionTypes = getLegalActions(state, "runner").map((action) => action.type);
+
+    expect(actionTypes).not.toContain("resolve_choice");
+    expect(actionTypes).not.toContain("trigger_ability");
+    expect(DEMO_CARDS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain("trace");
+    expect(DEMO_CARDS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain("hosting");
+    expect(DEMO_CARDS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain("virus");
+    expect(DEMO_CARDS_BY_ID.v095_safehouse_resource?.mechanics).not.toContain("prevention");
+  });
+});
+
 describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
     const state = toRunnerTurn(createGame({ seed: "v093-choice" }));
@@ -656,6 +757,37 @@ const V094_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const V095_RUNNER_DECK: DeckDefinition = {
+  id: "demo_runner_095",
+  name: "Runner Demo Deck 0.95 - Resource Harness",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_economy_event", quantity: 3 },
+    { id: "simple_run_event", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_killer", quantity: 2 },
+    { id: "v095_safehouse_resource", quantity: 2 }
+  ]
+};
+
+const V095_CORP_DECK: DeckDefinition = {
+  id: "demo_corp_095",
+  name: "Corp Demo Deck 0.95 - Resource Trash Harness",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_priority_agenda", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "simple_economy_asset", quantity: 2 },
+    { id: "simple_tag_ice", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 }
+  ]
+};
+
 function v094DamageGame(seed: string): GameState {
   return createGame({
     seed,
@@ -663,6 +795,29 @@ function v094DamageGame(seed: string): GameState {
     corpDeck: V094_CORP_DECK,
     agendaPointsToWin: 7
   });
+}
+
+function v095ResourceGame(seed: string): GameState {
+  return createGame({
+    seed,
+    runnerDeck: V095_RUNNER_DECK,
+    corpDeck: V095_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function installedResourceCorpTurn(seed: string): GameState {
+  let state = toRunnerTurn(v095ResourceGame(seed));
+  state.runner.credits = 6;
+  moveRunnerCardToGrip(state, "v095_safehouse_resource");
+  state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "v095_safehouse_resource");
+  state.activeSide = "corp";
+  state.phase = "corp_action_phase";
+  state.timingPoint = "corp_action.main";
+  state.corp.clicks = 3;
+  state.corp.credits = 5;
+  state.runner.tags = 1;
+  return state;
 }
 
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
@@ -837,4 +992,5 @@ function removeEverywhere(state: GameState, id: string): void {
   state.runner.scoreArea = state.runner.scoreArea.filter((cardId) => cardId !== id);
   state.runner.rig.programs = state.runner.rig.programs.filter((cardId) => cardId !== id);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((cardId) => cardId !== id);
+  state.runner.rig.resources = state.runner.rig.resources.filter((cardId) => cardId !== id);
 }

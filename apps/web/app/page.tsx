@@ -1661,8 +1661,8 @@ function AccessRevealModal({
             ) : null}
             <div className="accessRevealActions">
               {primaryActions.map((action) => (
-                <button className={`button primary ${action.type === "trash_accessed_card" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
-                  {action.type === "trash_accessed_card" ? <Trash2 size={15} /> : <Shield size={15} />}
+                <button className={`button primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
+                  {action.type === "trash_accessed_card" || action.type === "trash_resource" ? <Trash2 size={15} /> : <Shield size={15} />}
                   {accessDecisionLabel(action)}
                 </button>
               ))}
@@ -1689,6 +1689,7 @@ function AccessRevealModal({
 function accessDecisionLabel(action: LegalAction): string {
   if (action.type === "steal_agenda") return "Agenda stehlen";
   if (action.type === "trash_accessed_card") return "Trashen";
+  if (action.type === "trash_resource") return "Resource trashen";
   if (action.type === "decline_trash") return "Nicht trashen";
   return action.label;
 }

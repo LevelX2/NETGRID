@@ -183,6 +183,12 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       title = phrase(subject, `${cardTitle ?? "die zugegriffene Karte"} getrasht`);
       chips.push("Trash");
       break;
+    case "trash_resource":
+      category = "danger";
+      importance = "important";
+      title = phrase(subject, `${cardTitle ?? "eine Resource"} getrasht`);
+      chips.push("Resource", "Trash");
+      break;
     case "decline_trash":
       category = "run";
       title = phrase(subject, "den Zugriff abgeschlossen");
@@ -296,6 +302,7 @@ function cardCountText(amount: number): string {
 function installLocation(serverLabel: string | undefined, zoneLabel: string | undefined, label: string | undefined): string {
   if (serverLabel) return zoneLabel === "ICE" ? ` vor ${serverLabel}` : ` in ${serverLabel}`;
   if (zoneLabel === "Rig") return " im Rig";
+  if (zoneLabel === "Resource") return " als Resource";
   const area = installAreaFromLabel(label);
   if (area === "Remote") return " in einem Remote";
   if (area === "ICE") return " als ICE";
@@ -303,6 +310,7 @@ function installLocation(serverLabel: string | undefined, zoneLabel: string | un
 }
 
 function installDestinationForTitle(actor: Side | undefined, serverLabel: string | undefined, zoneLabel: string | undefined, label: string | undefined): string {
+  if (zoneLabel === "Resource") return " als Resource";
   if (actor === "runner" || zoneLabel === "Rig") return " im Rig";
   return installLocation(serverLabel, zoneLabel, label);
 }
@@ -328,7 +336,7 @@ function runTargetFromLabel(label: string | undefined): string {
 function extractCardTitleFromLabel(actionType: string, label: string | undefined, actor: Side | undefined): string | undefined {
   if (!label || (actor === "corp" && ["install_card", "advance_card"].includes(actionType))) return undefined;
   const patterns: RegExp[] = [];
-  if (["install_card", "play_event", "play_operation", "rez_ice", "pump_breaker", "trash_accessed_card", "steal_agenda"].includes(actionType)) {
+  if (["install_card", "play_event", "play_operation", "rez_ice", "pump_breaker", "trash_accessed_card", "trash_resource", "steal_agenda"].includes(actionType)) {
     patterns.push(/^(.+?)\s+(?:installieren|spielen|rezzen|pumpen|trashen|stehlen)$/i);
     patterns.push(/^(.+?)\s+auf\s+.+$/i);
   }

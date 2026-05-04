@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "demo-decks-v0.95",
+  "id": "demo-decks-0.95",
+  "status": "implemented_for_v0.95_final_gate",
+  "extends": "data/decks/demo-decks-0.94.json",
+  "decks": [
+    {
+      "id": "demo_runner_095",
+      "name": "Runner Demo Deck 0.95 - Resource Harness",
+      "side": "runner",
+      "identity": "runner_identity_001",
+      "cards": [
+        { "id": "simple_economy_event", "quantity": 3 },
+        { "id": "simple_run_event", "quantity": 2 },
+        { "id": "simple_fracter", "quantity": 2 },
+        { "id": "simple_decoder", "quantity": 2 },
+        { "id": "simple_killer", "quantity": 2 },
+        { "id": "v095_safehouse_resource", "quantity": 2 }
+      ]
+    },
+    {
+      "id": "demo_corp_095",
+      "name": "Corp Demo Deck 0.95 - Resource Trash Harness",
+      "side": "corp",
+      "identity": "corp_identity_001",
+      "cards": [
+        { "id": "simple_agenda", "quantity": 2 },
+        { "id": "simple_priority_agenda", "quantity": 1 },
+        { "id": "simple_economy_operation", "quantity": 3 },
+        { "id": "simple_economy_asset", "quantity": 2 },
+        { "id": "simple_tag_ice", "quantity": 2 },
+        { "id": "simple_barrier_ice", "quantity": 2 },
+        { "id": "simple_code_gate_ice", "quantity": 2 }
+      ]
+    }
+  ]
+}

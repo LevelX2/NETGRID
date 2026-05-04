@@ -548,6 +548,12 @@ function scoreCorpAction(input: AiDecisionInput, features: AiFeatures, action: L
       explanation = "Eine legale Operation verbessert anhand eigener sichtbarer Rollen die Corp-Position.";
       evidence.push("own_operation_role_known", ...publicRoleEvidence(roles), `runner_tags:${features.opponentTags}`);
       break;
+    case "trash_resource":
+      score = features.opponentTags > 0 ? 760 + (profile.remote ?? 1) * 20 : 140;
+      reasonCode = "corp.tag.trash_visible_resource";
+      explanation = "Die Corp nutzt einen sichtbaren Tag, um eine öffentliche Resource zu trashen.";
+      evidence.push("resource_trash_legal", `runner_tags:${features.opponentTags}`);
+      break;
     case "gain_credit":
       score = features.credits < 5 ? 500 : 350;
       reasonCode = "corp.economy.basic_credit";

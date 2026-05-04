@@ -51,5 +51,12 @@
 - `docs/derived/MVP_0.94_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.94.
 - `data/rules/mechanics-coverage-0.94.json`: maschinenlesbare Coverage nach V0.94; Damage/Flatline ist `implemented_limited`, V0.95+-Mechaniken bleiben offen.
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`: detaillierte Planung für V0.95 Resources und Tag-Interaktion.
+- `docs/derived/MVP_0.95_REQUIREMENTS.md`: eingefrorene V0.95-Anforderungen für Runner-Resources und tag-basiertes Resource-Trash.
+- `docs/derived/RESOURCE_TAG_INTERACTION_0.95_SPEC.md`: V0.95-Spezifikation für Resource-Install, Corp-Resource-Trash, Sichtbarkeit, Events und No-Scope-Grenzen.
+- `docs/derived/MVP_0.95_TEST_MATRIX.md`: V0.95-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
+- `docs/derived/MVP_0.95_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.95.
+- `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.95-Resource-/Tag-Slice.
+- `docs/derived/MVP_0.95_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.95.
+- `data/rules/mechanics-coverage-0.95.json`: maschinenlesbare Coverage nach V0.95; Resources sind `implemented_limited`, V0.96+-Mechaniken bleiben offen.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.

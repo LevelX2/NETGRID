@@ -1,0 +1,35 @@
+{
+  "id": "SCN-V095-001",
+  "name": "V0.95 Resource install and tagged trash engine harness",
+  "baselineId": "rules-baseline-mvp-0.95",
+  "requirementIds": [
+    "M095-INSTALL-001",
+    "M095-INSTALL-002",
+    "M095-TRASH-001",
+    "M095-TRASH-002",
+    "M095-TRASH-003",
+    "M095-VISIBILITY-001",
+    "M095-REPLAY-001",
+    "M095-CARD-001"
+  ],
+  "coversCards": ["v095_safehouse_resource"],
+  "seed": "v095-resource-tag",
+  "runnerDeckSnapshotId": "demo_runner_095_snapshot_v0_95",
+  "corpDeckSnapshotId": "demo_corp_095_snapshot_v0_95",
+  "steps": [
+    "Runner installs Safehouse Resource from Grip through LegalActions.",
+    "Installed Resource appears in both PlayerViews as public board card.",
+    "Fixture sets Runner tagged in Corp action phase.",
+    "Corp submits legal trash_resource and pays 1 click plus 2 credits.",
+    "Safehouse Resource moves deterministically to Runner heap."
+  ],
+  "expected": {
+    "legalActionsOnly": true,
+    "resourceVisibleToBothSides": true,
+    "trashRequiresTaggedRunner": true,
+    "trashCostsClickAndCredits": true,
+    "resourceTrashVisibilityClass": "public",
+    "resourceTrashNotHiddenInfoBarrier": true,
+    "finalStateHash": "covered_by_engine_replay_test"
+  }
+}

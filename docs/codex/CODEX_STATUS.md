@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V0.94 Damage/Flatline is implemented, verified and final-reviewed. V0.95 is the next gated scope for a separate Requirements Freeze; later mechanics remain planned only and are not implementation-freigegeben.
+V0.95 Resources and tag-interaction are implemented, verified and final-reviewed. V0.96 Trace/Link/Bidding is the next gated scope for a separate Requirements Freeze; later mechanics remain planned only and are not implementation-freigegeben.
 
 ## Status
 
@@ -172,6 +172,18 @@ MVP 0.94 Damage/Flatline implementation, validation and documentation are comple
 
 `ready_for_MVP_0.95_requirements_freeze: true`
 
+MVP 0.95 Resources and tag-interaction requirements freeze is complete.
+
+`MVP_0.95_requirements_freeze_done: true`
+
+`ready_for_MVP_0.95_implementation: true`
+
+MVP 0.95 Resources and tag-interaction implementation, validation and documentation are complete.
+
+`MVP_0.95_done: true`
+
+`ready_for_MVP_0.96_requirements_freeze: true`
+
 S01 requirements, result modal, private match series, audio and test matrix are complete.
 
 `S01_requirements_freeze_done: true`
@@ -220,6 +232,8 @@ Gate flow:
 30. MVP 0.94/V0.95 detailed planning: pass.
 31. MVP 0.94 Damage/Flatline requirements freeze: pass.
 32. MVP 0.94 Damage/Flatline implementation, validation and final review: pass.
+33. MVP 0.95 Resources/tag-interaction requirements freeze: pass.
+34. MVP 0.95 Resources/tag-interaction implementation, validation and final review: pass.
 
 ## Phase 1 files created or updated
 
@@ -1199,6 +1213,77 @@ Checks:
 - `corepack pnpm test`: pass, 78 package tests plus 27 root spec tests.
 - `corepack pnpm build`: pass, known Turbopack NFT warning remains for the existing `card-images` route trace.
 
+## MVP 0.95 Requirements Freeze files created or updated
+
+- `docs/derived/MVP_0.95_REQUIREMENTS.md`
+- `docs/derived/RESOURCE_TAG_INTERACTION_0.95_SPEC.md`
+- `docs/derived/MVP_0.95_TEST_MATRIX.md`
+- `docs/derived/MVP_0.95_REQUIREMENTS_REVIEW.md`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.95 Requirements Freeze decision
+
+`MVP_0.95_requirements_freeze_done: true`
+
+`ready_for_MVP_0.95_implementation: true`
+
+V0.95 is frozen as a narrow Runner Resource and tag-interaction gate. It adds a Resource card type, visible installed Runner Resources and the Corp basic action `trash_resource` while the Runner is tagged, paying 1 click and 2 credits. Resource trash is a public board interaction and must not leak Runner Grip/Stack/R&D/HQ/Archives hidden data. Trace, Link, Bidding, Hosting, Viruses, Counter families, Prevention/Avoid/Interrupt/Replacement and V0.96+ mechanics remain out of scope.
+
+## MVP 0.95 Final files created or updated
+
+- `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.95_FINAL_REVIEW.md`
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `data/rules/rules-baseline-0.95.json`
+- `data/cards/demo-cards-0.95.json`
+- `data/decks/demo-decks-0.95.json`
+- `data/manifests/card-implementation-manifest-0.95.json`
+- `data/rules/mechanics-coverage-0.95.json`
+- `data/scenarios/v095-resource-tag.json`
+- `data/scenarios/v095-multiplayer-resource-smoke.json`
+- `packages/shared/src/index.ts`
+- `packages/engine/src/index.ts`
+- `packages/engine/src/index.test.ts`
+- `packages/ai/src/index.ts`
+- `packages/ai/src/index.test.ts`
+- `apps/server/src/multiplayer.test.ts`
+- `apps/web/app/chronicle.ts`
+- `apps/web/app/page.tsx`
+- `tests/specs/phase1-artifacts.test.ts`
+- `docs/codex/CODEX_STATUS.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+
+## MVP 0.95 Final gate
+
+`MVP_0.95_done: true`
+
+`ready_for_MVP_0.96_requirements_freeze: true`
+
+V0.95 implements Runner Resources and tag-based Resource trash as a narrow public-board mechanics gate. `v095_safehouse_resource` is a local fictional Resource harness. The Corp basic action `trash_resource` is available only while the Runner is tagged and costs 1 click plus 2 credits. Resource trash is public, not a hidden-info barrier, and preserves deterministic Replay/StateHash. Trace, Link/Bidding, Jack-out/Breach/Multiaccess, Identity-Abilities, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families and Prevention remain unimplemented.
+
+Checks:
+
+- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
+- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
+- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 36 tests.
+- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 18 tests.
+- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 17 tests.
+- `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 20 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass.
+
 
 ## S01 Requirements and implementation files created or updated
 
@@ -1292,7 +1377,7 @@ The next scope decision is resolved into a product-oriented post-MVP-0.4 roadmap
 - V0.94: Damage and Flatline, with narrow Game-End reason contract.
 - V0.95: Runner Resources and tag-interaction.
 
-Current gate: V0.94 is complete and V0.95 Requirements Freeze is next. Damage and Flatline are playable only in the narrow V0.94 scope. V0.95+ mechanics remain planned only; Resources, Trace, Multiaccess, Identity-Abilities, Hosting, Viruses, Counter families and Prevention are still not playable until their respective gates are implemented.
+Current gate: V0.95 is complete and V0.96 Requirements Freeze is next. Damage/Flatline and Resources are playable only in their narrow V0.94/V0.95 scopes. V0.96+ mechanics remain planned only; Trace, Multiaccess, Identity-Abilities, Hosting, Viruses, Counter families and Prevention are still not playable until their respective gates are implemented.
 
 Detailed planning artifacts available:
 
@@ -1316,6 +1401,13 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
 - `docs/derived/MVP_0.94_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/derived/MVP_0.95_REQUIREMENTS.md`
+- `docs/derived/RESOURCE_TAG_INTERACTION_0.95_SPEC.md`
+- `docs/derived/MVP_0.95_TEST_MATRIX.md`
+- `docs/derived/MVP_0.95_REQUIREMENTS_REVIEW.md`
+- `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/MVP_0.95_FINAL_REVIEW.md`
+- `data/rules/mechanics-coverage-0.95.json`
 
 UI design exploration artifacts available:
 

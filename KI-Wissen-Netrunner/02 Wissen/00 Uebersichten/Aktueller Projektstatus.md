@@ -60,6 +60,8 @@
 - Die detaillierte Planung für V0.94 und V0.95 liegt vor. Die Annahmenprüfung bestätigt V0.94 als Damage-/Flatline-Gate mit engem Game-End-Grundvertrag und V0.95 als Resource-/Tag-Interaktionsgate. V0.94 startet keinen vollen M2-Block; V0.95 startet kein Trace/Link/Bidding.
 - V0.94 Requirements Freeze ist abgeschlossen. `MVP_0.94_REQUIREMENTS.md`, `DAMAGE_FLATLINE_0.94_SPEC.md`, `MVP_0.94_TEST_MATRIX.md` und `MVP_0.94_REQUIREMENTS_REVIEW.md` geben die Implementierung frei: Net-/Meat-Damage, RandomDrawRecords, Hidden-Info-Barriere, Undo-Block nach Damage und Flatline als enger Game-End-Grundvertrag.
 - V0.94 Damage/Flatline ist umgesetzt und final geprüft. Net-/Meat-Damage laufen über freigegebene Engine-Pfade, nutzen RandomDrawRecords, erzeugen `hidden_info_barrier`-Events und blockieren Undo. Flatline ist als side-sicherer Game-End-Grund in Engine, Multiplayer-Result Summary und Web-UI verfügbar. Gate-Ergebnis: `MVP_0.94_done: true`; `ready_for_MVP_0.95_requirements_freeze: true`.
+- V0.95 Requirements Freeze ist abgeschlossen. `MVP_0.95_REQUIREMENTS.md`, `RESOURCE_TAG_INTERACTION_0.95_SPEC.md`, `MVP_0.95_TEST_MATRIX.md` und `MVP_0.95_REQUIREMENTS_REVIEW.md` geben die Umsetzung frei: Runner-Resources, sichtbare installierte Resource-Zone und Corp-`trash_resource` bei getaggtem Runner für 1 Klick und 2 Credits. Trace, Link/Bidding, Hosting, Viren, Counter-Familien, Prevention/Avoid/Interrupt/Replacement und V0.96+ bleiben gesperrt.
+- V0.95 Resources und Tag-Interaktion sind umgesetzt und final geprüft. Runner-Resources sind public installierte Boardkarten; `v095_safehouse_resource` ist eine lokale/fiktive Resource-Harness-Karte. Die Corp kann bei getaggtem Runner mit `trash_resource` für 1 Klick und 2 Credits eine installierte Resource trashen. Resource-Trash ist public, keine Hidden-Info-Barriere, Undo bleibt darüber möglich, Replay/StateHash bleiben deterministisch. Gate-Ergebnis: `MVP_0.95_done: true`; `ready_for_MVP_0.96_requirements_freeze: true`.
 
 ## Teilweise umgesetzt
 
@@ -75,7 +77,7 @@
 ## Offen
 
 - Kein gate-basierter MVP-0.1- bis MVP-0.9-Arbeitsschritt ist offen.
-- Der nächste empfohlene Scope ist V0.95 Requirements Freeze für Resources und Tag-Interaktion. M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten. Resources, Trace, Multiaccess, Identity-Abilities, Hosting, Viren, Counter-Familien und Prevention sind weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
+- Der nächste empfohlene Scope ist V0.96 Requirements Freeze für Trace, Link und Bidding. M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten. Trace, Multiaccess, Identity-Abilities, Hosting, Viren, Counter-Familien und Prevention sind weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - Core-Damage, Damage-Prevention, Avoid, Interrupt und Replacement bleiben zurückgestellt und sind nicht Teil des V0.94-Scopes.
 - V0.2.1-Härtung bleibt ein optionaler Nachlaufstrang für Storage-/SQLite-Entscheidung, screenshotbasierte UI-Smokes und privaten Betrieb.
 - UI-Neugestaltung und Designgestaltung sind bewusst V0.7 zugeordnet. Requirements, UI-Spezifikationen, Testmatrix und Requirements Review sind eingefroren.
@@ -84,7 +86,7 @@
 - V0.8 ist abgeschlossen. Weitere Karten oder Mechanikgruppen dürfen nicht durch Importstatus, Katalogdaten oder Deckeditor-Freigaben spielbar werden, sondern brauchen weiterhin eigenes Resolver-, Manifest-, Test-, Visibility-, Replay/StateHash- und KI-Smoke-Gate.
 - V0.9 ist abgeschlossen. Weitere KI-Arbeit darf den LegalActions-/PlayerView-/side-gefilterten-Event-Vertrag nicht aufweichen und keine FullState-, verdeckte Gegnerdaten- oder LLM-Regelakteur-Pfade einführen.
 - V0.91 Requirements sind eingefroren und private lokale Scan-/Asset-Nutzung ist als Projektentscheidung dokumentiert. NetrunnerDB ist nur technische Kandidatenquelle für Bildmetadaten; Null-Signal-Primärquellen geben Card Art, Frames und Card Backs nicht pauschal frei. Bilder dürfen ausschließlich als private lokale Anzeige-Artefakte genutzt werden und dürfen keine Engine-, KI-, Deck-, Replay-, StateHash- oder Match-State-Daten beeinflussen.
-- V0.92, V0.93 und V0.94 sind abgeschlossen. V0.95 ist geplant, aber nicht implementiert; Resources, Trace, Mulligan, Multiaccess, Identity-Abilities und Prevention bleiben weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
+- V0.92, V0.93, V0.94 und V0.95 sind abgeschlossen. Trace, Mulligan, Multiaccess, Identity-Abilities, Hosting, Viren, Counter-Familien und Prevention bleiben weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - S01-Mehrspiel-Serien sind als private Zwei-Spiel-Hülle umgesetzt. Der Seitenwechsel erfolgt über ein neues Einzelspiel mit neuem privaten Session-/Join-Kontext; öffentliche Turnier-, Ranking- und Matchmaking-Funktionen bleiben ausgeschlossen.
 - V0.5-Importdaten dürfen keine Engine-, KI-, Deckvalidierungs- oder Matchstart-Freigabe auslösen. `deck_legal` setzt `playable` voraus.
 - Vor weiteren technischen Schritten Node 24 LTS verwenden und bei Bedarf `corepack pnpm ...` statt direktem `pnpm` nutzen.

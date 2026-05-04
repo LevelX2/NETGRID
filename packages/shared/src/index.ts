@@ -34,13 +34,14 @@ export type ActionType =
   | "access_card"
   | "steal_agenda"
   | "trash_accessed_card"
+  | "trash_resource"
   | "decline_trash"
   | "remove_tag"
   | "resolve_choice"
   | "trigger_ability"
   | "end_turn";
 
-export type CardType = "identity" | "event" | "program" | "hardware" | "agenda" | "operation" | "asset" | "upgrade" | "ice";
+export type CardType = "identity" | "event" | "program" | "hardware" | "resource" | "agenda" | "operation" | "asset" | "upgrade" | "ice";
 export type CardDefinitionId = string;
 export type CardInstanceId = string;
 export type ServerId = "hq" | "rd" | "archives" | `remote_${number}` | "new_remote";
@@ -196,14 +197,14 @@ export type DeckPublicMetadata = {
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
-  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
-  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
-  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
-  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
-  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0";
+  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo" | "mvp-0.95-demo";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
+  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
+  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
+  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0";
 };
 
 export type PlayerController = {
@@ -274,6 +275,7 @@ export type CorpState = {
 export type RunnerRig = {
   programs: CardInstanceId[];
   hardware: CardInstanceId[];
+  resources: CardInstanceId[];
 };
 
 export type RunnerState = {
@@ -478,6 +480,7 @@ export type PlayerView = {
     deckCount: number;
     discardCount: number;
     scoreArea: VisibleCard[];
+    rig?: VisibleCard[];
   };
   servers: Array<{
     id: Exclude<ServerId, "new_remote">;
@@ -589,6 +592,18 @@ export const MVP_0_94_BASELINE: RulesBaseline = {
   multiplayerSchemaVersion: "0.94.0",
   aiControllerSchemaVersion: "0.94.0",
   simulationSchemaVersion: "0.94.0"
+};
+
+export const MVP_0_95_BASELINE: RulesBaseline = {
+  ...MVP_0_94_BASELINE,
+  cardTextSnapshotId: "mvp-0.95-demo",
+  engineSchemaVersion: "0.95.0",
+  cardImplementationVersion: "0.95.0",
+  deviationRegistryVersion: "0.95.0",
+  playerViewSchemaVersion: "0.95.0",
+  multiplayerSchemaVersion: "0.95.0",
+  aiControllerSchemaVersion: "0.95.0",
+  simulationSchemaVersion: "0.95.0"
 };
 
 export const DEMO_CARDS: CardDefinition[] = [
@@ -899,6 +914,17 @@ export const DEMO_CARDS: CardDefinition[] = [
       { id: "v094_neural_sentry_ice_etr", type: "end_the_run" }
     ],
     mechanics: ["install_ice", "rez_ice", "encounter_ice", "damage", "flatline", "end_the_run", "v094_local_original"]
+  },
+  {
+    id: "v095_safehouse_resource",
+    title: "Safehouse Resource",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "Einfache offene Runner-Resource ohne aktive Fähigkeit.",
+    mechanics: ["install_resource", "resource", "trash_resource", "tag_interaction", "v095_local_original"]
   },
   {
     id: "v08_burst_credit_event",
