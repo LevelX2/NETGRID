@@ -96,8 +96,8 @@ export type AiSimulationConfig = {
   corpDifficulty?: AiDifficulty;
   runnerProfileId?: string;
   corpProfileId?: string;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096" | "demo_runner_097" | "demo_runner_098";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096" | "demo_corp_097" | "demo_corp_098";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096" | "demo_runner_097" | "demo_runner_098" | "demo_runner_099";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096" | "demo_corp_097" | "demo_corp_098" | "demo_corp_099";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -126,7 +126,7 @@ export type AiSimulationSummary = {
     stateHashAfter: string;
   }>;
   errors: string[];
-  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
   metrics: AiQualityMetrics;
 };
 
@@ -315,6 +315,18 @@ export function simulateAiSoak(config: Partial<AiSimulationConfig> = {}): AiSoak
 }
 
 function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationSummary["cardPoolVersion"] {
+  if (
+    config.runnerDeck?.id.includes("_099") ||
+    config.runnerDeck?.id.includes("_v0_99") ||
+    config.corpDeck?.id.includes("_099") ||
+    config.corpDeck?.id.includes("_v0_99") ||
+    config.runnerDeck?.cards.some((card) => card.id.startsWith("v099_")) ||
+    config.corpDeck?.cards.some((card) => card.id.startsWith("v099_")) ||
+    config.runnerDeckId === "demo_runner_099" ||
+    config.corpDeckId === "demo_corp_099"
+  ) {
+    return "0.99.0";
+  }
   if (
     config.runnerDeck?.id.includes("_098") ||
     config.runnerDeck?.id.includes("_v0_98") ||
@@ -657,6 +669,12 @@ function scoreCorpAction(input: AiDecisionInput, features: AiFeatures, action: L
       reasonCode = "corp.tag.trash_visible_resource";
       explanation = "Die Corp nutzt einen sichtbaren Tag, um eine öffentliche Resource zu trashen.";
       evidence.push("resource_trash_legal", `runner_tags:${features.opponentTags}`);
+      break;
+    case "purge_virus_counters":
+      score = 780;
+      reasonCode = "corp.purge.visible_virus_counters";
+      explanation = "Die Corp nutzt die legale Purge-Aktion gegen sichtbare Virus-Counter.";
+      evidence.push("purge_legal");
       break;
     case "gain_credit":
       score = features.credits < 5 ? 500 : 350;

@@ -36,7 +36,7 @@
 - `docs/derived/MVP_0.91_REQUIREMENTS.md`: eingefrorene V0.91-Anforderungen; private lokale Scan-/Asset-Nutzung ist nur als Anzeige-Artefakt erlaubt.
 - `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`: Quellen-, Nutzungs- und Asset-Policy-Grenzen für Kartenbilder.
 - `docs/derived/MVP_0.92_REQUIREMENTS.md`: eingefrorene V0.92-Anforderungen für Mechanik-Inventar und M1-Gate.
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`: normalisierte Mechanik-Coverage nach V0.9/S01.
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`: normalisierte Mechanik-Coverage nach V0.99.
 - `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`: Spezifikation für V0.93 Effects, Abilities, Timing, Choices und Eventklassifikation.
 - `docs/derived/MVP_0.93_REQUIREMENTS.md`: umgesetzte V0.93-Anforderungen für das M1-Engine-Fundament und M2 als Requirements-only Scope.
 - `docs/derived/SETUP_GAME_END_0.93_SPEC.md`: M2-Spezifikation für Setup, Mulligan, Siegwerte, Deckout/Flatline-Vorbereitung, Identity Setup und Archives/facedown.
@@ -79,6 +79,15 @@
 - `docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.98a.
 - `docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.98-Identity-/Hidden-Zone-Slice.
 - `docs/derived/MVP_0.98_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.98.
-- `data/rules/mechanics-coverage-0.98.json`: maschinenlesbare Coverage nach V0.98; Identity/Modifier und Hidden-Zone-Tools sind `implemented_limited`, V0.99+-Mechaniken bleiben offen.
+- `data/rules/mechanics-coverage-0.98.json`: maschinenlesbare Coverage nach V0.98; Identity/Modifier und Hidden-Zone-Tools sind `implemented_limited`, V0.99 war zu diesem Zeitpunkt noch offen.
+- `docs/derived/MVP_0.99_REQUIREMENTS.md`: eingefrorene V0.99-Anforderungen für Counter, Hosting, Viren, Purge, Recurring Credits und Bad Publicity.
+- `docs/derived/COUNTER_HOSTING_0.99_SPEC.md`: V0.99a/b-Spezifikation für Counter-Felder, `hostedOn`, Hosting-Choice, Host-Trash-Kaskade und Sichtbarkeit.
+- `docs/derived/VIRUS_PURGE_0.99_SPEC.md`: V0.99c-Spezifikation für Virus-Counter und Corp-`purge_virus_counters`.
+- `docs/derived/RECURRING_BAD_PUBLICITY_0.99_SPEC.md`: V0.99d-Spezifikation für Recurring Credits und Bad Publicity.
+- `docs/derived/MVP_0.99_TEST_MATRIX.md`: V0.99-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
+- `docs/derived/MVP_0.99_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.99a bis V0.99d.
+- `docs/derived/MVP_0.99_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.99-Hosting-/Counter-Slice.
+- `docs/derived/MVP_0.99_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.99.
+- `data/rules/mechanics-coverage-0.99.json`: maschinenlesbare Coverage nach V0.99; Hosting, Viren, Purge, Counter-Familien, Recurring Credits und Bad Publicity sind `implemented_limited`, M11+-Mechaniken bleiben offen.
 - `docs/derived/S01_REQUIREMENTS.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/derived/S01_MATCH_SERIES_SPEC.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.

@@ -186,6 +186,53 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(corpSerialized).not.toContain("Simple Decoder");
     expect(corpSerialized).not.toContain("cardInstances");
   });
+
+  it("keeps V0.99 hosting choices side-safe and lets Corp AI choose legal Purge", () => {
+    let hostingState = toRunnerTurn(
+      createGame({
+        seed: "ai-v099-hosting",
+        runnerDeckId: "demo_runner_099",
+        corpDeckId: "demo_corp_099",
+        agendaPointsToWin: 7
+      })
+    );
+    moveRunnerCardToGrip(hostingState, "v099_host_resource");
+    moveRunnerCardToGrip(hostingState, "simple_decoder");
+    hostingState = apply(hostingState, "runner", (action) => action.type === "install_card" && sourceDefinition(hostingState, action) === "v099_host_resource");
+
+    const runnerInput = buildAiDecisionInput(hostingState, "runner", { difficulty: "normal" });
+    const runnerDecision = chooseRunnerAction(runnerInput);
+    const corpInput = buildAiDecisionInput(hostingState, "corp", { difficulty: "normal" });
+
+    expect(runnerInput.playerView.pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(runnerInput.legalActions.find((action) => action.actionId === runnerDecision.actionId)?.type).toBe("resolve_choice");
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+    expect(corpInput.playerView.pendingChoice).toBeUndefined();
+    expect(corpInput.legalActions).toEqual([]);
+    expect(JSON.stringify(corpInput)).not.toContain("Simple Decoder");
+
+    let purgeState = toRunnerTurn(
+      createGame({
+        seed: "ai-v099-purge",
+        runnerDeckId: "demo_runner_099",
+        corpDeckId: "demo_corp_099",
+        agendaPointsToWin: 7
+      })
+    );
+    purgeState.runner.credits = 3;
+    moveRunnerCardToGrip(purgeState, "v099_virus_program");
+    purgeState = apply(purgeState, "runner", (action) => action.type === "install_card" && sourceDefinition(purgeState, action) === "v099_virus_program");
+    purgeState.activeSide = "corp";
+    purgeState.phase = "corp_action_phase";
+    purgeState.timingPoint = "corp_action.main";
+    purgeState.corp.clicks = 3;
+
+    const purgeInput = buildAiDecisionInput(purgeState, "corp", { difficulty: "normal" });
+    const purgeDecision = chooseCorpAction(purgeInput);
+    expect(purgeInput.legalActions.find((action) => action.actionId === purgeDecision.actionId)?.type).toBe("purge_virus_counters");
+    expect(purgeDecision.reasonCode).toBe("corp.purge.visible_virus_counters");
+    expect(assertAiInputIsSideSafe(purgeInput)).toBe(true);
+  });
 });
 
 describe("MVP 0.3 Runner AI", () => {
@@ -349,6 +396,22 @@ describe("MVP 0.3 AI simulation harness", () => {
     });
 
     expect(summary.cardPoolVersion).toBe("0.98.0");
+    expect(summary.errors).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    expect(summary.finalStateHash).toMatch(/^fnv1a:/);
+    expect(JSON.stringify(summary)).not.toContain("cardInstances");
+  });
+
+  it("runs V0.99 Counter/Hosting decks through side-safe AI smokes", () => {
+    const summary = simulateAiGame({
+      seed: "ai-v099-counter-hosting",
+      runnerDeckId: "demo_runner_099",
+      corpDeckId: "demo_corp_099",
+      agendaPointsToWin: 7,
+      maxActions: 200
+    });
+
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "demo-decks-v0.99",
+  "id": "demo-decks-0.99",
+  "status": "implemented_for_v0.99_final_gate",
+  "extends": "data/decks/demo-decks-0.98.json",
+  "decks": [
+    {
+      "id": "demo_runner_099",
+      "name": "Runner Demo Deck 0.99 - Hosting Counter Harness",
+      "side": "runner",
+      "identity": "v098_runner_identity",
+      "cards": [
+        { "id": "simple_economy_event", "quantity": 2 },
+        { "id": "simple_run_event", "quantity": 2 },
+        { "id": "simple_fracter", "quantity": 2 },
+        { "id": "simple_decoder", "quantity": 2 },
+        { "id": "simple_killer", "quantity": 1 },
+        { "id": "v08_burst_credit_event", "quantity": 2 },
+        { "id": "v095_safehouse_resource", "quantity": 1 },
+        { "id": "v097_deep_dive_event", "quantity": 1 },
+        { "id": "v099_host_resource", "quantity": 2 },
+        { "id": "v099_virus_program", "quantity": 2 },
+        { "id": "v099_recurring_chip", "quantity": 2 }
+      ]
+    },
+    {
+      "id": "demo_corp_099",
+      "name": "Corp Demo Deck 0.99 - Purge Bad Publicity Harness",
+      "side": "corp",
+      "identity": "v098_corp_identity",
+      "cards": [
+        { "id": "simple_agenda", "quantity": 1 },
+        { "id": "simple_priority_agenda", "quantity": 1 },
+        { "id": "v08_project_agenda", "quantity": 1 },
+        { "id": "simple_economy_operation", "quantity": 1 },
+        { "id": "simple_economy_asset", "quantity": 1 },
+        { "id": "simple_upgrade", "quantity": 1 },
+        { "id": "simple_barrier_ice", "quantity": 2 },
+        { "id": "simple_tag_ice", "quantity": 1 },
+        { "id": "v096_trace_probe_ice", "quantity": 1 },
+        { "id": "v08_credit_surge_operation", "quantity": 1 },
+        { "id": "v099_bad_publicity_operation", "quantity": 2 }
+      ]
+    }
+  ]
+}

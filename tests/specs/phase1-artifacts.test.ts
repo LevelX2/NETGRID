@@ -222,6 +222,38 @@ const REQUIRED_MVP_0_98_MUST_IDS = [
   "M098-NOSCOPE-001",
   "M098-GATE-001"
 ];
+const REQUIRED_MVP_0_99_MUST_IDS = [
+  "M099A-SHARED-001",
+  "M099A-COUNTER-001",
+  "M099A-COUNTER-002",
+  "M099A-VISIBILITY-001",
+  "M099A-REPLAY-001",
+  "M099B-HOSTING-001",
+  "M099B-HOSTING-002",
+  "M099B-HOSTING-003",
+  "M099B-HOSTING-004",
+  "M099B-HOSTING-005",
+  "M099B-HOSTING-006",
+  "M099B-HOSTING-007",
+  "M099C-VIRUS-001",
+  "M099C-VIRUS-002",
+  "M099C-VIRUS-003",
+  "M099C-VIRUS-004",
+  "M099C-VIRUS-005",
+  "M099C-VIRUS-006",
+  "M099D-RECURRING-001",
+  "M099D-RECURRING-002",
+  "M099D-RECURRING-003",
+  "M099D-RECURRING-004",
+  "M099D-BADPUB-001",
+  "M099D-BADPUB-002",
+  "M099D-BADPUB-003",
+  "M099D-BADPUB-004",
+  "M099-CARD-001",
+  "M099-DECK-001",
+  "M099-NOSCOPE-001",
+  "M099-GATE-001"
+];
 const REQUIRED_MVP_0_7_DOCS = [
   "docs/derived/MVP_0.7_REQUIREMENTS.md",
   "docs/derived/UI_REDESIGN_0.7_SPEC.md",
@@ -330,6 +362,21 @@ const REQUIRED_MVP_0_98_REQUIREMENTS_DOCS = [
   "docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md"
 ];
 
+const REQUIRED_MVP_0_99_REQUIREMENTS_DOCS = [
+  "docs/derived/MVP_0.99_REQUIREMENTS.md",
+  "docs/derived/COUNTER_HOSTING_0.99_SPEC.md",
+  "docs/derived/VIRUS_PURGE_0.99_SPEC.md",
+  "docs/derived/RECURRING_BAD_PUBLICITY_0.99_SPEC.md",
+  "docs/derived/MVP_0.99_TEST_MATRIX.md",
+  "docs/derived/MVP_0.99_REQUIREMENTS_REVIEW.md"
+];
+
+const REQUIRED_MVP_0_99_FINAL_DOCS = [
+  ...REQUIRED_MVP_0_99_REQUIREMENTS_DOCS,
+  "docs/derived/MVP_0.99_IMPLEMENTATION_REVIEW.md",
+  "docs/derived/MVP_0.99_FINAL_REVIEW.md"
+];
+
 const REQUIRED_MVP_0_98_FINAL_DOCS = [
   ...REQUIRED_MVP_0_98_REQUIREMENTS_DOCS,
   "docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md",
@@ -419,6 +466,16 @@ const MVP_0_98_DATA_FILES = [
 ];
 
 const REQUIRED_MVP_0_98_SCENARIOS = ["v098-identity-hidden-zone.json", "v098-hidden-zone-tools.json", "v098-multiplayer-hidden-zone-smoke.json"];
+
+const MVP_0_99_DATA_FILES = [
+  "data/rules/rules-baseline-0.99.json",
+  "data/cards/demo-cards-0.99.json",
+  "data/decks/demo-decks-0.99.json",
+  "data/manifests/card-implementation-manifest-0.99.json",
+  "data/rules/mechanics-coverage-0.99.json"
+];
+
+const REQUIRED_MVP_0_99_SCENARIOS = ["v099-counter-hosting.json", "v099-virus-recurring-bad-publicity.json", "v099-multiplayer-hosting-smoke.json"];
 
 describe("Phase 1 derived artifacts", () => {
   it("keeps all MVP 0.1 JSON data artifacts parseable", () => {
@@ -1057,6 +1114,31 @@ describe("Phase 1 derived artifacts", () => {
     expect(requirementsReview).not.toContain("ready_for_MVP_0.99_implementation: true");
   });
 
+  it("keeps MVP 0.99 Counter/Hosting/Virus/Purge requirements frozen and mapped", () => {
+    for (const file of REQUIRED_MVP_0_99_REQUIREMENTS_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+
+    const requirements = readFileSync("docs/derived/MVP_0.99_REQUIREMENTS.md", "utf8");
+    const counterHostingSpec = readFileSync("docs/derived/COUNTER_HOSTING_0.99_SPEC.md", "utf8");
+    const virusPurgeSpec = readFileSync("docs/derived/VIRUS_PURGE_0.99_SPEC.md", "utf8");
+    const recurringBadPublicitySpec = readFileSync("docs/derived/RECURRING_BAD_PUBLICITY_0.99_SPEC.md", "utf8");
+    const testMatrix = readFileSync("docs/derived/MVP_0.99_TEST_MATRIX.md", "utf8");
+    const requirementsReview = readFileSync("docs/derived/MVP_0.99_REQUIREMENTS_REVIEW.md", "utf8");
+
+    for (const requirementId of REQUIRED_MVP_0_99_MUST_IDS) {
+      expect(requirements, requirementId).toContain(requirementId);
+      expect(testMatrix, requirementId).toContain(requirementId);
+    }
+    expect(counterHostingSpec).toContain("CounterType");
+    expect(counterHostingSpec).toContain("hostedOn");
+    expect(virusPurgeSpec).toContain("purge_virus_counters");
+    expect(recurringBadPublicitySpec).toContain("recurring_credit");
+    expect(recurringBadPublicitySpec).toContain("badPublicityCredits");
+    expect(requirementsReview).toContain("ready_for_MVP_0.99a_implementation: true");
+    expect(requirementsReview).not.toContain("ready_for_MVP_1.0_implementation: true");
+  });
+
   it("keeps MVP 0.95 Resources and tag-interaction implementation documented and gated", () => {
     for (const file of REQUIRED_MVP_0_95_FINAL_DOCS) {
       expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
@@ -1403,6 +1485,93 @@ describe("Phase 1 derived artifacts", () => {
       };
       expect(scenario.id, file).toMatch(/^SCN-V098-\d{3}$/);
       expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.98");
+      expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
+      expect(scenario.coversCards?.length, file).toBeGreaterThan(0);
+      expect(scenario.expected, file).toBeDefined();
+    }
+  });
+
+  it("keeps MVP 0.99 Hosting/Virus/Purge/Counter implementation documented and gated", () => {
+    for (const file of REQUIRED_MVP_0_99_FINAL_DOCS) {
+      expect(readFileSync(file, "utf8").length, file).toBeGreaterThan(0);
+    }
+    for (const file of MVP_0_99_DATA_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+
+    const implementationReview = readFileSync("docs/derived/MVP_0.99_IMPLEMENTATION_REVIEW.md", "utf8");
+    const finalReview = readFileSync("docs/derived/MVP_0.99_FINAL_REVIEW.md", "utf8");
+    expect(implementationReview).toContain("ready_for_hardening: true");
+    expect(finalReview).toContain("MVP_0.99_done: true");
+    expect(finalReview).toContain("mechanics_completion_V0.94_to_V0.99_done: true");
+
+    const baseline = JSON.parse(readFileSync("data/rules/rules-baseline-0.99.json", "utf8")) as {
+      id?: string;
+      gateAssertions?: Record<string, boolean>;
+    };
+    expect(baseline.id).toBe("rules-baseline-mvp-0.99");
+    expect(baseline.gateAssertions?.hostingIsDirectAndAcyclic).toBe(true);
+    expect(baseline.gateAssertions?.purgeRemovesOnlyVirusCounters).toBe(true);
+    expect(baseline.gateAssertions?.badPublicityFundCreatedAtRunStart).toBe(true);
+    expect(baseline.gateAssertions?.noM11PlusMechanicsEnabled).toBe(true);
+
+    const manifest = JSON.parse(readFileSync("data/manifests/card-implementation-manifest-0.99.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      cards: Array<{
+        cardCode: string;
+        status: string;
+        sourceMode?: string;
+        resolver?: string;
+        unitTests?: string[];
+        scenarioTests?: string[];
+        visibilityTests?: string[];
+        replayTests?: string[];
+        aiSmokeTests?: string[];
+        multiplayerSmokeTests?: string[];
+      }>;
+    };
+    expect(manifest.gateAssertions?.noM11PlusMechanicsEnabled).toBe(true);
+    const playable = manifest.cards.filter((card) => card.status === "playable_mvp");
+    expect(playable.map((card) => card.cardCode).sort()).toEqual(["v099_bad_publicity_operation", "v099_host_resource", "v099_recurring_chip", "v099_virus_program"].sort());
+    expect(
+      playable.every(
+        (card) =>
+          card.sourceMode === "local_original" &&
+          card.resolver &&
+          card.unitTests?.length &&
+          card.scenarioTests?.length &&
+          card.visibilityTests?.length &&
+          card.replayTests?.length &&
+          card.aiSmokeTests?.length &&
+          card.multiplayerSmokeTests?.length
+      )
+    ).toBe(true);
+
+    const coverage = JSON.parse(readFileSync("data/rules/mechanics-coverage-0.99.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      mechanics?: Array<{ mechanicId?: string; currentStatus?: string; targetGate?: string }>;
+    };
+    expect(coverage.gateAssertions?.v099CountersImplemented).toBe(true);
+    expect(coverage.gateAssertions?.v099HostingImplemented).toBe(true);
+    expect(coverage.gateAssertions?.v099VirusPurgeImplemented).toBe(true);
+    expect(coverage.gateAssertions?.v099RecurringBadPublicityImplemented).toBe(true);
+    expect(coverage.gateAssertions?.noM11PlusMechanicsImplemented).toBe(true);
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.hosting.viruses.counters")?.currentStatus).toBe("implemented_limited");
+    expect(coverage.mechanics?.find((mechanic) => mechanic.mechanicId === "mechanic.event_modification")?.currentStatus).toBe("open");
+
+    const scenarioDir = "data/scenarios";
+    const present = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
+    for (const file of REQUIRED_MVP_0_99_SCENARIOS) {
+      expect(present, file).toContain(file);
+      const scenario = JSON.parse(readFileSync(join(scenarioDir, file), "utf8")) as {
+        id?: string;
+        baselineId?: string;
+        requirementIds?: string[];
+        coversCards?: string[];
+        expected?: unknown;
+      };
+      expect(scenario.id, file).toMatch(/^SCN-V099-\d{3}$/);
+      expect(scenario.baselineId, file).toBe("rules-baseline-mvp-0.99");
       expect(scenario.requirementIds?.length, file).toBeGreaterThan(0);
       expect(scenario.coversCards?.length, file).toBeGreaterThan(0);
       expect(scenario.expected, file).toBeDefined();

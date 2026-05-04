@@ -893,6 +893,173 @@ describe("MVP 0.98a Identity and modifiers", () => {
   });
 });
 
+describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
+  it("creates deterministic V0.99 games with additive counter and hosting contracts", () => {
+    const first = v099CounterHostingGame("v099-baseline");
+    const second = v099CounterHostingGame("v099-baseline");
+
+    expect(first.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(first.deckMetadata?.runner.cardPoolSnapshotId).toBe("card-snapshot-0.99");
+    expect(first.deckMetadata?.corp.formatProfileId).toBe("local-demo-v0.99");
+    expect(DEMO_CARDS_BY_ID.v099_host_resource?.mechanics).toContain("hosting");
+    expect(DEMO_CARDS_BY_ID.v099_virus_program?.mechanics).toContain("virus");
+    expect(DEMO_CARDS_BY_ID.v099_recurring_chip?.recurringCredits).toBe(1);
+    expect(hashState(first)).toBe(hashState(second));
+    expect(validateGameState(first).ok).toBe(true);
+  });
+
+  it("installs a virus program and lets the Corp purge only virus counters", () => {
+    let state = toRunnerTurn(v099CounterHostingGame("v099-virus-purge"));
+    state.runner.credits = 3;
+    moveRunnerCardToGrip(state, "v099_virus_program");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "v099_virus_program");
+    const virusId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "v099_virus_program");
+    expect(virusId).toBeDefined();
+    if (!virusId) throw new Error("Missing virus program");
+    state.cardInstances[virusId] = { ...state.cardInstances[virusId]!, counters: { ...state.cardInstances[virusId]!.counters, power: 2 } };
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    const initial = structuredClone(state);
+
+    const purge = mustAction(state, "corp", (action) => action.type === "purge_virus_counters");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: purge.actionId,
+      clientKnownStateVersion: state.stateVersion
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: purge.actionId,
+      clientKnownStateVersion: state.stateVersion - 1
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(state, "corp", (action) => action.type === "purge_virus_counters");
+
+    expect(state.corp.clicks).toBe(0);
+    expect(state.cardInstances[virusId]?.counters?.virus).toBeUndefined();
+    expect(state.cardInstances[virusId]?.counters?.power).toBe(2);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ purgedCounterType: "virus", purgedVirusCounters: 1 });
+    expect(state.randomDrawRecords).toEqual(initial.randomDrawRecords);
+    expect(replayEvents(initial, state.eventLog.slice(initial.eventLog.length)).actualFinalStateHash).toBe(hashState(state));
+    expect(getLegalActions(state, "corp").map((action) => action.type)).not.toContain("purge_virus_counters");
+  });
+
+  it("hosts a Runner program through a private choice and trashes hosted cards with the host", () => {
+    let state = toRunnerTurn(v099CounterHostingGame("v099-hosting"));
+    state.runner.credits = 2;
+    const hostCandidate = moveRunnerCardToGrip(state, "v099_host_resource");
+    const hostedCandidate = moveRunnerCardToGrip(state, "simple_decoder");
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && action.source === hostCandidate);
+
+    expect(state.pendingChoice?.source).toContain("v099.host_program");
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(getPlayerView(state, "runner").pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Simple Decoder");
+
+    state = applyChoice(state, "runner", `card_${hostedCandidate}`);
+
+    expect(state.cardInstances[hostedCandidate]?.hostedOn).toBe(hostCandidate);
+    expect(state.runner.rig.programs).toContain(hostedCandidate);
+    expect(validateGameState(state).ok).toBe(true);
+    expect(replayEvents(initial, state.eventLog.slice(initial.eventLog.length)).ok).toBe(true);
+
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 5;
+    state.runner.tags = 1;
+    state = apply(state, "corp", (action) => action.type === "trash_resource" && action.payload?.resourceId === hostCandidate);
+
+    expect(state.runner.heap).toContain(hostCandidate);
+    expect(state.runner.heap).toContain(hostedCandidate);
+    expect(state.cardInstances[hostedCandidate]?.hostedOn).toBeUndefined();
+    expect(state.runner.rig.programs).not.toContain(hostedCandidate);
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
+  it("uses recurring credits for program installs and refreshes without accumulation", () => {
+    let state = toRunnerTurn(v099CounterHostingGame("v099-recurring"));
+    state.runner.credits = 0;
+    const chip = moveRunnerCardToGrip(state, "v099_recurring_chip");
+    const virus = moveRunnerCardToGrip(state, "v099_virus_program");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && action.source === chip);
+    expect(state.cardInstances[chip]?.counters?.recurring_credit).toBe(1);
+    expect(getLegalActions(state, "runner").some((action) => action.type === "install_card" && action.source === virus)).toBe(true);
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && action.source === virus);
+    expect(state.runner.credits).toBe(0);
+    expect(state.cardInstances[chip]?.counters?.recurring_credit).toBeUndefined();
+    expect(state.cardInstances[virus]?.counters?.virus).toBe(1);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    expect(state.cardInstances[chip]?.counters?.recurring_credit).toBe(1);
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
+  it("creates and spends Bad Publicity credits during a run only", () => {
+    let state = v099CounterHostingGame("v099-bad-publicity");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, "v099_bad_publicity_operation");
+    keepOnlyCorpHqCards(state, state.corp.hq.slice(0, 1));
+    state.corp.credits = 0;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "v099_bad_publicity_operation");
+    expect(state.corp.badPublicity).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ badPublicityAfter: 1 });
+
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    installRunnerProgramForTest(state, "simple_fracter");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.runner.credits = 0;
+    state.corp.credits = 10;
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    expect(state.run?.badPublicityCredits).toBe(1);
+    expect(getPlayerView(state, "runner").run?.badPublicityCredits).toBe(1);
+    const laterBadPublicityChange = structuredClone(state);
+    laterBadPublicityChange.corp.badPublicity = 2;
+    expect(laterBadPublicityChange.run?.badPublicityCredits).toBe(1);
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker");
+
+    expect(state.run?.badPublicityCredits).toBe(0);
+    expect(state.runner.credits).toBe(0);
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toBeUndefined();
+    expect(replayEvents(initial, state.eventLog.slice(initial.eventLog.length)).ok).toBe(true);
+  });
+
+  it("does not expose M11+ mechanics while enabling V0.99 harness cards", () => {
+    const state = toRunnerTurn(v099CounterHostingGame("v099-no-scope"));
+    const actionTypes = getLegalActions(state, "runner").map((action) => action.type);
+
+    expect(actionTypes).not.toContain("trigger_ability");
+    expect(DEMO_CARDS_BY_ID.v099_host_resource?.mechanics).not.toContain("prevention");
+    expect(DEMO_CARDS_BY_ID.v099_host_resource?.mechanics).not.toContain("replacement");
+    expect(DEMO_CARDS_BY_ID.v099_virus_program?.mechanics).not.toContain("set_aside");
+    expect(DEMO_CARDS_BY_ID.v099_bad_publicity_operation?.mechanics).not.toContain("remove_from_game");
+  });
+});
+
 describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
     const state = toRunnerTurn(createGame({ seed: "v093-choice" }));
@@ -1306,6 +1473,15 @@ function v098IdentityGame(seed: string): GameState {
     seed,
     runnerDeckId: "demo_runner_098",
     corpDeckId: "demo_corp_098",
+    agendaPointsToWin: 7
+  });
+}
+
+function v099CounterHostingGame(seed: string): GameState {
+  return createGame({
+    seed,
+    runnerDeckId: "demo_runner_099",
+    corpDeckId: "demo_corp_099",
     agendaPointsToWin: 7
   });
 }

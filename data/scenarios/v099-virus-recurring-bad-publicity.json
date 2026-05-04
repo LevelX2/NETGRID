@@ -1,0 +1,26 @@
+{
+  "id": "SCN-V099-002",
+  "baselineId": "rules-baseline-mvp-0.99",
+  "title": "Virus/Purge, Recurring Credits and Bad Publicity remain narrow and deterministic",
+  "requirementIds": ["M099A-COUNTER-001", "M099A-COUNTER-002", "M099A-REPLAY-001", "M099C-VIRUS-001", "M099C-VIRUS-002", "M099C-VIRUS-003", "M099C-VIRUS-004", "M099C-VIRUS-005", "M099C-VIRUS-006", "M099D-RECURRING-001", "M099D-RECURRING-002", "M099D-RECURRING-003", "M099D-RECURRING-004", "M099D-BADPUB-001", "M099D-BADPUB-002", "M099D-BADPUB-003", "M099D-BADPUB-004", "M099-CARD-001"],
+  "coversTests": ["V099-T007", "V099-T008", "V099-T009", "V099-T010", "V099-T011", "V099-T012", "V099-T013", "V099-T014", "V099-T015", "V099-T016", "V099-T018"],
+  "coversCards": ["v099_virus_program", "v099_recurring_chip", "v099_bad_publicity_operation"],
+  "steps": [
+    "Runner installs Virus Program and receives one virus counter.",
+    "Corp Purge is legal only with 3 clicks and removes only virus counters.",
+    "Runner installs Recurring Chip and uses its recurring credit for a program install.",
+    "Recurring credits refresh at Runner turn start without accumulation.",
+    "Corp plays Bad Publicity Operation and gains one Bad Publicity.",
+    "Runner starts a run and receives a bad-publicity fund equal to Corp Bad Publicity at run start.",
+    "Runner spends the fund for a breaker cost and the fund disappears when the run ends.",
+    "Replay reproduces the final StateHash and no extra RandomDrawRecords are created."
+  ],
+  "expected": {
+    "purgeCostsThreeClicks": true,
+    "purgeRemovesOnlyVirus": true,
+    "recurringCreditsDoNotAccumulate": true,
+    "badPublicityFundSnapshotsAtRunStart": true,
+    "badPublicityFundClearsAtRunEnd": true,
+    "stateHashDeterministic": true
+  }
+}

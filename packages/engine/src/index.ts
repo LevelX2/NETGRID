@@ -9,11 +9,13 @@ import {
   MVP_0_96_BASELINE,
   MVP_0_97_BASELINE,
   MVP_0_98_BASELINE,
+  MVP_0_99_BASELINE,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
   type CardInstance,
   type CardInstanceId,
+  type CounterType,
   type CorpServer,
   type CreateGameConfig,
   type DeckDefinition,
@@ -56,7 +58,8 @@ export {
   MVP_0_95_BASELINE,
   MVP_0_96_BASELINE,
   MVP_0_97_BASELINE,
-  MVP_0_98_BASELINE
+  MVP_0_98_BASELINE,
+  MVP_0_99_BASELINE
 } from "@netrunner/shared";
 
 export type {
@@ -65,6 +68,7 @@ export type {
   CardInstance,
   CardInstanceId,
   ChoiceRequest,
+  CounterType,
   CorpServer,
   CreateGameConfig,
   DeckDefinition,
@@ -96,7 +100,7 @@ const DEFAULT_CONTROLLERS: { runner: PlayerController; corp: PlayerController } 
   corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI" }
 };
 
-type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+type CardPoolVersion = "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
 
 type RunnerEventResolver = {
   name: string;
@@ -251,6 +255,13 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     canPlay: (state) => state.corp.hq.length > 1 && state.corp.rd.length > 0,
     resolve: (state) => {
       swapCorpHqAndRdTop(state);
+    }
+  },
+  v099_bad_publicity_operation: {
+    name: "corp_operation_bad_publicity_credit",
+    resolve: (state) => {
+      state.corp.credits += 3;
+      state.corp.badPublicity += 1;
     }
   }
 };
@@ -468,6 +479,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
               }
             }
           : {}),
+        ...(state.run.badPublicityCredits !== undefined ? { badPublicityCredits: state.run.badPublicityCredits } : {}),
         successful: state.run.successful
       }
     : undefined;
@@ -575,6 +587,7 @@ export function validateGameState(state: GameState): ValidationResult {
 
   if (state.corp.credits < 0 || state.runner.credits < 0) errors.push("Credits must not be negative.");
   if (state.corp.clicks < 0 || state.runner.clicks < 0) errors.push("Clicks must not be negative.");
+  if (!Number.isInteger(state.corp.badPublicity) || state.corp.badPublicity < 0) errors.push("Corp bad publicity must be a non-negative integer.");
   if (state.runner.tags < 0) errors.push("Runner tags must not be negative.");
   if (!Number.isInteger(state.runner.memoryLimit) || state.runner.memoryLimit < 0) errors.push("Runner memory limit must be a non-negative integer.");
   if (!Number.isInteger(state.runner.memoryUsed) || state.runner.memoryUsed < 0) errors.push("Runner memory used must be a non-negative integer.");
@@ -587,6 +600,16 @@ export function validateGameState(state: GameState): ValidationResult {
   }
   for (const id of state.runner.rig.resources) {
     if (definitionFor(state, id).type !== "resource") errors.push(`Runner rig resource slot contains non-resource ${id}.`);
+  }
+  for (const [id, instance] of Object.entries(state.cardInstances)) {
+    for (const [counterType, amount] of Object.entries(instance.counters ?? {})) {
+      if (!Number.isInteger(amount) || amount < 0) errors.push(`Counter ${counterType} on ${id} must be a non-negative integer.`);
+    }
+    if (instance.hostedOn) {
+      if (instance.hostedOn === id) errors.push(`CardInstance ${id} cannot host itself.`);
+      if (!state.cardInstances[instance.hostedOn]) errors.push(`CardInstance ${id} references missing host ${instance.hostedOn}.`);
+      if (hasHostingCycle(state, id)) errors.push(`CardInstance ${id} has a hosting cycle.`);
+    }
   }
   if (state.run?.encounteredIceId && !state.cardInstances[state.run.encounteredIceId]) errors.push("Run references missing encountered ice.");
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes)) errors.push("Run resolved subroutine index list is missing.");
@@ -764,6 +787,7 @@ export function eventVisibilityForAction(legalAction: LegalAction): EventVisibil
   if (legalAction.payload?.hiddenZoneBarrier === true) return "hidden_info_barrier";
   if (["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(legalAction.type)) return "hidden_info_barrier";
   if (["mandatory_draw", "draw_card"].includes(legalAction.type)) return "private_to_side";
+  if (legalAction.type === "purge_virus_counters") return "public";
   if (legalAction.type === "jack_out") return "public";
   if (legalAction.visibility === "public") return "public";
   if (legalAction.type === "play_event") return "public";
@@ -790,6 +814,11 @@ function corpMainActions(state: GameState): LegalAction[] {
   if (state.corp.clicks <= 0) {
     actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
     return actions;
+  }
+  if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
+    actions.push(
+      action(state, "corp", "purge_virus_counters", "Virus-Counter purgen", "basic_action", [{ clicks: 3 }], { purgedCounterType: "virus" }, { targetRequirements: [] })
+    );
   }
   actions.push(action(state, "corp", "gain_credit", "1 Credit nehmen", "basic_action", [{ clicks: 1 }]));
   if (state.corp.rd.length > 0) actions.push(action(state, "corp", "draw_card", "Karte ziehen", "basic_action", [{ clicks: 1 }]));
@@ -855,7 +884,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
   }
   for (const id of state.runner.grip) {
     const definition = definitionFor(state, id);
-    if (definition.type === "program" && state.runner.credits >= (definition.installCost ?? 0) && state.runner.memoryUsed + (definition.memoryCost ?? 0) <= state.runner.memoryLimit) {
+    if (
+      definition.type === "program" &&
+      availableRunnerProgramInstallCredits(state) >= (definition.installCost ?? 0) &&
+      state.runner.memoryUsed + (definition.memoryCost ?? 0) <= state.runner.memoryLimit
+    ) {
       actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
     }
     if (definition.type === "hardware" && state.runner.credits >= (definition.installCost ?? 0)) {
@@ -919,7 +952,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breaker = definitionFor(state, breakerId);
     const breakerStrength = (breaker.strength ?? 0) + mustInstance(state.cardInstances, breakerId).strengthModifier;
     const pump = breaker.abilities?.find((ability) => ability.type === "pump_strength");
-    if (pump && state.runner.credits >= pump.cost.credits) {
+    if (pump && availableRunnerRunCredits(state) >= pump.cost.credits) {
       actions.push(
         action(
           state,
@@ -934,7 +967,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       );
     }
     const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && ability.iceSubtype && iceDefinition.subtypes.includes(ability.iceSubtype));
-    if (breakAbility && breakerStrength >= (iceDefinition.strength ?? 0) && state.runner.credits >= breakAbility.cost.credits) {
+    if (breakAbility && breakerStrength >= (iceDefinition.strength ?? 0) && availableRunnerRunCredits(state) >= breakAbility.cost.credits) {
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
         if (!run.brokenSubroutineIndexes.includes(index) && !run.resolvedSubroutineIndexes.includes(index)) {
@@ -1013,6 +1046,9 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         if (definition.id === "v098_hq_rd_swap_operation") {
           legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "swap_hq_rd" };
         }
+        if (definition.id === "v099_bad_publicity_operation") {
+          legalAction.payload = { ...(legalAction.payload ?? {}), badPublicityAfter: state.corp.badPublicity };
+        }
       }
       return;
     case "install_card":
@@ -1040,14 +1076,14 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       passApproachedIce(state);
       return;
     case "pump_breaker":
+      spendRunnerRunCredits(state, legalAction.costs[0]?.credits ?? 1);
       executeEffectCommands(state, [
-        { type: "spend_credits", side: "runner", amount: legalAction.costs[0]?.credits ?? 1 },
         { type: "change_breaker_strength", breakerId: String(legalAction.payload?.breakerId), amount: 1 }
       ]);
       return;
     case "break_subroutine":
+      spendRunnerRunCredits(state, legalAction.costs[0]?.credits ?? 1);
       executeEffectCommands(state, [
-        { type: "spend_credits", side: "runner", amount: legalAction.costs[0]?.credits ?? 1 },
         { type: "break_subroutine", subroutineIndex: Number(legalAction.payload?.subroutineIndex) }
       ]);
       return;
@@ -1074,6 +1110,12 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       spendCredits(state, "runner", 2);
       state.runner.tags = Math.max(0, state.runner.tags - 1);
       return;
+    case "purge_virus_counters": {
+      spendClicks(state, "corp", 3);
+      const purged = purgeVirusCounters(state);
+      legalAction.payload = { ...(legalAction.payload ?? {}), purgedVirusCounters: purged, purgedCounterType: "virus" };
+      return;
+    }
     case "resolve_choice":
       resolvePendingChoice(state, legalAction, playerAction);
       return;
@@ -1103,20 +1145,23 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   const definition = definitionFor(state, cardId);
   spendClick(state, legalAction.side);
   if (legalAction.side === "runner") {
-    spendCredits(state, "runner", definition.installCost ?? 0);
+    spendRunnerInstallCredits(state, definition.installCost ?? 0, definition.type);
     removeFromAllZones(state, cardId);
     if (definition.type === "hardware") {
       state.runner.rig.hardware.push(cardId);
       if (definition.mechanics.includes("modify_memory_limit")) state.runner.memoryLimit += 1;
+      if ((definition.recurringCredits ?? 0) > 0) setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
     } else if (definition.type === "program") {
       state.runner.rig.programs.push(cardId);
       state.runner.memoryUsed += definition.memoryCost ?? 0;
+      if (definition.mechanics.includes("virus")) addCardCounter(state, cardId, "virus", 1);
     } else if (definition.type === "resource") {
       state.runner.rig.resources.push(cardId);
     } else {
       throw new Error("Nur Programme, Hardware und Resources koennen vom Runner installiert werden.");
     }
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "rig" } };
+    if (definition.id === "v099_host_resource") startRunnerHostingChoice(state, cardId, legalAction);
     return;
   }
 
@@ -1147,6 +1192,7 @@ function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, p
     resolvedSubroutineIndexes: [],
     successful: false,
     accessCount: Math.max(1, Math.floor(accessCount)),
+    ...(isV099OrLater(state) ? { badPublicityCredits: state.corp.badPublicity } : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {})
   };
   if (server.ice.length > 0) {
@@ -1592,9 +1638,20 @@ function trashResource(state: GameState, cardId: string): void {
   if (definition.type !== "resource") throw new Error("Nur installierte Resources koennen getrasht werden.");
   spendClick(state, "corp");
   spendCredits(state, "corp", 2);
+  const hostedIds = hostedCardsOn(state, cardId);
   removeFromAllZones(state, cardId);
   state.runner.heap.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+  for (const hostedId of hostedIds) {
+    const hostedDefinition = definitionFor(state, hostedId);
+    removeFromAllZones(state, hostedId);
+    state.runner.heap.push(hostedId);
+    state.runner.memoryUsed = Math.max(0, state.runner.memoryUsed - (hostedDefinition.memoryCost ?? 0));
+    const hostedInstance = mustInstance(state.cardInstances, hostedId);
+    const { hostedOn: _hostedOn, ...withoutHost } = hostedInstance;
+    void _hostedOn;
+    state.cardInstances[hostedId] = { ...withoutHost, faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+  }
 }
 
 function finishRun(state: GameState, successful: boolean): void {
@@ -1622,6 +1679,7 @@ function endTurn(state: GameState, side: Side): void {
   state.timingPoint = "runner_action.main";
   state.runner.clicks = 4;
   state.corp.clicks = 0;
+  refreshRecurringCredits(state, "runner");
 }
 
 function drawCorpCard(state: GameState): void {
@@ -1818,6 +1876,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveRunnerStackArrangeChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v099.host_program")) {
+    resolveRunnerHostingChoice(state, legalAction, playerAction);
+    return;
+  }
   delete state.pendingChoice;
 }
 
@@ -1899,6 +1961,63 @@ function resolveRunnerStackArrangeChoice(state: GameState, legalAction: LegalAct
   }
   delete state.pendingChoice;
   legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "arrange_stack", arrangedCount: selectedIds.length };
+}
+
+function startRunnerHostingChoice(state: GameState, hostId: CardInstanceId, legalAction: LegalAction): void {
+  const host = mustInstance(state.cardInstances, hostId);
+  if (host.definitionId !== "v099_host_resource" || !state.runner.rig.resources.includes(hostId)) throw new Error("Diese Karte kann in V0.99 nicht hosten.");
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = state.runner.grip
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return definition.type === "program" && state.runner.memoryUsed + (definition.memoryCost ?? 0) <= state.runner.memoryLimit;
+    })
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (options.length === 0) return;
+  state.pendingChoice = {
+    choiceId: `v099_host_program_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v099.host_program:${hostId}:${state.stateVersion + 1}`,
+    prompt: "Programm hosten",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "host_program", hostId };
+}
+
+function resolveRunnerHostingChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Hosting-Choice offen.");
+  const sourceParts = choice.source.split(":");
+  const hostId = sourceParts[1];
+  if (!hostId || !state.runner.rig.resources.includes(hostId)) throw new Error("Der Host ist nicht mehr installiert.");
+  const hostDefinition = definitionFor(state, hostId);
+  if (hostDefinition.id !== "v099_host_resource") throw new Error("Diese Karte kann in V0.99 nicht hosten.");
+  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!cardId || !state.runner.grip.includes(cardId)) throw new Error("Die gewählte Karte liegt nicht in der Grip.");
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program") throw new Error("Nur Programme können in dieser Hosting-Harness gehostet werden.");
+  if (state.runner.memoryUsed + (definition.memoryCost ?? 0) > state.runner.memoryLimit) throw new Error("Nicht genug Memory für das gehostete Programm.");
+  setHostedOn(state, cardId, hostId);
+  removeFromAllZones(state, cardId);
+  state.runner.rig.programs.push(cardId);
+  state.runner.memoryUsed += definition.memoryCost ?? 0;
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+    hostedOn: hostId
+  };
+  delete state.pendingChoice;
+  legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "host_program", hostedCount: 1, hostId };
 }
 
 function selectedChoiceCardIds(choice: ChoiceRequest, playerAction: PlayerAction): CardInstanceId[] {
@@ -2234,12 +2353,17 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.cardsTrashed = legalAction.payload.cardsTrashed;
     context.flatline = legalAction.payload.flatline;
   }
+  if (legalAction.type === "purge_virus_counters") {
+    context.purgedCounterType = "virus";
+    context.purgedVirusCounters = legalAction.payload?.purgedVirusCounters ?? 0;
+  }
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
     context.redactedKind = "hidden_zone";
   }
   if (legalAction.payload?.publicRevealKind) context.revealKind = legalAction.payload.publicRevealKind;
+  if (typeof legalAction.payload?.badPublicityAfter === "number") context.badPublicityAfter = legalAction.payload.badPublicityAfter;
   if (state.winner && state.gameEndReason) context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
   if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {
@@ -2316,7 +2440,9 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(definition.advancementRequirement !== undefined ? { advancementRequirement: definition.advancementRequirement } : {}),
     ...(definition.strength !== undefined ? { strength: definition.strength + instance.strengthModifier } : {}),
     ...(definition.agendaPoints !== undefined ? { agendaPoints: definition.agendaPoints } : {}),
-    ...(definition.trashCost !== undefined ? { trashCost: definition.trashCost } : {})
+    ...(definition.trashCost !== undefined ? { trashCost: definition.trashCost } : {}),
+    ...(instance.counters ? { counters: cloneCounters(instance.counters) } : {}),
+    ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {})
   };
 }
 
@@ -2347,6 +2473,79 @@ function credits(state: GameState, side: Side, amount: number): void {
   else state.runner.credits += amount;
 }
 
+function cloneCounters(counters: Partial<Record<CounterType, number>>): Partial<Record<CounterType, number>> {
+  return Object.fromEntries(Object.entries(counters).filter(([, amount]) => typeof amount === "number" && amount > 0)) as Partial<Record<CounterType, number>>;
+}
+
+function cardCounter(state: GameState, cardId: CardInstanceId, counterType: CounterType): number {
+  return mustInstance(state.cardInstances, cardId).counters?.[counterType] ?? 0;
+}
+
+function setCardCounter(state: GameState, cardId: CardInstanceId, counterType: CounterType, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Counter amount ist ungueltig.");
+  const instance = mustInstance(state.cardInstances, cardId);
+  const counters = { ...(instance.counters ?? {}) };
+  if (amount === 0) delete counters[counterType];
+  else counters[counterType] = amount;
+  const { counters: _counters, ...withoutCounters } = instance;
+  void _counters;
+  state.cardInstances[cardId] = Object.keys(counters).length > 0 ? { ...withoutCounters, counters } : withoutCounters;
+}
+
+function addCardCounter(state: GameState, cardId: CardInstanceId, counterType: CounterType, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Counter amount ist ungueltig.");
+  setCardCounter(state, cardId, counterType, cardCounter(state, cardId, counterType) + amount);
+}
+
+function spendCardCounter(state: GameState, cardId: CardInstanceId, counterType: CounterType, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Counter amount ist ungueltig.");
+  const current = cardCounter(state, cardId, counterType);
+  if (current < amount) throw new Error("Nicht genug Counter vorhanden.");
+  setCardCounter(state, cardId, counterType, current - amount);
+}
+
+function totalCounters(state: GameState, counterType: CounterType): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => sum + cardCounter(state, cardId, counterType), 0);
+}
+
+function purgeVirusCounters(state: GameState): number {
+  const total = totalCounters(state, "virus");
+  if (total <= 0) throw new Error("Es gibt keine Virus-Counter zu purgen.");
+  for (const cardId of Object.keys(state.cardInstances)) {
+    setCardCounter(state, cardId, "virus", 0);
+  }
+  return total;
+}
+
+function hostedCardsOn(state: GameState, hostId: CardInstanceId): CardInstanceId[] {
+  return Object.entries(state.cardInstances)
+    .filter(([, instance]) => instance.hostedOn === hostId)
+    .map(([cardId]) => cardId)
+    .sort();
+}
+
+function setHostedOn(state: GameState, cardId: CardInstanceId, hostId: CardInstanceId): void {
+  if (cardId === hostId) throw new Error("Eine Karte kann nicht auf sich selbst gehostet werden.");
+  if (!state.cardInstances[hostId]) throw new Error("Host-Karte fehlt.");
+  let current: CardInstanceId | undefined = hostId;
+  while (current) {
+    if (current === cardId) throw new Error("Hosting-Zyklus ist nicht erlaubt.");
+    current = state.cardInstances[current]?.hostedOn;
+  }
+  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), hostedOn: hostId };
+}
+
+function hasHostingCycle(state: GameState, cardId: CardInstanceId): boolean {
+  const seen = new Set<CardInstanceId>([cardId]);
+  let current = state.cardInstances[cardId]?.hostedOn;
+  while (current) {
+    if (seen.has(current)) return true;
+    seen.add(current);
+    current = state.cardInstances[current]?.hostedOn;
+  }
+  return false;
+}
+
 function spendCredits(state: GameState, side: Side, amount: number): void {
   if (amount <= 0) return;
   if (side === "corp") {
@@ -2358,6 +2557,57 @@ function spendCredits(state: GameState, side: Side, amount: number): void {
   state.runner.credits -= amount;
 }
 
+function availableRunnerProgramInstallCredits(state: GameState): number {
+  return state.runner.credits + runnerRecurringCredits(state);
+}
+
+function runnerRecurringCredits(state: GameState): number {
+  return state.runner.rig.hardware.reduce((sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"), 0);
+}
+
+function spendRunnerInstallCredits(state: GameState, amount: number, cardType: CardDefinition["type"]): void {
+  if (amount <= 0) return;
+  if (cardType !== "program") {
+    spendCredits(state, "runner", amount);
+    return;
+  }
+  if (availableRunnerProgramInstallCredits(state) < amount) throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
+  let remaining = amount;
+  for (const cardId of state.runner.rig.hardware) {
+    if (remaining <= 0) break;
+    const available = cardCounter(state, cardId, "recurring_credit");
+    const spent = Math.min(available, remaining);
+    if (spent > 0) {
+      spendCardCounter(state, cardId, "recurring_credit", spent);
+      remaining -= spent;
+    }
+  }
+  spendCredits(state, "runner", remaining);
+}
+
+function availableRunnerRunCredits(state: GameState): number {
+  return state.runner.credits + (state.run?.badPublicityCredits ?? 0);
+}
+
+function spendRunnerRunCredits(state: GameState, amount: number): void {
+  if (amount <= 0) return;
+  if (availableRunnerRunCredits(state) < amount) throw new Error("Der Runner kann die Run-Kosten nicht bezahlen.");
+  const run = mustRun(state);
+  const fromBadPublicity = Math.min(run.badPublicityCredits ?? 0, amount);
+  if (fromBadPublicity > 0) {
+    run.badPublicityCredits = (run.badPublicityCredits ?? 0) - fromBadPublicity;
+  }
+  spendCredits(state, "runner", amount - fromBadPublicity);
+}
+
+function refreshRecurringCredits(state: GameState, side: Side): void {
+  if (side !== "runner" || !isV099OrLater(state)) return;
+  for (const cardId of state.runner.rig.hardware) {
+    const definition = definitionFor(state, cardId);
+    if ((definition.recurringCredits ?? 0) > 0) setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
+  }
+}
+
 function spendClick(state: GameState, side: Side): void {
   if (side === "corp") {
     if (state.corp.clicks <= 0) throw new Error("Die Corp hat keine Clicks mehr.");
@@ -2366,6 +2616,17 @@ function spendClick(state: GameState, side: Side): void {
   }
   if (state.runner.clicks <= 0) throw new Error("Der Runner hat keine Clicks mehr.");
   state.runner.clicks -= 1;
+}
+
+function spendClicks(state: GameState, side: Side, amount: number): void {
+  if (!Number.isInteger(amount) || amount < 0) throw new Error("Click amount ist ungueltig.");
+  if (side === "corp") {
+    if (state.corp.clicks < amount) throw new Error("Die Corp hat nicht genug Clicks.");
+    state.corp.clicks -= amount;
+    return;
+  }
+  if (state.runner.clicks < amount) throw new Error("Der Runner hat nicht genug Clicks.");
+  state.runner.clicks -= amount;
 }
 
 function randomHqAccess(state: GameState): CardInstanceId | undefined {
@@ -2427,6 +2688,7 @@ function expandDeck(side: Side, cards: Array<{ id: string; quantity: number }>, 
 }
 
 function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefinition): CardPoolVersion {
+  if (usesMvp099CardPool(runnerDeck) || usesMvp099CardPool(corpDeck)) return "0.99.0";
   if (usesMvp098CardPool(runnerDeck) || usesMvp098CardPool(corpDeck)) return "0.98.0";
   if (usesMvp097CardPool(runnerDeck) || usesMvp097CardPool(corpDeck)) return "0.97.0";
   if (usesMvp096CardPool(runnerDeck) || usesMvp096CardPool(corpDeck)) return "0.96.0";
@@ -2438,6 +2700,7 @@ function cardPoolVersionForDecks(runnerDeck: DeckDefinition, corpDeck: DeckDefin
 }
 
 function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
+  if (version === "0.99.0") return MVP_0_99_BASELINE;
   if (version === "0.98.0") return MVP_0_98_BASELINE;
   if (version === "0.97.0") return MVP_0_97_BASELINE;
   if (version === "0.96.0") return MVP_0_96_BASELINE;
@@ -2448,7 +2711,14 @@ function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
   return MVP_0_1_BASELINE;
 }
 
+function usesMvp099CardPool(deck: DeckDefinition): boolean {
+  if (deck.id.endsWith("_099") || deck.id.includes("_0_99") || deck.id.includes("_v0_99")) return true;
+  if (deck.identity.startsWith("v099_")) return true;
+  return deck.cards.some((card) => card.id.startsWith("v099_"));
+}
+
 function usesMvp098CardPool(deck: DeckDefinition): boolean {
+  if (usesMvp099CardPool(deck)) return true;
   if (deck.id.endsWith("_098") || deck.id.includes("_0_98") || deck.id.includes("_v0_98")) return true;
   if (deck.identity.startsWith("v098_")) return true;
   return deck.cards.some((card) => card.id.startsWith("v098_"));
@@ -2507,7 +2777,9 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
     identityCardId: deck.identity,
     deckName: deck.name,
     cardPoolSnapshotId:
-      cardPoolVersion === "0.98.0"
+      cardPoolVersion === "0.99.0"
+        ? "card-snapshot-0.99"
+        : cardPoolVersion === "0.98.0"
         ? "card-snapshot-0.98"
         : cardPoolVersion === "0.97.0"
         ? "card-snapshot-0.97"
@@ -2523,7 +2795,9 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
                 ? "card-snapshot-0.5"
                 : "mvp-0.1-demo",
     formatProfileId:
-      cardPoolVersion === "0.98.0"
+      cardPoolVersion === "0.99.0"
+        ? "local-demo-v0.99"
+        : cardPoolVersion === "0.98.0"
         ? "local-demo-v0.98"
         : cardPoolVersion === "0.97.0"
         ? "local-demo-v0.97"
@@ -2543,10 +2817,18 @@ function metadataForDeck(deck: DeckDefinition, cardPoolVersion: CardPoolVersion)
 }
 
 function isV097OrLater(state: GameState): boolean {
+  return isVersionAtLeast(state, 97);
+}
+
+function isV099OrLater(state: GameState): boolean {
+  return isVersionAtLeast(state, 99);
+}
+
+function isVersionAtLeast(state: GameState, minorGate: number): boolean {
   const version = state.baseline.engineSchemaVersion.split(".").map((part) => Number(part));
   const [major = 0, minor = 0, patch = 0] = version;
   if (major !== 0) return major > 0;
-  if (minor !== 97) return minor > 97;
+  if (minor !== minorGate) return minor > minorGate;
   return patch >= 0;
 }
 

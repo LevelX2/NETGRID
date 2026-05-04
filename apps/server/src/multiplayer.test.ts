@@ -672,6 +672,95 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(blocked.error.code).toBe("undo_blocked");
   });
 
+  it("handles V0.99 Hosting through submit, idempotency, reconnect and undo barrier", async () => {
+    const match = await joinedV099HostingMatch("mp-v099-hosting");
+    const before = await bootstrap(match.service, match.matchId, match.runner);
+    const hostAction = mustAction(before, (action) => action.type === "install_card" && String(action.source).includes("v099_host_resource"));
+
+    const started = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: hostAction.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v099-host-install"
+    });
+
+    expect(started.ok).toBe(true);
+    if (!started.ok) throw new Error(started.error.message);
+    expect(started.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
+    expect(started.actorPayload.pendingChoice?.kind).toBe("select_cards");
+    expect(started.actorPayload.pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(started.opponentPayload.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(started.opponentPayload)).not.toContain("Simple Decoder");
+
+    const duplicate = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: hostAction.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v099-host-install"
+    });
+    expect(duplicate.ok).toBe(true);
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.receipt.stateVersionAfter).toBe(started.receipt.stateVersionAfter);
+
+    const stale = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      actionId: hostAction.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v099-host-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale-state rejection");
+    expect(stale.error.code).toBe("stale_state");
+
+    const reconnected = await match.service.reconnectMatch(match.matchId, {
+      side: "runner",
+      reconnectToken: match.runner.reconnectToken
+    });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(JSON.stringify(reconnected)).not.toContain("Simple Agenda");
+
+    const choiceAction = reconnected.legalActions.find((action) => action.type === "resolve_choice");
+    const selectedOptionId = reconnected.pendingChoice?.options.find((option) => option.label === "Simple Decoder")?.id;
+    expect(choiceAction).toBeDefined();
+    expect(selectedOptionId).toBeDefined();
+    if (!choiceAction || !selectedOptionId) throw new Error("Missing V0.99 hosting choice");
+    const resolved = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: reconnected.sessionToken,
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: reconnected.playerView.stateVersion,
+      selectedChoices: { choiceId: reconnected.pendingChoice?.choiceId, selectedOptionIds: [selectedOptionId] },
+      idempotencyKey: "v099-host-resolve"
+    });
+
+    expect(resolved.ok).toBe(true);
+    if (!resolved.ok) throw new Error(resolved.error.message);
+    expect(resolved.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
+    expect(JSON.stringify(resolved.publicEvent?.publicPayload)).not.toContain("Simple Decoder");
+    expect(resolved.actorPayload.playerView.own.rig?.some((card) => card.definitionId === "simple_decoder" && card.hostedOn)).toBe(true);
+    expect(resolved.opponentPayload.playerView.opponent.rig?.some((card) => card.definitionId === "simple_decoder" && card.hostedOn)).toBe(true);
+
+    const blocked = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnected.sessionToken,
+      targetEventId: `evt_${started.receipt.stateVersionAfter}`,
+      reason: "Hosting hidden-zone undo"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected undo_blocked");
+    expect(blocked.error.code).toBe("undo_blocked");
+  });
+
   it("reports V0.94 Flatline as a side-safe result reason", async () => {
     const match = await joinedV094DamageMatch("mp-v094-flatline", { emptyRunnerGrip: true });
 
@@ -1339,6 +1428,53 @@ async function joinedV098HiddenSearchMatch(seed: string) {
   record.match.settings.agendaPointsToWin = 7;
   record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
   record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v098_hidden_search_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
+async function joinedV099HostingMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  const gameState = toRunnerTurnEngine(
+    createGame({
+      matchId: created.matchId,
+      seed,
+      runnerDeckId: "demo_runner_099",
+      corpDeckId: "demo_corp_099",
+      agendaPointsToWin: 7
+    })
+  );
+  gameState.runner.credits = 2;
+  moveRunnerCardToGripForTest(gameState, "v099_host_resource");
+  moveRunnerCardToGripForTest(gameState, "simple_decoder");
+  record.gameState = gameState;
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v099_hosting_ready")];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;

@@ -39,6 +39,7 @@ export type ActionType =
   | "trash_resource"
   | "decline_trash"
   | "remove_tag"
+  | "purge_virus_counters"
   | "resolve_choice"
   | "trigger_ability"
   | "end_turn";
@@ -62,9 +63,12 @@ export type DemoDeckId =
   | "demo_runner_097"
   | "demo_corp_097"
   | "demo_runner_098"
-  | "demo_corp_098";
+  | "demo_corp_098"
+  | "demo_runner_099"
+  | "demo_corp_099";
 
 export type DamageType = "net" | "meat" | "core";
+export type CounterType = "advancement" | "virus" | "power" | "agenda" | "recurring_credit" | "bad_publicity" | "charge" | "mark" | "dividend" | "core_damage";
 
 export type TraceSuccessEffect = { type: "add_tag"; amount: number };
 
@@ -201,6 +205,7 @@ export type CardDefinition = {
   trashCost?: number;
   advancementRequirement?: number;
   agendaPoints?: number;
+  recurringCredits?: number;
   rulesText: string;
   abilities?: AbilityDefinition[];
   modifiers?: ModifierDefinition[];
@@ -228,14 +233,23 @@ export type DeckPublicMetadata = {
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
-  cardTextSnapshotId: "mvp-0.1-demo" | "mvp-0.4-demo" | "mvp-0.8-demo" | "mvp-0.94-demo" | "mvp-0.95-demo" | "mvp-0.96-demo" | "mvp-0.97-demo" | "mvp-0.98-demo";
-  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
-  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
-  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
-  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
-  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
-  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
-  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0";
+  cardTextSnapshotId:
+    | "mvp-0.1-demo"
+    | "mvp-0.4-demo"
+    | "mvp-0.8-demo"
+    | "mvp-0.94-demo"
+    | "mvp-0.95-demo"
+    | "mvp-0.96-demo"
+    | "mvp-0.97-demo"
+    | "mvp-0.98-demo"
+    | "mvp-0.99-demo";
+  engineSchemaVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
+  cardImplementationVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
+  deviationRegistryVersion: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
+  playerViewSchemaVersion?: "0.1.0" | "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
+  multiplayerSchemaVersion?: "0.2.0" | "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
+  aiControllerSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
+  simulationSchemaVersion?: "0.3.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
 };
 
 export type PlayerController = {
@@ -253,8 +267,8 @@ export type CreateGameConfig = {
   matchId?: string;
   seed?: string;
   baseline?: RulesBaseline;
-  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096" | "demo_runner_097" | "demo_runner_098";
-  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096" | "demo_corp_097" | "demo_corp_098";
+  runnerDeckId?: "demo_runner_001" | "demo_runner_004" | "demo_runner_008" | "demo_runner_096" | "demo_runner_097" | "demo_runner_098" | "demo_runner_099";
+  corpDeckId?: "demo_corp_001" | "demo_corp_004" | "demo_corp_008" | "demo_corp_096" | "demo_corp_097" | "demo_corp_098" | "demo_corp_099";
   runnerDeck?: DeckDefinition;
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
@@ -281,6 +295,8 @@ export type CardInstance = {
   rezzed: boolean;
   advancementCounters: number;
   strengthModifier: number;
+  counters?: Partial<Record<CounterType, number>>;
+  hostedOn?: CardInstanceId;
 };
 
 export type CorpServer = {
@@ -336,6 +352,7 @@ export type RunState = {
   accessedCardId?: CardInstanceId;
   pendingSuccessBonusCredits?: number;
   accessCount?: number;
+  badPublicityCredits?: number;
   breach?: BreachState;
 };
 
@@ -522,6 +539,8 @@ export type VisibleCard = {
   strength?: number;
   agendaPoints?: number;
   trashCost?: number;
+  counters?: Partial<Record<CounterType, number>>;
+  hostedOn?: CardInstanceId;
 };
 
 export type PlayerView = {
@@ -572,6 +591,7 @@ export type PlayerView = {
       remainingCount: number;
       completed: boolean;
     };
+    badPublicityCredits?: number;
     successful: boolean;
   };
   deckMetadata?: {
@@ -721,6 +741,18 @@ export const MVP_0_98_BASELINE: RulesBaseline = {
   multiplayerSchemaVersion: "0.98.0",
   aiControllerSchemaVersion: "0.98.0",
   simulationSchemaVersion: "0.98.0"
+};
+
+export const MVP_0_99_BASELINE: RulesBaseline = {
+  ...MVP_0_98_BASELINE,
+  cardTextSnapshotId: "mvp-0.99-demo",
+  engineSchemaVersion: "0.99.0",
+  cardImplementationVersion: "0.99.0",
+  deviationRegistryVersion: "0.99.0",
+  playerViewSchemaVersion: "0.99.0",
+  multiplayerSchemaVersion: "0.99.0",
+  aiControllerSchemaVersion: "0.99.0",
+  simulationSchemaVersion: "0.99.0"
 };
 
 export const DEMO_CARDS: CardDefinition[] = [
@@ -1159,6 +1191,52 @@ export const DEMO_CARDS: CardDefinition[] = [
     mechanics: ["play_operation", "swap", "hidden_zone_tool", "v098_local_original"]
   },
   {
+    id: "v099_host_resource",
+    title: "Host Resource",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "When installed, host a program from your grip.",
+    mechanics: ["install_resource", "resource", "hosting", "hidden_zone_choice", "v099_local_original"]
+  },
+  {
+    id: "v099_virus_program",
+    title: "Virus Program",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    rulesText: "When installed, place 1 virus counter on this program.",
+    mechanics: ["install_program", "memory", "counter", "virus", "purge", "v099_local_original"]
+  },
+  {
+    id: "v099_recurring_chip",
+    title: "Recurring Chip",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    recurringCredits: 1,
+    rulesText: "1 recurring credit. Use this credit to install a program.",
+    mechanics: ["install_hardware", "counter", "recurring_credit", "v099_local_original"]
+  },
+  {
+    id: "v099_bad_publicity_operation",
+    title: "Bad Publicity Operation",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Gain 3 credits and take 1 bad publicity.",
+    mechanics: ["play_operation", "gain_credits", "bad_publicity", "v099_local_original"]
+  },
+  {
     id: "v08_burst_credit_event",
     title: "Burst Credit Event",
     side: "runner",
@@ -1569,6 +1647,44 @@ export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
       { id: "v096_trace_probe_ice", quantity: 1 },
       { id: "v08_credit_surge_operation", quantity: 2 },
       { id: "v098_hq_rd_swap_operation", quantity: 1 }
+    ]
+  },
+  demo_runner_099: {
+    id: "demo_runner_099",
+    name: "Runner Demo Deck 0.99 - Hosting Counter Harness",
+    side: "runner",
+    identity: "v098_runner_identity",
+    cards: [
+      { id: "simple_economy_event", quantity: 2 },
+      { id: "simple_run_event", quantity: 2 },
+      { id: "simple_fracter", quantity: 2 },
+      { id: "simple_decoder", quantity: 2 },
+      { id: "simple_killer", quantity: 1 },
+      { id: "v08_burst_credit_event", quantity: 2 },
+      { id: "v095_safehouse_resource", quantity: 1 },
+      { id: "v097_deep_dive_event", quantity: 1 },
+      { id: "v099_host_resource", quantity: 2 },
+      { id: "v099_virus_program", quantity: 2 },
+      { id: "v099_recurring_chip", quantity: 2 }
+    ]
+  },
+  demo_corp_099: {
+    id: "demo_corp_099",
+    name: "Corp Demo Deck 0.99 - Purge Bad Publicity Harness",
+    side: "corp",
+    identity: "v098_corp_identity",
+    cards: [
+      { id: "simple_agenda", quantity: 1 },
+      { id: "simple_priority_agenda", quantity: 1 },
+      { id: "v08_project_agenda", quantity: 1 },
+      { id: "simple_economy_operation", quantity: 1 },
+      { id: "simple_economy_asset", quantity: 1 },
+      { id: "simple_upgrade", quantity: 1 },
+      { id: "simple_barrier_ice", quantity: 2 },
+      { id: "simple_tag_ice", quantity: 1 },
+      { id: "v096_trace_probe_ice", quantity: 1 },
+      { id: "v08_credit_surge_operation", quantity: 1 },
+      { id: "v099_bad_publicity_operation", quantity: 2 }
     ]
   }
 };
