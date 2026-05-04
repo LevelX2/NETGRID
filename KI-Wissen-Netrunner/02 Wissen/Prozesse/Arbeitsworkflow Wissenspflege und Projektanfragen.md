@@ -27,7 +27,7 @@ Dieser Workflow beschreibt, wie Codex im Projekt Netrunner arbeiten soll: erst v
 2. Passende Wissensseite aktualisieren oder eine neue Seite anlegen.
 3. Bei konkreten wiederkehrenden Abläufen ein Runbook oder eine Prozessseite bevorzugen.
 4. Statuswissen verdichtet in `Aktueller Projektstatus` einarbeiten.
-5. Chronologische Entscheidung, Verifikation oder Risiko in `03 Betrieb/Log.md` eintragen.
+5. Entscheidung, Verifikation oder Risiko in `03 Betrieb/Log.md` eintragen; neueste Logeinträge stehen oben.
 
 ## Fall 4: Phase wechseln
 
