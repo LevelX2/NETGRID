@@ -45,6 +45,7 @@ Latest V1.0.6 requirements review artifact: `docs/derived/V1_0_6_REQUIREMENTS_RE
 Latest V1.0.6 browser/playtest smoke artifact: `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`.
 Latest V1.0.6 implementation review artifact: `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md`.
 Latest V1.0.6 final review artifact: `docs/derived/V1_0_6_FINAL_REVIEW.md`.
+Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 

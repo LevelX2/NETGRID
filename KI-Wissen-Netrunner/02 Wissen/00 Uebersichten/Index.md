@@ -129,5 +129,6 @@
 - `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`: wiederholbarer V1.0.6-Browser-/Playtest-Smoke.
 - `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md`: Implementation Review für V1.0.6 Aktionen, Credits und Kartenanzeige mit V1.0.5-Basisprüfung, UI-Scope-Grenze und Testmatrix-Abgleich.
 - `docs/derived/V1_0_6_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.6 inklusive Pflichtchecks, Browser-Smoke-Ergebnis und dokumentierter Viewport-Einschränkung.
+- `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
