@@ -114,7 +114,9 @@ describe("Client visibility contract", () => {
     expect(page).toContain("displayName");
     expect(page).toContain("Meine Decks");
     expect(page).toContain("Speichern");
-    expect(page).toContain("Vorgefertigte Decks anzeigen");
+    expect(page).toContain("Neues Runner-Deck");
+    expect(page).toContain("Neues Corp-Deck");
+    expect(page).toContain("deckSideFilter");
     expect(page).toContain("Teilnehmer A · Runner-Deck");
     expect(page).toContain("Teilnehmer A · Corp-Deck");
     expect(page).toContain("Teilnehmer B wählt eigene Decks beim Beitritt.");
@@ -252,7 +254,8 @@ describe("Client visibility contract", () => {
     expect(page).toContain('setTooltipPlacement(spaceBelow < 118');
     expect(page).toContain('rulesText: "1 Credit: +1 Stärke.');
     expect(page).toContain('title={nativeTitle}');
-    expect(page).toContain('card.known && card.rulesText');
+    expect(page).toContain("hasRulesText");
+    expect(page).toContain("rulesTextLines");
   });
 
   it("keeps Runner server lanes oriented with Root above ICE", () => {

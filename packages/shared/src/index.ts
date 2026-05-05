@@ -1191,7 +1191,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["code_gate"],
     rezCost: 7,
     strength: 3,
-    rulesText: "End the run. End the run. End the run.",
+    rulesText: "End the run.\nEnd the run.\nEnd the run.",
     subroutines: [onrEtr("onr_v1_230_cortical_scanner_etr_1"), onrEtr("onr_v1_230_cortical_scanner_etr_2"), onrEtr("onr_v1_230_cortical_scanner_etr_3")],
     mechanics: ["end_the_run"]
   }),
@@ -1231,7 +1231,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["code_gate"],
     rezCost: 4,
     strength: 4,
-    rulesText: "End the run. End the run.",
+    rulesText: "End the run.\nEnd the run.",
     subroutines: [onrEtr("onr_v1_239_endless_corridor_etr_1"), onrEtr("onr_v1_239_endless_corridor_etr_2")],
     mechanics: ["end_the_run"]
   }),

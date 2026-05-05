@@ -447,7 +447,8 @@ select {
   border-bottom: 1px solid var(--line);
 }
 
-.catalogControls label {
+.catalogControls label,
+.catalogField {
   display: grid;
   gap: 6px;
   color: var(--muted);
@@ -458,7 +459,7 @@ select {
   position: relative;
 }
 
-.searchBox svg {
+.searchBox .searchIcon {
   position: absolute;
   left: 10px;
   bottom: 11px;
@@ -467,6 +468,28 @@ select {
 
 .searchBox input {
   padding-left: 34px;
+  padding-right: 38px;
+}
+
+.searchClearButton {
+  width: 28px;
+  height: 28px;
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.searchClearButton:hover,
+.searchClearButton:focus-visible {
+  color: var(--text);
+  background: var(--panel-soft);
 }
 
 .catalogTypeFilters {
@@ -714,6 +737,13 @@ select {
   color: var(--text);
   line-height: 1.45;
   overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.catalogText .subroutineLine,
+.cardRulesPreview .subroutineLine,
+.cardTooltipText .subroutineLine {
+  display: block;
 }
 
 .catalogMetaGrid {
@@ -767,6 +797,8 @@ select {
 .deckHeaderActions {
   display: inline-flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
@@ -783,40 +815,24 @@ select {
   overflow-wrap: anywhere;
 }
 
-.deckCreateRow,
-.deckTemplateRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 12px 14px;
-  border-bottom: 1px solid var(--line);
-}
-
-.deckCreateRow {
-  background: var(--settings-bg);
-}
-
-.deckTemplateBox {
-  border-bottom: 1px solid var(--line);
-}
-
-.deckTemplateBox summary {
-  min-height: 40px;
+.deckDisplayRow {
   display: flex;
   align-items: center;
-  padding: 10px 14px;
-  color: var(--muted);
-  cursor: pointer;
-  font-weight: 800;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--section-bg);
 }
 
-.deckCreateRow .button,
-.deckTemplateRow .button {
-  height: auto;
-  min-height: 36px;
-  justify-content: flex-start;
-  white-space: normal;
-  text-align: left;
+.deckSideFilter {
+  grid-template-columns: repeat(3, minmax(70px, 1fr));
+}
+
+.deckSideFilter button.active.corp {
+  color: var(--segmented-active-text);
+  background: var(--corp);
 }
 
 .deckWorkspace {
@@ -1881,6 +1897,7 @@ select {
   color: var(--text);
   font-size: 12px;
   line-height: 1.3;
+  white-space: pre-line;
 }
 
 .card.compactCard .cardRulesPreview {
@@ -1936,6 +1953,9 @@ select {
 
 .cardTooltipText {
   color: var(--text) !important;
+  display: grid;
+  gap: 3px;
+  white-space: pre-line;
 }
 
 .card:hover .cardTooltip,
@@ -3289,6 +3309,7 @@ select,
   .topbar,
   .toolbar,
   .matchStrip,
+  .deckDisplayRow,
   .colorSchemeSettings,
   .cardDisplaySettings,
   .gameOverFooter {

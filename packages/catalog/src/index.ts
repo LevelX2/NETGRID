@@ -1,5 +1,5 @@
 import snapshotData from "../../../data/card-import/card-snapshot-0.8.json";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 export type CatalogSide = "runner" | "corp";
@@ -175,6 +175,21 @@ const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
   "onr_v1_239_endless-corridor": { rezCost: 4, strength: 4 }
 };
 
+const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_015_codeslinger": "1 credit: Break sentry subroutine.",
+  "onr_v1_052_raffles": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
+  "onr_v1_054_raptor": "2 credits: Break sentry subroutine.\n1 credit: +1 strength.",
+  "onr_v1_070_tinweasel": "0 credits: Break code gate subroutine.",
+  "onr_v1_144_tycho-mem-chip": "Provides +3 MU.",
+  "onr_v1_146_zetatech-mem-chip": "Provides +2 MU.",
+  "onr_v1_203_hostile-takeover": "Gain 5 credits when scored.",
+  "onr_v1_230_cortical-scanner": "End the run.\nEnd the run.\nEnd the run.",
+  "onr_v1_232_crystal-wall": "End the run.",
+  "onr_v1_237_data-wall": "End the run.",
+  "onr_v1_238_data-wall-2-0": "End the run.",
+  "onr_v1_239_endless-corridor": "End the run.\nEnd the run."
+};
+
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
   return {
     ...snapshot,
@@ -313,7 +328,9 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
   const baseSnapshot = snapshotData as CardSnapshot;
   const localOnrSnapshot = readLocalOnrSnapshot();
   if (!localOnrSnapshot) return baseSnapshot;
-  const v105kCards = applyOnrV105KReleaseGate(localOnrSnapshot.cards);
+  const confirmedTextOverrides = readLocalConfirmedTextOverrides();
+  const localCardsWithConfirmedText = applyLocalConfirmedTextOverrides(localOnrSnapshot.cards, confirmedTextOverrides);
+  const v105kCards = applyOnrV105KReleaseGate(localCardsWithConfirmedText);
 
   return {
     ...baseSnapshot,
@@ -374,6 +391,104 @@ function localSnapshotCandidates(): string[] {
   );
 }
 
+function applyLocalConfirmedTextOverrides(cards: CatalogCard[], overridesByCollectorNumber: Record<string, string>): CatalogCard[] {
+  return cards.map((card) => {
+    const cleanText = overridesByCollectorNumber[card.collectorNumber];
+    if (!cleanText) return card;
+    return { ...card, text: cleanText };
+  });
+}
+
+function readLocalConfirmedTextOverrides(): Record<string, string> {
+  const overrides: Record<string, string> = {};
+  for (const candidate of localConfirmedTextDirCandidates()) {
+    if (!existsSync(candidate)) continue;
+    for (const filePath of localConfirmedTextFiles(candidate)) {
+      Object.assign(overrides, parseConfirmedTextOverrides(readFileSync(filePath, "utf8")));
+    }
+  }
+  return overrides;
+}
+
+function localConfirmedTextDirCandidates(): string[] {
+  const relatives = [
+    path.join("data", "local", "card-import", "onr-v1-limited", "text-review-galleries"),
+    path.join("data", "local", "card-import", "onr-v1-limited", "v105k-control")
+  ];
+  return relatives.flatMap((relative) =>
+    Array.from(
+      new Set([
+        path.resolve(process.cwd(), relative),
+        path.resolve(process.cwd(), "..", relative),
+        path.resolve(process.cwd(), "..", "..", relative)
+      ])
+    )
+  );
+}
+
+function localConfirmedTextFiles(directory: string): string[] {
+  return readdirSync(directory)
+    .filter((fileName) => fileName.endsWith(".local.md") && (fileName.includes("confirmed-texts") || fileName.includes("candidates-control")))
+    .map((fileName) => path.join(directory, fileName));
+}
+
+function parseConfirmedTextOverrides(markdown: string): Record<string, string> {
+  const overrides: Record<string, string> = {};
+  const headingPattern = /^(#{2,3})\s+(\d{3})\s+-\s+(.+)$/gm;
+  const headings = [...markdown.matchAll(headingPattern)].map((match) => ({
+    index: match.index ?? 0,
+    number: match[2] ?? ""
+  }));
+
+  for (let index = 0; index < headings.length; index += 1) {
+    const heading = headings[index];
+    if (!heading) continue;
+    const nextHeading = headings[index + 1];
+    const section = markdown.slice(heading.index, nextHeading?.index ?? markdown.length);
+    if (section.includes("Mapping-Hinweis")) continue;
+    const cleanText = extractConfirmedRulesText(section);
+    if (cleanText && heading.number) overrides[heading.number] = cleanText;
+  }
+
+  return overrides;
+}
+
+function extractConfirmedRulesText(section: string): string | null {
+  const fencedRules = section.match(/Regeltext(?: ohne Flavour)?:\s*```text\s*([\s\S]*?)\s*```/);
+  if (fencedRules?.[1]) return normalizeConfirmedRulesText(fencedRules[1]);
+
+  const fencedUserText = section.match(/Vom Nutzer bestätigter Text:\s*```text\s*([\s\S]*?)\s*```/);
+  if (fencedUserText?.[1]) return normalizeConfirmedRulesText(stripCardMetadataFromConfirmedText(fencedUserText[1]));
+
+  const inline = section.match(/^- Regeltext:\s*(.+)$/m);
+  if (inline?.[1]) return normalizeConfirmedRulesText(inline[1]);
+
+  return null;
+}
+
+function stripCardMetadataFromConfirmedText(text: string): string {
+  return text
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !/^Kosten\b/i.test(line))
+    .filter((line) => !/^Stärke\b/i.test(line))
+    .filter((line) => !/^MU\b/i.test(line))
+    .filter((line) => !/^Program\b/i.test(line))
+    .filter((line) => !/^Hardware\b/i.test(line))
+    .join("\n");
+}
+
+function normalizeConfirmedRulesText(text: string): string {
+  return text
+    .replace(/\r\n/g, "\n")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
 function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
   return cards.map((card) => (ONR_V1_0_5K_RELEASE_CARD_ID_SET.has(card.catalogCardId) ? promoteOnrV105KCard(card) : demoteLocalOnrCard(card)));
 }
@@ -383,6 +498,7 @@ function promoteOnrV105KCard(card: CatalogCard): CatalogCard {
     ...card,
     engineCardId: card.catalogCardId,
     subtypes: [...card.subtypes],
+    text: ONR_V1_0_5K_TEXT_OVERRIDES[card.catalogCardId] ?? card.text,
     numeric: { ...card.numeric, ...(ONR_V1_0_5K_NUMERIC_OVERRIDES[card.catalogCardId] ?? {}) },
     statuses: {
       ...card.statuses,

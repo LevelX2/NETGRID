@@ -130,6 +130,7 @@ type AiPacingMode = "fast" | "paced" | "manual";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
+type DeckSideFilter = Side | "all";
 
 type SeriesResultSummary = {
   seriesId: string;
@@ -601,6 +602,17 @@ function formatCatalogTypeLine(card: Pick<CatalogCardSummary, "type" | "subtypes
   const type = formatCatalogTerm(card.type);
   const subtypes = card.subtypes.map(formatCatalogTerm).join(" / ");
   return [type, subtypes].filter(Boolean).join(" - ");
+}
+
+function rulesTextLines(text: string): string[] {
+  return text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function shouldShowSubroutineMarkers(cardType: string, text: string): boolean {
+  return cardType.toLowerCase() === "ice" && rulesTextLines(text).length > 1;
 }
 
 function catalogDetailLines(card: CatalogCardDetail): string[] {
@@ -1876,29 +1888,6 @@ export default function Page() {
     rememberDisplayName(value);
   };
 
-  const createDeckFromTemplate = (templateId: string) => {
-    const template = deckTemplates.find((candidate) => candidate.templateId === templateId);
-    if (!template) return;
-    const now = new Date().toISOString();
-    const deck: EditableDeck = {
-      deckId: `local_${template.sourceDeckId}_${crypto.randomUUID().slice(0, 8)}`,
-      deckVersion: "0.6.0-local",
-      name: `${template.name} Kopie`,
-      side: template.side,
-      identityCardId: template.identityCardId,
-      cardPoolSnapshotId: DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
-      formatProfileId: DEFAULT_DECK_FORMAT_PROFILE_ID,
-      cards: template.cards.map((entry) => ({ ...entry })),
-      createdAt: now,
-      updatedAt: now
-    };
-    setLocalDecks((current) => saveDeckLibrary([...current, deck]));
-    setSelectedLocalDeckId(deck.deckId);
-    selectDeckForSide(deck);
-    clearDeckValidation();
-    setNotice("Deck-Kopie gespeichert. Du kannst den Decknamen direkt ändern.");
-  };
-
   const createEmptyDeck = (side: Side) => {
     const now = new Date().toISOString();
     const templateIdentity = deckTemplates.find((candidate) => candidate.side === side)?.identityCardId;
@@ -2519,7 +2508,6 @@ export default function Page() {
           ) : null}
           {entryTab === "decks" ? (
             <DeckEditorPanel
-            templates={deckTemplates}
             localDecks={localDecks}
             selectedDeck={selectedLocalDeck}
             selectedDeckDirty={selectedDeckDirty}
@@ -2530,7 +2518,6 @@ export default function Page() {
             importText={deckImportText}
             exportText={deckExportText}
             onCreateEmpty={createEmptyDeck}
-            onCreateFromTemplate={createDeckFromTemplate}
             onSelectDeck={setSelectedLocalDeckId}
             onUpdateDeck={updateSelectedDeck}
             onSave={saveSelectedDeck}
@@ -4008,14 +3995,18 @@ function CatalogPanel({
             {cards.length} Karten · {summary.playable ?? 0} playable · {summary.blocked ?? 0} blocked
           </p>
         </div>
-        <ListFilter size={18} />
       </div>
       <div className="catalogControls">
-        <label className="searchBox">
-          <span>Suche</span>
-          <Search size={16} />
-          <input value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Kartenname, Text, Subtyp" />
-        </label>
+        <div className="searchBox catalogField">
+          <label htmlFor="catalogSearch">Suche</label>
+          <Search className="searchIcon" size={16} />
+          <input id="catalogSearch" value={search} onChange={(event) => onSearch(event.target.value)} placeholder="Kartenname, Text, Subtyp" />
+          {search ? (
+            <button className="searchClearButton" onClick={() => onSearch("")} type="button" aria-label="Suche löschen" title="Suche löschen">
+              <X size={14} />
+            </button>
+          ) : null}
+        </div>
         <label>
           Seite
           <select value={side} onChange={(event) => onSide(event.target.value as Side | "all")}>
@@ -4097,7 +4088,14 @@ function CatalogPanel({
                 </div>
               ) : null}
               <StatusBadges statuses={detail.statuses} />
-              <p className="catalogText">{detail.text}</p>
+              <p className="catalogText">
+                {rulesTextLines(detail.text).map((line, index) => (
+                  <span key={`${detail.catalogCardId}-rules-${index}`} className={shouldShowSubroutineMarkers(detail.type, detail.text) ? "subroutineLine" : undefined}>
+                    {shouldShowSubroutineMarkers(detail.type, detail.text) ? <span aria-hidden="true">↩ </span> : null}
+                    {line}
+                  </span>
+                ))}
+              </p>
               <div className="catalogMetaGrid">
                 {Object.entries(detail.numeric)
                   .filter(([, value]) => value !== null)
@@ -4193,7 +4191,6 @@ function DeckMetadataLine({ entries }: { entries: Array<{ label: string; metadat
 }
 
 function DeckEditorPanel({
-  templates,
   localDecks,
   selectedDeck,
   selectedDeckDirty,
@@ -4204,7 +4201,6 @@ function DeckEditorPanel({
   importText,
   exportText,
   onCreateEmpty,
-  onCreateFromTemplate,
   onSelectDeck,
   onUpdateDeck,
   onSave,
@@ -4217,7 +4213,6 @@ function DeckEditorPanel({
   onImportText,
   onImport
 }: {
-  templates: DeckTemplate[];
   localDecks: EditableDeck[];
   selectedDeck: EditableDeck | null;
   selectedDeckDirty: boolean;
@@ -4228,7 +4223,6 @@ function DeckEditorPanel({
   importText: string;
   exportText: string;
   onCreateEmpty(side: Side): void;
-  onCreateFromTemplate(templateId: string): void;
   onSelectDeck(deckId: string): void;
   onUpdateDeck(deck: EditableDeck): void;
   onSave(): void;
@@ -4245,12 +4239,15 @@ function DeckEditorPanel({
   const [builderTypeFilters, setBuilderTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
-  const [templatesOpen, setTemplatesOpen] = useState(false);
+  const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
   const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
   const deckQuantities = useMemo(() => new Map(selectedDeck?.cards.map((entry) => [entry.cardId, entry.quantity]) ?? []), [selectedDeck?.cards]);
   const cardLookup = useMemo(() => new Map(playableCards.map((card) => [card.catalogCardId, card])), [playableCards]);
   const builderTypeCounts = useMemo(() => summarizeCatalogTypeFilters(playableCards), [playableCards]);
+  const runnerDeckCount = localDecks.filter((deck) => deck.side === "runner").length;
+  const corpDeckCount = localDecks.filter((deck) => deck.side === "corp").length;
+  const filteredLocalDecks = useMemo(() => (deckSideFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === deckSideFilter)), [deckSideFilter, localDecks]);
   const visibleTypeFilterGroups = selectedDeck ? CATALOG_TYPE_FILTER_GROUPS.filter((group) => group.side === selectedDeck.side) : CATALOG_TYPE_FILTER_GROUPS;
   const libraryCards = useMemo(() => {
     const search = builderSearch.trim().toLowerCase();
@@ -4272,6 +4269,20 @@ function DeckEditorPanel({
   );
   const previewCard = (previewCardId ? cardLookup.get(previewCardId) : null) ?? libraryCards[0] ?? deckRows[0]?.card ?? null;
   const previewQuantity = previewCard ? deckQuantities.get(previewCard.catalogCardId) ?? 0 : 0;
+  useEffect(() => {
+    if (!selectedDeck || deckSideFilter === "all" || selectedDeck.side === deckSideFilter) return;
+    setDeckSideFilter(selectedDeck.side);
+  }, [deckSideFilter, selectedDeck?.side]);
+  const handleDeckSideFilter = (nextFilter: DeckSideFilter) => {
+    setDeckSideFilter(nextFilter);
+    const candidates = nextFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === nextFilter);
+    if (selectedDeck && candidates.some((deck) => deck.deckId === selectedDeck.deckId)) return;
+    onSelectDeck(candidates[0]?.deckId ?? "");
+  };
+  const createBlankDeck = (side: Side) => {
+    setDeckSideFilter(side);
+    onCreateEmpty(side);
+  };
   const setVisibleBuilderTypes = (selected: boolean) => {
     setBuilderTypeFilters((current) => {
       const next = { ...current };
@@ -4287,15 +4298,22 @@ function DeckEditorPanel({
         <div>
           <h2>Meine Decks</h2>
           <p className="meta">
-            Meine Decks · {localDecks.length} gespeichert
+            Meine Decks · {localDecks.length} gespeichert · Runner {runnerDeckCount} · Corp {corpDeckCount}
           </p>
         </div>
         <div className="deckHeaderActions">
+          <button className="button" onClick={() => createBlankDeck("runner")}>
+            <Plus size={15} />
+            Neues Runner-Deck
+          </button>
+          <button className="button corp" onClick={() => createBlankDeck("corp")}>
+            <Plus size={15} />
+            Neues Corp-Deck
+          </button>
           <button className={`button ${importOpen ? "primary" : ""}`} onClick={() => setImportOpen((current) => !current)} type="button" aria-expanded={importOpen}>
             <Upload size={15} />
             Import
           </button>
-          <Save size={18} />
         </div>
       </div>
       {importOpen ? (
@@ -4308,37 +4326,33 @@ function DeckEditorPanel({
           </button>
         </div>
       ) : null}
-      <div className="deckCreateRow">
-        <button className="button" onClick={() => onCreateEmpty("runner")}>
-          <Plus size={15} />
-          Neues Runner-Deck
-        </button>
-        <button className="button corp" onClick={() => onCreateEmpty("corp")}>
-          <Plus size={15} />
-          Neues Corp-Deck
-        </button>
-      </div>
-      <details className="deckTemplateBox" open={templatesOpen} onToggle={(event) => setTemplatesOpen(event.currentTarget.open)}>
-        <summary>Vorgefertigte Decks anzeigen</summary>
-        <div className="deckTemplateRow">
-          {templates.map((template) => (
-            <button className={`button ${template.side === "corp" ? "corp" : ""}`} key={template.templateId} onClick={() => onCreateFromTemplate(template.templateId)}>
-              <CopyPlus size={15} />
-              {template.name}
-            </button>
-          ))}
-        </div>
-      </details>
       <div className="deckWorkspace">
         <div className="deckEditor">
+          <div className="deckDisplayRow">
+            <div>
+              <span className="settingsTitle">Anzeige</span>
+              <span className="meta">{filteredLocalDecks.length} Decks in dieser Auswahl</span>
+            </div>
+            <div className="segmented deckSideFilter" role="group" aria-label="Deckseite anzeigen">
+              <button className={deckSideFilter === "all" ? "active" : ""} onClick={() => handleDeckSideFilter("all")} type="button" aria-pressed={deckSideFilter === "all"}>
+                Alle
+              </button>
+              <button className={deckSideFilter === "runner" ? "active runner" : "runner"} onClick={() => handleDeckSideFilter("runner")} type="button" aria-pressed={deckSideFilter === "runner"}>
+                Runner
+              </button>
+              <button className={deckSideFilter === "corp" ? "active corp" : "corp"} onClick={() => handleDeckSideFilter("corp")} type="button" aria-pressed={deckSideFilter === "corp"}>
+                Corp
+              </button>
+            </div>
+          </div>
           <div className="deckSelectGrid">
             <label>
-              Deck auswählen
-              <select value={selectedDeck?.deckId ?? ""} onChange={(event) => onSelectDeck(event.target.value)} disabled={localDecks.length === 0}>
+              Deck anzeigen
+              <select value={selectedDeck && filteredLocalDecks.some((deck) => deck.deckId === selectedDeck.deckId) ? selectedDeck.deckId : ""} onChange={(event) => onSelectDeck(event.target.value)} disabled={filteredLocalDecks.length === 0}>
                 <option value="">Kein lokales Deck</option>
-                {localDecks.map((deck) => (
+                {filteredLocalDecks.map((deck) => (
                   <option value={deck.deckId} key={deck.deckId}>
-                    {deck.name}
+                    {sideLabel(deck.side)} · {deck.name}
                   </option>
                 ))}
               </select>
@@ -4498,7 +4512,9 @@ function DeckEditorPanel({
               {exportText ? <textarea className="deckTextArea" value={exportText} readOnly /> : null}
             </>
           ) : (
-            <p className="meta deckEmpty">Erstelle eine Kopie aus einem Template oder importiere ein lokales Deck.</p>
+            <p className="meta deckEmpty">
+              {localDecks.length === 0 ? "Erstelle ein neues Deck oder importiere ein lokales Deck." : "In dieser Auswahl ist noch kein Deck vorhanden."}
+            </p>
           )}
         </div>
       </div>
@@ -4781,20 +4797,23 @@ function CardView({
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const detailLines = card.known ? cardDetailLines(card) : [];
-  const tooltipText = card.known ? [card.title, ...detailLines, card.rulesText].filter(Boolean).join("\n") : undefined;
-  const tooltipId = card.known && card.rulesText ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const rulesText = card.known ? (card.rulesText ?? "") : "";
+  const hasRulesText = rulesText.length > 0;
+  const hasSubroutineMarkers = shouldShowSubroutineMarkers(card.type ?? "", rulesText);
+  const tooltipText = card.known ? [card.title, ...detailLines, rulesText].filter(Boolean).join("\n") : undefined;
+  const tooltipId = card.known && hasRulesText ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
   const nativeTitle = tooltipId ? undefined : tooltipText;
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const showArtBlock = !visualImageUrl && displayMode === "placeholder";
   const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
-  const showRulesPreview = !visualImageUrl && card.known && card.rulesText && !isCompact;
+  const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
 
   const updateTooltipPlacement = () => {
     const element = cardRef.current;
-    if (!element || !card.known || !card.rulesText) return;
+    if (!element || !card.known || !hasRulesText) return;
     const cardRect = element.getBoundingClientRect();
     const boundary = nearestTooltipBoundary(element);
     const boundaryTop = Math.max(0, boundary.top);
@@ -4829,15 +4848,31 @@ function CardView({
       {installedState === "rezzed" ? <span className="rezChip rezzed">Gerezzt</span> : null}
       {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
       {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
-      {showRulesPreview ? <span className="cardRulesPreview">{card.rulesText}</span> : null}
+      {showRulesPreview ? (
+        <span className="cardRulesPreview">
+          {rulesTextLines(rulesText).map((line, index) => (
+            <span key={`${card.instanceId}-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
+              {hasSubroutineMarkers ? <span aria-hidden="true">↩ </span> : null}
+              {line}
+            </span>
+          ))}
+        </span>
+      ) : null}
       {!visualImageUrl && card.known && card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
-      {card.known && card.rulesText ? (
+      {card.known && hasRulesText ? (
         <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
           <strong>{card.title}</strong>
           {detailLines.map((line) => (
             <span key={line}>{line}</span>
           ))}
-          <span className="cardTooltipText">{card.rulesText}</span>
+          <span className="cardTooltipText">
+            {rulesTextLines(rulesText).map((line, index) => (
+              <span key={`${card.instanceId}-tooltip-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
+                {hasSubroutineMarkers ? <span aria-hidden="true">↩ </span> : null}
+                {line}
+              </span>
+            ))}
+          </span>
         </span>
       ) : null}
     </button>
