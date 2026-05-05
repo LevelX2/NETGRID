@@ -71,6 +71,27 @@ export const RUN_TIMELINE_STEPS = [
 
 export type RunTimelineStepId = (typeof RUN_TIMELINE_STEPS)[number]["id"];
 
+export type ActionSlotVisual = {
+  index: number;
+  state: "available" | "spent";
+  bonus: boolean;
+};
+
+export type ActionSlotDisplay = {
+  label: string;
+  available: number;
+  spent: number;
+  capacity: number;
+  baseCapacity: number;
+  slots: ActionSlotVisual[];
+};
+
+export type CostChipView = {
+  kind: "action" | "credit";
+  amount: number;
+  label: string;
+};
+
 export function splitLegalActions(actions: LegalAction[]): { primaryActions: LegalAction[]; contextualActions: LegalAction[] } {
   const primaryActions: LegalAction[] = [];
   const contextualActions: LegalAction[] = [];
@@ -123,6 +144,60 @@ export function actionButtonLabel(action: LegalAction): string {
     default:
       return normalizeVisibleTerms(action.label);
   }
+}
+
+export function baseActionSlotCapacity(side: Side): number {
+  return side === "runner" ? 4 : 3;
+}
+
+export function actionSlotDisplay(side: Side, currentClicks: number, displayCapacity: number | undefined, active: boolean): ActionSlotDisplay {
+  const available = Math.max(0, Math.floor(currentClicks));
+  const baseCapacity = baseActionSlotCapacity(side);
+  const shouldShowSlots = active || available > 0;
+  const capacity = shouldShowSlots ? Math.max(baseCapacity, Math.floor(displayCapacity ?? baseCapacity), available) : 0;
+  const spent = Math.max(0, capacity - available);
+  const slots = Array.from({ length: capacity }, (_, index): ActionSlotVisual => {
+    return {
+      index,
+      state: index < spent ? "spent" : "available",
+      bonus: index >= baseCapacity
+    };
+  });
+  return {
+    label: `${available} ${available === 1 ? "Aktion" : "Aktionen"}`,
+    available,
+    spent,
+    capacity,
+    baseCapacity,
+    slots
+  };
+}
+
+export function actionCostChips(action: Pick<LegalAction, "costs">): CostChipView[] {
+  const totals = action.costs.reduce<{ clicks: number; credits: number }>(
+    (acc, cost) => {
+      acc.clicks += cost.clicks ?? 0;
+      acc.credits += cost.credits ?? 0;
+      return acc;
+    },
+    { clicks: 0, credits: 0 }
+  );
+  const chips: CostChipView[] = [];
+  if (totals.clicks > 0) {
+    chips.push({
+      kind: "action",
+      amount: totals.clicks,
+      label: `${totals.clicks} ${totals.clicks === 1 ? "Aktion" : "Aktionen"}`
+    });
+  }
+  if (totals.credits > 0) {
+    chips.push({
+      kind: "credit",
+      amount: totals.credits,
+      label: `${totals.credits} ${totals.credits === 1 ? "Credit" : "Credits"}`
+    });
+  }
+  return chips;
 }
 
 export function normalizeVisibleTerms(value: string): string {

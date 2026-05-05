@@ -8,8 +8,6 @@ const IMAGE_DIR = path.join(REPO_ROOT, "data", "local-assets", "card-images");
 const LOCAL_ONR_SNAPSHOT_PATH = path.join(REPO_ROOT, "data", "local", "card-import", "onr-v1-limited", "card-snapshot-onr-v1-limited.local.json");
 
 const CARD_IMAGES: Record<string, string> = {
-  back_corp: "generated-backs/corp_back.png",
-  back_runner: "generated-backs/runner_back.png",
   corp_identity_001: "generated-identities/corp_identity_001.png",
   efficient_fracter: "generated-icebreakers/efficient_fracter.png",
   runner_identity_001: "generated-identities/runner_identity_001.png",

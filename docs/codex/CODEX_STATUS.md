@@ -4,9 +4,9 @@
 
 V1.0.5K kleines Karten-Nachrelease nach V1.0.5 ist umgesetzt und lokal verifiziert. Die finale Freigabe umfasst 12 lokal geprüfte O:NR-v1-Karten: Codeslinger, Raffles, Raptor, Tinweasel, Tycho Mem Chip, Zetatech Mem Chip, Hostile Takeover, Cortical Scanner, Crystal Wall, Data Wall, Data Wall 2.0 und Endless Corridor. Dogcatcher, Flak, Reflector, Shield, Corporate War und Political Overthrow bleiben wegen zusätzlicher Mechanikfamilien zurückgestellt.
 
-V1.0.5 Action Board UX und Board-Klarheit requirements freeze is complete and ready for implementation. V1.0.6 Aktionen, Credits und Kartenanzeige requirements freeze is complete as the planned post-V1.0.5 UI clarity release. V1.0.4 Private Match Lifecycle und Session Recovery ist umgesetzt und lokal verifiziert. V1.0.3 Matchstart-UX ist umgesetzt und lokal verifiziert. V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
+V1.0.6 Aktionen, Credits und Kartenanzeige ist umgesetzt und lokal verifiziert. V1.0.5K kleines Karten-Nachrelease nach V1.0.5 ist umgesetzt und lokal verifiziert. V1.0.5 Action Board UX und Board-Klarheit ist im Workspace als passende UI-Basis vorhanden, aber ohne eigene formale Finalartefakte dokumentiert. V1.0.4 Private Match Lifecycle und Session Recovery ist umgesetzt und lokal verifiziert. V1.0.3 Matchstart-UX ist umgesetzt und lokal verifiziert. V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. V1.0.4 adds terminal private-match lifecycle commands, Session Recovery hardening, Recreate and side-safe opponent names. V1.0.5 Action Board UX and Board-Klarheit now has frozen requirements, action-board and board/run UI specs, test matrix, requirements review and repeatable browser/playtest smoke, amended with contextual card actions, local cue positioning, exact run target highlighting, BoardHeader utility review, RunTimeline orientation evaluation and side-safe rezzed/unrezzed Corp card display. V1.0.6 now has frozen UI clarity requirements for action slots, generic credit visuals, cost chips and compact Card Display modes. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. V1.0.4 adds terminal private-match lifecycle commands, Session Recovery hardening, Recreate and side-safe opponent names. V1.0.5 Action Board UX and Board-Klarheit has frozen requirements and a suitable implemented UI baseline in the workspace, but no dedicated V1.0.5 implementation/final review artifacts. V1.0.5K is locally verified as a narrow card-release insert. V1.0.6 is implemented as a UI clarity release for action slots, generic credit visuals, cost chips and compact card-display modes, without Engine, card, Replay or StateHash expansion. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
@@ -35,16 +35,20 @@ Latest V1.0.5 board/run UI spec artifact: `docs/derived/BOARD_RUN_UI_1_0_5_SPEC.
 Latest V1.0.5 test matrix artifact: `docs/derived/V1_0_5_TEST_MATRIX.md`.
 Latest V1.0.5 requirements review artifact: `docs/derived/V1_0_5_REQUIREMENTS_REVIEW.md`.
 Latest V1.0.5 browser/playtest smoke artifact: `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md`.
+Latest V1.0.5K card-release requirements artifact: `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`.
+Latest V1.0.5K card-release implementation review artifact: `docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`.
 Latest V1.0.6 planning artifact: `docs/derived/V1_0_6_UI_RESOURCE_CLARITY_PLAN.md`.
 Latest V1.0.6 requirements artifact: `docs/derived/V1_0_6_REQUIREMENTS.md`.
 Latest V1.0.6 resource/card-display spec artifact: `docs/derived/RESOURCE_CARD_DISPLAY_1_0_6_SPEC.md`.
 Latest V1.0.6 test matrix artifact: `docs/derived/V1_0_6_TEST_MATRIX.md`.
 Latest V1.0.6 requirements review artifact: `docs/derived/V1_0_6_REQUIREMENTS_REVIEW.md`.
 Latest V1.0.6 browser/playtest smoke artifact: `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`.
+Latest V1.0.6 implementation review artifact: `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md`.
+Latest V1.0.6 final review artifact: `docs/derived/V1_0_6_FINAL_REVIEW.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: implement V1.0.5 Action Board UX and Board-Klarheit from `V1_0_5_ACTION_BOARD_UX_PLAN.md`, `V1_0_5_REQUIREMENTS.md`, `ACTION_BOARD_UX_1_0_5_SPEC.md`, `BOARD_RUN_UI_1_0_5_SPEC.md`, `V1_0_5_TEST_MATRIX.md` and `V1_0_5_BROWSER_PLAYTEST_SMOKE.md`. The V1.0.5 implementation scope now explicitly includes contextual presentation of card/object-bound LegalActions, locally draggable or preset-positioned opponent action cues, exclusive visual highlighting of the current run target server, removal or functional reduction of the redundant BoardHeader, a documented RunTimeline orientation decision, and clear side-safe visual distinction between rezzed and unrezzed installed Corp cards. V1.0.6 is now requirements-ready as the following UI clarity release for actions, credits and card display modes, but implementation should wait for the V1.0.5 gate unless explicitly reordered. V1.0.4 Private Match Lifecycle and Session Recovery is implemented from `V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md` and `V1_0_4_REQUIREMENTS.md`: terminal statuses, Joiner-Leave semantics, Forfeit result modeling, Recreate, Session-Recovery, opponent display names, REST-vs-WebSocket transport, Human-vs-KI Forfeit and repeatable two-tab smoke expectations are covered. `V1_0_4_NEXT_RELEASE_CANDIDATES.md` remains the candidate/history document. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
+Current selected next scope: V1.0.6 Aktionen, Credits und Kartenanzeige is complete. V1.0.6 changed only the active-game presentation layer: visible `Aktionen` terminology, local action-slot meters, generic Credit badges, action/credit cost chips, compact Card Display controls in the preview header, distinct Bild/Text/Kompakt modes, no duplicate Preview details and side-safe tooltips. V1.0.5K is complete as a narrow card-release insert. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6. V1.0.4 Private Match Lifecycle and Session Recovery is implemented from `V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md` and `V1_0_4_REQUIREMENTS.md`: terminal statuses, Joiner-Leave semantics, Forfeit result modeling, Recreate, Session-Recovery, opponent display names, REST-vs-WebSocket transport, Human-vs-KI Forfeit and repeatable two-tab smoke expectations are covered. `V1_0_4_NEXT_RELEASE_CANDIDATES.md` remains the candidate/history document. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
 
 ## Status
 
@@ -330,6 +334,14 @@ V1.0.5K verification:
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
 - `corepack pnpm build`: pass.
+
+V1.0.6 Aktionen, Credits und Kartenanzeige implementation is complete and locally verified as a UI/presentation release on the existing V1.0.5 workspace baseline.
+
+`V1_0_6_implemented: true`
+
+`V1_0_6_verified: true`
+
+`V1_0_6_done: true`
 
 `long_term_product_vision_2026_05_05_available: true`
 
@@ -1929,15 +1941,17 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V1.0.2: Gegner-Aktionsdarstellung und Ablauftransparenz, implementation complete and locally verified.
 - V1.0.3: Matchstart-UX, implementation complete and locally verified.
 - V1.0.4: Private Match Lifecycle und Session Recovery, implementation complete and locally verified.
-- V1.0.5: Action Board UX und Board-Klarheit requirements freeze complete and ready for implementation.
+- V1.0.5: Action Board UX und Board-Klarheit has a suitable implemented UI baseline in the workspace, but no dedicated formal final artifacts.
+- V1.0.5K: kleines Karten-Nachrelease, implementation complete and locally verified.
+- V1.0.6: Aktionen, Credits und Kartenanzeige, implementation complete and locally verified.
 
-Current gate: V1.0.5 Action Board UX and Board-Klarheit implementation is the selected next step. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and now include contextual card/object actions, local cue positioning, exact run target highlighting, BoardHeader utility review, RunTimeline orientation evaluation and side-safe rezzed/unrezzed Corp card display. V1.0.6 requirements are also complete as a planned post-V1.0.5 UI clarity release for actions, credits and card display modes. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0.6 Aktionen, Credits und Kartenanzeige is complete. V1.0.6 implementation and final review are documented in `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_6_FINAL_REVIEW.md`. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. V1.0.5K is complete as a separate narrow card-release insert. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
 Next scope decision:
 
-1. Implement V1.0.5 Action Board UX and Board-Klarheit from `docs/derived/V1_0_5_REQUIREMENTS.md`, `docs/derived/ACTION_BOARD_UX_1_0_5_SPEC.md`, `docs/derived/BOARD_RUN_UI_1_0_5_SPEC.md`, `docs/derived/V1_0_5_TEST_MATRIX.md` and `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md`.
-2. After V1.0.5 gate, implement V1.0.6 from `docs/derived/V1_0_6_REQUIREMENTS.md`, `docs/derived/RESOURCE_CARD_DISPLAY_1_0_6_SPEC.md`, `docs/derived/V1_0_6_TEST_MATRIX.md` and `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`.
-3. Keep V1.0.4 lifecycle contracts green while V1.0.5 and V1.0.6 change the active-game surface.
+1. Decide the next scope after V1.0.6; do not treat V1.0.6 as a card or mechanic release.
+2. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
+3. Repeat the V1.0.6 narrow-viewport visual smoke manually or with a browser backend that exposes viewport resizing.
 4. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
 5. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 
@@ -1972,6 +1986,8 @@ Detailed planning artifacts available:
 - `docs/derived/V1_0_6_TEST_MATRIX.md`
 - `docs/derived/V1_0_6_REQUIREMENTS_REVIEW.md`
 - `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`
+- `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/V1_0_6_FINAL_REVIEW.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`

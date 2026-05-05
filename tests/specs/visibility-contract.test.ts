@@ -26,7 +26,8 @@ describe("Client visibility contract", () => {
     expect(page).toContain("function DiagnosticsDrawer");
     expect(page).toContain("side-filtered");
     expect(page).toContain("localCardImageUrl");
-    expect(page).toContain("cardBackImageUrl");
+    expect(page).not.toContain("cardBackImageUrl");
+    expect(page).not.toContain("/api/card-images/back_");
     expect(page).toContain("src={visualImageUrl}");
     expect(page).not.toContain("imageAssetId");
     expect(page).not.toContain("localImagePath");
@@ -59,7 +60,7 @@ describe("Client visibility contract", () => {
   it("keeps the V1.0.5 matchstart lobby and lifecycle recovery explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.5"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.6"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
@@ -206,10 +207,43 @@ describe("Client visibility contract", () => {
     expect(chronicle).not.toContain("idempotencyKey");
   });
 
+  it("keeps V1.0.6 resource and card-display presentation side-safe", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    const helpers = readFileSync("apps/web/app/action-board-ui.ts", "utf8");
+    const styles = readFileSync("apps/web/app/globals.css", "utf8");
+    const cardImageRoute = readFileSync("apps/web/app/api/card-images/[cardId]/route.ts", "utf8");
+
+    expect(page).toContain("function ActionSlotMeter");
+    expect(page).toContain("function CreditBadge");
+    expect(page).toContain("function CostChips");
+    expect(page).toContain("function CardDisplayModeSelector");
+    expect(page).toContain("actionSlotCapacities");
+    expect(page).toContain("lastActionSlotTurnRef");
+    expect(page).toContain("Aktionen");
+    expect(page).toContain("Kartenanzeige");
+    expect(page).toContain("Vorschau");
+    expect(page).not.toContain('label="Clicks"');
+    expect(page).not.toContain('label="Klicks"');
+    expect(page).not.toContain("Card Display");
+    expect(page).not.toContain(">Preview<");
+    expect(page).not.toContain("cardBackImageUrl");
+    expect(page).not.toContain("/api/card-images/back_");
+    expect(cardImageRoute).not.toContain("back_corp");
+    expect(cardImageRoute).not.toContain("back_runner");
+    expect(helpers).toContain("baseActionSlotCapacity");
+    expect(helpers).toContain("actionSlotDisplay");
+    expect(helpers).toContain("actionCostChips");
+    expect(styles).toContain(".actionSlot");
+    expect(styles).toContain(".creditCoin");
+    expect(styles).toContain(".costChip");
+    expect(styles).toContain(".cardDisplaySelector");
+    expect(styles).toContain(".card.textCard");
+    expect(styles).toContain(".card.compactCard");
+  });
+
   it("keeps card rules text reachable in image display mode without hidden-card leaks", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     expect(page).toContain("Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus");
-    expect(page).toContain("cardRulesDetail");
     expect(page).toContain("aria-describedby={tooltipId}");
     expect(page).toContain("visibleKnownCardIds");
     expect(page).toContain("enrichVisibleCard");
@@ -217,7 +251,7 @@ describe("Client visibility contract", () => {
     expect(page).toContain("nearestTooltipBoundary");
     expect(page).toContain('setTooltipPlacement(spaceBelow < 118');
     expect(page).toContain('rulesText: "1 Credit: +1 Stärke.');
-    expect(page).toContain('title={tooltipText}');
+    expect(page).toContain('title={nativeTitle}');
     expect(page).toContain('card.known && card.rulesText');
   });
 
@@ -271,7 +305,12 @@ describe("Client visibility contract", () => {
   });
 
   it("validates locally playable O:NR cards through the deck API when the local overlay is present", () => {
-    if (catalogDetailResponse("onr_v1_079_bodyweight-synthetic-blood").status === 404) return;
+    const localPlayableRunnerCards = catalogListResponse(new URLSearchParams()).body.cards.filter(
+      (card) => card.catalogCardId.startsWith("onr_v1_") && card.side === "runner" && card.statuses.playable && card.statuses.deck_legal
+    );
+    if (localPlayableRunnerCards.length < 2) return;
+    const [firstLocalCard, secondLocalCard] = localPlayableRunnerCards;
+    if (!firstLocalCard || !secondLocalCard || catalogDetailResponse(firstLocalCard.catalogCardId).status === 404) return;
 
     const response = deckValidationResponse({
       deckId: "local_onr_runner_validation_smoke",
@@ -282,8 +321,8 @@ describe("Client visibility contract", () => {
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 3 },
-        { cardId: "onr_v1_040_loony-goon", quantity: 3 },
+        { cardId: firstLocalCard.catalogCardId, quantity: 3 },
+        { cardId: secondLocalCard.catalogCardId, quantity: 3 },
         { cardId: "simple_killer", quantity: 3 },
         { cardId: "simple_economy_event", quantity: 3 }
       ],
@@ -294,7 +333,7 @@ describe("Client visibility contract", () => {
     expect(response.status).toBe(200);
     expect(response.body.validation.ok).toBe(true);
     expect(response.body.validation.errors).toEqual([]);
-    expect(JSON.stringify(response.body)).not.toContain("Unknown card onr_v1_079_bodyweight-synthetic-blood");
-    expect(JSON.stringify(response.body)).not.toContain("Unknown card onr_v1_040_loony-goon");
+    expect(JSON.stringify(response.body)).not.toContain(`Unknown card ${firstLocalCard.catalogCardId}`);
+    expect(JSON.stringify(response.body)).not.toContain(`Unknown card ${secondLocalCard.catalogCardId}`);
   });
 });

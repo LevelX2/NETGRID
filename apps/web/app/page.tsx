@@ -58,8 +58,11 @@ import {
   actionButtonLabel,
   actionContextStillVisible,
   actionContextTitle,
+  actionCostChips,
   actionGroupLabel,
   actionMatchesContext,
+  actionSlotDisplay,
+  baseActionSlotCapacity,
   breachProgressLabel,
   clampCuePosition,
   corpInstalledCardState,
@@ -99,7 +102,7 @@ const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Shield;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
-const APP_STATUS_LABEL = "V1.0.5";
+const APP_STATUS_LABEL = "V1.0.6";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -584,10 +587,6 @@ function localCardImageUrl(cardId: string): string | undefined {
   return undefined;
 }
 
-function cardBackImageUrl(side: Side): string {
-  return `/api/card-images/back_${side}`;
-}
-
 function formatCatalogTerm(value: string): string {
   if (value.toLowerCase() === "ice") return "ICE";
   return value
@@ -840,6 +839,20 @@ function sideLabel(side: Side): string {
   return side === "corp" ? "Corp" : "Runner";
 }
 
+function updateActionSlotCapacity(capacities: Record<Side, number>, side: Side, currentClicks: number, active: boolean, resetActiveSide: boolean): void {
+  const baseCapacity = baseActionSlotCapacity(side);
+  const safeClicks = Math.max(0, Math.floor(currentClicks));
+  if (active && resetActiveSide) {
+    capacities[side] = Math.max(baseCapacity, safeClicks);
+    return;
+  }
+  if (active) {
+    capacities[side] = Math.max(capacities[side] ?? baseCapacity, safeClicks);
+    return;
+  }
+  if (safeClicks > (capacities[side] ?? baseCapacity)) capacities[side] = safeClicks;
+}
+
 function centralServerCardCount(view: PlayerView, serverId: PlayerView["servers"][number]["id"]): number | null {
   switch (serverId) {
     case "hq":
@@ -959,12 +972,17 @@ export default function Page() {
   const [audioMenuOpen, setAudioMenuOpen] = useState(false);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
+  const [actionSlotCapacities, setActionSlotCapacities] = useState<Record<Side, number>>({
+    runner: baseActionSlotCapacity("runner"),
+    corp: baseActionSlotCapacity("corp")
+  });
   const [recentSession, setRecentSession] = useState<RecentSessionInfo | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
+  const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1234,6 +1252,23 @@ export default function Page() {
     if (!selectedActionContext) return;
     if (!activeView || payload?.winner || !actionContextStillVisible(selectedActionContext, activeView)) setSelectedActionContext(null);
   }, [activeView, payload?.winner, selectedActionContext]);
+
+  useEffect(() => {
+    if (!payload || !activeView) return;
+    const ownSide = activeView.side;
+    const opponent = opponentSide(ownSide);
+    const turnKey = { matchId: payload.matchId, activeSide: activeView.activeSide };
+    const previousTurnKey = lastActionSlotTurnRef.current;
+    const resetActiveSide = !previousTurnKey || previousTurnKey.matchId !== turnKey.matchId || previousTurnKey.activeSide !== turnKey.activeSide;
+    lastActionSlotTurnRef.current = turnKey;
+
+    setActionSlotCapacities((current) => {
+      const next = { ...current };
+      updateActionSlotCapacity(next, ownSide, activeView.own.clicks, activeView.activeSide === ownSide, resetActiveSide);
+      updateActionSlotCapacity(next, opponent, activeView.opponent.clicks, activeView.activeSide === opponent, resetActiveSide);
+      return next.runner === current.runner && next.corp === current.corp ? current : next;
+    });
+  }, [activeView?.activeSide, activeView?.own.clicks, activeView?.opponent.clicks, activeView?.side, payload?.matchId, payload?.playerView.stateVersion]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -2582,7 +2617,12 @@ export default function Page() {
 
       <div className="main">
         <aside className="column panel sidePanel">
-          <OpponentPanel view={activeView} connected={payload.opponentStatus.connected} {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})} />
+          <OpponentPanel
+            view={activeView}
+            connected={payload.opponentStatus.connected}
+            actionCapacity={actionSlotCapacities[opponentSide(activeView.side)]}
+            {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})}
+          />
           <AiPacingControls
             presentation={payload.aiTurnPresentation}
             mode={localAiPacingMode}
@@ -2704,11 +2744,8 @@ export default function Page() {
         </section>
 
         <aside className="log panel rightRail">
-          <section className="section">
-            <CardDisplaySettings mode={cardDisplayMode} onChange={setCardDisplayMode} compact />
-          </section>
-          <CardPreviewPanel card={enrichedPreviewCard} displayMode={cardDisplayMode} {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})} />
-          <PlayerPanel view={activeView} title={sideLabel(activeView.side)} />
+          <CardPreviewPanel card={enrichedPreviewCard} displayMode={cardDisplayMode} onDisplayMode={setCardDisplayMode} {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})} />
+          <PlayerPanel view={activeView} title={sideLabel(activeView.side)} actionCapacity={actionSlotCapacities[activeView.side]} />
           <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocusCard={focusCard} />
           <section className="section">
             <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
@@ -3236,23 +3273,29 @@ function CardDisplaySettings({ mode, onChange, compact = false }: { mode: CardDi
   return (
     <div className={`cardDisplaySettings ${compact ? "compact" : ""}`}>
       <div>
-        <span className="settingsTitle">Card Display</span>
+        <span className="settingsTitle">Kartenanzeige</span>
         {!compact ? <span className="meta">Lokale Anzeigeoption, kein Match-State</span> : null}
       </div>
-      <div className="segmented" role="group" aria-label="Card Display Mode">
-        <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus" aria-label="Bildmodus">
-          <Image size={15} />
-          {!compact ? "Bild" : null}
-        </button>
-        <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Text-Fallback mit Regeltext auf der Karte" aria-label="Text-Fallback">
-          <Keyboard size={15} />
-          {!compact ? "Text" : null}
-        </button>
-        <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompakte Karten mit Regeltext im Tooltip" aria-label="Kompakte Karten">
-          <ZoomIn size={15} />
-          {!compact ? "Kompakt" : null}
-        </button>
-      </div>
+      <CardDisplayModeSelector mode={mode} onChange={onChange} iconOnly={compact} />
+    </div>
+  );
+}
+
+function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: CardDisplayMode; onChange(value: CardDisplayMode): void; iconOnly?: boolean }) {
+  return (
+    <div className={`segmented cardDisplaySelector ${iconOnly ? "iconOnlySelector" : ""}`} role="group" aria-label="Kartenanzeige">
+      <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus" aria-label="Bildmodus">
+        <Image size={15} />
+        {!iconOnly ? "Bild" : <span className="srOnly">Bild</span>}
+      </button>
+      <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Textmodus ohne große leere Bildfläche" aria-label="Textmodus">
+        <Keyboard size={15} />
+        {!iconOnly ? "Text" : <span className="srOnly">Text</span>}
+      </button>
+      <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompaktmodus mit Regeltext per Tooltip oder Fokus" aria-label="Kompaktmodus">
+        <ZoomIn size={15} />
+        {!iconOnly ? "Kompakt" : <span className="srOnly">Kompakt</span>}
+      </button>
     </div>
   );
 }
@@ -3289,7 +3332,7 @@ function BoardPreview({ displayMode }: { displayMode: CardDisplayMode }) {
     { instanceId: "preview-hidden", known: false }
   ];
   return (
-    <div className="boardPreview" aria-label="Board Preview">
+    <div className="boardPreview" aria-label="Board-Vorschau">
       {previewCards.map((card) => (
         <CardView key={card.instanceId} card={card} displayMode={displayMode} compact hiddenSide="corp" />
       ))}
@@ -3568,7 +3611,8 @@ function LegalActionsPanel({
             {groupActions.map((action) => (
               <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled}>
                 <Play size={15} />
-                {actionButtonLabel(action)}
+                <span className="actionButtonLabel">{actionButtonLabel(action)}</span>
+                <CostChips action={action} />
               </button>
             ))}
           </div>
@@ -3584,7 +3628,8 @@ function LegalActionsPanel({
             {contextualActions.map((action) => (
               <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled}>
                 <Play size={15} />
-                {actionButtonLabel(action)}
+                <span className="actionButtonLabel">{actionButtonLabel(action)}</span>
+                <CostChips action={action} />
               </button>
             ))}
             {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
@@ -3595,6 +3640,21 @@ function LegalActionsPanel({
         {primaryActions.length === 0 && !selectedContext ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
     </section>
+  );
+}
+
+function CostChips({ action }: { action: LegalAction }) {
+  const chips = actionCostChips(action);
+  if (chips.length === 0) return null;
+  return (
+    <span className="costChips" aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`}>
+      {chips.map((chip) => (
+        <span className={`costChip ${chip.kind}`} key={`${chip.kind}-${chip.amount}`}>
+          <span className={chip.kind === "action" ? "costActionIcon" : "costCreditIcon"} aria-hidden="true" />
+          {chip.label}
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -3638,31 +3698,32 @@ function UndoPanel({
   );
 }
 
-function CardPreviewPanel({ card, displayMode, hiddenSide }: { card: DisplayVisibleCard | null; displayMode: CardDisplayMode; hiddenSide?: Side }) {
-  const showSupplementalDetails = Boolean(card?.known && (displayMode === "compact" || (displayMode === "placeholder" && card.imageUrl)));
+function CardPreviewPanel({
+  card,
+  displayMode,
+  onDisplayMode,
+  hiddenSide
+}: {
+  card: DisplayVisibleCard | null;
+  displayMode: CardDisplayMode;
+  onDisplayMode(value: CardDisplayMode): void;
+  hiddenSide?: Side;
+}) {
   return (
     <section className="section cardPreviewPanel">
-      <div className="sectionTitleLine">
-        <h2>Preview</h2>
-        <Eye size={16} />
+      <div className="previewTitleLine">
+        <div>
+          <h2>Vorschau</h2>
+          <p className="meta">Kartenanzeige</p>
+        </div>
+        <CardDisplayModeSelector mode={displayMode} onChange={onDisplayMode} iconOnly />
       </div>
       {card ? (
-        <>
+        <div className={`previewModeShell mode-${displayMode}`}>
           <CardView card={card} displayMode={displayMode} {...(hiddenSide ? { hiddenSide } : {})} preview />
-          {showSupplementalDetails ? (
-            <>
-              <p className="meta">{[card.type, card.subtypes?.join(" / "), card.strength !== undefined ? `Stärke ${card.strength}` : ""].filter(Boolean).join(" · ")}</p>
-              {card.rulesText ? (
-                <div className="cardRulesDetail">
-                  <strong>Regeltext</strong>
-                  <span>{card.rulesText}</span>
-                </div>
-              ) : null}
-            </>
-          ) : null}
-        </>
+        </div>
       ) : (
-        <p className="meta">Fokussiere eine bekannte Karte.</p>
+        <p className="meta">Wähle eine Karte für die Vorschau.</p>
       )}
     </section>
   );
@@ -4599,14 +4660,14 @@ function ConnectionBadge({ text, state }: { text: string; state: "offline" | "co
   return <span className={`connection ${state}`}>{text}</span>;
 }
 
-function OpponentPanel({ view, connected, displayName }: { view: PlayerView; connected: boolean; displayName?: string }) {
+function OpponentPanel({ view, connected, displayName, actionCapacity }: { view: PlayerView; connected: boolean; displayName?: string; actionCapacity: number }) {
   const side = opponentSide(view.side);
   return (
     <section className="section">
       <h2>{displayName ? `${displayName} · ${sideLabel(side)}` : sideLabel(side)}</h2>
       <div className="stats">
-        <Stat label="Credits" value={view.opponent.credits} />
-        <Stat label="Clicks" value={view.opponent.clicks} />
+        <CreditBadge credits={view.opponent.credits} />
+        <ActionSlotMeter side={side} currentClicks={view.opponent.clicks} displayCapacity={actionCapacity} active={view.activeSide === side} compact />
         <Stat label="Agenda" value={view.opponent.agendaPoints} />
         {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} /> : null}
       </div>
@@ -4615,14 +4676,14 @@ function OpponentPanel({ view, connected, displayName }: { view: PlayerView; con
   );
 }
 
-function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
+function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title: string; actionCapacity: number }) {
   const visibleTags = view.side === "runner" ? view.own.tags : view.opponent.tags;
   return (
     <section className="section">
       <h2>{title}</h2>
       <div className="stats">
-        <Stat label="Credits" value={view.own.credits} />
-        <Stat label="Clicks" value={view.own.clicks} />
+        <CreditBadge credits={view.own.credits} />
+        <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={view.activeSide === view.side} />
         <Stat label="Agenda" value={view.own.agendaPoints} />
         <Stat label="Tags" value={visibleTags} />
       </div>
@@ -4634,6 +4695,35 @@ function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
       ) : null}
       <p className="meta statusLine">{view.activeSide === view.side ? "Aktiv" : "Wartet"} · {view.timingPoint}</p>
     </section>
+  );
+}
+
+function ActionSlotMeter({ side, currentClicks, displayCapacity, active, compact = false }: { side: Side; currentClicks: number; displayCapacity: number; active: boolean; compact?: boolean }) {
+  const display = actionSlotDisplay(side, currentClicks, displayCapacity, active);
+  return (
+    <div className={`stat resourceStat actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`}>
+      <div className="resourceStatTop">
+        <strong>{display.available}</strong>
+        <span>Aktionen</span>
+      </div>
+      <div className="actionSlots" aria-hidden="true">
+        {display.slots.map((slot) => (
+          <span className={`actionSlot ${slot.state} ${slot.bonus ? "bonus" : ""}`} key={slot.index} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CreditBadge({ credits }: { credits: number }) {
+  return (
+    <div className="stat resourceStat creditResource" aria-label={`${credits} Credits`}>
+      <div className="resourceStatTop">
+        <span className="creditCoin" aria-hidden="true" />
+        <strong>{credits}</strong>
+      </div>
+      <span>Credits</span>
+    </div>
   );
 }
 
@@ -4650,8 +4740,8 @@ function SimulationResult({ summary }: { summary: AiSimulationSummary }) {
   return (
     <div className="simulationResult">
       <div className="stats">
-        <Stat label="Actions" value={summary.actions} />
-        <Stat label="Turns" value={summary.turns} />
+        <Stat label="Aktionen" value={summary.actions} />
+        <Stat label="Züge" value={summary.turns} />
       </div>
       <p className="meta statusLine">
         {summary.winner === "action_limit_reached" ? "Limit erreicht" : `${summary.winner === "runner" ? "Runner" : summary.winner === "corp" ? "Corp" : "Draw"} gewinnt`}
@@ -4695,8 +4785,11 @@ function CardView({
   const tooltipId = card.known && card.rulesText ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
   const nativeTitle = tooltipId ? undefined : tooltipText;
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
-  const cardBackUrl = !card.known && displayMode === "placeholder" && hiddenSide ? cardBackImageUrl(hiddenSide) : undefined;
-  const visualImageUrl = cardImageUrl ?? cardBackUrl;
+  const visualImageUrl = cardImageUrl;
+  const showArtBlock = !visualImageUrl && displayMode === "placeholder";
+  const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
+  const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
+  const showRulesPreview = !visualImageUrl && card.known && card.rulesText && !isCompact;
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
 
   const updateTooltipPlacement = () => {
@@ -4730,14 +4823,14 @@ function CardView({
       aria-describedby={tooltipId}
       title={nativeTitle}
     >
-      {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : <span className="cardArt" aria-hidden="true" />}
+      {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
+      {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
       {installedState === "unrezzed" ? <span className="rezChip unrezzed">Ungerezzt</span> : null}
       {installedState === "rezzed" ? <span className="rezChip rezzed">Gerezzt</span> : null}
       {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
-      {!visualImageUrl && !isCompact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Redacted"}</span> : null}
-      {!visualImageUrl && card.known && card.rulesText ? <span className="cardRulesPreview">{card.rulesText}</span> : null}
+      {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
+      {showRulesPreview ? <span className="cardRulesPreview">{card.rulesText}</span> : null}
       {!visualImageUrl && card.known && card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
-      {!visualImageUrl && card.known && card.strength !== undefined ? <span className="cardMeta">Stärke {card.strength}</span> : null}
       {card.known && card.rulesText ? (
         <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
           <strong>{card.title}</strong>

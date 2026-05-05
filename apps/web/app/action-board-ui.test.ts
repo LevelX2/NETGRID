@@ -3,7 +3,9 @@ import type { LegalAction, PlayerView, Side, VisibleCard } from "@netrunner/shar
 import {
   DEFAULT_CUE_POSITION,
   actionButtonLabel,
+  actionCostChips,
   actionMatchesContext,
+  actionSlotDisplay,
   breachProgressLabel,
   clampCuePosition,
   corpInstalledCardState,
@@ -82,6 +84,46 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(parseCuePositionPreference(JSON.stringify({ kind: "preset", preset: "center" }))).toEqual({ kind: "preset", preset: "center" });
     expect(parseCuePositionPreference("{bad json")).toEqual(DEFAULT_CUE_POSITION);
     expect(clampCuePosition(98, 98, 400, 300, 180, 120)).toEqual({ kind: "custom", xPercent: 52, yPercent: 56 });
+  });
+});
+
+describe("V1.0.6 resource and card-display helpers", () => {
+  it("renders action slot states for normal Runner, Corp and spent-action cases", () => {
+    const runnerStart = actionSlotDisplay("runner", 4, 4, true);
+    expect(runnerStart.label).toBe("4 Aktionen");
+    expect(runnerStart.slots).toHaveLength(4);
+    expect(runnerStart.slots.every((slot) => slot.state === "available")).toBe(true);
+
+    const runnerAfterAction = actionSlotDisplay("runner", 3, 4, true);
+    expect(runnerAfterAction.spent).toBe(1);
+    expect(runnerAfterAction.slots.map((slot) => slot.state)).toEqual(["spent", "available", "available", "available"]);
+
+    const corpStart = actionSlotDisplay("corp", 3, 3, true);
+    expect(corpStart.slots).toHaveLength(3);
+    expect(corpStart.spent).toBe(0);
+  });
+
+  it("keeps off-turn and bonus-action displays conservative and local", () => {
+    const offTurn = actionSlotDisplay("runner", 0, 4, false);
+    expect(offTurn.label).toBe("0 Aktionen");
+    expect(offTurn.slots).toEqual([]);
+
+    const bonus = actionSlotDisplay("runner", 5, 4, true);
+    expect(bonus.capacity).toBe(5);
+    expect(bonus.slots.filter((slot) => slot.bonus)).toHaveLength(1);
+    expect(bonus.slots.every((slot) => slot.state === "available")).toBe(true);
+  });
+
+  it("formats action and credit costs as user-facing chips", () => {
+    expect(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] })).toEqual([
+      { kind: "action", amount: 1, label: "1 Aktion" },
+      { kind: "credit", amount: 2, label: "2 Credits" }
+    ]);
+    expect(actionCostChips({ costs: [{ clicks: 3 }, { credits: 1 }] })).toEqual([
+      { kind: "action", amount: 3, label: "3 Aktionen" },
+      { kind: "credit", amount: 1, label: "1 Credit" }
+    ]);
+    expect(JSON.stringify(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] }))).not.toContain("{ clicks");
   });
 });
 
