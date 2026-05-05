@@ -56,10 +56,10 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("resultSummary.sessionToken");
   });
 
-  it("keeps the V1.0.4 matchstart lobby and lifecycle recovery explicit without adding browser authority", () => {
+  it("keeps the V1.0.5 matchstart lobby and lifecycle recovery explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.4"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.5"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
@@ -78,13 +78,13 @@ describe("Client visibility contract", () => {
     expect(page).toContain("Zielwert {start.agendaPointsToWin} Agenda-Punkte");
     expect(page).toContain("Agenda-Punkte, die für den Spielsieg erreicht werden müssen.");
     expect(page).toContain("LobbyChatMessage");
-    expect(page).toContain("serverLabelFromId");
-    expect(page).toContain('if (serverId === "hq") return "HQ"');
+    expect(page).toContain("serverDisplayLabel");
+    expect(readFileSync("apps/web/app/action-board-ui.ts", "utf8")).toContain('if (serverIdOrLabel === "hq" || serverIdOrLabel === "HQ") return "HQ"');
     expect(page).toContain("netrunner.displayName");
     expect(page).toContain("netrunner.recentSessions");
     expect(page).toContain("Letzte Sitzung");
     expect(page).toContain("Fortsetzen");
-    expect(page).toContain("Reconnect über Link");
+    expect(page).toContain("Wieder verbinden über Link");
     expect(page).toContain("Verwerfen");
     expect(page).toContain("storedSessionMatches");
     expect(page).toContain("safeRecentSession");
@@ -137,6 +137,45 @@ describe("Client visibility contract", () => {
     expect(page).toContain("opponentAgendaPoints");
     expect(page).not.toContain("applyAction(");
     expect(page).not.toContain("createGame(");
+  });
+
+  it("keeps the V1.0.5 active board UI presentational and side-safe", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    const helpers = readFileSync("apps/web/app/action-board-ui.ts", "utf8");
+    const styles = readFileSync("apps/web/app/globals.css", "utf8");
+
+    expect(page).toContain("Mögliche Aktionen");
+    expect(page).toContain("Zurücknehmen");
+    expect(page).toContain("Letzte Aktion anfragen");
+    expect(page).toContain("Wieder verbinden");
+    expect(page).toContain("Getaktet");
+    expect(page).toContain("Einzelschritt");
+    expect(page).toContain("KI-Schritt");
+    expect(page).toContain("activeRunTarget");
+    expect(page).toContain("installedCorpCard");
+    expect(page).toContain("Ungerezzt");
+    expect(page).toContain("Gerezzt");
+    expect(page).toContain("cuePositionClassName");
+    expect(page).toContain("cueDragHandle");
+    expect(page).not.toContain("<BoardHeader");
+    expect(page).not.toContain("function BoardHeader");
+    expect(page).not.toContain("<h2>LegalActions</h2>");
+    expect(page).not.toContain("<h2>Undo</h2>");
+    expect(page).not.toContain("Runner View");
+    expect(page).not.toContain("Corp View");
+    expect(page).not.toContain("Dein Fenster");
+    expect(page).not.toContain('<p className="eyebrow">Access</p>');
+    expect(helpers).toContain("netrunner.actionCuePosition.v1");
+    expect(helpers).toContain("Ausgewählte Karte");
+    expect(helpers).toContain("Ausgewähltes Objekt");
+    expect(helpers).toContain("splitLegalActions");
+    expect(helpers).toContain("runTargetServerIds");
+    expect(helpers).toContain("groupRunnerRigCards");
+    expect(helpers).toContain("corpInstalledCardState");
+    expect(styles).toContain(".activeRunTarget");
+    expect(styles).toContain(".unrezzedInstalled");
+    expect(styles).toContain(".selectedActionGroup");
+    expect(styles).toContain(".cuePosition-center");
   });
 
   it("renders the player chronicle without normal-mode technical event metadata", () => {

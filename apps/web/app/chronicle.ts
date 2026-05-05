@@ -141,7 +141,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       category = context.cardType === "asset" || context.cardType === "upgrade" ? "card" : "run";
       title = phrase(subject, `${cardTitle ?? "eine Karte"} gerezzt${rezSuffix(context.cardType, effect)}`);
       chips.push("Rez", ...effect.chips);
-      if (context.cardType === "ice" || cardTitle?.includes("ICE")) chips.push("Encounter");
+      if (context.cardType === "ice" || cardTitle?.includes("ICE")) chips.push("Begegnung");
       break;
     case "decline_rez":
       category = "run";
@@ -167,7 +167,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       category = "run";
       importance = "important";
       title = phrase(subject, `auf ${cardTitle ?? "eine Karte"} zugegriffen`);
-      chips.push("Access", ...(serverLabel ? [serverLabel] : []));
+      chips.push("Zugriff", ...(serverLabel ? [serverLabel] : []));
       break;
     case "steal_agenda": {
       category = "agenda";
@@ -192,7 +192,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     case "decline_trash":
       category = "run";
       title = phrase(subject, "den Zugriff abgeschlossen");
-      chips.push("Access");
+      chips.push("Zugriff");
       break;
     case "remove_tag":
       category = "danger";
@@ -287,7 +287,7 @@ function summarizeEffect(cardText: string | undefined): EffectSummary {
 
 function rezSuffix(cardType: string | null | undefined, effect: EffectSummary): string {
   if (effect.suffix) return ` und ${effect.suffix}`;
-  if (cardType === "ice") return ". Der Encounter beginnt";
+  if (cardType === "ice") return ". Die Begegnung beginnt";
   return "";
 }
 
@@ -354,10 +354,10 @@ function isGenericCardLabel(value: string): boolean {
 
 function runPhaseLabel(phase: string): string {
   const labels: Record<string, string> = {
-    approach_ice: "Approach",
-    encounter_ice: "Encounter",
-    break: "Break",
-    access: "Access",
+    approach_ice: "Annäherung",
+    encounter_ice: "Begegnung",
+    break: "Brechen",
+    access: "Zugriff",
     complete: "Abschluss"
   };
   return labels[phase] ?? phase;

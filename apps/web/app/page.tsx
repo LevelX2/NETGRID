@@ -35,6 +35,7 @@ import {
   ZoomIn
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
 import {
   CHRONICLE_CATEGORY_LABELS,
@@ -50,6 +51,32 @@ import {
   type BoardHighlight,
   type OpponentActionCue
 } from "./action-cues";
+import {
+  ACTION_CUE_POSITION_STORAGE_KEY,
+  DEFAULT_CUE_POSITION,
+  RUN_TIMELINE_STEPS,
+  actionButtonLabel,
+  actionContextStillVisible,
+  actionContextTitle,
+  actionGroupLabel,
+  actionMatchesContext,
+  breachProgressLabel,
+  clampCuePosition,
+  corpInstalledCardState,
+  cuePositionClassName,
+  cuePositionStyle,
+  groupRunnerRigCards,
+  hasLegalAction,
+  parseCuePositionPreference,
+  runTargetServerIds,
+  serializeCuePositionPreference,
+  serverDisplayLabel,
+  splitLegalActions,
+  currentRunTimelineStep,
+  type ActionContext,
+  type CuePositionPreference,
+  type CuePositionPreset
+} from "./action-board-ui";
 import {
   deriveMatchStart,
   humanAiSideLabel,
@@ -72,7 +99,7 @@ const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Shield;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
-const APP_STATUS_LABEL = "V1.0.4";
+const APP_STATUS_LABEL = "V1.0.5";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -828,7 +855,7 @@ function centralServerCardCount(view: PlayerView, serverId: PlayerView["servers"
 
 function serverHighlighted(highlight: BoardHighlight | null, serverId: string): boolean {
   if (!highlight) return false;
-  if (highlight.kind === "server" || highlight.kind === "run") return !highlight.serverId || highlight.serverId === serverId;
+  if (highlight.kind === "server" || highlight.kind === "run") return Boolean(highlight.serverId && highlight.serverId === serverId);
   return false;
 }
 
@@ -930,6 +957,8 @@ export default function Page() {
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
   const [audioMenuOpen, setAudioMenuOpen] = useState(false);
+  const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
+  const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
   const [recentSession, setRecentSession] = useState<RecentSessionInfo | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
   const resultAudioPrimedRef = useRef(false);
@@ -1036,6 +1065,14 @@ export default function Page() {
   useEffect(() => {
     window.localStorage.setItem(AUDIO_STORAGE_KEY, JSON.stringify({ enabled: audioEnabled, volume: audioVolume }));
   }, [audioEnabled, audioVolume]);
+
+  useEffect(() => {
+    setCuePosition(parseCuePositionPreference(window.localStorage.getItem(ACTION_CUE_POSITION_STORAGE_KEY)));
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(ACTION_CUE_POSITION_STORAGE_KEY, serializeCuePositionPreference(cuePosition));
+  }, [cuePosition]);
 
   useEffect(() => {
     if (!session) return;
@@ -1174,6 +1211,10 @@ export default function Page() {
   const enrichCard = (card: VisibleCard) => enrichVisibleCard(card, catalogDetailsById);
   const enrichedPreviewCard = previewCard ? enrichCard(previewCard) : null;
   const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) => setFocusedCard({ card, ...(hiddenSide ? { hiddenSide } : {}) });
+  const selectActionCard = (card: DisplayVisibleCard, hiddenSide?: Side) => {
+    focusCard(card, hiddenSide);
+    if (card.known) setSelectedActionContext({ kind: "card", id: card.instanceId, label: card.title ?? "Karte" });
+  };
   const accessReveal = payload ? accessRevealFromLatestEvent(payload.eventTail.at(-1), catalogDetailsById, payload.legalActions) : null;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const resultSummary = payload?.resultSummary ?? null;
@@ -1183,8 +1224,16 @@ export default function Page() {
   const canForfeit = Boolean(payload && payload.matchStatus === "active" && !payload.winner);
   const activeCueHighlight = currentActionCue?.highlight ?? null;
   const hasDecisionCue = Boolean(currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length));
+  const legalActionSplit = useMemo(() => splitLegalActions(payload?.legalActions ?? []), [payload?.legalActions]);
+  const selectedContextActions = selectedActionContext ? legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, selectedActionContext)) : [];
+  const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
   const effectiveCurrentCorpSnapshot = currentCorpSnapshotForSetup();
   const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCurrentCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
+
+  useEffect(() => {
+    if (!selectedActionContext) return;
+    if (!activeView || payload?.winner || !actionContextStillVisible(selectedActionContext, activeView)) setSelectedActionContext(null);
+  }, [activeView, payload?.winner, selectedActionContext]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -1534,7 +1583,7 @@ export default function Page() {
       setPayload(fromJoinedResponse(reconnected));
       setLobby(null);
     }
-    setNotice("Reconnect abgeschlossen.");
+    setNotice("Wiederverbindung abgeschlossen.");
   };
 
   function applyRemotePayload(remotePayload: ClientPayload | LobbyClientPayload) {
@@ -1564,7 +1613,7 @@ export default function Page() {
       setMode("join");
       setJoinMatchId(recentSession.matchId);
       setJoinToken("");
-      setNotice("Fortsetzen braucht ein Token aus diesem Tab. Für Reconnect bitte den Link oder Token erneut eintragen.");
+      setNotice("Fortsetzen braucht ein Token aus diesem Tab. Für die Wiederverbindung bitte den Link oder Token erneut eintragen.");
       return;
     }
     setSession(nextSession);
@@ -1590,7 +1639,7 @@ export default function Page() {
     setMode("join");
     setJoinMatchId(recentSession.matchId);
     setJoinToken("");
-    setNotice("Reconnect vorbereitet. Bitte den aktuellen Join- oder Reconnect-Token eintragen.");
+    setNotice("Wiederverbindung vorbereitet. Bitte den aktuellen Join- oder Wiederverbindungs-Token eintragen.");
   };
 
   const discardRecentSession = () => {
@@ -1602,6 +1651,7 @@ export default function Page() {
 
   const submitAction = (action: LegalAction) => {
     if (!session || !payload || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    if (selectedActionContext && actionMatchesContext(action, selectedActionContext)) setSelectedActionContext(null);
     socketRef.current.send(
       JSON.stringify({
         type: "submit_action",
@@ -2180,7 +2230,7 @@ export default function Page() {
                 </button>
                 <button className="button" onClick={reconnectFromRecentSession} type="button">
                   <Link2 size={15} />
-                  Reconnect über Link
+                  Wieder verbinden über Link
                 </button>
                 <button className="button" onClick={discardRecentSession} type="button">
                   <Trash2 size={15} />
@@ -2499,9 +2549,9 @@ export default function Page() {
               Link
             </button>
           ) : null}
-          <button className="button" onClick={reconnect} disabled={!canReconnect} title="Reconnect">
+          <button className="button" onClick={reconnect} disabled={!canReconnect} title="Wieder verbinden">
             <Cable size={16} />
-            Reconnect
+            Wieder verbinden
           </button>
           <button className="button dangerButton" onClick={forfeitMatch} disabled={!canForfeit} title="Spiel aufgeben">
             <Flag size={16} />
@@ -2522,7 +2572,13 @@ export default function Page() {
         <span>State {activeView.stateVersion}</span>
         <span>{notice}</span>
       </div>
-      <OpponentActionOverlay cue={currentActionCue} queued={actionCueQueue.length} onDismiss={() => setCurrentActionCue(null)} />
+      <OpponentActionOverlay
+        cue={currentActionCue}
+        queued={actionCueQueue.length}
+        position={cuePosition}
+        onPosition={setCuePosition}
+        onDismiss={() => setCurrentActionCue(null)}
+      />
 
       <div className="main">
         <aside className="column panel sidePanel">
@@ -2534,14 +2590,29 @@ export default function Page() {
             onMode={setLocalAiPacingMode}
             onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
           />
-          <LegalActionsPanel actions={payload.legalActions} disabled={Boolean(payload.winner) || connection !== "online"} highlighted={hasDecisionCue} onAction={submitAction} />
+          <LegalActionsPanel
+            primaryActions={legalActionSplit.primaryActions}
+            contextualActions={selectedContextActions}
+            selectedContext={selectedActionContext}
+            hasHiddenContextActions={legalActionSplit.contextualActions.length > 0}
+            disabled={Boolean(payload.winner) || connection !== "online"}
+            highlighted={hasDecisionCue}
+            onAction={submitAction}
+            onClearContext={() => setSelectedActionContext(null)}
+          />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
         </aside>
 
         <section className="board boardPanel">
-          <BoardHeader view={activeView} highlighted={hasDecisionCue} />
-          <RunnerRigStrip view={activeView} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocus={focusCard} />
-          <RunTimeline view={activeView} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} />
+          <RunnerRigStrip
+            view={activeView}
+            cardDetailsById={catalogDetailsById}
+            displayMode={cardDisplayMode}
+            selectedContext={selectedActionContext}
+            onFocus={focusCard}
+            onActionContext={selectActionCard}
+          />
+          <RunTimeline view={activeView} legalActions={payload.legalActions} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} />
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -2554,15 +2625,37 @@ export default function Page() {
             {activeView.servers.map((server) => {
               const cardCount = centralServerCardCount(activeView, server.id);
               return (
-                <article className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""}`} key={server.id}>
+                <article
+                  className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
+                  key={server.id}
+                >
                   <h3 className="serverTitle">
-                    <span>{server.label}</span>
+                    <button className="serverContextButton" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
+                      {serverDisplayLabel(server.id)}
+                    </button>
                     {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
                   </h3>
                   {serverLanesForSide(activeView.side, server).map((lane) => (
                     <div className="serverLaneGroup" key={lane.label}>
                       <div className="laneLabel">{lane.label}</div>
-                      <div className="lane">{lane.cards.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} compact displayMode={cardDisplayMode} hiddenSide="corp" onFocus={focusCard} />)}</div>
+                      <div className="lane">
+                        {lane.cards.map((card) => {
+                          const displayCard = enrichCard(card);
+                          return (
+                            <CardView
+                              key={card.instanceId}
+                              card={displayCard}
+                              compact
+                              displayMode={cardDisplayMode}
+                              hiddenSide="corp"
+                              installedCorpCard
+                              selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                              onFocus={focusCard}
+                              onActionContextSelect={selectActionCard}
+                            />
+                          );
+                        })}
+                      </div>
                     </div>
                   ))}
                 </article>
@@ -2572,12 +2665,41 @@ export default function Page() {
           {activeView.own.rig ? (
             <section className="section panel boardSection">
               <h2>Rig</h2>
-              <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>{activeView.own.rig.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} onFocus={focusCard} />)}</div>
+              <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>
+                {activeView.own.rig.map((card) => {
+                  const displayCard = enrichCard(card);
+                  return (
+                    <CardView
+                      key={card.instanceId}
+                      card={displayCard}
+                      displayMode={cardDisplayMode}
+                      selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                      onFocus={focusCard}
+                      onActionContextSelect={selectActionCard}
+                    />
+                  );
+                })}
+              </div>
             </section>
           ) : null}
           <section className="section panel boardSection">
             <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
-            <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, activeView.side === "runner" ? "grip" : "hq") ? "cueHighlightSoft" : ""}`}>{activeView.own.gripOrHq.map((card) => <CardView key={card.instanceId} card={enrichCard(card)} displayMode={cardDisplayMode} hiddenSide={activeView.side} onFocus={focusCard} />)}</div>
+            <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, activeView.side === "runner" ? "grip" : "hq") ? "cueHighlightSoft" : ""}`}>
+              {activeView.own.gripOrHq.map((card) => {
+                const displayCard = enrichCard(card);
+                return (
+                  <CardView
+                    key={card.instanceId}
+                    card={displayCard}
+                    displayMode={cardDisplayMode}
+                    hiddenSide={activeView.side}
+                    selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                    onFocus={focusCard}
+                    onActionContextSelect={selectActionCard}
+                  />
+                );
+              })}
+            </div>
           </section>
         </section>
 
@@ -2837,7 +2959,7 @@ function AccessRevealModal({
       <section className="accessRevealPanel">
         <div className="accessRevealHeader">
           <div>
-            <p className="eyebrow">Access</p>
+            <p className="eyebrow">Zugriff</p>
             <h2 id="access-reveal-title">Zugriff auf {reveal.serverLabel}</h2>
             <p>Du hast auf eine Karte in {reveal.serverLabel} zugegriffen.</p>
           </div>
@@ -3175,10 +3297,59 @@ function BoardPreview({ displayMode }: { displayMode: CardDisplayMode }) {
   );
 }
 
-function OpponentActionOverlay({ cue, queued, onDismiss }: { cue: OpponentActionCue | null; queued: number; onDismiss(): void }) {
+function OpponentActionOverlay({
+  cue,
+  queued,
+  position,
+  onPosition,
+  onDismiss
+}: {
+  cue: OpponentActionCue | null;
+  queued: number;
+  position: CuePositionPreference;
+  onPosition(position: CuePositionPreference): void;
+  onDismiss(): void;
+}) {
+  const overlayRef = useRef<HTMLElement | null>(null);
+  const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   if (!cue) return null;
+
+  const setPreset = (preset: CuePositionPreset) => onPosition({ kind: "preset", preset });
+  const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const rect = overlay.getBoundingClientRect();
+    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const dragCue = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const overlay = overlayRef.current;
+    const offset = dragOffsetRef.current;
+    if (!overlay || !offset) return;
+    const rect = overlay.getBoundingClientRect();
+    onPosition(
+      clampCuePosition(
+        ((event.clientX - offset.x) / window.innerWidth) * 100,
+        ((event.clientY - offset.y) / window.innerHeight) * 100,
+        window.innerWidth,
+        window.innerHeight,
+        rect.width,
+        rect.height
+      )
+    );
+  };
+  const stopDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    dragOffsetRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+
   return (
-    <aside className={`opponentCueOverlay importance-${cue.importance} visibility-${cue.visibility}`} aria-live="polite">
+    <aside
+      ref={overlayRef}
+      className={`opponentCueOverlay ${cuePositionClassName(position)} importance-${cue.importance} visibility-${cue.visibility}`}
+      style={cuePositionStyle(position)}
+      aria-live="polite"
+    >
       <div className="opponentCueIcon" aria-hidden="true">
         {cue.source === "ai" ? <Bot size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
       </div>
@@ -3188,9 +3359,41 @@ function OpponentActionOverlay({ cue, queued, onDismiss }: { cue: OpponentAction
         {cue.description ? <p>{cue.description}</p> : null}
       </div>
       {queued > 0 ? <small>{queued} weitere</small> : null}
+      <button
+        className="button iconOnly cueDragHandle"
+        onPointerDown={startDrag}
+        onPointerMove={dragCue}
+        onPointerUp={stopDrag}
+        onPointerCancel={stopDrag}
+        aria-label="Hinweis verschieben"
+        title="Hinweis verschieben"
+        type="button"
+      >
+        <SlidersHorizontal size={15} />
+      </button>
       <button className="button iconOnly" onClick={onDismiss} aria-label="Hinweis schließen" title="Hinweis schließen" type="button">
         <X size={15} />
       </button>
+      <div className="opponentCueControls">
+        <select
+          aria-label="Hinweisposition"
+          value={position.kind === "preset" ? position.preset : "custom"}
+          onChange={(event) => {
+            if (event.target.value === "custom") return;
+            setPreset(event.target.value as CuePositionPreset);
+          }}
+        >
+          <option value="top-right">Oben rechts</option>
+          <option value="top-left">Oben links</option>
+          <option value="bottom-right">Unten rechts</option>
+          <option value="bottom-left">Unten links</option>
+          <option value="center">Mitte</option>
+          {position.kind === "custom" ? <option value="custom">Eigene Position</option> : null}
+        </select>
+        <button className="button" onClick={() => setPreset("top-right")} type="button">
+          Zurücksetzen
+        </button>
+      </div>
     </aside>
   );
 }
@@ -3220,26 +3423,15 @@ function AiPacingControls({
       <div className="segmented aiPacingModes" role="group" aria-label="KI-Takt">
         {(["paced", "manual", "fast"] as const).map((value) => (
           <button className={mode === value ? "active" : ""} key={value} onClick={() => onMode(value)} type="button">
-            {value === "paced" ? "Takt" : value === "manual" ? "Schritt" : "Schnell"}
+            {value === "paced" ? "Getaktet" : value === "manual" ? "Einzelschritt" : "Schnell"}
           </button>
         ))}
       </div>
       <button className="button wide primary" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
         <Play size={15} />
-        KI fortsetzen
+        KI-Schritt
       </button>
     </section>
-  );
-}
-
-function BoardHeader({ view, highlighted = false }: { view: PlayerView; highlighted?: boolean }) {
-  return (
-    <div className={`boardHeader ${view.side} ${highlighted ? "cueHighlight" : ""}`}>
-      <div>
-        <p className="eyebrow">{view.side === "runner" ? "Runner View" : "Corp View"}</p>
-        <h2>{view.activeSide === view.side ? "Dein Fenster" : "Gegenseite aktiv"}</h2>
-      </div>
-    </div>
   );
 }
 
@@ -3247,27 +3439,49 @@ function RunnerRigStrip({
   view,
   cardDetailsById,
   displayMode,
-  onFocus
+  selectedContext,
+  onFocus,
+  onActionContext
 }: {
   view: PlayerView;
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
+  selectedContext: ActionContext | null;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
 }) {
   if (opponentSide(view.side) !== "runner") return null;
   const runnerRig = view.opponent.rig ?? [];
+  const groups = groupRunnerRigCards(runnerRig);
   return (
     <section className="runnerRigStrip">
       <div className="sectionTitleLine">
         <h2>Runner-Rig</h2>
         <RunIcon size={16} />
       </div>
-      {runnerRig.length > 0 ? (
-        <div className="cards miniCards">
-          {runnerRig.map((card) => {
-            const displayCard = enrichVisibleCard(card, cardDetailsById);
-            return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} onFocus={onFocus} />;
-          })}
+      {groups.length > 0 ? (
+        <div className="rigGroups">
+          {groups.map((group) => (
+            <div className="rigGroup" key={group.key}>
+              <h3>{group.label}</h3>
+              <div className="cards miniCards">
+                {group.cards.map((card) => {
+                  const displayCard = enrichVisibleCard(card, cardDetailsById);
+                  return (
+                    <CardView
+                      key={card.instanceId}
+                      card={displayCard}
+                      compact
+                      displayMode={displayMode}
+                      selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                      onFocus={onFocus}
+                      onActionContextSelect={onActionContext}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
         </div>
       ) : (
         <p className="meta">Keine installierten Runner-Karten.</p>
@@ -3276,34 +3490,39 @@ function RunnerRigStrip({
   );
 }
 
-function RunTimeline({ view, cardDetailsById, highlighted = false }: { view: PlayerView; cardDetailsById: Record<string, CatalogCardDetail>; highlighted?: boolean }) {
-  const phase = view.run?.phase;
+function RunTimeline({
+  view,
+  legalActions,
+  cardDetailsById,
+  highlighted = false
+}: {
+  view: PlayerView;
+  legalActions: LegalAction[];
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  highlighted?: boolean;
+}) {
+  const currentStep = currentRunTimelineStep(view, legalActions);
   const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
-  const steps = ["target", "approach_ice", "encounter_ice", "break", "access", "complete"] as const;
-  const labels: Record<(typeof steps)[number], string> = {
-    target: "Ziel",
-    approach_ice: "Approach",
-    encounter_ice: "Encounter",
-    break: "Break",
-    access: "Access",
-    complete: "Ergebnis"
-  };
+  const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
+  const breachProgress = breachProgressLabel(view);
   return (
     <div className={`runTimeline ${view.run ? "active" : ""} ${highlighted ? "cueHighlight" : ""}`}>
       <div className="runTimelineHead">
         <RunIcon size={18} />
-        <span>{view.run ? `Run auf ${serverLabelFromId(view.run.attackedServerId)}` : "Kein aktiver Run"}</span>
+        <span>{view.run ? `Run auf ${serverDisplayLabel(view.run.attackedServerId)}` : "Kein aktiver Run"}</span>
       </div>
       <div className="runSteps">
-        {steps.map((step) => (
-          <span className={phase === step || (!phase && step === "target") ? "current" : ""} key={step}>
-            {labels[step]}
+        {RUN_TIMELINE_STEPS.map((step) => (
+          <span className={currentStep === step.id ? "current" : ""} key={step.id}>
+            {step.label}
           </span>
         ))}
       </div>
+      {jackOutAvailable ? <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p> : null}
+      {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
       {encounteredIce ? (
         <div className="encounterFocus">
-          <span>Encounter</span>
+          <span>Begegnung</span>
           <strong>{encounteredIce.known ? [encounteredIce.title, encounteredIce.rulesText].filter(Boolean).join(" · ") : "Verdecktes ICE"}</strong>
         </div>
       ) : null}
@@ -3312,23 +3531,36 @@ function RunTimeline({ view, cardDetailsById, highlighted = false }: { view: Pla
 }
 
 function serverLabelFromId(serverId: string): string {
-  if (serverId === "hq") return "HQ";
-  if (serverId === "rd") return "R&D";
-  if (serverId === "archives") return "Archives";
-  const remote = /^remote_(\d+)$/.exec(serverId);
-  if (remote?.[1]) return `Remote ${remote[1]}`;
-  return serverId;
+  return serverDisplayLabel(serverId);
 }
 
-function LegalActionsPanel({ actions, disabled, highlighted = false, onAction }: { actions: LegalAction[]; disabled: boolean; highlighted?: boolean; onAction(action: LegalAction): void }) {
-  const grouped = actions.reduce<Record<string, LegalAction[]>>((acc, action) => {
-    const group = action.type.replaceAll("_", " ");
+function LegalActionsPanel({
+  primaryActions,
+  contextualActions,
+  selectedContext,
+  hasHiddenContextActions,
+  disabled,
+  highlighted = false,
+  onAction,
+  onClearContext
+}: {
+  primaryActions: LegalAction[];
+  contextualActions: LegalAction[];
+  selectedContext: ActionContext | null;
+  hasHiddenContextActions: boolean;
+  disabled: boolean;
+  highlighted?: boolean;
+  onAction(action: LegalAction): void;
+  onClearContext(): void;
+}) {
+  const grouped = primaryActions.reduce<Record<string, LegalAction[]>>((acc, action) => {
+    const group = actionGroupLabel(action.type);
     acc[group] = [...(acc[group] ?? []), action];
     return acc;
   }, {});
   return (
     <section className={`section ${highlighted ? "cueHighlight" : ""}`}>
-      <h2>LegalActions</h2>
+      <h2>Mögliche Aktionen</h2>
       <div className="actions">
         {Object.entries(grouped).map(([group, groupActions]) => (
           <div className="actionGroup" key={group}>
@@ -3336,12 +3568,31 @@ function LegalActionsPanel({ actions, disabled, highlighted = false, onAction }:
             {groupActions.map((action) => (
               <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled}>
                 <Play size={15} />
-                {action.label}
+                {actionButtonLabel(action)}
               </button>
             ))}
           </div>
         ))}
-        {actions.length === 0 ? <p className="meta">Keine Aktion im aktuellen Fenster.</p> : null}
+        {selectedContext ? (
+          <div className="actionGroup selectedActionGroup">
+            <div className="selectedActionTitle">
+              <span>{actionContextTitle(selectedContext)}</span>
+              <button className="button iconOnly" onClick={onClearContext} type="button" aria-label="Auswahl aufheben" title="Auswahl aufheben">
+                <X size={14} />
+              </button>
+            </div>
+            {contextualActions.map((action) => (
+              <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled}>
+                <Play size={15} />
+                {actionButtonLabel(action)}
+              </button>
+            ))}
+            {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
+          </div>
+        ) : hasHiddenContextActions ? (
+          <p className="meta">Wähle eine eigene Karte oder ein sichtbares Boardobjekt für weitere Aktionen.</p>
+        ) : null}
+        {primaryActions.length === 0 && !selectedContext ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
     </section>
   );
@@ -3362,10 +3613,10 @@ function UndoPanel({
 }) {
   return (
     <section className="section">
-      <h2>Undo</h2>
+      <h2>Zurücknehmen</h2>
       {pendingUndo?.needsResponse ? (
         <div className="undoBox">
-          <p className="meta">{pendingUndo.requestedBy === "runner" ? "Runner" : "Corp"} fragt Undo an.</p>
+          <p className="meta">{pendingUndo.requestedBy === "runner" ? "Runner" : "Corp"} fragt Zurücknehmen an.</p>
           <div className="splitButtons">
             <button className="button primary" onClick={() => onResolve(true)}>
               <Check size={15} />
@@ -3380,7 +3631,7 @@ function UndoPanel({
       ) : (
         <button className="button wide" onClick={onRequest} disabled={!latestEventId || connection !== "online"}>
           <RotateCcw size={15} />
-          Undo
+          Letzte Aktion anfragen
         </button>
       )}
     </section>
@@ -4419,14 +4670,20 @@ function CardView({
   preview = false,
   displayMode,
   hiddenSide,
-  onFocus
+  installedCorpCard = false,
+  selected = false,
+  onFocus,
+  onActionContextSelect
 }: {
   card: DisplayVisibleCard;
   compact?: boolean;
   preview?: boolean;
   displayMode: CardDisplayMode;
   hiddenSide?: Side;
+  installedCorpCard?: boolean;
+  selected?: boolean;
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
 }) {
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
@@ -4440,6 +4697,7 @@ function CardView({
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
   const cardBackUrl = !card.known && displayMode === "placeholder" && hiddenSide ? cardBackImageUrl(hiddenSide) : undefined;
   const visualImageUrl = cardImageUrl ?? cardBackUrl;
+  const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
 
   const updateTooltipPlacement = () => {
     const element = cardRef.current;
@@ -4457,15 +4715,24 @@ function CardView({
     <button
       ref={cardRef}
       type="button"
-      className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}`}
-      onClick={() => onFocus?.(card, hiddenSide)}
-      onFocus={updateTooltipPlacement}
+      className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${selected ? " selectedActionSource" : ""}`}
+      onClick={() => {
+        onFocus?.(card, hiddenSide);
+        if (card.known) onActionContextSelect?.(card, hiddenSide);
+      }}
+      onFocus={() => {
+        updateTooltipPlacement();
+        onFocus?.(card, hiddenSide);
+        if (card.known) onActionContextSelect?.(card, hiddenSide);
+      }}
       onPointerEnter={updateTooltipPlacement}
       aria-label={card.known ? `Karte ${card.title}` : "Verdeckte Karte"}
       aria-describedby={tooltipId}
       title={nativeTitle}
     >
       {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : <span className="cardArt" aria-hidden="true" />}
+      {installedState === "unrezzed" ? <span className="rezChip unrezzed">Ungerezzt</span> : null}
+      {installedState === "rezzed" ? <span className="rezChip rezzed">Gerezzt</span> : null}
       {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
       {!visualImageUrl && !isCompact ? <span className="cardMeta">{card.known ? [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ") : "Redacted"}</span> : null}
       {!visualImageUrl && card.known && card.rulesText ? <span className="cardRulesPreview">{card.rulesText}</span> : null}

@@ -1278,12 +1278,10 @@ select {
 
 .opponentCueOverlay {
   position: fixed;
-  top: 66px;
-  right: 18px;
   z-index: 72;
   width: min(440px, calc(100vw - 28px));
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto auto;
+  grid-template-columns: 38px minmax(0, 1fr) auto auto auto;
   align-items: center;
   gap: 10px;
   padding: 11px;
@@ -1291,6 +1289,36 @@ select {
   border-radius: 8px;
   background: color-mix(in srgb, var(--panel), var(--cue-soft) 22%);
   box-shadow: 0 18px 44px rgb(0 0 0 / 0.38);
+}
+
+.cuePosition-top-right {
+  top: 66px;
+  right: 18px;
+}
+
+.cuePosition-top-left {
+  top: 66px;
+  left: 18px;
+}
+
+.cuePosition-bottom-right {
+  right: 18px;
+  bottom: 18px;
+}
+
+.cuePosition-bottom-left {
+  left: 18px;
+  bottom: 18px;
+}
+
+.cuePosition-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cuePosition-custom {
+  transform: none;
 }
 
 .opponentCueOverlay.visibility-redacted {
@@ -1341,6 +1369,32 @@ select {
 
 .opponentCueOverlay small {
   white-space: nowrap;
+}
+
+.cueDragHandle {
+  cursor: grab;
+  touch-action: none;
+}
+
+.cueDragHandle:active {
+  cursor: grabbing;
+}
+
+.opponentCueControls {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.opponentCueControls select {
+  min-width: 138px;
+  min-height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--field-bg);
 }
 
 .main {
@@ -1465,6 +1519,28 @@ select {
   text-align: left;
 }
 
+.selectedActionGroup {
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 50%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--runner), var(--section-bg) 91%);
+}
+
+.selectedActionTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.selectedActionTitle > span {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
 .serverGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1477,6 +1553,19 @@ select {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--section-bg);
+}
+
+.server.activeRunTarget {
+  border-color: color-mix(in srgb, var(--cue), var(--runner) 25%);
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--cue), transparent 20%),
+    0 0 0 1px color-mix(in srgb, var(--cue), transparent 58%),
+    0 0 22px color-mix(in srgb, var(--cue), transparent 74%);
+}
+
+.server.selectedActionSource {
+  outline: 2px solid color-mix(in srgb, var(--runner), white 18%);
+  outline-offset: 2px;
 }
 
 .server h3 {
@@ -1495,6 +1584,25 @@ select {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.serverContextButton {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.serverContextButton:hover,
+.serverContextButton:focus-visible {
+  color: var(--runner);
 }
 
 .serverCount {
@@ -1553,6 +1661,52 @@ select {
 
 .card.hidden {
   background: var(--card-hidden-art-bg);
+}
+
+.card.unrezzedInstalled {
+  opacity: 0.78;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--cue), var(--line) 36%);
+  background: color-mix(in srgb, var(--card-bg), var(--cue-soft) 18%);
+}
+
+.card.rezzedInstalled {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 38%);
+}
+
+.card.selectedActionSource {
+  outline: 2px solid color-mix(in srgb, var(--runner), white 18%);
+  outline-offset: 2px;
+}
+
+.rezChip {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  max-width: calc(100% - 10px);
+  padding: 3px 6px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--zone-chip-bg);
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.rezChip.unrezzed {
+  border-style: dashed;
+  color: var(--cue);
+}
+
+.rezChip.rezzed {
+  color: var(--runner);
+}
+
+.card.unrezzedInstalled .cardTitle,
+.card.rezzedInstalled .cardTitle {
+  padding-right: 76px;
 }
 
 .card.agenda {
@@ -2597,7 +2751,7 @@ select,
 
 .runSteps {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
 }
 
@@ -2630,6 +2784,17 @@ select,
 
 .encounterFocus span {
   color: var(--muted);
+}
+
+.runHint {
+  margin: 0;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 48%);
+  border-radius: 6px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--runner), var(--section-bg) 91%);
+  font-size: 13px;
+  line-height: 1.35;
 }
 
 .actionGroup {
@@ -2812,6 +2977,24 @@ select,
   font-size: 16px;
 }
 
+.rigGroups {
+  display: grid;
+  gap: 9px;
+}
+
+.rigGroup {
+  display: grid;
+  gap: 6px;
+}
+
+.rigGroup h3 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
 .miniCards {
   grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
 }
@@ -2964,13 +3147,35 @@ select,
   }
 
   .opponentCueOverlay {
+    grid-template-columns: 34px minmax(0, 1fr) auto auto;
+  }
+
+  .cuePosition-top-right {
     top: 12px;
     right: 12px;
-    grid-template-columns: 34px minmax(0, 1fr) auto;
+  }
+
+  .cuePosition-top-left {
+    top: 12px;
+    left: 12px;
+  }
+
+  .cuePosition-bottom-right {
+    right: 12px;
+    bottom: 12px;
+  }
+
+  .cuePosition-bottom-left {
+    left: 12px;
+    bottom: 12px;
   }
 
   .opponentCueOverlay small {
     display: none;
+  }
+
+  .opponentCueControls {
+    grid-column: 1 / -1;
   }
 
   .opponentCueIcon {

@@ -1,0 +1,150 @@
+import { describe, expect, it } from "vitest";
+import type { LegalAction, PlayerView, Side, VisibleCard } from "@netrunner/shared";
+import {
+  DEFAULT_CUE_POSITION,
+  actionButtonLabel,
+  actionMatchesContext,
+  breachProgressLabel,
+  clampCuePosition,
+  corpInstalledCardState,
+  currentRunTimelineStep,
+  groupRunnerRigCards,
+  parseCuePositionPreference,
+  runTargetServerIds,
+  serverDisplayLabel,
+  splitLegalActions
+} from "./action-board-ui";
+
+describe("V1.0.5 action board UI helpers", () => {
+  it("keeps global and decision actions in the main panel while card actions move to context", () => {
+    const iceA = card("corp_ice_a", "Wall A", "ice");
+    const iceB = card("corp_ice_b", "Wall B", "ice");
+    const actions = [
+      legalAction("corp", "gain_credit", "basic_action", "Credit nehmen"),
+      legalAction("corp", "start_run", "basic_action", "Run auf R&D", { serverId: "rd" }),
+      legalAction("corp", "install_card", iceA.instanceId, "ICE vor HQ installieren", { cardId: iceA.instanceId, serverId: "hq", placement: "ice" }),
+      legalAction("corp", "install_card", iceB.instanceId, "ICE vor HQ installieren", { cardId: iceB.instanceId, serverId: "hq", placement: "ice" }),
+      legalAction("corp", "rez_ice", "corp_ice_installed", "Wall rezzen", { cardId: "corp_ice_installed" }, "run.approach_ice")
+    ];
+
+    const split = splitLegalActions(actions);
+
+    expect(split.primaryActions.map((action) => action.type)).toEqual(["gain_credit", "start_run", "rez_ice"]);
+    expect(split.contextualActions.map((action) => action.source)).toEqual([iceA.instanceId, iceB.instanceId]);
+    expect(split.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: iceA.instanceId, label: iceA.title! }))).toHaveLength(1);
+    expect(actionButtonLabel(actions[1]!)).toBe("Run auf F&E (R&D)");
+  });
+
+  it("maps RunTimeline state, active target and server labels without raw V1.0.5 labels", () => {
+    const running = view("runner", {
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] }
+      ],
+      run: { attackedServerId: "rd", phase: "movement", successful: false }
+    });
+
+    expect(currentRunTimelineStep(running, [legalAction("runner", "jack_out", "basic_action", "Jack out", undefined, "run.jack_out_window")])).toBe("movement");
+    expect(runTargetServerIds(running)).toEqual(["rd"]);
+    expect(serverDisplayLabel("rd")).toBe("F&E (R&D)");
+    expect(serverDisplayLabel("archives")).toBe("Archive");
+  });
+
+  it("shows access progress only from PlayerView breach data", () => {
+    const running = view("runner", {
+      run: {
+        attackedServerId: "hq",
+        phase: "access",
+        successful: true,
+        breach: { breachId: "breach_1", serverId: "hq", currentIndex: 1, remainingCount: 1, completed: false }
+      }
+    });
+
+    expect(currentRunTimelineStep(running, [])).toBe("access");
+    expect(breachProgressLabel(running)).toBe("Zugriff 2 von 3");
+  });
+
+  it("groups public Runner rig cards without implying hidden cards", () => {
+    const groups = groupRunnerRigCards([card("program_1", "Program", "program"), card("hardware_1", "Hardware", "hardware"), card("resource_1", "Resource", "resource")]);
+
+    expect(groups.map((group) => group.label)).toEqual(["Programme", "Hardware", "Ressourcen"]);
+    expect(groups.flatMap((group) => group.cards.map((entry) => entry.instanceId))).toEqual(["program_1", "hardware_1", "resource_1"]);
+  });
+
+  it("keeps Corp installed rez state side-safe", () => {
+    expect(corpInstalledCardState({ instanceId: "hidden_ice", known: false, rezzed: false })).toBe("hidden");
+    expect(corpInstalledCardState(card("corp_ice", "Wall", "ice", false))).toBe("unrezzed");
+    expect(corpInstalledCardState(card("rezzed_ice", "Wall", "ice", true))).toBe("rezzed");
+  });
+
+  it("keeps cue position local, resettable and clamped", () => {
+    expect(parseCuePositionPreference(null)).toEqual(DEFAULT_CUE_POSITION);
+    expect(parseCuePositionPreference(JSON.stringify({ kind: "preset", preset: "center" }))).toEqual({ kind: "preset", preset: "center" });
+    expect(parseCuePositionPreference("{bad json")).toEqual(DEFAULT_CUE_POSITION);
+    expect(clampCuePosition(98, 98, 400, 300, 180, 120)).toEqual({ kind: "custom", xPercent: 52, yPercent: 56 });
+  });
+});
+
+function legalAction(side: Side, type: LegalAction["type"], source: LegalAction["source"], label: string, payload?: LegalAction["payload"], timingPoint: LegalAction["timingPoint"] = "corp_action.main"): LegalAction {
+  return {
+    actionId: `${side}.${type}.${source}.${payload?.serverId ?? ""}.${payload?.cardId ?? ""}`,
+    side,
+    type,
+    label,
+    source,
+    timingPoint,
+    costs: [],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 1,
+    ...(payload ? { payload } : {})
+  };
+}
+
+function card(instanceId: string, title: string, type: NonNullable<VisibleCard["type"]>, rezzed = true): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    title,
+    definitionId: instanceId,
+    type,
+    rezzed
+  };
+}
+
+function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
+  return {
+    side,
+    stateVersion: 1,
+    timingPoint: "runner_action.main",
+    activeSide: side,
+    phase: "runner_action_phase",
+    own: {
+      credits: 5,
+      clicks: 3,
+      agendaPoints: 0,
+      gripOrHq: [],
+      stackOrRdCount: 5,
+      heapOrArchives: [],
+      scoreArea: [],
+      rig: [],
+      tags: 0
+    },
+    opponent: {
+      credits: 5,
+      clicks: 3,
+      agendaPoints: 0,
+      tags: 0,
+      handCount: 4,
+      deckCount: 5,
+      discardCount: 0,
+      scoreArea: [],
+      rig: []
+    },
+    servers: [{ id: "hq", label: "HQ", ice: [], root: [] }],
+    publicEvents: [],
+    legalActions: [],
+    winner: null,
+    ...overrides
+  };
+}
