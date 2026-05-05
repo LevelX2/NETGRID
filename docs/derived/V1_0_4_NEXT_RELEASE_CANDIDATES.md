@@ -6,6 +6,16 @@ Stand: 2026-05-05
 
 V1.0.4 ist als kleiner UX-Haertungsschritt nach V1.0.3 vorgesehen. Der Release soll keine neuen Engine-Regeln, Karten, Mechaniken, offiziellen Assets, Accounts, Matchmaking-, Ranking- oder Plattformfunktionen einfuehren.
 
+Nach Abgleich mit dem Planungsbranch liegen zusätzlich vor:
+
+- `docs/derived/RELEASE_PLANNING_2026-05-05.md`
+- `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`
+- `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`
+- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
+- `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
+
+Empfohlene Reihenfolge: zuerst V1.0.4 Private Match Lifecycle und Session Recovery, danach V1.0.5 Action Board UX und Board-Klarheit.
+
 ## Kandidaten
 
 ### Match abbrechen und aufgeben

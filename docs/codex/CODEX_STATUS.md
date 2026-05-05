@@ -4,7 +4,7 @@
 
 V1.0.3 Matchstart-UX ist umgesetzt und lokal verifiziert. V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. Release planning 2026-05-05 identifies V1.0.4 Private Match Lifecycle and Session Recovery as the next recommended gated scope, followed by V1.0.5 Action Board UX and Board-Klarheit. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
@@ -20,8 +20,13 @@ Latest V1.0.2 final review artifact: `docs/derived/V1_0_2_FINAL_REVIEW.md`.
 Latest V1.0.3 planning artifact: `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`.
 Latest V1.0.3 final review artifact: `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`.
 Latest V1.0.4 candidate backlog artifact: `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`.
+Latest release planning artifact: `docs/derived/RELEASE_PLANNING_2026-05-05.md`.
+Latest V1.0.4 planning artifact: `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`.
+Latest V1.0.5 planning artifact: `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`.
+Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
+Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: decide the next gated step after V1.0.3. Current V1.0.4 candidates are withdrawing a not-yet-active created match to edit and recreate it, match/lobby abort or active concession, visible opponent display names, a German UI rules-term glossary pass, server layout/ICE-orientation review, and active-game information architecture. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
+Current selected next scope: V1.0.4 Private Match Lifecycle and Session Recovery requirements freeze. Current V1.0.4 candidates are withdrawing a not-yet-active created match to edit and recreate it, match/lobby abort or active concession, visible opponent display names and session recovery hardening. V1.0.5 follows for German UI rules-term glossary, server layout/ICE-orientation review, active-game information architecture and browser/visual smokes. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
 
 ## Status
 
@@ -272,6 +277,16 @@ V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz implementation is complet
 V1.0.3 Matchstart-UX is complete and locally verified.
 
 `V1_0_3_matchstart_ux_done: true`
+
+Release planning 2026-05-05 is integrated after V1.0.3 finalization.
+
+`release_planning_2026_05_05_integrated: true`
+
+`V1_0_4_private_match_lifecycle_plan_available: true`
+
+`V1_0_5_action_board_ux_plan_available: true`
+
+`long_term_product_vision_2026_05_05_available: true`
 
 Bestandsaufnahme 2026-05-04 is complete.
 
@@ -1859,13 +1874,14 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V1.0.2: Gegner-Aktionsdarstellung und Ablauftransparenz, implementation complete and locally verified.
 - V1.0.3: Matchstart-UX, implementation complete and locally verified.
 
-Current gate: V1.0.3 Matchstart-UX is complete. V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0.4 Private Match Lifecycle and Session Recovery requirements freeze is the selected next step. V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
 Next scope decision:
 
-1. Choose the next gated post-V1.0.3 scope before writing more implementation.
-2. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
-3. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
+1. Freeze V1.0.4 requirements for pending-lobby cancel, joiner leave, active forfeit, recreate, session recovery and opponent display names before implementation.
+2. Follow with V1.0.5 Action Board UX and Board-Klarheit after V1.0.4 is green.
+3. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
+4. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 
 M11+ mechanics, Prevention/Avoid/Interrupt/Replacement, Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates.
 
@@ -1884,6 +1900,12 @@ Detailed planning artifacts available:
 - `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`
 - `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/V1_0_2_FINAL_REVIEW.md`
+- `docs/derived/RELEASE_PLANNING_2026-05-05.md`
+- `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`
+- `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`
+- `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`
+- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
+- `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.7_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`

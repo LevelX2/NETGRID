@@ -110,3 +110,8 @@
 - `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`: Planung und Umsetzungsergebnis für getrennte Matchstart-Entscheidungen, Auslosen, Startbereitschaftslobby und Lobbychat.
 - `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.3 Matchstart-UX.
 - `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`: gesammelte Kandidaten für den nächsten UX-Härtungsschritt nach V1.0.3, aktuell erstelltes Match zurücknehmen/ändern/neu erstellen, Match abbrechen/aufgeben, Gegnernamen sichtbarer anzeigen und deutschsprachige UI-Regelbegriffe per Glossar abgleichen.
+- `docs/derived/RELEASE_PLANNING_2026-05-05.md`: bereinigte Release-Planung nach V1.0.3-Finale mit V1.0.4/V1.0.5-Empfehlung.
+- `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`: Detailplan für pending Lobby abbrechen, Joiner leave, Forfeit, Recreate, Session Recovery und Gegnernamen.
+- `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`: Detailplan für Board-/Run-/Rig-Klarheit, deutsche UI-Begriffe, Cue-/KI-Pacing-Regression und Browser-Smokes.
+- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
+- `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.

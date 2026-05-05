@@ -84,6 +84,8 @@
 - Lokaler privater O:NR-v1-Testzugang ist für privaten Gebrauch als erlaubter lokaler Datenpool eingeordnet: Engine-Harness-Tests für 45 lokal spielbare Karten sind vorhanden, Web-Katalog und Deck-Validierung können ein lokales ignoriertes Overlay lesen, lokale Bilder liegen unter ignorierten Asset-Pfaden, die serverseitige Deck-Revalidierung nutzt denselben Runtime-Kartenpool, und V1.0 ergänzt AI-/Multiplayer-Smokes sowie Manifest-/Review-Abgleich.
 - Die Deck-/Match-Stabilisierung vom 2026-05-04 ist dokumentiert: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`, `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md` und `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`.
 - Die Gegner-Aktionsdarstellung ist umgesetzt und final reviewt: `docs/derived/V1_0_2_REQUIREMENTS.md`, `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`, `docs/derived/V1_0_2_TEST_MATRIX.md`, `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_0_2_FINAL_REVIEW.md`.
+- V1.0.3 Matchstart-UX ist umgesetzt, nach `main` integriert und final reviewt: `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md` und `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`.
+- Die Release-Planung vom 2026-05-05 ist bereinigt aus dem Planungsbranch übernommen: `docs/derived/RELEASE_PLANNING_2026-05-05.md`, `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`, `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`, `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md` und `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
 ## Teilweise umgesetzt
 
@@ -100,7 +102,7 @@
 
 - Kein gate-basierter MVP-0.1- bis MVP-0.9-Arbeitsschritt ist offen.
 - Kein gate-basierter V0.94- bis V0.99-Mechanikschritt ist offen.
-- Nächster ausgewählter Scope ist offen; V1.0.3 ist umgesetzt und abgeschlossen. V1.0.4-Kandidaten sind erstelltes Match zurücknehmen/ändern/neu erstellen, Match/Lobby abbrechen oder aktives Spiel aufgeben, Gegnernamen sichtbarer anzeigen sowie deutschsprachige UI-Regelbegriffe abgleichen.
+- Nächster ausgewählter Scope ist V1.0.4 Private Match Lifecycle und Session Recovery. Danach ist V1.0.5 Action Board UX und Board-Klarheit vorgesehen.
 - M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten. Mulligan, vollständiges Setup-/Deckout-/Archives-facedown-Modell und vollständige Spielende-Normalisierung bleiben offen.
 - Prevention, Avoid, Interrupt und Replacement sind weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - Core-Damage, Damage-Prevention, Avoid, Interrupt und Replacement bleiben zurückgestellt und sind nicht Teil des V0.94-Scopes.
