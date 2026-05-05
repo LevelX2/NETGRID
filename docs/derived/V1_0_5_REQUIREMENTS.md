@@ -34,11 +34,17 @@ V1.0.5 umfasst:
 - V1.0.2-KI-Pacing-Regression für `fast`, `paced`, `manual` und `advance_ai`.
 - V1.0.2-Cue-, Redaction-, Queue-, Highlight- und opt-in-Audio-Regression.
 - Kompaktere und weniger verdeckende Gegneraktions-Cues.
+- Lokale Positionierung der Gegneraktions-Cues per Ziehen oder fallback per Positionsauswahl.
 - RunTimeline mit verständlicher Movement-/Jack-out-/Encounter-/Breach-/Access-Darstellung.
+- Eindeutige visuelle Markierung des aktuell angegriffenen Run-Zielservers.
 - Strukturierte gegnerische Runner-Rig-Darstellung für die Corp-Sicht.
 - Verständlichere zentrale Serverdarstellung für HQ, R&D/F&E und Archive mit side-sicheren Counts.
 - Layout-/ICE-Ausrichtungsprüfung als reine Darstellung.
+- Klare side-sichere Rez-/Unrez-Zustände für installierte Corp-Karten, besonders ICE.
 - Deutsche sichtbare UI-Hauptbegriffe im aktiven Spiel.
+- Kontextuelle Präsentation karten- und objektgebundener LegalActions, damit das Action Panel nicht durch mehrere gleich benannte Handkartenaktionen überfüllt wird.
+- Überprüfung, ob der obere BoardHeader einen echten Orientierungsnutzen hat oder ersatzlos entfallen kann.
+- Erprobung einer alternativen RunTimeline-Ausrichtung, insbesondere als vertikale Richtung vom Runner zum Corp-Server, nur wenn sie Platz und Lesbarkeit verbessert.
 - Wiederholbare Browser-/Playtest-Smokes für KI, zwei Tabs, Reconnect, Run, verdeckte Installation und schmalen Viewport.
 
 ## Nicht-Ziele
@@ -98,6 +104,12 @@ Nicht als normale Endnutzerlabels erlaubt sind `LegalActions`, `Runner View`, `C
 | V105-MUST-010 | Boardlayout bleibt auf Desktop und schmalem Viewport nutzbar. | Runner-Rig, RunTimeline, zentrale Server, Actions, Undo und Cues überlappen nicht unlesbar und wichtige Buttons bleiben bedienbar. | V105-T021 |
 | V105-MUST-011 | Wiederholbare Browser-/Playtest-Smokes existieren. | Ein dokumentierter V1.0.5-Smoke deckt Runner-vs-KI, zwei Tabs, verdeckte Installation, Run, Reconnect und schmalen Viewport mit Prüfpunkten ab. | V105-T022 |
 | V105-MUST-012 | Bestehende Verträge bleiben grün. | Hidden-Info-, PublicEvent-, AI-Input-, Replay-/StateHash-, stale-action-, illegal-action-, V1.0.4-Lifecycle- und Build/Test-Gates bleiben bestanden. | V105-T017, V105-T020, V105-T023 |
+| V105-MUST-013 | Karten- und objektgebundene Aktionen werden kontextuell präsentiert. | Das permanente Action Panel zeigt primär globale Aktionen, Choices und laufende Pflichtentscheidungen; Aktionen mit konkreter Karten- oder Objektbindung erscheinen erst bei Auswahl der sichtbaren eigenen Karte bzw. des sichtbaren Boardobjekts und bleiben eindeutig dieser Auswahl zugeordnet. | V105-T024, V105-T025 |
+| V105-MUST-014 | Gegneraktions-Cues sind lokal positionierbar. | Zielumsetzung ist Drag per Handle mit lokal gemerkter Position; zusätzlich gibt es Presets und Reset für Tastaturbedienung und Fallback. Falls Drag in V1.0.5 technisch instabil bleibt, sind Presets inklusive bewusst wählbarer Mitte Mindestumfang. | V105-T026, V105-T027 |
+| V105-MUST-015 | Der aktuelle Run-Zielserver ist eindeutig markiert. | Während eines Runs erhält genau der angegriffene Server eine deutlich sichtbare, side-sichere Zielmarkierung; andere Server dürfen nicht denselben aktiven Run-Rahmen tragen, sofern sie nicht aus einem anderen kurzlebigen Cue-Grund separat hervorgehoben werden. | V105-T028, V105-T029 |
+| V105-MUST-016 | Der obere BoardHeader entfällt als redundanter Kasten. | Die V1.0.5-Standardumsetzung entfernt den separaten gerahmten Sicht-/Fenster-Header. Nützliche Statusinformation wandert kompakt in Topbar, Action Panel, RunTimeline oder KI-Takt; ein neuer Header ist nur zulässig, wenn er keine Wiederholung ist und konkrete Aufgabe/Statusinformation liefert. | V105-T030 |
+| V105-MUST-017 | Die RunTimeline-Ausrichtung wird bewusst entschieden. | Die V1.0.5-Standardumsetzung bleibt zunächst horizontal-kompakt mit klarer Richtung und Zielkopplung. Eine vertikale/seitliche Variante darf nur übernommen werden, wenn Desktop- und Schmalviewport-Smoke zeigen, dass sie Actions, Runner-Rig und Server nicht verdrängt; die Entscheidung wird dokumentiert. | V105-T031, V105-T032 |
+| V105-MUST-018 | Rezzed und unrezzed installierte Corp-Karten sind side-sicher unterscheidbar. | Die V1.0.5-Standardumsetzung nutzt Status-Chip plus gestrichelten/gedämpften Rahmen für ungerezzte Corp-Karten. 90-Grad-/seitliche Darstellung ist optional, aber nicht Default, solange Textkarten dadurch schlechter lesbar werden. Runner sieht ungerezzte Corp-Karten weiterhin nur anonym/verdeckte Platzhalter. | V105-T033, V105-T034 |
 
 ## Daten- und Autoritätsgrenzen
 
@@ -105,6 +117,9 @@ Nicht als normale Endnutzerlabels erlaubt sind `LegalActions`, `Runner View`, `C
 - `apps/web/app/page.tsx`, `action-cues.ts` und `chronicle.ts` dürfen keine Engine-Regelmodule importieren.
 - V1.0.5 darf keine Felder in `GameState`, `PlayerAction`, `GameEvent`, `RandomDrawRecord`, Replay oder StateHash ergänzen, nur um UI-Politur zu ermöglichen.
 - Cues, Highlights, Audio, Layout und Textlabels sind lokale Präsentation.
+- Cue-Positionen sind lokale UI-Einstellungen und dürfen nicht in Server, Engine, Replay, StateHash, PublicEvents oder Match-Payloads geschrieben werden.
+- Die UI darf die Anzeige vorhandener `LegalActions` filtern und kontextuell gruppieren, aber beim Ausführen nur unveränderte Engine-`actionId`s einreichen; `applyAction` bleibt die einzige Validierung.
+- Rez-/Unrez-Darstellung nutzt nur vorhandene side-sichere `VisibleCard.rezzed`-/`known`-Informationen aus der PlayerView und darf keine neuen Match- oder Engine-Felder verlangen.
 - Verdeckte Karten dürfen nicht über Titel, Definition-ID, Instance-ID, Bild-URL, DOM-Daten, CSS-Klassen, Tooltip, Audio-Unterscheidung oder Count-Differenzen verraten werden.
 - KI-Pacing bleibt Server-Orchestrierung und darf keine KI-Aktion außerhalb LegalActions/`applyAction` ausführen.
 
@@ -115,11 +130,11 @@ Nicht als normale Endnutzerlabels erlaubt sind `LegalActions`, `Runner View`, `C
 - `apps/web/app/action-cues.test.ts`
   - Cue-Mapping, Redaction, eigene/gegnerische Actions, Reconnect-Fortsetzung und lokale Aufmerksamkeit.
 - `apps/web/app/page.tsx`
-  - BoardHeader, RunTimeline, RunnerRigStrip, zentrale Server, LegalActionsPanel, UndoPanel, Audio-Menü, AI-Pacing-Controls und aktive Spieloberfläche.
+  - BoardHeader, RunTimeline, RunnerRigStrip, zentrale Server, kontextuelles LegalActionsPanel, CardActionMenu, UndoPanel, Audio-Menü, AI-Pacing-Controls und aktive Spieloberfläche.
 - `apps/web/app/chronicle.ts`
   - sichtbare deutsche Begriffe und konsistente Eventtexte.
 - `apps/web/app/globals.css`
-  - stabile Boardbereiche, responsive Zonen, Cue-Overlay, Highlight-Layer und Textfit.
+  - stabile Boardbereiche, responsive Zonen, positionierbares Cue-Overlay, Highlight-Layer und Textfit.
 - `apps/server/src/multiplayer.ts`
   - nur Regression: `advance_ai`, KI-Pacing-Payloads und side-sichere Payloads dürfen nicht geöffnet werden.
 - `apps/server/src/multiplayer.test.ts`
@@ -139,6 +154,15 @@ Nicht als normale Endnutzerlabels erlaubt sind `LegalActions`, `Runner View`, `C
 | Reconnect erzeugt Cue-/Sound-Sturm. | `lastPresentedEventId` bleibt tab-lokaler Wiedergabemarker; Bootstrap-Events sind Chronicle-only. |
 | Layout-Politur führt Browser-Engine-Importe wieder ein. | Visibility-Contract-Test bleibt Blocker. |
 | Browser-Smoke bleibt zu vage. | V1.0.5 bekommt ein eigenes Smoke-Dokument mit festen Prüfpunkten und erwarteten Beobachtungen. |
+| Kontextuelle Aktionen verstecken versehentlich wichtige Entscheidungen. | Globale Aktionen, Choice-/Access-/Run-Pflichtentscheidungen und Zugende bleiben im permanenten Panel; nur klar karten-/objektgebundene Optionen wandern in den Auswahlkontext. |
+| Corp-Handkartenaktionen zeigen mehrere gleich benannte ICE-Installationen. | Nach Klick auf eine eigene HQ-Karte zeigt der Kontext nur Aktionen für genau diese Karte; der Kartentitel kommt aus der eigenen PlayerView, nicht aus gegnerischen oder verdeckten Daten. |
+| Frei platzierbare Cues verdecken wichtige Boardbereiche. | Standardposition bleibt boardschonend; mittige Darstellung ist nur bewusste lokale Option und Cues bleiben dismissbar. |
+| Gespeicherte Cue-Position wird zu Matchdaten. | Position wird nur lokal gespeichert, ohne Server-/Engine-/Replay-/StateHash-Wirkung. |
+| Run-Zielhighlight ist mit Cue- oder Hover-Highlights verwechselbar. | Aktiver Run-Zielrahmen erhält eine eigene visuelle Klasse/Bezeichnung und gilt nur für `view.run.attackedServerId`; Cue-/Hover-Highlights bleiben davon unterscheidbar. |
+| BoardHeader verbraucht Platz ohne Nutzen. | Header wird nur beibehalten, wenn er konkrete Orientierung oder Aufgabe liefert; sonst wird er entfernt und seine nützlichen Inhalte wandern in Topbar, Action Panel oder RunTimeline. |
+| Vertikale RunTimeline nimmt zu viel Platz weg. | Vertikale/seitliche Variante wird als Layoutoption geprüft; die horizontale Variante darf bleiben, wenn sie im Browser-Smoke klar lesbarer und platzsparender ist. |
+| Unrezzed-Optik leakt Kartendaten an den Runner. | Runner sieht für ungerezzte Corp-Karten nur einheitliche verdeckte Platzhalter und keine Titel, Typen, Definition-IDs, Bildpfade oder kartenspezifische Zustände. |
+| 90-Grad-Drehung macht Karten unlesbar oder instabil. | Die erste Version darf Rotation nur verwenden, wenn sie lesbar bleibt; sonst reichen klarer Status-Chip, gestrichelter Rahmen, gedämpfte Darstellung oder eine andere stabile Unrez-Kennzeichnung. |
 
 ## Pflichtchecks
 

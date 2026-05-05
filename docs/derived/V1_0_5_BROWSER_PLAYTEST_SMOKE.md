@@ -47,6 +47,8 @@ Der Smoke erweitert keine Karten, keine Engine-Regeln, keine offiziellen Assets 
 2. Prüfe die Timeline.
 3. Erwartung:
    - Zielserver ist verständlich sichtbar.
+   - Genau der angegriffene Server ist im Board mit einem deutlichen Run-Zielrahmen markiert.
+   - Andere Server tragen nicht denselben aktiven Run-Zielrahmen.
    - Runphasen verwenden deutsche Labels wie `Annäherung`, `Begegnung`, `Bewegung`, `Zugriff`, `Abschluss`.
    - Keine normalen Hauptlabels `Approach`, `Encounter`, `Access`, `Breach`.
 4. Falls ein ICE begegnet wird, prüfe Encounter-Fokus:
@@ -101,6 +103,77 @@ Der Smoke erweitert keine Karten, keine Engine-Regeln, keine offiziellen Assets 
    - RunTimeline und zentrale Server überlappen nicht unlesbar.
    - Runner-Rig verdrängt nicht dauerhaft den Run-Fokus.
 
+## Smoke H: Kontextuelle Handkartenaktionen
+
+1. Starte ein Spiel, in dem die Corp mehrere ICE oder mehrere installierbare Karten in HQ hält.
+2. Prüfe das permanente Panel `Mögliche Aktionen`.
+3. Erwartung:
+   - globale Aktionen wie Credit nehmen, Karte ziehen und Zug beenden bleiben sichtbar,
+   - Choices, Zugriff, Begegnung und andere aktuelle Pflichtentscheidungen bleiben ebenfalls sichtbar,
+   - mehrere gleichartige ICE-Installationsaktionen erscheinen nicht als ununterscheidbare flache Button-Serie.
+4. Klicke eine konkrete eigene HQ-Karte an.
+5. Erwartung:
+   - der Kontext nennt die ausgewählte Karte,
+   - die ausgewählte Karte ist auf dem Board/in der Hand eindeutig markiert,
+   - nur Actions für diese Karte erscheinen,
+   - ICE-Installationsziele sind eindeutig als Zieloptionen erkennbar, z. B. HQ, F&E/R&D, Archive oder Remote,
+   - Ausführen reicht die originale Engine-Action ein und erzeugt keine Hidden-Info- oder StateHash-Änderung außerhalb des normalen Engine-Pfads.
+6. Wechsle zu einer anderen eigenen HQ-Karte.
+7. Erwartung:
+   - der Kontext aktualisiert sich auf diese Karte,
+   - die vorherige Karte bleibt nicht versehentlich als Actionquelle aktiv.
+
+## Smoke I: Positionierbarer Gegneraktions-Cue
+
+1. Erzeuge einen Gegneraktions-Cue.
+2. Verschiebe den Cue per Drag an eine andere Stelle oder wähle eine Positionsoption.
+3. Erzeuge einen weiteren Gegneraktions-Cue.
+4. Erwartung:
+   - der neue Cue erscheint an der lokal gemerkten Position,
+   - die Position kann zurückgesetzt werden,
+   - der Cue bleibt dismissbar,
+   - mittige Anzeige ist nur nach bewusster Auswahl aktiv,
+   - auf schmalem Viewport bleibt der Cue im sichtbaren Bereich oder fällt auf eine sichere Preset-Position zurück.
+5. Prüfe Storage/Payload-Stichproben.
+6. Erwartung:
+   - Cue-Position wird nicht in Server-, WebSocket-, Reconnect-, Engine-, Replay- oder StateHash-Daten geschrieben,
+   - die Einstellung bleibt rein lokal.
+
+## Smoke J: BoardHeader und Timeline-Ausrichtung
+
+1. Öffne ein aktives Spiel ohne Run.
+2. Prüfe den oberen Boardbereich.
+3. Erwartung:
+   - Es gibt keinen redundanten Kasten, der nur die ohnehin sichtbare Seite und `Dein Fenster` wiederholt.
+   - Falls ein BoardHeader vorhanden ist, zeigt er eine konkrete Aufgabe oder Statusinformation.
+4. Starte einen Run.
+5. Prüfe die Timeline-Ausrichtung auf Desktop.
+6. Erwartung:
+   - Die Runrichtung ist verständlich.
+   - Die Timeline verdrängt weder Runner-Rig noch zentrale Server noch `Mögliche Aktionen`.
+7. Prüfe denselben Zustand im schmalen Viewport.
+8. Erwartung:
+   - Die horizontale Default-Timeline oder eine begründet gewählte vertikale/hybride Timeline bleibt lesbar.
+   - Die Layoutentscheidung ist für den Final Review kurz begründbar.
+
+## Smoke K: Rez-/Unrez-Zustand von ICE
+
+1. Starte ein Match, in dem die Corp ein ICE installieren kann.
+2. Corp installiert ein ICE vor einen Server.
+3. Prüfe die Corp-Sicht.
+4. Erwartung:
+   - Die Corp erkennt die konkrete ICE-Karte.
+   - Die Karte ist klar als ungerezzt markiert, mindestens durch `Ungerezzt`-Chip, gedämpfte Darstellung und gestrichelten Rahmen.
+5. Prüfe die Runner-Sicht vor dem Rez.
+6. Erwartung:
+   - Runner sieht nur einen einheitlichen verdeckten ICE-Platzhalter.
+   - Kein Titel, Typ, Text, Definition-ID, Bild-URL oder kartenspezifischer Zustand ist sichtbar.
+7. Runner startet einen Run auf diesen Server und Corp rezzt das ICE.
+8. Erwartung:
+   - Beide Seiten sehen nach Rez die sichtbare ICE-Karte mit Titel und relevanten Werten.
+   - Der optische Statuswechsel von ungerezzt zu gerezzt ist deutlich.
+   - Falls Rotation verwendet wird, erzeugt sie keine unlesbare Überlappung auf Desktop oder schmalem Viewport; ohne Rotation bleibt die Statusdarstellung klar.
+
 ## Pflicht-Stichproben
 
 - Browsercode importiert keine Engine-Regelmodule in die aktive Spielseite.
@@ -111,7 +184,7 @@ Der Smoke erweitert keine Karten, keine Engine-Regeln, keine offiziellen Assets 
 
 ## Ergebnisnotiz für Final Review
 
-Nach Umsetzung soll der Final Review pro Smoke A bis G festhalten:
+Nach Umsetzung soll der Final Review pro Smoke A bis K festhalten:
 
 - `pass`, `partial` oder `fail`,
 - getesteter Browser/Viewport,

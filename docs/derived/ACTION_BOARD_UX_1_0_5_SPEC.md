@@ -25,7 +25,7 @@ Die aktive Spieloberfläche hat fünf Hauptbereiche:
 | Bereich | Aufgabe | V1.0.5-Regel |
 | --- | --- | --- |
 | Topbar | Versions-/Session-Kontext, Verbindung, Audio, Link, Aufgabe, Verwerfen | Bleibt kompakt; Audio bleibt Popover, kein dauerhaft offenes Optionspanel. |
-| Linke Spalte | Gegnerstatus, KI-Takt, mögliche Aktionen, Zurücknehmen | Entscheiden und Zurücknehmen sind sofort erreichbar; keine technischen Überschriften. |
+| Linke Spalte | Gegnerstatus, KI-Takt, mögliche Aktionen, Zurücknehmen | Globale Entscheidungen und Pflichtfenster sind sofort erreichbar; kartengebundene Aktionen erscheinen im Auswahlkontext. |
 | Boardmitte | Spielerperspektive, Runner-Rig, RunTimeline, Server, eigene Zone | Primärer Spielzustand, darf nicht durch Cues dauerhaft verdeckt werden. |
 | Rechte Spalte | Card Preview, Spielerstatus, Chronicle, Diagnostics | Detail- und Verlaufsebene, keine primären Aktionsbuttons verstecken. |
 | Overlay/Highlight | Kurze Gegneraktion, lokaler Fokus | Nur temporär; muss dismissbar sein und darf keine verdeckten Daten enthalten. |
@@ -45,6 +45,14 @@ Aktivitätszeile:
 - Gegenseite aktiv: `Gegenseite ist am Zug`
 - Eigene Choice offen: `Du bist gefragt`
 - KI aktiv: `KI-Zug läuft` oder `KI wartet auf Schritt`, je nach Pacing.
+
+Der BoardHeader ist kein Selbstzweck. V1.0.5-Standard ist: Der separate gerahmte Header oberhalb des Boards wird entfernt. Die bisherige Information wird verteilt:
+
+- Spielerperspektive und Gegenseite stehen kompakt in Topbar/OpponentPanel.
+- `Du bist am Zug`, `Du bist gefragt`, `Gegenseite ist am Zug` oder `KI-Zug läuft` stehen dort, wo sie handlungsrelevant sind: Action Panel, KI-Takt oder RunTimeline.
+- Die Boardmitte beginnt ohne redundanten Sicht-/Fensterkasten direkt mit Run-/Boardinformation.
+
+Ein neuer oder beibehaltener Header ist nur erlaubt, wenn er eine konkrete Aufgabe erfüllt und kein bloßer Wiederholungskasten mit `Deine Corp-Sicht`/`Dein Fenster` ist.
 
 ### Action Panel
 
@@ -72,6 +80,55 @@ Empfohlenes Gruppenmapping:
 
 Action-Button-Labels aus der Engine dürfen verwendet werden, wenn sie nutzerverständlich sind. Rohe ActionTypes sind nicht als Haupttext erlaubt.
 
+### Kontextuelle Kartenaktionen
+
+Das Action Panel darf nicht mehr alle karten- und objektgebundenen Aktionen flach anzeigen. Ziel ist, dass mehrere Handkarten mit gleichartigen Actions nicht als ununterscheidbare Button-Serie erscheinen.
+
+V1.0.5-Standardumsetzung: Hybrid ohne frei schwebendes Kontextmenü als Pflicht. Karten und Boardobjekte werden visuell auswählbar markiert; die zugehörigen Aktionen erscheinen als Abschnitt `Ausgewählte Karte` oder `Ausgewähltes Objekt` im linken Action Panel. Ein kleines Popover direkt an der Karte ist optional für Desktop, aber nicht nötig, solange die Zuordnung im linken Panel eindeutig ist.
+
+Permanente Anzeige in `Mögliche Aktionen`:
+
+- globale Basisaktionen wie Credit nehmen, Karte ziehen, Tag entfernen, Virus-Counter purgen und Zug beenden,
+- offene Choices und Access-/Run-/Encounter-Pflichtentscheidungen,
+- Aktionen ohne konkrete sichtbare Karten- oder Boardobjektbindung,
+- optional ein kompakter Hinweis, dass ausgewählte Hand- oder Boardkarten weitere Aktionen haben.
+
+Sortier-/Prioritätsregel:
+
+1. Pending Choice und Access-/Run-/Encounter-Pflichtentscheidungen bleiben immer sichtbar.
+2. Basisaktionen und Zugende bleiben sichtbar.
+3. Karten-/Objektaktionen werden nur im Auswahlkontext angezeigt.
+4. Falls eine Action sowohl kontextuell als auch aktuell entscheidungsrelevant ist, gewinnt die Entscheidungsrelevanz und sie bleibt sichtbar.
+
+Kontextuelle Anzeige nach Auswahl:
+
+- Klick oder Tastaturfokus auf eine eigene sichtbare Hand-/HQ-/Grip-Karte zeigt nur Actions, deren `source`, `payload.cardId`, `payload.resourceId`, `payload.breakerId` oder Ability-Quelle zu dieser Karte gehören.
+- Klick oder Tastaturfokus auf ein sichtbares Boardobjekt zeigt nur passende objektgebundene Actions, z. B. rezzen, advancen, scoren, trashen, pumpen oder brechen.
+- Der Kontextkopf nennt die ausgewählte sichtbare Karte oder das sichtbare Objekt, z. B. `Aktionen für Wall of Static`.
+- Corp-ICE auf der eigenen Hand zeigt darunter die legalen Zieloptionen wie `Vor HQ installieren`, `Vor F&E (R&D) installieren`, `Vor Archive installieren` oder `Vor Remote 1 installieren`.
+- Die UI reicht beim Ausführen immer die originale `actionId` der Engine ein; sie konstruiert keine PlayerAction aus UI-Text.
+
+Matching-Regel für die erste Umsetzung:
+
+- Kartenkontext matcht `action.source`, wenn `source` eine sichtbare CardInstanceId ist.
+- Zusätzlich matcht er `payload.cardId`, `payload.resourceId`, `payload.breakerId`, `abilityRef.sourceCardInstanceId` und `targetRequirements[].sourceIceRef`, soweit diese Felder vorhanden und in der PlayerView sichtbar sind.
+- Serverkontext matcht `payload.serverId` und sichtbare Server-IDs aus `PlayerView.servers`.
+- Subroutinen-/Encounter-Kontext darf über `targetRequirements[].sourceIceRef` oder das sichtbare `view.run.encounteredIce` abgeleitet werden.
+- Technische Felder werden nicht sichtbar ausgegeben; sie dienen nur zum Filtern vorhandener LegalActions.
+
+Lebenszyklus:
+
+- Auswahl wird bei `stateVersion`-Wechsel beibehalten, wenn dieselbe sichtbare Karte/dasselbe Objekt noch in der PlayerView vorhanden ist.
+- Auswahl wird gelöscht, wenn die Karte verschwindet, verdeckt wird, die Seite wechselt, ein Match endet oder eine Action aus diesem Kontext erfolgreich gesendet wurde.
+- Der Kontext zeigt einen leeren Zustand wie `Keine Aktion für diese Karte in diesem Fenster.`, wenn eine sichtbare ausgewählte Karte aktuell keine LegalActions hat.
+
+Hidden-Info-Grenzen:
+
+- Eigene Hand-/HQ-/Grip-Karten dürfen als Kontextquelle dienen, weil sie in der eigenen PlayerView sichtbar sind.
+- Gegnersicht auf verdeckte Corp-Karten darf keine kartenkonkreten Actions, Titel, Definition-IDs oder unterscheidbaren Kontextmenüs erhalten.
+- Kontextfilterung darf keine Actions aus Daten außerhalb von PlayerView, LegalActions, side-sicheren Events und lokalen UI-Einstellungen ableiten.
+- Wenn keine Karte ausgewählt ist, bleiben kartengebundene Handkartenaktionen aus der flachen Standardliste heraus, statt mehrdeutig angezeigt zu werden.
+
 ### Undo Panel
 
 Statt `Undo`:
@@ -94,12 +151,24 @@ Statt normalem Hauptlabel `Reconnect`:
 
 ### Platzierung
 
-V1.0.5-Cues dürfen nicht mittig als dauerhaftes Modal wirken. Empfohlen:
+V1.0.5-Cues dürfen in der Standardkonfiguration nicht mittig als dauerhaftes Modal wirken. Die Position soll aber lokal anpassbar sein, damit der Spieler das Overlay aus dem eigenen Blickfeld schieben kann.
 
-- Desktop: rechts oben oder oberhalb der rechten Detailspalte, ohne RunTimeline/ServerGrid zu verdecken.
-- Schmaler Viewport: kompakter Toast unter Topbar oder am unteren Rand, mit maximaler Breite und Auto-Dismiss.
+- Desktop-Default: rechts oben oder oberhalb der rechten Detailspalte, ohne RunTimeline/ServerGrid zu verdecken.
+- Schmaler-Viewport-Default: kompakter Toast unter Topbar oder am unteren Rand, mit maximaler Breite und Auto-Dismiss.
+- Zielumsetzung: Cue kann an einem klaren Drag-Handle gezogen werden; spätere Cues erscheinen dort wieder.
+- Presets sind zusätzlich Pflicht, damit Tastaturbedienung und Reset möglich bleiben: `Oben rechts`, `Oben links`, `Unten rechts`, `Unten links`, `Mitte`, `Zurücksetzen`.
+- Fallback, falls Drag in V1.0.5 technisch instabil bleibt: Presets alleine erfüllen den Mindestumfang.
+- Eine mittige Position ist nur als bewusste lokale Einstellung erlaubt, nicht als ungefragter Default.
 - Cue muss per Button dismissbar sein.
 - Cue darf Board-Highlights triggern, aber keine Layoutgröße des Boards verändern.
+- Gespeicherte Cue-Positionen sind lokale UI-Einstellungen; sie dürfen nicht in Server, Engine, Replay, StateHash oder Match-Payloads geschrieben werden.
+
+Persistenz- und Viewport-Regeln:
+
+- Empfohlener lokaler Schlüssel: `netrunner.actionCuePosition.v1`.
+- Custom-Positionen werden viewport-relativ gespeichert, z. B. als Prozentwerte, nicht als Matchdaten.
+- Beim Resize werden Positionen in den sichtbaren Bereich geklemmt; bei ungültigen gespeicherten Daten fällt die UI auf `Oben rechts` zurück.
+- Drag darf keine Textauswahl, Buttonklicks oder Dismiss-Aktion unbedienbar machen.
 
 ### Inhalt
 
@@ -139,6 +208,8 @@ Highlights dürfen nur auf abstrakte oder sichtbare Bereiche zeigen:
 | Decision | eigene Actions/Choice | gegnerische private Choice |
 
 Highlights sind kurz, ruhig und dürfen durch `prefers-reduced-motion` reduziert werden.
+
+Der aktive Run-Zielserver ist kein allgemeines Cue-Highlight, sondern ein eigener Boardzustand aus `PlayerView.run.attackedServerId`. Er muss eindeutig nur am angegriffenen Server erscheinen und darf nicht pauschal auf alle Server angewendet werden.
 
 ## Lokale Aufmerksamkeit
 
@@ -201,6 +272,7 @@ Schmaler Viewport:
 - linke Spalte, Board und rechte Details stapeln sich kontrolliert,
 - Actions bleiben vor reinem Chronicle-Detail erreichbar,
 - Cues sind kompakt und dismissbar,
+- gespeicherte Cue-Positionen werden in den sichtbaren Viewport geklemmt oder auf eine sichere Preset-Position zurückgesetzt,
 - Texte laufen nicht aus Buttons/Panels.
 
 ## Akzeptanz
@@ -209,6 +281,9 @@ Diese Spezifikation ist erfüllt, wenn:
 
 - normale aktive Spieltexte keine gesperrten technischen Hauptlabels mehr enthalten,
 - Cues kompakt, side-sicher und dismissbar sind,
+- Cues per Drag oder mindestens per Preset lokal positionierbar sind,
+- karten-/objektgebundene Actions erst im eindeutigen Auswahlkontext erscheinen,
+- der redundante BoardHeader entfernt oder durch echte Statusinformation ersetzt ist,
 - Action-/Undo-/Reconnect-/KI-Pacing-Controls deutsch und verständlich sind,
 - Audiooptionen kompakt bleiben,
 - Hidden-Info-, AI-Input-, Replay-/StateHash- und V1.0.4-Lifecycle-Verträge grün bleiben.

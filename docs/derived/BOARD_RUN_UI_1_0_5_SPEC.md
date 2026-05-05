@@ -70,9 +70,46 @@ RunTimeline besteht aus:
 - Headline: `Run auf <Serverlabel>` oder `Kein aktiver Run`.
 - Phasenleiste mit stabilen Segmenten: `Ziel`, `Annäherung`, `Begegnung`, `Brechen`, `Bewegung`, `Zugriff`, `Abschluss`.
 - Aktuelles Segment visuell markiert.
+- Visuelle Kopplung zum angegriffenen Server: Genau der Server mit `view.run.attackedServerId` erhält eine eindeutig erkennbare Run-Zielmarkierung.
 - Encounter-Fokus, wenn `view.run.encounteredIce` vorhanden ist.
 - Jack-out-Hinweis, wenn LegalActions `jack_out` enthalten.
 - Zugriff-Fortschritt, wenn `view.run.breach` side-sichere öffentliche Fortschrittsdaten enthält.
+
+### Ausrichtung
+
+Die bisher horizontale Timeline ist für V1.0.5 nicht zwingend. Damit die Umsetzung nicht blockiert, gilt aber eine klare erste Vorgabe: Die Standardumsetzung bleibt horizontal-kompakt und bekommt eine stärkere Richtungs-/Zielkopplung. Eine vertikale oder seitliche Darstellung ist ein erlaubter Ersatz, wenn sie in Desktop- und Schmalviewport-Smokes klar besser lesbar ist.
+
+Erlaubte Varianten:
+
+- horizontal über dem Serverbereich als V1.0.5-Default,
+- vertikal oder als Seitenleiste neben dem Runner-/Run-Bereich, wenn dadurch die Bewegung Richtung Corp-Server verständlicher wird,
+- responsive Mischung, z. B. horizontal auf schmalem Viewport und vertikal auf breitem Desktop, sofern keine Inhalte verdrängt werden.
+
+Entscheidungskriterien:
+
+- Actions und aktuelle Entscheidungen bleiben schneller erreichbar als Chronicle-Detail.
+- Runner-Rig wird nicht unlesbar zusammengedrückt.
+- Zentrale Server und aktiver Run-Zielrahmen bleiben sichtbar.
+- Text passt in alle Timeline-Segmente.
+- Wenn keine vertikale Variante umgesetzt wird, muss die horizontale Variante eine klare Richtung oder Verbindung zum angegriffenen Server zeigen.
+- Die finale Variante wird im Implementation oder Final Review kurz begründet.
+
+### Run-Zielmarkierung
+
+Während eines aktiven Runs muss die Boarddarstellung den angegriffenen Server klar markieren:
+
+- Die Markierung wird ausschließlich aus `PlayerView.run.attackedServerId` abgeleitet.
+- Genau ein Server darf den aktiven Run-Zielrahmen tragen.
+- Andere Server dürfen nicht denselben goldenen/aktiven Run-Rahmen erhalten, wenn sie nicht das Ziel des aktuellen Runs sind.
+- Kurzlebige Cue-, Hover- oder Fokus-Highlights dürfen zusätzlich existieren, müssen aber visuell vom aktiven Run-Zielrahmen unterscheidbar sein.
+- Die Zielmarkierung darf keine verdeckten Karteninformationen, künftigen Access-Queue-Titel oder zusätzliche Serverdaten anzeigen.
+- Bei Run-Ende wird die aktive Run-Zielmarkierung entfernt oder in einen kurzen, klar unterscheidbaren Abschlusszustand überführt.
+
+Implementierungsregel:
+
+- Verwende für das aktive Run-Ziel eine eigene visuelle Klasse oder Zustandsableitung, z. B. `activeRunTarget`, nicht die allgemeine Cue-Highlight-Klasse.
+- Wenn `view.run` fehlt oder der Zielserver in der PlayerView nicht vorhanden ist, wird kein aktiver Run-Zielrahmen gerendert.
+- Falls ein Cue zusätzlich denselben Server betrifft, dürfen beide Zustände kombiniert werden, müssen aber visuell unterscheidbar bleiben.
 
 ### Encounter-Fokus
 
@@ -153,6 +190,7 @@ Ein Server zeigt mindestens:
 - ICE-Lane.
 - Root-/Serverkarten-Lane.
 - Highlight-Zustand für Cues/Run.
+- Klare Rez-/Unrez-Zustände für installierte Corp-Karten, ohne gegnerische Hidden Info zu öffnen.
 
 ### ICE-Reihenfolge
 
@@ -164,6 +202,25 @@ Empfehlung:
 - Eindeutige Annäherungsrichtung markieren, z. B. `Runner nähert sich von außen`.
 - Keine Sortierung nach Titel, Rez-Status, Typ oder Kosten.
 - Keine Animation, die Kartenpositionen dauerhaft vertauscht.
+
+### Rez-/Unrez-Darstellung
+
+V1.0.5 soll den Unterschied zwischen gerezzten und ungerezzten installierten Corp-Karten klar sichtbar machen. Das ist eine reine Darstellung auf Basis der vorhandenen `VisibleCard.known`- und `VisibleCard.rezzed`-Informationen.
+
+V1.0.5-Standardumsetzung:
+
+- Corp-Sicht auf eigene ungerezzte ICE: Karte bleibt mit Titel sichtbar, erhält `Ungerezzt`-Chip, gedämpfte Darstellung und gestrichelten Rahmen.
+- Corp-Sicht auf eigene gerezzte ICE: normale aktive Kartendarstellung mit sichtbarem Titel, Stärke, Subtypen und Regeln; optional `Gerezzt`-Chip, wenn dadurch der Wechsel klarer wird.
+- Runner-Sicht auf ungerezzte Corp-ICE: einheitlicher verdeckter Platzhalter, keine Titel, keine Typen, keine Definition-ID, keine Bild-URL und keine kartenspezifische Unterscheidung.
+- Runner-Sicht auf gerezzte Corp-ICE: sichtbare Karte mit Titel, Stärke, Subtypen und Regeln.
+- Root-Karten folgen demselben Grundprinzip: Corp sieht eigene ungerezzte Karten mit klarer Unrez-Kennzeichnung; Runner sieht verdeckte Root-Karten weiterhin anonym bis Rez, Access oder andere side-sichere Reveal-Pfade greifen.
+
+Rotation ist erlaubt, aber nicht Pflicht:
+
+- Rotation ist nicht der V1.0.5-Default für Textkarten.
+- Falls 90-Grad-Drehung die räumliche Serverlogik verbessert und Text/Tooltip bedienbar bleiben, darf sie zusätzlich oder alternativ als Unrez- oder ICE-Lane-Konvention genutzt werden.
+- Falls Rotation auf Desktop oder schmalem Viewport zu schlechter Lesbarkeit, Überlappung oder instabilen Kartengrößen führt, bleibt die nicht rotierte Darstellung mit Status-Chip und eindeutigem Rahmen verbindlich.
+- Die finale Entscheidung wird im Implementation oder Final Review kurz begründet.
 
 ### Remote- und zentrale Server
 
@@ -240,8 +297,11 @@ V1.0.5-Board-/Run-UI darf nicht enthalten:
 Diese Spezifikation ist erfüllt, wenn:
 
 - RunTimeline die Phase mit deutschen Labels klar zeigt,
+- die RunTimeline-Standardausrichtung dokumentiert und browsergeprüft ist,
 - Jack-out-/Movement-Fenster verständlich sichtbar ist, wenn legal,
 - Encounter und Zugriff side-sicher fokussiert sind,
+- der aktive Run-Zielserver exklusiv markiert ist,
+- Corp-eigene ungerezzte Karten klar als ungerezzt erkennbar sind, ohne Runner-Hidden-Info zu öffnen,
 - Runner-Rig aus Corp-Sicht nach Programmen/Hardware/Ressourcen gruppiert ist,
 - HQ, F&E/R&D und Archive zentrale Server mit sicheren Counts und Lanes sind,
 - Layout und Cues auf Desktop und schmalem Viewport nicht kollidieren,

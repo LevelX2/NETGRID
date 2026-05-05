@@ -30,6 +30,17 @@ Status: Requirements-Freeze-Testmatrix
 | V105-T021 | Browser/Visual Viewports | V105-MUST-006, V105-MUST-010, V105-MUST-011 | Desktop und schmaler Viewport zeigen RunTimeline, Runner-Rig, zentrale Server, Actions, Zurücknehmen und Cues ohne unlesbare Überlappung oder auslaufende Buttons. |
 | V105-T022 | Browser/Playtest Runbook | V105-MUST-011 | `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md` existiert und enthält wiederholbare Schritte für KI, zwei Tabs, verdeckte Installation, Run, Reconnect und schmalen Viewport. |
 | V105-T023 | Scope/Regression Gate | V105-MUST-012 | `corepack pnpm lint`, `typecheck`, `test`, `build`, Web-/Server-Tests, Visibility-Vertrag und V1.0.4-Lifecycle-Regression bleiben grün; keine neuen Karten, Mechaniken, Assets oder Plattformfeatures. |
+| V105-T024 | Unit/Web Contextual Actions | V105-MUST-013 | Das permanente Action Panel trennt globale Aktionen von karten-/objektgebundenen Actions; ausgewählte eigene Karten zeigen nur Actions, die über `source` oder side-sichere Payload-Referenzen zu genau dieser Karte gehören. |
+| V105-T025 | Browser Smoke Corp ICE Hand Actions | V105-MUST-013, V105-MUST-010 | Bei mehreren ICE auf der Corp-Hand zeigt die Standardliste keine ununterscheidbaren `ICE installieren`-Serien; nach Klick auf ein bestimmtes ICE sind dessen Zieloptionen eindeutig sichtbar und ausführbar. |
+| V105-T026 | Unit/Web Cue Position Preference | V105-MUST-014, V105-MUST-004 | Cue-Position ist eine lokale UI-Einstellung, wird nicht an Server/Engine/Replay/StateHash weitergegeben, kann auf `Oben rechts` zurückgesetzt werden und fällt bei ungültigen Daten auf diesen Default zurück. |
+| V105-T027 | Browser/Visual Draggable Cue | V105-MUST-014, V105-MUST-010 | Cue-Overlay kann per Drag-Handle oder mindestens per Positionspreset verschoben werden; spätere Cues erscheinen an der lokalen Position, bleiben dismissbar und werden im schmalen Viewport nicht außerhalb des sichtbaren Bereichs angezeigt. |
+| V105-T028 | Unit/Web Run Target Highlight | V105-MUST-015, V105-MUST-006 | Die aktive Run-Zielmarkierung wird genau aus `PlayerView.run.attackedServerId` abgeleitet; bei aktivem Run hat genau ein Server den Run-Zielzustand. |
+| V105-T029 | Browser/Visual Run Target Frame | V105-MUST-015, V105-MUST-010 | Ein Run auf HQ, F&E/R&D, Archive oder Remote markiert sichtbar nur diesen Server; andere Server erhalten nicht denselben aktiven Run-Rahmen, Cue-/Hover-Highlights bleiben unterscheidbar. |
+| V105-T030 | Unit/Web BoardHeader Utility | V105-MUST-016, V105-MUST-005 | Der separate gerahmte BoardHeader mit bloßer Sicht-/Fenster-Wiederholung ist entfernt; falls ein neuer Header existiert, liefert er konkrete Aufgabe/Statusinformation. |
+| V105-T031 | Browser/Visual Timeline Orientation | V105-MUST-017, V105-MUST-006, V105-MUST-010 | Die horizontale V1.0.5-Default-Timeline oder eine begründet ersetzende vertikale/hybride Timeline ist auf Desktop und schmalem Viewport nutzbar und verdrängt Runner-Rig, Server, Actions und aktuelle Entscheidungen nicht. |
+| V105-T032 | Review Timeline Decision | V105-MUST-017 | Implementation oder Final Review dokumentiert kurz, ob horizontal, vertikal/seitlich oder hybrid gewählt wurde und warum. |
+| V105-T033 | Unit/Web Rez State Styling | V105-MUST-018, V105-MUST-008 | Card-/Server-Darstellung unterscheidet gerezzte und ungerezzte installierte Corp-Karten in der Corp-Sicht mit `Ungerezzt`-Chip, gedämpfter Darstellung und gestricheltem Rahmen, nutzt aber für Runner-Sicht auf ungerezzte Karten nur einheitliche verdeckte Platzhalter. |
+| V105-T034 | Browser/Visual ICE Rez Orientation | V105-MUST-018, V105-MUST-010, V105-MUST-012 | Corp sieht eigene ungerezzte ICE eindeutig als ungerezzt; Rotation ist optional und nur zulässig, wenn Text/Tooltip und Layout lesbar bleiben. Runner sieht vor Rez keine Titel/Typen/Bilder und nach Rez den sichtbaren Statuswechsel. |
 
 ## Pflichtchecks für Implementierung
 
@@ -50,6 +61,11 @@ Die Umsetzung sollte mindestens ergänzen:
 - Web-Unit-Test für RunTimeline-Labelmapping und gesperrte Rohlabels.
 - Web-Unit-Test für RunnerRig-Gruppierung.
 - Web-/Contract-Test, der `LegalActions`, `Runner View`, `Corp View`, `Approach`, `Encounter`, `Access` und `Breach` nicht mehr als normale Hauptlabels akzeptiert.
+- Web-Unit-Test für die Trennung von globalen Aktionen und karten-/objektgebundenen Kontextaktionen.
+- Web-Unit-Test für lokale Cue-Positionspräferenz, Reset und fehlende Server-/Replay-Wirkung.
+- Web-Unit-Test für exakt eine aktive Run-Zielmarkierung.
+- Web-/Contract-Test, der redundante BoardHeader-Rohtexte wie `Runner View`, `Corp View` und bloßes `Dein Fenster` aus der normalen aktiven Spieloberfläche entfernt oder auf konkrete Statusfunktion begrenzt.
+- Web-Unit-Test für Rez-/Unrez-Darstellung ohne Hidden-Info-Leak.
 - Visibility-Test für Runner-Rig- und zentrale Server-Darstellung ohne Hidden-Info-Leak.
 - Server-Regressionstest oder bestehender Testnachweis für `advance_ai`, KI-Pacing-Modi und Forfeit/Lifecycle-Schutz nach V1.0.4.
 
@@ -62,6 +78,12 @@ Falls noch kein automatisches Browser-E2E-Framework eingeführt wird, ist für V
 - verdeckte Corp-Installation ohne Titel-Leak.
 - Runner-Run mit RunTimeline und Encounter-/Zugriff-Fokus.
 - Reconnect/Reload ohne alte Cues/Sounds.
+- kontextuelle Karte-zu-Action-Auswahl für mehrere gleichartige Handkarten, insbesondere Corp-ICE-Installationen.
+- per Drag-Handle oder mindestens per Preset positionierbares Cue-Overlay mit lokal gemerkter Position.
+- eindeutiger aktiver Run-Zielrahmen für den angegriffenen Server.
+- entfernter redundanter BoardHeader oder neuer Header mit echter Statusfunktion.
+- horizontale Default-RunTimeline oder begründet ersetzte vertikale/hybride Ausrichtung mit Desktop-/Schmalviewport-Begründung.
+- Rez-/Unrez-Zustand von ICE und Root-Karten side-sicher unterscheidbar; Standard ist Chip plus Rahmen, Rotation nur bei bestandener Lesbarkeit.
 - zentrale Server und Archive-Counts je Seite.
 - schmaler Viewport ohne unlesbare Überlappung.
 
