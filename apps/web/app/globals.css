@@ -334,6 +334,13 @@ select {
   margin: 0;
 }
 
+.resumeSessionActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .entryTab {
   min-width: 0;
   min-height: 44px;

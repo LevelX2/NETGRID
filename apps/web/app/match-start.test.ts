@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { deriveMatchStart } from "./match-start";
 
-describe("V1.0.3 match start derivation", () => {
+describe("V1.0.4 match start derivation", () => {
   it("keeps Human-vs-Human side assignment server-readable", () => {
     expect(deriveMatchStart({ playMode: "human_vs_human", humanSideSelection: "random", humanAiSideSelection: "random" })).toMatchObject({
       technicalMode: "human_vs_human",

@@ -86,4 +86,4 @@ Die aktive Spieloberflaeche braucht einen eigenen UX-Pass, damit wichtige Inform
 
 ## Gate-Hinweis
 
-Vor Umsetzung braucht V1.0.4 einen kleinen Requirements-Freeze auf Basis von `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`, besonders fuer die Frage, wie aktive Aufgabe mit Engine, Replay, StateHash und Ergebnisdarstellung zusammenspielt.
+Der Requirements-Freeze wurde in `docs/derived/V1_0_4_REQUIREMENTS.md` festgehalten. Umsetzung soll auf `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md` und `docs/derived/V1_0_4_REQUIREMENTS.md` basieren.

@@ -9,6 +9,7 @@ import {
   type ActionReceipt,
   type AiTurnPresentationState,
   type GameResultSummary,
+  type LifecycleActionResult,
   type LobbyPayload,
   type SafeErrorPayload,
   type ServicePayload,
@@ -53,7 +54,7 @@ export type ServerWsMessage =
   | { type: "opponent_status"; payload: SidePayload["opponentStatus"] }
   | { type: "undo_request"; payload: NonNullable<SidePayload["pendingUndo"]> }
   | { type: "ai_turn"; payload: AiTurnPresentationState | null }
-  | { type: "match_finished"; payload: { winner: SidePayload["winner"]; finalStateHash: string; resultSummary?: GameResultSummary } }
+  | { type: "match_finished"; payload: { matchStatus: SidePayload["matchStatus"]; winner: SidePayload["winner"]; finalStateHash: string; resultSummary?: GameResultSummary } }
   | { type: "error"; payload: SafeErrorPayload }
   | { type: "pong"; payload: { clientTime: number; serverTime: number } };
 
@@ -305,6 +306,15 @@ export class NetrunnerRealtimeServer {
     this.scheduleCountdownFromPayload(result.actorPayload);
   }
 
+  broadcastLifecycle(result: LifecycleActionResult): void {
+    if (!result.ok) {
+      if (result.payload) this.broadcastPayload(result.payload);
+      return;
+    }
+    this.broadcastPayload(result.actorPayload);
+    if (result.opponentPayload) this.broadcastPayload(result.opponentPayload);
+  }
+
   private async handleClose(socket: WebSocket): Promise<void> {
     const context = this.findContext(socket);
     if (!context) return;
@@ -342,7 +352,12 @@ export class NetrunnerRealtimeServer {
   }
 
   private scheduleCountdownFromPayload(payload: ServicePayload): void {
-    if (!isLobbyPayload(payload) || payload.matchStatus !== "countdown" || !payload.startLobby?.countdownEndsAt) return;
+    if (!isLobbyPayload(payload) || payload.matchStatus !== "countdown" || !payload.startLobby?.countdownEndsAt) {
+      const existing = this.countdownTimers.get(payload.matchId);
+      if (existing) clearTimeout(existing);
+      this.countdownTimers.delete(payload.matchId);
+      return;
+    }
     const existing = this.countdownTimers.get(payload.matchId);
     if (existing) clearTimeout(existing);
     const delay = Math.max(0, new Date(payload.startLobby.countdownEndsAt).getTime() - Date.now());
@@ -377,7 +392,7 @@ export class NetrunnerRealtimeServer {
 
 export function createNetrunnerHttpServer(service = defaultService()): NetrunnerServerHandle {
   const realtime = new NetrunnerRealtimeServer(service);
-  const server = createServer((request, response) => void routeHttp(service, request, response));
+  const server = createServer((request, response) => void routeHttp(service, realtime, request, response));
   realtime.attach(server);
   return {
     server,
@@ -401,7 +416,7 @@ export async function startNetrunnerServer(options: { port?: number; host?: stri
   return { ...handle, url: `http://${host}:${port}` };
 }
 
-async function routeHttp(service: MultiplayerService, request: IncomingMessage, response: ServerResponse): Promise<void> {
+async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtimeServer, request: IncomingMessage, response: ServerResponse): Promise<void> {
   setCors(response);
   if (request.method === "OPTIONS") {
     response.writeHead(204);
@@ -505,6 +520,54 @@ async function routeHttp(service: MultiplayerService, request: IncomingMessage, 
         sendJson(response, "error" in reconnected ? 403 : 200, reconnected);
         return;
       }
+      if (request.method === "POST" && action === "cancel") {
+        const body = await readJson(request);
+        const side = body.side === "corp" ? "corp" : "runner";
+        const result = await service.cancelMatch({
+          matchId,
+          side,
+          sessionToken: bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : "")
+        });
+        realtime.broadcastLifecycle(result);
+        sendJson(response, result.ok ? 200 : 409, result);
+        return;
+      }
+      if (request.method === "POST" && action === "leave") {
+        const body = await readJson(request);
+        const side = body.side === "corp" ? "corp" : "runner";
+        const result = await service.leaveMatch({
+          matchId,
+          side,
+          sessionToken: bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : "")
+        });
+        realtime.broadcastLifecycle(result);
+        sendJson(response, result.ok ? 200 : 409, result);
+        return;
+      }
+      if (request.method === "POST" && action === "forfeit") {
+        const body = await readJson(request);
+        const side = body.side === "corp" ? "corp" : "runner";
+        const result = await service.forfeitMatch({
+          matchId,
+          side,
+          sessionToken: bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : "")
+        });
+        realtime.broadcastLifecycle(result);
+        sendJson(response, result.ok ? 200 : 409, result);
+        return;
+      }
+      if (request.method === "POST" && action === "recreate") {
+        const body = await readJson(request);
+        const side = body.side === "corp" ? "corp" : "runner";
+        const result = await service.recreateMatch(matchId, {
+          side,
+          sessionToken: bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : ""),
+          ...(typeof body.displayName === "string" ? { displayName: body.displayName } : {})
+        });
+        realtime.broadcastLifecycle(result);
+        sendJson(response, result.ok && result.newMatch ? 201 : result.ok ? 200 : 409, result.ok && result.newMatch ? result.newMatch : result);
+        return;
+      }
       if (request.method === "GET" && action === "bootstrap") {
         const side = url.searchParams.get("side") === "corp" ? "corp" : "runner";
         const sessionToken = bearerToken(request) ?? url.searchParams.get("sessionToken") ?? "";
@@ -583,7 +646,7 @@ function sendBootstrap(socket: WebSocket | undefined, payload: ServicePayload): 
   send(socket, { type: "opponent_status", payload: payload.opponentStatus });
   send(socket, { type: "ai_turn", payload: payload.aiTurnPresentation ?? null });
   if (payload.pendingUndo) send(socket, { type: "undo_request", payload: payload.pendingUndo });
-  if (payload.winner && payload.finalStateHash) send(socket, { type: "match_finished", payload: { winner: payload.winner, finalStateHash: payload.finalStateHash, ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {}) } });
+  if (payload.winner && payload.finalStateHash) send(socket, { type: "match_finished", payload: { matchStatus: payload.matchStatus, winner: payload.winner, finalStateHash: payload.finalStateHash, ...(payload.resultSummary ? { resultSummary: payload.resultSummary } : {}) } });
 }
 
 function isLobbyPayload(payload: ServicePayload): payload is LobbyPayload {

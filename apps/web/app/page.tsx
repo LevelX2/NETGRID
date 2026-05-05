@@ -6,6 +6,7 @@ import {
   Cable,
   Check,
   Clipboard,
+  Flag,
   CopyPlus,
   Download,
   Eye,
@@ -71,7 +72,7 @@ const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Shield;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
-const APP_STATUS_LABEL = "V1.0.3";
+const APP_STATUS_LABEL = "V1.0.4";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -79,7 +80,18 @@ const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
 
 let sharedAudioContext: AudioContext | null = null;
 
-type MatchStatus = "waiting_for_runner" | "waiting_for_corp" | "waiting_for_joiner_decks" | "ready_check" | "countdown" | "active" | "finished";
+type MatchStatus =
+  | "pending"
+  | "waiting_for_runner"
+  | "waiting_for_corp"
+  | "waiting_for_joiner_decks"
+  | "ready_check"
+  | "countdown"
+  | "active"
+  | "cancelled"
+  | "abandoned"
+  | "forfeited"
+  | "finished";
 type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
 type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
 type AiDifficulty = "easy" | "normal" | "hard";
@@ -107,8 +119,10 @@ type SeriesResultSummary = {
 
 type GameResultSummary = {
   winner: Winner;
+  winnerSide?: Side;
+  loserSide?: Side;
   viewerOutcome: "won" | "lost" | "draw";
-  reason: "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "unknown";
+  reason: "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "forfeit" | "unknown";
   matchFormat: MatchFormat;
   agendaPointsToWin: number;
   runnerAgendaPoints: number;
@@ -121,7 +135,18 @@ type GameResultSummary = {
   startedAt: string;
   finishedAt: string;
   finalStateHash: string;
+  finalEngineStateHash?: string;
   series?: SeriesResultSummary;
+};
+
+type LifecycleResultSummary = {
+  status: "cancelled" | "abandoned" | "forfeited";
+  reason: "cancel" | "leave" | "forfeit";
+  occurredAt: string;
+  actorSide: Side;
+  winnerSide?: Side;
+  loserSide?: Side;
+  finalEngineStateHash?: string;
 };
 
 type ClientPayload = {
@@ -132,7 +157,7 @@ type ClientPayload = {
   playerView: PlayerView;
   legalActions: LegalAction[];
   eventTail: PublicGameEvent[];
-  opponentStatus: { side: Side; connected: boolean };
+  opponentStatus: { side: Side; connected: boolean; displayName?: string };
   pendingUndo?: {
     undoRequestId: string;
     requestedBy: Side;
@@ -148,6 +173,7 @@ type ClientPayload = {
   winner?: Winner;
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
+  lifecycleResult?: LifecycleResultSummary;
 };
 
 type LobbyParticipant = {
@@ -187,7 +213,8 @@ type LobbyClientPayload = {
   matchVersion: number;
   side: Side;
   eventTail: PublicGameEvent[];
-  opponentStatus: { side: Side; connected: boolean };
+  opponentStatus: { side: Side; connected: boolean; displayName?: string };
+  lifecycleResult?: LifecycleResultSummary;
   pendingDeckHandshake?: {
     required: boolean;
     message: string;
@@ -206,7 +233,14 @@ type SessionInfo = {
   pendingDeckHandshake?: boolean;
 };
 
-type RecentSessionInfo = SessionInfo & { savedAt: string };
+type RecentSessionInfo = {
+  matchId: string;
+  side: Side;
+  displayName: string;
+  opponentDisplayName?: string;
+  matchStatus?: MatchStatus;
+  savedAt: string;
+};
 
 type ServerMessage =
   | { type: "state_update"; payload: { matchStatus: MatchStatus; matchVersion: number; playerView: PlayerView } }
@@ -216,7 +250,7 @@ type ServerMessage =
   | { type: "opponent_status"; payload: ClientPayload["opponentStatus"] }
   | { type: "undo_request"; payload: NonNullable<ClientPayload["pendingUndo"]> }
   | { type: "ai_turn"; payload: ClientPayload["aiTurnPresentation"] | null }
-  | { type: "match_finished"; payload: { winner: Winner; finalStateHash: string; resultSummary?: GameResultSummary } }
+  | { type: "match_finished"; payload: { matchStatus: MatchStatus; winner: Winner; finalStateHash: string; resultSummary?: GameResultSummary } }
   | { type: "error"; payload: { code: string; message: string; playerView?: PlayerView } }
   | { type: "action_receipt"; payload: { accepted: boolean; stateVersionAfter: number; errorCode?: string } }
   | { type: "choice_request"; payload: { choice: null } }
@@ -261,6 +295,15 @@ type JoinMatchResponse = {
   resultSummary?: GameResultSummary;
   error?: { message: string };
 };
+
+type LifecycleActionResponse =
+  | {
+      ok: true;
+      actorPayload: ClientPayload | LobbyClientPayload;
+      opponentPayload?: ClientPayload | LobbyClientPayload;
+      newMatch?: CreateMatchResponse;
+    }
+  | { ok?: false; error: { message: string } };
 
 type AiSimulationSummary = {
   seed: string;
@@ -1136,6 +1179,8 @@ export default function Page() {
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
+  const opponentDisplayName = payload?.opponentStatus.displayName ?? lobby?.opponentStatus.displayName ?? null;
+  const canForfeit = Boolean(payload && payload.matchStatus === "active" && !payload.winner);
   const activeCueHighlight = currentActionCue?.highlight ?? null;
   const hasDecisionCue = Boolean(currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length));
   const effectiveCurrentCorpSnapshot = currentCorpSnapshotForSetup();
@@ -1492,23 +1537,67 @@ export default function Page() {
     setNotice("Reconnect abgeschlossen.");
   };
 
+  function applyRemotePayload(remotePayload: ClientPayload | LobbyClientPayload) {
+    if ("playerView" in remotePayload) {
+      setPayload(remotePayload);
+      setLobby(null);
+    } else {
+      setPayload(null);
+      setLobby(remotePayload);
+    }
+    if (session) {
+      rememberRecentSession(session, remotePayload);
+      setRecentSession(loadRecentSession());
+    }
+    if (isInvalidatingTerminalStatus(remotePayload.matchStatus)) {
+      window.sessionStorage.removeItem(SESSION_KEY);
+      socketRef.current?.close();
+      setConnection("offline");
+    }
+  }
+
   const resumeRecentSession = async () => {
     if (!recentSession) return;
-    const nextSession: SessionInfo = { ...recentSession };
-    persistSession(nextSession);
+    const nextSession = loadStoredSession();
+    if (!nextSession || nextSession.matchId !== recentSession.matchId || nextSession.side !== recentSession.side) {
+      setEntryTab("play");
+      setMode("join");
+      setJoinMatchId(recentSession.matchId);
+      setJoinToken("");
+      setNotice("Fortsetzen braucht ein Token aus diesem Tab. Für Reconnect bitte den Link oder Token erneut eintragen.");
+      return;
+    }
     setSession(nextSession);
     setRecentSession(null);
-    setNotice("Letzte Sitzung wird wieder verbunden.");
+    setNotice("Letzte Sitzung wird fortgesetzt.");
     const bootstrapped = await bootstrap(nextSession);
     if (bootstrapped && "playerView" in bootstrapped) {
       setPayload(bootstrapped);
       setLobby(null);
+      rememberRecentSession(nextSession, bootstrapped);
     } else if (bootstrapped) {
       setPayload(null);
       setLobby(bootstrapped);
+      rememberRecentSession(nextSession, bootstrapped);
     } else {
       setNotice("Letzte Sitzung konnte nicht geladen werden.");
     }
+  };
+
+  const reconnectFromRecentSession = () => {
+    if (!recentSession) return;
+    setEntryTab("play");
+    setMode("join");
+    setJoinMatchId(recentSession.matchId);
+    setJoinToken("");
+    setNotice("Reconnect vorbereitet. Bitte den aktuellen Join- oder Reconnect-Token eintragen.");
+  };
+
+  const discardRecentSession = () => {
+    if (!recentSession) return;
+    removeRecentSession(recentSession);
+    setRecentSession(loadRecentSession());
+    setNotice("Lokaler Sitzungseintrag verworfen.");
   };
 
   const submitAction = (action: LegalAction) => {
@@ -1537,14 +1626,106 @@ export default function Page() {
     socketRef.current.send(JSON.stringify({ type: "cancel_countdown", payload: {} }));
   };
 
-  const returnToSetupFromLobby = () => {
-    if (session && socketRef.current?.readyState === WebSocket.OPEN) {
-      socketRef.current.send(JSON.stringify({ type: "set_ready", payload: { ready: false } }));
-      socketRef.current.send(JSON.stringify({ type: "cancel_countdown", payload: {} }));
+  const cancelMatchLifecycle = async () => {
+    if (!session) return;
+    const result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/cancel`, {
+      side: session.side,
+      sessionToken: session.sessionToken
+    });
+    if (!result.ok) {
+      setNotice(result.error.message);
+      return;
     }
-    leaveMatch();
+    applyRemotePayload(result.actorPayload);
+    setNotice("Match abgebrochen. Der alte Link und die alten Tokens sind ungültig.");
+  };
+
+  const leaveMatchLifecycle = async () => {
+    if (!session) {
+      leaveMatch();
+      return;
+    }
+    const result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/leave`, {
+      side: session.side,
+      sessionToken: session.sessionToken
+    });
+    if (!result.ok) {
+      setNotice(result.error.message);
+      return;
+    }
+    applyRemotePayload(result.actorPayload);
+    if (result.actorPayload.matchStatus === "pending") {
+      leaveMatch();
+      setEntryTab("play");
+      setNotice("Du hast die noch nicht aktive Lobby verlassen.");
+      return;
+    }
+    setNotice("Lobby verlassen. Das Match ist jetzt terminal abgebrochen.");
+  };
+
+  const forfeitMatch = async () => {
+    if (!session || !payload || payload.matchStatus !== "active" || payload.winner) return;
+    if (!window.confirm("Möchtest Du dieses Spiel wirklich aufgeben?")) return;
+    const result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/forfeit`, {
+      side: session.side,
+      sessionToken: session.sessionToken
+    });
+    if (!result.ok) {
+      setNotice(result.error.message);
+      return;
+    }
+    applyRemotePayload(result.actorPayload);
+    setNotice("Spiel aufgegeben. Der Engine-State bleibt der letzte echte Spielzustand.");
+  };
+
+  const recreateMatch = async () => {
+    if (!session) return;
+    const recreated = await postJson<CreateMatchResponse | LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/recreate`, {
+      side: session.side,
+      sessionToken: session.sessionToken,
+      displayName: session.displayName
+    });
+    if ("error" in recreated && recreated.error) {
+      setNotice(recreated.error.message);
+      return;
+    }
+    if (!("matchId" in recreated)) {
+      setNotice("Neu erstellen ist für dieses Match gerade nicht möglich.");
+      return;
+    }
+    const nextSession: SessionInfo = {
+      matchId: recreated.matchId,
+      side: recreated.hostSide,
+      sessionToken: recreated.hostSessionToken,
+      reconnectToken: recreated.hostReconnectToken,
+      webSocketUrl: recreated.webSocketUrl,
+      displayName: session.displayName,
+      ...(recreated.pendingDeckHandshake ? { pendingDeckHandshake: true } : {}),
+      ...(recreated.joinUrl ? { joinUrl: recreated.joinUrl } : {})
+    };
+    persistSession(nextSession);
+    setSession(nextSession);
+    setDismissedResultKey(null);
+    if (recreated.lobby || recreated.pendingDeckHandshake || !recreated.playerView) {
+      setPayload(null);
+      setLobby(lobbyFromInitialResponse(recreated, recreated.hostSide));
+    } else {
+      setPayload(fromInitialResponse(recreated, recreated.hostSide));
+      setLobby(null);
+    }
     setEntryTab("play");
-    setNotice("Zurück in der Auswahl. Du kannst Decks oder Startoptionen ändern und das Match neu erstellen.");
+    setNotice(recreated.joinUrl ? "Neues Match erstellt. Teile den neuen Join-Link." : "Neues Match erstellt.");
+  };
+
+  const returnToSetupFromLobby = () => {
+    if (!session || !lobby) {
+      leaveMatch();
+      setEntryTab("play");
+      return;
+    }
+    const isHost = lobby.startLobby ? playerSlotForSide(lobby.startLobby, lobby.side) === "player_a" : true;
+    if (isHost) void cancelMatchLifecycle();
+    else void leaveMatchLifecycle();
   };
 
   const sendLobbyChat = () => {
@@ -1842,6 +2023,7 @@ export default function Page() {
     if (message.type === "lobby_update") {
       setLobby(message.payload);
       setPayload(null);
+      if (session) rememberRecentSession(session, message.payload);
       return;
     }
     if (message.type === "state_update") {
@@ -1884,6 +2066,7 @@ export default function Page() {
     }
     if (message.type === "opponent_status") {
       setPayload((current) => (current ? { ...current, opponentStatus: message.payload } : current));
+      setLobby((current) => (current ? { ...current, opponentStatus: message.payload } : current));
       return;
     }
     if (message.type === "ai_turn") {
@@ -1907,7 +2090,7 @@ export default function Page() {
               winner: message.payload.winner,
               finalStateHash: message.payload.finalStateHash,
               ...(message.payload.resultSummary ? { resultSummary: message.payload.resultSummary } : {}),
-              matchStatus: "finished"
+              matchStatus: message.payload.matchStatus
             }
           : current
       );
@@ -1968,6 +2151,10 @@ export default function Page() {
               connection={connection}
               onReady={setReady}
               onCancel={cancelCountdown}
+              onCancelMatch={cancelMatchLifecycle}
+              onLeaveMatch={leaveMatchLifecycle}
+              onRecreate={recreateMatch}
+              onDiscardLocal={leaveMatch}
               onReturnToSetup={returnToSetupFromLobby}
               onChatText={setLobbyChatText}
               onSendChat={sendLobbyChat}
@@ -1980,12 +2167,26 @@ export default function Page() {
               <div>
                 <p className="eyebrow">Letzte Sitzung</p>
                 <h2>Match {recentSession.matchId}</h2>
-                <p className="meta">{sideLabel(recentSession.side)} · {recentSession.displayName}</p>
+                <p className="meta">
+                  {sideLabel(recentSession.side)} · {recentSession.displayName}
+                  {recentSession.opponentDisplayName ? ` · gegen ${recentSession.opponentDisplayName}` : ""}
+                  {recentSession.matchStatus ? ` · ${recentSession.matchStatus}` : ""}
+                </p>
               </div>
-              <button className="button primary" onClick={resumeRecentSession} type="button">
-                <Cable size={15} />
-                Wieder verbinden
-              </button>
+              <div className="resumeSessionActions">
+                <button className="button primary" onClick={resumeRecentSession} type="button" disabled={!storedSessionMatches(recentSession)}>
+                  <Cable size={15} />
+                  Fortsetzen
+                </button>
+                <button className="button" onClick={reconnectFromRecentSession} type="button">
+                  <Link2 size={15} />
+                  Reconnect über Link
+                </button>
+                <button className="button" onClick={discardRecentSession} type="button">
+                  <Trash2 size={15} />
+                  Verwerfen
+                </button>
+              </div>
             </section>
           ) : null}
           {entryTab === "play" && !showingStartLobby ? (
@@ -2279,7 +2480,7 @@ export default function Page() {
   return (
     <main className="app" data-theme={colorScheme}>
       <header className="topbar">
-        <Brand subtitle={`${APP_STATUS_LABEL} · ${session.side === "runner" ? "Runner" : "Corp"}`} />
+        <Brand subtitle={`${APP_STATUS_LABEL} · ${session.side === "runner" ? "Runner" : "Corp"}${opponentDisplayName ? ` gegen ${opponentDisplayName}` : ""}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
           <div className="audioMenu">
@@ -2302,9 +2503,13 @@ export default function Page() {
             <Cable size={16} />
             Reconnect
           </button>
-          <button className="button" onClick={leaveMatch} title="Match verlassen">
+          <button className="button dangerButton" onClick={forfeitMatch} disabled={!canForfeit} title="Spiel aufgeben">
+            <Flag size={16} />
+            Aufgeben
+          </button>
+          <button className="button" onClick={leaveMatch} title="Lokale Sitzung verwerfen">
             <RotateCcw size={16} />
-            Neu
+            Verwerfen
           </button>
         </div>
       </header>
@@ -2312,6 +2517,7 @@ export default function Page() {
       <div className="matchStrip">
         <span>{payload.matchStatus}</span>
         <span>Match {payload.matchId}</span>
+        <span>Gegenüber {opponentDisplayName ?? sideLabel(payload.opponentStatus.side)}</span>
         <span>Version {payload.matchVersion}</span>
         <span>State {activeView.stateVersion}</span>
         <span>{notice}</span>
@@ -2320,7 +2526,7 @@ export default function Page() {
 
       <div className="main">
         <aside className="column panel sidePanel">
-          <OpponentPanel view={activeView} connected={payload.opponentStatus.connected} />
+          <OpponentPanel view={activeView} connected={payload.opponentStatus.connected} {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})} />
           <AiPacingControls
             presentation={payload.aiTurnPresentation}
             mode={localAiPacingMode}
@@ -2400,6 +2606,7 @@ export default function Page() {
           }}
           onNewMatch={leaveMatch}
           nextSeriesPending={seriesTransitioning}
+          {...(opponentDisplayName ? { opponentName: opponentDisplayName } : {})}
           {...(resultSummary.series?.nextAvailable ? { onNextSeriesGame: startNextSeriesGame } : {})}
         />
       ) : null}
@@ -2437,6 +2644,10 @@ function StartLobbyPanel({
   connection,
   onReady,
   onCancel,
+  onCancelMatch,
+  onLeaveMatch,
+  onRecreate,
+  onDiscardLocal,
   onReturnToSetup,
   onChatText,
   onSendChat,
@@ -2448,6 +2659,10 @@ function StartLobbyPanel({
   connection: "offline" | "connecting" | "online";
   onReady: (ready: boolean) => void;
   onCancel: () => void;
+  onCancelMatch: () => void;
+  onLeaveMatch: () => void;
+  onRecreate: () => void;
+  onDiscardLocal: () => void;
   onReturnToSetup: () => void;
   onChatText: (value: string) => void;
   onSendChat: () => void;
@@ -2461,6 +2676,9 @@ function StartLobbyPanel({
   const selfReady = self?.ready ?? false;
   const countdownActive = lobby.matchStatus === "countdown" && Boolean(start?.countdownEndsAt);
   const opponentReady = opponent?.ready ?? false;
+  const terminal = isInvalidatingTerminalStatus(lobby.matchStatus) || lobby.matchStatus === "forfeited" || lobby.matchStatus === "finished";
+  const isHost = selfPlayer === "player_a";
+  const opponentName = lobby.opponentStatus.displayName ?? opponent?.displayName ?? "Gegenüber";
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const element = chatMessagesRef.current;
@@ -2470,15 +2688,29 @@ function StartLobbyPanel({
     <section className="startLobbyPanel">
       <div className="startLobbyHeader">
         <div>
-          <p className="eyebrow">Startbereitschaftslobby</p>
-          <h2>{start ? `Du startest als ${sideLabel(lobby.side)}` : "Match erstellt"}</h2>
+          <p className="eyebrow">{terminal ? "Terminaler Matchstatus" : "Startbereitschaftslobby"}</p>
+          <h2>{terminal ? terminalLobbyTitle(lobby.matchStatus, lobby.lifecycleResult) : start ? `Du startest als ${sideLabel(lobby.side)}` : "Match erstellt"}</h2>
+          <p className="meta">{opponentName ? `Gegenüber: ${opponentName}` : ""}</p>
         </div>
         <div className="startLobbyHeaderActions">
           <span className={`statusPill ${connection}`}>{connection === "online" ? "online" : connection === "connecting" ? "verbindet" : "offline"}</span>
-          <button className="button subtle" onClick={onReturnToSetup} type="button">
-            <RotateCcw size={15} />
-            Zurück zur Auswahl
-          </button>
+          {terminal ? (
+            <>
+              <button className="button primary" onClick={onRecreate} type="button">
+                <CopyPlus size={15} />
+                Neu erstellen
+              </button>
+              <button className="button subtle" onClick={onDiscardLocal} type="button">
+                <Trash2 size={15} />
+                Verwerfen
+              </button>
+            </>
+          ) : (
+            <button className="button subtle" onClick={onReturnToSetup} type="button">
+              <RotateCcw size={15} />
+              Zurück zur Auswahl
+            </button>
+          )}
         </div>
       </div>
       {joinUrl && lobby.pendingDeckHandshake ? (
@@ -2490,7 +2722,9 @@ function StartLobbyPanel({
           </button>
         </div>
       ) : null}
-      {start ? (
+      {terminal ? (
+        <p className="muted">{terminalLobbyMessage(lobby.matchStatus, lobby.lifecycleResult)}</p>
+      ) : start ? (
         <>
           <div className="lobbyFacts">
             <span>{matchFormatLabel(start.matchFormat)}</span>
@@ -2516,6 +2750,10 @@ function StartLobbyPanel({
                 Countdown abbrechen
               </button>
             ) : null}
+            <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" disabled={connection !== "online"}>
+              <X size={15} />
+              {isHost ? "Match abbrechen" : "Lobby verlassen"}
+            </button>
             <span className="countdownText">{countdownActive ? `Countdown bis ${formatLobbyTime(start.countdownEndsAt)}` : "Startet automatisch, sobald beide bereit sind."}</span>
           </div>
           <div className="lobbyChat">
@@ -2546,7 +2784,15 @@ function StartLobbyPanel({
           </div>
         </>
       ) : (
-        <p className="muted">{lobby.pendingDeckHandshake?.message ?? "Die Lobby wird vorbereitet."}</p>
+        <>
+          <p className="muted">{lobby.pendingDeckHandshake?.message ?? "Die Lobby wird vorbereitet."}</p>
+          <div className="lobbyActions">
+            <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button">
+              <X size={15} />
+              {isHost ? "Match abbrechen" : "Lobby verlassen"}
+            </button>
+          </div>
+        </>
       )}
     </section>
   );
@@ -2653,6 +2899,7 @@ function GameOverModal({
   onDismiss,
   onNewMatch,
   onNextSeriesGame,
+  opponentName,
   nextSeriesPending = false
 }: {
   result: GameResultSummary;
@@ -2660,6 +2907,7 @@ function GameOverModal({
   onDismiss(): void;
   onNewMatch(): void;
   onNextSeriesGame?: () => void;
+  opponentName?: string;
   nextSeriesPending?: boolean;
 }) {
   const outcomeText =
@@ -2705,7 +2953,7 @@ function GameOverModal({
         ) : null}
         <div className="gameOverFooter">
           <div>
-            <span>{result.winner === "draw" ? "Draw" : result.winner === side ? "Deine Seite gewinnt" : "Gegenseite gewinnt"}</span>
+            <span>{result.winner === "draw" ? "Draw" : result.winner === side ? "Deine Seite gewinnt" : `${opponentName ?? "Gegenseite"} gewinnt`}</span>
             <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
           </div>
           <div className="gameOverActions">
@@ -2738,7 +2986,44 @@ function resultReasonLabel(reason: GameResultSummary["reason"]): string {
   if (reason === "corp_deck_empty") return "Die Corp konnte keine Karte mehr ziehen.";
   if (reason === "flatline") return "Der Runner wurde flatlined.";
   if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
+  if (reason === "forfeit") return "Das Spiel wurde durch Aufgabe beendet.";
   return "Das Spiel wurde abgeschlossen.";
+}
+
+function terminalLobbyTitle(status: MatchStatus, result?: LifecycleResultSummary): string {
+  if (status === "cancelled") return "Match abgebrochen";
+  if (status === "abandoned") return "Lobby verlassen";
+  if (status === "forfeited") return result?.loserSide ? `${sideLabel(result.loserSide)} hat aufgegeben` : "Spiel aufgegeben";
+  if (status === "finished") return "Spiel abgeschlossen";
+  return "Match nicht mehr aktiv";
+}
+
+function terminalLobbyMessage(status: MatchStatus, result?: LifecycleResultSummary): string {
+  if (status === "cancelled") return "Der Host hat dieses Match beendet. Der alte Join-Link und die alten Tokens sind ungültig.";
+  if (status === "abandoned") return "Die Gegenseite hat die Lobby verlassen. Dieses Match springt nicht in die Bereitschaftslobby zurück.";
+  if (status === "forfeited") return result?.winnerSide ? `${sideLabel(result.winnerSide)} gewinnt durch Aufgabe. Der Engine-State bleibt unverändert.` : "Das Spiel wurde durch Aufgabe beendet.";
+  if (status === "finished") return "Das Spiel wurde regelgerecht beendet.";
+  return "Dieser Matchzustand kann nicht fortgesetzt werden.";
+}
+
+function isInvalidatingTerminalStatus(status: MatchStatus): boolean {
+  return status === "cancelled" || status === "abandoned";
+}
+
+function isKnownMatchStatus(status: string): status is MatchStatus {
+  return (
+    status === "pending" ||
+    status === "waiting_for_runner" ||
+    status === "waiting_for_corp" ||
+    status === "waiting_for_joiner_decks" ||
+    status === "ready_check" ||
+    status === "countdown" ||
+    status === "active" ||
+    status === "cancelled" ||
+    status === "abandoned" ||
+    status === "forfeited" ||
+    status === "finished"
+  );
 }
 
 function seriesStatusText(series: SeriesResultSummary): string {
@@ -4063,23 +4348,17 @@ function ConnectionBadge({ text, state }: { text: string; state: "offline" | "co
   return <span className={`connection ${state}`}>{text}</span>;
 }
 
-function OpponentPanel({ view, connected }: { view: PlayerView; connected: boolean }) {
+function OpponentPanel({ view, connected, displayName }: { view: PlayerView; connected: boolean; displayName?: string }) {
   const side = opponentSide(view.side);
   return (
     <section className="section">
-      <h2>{sideLabel(side)}</h2>
+      <h2>{displayName ? `${displayName} · ${sideLabel(side)}` : sideLabel(side)}</h2>
       <div className="stats">
         <Stat label="Credits" value={view.opponent.credits} />
         <Stat label="Clicks" value={view.opponent.clicks} />
         <Stat label="Agenda" value={view.opponent.agendaPoints} />
         {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} /> : null}
       </div>
-      {view.deckMetadata ? (
-        <div className="deckMini">
-          <span>{view.deckMetadata.opponent.deckName}</span>
-          <small>{view.deckMetadata.opponent.deckHash}</small>
-        </div>
-      ) : null}
       <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {view.activeSide === side ? "Aktiv" : "Wartet"}</p>
     </section>
   );
@@ -4242,7 +4521,7 @@ function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientP
   const winner = response.winner ?? response.playerView.winner;
   const payload: ClientPayload = {
     matchId: response.matchId,
-    matchStatus: response.mode === "human_vs_human" ? (response.hostSide === "runner" ? "waiting_for_corp" : "waiting_for_runner") : "active",
+    matchStatus: response.matchStatus ?? (response.mode === "human_vs_human" ? "pending" : "active"),
     matchVersion: response.matchVersion,
     side,
     playerView: response.playerView,
@@ -4262,7 +4541,7 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
   const winner = response.winner ?? response.playerView.winner;
   const payload: ClientPayload = {
     matchId: response.matchId,
-    matchStatus: "active",
+    matchStatus: response.matchStatus ?? "active",
     matchVersion: response.matchVersion,
     side: response.side,
     playerView: response.playerView,
@@ -4280,7 +4559,7 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
 function lobbyFromInitialResponse(response: CreateMatchResponse, side: Side): LobbyClientPayload {
   return {
     matchId: response.matchId,
-    matchStatus: response.matchStatus ?? "waiting_for_joiner_decks",
+    matchStatus: response.matchStatus ?? "pending",
     matchVersion: response.matchVersion,
     side,
     eventTail: [],
@@ -4458,11 +4737,26 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
   }
 }
 
-function persistSession(session: SessionInfo) {
+function persistSession(session: SessionInfo, remotePayload?: ClientPayload | LobbyClientPayload) {
   window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  rememberRecentSession(session, remotePayload);
+}
+
+function rememberRecentSession(session: SessionInfo, remotePayload?: ClientPayload | LobbyClientPayload) {
   const recent = loadRecentSessions().filter((candidate) => !(candidate.matchId === session.matchId && candidate.side === session.side));
-  const next: RecentSessionInfo[] = [{ ...session, savedAt: new Date().toISOString() }, ...recent].slice(0, 4);
+  const next: RecentSessionInfo[] = [safeRecentSession(session, remotePayload), ...recent].slice(0, 4);
   window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(next));
+}
+
+function safeRecentSession(session: SessionInfo, remotePayload?: ClientPayload | LobbyClientPayload): RecentSessionInfo {
+  return {
+    matchId: session.matchId,
+    side: session.side,
+    displayName: session.displayName,
+    ...(remotePayload?.opponentStatus.displayName ? { opponentDisplayName: remotePayload.opponentStatus.displayName } : {}),
+    ...(remotePayload?.matchStatus ? { matchStatus: remotePayload.matchStatus } : {}),
+    savedAt: new Date().toISOString()
+  };
 }
 
 function loadRecentSession(): RecentSessionInfo | null {
@@ -4471,17 +4765,60 @@ function loadRecentSession(): RecentSessionInfo | null {
 
 function loadRecentSessions(): RecentSessionInfo[] {
   try {
-    const parsed = JSON.parse(window.localStorage.getItem(RECENT_SESSIONS_KEY) ?? "[]") as RecentSessionInfo[];
-    return parsed
-      .filter((session) => typeof session.matchId === "string" && (session.side === "runner" || session.side === "corp") && typeof session.reconnectToken === "string")
-      .sort((left, right) => right.savedAt.localeCompare(left.savedAt));
+    const parsed = JSON.parse(window.localStorage.getItem(RECENT_SESSIONS_KEY) ?? "[]") as unknown[];
+    const sanitized = parsed
+      .map(sanitizeRecentSession)
+      .filter((session): session is RecentSessionInfo => Boolean(session))
+      .sort((left, right) => right.savedAt.localeCompare(left.savedAt))
+      .slice(0, 4);
+    if (sanitized.length > 0) window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(sanitized));
+    else window.localStorage.removeItem(RECENT_SESSIONS_KEY);
+    return sanitized;
   } catch {
     window.localStorage.removeItem(RECENT_SESSIONS_KEY);
     return [];
   }
 }
 
-function removeRecentSession(session: SessionInfo): void {
+function sanitizeRecentSession(value: unknown): RecentSessionInfo | null {
+  if (!value || typeof value !== "object") return null;
+  const candidate = value as Record<string, unknown>;
+  if (typeof candidate.matchId !== "string") return null;
+  if (candidate.side !== "runner" && candidate.side !== "corp") return null;
+  const savedAt = typeof candidate.savedAt === "string" ? candidate.savedAt : new Date().toISOString();
+  const displayName = typeof candidate.displayName === "string" && candidate.displayName.trim() ? candidate.displayName : "Du";
+  const matchStatus = typeof candidate.matchStatus === "string" && isKnownMatchStatus(candidate.matchStatus) ? candidate.matchStatus : undefined;
+  const opponentDisplayName = typeof candidate.opponentDisplayName === "string" && candidate.opponentDisplayName.trim() ? candidate.opponentDisplayName : undefined;
+  return {
+    matchId: candidate.matchId,
+    side: candidate.side,
+    displayName,
+    ...(opponentDisplayName ? { opponentDisplayName } : {}),
+    ...(matchStatus ? { matchStatus } : {}),
+    savedAt
+  };
+}
+
+function loadStoredSession(): SessionInfo | null {
+  try {
+    const stored = window.sessionStorage.getItem(SESSION_KEY);
+    if (!stored) return null;
+    const parsed = JSON.parse(stored) as SessionInfo;
+    if (!parsed.matchId || !parsed.sessionToken || !parsed.reconnectToken || (parsed.side !== "runner" && parsed.side !== "corp")) return null;
+    return parsed;
+  } catch {
+    window.sessionStorage.removeItem(SESSION_KEY);
+    return null;
+  }
+}
+
+function storedSessionMatches(recent: RecentSessionInfo | null): boolean {
+  if (!recent) return false;
+  const stored = loadStoredSession();
+  return Boolean(stored && stored.matchId === recent.matchId && stored.side === recent.side);
+}
+
+function removeRecentSession(session: Pick<RecentSessionInfo | SessionInfo, "matchId" | "side">): void {
   const next = loadRecentSessions().filter((candidate) => !(candidate.matchId === session.matchId && candidate.side === session.side));
   if (next.length > 0) window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(next));
   else window.localStorage.removeItem(RECENT_SESSIONS_KEY);

@@ -198,9 +198,9 @@ describe("MVP 0.2 multiplayer service", () => {
     if (!joinToken) throw new Error("Missing join token");
     const pending = await service.loadForTest(created.matchId);
 
-    expect(created.matchStatus).toBe("waiting_for_joiner_decks");
+    expect(created.matchStatus).toBe("pending");
     expect(created.pendingDeckHandshake).toBe(true);
-    expect(pending?.match.status).toBe("waiting_for_joiner_decks");
+    expect(pending?.match.status).toBe("pending");
     expect(pending?.gameState).toBeFalsy();
     expect(JSON.stringify(pending?.match.deckSetup)).not.toContain("cards");
     expect(pending?.startLobby?.countdownSeconds).toBe(5);
@@ -265,6 +265,173 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(active?.match.status).toBe("active");
     expect(active?.gameState).toBeTruthy();
     expect(active?.startLobby).toBeUndefined();
+  });
+
+  it("handles V1.0.4 host cancel from pending, ready_check and countdown as terminal cancelled", async () => {
+    const pending = await pendingDeckMatch("v104-cancel-pending");
+    const pendingCancel = await pending.service.cancelMatch({
+      matchId: pending.created.matchId,
+      side: pending.created.hostSide,
+      sessionToken: pending.created.hostSessionToken
+    });
+    expect(pendingCancel.ok).toBe(true);
+    if (!pendingCancel.ok) throw new Error(pendingCancel.error.message);
+    expect(pendingCancel.actorPayload.matchStatus).toBe("cancelled");
+    expect(pendingCancel.actorPayload.lifecycleResult).toMatchObject({ status: "cancelled", reason: "cancel", actorSide: pending.created.hostSide });
+    expectLifecyclePayloadSafe(pendingCancel.actorPayload);
+    await expectOldTokensRejected(pending.service, pending.created.matchId, pending.created.hostSide, pending.created.hostSessionToken, pending.created.hostReconnectToken);
+    const pendingJoinAfterCancel = await pending.service.joinMatch(pending.created.matchId, { token: pending.joinToken });
+    expect("error" in pendingJoinAfterCancel).toBe(true);
+
+    const ready = await readyLobby("v104-cancel-ready");
+    const readyCancel = await ready.service.cancelMatch({ matchId: ready.created.matchId, side: ready.created.hostSide, sessionToken: ready.created.hostSessionToken });
+    expect(readyCancel.ok).toBe(true);
+    if (!readyCancel.ok) throw new Error(readyCancel.error.message);
+    expect(readyCancel.actorPayload.matchStatus).toBe("cancelled");
+    expect(readyCancel.opponentPayload?.matchStatus).toBe("cancelled");
+    expect((await ready.service.loadForTest(ready.created.matchId))?.gameState).toBeFalsy();
+    await expectOldTokensRejected(ready.service, ready.created.matchId, ready.created.hostSide, ready.created.hostSessionToken, ready.created.hostReconnectToken);
+    await expectOldTokensRejected(ready.service, ready.created.matchId, ready.joined.side, ready.joined.sessionToken, ready.joined.reconnectToken);
+
+    const countdown = await countdownLobby("v104-cancel-countdown");
+    const countdownCancel = await countdown.service.cancelMatch({ matchId: countdown.created.matchId, side: countdown.created.hostSide, sessionToken: countdown.created.hostSessionToken });
+    expect(countdownCancel.ok).toBe(true);
+    if (!countdownCancel.ok) throw new Error(countdownCancel.error.message);
+    expect(countdownCancel.actorPayload.matchStatus).toBe("cancelled");
+    expect(countdownCancel.opponentPayload?.matchStatus).toBe("cancelled");
+    const activateAfterCancel = await countdown.service.activateLobbyCountdown(countdown.created.matchId);
+    expect(activateAfterCancel.ok).toBe(false);
+    expect((await countdown.service.loadForTest(countdown.created.matchId))?.gameState).toBeFalsy();
+  });
+
+  it("handles V1.0.4 joiner leave before deck submission, from ready_check and from countdown", async () => {
+    const pending = await pendingDeckMatch("v104-leave-pending");
+    const noServerSessionLeave = await pending.service.leaveMatch({
+      matchId: pending.created.matchId,
+      side: otherSide(pending.created.hostSide),
+      sessionToken: ""
+    });
+    expect(noServerSessionLeave.ok).toBe(false);
+    expect((await pending.service.loadForTest(pending.created.matchId))?.match.status).toBe("pending");
+
+    const ready = await readyLobby("v104-leave-ready");
+    const readyLeave = await ready.service.leaveMatch({ matchId: ready.created.matchId, side: ready.joined.side, sessionToken: ready.joined.sessionToken });
+    expect(readyLeave.ok).toBe(true);
+    if (!readyLeave.ok) throw new Error(readyLeave.error.message);
+    expect(readyLeave.actorPayload.matchStatus).toBe("abandoned");
+    expect(readyLeave.opponentPayload?.matchStatus).toBe("abandoned");
+    expect(readyLeave.actorPayload.lifecycleResult).toMatchObject({ status: "abandoned", reason: "leave", actorSide: ready.joined.side });
+    expectLifecyclePayloadSafe(readyLeave.actorPayload);
+    await expectOldTokensRejected(ready.service, ready.created.matchId, ready.joined.side, ready.joined.sessionToken, ready.joined.reconnectToken);
+
+    const countdown = await countdownLobby("v104-leave-countdown");
+    const countdownLeave = await countdown.service.leaveMatch({ matchId: countdown.created.matchId, side: countdown.joined.side, sessionToken: countdown.joined.sessionToken });
+    expect(countdownLeave.ok).toBe(true);
+    if (!countdownLeave.ok) throw new Error(countdownLeave.error.message);
+    expect(countdownLeave.actorPayload.matchStatus).toBe("abandoned");
+    expect(countdownLeave.opponentPayload?.matchStatus).toBe("abandoned");
+    const activateAfterLeave = await countdown.service.activateLobbyCountdown(countdown.created.matchId);
+    expect(activateAfterLeave.ok).toBe(false);
+    expect((await countdown.service.loadForTest(countdown.created.matchId))?.gameState).toBeFalsy();
+  });
+
+  it("records V1.0.4 forfeit without faking an Engine win or changing replay StateHash", async () => {
+    const runnerMatch = await joinedMatch("v104-forfeit-runner");
+    const runnerBefore = await runnerMatch.service.loadForTest(runnerMatch.matchId);
+    if (!runnerBefore?.gameState) throw new Error("Missing runner forfeit state");
+    const runnerHash = hashState(runnerBefore.gameState);
+    const runnerForfeit = await runnerMatch.service.forfeitMatch({ matchId: runnerMatch.matchId, side: "runner", sessionToken: runnerMatch.runner.sessionToken });
+    expect(runnerForfeit.ok).toBe(true);
+    if (!runnerForfeit.ok) throw new Error(runnerForfeit.error.message);
+    const runnerForfeitPayload = expectSidePayload(runnerForfeit.actorPayload);
+    expect(runnerForfeitPayload.matchStatus).toBe("forfeited");
+    expect(runnerForfeitPayload.resultSummary).toMatchObject({ reason: "forfeit", winner: "corp", winnerSide: "corp", loserSide: "runner", finalEngineStateHash: runnerHash });
+    expect(runnerForfeitPayload.finalStateHash).toBe(runnerHash);
+    const runnerStored = await runnerMatch.service.loadForTest(runnerMatch.matchId);
+    expect(runnerStored?.gameState.winner).toBeFalsy();
+    expect(runnerStored?.match.winner).toBe("corp");
+    const runnerReplay = await runnerMatch.service.replayMatch(runnerMatch.matchId);
+    expect(runnerReplay.ok).toBe(true);
+    expect(runnerReplay.finalStateHash).toBe(runnerHash);
+    expectLifecyclePayloadSafe(runnerForfeitPayload);
+
+    const corpMatch = await joinedMatch("v104-forfeit-corp");
+    const corpBefore = await corpMatch.service.loadForTest(corpMatch.matchId);
+    if (!corpBefore?.gameState) throw new Error("Missing corp forfeit state");
+    const corpHash = hashState(corpBefore.gameState);
+    const corpForfeit = await corpMatch.service.forfeitMatch({ matchId: corpMatch.matchId, side: "corp", sessionToken: corpMatch.corp.sessionToken });
+    expect(corpForfeit.ok).toBe(true);
+    if (!corpForfeit.ok) throw new Error(corpForfeit.error.message);
+    expect(expectSidePayload(corpForfeit.actorPayload).resultSummary).toMatchObject({ reason: "forfeit", winner: "runner", winnerSide: "runner", loserSide: "corp", finalEngineStateHash: corpHash });
+    expect((await corpMatch.service.replayMatch(corpMatch.matchId)).finalStateHash).toBe(corpHash);
+  });
+
+  it("allows Human-vs-KI forfeit only from the human side and stops AI advance afterwards", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v104-ai-forfeit" });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "v104-ai-forfeit",
+      corpDifficulty: "normal"
+    });
+    const beforeHash = hashState((await service.loadForTest(created.matchId))!.gameState);
+    const aiForfeit = await service.forfeitMatch({ matchId: created.matchId, side: "corp", sessionToken: created.hostSessionToken });
+    expect(aiForfeit.ok).toBe(false);
+    if (aiForfeit.ok) throw new Error("Expected AI forfeit rejection");
+    expect(aiForfeit.error.code).toBe("unauthorized");
+
+    const humanForfeit = await service.forfeitMatch({ matchId: created.matchId, side: "runner", sessionToken: created.hostSessionToken });
+    expect(humanForfeit.ok).toBe(true);
+    if (!humanForfeit.ok) throw new Error(humanForfeit.error.message);
+    const humanForfeitPayload = expectSidePayload(humanForfeit.actorPayload);
+    expect(humanForfeitPayload.matchStatus).toBe("forfeited");
+    expect(humanForfeitPayload.aiTurnPresentation?.canAdvanceAi).toBe(false);
+    expect(humanForfeitPayload.resultSummary).toMatchObject({ reason: "forfeit", winnerSide: "corp", loserSide: "runner", finalEngineStateHash: beforeHash });
+    const advanceAfterForfeit = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: created.playerView.stateVersion,
+      knownMatchVersion: humanForfeitPayload.matchVersion,
+      mode: "single_step"
+    });
+    expect(advanceAfterForfeit.ok).toBe(false);
+    if (advanceAfterForfeit.ok) throw new Error("Expected advance_ai rejection");
+    expect(advanceAfterForfeit.error.code).toBe("match_not_active");
+  });
+
+  it("recreates V1.0.4 matches with new identity, links, seed and tokens while old tokens stop working", async () => {
+    const pending = await pendingDeckMatch("v104-recreate-pending");
+    const oldStored = await pending.service.loadForTest(pending.created.matchId);
+    const recreated = await pending.service.recreateMatch(pending.created.matchId, {
+      side: pending.created.hostSide,
+      sessionToken: pending.created.hostSessionToken,
+      displayName: "Host Recreate"
+    });
+    expect(recreated.ok).toBe(true);
+    if (!recreated.ok || !recreated.newMatch) throw new Error("Expected recreated match");
+    expect(recreated.actorPayload.matchStatus).toBe("cancelled");
+    expect(recreated.newMatch.matchId).not.toBe(pending.created.matchId);
+    expect(recreated.newMatch.joinUrl).toBeTruthy();
+    expect(recreated.newMatch.joinUrl).not.toBe(pending.created.joinUrl);
+    expect(recreated.newMatch.hostSessionToken).not.toBe(pending.created.hostSessionToken);
+    expect(recreated.newMatch.hostReconnectToken).not.toBe(pending.created.hostReconnectToken);
+    const newStored = await pending.service.loadForTest(recreated.newMatch.matchId);
+    expect(newStored?.match.seed).toBeTruthy();
+    expect(newStored?.match.seed).not.toBe(oldStored?.match.seed);
+    expect((await pending.service.loadForTest(pending.created.matchId))?.match.status).toBe("cancelled");
+    await expectOldTokensRejected(pending.service, pending.created.matchId, pending.created.hostSide, pending.created.hostSessionToken, pending.created.hostReconnectToken);
+    const staleJoin = await pending.service.joinMatch(pending.created.matchId, { token: pending.joinToken });
+    expect("error" in staleJoin).toBe(true);
+
+    const cancelledRecreate = await pending.service.recreateMatch(pending.created.matchId, {
+      side: pending.created.hostSide,
+      sessionToken: pending.created.hostSessionToken,
+      displayName: "Host Again"
+    });
+    expect(cancelledRecreate.ok).toBe(true);
+    if (!cancelledRecreate.ok || !cancelledRecreate.newMatch) throw new Error("Expected terminal recreate");
+    expect(cancelledRecreate.newMatch.matchId).not.toBe(recreated.newMatch.matchId);
   });
 
   it("runs actions only through the server pipeline with idempotency and stale-state rejection", async () => {
@@ -1271,7 +1438,7 @@ describe("MVP 0.2 multiplayer service", () => {
           payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide }
         })
       );
-      const update = await waitForMessage(socket, "state_update");
+      const update = await waitForMessage(socket, "lobby_update");
       expect(JSON.stringify(update)).not.toContain("hostSessionToken");
       expect(JSON.stringify(update)).not.toContain("Simple Agenda");
 
@@ -1284,7 +1451,7 @@ describe("MVP 0.2 multiplayer service", () => {
           payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide }
         })
       );
-      await waitForMessage(replacement, "state_update");
+      await waitForMessage(replacement, "lobby_update");
       const oldMessage = await oldClosed;
       expect(JSON.stringify(oldMessage)).toContain("reconnected_elsewhere");
       socket.close();
@@ -1384,8 +1551,8 @@ describe("MVP 0.2 multiplayer service", () => {
           payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: "corp" }
         })
       );
-      const waitingUpdate = await waitForMessage(hostSocket, "state_update");
-      expect(messagePayload(waitingUpdate).matchStatus).toBe("waiting_for_runner");
+      const waitingUpdate = await waitForMessage(hostSocket, "lobby_update");
+      expect(messagePayload(waitingUpdate).matchStatus).toBe("pending");
 
       expect(created.joinUrl).toBeTruthy();
       if (!created.joinUrl) throw new Error("Missing join URL");
@@ -1447,7 +1614,7 @@ describe("MVP 0.2 multiplayer service", () => {
         })
       );
       const waitingUpdate = await waitForMessage(hostSocket, "lobby_update");
-      expect(messagePayload(waitingUpdate).matchStatus).toBe("waiting_for_joiner_decks");
+      expect(messagePayload(waitingUpdate).matchStatus).toBe("pending");
 
       const joinedResponse = await fetch(`http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`, {
         method: "POST",
@@ -1788,6 +1955,80 @@ async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettin
     corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
     runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
   };
+}
+
+async function pendingDeckMatch(seed: string, countdownSeconds: 3 | 5 | 10 = 5) {
+  const service = new MultiplayerService(new InMemoryMatchStorage(), {
+    tokenSalt: `v104-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({
+    hostSide: "runner",
+    seed,
+    mode: "human_vs_human",
+    countdownSeconds,
+    settings: { matchFormat: "single_game" },
+    participantADecks: {
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
+    }
+  });
+  const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  return { service, created, joinToken };
+}
+
+async function readyLobby(seed: string, countdownSeconds: 3 | 5 | 10 = 5) {
+  const pending = await pendingDeckMatch(seed, countdownSeconds);
+  const joined = await pending.service.joinMatch(pending.created.matchId, {
+    token: pending.joinToken,
+    displayName: "Joiner",
+    runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+    corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+  });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+  expect(joined.matchStatus).toBe("ready_check");
+  return { ...pending, joined };
+}
+
+async function countdownLobby(seed: string) {
+  const lobby = await readyLobby(seed, 5);
+  const hostReady = await lobby.service.setLobbyReady({ matchId: lobby.created.matchId, side: lobby.created.hostSide, sessionToken: lobby.created.hostSessionToken, ready: true });
+  expect(hostReady.ok).toBe(true);
+  if (!hostReady.ok) throw new Error(hostReady.error.message);
+  const joinerReady = await lobby.service.setLobbyReady({ matchId: lobby.created.matchId, side: lobby.joined.side, sessionToken: lobby.joined.sessionToken, ready: true });
+  expect(joinerReady.ok).toBe(true);
+  if (!joinerReady.ok) throw new Error(joinerReady.error.message);
+  expect(joinerReady.actorPayload.matchStatus).toBe("countdown");
+  return lobby;
+}
+
+async function expectOldTokensRejected(service: MultiplayerService, matchId: string, side: Side, sessionToken: string, reconnectToken: string) {
+  const bootstrapResult = await service.bootstrap(matchId, side, sessionToken, { allowLobby: true });
+  expect("error" in bootstrapResult).toBe(true);
+  const reconnectResult = await service.reconnectMatch(matchId, { side, reconnectToken });
+  expect("error" in reconnectResult).toBe(true);
+}
+
+function expectLifecyclePayloadSafe(payload: unknown) {
+  const serialized = JSON.stringify(payload);
+  expect(serialized).not.toContain("sessionToken");
+  expect(serialized).not.toContain("reconnectToken");
+  expect(serialized).not.toContain("hostSessionToken");
+  expect(serialized).not.toContain("hostReconnectToken");
+  expect(serialized).not.toContain("joinToken");
+  expect(serialized).not.toContain("cardInstances");
+}
+
+function expectSidePayload(payload: unknown): SidePayload {
+  if (!payload || typeof payload !== "object" || !("playerView" in payload) || !(payload as { playerView?: unknown }).playerView) throw new Error("Expected side payload");
+  return payload as SidePayload;
+}
+
+function otherSide(side: Side): Side {
+  return side === "runner" ? "corp" : "runner";
 }
 
 async function joinedV094DamageMatch(seed: string, options: { emptyRunnerGrip?: boolean } = {}) {

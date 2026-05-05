@@ -56,10 +56,10 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("resultSummary.sessionToken");
   });
 
-  it("keeps the V1.0.3 matchstart lobby explicit without adding browser authority", () => {
+  it("keeps the V1.0.4 matchstart lobby and lifecycle recovery explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.3"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.4"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
@@ -83,7 +83,34 @@ describe("Client visibility contract", () => {
     expect(page).toContain("netrunner.displayName");
     expect(page).toContain("netrunner.recentSessions");
     expect(page).toContain("Letzte Sitzung");
-    expect(page).toContain("Wieder verbinden");
+    expect(page).toContain("Fortsetzen");
+    expect(page).toContain("Reconnect über Link");
+    expect(page).toContain("Verwerfen");
+    expect(page).toContain("storedSessionMatches");
+    expect(page).toContain("safeRecentSession");
+    expect(page).toContain("sanitizeRecentSession");
+    expect(page).not.toContain("RecentSessionInfo = SessionInfo");
+    expect(page).not.toContain("{ ...session, savedAt");
+    expect(page).not.toContain("typeof session.reconnectToken");
+    expect(page).toContain("LifecycleResultSummary");
+    expect(page).toContain("cancelMatchLifecycle");
+    expect(page).toContain("leaveMatchLifecycle");
+    expect(page).toContain("forfeitMatch");
+    expect(page).toContain("recreateMatch");
+    expect(page).toContain('/cancel`');
+    expect(page).toContain('/leave`');
+    expect(page).toContain('/forfeit`');
+    expect(page).toContain('/recreate`');
+    expect(page).toContain("Match abbrechen");
+    expect(page).toContain("Lobby verlassen");
+    expect(page).toContain("Aufgeben");
+    expect(page).toContain("Neu erstellen");
+    expect(page).toContain("result.reason");
+    expect(page).toContain("forfeit");
+    expect(page).toContain("opponentDisplayName");
+    expect(page).toContain("function OpponentPanel");
+    expect(page).toContain("opponentName");
+    expect(page).toContain("displayName");
     expect(page).toContain("Meine Decks");
     expect(page).toContain("Speichern");
     expect(page).toContain("Vorgefertigte Decks anzeigen");

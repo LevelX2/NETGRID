@@ -2,9 +2,9 @@
 
 ## Current phase
 
-V1.0.3 Matchstart-UX ist umgesetzt und lokal verifiziert. V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
+V1.0.4 Private Match Lifecycle und Session Recovery ist umgesetzt und lokal verifiziert. V1.0.3 Matchstart-UX ist umgesetzt und lokal verifiziert. V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. Release planning 2026-05-05 identifies V1.0.4 Private Match Lifecycle and Session Recovery as the next recommended gated scope, followed by V1.0.5 Action Board UX and Board-Klarheit. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. V1.0.4 adds terminal private-match lifecycle commands, Session Recovery hardening, Recreate and side-safe opponent names. V1.0.5 Action Board UX and Board-Klarheit is the next planned gated scope. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
@@ -22,11 +22,15 @@ Latest V1.0.3 final review artifact: `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_RE
 Latest V1.0.4 candidate backlog artifact: `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`.
 Latest release planning artifact: `docs/derived/RELEASE_PLANNING_2026-05-05.md`.
 Latest V1.0.4 planning artifact: `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`.
+Latest V1.0.4 requirements artifact: `docs/derived/V1_0_4_REQUIREMENTS.md`.
+Latest V1.0.4 implementation review artifact: `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md`.
+Latest V1.0.4 final review artifact: `docs/derived/V1_0_4_FINAL_REVIEW.md`.
+Latest V1.0.4 two-tab smoke artifact: `docs/derived/V1_0_4_TWO_TAB_SMOKE.md`.
 Latest V1.0.5 planning artifact: `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.0.4 Private Match Lifecycle and Session Recovery requirements freeze. `V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md` is the canonical V1.0.4 detail plan; `V1_0_4_NEXT_RELEASE_CANDIDATES.md` remains the candidate/history document. Current V1.0.4 candidates are withdrawing a not-yet-active created match to edit and recreate it, match/lobby abort or active concession, visible opponent display names and session recovery hardening. `V1_0_5_ACTION_BOARD_UX_PLAN.md` is the canonical V1.0.5 detail plan and follows for German UI rules-term glossary, server layout/ICE-orientation review, active-game information architecture and browser/visual smokes. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
+Current selected next scope: V1.0.5 Action Board UX and Board-Klarheit. V1.0.4 Private Match Lifecycle and Session Recovery is implemented from `V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md` and `V1_0_4_REQUIREMENTS.md`: terminal statuses, Joiner-Leave semantics, Forfeit result modeling, Recreate, Session-Recovery, opponent display names, REST-vs-WebSocket transport, Human-vs-KI Forfeit and repeatable two-tab smoke expectations are covered. `V1_0_4_NEXT_RELEASE_CANDIDATES.md` remains the candidate/history document. `V1_0_5_ACTION_BOARD_UX_PLAN.md` is the canonical V1.0.5 detail plan and follows for German UI rules-term glossary, server layout/ICE-orientation review, active-game information architecture and browser/visual smokes. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
 
 ## Status
 
@@ -278,6 +282,10 @@ V1.0.3 Matchstart-UX is complete and locally verified.
 
 `V1_0_3_matchstart_ux_done: true`
 
+V1.0.4 Private Match Lifecycle und Session Recovery is complete and locally verified.
+
+`V1_0_4_private_match_lifecycle_done: true`
+
 Release planning 2026-05-05 is integrated after V1.0.3 finalization.
 
 `release_planning_2026_05_05_integrated: true`
@@ -319,6 +327,16 @@ Current verification after V1.0.3 implementation:
 - `corepack pnpm test`: pass, 186 package tests plus 39 root spec tests.
 - `corepack pnpm build`: pass.
 - V1.0.3 gate: `V1_0_3_matchstart_ux_done: true`.
+
+Current verification after V1.0.4 implementation:
+
+- Implemented: REST lifecycle commands for Cancel, Leave, Forfeit and Recreate; terminal `cancelled`, `abandoned` and `forfeited` payloads; Human-vs-KI Forfeit stop behavior; Recreate token/link/seed rotation; Recent-Session sanitizing; explicit Fortsetzen/Reconnect/Verwerfen UI; side-safe opponent names.
+- Regression constraints: no new Engine rules, cards, official assets, accounts, matchmaking, rankings, Replay stream expansion, AI hidden-info input expansion or public platform features.
+- `corepack pnpm --filter @netrunner/web test`: pass, 14 tests.
+- `corepack pnpm --filter @netrunner/server test`: pass, 34 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 11 tests.
+- Full final gate commands are recorded in `docs/derived/V1_0_4_FINAL_REVIEW.md`.
+- V1.0.4 gate: `V1_0_4_private_match_lifecycle_done: true`.
 
 Last code verification baseline from V1.0.1 Deckbibliothek und Join-Deck-Handshake:
 
@@ -1873,13 +1891,14 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V1.0.1: Deckbibliothek und Join-Deck-Handshake.
 - V1.0.2: Gegner-Aktionsdarstellung und Ablauftransparenz, implementation complete and locally verified.
 - V1.0.3: Matchstart-UX, implementation complete and locally verified.
+- V1.0.4: Private Match Lifecycle und Session Recovery, implementation complete and locally verified.
 
-Current gate: V1.0.4 Private Match Lifecycle and Session Recovery requirements freeze is the selected next step. V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0.5 Action Board UX and Board-Klarheit is the selected next step. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
 Next scope decision:
 
-1. Freeze V1.0.4 requirements for pending-lobby cancel, joiner leave, active forfeit, recreate, session recovery and opponent display names before implementation.
-2. Follow with V1.0.5 Action Board UX and Board-Klarheit after V1.0.4 is green.
+1. Implement V1.0.5 Action Board UX and Board-Klarheit from `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`.
+2. Keep V1.0.4 lifecycle contracts green while V1.0.5 changes the active-game surface.
 3. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
 4. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 
@@ -1903,6 +1922,10 @@ Detailed planning artifacts available:
 - `docs/derived/RELEASE_PLANNING_2026-05-05.md`
 - `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`
 - `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`
+- `docs/derived/V1_0_4_REQUIREMENTS.md`
+- `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/V1_0_4_FINAL_REVIEW.md`
+- `docs/derived/V1_0_4_TWO_TAB_SMOKE.md`
 - `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
