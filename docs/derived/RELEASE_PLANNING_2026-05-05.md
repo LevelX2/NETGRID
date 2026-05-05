@@ -92,7 +92,13 @@ Die bestehende Basis bleibt stark: PlayerViews, PublicEvents, Reconnect, Undo, A
    - Audio-/Optionen im Spiel weiter härtbar machen.
    - Browser-E2E-/Visual-Smokes vorbereiten oder aufnehmen.
 
-3. **Danach**
+3. **V1.0.5K kleines Karten-Nachrelease**
+   - Nach V1.0.5 bis zu 20 lokal geprüfte Karten aktivieren.
+   - Keine große neue Mechanikfamilie erzwingen.
+   - Nur Karten mit bestätigtem Text, passender Mechanik-Coverage, Manifest, Unit-/Szenariotests, Decklegalität und Visibility-/Replay-/StateHash-Schutz freigeben.
+   - Definition: `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`.
+
+4. **Danach**
    - Browser-E2E und Visual QA als eigener Qualitätsrelease.
    - Storage-/Backup-Härtung.
    - Erst danach weitere Regel-/Karten-Gates oder private Internet-Härtung.
