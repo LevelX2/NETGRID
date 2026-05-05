@@ -87,6 +87,7 @@
 - Die Gegner-Aktionsdarstellung ist umgesetzt und final reviewt: `docs/derived/V1_0_2_REQUIREMENTS.md`, `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`, `docs/derived/V1_0_2_TEST_MATRIX.md`, `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_0_2_FINAL_REVIEW.md`.
 - V1.0.3 Matchstart-UX ist umgesetzt, nach `main` integriert und final reviewt: `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md` und `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`.
 - Die Release-Planung vom 2026-05-05 ist bereinigt aus dem Planungsbranch übernommen und nachgeschärft: `docs/derived/RELEASE_PLANNING_2026-05-05.md`, `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`, `docs/derived/V1_0_4_REQUIREMENTS.md`, `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`, `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md` und `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
+- V1.0.5 Action Board UX und Board-Klarheit Requirements Freeze ist abgeschlossen: `docs/derived/V1_0_5_REQUIREMENTS.md`, `docs/derived/ACTION_BOARD_UX_1_0_5_SPEC.md`, `docs/derived/BOARD_RUN_UI_1_0_5_SPEC.md`, `docs/derived/V1_0_5_TEST_MATRIX.md`, `docs/derived/V1_0_5_REQUIREMENTS_REVIEW.md` und `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md` liegen vor. Gate-Ergebnis: `V1_0_5_requirements_freeze_done: true`; `ready_for_V1_0_5_implementation: true`.
 
 ## Teilweise umgesetzt
 
@@ -103,7 +104,7 @@
 
 - Kein gate-basierter MVP-0.1- bis MVP-0.9-Arbeitsschritt ist offen.
 - Kein gate-basierter V0.94- bis V0.99-Mechanikschritt ist offen.
-- Nächster ausgewählter Scope ist V1.0.5 Action Board UX und Board-Klarheit. V1.0.4 Private Match Lifecycle und Session Recovery ist abgeschlossen.
+- Nächster ausgewählter Scope ist die Umsetzung von V1.0.5 Action Board UX und Board-Klarheit. V1.0.4 Private Match Lifecycle und Session Recovery ist abgeschlossen; V1.0.5 Requirements, Spezifikationen, Testmatrix, Requirements Review und Browser-/Playtest-Smoke sind eingefroren.
 - M2 kann später aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` starten. Mulligan, vollständiges Setup-/Deckout-/Archives-facedown-Modell und vollständige Spielende-Normalisierung bleiben offen.
 - Prevention, Avoid, Interrupt und Replacement sind weiterhin nicht spielbar, bis das jeweilige Gate umgesetzt ist.
 - Core-Damage, Damage-Prevention, Avoid, Interrupt und Replacement bleiben zurückgestellt und sind nicht Teil des V0.94-Scopes.

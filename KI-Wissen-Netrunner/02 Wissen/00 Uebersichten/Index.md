@@ -113,5 +113,11 @@
 - `docs/derived/RELEASE_PLANNING_2026-05-05.md`: bereinigte Release-Planung nach V1.0.3-Finale mit V1.0.4/V1.0.5-Empfehlung.
 - `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`: Detailplan für pending Lobby abbrechen, Joiner leave, Forfeit, Recreate, Session Recovery und Gegnernamen.
 - `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`: Detailplan für Board-/Run-/Rig-Klarheit, deutsche UI-Begriffe, Cue-/KI-Pacing-Regression und Browser-Smokes.
+- `docs/derived/V1_0_5_REQUIREMENTS.md`: eingefrorene V1.0.5-Anforderungen mit projektinternem UI-Glossar, Scope-Grenzen und Must-/Testspur.
+- `docs/derived/ACTION_BOARD_UX_1_0_5_SPEC.md`: Spezifikation für aktive Spieloberfläche, Cues, Audio, Action Panel, Zurücknehmen und KI-Takt.
+- `docs/derived/BOARD_RUN_UI_1_0_5_SPEC.md`: Spezifikation für RunTimeline, Runner-Rig, zentrale Server, Counts, Archive-Sichtbarkeit und ICE-Ausrichtung.
+- `docs/derived/V1_0_5_TEST_MATRIX.md`: V1.0.5-Testmatrix für Cues, Glossar, RunTimeline, Rig, zentrale Server, Browser-Smokes und Regression.
+- `docs/derived/V1_0_5_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.5.
+- `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md`: wiederholbarer V1.0.5-Browser-/Playtest-Smoke.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.

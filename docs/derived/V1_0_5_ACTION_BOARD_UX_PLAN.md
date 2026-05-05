@@ -1,6 +1,6 @@
 # V1.0.5 Action Board UX und Board-Klarheit
 
-Status: detailed_plan
+Status: requirements_ready
 Stand: 2026-05-05
 
 ## Ziel
@@ -14,6 +14,19 @@ Der Schwerpunkt liegt auf Spielansicht, deutschen UI-Begriffen, Run-/Server-Klar
 Dieses Dokument ist der kanonische Detailplan für V1.0.5. V1.0.5 implementiert nicht nachträglich V1.0.2, sondern härtet und poliert die bereits vorhandenen V1.0.2-Funktionen KI-Pacing, `advance_ai`, Action-Cues, Board-Highlights und opt-in Action-Audio gegen Regressionen.
 
 Alle V1.0.4-Lifecycle-Themen wie Cancel, Leave, Forfeit, Reconnect, Recreate und Gegnernamen bleiben in `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`.
+
+## Requirements-Freeze-Ergänzung 2026-05-05
+
+Die Umsetzung darf auf Basis dieses Plans starten. Die verbindlichen V1.0.5-Anforderungen, UI-Spezifikationen, Testspuren und der wiederholbare Browser-/Playtest-Smoke liegen vor:
+
+- `docs/derived/V1_0_5_REQUIREMENTS.md`
+- `docs/derived/ACTION_BOARD_UX_1_0_5_SPEC.md`
+- `docs/derived/BOARD_RUN_UI_1_0_5_SPEC.md`
+- `docs/derived/V1_0_5_TEST_MATRIX.md`
+- `docs/derived/V1_0_5_REQUIREMENTS_REVIEW.md`
+- `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md`
+
+Der Requirements Review meldet `V1_0_5_requirements_freeze_done: true` und `ready_for_implementation: true`. Das deutsche UI-Glossar ist projektintern freigegeben und beansprucht keine offizielle deutsche Netrunner-Übersetzung; technische IDs bleiben unverändert.
 
 ## Muss-Anforderungen
 
@@ -101,12 +114,8 @@ Alle V1.0.4-Lifecycle-Themen wie Cancel, Leave, Forfeit, Reconnect, Recreate und
 
 ## Dokumentationsbedarf
 
-- `docs/derived/V1_0_5_REQUIREMENTS.md`
-- `docs/derived/ACTION_BOARD_UX_1_0_5_SPEC.md`
-- `docs/derived/BOARD_RUN_UI_1_0_5_SPEC.md`
-- `docs/derived/V1_0_5_TEST_MATRIX.md`
-- `docs/derived/V1_0_5_REQUIREMENTS_REVIEW.md`
-- nach Umsetzung: Implementation Review und Final Review.
+- Requirements, Spezifikationen, Testmatrix, Requirements Review und Browser-/Playtest-Smoke sind erstellt.
+- Nach Umsetzung: Implementation Review und Final Review.
 
 ## Akzeptanzkriterien
 
