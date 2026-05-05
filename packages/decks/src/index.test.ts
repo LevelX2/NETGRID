@@ -17,9 +17,10 @@ import {
   validateEditableDeck,
   type DeckFormatProfile,
   type DeckSnapshot,
-  type DeckTemplate
+  type DeckTemplate,
+  type EditableDeck
 } from "./index";
-import type { CatalogCard } from "@netrunner/catalog";
+import { createRuntimeCardsById, type CatalogCard } from "@netrunner/catalog";
 
 const cardsById = Object.fromEntries((snapshotData.cards as CatalogCard[]).map((card) => [card.catalogCardId, card]));
 const profile = profilesData.profiles[0] as DeckFormatProfile;
@@ -96,5 +97,68 @@ describe("deck validation and snapshots", () => {
     expect(corp.publicMetadata).not.toHaveProperty("cards");
     expect(buildEngineDeck(runner).id).toBe("demo_runner_008_snapshot_v0_8");
     expect(buildEngineDeck(corp).cards.some((entry) => entry.id === "v08_project_agenda")).toBe(true);
+  });
+
+  it("validates V1.0.5K O:NR decks through the runtime release gate when the local overlay is present", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    if (!runtimeCardsById["onr_v1_015_codeslinger"]) return;
+
+    const contextV105K = { cardsById: runtimeCardsById, profile: profile08 };
+    const now = "2026-05-05T12:00:00.000Z";
+    const runnerDeck: EditableDeck = {
+      deckId: "local_onr_runner_v105k_validation",
+      deckVersion: "1.0.5k-local-onr",
+      name: "O:NR V1.0.5K Runner Validation",
+      side: "runner",
+      identityCardId: "runner_identity_001",
+      cardPoolSnapshotId: "card-snapshot-0.8",
+      formatProfileId: "local-demo-v0.8",
+      cards: [
+        { cardId: "onr_v1_015_codeslinger", quantity: 2 },
+        { cardId: "onr_v1_052_raffles", quantity: 2 },
+        { cardId: "onr_v1_054_raptor", quantity: 2 },
+        { cardId: "onr_v1_070_tinweasel", quantity: 2 },
+        { cardId: "onr_v1_144_tycho-mem-chip", quantity: 1 },
+        { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+        { cardId: "simple_economy_event", quantity: 2 }
+      ],
+      createdAt: now,
+      updatedAt: now
+    };
+    const corpDeck: EditableDeck = {
+      deckId: "local_onr_corp_v105k_validation",
+      deckVersion: "1.0.5k-local-onr",
+      name: "O:NR V1.0.5K Corp Validation",
+      side: "corp",
+      identityCardId: "corp_identity_001",
+      cardPoolSnapshotId: "card-snapshot-0.8",
+      formatProfileId: "local-demo-v0.8",
+      cards: [
+        { cardId: "onr_v1_203_hostile-takeover", quantity: 3 },
+        { cardId: "simple_agenda", quantity: 3 },
+        { cardId: "onr_v1_230_cortical-scanner", quantity: 2 },
+        { cardId: "onr_v1_232_crystal-wall", quantity: 2 },
+        { cardId: "onr_v1_237_data-wall", quantity: 2 },
+        { cardId: "onr_v1_238_data-wall-2-0", quantity: 2 },
+        { cardId: "onr_v1_239_endless-corridor", quantity: 2 },
+        { cardId: "simple_economy_operation", quantity: 2 }
+      ],
+      createdAt: now,
+      updatedAt: now
+    };
+
+    expect(validateEditableDeck(runnerDeck, contextV105K).errors).toEqual([]);
+    expect(validateEditableDeck(runnerDeck, contextV105K).ok).toBe(true);
+    expect(validateEditableDeck(corpDeck, contextV105K).errors).toEqual([]);
+    expect(validateEditableDeck(corpDeck, contextV105K).ok).toBe(true);
+
+    const oldOnrDeck: EditableDeck = {
+      ...runnerDeck,
+      deckId: "local_onr_runner_v105k_blocked_old_card",
+      cards: [...runnerDeck.cards, { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 }]
+    };
+    const blocked = validateEditableDeck(oldOnrDeck, contextV105K);
+    expect(blocked.ok).toBe(false);
+    expect(blocked.errors.join(" ")).toContain("onr_v1_079_bodyweight-synthetic-blood");
   });
 });

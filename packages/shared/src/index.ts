@@ -199,6 +199,7 @@ export type CardDefinition = {
   cost?: number;
   installCost?: number;
   memoryCost?: number;
+  memoryLimitBonus?: number;
   strength?: number;
   baseLink?: number;
   rezCost?: number;
@@ -531,6 +532,7 @@ export type VisibleCard = {
   cost?: number;
   installCost?: number;
   memoryCost?: number;
+  memoryLimitBonus?: number;
   rezCost?: number;
   baseLink?: number;
   rezzed?: boolean;
@@ -765,10 +767,12 @@ function onrBreaker(params: {
   memoryCost: number;
   strength: number;
   breakCost: number;
-  pumpCost: number;
+  pumpCost?: number;
   iceSubtype: string;
   iceLabel: string;
 }): CardDefinition {
+  const pumpText = params.pumpCost === undefined ? "" : ` ${params.pumpCost} Credits: +1 strength.`;
+  const mechanics = ["install_program", "memory", ...(params.pumpCost === undefined ? [] : ["pump_breaker"]), "break_subroutine", ONR_V1_LOCAL_PRIVATE];
   return {
     id: params.id,
     title: params.title,
@@ -779,12 +783,14 @@ function onrBreaker(params: {
     installCost: params.installCost,
     memoryCost: params.memoryCost,
     strength: params.strength,
-    rulesText: `${params.breakCost} Credits: Break 1 ${params.iceLabel} subroutine. ${params.pumpCost} Credits: +1 strength.`,
+    rulesText: `${params.breakCost} Credits: Break 1 ${params.iceLabel} subroutine.${pumpText}`,
     abilities: [
-      { id: `${params.id}_pump`, type: "pump_strength", cost: { credits: params.pumpCost }, amount: 1, timingPoint: "run.encounter_ice" },
+      ...(params.pumpCost === undefined
+        ? []
+        : [{ id: `${params.id}_pump`, type: "pump_strength" as const, cost: { credits: params.pumpCost }, amount: 1, timingPoint: "run.encounter_ice" as const }]),
       { id: `${params.id}_break`, type: "break_subroutine", cost: { credits: params.breakCost }, iceSubtype: params.iceSubtype, count: 1, timingPoint: "run.encounter_ice" }
     ],
-    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", ONR_V1_LOCAL_PRIVATE]
+    mechanics
   };
 }
 
@@ -821,7 +827,68 @@ function onrNetDamage(id: string, amount: number): SubroutineDefinition {
   return { id, type: "do_damage", damageType: "net", amount };
 }
 
+function onrMemoryChip(params: { id: string; title: string; installCost: number; memoryLimitBonus: number }): CardDefinition {
+  return {
+    id: params.id,
+    title: params.title,
+    side: "runner",
+    type: "hardware",
+    subtypes: ["chip"],
+    implementationStatus: "playable_mvp",
+    installCost: params.installCost,
+    memoryLimitBonus: params.memoryLimitBonus,
+    rulesText: `Provides +${params.memoryLimitBonus} MU.`,
+    mechanics: ["install_hardware", "modify_memory_limit", ONR_V1_LOCAL_PRIVATE]
+  };
+}
+
 const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
+  onrBreaker({
+    id: "onr_v1_015_codeslinger",
+    title: "Codeslinger",
+    subtypes: ["icebreaker", "killer"],
+    installCost: 7,
+    memoryCost: 1,
+    strength: 3,
+    breakCost: 1,
+    iceSubtype: "sentry",
+    iceLabel: "sentry"
+  }),
+  onrBreaker({
+    id: "onr_v1_052_raffles",
+    title: "Raffles",
+    subtypes: ["icebreaker"],
+    installCost: 7,
+    memoryCost: 1,
+    strength: 4,
+    breakCost: 0,
+    pumpCost: 2,
+    iceSubtype: "code_gate",
+    iceLabel: "code gate"
+  }),
+  onrBreaker({
+    id: "onr_v1_054_raptor",
+    title: "Raptor",
+    subtypes: ["icebreaker", "killer"],
+    installCost: 1,
+    memoryCost: 1,
+    strength: 1,
+    breakCost: 2,
+    pumpCost: 1,
+    iceSubtype: "sentry",
+    iceLabel: "sentry"
+  }),
+  onrBreaker({
+    id: "onr_v1_070_tinweasel",
+    title: "Tinweasel",
+    subtypes: ["icebreaker"],
+    installCost: 5,
+    memoryCost: 1,
+    strength: 3,
+    breakCost: 0,
+    iceSubtype: "code_gate",
+    iceLabel: "code gate"
+  }),
   {
     id: "onr_v1_079_bodyweight-synthetic-blood",
     title: "Bodyweight™ Synthetic Blood",
@@ -961,6 +1028,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "+1 memory limit.",
     mechanics: ["install_hardware", "modify_memory_limit", ONR_V1_LOCAL_PRIVATE]
   },
+  onrMemoryChip({
+    id: "onr_v1_144_tycho-mem-chip",
+    title: "Tycho Mem Chip",
+    installCost: 5,
+    memoryLimitBonus: 3
+  }),
+  onrMemoryChip({
+    id: "onr_v1_146_zetatech-mem-chip",
+    title: "Zetatech Mem Chip",
+    installCost: 5,
+    memoryLimitBonus: 2
+  }),
   {
     id: "onr_v1_220_tycho-extension",
     title: "Tycho Extension",
@@ -972,6 +1051,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 4,
     rulesText: "No additional ability.",
     mechanics: ["install_remote", "advance", "score", "steal", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_203_hostile-takeover",
+    title: "Hostile Takeover",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 3,
+    agendaPoints: 1,
+    rulesText: "Gain 5 credits when scored.",
+    mechanics: ["install_remote", "advance", "score", "steal", "on_score_gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_281_accounts-receivable",
@@ -1119,7 +1210,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Data Wall",
     subtypes: ["wall"],
     rezCost: 1,
-    strength: 0,
+    strength: 1,
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_237_data_wall_etr")],
     mechanics: ["end_the_run"]
@@ -1129,7 +1220,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Data Wall 2.0",
     subtypes: ["wall"],
     rezCost: 2,
-    strength: 1,
+    strength: 3,
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_238_data_wall_2_0_etr")],
     mechanics: ["end_the_run"]
@@ -1139,7 +1230,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Endless Corridor",
     subtypes: ["code_gate"],
     rezCost: 4,
-    strength: 2,
+    strength: 4,
     rulesText: "End the run. End the run.",
     subroutines: [onrEtr("onr_v1_239_endless_corridor_etr_1"), onrEtr("onr_v1_239_endless_corridor_etr_2")],
     mechanics: ["end_the_run"]

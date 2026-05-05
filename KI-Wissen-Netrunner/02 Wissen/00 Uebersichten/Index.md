@@ -119,11 +119,15 @@
 - `docs/derived/V1_0_5_TEST_MATRIX.md`: V1.0.5-Testmatrix für Cues, Glossar, RunTimeline, Rig, zentrale Server, Browser-Smokes und Regression.
 - `docs/derived/V1_0_5_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.5.
 - `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md`: wiederholbarer V1.0.5-Browser-/Playtest-Smoke.
+- `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`: Definition für das kleine Karten-Nachrelease nach V1.0.5 mit maximal 20 lokal geprüften Karten, Aufnahme-/Rückstellregeln und Gate-Kriterien.
+- `docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für das kleine Karten-Nachrelease mit finaler 12-Karten-Liste, Rückstellungen, Manifest- und Testabdeckung.
 - `docs/derived/V1_0_6_UI_RESOURCE_CLARITY_PLAN.md`: Detailplan für Aktionen-Slots, Credit-Visualisierung und Card-Display-Modi nach V1.0.5.
 - `docs/derived/V1_0_6_REQUIREMENTS.md`: eingefrorene V1.0.6-Anforderungen für Aktionen, Credits und Kartenanzeige.
 - `docs/derived/RESOURCE_CARD_DISPLAY_1_0_6_SPEC.md`: Spezifikation für Aktionsslots, Credit-Badges, Kostenchips und kompakte Card-Display-Steuerung.
 - `docs/derived/V1_0_6_TEST_MATRIX.md`: V1.0.6-Testmatrix für Ressourcenanzeigen, Card Display, Tooltips, Hidden-Info und Regression.
 - `docs/derived/V1_0_6_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.6 nach V1.0.5.
 - `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`: wiederholbarer V1.0.6-Browser-/Playtest-Smoke.
+- `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md`: Implementation Review für V1.0.6 Aktionen, Credits und Kartenanzeige mit V1.0.5-Basisprüfung, UI-Scope-Grenze und Testmatrix-Abgleich.
+- `docs/derived/V1_0_6_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.6 inklusive Pflichtchecks, Browser-Smoke-Ergebnis und dokumentierter Viewport-Einschränkung.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.

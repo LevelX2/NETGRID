@@ -551,6 +551,147 @@ describe("O:NR v1 Limited local private test access", () => {
   });
 });
 
+describe("V1.0.5K Card Release", () => {
+  it("keeps the final V1.0.5K card list small and backed by concrete definitions", () => {
+    expect(ONR_V1_0_5K_FINAL_CARD_IDS).toHaveLength(12);
+    expect(ONR_V1_0_5K_FINAL_CARD_IDS.length).toBeLessThanOrEqual(20);
+    for (const definitionId of ONR_V1_0_5K_FINAL_CARD_IDS) {
+      expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).toBe("playable_mvp");
+    }
+
+    expect(DEMO_CARDS_BY_ID["onr_v1_237_data-wall"]).toMatchObject({ rezCost: 1, strength: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_238_data-wall-2-0"]).toMatchObject({ rezCost: 2, strength: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject({ rezCost: 4, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_144_tycho-mem-chip"]).toMatchObject({ installCost: 5, memoryLimitBonus: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_146_zetatech-mem-chip"]).toMatchObject({ installCost: 5, memoryLimitBonus: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_203_hostile-takeover"]).toMatchObject({ advancementRequirement: 3, agendaPoints: 1 });
+  });
+
+  it("validates the V1.0.5K smoke decks and starts on the O:NR rules baseline", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_0_5K_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_0_5K_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v105kCardReleaseGame("v105k-validation");
+
+    expect(runnerValidation.errors).toEqual([]);
+    expect(runnerValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe("card-snapshot-0.94");
+  });
+
+  it("installs V1.0.5K memory chips with their printed MU bonuses and gates program installs by memory", () => {
+    let state = toRunnerTurn(v105kCardReleaseGame("v105k-memory-chips"));
+    state.runner.credits = 40;
+    state.runner.clicks = 10;
+    moveRunnerCardToGrip(state, "onr_v1_144_tycho-mem-chip");
+    moveRunnerCardToGrip(state, "onr_v1_146_zetatech-mem-chip");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_144_tycho-mem-chip");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_146_zetatech-mem-chip");
+
+    expect(state.runner.memoryLimit).toBe(9);
+    const runnerView = getPlayerView(state, "runner");
+    expect(runnerView.own.rig?.find((card) => card.definitionId === "onr_v1_144_tycho-mem-chip")?.memoryLimitBonus).toBe(3);
+    expect(runnerView.own.rig?.find((card) => card.definitionId === "onr_v1_146_zetatech-mem-chip")?.memoryLimitBonus).toBe(2);
+
+    let gatedState = toRunnerTurn(v105kCardReleaseGame("v105k-memory-gate"));
+    gatedState.runner.credits = 40;
+    gatedState.runner.clicks = 10;
+    installRunnerProgramForTest(gatedState, "onr_v1_015_codeslinger");
+    installRunnerProgramForTest(gatedState, "onr_v1_052_raffles");
+    installRunnerProgramForTest(gatedState, "onr_v1_054_raptor");
+    installRunnerProgramForTest(gatedState, "onr_v1_070_tinweasel");
+    moveRunnerCardCopyToGrip(gatedState, "onr_v1_015_codeslinger");
+
+    expect(gatedState.runner.memoryUsed).toBe(4);
+    expect(getLegalActions(gatedState, "runner").some((action) => action.type === "install_card" && sourceDefinition(gatedState, action) === "onr_v1_015_codeslinger")).toBe(false);
+
+    moveRunnerCardToGrip(gatedState, "onr_v1_144_tycho-mem-chip");
+    gatedState = apply(gatedState, "runner", (action) => action.type === "install_card" && sourceDefinition(gatedState, action) === "onr_v1_144_tycho-mem-chip");
+    expect(getLegalActions(gatedState, "runner").some((action) => action.type === "install_card" && sourceDefinition(gatedState, action) === "onr_v1_015_codeslinger")).toBe(true);
+  });
+
+  it("breaks matching V1.0.5K ICE subroutines and rejects mismatched breaker targets", () => {
+    let state = toRunnerTurn(v105kCardReleaseGame("v105k-raffles-endless"));
+    state.runner.credits = 20;
+    installRunnerProgramForTest(state, "onr_v1_052_raffles");
+    putCorpIceOnServer(state, "rd", "onr_v1_239_endless-corridor");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state.corp.credits = 20;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_239_endless-corridor");
+    state = apply(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_052_raffles" && action.payload?.subroutineIndex === 0);
+    state = apply(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_052_raffles" && action.payload?.subroutineIndex === 1);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation" });
+
+    for (const [breakerId, iceId] of [
+      ["onr_v1_015_codeslinger", "onr_v1_237_data-wall"],
+      ["onr_v1_070_tinweasel", "onr_v1_232_crystal-wall"]
+    ] as const) {
+      let mismatch = toRunnerTurn(v105kCardReleaseGame(`v105k-mismatch-${breakerId}`));
+      mismatch.runner.credits = 20;
+      installRunnerProgramForTest(mismatch, breakerId);
+      putCorpIceOnServer(mismatch, "rd", iceId);
+      mismatch.corp.credits = 20;
+
+      mismatch = apply(mismatch, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      mismatch = apply(mismatch, "corp", (action) => action.type === "rez_ice" && sourceDefinition(mismatch, action) === iceId);
+
+      expect(getLegalActions(mismatch, "runner").some((action) => action.type === "break_subroutine" && sourceDefinition(mismatch, action) === breakerId)).toBe(false);
+    }
+  });
+
+  it("scores Hostile Takeover with its narrow on-score credit resolver and deterministic replay", () => {
+    let state = createGame({ seed: "v105k-hostile-takeover", runnerDeck: ONR_V1_0_5K_RUNNER_DECK, corpDeck: ONR_V1_0_5K_CORP_DECK, agendaPointsToWin: 7 });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    moveCorpCardToHq(state, "onr_v1_203_hostile-takeover");
+    const initial = structuredClone(state);
+
+    state = apply(state, "corp", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_203_hostile-takeover");
+    state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_203_hostile-takeover");
+    state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_203_hostile-takeover");
+    state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_203_hostile-takeover");
+    const beforeScoreCredits = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_203_hostile-takeover");
+
+    expect(state.corp.credits).toBe(beforeScoreCredits + 5);
+    expect(agendaPoints(state, "corp")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      cardDefinitionId: "onr_v1_203_hostile-takeover",
+      onScoreGainCredits: 5,
+      corpCreditsAfter: state.corp.credits
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("corp_");
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("keeps V1.0.5K ICE hidden in Runner views until rez", () => {
+    let state = toRunnerTurn(v105kCardReleaseGame("v105k-visibility-data-wall-2"));
+    putCorpIceOnServer(state, "rd", "onr_v1_238_data-wall-2-0");
+    state.corp.credits = 20;
+
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Data Wall 2.0");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_238_data-wall-2-0");
+
+    expect(JSON.stringify(getPlayerView(state, "runner"))).toContain("Data Wall 2.0");
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "rez_ice", cardDefinitionId: "onr_v1_238_data-wall-2-0", title: "Data Wall 2.0" });
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -1607,6 +1748,54 @@ describe("MVP 0.8 playable starter slice", () => {
   });
 });
 
+const ONR_V1_0_5K_FINAL_CARD_IDS = [
+  "onr_v1_015_codeslinger",
+  "onr_v1_052_raffles",
+  "onr_v1_054_raptor",
+  "onr_v1_070_tinweasel",
+  "onr_v1_144_tycho-mem-chip",
+  "onr_v1_146_zetatech-mem-chip",
+  "onr_v1_203_hostile-takeover",
+  "onr_v1_230_cortical-scanner",
+  "onr_v1_232_crystal-wall",
+  "onr_v1_237_data-wall",
+  "onr_v1_238_data-wall-2-0",
+  "onr_v1_239_endless-corridor"
+] as const;
+
+const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v105k_smoke_094",
+  name: "O:NR V1.0.5K Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_015_codeslinger", quantity: 2 },
+    { id: "onr_v1_052_raffles", quantity: 2 },
+    { id: "onr_v1_054_raptor", quantity: 2 },
+    { id: "onr_v1_070_tinweasel", quantity: 2 },
+    { id: "onr_v1_144_tycho-mem-chip", quantity: 1 },
+    { id: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+    { id: "simple_economy_event", quantity: 2 }
+  ]
+};
+
+const ONR_V1_0_5K_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v105k_smoke_094",
+  name: "O:NR V1.0.5K Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "onr_v1_230_cortical-scanner", quantity: 2 },
+    { id: "onr_v1_232_crystal-wall", quantity: 2 },
+    { id: "onr_v1_237_data-wall", quantity: 2 },
+    { id: "onr_v1_238_data-wall-2-0", quantity: 2 },
+    { id: "onr_v1_239_endless-corridor", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 2 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -1745,6 +1934,15 @@ function onrV1Game(seed: string): GameState {
     seed,
     runnerDeck: ONR_V1_RUNNER_DECK,
     corpDeck: ONR_V1_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v105kCardReleaseGame(seed: string): GameState {
+  return createGame({
+    seed,
+    runnerDeck: ONR_V1_0_5K_RUNNER_DECK,
+    corpDeck: ONR_V1_0_5K_CORP_DECK,
     agendaPointsToWin: 7
   });
 }
@@ -1889,6 +2087,24 @@ function choiceRequest(state: GameState, side: Side): ChoiceRequest {
 
 function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInstanceId {
   const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.grip.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function moveRunnerCardCopyToGrip(state: GameState, definitionId: string): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === definitionId &&
+      !state.runner.rig.programs.includes(id) &&
+      !state.runner.rig.hardware.includes(id) &&
+      !state.runner.rig.resources.includes(id) &&
+      !state.runner.scoreArea.includes(id)
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing uninstalled ${definitionId}`);
+  const id = entry[0];
   removeEverywhere(state, id);
   state.runner.grip.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };

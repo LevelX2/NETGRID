@@ -134,6 +134,47 @@ export const FORBIDDEN_CATALOG_PAYLOAD_KEYS = [
   "undoSnapshots"
 ] as const;
 
+export const ONR_V1_0_5K_RELEASE_CARD_IDS = [
+  "onr_v1_015_codeslinger",
+  "onr_v1_052_raffles",
+  "onr_v1_054_raptor",
+  "onr_v1_070_tinweasel",
+  "onr_v1_144_tycho-mem-chip",
+  "onr_v1_146_zetatech-mem-chip",
+  "onr_v1_203_hostile-takeover",
+  "onr_v1_230_cortical-scanner",
+  "onr_v1_232_crystal-wall",
+  "onr_v1_237_data-wall",
+  "onr_v1_238_data-wall-2-0",
+  "onr_v1_239_endless-corridor"
+] as const;
+
+const ONR_V1_0_5K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_5K_RELEASE_CARD_IDS);
+
+const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.0.5k",
+  status: "playable_mvp_v1_0_5k",
+  unitTests: ["packages/engine/src/index.test.ts::V1.0.5K Card Release"],
+  scenarioTests: ["packages/engine/src/index.test.ts::V1.0.5K Card Release"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.0.5K Card Release", "apps/server/src/multiplayer.test.ts::private local O:NR V1.0.5K matches"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.0.5K Card Release"]
+};
+
+const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_015_codeslinger": { installCost: 7, memoryCost: 1, strength: 3 },
+  "onr_v1_052_raffles": { installCost: 7, memoryCost: 1, strength: 4 },
+  "onr_v1_054_raptor": { installCost: 1, memoryCost: 1, strength: 1 },
+  "onr_v1_070_tinweasel": { installCost: 5, memoryCost: 1, strength: 3 },
+  "onr_v1_144_tycho-mem-chip": { installCost: 5 },
+  "onr_v1_146_zetatech-mem-chip": { installCost: 5 },
+  "onr_v1_203_hostile-takeover": { advancementRequirement: 3, agendaPoints: 1 },
+  "onr_v1_230_cortical-scanner": { rezCost: 4, strength: 3 },
+  "onr_v1_232_crystal-wall": { rezCost: 3, strength: 3 },
+  "onr_v1_237_data-wall": { rezCost: 1, strength: 1 },
+  "onr_v1_238_data-wall-2-0": { rezCost: 2, strength: 3 },
+  "onr_v1_239_endless-corridor": { rezCost: 4, strength: 4 }
+};
+
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
   return {
     ...snapshot,
@@ -272,6 +313,7 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
   const baseSnapshot = snapshotData as CardSnapshot;
   const localOnrSnapshot = readLocalOnrSnapshot();
   if (!localOnrSnapshot) return baseSnapshot;
+  const v105kCards = applyOnrV105KReleaseGate(localOnrSnapshot.cards);
 
   return {
     ...baseSnapshot,
@@ -283,7 +325,7 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
       textPolicy: `${baseSnapshot.normalization.textPolicy} Lokale O:NR-v1-Texte bleiben Anzeigeinformation und sind kein Regelparser.`,
       assetPolicy: `${baseSnapshot.normalization.assetPolicy} Lokale O:NR-v1-Bilder werden nur aus data/local-assets gelesen.`
     },
-    cards: [...baseSnapshot.cards, ...localOnrSnapshot.cards]
+    cards: [...baseSnapshot.cards, ...v105kCards]
   };
 }
 
@@ -330,6 +372,58 @@ function localSnapshotCandidates(): string[] {
       path.resolve(process.cwd(), "..", "..", relative)
     ])
   );
+}
+
+function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
+  return cards.map((card) => (ONR_V1_0_5K_RELEASE_CARD_ID_SET.has(card.catalogCardId) ? promoteOnrV105KCard(card) : demoteLocalOnrCard(card)));
+}
+
+function promoteOnrV105KCard(card: CatalogCard): CatalogCard {
+  return {
+    ...card,
+    engineCardId: card.catalogCardId,
+    subtypes: [...card.subtypes],
+    numeric: { ...card.numeric, ...(ONR_V1_0_5K_NUMERIC_OVERRIDES[card.catalogCardId] ?? {}) },
+    statuses: {
+      ...card.statuses,
+      imported: true,
+      validated: true,
+      catalog_ready: true,
+      implemented: true,
+      playable: true,
+      deck_legal: true,
+      blocked: false
+    },
+    blockReasons: [],
+    implementationManifest: cloneManifestReference(ONR_V1_0_5K_RELEASE_MANIFEST)
+  };
+}
+
+function demoteLocalOnrCard(card: CatalogCard): CatalogCard {
+  return {
+    ...card,
+    engineCardId: null,
+    subtypes: [...card.subtypes],
+    numeric: { ...card.numeric },
+    statuses: {
+      ...card.statuses,
+      implemented: false,
+      playable: false,
+      deck_legal: false
+    },
+    blockReasons: [...card.blockReasons],
+    implementationManifest: null
+  };
+}
+
+function cloneManifestReference(reference: CatalogManifestReference): CatalogManifestReference {
+  return {
+    ...reference,
+    unitTests: [...reference.unitTests],
+    scenarioTests: [...reference.scenarioTests],
+    visibilityTests: [...reference.visibilityTests],
+    replayTests: [...reference.replayTests]
+  };
 }
 
 function stableStringify(value: unknown): string {

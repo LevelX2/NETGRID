@@ -46,7 +46,8 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("starts private local O:NR matches from the shared runtime card pool when the overlay is present", async () => {
     const cardsById = createRuntimeCardsById();
-    if (!cardsById["onr_v1_079_bodyweight-synthetic-blood"]) return;
+    if (!cardsById["onr_v1_015_codeslinger"]) return;
+    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal).toBe(false);
 
     const profile = (profilesData08.profiles as DeckFormatProfile[]).find((candidate) => candidate.profileId === "local-demo-v0.8");
     if (!profile) throw new Error("Missing V0.8 deck format profile");
@@ -61,10 +62,13 @@ describe("MVP 0.2 multiplayer service", () => {
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 3 },
-        { cardId: "onr_v1_040_loony-goon", quantity: 3 },
-        { cardId: "onr_v1_014_codecracker", quantity: 3 },
-        { cardId: "simple_economy_event", quantity: 3 }
+        { cardId: "onr_v1_015_codeslinger", quantity: 2 },
+        { cardId: "onr_v1_052_raffles", quantity: 2 },
+        { cardId: "onr_v1_054_raptor", quantity: 2 },
+        { cardId: "onr_v1_070_tinweasel", quantity: 2 },
+        { cardId: "onr_v1_144_tycho-mem-chip", quantity: 1 },
+        { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+        { cardId: "simple_economy_event", quantity: 2 }
       ],
       createdAt: now,
       updatedAt: now
@@ -78,14 +82,13 @@ describe("MVP 0.2 multiplayer service", () => {
       cardPoolSnapshotId: "card-snapshot-0.8",
       formatProfileId: "local-demo-v0.8",
       cards: [
-        { cardId: "onr_v1_220_tycho-extension", quantity: 2 },
-        { cardId: "onr_v1_281_accounts-receivable", quantity: 2 },
-        { cardId: "onr_v1_282_annual-reviews", quantity: 2 },
+        { cardId: "onr_v1_203_hostile-takeover", quantity: 3 },
+        { cardId: "simple_agenda", quantity: 3 },
         { cardId: "onr_v1_230_cortical-scanner", quantity: 2 },
         { cardId: "onr_v1_232_crystal-wall", quantity: 2 },
         { cardId: "onr_v1_237_data-wall", quantity: 2 },
-        { cardId: "onr_v1_244_filter", quantity: 2 },
-        { cardId: "onr_v1_245_fire-wall", quantity: 2 },
+        { cardId: "onr_v1_238_data-wall-2-0", quantity: 2 },
+        { cardId: "onr_v1_239_endless-corridor", quantity: 2 },
         { cardId: "simple_economy_operation", quantity: 2 }
       ],
       createdAt: now,
@@ -113,7 +116,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(stored?.match.deckSetup.runnerSnapshotId).toBe("local_onr_runner_match_smoke_snapshot");
     expect(stored?.match.deckSetup.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
     expect(JSON.stringify(stored?.match.deckSetup)).not.toContain("cards");
-    expect(JSON.stringify(created)).not.toContain("onr_v1_220_tycho-extension");
+    expect(JSON.stringify(created)).not.toContain("onr_v1_203_hostile-takeover");
     expect(JSON.stringify(created)).not.toContain("cardInstances");
 
     expect(created.joinUrl).toBeTruthy();
@@ -123,7 +126,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in joined).toBe(false);
     if ("error" in joined) throw new Error(joined.error.message);
     expect(joined.playerView.deckMetadata?.own.deckName).toBe("O:NR Corp Match Smoke");
-    expect(JSON.stringify(joined)).not.toContain("onr_v1_079_bodyweight-synthetic-blood");
+    expect(JSON.stringify(joined)).not.toContain("onr_v1_015_codeslinger");
     expect(JSON.stringify(joined)).not.toContain("cardInstances");
 
     const aiCreated = await service.createMatch({
@@ -141,7 +144,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(aiStored?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_a", corpPlayer: "player_b" });
     expect(aiStored?.match.deckSetup.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
     expect(aiStored?.match.deckSetup.participants?.player_b.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
-    expect(JSON.stringify(aiCreated)).not.toContain("onr_v1_220_tycho-extension");
+    expect(JSON.stringify(aiCreated)).not.toContain("onr_v1_203_hostile-takeover");
     expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 

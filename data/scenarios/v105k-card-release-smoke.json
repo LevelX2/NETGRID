@@ -1,0 +1,53 @@
+{
+  "id": "SCN-V105K-001",
+  "baselineId": "rules-baseline-mvp-0.94",
+  "title": "V1.0.5K local O:NR card release stays small, deck-legal and side-safe",
+  "requirementIds": [
+    "V105K-CARD-001",
+    "V105K-BREAKER-001",
+    "V105K-MEMORY-001",
+    "V105K-ICE-001",
+    "V105K-AGENDA-001",
+    "V105K-VISIBILITY-001",
+    "V105K-REPLAY-001",
+    "V105K-DECK-001"
+  ],
+  "coversTests": ["V105K-T001", "V105K-T002", "V105K-T003", "V105K-T004", "V105K-T005", "V105K-T006", "V105K-T007", "V105K-T008"],
+  "coversCards": [
+    "onr_v1_015_codeslinger",
+    "onr_v1_052_raffles",
+    "onr_v1_054_raptor",
+    "onr_v1_070_tinweasel",
+    "onr_v1_144_tycho-mem-chip",
+    "onr_v1_146_zetatech-mem-chip",
+    "onr_v1_203_hostile-takeover",
+    "onr_v1_230_cortical-scanner",
+    "onr_v1_232_crystal-wall",
+    "onr_v1_237_data-wall",
+    "onr_v1_238_data-wall-2-0",
+    "onr_v1_239_endless-corridor"
+  ],
+  "steps": [
+    "Load the private local O:NR runtime overlay through the catalog package.",
+    "Apply the V1.0.5K release gate and keep only the final 12 cards deck-legal.",
+    "Validate V1.0.5K Runner and Corp smoke decks and start a private match from their deck snapshots.",
+    "Install Tycho Mem Chip and Zetatech Mem Chip, then verify the Runner memory limit and visible rig metadata.",
+    "Run with Raffles into Endless Corridor, break both matching code-gate subroutines and access R&D.",
+    "Verify that mismatched breakers do not receive break actions against wall ICE.",
+    "Score Hostile Takeover and verify the public credit result, Replay and final StateHash.",
+    "Verify unrezzed V1.0.5K ICE stays hidden in Runner views until rez."
+  ],
+  "expected": {
+    "finalCardCount": 12,
+    "maxCardCount": 20,
+    "onlyReleaseCardsDeckLegalFromLocalOnrRuntime": true,
+    "deckValidationAcceptsReleaseDecks": true,
+    "privateMatchstartAcceptsReleaseDecks": true,
+    "memoryBonusesApplied": true,
+    "breakerTargetsValidated": true,
+    "hostileTakeoverCreditsOnScore": true,
+    "hiddenIceRedactedUntilRez": true,
+    "replayStateHashDeterministic": true,
+    "privateLocalArtifactsUnversioned": true
+  }
+}

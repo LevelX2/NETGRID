@@ -7,7 +7,9 @@ import {
   assertCatalogPayloadSafe,
   computeSnapshotHash,
   createCatalogIndex,
+  createRuntimeCardsById,
   getCatalogCard,
+  ONR_V1_0_5K_RELEASE_CARD_IDS,
   searchCatalog,
   validateSnapshot,
   type CardSnapshot
@@ -94,5 +96,31 @@ describe("catalog import and status logic", () => {
     expect(missingManifest).toEqual([]);
     expect(missingCoverage).toEqual([]);
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
+  });
+
+  it("applies the V1.0.5K release gate to private local O:NR runtime cards when present", () => {
+    const cardsById = createRuntimeCardsById();
+    if (!cardsById["onr_v1_015_codeslinger"]) return;
+
+    expect(ONR_V1_0_5K_RELEASE_CARD_IDS).toHaveLength(12);
+    for (const cardId of ONR_V1_0_5K_RELEASE_CARD_IDS) {
+      const card = cardsById[cardId];
+      expect(card, cardId).toBeDefined();
+      expect(card?.engineCardId).toBe(cardId);
+      expect(card?.statuses.implemented).toBe(true);
+      expect(card?.statuses.playable).toBe(true);
+      expect(card?.statuses.deck_legal).toBe(true);
+      expect(card?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.0.5k");
+      expect(card?.implementationManifest?.unitTests.length).toBeGreaterThan(0);
+      expect(card?.implementationManifest?.scenarioTests.length).toBeGreaterThan(0);
+      expect(card?.implementationManifest?.visibilityTests.length).toBeGreaterThan(0);
+      expect(card?.implementationManifest?.replayTests.length).toBeGreaterThan(0);
+    }
+
+    expect(cardsById["onr_v1_237_data-wall"]?.numeric.strength).toBe(1);
+    expect(cardsById["onr_v1_238_data-wall-2-0"]?.numeric.strength).toBe(3);
+    expect(cardsById["onr_v1_239_endless-corridor"]?.numeric.strength).toBe(4);
+    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal).toBe(false);
+    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.engineCardId).toBeNull();
   });
 });

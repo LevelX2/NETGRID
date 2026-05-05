@@ -1165,7 +1165,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       mustInstance(state.cardInstances, String(legalAction.payload?.cardId)).advancementCounters += 1;
       return;
     case "score_agenda":
-      scoreAgenda(state, String(legalAction.payload?.cardId));
+      scoreAgenda(state, String(legalAction.payload?.cardId), legalAction);
       return;
     case "start_run":
       spendClick(state, "runner");
@@ -1254,7 +1254,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     removeFromAllZones(state, cardId);
     if (definition.type === "hardware") {
       state.runner.rig.hardware.push(cardId);
-      if (definition.mechanics.includes("modify_memory_limit")) state.runner.memoryLimit += 1;
+      if (definition.mechanics.includes("modify_memory_limit")) state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
       if ((definition.recurringCredits ?? 0) > 0) setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
     } else if (definition.type === "program") {
       state.runner.rig.programs.push(cardId);
@@ -1886,13 +1886,17 @@ function requireRunnerTagged(state: GameState): void {
   if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
 }
 
-function scoreAgenda(state: GameState, cardId: string): void {
+function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction): void {
   const definition = definitionFor(state, cardId);
   if (definition.type !== "agenda") throw new Error("Nur Agendas koennen gescored werden.");
   if (mustInstance(state.cardInstances, cardId).advancementCounters < (definition.advancementRequirement ?? 0)) throw new Error("Agenda hat nicht genug Advancements.");
   removeFromAllZones(state, cardId);
   state.corp.scoreArea.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "scoreArea" } };
+  if (definition.id === "onr_v1_203_hostile-takeover") {
+    state.corp.credits += 5;
+    if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), onScoreGainCredits: 5, corpCreditsAfter: state.corp.credits };
+  }
   cleanupEmptyRemotes(state);
 }
 
@@ -2508,6 +2512,8 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   }
   if (legalAction.payload?.publicRevealKind) context.revealKind = legalAction.payload.publicRevealKind;
   if (typeof legalAction.payload?.badPublicityAfter === "number") context.badPublicityAfter = legalAction.payload.badPublicityAfter;
+  if (typeof legalAction.payload?.onScoreGainCredits === "number") context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
+  if (typeof legalAction.payload?.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
   if (state.winner && state.gameEndReason) context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
   if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {
@@ -2577,6 +2583,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
     ...(definition.installCost !== undefined ? { installCost: definition.installCost } : {}),
     ...(definition.memoryCost !== undefined ? { memoryCost: definition.memoryCost } : {}),
+    ...(definition.memoryLimitBonus !== undefined ? { memoryLimitBonus: definition.memoryLimitBonus } : {}),
     ...(definition.rezCost !== undefined ? { rezCost: definition.rezCost } : {}),
     ...(definition.baseLink !== undefined ? { baseLink: definition.baseLink } : {}),
     rezzed: instance.rezzed,

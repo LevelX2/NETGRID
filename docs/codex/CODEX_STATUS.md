@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.0.5K kleines Karten-Nachrelease nach V1.0.5 ist umgesetzt und lokal verifiziert. Die finale Freigabe umfasst 12 lokal geprüfte O:NR-v1-Karten: Codeslinger, Raffles, Raptor, Tinweasel, Tycho Mem Chip, Zetatech Mem Chip, Hostile Takeover, Cortical Scanner, Crystal Wall, Data Wall, Data Wall 2.0 und Endless Corridor. Dogcatcher, Flak, Reflector, Shield, Corporate War und Political Overthrow bleiben wegen zusätzlicher Mechanikfamilien zurückgestellt.
+
 V1.0.5 Action Board UX und Board-Klarheit requirements freeze is complete and ready for implementation. V1.0.6 Aktionen, Credits und Kartenanzeige requirements freeze is complete as the planned post-V1.0.5 UI clarity release. V1.0.4 Private Match Lifecycle und Session Recovery ist umgesetzt und lokal verifiziert. V1.0.3 Matchstart-UX ist umgesetzt und lokal verifiziert. V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
 
 V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. V1.0.4 adds terminal private-match lifecycle commands, Session Recovery hardening, Recreate and side-safe opponent names. V1.0.5 Action Board UX and Board-Klarheit now has frozen requirements, action-board and board/run UI specs, test matrix, requirements review and repeatable browser/playtest smoke, amended with contextual card actions, local cue positioning, exact run target highlighting, BoardHeader utility review, RunTimeline orientation evaluation and side-safe rezzed/unrezzed Corp card display. V1.0.6 now has frozen UI clarity requirements for action slots, generic credit visuals, cost chips and compact Card Display modes. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
@@ -317,6 +319,17 @@ V1.0.6 Aktionen, Credits und Kartenanzeige requirements freeze is complete as a 
 `V1_0_6_requirements_freeze_done: true`
 
 `ready_for_implementation_after_V1_0_5: true`
+
+V1.0.5K kleines Karten-Nachrelease ist umgesetzt und lokal verifiziert. Final freigegeben sind 12 Karten, nicht 20; nicht freigegebene private O:NR-Karten bleiben im Runtime-Deckbau gesperrt.
+
+`V1_0_5K_card_release_done: true`
+
+V1.0.5K verification:
+
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass.
 
 `long_term_product_vision_2026_05_05_available: true`
 
