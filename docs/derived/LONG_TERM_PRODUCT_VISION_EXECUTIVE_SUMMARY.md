@@ -34,7 +34,7 @@ Belegt grün am 2026-05-05 nach V1.0.3-Finale:
 Empfohlene nächste Linie:
 
 1. V1.0.4 Private Match Lifecycle und Session Recovery.
-2. V1.0.5 Gegner-Aktionsdarstellung, KI-Pacing und Board-Klarheit.
+2. V1.0.5 Action Board UX und Board-Klarheit, inklusive Regression für V1.0.2-KI-Pacing und Action-Cues.
 3. V1.0.6 Private Lobby Comfort.
 4. V1.0.7 Browser-E2E und Visual QA.
 5. V1.0.8 Storage/Backup-Härtung.

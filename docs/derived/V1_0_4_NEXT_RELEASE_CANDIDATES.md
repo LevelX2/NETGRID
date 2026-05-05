@@ -16,6 +16,12 @@ Nach Abgleich mit dem Planungsbranch liegen zusätzlich vor:
 
 Empfohlene Reihenfolge: zuerst V1.0.4 Private Match Lifecycle und Session Recovery, danach V1.0.5 Action Board UX und Board-Klarheit.
 
+## Konsolidierungsentscheidung 2026-05-05
+
+Dieses Dokument ist ab jetzt das Kandidaten- und Herkunftsdokument, nicht der kanonische Detailumfang fuer V1.0.4. Der kanonische V1.0.4-Scope ist `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`.
+
+Die Kandidaten "Deutsche Regelbegriffe und UI-Glossar", "Serverlayout und ICE-Ausrichtung" sowie "Spieloberflaeche und Informationsarchitektur" gehoeren nur dann in V1.0.4, wenn sie direkt fuer Cancel/Leave/Forfeit/Reconnect oder Gegnernamen noetig sind. Ansonsten sind sie V1.0.5 Action Board UX zugeordnet.
+
 ## Kandidaten
 
 ### Match abbrechen und aufgeben
@@ -80,4 +86,4 @@ Die aktive Spieloberflaeche braucht einen eigenen UX-Pass, damit wichtige Inform
 
 ## Gate-Hinweis
 
-Vor Umsetzung braucht V1.0.4 einen kleinen Requirements-Freeze, besonders fuer die Frage, wie aktive Aufgabe mit Engine, Replay, StateHash und Ergebnisdarstellung zusammenspielt.
+Vor Umsetzung braucht V1.0.4 einen kleinen Requirements-Freeze auf Basis von `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`, besonders fuer die Frage, wie aktive Aufgabe mit Engine, Replay, StateHash und Ergebnisdarstellung zusammenspielt.

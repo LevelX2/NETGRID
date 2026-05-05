@@ -9,6 +9,12 @@ V1.0.4 macht private Matches kontrollierbar: erstellte Lobbys können sauber abg
 
 Der Release bleibt Match-/Server-/UI-Lifecycle. Er fügt keine Karten, keine Engine-Regeln und keine öffentlichen Plattformfunktionen hinzu.
 
+## Konsolidierungsentscheidung 2026-05-05
+
+Dieses Dokument ist der kanonische Detailplan für V1.0.4. `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md` bleibt als Kandidaten- und Herkunftsdokument erhalten, überschreibt aber diesen Scope nicht.
+
+Deutsche UI-Begriffe, Serverlayout/ICE-Ausrichtung und allgemeine Spieloberflächen-Politur sind V1.0.5 zugeordnet, sofern sie nicht direkt für Cancel, Leave, Forfeit, Reconnect, Recreate oder side-sichere Gegnernamen gebraucht werden.
+
 ## Muss-Anforderungen
 
 | ID | Muss-Anforderung |

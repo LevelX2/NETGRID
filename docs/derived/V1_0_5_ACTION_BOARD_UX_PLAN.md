@@ -9,6 +9,12 @@ V1.0.5 macht laufende Partien besser lesbar, ohne neue Regeln oder Karten einzuf
 
 Der Schwerpunkt liegt auf Spielansicht, deutschen UI-Begriffen, Run-/Server-Klarheit, Runner-Rig-Struktur, Optionen im Spiel und wiederholbaren UI-Tests.
 
+## Konsolidierungsentscheidung 2026-05-05
+
+Dieses Dokument ist der kanonische Detailplan für V1.0.5. V1.0.5 implementiert nicht nachträglich V1.0.2, sondern härtet und poliert die bereits vorhandenen V1.0.2-Funktionen KI-Pacing, `advance_ai`, Action-Cues, Board-Highlights und opt-in Action-Audio gegen Regressionen.
+
+Alle V1.0.4-Lifecycle-Themen wie Cancel, Leave, Forfeit, Reconnect, Recreate und Gegnernamen bleiben in `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`.
+
 ## Muss-Anforderungen
 
 | ID | Muss-Anforderung |
