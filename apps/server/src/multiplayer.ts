@@ -24,7 +24,6 @@ import {
 } from "@netrunner/shared";
 import {
   deckSetupForParticipants,
-  defaultAgendaPointsToWin,
   resolveParticipantDeckSetup,
   resolveParticipantDeckPair,
   setupUsesExpandedRules,
@@ -64,6 +63,8 @@ export type MatchSettings = {
   agendaPointsToWin: number;
   matchFormat: MatchFormat;
 };
+
+const RULE_AGENDA_POINTS_TO_WIN = 7;
 
 export type GameResultReason = "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "forfeit" | "unknown";
 
@@ -607,12 +608,12 @@ export class MultiplayerService {
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
-    const matchFormat = input.settings?.matchFormat ?? "rules_match";
+    const matchFormat = normalizeMatchFormat(input.settings?.matchFormat);
     const countdownSeconds = normalizeCountdownSeconds(input.countdownSeconds);
     const pendingDeckHandshake = mode === "human_vs_human" && Boolean(input.participantADecks) && !input.participantBDecks;
     if (pendingDeckHandshake) {
       const hostDeckPair = resolveParticipantDeckPair(input.participantADecks ?? legacyParticipantDeckPair(input));
-      const pendingAgendaPointsToWin = input.settings?.agendaPointsToWin ?? (matchFormat === "single_game" ? 0 : 7);
+      const pendingAgendaPointsToWin = agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin);
       const session: SessionRecord = {
         sessionId: randomId("session"),
         matchId,
@@ -713,7 +714,7 @@ export class MultiplayerService {
     const participantDecks = resolveParticipantDeckSetup(input, { seed, ...(aiPlayer ? { aiPlayer } : {}), ...(aiDeckPolicy ? { aiDeckPolicy } : {}) });
     const deckSetup = deckSetupForParticipants(participantDecks, { runnerPlayer, corpPlayer });
     const settings: MatchSettings = {
-      agendaPointsToWin: agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin, deckSetup),
+      agendaPointsToWin: agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin),
       matchFormat
     };
     const baseline = baselineForMode(mode, deckSetup);
@@ -1639,11 +1640,12 @@ export class MultiplayerService {
     const corpPlayer: SeriesPlayerSlot = hostSide === "corp" ? "player_a" : "player_b";
     const deckSetup = deckSetupForParticipants(participants, { runnerPlayer, corpPlayer });
     const baseline = baselineForMode(record.match.mode, deckSetup);
-    const agendaPointsToWin = agendaPointsToWinFor(record.match.settings.matchFormat, record.match.settings.agendaPointsToWin > 0 ? record.match.settings.agendaPointsToWin : undefined, deckSetup);
+    const matchFormat = normalizeMatchFormat(record.match.settings.matchFormat);
+    const agendaPointsToWin = agendaPointsToWinFor(matchFormat, record.match.settings.agendaPointsToWin > 0 ? record.match.settings.agendaPointsToWin : undefined);
     record.gameState = undefined as unknown as GameState;
     record.match.baseline = baseline;
     record.match.status = "ready_check";
-    record.match.settings = { ...record.match.settings, agendaPointsToWin };
+    record.match.settings = { ...record.match.settings, agendaPointsToWin, matchFormat };
     record.match.deckSetup = {
       runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
       corpSnapshotId: deckSetup.corpSnapshot.deckSnapshotId,
@@ -1666,7 +1668,7 @@ export class MultiplayerService {
       joinerReady: false,
       countdownSeconds: record.startLobby?.countdownSeconds ?? 3,
       agendaPointsToWin,
-      matchFormat: record.match.settings.matchFormat,
+      matchFormat,
       sideAssignment: { runnerPlayer, corpPlayer },
       chatMessages: record.startLobby?.chatMessages ?? []
     };
@@ -2137,10 +2139,14 @@ function isHostSession(record: StoredMatch, session: SessionRecord): boolean {
   return record.sessions[0]?.sessionId === session.sessionId;
 }
 
-function agendaPointsToWinFor(matchFormat: MatchFormat, explicit: number | undefined, deckSetup: ResolvedDeckSetup): number {
+function normalizeMatchFormat(matchFormat: MatchFormat | undefined): MatchFormat {
+  if (matchFormat === "two_game_side_swap") return "two_game_side_swap";
+  return "rules_match";
+}
+
+function agendaPointsToWinFor(_matchFormat: MatchFormat, explicit: number | undefined): number {
   if (typeof explicit === "number" && Number.isFinite(explicit) && explicit > 0) return Math.floor(explicit);
-  if (matchFormat === "single_game") return defaultAgendaPointsToWin(deckSetup);
-  return 7;
+  return RULE_AGENDA_POINTS_TO_WIN;
 }
 
 function normalizeCountdownSeconds(value: number | undefined): 3 | 5 | 10 {

@@ -145,8 +145,8 @@ export function setupUsesMvp08Rules(setup: ResolvedDeckSetup): boolean {
   );
 }
 
-export function defaultAgendaPointsToWin(setup: ResolvedDeckSetup): number {
-  return setup.corpSnapshot.validation.agendaPoints ?? (setupUsesExpandedRules(setup) ? 7 : 6);
+export function defaultAgendaPointsToWin(_setup: ResolvedDeckSetup): number {
+  return 7;
 }
 
 function resolveSnapshot(side: "runner" | "corp", supplied: DeckSnapshot | undefined, requestedId: string | undefined, fallbackId: string): DeckSnapshot {

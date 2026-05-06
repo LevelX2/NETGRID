@@ -26,7 +26,7 @@ import {
   StorageError,
   type StorageKind
 } from "./storage-sqlite";
-import { defaultAgendaPointsToWin, resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
+import { resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
 import type { Side } from "@netrunner/shared";
 import type { AiDifficulty } from "@netrunner/shared";
 
@@ -465,8 +465,8 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
       if (typeof body.settings === "object" && body.settings) {
         const settings = body.settings as Record<string, unknown>;
         const nextSettings: Parameters<MultiplayerService["createMatch"]>[0]["settings"] = {};
-        if (typeof settings.agendaPointsToWin === "number") nextSettings.agendaPointsToWin = settings.agendaPointsToWin;
-        if (settings.matchFormat === "single_game" || settings.matchFormat === "rules_match" || settings.matchFormat === "two_game_side_swap") nextSettings.matchFormat = settings.matchFormat;
+        nextSettings.agendaPointsToWin = 7;
+        if (settings.matchFormat === "rules_match" || settings.matchFormat === "two_game_side_swap") nextSettings.matchFormat = settings.matchFormat;
         if (Object.keys(nextSettings).length > 0) createInput.settings = nextSettings;
       }
       try {
@@ -483,7 +483,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
       const config: Parameters<typeof simulateAiGame>[0] = {};
       if (typeof body.seed === "string") config.seed = body.seed;
       if (typeof body.maxActions === "number") config.maxActions = Math.max(1, Math.min(500, Math.floor(body.maxActions)));
-      if (typeof body.agendaPointsToWin === "number") config.agendaPointsToWin = Math.max(1, Math.floor(body.agendaPointsToWin));
+      config.agendaPointsToWin = 7;
       if (isDifficulty(body.runnerDifficulty)) config.runnerDifficulty = body.runnerDifficulty;
       if (isDifficulty(body.corpDifficulty)) config.corpDifficulty = body.corpDifficulty;
       const deckSelection = deckSelectionFromBody(body);
@@ -494,7 +494,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         config.corpDeck = deckSetup.corpDeck;
         config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
         config.corpDeckMetadata = deckSetup.corpSnapshot.publicMetadata;
-        config.agendaPointsToWin = config.agendaPointsToWin ?? defaultAgendaPointsToWin(deckSetup);
+        config.agendaPointsToWin = config.agendaPointsToWin ?? 7;
       } else {
         if (body.runnerDeckId === "demo_runner_001" || body.runnerDeckId === "demo_runner_004") config.runnerDeckId = body.runnerDeckId;
         if (body.corpDeckId === "demo_corp_001" || body.corpDeckId === "demo_corp_004") config.corpDeckId = body.corpDeckId;

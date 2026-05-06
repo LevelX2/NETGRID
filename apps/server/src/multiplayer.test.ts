@@ -426,7 +426,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(readyCheck?.match.status).toBe("ready_check");
     expect(readyCheck?.gameState).toBeFalsy();
     expect(readyCheck?.match.settings.agendaPointsToWin).toBe(7);
+    expect(readyCheck?.match.settings.matchFormat).toBe("rules_match");
     expect(joined.lobby?.agendaPointsToWin).toBe(7);
+    expect(joined.lobby?.matchFormat).toBe("rules_match");
     expect(joined.lobby?.hostReady).toBe(false);
     expect(joined.lobby?.joinerReady).toBe(false);
     expect(joined.lobby?.participants.player_a.runnerDeckReady).toBe(true);
@@ -1361,7 +1363,7 @@ describe("MVP 0.2 multiplayer service", () => {
       winner: "runner",
       viewerOutcome: "won",
       reason: "agenda_points",
-      matchFormat: "single_game",
+      matchFormat: "rules_match",
       agendaPointsToWin: 2,
       runnerAgendaPoints: 3,
       corpAgendaPoints: 0,

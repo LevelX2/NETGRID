@@ -4,7 +4,7 @@
 
 V1.0.9 Private Internet Hardening ist als nächster Release-Scope geplant und requirements-frozen. Der Release ist in sechs konkrete Pakete geschnitten: Transport/Deployment-Profil, Origin/CORS/WebSocket-Zugriff, Rate Limits, Secrets/Tokens/Redaction, Health/Monitoring/Ops und Internet-Smokes. Ziel ist privater Internetbetrieb für eingeladene Spieler über HTTPS/WSS, ohne öffentliche Plattformfunktionen, Accounts, Matchmaking, Rankings, Turniere, neue Karten, neue Mechaniken, Postgres, Replay-/StateHash- oder Engine-Autoritätsänderungen.
 
-Aktuelle lokale UI-/Ablaufkorrektur vom 2026-05-06: Die aktive Spieloberfläche hält zentrale Corp-Server unten fest in der Reihenfolge `HQ`, `F&E (R&D)`, `Archive`; Außenserver entstehen darüber. Der eigene Statusbereich sitzt links unter Aktionen/Zurücknehmen, Spielerwert-Flächen sind seitenfarbig hinterlegt und markieren die aktuelle Zugseite mit Rahmen, Aktionen erscheinen als eigene horizontale Leiste, Tags werden nur beim Runner angezeigt, die Kartenvorschau ist vollständig einklappbar, getaktete KI-Zugriffshinweise laufen nach Anzeige automatisch weiter, zentrale HQ-/F&E-Zugriffe werden aus Corp-Sicht in PlayerViews/WebSocket-Payloads redigiert, bestehende Außenserver mit Agenda/Asset im Root bieten keine weitere Agenda-/Asset-Installation in denselben Root mehr an, KI-Erklärtexte werden nicht mehr als normale Chronikbeschreibung angezeigt, und Runner-KI-Runs bleiben im getakteten Modus nicht mehr an Hinweis-Timern oder Corp-Rezfenstern hängen.
+Aktuelle lokale UI-/Ablaufkorrektur vom 2026-05-06/2026-05-07: Die aktive Spieloberfläche hält zentrale Corp-Server unten fest in der Reihenfolge `HQ`, `F&E (R&D)`, `Archive`; Außenserver entstehen darüber. Der eigene Statusbereich sitzt links unter Aktionen/Zurücknehmen, Spielerwert-Flächen sind seitenfarbig hinterlegt und markieren die aktuelle Zugseite mit Rahmen, Aktionen erscheinen als eigene horizontale Leiste, Tags werden nur beim Runner angezeigt, die Kartenvorschau ist vollständig einklappbar, getaktete KI-Zugriffshinweise laufen nach Anzeige automatisch weiter, zentrale HQ-/F&E-Zugriffe werden aus Corp-Sicht in PlayerViews/WebSocket-Payloads redigiert, bestehende Außenserver mit Agenda/Asset im Root bieten keine weitere Agenda-/Asset-Installation in denselben Root mehr an, KI-Erklärtexte werden nicht mehr als normale Chronikbeschreibung angezeigt, Runner-KI-Runs bleiben im getakteten Modus nicht mehr an Hinweis-Timern oder Corp-Rezfenstern hängen, und das Spielziel ist wieder regelhaft auf 7 Agendapunkte festgezogen. Der alte deckabhängige Modus `Einzelspiel · Deckziel` ist keine auswählbare Produktoption mehr; alte `single_game`-Eingaben werden als `rules_match` behandelt.
 
 V1.0.8 Storage/Backup-Härtung ist umgesetzt und lokal verifiziert. SQLite ist jetzt der private lokale Standard-Storage für Multiplayer-Matches; JSON bleibt Legacy-/Test-/Migrationseingang. Der Release ergänzt kontrollierten Legacy-Import aus `data/runtime/multiplayer/matches.json`, `storage_meta` mit Schema-Versionierung, Backup/Restore mit Manifest und Prüfsummen, Recovery-Verhalten, redaktionierte Health-/Diagnoseflächen und V1.0.7-E2E-Isolation über temporäre SQLite-Datenbanken.
 
@@ -1969,7 +1969,7 @@ Implemented scope:
 
 - Server-side side-safe `GameResultSummary` for finished games.
 - WebSocket `match_finished` payload now carries the result summary.
-- Startscreen offers `Regelmatch · 7 Agendapunkte`, `Einzelspiel · Deckziel` and `Private Matchserie · Seitenwechsel`.
+- Startscreen offers `Regelmatch · 7 Agendapunkte` and `Private Matchserie · Seitenwechsel`; the earlier `Einzelspiel · Deckziel` option has been removed as a rules correction.
 - Private `two_game_side_swap` series creates a second game with side swap and side-safe standings.
 - Web UI shows a result modal with perspective text, safe statistics, final StateHash and abstract local CSS background graphic.
 - Audio effects are opt-in, locally synthesized and not part of Engine, Replay or StateHash.
@@ -1990,14 +1990,14 @@ Checks:
 - LegalAction/PlayerAction revalidation for side, StateVersion and current legal action.
 - Runner and Corp basic actions, install/play/advance/score/end turn.
 - Run, ICE rez, encounter, breaker pump/break, ETR, access, agenda steal, asset trash path.
-- Agenda win condition with explicit demo target `agendaPointsToWin = 6`.
+- Agenda win condition with configurable test harness support; product match setup now uses the rule target `agendaPointsToWin = 7`.
 - Side-filtered PlayerViews and PublicEvents.
 - Deterministic Corp-KI over LegalActions and Corp PlayerView.
 - Minimal local Next.js UI for Human Runner vs Corp-KI.
 
 ## Important Phase 1 assumptions
 
-- Demo games use `agendaPointsToWin = 6` because the fixed Corp demo deck contains three 2-point agendas.
+- Current product games use `agendaPointsToWin = 7`; the historical 6-point demo target is no longer a valid product rule.
 - Mulligan, Jack-out, Multiaccess, Tags, Trace, Damage, Viren, Hosting, Prevention, Replacement and Interrupts are documented deviations, not MVP-0.1 implementation scope.
 - Concrete scenario StateHashes are generated and frozen during Phase 2 after the first green replay implementation.
 - MVP 0.2 was read only for future compatibility and did not expand MVP 0.1 scope.

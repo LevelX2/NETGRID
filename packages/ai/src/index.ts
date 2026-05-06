@@ -191,7 +191,7 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
   const seed = config.seed ?? "ai-vs-ai-smoke";
   let state = createGame({
     seed,
-    agendaPointsToWin: config.agendaPointsToWin ?? 6,
+    agendaPointsToWin: config.agendaPointsToWin ?? 7,
     ...(config.runnerDeckId ? { runnerDeckId: config.runnerDeckId } : {}),
     ...(config.corpDeckId ? { corpDeckId: config.corpDeckId } : {}),
     ...(config.runnerDeck ? { runnerDeck: config.runnerDeck } : {}),

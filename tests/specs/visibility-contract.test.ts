@@ -50,6 +50,7 @@ describe("Client visibility contract", () => {
     expect(page).toContain("runnerRigStrip");
     expect(page).toContain("Regelmatch · 7 Agendapunkte");
     expect(page).toContain("Private Matchserie · Seitenwechsel");
+    expect(page).not.toContain("Einzelspiel · Deckziel");
     expect(page).toContain("Nächstes Serienspiel");
     expect(page).toContain("seriesAudioOutcome");
     expect(page).not.toContain("resultSummary.cardInstances");

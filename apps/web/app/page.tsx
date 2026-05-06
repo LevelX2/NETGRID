@@ -1402,8 +1402,7 @@ export default function Page() {
     return runActions.length === 1 ? runActions[0]! : null;
   };
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
-  const effectiveCurrentCorpSnapshot = currentCorpSnapshotForSetup();
-  const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCurrentCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
+  const effectiveAgendaTarget = 7;
 
   useEffect(() => {
     if (!selectedActionContext) return;
@@ -1575,7 +1574,7 @@ export default function Page() {
         ...(isHumanVsHuman ? { countdownSeconds } : {}),
         settings: {
           matchFormat,
-          ...(matchFormat === "single_game" ? {} : { agendaPointsToWin: 7 })
+          agendaPointsToWin: effectiveAgendaTarget
         },
         ...deckPayload
       });
@@ -1663,7 +1662,7 @@ export default function Page() {
         runnerDifficulty,
         corpDifficulty,
         ...deckPayload,
-        ...(effectiveAgendaTarget ? { agendaPointsToWin: effectiveAgendaTarget } : {}),
+        agendaPointsToWin: effectiveAgendaTarget,
         maxActions: 120
       });
     } catch (error) {
@@ -1716,13 +1715,6 @@ export default function Page() {
       ...(await deckSidePayload("runner", runnerSlot.source, runnerSlot.snapshotId, runnerSlot.localDeckId)),
       ...(await deckSidePayload("corp", corpSlot.source, corpSlot.snapshotId, corpSlot.localDeckId))
     };
-  }
-
-  function currentCorpSnapshotForSetup(): DeckSnapshot | null {
-    if ((gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai") && aiDeckPolicy === "fixed") return defaultCorpSnapshot;
-    if ((gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai") && aiDeckPolicy === "seeded_random") return matchFormat === "single_game" ? null : defaultCorpSnapshot;
-    if (gameMode === "human_corp_vs_runner_ai" || (isHumanVsHuman && humanSideSelection === "corp")) return corpDeckSource === "local" ? corpLocalSnapshot : selectedCorpSnapshot;
-    return participantBCorpDeckSource === "local" ? corpLocalSnapshot : selectedParticipantBCorpSnapshot;
   }
 
   async function deckPairPayload(runnerSource: "snapshot" | "local", runnerSnapshotId: string, runnerLocalDeckId: string, corpSource: "snapshot" | "local", corpSnapshotId: string, corpLocalDeckId: string) {
@@ -2552,7 +2544,6 @@ export default function Page() {
                   Spielziel
                   <select value={matchFormat} onChange={(event) => setMatchFormat(event.target.value as MatchFormat)}>
                     <option value="rules_match">Regelmatch · 7 Agendapunkte</option>
-                    <option value="single_game">Einzelspiel · Deckziel</option>
                     <option value="two_game_side_swap">Private Matchserie · Seitenwechsel</option>
                   </select>
                 </label>
@@ -3464,8 +3455,7 @@ function GameOverModal({
 
 function matchFormatLabel(format: MatchFormat): string {
   if (format === "two_game_side_swap") return "Private Matchserie";
-  if (format === "rules_match") return "Regelmatch";
-  return "Einzelspiel";
+  return "Regelmatch";
 }
 
 function resultReasonLabel(reason: GameResultSummary["reason"]): string {

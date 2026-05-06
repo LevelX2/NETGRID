@@ -30,7 +30,7 @@ export async function createHumanVsHumanLobby(page: Page, seed: string, side: "r
   await openApp(page);
   await page.getByLabel("Spielart").selectOption("human_vs_human");
   await page.getByLabel("Seitenzuteilung").selectOption(side);
-  await page.getByLabel("Spielziel").selectOption("single_game");
+  await page.getByLabel("Spielziel").selectOption("rules_match");
   await page.getByLabel("Countdown").selectOption("3");
   await page.getByLabel("Seed").fill(seed);
   await page.getByLabel("Name").fill(side === "corp" ? "Host Corp V107" : "Host Runner V107");
