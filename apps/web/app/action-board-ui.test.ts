@@ -15,7 +15,7 @@ import {
   groupRunnerRigCards,
   parseCuePositionPreference,
   runTargetServerIds,
-  serverBoardOrderForSide,
+  serverBoardRows,
   serverDisplayLabel,
   splitLegalActions
 } from "./action-board-ui";
@@ -93,7 +93,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(clampCuePosition(98, 98, 400, 300, 180, 120)).toEqual({ kind: "custom", xPercent: 52, yPercent: 56 });
   });
 
-  it("mirrors server board order by player side", () => {
+  it("groups remotes above central servers for the board", () => {
     const servers = [
       { id: "hq", label: "HQ", ice: [], root: [] },
       { id: "rd", label: "R&D", ice: [], root: [] },
@@ -102,8 +102,10 @@ describe("V1.0.5 action board UI helpers", () => {
       { id: "remote_1", label: "Remote 1", ice: [], root: [] }
     ];
 
-    expect(serverBoardOrderForSide("corp", servers).map((server) => server.id)).toEqual(["remote_1", "remote_2", "hq", "rd", "archives"]);
-    expect(serverBoardOrderForSide("runner", servers).map((server) => server.id)).toEqual(["hq", "rd", "archives", "remote_1", "remote_2"]);
+    expect(serverBoardRows(servers).map((row) => [row.kind, row.servers.map((server) => server.id)])).toEqual([
+      ["remotes", ["remote_1", "remote_2"]],
+      ["centrals", ["hq", "rd", "archives"]]
+    ]);
   });
 
   it("keeps paced AI moving even when an action cue remains visible", () => {

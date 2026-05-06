@@ -265,10 +265,11 @@ describe("Client visibility contract", () => {
     expect(page).toContain("function serverLanesForSide");
     expect(page).toContain('side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane]');
     expect(page).toContain("serverLanesForSide(activeView.side, server)");
-    expect(page).toContain("serverBoardOrderForSide(activeView.side, activeView.servers)");
+    expect(page).toContain("serverBoardRows(activeView.servers)");
     const helpers = readFileSync("apps/web/app/action-board-ui.ts", "utf8");
-    expect(helpers).toContain("function serverBoardOrderForSide");
-    expect(helpers).toContain('return side === "corp" ? [...remotes, ...other, ...central] : [...central, ...other, ...remotes]');
+    expect(helpers).toContain("function serverBoardRows");
+    expect(helpers).toContain('{ kind: "remotes", servers: [...remotes, ...other] }');
+    expect(helpers).toContain('{ kind: "centrals", servers: central }');
   });
 
   it("returns PlayerView payloads from the web game API", () => {

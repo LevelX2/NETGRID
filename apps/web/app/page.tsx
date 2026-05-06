@@ -79,7 +79,7 @@ import {
   parseCuePositionPreference,
   runTargetServerIds,
   serializeCuePositionPreference,
-  serverBoardOrderForSide,
+  serverBoardRows,
   serverDisplayLabel,
   splitLegalActions,
   currentRunTimelineStep,
@@ -2866,70 +2866,76 @@ export default function Page() {
               </span>
             </div>
           ) : null}
-          <div className={`serverGrid ${activeView.side === "corp" ? "corpPerspective" : "runnerPerspective"}`}>
-            {serverBoardOrderForSide(activeView.side, activeView.servers).map((server) => {
-              const cardCount = centralServerCardCount(activeView, server.id);
-              const runAction = runActionForServer(server.id);
-              return (
-                <article
-                  className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
-                  key={server.id}
-                  data-testid="server"
-                  data-server-id={server.id}
-                >
-                  <h3 className="serverTitle">
-                    <button className="serverContextButton" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
-                      {serverDisplayLabel(server.id)}
-                    </button>
-                    {runAction ? (
-                      <button
-                        className="serverRunButton"
-                        type="button"
-                        onClick={() => submitAction(runAction)}
-                        disabled={Boolean(payload.winner) || connection !== "online"}
-                        aria-label={`${actionButtonLabel(runAction)} starten`}
-                        title={actionButtonLabel(runAction)}
-                        data-testid="server-run-action"
+          <div className="serverGrid">
+            {serverBoardRows(activeView.servers).map((row) =>
+              row.servers.length > 0 ? (
+                <div className={`serverRow ${row.kind}`} key={row.kind} data-testid={`server-row-${row.kind}`}>
+                  {row.servers.map((server) => {
+                    const cardCount = centralServerCardCount(activeView, server.id);
+                    const runAction = runActionForServer(server.id);
+                    return (
+                      <article
+                        className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
+                        key={server.id}
+                        data-testid="server"
                         data-server-id={server.id}
                       >
-                        <RunIcon size={13} />
-                        <CostChips action={runAction} />
-                      </button>
-                    ) : null}
-                    {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
-                  </h3>
-                  {serverLanesForSide(activeView.side, server).map((lane) => (
-                    <div className="serverLaneGroup" key={lane.label}>
-                      <div className="laneLabel">
-                        <span>{lane.label}</span>
-                      </div>
-                      <div className="lane">
-                        {lane.cards.map((card, index) => {
-                          const displayCard = enrichCard(card);
-                          return (
-                            <CardView
-                              key={card.instanceId}
-                              card={displayCard}
-                              compact
-                              displayMode={cardDisplayMode}
-                              hiddenSide="corp"
-                              installedCorpCard
-                              selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                              actions={cardActionsFor(card)}
-                              actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                              {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
-                              onAction={submitAction}
-                              onFocus={focusCard}
-                              onActionContextSelect={selectActionCard}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </article>
-              );
-            })}
+                        <h3 className="serverTitle">
+                          <button className="serverContextButton" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
+                            {serverDisplayLabel(server.id)}
+                          </button>
+                          {runAction ? (
+                            <button
+                              className="serverRunButton"
+                              type="button"
+                              onClick={() => submitAction(runAction)}
+                              disabled={Boolean(payload.winner) || connection !== "online"}
+                              aria-label={`${actionButtonLabel(runAction)} starten`}
+                              title={actionButtonLabel(runAction)}
+                              data-testid="server-run-action"
+                              data-server-id={server.id}
+                            >
+                              <RunIcon size={13} />
+                              <CostChips action={runAction} />
+                            </button>
+                          ) : null}
+                          {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
+                        </h3>
+                        {serverLanesForSide(activeView.side, server).map((lane) => (
+                          <div className="serverLaneGroup" key={lane.label}>
+                            <div className="laneLabel">
+                              <span>{lane.label}</span>
+                            </div>
+                            <div className="lane">
+                              {lane.cards.map((card, index) => {
+                                const displayCard = enrichCard(card);
+                                return (
+                                  <CardView
+                                    key={card.instanceId}
+                                    card={displayCard}
+                                    compact
+                                    displayMode={cardDisplayMode}
+                                    hiddenSide="corp"
+                                    installedCorpCard
+                                    selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                                    actions={cardActionsFor(card)}
+                                    actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                    {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
+                                    onAction={submitAction}
+                                    onFocus={focusCard}
+                                    onActionContextSelect={selectActionCard}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : null
+            )}
           </div>
           {activeView.own.rig ? (
             <section className="section panel boardSection">
