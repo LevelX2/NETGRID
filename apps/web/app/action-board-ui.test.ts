@@ -32,9 +32,10 @@ describe("V1.0.5 action board UI helpers", () => {
 
     const split = splitLegalActions(actions);
 
-    expect(split.primaryActions.map((action) => action.type)).toEqual(["gain_credit", "start_run", "rez_ice"]);
-    expect(split.contextualActions.map((action) => action.source)).toEqual([iceA.instanceId, iceB.instanceId]);
+    expect(split.primaryActions.map((action) => action.type)).toEqual(["gain_credit", "rez_ice"]);
+    expect(split.contextualActions.map((action) => action.source)).toEqual(["basic_action", iceA.instanceId, iceB.instanceId]);
     expect(split.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: iceA.instanceId, label: iceA.title! }))).toHaveLength(1);
+    expect(split.contextualActions.filter((action) => actionMatchesContext(action, { kind: "server", id: "rd", label: "F&E (R&D)" }))).toHaveLength(1);
     expect(actionButtonLabel(actions[1]!)).toBe("Run auf F&E (R&D)");
   });
 
@@ -135,6 +136,17 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Draw Event spielen", { cardId: "card_1" }))).toBe("Spielen");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Außenserver 2");
+  });
+
+  it("moves rig icebreaker actions to their card context", () => {
+    const pump = legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder pumpen", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice");
+    const continueRun = legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.approach_ice");
+
+    const split = splitLegalActions([pump, continueRun]);
+
+    expect(split.primaryActions.map((action) => action.type)).toEqual(["continue_run"]);
+    expect(split.contextualActions).toEqual([pump]);
+    expect(actionMatchesContext(pump, { kind: "card", id: "breaker_1", label: "Simple Decoder" })).toBe(true);
   });
 });
 

@@ -392,6 +392,7 @@ type CatalogListResponse = {
 
 type DisplayVisibleCard = VisibleCard & {
   imageUrl?: string;
+  strengthModifier?: number;
 };
 
 type FocusedCard = {
@@ -701,6 +702,9 @@ function enrichVisibleCard(card: VisibleCard, detailsById: Record<string, Catalo
   addNumeric(enriched, "trashCost", card.trashCost, detail.numeric.trashCost);
   addNumeric(enriched, "advancementRequirement", card.advancementRequirement, detail.numeric.advancementRequirement);
   addNumeric(enriched, "agendaPoints", card.agendaPoints, detail.numeric.agendaPoints);
+  if (typeof card.strength === "number" && typeof detail.numeric.strength === "number" && card.strength > detail.numeric.strength) {
+    enriched.strengthModifier = card.strength - detail.numeric.strength;
+  }
   return enriched;
 }
 
@@ -883,9 +887,9 @@ function deckMetadataFromEditable(deck: EditableDeck | null): DeckPublicMetadata
   };
 }
 
-function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): Array<{ label: "ICE" | "Root"; cards: VisibleCard[] }> {
-  const iceLane = { label: "ICE" as const, cards: server.ice };
-  const rootLane = { label: "Root" as const, cards: server.root };
+function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): Array<{ kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }> {
+  const iceLane = { kind: "ice" as const, label: "ICE" as const, cards: server.ice };
+  const rootLane = { kind: "root" as const, label: "Root" as const, cards: server.root };
   return side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane];
 }
 
@@ -1308,6 +1312,11 @@ export default function Page() {
   const cardActionsFor = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
     return legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+  };
+  const runActionForServer = (serverId: string): LegalAction | null => {
+    const serverContext = { kind: "server" as const, id: serverId, label: serverDisplayLabel(serverId) };
+    const runActions = legalActionSplit.contextualActions.filter((action) => action.type === "start_run" && actionMatchesContext(action, serverContext));
+    return runActions.length === 1 ? runActions[0]! : null;
   };
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
   const effectiveCurrentCorpSnapshot = currentCorpSnapshotForSetup();
@@ -2708,6 +2717,7 @@ export default function Page() {
           <div className="serverGrid">
             {activeView.servers.map((server) => {
               const cardCount = centralServerCardCount(activeView, server.id);
+              const runAction = runActionForServer(server.id);
               return (
                 <article
                   className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
@@ -2717,13 +2727,22 @@ export default function Page() {
                     <button className="serverContextButton" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
                       {serverDisplayLabel(server.id)}
                     </button>
+                    {runAction ? (
+                      <button className="serverRunButton" type="button" onClick={() => submitAction(runAction)} disabled={Boolean(payload.winner) || connection !== "online"} aria-label={`${actionButtonLabel(runAction)} starten`} title={actionButtonLabel(runAction)}>
+                        <RunIcon size={13} />
+                        <CostChips action={runAction} />
+                      </button>
+                    ) : null}
                     {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
                   </h3>
                   {serverLanesForSide(activeView.side, server).map((lane) => (
                     <div className="serverLaneGroup" key={lane.label}>
-                      <div className="laneLabel">{lane.label}</div>
+                      <div className="laneLabel">
+                        <span>{lane.label}</span>
+                        {lane.kind === "ice" && lane.cards.length > 0 ? <span className="laneDirection">Außen → Server</span> : null}
+                      </div>
                       <div className="lane">
-                        {lane.cards.map((card) => {
+                        {lane.cards.map((card, index) => {
                           const displayCard = enrichCard(card);
                           return (
                             <CardView
@@ -2736,6 +2755,7 @@ export default function Page() {
                               selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                               actions={cardActionsFor(card)}
                               actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                              {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
                               onAction={submitAction}
                               onFocus={focusCard}
                               onActionContextSelect={selectActionCard}
@@ -4898,6 +4918,7 @@ function CardView({
   selected = false,
   actions = [],
   actionDisabled = false,
+  positionBadge,
   onFocus,
   onActionContextSelect,
   onAction
@@ -4911,6 +4932,7 @@ function CardView({
   selected?: boolean;
   actions?: LegalAction[];
   actionDisabled?: boolean;
+  positionBadge?: string;
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction?(action: LegalAction): void;
@@ -4942,6 +4964,7 @@ function CardView({
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
   const advancementCount = preview ? 0 : Math.max(0, Math.floor(card.advancementCounters ?? 0));
   const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
+  const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const cardAriaLabel = card.known ? `Karte ${card.title}${advancementLabel ? `, ${advancementLabel}` : ""}` : advancementLabel ? `Verdeckte Karte, ${advancementLabel}` : "Verdeckte Karte";
 
   const updateOverlayPlacement = () => {
@@ -4962,6 +4985,11 @@ function CardView({
 
   return (
     <div className={`cardSlot${showCardActions ? " actionMenuOpen" : ""}`}>
+      {positionBadge ? (
+        <span className="cardPositionBadge" aria-label={`ICE ${positionBadge}: äußerstes ICE zuerst`}>
+          {positionBadge}
+        </span>
+      ) : null}
       <button
         ref={cardRef}
         type="button"
@@ -4996,6 +5024,7 @@ function CardView({
           </span>
         ) : null}
         {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
+        {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
         {tooltipId ? (
           <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
             <strong>{card.title}</strong>
@@ -5061,6 +5090,14 @@ function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: num
         <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index)} />
       ))}
       {count > visibleGemCount ? <span className="advancementGemCount">x{count}</span> : null}
+    </span>
+  );
+}
+
+function StrengthBoostBadge({ amount }: { amount: number }) {
+  return (
+    <span className="strengthBoostBadge" aria-label={`+${amount} Stärke`}>
+      +{amount} Stärke
     </span>
   );
 }

@@ -103,6 +103,8 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
 }
 
 export function isContextualLegalAction(action: LegalAction): boolean {
+  if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
+  if ((action.type === "pump_breaker" || action.type === "break_subroutine") && cardRefsForAction(action).length > 0) return true;
   if (isPriorityAction(action)) return false;
   return cardRefsForAction(action).length > 0 || objectBoundAction(action);
 }
