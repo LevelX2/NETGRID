@@ -67,6 +67,7 @@ import {
   baseActionSlotCapacity,
   breachProgressLabel,
   clampCuePosition,
+  contextualCardActionLabel,
   corpInstalledCardState,
   cuePositionClassName,
   cuePositionStyle,
@@ -401,6 +402,8 @@ type FocusedCard = {
 type AccessReveal = {
   eventId: string;
   serverLabel: string;
+  serverTitleLabel: string;
+  serverLocationPhrase: string;
   card: DisplayVisibleCard;
   actions: LegalAction[];
   trashStatus: string;
@@ -538,7 +541,7 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   strength: "Stärke",
   rezCost: "Rez",
   trashCost: "Trash",
-  advancementRequirement: "Fortschritt",
+  advancementRequirement: "Benötigt",
   agendaPoints: "Agenda"
 };
 
@@ -618,16 +621,42 @@ function shouldShowSubroutineMarkers(cardType: string, text: string): boolean {
   return cardType.toLowerCase() === "ice" && rulesTextLines(text).length > 1;
 }
 
+function isSubroutineRuleLine(cardType: string, text: string, line: string): boolean {
+  return line.includes("[Subroutine]") || shouldShowSubroutineMarkers(cardType, text);
+}
+
+function shouldAddFallbackSubroutineMarker(cardType: string, text: string, line: string): boolean {
+  return !line.includes("[Subroutine]") && shouldShowSubroutineMarkers(cardType, text);
+}
+
+function renderRuleTextSegments(line: string, keyPrefix: string) {
+  return line.split(/(\[Subroutine\])/g).map((part, index) => (part === "[Subroutine]" ? <SubroutineIcon key={`${keyPrefix}-subroutine-${index}`} /> : part));
+}
+
+function SubroutineIcon() {
+  return (
+    <span className="subroutineIcon" role="img" aria-label="Subroutine">
+      ↩
+    </span>
+  );
+}
+
 function catalogDetailLines(card: CatalogCardDetail): string[] {
   const typeLine = [card.side, formatCatalogTypeLine(card)].filter(Boolean).join(" · ");
   const numberLine = Object.entries(CATALOG_NUMERIC_LABELS)
     .map(([key, label]) => {
       const value = card.numeric[key];
-      return value === null || value === undefined ? null : `${label} ${value}`;
+      return catalogNumericLabel(key, label, value);
     })
     .filter(Boolean)
     .join(" · ");
   return [typeLine, numberLine].filter(Boolean);
+}
+
+function catalogNumericLabel(key: string, label: string, value: number | null | undefined): string | null {
+  if (value === null || value === undefined) return null;
+  if (key === "advancementRequirement") return neededDevelopmentLabel(value);
+  return `${label} ${value}`;
 }
 
 function revealedEventCardId(event: PublicGameEvent): string | null {
@@ -715,6 +744,8 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   return {
     eventId: event.eventId,
     serverLabel,
+    serverTitleLabel: accessServerTitleLabel(serverLabel),
+    serverLocationPhrase: accessServerLocationPhrase(serverLabel),
     card,
     actions,
     trashStatus: accessTrashStatus(card, actions)
@@ -741,9 +772,21 @@ function payloadString(payload: Record<string, unknown>, key: string): string | 
 function accessTrashStatus(card: DisplayVisibleCard, actions: LegalAction[]): string {
   if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
-  if (actions.some((action) => action.type === "decline_trash")) return "Trashen ist aktuell nicht möglich. Du kannst den Zugriff abschließen.";
-  if (card.type === "operation" || card.type === "event") return "Diese Karte kann nicht getrasht werden. Der Zugriff ist abgeschlossen.";
-  return "Für diese Karte ist aktuell keine weitere Zugriffentscheidung offen.";
+  if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
+  if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
+  return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
+}
+
+function accessServerTitleLabel(serverLabel: string): string {
+  if (serverLabel === "HQ") return "Hauptquartier (HQ)";
+  return serverLabel;
+}
+
+function accessServerLocationPhrase(serverLabel: string): string {
+  if (serverLabel === "HQ") return "im Hauptquartier (HQ)";
+  if (serverLabel === "Archive") return "im Archiv";
+  if (/^Außenserver \d+$/.test(serverLabel)) return `im ${serverLabel}`;
+  return `in ${serverLabel}`;
 }
 
 function catalogTypeKeysForCard(card: Pick<CatalogCardSummary, "type" | "subtypes">): CatalogTypeFilterKey[] {
@@ -806,7 +849,7 @@ function deckBuilderMetricLine(detail: CatalogCardDetail | undefined): string {
   return Object.entries(CATALOG_NUMERIC_LABELS)
     .map(([key, label]) => {
       const value = detail.numeric[key];
-      return value === null || value === undefined ? null : `${label} ${value}`;
+      return catalogNumericLabel(key, label, value);
     })
     .filter(Boolean)
     .join(" · ");
@@ -3013,8 +3056,8 @@ function AccessRevealModal({
         <div className="accessRevealHeader">
           <div>
             <p className="eyebrow">Zugriff</p>
-            <h2 id="access-reveal-title">Zugriff auf {reveal.serverLabel}</h2>
-            <p>Du hast auf eine Karte in {reveal.serverLabel} zugegriffen.</p>
+            <h2 id="access-reveal-title">Zugriff auf {reveal.serverTitleLabel}</h2>
+            <p>Du hast auf eine Karte {reveal.serverLocationPhrase} zugegriffen.</p>
           </div>
           <button className="button iconOnly" onClick={onDismiss} aria-label="Fenster schließen" title="Schließen">
             <X size={16} />
@@ -3030,7 +3073,14 @@ function AccessRevealModal({
             {reveal.card.rulesText ? (
               <div className="cardRulesDetail">
                 <strong>Regeltext</strong>
-                <span>{reveal.card.rulesText}</span>
+                <span className="cardRulesDetailText">
+                  {rulesTextLines(reveal.card.rulesText).map((line, index) => (
+                    <span key={`${reveal.card.instanceId}-access-rules-${index}`} className={isSubroutineRuleLine(reveal.card.type ?? "", reveal.card.rulesText ?? "", line) ? "subroutineLine" : undefined}>
+                      {shouldAddFallbackSubroutineMarker(reveal.card.type ?? "", reveal.card.rulesText ?? "", line) ? <SubroutineIcon /> : null}
+                      {renderRuleTextSegments(line, `${reveal.card.instanceId}-access-rules-${index}`)}
+                    </span>
+                  ))}
+                </span>
               </div>
             ) : null}
             <div className="accessRevealActions">
@@ -4158,9 +4208,9 @@ function CatalogPanel({
               <StatusBadges statuses={detail.statuses} />
               <p className="catalogText">
                 {rulesTextLines(detail.text).map((line, index) => (
-                  <span key={`${detail.catalogCardId}-rules-${index}`} className={shouldShowSubroutineMarkers(detail.type, detail.text) ? "subroutineLine" : undefined}>
-                    {shouldShowSubroutineMarkers(detail.type, detail.text) ? <span aria-hidden="true">↩ </span> : null}
-                    {line}
+                  <span key={`${detail.catalogCardId}-rules-${index}`} className={isSubroutineRuleLine(detail.type, detail.text, line) ? "subroutineLine" : undefined}>
+                    {shouldAddFallbackSubroutineMarker(detail.type, detail.text, line) ? <SubroutineIcon /> : null}
+                    {renderRuleTextSegments(line, `${detail.catalogCardId}-rules-${index}`)}
                   </span>
                 ))}
               </p>
@@ -4868,18 +4918,21 @@ function CardView({
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const [actionMenuPlacement, setActionMenuPlacement] = useState<"above" | "below">("below");
+  const [suppressCardTooltip, setSuppressCardTooltip] = useState(false);
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
-  const detailLines = card.known ? cardDetailLines(card) : [];
+  const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
+  const detailLines = card.known ? cardDetailLines(previewCard) : [];
   const rulesText = card.known ? (card.rulesText ?? "") : "";
   const hasRulesText = rulesText.length > 0;
-  const hasSubroutineMarkers = shouldShowSubroutineMarkers(card.type ?? "", rulesText);
+  const hasSubroutineMarkers = rulesTextLines(rulesText).some((line) => isSubroutineRuleLine(card.type ?? "", rulesText, line));
   const tooltipText = card.known ? [card.title, ...detailLines, rulesText].filter(Boolean).join("\n") : undefined;
-  const tooltipId = card.known && hasRulesText && !showCardActions ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
-  const nativeTitle = tooltipId ? undefined : tooltipText;
+  const showTooltip = card.known && hasRulesText && !showCardActions && !suppressCardTooltip;
+  const tooltipId = showTooltip ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const nativeTitle = showTooltip || showCardActions || suppressCardTooltip ? undefined : tooltipText;
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const showArtBlock = !visualImageUrl && displayMode === "placeholder";
@@ -4887,7 +4940,7 @@ function CardView({
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
   const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
-  const advancementCount = Math.max(0, Math.floor(card.advancementCounters ?? 0));
+  const advancementCount = preview ? 0 : Math.max(0, Math.floor(card.advancementCounters ?? 0));
   const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
   const cardAriaLabel = card.known ? `Karte ${card.title}${advancementLabel ? `, ${advancementLabel}` : ""}` : advancementLabel ? `Verdeckte Karte, ${advancementLabel}` : "Verdeckte Karte";
 
@@ -4914,34 +4967,30 @@ function CardView({
         type="button"
         className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}`}
         onClick={() => {
+          if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
           onFocus?.(card, hiddenSide);
-          if (card.known) onActionContextSelect?.(card, hiddenSide);
         }}
         onFocus={() => {
           updateOverlayPlacement();
           onFocus?.(card, hiddenSide);
         }}
         onPointerEnter={updateOverlayPlacement}
+        onPointerLeave={() => setSuppressCardTooltip(false)}
         aria-label={cardAriaLabel}
         aria-describedby={tooltipId}
         title={nativeTitle}
       >
         {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
-        {hasCardActions ? (
-          <span className="cardActionMarker" aria-hidden="true">
-            <Play size={10} />
-          </span>
-        ) : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
         {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
         {showRulesPreview ? (
           <span className="cardRulesPreview">
             {rulesTextLines(rulesText).map((line, index) => (
               <span key={`${card.instanceId}-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
-                {hasSubroutineMarkers ? <span aria-hidden="true">↩ </span> : null}
-                {line}
+                {shouldAddFallbackSubroutineMarker(card.type ?? "", rulesText, line) ? <SubroutineIcon /> : null}
+                {renderRuleTextSegments(line, `${card.instanceId}-rules-${index}`)}
               </span>
             ))}
           </span>
@@ -4956,14 +5005,35 @@ function CardView({
             <span className="cardTooltipText">
               {rulesTextLines(rulesText).map((line, index) => (
                 <span key={`${card.instanceId}-tooltip-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
-                  {hasSubroutineMarkers ? <span aria-hidden="true">↩ </span> : null}
-                  {line}
+                  {shouldAddFallbackSubroutineMarker(card.type ?? "", rulesText, line) ? <SubroutineIcon /> : null}
+                  {renderRuleTextSegments(line, `${card.instanceId}-tooltip-rules-${index}`)}
                 </span>
               ))}
             </span>
           </span>
         ) : null}
       </button>
+      {hasCardActions ? (
+        <button
+          className={`cardActionMarker${showCardActions ? " active" : ""}`}
+          type="button"
+          aria-label={showCardActions ? "Kartenaktionen einklappen" : "Kartenaktionen anzeigen"}
+          aria-expanded={showCardActions}
+          onClick={() => {
+            if (showCardActions) setSuppressCardTooltip(true);
+            updateOverlayPlacement();
+            onFocus?.(card, hiddenSide);
+            if (card.known) onActionContextSelect?.(card, hiddenSide);
+          }}
+          onDoubleClick={() => {
+            if (actions.length === 1 && onAction && !actionDisabled) onAction(actions[0]!);
+          }}
+          onPointerEnter={updateOverlayPlacement}
+          onPointerLeave={() => setSuppressCardTooltip(false)}
+        >
+          <Play size={10} />
+        </button>
+      ) : null}
       {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} onAction={onAction!} /> : null}
     </div>
   );
@@ -4975,41 +5045,12 @@ function CardActionsPopover({ actions, disabled, placement, onAction }: { action
       {actions.map((action) => (
         <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem">
           <Play size={14} />
-          <span className="actionButtonLabel">{inlineCardActionLabel(action)}</span>
+          <span className="actionButtonLabel">{contextualCardActionLabel(action)}</span>
           <CostChips action={action} />
         </button>
       ))}
     </div>
   );
-}
-
-function inlineCardActionLabel(action: LegalAction): string {
-  switch (action.type) {
-    case "install_card":
-      return "Installieren";
-    case "play_event":
-    case "play_operation":
-      return "Spielen";
-    case "advance_card":
-      return "Ausbauen";
-    case "score_agenda":
-      return "Scoren";
-    case "rez_ice":
-      return "Rezzen";
-    case "pump_breaker":
-      return "Pumpen";
-    case "break_subroutine":
-      return "Brechen";
-    case "trash_accessed_card":
-    case "trash_resource":
-      return "Trashen";
-    case "steal_agenda":
-      return "Stehlen";
-    case "trigger_ability":
-      return "Aktivieren";
-    default:
-      return actionButtonLabel(action);
-  }
 }
 
 function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: number }) {
@@ -5066,7 +5107,7 @@ function cardDetailLines(card: VisibleCard): string[] {
     valueLabel("MU", card.memoryCost),
     valueLabel("Rez", card.rezCost),
     valueLabel("Trash", card.trashCost),
-    valueLabel("Fortschritt", card.advancementRequirement),
+    neededDevelopmentLabel(card.advancementRequirement),
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength)
   ]
@@ -5075,12 +5116,21 @@ function cardDetailLines(card: VisibleCard): string[] {
   return [typeLine, numberLine].filter(Boolean);
 }
 
+function cardWithoutDevelopmentCounters(card: DisplayVisibleCard): DisplayVisibleCard {
+  const { advancementCounters: _advancementCounters, ...nativeCard } = card;
+  return nativeCard;
+}
+
 function valueLabel(label: string, value: number | undefined): string | null {
   return value === undefined ? null : `${label} ${value}`;
 }
 
 function developmentCountLabel(count: number): string {
   return `${count} ${count === 1 ? "Entwicklung" : "Entwicklungen"}`;
+}
+
+function neededDevelopmentLabel(count: number | undefined): string | null {
+  return count === undefined ? null : `Benötigt ${count} ${count === 1 ? "Entwicklung" : "Entwicklungen"}`;
 }
 
 function runnerHandLimit(_view: PlayerView): number {

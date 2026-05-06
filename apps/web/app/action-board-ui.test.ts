@@ -8,6 +8,7 @@ import {
   actionSlotDisplay,
   breachProgressLabel,
   clampCuePosition,
+  contextualCardActionLabel,
   corpInstalledCardState,
   currentRunTimelineStep,
   groupRunnerRigCards,
@@ -127,6 +128,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
       { kind: "credit", amount: 1, label: "1 Credit" }
     ]);
     expect(JSON.stringify(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] }))).not.toContain("{ clicks");
+  });
+
+  it("keeps contextual card action labels distinct for server-targeted events", () => {
+    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf R&D", { cardId: "card_1", serverId: "rd" }))).toBe("Run auf F&E (R&D)");
+    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
+    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Draw Event spielen", { cardId: "card_1" }))).toBe("Spielen");
+    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Außenserver 2");
   });
 });
 

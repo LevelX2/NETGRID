@@ -148,6 +148,45 @@ export function actionButtonLabel(action: LegalAction): string {
   }
 }
 
+export function contextualCardActionLabel(action: LegalAction): string {
+  switch (action.type) {
+    case "install_card":
+      return "Installieren";
+    case "play_event":
+      return playEventContextLabel(action);
+    case "play_operation":
+      return "Spielen";
+    case "advance_card":
+      return "Ausbauen";
+    case "score_agenda":
+      return "Scoren";
+    case "rez_ice":
+      return "Rezzen";
+    case "pump_breaker":
+      return "Pumpen";
+    case "break_subroutine":
+      return "Brechen";
+    case "trash_accessed_card":
+    case "trash_resource":
+      return "Trashen";
+    case "steal_agenda":
+      return "Stehlen";
+    case "trigger_ability":
+      return "Aktivieren";
+    default:
+      return actionButtonLabel(action);
+  }
+}
+
+function playEventContextLabel(action: LegalAction): string {
+  const serverId = typeof action.payload?.serverId === "string" ? action.payload.serverId : null;
+  if (!serverId) return "Spielen";
+  const serverLabel = serverDisplayLabel(serverId);
+  const fullLabel = actionButtonLabel(action);
+  if (/\bRun\b/i.test(fullLabel) || /\bDeep Dive\b/i.test(fullLabel)) return `Run auf ${serverLabel}`;
+  return `Spielen auf ${serverLabel}`;
+}
+
 export function baseActionSlotCapacity(side: Side): number {
   return side === "runner" ? 4 : 3;
 }
