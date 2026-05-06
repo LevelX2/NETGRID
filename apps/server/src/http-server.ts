@@ -5,6 +5,7 @@ import { WebSocket, WebSocketServer } from "ws";
 import { simulateAiGame } from "@netrunner/ai";
 import {
   JsonFileMatchStorage,
+  InMemoryMatchStorage,
   MultiplayerService,
   type ActionReceipt,
   type AiTurnPresentationState,
@@ -17,6 +18,14 @@ import {
   type SubmitActionResult,
   type UndoResult
 } from "./multiplayer";
+import {
+  DEFAULT_LEGACY_MATCH_STORAGE_PATH,
+  DEFAULT_SQLITE_STORAGE_PATH,
+  DEFAULT_STORAGE_BACKUP_DIR,
+  SqliteMatchStorage,
+  StorageError,
+  type StorageKind
+} from "./storage-sqlite";
 import { defaultAgendaPointsToWin, resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
 import type { Side } from "@netrunner/shared";
 import type { AiDifficulty } from "@netrunner/shared";
@@ -402,7 +411,12 @@ export function createNetrunnerHttpServer(service = defaultService()): Netrunner
       new Promise<void>((resolve, reject) => {
         realtime
           .close()
-          .then(() => server.close((error) => (error ? reject(error) : resolve())))
+          .then(() =>
+            server.close((error) => {
+              service.closeStorage();
+              return error ? reject(error) : resolve();
+            })
+          )
           .catch(reject);
       })
   };
@@ -427,7 +441,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
   const url = new URL(request.url ?? "/", "http://localhost");
   try {
     if (request.method === "GET" && url.pathname === "/health") {
-      sendJson(response, 200, { ok: true, service: "netrunner-multiplayer" });
+      sendJson(response, 200, { ok: true, service: "netrunner-multiplayer", storage: await service.storageHealth() });
       return;
     }
 
@@ -618,10 +632,31 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
 }
 
 function defaultService(): MultiplayerService {
-  const storagePath = process.env.NETRUNNER_MATCH_STORAGE_PATH
-    ? resolve(process.env.NETRUNNER_MATCH_STORAGE_PATH)
-    : resolve(dirname(fileURLToPath(import.meta.url)), "../../../data/runtime/multiplayer/matches.json");
-  return new MultiplayerService(new JsonFileMatchStorage(storagePath));
+  return new MultiplayerService(createConfiguredStorage());
+}
+
+export function createConfiguredStorage() {
+  const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
+  const storageKind = storageKindFromEnv(process.env.NETRUNNER_STORAGE_KIND);
+  if (storageKind === "memory") return new InMemoryMatchStorage();
+  if (storageKind === "json") {
+    const storagePath = process.env.NETRUNNER_MATCH_STORAGE_PATH ? resolve(process.env.NETRUNNER_MATCH_STORAGE_PATH) : resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
+    return new JsonFileMatchStorage(storagePath);
+  }
+  const sqlitePath = process.env.NETRUNNER_SQLITE_STORAGE_PATH ? resolve(process.env.NETRUNNER_SQLITE_STORAGE_PATH) : resolve(root, DEFAULT_SQLITE_STORAGE_PATH);
+  const legacyJsonPath = process.env.NETRUNNER_LEGACY_MATCH_STORAGE_PATH ? resolve(process.env.NETRUNNER_LEGACY_MATCH_STORAGE_PATH) : resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
+  const backupDir = process.env.NETRUNNER_STORAGE_BACKUP_DIR ? resolve(process.env.NETRUNNER_STORAGE_BACKUP_DIR) : resolve(root, DEFAULT_STORAGE_BACKUP_DIR);
+  try {
+    return new SqliteMatchStorage({ dbPath: sqlitePath, legacyJsonPath, backupDir });
+  } catch (error) {
+    if (error instanceof StorageError) throw error;
+    throw new StorageError("storage_corrupt", "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.");
+  }
+}
+
+function storageKindFromEnv(value: string | undefined): StorageKind {
+  if (value === "json" || value === "memory" || value === "sqlite") return value;
+  return "sqlite";
 }
 
 async function readJson(request: IncomingMessage): Promise<Record<string, unknown>> {

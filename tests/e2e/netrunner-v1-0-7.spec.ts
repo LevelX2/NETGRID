@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { stat } from "node:fs/promises";
+import path from "node:path";
 import {
   createHumanVsAiGame,
   createHumanVsHumanLobby,
@@ -89,6 +90,7 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
 
     await createHumanVsAiGame(page, "v1-0-7-lifecycle-reconnect");
     await page.getByRole("button", { name: "Wieder verbinden" }).click();
+    await expect(page.getByText("Wiederverbindung abgeschlossen.")).toBeVisible();
     await expect(page.getByTestId("active-game")).toBeVisible();
     await page.reload();
     await expect(page.getByTestId("active-game")).toBeVisible({ timeout: 20_000 });
@@ -152,11 +154,20 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     }
   });
 
-  test("Runtime-Isolation nutzt den E2E-Speicherpfad statt normaler lokaler Runtime-Datei", async () => {
+  test("Runtime-Isolation nutzt die temporäre SQLite-Datenbank statt normaler lokaler Runtime-Dateien", async ({ request }) => {
     const runtimePath = process.env.NETRUNNER_E2E_RUNTIME_PATH;
     expect(runtimePath).toBeTruthy();
+    expect(path.basename(runtimePath!)).toBe("netrunner.sqlite");
     expect(runtimePath).not.toContain("data\\runtime\\multiplayer\\matches.json");
     expect(runtimePath).not.toContain("data/runtime/multiplayer/matches.json");
+    expect(runtimePath).not.toContain("data\\runtime\\multiplayer\\netrunner.sqlite");
+    expect(runtimePath).not.toContain("data/runtime/multiplayer/netrunner.sqlite");
     await expect(async () => stat(runtimePath!)).toPass();
+    const health = await request.get(`${process.env.NETRUNNER_E2E_SERVER_URL}/health`);
+    const body = (await health.json()) as { storage?: { kind?: string; database?: string; matchCount?: number } };
+    expect(body.storage?.kind).toBe("sqlite");
+    expect(body.storage?.database).toBe("netrunner.sqlite");
+    expect(typeof body.storage?.matchCount).toBe("number");
+    expect(JSON.stringify(body)).not.toMatch(/sessionToken|reconnectToken|joinToken|cardInstances|privateDeckSnapshots|decklist/i);
   });
 });

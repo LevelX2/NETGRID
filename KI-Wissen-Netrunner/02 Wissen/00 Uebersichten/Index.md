@@ -144,6 +144,8 @@
 - `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`: Spezifikation für private lokale Backups, Restore, Manifest, Prüfsummen und Recovery-Verhalten.
 - `docs/derived/V1_0_8_TEST_MATRIX.md`: V1.0.8-Testmatrix für Storage-Roundtrip, Migration, Backup/Restore, Redaction, Recovery und E2E-Regression.
 - `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.8.
+- `docs/derived/V1_0_8_IMPLEMENTATION_REVIEW.md`: Implementation Review für SQLite-Standardstorage, Legacy-Import, Backup/Restore, Recovery und E2E-SQLite-Isolation.
+- `docs/derived/V1_0_8_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.8 Storage/Backup-Härtung.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.

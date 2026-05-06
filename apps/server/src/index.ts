@@ -6,6 +6,7 @@ import { startNetrunnerServer } from "./http-server";
 
 export * from "./http-server";
 export * from "./multiplayer";
+export * from "./storage-sqlite";
 
 export type LocalDemoMatch = {
   state: GameState;

@@ -1,3 +1,7 @@
+import { mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 import { describe, expect, it } from "vitest";
 import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
@@ -6,9 +10,185 @@ import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { createRuntimeCardsById } from "@netrunner/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netrunner/decks";
 import { applyAction, createGame, getLegalActions, hashState } from "@netrunner/engine";
-import { createNetrunnerHttpServer } from "./http-server";
-import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type SidePayload, type StateSnapshot } from "./multiplayer";
+import { createConfiguredStorage, createNetrunnerHttpServer } from "./http-server";
+import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
+import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
 import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netrunner/shared";
+
+describe("V1.0.8 SQLite storage and backup hardening", () => {
+  it("uses SQLite as configurable default storage and reports only redacted health signals", async () => {
+    const dir = await tempStorageDir();
+    const previousKind = process.env.NETRUNNER_STORAGE_KIND;
+    const previousSqlite = process.env.NETRUNNER_SQLITE_STORAGE_PATH;
+    const previousBackup = process.env.NETRUNNER_STORAGE_BACKUP_DIR;
+    const previousLegacy = process.env.NETRUNNER_LEGACY_MATCH_STORAGE_PATH;
+    process.env.NETRUNNER_STORAGE_KIND = "";
+    process.env.NETRUNNER_SQLITE_STORAGE_PATH = join(dir, "configured.sqlite");
+    process.env.NETRUNNER_STORAGE_BACKUP_DIR = join(dir, "backups");
+    process.env.NETRUNNER_LEGACY_MATCH_STORAGE_PATH = join(dir, "missing-legacy.json");
+    try {
+      const storage = createConfiguredStorage();
+      const service = new MultiplayerService(storage, { tokenSalt: "v108-default-storage" });
+      const health = await service.storageHealth();
+      expect(health.kind).toBe("sqlite");
+      expect(health.schemaVersion).toBe(1);
+      expect(JSON.stringify(health)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
+      service.closeStorage();
+    } finally {
+      restoreEnv("NETRUNNER_STORAGE_KIND", previousKind);
+      restoreEnv("NETRUNNER_SQLITE_STORAGE_PATH", previousSqlite);
+      restoreEnv("NETRUNNER_STORAGE_BACKUP_DIR", previousBackup);
+      restoreEnv("NETRUNNER_LEGACY_MATCH_STORAGE_PATH", previousLegacy);
+    }
+  });
+
+  it("roundtrips full StoredMatch records through SQLite without persisting cleartext tokens", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netrunner.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-roundtrip" });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v108-sqlite-roundtrip" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+    expect("error" in joined).toBe(false);
+    const before = await service.loadForTest(created.matchId);
+    expect(before?.privateDeckSnapshots?.runner.cards.length).toBeGreaterThan(0);
+    service.closeStorage();
+
+    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const reopened = await reopenedStorage.load(created.matchId);
+    expect(reopened?.match.matchId).toBe(created.matchId);
+    expect(reopened?.tokens.every((token) => token.tokenHash.startsWith("sha256:"))).toBe(true);
+    expect(reopened?.sessions.every((session) => session.sessionTokenHash.startsWith("sha256:"))).toBe(true);
+    expect(reopened?.privateDeckSnapshots?.corp.cards.length).toBeGreaterThan(0);
+    expect(reopened?.eventLog.at(0)?.publicPayload.type).toBe("game_created");
+    const raw = await readFile(dbPath);
+    expect(raw.toString("utf8")).not.toContain(created.hostSessionToken);
+    expect(raw.toString("utf8")).not.toContain(created.hostReconnectToken);
+    expect(raw.toString("utf8")).not.toContain(joinToken);
+    reopenedStorage.close();
+  });
+
+  it("imports valid legacy JSON transactionally after creating a pre-migration backup", async () => {
+    const fixture = await storedMatchFixture("v108-legacy-import");
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netrunner.sqlite");
+    const legacyPath = join(dir, "matches.json");
+    const backupDir = join(dir, "backups");
+    const legacyRecord = structuredClone(fixture.record) as StoredMatch;
+    delete (legacyRecord.match as Partial<StoredMatch["match"]>).mode;
+    await writeFile(legacyPath, `${JSON.stringify({ matches: [legacyRecord] }, null, 2)}\n`, "utf8");
+
+    const storage = new SqliteMatchStorage({ dbPath, legacyJsonPath: legacyPath, backupDir });
+    const imported = await storage.load(fixture.record.match.matchId);
+    expect(imported?.match.matchId).toBe(fixture.record.match.matchId);
+    expect(imported?.match.mode).toBe("human_vs_human");
+    expect((await storage.health()).legacyImport).toBe("completed");
+    const backups = await listBackupManifests(backupDir);
+    expect(backups.length).toBe(1);
+    expect(backups[0]).toMatchObject({ source: "legacy_json_import", reason: "pre_migration" });
+    const manifestText = JSON.stringify(backups[0]);
+    expect(manifestText).not.toContain(fixture.hostSessionToken);
+    expect(manifestText).not.toContain(fixture.joinToken);
+    expect(manifestText).not.toMatch(/tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
+    expect(await readFile(legacyPath, "utf8")).toContain(fixture.record.match.matchId);
+    storage.close();
+  });
+
+  it("rejects invalid legacy JSON without partial SQLite import", async () => {
+    const fixture = await storedMatchFixture("v108-legacy-invalid");
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netrunner.sqlite");
+    const legacyPath = join(dir, "matches.json");
+    const invalid = structuredClone(fixture.record) as StoredMatch;
+    (invalid.match as unknown as { status: string }).status = "future_status";
+    await writeFile(legacyPath, `${JSON.stringify({ matches: [fixture.record, invalid] }, null, 2)}\n`, "utf8");
+
+    expect(() => new SqliteMatchStorage({ dbPath, legacyJsonPath: legacyPath, backupDir: join(dir, "backups") })).toThrow(StorageError);
+    const storage = new SqliteMatchStorage({ dbPath, legacyJsonPath: legacyPath, backupDir: join(dir, "backups"), autoImportLegacy: false });
+    expect(await storage.list()).toEqual([]);
+    storage.close();
+  });
+
+  it("rejects newer schema versions and corrupted SQLite files with side-safe errors", async () => {
+    const dir = await tempStorageDir();
+    const newerPath = join(dir, "newer.sqlite");
+    const newer = new DatabaseSync(newerPath);
+    newer.exec("CREATE TABLE storage_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL, updated_at TEXT NOT NULL)");
+    newer.prepare("INSERT INTO storage_meta (key, value, updated_at) VALUES ('schema_version', '999', '2026-05-06T00:00:00.000Z')").run();
+    newer.close();
+
+    expect(() => new SqliteMatchStorage({ dbPath: newerPath, backupDir: join(dir, "backups"), autoImportLegacy: false })).toThrow(/neuer/);
+    const corruptPath = join(dir, "corrupt.sqlite");
+    await writeFile(corruptPath, "das ist keine sqlite datei", "utf8");
+    expect(() => new SqliteMatchStorage({ dbPath: corruptPath, backupDir: join(dir, "backups"), autoImportLegacy: false })).toThrow(/Backup/);
+  });
+
+  it("creates validated backups and restores them after a pre-restore backup", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netrunner.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-backup-restore" });
+    const first = await service.createMatch({ hostSide: "runner", seed: "v108-backup-first" });
+    const backup = await service.backupStorageForTest("manual");
+    const second = await service.createMatch({ hostSide: "corp", seed: "v108-backup-second" });
+    expect((await storage.list()).map((record) => record.match.matchId)).toEqual([first.matchId, second.matchId]);
+    service.closeStorage();
+
+    const restored = restoreSqliteStorageBackup({ backupDir: backup.backupDir, targetPath: dbPath, backupRootDir: backupDir });
+    expect(restored.preRestoreBackupDir).toBeTruthy();
+    const reopened = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    expect((await reopened.list()).map((record) => record.match.matchId)).toEqual([first.matchId]);
+    const health = inspectSqliteStorage(dbPath);
+    expect(health).toMatchObject({ kind: "sqlite", schemaVersion: 1, matchCount: 1 });
+    const manifestText = await readFile(join(backup.backupDir, "manifest.json"), "utf8");
+    expect(manifestText).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
+    reopened.close();
+  });
+
+  it("rejects manipulated backups before restore", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netrunner.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-bad-backup" });
+    await service.createMatch({ hostSide: "runner", seed: "v108-bad-backup" });
+    const backup = await service.backupStorageForTest("manual");
+    service.closeStorage();
+    await writeFile(join(backup.backupDir, "netrunner.sqlite"), "tampered", "utf8");
+    expect(() => restoreSqliteStorageBackup({ backupDir: backup.backupDir, targetPath: dbPath, backupRootDir: backupDir })).toThrow(/Prüfsumme/);
+  });
+
+  it("does not return a successful action when persistence fails", async () => {
+    const storage = new FailingStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-persist-failure" });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v108-persist-failure" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+    expect("error" in joined).toBe(false);
+    const activeSide = (await service.loadForTest(created.matchId))?.gameState.activeSide ?? "runner";
+    const sessionToken = activeSide === "runner" ? created.hostSessionToken : "error" in joined ? "" : joined.sessionToken;
+    const payload = await service.bootstrap(created.matchId, activeSide, sessionToken);
+    if ("error" in payload) throw new Error(payload.error.message);
+    const action = payload.legalActions[0];
+    if (!action) throw new Error("Missing legal action");
+    storage.failNextSave = true;
+    await expect(
+      service.submitAction({
+        matchId: created.matchId,
+        side: activeSide,
+        sessionToken,
+        actionId: action.actionId,
+        clientKnownStateVersion: payload.playerView.stateVersion,
+        idempotencyKey: "persist-fails"
+      })
+    ).rejects.toThrow("forced_storage_failure");
+  });
+});
 
 describe("MVP 0.2 multiplayer service", () => {
   it("starts V0.6 matches from validated immutable deck snapshots without exposing opponent decklists", async () => {
@@ -2528,4 +2708,55 @@ function waitForMessage(socket: WebSocket, type: string): Promise<unknown> {
 
 function messagePayload(message: unknown): { matchStatus?: string } {
   return (message as { payload?: { matchStatus?: string } }).payload ?? {};
+}
+
+async function tempStorageDir(): Promise<string> {
+  return mkdtemp(join(tmpdir(), "netrunner-v108-"));
+}
+
+async function storedMatchFixture(seed: string): Promise<{ record: StoredMatch; hostSessionToken: string; hostReconnectToken: string; joinToken: string }> {
+  const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: `fixture-${seed}` });
+  const created = await service.createMatch({ hostSide: "runner", seed });
+  const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Corp" });
+  expect("error" in joined).toBe(false);
+  const record = await service.loadForTest(created.matchId);
+  if (!record) throw new Error("Missing stored fixture");
+  return { record, hostSessionToken: created.hostSessionToken, hostReconnectToken: created.hostReconnectToken, joinToken };
+}
+
+async function listBackupManifests(backupDir: string) {
+  const entries = await readdir(backupDir, { withFileTypes: true });
+  return Promise.all(
+    entries
+      .filter((entry) => entry.isDirectory())
+      .map(async (entry) => JSON.parse(await readFile(join(backupDir, entry.name, "manifest.json"), "utf8")) as Record<string, unknown>)
+  );
+}
+
+function restoreEnv(key: string, value: string | undefined): void {
+  if (value === undefined) delete process.env[key];
+  else process.env[key] = value;
+}
+
+class FailingStorage implements MultiplayerStorage {
+  private readonly inner = new InMemoryMatchStorage();
+  failNextSave = false;
+
+  load(matchId: string): Promise<StoredMatch | undefined> {
+    return this.inner.load(matchId);
+  }
+
+  async save(record: StoredMatch): Promise<void> {
+    if (this.failNextSave) {
+      this.failNextSave = false;
+      throw new Error("forced_storage_failure");
+    }
+    await this.inner.save(record);
+  }
+
+  list(): Promise<StoredMatch[]> {
+    return this.inner.list();
+  }
 }

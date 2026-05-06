@@ -14,7 +14,8 @@ const webPort = await freePort();
 const serverUrl = `http://127.0.0.1:${serverPort}`;
 const webUrl = `http://127.0.0.1:${webPort}`;
 const runtimeDir = path.join(root, "tmp", `e2e-runtime-${Date.now()}`);
-const runtimePath = path.join(runtimeDir, "matches.json");
+const runtimePath = path.join(runtimeDir, "netrunner.sqlite");
+const backupDir = path.join(runtimeDir, "backups");
 
 await rm(runtimeDir, { recursive: true, force: true });
 await mkdir(runtimeDir, { recursive: true });
@@ -23,7 +24,10 @@ try {
   start("server", ["pnpm", "--filter", "@netrunner/server", "exec", "tsx", "src/index.ts"], {
     PORT: String(serverPort),
     HOST: "127.0.0.1",
-    NETRUNNER_MATCH_STORAGE_PATH: runtimePath,
+    NETRUNNER_STORAGE_KIND: "sqlite",
+    NETRUNNER_SQLITE_STORAGE_PATH: runtimePath,
+    NETRUNNER_STORAGE_BACKUP_DIR: backupDir,
+    NETRUNNER_LEGACY_MATCH_STORAGE_PATH: path.join(runtimeDir, "legacy-matches.json"),
     NETRUNNER_TOKEN_SALT: "v1-0-7-e2e-token-salt",
     NETRUNNER_WEB_BASE_URL: webUrl,
     NETRUNNER_SERVER_BASE_URL: serverUrl
@@ -52,8 +56,8 @@ function start(label, args, env) {
     stdio: ["ignore", "pipe", "pipe"],
     shell: useShell
   });
-  child.stdout.on("data", (chunk) => process.stdout.write(`[${label}] ${chunk}`));
-  child.stderr.on("data", (chunk) => process.stderr.write(`[${label}] ${chunk}`));
+  child.stdout.on("data", (chunk) => process.stdout.write(`[${label}] ${redactLogChunk(chunk)}`));
+  child.stderr.on("data", (chunk) => process.stderr.write(`[${label}] ${redactLogChunk(chunk)}`));
   child.on("exit", (code, signal) => {
     if (process.exitCode === undefined && code !== null && code !== 0) {
       process.stderr.write(`[${label}] exited with code ${code}${signal ? ` (${signal})` : ""}\n`);
@@ -62,6 +66,13 @@ function start(label, args, env) {
   });
   started.push(child);
   return child;
+}
+
+function redactLogChunk(chunk) {
+  return String(chunk)
+    .replace(/(joinToken=)[A-Za-z0-9_-]+/g, "$1[redacted]")
+    .replace(/("(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken)"\s*:\s*")[^"]+(")/g, "$1[redacted]$2")
+    .replace(/sha256:[a-f0-9]{64}/gi, "sha256:[redacted]");
 }
 
 function run(command, args, env) {

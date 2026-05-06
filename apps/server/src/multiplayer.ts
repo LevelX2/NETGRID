@@ -36,6 +36,7 @@ import {
   type ResolvedParticipantDeckPair,
   type ResolvedParticipantDeckSetup
 } from "./deck-setup";
+import type { BackupManifest, StorageHealth } from "./storage-sqlite";
 
 export type MatchStatus =
   | "pending"
@@ -318,6 +319,9 @@ export type MultiplayerStorage = {
   load(matchId: string): Promise<StoredMatch | undefined>;
   save(record: StoredMatch): Promise<void>;
   list?(): Promise<StoredMatch[]>;
+  health?(): Promise<StorageHealth>;
+  backup?(reason?: BackupManifest["reason"]): Promise<{ backupDir: string; manifest: BackupManifest }>;
+  close?(): void;
 };
 
 export type SidePayload = {
@@ -494,6 +498,10 @@ export class InMemoryMatchStorage implements MultiplayerStorage {
   async list(): Promise<StoredMatch[]> {
     return [...this.records.values()].map((record) => clone(record));
   }
+
+  async health(): Promise<StorageHealth> {
+    return { ok: true, kind: "memory", matchCount: this.records.size, legacyImport: "not_applicable" };
+  }
 }
 
 export class JsonFileMatchStorage implements MultiplayerStorage {
@@ -519,6 +527,11 @@ export class JsonFileMatchStorage implements MultiplayerStorage {
   async list(): Promise<StoredMatch[]> {
     await this.ready;
     return [...this.records.values()].map((record) => clone(record));
+  }
+
+  async health(): Promise<StorageHealth> {
+    await this.ready;
+    return { ok: true, kind: "json", matchCount: this.records.size, legacyImport: "not_applicable" };
   }
 
   private async loadFromDisk(): Promise<void> {
@@ -1490,6 +1503,20 @@ export class MultiplayerService {
 
   async loadForTest(matchId: string): Promise<StoredMatch | undefined> {
     return this.storage.load(matchId);
+  }
+
+  async storageHealth(): Promise<StorageHealth> {
+    if (this.storage.health) return this.storage.health();
+    return { ok: true, kind: "memory", legacyImport: "not_applicable" };
+  }
+
+  async backupStorageForTest(reason?: BackupManifest["reason"]): Promise<{ backupDir: string; manifest: BackupManifest }> {
+    if (!this.storage.backup) throw new Error("storage_backup_unavailable");
+    return this.storage.backup(reason);
+  }
+
+  closeStorage(): void {
+    this.storage.close?.();
   }
 
   private async resolveUndo(input: { matchId: string; side: Side; sessionToken: string; undoRequestId: string }, status: "accepted" | "declined"): Promise<UndoResult> {
