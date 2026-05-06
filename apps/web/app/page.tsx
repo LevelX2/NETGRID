@@ -63,6 +63,7 @@ import {
   actionContextStillVisible,
   actionContextTitle,
   actionCostChips,
+  aiPacingDelayMs,
   actionGroupLabel,
   actionMatchesContext,
   actionSlotDisplay,
@@ -78,6 +79,7 @@ import {
   parseCuePositionPreference,
   runTargetServerIds,
   serializeCuePositionPreference,
+  serverBoardOrderForSide,
   serverDisplayLabel,
   splitLegalActions,
   currentRunTimelineStep,
@@ -1515,16 +1517,16 @@ export default function Page() {
 
   useEffect(() => {
     if (!payload?.aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online") return;
-    if (localAiPacingMode === "manual") return;
-    if (currentActionCue || actionCueQueue.length > 0) return;
+    const delayMs = aiPacingDelayMs(localAiPacingMode, Boolean(currentActionCue) || actionCueQueue.length > 0, actionCueAutoDismissMs);
+    if (delayMs === null) return;
     const advanceKey = `${payload.matchId}:${payload.matchVersion}:${payload.playerView.stateVersion}:${localAiPacingMode}`;
     if (pendingAiAdvanceKeyRef.current === advanceKey) return;
     pendingAiAdvanceKeyRef.current = advanceKey;
     const timeout = window.setTimeout(() => {
       advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
-    }, localAiPacingMode === "fast" ? 120 : 650);
+    }, delayMs);
     return () => window.clearTimeout(timeout);
-  }, [actionCueQueue.length, connection, currentActionCue, localAiPacingMode, payload?.aiTurnPresentation?.canAdvanceAi, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
+  }, [actionCueAutoDismissMs, actionCueQueue.length, connection, currentActionCue, localAiPacingMode, payload?.aiTurnPresentation?.canAdvanceAi, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
 
   const createMatch = async () => {
     setNotice("");
@@ -2864,8 +2866,8 @@ export default function Page() {
               </span>
             </div>
           ) : null}
-          <div className="serverGrid">
-            {activeView.servers.map((server) => {
+          <div className={`serverGrid ${activeView.side === "corp" ? "corpPerspective" : "runnerPerspective"}`}>
+            {serverBoardOrderForSide(activeView.side, activeView.servers).map((server) => {
               const cardCount = centralServerCardCount(activeView, server.id);
               const runAction = runActionForServer(server.id);
               return (

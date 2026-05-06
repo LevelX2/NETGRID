@@ -6,6 +6,7 @@ import {
   actionCostChips,
   actionMatchesContext,
   actionSlotDisplay,
+  aiPacingDelayMs,
   breachProgressLabel,
   clampCuePosition,
   contextualCardActionLabel,
@@ -14,6 +15,7 @@ import {
   groupRunnerRigCards,
   parseCuePositionPreference,
   runTargetServerIds,
+  serverBoardOrderForSide,
   serverDisplayLabel,
   splitLegalActions
 } from "./action-board-ui";
@@ -89,6 +91,26 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(parseCuePositionPreference(JSON.stringify({ kind: "preset", preset: "center" }))).toEqual({ kind: "preset", preset: "center" });
     expect(parseCuePositionPreference("{bad json")).toEqual(DEFAULT_CUE_POSITION);
     expect(clampCuePosition(98, 98, 400, 300, 180, 120)).toEqual({ kind: "custom", xPercent: 52, yPercent: 56 });
+  });
+
+  it("mirrors server board order by player side", () => {
+    const servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      { id: "archives", label: "Archives", ice: [], root: [] },
+      { id: "remote_2", label: "Remote 2", ice: [], root: [] },
+      { id: "remote_1", label: "Remote 1", ice: [], root: [] }
+    ];
+
+    expect(serverBoardOrderForSide("corp", servers).map((server) => server.id)).toEqual(["remote_1", "remote_2", "hq", "rd", "archives"]);
+    expect(serverBoardOrderForSide("runner", servers).map((server) => server.id)).toEqual(["hq", "rd", "archives", "remote_1", "remote_2"]);
+  });
+
+  it("keeps paced AI moving even when an action cue remains visible", () => {
+    expect(aiPacingDelayMs("manual", true, 0)).toBeNull();
+    expect(aiPacingDelayMs("paced", false, 2500)).toBe(650);
+    expect(aiPacingDelayMs("paced", true, 0)).toBe(900);
+    expect(aiPacingDelayMs("fast", true, 6000)).toBe(1600);
   });
 });
 

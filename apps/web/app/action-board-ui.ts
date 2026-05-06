@@ -86,6 +86,8 @@ export type ActionSlotDisplay = {
   slots: ActionSlotVisual[];
 };
 
+export type AiPacingTriggerMode = "fast" | "paced" | "manual";
+
 export type CostChipView = {
   kind: "action" | "credit";
   amount: number;
@@ -250,6 +252,26 @@ export function actionCostChips(action: Pick<LegalAction, "costs">): CostChipVie
     });
   }
   return chips;
+}
+
+export function aiPacingDelayMs(mode: AiPacingTriggerMode, hasPendingCue: boolean, autoDismissMs: number): number | null {
+  if (mode === "manual") return null;
+  if (!hasPendingCue) return mode === "fast" ? 120 : 650;
+  if (autoDismissMs <= 0) return mode === "fast" ? 750 : 900;
+  const minimum = mode === "fast" ? 320 : 650;
+  return Math.min(Math.max(autoDismissMs, minimum), 1600);
+}
+
+export function serverBoardOrderForSide<T extends { id: string }>(side: Side, servers: T[]): T[] {
+  const centralOrder = new Map([
+    ["hq", 0],
+    ["rd", 1],
+    ["archives", 2]
+  ]);
+  const central = servers.filter((server) => centralOrder.has(server.id)).sort((left, right) => centralOrder.get(left.id)! - centralOrder.get(right.id)!);
+  const remotes = servers.filter((server) => /^remote_\d+$/.test(server.id)).sort((left, right) => remoteNumber(left.id) - remoteNumber(right.id));
+  const other = servers.filter((server) => !centralOrder.has(server.id) && !/^remote_\d+$/.test(server.id));
+  return side === "corp" ? [...remotes, ...other, ...central] : [...central, ...other, ...remotes];
 }
 
 export function normalizeVisibleTerms(value: string): string {
@@ -441,4 +463,8 @@ function clamp(value: number, min: number, max: number): number {
 
 function roundPercent(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+function remoteNumber(serverId: string): number {
+  return Number(/^remote_(\d+)$/.exec(serverId)?.[1] ?? Number.MAX_SAFE_INTEGER);
 }
