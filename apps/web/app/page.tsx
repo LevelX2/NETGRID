@@ -1246,7 +1246,9 @@ export default function Page() {
   const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) => setFocusedCard({ card, ...(hiddenSide ? { hiddenSide } : {}) });
   const selectActionCard = (card: DisplayVisibleCard, hiddenSide?: Side) => {
     focusCard(card, hiddenSide);
-    if (card.known) setSelectedActionContext({ kind: "card", id: card.instanceId, label: card.title ?? "Karte" });
+    if (card.known) {
+      setSelectedActionContext((current) => (current?.kind === "card" && current.id === card.instanceId ? null : { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+    }
   };
   const accessReveal = payload ? accessRevealFromLatestEvent(payload.eventTail.at(-1), catalogDetailsById, payload.legalActions) : null;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
@@ -1258,7 +1260,12 @@ export default function Page() {
   const activeCueHighlight = currentActionCue?.highlight ?? null;
   const hasDecisionCue = Boolean(currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length));
   const legalActionSplit = useMemo(() => splitLegalActions(payload?.legalActions ?? []), [payload?.legalActions]);
-  const selectedContextActions = selectedActionContext ? legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, selectedActionContext)) : [];
+  const selectedPanelContext = selectedActionContext?.kind === "server" ? selectedActionContext : null;
+  const selectedPanelContextActions = selectedPanelContext ? legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, selectedPanelContext)) : [];
+  const cardActionsFor = (card: VisibleCard): LegalAction[] => {
+    if (!card.known) return [];
+    return legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+  };
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
   const effectiveCurrentCorpSnapshot = currentCorpSnapshotForSetup();
   const effectiveAgendaTarget = matchFormat === "single_game" ? effectiveCurrentCorpSnapshot?.validation.agendaPoints ?? undefined : 7;
@@ -2622,9 +2629,10 @@ export default function Page() {
           />
           <LegalActionsPanel
             primaryActions={legalActionSplit.primaryActions}
-            contextualActions={selectedContextActions}
-            selectedContext={selectedActionContext}
-            hasHiddenContextActions={legalActionSplit.contextualActions.length > 0}
+            contextualActions={selectedPanelContextActions}
+            selectedContext={selectedPanelContext}
+            hasHiddenContextActions={legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card"}
+            cardContextActive={selectedActionContext?.kind === "card"}
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
             onAction={submitAction}
@@ -2639,8 +2647,11 @@ export default function Page() {
             cardDetailsById={catalogDetailsById}
             displayMode={cardDisplayMode}
             selectedContext={selectedActionContext}
+            contextualActions={legalActionSplit.contextualActions}
+            actionDisabled={Boolean(payload.winner) || connection !== "online"}
             onFocus={focusCard}
             onActionContext={selectActionCard}
+            onAction={submitAction}
           />
           <RunTimeline view={activeView} legalActions={payload.legalActions} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} />
           {payload.winner ? (
@@ -2680,6 +2691,9 @@ export default function Page() {
                               hiddenSide="corp"
                               installedCorpCard
                               selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                              actions={cardActionsFor(card)}
+                              actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                              onAction={submitAction}
                               onFocus={focusCard}
                               onActionContextSelect={selectActionCard}
                             />
@@ -2707,6 +2721,9 @@ export default function Page() {
                       card={displayCard}
                       displayMode={cardDisplayMode}
                       selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                      actions={cardActionsFor(card)}
+                      actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                      onAction={submitAction}
                       onFocus={focusCard}
                       onActionContextSelect={selectActionCard}
                     />
@@ -2730,6 +2747,9 @@ export default function Page() {
                     displayMode={cardDisplayMode}
                     hiddenSide={activeView.side}
                     selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                    actions={cardActionsFor(card)}
+                    actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                    onAction={submitAction}
                     onFocus={focusCard}
                     onActionContextSelect={selectActionCard}
                   />
@@ -3479,19 +3499,29 @@ function RunnerRigStrip({
   cardDetailsById,
   displayMode,
   selectedContext,
+  contextualActions,
+  actionDisabled,
   onFocus,
-  onActionContext
+  onActionContext,
+  onAction
 }: {
   view: PlayerView;
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
   selectedContext: ActionContext | null;
+  contextualActions: LegalAction[];
+  actionDisabled: boolean;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onAction(action: LegalAction): void;
 }) {
   if (opponentSide(view.side) !== "runner") return null;
   const runnerRig = view.opponent.rig ?? [];
   const groups = groupRunnerRigCards(runnerRig);
+  const cardActionsForRig = (card: VisibleCard): LegalAction[] => {
+    if (!card.known) return [];
+    return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+  };
   return (
     <section className="runnerRigStrip">
       <div className="sectionTitleLine">
@@ -3513,8 +3543,11 @@ function RunnerRigStrip({
                       compact
                       displayMode={displayMode}
                       selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                      actions={cardActionsForRig(card)}
+                      actionDisabled={actionDisabled}
                       onFocus={onFocus}
                       onActionContextSelect={onActionContext}
+                      onAction={onAction}
                     />
                   );
                 })}
@@ -3578,6 +3611,7 @@ function LegalActionsPanel({
   contextualActions,
   selectedContext,
   hasHiddenContextActions,
+  cardContextActive = false,
   disabled,
   highlighted = false,
   onAction,
@@ -3587,6 +3621,7 @@ function LegalActionsPanel({
   contextualActions: LegalAction[];
   selectedContext: ActionContext | null;
   hasHiddenContextActions: boolean;
+  cardContextActive?: boolean;
   disabled: boolean;
   highlighted?: boolean;
   onAction(action: LegalAction): void;
@@ -3633,7 +3668,7 @@ function LegalActionsPanel({
         ) : hasHiddenContextActions ? (
           <p className="meta">Wähle eine eigene Karte oder ein sichtbares Boardobjekt für weitere Aktionen.</p>
         ) : null}
-        {primaryActions.length === 0 && !selectedContext ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
+        {primaryActions.length === 0 && !selectedContext && !cardContextActive ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
     </section>
   );
@@ -3647,7 +3682,7 @@ function CostChips({ action }: { action: LegalAction }) {
       {chips.map((chip) => (
         <span className={`costChip ${chip.kind}`} key={`${chip.kind}-${chip.amount}`}>
           <span className={chip.kind === "action" ? "costActionIcon" : "costCreditIcon"} aria-hidden="true" />
-          {chip.label}
+          {chip.amount}
         </span>
       ))}
     </span>
@@ -4811,8 +4846,11 @@ function CardView({
   hiddenSide,
   installedCorpCard = false,
   selected = false,
+  actions = [],
+  actionDisabled = false,
   onFocus,
-  onActionContextSelect
+  onActionContextSelect,
+  onAction
 }: {
   card: DisplayVisibleCard;
   compact?: boolean;
@@ -4821,11 +4859,17 @@ function CardView({
   hiddenSide?: Side;
   installedCorpCard?: boolean;
   selected?: boolean;
+  actions?: LegalAction[];
+  actionDisabled?: boolean;
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onAction?(action: LegalAction): void;
 }) {
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
+  const [actionMenuPlacement, setActionMenuPlacement] = useState<"above" | "below">("below");
+  const hasCardActions = actions.length > 0;
+  const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
@@ -4834,7 +4878,7 @@ function CardView({
   const hasRulesText = rulesText.length > 0;
   const hasSubroutineMarkers = shouldShowSubroutineMarkers(card.type ?? "", rulesText);
   const tooltipText = card.known ? [card.title, ...detailLines, rulesText].filter(Boolean).join("\n") : undefined;
-  const tooltipId = card.known && hasRulesText ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const tooltipId = card.known && hasRulesText && !showCardActions ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
   const nativeTitle = tooltipId ? undefined : tooltipText;
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
   const visualImageUrl = cardImageUrl;
@@ -4847,70 +4891,125 @@ function CardView({
   const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
   const cardAriaLabel = card.known ? `Karte ${card.title}${advancementLabel ? `, ${advancementLabel}` : ""}` : advancementLabel ? `Verdeckte Karte, ${advancementLabel}` : "Verdeckte Karte";
 
-  const updateTooltipPlacement = () => {
+  const updateOverlayPlacement = () => {
     const element = cardRef.current;
-    if (!element || !card.known || !hasRulesText) return;
+    if (!element) return;
     const cardRect = element.getBoundingClientRect();
     const boundary = nearestTooltipBoundary(element);
     const boundaryTop = Math.max(0, boundary.top);
     const boundaryBottom = Math.min(window.innerHeight, boundary.bottom);
     const spaceBelow = boundaryBottom - cardRect.bottom;
     const spaceAbove = cardRect.top - boundaryTop;
-    setTooltipPlacement(spaceBelow < 118 && spaceAbove > spaceBelow ? "above" : "below");
+    const nextTooltipPlacement = spaceBelow < 118 && spaceAbove > spaceBelow ? "above" : "below";
+    const estimatedActionMenuHeight = Math.min(196, Math.max(58, actions.length * 54 + 16));
+    const nextActionMenuPlacement = spaceBelow < estimatedActionMenuHeight && spaceAbove > spaceBelow ? "above" : "below";
+    if (card.known && hasRulesText) setTooltipPlacement(nextTooltipPlacement);
+    if (hasCardActions) setActionMenuPlacement(nextActionMenuPlacement);
   };
 
   return (
-    <button
-      ref={cardRef}
-      type="button"
-      className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${selected ? " selectedActionSource" : ""}`}
-      onClick={() => {
-        onFocus?.(card, hiddenSide);
-        if (card.known) onActionContextSelect?.(card, hiddenSide);
-      }}
-      onFocus={() => {
-        updateTooltipPlacement();
-        onFocus?.(card, hiddenSide);
-        if (card.known) onActionContextSelect?.(card, hiddenSide);
-      }}
-      onPointerEnter={updateTooltipPlacement}
-      aria-label={cardAriaLabel}
-      aria-describedby={tooltipId}
-      title={nativeTitle}
-    >
-      {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
-      {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
-      {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
-      {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
-      {showRulesPreview ? (
-        <span className="cardRulesPreview">
-          {rulesTextLines(rulesText).map((line, index) => (
-            <span key={`${card.instanceId}-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
-              {hasSubroutineMarkers ? <span aria-hidden="true">↩ </span> : null}
-              {line}
-            </span>
-          ))}
-        </span>
-      ) : null}
-      {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
-      {card.known && hasRulesText ? (
-        <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
-          <strong>{card.title}</strong>
-          {detailLines.map((line) => (
-            <span key={line}>{line}</span>
-          ))}
-          <span className="cardTooltipText">
+    <div className={`cardSlot${showCardActions ? " actionMenuOpen" : ""}`}>
+      <button
+        ref={cardRef}
+        type="button"
+        className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}`}
+        onClick={() => {
+          updateOverlayPlacement();
+          onFocus?.(card, hiddenSide);
+          if (card.known) onActionContextSelect?.(card, hiddenSide);
+        }}
+        onFocus={() => {
+          updateOverlayPlacement();
+          onFocus?.(card, hiddenSide);
+        }}
+        onPointerEnter={updateOverlayPlacement}
+        aria-label={cardAriaLabel}
+        aria-describedby={tooltipId}
+        title={nativeTitle}
+      >
+        {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
+        {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
+        {hasCardActions ? (
+          <span className="cardActionMarker" aria-hidden="true">
+            <Play size={10} />
+          </span>
+        ) : null}
+        {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
+        {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
+        {showRulesPreview ? (
+          <span className="cardRulesPreview">
             {rulesTextLines(rulesText).map((line, index) => (
-              <span key={`${card.instanceId}-tooltip-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
+              <span key={`${card.instanceId}-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
                 {hasSubroutineMarkers ? <span aria-hidden="true">↩ </span> : null}
                 {line}
               </span>
             ))}
           </span>
-        </span>
-      ) : null}
-    </button>
+        ) : null}
+        {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
+        {tooltipId ? (
+          <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
+            <strong>{card.title}</strong>
+            {detailLines.map((line) => (
+              <span key={line}>{line}</span>
+            ))}
+            <span className="cardTooltipText">
+              {rulesTextLines(rulesText).map((line, index) => (
+                <span key={`${card.instanceId}-tooltip-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
+                  {hasSubroutineMarkers ? <span aria-hidden="true">↩ </span> : null}
+                  {line}
+                </span>
+              ))}
+            </span>
+          </span>
+        ) : null}
+      </button>
+      {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} onAction={onAction!} /> : null}
+    </div>
   );
+}
+
+function CardActionsPopover({ actions, disabled, placement, onAction }: { actions: LegalAction[]; disabled: boolean; placement: "above" | "below"; onAction(action: LegalAction): void }) {
+  return (
+    <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen">
+      {actions.map((action) => (
+        <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem">
+          <Play size={14} />
+          <span className="actionButtonLabel">{inlineCardActionLabel(action)}</span>
+          <CostChips action={action} />
+        </button>
+      ))}
+    </div>
+  );
+}
+
+function inlineCardActionLabel(action: LegalAction): string {
+  switch (action.type) {
+    case "install_card":
+      return "Installieren";
+    case "play_event":
+    case "play_operation":
+      return "Spielen";
+    case "advance_card":
+      return "Ausbauen";
+    case "score_agenda":
+      return "Scoren";
+    case "rez_ice":
+      return "Rezzen";
+    case "pump_breaker":
+      return "Pumpen";
+    case "break_subroutine":
+      return "Brechen";
+    case "trash_accessed_card":
+    case "trash_resource":
+      return "Trashen";
+    case "steal_agenda":
+      return "Stehlen";
+    case "trigger_ability":
+      return "Aktivieren";
+    default:
+      return actionButtonLabel(action);
+  }
 }
 
 function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: number }) {
