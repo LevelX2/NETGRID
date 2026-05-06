@@ -499,7 +499,7 @@ const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
 };
 
 const RUNNER_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
-  { key: "event", label: "Event" },
+  { key: "event", label: "Prep" },
   { key: "hardware", label: "Hardware" },
   { key: "resource", label: "Ressource" },
   { key: "program", label: "Programm" },
@@ -611,7 +611,9 @@ function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
 }
 
 function formatCatalogTerm(value: string): string {
-  if (value.toLowerCase() === "ice") return "ICE";
+  const normalized = value.toLowerCase();
+  if (normalized === "ice") return "ICE";
+  if (normalized === "event") return "Prep";
   return value
     .replace(/[_-]+/g, " ")
     .split(" ")
@@ -836,18 +838,28 @@ function accessServerLocationPhrase(serverLabel: string): string {
 }
 
 function catalogTypeKeysForCard(card: Pick<CatalogCardSummary, "type" | "subtypes">): CatalogTypeFilterKey[] {
-  if (card.type === "program" && card.subtypes.some((subtype) => subtype.toLowerCase() === "icebreaker")) return ["icebreaker"];
-  switch (card.type) {
+  const type = card.type.toLowerCase();
+  if (type === "program" && card.subtypes.some((subtype) => subtype.toLowerCase() === "icebreaker")) return ["icebreaker"];
+  if (type.startsWith("hardware-")) return ["hardware"];
+  switch (type) {
     case "ice":
+      return ["ice"];
     case "agenda":
+      return ["agenda"];
     case "asset":
+      return ["asset"];
     case "upgrade":
+      return ["upgrade"];
     case "operation":
+      return ["operation"];
     case "event":
+      return ["event"];
     case "hardware":
+      return ["hardware"];
     case "resource":
+      return ["resource"];
     case "program":
-      return [card.type];
+      return ["program"];
     default:
       return [];
   }
@@ -859,7 +871,7 @@ function isCatalogVisibleCard(card: CatalogCardSummary): boolean {
 
 function catalogCardMatchesTypeFilters(card: CatalogCardSummary, filters: CatalogTypeFilterState): boolean {
   const keys = catalogTypeKeysForCard(card);
-  if (keys.length === 0) return true;
+  if (keys.length === 0) return Object.values(filters).every(Boolean);
   return keys.some((key) => filters[key]);
 }
 
@@ -2738,6 +2750,7 @@ export default function Page() {
               cardDisplayMode={cardDisplayMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
+              aiPacingMode={localAiPacingMode}
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
               onAudioEnabled={updateAudioEnabled}
@@ -2745,6 +2758,7 @@ export default function Page() {
               onCardDisplayMode={setCardDisplayMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
+              onAiPacingMode={setLocalAiPacingMode}
             />
           ) : null}
           </div>
@@ -2813,7 +2827,6 @@ export default function Page() {
             presentation={payload.aiTurnPresentation}
             mode={localAiPacingMode}
             connection={connection}
-            onMode={setLocalAiPacingMode}
             onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
           />
           <LegalActionsPanel
@@ -3014,6 +3027,7 @@ export default function Page() {
             cardDisplayMode={cardDisplayMode}
             colorScheme={colorScheme}
             cuePosition={cuePosition}
+            aiPacingMode={localAiPacingMode}
             modal
             onActionCueAutoDismissMs={setActionCueAutoDismissMs}
             onActionCuesEnabled={setActionCuesEnabled}
@@ -3022,6 +3036,7 @@ export default function Page() {
             onCardDisplayMode={setCardDisplayMode}
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
+            onAiPacingMode={setLocalAiPacingMode}
           />
         </OptionsDialog>
       ) : null}
@@ -3466,6 +3481,7 @@ function OptionsPanel({
   cardDisplayMode,
   colorScheme,
   cuePosition,
+  aiPacingMode,
   modal = false,
   onActionCueAutoDismissMs,
   onActionCuesEnabled,
@@ -3473,7 +3489,8 @@ function OptionsPanel({
   onAudioVolume,
   onCardDisplayMode,
   onColorScheme,
-  onCuePosition
+  onCuePosition,
+  onAiPacingMode
 }: {
   actionCueAutoDismissMs: CueAutoDismissMs;
   actionCuesEnabled: boolean;
@@ -3482,6 +3499,7 @@ function OptionsPanel({
   cardDisplayMode: CardDisplayMode;
   colorScheme: ColorScheme;
   cuePosition: CuePositionPreference;
+  aiPacingMode: AiPacingMode;
   modal?: boolean;
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
   onActionCuesEnabled(value: boolean): void;
@@ -3490,6 +3508,7 @@ function OptionsPanel({
   onCardDisplayMode(value: CardDisplayMode): void;
   onColorScheme(value: ColorScheme): void;
   onCuePosition(value: CuePositionPreference): void;
+  onAiPacingMode(value: AiPacingMode): void;
 }) {
   return (
     <section className={`optionsPanel panel${modal ? " inModal" : ""}`}>
@@ -3505,6 +3524,7 @@ function OptionsPanel({
       <div className="optionsContent">
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
+        <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings enabled={actionCuesEnabled} position={cuePosition} autoDismissMs={actionCueAutoDismissMs} onEnabled={onActionCuesEnabled} onPosition={onCuePosition} onAutoDismissMs={onActionCueAutoDismissMs} />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
         <SystemStatus />
@@ -3596,6 +3616,25 @@ function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: C
         <ZoomIn size={15} />
         {!iconOnly ? "Kompakt" : <span className="srOnly">Kompakt</span>}
       </button>
+    </div>
+  );
+}
+
+function AiPacingSettings({ mode, onMode }: { mode: AiPacingMode; onMode(value: AiPacingMode): void }) {
+  return (
+    <div className="aiPacingSettings">
+      <div>
+        <span className="settingsTitle">KI-Steuerung</span>
+        <span className="meta">Lokale Ablaufoption, kein Match-State</span>
+      </div>
+      <div className="segmented aiPacingSelector" role="group" aria-label="KI-Steuerung">
+        {(["manual", "paced", "fast"] as const).map((value) => (
+          <button className={mode === value ? "active" : ""} key={value} onClick={() => onMode(value)} type="button" title={aiPacingModeHelp(value)}>
+            {value === "manual" ? "Einzelschritt" : value === "paced" ? "Getaktet" : "Schnell"}
+          </button>
+        ))}
+      </div>
+      <p className="settingsHelp">{aiPacingModeHelp(mode)}</p>
     </div>
   );
 }
@@ -3785,13 +3824,11 @@ function AiPacingControls({
   presentation,
   mode,
   connection,
-  onMode,
   onAdvance
 }: {
   presentation: ClientPayload["aiTurnPresentation"] | undefined;
   mode: AiPacingMode;
   connection: "offline" | "connecting" | "online";
-  onMode(mode: AiPacingMode): void;
   onAdvance(): void;
 }) {
   if (!presentation) return null;
@@ -3799,22 +3836,19 @@ function AiPacingControls({
   return (
     <section className="section aiPacingPanel" data-testid="ai-pacing">
       <div className="sectionTitleLine">
-        <h2>KI-Takt</h2>
+        <h2>KI-Steuerung</h2>
         <Bot size={16} />
       </div>
       <p className="meta">{activeLabel}</p>
-      <div className="segmented aiPacingModes" role="group" aria-label="KI-Takt">
-        {(["paced", "manual", "fast"] as const).map((value) => (
-          <button className={mode === value ? "active" : ""} key={value} onClick={() => onMode(value)} type="button" title={aiPacingModeHelp(value)}>
-            {value === "paced" ? "Getaktet" : value === "manual" ? "Einzelschritt" : "Schnell"}
-          </button>
-        ))}
-      </div>
-      <p className="aiPacingHint">{aiPacingModeHelp(mode)}</p>
-      <button className="button wide primary" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
-        <Play size={15} />
-        KI-Schritt
-      </button>
+      <p className="aiPacingHint">
+        {mode === "manual" ? "Einzelschritt aktiv." : mode === "paced" ? "Getakteter Automatiklauf aktiv." : "Schneller Automatiklauf aktiv."}
+      </p>
+      {mode === "manual" ? (
+        <button className="aiStepButton" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
+          <Bot size={15} />
+          KI-Schritt
+        </button>
+      ) : null}
     </section>
   );
 }
@@ -3904,15 +3938,16 @@ function RunTimeline({
   cardDetailsById: Record<string, CatalogCardDetail>;
   highlighted?: boolean;
 }) {
+  if (!view.run) return null;
   const currentStep = currentRunTimelineStep(view, legalActions);
   const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
   return (
-    <div className={`runTimeline ${view.run ? "active" : ""} ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline">
+    <div className={`runTimeline active ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline">
       <div className="runTimelineHead">
         <RunIcon size={18} />
-        <span>{view.run ? `Run auf ${serverDisplayLabel(view.run.attackedServerId)}` : "Kein aktiver Run"}</span>
+        <span>{`Run auf ${serverDisplayLabel(view.run.attackedServerId)}`}</span>
       </div>
       <div className="runSteps">
         {RUN_TIMELINE_STEPS.map((step) => (

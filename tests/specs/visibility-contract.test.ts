@@ -43,8 +43,8 @@ describe("Client visibility contract", () => {
     expect(page).toContain("AudioSettings");
     expect(page).toContain("primeAudio");
     expect(page).toContain("sharedAudioContext");
-    expect(page).toContain("audioMenuOpen");
-    expect(page).toContain("audioPopover");
+    expect(page).toContain("optionsDialogOpen");
+    expect(page).toContain("OptionsDialog");
     expect(page).toContain("Runner-Rig");
     expect(page).toContain("RunnerRigStrip");
     expect(page).toContain("runnerRigStrip");
@@ -254,7 +254,7 @@ describe("Client visibility contract", () => {
     expect(page).toContain("card.known && card.definitionId");
     expect(page).toContain("nearestTooltipBoundary");
     expect(page).toContain("const nextTooltipPlacement = spaceBelow < 118");
-    expect(page).toContain('rulesText: "1 Credit: +1 Stärke.');
+    expect(page).toContain('const rulesText = card.known ? (card.rulesText ?? "") : ""');
     expect(page).toContain('title={nativeTitle}');
     expect(page).toContain("hasRulesText");
     expect(page).toContain("rulesTextLines");
