@@ -261,23 +261,6 @@ select {
   border-color: #704044;
 }
 
-.audioMenu {
-  position: relative;
-}
-
-.audioPopover {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 60;
-  width: min(280px, calc(100vw - 28px));
-  padding: 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: var(--panel);
-  box-shadow: var(--overlay-shadow);
-}
-
 .setup {
   display: grid;
   place-items: start center;
@@ -1322,7 +1305,7 @@ select {
   z-index: 72;
   width: min(440px, calc(100vw - 28px));
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto auto auto;
+  grid-template-columns: 38px minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 10px;
   padding: 11px;
@@ -1412,6 +1395,15 @@ select {
   white-space: nowrap;
 }
 
+.opponentCueCard {
+  grid-column: 2 / -1;
+  width: min(172px, 100%);
+}
+
+.opponentCueCard .card {
+  min-height: 64px;
+}
+
 .cueDragHandle {
   cursor: grab;
   touch-action: none;
@@ -1419,23 +1411,6 @@ select {
 
 .cueDragHandle:active {
   cursor: grabbing;
-}
-
-.opponentCueControls {
-  grid-column: 2 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-
-.opponentCueControls select {
-  min-width: 138px;
-  min-height: 32px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  color: var(--text);
-  background: var(--field-bg);
 }
 
 .main {
@@ -1644,6 +1619,14 @@ select {
 }
 
 .aiPacingPanel .meta {
+  overflow-wrap: anywhere;
+}
+
+.aiPacingHint {
+  margin: -2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 
@@ -3130,6 +3113,12 @@ select,
   max-width: 760px;
 }
 
+.optionsPanel.inModal {
+  max-width: none;
+  border: 0;
+  border-radius: 0;
+}
+
 .optionsContent {
   display: grid;
   gap: 12px;
@@ -3137,12 +3126,9 @@ select,
 }
 
 .colorSchemeSettings,
-.cardDisplaySettings {
+.cardDisplaySettings,
+.actionCueSettings {
   grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
   min-width: 0;
   padding: 10px;
   border: 1px solid var(--line);
@@ -3150,9 +3136,75 @@ select,
   background: var(--settings-bg);
 }
 
+.colorSchemeSettings,
+.cardDisplaySettings {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
 .cardDisplaySettings.compact {
   display: grid;
   gap: 8px;
+}
+
+.actionCueSettings {
+  display: grid;
+  gap: 10px;
+}
+
+.settingsHeaderLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settingsControlGrid {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) minmax(180px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.settingsControlGrid label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.settingsControlGrid select {
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--field-bg);
+}
+
+.settingsToggle {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: var(--section-bg);
+  font-size: 12px;
+}
+
+.settingsToggle.checked {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--runner), var(--line));
+  background: color-mix(in srgb, var(--runner), var(--section-bg) 82%);
+}
+
+.settingsToggle input {
+  accent-color: var(--runner);
 }
 
 .audioSettings {
@@ -3211,6 +3263,48 @@ select,
   font-weight: 800;
 }
 
+.optionsDialogOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.optionsDialogBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.58);
+}
+
+.optionsDialogPanel {
+  position: relative;
+  z-index: 1;
+  width: min(820px, 100%);
+  max-height: min(780px, calc(100vh - 36px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid var(--access-modal-border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--access-modal-shadow);
+  overflow: auto;
+}
+
+.optionsDialogHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.optionsDialogHeader h2 {
+  margin: 0;
+}
+
 .segmented {
   display: inline-grid;
   grid-template-columns: repeat(3, minmax(44px, 1fr));
@@ -3241,13 +3335,6 @@ select,
 .segmented button.active {
   color: var(--segmented-active-text);
   background: var(--runner);
-}
-
-.boardPreview {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 96px));
-  gap: 8px;
 }
 
 .matchStrip {
@@ -3754,6 +3841,10 @@ select,
     grid-template-columns: 1fr;
   }
 
+  .settingsControlGrid {
+    grid-template-columns: 1fr;
+  }
+
   .deckSelectGrid,
   .deckSlotGrid {
     grid-template-columns: 1fr;
@@ -3828,10 +3919,6 @@ select,
     display: none;
   }
 
-  .opponentCueControls {
-    grid-column: 1 / -1;
-  }
-
   .cardTooltip {
     left: 50%;
     width: min(220px, calc(100vw - 32px));
@@ -3889,10 +3976,6 @@ select,
 
   .runSteps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .boardPreview {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .chronicleEntry {

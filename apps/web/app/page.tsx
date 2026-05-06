@@ -38,7 +38,7 @@ import {
   ZoomIn
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
 import {
   CHRONICLE_CATEGORY_LABELS,
@@ -49,6 +49,7 @@ import {
   type ChronicleItem
 } from "./chronicle";
 import {
+  actionSoundForActionType,
   deriveOpponentActionCues,
   type ActionSoundKind,
   type BoardHighlight,
@@ -100,6 +101,7 @@ const SESSION_KEY = "netrunner-mvp-0-3-session";
 const RECENT_SESSIONS_KEY = "netrunner.recentSessions";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
 const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
+const ACTION_CUE_SETTINGS_STORAGE_KEY = "netrunner.actionCueSettings.v1";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DISPLAY_NAME_STORAGE_KEY = "netrunner.displayName";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
@@ -139,6 +141,7 @@ type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
 type DeckSideFilter = Side | "all";
+type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
 
 type SeriesResultSummary = {
   seriesId: string;
@@ -600,6 +603,11 @@ function localCardImageUrl(cardId: string): string | undefined {
   if (LOCAL_CARD_IMAGE_IDS.has(cardId)) return `/api/card-images/${encodedCardId}?v=${LOCAL_CARD_IMAGE_VERSION}`;
   if (cardId.startsWith("onr_v1_")) return `/api/card-images/${encodedCardId}`;
   return undefined;
+}
+
+function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
+  if (value === 0 || value === 1500 || value === 2500 || value === 4000 || value === 6000) return value;
+  return 2500;
 }
 
 function formatCatalogTerm(value: string): string {
@@ -1065,7 +1073,9 @@ export default function Page() {
   const [currentActionCue, setCurrentActionCue] = useState<OpponentActionCue | null>(null);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
-  const [audioMenuOpen, setAudioMenuOpen] = useState(false);
+  const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
+  const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
+  const [actionCueAutoDismissMs, setActionCueAutoDismissMs] = useState<CueAutoDismissMs>(2500);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
   const [actionSlotCapacities, setActionSlotCapacities] = useState<Record<Side, number>>({
@@ -1181,6 +1191,22 @@ export default function Page() {
   useEffect(() => {
     window.localStorage.setItem(AUDIO_STORAGE_KEY, JSON.stringify({ enabled: audioEnabled, volume: audioVolume }));
   }, [audioEnabled, audioVolume]);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem(ACTION_CUE_SETTINGS_STORAGE_KEY);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as { enabled?: boolean; autoDismissMs?: number };
+      if (typeof parsed.enabled === "boolean") setActionCuesEnabled(parsed.enabled);
+      setActionCueAutoDismissMs(normalizeCueAutoDismissMs(parsed.autoDismissMs));
+    } catch {
+      window.localStorage.removeItem(ACTION_CUE_SETTINGS_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(ACTION_CUE_SETTINGS_STORAGE_KEY, JSON.stringify({ enabled: actionCuesEnabled, autoDismissMs: actionCueAutoDismissMs }));
+  }, [actionCuesEnabled, actionCueAutoDismissMs]);
 
   useEffect(() => {
     setCuePosition(parseCuePositionPreference(window.localStorage.getItem(ACTION_CUE_POSITION_STORAGE_KEY)));
@@ -1436,16 +1462,28 @@ export default function Page() {
       lastSeenCueEventIdRef.current = latestId;
       return;
     }
-    const cues = deriveOpponentActionCues({
-      viewerSide: payload.side,
-      playerView: payload.playerView,
-      events: payload.eventTail,
-      lastPresentedEventId: lastSeen,
-      contextByEventId: chronicleContextByEventId(payload.eventTail, catalogDetailsById)
-    });
+    const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
+    const contextByEventId = chronicleContextByEventId(payload.eventTail, catalogDetailsById);
+    const cues = actionCuesEnabled
+      ? deriveOpponentActionCues({
+          viewerSide: payload.side,
+          playerView: payload.playerView,
+          events: payload.eventTail,
+          lastPresentedEventId: lastSeen,
+          contextByEventId
+        })
+      : [];
     lastSeenCueEventIdRef.current = latestId;
     if (cues.length > 0) setActionCueQueue((current) => [...current, ...cues]);
-  }, [payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById]);
+    if (!audioEnabled || newEvents.length === 0) return;
+    const overlayEventIds = new Set(cues.map((cue) => cue.eventId));
+    for (const event of newEvents) {
+      if (overlayEventIds.has(event.eventId)) continue;
+      const item = formatChronicleEvent(event, payload.side, contextByEventId[event.eventId] ?? {});
+      const sound = actionSoundForActionType(eventActionType(event), item.visibility);
+      if (sound) playActionCueSound(sound, audioVolume);
+    }
+  }, [actionCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById]);
 
   useEffect(() => {
     if (currentActionCue || actionCueQueue.length === 0) return;
@@ -1458,10 +1496,10 @@ export default function Page() {
   useEffect(() => {
     if (!currentActionCue) return;
     if (audioEnabled && currentActionCue.sound) playActionCueSound(currentActionCue.sound, audioVolume);
-    if (currentActionCue.requiresLocalAttention) return;
-    const timeout = window.setTimeout(() => setCurrentActionCue(null), currentActionCue.importance === "critical" ? 2300 : 1700);
+    if (actionCueAutoDismissMs === 0) return;
+    const timeout = window.setTimeout(() => setCurrentActionCue(null), actionCueAutoDismissMs);
     return () => window.clearTimeout(timeout);
-  }, [audioEnabled, audioVolume, currentActionCue]);
+  }, [actionCueAutoDismissMs, audioEnabled, audioVolume, currentActionCue]);
 
   useEffect(() => {
     if (!payload?.aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online") return;
@@ -2693,14 +2731,20 @@ export default function Page() {
           ) : null}
           {entryTab === "options" ? (
             <OptionsPanel
+              actionCueAutoDismissMs={actionCueAutoDismissMs}
+              actionCuesEnabled={actionCuesEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardDisplayMode={cardDisplayMode}
               colorScheme={colorScheme}
+              cuePosition={cuePosition}
+              onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+              onActionCuesEnabled={setActionCuesEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardDisplayMode={setCardDisplayMode}
               onColorScheme={setColorScheme}
+              onCuePosition={setCuePosition}
             />
           ) : null}
           </div>
@@ -2715,16 +2759,9 @@ export default function Page() {
         <Brand subtitle={`${APP_STATUS_LABEL} · ${session.side === "runner" ? "Runner" : "Corp"}${opponentDisplayName ? ` gegen ${opponentDisplayName}` : ""}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
-          <div className="audioMenu">
-            <button className="button iconOnly" onClick={() => setAudioMenuOpen((current) => !current)} title="Audio einstellen" aria-label="Audio einstellen" type="button">
-              {audioEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
-            </button>
-            {audioMenuOpen ? (
-              <div className="audioPopover">
-                <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={updateAudioEnabled} onVolume={setAudioVolume} />
-              </div>
-            ) : null}
-          </div>
+          <button className="button iconOnly" onClick={() => setOptionsDialogOpen(true)} title="Optionen öffnen" aria-label="Optionen öffnen" type="button">
+            <SlidersHorizontal size={16} />
+          </button>
           {session.joinUrl ? (
             <button className="button" onClick={copyJoinLink} title="Join-Link kopieren">
               <Clipboard size={16} />
@@ -2758,6 +2795,8 @@ export default function Page() {
         cue={currentActionCue}
         queued={actionCueQueue.length}
         position={cuePosition}
+        cardDetailsById={catalogDetailsById}
+        displayMode={cardDisplayMode}
         onPosition={setCuePosition}
         onDismiss={() => setCurrentActionCue(null)}
       />
@@ -2965,8 +3004,39 @@ export default function Page() {
           onDismiss={() => setDismissedAccessEventId(accessReveal.eventId)}
         />
       ) : null}
+      {optionsDialogOpen ? (
+        <OptionsDialog onDismiss={() => setOptionsDialogOpen(false)}>
+          <OptionsPanel
+            actionCueAutoDismissMs={actionCueAutoDismissMs}
+            actionCuesEnabled={actionCuesEnabled}
+            audioEnabled={audioEnabled}
+            audioVolume={audioVolume}
+            cardDisplayMode={cardDisplayMode}
+            colorScheme={colorScheme}
+            cuePosition={cuePosition}
+            modal
+            onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+            onActionCuesEnabled={setActionCuesEnabled}
+            onAudioEnabled={updateAudioEnabled}
+            onAudioVolume={setAudioVolume}
+            onCardDisplayMode={setCardDisplayMode}
+            onColorScheme={setColorScheme}
+            onCuePosition={setCuePosition}
+          />
+        </OptionsDialog>
+      ) : null}
     </main>
   );
+}
+
+function publicEventsAfter(events: PublicGameEvent[], lastPresentedEventId: string | null): PublicGameEvent[] {
+  if (!lastPresentedEventId) return events;
+  const index = events.findIndex((event) => event.eventId === lastPresentedEventId);
+  return index >= 0 ? events.slice(index + 1) : events;
+}
+
+function eventActionType(event: PublicGameEvent): string {
+  return payloadString(event.publicPayload, "actionType") ?? event.type;
 }
 
 function Brand({ subtitle }: { subtitle: string }) {
@@ -3389,41 +3459,77 @@ function seriesStatusText(series: SeriesResultSummary): string {
 }
 
 function OptionsPanel({
+  actionCueAutoDismissMs,
+  actionCuesEnabled,
   audioEnabled,
   audioVolume,
   cardDisplayMode,
   colorScheme,
+  cuePosition,
+  modal = false,
+  onActionCueAutoDismissMs,
+  onActionCuesEnabled,
   onAudioEnabled,
   onAudioVolume,
   onCardDisplayMode,
-  onColorScheme
+  onColorScheme,
+  onCuePosition
 }: {
+  actionCueAutoDismissMs: CueAutoDismissMs;
+  actionCuesEnabled: boolean;
   audioEnabled: boolean;
   audioVolume: number;
   cardDisplayMode: CardDisplayMode;
   colorScheme: ColorScheme;
+  cuePosition: CuePositionPreference;
+  modal?: boolean;
+  onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
+  onActionCuesEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
   onColorScheme(value: ColorScheme): void;
+  onCuePosition(value: CuePositionPreference): void;
 }) {
   return (
-    <section className="optionsPanel panel">
-      <div className="catalogHeader">
-        <div>
-          <h2>Optionen</h2>
-          <p className="meta">Darstellung und Audio</p>
+    <section className={`optionsPanel panel${modal ? " inModal" : ""}`}>
+      {!modal ? (
+        <div className="catalogHeader">
+          <div>
+            <h2>Optionen</h2>
+            <p className="meta">Darstellung, Hinweise und Audio</p>
+          </div>
+          <SlidersHorizontal size={18} />
         </div>
-        <SlidersHorizontal size={18} />
-      </div>
+      ) : null}
       <div className="optionsContent">
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
-        <BoardPreview displayMode={cardDisplayMode} />
+        <ActionCueSettings enabled={actionCuesEnabled} position={cuePosition} autoDismissMs={actionCueAutoDismissMs} onEnabled={onActionCuesEnabled} onPosition={onCuePosition} onAutoDismissMs={onActionCueAutoDismissMs} />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
         <SystemStatus />
       </div>
     </section>
+  );
+}
+
+function OptionsDialog({ children, onDismiss }: { children: ReactNode; onDismiss(): void }) {
+  return (
+    <div className="optionsDialogOverlay" role="dialog" aria-modal="true" aria-labelledby="options-dialog-title">
+      <div className="optionsDialogBackdrop" aria-hidden="true" onClick={onDismiss} />
+      <section className="optionsDialogPanel">
+        <div className="optionsDialogHeader">
+          <div>
+            <p className="eyebrow">Lokal</p>
+            <h2 id="options-dialog-title">Optionen</h2>
+          </div>
+          <button className="button iconOnly" onClick={onDismiss} aria-label="Optionen schließen" title="Schließen" type="button">
+            <X size={16} />
+          </button>
+        </div>
+        {children}
+      </section>
+    </div>
   );
 }
 
@@ -3494,6 +3600,71 @@ function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: C
   );
 }
 
+function ActionCueSettings({
+  enabled,
+  position,
+  autoDismissMs,
+  onEnabled,
+  onPosition,
+  onAutoDismissMs
+}: {
+  enabled: boolean;
+  position: CuePositionPreference;
+  autoDismissMs: CueAutoDismissMs;
+  onEnabled(value: boolean): void;
+  onPosition(value: CuePositionPreference): void;
+  onAutoDismissMs(value: CueAutoDismissMs): void;
+}) {
+  const setPreset = (preset: CuePositionPreset) => onPosition({ kind: "preset", preset });
+  return (
+    <div className="actionCueSettings">
+      <div className="settingsHeaderLine">
+        <div>
+          <span className="settingsTitle">Infofenster</span>
+          <span className="meta">Lokale Hinweise zu KI- und Gegenzügen</span>
+        </div>
+        <label className={`settingsToggle ${enabled ? "checked" : ""}`}>
+          <input type="checkbox" checked={enabled} onChange={(event) => onEnabled(event.target.checked)} />
+          Anzeigen
+        </label>
+      </div>
+      <div className="settingsControlGrid">
+        <label>
+          Position
+          <select
+            value={position.kind === "preset" ? position.preset : "custom"}
+            onChange={(event) => {
+              if (event.target.value === "custom") return;
+              setPreset(event.target.value as CuePositionPreset);
+            }}
+            disabled={!enabled}
+          >
+            <option value="top-right">Oben rechts</option>
+            <option value="top-left">Oben links</option>
+            <option value="bottom-right">Unten rechts</option>
+            <option value="bottom-left">Unten links</option>
+            <option value="center">Mitte</option>
+            {position.kind === "custom" ? <option value="custom">Eigene Position</option> : null}
+          </select>
+        </label>
+        <label>
+          Automatisch ausblenden
+          <select value={autoDismissMs} onChange={(event) => onAutoDismissMs(normalizeCueAutoDismissMs(Number(event.target.value)))} disabled={!enabled}>
+            <option value={1500}>Nach 1,5 Sekunden</option>
+            <option value={2500}>Nach 2,5 Sekunden</option>
+            <option value={4000}>Nach 4 Sekunden</option>
+            <option value={6000}>Nach 6 Sekunden</option>
+            <option value={0}>Nicht automatisch</option>
+          </select>
+        </label>
+        <button className="button" onClick={() => setPreset("top-right")} type="button" disabled={!enabled}>
+          Zurücksetzen
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AudioSettings({
   enabled,
   volume,
@@ -3519,31 +3690,20 @@ function AudioSettings({
   );
 }
 
-function BoardPreview({ displayMode }: { displayMode: CardDisplayMode }) {
-  const previewCards: VisibleCard[] = [
-    { instanceId: "preview-runner", known: true, title: "Demo Program", type: "program", subtypes: ["Icebreaker"], strength: 2, rulesText: "1 Credit: +1 Stärke. 1 Credit: Brich 1 ICE-Subroutine." },
-    { instanceId: "preview-corp", known: true, title: "Demo ICE", type: "ice", subtypes: ["Barrier"], strength: 3, rulesText: "End the run." },
-    { instanceId: "preview-hidden", known: false }
-  ];
-  return (
-    <div className="boardPreview" aria-label="Board-Vorschau">
-      {previewCards.map((card) => (
-        <CardView key={card.instanceId} card={card} displayMode={displayMode} compact hiddenSide="corp" />
-      ))}
-    </div>
-  );
-}
-
 function OpponentActionOverlay({
   cue,
   queued,
   position,
+  cardDetailsById,
+  displayMode,
   onPosition,
   onDismiss
 }: {
   cue: OpponentActionCue | null;
   queued: number;
   position: CuePositionPreference;
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  displayMode: CardDisplayMode;
   onPosition(position: CuePositionPreference): void;
   onDismiss(): void;
 }) {
@@ -3551,7 +3711,7 @@ function OpponentActionOverlay({
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   if (!cue) return null;
 
-  const setPreset = (preset: CuePositionPreset) => onPosition({ kind: "preset", preset });
+  const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const overlay = overlayRef.current;
     if (!overlay) return;
@@ -3592,10 +3752,15 @@ function OpponentActionOverlay({
         {cue.source === "ai" ? <Bot size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
       </div>
       <div className="opponentCueText">
-        <span>{cue.requiresLocalAttention ? "Du bist gefragt" : cue.actorLabel}</span>
+        <span>{cue.actorLabel}</span>
         <strong>{cue.title}</strong>
         {cue.description ? <p>{cue.description}</p> : null}
       </div>
+      {relatedCard ? (
+        <div className="opponentCueCard">
+          <CardView card={relatedCard} displayMode={displayMode} compact preview />
+        </div>
+      ) : null}
       {queued > 0 ? <small>{queued} weitere</small> : null}
       <button
         className="button iconOnly cueDragHandle"
@@ -3612,26 +3777,6 @@ function OpponentActionOverlay({
       <button className="button iconOnly" onClick={onDismiss} aria-label="Hinweis schließen" title="Hinweis schließen" type="button">
         <X size={15} />
       </button>
-      <div className="opponentCueControls">
-        <select
-          aria-label="Hinweisposition"
-          value={position.kind === "preset" ? position.preset : "custom"}
-          onChange={(event) => {
-            if (event.target.value === "custom") return;
-            setPreset(event.target.value as CuePositionPreset);
-          }}
-        >
-          <option value="top-right">Oben rechts</option>
-          <option value="top-left">Oben links</option>
-          <option value="bottom-right">Unten rechts</option>
-          <option value="bottom-left">Unten links</option>
-          <option value="center">Mitte</option>
-          {position.kind === "custom" ? <option value="custom">Eigene Position</option> : null}
-        </select>
-        <button className="button" onClick={() => setPreset("top-right")} type="button">
-          Zurücksetzen
-        </button>
-      </div>
     </aside>
   );
 }
@@ -3660,17 +3805,24 @@ function AiPacingControls({
       <p className="meta">{activeLabel}</p>
       <div className="segmented aiPacingModes" role="group" aria-label="KI-Takt">
         {(["paced", "manual", "fast"] as const).map((value) => (
-          <button className={mode === value ? "active" : ""} key={value} onClick={() => onMode(value)} type="button">
+          <button className={mode === value ? "active" : ""} key={value} onClick={() => onMode(value)} type="button" title={aiPacingModeHelp(value)}>
             {value === "paced" ? "Getaktet" : value === "manual" ? "Einzelschritt" : "Schnell"}
           </button>
         ))}
       </div>
+      <p className="aiPacingHint">{aiPacingModeHelp(mode)}</p>
       <button className="button wide primary" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
         <Play size={15} />
         KI-Schritt
       </button>
     </section>
   );
+}
+
+function aiPacingModeHelp(mode: AiPacingMode): string {
+  if (mode === "manual") return "Einzelschritt: Die KI macht nur dann genau einen Schritt, wenn Du KI-Schritt klickst.";
+  if (mode === "fast") return "Schnell: Die KI läuft ohne Präsentationspausen bis zum nächsten menschlichen Fenster.";
+  return "Getaktet: Die KI macht ihre Schritte automatisch, aber mit kurzen Pausen, damit Du sie verfolgen kannst.";
 }
 
 function RunnerRigStrip({

@@ -16,6 +16,7 @@ export type OpponentActionCue = {
   visibility: ChronicleVisibility;
   importance: ChronicleImportance;
   highlight?: BoardHighlight;
+  relatedCard?: VisibleCard;
   sound?: ActionSoundKind;
   requiresLocalAttention: boolean;
   aiExplanation?: string;
@@ -62,17 +63,20 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
   const cues = relevantEvents.flatMap((event) => {
     const payload = event.publicPayload ?? {};
     const actionType = stringValue(payload.actionType) ?? event.type;
+    if (actionType === "access_card" && stringValue(payload.cardDefinitionId) && stringValue(payload.title)) return [];
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
     const systemCue = !actor && actionType !== "game_created";
     if (!input.includeOwnActions && !opponent && !systemCue) return [];
+    if (actionType === "end_turn" && opponent && localAttention && !input.playerView.pendingChoice) return [];
 
     const item = formatChronicleEvent(event, input.viewerSide, input.contextByEventId?.[event.eventId] ?? {});
     const aiExplanation = stringValue(payload.aiExplanation);
     const source = aiExplanation || stringValue(payload.aiReasonCode) ? "ai" : actor ? "human" : "system";
     const visibility = item.visibility;
     const highlight = deriveHighlight(actionType, payload, actor, visibility, visibleCards);
-    const sound = soundFor(actionType, visibility);
+    const relatedCard = deriveRelatedCard(payload, visibility, visibleCards);
+    const sound = actionSoundForActionType(actionType, visibility);
 
     const cue: OpponentActionCue = {
       cueId: `${input.viewerSide}:${event.eventId}`,
@@ -88,30 +92,13 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       visibility,
       importance: item.importance,
       ...(highlight ? { highlight } : {}),
+      ...(relatedCard ? { relatedCard } : {}),
       ...(sound ? { sound } : {}),
       requiresLocalAttention: localAttention,
       ...(aiExplanation ? { aiExplanation } : {})
     };
     return [cue];
   });
-
-  if (localAttention && relevantEvents.length > 0 && !cues.some((cue) => cue.requiresLocalAttention)) {
-    cues.push({
-      cueId: `${input.viewerSide}:${relevantEvents.at(-1)!.eventId}:decision`,
-      eventId: relevantEvents.at(-1)!.eventId,
-      viewerSide: input.viewerSide,
-      actorLabel: "Du",
-      opponent: false,
-      source: "system",
-      actionType: "local_attention",
-      title: input.playerView.pendingChoice ? "Du bist gefragt." : "Du bist dran.",
-      visibility: "system",
-      importance: "important",
-      highlight: { kind: "decision", side: input.viewerSide },
-      sound: "choice",
-      requiresLocalAttention: true
-    });
-  }
 
   return cues;
 }
@@ -173,6 +160,13 @@ function deriveHighlight(
   return undefined;
 }
 
+function deriveRelatedCard(payload: Record<string, unknown>, visibility: ChronicleVisibility, visibleCards: Map<string, VisibleCard>): VisibleCard | undefined {
+  if (visibility === "redacted") return undefined;
+  const cardDefinitionId = stringValue(payload.cardDefinitionId);
+  const visibleCard = cardDefinitionId ? visibleCards.get(cardDefinitionId) : undefined;
+  return visibleCard?.known ? visibleCard : undefined;
+}
+
 function serverHighlight(payload: Record<string, unknown>): BoardHighlight {
   const zoneLabel = stringValue(payload.zoneLabel);
   return {
@@ -183,7 +177,7 @@ function serverHighlight(payload: Record<string, unknown>): BoardHighlight {
   };
 }
 
-function soundFor(actionType: string, visibility: ChronicleVisibility): ActionSoundKind | undefined {
+export function actionSoundForActionType(actionType: string, visibility: ChronicleVisibility): ActionSoundKind | undefined {
   switch (actionType) {
     case "mandatory_draw":
     case "draw_card":

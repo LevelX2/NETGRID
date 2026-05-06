@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView, PublicGameEvent, Side } from "@netrunner/shared";
-import { cueHasHiddenLeak, deriveOpponentActionCues } from "./action-cues";
+import { actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues } from "./action-cues";
 
 describe("deriveOpponentActionCues", () => {
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
@@ -72,7 +72,34 @@ describe("deriveOpponentActionCues", () => {
     expect(cues[0]?.highlight).toEqual({ kind: "zone", side: "runner", zone: "rig" });
   });
 
-  it("skips old reconnect events by lastPresentedEventId and marks local attention", () => {
+  it("adds related cards only when the card is visible to the viewer", () => {
+    const visibleIce = { instanceId: "ice_1", known: true, title: "Gate ICE", definitionId: "gate_ice", type: "ice" as const };
+    const playerView = view("runner", {
+      servers: [{ id: "remote_1", label: "Remote 1", ice: [visibleIce], root: [] }]
+    });
+
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView,
+      events: [event("evt_rez", "rez_ice", { actor: "corp", cardDefinitionId: "gate_ice", title: "Gate ICE" })]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.relatedCard).toEqual(visibleIce);
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
+  it("does not create a duplicate cue for visible access reveals", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [event("evt_access", "access_card", { actor: "runner", cardDefinitionId: "agenda_1", title: "Public Agenda" })]
+    });
+
+    expect(cues).toHaveLength(0);
+  });
+
+  it("skips old reconnect events and does not show a pure turn-handoff cue", () => {
     const playerView = view("runner", { activeSide: "runner", legalActions: [legalAction("runner", "start_run")] });
     const cues = deriveOpponentActionCues({
       viewerSide: "runner",
@@ -84,8 +111,20 @@ describe("deriveOpponentActionCues", () => {
       ]
     });
 
+    expect(cues).toHaveLength(0);
+    expect(actionSoundForActionType("end_turn", "public")).toBe("turn");
+  });
+
+  it("marks substantive opponent actions when local play can continue", () => {
+    const playerView = view("runner", { activeSide: "runner", legalActions: [legalAction("runner", "start_run")] });
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView,
+      events: [event("evt_credit", "gain_credit", { actor: "corp", amount: 1 })]
+    });
+
     expect(cues).toHaveLength(1);
-    expect(cues[0]?.eventId).toBe("evt_new");
+    expect(cues[0]?.eventId).toBe("evt_credit");
     expect(cues[0]?.requiresLocalAttention).toBe(true);
   });
 });
