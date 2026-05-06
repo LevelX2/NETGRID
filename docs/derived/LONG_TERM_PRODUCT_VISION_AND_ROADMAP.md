@@ -4,11 +4,13 @@ Status: planning
 Stand: 2026-05-05
 Scope: langfristige Produktvision, Roadmap, Gates und Idealarchitektur für ein quasi vollständiges Netrunner-Endprodukt
 
+Nachtrag 2026-05-06: Die kurzfristige V1.x-Linie wurde durch den tatsächlichen Projektverlauf fortgeschrieben. V1.0.4, V1.0.5K und V1.0.6 sind inzwischen umgesetzt bzw. verifiziert; V1.0.7 Browser-E2E und Visual QA ist requirements-frozen und bereit für die Umsetzung. Die ursprünglich skizzierte V1.0.6-Position "Private Lobby Comfort" wurde faktisch durch V1.0.6 Aktionen, Credits und Kartenanzeige ersetzt; verbleibende Lobby-Politur ist kein aktiver V1.0.7-Scope.
+
 ## Kurzfazit
 
 Das realistische Zielbild ist kein sofort öffentliches "alles kann alles"-Netrunner, sondern ein stufenweise gehärtetes Produkt:
 
-1. **Privat lokal sehr gut spielbar**: die heutige Basis plus V1.0.4/V1.0.5 stabilisiert Match-Lifecycle, Reconnect, KI-Pacing und Board-Klarheit.
+1. **Privat lokal sehr gut spielbar**: die heutige Basis plus V1.0.4 bis V1.0.6 stabilisiert Match-Lifecycle, Reconnect, KI-Pacing, Board-Klarheit, Aktionen, Credits und Kartenanzeige.
 2. **Privat über Internet belastbar**: sicherer privater Betrieb mit HTTPS/WSS, SQLite/Postgres-Pfad, Backups, Monitoring, Rate Limits, Browser-E2E und Datenschutzgrenzen.
 3. **Regel- und Kartenbreite systematisch vollständig**: alle Mechaniken, Formate, Setrotation, Banlists und Karten nur über Datenpipeline, Resolver/Ability-Gates, Hidden-Info-Tests, Replay/StateHash und Multiplayer-Smokes.
 4. **Öffentliche Plattform nur mit harten Gates**: Accounts, öffentliche Lobbys, Matchmaking, Chat, Rankings, Turniere, Moderation, Anti-Abuse und Betrieb sind ein eigenes Produkt, nicht nur eine Serveroption.
@@ -99,11 +101,11 @@ Umgesetzt und grün:
 Nicht belegbar oder bewusst offen:
 
 - V1.0.2 Gegner-Aktionsdarstellung und V1.0.3 Matchstart-UX sind umgesetzt und auf `main` integriert.
-- V1.0.4/V1.0.5 sind geplant, aber nicht umgesetzt.
+- V1.0.4 ist umgesetzt und final geprüft; V1.0.5 besitzt Requirements/Specs und eine passende Workspace-Basis, aber keine eigenen formalen Finalartefakte; V1.0.5K und V1.0.6 sind umgesetzt und lokal verifiziert; V1.0.7 ist als Browser-E2E-/Visual-QA-Gate requirements-frozen.
 - Server hat keine Cancel-/Leave-/Forfeit-API.
 - KI-Pacing, `advance_ai`, Action-Cues und opt-in Aktionsaudio existieren seit V1.0.2; V1.0.5 soll sie gegen Regression absichern und die Spielansicht verständlicher machen.
-- Gegnernamen sind gespeichert, aber nicht als safe Opponent-Display in Payloads/UI fertig.
-- Browser-E2E-/Screenshot-Smokes für Zwei-Tab-UX, Reconnect und Kartenbilder sind kein wiederholbares Standardwerkzeug.
+- Gegnernamen sind seit V1.0.4 side-sicher in Payloads/UI ergänzt.
+- Browser-E2E-/Screenshot-Smokes für Zwei-Tab-UX, Reconnect, Viewports und Kartenanzeige sind noch kein umgesetztes Standardwerkzeug; V1.0.7 ist genau dafür requirements-frozen.
 - JSON-Storage ist ausreichend für privaten Stand; SQLite/Postgres, Migrationen, Backups und Betriebshärtung sind offen.
 - Accounts, öffentliche Lobbys, öffentlicher oder moderationspflichtiger Chat, Matchmaking, Rankings, Turniere, Zuschauer, Moderation und Anti-Abuse fehlen bewusst. Der private V1.0.3-Lobbychat bleibt auf die Startlobby begrenzt.
 - Vollständige offizielle Deckbuilding-/Formatregeln, vollständige Setrotation/Banlists und vollständige Karten-/Mechanikabdeckung fehlen.
@@ -151,7 +153,7 @@ Legende:
 | Kartentexte, Übersetzungen, Suche | Katalog und display-only Texte für aktuellen Stand; deutsche UI teilweise. | Offizielle Kartentexte können urheberrechtlich geschützt sein und ändern sich. Mehrsprachigkeit braucht versionierte Quellen und Fallbacks. | Suchindex-Tests, Text-Versionierung, locale-Fallback, keine Kartentextparser als Regelquelle. |
 | Kartenbilder und Asset-Rechte | V0.91: private lokale O:NR-Frontbilder als Anzeige-Artefakte erlaubt; keine öffentlichen Assets. | Öffentliche Nutzung offizieller Card Art, Frames, Backs, Logos bleibt blockiert. Hidden Cards dürfen keine Bild-/DOM-/Asset-Spuren leaken. | Asset-Policy, Source Registry, lokale nicht versionierte Caches, Hidden-Card DOM/Payload-Leaktests, keine Bilddaten in Engine/AI/StateHash. |
 | Human-vs-Human Internet-Multiplayer | Privater Multiplayer lokal, serverautoritative Actions, WebSocket, Reconnect, Undo vorhanden. | Internetbetrieb braucht HTTPS/WSS, origin/cors, rate limits, robuste Persistenz, Reconnect über Browserneustart, Betriebshärtung. | Zwei-Tab/E2E, Netzwerkunterbrechung, stale actions, duplicate idempotency, token rotation, leak scans. |
-| Private Lobbys | Pending Lobby mit Join-Deck-Handshake vorhanden. | Cancel, Leave, Forfeit, Recreate, klare Lobbyzustände fehlen. | V1.0.4 Tests: cancel/join-after-cancel/leave/forfeit/recreate/reconnect/Gegnername. |
+| Private Lobbys | Pending Lobby mit Join-Deck-Handshake sowie V1.0.4-Cancel, Leave, Forfeit, Recreate, Session-Recovery und Gegnernamen vorhanden. | Weitere Lobby-Politur ist möglich, aber kein aktiver V1.0.7-Scope. | V1.0.4 Tests plus V1.0.7 Browser-E2E für Host/Join/Ready/Lifecycle/Reconnect. |
 | Öffentliche Lobbys | Nicht vorhanden, bewusst out of scope. | Öffentliche Discovery öffnet Spam, Abuse, Datenschutz, Moderation und Verfügbarkeit. | Erst nach Auth/Moderation/Rate-Limit-Gate; Akzeptanz: private Daten nicht sichtbar, Abuse-Meldepfad, Admin-Audit. |
 | Matchmaking | Nicht vorhanden. | Braucht Accounts oder stabile Gastidentität, Rating/Queue, Abuse-Schutz, Region/Latenz, Smurfing-Gegenmaßnahmen. | Loadtests, Queue-Fairness, cancel/timeout, abuse controls, no hidden deck leakage. |
 | Ranked/Casual | Nicht vorhanden. | Ranked erfordert Ratingmodell, Formatvalidierung, Cheating-/Concede-Politik, Saisonreset, Moderation. | Deterministische Ergebnisverbuchung, auditierbare Replays ohne Hidden-Leak, Rating-Regressionen. |
@@ -268,8 +270,8 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | V1.0.4 Private Match Lifecycle | Pending Lobby abbrechen, Joiner leave, Forfeit, Recreate, Session-Recovery, Gegnernamen | keine neuen Regeln, keine Chaterweiterung, keine Accounts | shared, server multiplayer/http, web page, visibility tests | `V1_0_4_REQUIREMENTS`, lifecycle spec, test matrix | server lifecycle tests, two-tab cancel/forfeit/reconnect, token leak scan | stale Lobbys vermeidbar, Aufgabe side-sicher, StateHash letzter Engine-State bleibt |
 | V1.0.5 Action Board UX | V1.0.2-Cues/KI-Pacing absichern, Board-/Run-/Rig-Klarheit, deutsche Run-/Board-Begriffe, kompakte Audio-/Optionen | keine neuen Karten, kein Tutorial, keine Chaterweiterung | web cue helper, page/css, chronicle, visibility tests | V1.0.5 req/spec/test matrix | cue regression tests, redaction tests, two-tab/KI playtests, build/lint | laufende Partien lesbarer, keine Hidden-Info-Leaks, Human-vs-Human nicht blockiert |
-| V1.0.6 Private Lobby Comfort | verbleibende Lobby-Politur nach V1.0.3/V1.0.4, bessere Join-/Reconnect-Hinweise, Fehlerzustände, mobile Lobby-Lesbarkeit | kein öffentlicher Lobbykatalog, keine öffentliche Chatfunktion | server lobby payloads, web lobby UI | Lobby comfort spec | host/join/reload/ready race tests | private Lobby fühlt sich vollständig kontrollierbar an |
-| V1.0.7 Browser-E2E und Visual QA | Wiederholbare Zwei-Tab-Browser-Smokes, Screenshot-/DOM-Leak-Checks, mobile/tablet/desktop Basis | keine Featurebreite | tests/e2e, scripts, web QA docs | E2E runbook | Playwright oder Browser-Plugin-Smokes, screenshot diffs, text-fit checks | V1.x-Releases haben reproduzierbaren Browser-Gate |
+| V1.0.6 Aktionen, Credits und Kartenanzeige | sichtbare Aktionen, Aktionsslots, generische Credits, Kostenchips, kompakte Card-Display-Modi | keine Featurebreite, keine neuen Regeln, keine Karten | web page/css/helpers, visibility tests | V1.0.6 req/spec/test/final review | Web-Tests, Browser-Smoke, Hidden-Info-Stichprobe | aktive Spieloberfläche ist ressourcen- und kartenlesbarer |
+| V1.0.7 Browser-E2E und Visual QA | Wiederholbare Zwei-Kontext-Browser-Smokes, Screenshot-/DOM-/Storage-/Payload-Leak-Checks, Desktop/Tablet/schmale Viewports | keine Featurebreite | tests/e2e, scripts, web QA docs | V1.0.7 req/spec/test matrix | Playwright oder gleichwertige Browser-Automation, Screenshots/Traces, text-fit checks | V1.x-Releases haben reproduzierbaren Browser-Gate |
 | V1.0.8 Storage/Backup-Härtung | SQLite-Adapter oder formal gehärteter JSON-Backup/Recovery-Pfad, migrationsfähiger Storage-Port | keine Accounts, keine öffentliche Plattform | server storage, data/runtime docs | storage migration spec, backup runbook | backup/restore drill, lock/concurrency tests | privater Betrieb kann Datenverlust realistisch vermeiden |
 | V1.0.9 Private Internet Hardening | HTTPS/WSS deployment path, origin/CORS, rate limits, secrets, healthchecks, basic monitoring | keine Public Discovery | server/http, deployment docs | private ops/security checklist | LAN/VPS smoke, token redaction, rate-limit tests | eingeladene Spieler können sicher über Internet spielen |
 
@@ -326,10 +328,11 @@ Diese Stufe darf erst starten, wenn die privaten Internet-Gates stabil sind und 
 
 Empfohlen:
 
-1. **V1.0.6 Private Lobby Comfort**
-   - Warum: Nach Lifecycle und Action-UX braucht der private Spielstart eine ruhige, vollständige Oberfläche.
-   - Bewusst ohne öffentliche oder persistente Chat-Erweiterung, solange Moderations-/Retention-Fragen offen sind.
+1. **V1.0.6 Aktionen, Credits und Kartenanzeige**
+   - Status: umgesetzt und lokal verifiziert.
+   - Warum: Nach Lifecycle und Action-UX brauchte die aktive Spieloberfläche klarere Ressourcen- und Kartenanzeige.
 2. **V1.0.7 Browser-E2E und Visual QA**
+   - Status: requirements-frozen und bereit für Umsetzung.
    - Warum: Ab jetzt werden UI, Reconnect, Cues, mobile Layouts und Zwei-Tab-Flows zu wichtig, um sie nur manuell zu prüfen.
    - Das ist die Test-Investition, die spätere Public- und Mobile-Arbeit trägt.
 3. **V1.0.8 Storage/Backup-Härtung**
@@ -382,14 +385,11 @@ Realistisch ist ein hervorragendes privates bis halböffentliches Netrunner-Prod
 
 ### Beste Releasefolge aus heutiger Sicht
 
-1. V1.0.4 umsetzen und final prüfen.
-2. V1.0.5 umsetzen und final prüfen.
-3. V1.0.6 Private Lobby Comfort.
-4. V1.0.7 Browser-E2E/Visual QA.
-5. V1.0.8 Storage/Backup-Härtung.
-6. V1.0.9 Private Internet Hardening.
-7. Danach erst Regelkern und Datenpipeline in V1.1 bis V1.7 weiter vervollständigen.
-8. Öffentliche Plattform erst ab V2.x und nur nach harten Gates.
+1. V1.0.7 Browser-E2E/Visual QA umsetzen.
+2. V1.0.8 Storage/Backup-Härtung.
+3. V1.0.9 Private Internet Hardening.
+4. Danach erst Regelkern und Datenpipeline in V1.1 bis V1.7 weiter vervollständigen.
+5. Öffentliche Plattform erst ab V2.x und nur nach harten Gates.
 
 ## Offene Punkte
 

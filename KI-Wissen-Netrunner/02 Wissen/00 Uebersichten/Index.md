@@ -129,6 +129,13 @@
 - `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`: wiederholbarer V1.0.6-Browser-/Playtest-Smoke.
 - `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md`: Implementation Review für V1.0.6 Aktionen, Credits und Kartenanzeige mit V1.0.5-Basisprüfung, UI-Scope-Grenze und Testmatrix-Abgleich.
 - `docs/derived/V1_0_6_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.6 inklusive Pflichtchecks, Browser-Smoke-Ergebnis und dokumentierter Viewport-Einschränkung.
+- `docs/derived/V1_0_6K_CARD_RELEASE_REQUIREMENTS.md`: Definition für das kleine Karten-Nachrelease nach V1.0.6 mit 20 lokal geprüften Karten, Aufnahme-/Rückstellregeln und Gate-Kriterien.
+- `docs/derived/V1_0_6K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für das kleine Karten-Nachrelease mit finaler 20-Karten-Liste, Runtime-Gate, Manifest- und Testabdeckung.
+- `docs/derived/V1_0_7_BROWSER_E2E_VISUAL_QA_PLAN.md`: Detailplan für den Browser-E2E- und Visual-QA-Gate nach V1.0.6.
+- `docs/derived/V1_0_7_REQUIREMENTS.md`: eingefrorene V1.0.7-Anforderungen für reproduzierbare Zwei-Kontext-Browser-Smokes, Viewport-Matrix, Screenshots/Traces und Leak-Scans.
+- `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`: Spezifikation für Werkzeugmodell, Harness, Browser-Kontexte, Viewports, Flows und DOM-/Storage-/Payload-Leak-Scans.
+- `docs/derived/V1_0_7_TEST_MATRIX.md`: V1.0.7-Testmatrix für Browser-Gate, Runtime-Isolation, Human-vs-KI, Human-vs-Human, Lifecycle, Board, Card Display, Viewports und Hidden Info.
+- `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.7.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
