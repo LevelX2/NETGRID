@@ -117,9 +117,12 @@ describe("catalog import and status logic", () => {
       expect(card?.implementationManifest?.replayTests.length).toBeGreaterThan(0);
     }
 
-    expect(cardsById["onr_v1_237_data-wall"]?.numeric.strength).toBe(1);
-    expect(cardsById["onr_v1_238_data-wall-2-0"]?.numeric.strength).toBe(3);
-    expect(cardsById["onr_v1_239_endless-corridor"]?.numeric.strength).toBe(4);
+    expect(cardsById["onr_v1_230_cortical-scanner"]?.numeric.rezCost).toBe(7);
+    expect(cardsById["onr_v1_237_data-wall"]?.numeric.strength).toBe(0);
+    expect(cardsById["onr_v1_238_data-wall-2-0"]?.numeric.strength).toBe(1);
+    expect(cardsById["onr_v1_239_endless-corridor"]?.numeric.strength).toBe(2);
+    expect(cardsById["onr_v1_015_codeslinger"]?.text).toBe("0 credits: Break sentry subroutine.");
+    expect(cardsById["onr_v1_146_zetatech-mem-chip"]?.numeric.installCost).toBe(3);
     expect(cardsById["onr_v1_146_zetatech-mem-chip"]?.text).toBe("Provides +2 MU.");
     expect(cardsById["onr_v1_075_zetatech-software-installer"]?.text).toBe(
       "Put 2 bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overlying Software Installer itself. If you use any of these bits, replace them at the start of your next turn."

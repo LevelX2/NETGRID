@@ -850,7 +850,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 7,
     memoryCost: 1,
     strength: 3,
-    breakCost: 1,
+    breakCost: 0,
     iceSubtype: "sentry",
     iceLabel: "sentry"
   }),
@@ -963,7 +963,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["icebreaker"],
     installCost: 5,
     memoryCost: 1,
-    strength: 4,
+    strength: 2,
     breakCost: 2,
     pumpCost: 1,
     iceSubtype: "code_gate",
@@ -1037,7 +1037,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrMemoryChip({
     id: "onr_v1_146_zetatech-mem-chip",
     title: "Zetatech Mem Chip",
-    installCost: 5,
+    installCost: 3,
     memoryLimitBonus: 2
   }),
   {
@@ -1210,7 +1210,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Data Wall",
     subtypes: ["wall"],
     rezCost: 1,
-    strength: 1,
+    strength: 0,
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_237_data_wall_etr")],
     mechanics: ["end_the_run"]
@@ -1220,7 +1220,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Data Wall 2.0",
     subtypes: ["wall"],
     rezCost: 2,
-    strength: 3,
+    strength: 1,
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_238_data_wall_2_0_etr")],
     mechanics: ["end_the_run"]
@@ -1230,7 +1230,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Endless Corridor",
     subtypes: ["code_gate"],
     rezCost: 4,
-    strength: 4,
+    strength: 2,
     rulesText: "End the run.\nEnd the run.",
     subroutines: [onrEtr("onr_v1_239_endless_corridor_etr_1"), onrEtr("onr_v1_239_endless_corridor_etr_2")],
     mechanics: ["end_the_run"]

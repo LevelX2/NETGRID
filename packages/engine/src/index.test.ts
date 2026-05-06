@@ -566,11 +566,11 @@ describe("V1.0.5K Card Release", () => {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).toBe("playable_mvp");
     }
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_237_data-wall"]).toMatchObject({ rezCost: 1, strength: 1 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_238_data-wall-2-0"]).toMatchObject({ rezCost: 2, strength: 3 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject({ rezCost: 4, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_237_data-wall"]).toMatchObject({ rezCost: 1, strength: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_238_data-wall-2-0"]).toMatchObject({ rezCost: 2, strength: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject({ rezCost: 4, strength: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_144_tycho-mem-chip"]).toMatchObject({ installCost: 5, memoryLimitBonus: 3 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_146_zetatech-mem-chip"]).toMatchObject({ installCost: 5, memoryLimitBonus: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_146_zetatech-mem-chip"]).toMatchObject({ installCost: 3, memoryLimitBonus: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_203_hostile-takeover"]).toMatchObject({ advancementRequirement: 3, agendaPoints: 1 });
   });
 

@@ -102,6 +102,7 @@ const DISPLAY_NAME_STORAGE_KEY = "netrunner.displayName";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Shield;
+const RUNNER_BASE_HAND_LIMIT = 5;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
 const APP_STATUS_LABEL = "V1.0.6";
@@ -2693,7 +2694,10 @@ export default function Page() {
           </div>
           {activeView.own.rig ? (
             <section className="section panel boardSection">
-              <h2>Rig</h2>
+              <div className="sectionTitleLine boardSectionTitle">
+                <h2>Rig</h2>
+                <ZoneLimitBadge label="MU" value={`${activeView.own.memoryUsed ?? 0}/${activeView.own.memoryLimit ?? 0}`} />
+              </div>
               <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>
                 {activeView.own.rig.map((card) => {
                   const displayCard = enrichCard(card);
@@ -2712,7 +2716,10 @@ export default function Page() {
             </section>
           ) : null}
           <section className="section panel boardSection">
-            <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
+            <div className="sectionTitleLine boardSectionTitle">
+              <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
+              {activeView.side === "runner" ? <ZoneLimitBadge label="Grip" value={`${activeView.own.gripOrHq.length}/${runnerHandLimit(activeView)}`} /> : null}
+            </div>
             <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, activeView.side === "runner" ? "grip" : "hq") ? "cueHighlightSoft" : ""}`}>
               {activeView.own.gripOrHq.map((card) => {
                 const displayCard = enrichCard(card);
@@ -4873,8 +4880,6 @@ function CardView({
     >
       {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
       {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
-      {installedState === "unrezzed" ? <span className="rezChip unrezzed">Ungerezzt</span> : null}
-      {installedState === "rezzed" ? <span className="rezChip rezzed">Gerezzt</span> : null}
       {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
       {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
       {showRulesPreview ? (
@@ -4977,6 +4982,19 @@ function valueLabel(label: string, value: number | undefined): string | null {
 
 function developmentCountLabel(count: number): string {
   return `${count} ${count === 1 ? "Entwicklung" : "Entwicklungen"}`;
+}
+
+function runnerHandLimit(_view: PlayerView): number {
+  return RUNNER_BASE_HAND_LIMIT;
+}
+
+function ZoneLimitBadge({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="zoneLimitBadge" aria-label={`${label} ${value}`}>
+      <strong>{label}</strong>
+      <span>{value}</span>
+    </span>
+  );
 }
 
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {

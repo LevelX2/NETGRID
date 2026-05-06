@@ -166,28 +166,28 @@ const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
   "onr_v1_054_raptor": { installCost: 1, memoryCost: 1, strength: 1 },
   "onr_v1_070_tinweasel": { installCost: 5, memoryCost: 1, strength: 3 },
   "onr_v1_144_tycho-mem-chip": { installCost: 5 },
-  "onr_v1_146_zetatech-mem-chip": { installCost: 5 },
+  "onr_v1_146_zetatech-mem-chip": { installCost: 3 },
   "onr_v1_203_hostile-takeover": { advancementRequirement: 3, agendaPoints: 1 },
-  "onr_v1_230_cortical-scanner": { rezCost: 4, strength: 3 },
-  "onr_v1_232_crystal-wall": { rezCost: 3, strength: 3 },
-  "onr_v1_237_data-wall": { rezCost: 1, strength: 1 },
-  "onr_v1_238_data-wall-2-0": { rezCost: 2, strength: 3 },
-  "onr_v1_239_endless-corridor": { rezCost: 4, strength: 4 }
+  "onr_v1_230_cortical-scanner": { rezCost: 7, strength: 3 },
+  "onr_v1_232_crystal-wall": { rezCost: 4, strength: 3 },
+  "onr_v1_237_data-wall": { rezCost: 1, strength: 0 },
+  "onr_v1_238_data-wall-2-0": { rezCost: 2, strength: 1 },
+  "onr_v1_239_endless-corridor": { rezCost: 4, strength: 2 }
 };
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
-  "onr_v1_015_codeslinger": "1 credit: Break sentry subroutine.",
+  "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
   "onr_v1_052_raffles": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
   "onr_v1_054_raptor": "2 credits: Break sentry subroutine.\n1 credit: +1 strength.",
   "onr_v1_070_tinweasel": "0 credits: Break code gate subroutine.",
   "onr_v1_144_tycho-mem-chip": "Provides +3 MU.",
   "onr_v1_146_zetatech-mem-chip": "Provides +2 MU.",
   "onr_v1_203_hostile-takeover": "Gain 5 credits when scored.",
-  "onr_v1_230_cortical-scanner": "End the run.\nEnd the run.\nEnd the run.",
-  "onr_v1_232_crystal-wall": "End the run.",
-  "onr_v1_237_data-wall": "End the run.",
-  "onr_v1_238_data-wall-2-0": "End the run.",
-  "onr_v1_239_endless-corridor": "End the run.\nEnd the run."
+  "onr_v1_230_cortical-scanner": "[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+  "onr_v1_232_crystal-wall": "[Subroutine] End the run.",
+  "onr_v1_237_data-wall": "[Subroutine] End the run.",
+  "onr_v1_238_data-wall-2-0": "[Subroutine] End the run.",
+  "onr_v1_239_endless-corridor": "[Subroutine] End the run.\n[Subroutine] End the run."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {

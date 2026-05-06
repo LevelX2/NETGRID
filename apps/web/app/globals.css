@@ -1823,43 +1823,9 @@ select {
   background: color-mix(in srgb, var(--card-bg), var(--cue-soft) 18%);
 }
 
-.card.rezzedInstalled {
-  border-color: color-mix(in srgb, var(--runner), var(--line) 38%);
-}
-
 .card.selectedActionSource {
   outline: 2px solid color-mix(in srgb, var(--runner), white 18%);
   outline-offset: 2px;
-}
-
-.rezChip {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  max-width: calc(100% - 10px);
-  padding: 3px 6px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: var(--zone-chip-bg);
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: 800;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.rezChip.unrezzed {
-  border-style: dashed;
-  color: var(--cue);
-}
-
-.rezChip.rezzed {
-  color: var(--runner);
-}
-
-.card.unrezzedInstalled .cardTitle,
-.card.rezzedInstalled .cardTitle {
-  padding-right: 76px;
 }
 
 .card.agenda {
@@ -2602,6 +2568,34 @@ select {
 
 .boardSection {
   margin-top: 14px;
+}
+
+.boardSectionTitle {
+  margin-bottom: 10px;
+}
+
+.boardSectionTitle h2 {
+  margin: 0;
+}
+
+.zoneLimitBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 24px;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--zone-chip-bg);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.zoneLimitBadge strong {
+  color: var(--text);
+  font-size: 11px;
 }
 
 .splitButtons {
