@@ -1912,6 +1912,47 @@ select {
   font-size: 12px;
 }
 
+.advancementGems {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.advancementGem {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border: 1px solid rgb(255 164 156 / 0.9);
+  border-radius: 45% 55% 48% 52%;
+  background:
+    radial-gradient(circle at 32% 27%, rgb(255 240 232 / 0.95) 0 13%, transparent 14%),
+    radial-gradient(circle at 42% 38%, rgb(255 120 105 / 0.88) 0 36%, rgb(143 20 34 / 0.95) 68%, rgb(78 8 20 / 0.98) 100%);
+  box-shadow:
+    0 2px 5px rgb(0 0 0 / 0.34),
+    inset -2px -2px 4px rgb(77 0 10 / 0.45),
+    inset 2px 2px 4px rgb(255 220 210 / 0.42);
+}
+
+.advancementGemCount {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  min-width: 23px;
+  min-height: 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 1px 5px;
+  border: 1px solid rgb(255 164 156 / 0.75);
+  border-radius: 999px;
+  color: var(--text);
+  background: rgb(85 12 25 / 0.82);
+  box-shadow: 0 2px 7px rgb(0 0 0 / 0.35);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .cardTooltip {
   position: absolute;
   left: 6px;

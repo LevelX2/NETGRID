@@ -60,7 +60,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const actionType = stringValue(payload.actionType) ?? event.type;
   const actor = sideValue(payload.actor);
   const amount = numberValue(payload.amount);
-  const serverLabel = stringValue(payload.serverLabel);
+  const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
   const zoneLabel = stringValue(payload.zoneLabel);
   const result = stringValue(payload.result);
   const runPhase = stringValue(payload.runPhase);
@@ -127,9 +127,9 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "advance_card":
       category = "hidden";
-      visibility = "redacted";
-      title = phrase(subject, `eine installierte Karte${serverLabel ? ` in ${serverLabel}` : ""} vorangebracht`);
-      chips.push("Advancement", "Verdeckt");
+      visibility = actor === "corp" && (redactedKind || !cardTitle) ? "redacted" : "public";
+      title = phrase(subject, advanceTitlePart(cardTitle, context.cardType, serverLabel, visibility === "redacted"));
+      chips.push("+1 Entwicklung", ...(serverLabel ? [serverLabel] : []), ...(visibility === "redacted" ? ["Verdeckt"] : []));
       break;
     case "score_agenda": {
       category = "agenda";
@@ -325,7 +325,7 @@ function installLocation(serverLabel: string | undefined, zoneLabel: string | un
   if (zoneLabel === "Rig") return " im Rig";
   if (zoneLabel === "Resource") return " als Resource";
   const area = installAreaFromLabel(label);
-  if (area === "Remote") return " in einem Remote";
+  if (area === "Außenserver") return " in einem Außenserver";
   if (area === "ICE") return " als ICE";
   return "";
 }
@@ -338,15 +338,28 @@ function installDestinationForTitle(actor: Side | undefined, serverLabel: string
 
 function installAreaFromPayload(serverLabel: string | undefined, zoneLabel: string | undefined, label: string | undefined): string {
   if (zoneLabel) return zoneLabel;
-  if (serverLabel) return serverLabel.includes("Remote") ? "Remote" : serverLabel;
+  if (serverLabel) return /Außenserver/.test(serverLabel) ? "Außenserver" : serverLabel;
   return installAreaFromLabel(label);
 }
 
 function installAreaFromLabel(label: string | undefined): string {
   if (!label) return "Installation";
   if (/ice|vor/i.test(label)) return "ICE";
-  if (/remote/i.test(label)) return "Remote";
+  if (/remote|außenserver|aussenserver/i.test(label)) return "Außenserver";
   return "Installation";
+}
+
+function advanceTitlePart(cardTitle: string | undefined, cardType: string | null | undefined, serverLabel: string | undefined, redacted: boolean): string {
+  if (redacted || !cardTitle) return `eine Installation${serverLabel ? ` in ${serverLabel}` : ""} ausgebaut`;
+  if (cardType === "agenda") return `das Projekt ${cardTitle} weiterentwickelt`;
+  if (cardType === "asset") return `die Anlage ${cardTitle} ausgebaut`;
+  if (cardType === "upgrade") return `das Upgrade ${cardTitle} ausgebaut`;
+  return `${cardTitle} weiterentwickelt`;
+}
+
+function displayServerLabel(label: string | undefined): string | undefined {
+  if (!label) return undefined;
+  return label.replace(/\bRemote\s+(\d+)\b/g, "Außenserver $1").replace(/\bneuem Remote\b/g, "neuem Außenserver");
 }
 
 function runTargetFromLabel(label: string | undefined): string {

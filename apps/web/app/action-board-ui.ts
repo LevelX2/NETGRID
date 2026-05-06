@@ -38,7 +38,7 @@ const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
   install_card: "Installieren",
   play_event: "Spielen",
   play_operation: "Spielen",
-  advance_card: "Agenda/Server",
+  advance_card: "Ausbauen",
   score_agenda: "Agenda/Server",
   start_run: "Run",
   jack_out: "Run",
@@ -137,6 +137,8 @@ export function actionButtonLabel(action: LegalAction): string {
       return normalizeVisibleTerms(action.label || "Run fortsetzen");
     case "decline_trash":
       return "Zugriff abschließen";
+    case "advance_card":
+      return "Installation ausbauen";
     case "end_turn":
       return "Zug beenden";
     case "resolve_choice":
@@ -204,6 +206,8 @@ export function normalizeVisibleTerms(value: string): string {
   return value
     .replace(/\bR&D\b/g, "F&E (R&D)")
     .replace(/\bArchives\b/g, "Archive")
+    .replace(/\bRemote\s+(\d+)\b/g, "Außenserver $1")
+    .replace(/\bneuem Remote\b/g, "neuem Außenserver")
     .replace(/\bApproach\b/g, "Annäherung")
     .replace(/\bEncounter\b/g, "Begegnung")
     .replace(/\bAccess\b/g, "Zugriff")
@@ -215,9 +219,9 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   if (serverIdOrLabel === "hq" || serverIdOrLabel === "HQ") return "HQ";
   if (serverIdOrLabel === "rd" || serverIdOrLabel === "R&D") return "F&E (R&D)";
   if (serverIdOrLabel === "archives" || serverIdOrLabel === "Archives") return "Archive";
-  if (serverIdOrLabel === "new_remote") return "neuem Remote";
+  if (serverIdOrLabel === "new_remote") return "neuem Außenserver";
   const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
-  if (remote?.[1]) return `Remote ${remote[1]}`;
+  if (remote?.[1]) return `Außenserver ${remote[1]}`;
   return normalizeVisibleTerms(serverIdOrLabel);
 }
 

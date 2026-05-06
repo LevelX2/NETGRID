@@ -37,7 +37,7 @@ import {
   ZoomIn
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
-import type { PointerEvent as ReactPointerEvent } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
 import {
   CHRONICLE_CATEGORY_LABELS,
@@ -709,7 +709,7 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   if (!cardId || !title) return null;
   const detail = detailsById[cardId] ?? null;
   const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
-  const serverLabel = payloadString(event.publicPayload, "serverLabel") ?? "einen Server";
+  const serverLabel = serverDisplayLabel(payloadString(event.publicPayload, "serverLabel") ?? "einen Server");
   const actions = legalActions.filter((action) => ["steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
   return {
     eventId: event.eventId,
@@ -4836,6 +4836,9 @@ function CardView({
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
   const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
+  const advancementCount = Math.max(0, Math.floor(card.advancementCounters ?? 0));
+  const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
+  const cardAriaLabel = card.known ? `Karte ${card.title}${advancementLabel ? `, ${advancementLabel}` : ""}` : advancementLabel ? `Verdeckte Karte, ${advancementLabel}` : "Verdeckte Karte";
 
   const updateTooltipPlacement = () => {
     const element = cardRef.current;
@@ -4864,7 +4867,7 @@ function CardView({
         if (card.known) onActionContextSelect?.(card, hiddenSide);
       }}
       onPointerEnter={updateTooltipPlacement}
-      aria-label={card.known ? `Karte ${card.title}` : "Verdeckte Karte"}
+      aria-label={cardAriaLabel}
       aria-describedby={tooltipId}
       title={nativeTitle}
     >
@@ -4884,7 +4887,7 @@ function CardView({
           ))}
         </span>
       ) : null}
-      {!visualImageUrl && card.known && card.advancementCounters ? <span className="cardMeta">Adv: {card.advancementCounters}</span> : null}
+      {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
       {card.known && hasRulesText ? (
         <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
           <strong>{card.title}</strong>
@@ -4905,6 +4908,40 @@ function CardView({
   );
 }
 
+function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: number }) {
+  const visibleGemCount = Math.min(count, 4);
+  return (
+    <span className="advancementGems" aria-hidden="true">
+      {Array.from({ length: visibleGemCount }, (_, index) => (
+        <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index)} />
+      ))}
+      {count > visibleGemCount ? <span className="advancementGemCount">x{count}</span> : null}
+    </span>
+  );
+}
+
+function advancementGemStyle(instanceId: string, index: number): CSSProperties {
+  const seed = hashString(`${instanceId}:${index}`);
+  const x = 18 + (seed % 58);
+  const y = 14 + (Math.floor(seed / 7) % 45);
+  const rotation = (Math.floor(seed / 17) % 38) - 19;
+  const scale = 0.9 + ((Math.floor(seed / 31) % 18) / 100);
+  return {
+    left: `${x}%`,
+    top: `${y}%`,
+    transform: `rotate(${rotation}deg) scale(${scale})`
+  };
+}
+
+function hashString(value: string): number {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
 function nearestTooltipBoundary(element: HTMLElement): DOMRect {
   let current = element.parentElement;
   while (current) {
@@ -4919,6 +4956,7 @@ function nearestTooltipBoundary(element: HTMLElement): DOMRect {
 function cardDetailLines(card: VisibleCard): string[] {
   const typeLine = [card.type, card.subtypes?.join(" / ")].filter(Boolean).join(" · ");
   const numberLine = [
+    card.advancementCounters && card.advancementCounters > 0 ? developmentCountLabel(card.advancementCounters) : null,
     valueLabel("Kosten", card.cost),
     valueLabel("Install", card.installCost),
     valueLabel("MU", card.memoryCost),
@@ -4935,6 +4973,10 @@ function cardDetailLines(card: VisibleCard): string[] {
 
 function valueLabel(label: string, value: number | undefined): string | null {
   return value === undefined ? null : `${label} ${value}`;
+}
+
+function developmentCountLabel(count: number): string {
+  return `${count} ${count === 1 ? "Entwicklung" : "Entwicklungen"}`;
 }
 
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {

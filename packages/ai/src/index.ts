@@ -644,19 +644,19 @@ function scoreCorpAction(input: AiDecisionInput, features: AiFeatures, action: L
     case "advance_card":
       score = 720 + (profile.score ?? 1) * 30;
       reasonCode = "corp.remote.advance_score_plan";
-      explanation = "Ein Remote-Plan kann sichtbar vorangebracht werden.";
+      explanation = "Eine Installation im Außenserver kann ausgebaut werden.";
       evidence.push("advance_legal");
       break;
     case "install_card":
       if (action.payload?.placement === "ice") {
         score = scoreCorpIceInstall(action, features, profile);
         reasonCode = "corp.ice.install_defense";
-        explanation = "Eine ICE-Installation schützt einen sichtbaren Serverplan.";
+        explanation = "Eine ICE-Installation schützt einen sichtbaren Außenserver-Plan.";
         evidence.push(`server:${String(action.payload?.serverId ?? "unknown")}`);
       } else {
         score = scoreCorpRootInstall(roles, action, features, profile);
         reasonCode = roles.some((role) => role.startsWith("agenda_")) ? "corp.remote.install_score_plan" : "corp.remote.install_asset_plan";
-        explanation = "Die Corp baut einen sichtbaren Remote-Plan aus eigener Information.";
+        explanation = "Die Corp baut eine Installation im Außenserver aus eigener Information auf.";
         evidence.push("own_card_role_known", ...publicRoleEvidence(roles));
       }
       break;

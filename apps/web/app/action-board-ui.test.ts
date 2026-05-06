@@ -50,6 +50,9 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(runTargetServerIds(running)).toEqual(["rd"]);
     expect(serverDisplayLabel("rd")).toBe("F&E (R&D)");
     expect(serverDisplayLabel("archives")).toBe("Archive");
+    expect(serverDisplayLabel("remote_2")).toBe("Außenserver 2");
+    expect(serverDisplayLabel("Remote 3")).toBe("Außenserver 3");
+    expect(actionButtonLabel(legalAction("corp", "advance_card", "basic_action", "Agenda in Remote 2 advancen"))).toBe("Installation ausbauen");
   });
 
   it("shows access progress only from PlayerView breach data", () => {

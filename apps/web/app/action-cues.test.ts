@@ -44,8 +44,8 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]?.visibility).toBe("redacted");
-    expect(cues[0]?.title).toBe("Die Corp hat eine verdeckte Karte in Remote 1 installiert.");
-    expect(cues[0]?.highlight).toEqual({ kind: "server", serverId: "remote_1", serverLabel: "Remote 1", lane: "root" });
+    expect(cues[0]?.title).toBe("Die Corp hat eine verdeckte Karte in Außenserver 1 installiert.");
+    expect(cues[0]?.highlight).toEqual({ kind: "server", serverId: "remote_1", serverLabel: "Außenserver 1", lane: "root" });
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
     expect(JSON.stringify(cues[0])).not.toContain("Simple Agenda");
     expect(JSON.stringify(cues[0])).not.toContain("simple_agenda");

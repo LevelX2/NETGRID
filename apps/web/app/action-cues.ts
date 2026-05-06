@@ -1,5 +1,6 @@
 import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netrunner/shared";
 import { formatChronicleEvent, type ChronicleContext, type ChronicleImportance, type ChronicleVisibility } from "./chronicle";
+import { serverDisplayLabel } from "./action-board-ui";
 
 export type OpponentActionCue = {
   cueId: string;
@@ -136,7 +137,7 @@ function deriveHighlight(
 ): BoardHighlight | undefined {
   if (actionType === "game_created") return undefined;
   if (actionType === "start_run" || actionType === "continue_run" || actionType === "rez_ice" || actionType === "decline_rez" || actionType === "break_subroutine" || actionType === "pump_breaker") {
-    return { kind: "run", ...(stringValue(payload.serverId) ? { serverId: stringValue(payload.serverId)! } : {}), ...(stringValue(payload.serverLabel) ? { serverLabel: stringValue(payload.serverLabel)! } : {}), ...(stringValue(payload.runPhase) ? { phase: stringValue(payload.runPhase)! } : {}) };
+    return { kind: "run", ...(stringValue(payload.serverId) ? { serverId: stringValue(payload.serverId)! } : {}), ...(stringValue(payload.serverLabel) ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) } : {}), ...(stringValue(payload.runPhase) ? { phase: stringValue(payload.runPhase)! } : {}) };
   }
   if (actionType === "mandatory_draw" || actionType === "draw_card") {
     return { kind: "zone", side: actor ?? "corp", zone: actor === "runner" ? "grip" : "hq" };
@@ -145,7 +146,7 @@ function deriveHighlight(
   if (actionType === "score_agenda") return { kind: "zone", side: "corp", zone: "scoreArea" };
   if (actionType === "steal_agenda") return { kind: "zone", side: "runner", zone: "scoreArea" };
   if (actionType === "access_card") {
-    return { kind: "server", ...(stringValue(payload.serverId) ? { serverId: stringValue(payload.serverId)! } : {}), ...(stringValue(payload.serverLabel) ? { serverLabel: stringValue(payload.serverLabel)! } : {}), lane: "central" };
+    return { kind: "server", ...(stringValue(payload.serverId) ? { serverId: stringValue(payload.serverId)! } : {}), ...(stringValue(payload.serverLabel) ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) } : {}), lane: "central" };
   }
   if (actionType === "trash_accessed_card") return { kind: "zone", side: actor === "runner" ? "corp" : "runner", zone: actor === "runner" ? "archives" : "heap" };
   if (actionType === "trash_resource" || actionType === "remove_tag") return { kind: "zone", side: "runner", zone: "rig" };
@@ -177,7 +178,7 @@ function serverHighlight(payload: Record<string, unknown>): BoardHighlight {
   return {
     kind: "server",
     ...(stringValue(payload.serverId) ? { serverId: stringValue(payload.serverId)! } : {}),
-    ...(stringValue(payload.serverLabel) ? { serverLabel: stringValue(payload.serverLabel)! } : {}),
+    ...(stringValue(payload.serverLabel) ? { serverLabel: serverDisplayLabel(stringValue(payload.serverLabel)!) } : {}),
     lane: zoneLabel === "ICE" ? "ice" : zoneLabel === "Root" ? "root" : "central"
   };
 }

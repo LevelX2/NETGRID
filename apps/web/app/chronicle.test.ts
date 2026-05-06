@@ -153,6 +153,40 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("HQ");
   });
 
+  it("describes Corp advances as installations and developments without leaking hidden titles", () => {
+    const hidden = formatChronicleEvent(
+      makeEvent("advance_card", {
+        actor: "corp",
+        serverLabel: "Remote 2",
+        redactedKind: "installed_card",
+        title: "Simple Agenda"
+      }),
+      "runner",
+      {
+        cardTitle: "Simple Agenda",
+        cardType: "agenda"
+      }
+    );
+    const visibleAgenda = formatChronicleEvent(
+      makeEvent("advance_card", {
+        actor: "corp",
+        serverLabel: "Remote 2"
+      }),
+      "runner",
+      {
+        cardTitle: "Hostile Takeover",
+        cardType: "agenda"
+      }
+    );
+
+    expect(hidden.title).toBe("Die Corp hat eine Installation in Außenserver 2 ausgebaut.");
+    expect(hidden.visibility).toBe("redacted");
+    expect(hidden.chips).toEqual(["Corp", "+1 Entwicklung", "Außenserver 2", "Verdeckt"]);
+    expect(JSON.stringify(hidden)).not.toContain("Simple Agenda");
+    expect(visibleAgenda.title).toBe("Die Corp hat das Projekt Hostile Takeover weiterentwickelt.");
+    expect(visibleAgenda.chips).toContain("+1 Entwicklung");
+  });
+
   it("exposes action ordinal metadata only for entries that spent actions", () => {
     const paid = formatChronicleEvent(
       makeEvent("install_card", {
