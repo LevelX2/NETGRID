@@ -99,7 +99,7 @@ describe("deck validation and snapshots", () => {
     expect(buildEngineDeck(corp).cards.some((entry) => entry.id === "v08_project_agenda")).toBe(true);
   });
 
-  it("validates V1.0.5K O:NR decks through the runtime release gate when the local overlay is present", () => {
+  it("validates V1.0.6K O:NR decks through the runtime release gate when the local overlay is present", () => {
     const runtimeCardsById = createRuntimeCardsById();
     if (!runtimeCardsById["onr_v1_015_codeslinger"]) return;
 
@@ -107,8 +107,8 @@ describe("deck validation and snapshots", () => {
     const now = "2026-05-05T12:00:00.000Z";
     const runnerDeck: EditableDeck = {
       deckId: "local_onr_runner_v105k_validation",
-      deckVersion: "1.0.5k-local-onr",
-      name: "O:NR V1.0.5K Runner Validation",
+      deckVersion: "1.0.6k-local-onr",
+      name: "O:NR V1.0.6K Runner Validation",
       side: "runner",
       identityCardId: "runner_identity_001",
       cardPoolSnapshotId: "card-snapshot-0.8",
@@ -120,6 +120,12 @@ describe("deck validation and snapshots", () => {
         { cardId: "onr_v1_070_tinweasel", quantity: 2 },
         { cardId: "onr_v1_144_tycho-mem-chip", quantity: 1 },
         { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 },
+        { cardId: "onr_v1_095_jack-n-joe", quantity: 1 },
+        { cardId: "onr_v1_097_livewires-contacts", quantity: 1 },
+        { cardId: "onr_v1_108_score", quantity: 1 },
+        { cardId: "onr_v1_072_wild-card", quantity: 1 },
+        { cardId: "onr_v1_145_wutech-mem-chip", quantity: 1 },
         { cardId: "simple_economy_event", quantity: 2 }
       ],
       createdAt: now,
@@ -127,8 +133,8 @@ describe("deck validation and snapshots", () => {
     };
     const corpDeck: EditableDeck = {
       deckId: "local_onr_corp_v105k_validation",
-      deckVersion: "1.0.5k-local-onr",
-      name: "O:NR V1.0.5K Corp Validation",
+      deckVersion: "1.0.6k-local-onr",
+      name: "O:NR V1.0.6K Corp Validation",
       side: "corp",
       identityCardId: "corp_identity_001",
       cardPoolSnapshotId: "card-snapshot-0.8",
@@ -141,6 +147,20 @@ describe("deck validation and snapshots", () => {
         { cardId: "onr_v1_237_data-wall", quantity: 2 },
         { cardId: "onr_v1_238_data-wall-2-0", quantity: 2 },
         { cardId: "onr_v1_239_endless-corridor", quantity: 2 },
+        { cardId: "onr_v1_220_tycho-extension", quantity: 2 },
+        { cardId: "onr_v1_281_accounts-receivable", quantity: 1 },
+        { cardId: "onr_v1_282_annual-reviews", quantity: 1 },
+        { cardId: "onr_v1_285_closed-accounts", quantity: 1 },
+        { cardId: "onr_v1_287_datapool-by-zetatech", quantity: 1 },
+        { cardId: "onr_v1_288_day-shift", quantity: 1 },
+        { cardId: "onr_v1_290_efficiency-experts", quantity: 1 },
+        { cardId: "onr_v1_301_punitive-counterstrike", quantity: 1 },
+        { cardId: "onr_v1_302_scorched-earth", quantity: 1 },
+        { cardId: "onr_v1_307_urban-renewal", quantity: 1 },
+        { cardId: "onr_v1_244_filter", quantity: 1 },
+        { cardId: "onr_v1_245_fire-wall", quantity: 1 },
+        { cardId: "onr_v1_252_keeper", quantity: 1 },
+        { cardId: "onr_v1_256_mazer", quantity: 1 },
         { cardId: "simple_economy_operation", quantity: 2 }
       ],
       createdAt: now,
@@ -155,10 +175,10 @@ describe("deck validation and snapshots", () => {
     const oldOnrDeck: EditableDeck = {
       ...runnerDeck,
       deckId: "local_onr_runner_v105k_blocked_old_card",
-      cards: [...runnerDeck.cards, { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 }]
+      cards: [...runnerDeck.cards, { cardId: "onr_v1_006_black-dahlia", quantity: 1 }]
     };
     const blocked = validateEditableDeck(oldOnrDeck, contextV105K);
     expect(blocked.ok).toBe(false);
-    expect(blocked.errors.join(" ")).toContain("onr_v1_079_bodyweight-synthetic-blood");
+    expect(blocked.errors.join(" ")).toContain("onr_v1_006_black-dahlia");
   });
 });

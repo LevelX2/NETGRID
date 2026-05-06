@@ -12,6 +12,7 @@ import {
   CopyPlus,
   Download,
   Eye,
+  EyeOff,
   Image,
   Keyboard,
   Layers3,
@@ -94,6 +95,7 @@ import {
 } from "./match-start";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
+const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
 const SESSION_KEY = "netrunner-mvp-0-3-session";
 const RECENT_SESSIONS_KEY = "netrunner.recentSessions";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
@@ -106,7 +108,7 @@ const RunIcon = Shield;
 const RUNNER_BASE_HAND_LIMIT = 5;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
-const APP_STATUS_LABEL = "V1.0.6";
+const APP_STATUS_LABEL = "V1.0.7";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -402,9 +404,12 @@ type FocusedCard = {
 
 type AccessReveal = {
   eventId: string;
+  actorSide: Side;
+  viewerSide: Side;
   serverLabel: string;
   serverTitleLabel: string;
   serverLocationPhrase: string;
+  description: string;
   card: DisplayVisibleCard;
   actions: LegalAction[];
   trashStatus: string;
@@ -736,23 +741,27 @@ function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "
   target[key] = fallback;
 }
 
-function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[]): AccessReveal | null {
+function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side): AccessReveal | null {
   if (!event || event.publicPayload.actionType !== "access_card") return null;
   const cardId = payloadString(event.publicPayload, "cardDefinitionId");
   const title = payloadString(event.publicPayload, "title");
   if (!cardId || !title) return null;
+  const actorSide = payloadSide(event.publicPayload, "actor") ?? "runner";
   const detail = detailsById[cardId] ?? null;
   const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
   const serverLabel = serverDisplayLabel(payloadString(event.publicPayload, "serverLabel") ?? "einen Server");
   const actions = legalActions.filter((action) => ["steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
   return {
     eventId: event.eventId,
+    actorSide,
+    viewerSide,
     serverLabel,
     serverTitleLabel: accessServerTitleLabel(serverLabel),
     serverLocationPhrase: accessServerLocationPhrase(serverLabel),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
     card,
     actions,
-    trashStatus: accessTrashStatus(card, actions)
+    trashStatus: accessTrashStatus(card, actions, actorSide, viewerSide)
   };
 }
 
@@ -773,12 +782,35 @@ function payloadString(payload: Record<string, unknown>, key: string): string | 
   return typeof value === "string" && value.trim() ? value : null;
 }
 
-function accessTrashStatus(card: DisplayVisibleCard, actions: LegalAction[]): string {
+function payloadSide(payload: Record<string, unknown>, key: string): Side | null {
+  const value = payloadString(payload, key);
+  return value === "corp" || value === "runner" ? value : null;
+}
+
+function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string): string {
+  const location = accessServerLocationPhrase(serverLabel);
+  if (actorSide === viewerSide) return `Du hast auf eine Karte ${location} zugegriffen.`;
+  return `${accessActorSubject(actorSide)} hat auf eine Karte ${location} zugegriffen.`;
+}
+
+function accessActorSubject(side: Side): string {
+  return side === "corp" ? "Die Corp" : "Der Runner";
+}
+
+function accessTrashStatus(card: DisplayVisibleCard, actions: LegalAction[], actorSide: Side, viewerSide: Side): string {
+  if (actorSide !== viewerSide) return observedAccessStatus(card, actorSide);
   if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
   if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
   if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
+}
+
+function observedAccessStatus(card: DisplayVisibleCard, actorSide: Side): string {
+  const subject = accessActorSubject(actorSide);
+  if (card.type === "agenda") return `${subject} kann diese Agenda jetzt stehlen.`;
+  if ((card.type === "asset" || card.type === "upgrade") && typeof card.trashCost === "number") return `${subject} entscheidet jetzt, ob diese Karte getrasht oder liegen gelassen wird.`;
+  return `${subject} hat diese Karte gesehen; der Zugriff ist abgeschlossen.`;
 }
 
 function accessServerTitleLabel(serverLabel: string): string {
@@ -1067,16 +1099,18 @@ export default function Page() {
     }
     const parsed = JSON.parse(stored) as SessionInfo;
     setSession(parsed);
-    void bootstrap(parsed).then((bootstrapped) => {
-      if (bootstrapped && "playerView" in bootstrapped) {
-        setPayload(bootstrapped);
-        setLobby(null);
-      } else if (bootstrapped) {
-        setLobby(bootstrapped);
-        setPayload(null);
-      }
-      else setNotice("Session konnte nicht geladen werden.");
-    });
+    void bootstrap(parsed)
+      .then((bootstrapped) => {
+        if (bootstrapped && "playerView" in bootstrapped) {
+          setPayload(bootstrapped);
+          setLobby(null);
+        } else if (bootstrapped) {
+          setLobby(bootstrapped);
+          setPayload(null);
+        }
+        else setNotice("Session konnte nicht geladen werden.");
+      })
+      .catch((error) => setNotice(serverErrorNotice(error, "Session konnte nicht geladen werden.")));
   }, []);
 
   useEffect(() => {
@@ -1297,7 +1331,7 @@ export default function Page() {
       setSelectedActionContext((current) => (current?.kind === "card" && current.id === card.instanceId ? null : { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
     }
   };
-  const accessReveal = payload ? accessRevealFromLatestEvent(payload.eventTail.at(-1), catalogDetailsById, payload.legalActions) : null;
+  const accessReveal = payload ? accessRevealFromLatestEvent(payload.eventTail.at(-1), catalogDetailsById, payload.legalActions, payload.side) : null;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
@@ -1454,20 +1488,26 @@ export default function Page() {
       setNotice(error instanceof Error ? error.message : "Deckauswahl ist nicht matchstartfähig.");
       return;
     }
-    const created = await postJson<CreateMatchResponse>("/api/matches", {
-      ...matchStart.createRequest,
-      displayName,
-      seed,
-      runnerDifficulty,
-      corpDifficulty,
-      ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
-      ...(isHumanVsHuman ? { countdownSeconds } : {}),
-      settings: {
-        matchFormat,
-        ...(matchFormat === "single_game" ? {} : { agendaPointsToWin: 7 })
-      },
-      ...deckPayload
-    });
+    let created: CreateMatchResponse;
+    try {
+      created = await postJson<CreateMatchResponse>("/api/matches", {
+        ...matchStart.createRequest,
+        displayName,
+        seed,
+        runnerDifficulty,
+        corpDifficulty,
+        ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
+        ...(isHumanVsHuman ? { countdownSeconds } : {}),
+        settings: {
+          matchFormat,
+          ...(matchFormat === "single_game" ? {} : { agendaPointsToWin: 7 })
+        },
+        ...deckPayload
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Match konnte nicht erstellt werden."));
+      return;
+    }
     if (created.error) {
       setNotice(created.error.message);
       return;
@@ -1525,6 +1565,8 @@ export default function Page() {
       setLobby(null);
       setDismissedResultKey(null);
       setNotice(next.joinUrl ? "Nächstes Serienspiel erstellt. Teile den neuen Join-Link." : "Nächstes Serienspiel erstellt.");
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Nächstes Serienspiel konnte nicht erstellt werden."));
     } finally {
       setSeriesTransitioning(false);
     }
@@ -1539,14 +1581,20 @@ export default function Page() {
       setNotice(error instanceof Error ? error.message : "Deckauswahl ist nicht matchstartfähig.");
       return;
     }
-    const result = await postJson<{ summary: AiSimulationSummary }>("/api/simulations/ai-vs-ai", {
-      seed,
-      runnerDifficulty,
-      corpDifficulty,
-      ...deckPayload,
-      ...(effectiveAgendaTarget ? { agendaPointsToWin: effectiveAgendaTarget } : {}),
-      maxActions: 120
-    });
+    let result: { summary: AiSimulationSummary };
+    try {
+      result = await postJson<{ summary: AiSimulationSummary }>("/api/simulations/ai-vs-ai", {
+        seed,
+        runnerDifficulty,
+        corpDifficulty,
+        ...deckPayload,
+        ...(effectiveAgendaTarget ? { agendaPointsToWin: effectiveAgendaTarget } : {}),
+        maxActions: 120
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Simulation konnte nicht gestartet werden."));
+      return;
+    }
     setSimulation(result.summary);
     setNotice("Simulation abgeschlossen.");
   };
@@ -1635,11 +1683,17 @@ export default function Page() {
       setNotice(error instanceof Error ? error.message : "Deckauswahl ist nicht matchstartfähig.");
       return;
     }
-    const joined = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(joinMatchId)}/join`, {
-      token: joinToken,
-      displayName,
-      ...deckPayload
-    });
+    let joined: JoinMatchResponse;
+    try {
+      joined = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(joinMatchId)}/join`, {
+        token: joinToken,
+        displayName,
+        ...deckPayload
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Beitritt konnte nicht gestartet werden."));
+      return;
+    }
     if (joined.error) {
       setNotice(joined.error.message);
       return;
@@ -1668,11 +1722,17 @@ export default function Page() {
 
   const reconnect = async () => {
     if (!session || !canReconnect) return;
-    const reconnected = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/reconnect`, {
-      side: session.side,
-      reconnectToken: session.reconnectToken,
-      displayName: session.displayName
-    });
+    let reconnected: JoinMatchResponse;
+    try {
+      reconnected = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/reconnect`, {
+        side: session.side,
+        reconnectToken: session.reconnectToken,
+        displayName: session.displayName
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Wiederverbindung konnte nicht gestartet werden."));
+      return;
+    }
     if (reconnected.error) {
       setNotice(reconnected.error.message);
       return;
@@ -1728,7 +1788,13 @@ export default function Page() {
     setSession(nextSession);
     setRecentSession(null);
     setNotice("Letzte Sitzung wird fortgesetzt.");
-    const bootstrapped = await bootstrap(nextSession);
+    let bootstrapped: ClientPayload | LobbyClientPayload | null;
+    try {
+      bootstrapped = await bootstrap(nextSession);
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Letzte Sitzung konnte nicht geladen werden."));
+      return;
+    }
     if (bootstrapped && "playerView" in bootstrapped) {
       setPayload(bootstrapped);
       setLobby(null);
@@ -1759,9 +1825,9 @@ export default function Page() {
   };
 
   const submitAction = (action: LegalAction) => {
-    if (!session || !payload || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    if (!session || !payload || !ensureSocketConnected()) return;
     if (selectedActionContext && actionMatchesContext(action, selectedActionContext)) setSelectedActionContext(null);
-    socketRef.current.send(
+    socketRef.current?.send(
       JSON.stringify({
         type: "submit_action",
         payload: {
@@ -1776,21 +1842,27 @@ export default function Page() {
   };
 
   const setReady = (ready: boolean) => {
-    if (!session || socketRef.current?.readyState !== WebSocket.OPEN) return;
-    socketRef.current.send(JSON.stringify({ type: "set_ready", payload: { ready } }));
+    if (!session || !ensureSocketConnected()) return;
+    socketRef.current?.send(JSON.stringify({ type: "set_ready", payload: { ready } }));
   };
 
   const cancelCountdown = () => {
-    if (!session || socketRef.current?.readyState !== WebSocket.OPEN) return;
-    socketRef.current.send(JSON.stringify({ type: "cancel_countdown", payload: {} }));
+    if (!session || !ensureSocketConnected()) return;
+    socketRef.current?.send(JSON.stringify({ type: "cancel_countdown", payload: {} }));
   };
 
   const cancelMatchLifecycle = async () => {
     if (!session) return;
-    const result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/cancel`, {
-      side: session.side,
-      sessionToken: session.sessionToken
-    });
+    let result: LifecycleActionResponse;
+    try {
+      result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/cancel`, {
+        side: session.side,
+        sessionToken: session.sessionToken
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Match konnte nicht abgebrochen werden."));
+      return;
+    }
     if (!result.ok) {
       setNotice(result.error.message);
       return;
@@ -1804,10 +1876,16 @@ export default function Page() {
       leaveMatch();
       return;
     }
-    const result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/leave`, {
-      side: session.side,
-      sessionToken: session.sessionToken
-    });
+    let result: LifecycleActionResponse;
+    try {
+      result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/leave`, {
+        side: session.side,
+        sessionToken: session.sessionToken
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Lobby konnte nicht verlassen werden."));
+      return;
+    }
     if (!result.ok) {
       setNotice(result.error.message);
       return;
@@ -1825,10 +1903,16 @@ export default function Page() {
   const forfeitMatch = async () => {
     if (!session || !payload || payload.matchStatus !== "active" || payload.winner) return;
     if (!window.confirm("Möchtest Du dieses Spiel wirklich aufgeben?")) return;
-    const result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/forfeit`, {
-      side: session.side,
-      sessionToken: session.sessionToken
-    });
+    let result: LifecycleActionResponse;
+    try {
+      result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/forfeit`, {
+        side: session.side,
+        sessionToken: session.sessionToken
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Spiel konnte nicht aufgegeben werden."));
+      return;
+    }
     if (!result.ok) {
       setNotice(result.error.message);
       return;
@@ -1839,11 +1923,17 @@ export default function Page() {
 
   const recreateMatch = async () => {
     if (!session) return;
-    const recreated = await postJson<CreateMatchResponse | LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/recreate`, {
-      side: session.side,
-      sessionToken: session.sessionToken,
-      displayName: session.displayName
-    });
+    let recreated: CreateMatchResponse | LifecycleActionResponse;
+    try {
+      recreated = await postJson<CreateMatchResponse | LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/recreate`, {
+        side: session.side,
+        sessionToken: session.sessionToken,
+        displayName: session.displayName
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Match konnte nicht neu erstellt werden."));
+      return;
+    }
     if ("error" in recreated && recreated.error) {
       setNotice(recreated.error.message);
       return;
@@ -1888,16 +1978,16 @@ export default function Page() {
   };
 
   const sendLobbyChat = () => {
-    if (!session || socketRef.current?.readyState !== WebSocket.OPEN) return;
+    if (!session || !ensureSocketConnected()) return;
     const text = lobbyChatText.trim();
     if (!text) return;
-    socketRef.current.send(JSON.stringify({ type: "send_lobby_chat", payload: { text } }));
+    socketRef.current?.send(JSON.stringify({ type: "send_lobby_chat", payload: { text } }));
     setLobbyChatText("");
   };
 
   const advanceAi = (mode: "single_step" | "until_human" = "single_step") => {
-    if (!session || !payload || socketRef.current?.readyState !== WebSocket.OPEN || !payload.aiTurnPresentation?.canAdvanceAi) return;
-    socketRef.current.send(
+    if (!session || !payload || !ensureSocketConnected() || !payload.aiTurnPresentation?.canAdvanceAi) return;
+    socketRef.current?.send(
       JSON.stringify({
         type: "advance_ai",
         payload: {
@@ -1910,13 +2000,13 @@ export default function Page() {
   };
 
   const requestUndo = () => {
-    if (!latestEventId || !socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
-    socketRef.current.send(JSON.stringify({ type: "request_undo", payload: { targetEventId: latestEventId } }));
+    if (!latestEventId || !ensureSocketConnected()) return;
+    socketRef.current?.send(JSON.stringify({ type: "request_undo", payload: { targetEventId: latestEventId } }));
   };
 
   const resolveUndo = (accepted: boolean) => {
-    if (!payload?.pendingUndo || !socketRef.current || socketRef.current.readyState !== WebSocket.OPEN) return;
-    socketRef.current.send(
+    if (!payload?.pendingUndo || !ensureSocketConnected()) return;
+    socketRef.current?.send(
       JSON.stringify({
         type: accepted ? "accept_undo" : "decline_undo",
         payload: { undoRequestId: payload.pendingUndo.undoRequestId }
@@ -1937,6 +2027,12 @@ export default function Page() {
     setConnection("offline");
     setSeriesTransitioning(false);
     setNotice("");
+  };
+
+  const ensureSocketConnected = () => {
+    if (socketRef.current?.readyState === WebSocket.OPEN) return true;
+    setNotice("Serververbindung ist offline. Bitte prüfe, ob der lokale Multiplayer-Server läuft, und verbinde Dich erneut.");
+    return false;
   };
 
   const copyJoinLink = async () => {
@@ -2259,7 +2355,7 @@ export default function Page() {
           <Brand subtitle={`${APP_STATUS_LABEL} · private Matches`} />
           <ConnectionBadge text={statusText} state={connection} />
         </header>
-        <div className="setup v07Entry">
+        <div className="setup v07Entry" data-testid="setup-screen">
           <nav className="entryTabs" aria-label="Startbereiche">
             <button className={`entryTab ${entryTab === "play" ? "active" : ""}`} onClick={() => setEntryTab("play")} type="button" aria-current={entryTab === "play" ? "page" : undefined}>
               <Play size={16} />
@@ -2495,7 +2591,7 @@ export default function Page() {
                         ])
                   ]}
                 />
-                <button className="button primary wide" onClick={createMatch}>
+                <button className="button primary wide" onClick={createMatch} data-testid="create-match">
                   {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
                   {gameMode === "ai_vs_ai" ? "Simulation starten" : "Match erstellen"}
                 </button>
@@ -2539,7 +2635,7 @@ export default function Page() {
                     onLocalDeck={setSelectedParticipantBCorpLocalDeckId}
                   />
                 </div>
-                <button className="button primary wide" onClick={joinMatch} disabled={!joinMatchId || !joinToken}>
+                <button className="button primary wide" onClick={joinMatch} disabled={!joinMatchId || !joinToken} data-testid="join-match">
                   <Link2 size={16} />
                   Mit Decks beitreten
                 </button>
@@ -2664,7 +2760,7 @@ export default function Page() {
         onDismiss={() => setCurrentActionCue(null)}
       />
 
-      <div className="main">
+      <div className="main" data-testid="active-game">
         <aside className="column panel sidePanel">
           <OpponentPanel
             view={activeView}
@@ -2693,7 +2789,7 @@ export default function Page() {
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
         </aside>
 
-        <section className="board boardPanel">
+        <section className="board boardPanel" data-testid="active-board">
           <RunnerRigStrip
             view={activeView}
             cardDetailsById={catalogDetailsById}
@@ -2722,13 +2818,24 @@ export default function Page() {
                 <article
                   className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
                   key={server.id}
+                  data-testid="server"
+                  data-server-id={server.id}
                 >
                   <h3 className="serverTitle">
                     <button className="serverContextButton" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
                       {serverDisplayLabel(server.id)}
                     </button>
                     {runAction ? (
-                      <button className="serverRunButton" type="button" onClick={() => submitAction(runAction)} disabled={Boolean(payload.winner) || connection !== "online"} aria-label={`${actionButtonLabel(runAction)} starten`} title={actionButtonLabel(runAction)}>
+                      <button
+                        className="serverRunButton"
+                        type="button"
+                        onClick={() => submitAction(runAction)}
+                        disabled={Boolean(payload.winner) || connection !== "online"}
+                        aria-label={`${actionButtonLabel(runAction)} starten`}
+                        title={actionButtonLabel(runAction)}
+                        data-testid="server-run-action"
+                        data-server-id={server.id}
+                      >
                         <RunIcon size={13} />
                         <CostChips action={runAction} />
                       </button>
@@ -2739,7 +2846,6 @@ export default function Page() {
                     <div className="serverLaneGroup" key={lane.label}>
                       <div className="laneLabel">
                         <span>{lane.label}</span>
-                        {lane.kind === "ice" && lane.cards.length > 0 ? <span className="laneDirection">Außen → Server</span> : null}
                       </div>
                       <div className="lane">
                         {lane.cards.map((card, index) => {
@@ -2923,7 +3029,7 @@ function StartLobbyPanel({
     if (element) element.scrollTop = element.scrollHeight;
   }, [start?.chatMessages.length]);
   return (
-    <section className="startLobbyPanel">
+    <section className="startLobbyPanel" data-testid="start-lobby">
       <div className="startLobbyHeader">
         <div>
           <p className="eyebrow">{terminal ? "Terminaler Matchstatus" : "Startbereitschaftslobby"}</p>
@@ -2934,11 +3040,11 @@ function StartLobbyPanel({
           <span className={`statusPill ${connection}`}>{connection === "online" ? "online" : connection === "connecting" ? "verbindet" : "offline"}</span>
           {terminal ? (
             <>
-              <button className="button primary" onClick={onRecreate} type="button">
+              <button className="button primary" onClick={onRecreate} type="button" data-testid="recreate-match">
                 <CopyPlus size={15} />
                 Neu erstellen
               </button>
-              <button className="button subtle" onClick={onDiscardLocal} type="button">
+              <button className="button subtle" onClick={onDiscardLocal} type="button" data-testid="discard-local-session">
                 <Trash2 size={15} />
                 Verwerfen
               </button>
@@ -2953,7 +3059,7 @@ function StartLobbyPanel({
       </div>
       {joinUrl && lobby.pendingDeckHandshake ? (
         <div className="joinLinkRow">
-          <input value={joinUrl} readOnly aria-label="Join-Link" />
+          <input value={joinUrl} readOnly aria-label="Join-Link" data-testid="join-link" />
           <button className="button" onClick={onCopyJoinLink} type="button">
             <Clipboard size={15} />
             Join-Link kopieren
@@ -2978,7 +3084,7 @@ function StartLobbyPanel({
             <span>{opponentReady ? "Gegenüber ist bereit." : "Gegenüber ist noch nicht bereit."}</span>
           </div>
           <div className="lobbyActions">
-            <button className="button primary" onClick={() => onReady(!selfReady)} type="button" disabled={connection !== "online"}>
+            <button className="button primary" onClick={() => onReady(!selfReady)} type="button" disabled={connection !== "online"} data-testid="ready-toggle">
               <Check size={15} />
               {selfReady ? "Bereitschaft zurücknehmen" : "Ich bin bereit"}
             </button>
@@ -2988,7 +3094,7 @@ function StartLobbyPanel({
                 Countdown abbrechen
               </button>
             ) : null}
-            <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" disabled={connection !== "online"}>
+            <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" disabled={connection !== "online"} data-testid={isHost ? "cancel-match" : "leave-lobby"}>
               <X size={15} />
               {isHost ? "Match abbrechen" : "Lobby verlassen"}
             </button>
@@ -3025,7 +3131,7 @@ function StartLobbyPanel({
         <>
           <p className="muted">{lobby.pendingDeckHandshake?.message ?? "Die Lobby wird vorbereitet."}</p>
           <div className="lobbyActions">
-            <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button">
+            <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" data-testid={isHost ? "cancel-match" : "leave-lobby"}>
               <X size={15} />
               {isHost ? "Match abbrechen" : "Lobby verlassen"}
             </button>
@@ -3077,7 +3183,7 @@ function AccessRevealModal({
           <div>
             <p className="eyebrow">Zugriff</p>
             <h2 id="access-reveal-title">Zugriff auf {reveal.serverTitleLabel}</h2>
-            <p>Du hast auf eine Karte {reveal.serverLocationPhrase} zugegriffen.</p>
+            <p>{reveal.description}</p>
           </div>
           <button className="button iconOnly" onClick={onDismiss} aria-label="Fenster schließen" title="Schließen">
             <X size={16} />
@@ -3370,15 +3476,15 @@ function CardDisplaySettings({ mode, onChange, compact = false }: { mode: CardDi
 function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: CardDisplayMode; onChange(value: CardDisplayMode): void; iconOnly?: boolean }) {
   return (
     <div className={`segmented cardDisplaySelector ${iconOnly ? "iconOnlySelector" : ""}`} role="group" aria-label="Kartenanzeige">
-      <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus" aria-label="Bildmodus">
+      <button className={mode === "placeholder" ? "active" : ""} onClick={() => onChange("placeholder")} type="button" title="Bildmodus: Regeltext für bekannte Karten per Hover oder Fokus" aria-label="Bildmodus" data-testid="card-display-image">
         <Image size={15} />
         {!iconOnly ? "Bild" : <span className="srOnly">Bild</span>}
       </button>
-      <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Textmodus ohne große leere Bildfläche" aria-label="Textmodus">
+      <button className={mode === "text-card" ? "active" : ""} onClick={() => onChange("text-card")} type="button" title="Textmodus ohne große leere Bildfläche" aria-label="Textmodus" data-testid="card-display-text">
         <Keyboard size={15} />
         {!iconOnly ? "Text" : <span className="srOnly">Text</span>}
       </button>
-      <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompaktmodus mit Regeltext per Tooltip oder Fokus" aria-label="Kompaktmodus">
+      <button className={mode === "compact" ? "active" : ""} onClick={() => onChange("compact")} type="button" title="Kompaktmodus mit Regeltext per Tooltip oder Fokus" aria-label="Kompaktmodus" data-testid="card-display-compact">
         <ZoomIn size={15} />
         {!iconOnly ? "Kompakt" : <span className="srOnly">Kompakt</span>}
       </button>
@@ -3478,6 +3584,7 @@ function OpponentActionOverlay({
       className={`opponentCueOverlay ${cuePositionClassName(position)} importance-${cue.importance} visibility-${cue.visibility}`}
       style={cuePositionStyle(position)}
       aria-live="polite"
+      data-testid="opponent-cue"
     >
       <div className="opponentCueIcon" aria-hidden="true">
         {cue.source === "ai" ? <Bot size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
@@ -3543,7 +3650,7 @@ function AiPacingControls({
   if (!presentation) return null;
   const activeLabel = presentation.activeAiSide ? `${sideLabel(presentation.activeAiSide)}-KI ist am Zug` : "KI wartet";
   return (
-    <section className="section aiPacingPanel">
+    <section className="section aiPacingPanel" data-testid="ai-pacing">
       <div className="sectionTitleLine">
         <h2>KI-Takt</h2>
         <Bot size={16} />
@@ -3593,7 +3700,7 @@ function RunnerRigStrip({
     return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
   };
   return (
-    <section className="runnerRigStrip">
+    <section className="runnerRigStrip" data-testid="runner-rig">
       <div className="sectionTitleLine">
         <h2>Runner-Rig</h2>
         <RunIcon size={16} />
@@ -3648,7 +3755,7 @@ function RunTimeline({
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
   return (
-    <div className={`runTimeline ${view.run ? "active" : ""} ${highlighted ? "cueHighlight" : ""}`}>
+    <div className={`runTimeline ${view.run ? "active" : ""} ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline">
       <div className="runTimelineHead">
         <RunIcon size={18} />
         <span>{view.run ? `Run auf ${serverDisplayLabel(view.run.attackedServerId)}` : "Kein aktiver Run"}</span>
@@ -3703,14 +3810,14 @@ function LegalActionsPanel({
     return acc;
   }, {});
   return (
-    <section className={`section ${highlighted ? "cueHighlight" : ""}`}>
+    <section className={`section ${highlighted ? "cueHighlight" : ""}`} data-testid="legal-actions">
       <h2>Mögliche Aktionen</h2>
       <div className="actions">
         {Object.entries(grouped).map(([group, groupActions]) => (
           <div className="actionGroup" key={group}>
             <span>{group}</span>
             {groupActions.map((action) => (
-              <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled}>
+              <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
                 <Play size={15} />
                 <span className="actionButtonLabel">{actionButtonLabel(action)}</span>
                 <CostChips action={action} />
@@ -3727,7 +3834,7 @@ function LegalActionsPanel({
               </button>
             </div>
             {contextualActions.map((action) => (
-              <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled}>
+              <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
                 <Play size={15} />
                 <span className="actionButtonLabel">{actionButtonLabel(action)}</span>
                 <CostChips action={action} />
@@ -3748,7 +3855,7 @@ function CostChips({ action }: { action: LegalAction }) {
   const chips = actionCostChips(action);
   if (chips.length === 0) return null;
   return (
-    <span className="costChips" aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`}>
+    <span className="costChips" aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`} data-testid="cost-chips">
       {chips.map((chip) => (
         <span className={`costChip ${chip.kind}`} key={`${chip.kind}-${chip.amount}`}>
           <span className={chip.kind === "action" ? "costActionIcon" : "costCreditIcon"} aria-hidden="true" />
@@ -3811,7 +3918,7 @@ function CardPreviewPanel({
   hiddenSide?: Side;
 }) {
   return (
-    <section className="section cardPreviewPanel">
+    <section className="section cardPreviewPanel" data-testid="card-preview">
       <div className="previewTitleLine">
         <div>
           <h2>Vorschau</h2>
@@ -3860,7 +3967,7 @@ function ChroniclePanel({
     });
 
   return (
-    <section className={`section chroniclePanel ${collapsed ? "collapsed" : ""}`}>
+    <section className={`section chroniclePanel ${collapsed ? "collapsed" : ""}`} data-testid="chronicle">
       <div className="sectionTitleLine">
         <div>
           <h2>Spielchronik</h2>
@@ -4026,7 +4133,7 @@ function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; paylo
   if (!open) return null;
   const hash = payload.finalStateHash ?? payload.eventTail.at(-1)?.stateHashAfter ?? payload.playerView.publicEvents.at(-1)?.stateHashAfter ?? "pending";
   return (
-    <section className="section diagnosticsDrawer">
+    <section className="section diagnosticsDrawer" data-testid="diagnostics-drawer">
       <h2>Diagnostics</h2>
       <dl>
         <div>
@@ -4321,7 +4428,7 @@ function DeckMetadataLine({ entries }: { entries: Array<{ label: string; metadat
     <div className="deckMetadataLine">
       {visible.map((entry) => (
         <span key={entry.label}>
-          {entry.label}: {entry.metadata!.deckName} · {entry.metadata!.deckHash}
+          {entry.label}: {entry.metadata!.deckName}
         </span>
       ))}
     </div>
@@ -4844,7 +4951,7 @@ function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title:
       {view.deckMetadata ? (
         <div className="deckMini">
           <span>{view.deckMetadata.own.deckName}</span>
-          <small>{view.deckMetadata.own.deckHash}</small>
+          <small>Deck geprüft</small>
         </div>
       ) : null}
       <p className="meta statusLine">{view.activeSide === view.side ? "Aktiv" : "Wartet"} · {view.timingPoint}</p>
@@ -4855,7 +4962,7 @@ function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title:
 function ActionSlotMeter({ side, currentClicks, displayCapacity, active, compact = false }: { side: Side; currentClicks: number; displayCapacity: number; active: boolean; compact?: boolean }) {
   const display = actionSlotDisplay(side, currentClicks, displayCapacity, active);
   return (
-    <div className={`stat resourceStat actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`}>
+    <div className={`stat resourceStat actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
       <div className="resourceStatTop">
         <strong>{display.available}</strong>
         <span>Aktionen</span>
@@ -4871,7 +4978,7 @@ function ActionSlotMeter({ side, currentClicks, displayCapacity, active, compact
 
 function CreditBadge({ credits }: { credits: number }) {
   return (
-    <div className="stat resourceStat creditResource" aria-label={`${credits} Credits`}>
+    <div className="stat resourceStat creditResource" aria-label={`${credits} Credits`} data-testid="credit-badge">
       <div className="resourceStatTop">
         <span className="creditCoin" aria-hidden="true" />
         <strong>{credits}</strong>
@@ -4962,6 +5069,7 @@ function CardView({
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
   const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
+  const installedStateLabel = installedState === "unrezzed" ? "Ungerezzt" : installedState === "rezzed" ? "Gerezzt" : installedState === "hidden" ? "Verdeckt / ungerezzt" : null;
   const advancementCount = preview ? 0 : Math.max(0, Math.floor(card.advancementCounters ?? 0));
   const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
@@ -5008,10 +5116,13 @@ function CardView({
         aria-label={cardAriaLabel}
         aria-describedby={tooltipId}
         title={nativeTitle}
+        data-testid={card.known ? "known-card" : "hidden-card"}
+        data-known={card.known ? "true" : "false"}
       >
         {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
+        {installedState && installedStateLabel ? <InstalledStateMark state={installedState} label={installedStateLabel} /> : null}
         {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
         {showRulesPreview ? (
           <span className="cardRulesPreview">
@@ -5048,6 +5159,7 @@ function CardView({
           type="button"
           aria-label={showCardActions ? "Kartenaktionen einklappen" : "Kartenaktionen anzeigen"}
           aria-expanded={showCardActions}
+          data-testid="card-action-marker"
           onClick={() => {
             if (showCardActions) setSuppressCardTooltip(true);
             updateOverlayPlacement();
@@ -5072,7 +5184,7 @@ function CardActionsPopover({ actions, disabled, placement, onAction }: { action
   return (
     <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen">
       {actions.map((action) => (
-        <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem">
+        <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
           <Play size={14} />
           <span className="actionButtonLabel">{contextualCardActionLabel(action)}</span>
           <CostChips action={action} />
@@ -5094,9 +5206,18 @@ function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: num
   );
 }
 
+function InstalledStateMark({ state, label }: { state: "hidden" | "unrezzed" | "rezzed" | "known"; label: string }) {
+  if (state === "known") return null;
+  return (
+    <span className={`installedStateMark ${state}`} aria-label={label} title={label} data-testid="installed-state-mark">
+      {state === "rezzed" ? <span className="installedStateLetter" aria-hidden="true">R</span> : <EyeOff size={11} strokeWidth={2.4} aria-hidden="true" />}
+    </span>
+  );
+}
+
 function StrengthBoostBadge({ amount }: { amount: number }) {
   return (
-    <span className="strengthBoostBadge" aria-label={`+${amount} Stärke`}>
+    <span className="strengthBoostBadge" aria-label={`+${amount} Stärke`} data-testid="strength-boost-badge">
       +{amount} Stärke
     </span>
   );
@@ -5249,10 +5370,15 @@ function lobbyFromJoinedResponse(response: JoinMatchResponse): LobbyClientPayloa
 }
 
 async function bootstrap(session: SessionInfo): Promise<ClientPayload | LobbyClientPayload | null> {
-  const response = await fetch(`${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/bootstrap?side=${session.side}`, {
-    headers: { authorization: `Bearer ${session.sessionToken}` },
-    cache: "no-store"
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/bootstrap?side=${session.side}`, {
+      headers: { authorization: `Bearer ${session.sessionToken}` },
+      cache: "no-store"
+    });
+  } catch {
+    throw new ServerConnectionError();
+  }
   if (!response.ok) return null;
   return (await response.json()) as ClientPayload | LobbyClientPayload;
 }
@@ -5278,12 +5404,31 @@ function rememberDisplayName(name: string): void {
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {
-  const response = await fetch(`${SERVER_HTTP}${path}`, {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(body)
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_HTTP}${path}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body)
+    });
+  } catch {
+    throw new ServerConnectionError();
+  }
   return (await response.json()) as T;
+}
+
+class ServerConnectionError extends Error {
+  constructor() {
+    super(SERVER_UNREACHABLE_NOTICE);
+    this.name = "ServerConnectionError";
+  }
+}
+
+function serverErrorNotice(error: unknown, fallback: string): string {
+  if (error instanceof ServerConnectionError) return error.message;
+  if (error instanceof TypeError && /fetch|network|failed/i.test(error.message)) return SERVER_UNREACHABLE_NOTICE;
+  if (error instanceof Error && error.message) return error.message;
+  return fallback;
 }
 
 function seriesAudioOutcome(result: GameResultSummary): GameResultSummary["viewerOutcome"] {

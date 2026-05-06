@@ -6,11 +6,11 @@ V1.0.6K kleines Karten-Nachrelease nach V1.0.6 ist umgesetzt und lokal verifizie
 
 V1.0.5K kleines Karten-Nachrelease nach V1.0.5 ist umgesetzt und lokal verifiziert. Die finale Freigabe umfasst 12 lokal geprüfte O:NR-v1-Karten: Codeslinger, Raffles, Raptor, Tinweasel, Tycho Mem Chip, Zetatech Mem Chip, Hostile Takeover, Cortical Scanner, Crystal Wall, Data Wall, Data Wall 2.0 und Endless Corridor. Dogcatcher, Flak, Reflector, Shield, Corporate War und Political Overthrow bleiben wegen zusätzlicher Mechanikfamilien zurückgestellt.
 
-V1.0.7 Browser-E2E und Visual QA requirements freeze is complete and ready for implementation. V1.0.7 is a quality-infrastructure release for repeatable two-context browser smokes, viewport checks, screenshots/traces and DOM/Storage/Payload leak scans over the existing V1.x UI. It does not add cards, mechanics, official assets, Replay/StateHash changes or public platform features.
+V1.0.7 Browser-E2E und Visual QA is implemented and locally verified. The release adds a reproducible Playwright browser gate for repeatable two-context browser smokes, viewport checks, screenshots and DOM/Storage/Payload leak scans over the existing V1.x UI. It does not add cards, mechanics, official assets, Replay/StateHash changes or public platform features.
 
 V1.0.6 Aktionen, Credits und Kartenanzeige ist umgesetzt und lokal verifiziert. V1.0.5K kleines Karten-Nachrelease nach V1.0.5 ist umgesetzt und lokal verifiziert. V1.0.5 Action Board UX und Board-Klarheit ist im Workspace als passende UI-Basis vorhanden, aber ohne eigene formale Finalartefakte dokumentiert. V1.0.4 Private Match Lifecycle und Session Recovery ist umgesetzt und lokal verifiziert. V1.0.3 Matchstart-UX ist umgesetzt und lokal verifiziert. V1.0.2 Gegner-Aktionsdarstellung und Ablauftransparenz ist umgesetzt und lokal verifiziert. V1.0.1 Deckbibliothek und Join-Deck-Handshake ist lokal umgesetzt und verifiziert.
 
-V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. V1.0.4 adds terminal private-match lifecycle commands, Session Recovery hardening, Recreate and side-safe opponent names. V1.0.5 Action Board UX and Board-Klarheit has frozen requirements and a suitable implemented UI baseline in the workspace, but no dedicated V1.0.5 implementation/final review artifacts. V1.0.5K is locally verified as a narrow card-release insert. V1.0.6 is implemented as a UI clarity release for action slots, generic credit visuals, cost chips and compact card-display modes, without Engine, card, Replay or StateHash expansion. V1.0.7 is frozen as a Browser-E2E/Visual-QA quality gate. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
+V0.99 Counter/Hosting/Virus/Purge/Recurring-Credits/Bad-Publicity implementation, validation and documentation are complete. S01 result modal, game-goal selection, private two-game side-swap series and opt-in audio are complete. V1.0 stabilizes Deck Editor, Matchstart, personal series deck pairs, KI deck policy and private local O:NR smokes. V1.0.1 makes saved local decks the normal Matchstart/Join flow and adds the Human-vs-Human Join-Deck-Handshake. V1.0.2 adds side-safe live opponent action cues, AI pacing, board highlights and opt-in action audio as a presentation/orchestration release. V1.0.3 separates Matchstart choices and adds the private Human-vs-Human start readiness lobby. V1.0.4 adds terminal private-match lifecycle commands, Session Recovery hardening, Recreate and side-safe opponent names. V1.0.5 Action Board UX and Board-Klarheit has frozen requirements and a suitable implemented UI baseline in the workspace, but no dedicated V1.0.5 implementation/final review artifacts. V1.0.5K is locally verified as a narrow card-release insert. V1.0.6 is implemented as a UI clarity release for action slots, generic credit visuals, cost chips and compact card-display modes, without Engine, card, Replay or StateHash expansion. V1.0.7 is implemented as a Browser-E2E/Visual-QA quality gate. The planned V0.94 to V0.99 mechanics sequence is implemented in narrow, gate-oriented slices. M11+ mechanics remain unimplemented until their own gates.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
 Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
@@ -56,11 +56,13 @@ Latest V1.0.7 requirements artifact: `docs/derived/V1_0_7_REQUIREMENTS.md`.
 Latest V1.0.7 browser E2E/Visual QA spec artifact: `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`.
 Latest V1.0.7 test matrix artifact: `docs/derived/V1_0_7_TEST_MATRIX.md`.
 Latest V1.0.7 requirements review artifact: `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`.
+Latest V1.0.7 implementation review artifact: `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md`.
+Latest V1.0.7 final review artifact: `docs/derived/V1_0_7_FINAL_REVIEW.md`.
 Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.0.7 Browser-E2E und Visual QA is requirements-frozen and ready for implementation. The scope converts the existing V1.0.4/V1.0.5/V1.0.6 browser smoke runbooks into a reproducible local browser gate with two-context Human-vs-Human coverage, Human-vs-KI pacing/cue coverage, lifecycle/reconnect flows, desktop/tablet/narrow viewport checks, screenshots/traces and DOM/Storage/Payload leak scans. V1.0.7 includes current active-game UI adjustments such as direct server run actions, breaker-bound contextual actions and strength boost badges as QA targets only. V1.0.6 is complete. V1.0.5K is complete as a narrow card-release insert. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA. V1.0.4 Private Match Lifecycle and Session Recovery is implemented from `V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md` and `V1_0_4_REQUIREMENTS.md`: terminal statuses, Joiner-Leave semantics, Forfeit result modeling, Recreate, Session-Recovery, opponent display names, REST-vs-WebSocket transport, Human-vs-KI Forfeit and repeatable two-tab smoke expectations are covered. `V1_0_4_NEXT_RELEASE_CANDIDATES.md` remains the candidate/history document. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
+Current selected next scope: V1.0.7 Browser-E2E und Visual QA is complete and locally verified. The scope converts the existing V1.0.4/V1.0.5/V1.0.6 browser smoke runbooks into a reproducible local browser gate with two-context Human-vs-Human coverage, Human-vs-KI pacing/cue coverage, lifecycle/reconnect flows, desktop/tablet/narrow viewport checks, screenshots/traces and DOM/Storage/Payload leak scans. V1.0.7 includes current active-game UI adjustments such as direct server run actions, breaker-bound contextual actions and strength boost badges as QA targets only. V1.0.6 is complete. V1.0.5K is complete as a narrow card-release insert. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA. V1.0.4 Private Match Lifecycle and Session Recovery is implemented from `V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md` and `V1_0_4_REQUIREMENTS.md`: terminal statuses, Joiner-Leave semantics, Forfeit result modeling, Recreate, Session-Recovery, opponent display names, REST-vs-WebSocket transport, Human-vs-KI Forfeit and repeatable two-tab smoke expectations are covered. `V1_0_4_NEXT_RELEASE_CANDIDATES.md` remains the candidate/history document. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
 
 ## Status
 
@@ -364,6 +366,26 @@ V1.0.7 Browser-E2E und Visual QA requirements freeze is complete. The scope intr
 `V1_0_7_requirements_freeze_done: true`
 
 `ready_for_V1_0_7_implementation: true`
+
+V1.0.7 Browser-E2E und Visual QA implementation is complete and locally verified. The gate command is `corepack pnpm e2e` or `corepack pnpm test:e2e`. It starts Web and Server on dynamic local ports, uses isolated `NETRUNNER_MATCH_STORAGE_PATH` runtime data, runs Playwright Chromium against Desktop 1280x720, Tablet 1024x768 and Schmal 390x844, and covers Human-vs-KI, Human-vs-Human, Lifecycle/Reconnect, active Board/Run/Card Display views and DOM/Storage/Payload leak scans.
+
+`V1_0_7_implemented: true`
+
+`V1_0_7_verified: true`
+
+`V1_0_7_done: true`
+
+V1.0.7 verification:
+
+- `corepack pnpm e2e`: pass, 7/7 Playwright tests.
+- `corepack pnpm --filter @netrunner/web test`: pass, 27 tests.
+- `corepack pnpm --filter @netrunner/server test`: pass, 34 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 13 tests.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass.
+- `corepack pnpm build`: pass, known Turbopack NFT warning remains.
+- `git diff --check`: pass, CRLF working-copy warnings only.
 
 `long_term_product_vision_2026_05_05_available: true`
 
@@ -1966,18 +1988,15 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V1.0.5: Action Board UX und Board-Klarheit has a suitable implemented UI baseline in the workspace, but no dedicated formal final artifacts.
 - V1.0.5K: kleines Karten-Nachrelease, implementation complete and locally verified.
 - V1.0.6: Aktionen, Credits und Kartenanzeige, implementation complete and locally verified.
-- V1.0.7: Browser-E2E und Visual QA, requirements freeze complete and ready for implementation.
+- V1.0.7: Browser-E2E und Visual QA, implementation complete and locally verified.
 
-Current gate: V1.0.7 Browser-E2E und Visual QA requirements freeze is complete and ready for implementation. V1.0.7 planning, requirements, spec, test matrix and requirements review are documented in `docs/derived/V1_0_7_BROWSER_E2E_VISUAL_QA_PLAN.md`, `docs/derived/V1_0_7_REQUIREMENTS.md`, `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`, `docs/derived/V1_0_7_TEST_MATRIX.md` and `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`. V1.0.6 Aktionen, Credits und Kartenanzeige is complete and documented in `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_6_FINAL_REVIEW.md`. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. V1.0.5K is complete as a separate narrow card-release insert. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0.7 Browser-E2E und Visual QA is complete and locally verified. V1.0.7 planning, requirements, spec, test matrix, requirements review, implementation review and final review are documented in `docs/derived/V1_0_7_BROWSER_E2E_VISUAL_QA_PLAN.md`, `docs/derived/V1_0_7_REQUIREMENTS.md`, `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`, `docs/derived/V1_0_7_TEST_MATRIX.md`, `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_7_FINAL_REVIEW.md`. V1.0.6 Aktionen, Credits und Kartenanzeige is complete and documented in `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_6_FINAL_REVIEW.md`. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. V1.0.5K is complete as a separate narrow card-release insert. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
 Next scope decision:
 
-1. Implement V1.0.7 Browser-E2E und Visual QA from the frozen requirements.
-2. Use Playwright or an equivalent browser automation path with isolated runtime data, two browser contexts and desktop/tablet/narrow viewports.
-3. Treat direct server run actions, breaker-bound contextual actions and strength boost badges as QA targets only, not V1.0.7 feature expansion.
-4. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
-5. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
-6. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
+1. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
+2. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
+3. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 
 M11+ mechanics, Prevention/Avoid/Interrupt/Replacement, Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates.
 
@@ -2017,6 +2036,8 @@ Detailed planning artifacts available:
 - `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`
 - `docs/derived/V1_0_7_TEST_MATRIX.md`
 - `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`
+- `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/V1_0_7_FINAL_REVIEW.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`

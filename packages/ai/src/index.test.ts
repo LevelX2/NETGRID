@@ -265,6 +265,29 @@ describe("MVP 0.3 Runner AI", () => {
     expect(normal.actionId).toBe(run.actionId);
   });
 
+  it("backs off from a visibly blocked rezzed ICE run when setup alternatives exist", () => {
+    let state = toRunnerTurn(createGame({ seed: "ai-runner-rezzed-ice-loop" }));
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    state.corp.credits = 5;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const blockedRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(blockedRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!blockedRun || !gain) throw new Error("Missing fixture actions");
+
+    const decision = chooseRunnerAction({ ...input, legalActions: [blockedRun, gain] });
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.economy.basic_credit");
+  });
+
   it("prioritizes removing public tags when legal", () => {
     const state = toRunnerTurn(createGame({ seed: "ai-remove-tag" }));
     state.runner.tags = 1;

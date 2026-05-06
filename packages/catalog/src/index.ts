@@ -149,7 +149,33 @@ export const ONR_V1_0_5K_RELEASE_CARD_IDS = [
   "onr_v1_239_endless-corridor"
 ] as const;
 
-const ONR_V1_0_5K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_5K_RELEASE_CARD_IDS);
+export const ONR_V1_0_6K_RELEASE_CARD_IDS = [
+  "onr_v1_079_bodyweight-synthetic-blood",
+  "onr_v1_095_jack-n-joe",
+  "onr_v1_097_livewires-contacts",
+  "onr_v1_108_score",
+  "onr_v1_072_wild-card",
+  "onr_v1_145_wutech-mem-chip",
+  "onr_v1_220_tycho-extension",
+  "onr_v1_281_accounts-receivable",
+  "onr_v1_282_annual-reviews",
+  "onr_v1_285_closed-accounts",
+  "onr_v1_287_datapool-by-zetatech",
+  "onr_v1_288_day-shift",
+  "onr_v1_290_efficiency-experts",
+  "onr_v1_301_punitive-counterstrike",
+  "onr_v1_302_scorched-earth",
+  "onr_v1_307_urban-renewal",
+  "onr_v1_244_filter",
+  "onr_v1_245_fire-wall",
+  "onr_v1_252_keeper",
+  "onr_v1_256_mazer"
+] as const;
+
+export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [...ONR_V1_0_5K_RELEASE_CARD_IDS, ...ONR_V1_0_6K_RELEASE_CARD_IDS] as const;
+
+const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
+const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -158,6 +184,15 @@ const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["packages/engine/src/index.test.ts::V1.0.5K Card Release"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.0.5K Card Release", "apps/server/src/multiplayer.test.ts::private local O:NR V1.0.5K matches"],
   replayTests: ["packages/engine/src/index.test.ts::V1.0.5K Card Release"]
+};
+
+const ONR_V1_0_6K_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.0.6k",
+  status: "playable_mvp_v1_0_6k",
+  unitTests: ["packages/engine/src/index.test.ts::V1.0.6K Card Release"],
+  scenarioTests: ["packages/engine/src/index.test.ts::V1.0.6K Card Release"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.0.6K Card Release", "apps/server/src/multiplayer.test.ts::private local O:NR V1.0.6K matches"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.0.6K Card Release"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -175,6 +210,27 @@ const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
   "onr_v1_239_endless-corridor": { rezCost: 4, strength: 2 }
 };
 
+const ONR_V1_0_6K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_079_bodyweight-synthetic-blood": { cost: 2, installCost: null },
+  "onr_v1_095_jack-n-joe": { cost: 0, installCost: null },
+  "onr_v1_097_livewires-contacts": { cost: 0, installCost: null },
+  "onr_v1_108_score": { cost: 5, installCost: null },
+  "onr_v1_220_tycho-extension": { advancementRequirement: 4, agendaPoints: 4 },
+  "onr_v1_281_accounts-receivable": { cost: 5, installCost: null },
+  "onr_v1_282_annual-reviews": { cost: 0, installCost: null },
+  "onr_v1_285_closed-accounts": { cost: 1, installCost: null },
+  "onr_v1_287_datapool-by-zetatech": { cost: 1, installCost: null },
+  "onr_v1_288_day-shift": { cost: 0, installCost: null },
+  "onr_v1_290_efficiency-experts": { cost: 0, installCost: null },
+  "onr_v1_301_punitive-counterstrike": { cost: 0, installCost: null },
+  "onr_v1_302_scorched-earth": { cost: 3, installCost: null },
+  "onr_v1_307_urban-renewal": { cost: 6, installCost: null },
+  "onr_v1_244_filter": { rezCost: 0, strength: 0 },
+  "onr_v1_245_fire-wall": { rezCost: 5, strength: 4 },
+  "onr_v1_252_keeper": { rezCost: 4, strength: 4 },
+  "onr_v1_256_mazer": { rezCost: 5, strength: 5 }
+};
+
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
   "onr_v1_052_raffles": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
@@ -188,6 +244,29 @@ const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_237_data-wall": "[Subroutine] End the run.",
   "onr_v1_238_data-wall-2-0": "[Subroutine] End the run.",
   "onr_v1_239_endless-corridor": "[Subroutine] End the run.\n[Subroutine] End the run."
+};
+
+const ONR_V1_0_6K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_079_bodyweight-synthetic-blood": "Draw five cards.",
+  "onr_v1_095_jack-n-joe": "Draw three cards.",
+  "onr_v1_097_livewires-contacts": "Gain 3.",
+  "onr_v1_108_score": "Gain 9.",
+  "onr_v1_072_wild-card": "0 credits: Break sentry subroutine.\n3 credits: +1 strength.",
+  "onr_v1_145_wutech-mem-chip": "Provides +1 MU.",
+  "onr_v1_220_tycho-extension": "No additional Regeltext.",
+  "onr_v1_281_accounts-receivable": "Gain 9.",
+  "onr_v1_282_annual-reviews": "Draw three cards.",
+  "onr_v1_285_closed-accounts": "Play only if Runner is tagged. Runner loses all bits.",
+  "onr_v1_287_datapool-by-zetatech": "Play only if Runner is tagged. Give Runner two tags.",
+  "onr_v1_288_day-shift": "Draw two cards and gain 1.",
+  "onr_v1_290_efficiency-experts": "Gain 3.",
+  "onr_v1_301_punitive-counterstrike": "Play only if Runner is tagged. Do 2 meat damage.",
+  "onr_v1_302_scorched-earth": "Play only if Runner is tagged. Do 4 meat damage.",
+  "onr_v1_307_urban-renewal": "Play only if Runner is tagged. Do 5 meat damage.",
+  "onr_v1_244_filter": "[Subroutine] End the run.",
+  "onr_v1_245_fire-wall": "[Subroutine] End the run.",
+  "onr_v1_252_keeper": "[Subroutine] End the run.",
+  "onr_v1_256_mazer": "[Subroutine] End the run."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -494,16 +573,20 @@ function normalizeConfirmedRulesText(text: string): string {
 }
 
 function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
-  return cards.map((card) => (ONR_V1_0_5K_RELEASE_CARD_ID_SET.has(card.catalogCardId) ? promoteOnrV105KCard(card) : demoteLocalOnrCard(card)));
+  return cards.map((card) => (ONR_V1_RUNTIME_RELEASE_CARD_ID_SET.has(card.catalogCardId) ? promoteOnrRuntimeReleaseCard(card) : demoteLocalOnrCard(card)));
 }
 
-function promoteOnrV105KCard(card: CatalogCard): CatalogCard {
+function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const textOverrides = isV106K ? ONR_V1_0_6K_TEXT_OVERRIDES : ONR_V1_0_5K_TEXT_OVERRIDES;
+  const numericOverrides = isV106K ? ONR_V1_0_6K_NUMERIC_OVERRIDES : ONR_V1_0_5K_NUMERIC_OVERRIDES;
+  const manifest = isV106K ? ONR_V1_0_6K_RELEASE_MANIFEST : ONR_V1_0_5K_RELEASE_MANIFEST;
   return {
     ...card,
     engineCardId: card.catalogCardId,
     subtypes: [...card.subtypes],
-    text: ONR_V1_0_5K_TEXT_OVERRIDES[card.catalogCardId] ?? card.text,
-    numeric: { ...card.numeric, ...(ONR_V1_0_5K_NUMERIC_OVERRIDES[card.catalogCardId] ?? {}) },
+    text: textOverrides[card.catalogCardId] ?? card.text,
+    numeric: { ...card.numeric, ...(numericOverrides[card.catalogCardId] ?? {}) },
     statuses: {
       ...card.statuses,
       imported: true,
@@ -515,7 +598,7 @@ function promoteOnrV105KCard(card: CatalogCard): CatalogCard {
       blocked: false
     },
     blockReasons: [],
-    implementationManifest: cloneManifestReference(ONR_V1_0_5K_RELEASE_MANIFEST)
+    implementationManifest: cloneManifestReference(manifest)
   };
 }
 

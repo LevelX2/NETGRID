@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.0.6k",
+  "id": "v1.0.6k-card-release-manifest",
+  "status": "implemented_for_v1.0.6k_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.0.5k.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "additionalPlayableCardCountIs20": true,
+    "previousV105KCardsRemainPlayable": true,
+    "allPlayableCardsHaveResolver": true,
+    "allPlayableCardsHaveUnitScenarioVisibilityReplayAndMultiplayerCoverage": true,
+    "privateLocalDataNotVersioned": true,
+    "noOfficialCardsOrAssets": true,
+    "noExternalCardDatabaseDependency": true,
+    "importDoesNotGrantPlayability": true,
+    "nonReleaseLocalOnrCardsRemainRuntimeDeckIllegal": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_079_bodyweight-synthetic-blood",
+      "title": "Bodyweight™ Synthetic Blood",
+      "status": "playable_mvp",
+      "resolver": "runner_event_draw_5",
+      "roleTags": ["runner", "event", "draw"]
+    },
+    {
+      "cardCode": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "status": "playable_mvp",
+      "resolver": "runner_event_draw_3",
+      "roleTags": ["runner", "event", "draw"]
+    },
+    {
+      "cardCode": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "status": "playable_mvp",
+      "resolver": "runner_event_gain_credits_3",
+      "roleTags": ["runner", "event", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_108_score",
+      "title": "Score!",
+      "status": "playable_mvp",
+      "resolver": "runner_event_gain_credits_9",
+      "roleTags": ["runner", "event", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_072_wild-card",
+      "title": "Wild Card",
+      "status": "playable_mvp",
+      "resolver": "runner_icebreaker_pump_break_sentry",
+      "roleTags": ["runner", "program", "icebreaker", "sentry_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_145_wutech-mem-chip",
+      "title": "WuTech Mem Chip",
+      "status": "playable_mvp",
+      "resolver": "runner_install_memory_chip_bonus_mu",
+      "roleTags": ["runner", "hardware", "chip", "memory"]
+    },
+    {
+      "cardCode": "onr_v1_220_tycho-extension",
+      "title": "Tycho Extension",
+      "status": "playable_mvp",
+      "resolver": "corp_score_agenda_no_extra_ability",
+      "roleTags": ["corp", "agenda", "score"]
+    },
+    {
+      "cardCode": "onr_v1_281_accounts-receivable",
+      "title": "Accounts Receivable",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_gain_credits_9",
+      "roleTags": ["corp", "operation", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_282_annual-reviews",
+      "title": "Annual Reviews",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_draw_3",
+      "roleTags": ["corp", "operation", "draw"]
+    },
+    {
+      "cardCode": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_runner_tagged_lose_all_credits",
+      "roleTags": ["corp", "operation", "tagged_runner_punishment"]
+    },
+    {
+      "cardCode": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool® by Zetatech",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_runner_tagged_add_two_tags",
+      "roleTags": ["corp", "operation", "tagged_runner_punishment"]
+    },
+    {
+      "cardCode": "onr_v1_288_day-shift",
+      "title": "Day Shift",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_draw_2_gain_1",
+      "roleTags": ["corp", "operation", "draw", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_290_efficiency-experts",
+      "title": "Efficiency Experts",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_gain_credits_3",
+      "roleTags": ["corp", "operation", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_runner_tagged_meat_damage_2",
+      "roleTags": ["corp", "operation", "tagged_runner_punishment", "damage"]
+    },
+    {
+      "cardCode": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_runner_tagged_meat_damage_4",
+      "roleTags": ["corp", "operation", "tagged_runner_punishment", "damage"]
+    },
+    {
+      "cardCode": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_runner_tagged_meat_damage_5",
+      "roleTags": ["corp", "operation", "tagged_runner_punishment", "damage"]
+    },
+    {
+      "cardCode": "onr_v1_244_filter",
+      "title": "Filter",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_code_gate_end_the_run",
+      "roleTags": ["corp", "ice", "code_gate", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_245_fire-wall",
+      "title": "Fire Wall",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_wall_end_the_run",
+      "roleTags": ["corp", "ice", "wall", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_252_keeper",
+      "title": "Keeper",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_code_gate_end_the_run",
+      "roleTags": ["corp", "ice", "code_gate", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_256_mazer",
+      "title": "Mazer",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_code_gate_end_the_run",
+      "roleTags": ["corp", "ice", "code_gate", "end_the_run"]
+    }
+  ],
+  "coverage": {
+    "unitTests": ["packages/engine/src/index.test.ts::V1.0.6K Card Release"],
+    "scenarioTests": ["data/scenarios/v106k-card-release-smoke.json"],
+    "visibilityTests": [
+      "packages/engine/src/index.test.ts::V1.0.6K Card Release",
+      "apps/server/src/multiplayer.test.ts::private local O:NR matches"
+    ],
+    "replayTests": ["packages/engine/src/index.test.ts::V1.0.6K Card Release"],
+    "deckTests": ["packages/decks/src/index.test.ts::V1.0.6K O:NR decks"],
+    "catalogTests": ["packages/catalog/src/index.test.ts::V1.0.5K and V1.0.6K release gates"]
+  }
+}

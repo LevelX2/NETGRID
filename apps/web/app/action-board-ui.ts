@@ -153,7 +153,7 @@ export function actionButtonLabel(action: LegalAction): string {
 export function contextualCardActionLabel(action: LegalAction): string {
   switch (action.type) {
     case "install_card":
-      return "Installieren";
+      return installContextLabel(action);
     case "play_event":
       return playEventContextLabel(action);
     case "play_operation":
@@ -178,6 +178,15 @@ export function contextualCardActionLabel(action: LegalAction): string {
     default:
       return actionButtonLabel(action);
   }
+}
+
+function installContextLabel(action: LegalAction): string {
+  const serverId = typeof action.payload?.serverId === "string" ? action.payload.serverId : null;
+  if (!serverId) return "Installieren";
+  const serverLabel = serverDisplayLabel(serverId);
+  if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
+  if (action.payload?.placement === "root") return `In ${serverLabel}`;
+  return `Installieren: ${serverLabel}`;
 }
 
 function playEventContextLabel(action: LegalAction): string {

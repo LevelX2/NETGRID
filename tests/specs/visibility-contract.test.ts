@@ -60,7 +60,7 @@ describe("Client visibility contract", () => {
   it("keeps the V1.0.5 matchstart lobby and lifecycle recovery explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.6"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.7"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
@@ -196,7 +196,9 @@ describe("Client visibility contract", () => {
     expect(page).toContain("visibleCardFromCatalogDetail");
     expect(page).toContain("function AccessRevealModal");
     expect(page).toContain("accessRevealFromLatestEvent");
-    expect(page).toContain("Du hast auf eine Karte in");
+    expect(page).toContain("accessRevealDescription");
+    expect(page).toContain("observedAccessStatus");
+    expect(page).toContain("{reveal.description}");
     expect(page).not.toContain("chronicleEntry ${item.category}");
     expect(page).not.toContain("<h2>EventLog</h2>");
     expect(page).not.toContain("function EventLogPanel");
@@ -251,7 +253,7 @@ describe("Client visibility contract", () => {
     expect(page).toContain("enrichVisibleCard");
     expect(page).toContain("card.known && card.definitionId");
     expect(page).toContain("nearestTooltipBoundary");
-    expect(page).toContain('setTooltipPlacement(spaceBelow < 118');
+    expect(page).toContain("const nextTooltipPlacement = spaceBelow < 118");
     expect(page).toContain('rulesText: "1 Credit: +1 Stärke.');
     expect(page).toContain('title={nativeTitle}');
     expect(page).toContain("hasRulesText");

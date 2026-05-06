@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v106k-card-release-smoke",
+  "title": "V1.0.6K local O:NR card release adds 20 confirmed cards",
+  "release": "V1.0.6K",
+  "status": "implemented",
+  "extends": "data/scenarios/v105k-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_079_bodyweight-synthetic-blood",
+    "onr_v1_095_jack-n-joe",
+    "onr_v1_097_livewires-contacts",
+    "onr_v1_108_score",
+    "onr_v1_072_wild-card",
+    "onr_v1_145_wutech-mem-chip",
+    "onr_v1_220_tycho-extension",
+    "onr_v1_281_accounts-receivable",
+    "onr_v1_282_annual-reviews",
+    "onr_v1_285_closed-accounts",
+    "onr_v1_287_datapool-by-zetatech",
+    "onr_v1_288_day-shift",
+    "onr_v1_290_efficiency-experts",
+    "onr_v1_301_punitive-counterstrike",
+    "onr_v1_302_scorched-earth",
+    "onr_v1_307_urban-renewal",
+    "onr_v1_244_filter",
+    "onr_v1_245_fire-wall",
+    "onr_v1_252_keeper",
+    "onr_v1_256_mazer"
+  ],
+  "preconditions": [
+    "The private local O:NR v1 overlay exists under data/local.",
+    "The previous V1.0.5K 12-card release remains active.",
+    "Non-release O:NR cards remain not deck_legal in the runtime catalog."
+  ],
+  "steps": [
+    "Apply the runtime release gate and promote the 20 V1.0.6K cards to implemented, playable and deck_legal.",
+    "Validate V1.0.6K Runner and Corp smoke decks through the deck validator.",
+    "Play Runner draw and economy cards, install WuTech Mem Chip and Wild Card, and use Wild Card through the existing sentry-breaker rules.",
+    "Play Corp economy, draw, tagged-runner punishment and meat-damage operations.",
+    "Rez Filter, Fire Wall, Keeper and Mazer and verify unrezzed ICE remains hidden until rez."
+  ],
+  "expected": [
+    "V1.0.6K adds exactly 20 further local O:NR cards.",
+    "Runtime catalog contains 32 local O:NR release cards total, including the previous 12 from V1.0.5K.",
+    "Deck validation and private match setup accept the new cards.",
+    "Visibility, replay and StateHash contracts remain covered by the existing engine and server tests.",
+    "Private local text and image artifacts remain ignored and are not versioned."
+  ]
+}

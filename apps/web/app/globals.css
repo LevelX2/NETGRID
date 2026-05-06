@@ -1849,13 +1849,6 @@ select {
   margin: 8px 0 4px;
 }
 
-.laneDirection {
-  color: color-mix(in srgb, var(--runner), var(--muted) 45%);
-  font-size: 11px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
@@ -1930,6 +1923,45 @@ select {
 .card.selectedActionSource {
   outline: 2px solid color-mix(in srgb, var(--runner), white 18%);
   outline-offset: 2px;
+}
+
+.installedStateMark {
+  position: absolute;
+  right: -7px;
+  top: 50%;
+  z-index: 55;
+  width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 26%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel), transparent 16%);
+  color: color-mix(in srgb, var(--text), var(--muted) 28%);
+  box-shadow:
+    0 2px 8px rgb(0 0 0 / 0.34),
+    inset 0 0 0 1px rgb(255 255 255 / 0.07);
+  transform: translateY(-50%);
+  pointer-events: auto;
+}
+
+.installedStateMark.hidden,
+.installedStateMark.unrezzed {
+  border-color: color-mix(in srgb, var(--cue), var(--line) 35%);
+  background: color-mix(in srgb, var(--panel), var(--cue-soft) 32%);
+  color: color-mix(in srgb, var(--muted), var(--text) 18%);
+}
+
+.installedStateMark.rezzed {
+  border-color: color-mix(in srgb, var(--runner), white 22%);
+  background: color-mix(in srgb, var(--runner), var(--panel) 56%);
+  color: var(--text);
+}
+
+.installedStateLetter {
+  font-size: 11px;
+  font-weight: 950;
+  line-height: 1;
 }
 
 .cardActionMarker {
@@ -3665,6 +3697,10 @@ select,
 }
 
 @media (max-width: 1180px) {
+  .main {
+    grid-template-columns: 1fr;
+  }
+
   .boardHeader {
     grid-template-columns: 1fr;
     display: grid;
@@ -3785,6 +3821,21 @@ select,
 
   .opponentCueControls {
     grid-column: 1 / -1;
+  }
+
+  .cardTooltip {
+    left: 50%;
+    width: min(220px, calc(100vw - 32px));
+    transform: translate(-50%, -3px);
+  }
+
+  .cardTooltip.above {
+    transform: translate(-50%, 3px);
+  }
+
+  .card:hover .cardTooltip,
+  .card:focus .cardTooltip {
+    transform: translate(-50%, 0);
   }
 
   .opponentCueIcon {

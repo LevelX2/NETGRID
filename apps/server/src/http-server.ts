@@ -618,7 +618,9 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
 }
 
 function defaultService(): MultiplayerService {
-  const storagePath = resolve(dirname(fileURLToPath(import.meta.url)), "../../../data/runtime/multiplayer/matches.json");
+  const storagePath = process.env.NETRUNNER_MATCH_STORAGE_PATH
+    ? resolve(process.env.NETRUNNER_MATCH_STORAGE_PATH)
+    : resolve(dirname(fileURLToPath(import.meta.url)), "../../../data/runtime/multiplayer/matches.json");
   return new MultiplayerService(new JsonFileMatchStorage(storagePath));
 }
 

@@ -950,6 +950,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       actions.push(action(state, "corp", "play_operation", `${definition.title} spielen`, id, [{ clicks: 1, credits: definition.cost ?? 0 }], { cardId: id }));
     }
     if (definition.type === "ice") {
+      actions.push(action(state, "corp", "install_card", `ICE vor neuem Remote installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: "new_remote", placement: "ice" }));
       for (const server of state.corp.servers) {
         actions.push(action(state, "corp", "install_card", `ICE vor ${server.label} installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: server.id, placement: "ice" }));
       }
@@ -1273,7 +1274,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   removeFromAllZones(state, cardId);
   const placement = legalAction.payload?.placement;
   if (placement === "ice") {
-    const server = mustServer(state, String(legalAction.payload?.serverId));
+    const server = legalAction.payload?.serverId === "new_remote" ? createRemote(state) : mustServer(state, String(legalAction.payload?.serverId));
     server.ice.unshift(cardId);
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "serverIce", serverId: server.id } };
     return;
@@ -1303,8 +1304,7 @@ function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, p
   if (server.ice.length > 0) {
     const approachedIceId = mustArrayValue(server.ice, 0, "Server has no approached ice.");
     state.run.approachedIceId = approachedIceId;
-    state.timingPoint = "run.approach_ice";
-    state.activeSide = "corp";
+    approachOrEncounterIce(state, approachedIceId);
   } else {
     enterAccess(state);
   }
@@ -1342,6 +1342,26 @@ function passApproachedIce(state: GameState): void {
     return;
   }
   movePastCurrentIce(state);
+}
+
+function approachOrEncounterIce(state: GameState, approachedIceId: CardInstanceId): void {
+  const run = mustRun(state);
+  const ice = mustInstance(state.cardInstances, approachedIceId);
+  run.approachedIceId = approachedIceId;
+  if (ice.rezzed) {
+    run.phase = "encounter_ice";
+    run.encounteredIceId = approachedIceId;
+    run.brokenSubroutineIndexes = [];
+    run.resolvedSubroutineIndexes = [];
+    state.timingPoint = "run.encounter_ice";
+    state.activeSide = "runner";
+    return;
+  }
+  const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
+  void _encounteredIceId;
+  state.run = { ...runWithoutEncounter, phase: "approach_ice", approachedIceId };
+  state.timingPoint = "run.approach_ice";
+  state.activeSide = "corp";
 }
 
 function continueRun(state: GameState, legalAction?: LegalAction): void {
@@ -1494,8 +1514,7 @@ function movePastCurrentIce(state: GameState): void {
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: []
     };
-    state.timingPoint = "run.approach_ice";
-    state.activeSide = "corp";
+    approachOrEncounterIce(state, approachedIceId);
     return;
   }
   if (isV097OrLater(state)) {
@@ -1513,9 +1532,10 @@ function movePastCurrentIce(state: GameState): void {
 function continueFromMovement(state: GameState): void {
   const run = mustRun(state);
   if (run.position.kind === "ice") {
-    state.run = { ...run, phase: "approach_ice" };
-    state.timingPoint = "run.approach_ice";
-    state.activeSide = "corp";
+    const server = mustServer(state, run.position.serverId);
+    const approachedIceId = run.approachedIceId ?? mustArrayValue(server.ice, run.position.iceIndex, "Naechstes ICE fehlt.");
+    state.run = { ...run, phase: "approach_ice", approachedIceId };
+    approachOrEncounterIce(state, approachedIceId);
     return;
   }
   enterAccess(state);

@@ -96,6 +96,26 @@ describe("MVP 0.1 turns and cards", () => {
     });
     expect(state.corp.archives.map((id) => state.cardInstances[id]?.definitionId)).toContain("simple_economy_operation");
   });
+
+  it("lets the Corp create a new remote by installing ICE", () => {
+    let state = createGame({ seed: "corp-ice-new-remote" });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const iceId = moveCorpCardToHq(state, "simple_barrier_ice");
+
+    const install = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.source === iceId && action.payload?.serverId === "new_remote" && action.payload?.placement === "ice"
+    );
+    expect(install.label).toBe("ICE vor neuem Remote installieren");
+
+    state = apply(state, "corp", (action) => action.actionId === install.actionId);
+    const remote = state.corp.servers.find((server) => server.kind === "remote" && server.ice.includes(iceId));
+
+    expect(remote).toBeDefined();
+    expect(remote?.root).toEqual([]);
+    expect(state.cardInstances[iceId]?.zone).toMatchObject({ side: "corp", zone: "serverIce", serverId: remote?.id });
+  });
 });
 
 describe("MVP 0.1 runs, access and scoring", () => {
@@ -179,6 +199,25 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(state.run).toBeUndefined();
     expect(agendaPoints(state, "runner")).toBe(0);
     expect(state.corp.rd.map((id) => state.cardInstances[id]?.definitionId)).toContain("simple_agenda");
+  });
+
+  it("skips the Corp rez window when a later run approaches already rezzed ICE", () => {
+    let state = toRunnerTurn(createGame({ seed: "rezzed-ice-repeat-run" }));
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    state.corp.credits = 5;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.run).toBeUndefined();
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expect(state.activeSide).toBe("runner");
+    expect(getLegalActions(state, "corp").map((action) => action.type)).not.toContain("decline_rez");
+    expect(getLegalActions(state, "runner").map((action) => action.type)).toContain("continue_run");
   });
 
   it("lets the Corp score the third Simple Agenda and win at six agenda points", () => {
@@ -696,6 +735,168 @@ describe("V1.0.5K Card Release", () => {
     expect(JSON.stringify(getPlayerView(state, "runner"))).toContain("Data Wall 2.0");
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "rez_ice", cardDefinitionId: "onr_v1_238_data-wall-2-0", title: "Data Wall 2.0" });
+  });
+});
+
+describe("V1.0.6K Card Release", () => {
+  it("adds exactly 20 further O:NR cards backed by existing engine definitions", () => {
+    expect(ONR_V1_0_6K_FINAL_CARD_IDS).toHaveLength(20);
+    for (const definitionId of ONR_V1_0_6K_FINAL_CARD_IDS) {
+      expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).toBe("playable_mvp");
+    }
+
+    expect(DEMO_CARDS_BY_ID["onr_v1_072_wild-card"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_145_wutech-mem-chip"]).toMatchObject({ installCost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_220_tycho-extension"]).toMatchObject({ advancementRequirement: 4, agendaPoints: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_244_filter"]).toMatchObject({ rezCost: 0, strength: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_245_fire-wall"]).toMatchObject({ rezCost: 5, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_252_keeper"]).toMatchObject({ rezCost: 4, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_256_mazer"]).toMatchObject({ rezCost: 5, strength: 5 });
+  });
+
+  it("validates V1.0.6K smoke decks and keeps the previous V1.0.5K cards available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_0_6K_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_0_6K_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v106kCardReleaseGame("v106k-validation");
+
+    expect(runnerValidation.errors).toEqual([]);
+    expect(runnerValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
+    expect(DEMO_CARDS_BY_ID["onr_v1_203_hostile-takeover"]).toBeDefined();
+  });
+
+  it("plays V1.0.6K Runner economy/draw cards, installs WuTech and uses Wild Card", () => {
+    let state = toRunnerTurn(v106kCardReleaseGame("v106k-runner-cards"));
+    state.runner.credits = 40;
+    state.runner.clicks = 12;
+    moveRunnerCardToGrip(state, "onr_v1_079_bodyweight-synthetic-blood");
+    moveRunnerCardToGrip(state, "onr_v1_095_jack-n-joe");
+    moveRunnerCardToGrip(state, "onr_v1_097_livewires-contacts");
+    moveRunnerCardToGrip(state, "onr_v1_108_score");
+    moveRunnerCardToGrip(state, "onr_v1_145_wutech-mem-chip");
+    moveRunnerCardToGrip(state, "onr_v1_072_wild-card");
+
+    const beforeBodyweightGrip = state.runner.grip.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_079_bodyweight-synthetic-blood");
+    expect(state.runner.grip.length).toBe(beforeBodyweightGrip + 4);
+
+    const beforeJackGrip = state.runner.grip.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_095_jack-n-joe");
+    expect(state.runner.grip.length).toBe(beforeJackGrip + 2);
+
+    const beforeContactsCredits = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_097_livewires-contacts");
+    expect(state.runner.credits).toBe(beforeContactsCredits + 3);
+
+    const beforeScoreCredits = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_108_score");
+    expect(state.runner.credits).toBe(beforeScoreCredits + 4);
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_145_wutech-mem-chip");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_072_wild-card");
+    expect(state.runner.memoryLimit).toBe(5);
+    expect(state.runner.rig.programs.map((id) => state.cardInstances[id]?.definitionId)).toContain("onr_v1_072_wild-card");
+
+    let sentryRun = toRunnerTurn(v106kCardReleaseGame("v106k-wild-card-sentry"));
+    sentryRun.runner.credits = 20;
+    installRunnerProgramForTest(sentryRun, "onr_v1_072_wild-card");
+    putCorpIceOnServer(sentryRun, "rd", "simple_sentry_ice");
+    putCorpCardOnTopOfRd(sentryRun, "simple_economy_operation");
+    sentryRun.corp.credits = 20;
+
+    sentryRun = apply(sentryRun, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    sentryRun = apply(sentryRun, "corp", (action) => action.type === "rez_ice" && sourceDefinition(sentryRun, action) === "simple_sentry_ice");
+    sentryRun = apply(sentryRun, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card");
+    sentryRun = apply(sentryRun, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card");
+    sentryRun = apply(sentryRun, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card");
+    sentryRun = apply(sentryRun, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card");
+    sentryRun = apply(sentryRun, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card");
+    sentryRun = apply(sentryRun, "runner", (action) => action.type === "continue_run");
+    sentryRun = apply(sentryRun, "runner", (action) => action.type === "access_card");
+    expect(sentryRun.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation" });
+  });
+
+  it("plays V1.0.6K Corp economy, tagged and damage operations", () => {
+    let state = createGame({ seed: "v106k-corp-operations", runnerDeck: ONR_V1_0_6K_RUNNER_DECK, corpDeck: ONR_V1_0_6K_CORP_DECK, agendaPointsToWin: 7 });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 40;
+    state.corp.clicks = 20;
+    state.runner.tags = 1;
+    state.runner.credits = 9;
+    moveCorpCardToHq(state, "onr_v1_281_accounts-receivable");
+    moveCorpCardToHq(state, "onr_v1_282_annual-reviews");
+    moveCorpCardToHq(state, "onr_v1_288_day-shift");
+    moveCorpCardToHq(state, "onr_v1_290_efficiency-experts");
+    moveCorpCardToHq(state, "onr_v1_285_closed-accounts");
+    moveCorpCardToHq(state, "onr_v1_287_datapool-by-zetatech");
+
+    const beforeAccounts = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_281_accounts-receivable");
+    expect(state.corp.credits).toBe(beforeAccounts + 4);
+
+    const beforeReviewsHq = state.corp.hq.length;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_282_annual-reviews");
+    expect(state.corp.hq.length).toBe(beforeReviewsHq + 2);
+
+    const beforeDayShiftHq = state.corp.hq.length;
+    const beforeDayShiftCredits = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_288_day-shift");
+    expect(state.corp.hq.length).toBe(beforeDayShiftHq + 1);
+    expect(state.corp.credits).toBe(beforeDayShiftCredits + 1);
+
+    const beforeEfficiency = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_290_efficiency-experts");
+    expect(state.corp.credits).toBe(beforeEfficiency + 3);
+
+    const beforeDatapoolTags = state.runner.tags;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_287_datapool-by-zetatech");
+    expect(state.runner.tags).toBe(beforeDatapoolTags + 2);
+
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_285_closed-accounts");
+    expect(state.runner.credits).toBe(0);
+
+    for (const [definitionId, amount] of [
+      ["onr_v1_301_punitive-counterstrike", 2],
+      ["onr_v1_302_scorched-earth", 4],
+      ["onr_v1_307_urban-renewal", 5]
+    ] as const) {
+      let damageState = createGame({ seed: `v106k-${definitionId}`, runnerDeck: ONR_V1_0_6K_RUNNER_DECK, corpDeck: ONR_V1_0_6K_CORP_DECK, agendaPointsToWin: 7 });
+      damageState = apply(damageState, "corp", (action) => action.type === "mandatory_draw");
+      damageState.corp.credits = 40;
+      damageState.runner.tags = 1;
+      moveCorpCardToHq(damageState, definitionId);
+      damageState = apply(damageState, "corp", (action) => action.type === "play_operation" && sourceDefinition(damageState, action) === definitionId);
+      expect(damageState.runner.heap.length).toBe(amount);
+      expect(damageState.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "play_operation",
+        cardDefinitionId: definitionId,
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: amount,
+        cardsTrashed: amount,
+        flatline: false
+      });
+    }
+  });
+
+  it("rezzes V1.0.6K simple ICE and keeps unrezzed titles hidden", () => {
+    for (const definitionId of ["onr_v1_244_filter", "onr_v1_245_fire-wall", "onr_v1_252_keeper", "onr_v1_256_mazer"] as const) {
+      let state = toRunnerTurn(v106kCardReleaseGame(`v106k-ice-${definitionId}`));
+      putCorpIceOnServer(state, "rd", definitionId);
+      state.corp.credits = 20;
+
+      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(DEMO_CARDS_BY_ID[definitionId]?.title);
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === definitionId);
+
+      expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(DEMO_CARDS_BY_ID[definitionId]?.title);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      expect(state.run).toBeUndefined();
+    }
   });
 });
 
@@ -1776,6 +1977,29 @@ const ONR_V1_0_5K_FINAL_CARD_IDS = [
   "onr_v1_239_endless-corridor"
 ] as const;
 
+const ONR_V1_0_6K_FINAL_CARD_IDS = [
+  "onr_v1_079_bodyweight-synthetic-blood",
+  "onr_v1_095_jack-n-joe",
+  "onr_v1_097_livewires-contacts",
+  "onr_v1_108_score",
+  "onr_v1_072_wild-card",
+  "onr_v1_145_wutech-mem-chip",
+  "onr_v1_220_tycho-extension",
+  "onr_v1_281_accounts-receivable",
+  "onr_v1_282_annual-reviews",
+  "onr_v1_285_closed-accounts",
+  "onr_v1_287_datapool-by-zetatech",
+  "onr_v1_288_day-shift",
+  "onr_v1_290_efficiency-experts",
+  "onr_v1_301_punitive-counterstrike",
+  "onr_v1_302_scorched-earth",
+  "onr_v1_307_urban-renewal",
+  "onr_v1_244_filter",
+  "onr_v1_245_fire-wall",
+  "onr_v1_252_keeper",
+  "onr_v1_256_mazer"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -1806,6 +2030,52 @@ const ONR_V1_0_5K_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_238_data-wall-2-0", quantity: 2 },
     { id: "onr_v1_239_endless-corridor", quantity: 2 },
     { id: "simple_economy_operation", quantity: 2 }
+  ]
+};
+
+const ONR_V1_0_6K_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v106k_smoke_094",
+  name: "O:NR V1.0.6K Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_079_bodyweight-synthetic-blood", quantity: 2 },
+    { id: "onr_v1_095_jack-n-joe", quantity: 2 },
+    { id: "onr_v1_097_livewires-contacts", quantity: 2 },
+    { id: "onr_v1_108_score", quantity: 2 },
+    { id: "onr_v1_072_wild-card", quantity: 2 },
+    { id: "onr_v1_145_wutech-mem-chip", quantity: 2 },
+    { id: "onr_v1_015_codeslinger", quantity: 1 },
+    { id: "onr_v1_070_tinweasel", quantity: 1 },
+    { id: "simple_economy_event", quantity: 8 }
+  ]
+};
+
+const ONR_V1_0_6K_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v106k_smoke_094",
+  name: "O:NR V1.0.6K Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_281_accounts-receivable", quantity: 1 },
+    { id: "onr_v1_282_annual-reviews", quantity: 1 },
+    { id: "onr_v1_285_closed-accounts", quantity: 1 },
+    { id: "onr_v1_287_datapool-by-zetatech", quantity: 1 },
+    { id: "onr_v1_288_day-shift", quantity: 1 },
+    { id: "onr_v1_290_efficiency-experts", quantity: 1 },
+    { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
+    { id: "onr_v1_302_scorched-earth", quantity: 1 },
+    { id: "onr_v1_307_urban-renewal", quantity: 1 },
+    { id: "onr_v1_244_filter", quantity: 1 },
+    { id: "onr_v1_245_fire-wall", quantity: 1 },
+    { id: "onr_v1_252_keeper", quantity: 1 },
+    { id: "onr_v1_256_mazer", quantity: 1 },
+    { id: "onr_v1_230_cortical-scanner", quantity: 1 },
+    { id: "onr_v1_232_crystal-wall", quantity: 1 },
+    { id: "simple_sentry_ice", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 1 }
   ]
 };
 
@@ -1956,6 +2226,15 @@ function v105kCardReleaseGame(seed: string): GameState {
     seed,
     runnerDeck: ONR_V1_0_5K_RUNNER_DECK,
     corpDeck: ONR_V1_0_5K_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v106kCardReleaseGame(seed: string): GameState {
+  return createGame({
+    seed,
+    runnerDeck: ONR_V1_0_6K_RUNNER_DECK,
+    corpDeck: ONR_V1_0_6K_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

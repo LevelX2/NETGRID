@@ -10,6 +10,8 @@ import {
   createRuntimeCardsById,
   getCatalogCard,
   ONR_V1_0_5K_RELEASE_CARD_IDS,
+  ONR_V1_0_6K_RELEASE_CARD_IDS,
+  ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateSnapshot,
   type CardSnapshot
@@ -98,19 +100,23 @@ describe("catalog import and status logic", () => {
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 
-  it("applies the V1.0.5K release gate to private local O:NR runtime cards when present", () => {
+  it("applies the V1.0.5K and V1.0.6K release gates to private local O:NR runtime cards when present", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
 
     expect(ONR_V1_0_5K_RELEASE_CARD_IDS).toHaveLength(12);
-    for (const cardId of ONR_V1_0_5K_RELEASE_CARD_IDS) {
+    expect(ONR_V1_0_6K_RELEASE_CARD_IDS).toHaveLength(20);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(32);
+    for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
       expect(card?.engineCardId).toBe(cardId);
       expect(card?.statuses.implemented).toBe(true);
       expect(card?.statuses.playable).toBe(true);
       expect(card?.statuses.deck_legal).toBe(true);
-      expect(card?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.0.5k");
+      expect(card?.implementationManifest?.manifestVersion).toBe(
+        (ONR_V1_0_6K_RELEASE_CARD_IDS as readonly string[]).includes(cardId) ? "card-implementation-manifest-v1.0.6k" : "card-implementation-manifest-v1.0.5k"
+      );
       expect(card?.implementationManifest?.unitTests.length).toBeGreaterThan(0);
       expect(card?.implementationManifest?.scenarioTests.length).toBeGreaterThan(0);
       expect(card?.implementationManifest?.visibilityTests.length).toBeGreaterThan(0);
@@ -124,11 +130,19 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_015_codeslinger"]?.text).toBe("0 credits: Break sentry subroutine.");
     expect(cardsById["onr_v1_146_zetatech-mem-chip"]?.numeric.installCost).toBe(3);
     expect(cardsById["onr_v1_146_zetatech-mem-chip"]?.text).toBe("Provides +2 MU.");
+    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.numeric.cost).toBe(2);
+    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.numeric.installCost).toBeNull();
+    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.text).toBe("Draw five cards.");
+    expect(cardsById["onr_v1_072_wild-card"]?.text).toBe("0 credits: Break sentry subroutine.\n3 credits: +1 strength.");
+    expect(cardsById["onr_v1_145_wutech-mem-chip"]?.text).toBe("Provides +1 MU.");
+    expect(cardsById["onr_v1_220_tycho-extension"]?.numeric.agendaPoints).toBe(4);
+    expect(cardsById["onr_v1_244_filter"]?.numeric.rezCost).toBe(0);
+    expect(cardsById["onr_v1_256_mazer"]?.numeric.strength).toBe(5);
     expect(cardsById["onr_v1_075_zetatech-software-installer"]?.text).toBe(
       "Put 2 bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overlying Software Installer itself. If you use any of these bits, replace them at the start of your next turn."
     );
     expect(cardsById["onr_v1_001_afreet"]?.text).toContain("Afreet can have up to 3 MU");
-    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal).toBe(false);
-    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.engineCardId).toBeNull();
+    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(false);
+    expect(cardsById["onr_v1_006_black-dahlia"]?.engineCardId).toBeNull();
   });
 });

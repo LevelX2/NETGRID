@@ -8,6 +8,8 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "e2e": "node scripts/run-e2e.mjs",
+    "test:e2e": "node scripts/run-e2e.mjs",
     "lint": "corepack pnpm -r --if-present lint",
     "typecheck": "corepack pnpm -r --if-present typecheck",
     "test": "corepack pnpm -r --if-present test && vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts --passWithNoTests",
@@ -15,6 +17,7 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@playwright/test": "1.59.1",
     "@types/node": "24.12.2",
     "prettier": "3.8.3",
     "typescript": "6.0.3",

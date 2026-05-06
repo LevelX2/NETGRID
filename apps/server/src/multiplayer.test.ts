@@ -47,7 +47,8 @@ describe("MVP 0.2 multiplayer service", () => {
   it("starts private local O:NR matches from the shared runtime card pool when the overlay is present", async () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
-    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal).toBe(false);
+    expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal).toBe(true);
+    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(false);
 
     const profile = (profilesData08.profiles as DeckFormatProfile[]).find((candidate) => candidate.profileId === "local-demo-v0.8");
     if (!profile) throw new Error("Missing V0.8 deck format profile");
@@ -68,6 +69,12 @@ describe("MVP 0.2 multiplayer service", () => {
         { cardId: "onr_v1_070_tinweasel", quantity: 2 },
         { cardId: "onr_v1_144_tycho-mem-chip", quantity: 1 },
         { cardId: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+        { cardId: "onr_v1_079_bodyweight-synthetic-blood", quantity: 1 },
+        { cardId: "onr_v1_095_jack-n-joe", quantity: 1 },
+        { cardId: "onr_v1_097_livewires-contacts", quantity: 1 },
+        { cardId: "onr_v1_108_score", quantity: 1 },
+        { cardId: "onr_v1_072_wild-card", quantity: 1 },
+        { cardId: "onr_v1_145_wutech-mem-chip", quantity: 1 },
         { cardId: "simple_economy_event", quantity: 2 }
       ],
       createdAt: now,
@@ -89,6 +96,20 @@ describe("MVP 0.2 multiplayer service", () => {
         { cardId: "onr_v1_237_data-wall", quantity: 2 },
         { cardId: "onr_v1_238_data-wall-2-0", quantity: 2 },
         { cardId: "onr_v1_239_endless-corridor", quantity: 2 },
+        { cardId: "onr_v1_220_tycho-extension", quantity: 2 },
+        { cardId: "onr_v1_281_accounts-receivable", quantity: 1 },
+        { cardId: "onr_v1_282_annual-reviews", quantity: 1 },
+        { cardId: "onr_v1_285_closed-accounts", quantity: 1 },
+        { cardId: "onr_v1_287_datapool-by-zetatech", quantity: 1 },
+        { cardId: "onr_v1_288_day-shift", quantity: 1 },
+        { cardId: "onr_v1_290_efficiency-experts", quantity: 1 },
+        { cardId: "onr_v1_301_punitive-counterstrike", quantity: 1 },
+        { cardId: "onr_v1_302_scorched-earth", quantity: 1 },
+        { cardId: "onr_v1_307_urban-renewal", quantity: 1 },
+        { cardId: "onr_v1_244_filter", quantity: 1 },
+        { cardId: "onr_v1_245_fire-wall", quantity: 1 },
+        { cardId: "onr_v1_252_keeper", quantity: 1 },
+        { cardId: "onr_v1_256_mazer", quantity: 1 },
         { cardId: "simple_economy_operation", quantity: 2 }
       ],
       createdAt: now,

@@ -40,6 +40,7 @@ type AiFeatures = {
   handRoles: Set<string>;
   eventCounts: Record<string, number>;
   knownServerPressure: number;
+  blockedRunServers: Set<string>;
 };
 
 export type AiObservedFacts = {
@@ -573,8 +574,11 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       break;
     case "start_run":
       score = scoreRunTarget(action, features, profile, input.difficulty);
-      reasonCode = "runner.run.visible_pressure";
-      explanation = "Der Serverdruck ist anhand sichtbarer Lage vertretbar.";
+      reasonCode = features.blockedRunServers.has(String(action.payload?.serverId ?? "")) ? "runner.run.blocked_by_rezzed_ice" : "runner.run.visible_pressure";
+      explanation =
+        reasonCode === "runner.run.blocked_by_rezzed_ice"
+          ? "Ein bereits gerezztes ICE stoppt diesen Server sichtbar; Setup oder Wirtschaft ist gerade wertvoller."
+          : "Der Serverdruck ist anhand sichtbarer Lage vertretbar.";
       evidence.push(`server:${String(action.payload?.serverId ?? "unknown")}`, `known_pressure:${features.knownServerPressure}`);
       break;
     case "gain_credit":
@@ -709,6 +713,11 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
   const handRoles = new Set(input.playerView.own.gripOrHq.flatMap((card) => rolesForCardId(card.definitionId)));
   const eventCounts = buildObservedFacts(input).eventCounts;
   const knownServerPressure = input.playerView.servers.reduce((sum, server) => sum + server.ice.filter((card) => card.known || card.rezzed).length + server.root.filter((card) => card.known).length, 0);
+  const blockedRunServers = new Set(
+    input.playerView.servers
+      .filter((server) => isBlockedByKnownRezzedIce(server.ice[0], rigRoles))
+      .map((server) => server.id)
+  );
   return {
     side: input.side,
     credits: input.playerView.own.credits,
@@ -721,7 +730,8 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
     rigRoles,
     handRoles: new Set([...handRoles, ...ownCards.flatMap((card) => rolesForCardId(card.definitionId)).filter((role) => role === "tag_punishment")]),
     eventCounts,
-    knownServerPressure
+    knownServerPressure,
+    blockedRunServers
   };
 }
 
@@ -784,9 +794,26 @@ function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Reco
   let score = difficulty === "easy" ? 330 : 560 + (profile.run ?? 1) * 55;
   if (serverId.startsWith("remote_")) score += 60;
   if (serverId === "rd") score += 45;
+  if (features.blockedRunServers.has(serverId)) score -= 430;
   if (features.credits < 3) score -= 140;
   if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
   return score;
+}
+
+function isBlockedByKnownRezzedIce(ice: { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[] } | undefined, rigRoles: Set<string>): boolean {
+  if (!ice?.definitionId || !ice.known || ice.rezzed !== true) return false;
+  const roles = rolesForCardId(ice.definitionId);
+  if (!roles.includes("etr_ice")) return false;
+  const breakerRole = breakerRoleForIce(roles, ice.subtypes ?? []);
+  return breakerRole ? !rigRoles.has(breakerRole) : rigRoles.size === 0;
+}
+
+function breakerRoleForIce(roles: string[], subtypes: string[]): string | null {
+  const normalizedSubtypes = subtypes.map((subtype) => subtype.toLowerCase());
+  if (roles.includes("barrier_ice") || normalizedSubtypes.includes("barrier")) return "breaker_fracter";
+  if (roles.includes("code_gate_ice") || normalizedSubtypes.includes("code gate")) return "breaker_decoder";
+  if (roles.includes("sentry_ice") || normalizedSubtypes.includes("sentry")) return "breaker_killer";
+  return null;
 }
 
 function scoreCorpRootInstall(roles: string[], action: LegalAction, features: AiFeatures, profile: Record<string, number>): number {

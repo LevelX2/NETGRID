@@ -136,6 +136,8 @@
 - `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`: Spezifikation für Werkzeugmodell, Harness, Browser-Kontexte, Viewports, Flows und DOM-/Storage-/Payload-Leak-Scans.
 - `docs/derived/V1_0_7_TEST_MATRIX.md`: V1.0.7-Testmatrix für Browser-Gate, Runtime-Isolation, Human-vs-KI, Human-vs-Human, Lifecycle, Board, Card Display, Viewports und Hidden Info.
 - `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.7.
+- `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für den Playwright-basierten Browser-E2E-/Visual-QA-Gate inklusive Harness, Flow-Abdeckung und Leak-Scans.
+- `docs/derived/V1_0_7_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.7 inklusive Befehl, Viewports, Artefakten, Checks und Leak-Befund.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
