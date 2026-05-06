@@ -20,7 +20,8 @@ describe("deriveOpponentActionCues", () => {
     expect(cues[0]?.cueId).toBe("runner:evt_1");
     expect(cues[0]?.source).toBe("ai");
     expect(cues[0]?.title).toBe("Die Corp-KI hat ihre Pflichtkarte gezogen.");
-    expect(cues[0]?.description).toBe("Grund: Die Corp braucht ihre Pflichtkarte.");
+    expect(cues[0]?.description).toBeUndefined();
+    expect(cues[0]?.aiExplanation).toBe("Die Corp braucht ihre Pflichtkarte.");
     expect(JSON.stringify(cues[0])).not.toContain("corp.mandatory_draw");
   });
 

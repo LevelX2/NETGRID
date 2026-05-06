@@ -957,6 +957,12 @@ function sideLabel(side: Side): string {
   return side === "corp" ? "Corp" : "Runner";
 }
 
+function turnSideForView(view: PlayerView): Side | null {
+  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase") return "corp";
+  if (view.phase === "runner_action_phase" || view.phase === "run") return "runner";
+  return null;
+}
+
 function updateActionSlotCapacity(capacities: Record<Side, number>, side: Side, currentClicks: number, active: boolean, resetActiveSide: boolean): void {
   const baseCapacity = baseActionSlotCapacity(side);
   const safeClicks = Math.max(0, Math.floor(currentClicks));
@@ -1075,6 +1081,7 @@ export default function Page() {
   const [deckImportText, setDeckImportText] = useState("");
   const [deckExportText, setDeckExportText] = useState("");
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
+  const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
@@ -1469,6 +1476,10 @@ export default function Page() {
   }, [session?.matchId, session?.sessionToken]);
 
   useEffect(() => {
+    if (connection === "online") pendingAiAdvanceKeyRef.current = null;
+  }, [connection]);
+
+  useEffect(() => {
     if (!payload) return;
     const latestId = payload.eventTail.at(-1)?.eventId ?? null;
     const lastSeen = lastSeenCueEventIdRef.current;
@@ -1510,10 +1521,11 @@ export default function Page() {
   useEffect(() => {
     if (!currentActionCue) return;
     if (audioEnabled && currentActionCue.sound) playActionCueSound(currentActionCue.sound, audioVolume);
+    if (currentActionCue.actionType === "access_card" && localAiPacingMode === "manual") return;
     if (actionCueAutoDismissMs === 0) return;
     const timeout = window.setTimeout(() => setCurrentActionCue(null), actionCueAutoDismissMs);
     return () => window.clearTimeout(timeout);
-  }, [actionCueAutoDismissMs, audioEnabled, audioVolume, currentActionCue]);
+  }, [actionCueAutoDismissMs, audioEnabled, audioVolume, currentActionCue, localAiPacingMode]);
 
   useEffect(() => {
     if (!payload?.aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online") return;
@@ -1523,9 +1535,18 @@ export default function Page() {
     if (pendingAiAdvanceKeyRef.current === advanceKey) return;
     pendingAiAdvanceKeyRef.current = advanceKey;
     const timeout = window.setTimeout(() => {
-      advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
+      if (currentActionCue) setCurrentActionCue(null);
+      const sent = advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
+      if (!sent && pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
     }, delayMs);
-    return () => window.clearTimeout(timeout);
+    const retryTimeout = window.setTimeout(() => {
+      if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
+    }, Math.max(delayMs + 2500, 3200));
+    return () => {
+      window.clearTimeout(timeout);
+      window.clearTimeout(retryTimeout);
+      if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
+    };
   }, [actionCueAutoDismissMs, actionCueQueue.length, connection, currentActionCue, localAiPacingMode, payload?.aiTurnPresentation?.canAdvanceAi, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
 
   const createMatch = async () => {
@@ -2039,18 +2060,26 @@ export default function Page() {
     setLobbyChatText("");
   };
 
-  const advanceAi = (mode: "single_step" | "until_human" = "single_step") => {
-    if (!session || !payload || !ensureSocketConnected() || !payload.aiTurnPresentation?.canAdvanceAi) return;
-    socketRef.current?.send(
-      JSON.stringify({
-        type: "advance_ai",
-        payload: {
-          knownStateVersion: payload.playerView.stateVersion,
-          knownMatchVersion: payload.matchVersion,
-          mode
-        }
-      })
-    );
+  const advanceAi = (mode: "single_step" | "until_human" = "single_step"): boolean => {
+    if (!session || !payload || !payload.aiTurnPresentation?.canAdvanceAi) return false;
+    if (!ensureSocketConnected()) return false;
+    try {
+      socketRef.current?.send(
+        JSON.stringify({
+          type: "advance_ai",
+          payload: {
+            knownStateVersion: payload.playerView.stateVersion,
+            knownMatchVersion: payload.matchVersion,
+            mode
+          }
+        })
+      );
+      return true;
+    } catch {
+      pendingAiAdvanceKeyRef.current = null;
+      setNotice("KI-Schritt konnte nicht gesendet werden. Bitte verbinde Dich erneut oder nutze den KI-Schritt erneut.");
+      return false;
+    }
   };
 
   const requestUndo = () => {
@@ -2313,6 +2342,7 @@ export default function Page() {
       return;
     }
     if (message.type === "state_update") {
+      pendingAiAdvanceKeyRef.current = null;
       setPayload((current) => {
         if (!current) {
           const nextFromLobby = lobby
@@ -2356,6 +2386,7 @@ export default function Page() {
       return;
     }
     if (message.type === "ai_turn") {
+      pendingAiAdvanceKeyRef.current = null;
       setPayload((current) => {
         if (!current) return current;
         if (message.payload) return { ...current, aiTurnPresentation: message.payload };
@@ -2383,6 +2414,7 @@ export default function Page() {
       return;
     }
     if (message.type === "error") {
+      pendingAiAdvanceKeyRef.current = null;
       setNotice(message.payload.message);
       if (message.payload.playerView) {
         setPayload((current) => (current ? { ...current, playerView: message.payload.playerView!, legalActions: message.payload.playerView!.legalActions } : current));
@@ -2813,8 +2845,10 @@ export default function Page() {
         position={cuePosition}
         cardDetailsById={catalogDetailsById}
         displayMode={cardDisplayMode}
+        canAdvanceAi={Boolean(payload.aiTurnPresentation?.canAdvanceAi && connection === "online")}
         onPosition={setCuePosition}
         onDismiss={() => setCurrentActionCue(null)}
+        onAdvanceAi={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
       />
 
       <div className="main" data-testid="active-game">
@@ -2843,6 +2877,7 @@ export default function Page() {
             onClearContext={() => setSelectedActionContext(null)}
           />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
+          <PlayerPanel view={activeView} title={`Du · ${sideLabel(activeView.side)}`} actionCapacity={actionSlotCapacities[activeView.side]} />
         </aside>
 
         <section className="board boardPanel" data-testid="active-board">
@@ -2991,8 +3026,14 @@ export default function Page() {
         </section>
 
         <aside className="log panel rightRail">
-          <CardPreviewPanel card={enrichedPreviewCard} displayMode={cardDisplayMode} onDisplayMode={setCardDisplayMode} {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})} />
-          <PlayerPanel view={activeView} title={sideLabel(activeView.side)} actionCapacity={actionSlotCapacities[activeView.side]} />
+          <CardPreviewPanel
+            card={enrichedPreviewCard}
+            displayMode={cardDisplayMode}
+            onDisplayMode={setCardDisplayMode}
+            collapsed={cardPreviewCollapsed}
+            onCollapsed={setCardPreviewCollapsed}
+            {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})}
+          />
           <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocusCard={focusCard} />
           <section className="section">
             <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
@@ -3743,22 +3784,27 @@ function OpponentActionOverlay({
   position,
   cardDetailsById,
   displayMode,
+  canAdvanceAi = false,
   onPosition,
-  onDismiss
+  onDismiss,
+  onAdvanceAi
 }: {
   cue: OpponentActionCue | null;
   queued: number;
   position: CuePositionPreference;
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
+  canAdvanceAi?: boolean;
   onPosition(position: CuePositionPreference): void;
   onDismiss(): void;
+  onAdvanceAi?(): void;
 }) {
   const overlayRef = useRef<HTMLElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   if (!cue) return null;
 
   const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
+  const showAdvance = cue.actionType === "access_card" && cue.source === "ai" && canAdvanceAi && onAdvanceAi;
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const overlay = overlayRef.current;
     if (!overlay) return;
@@ -3808,6 +3854,12 @@ function OpponentActionOverlay({
           <CardView card={relatedCard} displayMode={displayMode} compact preview />
         </div>
       ) : null}
+      {showAdvance ? (
+        <button className="button primary cueAdvanceButton" onClick={onAdvanceAi} type="button">
+          <Bot size={15} />
+          KI fortsetzen
+        </button>
+      ) : null}
       {queued > 0 ? <small>{queued} weitere</small> : null}
       <button
         className="button iconOnly cueDragHandle"
@@ -3840,23 +3892,19 @@ function AiPacingControls({
   onAdvance(): void;
 }) {
   if (!presentation) return null;
-  const activeLabel = presentation.activeAiSide ? `${sideLabel(presentation.activeAiSide)}-KI ist am Zug` : "KI wartet";
   return (
     <section className="section aiPacingPanel" data-testid="ai-pacing">
       <div className="sectionTitleLine">
         <h2>KI-Steuerung</h2>
         <Bot size={16} />
       </div>
-      <p className="meta">{activeLabel}</p>
       <p className="aiPacingHint">
         {mode === "manual" ? "Einzelschritt aktiv." : mode === "paced" ? "Getakteter Automatiklauf aktiv." : "Schneller Automatiklauf aktiv."}
       </p>
-      {mode === "manual" ? (
-        <button className="aiStepButton" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
-          <Bot size={15} />
-          KI-Schritt
-        </button>
-      ) : null}
+      <button className="aiStepButton" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
+        <Bot size={15} />
+        {mode === "manual" ? "KI-Schritt" : "Jetzt ausführen"}
+      </button>
     </section>
   );
 }
@@ -4107,29 +4155,46 @@ function CardPreviewPanel({
   card,
   displayMode,
   onDisplayMode,
-  hiddenSide
+  hiddenSide,
+  collapsed,
+  onCollapsed
 }: {
   card: DisplayVisibleCard | null;
   displayMode: CardDisplayMode;
   onDisplayMode(value: CardDisplayMode): void;
   hiddenSide?: Side;
+  collapsed: boolean;
+  onCollapsed(value: boolean): void;
 }) {
   return (
-    <section className="section cardPreviewPanel" data-testid="card-preview">
+    <section className={`section cardPreviewPanel ${collapsed ? "collapsed" : ""}`} data-testid="card-preview">
       <div className="previewTitleLine">
         <div>
           <h2>Vorschau</h2>
           <p className="meta">Kartenanzeige</p>
         </div>
-        <CardDisplayModeSelector mode={displayMode} onChange={onDisplayMode} iconOnly />
+        <div className="previewControls">
+          {!collapsed ? <CardDisplayModeSelector mode={displayMode} onChange={onDisplayMode} iconOnly /> : null}
+          <button
+            className="button iconOnly previewToggle"
+            type="button"
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? "Kartenvorschau ausklappen" : "Kartenvorschau einklappen"}
+            title={collapsed ? "Kartenvorschau ausklappen" : "Kartenvorschau einklappen"}
+            onClick={() => onCollapsed(!collapsed)}
+          >
+            {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+          </button>
+        </div>
       </div>
-      {card ? (
+      {!collapsed && card ? (
         <div className={`previewModeShell mode-${displayMode}`}>
           <CardView card={card} displayMode={displayMode} {...(hiddenSide ? { hiddenSide } : {})} preview />
         </div>
-      ) : (
+      ) : null}
+      {!collapsed && !card ? (
         <p className="meta">Wähle eine Karte für die Vorschau.</p>
-      )}
+      ) : null}
     </section>
   );
 }
@@ -5120,38 +5185,41 @@ function ConnectionBadge({ text, state }: { text: string; state: "offline" | "co
 
 function OpponentPanel({ view, connected, displayName, actionCapacity }: { view: PlayerView; connected: boolean; displayName?: string; actionCapacity: number }) {
   const side = opponentSide(view.side);
+  const turnSide = turnSideForView(view);
+  const isTurn = turnSide === side;
   return (
-    <section className="section">
+    <section className={`section sideStatusPanel side-${side} ${isTurn ? "turnActive" : ""}`}>
       <h2>{displayName ? `${displayName} · ${sideLabel(side)}` : sideLabel(side)}</h2>
       <div className="stats">
         <CreditBadge credits={view.opponent.credits} />
-        <ActionSlotMeter side={side} currentClicks={view.opponent.clicks} displayCapacity={actionCapacity} active={view.activeSide === side} compact />
         <Stat label="Agenda" value={view.opponent.agendaPoints} />
         {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} /> : null}
       </div>
-      <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {view.activeSide === side ? "Aktiv" : "Wartet"}</p>
+      <ActionSlotMeter side={side} currentClicks={view.opponent.clicks} displayCapacity={actionCapacity} active={isTurn} compact />
+      <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {isTurn ? "Am Zug" : "Wartet"}</p>
     </section>
   );
 }
 
 function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title: string; actionCapacity: number }) {
-  const visibleTags = view.side === "runner" ? view.own.tags : view.opponent.tags;
+  const turnSide = turnSideForView(view);
+  const isTurn = turnSide === view.side;
   return (
-    <section className="section">
+    <section className={`section sideStatusPanel side-${view.side} ${isTurn ? "turnActive" : ""}`}>
       <h2>{title}</h2>
       <div className="stats">
         <CreditBadge credits={view.own.credits} />
-        <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={view.activeSide === view.side} />
         <Stat label="Agenda" value={view.own.agendaPoints} />
-        <Stat label="Tags" value={visibleTags} />
+        {view.side === "runner" ? <Stat label="Tags" value={view.own.tags} /> : null}
       </div>
+      <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={isTurn} />
       {view.deckMetadata ? (
         <div className="deckMini">
           <span>{view.deckMetadata.own.deckName}</span>
           <small>Deck geprüft</small>
         </div>
       ) : null}
-      <p className="meta statusLine">{view.activeSide === view.side ? "Aktiv" : "Wartet"} · {view.timingPoint}</p>
+      <p className="meta statusLine">{isTurn ? "Am Zug" : "Wartet"}</p>
     </section>
   );
 }
@@ -5159,7 +5227,7 @@ function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title:
 function ActionSlotMeter({ side, currentClicks, displayCapacity, active, compact = false }: { side: Side; currentClicks: number; displayCapacity: number; active: boolean; compact?: boolean }) {
   const display = actionSlotDisplay(side, currentClicks, displayCapacity, active);
   return (
-    <div className={`stat resourceStat actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
+    <div className={`actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
       <div className="resourceStatTop">
         <strong>{display.available}</strong>
         <span>Aktionen</span>

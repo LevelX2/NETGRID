@@ -259,7 +259,7 @@ export function aiPacingDelayMs(mode: AiPacingTriggerMode, hasPendingCue: boolea
   if (!hasPendingCue) return mode === "fast" ? 120 : 650;
   if (autoDismissMs <= 0) return mode === "fast" ? 750 : 900;
   const minimum = mode === "fast" ? 320 : 650;
-  return Math.min(Math.max(autoDismissMs, minimum), 1600);
+  return Math.max(autoDismissMs, minimum);
 }
 
 export function serverBoardRows<T extends { id: string }>(servers: T[]): Array<{ kind: "remotes" | "centrals"; servers: T[] }> {

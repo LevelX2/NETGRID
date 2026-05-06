@@ -72,8 +72,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
   const cardTitle = explicitCardTitle ?? labelCardTitle;
   const cardText = context.cardText ?? undefined;
-  const aiExplanation = stringValue(payload.aiExplanation);
-  const isAi = Boolean(aiExplanation || stringValue(payload.aiReasonCode));
+  const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeEffect(cardText);
 
@@ -83,7 +82,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   let importance: ChronicleImportance = "normal";
   let visibility: ChronicleVisibility = "public";
   let title = "";
-  let description = aiExplanation ? `Grund: ${aiExplanation}` : undefined;
+  let description: string | undefined;
   const chips = [...baseChipList];
 
   switch (actionType) {

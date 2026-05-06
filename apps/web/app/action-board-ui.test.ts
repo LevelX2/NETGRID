@@ -112,7 +112,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(aiPacingDelayMs("manual", true, 0)).toBeNull();
     expect(aiPacingDelayMs("paced", false, 2500)).toBe(650);
     expect(aiPacingDelayMs("paced", true, 0)).toBe(900);
-    expect(aiPacingDelayMs("fast", true, 6000)).toBe(1600);
+    expect(aiPacingDelayMs("fast", true, 6000)).toBe(6000);
   });
 });
 

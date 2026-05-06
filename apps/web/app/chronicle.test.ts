@@ -95,7 +95,7 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("Rig");
   });
 
-  it("shows AI explanations as a human reason line without exposing the reason code", () => {
+  it("marks AI actions without showing explanation text as a chronicle reason line", () => {
     const item = formatChronicleEvent(
       makeEvent("play_operation", {
         actor: "corp",
@@ -111,8 +111,9 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(item.title).toBe("Die Corp-KI hat Simple Economy Operation gespielt und Credits erhalten.");
-    expect(item.description).toBe("Grund: Credits verbessern Rez- und Score-Fenster.");
+    expect(item.description).toBeUndefined();
     expect(item.chips).toContain("KI");
+    expect(JSON.stringify(item)).not.toContain("Credits verbessern Rez- und Score-Fenster.");
     expect(JSON.stringify(item)).not.toContain("corp.economy.operation");
   });
 
