@@ -12,6 +12,7 @@ Aktuelle Auswahl: [Vorläufige Branding-Entscheidung: NETGRID](BRANDING_DECISION
 - [Ausgewählter NETGRID-Lockup](selected-netgrid/netgrid-lockup-selected.png): bevorzugter rechter oberer NETGRID-Schriftzug.
 - [NETGRID Icon links](selected-netgrid/netgrid-icon-left-mark-clean.png): textloser Icon-Kandidat aus dem linken Symbol des Lockups.
 - [NETGRID Icon rechts](selected-netgrid/netgrid-icon-right-tile-clean.png): textloser Icon-Kandidat aus dem rechten Symbol des Lockups.
+- [NETGRID Icon rechts, neu gezeichnet](selected-netgrid/netgrid-icon-right-tile-redraw-v2.svg): aktuelles Client- und Desktop-Icon mit transparentem Außenbereich.
 
 ## Bewertung
 

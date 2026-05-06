@@ -64,7 +64,7 @@ if ($webReady) {
   exit 0
 }
 
-$message = "Netrunner konnte nicht gestartet werden.`nServer bereit: $serverReady`nWeb bereit: $webReady`nLogs:`n$serverLog`n$webLog"
+$message = "NETGRID konnte nicht gestartet werden.`nServer bereit: $serverReady`nWeb bereit: $webReady`nLogs:`n$serverLog`n$webLog"
 Add-Type -AssemblyName System.Windows.Forms
-[System.Windows.Forms.MessageBox]::Show($message, "Netrunner starten") | Out-Null
+[System.Windows.Forms.MessageBox]::Show($message, "NETGRID starten") | Out-Null
 exit 1

@@ -108,7 +108,9 @@ const RunIcon = Shield;
 const RUNNER_BASE_HAND_LIMIT = 5;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
-const APP_STATUS_LABEL = "V1.0.7";
+const APP_NAME = "NETGRID";
+const APP_STATUS_LABEL = "V1.0.8";
+const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -2971,10 +2973,10 @@ function Brand({ subtitle }: { subtitle: string }) {
   return (
     <div className="brand">
       <div className="mark">
-        <Sparkles size={18} />
+        <img className="brandLogo" src={APP_ICON_SRC} alt="" aria-hidden="true" />
       </div>
       <div>
-        <h1>Netrunner</h1>
+        <h1>{APP_NAME}</h1>
         <p>{subtitle}</p>
       </div>
     </div>

@@ -60,7 +60,7 @@ describe("Client visibility contract", () => {
   it("keeps the V1.0.5 matchstart lobby and lifecycle recovery explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.7"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.8"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");

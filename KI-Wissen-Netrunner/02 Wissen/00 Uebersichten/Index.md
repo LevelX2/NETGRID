@@ -146,6 +146,13 @@
 - `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.8.
 - `docs/derived/V1_0_8_IMPLEMENTATION_REVIEW.md`: Implementation Review für SQLite-Standardstorage, Legacy-Import, Backup/Restore, Recovery und E2E-SQLite-Isolation.
 - `docs/derived/V1_0_8_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.8 Storage/Backup-Härtung.
+- `docs/derived/V1_0_9_PRIVATE_INTERNET_HARDENING_PLAN.md`: Detailplan für V1.0.9 Private Internet Hardening mit sechs Releasepaketen für Transport, Origins, Rate Limits, Secrets, Health/Ops und Internet-Smokes.
+- `docs/derived/V1_0_9_REQUIREMENTS.md`: eingefrorene V1.0.9-Anforderungen für privaten HTTPS/WSS-Betrieb, Origin-Allowlist, Rate Limits, Token-Salt, Redaction, Health und Smoke-Gates.
+- `docs/derived/PRIVATE_INTERNET_SECURITY_1_0_9_SPEC.md`: Security-Spezifikation für private Internetprofile, Origin-/CORS-/WebSocket-Vertrag, Token-/Secret-Vertrag, Rate Limits und Redaction.
+- `docs/derived/PRIVATE_DEPLOYMENT_OPS_1_0_9_SPEC.md`: Ops-Spezifikation für lokale und private Internet-Betriebsprofile, Health, Diagnose, Deploy-Checkliste und LAN-/VPS-Smoke.
+- `docs/derived/V1_0_9_TEST_MATRIX.md`: V1.0.9-Testmatrix für Deployment-Profil, HTTPS/WSS-Konfiguration, Origins, Rate Limits, Redaction, Health, E2E und Internet-Smoke.
+- `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.9.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
+- `docs/ui-designsets/05-logo-exploration/BRANDING_DECISION.md`: vorläufige Branding-Entscheidung für den Client-Namen `NETGRID` und die ausgewählten Logo-/Icon-Referenzen.

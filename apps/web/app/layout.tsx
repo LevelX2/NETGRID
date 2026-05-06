@@ -2,8 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Netrunner MVP 0.1",
-  description: "Private Netrunner MVP 0.1 demo"
+  title: "NETGRID",
+  description: "Private NETGRID Spieloberfläche",
+  icons: {
+    icon: "/brand/netgrid.ico",
+    shortcut: "/brand/netgrid.ico"
+  }
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

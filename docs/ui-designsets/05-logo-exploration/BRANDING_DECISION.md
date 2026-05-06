@@ -17,8 +17,11 @@ Aus diesem Lockup dürfen die zugehörigen Symbole links und rechts vom Schriftz
 - [Ausgewählter NETGRID-Lockup](selected-netgrid/netgrid-lockup-selected.png)
 - [Icon links vom Schriftzug, sauberer Ausschnitt](selected-netgrid/netgrid-icon-left-mark-clean.png)
 - [Icon rechts vom Schriftzug, sauberer Ausschnitt](selected-netgrid/netgrid-icon-right-tile-clean.png)
+- [Neu gezeichnetes rechtes NETGRID-Kachel-Icon, SVG](selected-netgrid/netgrid-icon-right-tile-redraw-v2.svg)
 
 Für neue Verweise sollten die `*-clean.png`-Dateien verwendet werden.
+
+Für Client- und Desktop-Icons wird aktuell die neu gezeichnete rechte Kachel `netgrid-icon-right-tile-redraw-v2.svg` verwendet. Sie hat einen transparenten Außenbereich und wurde aus der rechten Kachel-Idee des Lockups abgeleitet.
 
 ## Nutzungsstatus
 

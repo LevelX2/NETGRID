@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-label="NETGRID icon redraw v2">
+  <defs>
+    <filter id="tileShadow" x="-8%" y="-8%" width="116%" height="116%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+    <filter id="stackShadow" x="-18%" y="-18%" width="136%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#0f172a" flood-opacity="0.28"/>
+    </filter>
+    <linearGradient id="topBlue" x1="248" y1="160" x2="772" y2="410" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2184ff"/>
+      <stop offset="0.52" stop-color="#146ef6"/>
+      <stop offset="1" stop-color="#0a51c9"/>
+    </linearGradient>
+    <linearGradient id="bandBlue" x1="210" y1="454" x2="815" y2="746" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#44a7ff"/>
+      <stop offset="0.48" stop-color="#1977f3"/>
+      <stop offset="1" stop-color="#0b56d6"/>
+    </linearGradient>
+    <linearGradient id="leftBlack" x1="206" y1="340" x2="520" y2="806" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3a4353"/>
+      <stop offset="0.45" stop-color="#222b39"/>
+      <stop offset="1" stop-color="#111927"/>
+    </linearGradient>
+    <linearGradient id="rightBlack" x1="518" y1="340" x2="818" y2="806" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2f3848"/>
+      <stop offset="0.48" stop-color="#1c2534"/>
+      <stop offset="1" stop-color="#0d1522"/>
+    </linearGradient>
+    <linearGradient id="pcbBlue" x1="190" y1="810" x2="835" y2="928" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b62ee"/>
+      <stop offset="0.55" stop-color="#238cff"/>
+      <stop offset="1" stop-color="#0b62ee"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="72" y="64" width="880" height="880" rx="132" fill="#ffffff" stroke="#dfe4eb" stroke-width="10" filter="url(#tileShadow)"/>
+
+  <g filter="url(#stackShadow)">
+    <path d="M214 288 L512 154 L810 288 L512 425 Z" fill="url(#topBlue)"/>
+    <path d="M366 292 L512 227 L658 292 L512 356 Z" fill="#f8fbff"/>
+
+    <path d="M206 330 L512 468 L512 557 L206 419 Z" fill="url(#leftBlack)"/>
+    <path d="M512 468 L818 330 L818 419 L512 557 Z" fill="url(#rightBlack)"/>
+    <path d="M250 395 L512 513 L774 395 L774 428 L512 548 L250 428 Z" fill="#f7fbff"/>
+    <path d="M226 431 L512 561 L798 431 L798 494 L512 626 L226 494 Z" fill="url(#bandBlue)"/>
+
+    <path d="M206 505 L512 643 L512 733 L206 594 Z" fill="url(#leftBlack)"/>
+    <path d="M512 643 L818 505 L818 594 L512 733 Z" fill="url(#rightBlack)"/>
+    <path d="M250 570 L512 689 L774 570 L774 603 L512 724 L250 603 Z" fill="#f7fbff"/>
+    <path d="M226 606 L512 737 L798 606 L798 668 L512 801 L226 668 Z" fill="url(#bandBlue)"/>
+
+    <path d="M214 680 L512 815 L512 878 L214 743 Z" fill="url(#leftBlack)"/>
+    <path d="M512 815 L810 680 L810 743 L512 878 Z" fill="url(#rightBlack)"/>
+
+    <g fill="#f8fbff">
+      <circle cx="288" cy="405" r="13"/>
+      <circle cx="358" cy="436" r="9"/>
+      <circle cx="666" cy="436" r="9"/>
+      <circle cx="736" cy="405" r="13"/>
+      <circle cx="288" cy="580" r="13"/>
+      <circle cx="358" cy="611" r="9"/>
+      <circle cx="666" cy="611" r="9"/>
+      <circle cx="736" cy="580" r="13"/>
+      <circle cx="302" cy="734" r="10"/>
+      <circle cx="722" cy="734" r="10"/>
+    </g>
+  </g>
+
+  <g fill="none" stroke="url(#pcbBlue)" stroke-width="15" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M512 878 L512 914"/>
+    <path d="M512 914 L422 914"/>
+    <path d="M512 914 L602 914"/>
+    <path d="M422 914 L366 860"/>
+    <path d="M602 914 L658 860"/>
+    <path d="M422 914 L318 914"/>
+    <path d="M602 914 L706 914"/>
+    <path d="M366 860 L292 860"/>
+    <path d="M658 860 L732 860"/>
+    <path d="M318 914 L286 944"/>
+    <path d="M706 914 L738 944"/>
+  </g>
+  <g fill="#1679f4" stroke="#ffffff" stroke-width="8">
+    <circle cx="292" cy="860" r="21"/>
+    <circle cx="732" cy="860" r="21"/>
+    <circle cx="286" cy="944" r="18"/>
+    <circle cx="738" cy="944" r="18"/>
+    <circle cx="318" cy="914" r="13"/>
+    <circle cx="706" cy="914" r="13"/>
+    <circle cx="512" cy="914" r="14"/>
+  </g>
+</svg>
