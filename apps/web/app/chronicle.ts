@@ -19,6 +19,7 @@ export type ChronicleItem = {
   importance: ChronicleImportance;
   visibility: ChronicleVisibility;
   actor?: Side;
+  actionUse?: ChronicleActionUse;
   title: string;
   description?: string;
   chips: string[];
@@ -26,6 +27,14 @@ export type ChronicleItem = {
   cardText?: string;
   cardDetailLines: string[];
   groupLabel: string;
+};
+
+export type ChronicleActionUse = {
+  label: string;
+  title: string;
+  clicks: number;
+  start: number;
+  end: number;
 };
 
 export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
@@ -57,6 +66,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const runPhase = stringValue(payload.runPhase);
   const redactedKind = stringValue(payload.redactedKind);
   const agendaPoints = numberValue(payload.agendaPoints) ?? context.agendaPoints;
+  const actionUse = actionUseFromPayload(payload);
   const label = stringValue(payload.label);
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
@@ -222,6 +232,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     importance,
     visibility,
     ...(actor ? { actor } : {}),
+    ...(actionUse ? { actionUse } : {}),
     title: ensurePeriod(title),
     ...(description ? { description: ensurePeriod(description) } : {}),
     chips: uniqueChips(chips.filter(Boolean)),
@@ -230,6 +241,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     cardDetailLines: visibility === "redacted" ? [] : cardDetailLines,
     groupLabel: groupLabelFor(category, actor, label, serverLabel)
   };
+}
+
+function actionUseFromPayload(payload: Record<string, unknown>): ChronicleActionUse | undefined {
+  const clicks = positiveIntegerValue(payload.actionCostClicks);
+  const start = positiveIntegerValue(payload.turnActionOrdinalStart);
+  const end = positiveIntegerValue(payload.turnActionOrdinalEnd) ?? start;
+  if (!clicks || !start || !end) return undefined;
+  const label = start === end ? String(start) : `${start}-${end}`;
+  const title = start === end ? `${start}. Aktion in diesem Zug` : `Aktionen ${start} bis ${end} in diesem Zug`;
+  return { label, title, clicks, start, end };
 }
 
 export function chronicleGroupLabel(item: ChronicleItem): string {
@@ -397,6 +418,10 @@ function stringValue(value: unknown): string | undefined {
 
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function positiveIntegerValue(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
 }
 
 function sideValue(value: unknown): Side | undefined {

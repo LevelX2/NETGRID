@@ -5,6 +5,8 @@ import {
   Bot,
   Cable,
   Check,
+  ChevronDown,
+  ChevronUp,
   Clipboard,
   Flag,
   CopyPlus,
@@ -3729,6 +3731,7 @@ function ChroniclePanel({
   displayMode: CardDisplayMode;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
+  const [collapsed, setCollapsed] = useState(false);
   const entries = events
     .slice()
     .reverse()
@@ -3745,24 +3748,37 @@ function ChroniclePanel({
     });
 
   return (
-    <section className="section chroniclePanel">
+    <section className={`section chroniclePanel ${collapsed ? "collapsed" : ""}`}>
       <div className="sectionTitleLine">
-        <h2>Spielchronik</h2>
-        <Activity size={16} />
+        <div>
+          <h2>Spielchronik</h2>
+          {collapsed && entries.length > 0 ? <p className="chronicleCollapsedMeta">{entries.length} Einträge</p> : null}
+        </div>
+        <button
+          className="button iconOnly chronicleToggle"
+          type="button"
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? "Spielchronik ausklappen" : "Spielchronik einklappen"}
+          onClick={() => setCollapsed((current) => !current)}
+        >
+          {collapsed ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
+        </button>
       </div>
-      <div className="chronicleList">
-        {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
-        {entries.map((entry, index) => {
-          const group = chronicleGroupLabel(entry.item);
-          const previousGroup = index > 0 ? chronicleGroupLabel(entries[index - 1]!.item) : null;
-          return (
-            <Fragment key={entry.item.id}>
-              {group !== previousGroup ? <div className="chronicleGroup">{group}</div> : null}
-              <ChronicleEntry item={entry.item} card={entry.card} displayMode={displayMode} onFocusCard={onFocusCard} />
-            </Fragment>
-          );
-        })}
-      </div>
+      {!collapsed ? (
+        <div className="chronicleList">
+          {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
+          {entries.map((entry, index) => {
+            const group = chronicleGroupLabel(entry.item);
+            const previousGroup = index > 0 ? chronicleGroupLabel(entries[index - 1]!.item) : null;
+            return (
+              <Fragment key={entry.item.id}>
+                {group !== previousGroup ? <div className="chronicleGroup">{group}</div> : null}
+                <ChronicleEntry item={entry.item} card={entry.card} displayMode={displayMode} onFocusCard={onFocusCard} />
+              </Fragment>
+            );
+          })}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -3783,8 +3799,18 @@ function ChronicleEntry({
   const previewCard = card ? visibleCardFromCatalogDetail(card) : null;
   return (
     <article className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility}`}>
-      <div className="chronicleRail" aria-hidden="true">
-        <ChronicleIcon category={item.category} />
+      <div className="chronicleRail" aria-hidden={!item.actionUse}>
+        <span className="chronicleRailIcon">
+          <ChronicleIcon category={item.category} />
+        </span>
+        {item.actionUse ? (
+          <span className="chronicleActionOrdinal" tabIndex={0} aria-label={item.actionUse.title}>
+            {item.actionUse.label}
+            <span className="chronicleActionTooltip" role="tooltip">
+              {item.actionUse.title}
+            </span>
+          </span>
+        ) : null}
       </div>
       <div className="chronicleContent">
         <div className="chronicleTopLine">

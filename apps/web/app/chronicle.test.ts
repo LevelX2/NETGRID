@@ -152,6 +152,33 @@ describe("formatChronicleEvent", () => {
     expect(item.cardTitle).toBe("Simple Economy Operation");
     expect(item.chips).toContain("HQ");
   });
+
+  it("exposes action ordinal metadata only for entries that spent actions", () => {
+    const paid = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "corp",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 2,
+        turnActionOrdinalEnd: 2,
+        redactedKind: "installed_card"
+      }),
+      "runner"
+    );
+    const free = formatChronicleEvent(makeEvent("rez_ice", { actor: "corp" }), "runner");
+    const multi = formatChronicleEvent(
+      makeEvent("purge_virus_counters", {
+        actor: "corp",
+        actionCostClicks: 3,
+        turnActionOrdinalStart: 1,
+        turnActionOrdinalEnd: 3
+      }),
+      "runner"
+    );
+
+    expect(paid.actionUse).toMatchObject({ label: "2", title: "2. Aktion in diesem Zug", clicks: 1 });
+    expect(free.actionUse).toBeUndefined();
+    expect(multi.actionUse).toMatchObject({ label: "1-3", title: "Aktionen 1 bis 3 in diesem Zug", clicks: 3 });
+  });
 });
 
 function makeEvent(actionType: string, payload: Record<string, unknown> = {}): PublicGameEvent {

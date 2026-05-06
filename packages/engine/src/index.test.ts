@@ -86,7 +86,14 @@ describe("MVP 0.1 turns and cards", () => {
     const before = state.corp.credits;
     state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "simple_economy_operation");
     expect(state.corp.credits).toBe(before + 4);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation", cardDefinitionId: "simple_economy_operation", title: "Simple Economy Operation" });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      actionCostClicks: 1,
+      turnActionOrdinalStart: 1,
+      turnActionOrdinalEnd: 1,
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation"
+    });
     expect(state.corp.archives.map((id) => state.cardInstances[id]?.definitionId)).toContain("simple_economy_operation");
   });
 });
@@ -1325,7 +1332,13 @@ describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
     expect(state.cardInstances[virusId]?.counters?.virus).toBeUndefined();
     expect(state.cardInstances[virusId]?.counters?.power).toBe(2);
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ purgedCounterType: "virus", purgedVirusCounters: 1 });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionCostClicks: 3,
+      turnActionOrdinalStart: 1,
+      turnActionOrdinalEnd: 3,
+      purgedCounterType: "virus",
+      purgedVirusCounters: 1
+    });
     expect(state.randomDrawRecords).toEqual(initial.randomDrawRecords);
     expect(replayEvents(initial, state.eventLog.slice(initial.eventLog.length)).actualFinalStateHash).toBe(hashState(state));
     expect(getLegalActions(state, "corp").map((action) => action.type)).not.toContain("purge_virus_counters");

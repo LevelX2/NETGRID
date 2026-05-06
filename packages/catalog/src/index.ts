@@ -375,9 +375,13 @@ function unique<T extends string>(values: T[]): T[] {
 function readLocalOnrSnapshot(): CardSnapshot | null {
   for (const candidate of localSnapshotCandidates()) {
     if (!existsSync(candidate)) continue;
-    return JSON.parse(readFileSync(candidate, "utf8")) as CardSnapshot;
+    return JSON.parse(stripJsonBom(readFileSync(candidate, "utf8"))) as CardSnapshot;
   }
   return null;
+}
+
+function stripJsonBom(value: string): string {
+  return value.charCodeAt(0) === 0xfeff ? value.slice(1) : value;
 }
 
 function localSnapshotCandidates(): string[] {

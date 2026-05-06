@@ -544,7 +544,7 @@ export function applyAction(state: GameState, playerAction: PlayerAction): Engin
   }
 
   const stateHash = hashState(next);
-  const event = buildEvent(before, next.stateVersion, stateHash, next, legalAction, playerAction);
+  const event = buildEvent(before, next.stateVersion, stateHash, state, next, legalAction, playerAction);
   next.eventLog.push(event);
 
   return {
@@ -2411,7 +2411,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   return parts.filter(Boolean).join(".");
 }
 
-function buildEvent(before: number, after: number, stateHashAfter: StateHash, state: GameState, legalAction: LegalAction, playerAction: PlayerAction): GameEvent {
+function buildEvent(before: number, after: number, stateHashAfter: StateHash, previousState: GameState, state: GameState, legalAction: LegalAction, playerAction: PlayerAction): GameEvent {
   const actor = legalAction.side;
   const reveal = revealForPublicEvent(state, legalAction);
   const visibilityClass = eventVisibilityForAction(legalAction);
@@ -2419,6 +2419,7 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, st
     actor,
     actionType: legalAction.type,
     label: publicLabel(legalAction),
+    ...publicActionUseContext(previousState, legalAction),
     ...publicContextForAction(state, legalAction),
     ...reveal
   };
@@ -2437,6 +2438,31 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, st
       }
     }
   };
+}
+
+function publicActionUseContext(state: GameState, legalAction: LegalAction): Record<string, unknown> {
+  const actionCostClicks = clickCostForAction(legalAction);
+  if (actionCostClicks <= 0) return {};
+  const clicksBefore = clicksForSide(state, legalAction.side);
+  const turnCapacity = Math.max(baseClicksForSide(legalAction.side), clicksBefore);
+  const usedBefore = Math.max(0, turnCapacity - clicksBefore);
+  return {
+    actionCostClicks,
+    turnActionOrdinalStart: usedBefore + 1,
+    turnActionOrdinalEnd: usedBefore + actionCostClicks
+  };
+}
+
+function clickCostForAction(legalAction: LegalAction): number {
+  return legalAction.costs.reduce((sum, cost) => sum + (Number.isInteger(cost.clicks) && cost.clicks ? cost.clicks : 0), 0);
+}
+
+function clicksForSide(state: GameState, side: Side): number {
+  return side === "corp" ? state.corp.clicks : state.runner.clicks;
+}
+
+function baseClicksForSide(side: Side): number {
+  return side === "corp" ? 3 : 4;
 }
 
 function publicLabel(legalAction: LegalAction): string {

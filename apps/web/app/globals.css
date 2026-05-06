@@ -1984,6 +1984,25 @@ select {
   overflow: visible;
 }
 
+.chroniclePanel.collapsed {
+  display: grid;
+  gap: 0;
+}
+
+.chronicleCollapsedMeta {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.chronicleToggle {
+  flex: 0 0 auto;
+}
+
+.chroniclePanel .sectionTitleLine h2 {
+  margin: 0;
+}
+
 .chronicleList {
   display: grid;
   gap: 9px;
@@ -2064,6 +2083,14 @@ select {
 
 .chronicleRail {
   display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  width: 30px;
+}
+
+.chronicleRailIcon {
+  display: grid;
   place-items: center;
   width: 30px;
   height: 30px;
@@ -2071,6 +2098,61 @@ select {
   border-radius: 8px;
   background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 86%);
   color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 34%);
+}
+
+.chronicleActionOrdinal {
+  position: relative;
+  min-width: 18px;
+  height: 18px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 4px;
+  border: 1px solid color-mix(in srgb, var(--chronicle-accent), white 18%);
+  border-radius: 4px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--chronicle-accent), var(--panel) 42%);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 0.28);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: help;
+  outline: 0;
+}
+
+.chronicleActionOrdinal:focus {
+  border-color: color-mix(in srgb, var(--chronicle-accent), white 45%);
+}
+
+.chronicleActionTooltip {
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  width: max-content;
+  max-width: min(220px, calc(100vw - 32px));
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line));
+  border-radius: 7px;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(-3px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+  visibility: hidden;
+  z-index: 41;
+}
+
+.chronicleActionOrdinal:hover .chronicleActionTooltip,
+.chronicleActionOrdinal:focus .chronicleActionTooltip {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+  visibility: visible;
 }
 
 .chronicleContent {
@@ -3462,6 +3544,10 @@ select,
   }
 
   .chronicleRail {
+    width: 26px;
+  }
+
+  .chronicleRailIcon {
     width: 26px;
     height: 26px;
   }
