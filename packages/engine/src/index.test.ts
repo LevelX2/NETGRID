@@ -127,6 +127,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_agenda", title: "Simple Agenda", serverLabel: "R&D" });
     expect(state.eventLog.at(-1)?.publicPayload.accessedCardId).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload)).toContain("Simple Agenda");
+    expect(JSON.stringify(getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload)).not.toContain("Simple Agenda");
+    expect(getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", serverLabel: "R&D", redactedKind: "accessed_card" });
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
 
     expect(agendaPoints(state, "runner")).toBe(2);
@@ -144,6 +147,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation", title: "Simple Economy Operation", serverLabel: "HQ" });
     expect(state.eventLog.at(-1)?.publicPayload.accessedCardId).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload)).not.toContain("Simple Economy Operation");
   });
 
   it("shows a card trashed from HQ in Runner-visible Archives", () => {
@@ -720,6 +724,30 @@ describe("V1.0.5K Card Release", () => {
     const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("does not offer a second agenda or asset into an occupied remote root", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_0_5K_CORP_DECK,
+      id: "v105k_remote_root_limit_corp",
+      cards: [...ONR_V1_0_5K_CORP_DECK.cards, { id: "simple_economy_asset", quantity: 1 }, { id: "simple_upgrade", quantity: 1 }]
+    };
+    let state = createGame({ seed: "v105k-remote-root-limit", runnerDeck: ONR_V1_0_5K_RUNNER_DECK, corpDeck, agendaPointsToWin: 7 });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    moveCorpCardToHq(state, "onr_v1_203_hostile-takeover");
+    moveCorpCardToHq(state, "simple_agenda");
+    moveCorpCardToHq(state, "simple_economy_asset");
+    moveCorpCardToHq(state, "simple_upgrade");
+
+    state = apply(state, "corp", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_203_hostile-takeover" && action.payload?.serverId === "new_remote");
+    const actions = getLegalActions(state, "corp");
+
+    expect(actions.some((action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_agenda" && action.payload?.serverId === "remote_1")).toBe(false);
+    expect(actions.some((action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_economy_asset" && action.payload?.serverId === "remote_1")).toBe(false);
+    expect(actions.some((action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_upgrade" && action.payload?.serverId === "remote_1")).toBe(true);
+    expect(actions.some((action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_agenda" && action.payload?.serverId === "new_remote")).toBe(true);
   });
 
   it("keeps V1.0.5K ICE hidden in Runner views until rez", () => {

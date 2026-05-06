@@ -1958,6 +1958,84 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(advanced.requesterPayload)).not.toContain("Simple Fracter");
   });
 
+  it("continues paced Runner AI runs through Corp rez windows by auto-declining after the timer", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-rez-window" });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "server-runner-ai-rez-window",
+      runnerDifficulty: "normal"
+    });
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing stored match");
+
+    let gameState = createGame({ matchId: created.matchId, seed: "server-runner-ai-rez-window" });
+    gameState = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
+    gameState = applyEngineAction(gameState, "corp", (action) => action.type === "end_turn");
+    putCorpIceOnServerForTest(gameState, "rd", "simple_barrier_ice");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    expect(gameState.activeSide).toBe("corp");
+    expect(gameState.timingPoint).toBe("run.approach_ice");
+
+    record.gameState = gameState;
+    record.match.baseline = gameState.baseline;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_rez_window")];
+    record.actionReceipts = [];
+    record.undoSnapshots = [];
+    delete record.pendingUndo;
+    await storage.save(record);
+
+    const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in before).toBe(false);
+    if ("error" in before) throw new Error(before.error.message);
+    expect(before.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: before.playerView.stateVersion,
+      knownMatchVersion: before.matchVersion,
+      mode: "single_step"
+    });
+    expect(advanced.ok).toBe(true);
+    if (!advanced.ok) throw new Error(advanced.error.message);
+    expect(advanced.publicEvent?.publicPayload).toMatchObject({ actionType: "decline_rez", autoPacedPass: true });
+    expect(advanced.requesterPayload.playerView.activeSide).toBe("runner");
+    expect(advanced.requesterPayload.playerView.timingPoint).toBe("access.resolve_card");
+    expect(advanced.requesterPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+  });
+
+  it("redacts central access card identities from Corp payloads", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "central-access-redaction" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "central-access-redaction" });
+    if (!created.joinUrl) throw new Error("Missing join URL");
+    const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing record");
+    let gameState = toRunnerTurnEngine(createGame({ matchId: created.matchId, seed: "central-access-redaction-engine" }));
+    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "access_card");
+    record.gameState = gameState;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.match.matchVersion += 1;
+    await storage.save(record);
+
+    const corpPayload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in corpPayload).toBe(false);
+    if ("error" in corpPayload) throw new Error(corpPayload.error.message);
+    expect(JSON.stringify(corpPayload.eventTail)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(corpPayload.playerView.publicEvents)).not.toContain("Simple Agenda");
+    expect(corpPayload.eventTail.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", serverLabel: "R&D", redactedKind: "accessed_card" });
+  });
+
   it("rejects advance_ai when the session or version is wrong", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-advance-auth" });
     const created = await service.createMatch({

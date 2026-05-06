@@ -652,7 +652,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           }
         }
       : {}),
-    publicEvents: state.eventLog.map(toPublicEvent),
+    publicEvents: state.eventLog.map((event) => redactPublicEventForSide(toPublicEvent(event), side)),
     legalActions: getLegalActions(state, side),
     winner: state.winner,
     ...(state.gameEndReason ? { gameEndReason: state.gameEndReason } : {})
@@ -958,7 +958,9 @@ function corpMainActions(state: GameState): LegalAction[] {
     if (definition.type === "agenda" || definition.type === "asset" || definition.type === "upgrade") {
       actions.push(action(state, "corp", "install_card", `Karte in neuem Remote installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: "new_remote", placement: "root" }));
       for (const server of state.corp.servers.filter((candidate) => candidate.kind === "remote")) {
-        actions.push(action(state, "corp", "install_card", `Karte in ${server.label} installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: server.id, placement: "root" }));
+        if (canInstallCorpRootCardInServer(state, definition, server)) {
+          actions.push(action(state, "corp", "install_card", `Karte in ${server.label} installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: server.id, placement: "root" }));
+        }
       }
     }
   }
@@ -1281,8 +1283,21 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   }
 
   const server = legalAction.payload?.serverId === "new_remote" ? createRemote(state) : mustServer(state, String(legalAction.payload?.serverId));
+  if (!canInstallCorpRootCardInServer(state, definition, server)) {
+    throw new Error("In einem Außenserver darf nur eine Agenda oder ein Asset im Root installiert sein.");
+  }
   server.root.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "serverRoot", serverId: server.id } };
+}
+
+function canInstallCorpRootCardInServer(state: GameState, definition: CardDefinition, server: CorpServer): boolean {
+  if (server.kind !== "remote") return false;
+  if (definition.type === "upgrade") return true;
+  if (definition.type !== "agenda" && definition.type !== "asset") return false;
+  return !server.root.some((id) => {
+    const installedType = definitionFor(state, id).type;
+    return installedType === "agenda" || installedType === "asset";
+  });
 }
 
 function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, pendingSuccessBonusCredits?: number, accessCount = 1): void {
@@ -2612,6 +2627,26 @@ function toPublicEvent(event: GameEvent): PublicGameEvent {
     stateHashAfter: event.stateHashAfter,
     ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
     publicPayload: event.publicPayload
+  };
+}
+
+export function redactPublicEventForSide(event: PublicGameEvent, viewerSide: Side): PublicGameEvent {
+  const actor = event.publicPayload.actor;
+  const actionType = event.publicPayload.actionType;
+  if (actionType !== "access_card" || actor !== "runner" || viewerSide !== "corp") return event;
+  const serverLabel = typeof event.publicPayload.serverLabel === "string" ? event.publicPayload.serverLabel : "";
+  const serverId = typeof event.publicPayload.serverId === "string" ? event.publicPayload.serverId : "";
+  const centralHiddenAccess = serverId === "hq" || serverId === "rd" || serverLabel === "HQ" || serverLabel === "R&D" || serverLabel === "F&E (R&D)";
+  if (!centralHiddenAccess) return event;
+  const { cardDefinitionId: _cardDefinitionId, title: _title, ...publicPayload } = event.publicPayload;
+  void _cardDefinitionId;
+  void _title;
+  return {
+    ...event,
+    publicPayload: {
+      ...publicPayload,
+      redactedKind: "accessed_card"
+    }
   };
 }
 

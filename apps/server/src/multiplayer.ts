@@ -3,7 +3,7 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { buildAiDecisionInput, chooseAiAction } from "@netrunner/ai";
 import { buildEngineDeck, type DeckSnapshot } from "@netrunner/decks";
-import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, replayEvents } from "@netrunner/engine";
+import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, redactPublicEventForSide, replayEvents } from "@netrunner/engine";
 import {
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
@@ -1398,7 +1398,8 @@ export class MultiplayerService {
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
       if (this.isAiSide(record, input.side)) return { ok: false, error: safeError("ai_session_forbidden", "Nur eine menschliche Session darf die KI fortsetzen.") };
       if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
-      if (!this.isAiSide(record, record.gameState.activeSide)) {
+      const activeAiSide = this.aiControllableSide(record);
+      if (!activeAiSide) {
         return { ok: false, error: safeError("ai_not_active", "Aktuell ist keine KI am Zug.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
       }
       if (input.knownStateVersion !== undefined && input.knownStateVersion !== record.gameState.stateVersion) {
@@ -1692,7 +1693,7 @@ export class MultiplayerService {
       side,
       playerView,
       legalActions: record.match.status === "active" ? getLegalActions(record.gameState, side) : [],
-      eventTail: record.eventLog.slice(-20).map((event) => event.publicPayload),
+      eventTail: record.eventLog.slice(-20).map((event) => redactPublicEventForSide(event.publicPayload, side)),
       opponentStatus: {
         side: opposite(side),
         connected: this.isAiSide(record, opposite(side)) || (opponent?.connected ?? false),
@@ -1900,7 +1901,7 @@ export class MultiplayerService {
   private runAiUntilNextHuman(record: StoredMatch): void {
     let state = record.gameState;
     if (!state) return;
-    for (let count = 0; count < 40 && record.match.status === "active" && !state.winner && this.isAiSide(record, state.activeSide); count += 1) {
+    for (let count = 0; count < 40 && record.match.status === "active" && !state.winner && this.aiControllableSide(record); count += 1) {
       if (!this.runAiStep(record)) return;
       state = record.gameState;
       if (!state) return;
@@ -1909,8 +1910,10 @@ export class MultiplayerService {
 
   private runAiStep(record: StoredMatch): boolean {
     const state = record.gameState;
-    if (!state || record.match.status !== "active" || state.winner || !this.isAiSide(record, state.activeSide)) return false;
-    const side = state.activeSide;
+    if (!state || record.match.status !== "active" || state.winner || !this.aiControllableSide(record)) return false;
+    if (this.isAiRunnerRunCorpReactionWindow(record)) return this.runPacedCorpPassStep(record);
+    const side = state.pendingChoice && this.isAiSide(record, state.pendingChoice.side) ? state.pendingChoice.side : state.activeSide;
+    if (!this.isAiSide(record, side)) return false;
     const legalActions = getLegalActions(state, side);
     if (legalActions.length === 0) return false;
     const controller = record.match.aiControllers?.[side];
@@ -1951,6 +1954,37 @@ export class MultiplayerService {
     return true;
   }
 
+  private runPacedCorpPassStep(record: StoredMatch): boolean {
+    const state = record.gameState;
+    if (!state || record.match.status !== "active" || state.winner || !this.isAiRunnerRunCorpReactionWindow(record)) return false;
+    const legalAction = getLegalActions(state, "corp").find((candidate) => candidate.type === "decline_rez");
+    if (!legalAction) return false;
+    const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
+    const result = applyAction(state, {
+      matchId: record.match.matchId,
+      side: "corp",
+      actionId: legalAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: `ai-paced-corp-pass-${state.stateVersion}`
+    });
+    if (!result.ok) return false;
+    const event: GameEvent = {
+      ...result.event,
+      publicPayload: {
+        ...result.event.publicPayload,
+        autoPacedPass: true
+      }
+    };
+    const barrier = isHiddenInfoBarrier(event);
+    record.stateSnapshots.push({ ...snapshot, hiddenInfoBarrier: barrier });
+    record.gameState = result.state;
+    record.eventLog.push(toEventRecord(record.match.matchId, event, barrier));
+    record.match.matchVersion += 1;
+    record.match.updatedAt = this.now();
+    if (result.state.winner) this.finalizeFinishedMatch(record);
+    return true;
+  }
+
   private aiTurnPresentationFor(record: StoredMatch, side: Side): AiTurnPresentationState | undefined {
     if (!record.gameState || !record.match.aiControllers) return undefined;
     if (record.match.status !== "active") {
@@ -1959,12 +1993,32 @@ export class MultiplayerService {
         pacingMode: record.match.aiPacingMode ?? "fast"
       };
     }
-    const activeAiSide = this.isAiSide(record, record.gameState.activeSide) ? record.gameState.activeSide : undefined;
+    const activeAiSide = this.aiControllableSide(record);
     return {
       ...(activeAiSide ? { activeAiSide } : {}),
       canAdvanceAi: Boolean(record.match.status === "active" && activeAiSide && !this.isAiSide(record, side) && !record.gameState.winner),
       pacingMode: record.match.aiPacingMode ?? "fast"
     };
+  }
+
+  private aiControllableSide(record: StoredMatch): Side | undefined {
+    const state = record.gameState;
+    if (!state) return undefined;
+    if (state.pendingChoice && this.isAiSide(record, state.pendingChoice.side)) return state.pendingChoice.side;
+    if (this.isAiSide(record, state.activeSide)) return state.activeSide;
+    if (this.isAiRunnerRunCorpReactionWindow(record)) return "runner";
+    return undefined;
+  }
+
+  private isAiRunnerRunCorpReactionWindow(record: StoredMatch): boolean {
+    const state = record.gameState;
+    return Boolean(
+      state?.run &&
+        state.timingPoint === "run.approach_ice" &&
+        state.activeSide === "corp" &&
+        this.isAiSide(record, "runner") &&
+        !this.isAiSide(record, "corp")
+    );
   }
 
   private isAiSide(record: StoredMatch, side: Side): boolean {
