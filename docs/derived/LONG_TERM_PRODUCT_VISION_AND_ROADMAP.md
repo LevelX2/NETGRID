@@ -4,7 +4,7 @@ Status: planning
 Stand: 2026-05-05
 Scope: langfristige Produktvision, Roadmap, Gates und Idealarchitektur für ein quasi vollständiges Netrunner-Endprodukt
 
-Nachtrag 2026-05-06: Die kurzfristige V1.x-Linie wurde durch den tatsächlichen Projektverlauf fortgeschrieben. V1.0.4, V1.0.5K und V1.0.6 sind inzwischen umgesetzt bzw. verifiziert; V1.0.7 Browser-E2E und Visual QA ist requirements-frozen und bereit für die Umsetzung. Die ursprünglich skizzierte V1.0.6-Position "Private Lobby Comfort" wurde faktisch durch V1.0.6 Aktionen, Credits und Kartenanzeige ersetzt; verbleibende Lobby-Politur ist kein aktiver V1.0.7-Scope.
+Nachtrag 2026-05-06: Die kurzfristige V1.x-Linie wurde durch den tatsächlichen Projektverlauf fortgeschrieben. V1.0.4, V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind inzwischen umgesetzt bzw. verifiziert; V1.0.8 Storage/Backup-Härtung ist requirements-frozen und bevorzugt SQLite als privaten lokalen Storage-Pfad. Die ursprünglich skizzierte V1.0.6-Position "Private Lobby Comfort" wurde faktisch durch V1.0.6 Aktionen, Credits und Kartenanzeige ersetzt; verbleibende Lobby-Politur ist kein aktiver V1.0.8-Scope.
 
 ## Kurzfazit
 
@@ -101,12 +101,12 @@ Umgesetzt und grün:
 Nicht belegbar oder bewusst offen:
 
 - V1.0.2 Gegner-Aktionsdarstellung und V1.0.3 Matchstart-UX sind umgesetzt und auf `main` integriert.
-- V1.0.4 ist umgesetzt und final geprüft; V1.0.5 besitzt Requirements/Specs und eine passende Workspace-Basis, aber keine eigenen formalen Finalartefakte; V1.0.5K und V1.0.6 sind umgesetzt und lokal verifiziert; V1.0.7 ist als Browser-E2E-/Visual-QA-Gate requirements-frozen.
-- Server hat keine Cancel-/Leave-/Forfeit-API.
+- V1.0.4 ist umgesetzt und final geprüft; V1.0.5 besitzt Requirements/Specs und eine passende Workspace-Basis, aber keine eigenen formalen Finalartefakte; V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind umgesetzt und lokal verifiziert; V1.0.8 Storage/Backup-Härtung ist requirements-frozen.
+- Server hat seit V1.0.4 Cancel-/Leave-/Forfeit-/Recreate-APIs für private Match-Lifecycle-Fälle.
 - KI-Pacing, `advance_ai`, Action-Cues und opt-in Aktionsaudio existieren seit V1.0.2; V1.0.5 soll sie gegen Regression absichern und die Spielansicht verständlicher machen.
 - Gegnernamen sind seit V1.0.4 side-sicher in Payloads/UI ergänzt.
-- Browser-E2E-/Screenshot-Smokes für Zwei-Tab-UX, Reconnect, Viewports und Kartenanzeige sind noch kein umgesetztes Standardwerkzeug; V1.0.7 ist genau dafür requirements-frozen.
-- JSON-Storage ist ausreichend für privaten Stand; SQLite/Postgres, Migrationen, Backups und Betriebshärtung sind offen.
+- Browser-E2E-/Screenshot-Smokes für Zwei-Tab-UX, Reconnect, Viewports und Kartenanzeige sind seit V1.0.7 als Playwright-Gate umgesetzt.
+- JSON-Storage ist ausreichend für den bisherigen privaten Stand; SQLite, Migrationen, Backups und Betriebshärtung sind als V1.0.8 geplant. Postgres bleibt zurückgestellt, solange kein Public-Scale-Gate beginnt.
 - Accounts, öffentliche Lobbys, öffentlicher oder moderationspflichtiger Chat, Matchmaking, Rankings, Turniere, Zuschauer, Moderation und Anti-Abuse fehlen bewusst. Der private V1.0.3-Lobbychat bleibt auf die Startlobby begrenzt.
 - Vollständige offizielle Deckbuilding-/Formatregeln, vollständige Setrotation/Banlists und vollständige Karten-/Mechanikabdeckung fehlen.
 - Öffentliche Nutzung offizieller Bilder, Frames, Logos, Card Backs oder vollständiger Kartendaten bleibt gesperrt, bis ein belastbarer Rechts-/Lizenzpfad existiert.
@@ -332,10 +332,11 @@ Empfohlen:
    - Status: umgesetzt und lokal verifiziert.
    - Warum: Nach Lifecycle und Action-UX brauchte die aktive Spieloberfläche klarere Ressourcen- und Kartenanzeige.
 2. **V1.0.7 Browser-E2E und Visual QA**
-   - Status: requirements-frozen und bereit für Umsetzung.
+   - Status: umgesetzt und lokal verifiziert.
    - Warum: Ab jetzt werden UI, Reconnect, Cues, mobile Layouts und Zwei-Tab-Flows zu wichtig, um sie nur manuell zu prüfen.
    - Das ist die Test-Investition, die spätere Public- und Mobile-Arbeit trägt.
 3. **V1.0.8 Storage/Backup-Härtung**
+   - Status: requirements-frozen; nächster Schritt ist Umsetzung.
    - Warum: Bevor privater Internetbetrieb oder Accounts kommen, muss Persistenz wiederherstellbar, migrierbar und dokumentiert sein.
    - SQLite ist der naheliegende private nächste Schritt; Postgres erst, wenn Public-Scale wirklich geplant wird.
 
@@ -385,11 +386,10 @@ Realistisch ist ein hervorragendes privates bis halböffentliches Netrunner-Prod
 
 ### Beste Releasefolge aus heutiger Sicht
 
-1. V1.0.7 Browser-E2E/Visual QA umsetzen.
-2. V1.0.8 Storage/Backup-Härtung.
-3. V1.0.9 Private Internet Hardening.
-4. Danach erst Regelkern und Datenpipeline in V1.1 bis V1.7 weiter vervollständigen.
-5. Öffentliche Plattform erst ab V2.x und nur nach harten Gates.
+1. V1.0.8 Storage/Backup-Härtung umsetzen.
+2. V1.0.9 Private Internet Hardening.
+3. Danach erst Regelkern und Datenpipeline in V1.1 bis V1.7 weiter vervollständigen.
+4. Öffentliche Plattform erst ab V2.x und nur nach harten Gates.
 
 ## Offene Punkte
 

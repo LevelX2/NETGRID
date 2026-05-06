@@ -138,6 +138,12 @@
 - `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.7.
 - `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für den Playwright-basierten Browser-E2E-/Visual-QA-Gate inklusive Harness, Flow-Abdeckung und Leak-Scans.
 - `docs/derived/V1_0_7_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.7 inklusive Befehl, Viewports, Artefakten, Checks und Leak-Befund.
+- `docs/derived/V1_0_8_STORAGE_BACKUP_HARDENING_PLAN.md`: Detailplan für V1.0.8 Storage/Backup-Härtung mit SQLite als bevorzugtem privaten Storage-Pfad, Migration, Backup, Restore und Recovery-Gates.
+- `docs/derived/V1_0_8_REQUIREMENTS.md`: eingefrorene V1.0.8-Anforderungen für SQLite-Standardstorage, Legacy-Import, Backup/Restore, Recovery und Redaction.
+- `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`: Spezifikation für SQLite-Adapter, Schema, Migration, Legacy-Import und E2E-Runtime-Isolation.
+- `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`: Spezifikation für private lokale Backups, Restore, Manifest, Prüfsummen und Recovery-Verhalten.
+- `docs/derived/V1_0_8_TEST_MATRIX.md`: V1.0.8-Testmatrix für Storage-Roundtrip, Migration, Backup/Restore, Redaction, Recovery und E2E-Regression.
+- `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.8.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.

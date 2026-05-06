@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.0.8 Storage/Backup-Härtung Requirements Freeze ist abgeschlossen. SQLite ist als bevorzugter privater lokaler Storage-Pfad eingefroren; der Scope umfasst migrationsfähige Match-Persistenz, kontrollierten JSON-Legacy-Import aus `data/runtime/multiplayer/matches.json`, Backup/Restore, Recovery-Verhalten, Token-/Hidden-Info-Redaktion und E2E-kompatible Runtime-Isolation. V1.0.8 ist bereit für die Umsetzung, aber noch nicht implementiert.
+
 V1.0.6K kleines Karten-Nachrelease nach V1.0.6 ist umgesetzt und lokal verifiziert. Es aktiviert 20 weitere lokal geprüfte O:NR-v1-Karten: Bodyweight™ Synthetic Blood, Jack 'n' Joe, Livewire's Contacts, Score!, Wild Card, WuTech Mem Chip, Tycho Extension, Accounts Receivable, Annual Reviews, Closed Accounts, Datapool® by Zetatech, Day Shift, Efficiency Experts, Punitive Counterstrike, Scorched Earth, Urban Renewal, Filter, Fire Wall, Keeper und Mazer. Die vorherige V1.0.5K-Freigabe mit 12 Karten bleibt aktiv.
 
 V1.0.5K kleines Karten-Nachrelease nach V1.0.5 ist umgesetzt und lokal verifiziert. Die finale Freigabe umfasst 12 lokal geprüfte O:NR-v1-Karten: Codeslinger, Raffles, Raptor, Tinweasel, Tycho Mem Chip, Zetatech Mem Chip, Hostile Takeover, Cortical Scanner, Crystal Wall, Data Wall, Data Wall 2.0 und Endless Corridor. Dogcatcher, Flak, Reflector, Shield, Corporate War und Political Overthrow bleiben wegen zusätzlicher Mechanikfamilien zurückgestellt.
@@ -58,11 +60,17 @@ Latest V1.0.7 test matrix artifact: `docs/derived/V1_0_7_TEST_MATRIX.md`.
 Latest V1.0.7 requirements review artifact: `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`.
 Latest V1.0.7 implementation review artifact: `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md`.
 Latest V1.0.7 final review artifact: `docs/derived/V1_0_7_FINAL_REVIEW.md`.
+Latest V1.0.8 planning artifact: `docs/derived/V1_0_8_STORAGE_BACKUP_HARDENING_PLAN.md`.
+Latest V1.0.8 requirements artifact: `docs/derived/V1_0_8_REQUIREMENTS.md`.
+Latest V1.0.8 SQLite storage spec artifact: `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`.
+Latest V1.0.8 backup/recovery spec artifact: `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`.
+Latest V1.0.8 test matrix artifact: `docs/derived/V1_0_8_TEST_MATRIX.md`.
+Latest V1.0.8 requirements review artifact: `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`.
 Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.0.7 Browser-E2E und Visual QA is complete and locally verified. The scope converts the existing V1.0.4/V1.0.5/V1.0.6 browser smoke runbooks into a reproducible local browser gate with two-context Human-vs-Human coverage, Human-vs-KI pacing/cue coverage, lifecycle/reconnect flows, desktop/tablet/narrow viewport checks, screenshots/traces and DOM/Storage/Payload leak scans. V1.0.7 includes current active-game UI adjustments such as direct server run actions, breaker-bound contextual actions and strength boost badges as QA targets only. V1.0.6 is complete. V1.0.5K is complete as a narrow card-release insert. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA. V1.0.4 Private Match Lifecycle and Session Recovery is implemented from `V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md` and `V1_0_4_REQUIREMENTS.md`: terminal statuses, Joiner-Leave semantics, Forfeit result modeling, Recreate, Session-Recovery, opponent display names, REST-vs-WebSocket transport, Human-vs-KI Forfeit and repeatable two-tab smoke expectations are covered. `V1_0_4_NEXT_RELEASE_CANDIDATES.md` remains the candidate/history document. Local private O:NR-v1 test access is accepted as part of the allowed private local data pool and is now covered by V1.0/V1.0.1 deck, AI/multiplayer, manifest/review and hidden-info regressions.
+Current selected next scope: V1.0.8 Storage/Backup-Härtung implementation. The requirements freeze is complete in `docs/derived/V1_0_8_REQUIREMENTS.md`, `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`, `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`, `docs/derived/V1_0_8_TEST_MATRIX.md` and `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`. The preferred path is SQLite as the private local standard storage after the completed V1.0.7 browser gate, with controlled JSON legacy import from `data/runtime/multiplayer/matches.json`, schema versioning, backup/restore, recovery behavior for missing/corrupt/old/new storage, token and hidden-info redaction, and continued isolated runtime storage for E2E. V1.0.8 must not introduce accounts, public platform features, Postgres, new cards, new mechanics, official assets, Replay/StateHash changes or Engine authority changes. V1.0.7 is complete and locally verified. V1.0.6 and V1.0.6K are complete. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
 
 ## Status
 
@@ -374,6 +382,18 @@ V1.0.7 Browser-E2E und Visual QA implementation is complete and locally verified
 `V1_0_7_verified: true`
 
 `V1_0_7_done: true`
+
+V1.0.8 Storage/Backup-Härtung detailed planning is complete as the next post-V1.0.7 quality release. The plan selects SQLite as the preferred private local storage path and scopes the release to storage migration, backup/restore, recovery behavior and storage leak safety.
+
+`V1_0_8_storage_backup_hardening_plan_available: true`
+
+`ready_for_V1_0_8_requirements_freeze: true`
+
+V1.0.8 Storage/Backup-Härtung requirements freeze is complete. The release is implementable as a SQLite-backed private local storage hardening step with controlled JSON legacy import, schema versioning, backup/restore, recovery behavior, redaction and E2E runtime isolation.
+
+`V1_0_8_requirements_freeze_done: true`
+
+`ready_for_V1_0_8_implementation: true`
 
 V1.0.7 verification:
 
@@ -1949,7 +1969,7 @@ No MVP-0.1 blocker remains.
 
 Remaining known limits:
 
-- JSON-File-Storage is intentionally simple; SQLite remains a later hardening target.
+- JSON-File-Storage is intentionally simple; SQLite is now the planned V1.0.8 Storage/Backup-Härtung path.
 - Localhost operation is the supported private MVP path. HTTPS/WSS are required outside localhost.
 - Public platform features, matchmaking, accounts, broad/free deckbuilder, chat and broad card pool remain out of scope. The local V0.6+ deck editor is permitted only as private local deck/snapshot tooling.
 - V0.94 Damage/Flatline is implemented; Core Damage, Damage Prevention, Avoid, Interrupt and Replacement remain later gated mechanics.
@@ -1989,14 +2009,16 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V1.0.5K: kleines Karten-Nachrelease, implementation complete and locally verified.
 - V1.0.6: Aktionen, Credits und Kartenanzeige, implementation complete and locally verified.
 - V1.0.7: Browser-E2E und Visual QA, implementation complete and locally verified.
+- V1.0.8: Storage/Backup-Härtung, requirements freeze complete; next step is implementation.
 
-Current gate: V1.0.7 Browser-E2E und Visual QA is complete and locally verified. V1.0.7 planning, requirements, spec, test matrix, requirements review, implementation review and final review are documented in `docs/derived/V1_0_7_BROWSER_E2E_VISUAL_QA_PLAN.md`, `docs/derived/V1_0_7_REQUIREMENTS.md`, `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`, `docs/derived/V1_0_7_TEST_MATRIX.md`, `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_7_FINAL_REVIEW.md`. V1.0.6 Aktionen, Credits und Kartenanzeige is complete and documented in `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_6_FINAL_REVIEW.md`. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. V1.0.5K is complete as a separate narrow card-release insert. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0.8 Storage/Backup-Härtung requirements freeze is complete and ready for implementation. The planning and freeze artifacts are `docs/derived/V1_0_8_STORAGE_BACKUP_HARDENING_PLAN.md`, `docs/derived/V1_0_8_REQUIREMENTS.md`, `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`, `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`, `docs/derived/V1_0_8_TEST_MATRIX.md` and `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`. V1.0.7 Browser-E2E und Visual QA is complete and locally verified. V1.0.7 planning, requirements, spec, test matrix, requirements review, implementation review and final review are documented in `docs/derived/V1_0_7_BROWSER_E2E_VISUAL_QA_PLAN.md`, `docs/derived/V1_0_7_REQUIREMENTS.md`, `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`, `docs/derived/V1_0_7_TEST_MATRIX.md`, `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_7_FINAL_REVIEW.md`. V1.0.6 Aktionen, Credits und Kartenanzeige is complete and documented in `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_6_FINAL_REVIEW.md`. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. V1.0.5K is complete as a separate narrow card-release insert. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
 Next scope decision:
 
-1. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
-2. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
-3. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
+1. Implement V1.0.8 SQLite-backed private local Storage/Backup-Härtung.
+2. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
+3. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
+4. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 
 M11+ mechanics, Prevention/Avoid/Interrupt/Replacement, Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates.
 
@@ -2038,6 +2060,12 @@ Detailed planning artifacts available:
 - `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`
 - `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/V1_0_7_FINAL_REVIEW.md`
+- `docs/derived/V1_0_8_STORAGE_BACKUP_HARDENING_PLAN.md`
+- `docs/derived/V1_0_8_REQUIREMENTS.md`
+- `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`
+- `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`
+- `docs/derived/V1_0_8_TEST_MATRIX.md`
+- `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`

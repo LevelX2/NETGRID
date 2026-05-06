@@ -4,7 +4,7 @@ Status: planning_summary
 Stand: 2026-05-05
 Hauptdokument: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 
-Nachtrag 2026-05-06: V1.0.4, V1.0.5K und V1.0.6 sind inzwischen umgesetzt bzw. verifiziert. V1.0.7 Browser-E2E und Visual QA ist requirements-frozen und der nächste umsetzungsbereite Scope.
+Nachtrag 2026-05-06: V1.0.4, V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind inzwischen umgesetzt bzw. verifiziert. V1.0.8 Storage/Backup-Härtung ist requirements-frozen; SQLite ist der bevorzugte private lokale Storage-Pfad.
 
 ## Ideales Endprodukt
 
@@ -29,7 +29,8 @@ Belegt grün am 2026-05-05 nach V1.0.3-Finale:
 - V1.0.4 ist umgesetzt und final geprüft.
 - V1.0.5 hat Requirements/Specs und eine passende Workspace-Basis, aber keine eigenen formalen Finalartefakte.
 - V1.0.5K und V1.0.6 sind umgesetzt und lokal verifiziert.
-- V1.0.7 Browser-E2E und Visual QA ist requirements-frozen und bereit für die Umsetzung.
+- V1.0.7 Browser-E2E und Visual QA ist umgesetzt und lokal verifiziert.
+- V1.0.8 Storage/Backup-Härtung ist requirements-frozen.
 - V0.94 bis V0.99 decken mehrere Kernmechaniken in engen Gates ab.
 - Private lokale O:NR-Daten sind nur privater lokaler Testpool, kein öffentlicher Kartenpool.
 - `corepack pnpm test`, `typecheck`, `lint` und `build` bestehen.
@@ -38,12 +39,11 @@ Belegt grün am 2026-05-05 nach V1.0.3-Finale:
 
 Empfohlene nächste Linie:
 
-1. V1.0.7 Browser-E2E und Visual QA.
-2. V1.0.8 Storage/Backup-Härtung.
-3. V1.0.9 Private Internet Hardening.
-4. V1.1 bis V1.7: Regelkern, Formate, Datenpipeline, Replays, Tutorials, AI v2.
-5. V2.x: geschlossene Community und öffentliche Multiplayer-Basis nur nach Auth-/Security-/Moderationsgates.
-6. V3.x/V4.x: Ranked, Turniere, vollständige Karten-/Formatabdeckung, Public-Replays, Mobile/Accessibility, langfristige Wartung.
+1. V1.0.8 Storage/Backup-Härtung.
+2. V1.0.9 Private Internet Hardening.
+3. V1.1 bis V1.7: Regelkern, Formate, Datenpipeline, Replays, Tutorials, AI v2.
+4. V2.x: geschlossene Community und öffentliche Multiplayer-Basis nur nach Auth-/Security-/Moderationsgates.
+5. V3.x/V4.x: Ranked, Turniere, vollständige Karten-/Formatabdeckung, Public-Replays, Mobile/Accessibility, langfristige Wartung.
 
 ## Harte Gates
 
