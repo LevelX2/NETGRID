@@ -27,6 +27,8 @@ Zu Beginn projektbezogener Arbeit zuerst diese Dateien lesen:
 5. `docs/codex/CODEX_STATUS.md`
 6. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`
 
+Für Anschlussplanung nach V1.1.2 ist zusätzlich `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` verbindlich, sobald `docs/codex/CODEX_STATUS.md` auf diesen Stand verweist.
+
 ## Quellenpriorität
 
 1. `docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md` für MVP 0.1.
@@ -35,6 +37,8 @@ Zu Beginn projektbezogener Arbeit zuerst diese Dateien lesen:
 4. `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf` als Regelreferenz, nicht als Scope-Erweiterung.
 5. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md` für Codex-Workflow.
 6. Ergänzende Spezifikations-, Test-, Betriebs- und Planungsdokumente unter `docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/` und `docs/Netrunner_Detailliertes_Testkonzept_MVP_0_1_0_2.md`.
+
+Aktuelle Releaseplanung hat Vorrang vor älteren Langfristskizzen: `docs/codex/CODEX_STATUS.md` nennt jeweils den aktuellen Gate-Stand und die gültigen Planungsartefakte. Für die Anschlussplanung nach V1.1.2 gilt `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`. Sie hält V1.1.2 unverändert und ersetzt die ältere Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur ab V1.1.3.
 
 Alte Konzeptdateien, Zwischenstände oder frühere Prompts dürfen nicht als gleichrangige Spezifikation verwendet werden.
 
