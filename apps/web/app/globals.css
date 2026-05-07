@@ -111,6 +111,15 @@ select {
   grid-template-rows: auto 1fr;
 }
 
+.app.activeMatch {
+  display: flex;
+  flex-direction: column;
+}
+
+.app.activeMatch .main {
+  flex: 1 1 auto;
+}
+
 .topbar {
   display: flex;
   align-items: center;
@@ -227,6 +236,16 @@ select {
 .button.iconOnly {
   width: 36px;
   padding: 0;
+}
+
+.button.matchDetailsToggle {
+  color: var(--muted);
+}
+
+.button.matchDetailsToggle.active {
+  color: var(--text);
+  border-color: var(--runner);
+  background: var(--panel-soft);
 }
 
 .wide {
@@ -1282,22 +1301,42 @@ select {
 }
 
 .matchStrip {
-  min-height: 36px;
+  min-height: 30px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 0 18px;
+  gap: 8px;
+  padding: 5px 18px;
   border-bottom: 1px solid var(--line);
   color: var(--muted);
   background: var(--match-strip-bg);
-  font-size: 13px;
+  font-size: 12px;
   overflow: hidden;
 }
 
 .matchStrip span {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.matchStrip strong {
+  margin-right: 4px;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.matchStripNotice {
+  flex: 1 1 auto;
+  color: var(--text);
+}
+
+.matchNotice {
+  padding: 7px 18px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text);
+  background: var(--match-strip-bg);
+  font-size: 13px;
 }
 
 .opponentCueOverlay {

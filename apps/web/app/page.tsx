@@ -1043,6 +1043,7 @@ export default function Page() {
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
+  const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
   const [colorSchemeLoaded, setColorSchemeLoaded] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
@@ -2810,10 +2811,21 @@ export default function Page() {
   }
 
   return (
-    <main className="app" data-theme={colorScheme}>
+    <main className="app activeMatch" data-theme={colorScheme}>
       <header className="topbar">
         <Brand subtitle={`${APP_STATUS_LABEL} · ${sideLabel(session.side)}${opponentDisplayName ? ` gegen ${opponentDisplayName}` : ""}`} />
         <div className="toolbar">
+          <button
+            className={`button iconOnly matchDetailsToggle ${matchDetailsOpen ? "active" : ""}`}
+            onClick={() => setMatchDetailsOpen((open) => !open)}
+            title={matchDetailsOpen ? "Matchdetails ausblenden" : "Matchdetails einblenden"}
+            aria-label={matchDetailsOpen ? "Matchdetails ausblenden" : "Matchdetails einblenden"}
+            aria-expanded={matchDetailsOpen}
+            aria-controls="match-details-strip"
+            type="button"
+          >
+            {matchDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          </button>
           <ConnectionBadge text={statusText} state={connection} />
           <button className="button iconOnly" onClick={() => setOptionsDialogOpen(true)} title="Optionen öffnen" aria-label="Optionen öffnen" type="button">
             <SlidersHorizontal size={16} />
@@ -2839,14 +2851,20 @@ export default function Page() {
         </div>
       </header>
 
-      <div className="matchStrip">
-        <span>{payload.matchStatus}</span>
-        <span>Match {payload.matchId}</span>
-        <span>Gegenüber {opponentDisplayName ?? sideLabel(payload.opponentStatus.side)}</span>
-        <span>Version {payload.matchVersion}</span>
-        <span>State {activeView.stateVersion}</span>
-        <span>{notice}</span>
-      </div>
+      {matchDetailsOpen ? (
+        <div className="matchStrip" id="match-details-strip" aria-label="Matchdetails">
+          <span title={payload.matchStatus}><strong>Status</strong> {payload.matchStatus}</span>
+          <span title={payload.matchId}><strong>Match</strong> {shortDiagnosticsHash(payload.matchId)}</span>
+          <span><strong>Gegenüber</strong> {opponentDisplayName ?? sideLabel(payload.opponentStatus.side)}</span>
+          <span><strong>Version</strong> {payload.matchVersion}</span>
+          <span><strong>State</strong> {activeView.stateVersion}</span>
+          {notice ? <span className="matchStripNotice">{notice}</span> : null}
+        </div>
+      ) : notice ? (
+        <div className="matchNotice" role="status" aria-live="polite">
+          {notice}
+        </div>
+      ) : null}
       <OpponentActionOverlay
         cue={currentActionCue}
         queued={actionCueQueue.length}
