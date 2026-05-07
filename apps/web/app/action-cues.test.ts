@@ -11,7 +11,7 @@ describe("deriveOpponentActionCues", () => {
         event("evt_1", "mandatory_draw", {
           actor: "corp",
           aiReasonCode: "corp.mandatory_draw",
-          aiExplanation: "Die Corp braucht ihre Pflichtkarte."
+          aiExplanation: "Die Korp braucht ihre Pflichtkarte."
         })
       ]
     });
@@ -19,9 +19,9 @@ describe("deriveOpponentActionCues", () => {
     expect(cues).toHaveLength(1);
     expect(cues[0]?.cueId).toBe("runner:evt_1");
     expect(cues[0]?.source).toBe("ai");
-    expect(cues[0]?.title).toBe("Die Corp-KI hat ihre Pflichtkarte gezogen.");
+    expect(cues[0]?.title).toBe("Die Korp-KI hat ihre Pflichtkarte gezogen.");
     expect(cues[0]?.description).toBeUndefined();
-    expect(cues[0]?.aiExplanation).toBe("Die Corp braucht ihre Pflichtkarte.");
+    expect(cues[0]?.aiExplanation).toBe("Die Korp braucht ihre Pflichtkarte.");
     expect(JSON.stringify(cues[0])).not.toContain("corp.mandatory_draw");
   });
 
@@ -32,7 +32,7 @@ describe("deriveOpponentActionCues", () => {
       events: [
         event("evt_2", "install_card", {
           actor: "corp",
-          label: "Corp installiert eine Karte.",
+          label: "Korp installiert eine Karte.",
           redactedKind: "installed_card",
           cardDefinitionId: "simple_agenda",
           title: "Simple Agenda",
@@ -45,7 +45,7 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]?.visibility).toBe("redacted");
-    expect(cues[0]?.title).toBe("Die Corp hat eine verdeckte Karte in Außenserver 1 installiert.");
+    expect(cues[0]?.title).toBe("Die Korp hat eine verdeckte Karte in Außenserver 1 installiert.");
     expect(cues[0]?.highlight).toEqual({ kind: "server", serverId: "remote_1", serverLabel: "Außenserver 1", lane: "root" });
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
     expect(JSON.stringify(cues[0])).not.toContain("Simple Agenda");
@@ -171,6 +171,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
       credits: 5,
       clicks: 3,
       agendaPoints: 0,
+      identity: { instanceId: `${side}_identity`, known: true, title: side === "corp" ? "Korp Identity" : "Runner Identity", definitionId: `${side}_identity`, type: "identity" },
       gripOrHq: [],
       stackOrRdCount: 5,
       heapOrArchives: [],
@@ -186,6 +187,13 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
       handCount: 4,
       deckCount: 5,
       discardCount: 0,
+      identity: {
+        instanceId: `${side === "corp" ? "runner" : "corp"}_identity`,
+        known: true,
+        title: side === "corp" ? "Runner Identity" : "Korp Identity",
+        definitionId: `${side === "corp" ? "runner" : "corp"}_identity`,
+        type: "identity"
+      },
       scoreArea: [],
       rig: []
     },
@@ -193,6 +201,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
     publicEvents: [],
     legalActions: [],
     winner: null,
+    agendaPointsToWin: 7,
     ...overrides
   };
 }

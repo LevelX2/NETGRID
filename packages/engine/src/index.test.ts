@@ -4,6 +4,7 @@ import {
   applyEffectCommands,
   checkWinConditions,
   createGame,
+  createGameAfterSetup,
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
   eventVisibilityForAction,
@@ -19,16 +20,70 @@ import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAct
 
 describe("MVP 0.1 engine foundation", () => {
   it("creates deterministic games for the same seed", () => {
-    const first = createGame({ seed: "deterministic" });
-    const second = createGame({ seed: "deterministic" });
+    const first = createGameAfterSetup({ seed: "deterministic" });
+    const second = createGameAfterSetup({ seed: "deterministic" });
 
     expect(hashState(first)).toBe(hashState(second));
     expect(first.randomDrawRecords).toEqual(second.randomDrawRecords);
     expect(validateGameState(first).ok).toBe(true);
   });
 
+  it("starts in explicit setup with side-safe private mulligan choices", () => {
+    const state = createGame({ seed: "v110-explicit-setup" });
+
+    expect(state.phase).toBe("setup");
+    expect(state.timingPoint).toBe("setup.mulligan.runner");
+    expect(state.setup).toMatchObject({ status: "mulligan_runner", initialHandSize: 5 });
+    expect(state.agendaPointsToWin).toBe(7);
+    expect(getLegalActions(state, "runner")).toHaveLength(1);
+    expect(getLegalActions(state, "runner")[0]?.type).toBe("resolve_choice");
+    expect(getLegalActions(state, "corp")).toHaveLength(0);
+    expect(getPlayerView(state, "runner").pendingChoice?.options.map((option) => option.id)).toEqual(["keep", "mulligan"]);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "runner").agendaPointsToWin).toBe(7);
+    expect(getPlayerView(state, "runner").own.identity.known).toBe(true);
+    expect(getPlayerView(state, "runner").opponent.identity.known).toBe(true);
+  });
+
+  it("resolves runner and corp keep decisions into the first mandatory draw", () => {
+    let state = createGame({ seed: "v110-setup-keep" });
+    state = applyChoice(state, "runner", "keep");
+
+    expect(state.phase).toBe("setup");
+    expect(state.timingPoint).toBe("setup.mulligan.corp");
+    expect(state.setup?.resolved.runner).toBe("keep");
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "corp").pendingChoice?.options.map((option) => option.id)).toEqual(["keep", "mulligan"]);
+
+    state = applyChoice(state, "corp", "keep");
+    expect(state.phase).toBe("corp_draw_phase");
+    expect(state.timingPoint).toBe("corp_draw.mandatory_draw");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.setup).toMatchObject({ status: "complete", resolved: { runner: "keep", corp: "keep" } });
+    expect(getLegalActions(state, "corp").some((action) => action.type === "mandatory_draw")).toBe(true);
+  });
+
+  it("mulligans deterministically without public hidden-info leaks", () => {
+    let state = createGame({ seed: "v110-runner-mulligan" });
+    const initialGrip = state.runner.grip.slice();
+    state = applyChoice(state, "runner", "mulligan");
+
+    expect(state.runner.grip).toHaveLength(5);
+    expect(state.runner.grip).not.toEqual(initialGrip);
+    expect(state.setup?.resolved.runner).toBe("mulligan");
+    expect(state.setup?.mulligansTaken.runner).toBe(1);
+    expect(state.randomDrawRecords.some((record) => record.purpose === "setup.shuffle.runner.mulligan")).toBe(true);
+    expect(state.randomDrawRecords.some((record) => record.purpose === "setup.draw.runner.mulligan_hand")).toBe(true);
+    expect(JSON.stringify(state.eventLog.map((event) => event.publicPayload))).not.toContain("runner_simple_");
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+
+    const replay = replayEvents(createGame({ seed: "v110-runner-mulligan" }), state.eventLog);
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("rejects stale and wrong-side player actions", () => {
-    let state = createGame({ seed: "validation" });
+    let state = createGameAfterSetup({ seed: "validation" });
     const mandatory = mustAction(state, "corp", (action) => action.type === "mandatory_draw");
     const stale = applyAction(state, {
       matchId: state.matchId,
@@ -54,7 +109,7 @@ describe("MVP 0.1 engine foundation", () => {
 
 describe("MVP 0.1 turns and cards", () => {
   it("plays the Runner economy event and installs all MVP breakers", () => {
-    let state = toRunnerTurn(createGame({ seed: "runner-cards" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "runner-cards" }));
     state.runner.credits = 10;
     moveRunnerCardToGrip(state, "simple_economy_event");
     moveRunnerCardToGrip(state, "simple_fracter");
@@ -79,7 +134,7 @@ describe("MVP 0.1 turns and cards", () => {
   });
 
   it("plays Corp economy operation", () => {
-    let state = createGame({ seed: "corp-operation" });
+    let state = createGameAfterSetup({ seed: "corp-operation" });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 5;
     moveCorpCardToHq(state, "simple_economy_operation");
@@ -98,7 +153,7 @@ describe("MVP 0.1 turns and cards", () => {
   });
 
   it("lets the Corp create a new remote by installing ICE", () => {
-    let state = createGame({ seed: "corp-ice-new-remote" });
+    let state = createGameAfterSetup({ seed: "corp-ice-new-remote" });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const iceId = moveCorpCardToHq(state, "simple_barrier_ice");
 
@@ -120,7 +175,7 @@ describe("MVP 0.1 turns and cards", () => {
 
 describe("MVP 0.1 runs, access and scoring", () => {
   it("lets the Runner steal the top R&D agenda", () => {
-    let state = toRunnerTurn(createGame({ seed: "steal-rd" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "steal-rd" }));
     putCorpCardOnTopOfRd(state, "simple_agenda");
 
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
@@ -138,7 +193,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
   });
 
   it("reveals the randomly accessed HQ card in the access event", () => {
-    let state = toRunnerTurn(createGame({ seed: "access-hq" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "access-hq" }));
     const accessedId = moveCorpCardToHq(state, "simple_economy_operation");
     keepOnlyCorpHqCard(state, accessedId);
 
@@ -151,7 +206,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
   });
 
   it("shows a card trashed from HQ in Runner-visible Archives", () => {
-    let state = toRunnerTurn(createGame({ seed: "trash-hq-asset" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "trash-hq-asset" }));
     state.runner.credits = 10;
     const accessedId = moveCorpCardToHq(state, "simple_economy_asset");
     keepOnlyCorpHqCard(state, accessedId);
@@ -168,9 +223,42 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(archives?.root.find((card) => card.definitionId === "simple_economy_asset")?.title).toBe("Simple Economy Asset");
   });
 
+  it("does not offer a card access when a successful remote run finds an empty root", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "empty-remote-access" }));
+    state.corp.servers.push({ id: "remote_1", kind: "remote", label: "Remote 1", ice: [], root: [] });
+    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const randomDrawsBefore = state.randomDrawRecords.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+
+    const accessActions = getLegalActions(state, "runner");
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(accessActions.some((action) => action.type === "access_card")).toBe(false);
+    expect(accessActions.find((action) => action.type === "continue_run")?.label).toBe("Zugriff abschließen");
+    expect(state.randomDrawRecords).toHaveLength(randomDrawsBefore);
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "continue_run", result: "ended" });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty("cardDefinitionId");
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty("title");
+  });
+
+  it("still offers card access for a remote with a root card", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "non-empty-remote-access" }));
+    putCorpRootInRemote(state, "simple_agenda");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+
+    expect(getLegalActions(state, "runner").some((action) => action.type === "access_card")).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_agenda", title: "Simple Agenda", serverLabel: "Remote 1" });
+  });
+
 
   it("lets the Runner break Barrier ICE and access R&D", () => {
-    let state = toRunnerTurn(createGame({ seed: "break-barrier" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "break-barrier" }));
     state.runner.credits = 10;
     installRunnerProgramForTest(state, "simple_fracter");
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
@@ -191,7 +279,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
   });
 
   it("ends the run on an unbroken End the Run subroutine", () => {
-    let state = toRunnerTurn(createGame({ seed: "etr" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "etr" }));
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpCardOnTopOfRd(state, "simple_agenda");
     state.corp.credits = 5;
@@ -206,7 +294,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
   });
 
   it("skips the Corp rez window when a later run approaches already rezzed ICE", () => {
-    let state = toRunnerTurn(createGame({ seed: "rezzed-ice-repeat-run" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "rezzed-ice-repeat-run" }));
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpCardOnTopOfRd(state, "simple_agenda");
     state.corp.credits = 5;
@@ -225,7 +313,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
   });
 
   it("lets the Corp score the third Simple Agenda and win at six agenda points", () => {
-    let state = createGame({ seed: "corp-score", agendaPointsToWin: 6 });
+    let state = createGameAfterSetup({ seed: "corp-score", agendaPointsToWin: 6 });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 10;
     state.corp.clicks = 4;
@@ -245,7 +333,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
 describe("MVP 0.1 visibility, replay and state hash", () => {
   it("does not leak hidden Corp card titles into the Runner view or public events", () => {
-    let state = toRunnerTurn(createGame({ seed: "visibility" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "visibility" }));
     moveRunnerCardToGrip(state, "simple_run_event");
     moveCorpCardToHq(state, "simple_agenda");
     moveCorpCardToArchives(state, "simple_economy_operation");
@@ -271,7 +359,7 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
   });
 
   it("replays actions and reproduces the final StateHash", () => {
-    let state = createGame({ seed: "replay" });
+    let state = createGameAfterSetup({ seed: "replay" });
     const initial = structuredClone(state);
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "gain_credit");
@@ -499,7 +587,7 @@ describe("O:NR v1 Limited local private test access", () => {
   });
 
   it("plays O:NR tagged operations, meat damage operations and Tycho Extension scoring", () => {
-    let state = createGame({ seed: "onr-v1-corp-operations", runnerDeck: ONR_V1_RUNNER_DECK, corpDeck: ONR_V1_CORP_DECK, agendaPointsToWin: 7 });
+    let state = createGameAfterSetup({ seed: "onr-v1-corp-operations", runnerDeck: ONR_V1_RUNNER_DECK, corpDeck: ONR_V1_CORP_DECK, agendaPointsToWin: 7 });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 40;
     state.corp.clicks = 20;
@@ -549,7 +637,7 @@ describe("O:NR v1 Limited local private test access", () => {
       ["onr_v1_302_scorched-earth", 4],
       ["onr_v1_307_urban-renewal", 5]
     ] as const) {
-      let damageState = createGame({ seed: `onr-v1-${definitionId}`, runnerDeck: ONR_V1_RUNNER_DECK, corpDeck: ONR_V1_CORP_DECK, agendaPointsToWin: 7 });
+      let damageState = createGameAfterSetup({ seed: `onr-v1-${definitionId}`, runnerDeck: ONR_V1_RUNNER_DECK, corpDeck: ONR_V1_CORP_DECK, agendaPointsToWin: 7 });
       damageState = apply(damageState, "corp", (action) => action.type === "mandatory_draw");
       damageState.corp.credits = 40;
       damageState.runner.tags = 1;
@@ -568,7 +656,7 @@ describe("O:NR v1 Limited local private test access", () => {
       expect(JSON.stringify(damageState.eventLog.at(-1)?.publicPayload)).not.toContain("runner_");
     }
 
-    let scoringState = createGame({ seed: "onr-v1-tycho-score", runnerDeck: ONR_V1_RUNNER_DECK, corpDeck: ONR_V1_CORP_DECK, agendaPointsToWin: 7 });
+    let scoringState = createGameAfterSetup({ seed: "onr-v1-tycho-score", runnerDeck: ONR_V1_RUNNER_DECK, corpDeck: ONR_V1_CORP_DECK, agendaPointsToWin: 7 });
     scoringState = apply(scoringState, "corp", (action) => action.type === "mandatory_draw");
     scoringState.corp.credits = 20;
     scoringState.corp.clicks = 10;
@@ -697,7 +785,7 @@ describe("V1.0.5K Card Release", () => {
   });
 
   it("scores Hostile Takeover with its narrow on-score credit resolver and deterministic replay", () => {
-    let state = createGame({ seed: "v105k-hostile-takeover", runnerDeck: ONR_V1_0_5K_RUNNER_DECK, corpDeck: ONR_V1_0_5K_CORP_DECK, agendaPointsToWin: 7 });
+    let state = createGameAfterSetup({ seed: "v105k-hostile-takeover", runnerDeck: ONR_V1_0_5K_RUNNER_DECK, corpDeck: ONR_V1_0_5K_CORP_DECK, agendaPointsToWin: 7 });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
     state.corp.clicks = 10;
@@ -732,7 +820,7 @@ describe("V1.0.5K Card Release", () => {
       id: "v105k_remote_root_limit_corp",
       cards: [...ONR_V1_0_5K_CORP_DECK.cards, { id: "simple_economy_asset", quantity: 1 }, { id: "simple_upgrade", quantity: 1 }]
     };
-    let state = createGame({ seed: "v105k-remote-root-limit", runnerDeck: ONR_V1_0_5K_RUNNER_DECK, corpDeck, agendaPointsToWin: 7 });
+    let state = createGameAfterSetup({ seed: "v105k-remote-root-limit", runnerDeck: ONR_V1_0_5K_RUNNER_DECK, corpDeck, agendaPointsToWin: 7 });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 20;
     state.corp.clicks = 10;
@@ -848,7 +936,7 @@ describe("V1.0.6K Card Release", () => {
   });
 
   it("plays V1.0.6K Corp economy, tagged and damage operations", () => {
-    let state = createGame({ seed: "v106k-corp-operations", runnerDeck: ONR_V1_0_6K_RUNNER_DECK, corpDeck: ONR_V1_0_6K_CORP_DECK, agendaPointsToWin: 7 });
+    let state = createGameAfterSetup({ seed: "v106k-corp-operations", runnerDeck: ONR_V1_0_6K_RUNNER_DECK, corpDeck: ONR_V1_0_6K_CORP_DECK, agendaPointsToWin: 7 });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 40;
     state.corp.clicks = 20;
@@ -891,7 +979,7 @@ describe("V1.0.6K Card Release", () => {
       ["onr_v1_302_scorched-earth", 4],
       ["onr_v1_307_urban-renewal", 5]
     ] as const) {
-      let damageState = createGame({ seed: `v106k-${definitionId}`, runnerDeck: ONR_V1_0_6K_RUNNER_DECK, corpDeck: ONR_V1_0_6K_CORP_DECK, agendaPointsToWin: 7 });
+      let damageState = createGameAfterSetup({ seed: `v106k-${definitionId}`, runnerDeck: ONR_V1_0_6K_RUNNER_DECK, corpDeck: ONR_V1_0_6K_CORP_DECK, agendaPointsToWin: 7 });
       damageState = apply(damageState, "corp", (action) => action.type === "mandatory_draw");
       damageState.corp.credits = 40;
       damageState.runner.tags = 1;
@@ -1191,12 +1279,12 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
   it("creates V0.97 games with explicit demo decks and keeps old run behavior gated", () => {
-    const state = createGame({
+    const state = createGameAfterSetup({
       seed: "v097-baseline",
       runnerDeckId: "demo_runner_097",
       corpDeckId: "demo_corp_097"
     });
-    const legacy = toRunnerTurn(createGame({ seed: "v097-legacy-gate" }));
+    const legacy = toRunnerTurn(createGameAfterSetup({ seed: "v097-legacy-gate" }));
 
     expect(state.baseline.engineSchemaVersion).toBe("0.97.0");
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe("card-snapshot-0.97");
@@ -1316,7 +1404,7 @@ describe("MVP 0.98a Identity and modifiers", () => {
   it("creates deterministic V0.98 games with setup and static identity modifiers", () => {
     const first = v098IdentityGame("v098-identity-setup");
     const second = v098IdentityGame("v098-identity-setup");
-    const legacy = createGame({ seed: "v098-legacy-identity" });
+    const legacy = createGameAfterSetup({ seed: "v098-legacy-identity" });
 
     expect(first.baseline.engineSchemaVersion).toBe("0.98.0");
     expect(first.deckMetadata?.runner.cardPoolSnapshotId).toBe("card-snapshot-0.98");
@@ -1681,7 +1769,7 @@ describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
 
 describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
-    const state = toRunnerTurn(createGame({ seed: "v093-choice" }));
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "v093-choice" }));
     state.pendingChoice = choiceRequest(state, "runner");
 
     const runnerView = getPlayerView(state, "runner");
@@ -1723,7 +1811,7 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   });
 
   it("keeps normal games free of generic V0.93 action types", () => {
-    const state = toRunnerTurn(createGame({ seed: "v093-no-visible-new-actions" }));
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "v093-no-visible-new-actions" }));
     const actionTypes = getLegalActions(state, "runner").map((action) => action.type);
 
     expect(actionTypes).not.toContain("resolve_choice");
@@ -1731,7 +1819,7 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   });
 
   it("runs basic effect commands without mutating the original state", () => {
-    const state = createGame({ seed: "v093-effects" });
+    const state = createGameAfterSetup({ seed: "v093-effects" });
     const beforeHash = hashState(state);
     const next = applyEffectCommands(state, [
       { type: "gain_credits", side: "runner", amount: 3 },
@@ -1747,7 +1835,7 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   });
 
   it("keeps breaker pump and break public action types while adding ability metadata", () => {
-    let state = toRunnerTurn(createGame({ seed: "v093-breaker-ability", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v093-breaker-ability", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
     state.runner.credits = 10;
     installRunnerProgramForTest(state, "v08_steady_fracter");
     putCorpIceOnServer(state, "rd", "v08_wall_ice");
@@ -1770,7 +1858,7 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   });
 
   it("classifies access as a hidden-info barrier event", () => {
-    let state = toRunnerTurn(createGame({ seed: "v093-event-classification", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v093-event-classification", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
     putCorpCardOnTopOfRd(state, "v08_project_agenda");
 
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
@@ -1787,16 +1875,16 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
 });
 
 describe("MVP 0.4 controlled card pool and tags", () => {
-  it("creates V0.4 games with explicit expanded demo decks without changing legacy defaults", () => {
-    const legacy = createGame({ seed: "legacy-default" });
-    const expanded = createGame({
+  it("creates V0.4 games with explicit expanded demo decks on the V1.1.0 agenda target", () => {
+    const legacy = createGameAfterSetup({ seed: "legacy-default" });
+    const expanded = createGameAfterSetup({
       seed: "v04-expanded",
       runnerDeckId: "demo_runner_004",
       corpDeckId: "demo_corp_004",
       agendaPointsToWin: 7
     });
 
-    expect(legacy.agendaPointsToWin).toBe(6);
+    expect(legacy.agendaPointsToWin).toBe(7);
     expect(expanded.agendaPointsToWin).toBe(7);
     expect(Object.values(expanded.cardInstances).some((card) => card.definitionId === "simple_setup_hardware")).toBe(true);
     expect(Object.values(expanded.cardInstances).some((card) => card.definitionId === "simple_tag_ice")).toBe(true);
@@ -1807,7 +1895,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
   });
 
   it("plays safe batch draw cards and installs hardware for memory", () => {
-    let state = toRunnerTurn(createGame({ seed: "v04-runner-safe", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v04-runner-safe", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
     state.runner.credits = 10;
     moveRunnerCardToGrip(state, "simple_draw_event");
     moveRunnerCardToGrip(state, "simple_setup_hardware");
@@ -1823,7 +1911,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
   });
 
   it("rezzes and trashes a simple upgrade without leaking its title before access", () => {
-    let state = toRunnerTurn(createGame({ seed: "v04-upgrade", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v04-upgrade", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
     state.runner.credits = 10;
     putCorpRootInRemote(state, "simple_upgrade");
 
@@ -1847,7 +1935,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
   });
 
   it("applies tags from ICE and lets Runner remove one tag", () => {
-    let state = toRunnerTurn(createGame({ seed: "v04-tags", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v04-tags", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
     putCorpIceOnServer(state, "rd", "simple_tag_ice");
     state.corp.credits = 5;
     state.runner.credits = 5;
@@ -1866,7 +1954,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
   });
 
   it("gates tag punishment operation on runner tags", () => {
-    let state = createGame({ seed: "v04-punishment", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" });
+    let state = createGameAfterSetup({ seed: "v04-punishment", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 5;
     moveCorpCardToHq(state, "simple_tag_punishment_operation");
@@ -1881,7 +1969,7 @@ describe("MVP 0.4 controlled card pool and tags", () => {
 
 describe("MVP 0.8 playable starter slice", () => {
   it("creates V0.8 games with explicit starter decks and baseline", () => {
-    const state = createGame({
+    const state = createGameAfterSetup({
       seed: "v08-starter",
       runnerDeckId: "demo_runner_008",
       corpDeckId: "demo_corp_008"
@@ -1899,7 +1987,7 @@ describe("MVP 0.8 playable starter slice", () => {
   });
 
   it("resolves V0.8 runner event and install resolvers", () => {
-    let state = toRunnerTurn(createGame({ seed: "v08-runner-events", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v08-runner-events", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
     state.runner.credits = 10;
     moveRunnerCardToGrip(state, "v08_burst_credit_event");
     moveRunnerCardToGrip(state, "v08_deep_draw_event");
@@ -1919,7 +2007,7 @@ describe("MVP 0.8 playable starter slice", () => {
   });
 
   it("uses V0.8 run events and breaker definitions through LegalActions", () => {
-    let state = toRunnerTurn(createGame({ seed: "v08-run-pressure", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v08-run-pressure", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
     state.runner.credits = 10;
     moveRunnerCardToGrip(state, "v08_overclock_run_event");
     installRunnerProgramForTest(state, "v08_steady_fracter");
@@ -1940,7 +2028,7 @@ describe("MVP 0.8 playable starter slice", () => {
   });
 
   it("resolves V0.8 corp operations, asset rez and agenda scoring", () => {
-    let state = createGame({ seed: "v08-corp-economy", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" });
+    let state = createGameAfterSetup({ seed: "v08-corp-economy", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 10;
     state.corp.clicks = 8;
@@ -1972,7 +2060,7 @@ describe("MVP 0.8 playable starter slice", () => {
   });
 
   it("keeps V0.8 hidden ICE redacted until rez and applies tag subroutines", () => {
-    let state = toRunnerTurn(createGame({ seed: "v08-watchdog", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v08-watchdog", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008" }));
     putCorpIceOnServer(state, "rd", "v08_watchdog_ice");
     state.corp.credits = 10;
     state.runner.credits = 5;
@@ -2232,7 +2320,7 @@ const V095_CORP_DECK: DeckDefinition = {
 };
 
 function v094DamageGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeck: V094_RUNNER_DECK,
     corpDeck: V094_CORP_DECK,
@@ -2241,7 +2329,7 @@ function v094DamageGame(seed: string): GameState {
 }
 
 function onrV1Game(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeck: ONR_V1_RUNNER_DECK,
     corpDeck: ONR_V1_CORP_DECK,
@@ -2250,7 +2338,7 @@ function onrV1Game(seed: string): GameState {
 }
 
 function v105kCardReleaseGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeck: ONR_V1_0_5K_RUNNER_DECK,
     corpDeck: ONR_V1_0_5K_CORP_DECK,
@@ -2259,7 +2347,7 @@ function v105kCardReleaseGame(seed: string): GameState {
 }
 
 function v106kCardReleaseGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeck: ONR_V1_0_6K_RUNNER_DECK,
     corpDeck: ONR_V1_0_6K_CORP_DECK,
@@ -2268,7 +2356,7 @@ function v106kCardReleaseGame(seed: string): GameState {
 }
 
 function v095ResourceGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeck: V095_RUNNER_DECK,
     corpDeck: V095_CORP_DECK,
@@ -2277,7 +2365,7 @@ function v095ResourceGame(seed: string): GameState {
 }
 
 function v096TraceGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeckId: "demo_runner_096",
     corpDeckId: "demo_corp_096",
@@ -2286,7 +2374,7 @@ function v096TraceGame(seed: string): GameState {
 }
 
 function v097RunGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeckId: "demo_runner_097",
     corpDeckId: "demo_corp_097",
@@ -2295,7 +2383,7 @@ function v097RunGame(seed: string): GameState {
 }
 
 function v098IdentityGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeckId: "demo_runner_098",
     corpDeckId: "demo_corp_098",
@@ -2304,7 +2392,7 @@ function v098IdentityGame(seed: string): GameState {
 }
 
 function v099CounterHostingGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeckId: "demo_runner_099",
     corpDeckId: "demo_corp_099",

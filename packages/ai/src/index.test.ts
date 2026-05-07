@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyAction, applyEffectCommands, createGame, getLegalActions, getPlayerView, replayEvents } from "@netrunner/engine";
+import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, replayEvents } from "@netrunner/engine";
 import {
   assertAiInputIsSideSafe,
   buildObservedFacts,
@@ -14,7 +14,7 @@ import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAct
 
 describe("MVP 0.3 AI controller contract", () => {
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
-    const state = createGame({ seed: "ai-contract" });
+    const state = createGameAfterSetup({ seed: "ai-contract" });
     const corpInput = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
     const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
 
@@ -29,7 +29,7 @@ describe("MVP 0.3 AI controller contract", () => {
   });
 
   it("keeps decisions deterministic and always chooses legal action ids", () => {
-    const state = createGame({ seed: "ai-deterministic" });
+    const state = createGameAfterSetup({ seed: "ai-deterministic" });
     const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
 
     const first = chooseAiAction(input);
@@ -42,7 +42,7 @@ describe("MVP 0.3 AI controller contract", () => {
   });
 
   it("uses deterministic fallback when no heuristic matches", () => {
-    const state = createGame({ seed: "ai-fallback" });
+    const state = createGameAfterSetup({ seed: "ai-fallback" });
     const input = buildAiDecisionInput(state, "corp");
     const fallbackOnly = { ...input, legalActions: [{ ...input.legalActions[0]!, type: "play_event" as const, actionId: "z.event" }] };
 
@@ -54,7 +54,7 @@ describe("MVP 0.3 AI controller contract", () => {
   });
 
   it("keeps V0.93 pending choices inside the side-safe LegalActions contract", () => {
-    const state = toRunnerTurn(createGame({ seed: "ai-v093-choice" }));
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v093-choice" }));
     state.pendingChoice = choiceRequest(state, "runner");
     const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
     const decision = chooseRunnerAction(input);
@@ -132,7 +132,7 @@ describe("MVP 0.3 AI controller contract", () => {
 
   it("keeps V0.97 breach queues hidden and chooses access from LegalActions", () => {
     let state = toRunnerTurn(
-      createGame({
+      createGameAfterSetup({
         seed: "ai-v097-breach",
         runnerDeckId: "demo_runner_097",
         corpDeckId: "demo_corp_097",
@@ -160,7 +160,7 @@ describe("MVP 0.3 AI controller contract", () => {
 
   it("keeps V0.98 hidden-zone choices side-safe for AI inputs", () => {
     let state = toRunnerTurn(
-      createGame({
+      createGameAfterSetup({
         seed: "ai-v098-hidden-zone",
         runnerDeckId: "demo_runner_098",
         corpDeckId: "demo_corp_098",
@@ -189,7 +189,7 @@ describe("MVP 0.3 AI controller contract", () => {
 
   it("keeps V0.99 hosting choices side-safe and lets Corp AI choose legal Purge", () => {
     let hostingState = toRunnerTurn(
-      createGame({
+      createGameAfterSetup({
         seed: "ai-v099-hosting",
         runnerDeckId: "demo_runner_099",
         corpDeckId: "demo_corp_099",
@@ -212,7 +212,7 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(corpInput)).not.toContain("Simple Decoder");
 
     let purgeState = toRunnerTurn(
-      createGame({
+      createGameAfterSetup({
         seed: "ai-v099-purge",
         runnerDeckId: "demo_runner_099",
         corpDeckId: "demo_corp_099",
@@ -237,7 +237,7 @@ describe("MVP 0.3 AI controller contract", () => {
 
 describe("MVP 0.3 Runner AI", () => {
   it("prioritizes accessing and stealing a visible agenda", () => {
-    let state = toRunnerTurn(createGame({ seed: "ai-runner-steal" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-runner-steal" }));
     putCorpCardOnTopOfRd(state, "simple_agenda");
 
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
@@ -250,7 +250,7 @@ describe("MVP 0.3 Runner AI", () => {
   });
 
   it("distinguishes easy and normal pressure choices", () => {
-    const state = toRunnerTurn(createGame({ seed: "ai-runner-difficulty" }));
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-runner-difficulty" }));
     const input = buildAiDecisionInput(state, "runner", { difficulty: "easy" });
     const gain = input.legalActions.find((action) => action.type === "gain_credit");
     const run = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
@@ -265,8 +265,47 @@ describe("MVP 0.3 Runner AI", () => {
     expect(normal.actionId).toBe(run.actionId);
   });
 
+  it("uses public remote root and ICE counts before choosing run targets", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-runner-empty-remote" }));
+    ensureRemoteServer(state, "remote_1");
+    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const emptyRemoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    expect(emptyRemoteRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!emptyRemoteRun || !rdRun) throw new Error("Missing run fixture actions");
+
+    const emptyOnly = chooseRunnerAction({ ...input, legalActions: [emptyRemoteRun] });
+    const betterTarget = chooseRunnerAction({ ...input, legalActions: [emptyRemoteRun, rdRun] });
+
+    expect(emptyOnly.reasonCode).toBe("runner.run.empty_remote_low_value");
+    expect(emptyOnly.evidence).toContain("ice_count:1");
+    expect(emptyOnly.evidence).toContain("root_count:0");
+    expect(betterTarget.actionId).toBe(rdRun.actionId);
+  });
+
+  it("treats multiple remote root cards as public pressure without learning identities", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-runner-remote-counts" }));
+    putCorpRootInRemote(state, "simple_agenda", 0);
+    putCorpRootInRemote(state, "simple_economy_asset", 0);
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const remoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    expect(remoteRun).toBeDefined();
+    if (!remoteRun) throw new Error("Missing remote run fixture action");
+
+    const decision = chooseRunnerAction({ ...input, legalActions: [remoteRun] });
+    const serializedDecision = JSON.stringify(decision);
+
+    expect(decision.reasonCode).toBe("runner.run.visible_pressure");
+    expect(decision.evidence).toContain("root_count:2");
+    expect(serializedDecision).not.toContain("Simple Agenda");
+    expect(serializedDecision).not.toContain("Simple Economy Asset");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
   it("backs off from a visibly blocked rezzed ICE run when setup alternatives exist", () => {
-    let state = toRunnerTurn(createGame({ seed: "ai-runner-rezzed-ice-loop" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-runner-rezzed-ice-loop" }));
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpCardOnTopOfRd(state, "simple_agenda");
     state.corp.credits = 5;
@@ -289,7 +328,7 @@ describe("MVP 0.3 Runner AI", () => {
   });
 
   it("prioritizes removing public tags when legal", () => {
-    const state = toRunnerTurn(createGame({ seed: "ai-remove-tag" }));
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-remove-tag" }));
     state.runner.tags = 1;
     state.runner.credits = 2;
     const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
@@ -303,7 +342,7 @@ describe("MVP 0.3 Runner AI", () => {
 
 describe("MVP 0.3 Corp AI v2", () => {
   it("prioritizes scoring an advanced remote agenda", () => {
-    let state = createGame({ seed: "ai-corp-score" });
+    let state = createGameAfterSetup({ seed: "ai-corp-score" });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 10;
     state.corp.clicks = 3;
@@ -332,7 +371,7 @@ describe("MVP 0.3 AI simulation harness", () => {
   });
 
   it("keeps a replayable long smoke run through public AI actions", () => {
-    let state = createGame({ seed: "ai-long-smoke" });
+    let state = createGameAfterSetup({ seed: "ai-long-smoke" });
     const initial = structuredClone(state);
     for (let step = 0; step < 60 && !state.winner; step += 1) {
       const side = state.activeSide;
@@ -467,7 +506,7 @@ describe("MVP 0.9 stronger AI", () => {
   });
 
   it("keeps hidden-state variants from changing visible decisions", () => {
-    const state = toRunnerTurn(createGame({ seed: "ai-v09-hidden", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008", agendaPointsToWin: 7 }));
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v09-hidden", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008", agendaPointsToWin: 7 }));
     const input = buildAiDecisionInput(state, "runner", { difficulty: "hard", profileId: "runner-ai-v0.9-hard" });
     const variant = {
       ...input,
@@ -479,7 +518,7 @@ describe("MVP 0.9 stronger AI", () => {
   });
 
   it("reconstructs observed facts without private decklists", () => {
-    const state = createGame({ seed: "ai-v09-observed", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008", agendaPointsToWin: 7 });
+    const state = createGameAfterSetup({ seed: "ai-v09-observed", runnerDeckId: "demo_runner_008", corpDeckId: "demo_corp_008", agendaPointsToWin: 7 });
     const input = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v0.9-normal" });
     const facts = buildObservedFacts(input);
 
@@ -561,7 +600,7 @@ const V095_CORP_DECK: DeckDefinition = {
 };
 
 function v094DamageGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeck: V094_RUNNER_DECK,
     corpDeck: V094_CORP_DECK,
@@ -570,7 +609,7 @@ function v094DamageGame(seed: string): GameState {
 }
 
 function v095ResourceGame(seed: string): GameState {
-  return createGame({
+  return createGameAfterSetup({
     seed,
     runnerDeck: V095_RUNNER_DECK,
     corpDeck: V095_CORP_DECK,
@@ -594,7 +633,7 @@ function installedResourceCorpTurn(seed: string): GameState {
 
 function traceCorpBidState(seed: string): GameState {
   let state = toRunnerTurn(
-    createGame({
+    createGameAfterSetup({
       seed,
       runnerDeckId: "demo_runner_096",
       corpDeckId: "demo_corp_096",
@@ -635,6 +674,12 @@ function toRunnerTurn(state: GameState): GameState {
   let next = apply(state, "corp", (action) => action.type === "mandatory_draw");
   next = apply(next, "corp", (action) => action.type === "end_turn");
   return next;
+}
+
+function ensureRemoteServer(state: GameState, serverId: `remote_${number}`): void {
+  if (state.corp.servers.some((server) => server.id === serverId)) return;
+  const number = serverId.replace("remote_", "");
+  state.corp.servers.push({ id: serverId, kind: "remote", label: `Remote ${number}`, ice: [], root: [] });
 }
 
 function putCorpCardOnTopOfRd(state: GameState, definitionId: string): CardInstanceId {

@@ -66,7 +66,7 @@ describe("Client visibility contract", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.0.9"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.1.0"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
@@ -124,10 +124,10 @@ describe("Client visibility contract", () => {
     expect(page).toContain("Meine Decks");
     expect(page).toContain("Speichern");
     expect(page).toContain("Neues Runner-Deck");
-    expect(page).toContain("Neues Corp-Deck");
+    expect(page).toContain("Neues Korp-Deck");
     expect(page).toContain("deckSideFilter");
     expect(page).toContain("Teilnehmer A · Runner-Deck");
-    expect(page).toContain("Teilnehmer A · Corp-Deck");
+    expect(page).toContain("Teilnehmer A · Korp-Deck");
     expect(page).toContain("Teilnehmer B wählt eigene Decks beim Beitritt.");
     expect(page).toContain("Dein Runner-Deck");
     expect(page).toContain("Mit Decks beitreten");

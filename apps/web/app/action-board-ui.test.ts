@@ -221,6 +221,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
       credits: 5,
       clicks: 3,
       agendaPoints: 0,
+      identity: card(`${side}_identity`, side === "corp" ? "Korp Identity" : "Runner Identity", "identity"),
       gripOrHq: [],
       stackOrRdCount: 5,
       heapOrArchives: [],
@@ -236,6 +237,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
       handCount: 4,
       deckCount: 5,
       discardCount: 0,
+      identity: card(`${side === "corp" ? "runner" : "corp"}_identity`, side === "corp" ? "Runner Identity" : "Korp Identity", "identity"),
       scoreArea: [],
       rig: []
     },
@@ -243,6 +245,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
     publicEvents: [],
     legalActions: [],
     winner: null,
+    agendaPointsToWin: 7,
     ...overrides
   };
 }

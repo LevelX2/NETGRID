@@ -61,10 +61,10 @@ export function playModeLabel(mode: PlayMode): string {
 
 export function sideSelectionLabel(selection: HumanSideSelection): string {
   if (selection === "random") return "Auslosen";
-  return selection === "runner" ? "Ich spiele Runner" : "Ich spiele Corp";
+  return selection === "runner" ? "Ich spiele Runner" : "Ich spiele Korp";
 }
 
 export function humanAiSideLabel(selection: HumanAiSideSelection): string {
   if (selection === "random") return "Auslosen";
-  return selection === "runner" ? "Runner" : "Corp";
+  return selection === "runner" ? "Runner" : "Korp";
 }

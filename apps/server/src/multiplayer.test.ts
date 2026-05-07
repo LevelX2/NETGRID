@@ -9,7 +9,7 @@ import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { createRuntimeCardsById } from "@netrunner/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netrunner/decks";
-import { applyAction, createGame, getLegalActions, hashState } from "@netrunner/engine";
+import { applyAction, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netrunner/engine";
 import { createConfiguredStorage, createNetrunnerHttpServer } from "./http-server";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
@@ -832,6 +832,41 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(cancelledRecreate.newMatch.matchId).not.toBe(recreated.newMatch.matchId);
   });
 
+  it("delivers V1.1.0 setup mulligan choices side-safely through multiplayer and reconnect", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v110-setup-server" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "v110-setup-server" });
+    if (!created.joinUrl) throw new Error("Missing join URL");
+    const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+
+    const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    const runnerView = await bootstrap(service, created.matchId, runner);
+    const corpView = await bootstrap(service, created.matchId, corp);
+    expect(runnerView.playerView.phase).toBe("setup");
+    expect(runnerView.pendingChoice?.source).toBe("setup.mulligan");
+    expect(runnerView.pendingChoice?.options.map((option) => option.id)).toEqual(["keep", "mulligan"]);
+    expect(corpView.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(corpView)).not.toContain("Starthand behalten");
+    expect(runnerView.playerView.agendaPointsToWin).toBe(7);
+
+    await submitChoice(service, created.matchId, runner, "keep", "v110-runner-keep");
+    const corpReconnect = await service.reconnectMatch(created.matchId, { side: "corp", reconnectToken: corp.reconnectToken });
+    expect("error" in corpReconnect).toBe(false);
+    if ("error" in corpReconnect) throw new Error(corpReconnect.error.message);
+    expect(corpReconnect.pendingChoice?.source).toBe("setup.mulligan");
+    expect(corpReconnect.pendingChoice?.options.map((option) => option.id)).toEqual(["keep", "mulligan"]);
+
+    const reconnectedCorp = { ...corp, sessionToken: corpReconnect.sessionToken, reconnectToken: corpReconnect.reconnectToken };
+    await submitChoice(service, created.matchId, reconnectedCorp, "keep", "v110-corp-keep");
+    const after = await bootstrap(service, created.matchId, reconnectedCorp);
+    expect(after.playerView.phase).toBe("corp_draw_phase");
+    expect(after.legalActions.some((action) => action.type === "mandatory_draw")).toBe(true);
+  });
+
   it("runs actions only through the server pipeline with idempotency and stale-state rejection", async () => {
     const { service, corp, matchId } = await joinedMatch();
     const before = await bootstrap(service, matchId, corp);
@@ -1527,7 +1562,8 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(flatline.actorPayload.winner).toBe("corp");
     expect(flatline.actorPayload.matchStatus).toBe("finished");
     expect(flatline.actorPayload.resultSummary).toMatchObject({ winner: "corp", reason: "flatline" });
-    expect(JSON.stringify(flatline.actorPayload)).not.toContain("Simple Killer");
+    expect(JSON.stringify(flatline.opponentPayload)).not.toContain("Simple Killer");
+    expect(JSON.stringify(flatline.publicEvent)).not.toContain("Simple Killer");
   });
 
   it("replays a multiplayer match to the stored final state hash", async () => {
@@ -1543,6 +1579,7 @@ describe("MVP 0.2 multiplayer service", () => {
   it("plays a private two-player match through to a Runner win", async () => {
     const match = await joinedMatch("mp-win-1", { agendaPointsToWin: 2, matchFormat: "single_game" });
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
+    await putTopCorpAgendaForMatch(match.service, match.matchId);
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "end-turn");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "access-rd");
@@ -1557,7 +1594,7 @@ describe("MVP 0.2 multiplayer service", () => {
       reason: "agenda_points",
       matchFormat: "rules_match",
       agendaPointsToWin: 2,
-      runnerAgendaPoints: 3,
+      runnerAgendaPoints: 2,
       corpAgendaPoints: 0,
       runCount: 1,
       successfulRunCount: 1,
@@ -1680,6 +1717,7 @@ describe("MVP 0.2 multiplayer service", () => {
   it("creates the next private series game with a side swap and side-safe standings", async () => {
     const match = await joinedMatch("series-side-swap", { agendaPointsToWin: 2, matchFormat: "two_game_side_swap" });
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
+    await putTopCorpAgendaForMatch(match.service, match.matchId);
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "end-turn");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "access-rd");
@@ -1775,7 +1813,9 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const runner = { side: "runner" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
     const corp = { side: "corp" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    await forceSetupComplete(service, created.matchId);
     await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", "mandatory");
+    await putTopCorpAgendaForMatch(service, created.matchId);
     await submit(service, created.matchId, corp, (action) => action.type === "end_turn", "end-turn");
     await submit(service, created.matchId, runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
     await submit(service, created.matchId, runner, (action) => action.type === "access_card", "access-rd");
@@ -1784,7 +1824,7 @@ describe("MVP 0.2 multiplayer service", () => {
       viewerPlayer: "player_a",
       viewerWins: 1,
       opponentWins: 0,
-      viewerAgendaPoints: 3,
+      viewerAgendaPoints: 2,
       opponentAgendaPoints: 0
     });
 
@@ -1808,7 +1848,7 @@ describe("MVP 0.2 multiplayer service", () => {
       winner: "runner",
       runnerPlayer: "player_a",
       corpPlayer: "player_b",
-      runnerAgendaPoints: 3,
+      runnerAgendaPoints: 2,
       corpAgendaPoints: 0
     });
     expect(JSON.stringify(next)).not.toContain("cardInstances");
@@ -2070,27 +2110,36 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.mode).toBe("human_runner_vs_corp_ai");
     expect(created.joinUrl).toBeUndefined();
     expect(created.playerView.side).toBe("runner");
-    expect(created.playerView.activeSide).toBe("corp");
+    expect(created.playerView.activeSide).toBe("runner");
+    expect(created.pendingChoice?.source).toBe("setup.mulligan");
     expect(created.matchVersion).toBe(1);
-    expect(created.aiTurnPresentation).toEqual({ activeAiSide: "corp", canAdvanceAi: true, pacingMode: "paced" });
-    expect(created.legalActions.length).toBe(0);
+    expect(created.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
+    expect(created.legalActions.some((action) => action.type === "resolve_choice")).toBe(true);
 
     const stored = await service.loadForTest(created.matchId);
     expect(stored?.match.aiControllers?.corp?.type).toBe("ai");
     expect(JSON.stringify(created)).not.toContain("cardInstances");
     expect(JSON.stringify(created)).not.toContain("Simple Agenda");
 
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "keep",
+      "runner-ai-mode-setup"
+    );
+    expect(afterSetup.aiTurnPresentation).toEqual({ activeAiSide: "corp", canAdvanceAi: true, pacingMode: "paced" });
+
     const advanced = await service.advanceAi({
       matchId: created.matchId,
       side: "runner",
       sessionToken: created.hostSessionToken,
-      knownStateVersion: created.playerView.stateVersion,
-      knownMatchVersion: created.matchVersion,
+      knownStateVersion: afterSetup.playerView.stateVersion,
       mode: "single_step"
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(advanced.requesterPayload.playerView.stateVersion).toBe(created.playerView.stateVersion + 1);
+    expect(advanced.requesterPayload.playerView.stateVersion).toBe(afterSetup.playerView.stateVersion + 1);
     expect(advanced.requesterPayload.aiTurnPresentation?.activeAiSide).toBe("corp");
     expect(advanced.publicEvent?.publicPayload.aiExplanation).toBeTruthy();
     expect(JSON.stringify(advanced.requesterPayload)).not.toContain("cardInstances");
@@ -2109,13 +2158,21 @@ describe("MVP 0.2 multiplayer service", () => {
     const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
-    const mandatory = mustAction(before, (action) => action.type === "mandatory_draw");
+    expect(before.pendingChoice?.source).toBe("setup.mulligan");
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "keep",
+      "corp-ai-mode-setup"
+    );
+    const mandatory = mustAction(afterSetup, (action) => action.type === "mandatory_draw");
     const mandatoryResult = await service.submitAction({
       matchId: created.matchId,
       side: "corp",
       sessionToken: created.hostSessionToken,
       actionId: mandatory.actionId,
-      clientKnownStateVersion: before.playerView.stateVersion,
+      clientKnownStateVersion: afterSetup.playerView.stateVersion,
       idempotencyKey: "corp-ai-mode-mandatory"
     });
     expect(mandatoryResult.ok).toBe(true);
@@ -2164,7 +2221,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");
 
-    let gameState = createGame({ matchId: created.matchId, seed: "server-runner-ai-rez-window" });
+    let gameState = createGameAfterSetup({ matchId: created.matchId, seed: "server-runner-ai-rez-window" });
     gameState = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
     gameState = applyEngineAction(gameState, "corp", (action) => action.type === "end_turn");
     putCorpIceOnServerForTest(gameState, "rd", "simple_barrier_ice");
@@ -2213,7 +2270,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing record");
-    let gameState = toRunnerTurnEngine(createGame({ matchId: created.matchId, seed: "central-access-redaction-engine" }));
+    let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed: "central-access-redaction-engine" }));
     putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
     gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     gameState = applyEngineAction(gameState, "runner", (action) => action.type === "access_card");
@@ -2238,12 +2295,19 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "server-corp-ai-auth",
       corpDifficulty: "normal"
     });
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "keep",
+      "ai-auth-setup"
+    );
 
     const stale = await service.advanceAi({
       matchId: created.matchId,
       side: "runner",
       sessionToken: created.hostSessionToken,
-      knownStateVersion: created.playerView.stateVersion + 1
+      knownStateVersion: afterSetup.playerView.stateVersion + 1
     });
     expect(stale.ok).toBe(false);
     if (stale.ok) throw new Error("Expected stale rejection");
@@ -2254,7 +2318,7 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: created.matchId,
       side: "runner",
       sessionToken: "wrong",
-      knownStateVersion: created.playerView.stateVersion
+      knownStateVersion: afterSetup.playerView.stateVersion
     });
     expect(wrongToken.ok).toBe(false);
     if (wrongToken.ok) throw new Error("Expected token rejection");
@@ -2264,8 +2328,7 @@ describe("MVP 0.2 multiplayer service", () => {
       matchId: created.matchId,
       side: "runner",
       sessionToken: created.hostSessionToken,
-      knownStateVersion: created.playerView.stateVersion,
-      knownMatchVersion: created.matchVersion,
+      knownStateVersion: afterSetup.playerView.stateVersion,
       mode: "until_human"
     });
     expect(first.ok).toBe(true);
@@ -2282,6 +2345,13 @@ describe("MVP 0.2 multiplayer service", () => {
       seed: "server-corp-ai-rest",
       corpDifficulty: "normal"
     });
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "keep",
+      "ai-rest-setup"
+    );
     const handle = createNetrunnerHttpServer(service);
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
@@ -2294,8 +2364,7 @@ describe("MVP 0.2 multiplayer service", () => {
         body: JSON.stringify({
           side: "runner",
           sessionToken: created.hostSessionToken,
-          knownStateVersion: created.playerView.stateVersion,
-          knownMatchVersion: created.matchVersion,
+          knownStateVersion: afterSetup.playerView.stateVersion,
           mode: "single_step"
         })
       });
@@ -2423,14 +2492,70 @@ async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettin
   const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
   expect("error" in joined).toBe(false);
   if ("error" in joined) throw new Error(joined.error.message);
+  const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+  const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+  await forceSetupComplete(service, created.matchId);
   return {
     service,
     created,
     joinToken,
     matchId: created.matchId,
-    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
-    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+    corp,
+    runner
   };
+}
+
+async function forceSetupComplete(service: MultiplayerService, matchId: string): Promise<void> {
+  const record = await service.loadForTest(matchId);
+  if (!record?.gameState) throw new Error("Missing active game state");
+  const gameState = structuredClone(record.gameState);
+  record.match.status = "active";
+  gameState.stateVersion = 0;
+  gameState.activeSide = "corp";
+  gameState.phase = "corp_draw_phase";
+  gameState.timingPoint = "corp_draw.mandatory_draw";
+  gameState.setup = { status: "complete", initialHandSize: 5, resolved: { runner: "keep", corp: "keep" }, mulligansTaken: {} };
+  delete gameState.pendingChoice;
+  gameState.winner = null;
+  delete gameState.gameEndReason;
+  const event = {
+    ...gameState.eventLog[0]!,
+    stateHashAfter: hashState({ ...gameState, eventLog: [] } as GameState),
+    publicPayload: {
+      ...gameState.eventLog[0]!.publicPayload,
+      setupStatus: "complete"
+    }
+  };
+  gameState.eventLog = [event];
+  event.stateHashAfter = hashState(gameState);
+  gameState.eventLog = [{ ...event, stateHashAfter: hashState(gameState) }];
+  record.gameState = gameState;
+  record.eventLog = gameState.eventLog.map((entry) => toEventRecordForTest(matchId, entry));
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  record.stateSnapshots = [stateSnapshotForTest(matchId, gameState, record.match.matchVersion, "snap_initial")];
+  delete record.pendingUndo;
+  await (service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+}
+
+async function putTopCorpAgendaForMatch(service: MultiplayerService, matchId: string): Promise<void> {
+  const record = await service.loadForTest(matchId);
+  if (!record?.gameState) throw new Error("Missing active game state");
+  const gameState = structuredClone(record.gameState);
+  const agenda = Object.values(gameState.cardInstances).find((card) => {
+    const definition = DEMO_CARDS_BY_ID[card.definitionId];
+    return card.zone.side === "corp" && definition?.side === "corp" && definition.type === "agenda";
+  });
+  if (!agenda) throw new Error("Missing corp agenda");
+  putCorpCardOnTopOfRdForTest(gameState, agenda.definitionId);
+  const latestEventIndex = gameState.eventLog.length - 1;
+  const event = latestEventIndex >= 0 ? gameState.eventLog[latestEventIndex] : undefined;
+  if (event) gameState.eventLog[latestEventIndex] = { ...event, stateHashAfter: hashState(gameState) };
+  record.gameState = gameState;
+  record.eventLog = gameState.eventLog.map((entry) => toEventRecordForTest(matchId, entry));
+  record.stateSnapshots = [stateSnapshotForTest(matchId, gameState, record.match.matchVersion, "snap_setup_agenda_top")];
+  delete record.pendingUndo;
+  await (service as unknown as { storage: MultiplayerStorage }).storage.save(record);
 }
 
 async function pendingDeckMatch(seed: string, countdownSeconds: 3 | 5 | 10 = 5) {
@@ -2524,7 +2649,7 @@ async function joinedV094DamageMatch(seed: string, options: { emptyRunnerGrip?: 
 
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
-  let gameState = toRunnerTurnEngine(createGame({ matchId: created.matchId, seed, runnerDeck: V094_RUNNER_DECK, corpDeck: V094_CORP_DECK, agendaPointsToWin: 7 }));
+  let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed, runnerDeck: V094_RUNNER_DECK, corpDeck: V094_CORP_DECK, agendaPointsToWin: 7 }));
   if (options.emptyRunnerGrip) emptyRunnerGripForTest(gameState);
   putCorpIceOnServerForTest(gameState, "rd", "v094_neural_sentry_ice");
   gameState.corp.credits = 10;
@@ -2563,7 +2688,7 @@ async function joinedV095ResourceMatch(seed: string) {
 
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
-  let gameState = toRunnerTurnEngine(createGame({ matchId: created.matchId, seed, runnerDeck: V095_RUNNER_DECK, corpDeck: V095_CORP_DECK, agendaPointsToWin: 7 }));
+  let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed, runnerDeck: V095_RUNNER_DECK, corpDeck: V095_CORP_DECK, agendaPointsToWin: 7 }));
   gameState.runner.credits = 6;
   moveRunnerCardToGripForTest(gameState, "v095_safehouse_resource");
   gameState = applyEngineAction(gameState, "runner", (action) => action.type === "install_card" && action.label.includes("Safehouse Resource"));
@@ -2609,7 +2734,7 @@ async function joinedV096TraceMatch(seed: string) {
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
   let gameState = toRunnerTurnEngine(
-    createGame({
+    createGameAfterSetup({
       matchId: created.matchId,
       seed,
       runnerDeckId: "demo_runner_096",
@@ -2659,7 +2784,7 @@ async function joinedV097BreachMatch(seed: string) {
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
   const gameState = toRunnerTurnEngine(
-    createGame({
+    createGameAfterSetup({
       matchId: created.matchId,
       seed,
       runnerDeckId: "demo_runner_097",
@@ -2707,7 +2832,7 @@ async function joinedV098HiddenSearchMatch(seed: string) {
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
   const gameState = toRunnerTurnEngine(
-    createGame({
+    createGameAfterSetup({
       matchId: created.matchId,
       seed,
       runnerDeckId: "demo_runner_098",
@@ -2753,7 +2878,7 @@ async function joinedV099HostingMatch(seed: string) {
   const record = await storage.load(created.matchId);
   if (!record) throw new Error("Missing stored match");
   const gameState = toRunnerTurnEngine(
-    createGame({
+    createGameAfterSetup({
       matchId: created.matchId,
       seed,
       runnerDeckId: "demo_runner_099",
@@ -2793,6 +2918,25 @@ function toRunnerTurnEngine(state: GameState): GameState {
   let next = applyEngineAction(state, "corp", (action) => action.type === "mandatory_draw");
   next = applyEngineAction(next, "corp", (action) => action.type === "end_turn");
   return next;
+}
+
+async function submitChoice(service: MultiplayerService, matchId: string, session: PlayerSession, optionId: string, key: string): Promise<SidePayload> {
+  const before = await bootstrap(service, matchId, session);
+  const choice = before.playerView.pendingChoice;
+  if (!choice) throw new Error("Missing pending choice");
+  const action = mustAction(before, (candidate) => candidate.type === "resolve_choice");
+  const result = await service.submitAction({
+    matchId,
+    side: session.side,
+    sessionToken: session.sessionToken,
+    actionId: action.actionId,
+    clientKnownStateVersion: before.playerView.stateVersion,
+    selectedChoices: { choiceId: choice.choiceId, selectedOptionIds: [optionId] },
+    idempotencyKey: `${key}-${before.playerView.stateVersion}`
+  });
+  expect(result.ok).toBe(true);
+  if (!result.ok) throw new Error(result.error.message);
+  return result.actorPayload;
 }
 
 function applyEngineAction(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {

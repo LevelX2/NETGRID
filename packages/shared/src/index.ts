@@ -1,6 +1,7 @@
 export type Side = "corp" | "runner";
 
 export type Phase =
+  | "setup"
   | "corp_draw_phase"
   | "corp_action_phase"
   | "runner_action_phase"
@@ -8,6 +9,8 @@ export type Phase =
   | "game_over";
 
 export type TimingPointId =
+  | "setup.mulligan.runner"
+  | "setup.mulligan.corp"
   | "corp_draw.mandatory_draw"
   | "corp_action.main"
   | "runner_action.main"
@@ -275,10 +278,18 @@ export type CreateGameConfig = {
   runnerDeckMetadata?: DeckPublicMetadata;
   corpDeckMetadata?: DeckPublicMetadata;
   agendaPointsToWin?: number;
+  setupMode?: "explicit" | "completed";
   controllers?: {
     runner: PlayerController;
     corp: PlayerController;
   };
+};
+
+export type SetupState = {
+  status: "mulligan_runner" | "mulligan_corp" | "complete";
+  initialHandSize: number;
+  resolved: Partial<Record<Side, "keep" | "mulligan">>;
+  mulligansTaken: Partial<Record<Side, number>>;
 };
 
 export type ZoneRef =
@@ -429,6 +440,7 @@ export type GameState = {
   winner: Winner | null;
   gameEndReason?: GameEndReason;
   agendaPointsToWin: number;
+  setup?: SetupState;
   pendingChoice?: PendingChoice;
   deckMetadata?: {
     runner: DeckPublicMetadata;
@@ -552,6 +564,7 @@ export type PlayerView = {
   activeSide: Side;
   phase: Phase;
   own: {
+    identity: VisibleCard;
     credits: number;
     clicks: number;
     agendaPoints: number;
@@ -565,6 +578,7 @@ export type PlayerView = {
     tags: number;
   };
   opponent: {
+    identity: VisibleCard;
     credits: number;
     clicks: number;
     agendaPoints: number;
@@ -604,6 +618,7 @@ export type PlayerView = {
   publicEvents: PublicGameEvent[];
   legalActions: LegalAction[];
   winner: Winner | null;
+  agendaPointsToWin: number;
   gameEndReason?: GameEndReason;
 };
 

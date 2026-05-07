@@ -45,18 +45,18 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {
         actor: "corp",
-        label: "Corp installiert eine Karte.",
+        label: "Korp installiert eine Karte.",
         redactedKind: "installed_card"
       }),
       "runner",
       {
         cardTitle: "Simple Agenda",
         cardText: "2 Agenda-Punkte.",
-        cardDetailLines: ["Corp · agenda"]
+        cardDetailLines: ["Korp · agenda"]
       }
     );
 
-    expect(item.title).toBe("Die Corp hat eine verdeckte Karte installiert.");
+    expect(item.title).toBe("Die Korp hat eine verdeckte Karte installiert.");
     expect(item.category).toBe("hidden");
     expect(item.visibility).toBe("redacted");
     expect(JSON.stringify(item)).not.toContain("Simple Agenda");
@@ -110,7 +110,7 @@ describe("formatChronicleEvent", () => {
       }
     );
 
-    expect(item.title).toBe("Die Corp-KI hat Simple Economy Operation gespielt und Credits erhalten.");
+    expect(item.title).toBe("Die Korp-KI hat Simple Economy Operation gespielt und Credits erhalten.");
     expect(item.description).toBeUndefined();
     expect(item.chips).toContain("KI");
     expect(JSON.stringify(item)).not.toContain("Credits verbessern Rez- und Score-Fenster.");
@@ -180,11 +180,11 @@ describe("formatChronicleEvent", () => {
       }
     );
 
-    expect(hidden.title).toBe("Die Corp hat eine Installation in Außenserver 2 ausgebaut.");
+    expect(hidden.title).toBe("Die Korp hat eine Installation in Außenserver 2 ausgebaut.");
     expect(hidden.visibility).toBe("redacted");
-    expect(hidden.chips).toEqual(["Corp", "+1 Entwicklung", "Außenserver 2", "Verdeckt"]);
+    expect(hidden.chips).toEqual(["Korp", "+1 Entwicklung", "Außenserver 2", "Verdeckt"]);
     expect(JSON.stringify(hidden)).not.toContain("Simple Agenda");
-    expect(visibleAgenda.title).toBe("Die Corp hat das Projekt Hostile Takeover weiterentwickelt.");
+    expect(visibleAgenda.title).toBe("Die Korp hat das Projekt Hostile Takeover weiterentwickelt.");
     expect(visibleAgenda.chips).toContain("+1 Entwicklung");
   });
 

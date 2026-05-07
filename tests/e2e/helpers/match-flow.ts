@@ -23,6 +23,7 @@ export async function createHumanVsAiGame(page: Page, seed: string): Promise<voi
   await page.getByTestId("create-match").click();
   await expect(page.getByTestId("active-game")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("ai-pacing")).toBeVisible();
+  await resolveSetupChoices(page);
   await advanceAiUntilHumanTurn(page);
 }
 
@@ -56,6 +57,7 @@ export async function readyAndWaitForActive(host: Page, joiner: Page): Promise<v
   await expect(host.getByText(/Countdown bis|Startet automatisch/)).toBeVisible();
   await expect(host.getByTestId("active-game")).toBeVisible({ timeout: 20_000 });
   await expect(joiner.getByTestId("active-game")).toBeVisible({ timeout: 20_000 });
+  await resolveSetupChoices(host, joiner);
 }
 
 export async function clickFirstAction(page: Page, actionType: string): Promise<void> {
@@ -143,11 +145,26 @@ async function clickActionIfVisible(page: Page, actionType: string): Promise<voi
   }
 }
 
+async function resolveSetupChoices(...pages: Page[]): Promise<void> {
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    let clicked = false;
+    for (const page of pages) {
+      const keep = page.getByRole("button", { name: "Starthand behalten" }).first();
+      if (await keep.isVisible().catch(() => false)) {
+        await keep.click();
+        clicked = true;
+      }
+    }
+    if (!clicked) return;
+    await pages[0]?.waitForTimeout(250);
+  }
+}
+
 async function advanceAiUntilHumanTurn(page: Page): Promise<void> {
   for (let attempt = 0; attempt < 8; attempt += 1) {
     const humanCreditAction = page.locator('[data-testid="action-button"][data-action-type="gain_credit"]').first();
     if (await humanCreditAction.isVisible().catch(() => false)) return;
-    const aiStep = page.getByRole("button", { name: "KI-Schritt" });
+    const aiStep = page.getByRole("button", { name: /KI-Schritt|Jetzt ausführen/ });
     if (await aiStep.isEnabled().catch(() => false)) {
       await aiStep.click();
       await page.waitForTimeout(250);

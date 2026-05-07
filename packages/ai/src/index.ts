@@ -41,6 +41,15 @@ type AiFeatures = {
   eventCounts: Record<string, number>;
   knownServerPressure: number;
   blockedRunServers: Set<string>;
+  serverFeaturesById: Map<string, ServerFeatures>;
+};
+
+type ServerFeatures = {
+  iceCount: number;
+  rootCount: number;
+  knownRootCount: number;
+  unrezzedRootCount: number;
+  rezzedRootCount: number;
 };
 
 export type AiObservedFacts = {
@@ -574,12 +583,14 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       break;
     case "start_run":
       score = scoreRunTarget(action, features, profile, input.difficulty);
-      reasonCode = features.blockedRunServers.has(String(action.payload?.serverId ?? "")) ? "runner.run.blocked_by_rezzed_ice" : "runner.run.visible_pressure";
+      reasonCode = runnerRunReasonCode(action, features);
       explanation =
         reasonCode === "runner.run.blocked_by_rezzed_ice"
           ? "Ein bereits gerezztes ICE stoppt diesen Server sichtbar; Setup oder Wirtschaft ist gerade wertvoller."
+          : reasonCode === "runner.run.empty_remote_low_value"
+            ? "Der Außenserver hat kein sichtbares Root-Ziel; ein Run ist derzeit wenig wertvoll."
           : "Der Serverdruck ist anhand sichtbarer Lage vertretbar.";
-      evidence.push(`server:${String(action.payload?.serverId ?? "unknown")}`, `known_pressure:${features.knownServerPressure}`);
+      evidence.push(`server:${String(action.payload?.serverId ?? "unknown")}`, `known_pressure:${features.knownServerPressure}`, ...runTargetEvidence(action, features));
       break;
     case "gain_credit":
       score = input.difficulty === "easy" ? 560 : features.credits < 4 ? 540 : 380;
@@ -712,6 +723,7 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
   const rigRoles = new Set((input.playerView.own.rig ?? []).flatMap((card) => rolesForCardId(card.definitionId)));
   const handRoles = new Set(input.playerView.own.gripOrHq.flatMap((card) => rolesForCardId(card.definitionId)));
   const eventCounts = buildObservedFacts(input).eventCounts;
+  const serverFeaturesById = buildServerFeatures(input);
   const knownServerPressure = input.playerView.servers.reduce((sum, server) => sum + server.ice.filter((card) => card.known || card.rezzed).length + server.root.filter((card) => card.known).length, 0);
   const blockedRunServers = new Set(
     input.playerView.servers
@@ -731,8 +743,24 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
     handRoles: new Set([...handRoles, ...ownCards.flatMap((card) => rolesForCardId(card.definitionId)).filter((role) => role === "tag_punishment")]),
     eventCounts,
     knownServerPressure,
-    blockedRunServers
+    blockedRunServers,
+    serverFeaturesById
   };
+}
+
+function buildServerFeatures(input: AiDecisionInput): Map<string, ServerFeatures> {
+  return new Map(
+    input.playerView.servers.map((server) => [
+      server.id,
+      {
+        iceCount: server.ice.length,
+        rootCount: server.root.length,
+        knownRootCount: server.root.filter((card) => card.known).length,
+        unrezzedRootCount: server.root.filter((card) => card.rezzed !== true).length,
+        rezzedRootCount: server.root.filter((card) => card.rezzed === true).length
+      }
+    ])
+  );
 }
 
 export function buildObservedFacts(input: AiDecisionInput): AiObservedFacts {
@@ -791,13 +819,34 @@ function scoreRunnerEvent(roles: string[], features: AiFeatures, profile: Record
 
 function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Record<string, number>, difficulty: AiDifficulty): number {
   const serverId = String(action.payload?.serverId ?? "");
+  const server = features.serverFeaturesById.get(serverId);
   let score = difficulty === "easy" ? 330 : 560 + (profile.run ?? 1) * 55;
-  if (serverId.startsWith("remote_")) score += 60;
+  if (serverId.startsWith("remote_")) {
+    score += 60;
+    if ((server?.rootCount ?? 0) === 0) score -= 380;
+    else score += Math.min(server?.rootCount ?? 0, 3) * 45;
+  }
   if (serverId === "rd") score += 45;
+  if (server?.iceCount) score -= Math.min(server.iceCount, 3) * 25;
   if (features.blockedRunServers.has(serverId)) score -= 430;
   if (features.credits < 3) score -= 140;
   if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
   return score;
+}
+
+function runnerRunReasonCode(action: LegalAction, features: AiFeatures): string {
+  const serverId = String(action.payload?.serverId ?? "");
+  const server = features.serverFeaturesById.get(serverId);
+  if (features.blockedRunServers.has(serverId)) return "runner.run.blocked_by_rezzed_ice";
+  if (serverId.startsWith("remote_") && (server?.rootCount ?? 0) === 0) return "runner.run.empty_remote_low_value";
+  return "runner.run.visible_pressure";
+}
+
+function runTargetEvidence(action: LegalAction, features: AiFeatures): string[] {
+  const serverId = String(action.payload?.serverId ?? "");
+  const server = features.serverFeaturesById.get(serverId);
+  if (!server) return [];
+  return [`ice_count:${server.iceCount}`, `root_count:${server.rootCount}`, `known_root_count:${server.knownRootCount}`, `rezzed_root_count:${server.rezzedRootCount}`];
 }
 
 function isBlockedByKnownRezzedIce(ice: { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[] } | undefined, rigRoles: Set<string>): boolean {

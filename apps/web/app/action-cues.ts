@@ -236,7 +236,7 @@ function hasLocalAttention(view: PlayerView, viewerSide: Side): boolean {
 
 function actorLabel(actor: Side | undefined, source: OpponentActionCue["source"]): string {
   if (!actor) return "Spiel";
-  if (actor === "corp") return source === "ai" ? "Corp-KI" : "Corp";
+  if (actor === "corp") return source === "ai" ? "Korp-KI" : "Korp";
   return source === "ai" ? "Runner-KI" : "Runner";
 }
 

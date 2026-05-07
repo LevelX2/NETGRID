@@ -92,6 +92,19 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       title = "Das Spiel wurde erstellt.";
       chips.push("Spielstart");
       break;
+    case "resolve_choice":
+      if (payload.setupStep === "mulligan") {
+        category = "system";
+        visibility = "system";
+        title = `${sideLabel(sideValue(payload.setupSide))} hat die Setup-Entscheidung abgeschlossen`;
+        chips.push("Setup", "Starthand");
+        break;
+      }
+      category = "system";
+      visibility = "system";
+      title = phrase(subject, "eine Entscheidung beantwortet");
+      chips.push("Choice");
+      break;
     case "mandatory_draw":
       category = "turn";
       title = phrase(subject, `${possessiveFor(subject)} Pflichtkarte gezogen`);
@@ -269,13 +282,13 @@ function categoryFor(actionType: string): ChronicleCategory {
 function subjectFor(actor: Side | undefined, side: Side, isAi: boolean): string {
   if (!actor) return "Das Spiel";
   if (actor === side) return "Du";
-  if (actor === "corp") return isAi ? "Die Corp-KI" : "Die Corp";
+  if (actor === "corp") return isAi ? "Die Korp-KI" : "Die Korp";
   return isAi ? "Die Runner-KI" : "Der Runner";
 }
 
 function possessiveFor(subject: string): string {
   if (subject === "Du") return "deine";
-  if (subject === "Die Corp" || subject.endsWith("-KI")) return "ihre";
+  if (subject === "Die Korp" || subject.endsWith("-KI")) return "ihre";
   if (subject === "Der Runner") return "seine";
   return "die";
 }
@@ -286,7 +299,7 @@ function phrase(subject: string, action: string): string {
 
 function baseChips(actor: Side | undefined, isAi: boolean): string[] {
   const chips: string[] = [];
-  if (actor) chips.push(actor === "corp" ? "Corp" : "Runner");
+  if (actor) chips.push(actor === "corp" ? "Korp" : "Runner");
   if (isAi) chips.push("KI");
   return chips;
 }
@@ -399,7 +412,7 @@ function runPhaseLabel(phase: string): string {
 function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined): string {
   if (category === "system") return "System";
   if (category === "run") return `Run${serverLabel ? ` auf ${serverLabel}` : label && /Run auf/i.test(label) ? ` auf ${runTargetFromLabel(label)}` : ""}`;
-  if (actor === "corp") return "Corp-Zug";
+  if (actor === "corp") return "Korp-Zug";
   if (actor === "runner") return "Runner-Zug";
   return "Spiel";
 }
@@ -438,4 +451,10 @@ function positiveIntegerValue(value: unknown): number | undefined {
 
 function sideValue(value: unknown): Side | undefined {
   return value === "corp" || value === "runner" ? value : undefined;
+}
+
+function sideLabel(side: Side | undefined): string {
+  if (side === "corp") return "Korp";
+  if (side === "runner") return "Runner";
+  return "Eine Seite";
 }

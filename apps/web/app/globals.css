@@ -9,7 +9,7 @@
   --muted: #9fb1bd;
   --runner: #52d6b8;
   --corp: #ff816f;
-  --agenda: #e4c764;
+  --agenda: #4aa3ff;
   --ice: #7db5ff;
   --danger: #ff8a95;
   --ok: #90df96;
@@ -1475,6 +1475,9 @@ select {
 }
 
 .sideStatusPanel h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
   margin-bottom: 1px;
   color: color-mix(in srgb, var(--side-status-accent), var(--text) 24%);
 }
@@ -1508,13 +1511,34 @@ select {
 }
 
 .stat strong {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: 18px;
+}
+
+.statIcon {
+  display: inline-flex;
+  color: var(--agenda);
+}
+
+.setupPanel h2 {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.setupActions {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
 .stat span {
   color: var(--muted);
   font-size: 12px;
+}
+
+.stat .statIcon {
+  color: var(--agenda);
 }
 
 .srOnly {
@@ -3034,7 +3058,7 @@ select {
   --muted: #637083;
   --runner: #1565d8;
   --corp: #b9571b;
-  --agenda: #7a6112;
+  --agenda: #156fd8;
   --ice: #4867c7;
   --danger: #b42335;
   --ok: #1d7a45;

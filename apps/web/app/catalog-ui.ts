@@ -1,0 +1,63 @@
+export type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "upgrade" | "operation" | "event" | "hardware" | "resource" | "program";
+
+export type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
+
+export type CatalogCardForTypeFilter = {
+  catalogCardId: string;
+  type: string;
+  subtypes: string[];
+};
+
+export function catalogTypeKeysForCard(card: Pick<CatalogCardForTypeFilter, "type" | "subtypes">): CatalogTypeFilterKey[] {
+  const type = card.type.toLowerCase();
+  if (type === "program" && card.subtypes.some((subtype) => subtype.toLowerCase() === "icebreaker")) return ["icebreaker"];
+  if (type.startsWith("hardware-")) return ["hardware"];
+  switch (type) {
+    case "ice":
+      return ["ice"];
+    case "agenda":
+      return ["agenda"];
+    case "asset":
+      return ["asset"];
+    case "upgrade":
+      return ["upgrade"];
+    case "operation":
+      return ["operation"];
+    case "event":
+      return ["event"];
+    case "hardware":
+      return ["hardware"];
+    case "resource":
+      return ["resource"];
+    case "program":
+      return ["program"];
+    default:
+      return [];
+  }
+}
+
+export function catalogCardMatchesTypeFilters(card: CatalogCardForTypeFilter, filters: CatalogTypeFilterState): boolean {
+  const keys = catalogTypeKeysForCard(card);
+  if (keys.length === 0) return Object.values(filters).every(Boolean);
+  return keys.some((key) => filters[key]);
+}
+
+export function filterCatalogCardsByType<T extends CatalogCardForTypeFilter>(cards: T[], filters: CatalogTypeFilterState): T[] {
+  return cards.filter((card) => catalogCardMatchesTypeFilters(card, filters));
+}
+
+export function nextCatalogSelection<T extends CatalogCardForTypeFilter>(current: string | null, cards: T[], filters: CatalogTypeFilterState): string | null {
+  const filteredCards = filterCatalogCardsByType(cards, filters);
+  if (current && filteredCards.some((card) => card.catalogCardId === current)) return current;
+  return filteredCards[0]?.catalogCardId ?? null;
+}
+
+export function summarizeCatalogTypeFilters(cards: CatalogCardForTypeFilter[]): Partial<Record<CatalogTypeFilterKey, number>> {
+  const counts: Partial<Record<CatalogTypeFilterKey, number>> = {};
+  for (const card of cards) {
+    for (const key of catalogTypeKeysForCard(card)) {
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+  }
+  return counts;
+}

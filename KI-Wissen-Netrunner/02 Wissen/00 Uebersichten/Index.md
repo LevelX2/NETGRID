@@ -154,6 +154,11 @@
 - `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.9.
 - `docs/derived/V1_0_9_IMPLEMENTATION_REVIEW.md`: Implementation Review für Deployment-Profile, Origin-/CORS-/WebSocket-Gate, Rate-Limits, Redaction, Health und internetnahe E2E-Konfiguration.
 - `docs/derived/V1_0_9_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.9 Private Internet Hardening.
+- `docs/derived/V1_1_0_SETUP_GAME_END_M2_DETAILED_PLAN.md`: ausführlicher Plan und Umsetzungseinstieg für V1.1.0 Setup/Game-End M2 inklusive explizitem Setup, Mulligan, Game-End-Vertrag, Archives-facedown-Grundlage und integrierter NETGRID-Symbolsprache mit sichtbarer Schreibweise `Korp`.
+- `docs/derived/V1_1_0_REQUIREMENTS.md`: umgesetzte V1.1.0-Anforderungen für Setup, private Mulligans, Agenda-Ziel 7, Game-End, Identity-PlayerViews, Reconnect/KI und NETGRID-Statusklarheit.
+- `docs/derived/V1_1_0_TEST_MATRIX.md`: Testmatrix für V1.1.0 mit Engine-, Multiplayer-, KI-, UI-, E2E-, Visibility-, Replay-/StateHash- und Scope-Regression.
+- `docs/derived/V1_1_0_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für V1.1.0 mit Architekturentscheidungen, geänderten Modulen und Grenzen.
+- `docs/derived/V1_1_0_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.1.0; `V1_1_0_done: true`.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.

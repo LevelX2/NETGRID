@@ -739,7 +739,7 @@ export class MultiplayerService {
       sessionId: randomId("session"),
       matchId,
       side: hostSide,
-      displayName: input.displayName?.trim() || (hostSide === "runner" ? "Runner" : "Corp"),
+        displayName: input.displayName?.trim() || (hostSide === "runner" ? "Runner" : "Korp"),
       sessionTokenHash: this.hashToken(hostSessionToken),
       reconnectTokenHash: this.hashToken(hostReconnectToken),
       connected: false,
@@ -948,7 +948,7 @@ export class MultiplayerService {
         return { error: safeError("join_runner_deck_missing", "Bitte wähle ein Runner-Deck für den Beitritt.") };
       }
       if (!joinerDecks.corpDeckSnapshot && !joinerDecks.corpDeckSnapshotId) {
-        return { error: safeError("join_corp_deck_missing", "Bitte wähle ein Corp-Deck für den Beitritt.") };
+        return { error: safeError("join_corp_deck_missing", "Bitte wähle ein Korp-Deck für den Beitritt.") };
       }
       try {
         this.activatePendingDeckHandshake(record, joinerDecks);
@@ -1898,6 +1898,9 @@ export class MultiplayerService {
   }
 
   private maybeRunAiAfterTransition(record: StoredMatch): void {
+    for (let count = 0; count < 4 && record.match.status === "active" && record.gameState?.pendingChoice?.source === "setup.mulligan" && this.aiControllableSide(record); count += 1) {
+      if (!this.runAiStep(record)) return;
+    }
     if (record.match.aiPacingMode === "fast") this.runAiUntilNextHuman(record);
   }
 
@@ -2339,9 +2342,10 @@ function participantDeckInputsForRecord(record: StoredMatch): Record<SeriesPlaye
 
 function resultReason(state: GameState, winner: Side | "draw", runnerAgendaPoints: number, corpAgendaPoints: number, agendaPointsToWin: number): GameResultReason {
   if (winner === "draw") return "draw";
+  if (state.gameEndReason === "agenda_points") return "agenda_points";
+  if (state.gameEndReason === "corp_deck_empty") return "corp_deck_empty";
   if (state.gameEndReason === "flatline") return "flatline";
   if (runnerAgendaPoints >= agendaPointsToWin || corpAgendaPoints >= agendaPointsToWin) return "agenda_points";
-  if (winner === "runner" || state.gameEndReason === "corp_deck_empty") return "corp_deck_empty";
   return "unknown";
 }
 
@@ -2395,18 +2399,18 @@ function controllersForMode(
   if (mode === "human_runner_vs_corp_ai") {
     return {
       runner: { controllerId: "runner-human", side: "runner", type: "human_remote", displayName: "Runner" },
-      corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Corp KI", difficulty: difficulties.corpDifficulty, profileId: `corp-ai-v0.9-${difficulties.corpDifficulty}` }
+      corp: { controllerId: "corp-ai", side: "corp", type: "ai", displayName: "Korp KI", difficulty: difficulties.corpDifficulty, profileId: `corp-ai-v0.9-${difficulties.corpDifficulty}` }
     };
   }
   if (mode === "human_corp_vs_runner_ai") {
     return {
       runner: { controllerId: "runner-ai", side: "runner", type: "ai", displayName: "Runner KI", difficulty: difficulties.runnerDifficulty, profileId: `runner-ai-v0.9-${difficulties.runnerDifficulty}` },
-      corp: { controllerId: "corp-human", side: "corp", type: "human_remote", displayName: "Corp" }
+      corp: { controllerId: "corp-human", side: "corp", type: "human_remote", displayName: "Korp" }
     };
   }
   return {
     runner: { controllerId: hostSide === "runner" ? "runner-host" : "runner-guest", side: "runner", type: "human_remote", displayName: "Runner" },
-    corp: { controllerId: hostSide === "corp" ? "corp-host" : "corp-guest", side: "corp", type: "human_remote", displayName: "Corp" }
+    corp: { controllerId: hostSide === "corp" ? "corp-host" : "corp-guest", side: "corp", type: "human_remote", displayName: "Korp" }
   };
 }
 
