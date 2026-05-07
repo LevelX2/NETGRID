@@ -22,7 +22,7 @@ export async function createHumanVsAiGame(page: Page, seed: string): Promise<voi
   await page.getByLabel("Seed").fill(seed);
   await page.getByTestId("create-match").click();
   await expect(page.getByTestId("active-game")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("KI-Takt")).toBeVisible();
+  await expect(page.getByTestId("ai-pacing")).toBeVisible();
   await advanceAiUntilHumanTurn(page);
 }
 

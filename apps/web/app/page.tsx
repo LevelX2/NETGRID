@@ -113,7 +113,7 @@ const RUNNER_BASE_HAND_LIMIT = 5;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.0.8";
+const APP_STATUS_LABEL = "V1.0.9";
 const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
@@ -3984,7 +3984,16 @@ function RunTimeline({
   cardDetailsById: Record<string, CatalogCardDetail>;
   highlighted?: boolean;
 }) {
-  if (!view.run) return null;
+  if (!view.run) {
+    return (
+      <div className={`runTimeline ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline">
+        <div className="runTimelineHead">
+          <RunIcon size={18} />
+          <span>Kein aktiver Run</span>
+        </div>
+      </div>
+    );
+  }
   const currentStep = currentRunTimelineStep(view, legalActions);
   const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");

@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { startNetrunnerServer } from "./http-server";
 
 export * from "./http-server";
+export * from "./internet-hardening";
 export * from "./multiplayer";
 export * from "./storage-sqlite";
 

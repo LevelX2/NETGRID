@@ -25,10 +25,12 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await expectActiveBoardBasics(page);
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     await expect(page.getByTestId("server-run-action").first().getByTestId("cost-chips")).toBeVisible();
+    await page.getByRole("button", { name: "Optionen öffnen" }).click();
     await page.getByRole("button", { name: "Einzelschritt" }).click();
+    await page.getByRole("button", { name: "Optionen schließen" }).click();
     await page.locator('[data-testid="action-button"][data-action-type="gain_credit"]').first().click();
     await page.locator('[data-testid="action-button"][data-action-type="end_turn"]').first().click();
-    await expect(page.getByText("Corp-KI ist am Zug")).toBeVisible();
+    await expect(page.getByRole("button", { name: "KI-Schritt" })).toBeEnabled();
     await page.getByRole("button", { name: "KI-Schritt" }).click();
     await expect(page.getByTestId("opponent-cue")).toBeVisible();
 
@@ -164,10 +166,12 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     expect(runtimePath).not.toContain("data/runtime/multiplayer/netrunner.sqlite");
     await expect(async () => stat(runtimePath!)).toPass();
     const health = await request.get(`${process.env.NETRUNNER_E2E_SERVER_URL}/health`);
-    const body = (await health.json()) as { storage?: { kind?: string; database?: string; matchCount?: number } };
+    const body = (await health.json()) as { profile?: string; realtime?: { ready?: boolean }; storage?: { kind?: string; database?: string; matchCount?: number } };
+    expect(body.profile).toBe("local");
+    expect(body.realtime?.ready).toBe(true);
     expect(body.storage?.kind).toBe("sqlite");
     expect(body.storage?.database).toBe("netrunner.sqlite");
-    expect(typeof body.storage?.matchCount).toBe("number");
-    expect(JSON.stringify(body)).not.toMatch(/sessionToken|reconnectToken|joinToken|cardInstances|privateDeckSnapshots|decklist/i);
+    expect(body.storage?.matchCount).toBeUndefined();
+    expect(JSON.stringify(body)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
   });
 });

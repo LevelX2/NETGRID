@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V1.0.9 Private Internet Hardening ist als nächster Release-Scope geplant und requirements-frozen. Der Release ist in sechs konkrete Pakete geschnitten: Transport/Deployment-Profil, Origin/CORS/WebSocket-Zugriff, Rate Limits, Secrets/Tokens/Redaction, Health/Monitoring/Ops und Internet-Smokes. Ziel ist privater Internetbetrieb für eingeladene Spieler über HTTPS/WSS, ohne öffentliche Plattformfunktionen, Accounts, Matchmaking, Rankings, Turniere, neue Karten, neue Mechaniken, Postgres, Replay-/StateHash- oder Engine-Autoritätsänderungen.
+V1.0.9 Private Internet Hardening ist umgesetzt und lokal verifiziert. Der Release ergänzt getrennte Deployment-Profile `local`/`private_internet`, HTTPS/WSS-Konfigurationsprüfungen für privaten Internetbetrieb, explizite REST-/WebSocket-Origin-Allowlist, deterministische Rate-Limits für sensible Flows, verpflichtenden Internet-Token-Salt, Token-/Hash-/Hidden-Info-Redaction, sichere Health-/Ops-Signale und internetnahe Smokes. Er führt keine öffentlichen Plattformfunktionen, Accounts, Matchmaking, Rankings, Turniere, neuen Karten, neuen Mechaniken, Postgres-, Replay-/StateHash- oder Engine-Autoritätsänderungen ein.
 
 Aktuelle lokale UI-/Ablaufkorrektur vom 2026-05-06/2026-05-07: Die aktive Spieloberfläche hält zentrale Corp-Server unten fest in der Reihenfolge `HQ`, `F&E (R&D)`, `Archive`; Außenserver entstehen darüber. Der eigene Statusbereich sitzt links unter Aktionen/Zurücknehmen, Spielerwert-Flächen sind seitenfarbig hinterlegt und markieren die aktuelle Zugseite mit Rahmen, Aktionen erscheinen als eigene horizontale Leiste, Tags werden nur beim Runner angezeigt, die Kartenvorschau ist vollständig einklappbar, getaktete KI-Zugriffshinweise laufen nach Anzeige automatisch weiter, zentrale HQ-/F&E-Zugriffe werden aus Corp-Sicht in PlayerViews/WebSocket-Payloads redigiert, bestehende Außenserver mit Agenda/Asset im Root bieten keine weitere Agenda-/Asset-Installation in denselben Root mehr an, KI-Erklärtexte werden nicht mehr als normale Chronikbeschreibung angezeigt, Runner-KI-Runs bleiben im getakteten Modus nicht mehr an Hinweis-Timern oder Corp-Rezfenstern hängen, und das Spielziel ist wieder regelhaft auf 7 Agendapunkte festgezogen. Der alte deckabhängige Modus `Einzelspiel · Deckziel` ist keine auswählbare Produktoption mehr; alte `single_game`-Eingaben werden als `rules_match` behandelt.
 
@@ -78,11 +78,13 @@ Latest V1.0.9 private internet security spec artifact: `docs/derived/PRIVATE_INT
 Latest V1.0.9 private deployment ops spec artifact: `docs/derived/PRIVATE_DEPLOYMENT_OPS_1_0_9_SPEC.md`.
 Latest V1.0.9 test matrix artifact: `docs/derived/V1_0_9_TEST_MATRIX.md`.
 Latest V1.0.9 requirements review artifact: `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`.
+Latest V1.0.9 implementation review artifact: `docs/derived/V1_0_9_IMPLEMENTATION_REVIEW.md`.
+Latest V1.0.9 final review artifact: `docs/derived/V1_0_9_FINAL_REVIEW.md`.
 Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.0.9 Private Internet Hardening is requirements-frozen and ready for implementation. The release makes private invite-only internet operation safer through HTTPS/WSS deployment profile, explicit allowed origins for REST and WebSocket, deterministic rate limits for sensitive flows, required internet token salt, token/hidden-info redaction, safe health/ops signals and LAN/VPS or equivalent proxy smoke coverage. V1.0.9 must not add accounts, public discovery, matchmaking, rankings, tournaments, public chat, moderation, Postgres, new cards, new mechanics, official assets, Replay/StateHash changes or Engine authority changes. V1.0.8 Storage/Backup-Härtung is complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
+Current selected next scope: V1.0.9 Private Internet Hardening is complete and locally verified. V1.0.8 Storage/Backup-Härtung is complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
 
 ## Status
 
@@ -422,6 +424,25 @@ V1.0.9 Private Internet Hardening detailed planning and requirements freeze are 
 `V1_0_9_requirements_freeze_done: true`
 
 `ready_for_V1_0_9_implementation: true`
+
+V1.0.9 Private Internet Hardening implementation is complete and locally verified. Implemented scope includes Deployment profile validation, REST CORS allowlist, WebSocket Origin validation before match join, deterministic in-memory rate limits, internet Token-Salt enforcement, redacted Health/Ops/error/log surfaces and internet-like E2E configuration.
+
+`V1_0_9_implemented: true`
+
+`V1_0_9_verified: true`
+
+`V1_0_9_done: true`
+
+V1.0.9 verification:
+
+- `corepack pnpm --filter @netrunner/server test`: pass, 49 tests.
+- `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 13 tests.
+- `corepack pnpm e2e`: pass, 7/7 Playwright tests with explicit local Origin, redacted Join-URLs and temporary SQLite runtime storage.
+- `corepack pnpm lint`: pass.
+- `corepack pnpm typecheck`: pass.
+- `corepack pnpm test`: pass, workspace tests plus root specs.
+- `corepack pnpm build`: pass with known Turbopack NFT warning in `apps/web/next.config.ts`.
+- `git diff --check`: pass with Windows working-copy CRLF warnings only.
 
 V1.0.8 verification:
 
@@ -2049,13 +2070,13 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V1.0.6: Aktionen, Credits und Kartenanzeige, implementation complete and locally verified.
 - V1.0.7: Browser-E2E und Visual QA, implementation complete and locally verified.
 - V1.0.8: Storage/Backup-Härtung, implementation complete and locally verified.
-- V1.0.9: Private Internet Hardening, requirements freeze complete and ready for implementation.
+- V1.0.9: Private Internet Hardening, implementation complete and locally verified.
 
-Current gate: V1.0.9 Private Internet Hardening requirements freeze is complete and ready for implementation. The planning, requirements, security spec, deployment/ops spec, test matrix and requirements review are `docs/derived/V1_0_9_PRIVATE_INTERNET_HARDENING_PLAN.md`, `docs/derived/V1_0_9_REQUIREMENTS.md`, `docs/derived/PRIVATE_INTERNET_SECURITY_1_0_9_SPEC.md`, `docs/derived/PRIVATE_DEPLOYMENT_OPS_1_0_9_SPEC.md`, `docs/derived/V1_0_9_TEST_MATRIX.md` and `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`. V1.0.8 Storage/Backup-Härtung is complete and locally verified. The planning, freeze, implementation and final artifacts are `docs/derived/V1_0_8_STORAGE_BACKUP_HARDENING_PLAN.md`, `docs/derived/V1_0_8_REQUIREMENTS.md`, `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`, `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`, `docs/derived/V1_0_8_TEST_MATRIX.md`, `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_8_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_8_FINAL_REVIEW.md`. V1.0.7 Browser-E2E und Visual QA is complete and locally verified. V1.0.6 Aktionen, Credits und Kartenanzeige is complete and documented in `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_6_FINAL_REVIEW.md`. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. V1.0.5K is complete as a separate narrow card-release insert. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.0.9 Private Internet Hardening implementation and final verification are complete. The planning, requirements, security spec, deployment/ops spec, test matrix, requirements review, implementation review and final review are `docs/derived/V1_0_9_PRIVATE_INTERNET_HARDENING_PLAN.md`, `docs/derived/V1_0_9_REQUIREMENTS.md`, `docs/derived/PRIVATE_INTERNET_SECURITY_1_0_9_SPEC.md`, `docs/derived/PRIVATE_DEPLOYMENT_OPS_1_0_9_SPEC.md`, `docs/derived/V1_0_9_TEST_MATRIX.md`, `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_9_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_9_FINAL_REVIEW.md`. V1.0.8 Storage/Backup-Härtung is complete and locally verified. The planning, freeze, implementation and final artifacts are `docs/derived/V1_0_8_STORAGE_BACKUP_HARDENING_PLAN.md`, `docs/derived/V1_0_8_REQUIREMENTS.md`, `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`, `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`, `docs/derived/V1_0_8_TEST_MATRIX.md`, `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_8_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_8_FINAL_REVIEW.md`. V1.0.7 Browser-E2E und Visual QA is complete and locally verified. V1.0.6 Aktionen, Credits und Kartenanzeige is complete and documented in `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_6_FINAL_REVIEW.md`. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. V1.0.5K is complete as a separate narrow card-release insert. V1.0.4 requirements are implemented and reviewed in `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_4_FINAL_REVIEW.md`; V1.0.3 plan and final review are complete. V1.0.2 requirements, presentation spec, test matrix, requirements review, implementation review and final review are complete. V1.0.1 implementation, validation and documentation are complete. S01 is complete. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
 
 Next scope decision:
 
-1. Implement V1.0.9 Private Internet Hardening from the frozen requirements.
+1. Choose the next gated project scope after V1.0.9.
 2. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
 3. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
 4. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.

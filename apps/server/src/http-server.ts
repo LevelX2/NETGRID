@@ -27,6 +27,21 @@ import {
   type StorageKind
 } from "./storage-sqlite";
 import { resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
+import {
+  applyCors,
+  clientIdentity,
+  createRateLimiter,
+  FixedWindowRateLimiter,
+  hashClientKey,
+  isOriginAllowed,
+  loadDeploymentConfig,
+  originDeniedPayload,
+  rateLimitedPayload,
+  redactedDiagnosticsUnavailable,
+  redactedHealth,
+  type DeploymentConfig,
+  type RateLimitCategory
+} from "./internet-hardening";
 import type { Side } from "@netrunner/shared";
 import type { AiDifficulty } from "@netrunner/shared";
 
@@ -82,19 +97,47 @@ export type NetrunnerServerHandle = {
   server: Server;
   service: MultiplayerService;
   realtime: NetrunnerRealtimeServer;
+  deploymentConfig: DeploymentConfig;
   close(): Promise<void>;
+};
+
+type NetrunnerServerOptions = {
+  deploymentConfig?: DeploymentConfig;
+  rateLimiter?: FixedWindowRateLimiter;
 };
 
 export class NetrunnerRealtimeServer {
   private readonly connections = new Map<string, Map<Side, Connection>>();
   private readonly countdownTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  private readonly socketClients = new WeakMap<WebSocket, { clientKey: string }>();
   private wss?: WebSocketServer;
 
-  constructor(private readonly service: MultiplayerService) {}
+  constructor(
+    private readonly service: MultiplayerService,
+    private readonly deploymentConfig: DeploymentConfig,
+    private readonly rateLimiter: FixedWindowRateLimiter
+  ) {}
 
   attach(server: Server): void {
-    this.wss = new WebSocketServer({ server, path: "/ws" });
-    this.wss.on("connection", (socket) => {
+    this.wss = new WebSocketServer({
+      server,
+      path: "/ws",
+      verifyClient: (info, done) => {
+        if (!isOriginAllowed(info.origin || info.req.headers.origin, this.deploymentConfig)) {
+          done(false, 403, "origin_not_allowed");
+          return;
+        }
+        const clientKey = hashClientKey(clientIdentity(info.req, this.deploymentConfig));
+        const limited = this.rateLimiter.check("ws_handshake", clientKey, "ws");
+        if (!limited.allowed) {
+          done(false, 429, "rate_limited");
+          return;
+        }
+        done(true);
+      }
+    });
+    this.wss.on("connection", (socket, request) => {
+      this.socketClients.set(socket, { clientKey: hashClientKey(clientIdentity(request, this.deploymentConfig)) });
       socket.on("message", (raw) => void this.handleMessage(socket, raw.toString()));
       socket.on("close", () => void this.handleClose(socket));
       socket.on("error", () => undefined);
@@ -221,6 +264,12 @@ export class NetrunnerRealtimeServer {
   }
 
   private async joinSocket(socket: WebSocket, payload: { matchId: string; sessionToken: string; side: Side }): Promise<void> {
+    const clientKey = this.socketClients.get(socket)?.clientKey ?? "unknown-client";
+    const limited = this.rateLimiter.check("ws_join", clientKey, payload.matchId);
+    if (!limited.allowed) {
+      send(socket, { type: "error", payload: { code: "rate_limited", message: "Zu viele WebSocket-Join-Versuche. Bitte kurz warten." } });
+      return;
+    }
     const connected = await this.service.setConnected(payload.matchId, payload.side, payload.sessionToken, true);
     if ("error" in connected) {
       send(socket, { type: "error", payload: connected.error });
@@ -399,21 +448,25 @@ export class NetrunnerRealtimeServer {
   }
 }
 
-export function createNetrunnerHttpServer(service = defaultService()): NetrunnerServerHandle {
-  const realtime = new NetrunnerRealtimeServer(service);
-  const server = createServer((request, response) => void routeHttp(service, realtime, request, response));
+export function createNetrunnerHttpServer(service?: MultiplayerService, options: NetrunnerServerOptions = {}): NetrunnerServerHandle {
+  const deploymentConfig = options.deploymentConfig ?? loadDeploymentConfig();
+  const activeService = service ?? defaultService(deploymentConfig);
+  const rateLimiter = options.rateLimiter ?? createRateLimiter(deploymentConfig.rateLimitProfile);
+  const realtime = new NetrunnerRealtimeServer(activeService, deploymentConfig, rateLimiter);
+  const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, request, response));
   realtime.attach(server);
   return {
     server,
-    service,
+    service: activeService,
     realtime,
+    deploymentConfig,
     close: () =>
       new Promise<void>((resolve, reject) => {
         realtime
           .close()
           .then(() =>
             server.close((error) => {
-              service.closeStorage();
+              activeService.closeStorage();
               return error ? reject(error) : resolve();
             })
           )
@@ -430,8 +483,19 @@ export async function startNetrunnerServer(options: { port?: number; host?: stri
   return { ...handle, url: `http://${host}:${port}` };
 }
 
-async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtimeServer, request: IncomingMessage, response: ServerResponse): Promise<void> {
-  setCors(response);
+async function routeHttp(
+  service: MultiplayerService,
+  realtime: NetrunnerRealtimeServer,
+  deploymentConfig: DeploymentConfig,
+  rateLimiter: FixedWindowRateLimiter,
+  request: IncomingMessage,
+  response: ServerResponse
+): Promise<void> {
+  const corsDecision = applyCors(request, response, deploymentConfig);
+  if (corsDecision === "denied") {
+    sendJson(response, 403, originDeniedPayload());
+    return;
+  }
   if (request.method === "OPTIONS") {
     response.writeHead(204);
     response.end();
@@ -441,11 +505,17 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
   const url = new URL(request.url ?? "/", "http://localhost");
   try {
     if (request.method === "GET" && url.pathname === "/health") {
-      sendJson(response, 200, { ok: true, service: "netrunner-multiplayer", storage: await service.storageHealth() });
+      sendJson(response, 200, redactedHealth(await service.storageHealth(), deploymentConfig));
+      return;
+    }
+
+    if (request.method === "GET" && url.pathname === "/ops/diagnostics") {
+      sendJson(response, 403, redactedDiagnosticsUnavailable());
       return;
     }
 
     if (request.method === "POST" && url.pathname === "/api/matches") {
+      if (!checkRateLimit(response, rateLimiter, "create_match", request, deploymentConfig, "create")) return;
       const body = await readJson(request);
       const createInput: Parameters<MultiplayerService["createMatch"]>[0] = {
         hostSide: body.hostSide === "runner" || body.hostSide === "corp" || body.hostSide === "random" ? body.hostSide : "runner"
@@ -479,6 +549,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
     }
 
     if (request.method === "POST" && url.pathname === "/api/simulations/ai-vs-ai") {
+      if (!checkRateLimit(response, rateLimiter, "ai_advance", request, deploymentConfig, "simulation")) return;
       const body = await readJson(request);
       const config: Parameters<typeof simulateAiGame>[0] = {};
       if (typeof body.seed === "string") config.seed = body.seed;
@@ -508,10 +579,12 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
       const matchId = decodeURIComponent(matchRoute[1] ?? "");
       const action = matchRoute[2];
       if (request.method === "GET" && action === "join-info") {
+        if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `join-info:${matchId}`)) return;
         sendJson(response, 200, await service.getJoinInfo(matchId, url.searchParams.get("token") ?? undefined));
         return;
       }
       if (request.method === "POST" && action === "join") {
+        if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `join:${matchId}`)) return;
         const body = await readJson(request);
         const joinInput: Parameters<MultiplayerService["joinMatch"]>[1] = {
           token: typeof body.token === "string" ? body.token : "",
@@ -523,6 +596,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         return;
       }
       if (request.method === "POST" && action === "reconnect") {
+        if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `reconnect:${matchId}`)) return;
         const body = await readJson(request);
         const side = body.side === "runner" || body.side === "corp" ? body.side : "runner";
         const reconnectInput: Parameters<MultiplayerService["reconnectMatch"]>[1] = {
@@ -535,6 +609,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         return;
       }
       if (request.method === "POST" && action === "cancel") {
+        if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `cancel:${matchId}`)) return;
         const body = await readJson(request);
         const side = body.side === "corp" ? "corp" : "runner";
         const result = await service.cancelMatch({
@@ -547,6 +622,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         return;
       }
       if (request.method === "POST" && action === "leave") {
+        if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `leave:${matchId}`)) return;
         const body = await readJson(request);
         const side = body.side === "corp" ? "corp" : "runner";
         const result = await service.leaveMatch({
@@ -559,6 +635,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         return;
       }
       if (request.method === "POST" && action === "forfeit") {
+        if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `forfeit:${matchId}`)) return;
         const body = await readJson(request);
         const side = body.side === "corp" ? "corp" : "runner";
         const result = await service.forfeitMatch({
@@ -571,6 +648,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         return;
       }
       if (request.method === "POST" && action === "recreate") {
+        if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `recreate:${matchId}`)) return;
         const body = await readJson(request);
         const side = body.side === "corp" ? "corp" : "runner";
         const result = await service.recreateMatch(matchId, {
@@ -583,6 +661,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         return;
       }
       if (request.method === "GET" && action === "bootstrap") {
+        if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `bootstrap:${matchId}`)) return;
         const side = url.searchParams.get("side") === "corp" ? "corp" : "runner";
         const sessionToken = bearerToken(request) ?? url.searchParams.get("sessionToken") ?? "";
         const bootstrapped = await service.bootstrap(matchId, side, sessionToken, { allowLobby: true });
@@ -590,6 +669,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         return;
       }
       if (request.method === "POST" && action === "series-next") {
+        if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `series-next:${matchId}`)) return;
         const body = await readJson(request);
         const side = body.side === "corp" ? "corp" : "runner";
         const sessionToken = bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : "");
@@ -602,6 +682,7 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
         return;
       }
       if (request.method === "POST" && action === "ai-advance") {
+        if (!checkRateLimit(response, rateLimiter, "ai_advance", request, deploymentConfig, `ai:${matchId}`)) return;
         const body = await readJson(request);
         const side = body.side === "corp" ? "corp" : "runner";
         const advanced = await service.advanceAi({
@@ -626,13 +707,21 @@ async function routeHttp(service: MultiplayerService, realtime: NetrunnerRealtim
     }
 
     sendJson(response, 404, { error: { code: "not_found", message: "Route nicht gefunden." } });
-  } catch {
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      sendJson(response, 400, { error: { code: "bad_json", message: "Anfrage konnte nicht gelesen werden." } });
+      return;
+    }
     sendJson(response, 500, { error: { code: "server_error", message: "Serverfehler." } });
   }
 }
 
-function defaultService(): MultiplayerService {
-  return new MultiplayerService(createConfiguredStorage());
+function defaultService(deploymentConfig: DeploymentConfig): MultiplayerService {
+  return new MultiplayerService(createConfiguredStorage(), {
+    ...(deploymentConfig.tokenSalt ? { tokenSalt: deploymentConfig.tokenSalt } : {}),
+    publicWebBaseUrl: deploymentConfig.webBaseUrl,
+    publicServerBaseUrl: deploymentConfig.serverBaseUrl
+  });
 }
 
 export function createConfiguredStorage() {
@@ -704,10 +793,20 @@ function parseWsMessage(raw: string): ClientWsMessage | null {
   }
 }
 
-function setCors(response: ServerResponse): void {
-  response.setHeader("access-control-allow-origin", "*");
-  response.setHeader("access-control-allow-methods", "GET,POST,OPTIONS");
-  response.setHeader("access-control-allow-headers", "content-type,authorization");
+function checkRateLimit(
+  response: ServerResponse,
+  rateLimiter: FixedWindowRateLimiter,
+  category: RateLimitCategory,
+  request: IncomingMessage,
+  deploymentConfig: DeploymentConfig,
+  scope: string
+): boolean {
+  const clientKey = hashClientKey(clientIdentity(request, deploymentConfig));
+  const limited = rateLimiter.check(category, clientKey, scope);
+  if (limited.allowed) return true;
+  if (limited.retryAfterSeconds) response.setHeader("retry-after", String(limited.retryAfterSeconds));
+  sendJson(response, 429, rateLimitedPayload());
+  return false;
 }
 
 function bearerToken(request: IncomingMessage): string | undefined {

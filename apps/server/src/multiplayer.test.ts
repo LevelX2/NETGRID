@@ -11,9 +11,201 @@ import { createRuntimeCardsById } from "@netrunner/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netrunner/decks";
 import { applyAction, createGame, getLegalActions, hashState } from "@netrunner/engine";
 import { createConfiguredStorage, createNetrunnerHttpServer } from "./http-server";
+import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
 import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netrunner/shared";
+
+describe("V1.0.9 private internet hardening", () => {
+  it("validates local and private internet deployment profiles", () => {
+    const local = loadDeploymentConfig({ NETRUNNER_DEPLOYMENT_PROFILE: "local" } as NodeJS.ProcessEnv);
+    expect(local.profile).toBe("local");
+    expect(local.webBaseUrl).toBe("http://127.0.0.1:3000");
+    expect(local.allowedOrigins).toContain("http://127.0.0.1:3000");
+
+    expect(() =>
+      loadDeploymentConfig({
+        NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
+        NETRUNNER_WEB_BASE_URL: "http://netgrid.example",
+        NETRUNNER_SERVER_BASE_URL: "https://api.netgrid.example",
+        NETRUNNER_ALLOWED_ORIGINS: "https://netgrid.example",
+        NETRUNNER_TOKEN_SALT: "private-test-salt"
+      } as NodeJS.ProcessEnv)
+    ).toThrow(/HTTPS/);
+    expect(() =>
+      loadDeploymentConfig({
+        NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
+        NETRUNNER_WEB_BASE_URL: "https://netgrid.example",
+        NETRUNNER_SERVER_BASE_URL: "https://api.netgrid.example",
+        NETRUNNER_ALLOWED_ORIGINS: "https://netgrid.example",
+        NETRUNNER_TOKEN_SALT: "local-dev-netrunner-token-salt"
+      } as NodeJS.ProcessEnv)
+    ).toThrow(/NETRUNNER_TOKEN_SALT/);
+
+    const privateConfig = loadDeploymentConfig({
+      NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
+      NETRUNNER_WEB_BASE_URL: "https://netgrid.example",
+      NETRUNNER_SERVER_BASE_URL: "https://api.netgrid.example",
+      NETRUNNER_ALLOWED_ORIGINS: "https://netgrid.example,https://tablet.netgrid.example",
+      NETRUNNER_TOKEN_SALT: "private-test-salt"
+    } as NodeJS.ProcessEnv);
+    expect(privateConfig).toMatchObject({
+      profile: "private_internet",
+      webBaseUrl: "https://netgrid.example",
+      serverBaseUrl: "https://api.netgrid.example",
+      rateLimitProfile: "private_internet"
+    });
+    expect(privateConfig.allowedOrigins).toEqual(["https://netgrid.example", "https://tablet.netgrid.example"]);
+  });
+
+  it("uses explicit REST CORS origins and keeps health redacted", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "private-health-salt",
+      publicWebBaseUrl: "https://netgrid.example",
+      publicServerBaseUrl: "https://api.netgrid.example"
+    });
+    const handle = createNetrunnerHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const baseUrl = await listen(handle);
+    try {
+      const preflight = await fetch(`${baseUrl}/api/matches`, {
+        method: "OPTIONS",
+        headers: { origin: "https://netgrid.example", "access-control-request-method": "POST" }
+      });
+      expect(preflight.status).toBe(204);
+      expect(preflight.headers.get("access-control-allow-origin")).toBe("https://netgrid.example");
+      expect(preflight.headers.get("access-control-allow-methods")).toBe("GET,POST,OPTIONS");
+
+      const denied = await fetch(`${baseUrl}/health`, { headers: { origin: "https://evil.example" } });
+      const deniedText = await denied.text();
+      expect(denied.status).toBe(403);
+      expect(deniedText).toContain("origin_not_allowed");
+      expect(deniedText).not.toMatch(/sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i);
+
+      const health = await fetch(`${baseUrl}/health`);
+      const body = (await health.json()) as { profile?: string; realtime?: { ready?: boolean }; storage?: { kind?: string; matchCount?: number } };
+      expect(body.profile).toBe("private_internet");
+      expect(body.realtime?.ready).toBe(true);
+      expect(body.storage?.kind).toBe("memory");
+      expect(body.storage?.matchCount).toBeUndefined();
+      expect(JSON.stringify(body)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("checks WebSocket origins before join payloads are sent", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "private-ws-salt",
+      publicWebBaseUrl: "https://netgrid.example",
+      publicServerBaseUrl: "https://api.netgrid.example"
+    });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v109-ws-origin" });
+    const handle = createNetrunnerHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const baseUrl = await listen(handle);
+    const wsUrl = baseUrl.replace(/^http:/, "ws:") + "/ws";
+    const deniedMessages: string[] = [];
+    const denied = new WebSocket(wsUrl, { headers: { Origin: "https://evil.example" } });
+    try {
+      denied.on("message", (raw) => deniedMessages.push(raw.toString()));
+      await waitForClosedOrErrored(denied);
+      expect(deniedMessages).toEqual([]);
+
+      const allowed = new WebSocket(wsUrl, { headers: { Origin: "https://netgrid.example" } });
+      try {
+        await waitForOpen(allowed);
+        allowed.send(JSON.stringify({ type: "join_match", payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide } }));
+        const update = await waitForMessage(allowed, "lobby_update");
+        expect(messagePayload(update).matchStatus).toBe("pending");
+        expect(JSON.stringify(update)).not.toMatch(/sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i);
+      } finally {
+        allowed.close();
+      }
+    } finally {
+      denied.close();
+      await handle.close();
+    }
+  });
+
+  it("rate-limits sensitive REST and WebSocket join flows with redacted errors", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "private-rate-salt",
+      publicWebBaseUrl: "https://netgrid.example",
+      publicServerBaseUrl: "https://api.netgrid.example"
+    });
+    const handle = createNetrunnerHttpServer(service, { deploymentConfig: privateDeploymentConfig(), rateLimiter: createRateLimiter("test") });
+    const baseUrl = await listen(handle);
+    try {
+      for (let index = 0; index < 2; index += 1) {
+        const response = await fetch(`${baseUrl}/api/matches`, {
+          method: "POST",
+          headers: { "content-type": "application/json", origin: "https://netgrid.example" },
+          body: JSON.stringify({ hostSide: "runner", seed: `rate-rest-${index}` })
+        });
+        expect(response.status).toBe(201);
+      }
+      const limited = await fetch(`${baseUrl}/api/matches`, {
+        method: "POST",
+        headers: { "content-type": "application/json", origin: "https://netgrid.example" },
+        body: JSON.stringify({ hostSide: "runner", seed: "rate-rest-limited", sessionToken: "secret" })
+      });
+      const limitedText = await limited.text();
+      expect(limited.status).toBe(429);
+      expect(limitedText).toContain("rate_limited");
+      expect(limitedText).not.toMatch(/secret|sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i);
+    } finally {
+      await handle.close();
+    }
+
+    const wsService = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "private-ws-rate-salt",
+      publicWebBaseUrl: "https://netgrid.example",
+      publicServerBaseUrl: "https://api.netgrid.example"
+    });
+    const created = await wsService.createMatch({ hostSide: "runner", seed: "v109-ws-rate" });
+    const wsLimiter = new FixedWindowRateLimiter({
+      create_match: undefined,
+      token_probe: undefined,
+      lifecycle: undefined,
+      ai_advance: undefined,
+      ws_handshake: { limit: 10, windowMs: 60_000 },
+      ws_join: { limit: 1, windowMs: 60_000 }
+    });
+    const wsHandle = createNetrunnerHttpServer(wsService, { deploymentConfig: privateDeploymentConfig(), rateLimiter: wsLimiter });
+    const wsBaseUrl = await listen(wsHandle);
+    const wsUrl = wsBaseUrl.replace(/^http:/, "ws:") + "/ws";
+    const socket = new WebSocket(wsUrl, { headers: { Origin: "https://netgrid.example" } });
+    try {
+      await waitForOpen(socket);
+      socket.send(JSON.stringify({ type: "join_match", payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide } }));
+      await waitForMessage(socket, "lobby_update");
+      socket.send(JSON.stringify({ type: "join_match", payload: { matchId: created.matchId, sessionToken: created.hostSessionToken, side: created.hostSide } }));
+      const error = await waitForMessage(socket, "error");
+      expect(JSON.stringify(error)).toContain("rate_limited");
+      expect(JSON.stringify(error)).not.toMatch(/sessionToken|joinToken|tokenHash|cardInstances|privatePayload|decklist/i);
+    } finally {
+      socket.close();
+      await wsHandle.close();
+    }
+  });
+
+  it("redacts token, hash, join URL and hidden-info diagnostics", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "private-redaction-salt" });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v109-redaction" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    expect(joinToken).toBeTruthy();
+    const redactedUrl = redactedJoinUrl(created.joinUrl);
+    expect(redactedUrl).toContain("joinToken=[redacted]");
+    expect(redactedUrl).not.toContain(joinToken ?? "missing");
+
+    const text = redactSensitiveText(
+      `joinToken=${joinToken} "sessionToken":"${created.hostSessionToken}" tokenHash=sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef privatePayload cardInstances decklist`
+    );
+    expect(text).toContain("joinToken=[redacted]");
+    expect(text).not.toContain(created.hostSessionToken);
+    expect(text).not.toContain(joinToken ?? "missing");
+    expect(text).not.toMatch(/sha256:[a-f0-9]{64}|privatePayload|cardInstances|decklist/i);
+  });
+});
 
 describe("V1.0.8 SQLite storage and backup hardening", () => {
   it("uses SQLite as configurable default storage and reports only redacted health signals", async () => {
@@ -2788,6 +2980,31 @@ function waitForMessage(socket: WebSocket, type: string): Promise<unknown> {
 
 function messagePayload(message: unknown): { matchStatus?: string } {
   return (message as { payload?: { matchStatus?: string } }).payload ?? {};
+}
+
+function privateDeploymentConfig(): DeploymentConfig {
+  return loadDeploymentConfig({
+    NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
+    NETRUNNER_WEB_BASE_URL: "https://netgrid.example",
+    NETRUNNER_SERVER_BASE_URL: "https://api.netgrid.example",
+    NETRUNNER_ALLOWED_ORIGINS: "https://netgrid.example",
+    NETRUNNER_TOKEN_SALT: "private-test-salt",
+    NETRUNNER_RATE_LIMIT_PROFILE: "private_internet"
+  } as NodeJS.ProcessEnv);
+}
+
+async function listen(handle: ReturnType<typeof createNetrunnerHttpServer>): Promise<string> {
+  await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+  const address = handle.server.address();
+  if (!address || typeof address === "string") throw new Error("Missing server address");
+  return `http://127.0.0.1:${address.port}`;
+}
+
+function waitForClosedOrErrored(socket: WebSocket): Promise<void> {
+  return new Promise((resolve) => {
+    socket.once("close", () => resolve());
+    socket.once("error", () => resolve());
+  });
 }
 
 async function tempStorageDir(): Promise<string> {

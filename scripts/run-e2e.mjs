@@ -29,8 +29,11 @@ try {
     NETRUNNER_STORAGE_BACKUP_DIR: backupDir,
     NETRUNNER_LEGACY_MATCH_STORAGE_PATH: path.join(runtimeDir, "legacy-matches.json"),
     NETRUNNER_TOKEN_SALT: "v1-0-7-e2e-token-salt",
+    NETRUNNER_DEPLOYMENT_PROFILE: "local",
     NETRUNNER_WEB_BASE_URL: webUrl,
-    NETRUNNER_SERVER_BASE_URL: serverUrl
+    NETRUNNER_SERVER_BASE_URL: serverUrl,
+    NETRUNNER_ALLOWED_ORIGINS: webUrl,
+    NETRUNNER_RATE_LIMIT_PROFILE: "local"
   });
   await waitForUrl(`${serverUrl}/health`, "server");
 
@@ -71,8 +74,9 @@ function start(label, args, env) {
 function redactLogChunk(chunk) {
   return String(chunk)
     .replace(/(joinToken=)[A-Za-z0-9_-]+/g, "$1[redacted]")
-    .replace(/("(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken)"\s*:\s*")[^"]+(")/g, "$1[redacted]$2")
-    .replace(/sha256:[a-f0-9]{64}/gi, "sha256:[redacted]");
+    .replace(/("(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash)"\s*:\s*")[^"]+(")/g, "$1[redacted]$2")
+    .replace(/sha256:[a-f0-9]{64}/gi, "sha256:[redacted]")
+    .replace(/privateDeckSnapshots|privatePayload|cardInstances|decklist/gi, "[redacted-field]");
 }
 
 function run(command, args, env) {

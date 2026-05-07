@@ -152,6 +152,8 @@
 - `docs/derived/PRIVATE_DEPLOYMENT_OPS_1_0_9_SPEC.md`: Ops-Spezifikation für lokale und private Internet-Betriebsprofile, Health, Diagnose, Deploy-Checkliste und LAN-/VPS-Smoke.
 - `docs/derived/V1_0_9_TEST_MATRIX.md`: V1.0.9-Testmatrix für Deployment-Profil, HTTPS/WSS-Konfiguration, Origins, Rate Limits, Redaction, Health, E2E und Internet-Smoke.
 - `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.0.9.
+- `docs/derived/V1_0_9_IMPLEMENTATION_REVIEW.md`: Implementation Review für Deployment-Profile, Origin-/CORS-/WebSocket-Gate, Rate-Limits, Redaction, Health und internetnahe E2E-Konfiguration.
+- `docs/derived/V1_0_9_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.0.9 Private Internet Hardening.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
