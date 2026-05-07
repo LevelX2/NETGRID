@@ -2,7 +2,13 @@
 
 ## Current phase
 
+V1.1.1 Discard, Handlimit und Core Damage ist umgesetzt und lokal verifiziert. Der Release ergänzt Engine-Discard-Phasen für Korp und Runner, dynamische Handlimits im GameState und PlayerView, side-private Discard-Choices über `LegalActions`/`PlayerActions`, Korp-Discard facedown nach Archives, Runner-Discard in Heap, Core Damage als spielbaren Damage-Typ, dauerhafte Runner-Handlimit-Reduktion, Flatline bei negativem Runner-Handlimit zu Beginn des Runner-Discard-Steps sowie Multiplayer-/Reconnect-/Undo-/Visibility-/AI-/Web-UI-Abdeckung. Damage Prevention, Avoid, Interrupts, Replacement Effects, Full Archives Access, Runner-Deckout-Siegbedingung, offizielle Assets und Plattformfeatures bleiben außerhalb des Scopes.
+
 V1.1.0 Setup/Game-End M2 und NETGRID-Statusklarheit ist umgesetzt und lokal verifiziert. Der Release ergänzt explizites Engine-Setup, private Runner-/Korp-Mulligan-Entscheidungen über `LegalActions`/`PlayerActions`, Agenda-Zielstandard 7 mit sichtbarem aktuellem Wert/Zielwert, konsolidierten Game-End-Vertrag für Agenda-Sieg, Korp-Deckout und Flatline, formalisierte Identity-PlayerViews, Archives-facedown-Grundlage ohne Full-Archives-Access, Setup-kompatible Multiplayer-/Reconnect-/KI-Flows und NETGRID-UI-Klarheit mit sichtbarer Schreibweise `Korp`, Lucide-Rollenicons, Agenda-/Tag-Icons und side-sicherer Setup-UI. Runner-Deckout wurde nur vorbereitet, nicht als neue Siegbedingung aktiviert.
+
+V1.1.2 Requirements Freeze ist abgeschlossen, aber noch nicht umgesetzt. Die Artefakte `docs/derived/V1_1_2_FULL_ARCHIVES_AND_MATCHSTART_ENTRY_UX_PLAN.md`, `docs/derived/V1_1_2_REQUIREMENTS.md`, `docs/derived/FULL_ARCHIVES_ACCESS_1_1_2_SPEC.md`, `docs/derived/MATCHSTART_ENTRY_UX_1_1_2_SPEC.md`, `docs/derived/V1_1_2_TEST_MATRIX.md` und `docs/derived/V1_1_2_REQUIREMENTS_REVIEW.md` planen Full Archives Access als primäres Mechanik-/Visibility-Gate und Matchstart Entry UX als unabhängigen Web-UI-Slice. Track B darf Track A fachlich nicht verwässern und kann bei Umsetzungsrisiko separat verschoben werden. Gate-Ergebnis: `V1_1_2_requirements_freeze_done: true`; `ready_for_implementation: true`.
+
+Post-V1.1.2 Anschlussplanung vom 2026-05-07: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` legt fest, dass V1.1.2 unverändert bleibt und danach eine kombinierte Mechanik-/Karten-/KI-Linie startet. Schwerpunkt ist mehr spielbare Karten durch fehlende Mechaniken; die KI wird nicht als spätes isoliertes V1.7-Feature behandelt, sondern bekommt in jedem Mechanik- und Kartenrelease eine eigene Support-Spur. Empfohlener erster Schritt nach V1.1.2 ist V1.1.3 Mechanics-AI-Card Baseline ohne Codeimplementierung.
 
 V1.0.9 Private Internet Hardening ist umgesetzt und lokal verifiziert. Der Release ergänzt getrennte Deployment-Profile `local`/`private_internet`, HTTPS/WSS-Konfigurationsprüfungen für privaten Internetbetrieb, explizite REST-/WebSocket-Origin-Allowlist, deterministische Rate-Limits für sensible Flows, verpflichtenden Internet-Token-Salt, Token-/Hash-/Hidden-Info-Redaction, sichere Health-/Ops-Signale und internetnahe Smokes. Er führt keine öffentlichen Plattformfunktionen, Accounts, Matchmaking, Rankings, Turniere, neuen Karten, neuen Mechaniken, Postgres-, Replay-/StateHash- oder Engine-Autoritätsänderungen ein.
 
@@ -89,11 +95,25 @@ Latest V1.1.0 requirements artifact: `docs/derived/V1_1_0_REQUIREMENTS.md`.
 Latest V1.1.0 test matrix artifact: `docs/derived/V1_1_0_TEST_MATRIX.md`.
 Latest V1.1.0 implementation review artifact: `docs/derived/V1_1_0_IMPLEMENTATION_REVIEW.md`.
 Latest V1.1.0 final review artifact: `docs/derived/V1_1_0_FINAL_REVIEW.md`.
+Latest V1.1.1 Discard/Handlimit/Core Damage planning artifact: `docs/derived/V1_1_1_DISCARD_HANDLIMIT_CORE_DAMAGE_PLAN.md`.
+Latest V1.1.1 requirements artifact: `docs/derived/V1_1_1_REQUIREMENTS.md`.
+Latest V1.1.1 mechanics spec artifact: `docs/derived/DISCARD_HANDLIMIT_CORE_DAMAGE_1_1_1_SPEC.md`.
+Latest V1.1.1 test matrix artifact: `docs/derived/V1_1_1_TEST_MATRIX.md`.
+Latest V1.1.1 requirements review artifact: `docs/derived/V1_1_1_REQUIREMENTS_REVIEW.md`.
+Latest V1.1.1 implementation review artifact: `docs/derived/V1_1_1_IMPLEMENTATION_REVIEW.md`.
+Latest V1.1.1 final review artifact: `docs/derived/V1_1_1_FINAL_REVIEW.md`.
+Latest V1.1.2 integrated planning artifact: `docs/derived/V1_1_2_FULL_ARCHIVES_AND_MATCHSTART_ENTRY_UX_PLAN.md`.
+Latest V1.1.2 requirements artifact: `docs/derived/V1_1_2_REQUIREMENTS.md`.
+Latest V1.1.2 Full Archives spec artifact: `docs/derived/FULL_ARCHIVES_ACCESS_1_1_2_SPEC.md`.
+Latest V1.1.2 Matchstart Entry UX spec artifact: `docs/derived/MATCHSTART_ENTRY_UX_1_1_2_SPEC.md`.
+Latest V1.1.2 test matrix artifact: `docs/derived/V1_1_2_TEST_MATRIX.md`.
+Latest V1.1.2 requirements review artifact: `docs/derived/V1_1_2_REQUIREMENTS_REVIEW.md`.
+Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`.
 Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.1.0 Setup/Game-End M2 is complete and locally verified. The release implements explicit setup, private mulligan, 7-point agenda normalization, game-end contract, Archives-facedown foundation, identity setup, and the NETGRID icon/status clarity requirements including visible spelling `Korp`. V1.0.9 Private Internet Hardening is complete and locally verified. V1.0.8 Storage/Backup-Härtung is complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
+Current selected next scope: V1.1.1 Discard/Handlimit/Core Damage is complete and locally verified. V1.1.2 is requirements-frozen for work after V1.1.1: Full Archives Access as the primary mechanic/visibility gate plus Matchstart Entry UX as an independent Web-UI slice. V1.1.2 remains unchanged by the post-V1.1.2 roadmap. After V1.1.2, the recommended next planning step is V1.1.3 Mechanics-AI-Card Baseline to align missing mechanics, card unlocks and continuous KI support before V1.2.x mechanism implementation. V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening and V1.0.8 Storage/Backup-Härtung are complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
 
 ## Status
 
@@ -2081,14 +2101,18 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V1.0.8: Storage/Backup-Härtung, implementation complete and locally verified.
 - V1.0.9: Private Internet Hardening, implementation complete and locally verified.
 - V1.1.0: Setup/Game-End M2 und NETGRID-Statusklarheit, implementation complete and locally verified.
+- V1.1.1: Discard, Handlimit und Core Damage, implementation complete and locally verified.
+- V1.1.2: Full Archives Access plus independent Matchstart Entry UX, requirements freeze complete and not implemented yet.
 
-Current gate: V1.1.0 Setup/Game-End M2 und NETGRID-Statusklarheit implementation and final verification are complete. The planning, requirements, test matrix, implementation review and final review are `docs/derived/V1_1_0_SETUP_GAME_END_M2_DETAILED_PLAN.md`, `docs/derived/V1_1_0_REQUIREMENTS.md`, `docs/derived/V1_1_0_TEST_MATRIX.md`, `docs/derived/V1_1_0_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_1_0_FINAL_REVIEW.md`. V1.0.9 Private Internet Hardening implementation and final verification are complete. The planning, requirements, security spec, deployment/ops spec, test matrix, requirements review, implementation review and final review are `docs/derived/V1_0_9_PRIVATE_INTERNET_HARDENING_PLAN.md`, `docs/derived/V1_0_9_REQUIREMENTS.md`, `docs/derived/PRIVATE_INTERNET_SECURITY_1_0_9_SPEC.md`, `docs/derived/PRIVATE_DEPLOYMENT_OPS_1_0_9_SPEC.md`, `docs/derived/V1_0_9_TEST_MATRIX.md`, `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_0_9_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_0_9_FINAL_REVIEW.md`. V1.0.8 Storage/Backup-Härtung is complete and locally verified. V1.0.7 Browser-E2E und Visual QA is complete and locally verified. V1.0.6 Aktionen, Credits und Kartenanzeige is complete. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits and Bad Publicity are playable only in their narrow V0.94 to V0.99 scopes.
+Current gate: V1.1.1 Discard, Handlimit und Core Damage implementation and final verification are complete. The planning, requirements, mechanics spec, test matrix, requirements review, implementation review and final review are `docs/derived/V1_1_1_DISCARD_HANDLIMIT_CORE_DAMAGE_PLAN.md`, `docs/derived/V1_1_1_REQUIREMENTS.md`, `docs/derived/DISCARD_HANDLIMIT_CORE_DAMAGE_1_1_1_SPEC.md`, `docs/derived/V1_1_1_TEST_MATRIX.md`, `docs/derived/V1_1_1_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_1_1_IMPLEMENTATION_REVIEW.md` and `docs/derived/V1_1_1_FINAL_REVIEW.md`. V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening, V1.0.8 Storage/Backup-Härtung and V1.0.7 Browser-E2E und Visual QA are complete and locally verified. V1.0.5 requirements, action-board UX spec, board/run UI spec, test matrix, requirements review and browser/playtest smoke are complete and the workspace contains the required UI baseline, but V1.0.5 still has no separate final gate artifacts. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits, Bad Publicity and Core Damage are playable only in their narrow gated scopes.
 
 V1.1.0 final review: `docs/derived/V1_1_0_FINAL_REVIEW.md` documents the completed Setup/Game-End M2 scope after V1.0.9. It confirms explicit setup, private mulligan, 7-point agenda normalization, game-end reason contract, Archives-facedown foundation, identity setup, visible spelling `Korp`, Lucide role icons, project/dossier-style agenda icon in agenda blue, tag icon, side-safe Setup UI and Browser-E2E regression.
 
+V1.1.1 final review: `docs/derived/V1_1_1_FINAL_REVIEW.md` documents the completed Discard/Handlimit/Core Damage scope. It confirms Korp-/Runner-Discard-Phases, side-private Discard choices, Engine handlimit values, Runner Core Damage, negative-handlimit Flatline, Hidden-Info safety, Replay/StateHash determinism, Multiplayer/Reconnect/Undo coverage, deterministic AI discard and Web UI status.
+
 Next scope decision:
 
-1. Choose the next gated release after V1.1.0.
+1. Implement V1.1.2 from the frozen requirements if approved.
 2. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
 3. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
 4. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
@@ -2148,6 +2172,12 @@ Detailed planning artifacts available:
 - `docs/derived/V1_0_9_TEST_MATRIX.md`
 - `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`
 - `docs/derived/V1_1_0_SETUP_GAME_END_M2_DETAILED_PLAN.md`
+- `docs/derived/V1_1_2_FULL_ARCHIVES_AND_MATCHSTART_ENTRY_UX_PLAN.md`
+- `docs/derived/V1_1_2_REQUIREMENTS.md`
+- `docs/derived/FULL_ARCHIVES_ACCESS_1_1_2_SPEC.md`
+- `docs/derived/MATCHSTART_ENTRY_UX_1_1_2_SPEC.md`
+- `docs/derived/V1_1_2_TEST_MATRIX.md`
+- `docs/derived/V1_1_2_REQUIREMENTS_REVIEW.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`

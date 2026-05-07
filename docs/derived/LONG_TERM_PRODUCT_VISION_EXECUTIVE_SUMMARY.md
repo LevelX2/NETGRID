@@ -6,6 +6,8 @@ Hauptdokument: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 
 Nachtrag 2026-05-06: V1.0.4, V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind inzwischen umgesetzt bzw. verifiziert. V1.0.8 Storage/Backup-Härtung ist requirements-frozen; SQLite ist der bevorzugte private lokale Storage-Pfad.
 
+Nachtrag 2026-05-07: Nach V1.1.2 gilt die Anschlussroadmap `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`. V1.1.2 bleibt unverändert. Danach werden fehlende Spielmechaniken, Kartenfreigabe und KI-Weiterentwicklung zusammen geplant; `AI v2` ist kein isolierter später Block mehr, sondern eine kontinuierliche Spur in den Mechanik- und Kartenreleases.
+
 ## Ideales Endprodukt
 
 Das ideale Produkt ist eine regelgeführte Netrunner-Plattform mit vollständiger Rules Engine, vollständigem rechtlich sauberem Karten-/Formatdatenpfad, privatem und später optional öffentlichem Internet-Multiplayer, Deckbuilder, Replays, Tutorials, Regelhilfe, KI-Gegnern, Accessibility, Betriebssicherheit, Moderation und langfristiger Wartbarkeit.
@@ -41,7 +43,7 @@ Empfohlene nächste Linie:
 
 1. V1.0.8 Storage/Backup-Härtung.
 2. V1.0.9 Private Internet Hardening.
-3. V1.1 bis V1.7: Regelkern, Formate, Datenpipeline, Replays, Tutorials, AI v2.
+3. V1.1 bis V1.5: V1.1.2 abschließen, danach Mechanik-/Karten-/KI-Linie mit V1.1.3 Baseline, V1.2.x Event-/Replacement-/Special-Zone-Gates, V1.3.x Format-/Card-Pipeline und V1.4.x planbasierter KI.
 4. V2.x: geschlossene Community und öffentliche Multiplayer-Basis nur nach Auth-/Security-/Moderationsgates.
 5. V3.x/V4.x: Ranked, Turniere, vollständige Karten-/Formatabdeckung, Public-Replays, Mobile/Accessibility, langfristige Wartung.
 

@@ -6,6 +6,8 @@ Scope: langfristige Produktvision, Roadmap, Gates und Idealarchitektur für ein 
 
 Nachtrag 2026-05-06: Die kurzfristige V1.x-Linie wurde durch den tatsächlichen Projektverlauf fortgeschrieben. V1.0.4, V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind inzwischen umgesetzt bzw. verifiziert; V1.0.8 Storage/Backup-Härtung ist requirements-frozen und bevorzugt SQLite als privaten lokalen Storage-Pfad. Die ursprünglich skizzierte V1.0.6-Position "Private Lobby Comfort" wurde faktisch durch V1.0.6 Aktionen, Credits und Kartenanzeige ersetzt; verbleibende Lobby-Politur ist kein aktiver V1.0.8-Scope.
 
+Nachtrag 2026-05-07: Die Anschlussplanung nach V1.1.2 ist in `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` neu geschnitten. V1.1.2 bleibt unverändert. Danach liegt der Schwerpunkt auf fehlenden Spielmechaniken, mechanikgebundener Kartenfreigabe und kontinuierlicher KI-Weiterentwicklung je Mechanik- und Kartenrelease. Die ältere isolierte Zeile `V1.7.0 AI v2` ist dadurch als alleinstehender später KI-Schnitt überholt; KI-Unterstützung wird ab Post-V1.1.2 laufend mitgeführt.
+
 ## Kurzfazit
 
 Das realistische Zielbild ist kein sofort öffentliches "alles kann alles"-Netrunner, sondern ein stufenweise gehärtetes Produkt:
@@ -281,7 +283,7 @@ flowchart LR
 |---|---|---|---|---|---|---|
 | V1.1.0 Setup/Game-End M2 | explizites Setup, Mulligan, 7-Punkte-Normalisierung, Deckout/Flatline-Vertrag, Archives-facedown-Grundlage, NETGRID-Statusklarheit mit Rollen-/Agenda-/Tag-Icons und sichtbarer Schreibweise `Korp` | keine Prevention/Replacement, kein allgemeiner UI-Redesign-Scope | engine/shared/server/web tests | M2 requirements refresh, scenarios, UI-Statussymbolik | mulligan private choice, replay/random, MP reconnect, UI-Icon-/Text-Smokes | Setup ist deterministisch und side-sicher; zentrale Statuswerte sind schnell erfassbar |
 | V1.1.1 Discard/Handlimit/Core Damage | vollständiger Discard-Grundpfad, Handlimit, Core Damage als eigenes Gate | keine Damage Prevention | engine/effects/ui | spec/test matrix | random/hidden barriers, undo after damage | Damage-/Discard-Familie stabil |
-| V1.1.2 Full Archives Access | faceup/facedown Archives, Access/Breach, Visibility und Undo-Barrieren | keine Spezial-Replacement | engine/visibility/ui | Archives spec | access leak tests, replay | Archives-Modell trägt spätere Karten |
+| V1.1.2 Full Archives Access + Entry UX | faceup/facedown Archives, Access/Breach, Visibility und Undo-Barrieren; zusätzlich Matchstart als klare NETGRID-Startkonsole | keine Spezial-Replacement, keine Engine-/Serveränderung durch Entry UX | engine/visibility/ui, web start | Archives spec, Matchstart Entry UX spec | access leak tests, replay, start view visual QA | Archives-Modell trägt spätere Karten; erster Start wirkt nicht mehr wie Optionsliste |
 | V1.2.0 Prevention/Avoid/Interrupt Foundation | Priority-/Interrupt-Modell, imminent instruction, prevent/avoid Pilotkarten | keine breite Kartenmatrix | engine effects/timing/choices | high-risk mechanic spec | property/fuzz, hidden info, stale choices | erster sicherer Event-Modification-Kern |
 | V1.2.1 Replacement Effects | Replacement-Pipeline, once-per-window, legality | keine alle Karten | engine | replacement test matrix | ordering/fuzz/replay | Replacement bricht StateHash/Replay nicht |
 | V1.2.2 Ownership/Control/Set Aside/RFG | Sonderzonen und Control-Wechsel | keine öffentlichen Formate | engine/state/visibility | special zones spec | zone invariants, view tests | Spezialzonen korrekt und leakfrei |
@@ -291,7 +293,7 @@ flowchart LR
 | V1.4.1 Search/Translations | Suchindex, Filter, locale fallback, Kartentextversionen | keine inoffiziellen Übersetzungen ohne Quelle | catalog/web | i18n policy | search tests, text snapshots | Nutzer finden Karten zuverlässig |
 | V1.5.0 Private Replay Browser | private Replays mit Timeline, StateHash Verify, Export lokal | kein Public Replay | replay/web/server | replay spec | replay verification, no hidden public mode | private Analyse nutzbar |
 | V1.6.0 Tutorial und Regelhilfe | geführte Szenarien, Kontext-Hilfe, Rule links | kein KI-Coaching mit LLM-Regelautorität | web/engine scenario | tutorial spec | scripted scenario replay | neue Spieler können Kernabläufe lernen |
-| V1.7.0 AI v2 | stärkere Heuristik, Rollen/Archetypen, difficulty tuning, paced learning | kein FullState/LLM-Akteur | ai/server/web | AI tuning docs | holdout seeds, hidden invariance | KI ist lern- und testbar besser |
+| V1.7.0 AI v2 | historischer Platzhalter, durch die Post-V1.1.2-Mechanik-/Karten-/KI-Roadmap überholt | kein isolierter später KI-Großschnitt | ai/server/web | siehe `POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` | je Mechanik- und Kartenrelease: AI-Hints, Szenarien, Soaks, hidden invariance | KI wird kontinuierlich mit Mechanik- und Kartenfreigaben verbessert |
 
 ### Langfristig: öffentlich nutzbarer Multiplayer
 

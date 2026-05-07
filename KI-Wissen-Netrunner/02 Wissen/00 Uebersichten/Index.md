@@ -159,6 +159,20 @@
 - `docs/derived/V1_1_0_TEST_MATRIX.md`: Testmatrix für V1.1.0 mit Engine-, Multiplayer-, KI-, UI-, E2E-, Visibility-, Replay-/StateHash- und Scope-Regression.
 - `docs/derived/V1_1_0_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für V1.1.0 mit Architekturentscheidungen, geänderten Modulen und Grenzen.
 - `docs/derived/V1_1_0_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.1.0; `V1_1_0_done: true`.
+- `docs/derived/V1_1_1_DISCARD_HANDLIMIT_CORE_DAMAGE_PLAN.md`: Plan für V1.1.1 Discard, Handlimit und Core Damage.
+- `docs/derived/V1_1_1_REQUIREMENTS.md`: eingefrorene V1.1.1-Anforderungen für Discard-Phasen, Handlimit und Core Damage.
+- `docs/derived/DISCARD_HANDLIMIT_CORE_DAMAGE_1_1_1_SPEC.md`: Spezifikation für Discard-Choices, Handlimit, Core Damage, Flatline und Sichtbarkeit.
+- `docs/derived/V1_1_1_TEST_MATRIX.md`: Testmatrix für V1.1.1 mit Requirements-, Engine-, Visibility-, Replay/StateHash-, AI-, Multiplayer-, Web- und E2E-Abdeckung.
+- `docs/derived/V1_1_1_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V1.1.1.
+- `docs/derived/V1_1_1_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für V1.1.1 Discard, Handlimit und Core Damage.
+- `docs/derived/V1_1_1_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.1.1; `V1_1_1_done: true`.
+- `docs/derived/V1_1_2_FULL_ARCHIVES_AND_MATCHSTART_ENTRY_UX_PLAN.md`: integrierter Plan für V1.1.2 mit Full Archives Access als primärem Mechanik-Gate und Matchstart Entry UX als unabhängigem Web-UI-Slice.
+- `docs/derived/V1_1_2_REQUIREMENTS.md`: eingefrorene V1.1.2-Anforderungen für Full Archives Access und Matchstart Entry UX.
+- `docs/derived/FULL_ARCHIVES_ACCESS_1_1_2_SPEC.md`: V1.1.2-Spezifikation für faceup/facedown Archives, Access/Breach, Visibility, Undo, Reconnect und Replay.
+- `docs/derived/MATCHSTART_ENTRY_UX_1_1_2_SPEC.md`: V1.1.2-Spezifikation für Spielart-/Format-Kacheln, gekürzten Startfluss, Join-Link-Beitritt und side-sichere Startzusammenfassung.
+- `docs/derived/V1_1_2_TEST_MATRIX.md`: Testmatrix für V1.1.2 mit Engine-, Server-, AI-, Web-, E2E-, Visibility- und No-Scope-Gates.
+- `docs/derived/V1_1_2_REQUIREMENTS_REVIEW.md`: Requirements Review für V1.1.2; `ready_for_implementation: true`.
+- `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`: angepasste Anschlussroadmap nach V1.1.2 für fehlende Spielmechaniken, Kartenfreigabe und kontinuierliche KI-Weiterentwicklung nach dem NETGRID-KI-Briefing.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
