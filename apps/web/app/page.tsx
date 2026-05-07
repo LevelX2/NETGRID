@@ -1074,7 +1074,25 @@ export default function Page() {
     const params = new URLSearchParams(window.location.search);
     const matchId = params.get("matchId");
     const token = params.get("joinToken");
+    const reconnectToken = params.get("reconnectToken");
+    const reconnectSide = params.get("side");
     const storedDisplayName = window.localStorage.getItem(DISPLAY_NAME_STORAGE_KEY)?.trim();
+    if (matchId && reconnectToken && (reconnectSide === "runner" || reconnectSide === "corp")) {
+      setEntryTab("play");
+      setMode("join");
+      void reconnectSession(
+        {
+          matchId,
+          side: reconnectSide,
+          sessionToken: "",
+          reconnectToken,
+          webSocketUrl: "",
+          displayName: storedDisplayName || "Du"
+        },
+        "Wiederverbindung konnte nicht geladen werden."
+      );
+      return;
+    }
     if (matchId && token) {
       setEntryTab("play");
       setMode("join");
@@ -1358,6 +1376,7 @@ export default function Page() {
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
+  const canReturnToStart = Boolean(payload && (resultSummary || payload.winner || payload.matchStatus === "finished" || payload.matchStatus === "forfeited"));
   const opponentDisplayName = payload?.opponentStatus.displayName ?? lobby?.opponentStatus.displayName ?? null;
   const canForfeit = Boolean(payload && payload.matchStatus === "active" && !payload.winner);
   const activeCueHighlight = currentActionCue?.highlight ?? null;
@@ -2129,6 +2148,18 @@ export default function Page() {
     setNotice("Join-Link kopiert.");
   };
 
+  const copyReconnectLink = async () => {
+    if (!session?.reconnectToken) return;
+    await navigator.clipboard.writeText(reconnectUrlForSession(session));
+    setNotice("Wiederverbindungslink kopiert.");
+  };
+
+  const discardLocalActiveSession = () => {
+    if (!window.confirm("Lokale Sitzung von diesem Gerät löschen? Das Spiel wird nicht aufgegeben. Für den Wiedereinstieg brauchst Du den Wiederverbindungslink.")) return;
+    setOptionsDialogOpen(false);
+    leaveMatch();
+  };
+
   const updateDisplayName = (value: string) => {
     setDisplayName(value);
     rememberDisplayName(value);
@@ -2815,6 +2846,13 @@ export default function Page() {
       <header className="topbar">
         <Brand subtitle={`${APP_STATUS_LABEL} · ${sideLabel(session.side)}${opponentDisplayName ? ` gegen ${opponentDisplayName}` : ""}`} />
         <div className="toolbar">
+          <ConnectionBadge text={statusText} state={connection} />
+          {connection !== "online" ? (
+            <button className="button" onClick={reconnect} disabled={!canReconnect} title="Wieder verbinden">
+              <Cable size={16} />
+              Wieder verbinden
+            </button>
+          ) : null}
           <button
             className={`button iconOnly matchDetailsToggle ${matchDetailsOpen ? "active" : ""}`}
             onClick={() => setMatchDetailsOpen((open) => !open)}
@@ -2826,28 +2864,21 @@ export default function Page() {
           >
             {matchDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
-          <ConnectionBadge text={statusText} state={connection} />
           <button className="button iconOnly" onClick={() => setOptionsDialogOpen(true)} title="Optionen öffnen" aria-label="Optionen öffnen" type="button">
             <SlidersHorizontal size={16} />
           </button>
-          {session.joinUrl ? (
-            <button className="button" onClick={copyJoinLink} title="Join-Link kopieren">
-              <Clipboard size={16} />
-              Link
+          {canReturnToStart ? (
+            <button className="button primary" onClick={leaveMatch} title="Zurück zum Startbildschirm" type="button">
+              <Play size={16} />
+              Startbildschirm
             </button>
           ) : null}
-          <button className="button" onClick={reconnect} disabled={!canReconnect} title="Wieder verbinden">
-            <Cable size={16} />
-            Wieder verbinden
-          </button>
-          <button className="button dangerButton" onClick={forfeitMatch} disabled={!canForfeit} title="Spiel aufgeben">
-            <Flag size={16} />
-            Aufgeben
-          </button>
-          <button className="button" onClick={leaveMatch} title="Lokale Sitzung verwerfen">
-            <RotateCcw size={16} />
-            Verwerfen
-          </button>
+          {canForfeit ? (
+            <button className="button dangerButton" onClick={forfeitMatch} title="Spiel aufgeben">
+              <Flag size={16} />
+              Aufgeben
+            </button>
+          ) : null}
         </div>
       </header>
 
@@ -3106,6 +3137,7 @@ export default function Page() {
             cuePosition={cuePosition}
             aiPacingMode={localAiPacingMode}
             modal
+            session={session}
             onActionCueAutoDismissMs={setActionCueAutoDismissMs}
             onActionCuesEnabled={setActionCuesEnabled}
             onAudioEnabled={updateAudioEnabled}
@@ -3114,6 +3146,8 @@ export default function Page() {
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
             onAiPacingMode={setLocalAiPacingMode}
+            onCopyReconnectLink={copyReconnectLink}
+            onDiscardLocalSession={discardLocalActiveSession}
           />
         </OptionsDialog>
       ) : null}
@@ -3481,7 +3515,7 @@ function GameOverModal({
               </button>
             ) : null}
             <button className="button primary" onClick={onNewMatch}>
-              Neues Spiel
+              Zurück zum Startbildschirm
             </button>
           </div>
         </div>
@@ -3547,6 +3581,7 @@ function OptionsPanel({
   cuePosition,
   aiPacingMode,
   modal = false,
+  session = null,
   onActionCueAutoDismissMs,
   onActionCuesEnabled,
   onAudioEnabled,
@@ -3554,7 +3589,9 @@ function OptionsPanel({
   onCardDisplayMode,
   onColorScheme,
   onCuePosition,
-  onAiPacingMode
+  onAiPacingMode,
+  onCopyReconnectLink,
+  onDiscardLocalSession
 }: {
   actionCueAutoDismissMs: CueAutoDismissMs;
   actionCuesEnabled: boolean;
@@ -3565,6 +3602,7 @@ function OptionsPanel({
   cuePosition: CuePositionPreference;
   aiPacingMode: AiPacingMode;
   modal?: boolean;
+  session?: SessionInfo | null;
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
   onActionCuesEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
@@ -3573,6 +3611,8 @@ function OptionsPanel({
   onColorScheme(value: ColorScheme): void;
   onCuePosition(value: CuePositionPreference): void;
   onAiPacingMode(value: AiPacingMode): void;
+  onCopyReconnectLink?: (() => void) | undefined;
+  onDiscardLocalSession?: (() => void) | undefined;
 }) {
   return (
     <section className={`optionsPanel panel${modal ? " inModal" : ""}`}>
@@ -3586,6 +3626,7 @@ function OptionsPanel({
         </div>
       ) : null}
       <div className="optionsContent">
+        {session ? <SessionAccessSettings session={session} onCopyReconnectLink={onCopyReconnectLink} onDiscardLocalSession={onDiscardLocalSession} /> : null}
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
@@ -3613,6 +3654,46 @@ function OptionsDialog({ children, onDismiss }: { children: ReactNode; onDismiss
         </div>
         {children}
       </section>
+    </div>
+  );
+}
+
+function SessionAccessSettings({
+  session,
+  onCopyReconnectLink,
+  onDiscardLocalSession
+}: {
+  session: SessionInfo;
+  onCopyReconnectLink?: (() => void) | undefined;
+  onDiscardLocalSession?: (() => void) | undefined;
+}) {
+  const reconnectUrl = reconnectUrlForSession(session);
+  return (
+    <div className="sessionAccessSettings">
+      <div>
+        <span className="settingsTitle">Sitzung</span>
+        <span className="meta">Lokaler Zugang zu diesem Spiel</span>
+      </div>
+      <div className="sessionAccessLink">
+        <label>
+          Wiederverbindungslink
+          <input value={reconnectUrl} readOnly aria-label="Wiederverbindungslink" />
+        </label>
+        <button className="button" onClick={onCopyReconnectLink} type="button" disabled={!onCopyReconnectLink || !session.reconnectToken}>
+          <Clipboard size={15} />
+          Kopieren
+        </button>
+      </div>
+      <p className="settingsHelp">
+        Der Link enthält Deinen Reconnect-Token für {sideLabel(session.side)}. Wer ihn hat, kann diese Seite des Matches weiterführen.
+      </p>
+      <div className="sessionDangerRow">
+        <button className="button dangerButton" onClick={onDiscardLocalSession} type="button" disabled={!onDiscardLocalSession}>
+          <Trash2 size={15} />
+          Lokale Sitzung löschen
+        </button>
+        <span className="settingsHelp">Löscht nur diesen Browserzugang. Das Spiel wird nicht aufgegeben.</span>
+      </div>
     </div>
   );
 }
@@ -4493,6 +4574,15 @@ function DiagnosticsDrawer({ open, payload, connection }: { open: boolean; paylo
 function shortDiagnosticsHash(hash: string): string {
   if (hash.length <= 18) return hash;
   return `${hash.slice(0, 14)}…`;
+}
+
+function reconnectUrlForSession(session: SessionInfo): string {
+  if (typeof window === "undefined") return "";
+  const url = new URL(window.location.pathname || "/", window.location.origin);
+  url.searchParams.set("matchId", session.matchId);
+  url.searchParams.set("side", session.side);
+  url.searchParams.set("reconnectToken", session.reconnectToken);
+  return url.toString();
 }
 
 function CatalogPanel({

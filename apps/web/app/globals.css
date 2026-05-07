@@ -3293,7 +3293,8 @@ select,
 .colorSchemeSettings,
 .cardDisplaySettings,
 .aiPacingSettings,
-.actionCueSettings {
+.actionCueSettings,
+.sessionAccessSettings {
   grid-column: 1 / -1;
   min-width: 0;
   padding: 10px;
@@ -3323,6 +3324,37 @@ select,
 
 .aiPacingSelector {
   width: 100%;
+}
+
+.sessionAccessSettings {
+  display: grid;
+  gap: 10px;
+}
+
+.sessionAccessLink {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
+}
+
+.sessionAccessLink label {
+  display: grid;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.sessionAccessLink input {
+  width: 100%;
+  font-size: 12px;
+}
+
+.sessionDangerRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .cardDisplaySettings.compact {
