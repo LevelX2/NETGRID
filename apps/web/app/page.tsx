@@ -3,6 +3,7 @@
 import {
   Activity,
   Bot,
+  Building2,
   Cable,
   Check,
   ChevronDown,
@@ -13,6 +14,8 @@ import {
   Download,
   Eye,
   EyeOff,
+  FileText,
+  Fingerprint,
   Image,
   Keyboard,
   Layers3,
@@ -22,9 +25,11 @@ import {
   PanelRightOpen,
   Play,
   Plus,
+  Route,
   RotateCcw,
   Save,
   Search,
+  ScanLine,
   Shield,
   SlidersHorizontal,
   Sparkles,
@@ -97,6 +102,15 @@ import {
   type PlayMode
 } from "./match-start";
 import {
+  catalogCardMatchesTypeFilters,
+  catalogTypeKeysForCard,
+  filterCatalogCardsByType,
+  nextCatalogSelection,
+  summarizeCatalogTypeFilters,
+  type CatalogTypeFilterKey,
+  type CatalogTypeFilterState
+} from "./catalog-ui";
+import {
   clearStoredSession,
   loadRecentSession,
   loadStoredSession,
@@ -117,12 +131,16 @@ const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DISPLAY_NAME_STORAGE_KEY = "netrunner.displayName";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
-const RunIcon = Shield;
+const RunIcon = Route;
+const RunnerRoleIcon = Fingerprint;
+const CorpRoleIcon = Building2;
+const AgendaIcon = FileText;
+const TagIcon = ScanLine;
 const RUNNER_BASE_HAND_LIMIT = 5;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.0.9";
+const APP_STATUS_LABEL = "V1.1.0";
 const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
@@ -352,10 +370,6 @@ type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemente
 
 type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
-type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "upgrade" | "operation" | "event" | "hardware" | "resource" | "program";
-
-type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
-
 type CatalogCardSummary = {
   catalogCardId: string;
   title: string;
@@ -507,7 +521,7 @@ const CORP_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: strin
 
 const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Array<{ key: CatalogTypeFilterKey; label: string }> }> = [
   { title: "Runner", side: "runner", filters: RUNNER_CATALOG_TYPE_FILTERS },
-  { title: "Corp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS }
+  { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS }
 ];
 
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
@@ -797,7 +811,7 @@ function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel:
 }
 
 function accessActorSubject(side: Side): string {
-  return side === "corp" ? "Die Corp" : "Der Runner";
+  return side === "corp" ? "Die Korp" : "Der Runner";
 }
 
 function accessTrashStatus(card: DisplayVisibleCard, actions: LegalAction[], actorSide: Side, viewerSide: Side): string {
@@ -828,52 +842,8 @@ function accessServerLocationPhrase(serverLabel: string): string {
   return `in ${serverLabel}`;
 }
 
-function catalogTypeKeysForCard(card: Pick<CatalogCardSummary, "type" | "subtypes">): CatalogTypeFilterKey[] {
-  const type = card.type.toLowerCase();
-  if (type === "program" && card.subtypes.some((subtype) => subtype.toLowerCase() === "icebreaker")) return ["icebreaker"];
-  if (type.startsWith("hardware-")) return ["hardware"];
-  switch (type) {
-    case "ice":
-      return ["ice"];
-    case "agenda":
-      return ["agenda"];
-    case "asset":
-      return ["asset"];
-    case "upgrade":
-      return ["upgrade"];
-    case "operation":
-      return ["operation"];
-    case "event":
-      return ["event"];
-    case "hardware":
-      return ["hardware"];
-    case "resource":
-      return ["resource"];
-    case "program":
-      return ["program"];
-    default:
-      return [];
-  }
-}
-
 function isCatalogVisibleCard(card: CatalogCardSummary): boolean {
   return card.type !== "identity";
-}
-
-function catalogCardMatchesTypeFilters(card: CatalogCardSummary, filters: CatalogTypeFilterState): boolean {
-  const keys = catalogTypeKeysForCard(card);
-  if (keys.length === 0) return Object.values(filters).every(Boolean);
-  return keys.some((key) => filters[key]);
-}
-
-function summarizeCatalogTypeFilters(cards: CatalogCardSummary[]): Partial<Record<CatalogTypeFilterKey, number>> {
-  const counts: Partial<Record<CatalogTypeFilterKey, number>> = {};
-  for (const card of cards) {
-    for (const key of catalogTypeKeysForCard(card)) {
-      counts[key] = (counts[key] ?? 0) + 1;
-    }
-  }
-  return counts;
 }
 
 function summarizeCatalogStatuses(cards: CatalogCardSummary[]): Partial<Record<CatalogStatusKey, number>> {
@@ -943,7 +913,7 @@ function opponentSide(side: Side): Side {
 }
 
 function sideLabel(side: Side): string {
-  return side === "corp" ? "Corp" : "Runner";
+  return side === "corp" ? "Korp" : "Runner";
 }
 
 function turnSideForView(view: PlayerView): Side | null {
@@ -978,7 +948,6 @@ function centralServerCardCount(view: PlayerView, serverId: PlayerView["servers"
       return null;
   }
 }
-
 function serverHighlighted(highlight: BoardHighlight | null, serverId: string): boolean {
   if (!highlight) return false;
   if (highlight.kind === "server" || highlight.kind === "run") return Boolean(highlight.serverId && highlight.serverId === serverId);
@@ -1132,7 +1101,8 @@ export default function Page() {
           persistSession(stored, bootstrapped);
         } else if (stored.reconnectToken) {
           void reconnectSession(stored, "Session konnte nicht geladen werden.");
-        } else setNotice("Session konnte nicht geladen werden.");
+        }
+        else setNotice("Session konnte nicht geladen werden.");
       })
       .catch(() => {
         if (stored.reconnectToken) void reconnectSession(stored, "Session konnte nicht geladen werden.");
@@ -1237,7 +1207,7 @@ export default function Page() {
     return () => socketRef.current?.close();
   }, [session?.matchId, session?.sessionToken]);
 
-  const filteredCatalogCards = useMemo(() => catalogCards.filter((card) => catalogCardMatchesTypeFilters(card, catalogTypeFilters)), [catalogCards, catalogTypeFilters]);
+  const filteredCatalogCards = useMemo(() => filterCatalogCardsByType(catalogCards, catalogTypeFilters), [catalogCards, catalogTypeFilters]);
   const catalogTypeCounts = useMemo(() => summarizeCatalogTypeFilters(catalogCards), [catalogCards]);
 
   useEffect(() => {
@@ -1252,7 +1222,7 @@ export default function Page() {
         setCatalogCards(visibleCards);
         setCatalogFilters(data.filters ?? null);
         setCatalogSummary(summarizeCatalogStatuses(visibleCards));
-        setSelectedCatalogId((current) => (current && visibleCards.some((card) => card.catalogCardId === current) ? current : visibleCards[0]?.catalogCardId ?? null));
+        setSelectedCatalogId((current) => nextCatalogSelection(current, visibleCards, catalogTypeFilters));
       })
       .catch(() => {
         setCatalogCards([]);
@@ -1271,10 +1241,18 @@ export default function Page() {
       setCatalogDetail(null);
       return;
     }
+    let ignore = false;
     void fetch(`/api/cards/catalog/${encodeURIComponent(selectedCatalogId)}`, { cache: "no-store" })
       .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
-      .then((data) => setCatalogDetail(data.card ?? null))
-      .catch(() => setCatalogDetail(null));
+      .then((data) => {
+        if (!ignore) setCatalogDetail(data.card ?? null);
+      })
+      .catch(() => {
+        if (!ignore) setCatalogDetail(null);
+      });
+    return () => {
+      ignore = true;
+    };
   }, [selectedCatalogId]);
 
   useEffect(() => {
@@ -1396,7 +1374,7 @@ export default function Page() {
     return runActions.length === 1 ? runActions[0]! : null;
   };
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
-  const effectiveAgendaTarget = 7;
+  const effectiveAgendaTarget = activeView?.agendaPointsToWin ?? 7;
 
   useEffect(() => {
     if (!selectedActionContext) return;
@@ -1925,6 +1903,23 @@ export default function Page() {
     );
   };
 
+  const submitChoiceOption = (action: LegalAction, choiceId: string, selectedOptionId: string) => {
+    if (!session || !payload || !ensureSocketConnected()) return;
+    socketRef.current?.send(
+      JSON.stringify({
+        type: "submit_action",
+        payload: {
+          matchId: session.matchId,
+          side: session.side,
+          actionId: action.actionId,
+          clientKnownStateVersion: payload.playerView.stateVersion,
+          selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
+          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${selectedOptionId}-${crypto.randomUUID()}`
+        }
+      })
+    );
+  };
+
   const setReady = (ready: boolean) => {
     if (!session || !ensureSocketConnected()) return;
     socketRef.current?.send(JSON.stringify({ type: "set_ready", payload: { ready } }));
@@ -2144,7 +2139,7 @@ export default function Page() {
     const deck: EditableDeck = {
       deckId: `local_${side}_${crypto.randomUUID().slice(0, 8)}`,
       deckVersion: "0.6.0-local",
-      name: side === "runner" ? "Neues Runner-Deck" : "Neues Corp-Deck",
+      name: side === "runner" ? "Neues Runner-Deck" : "Neues Korp-Deck",
       side,
       identityCardId: templateIdentity ?? DEFAULT_IDENTITY_BY_SIDE[side],
       cardPoolSnapshotId: DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
@@ -2601,7 +2596,7 @@ export default function Page() {
                 ) : null}
                 {(isHumanVsAi && humanAiSideSelection !== "corp") || gameMode === "ai_vs_ai" ? (
                   <label>
-                    Corp-KI
+                    Korp-KI
                     <select value={corpDifficulty} onChange={(event) => setCorpDifficulty(event.target.value as AiDifficulty)}>
                       <option value="easy">Easy</option>
                       <option value="normal">Normal</option>
@@ -2636,7 +2631,7 @@ export default function Page() {
                     onLocalDeck={setSelectedRunnerLocalDeckId}
                   />
                   <DeckSlotSelect
-                    label="Teilnehmer A · Corp-Deck"
+                    label="Teilnehmer A · Korp-Deck"
                     snapshots={corpSnapshots}
                     localDecks={localDecks.filter((deck) => deck.side === "corp")}
                     source={corpDeckSource}
@@ -2664,7 +2659,7 @@ export default function Page() {
                         onLocalDeck={setSelectedParticipantBRunnerLocalDeckId}
                       />
                       <DeckSlotSelect
-                        label={hasAiOpponent ? "KI · Corp-Deck" : "Teilnehmer B · Corp-Deck"}
+                        label={hasAiOpponent ? "KI · Korp-Deck" : "Teilnehmer B · Korp-Deck"}
                         snapshots={corpSnapshots}
                         localDecks={localDecks.filter((deck) => deck.side === "corp")}
                         source={participantBCorpDeckSource}
@@ -2681,12 +2676,12 @@ export default function Page() {
                 <DeckMetadataLine
                   entries={[
                     { label: "A Runner", metadata: participantARunnerMetadata },
-                    { label: "A Corp", metadata: participantACorpMetadata },
+                    { label: "A Korp", metadata: participantACorpMetadata },
                     ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
                       ? []
                       : [
                           { label: hasAiOpponent ? "KI Runner" : "B Runner", metadata: participantBRunnerMetadata },
-                          { label: hasAiOpponent ? "KI Corp" : "B Corp", metadata: participantBCorpMetadata }
+                          { label: hasAiOpponent ? "KI Korp" : "B Korp", metadata: participantBCorpMetadata }
                         ])
                   ]}
                 />
@@ -2723,7 +2718,7 @@ export default function Page() {
                     onLocalDeck={setSelectedParticipantBRunnerLocalDeckId}
                   />
                   <DeckSlotSelect
-                    label="Dein Corp-Deck"
+                    label="Dein Korp-Deck"
                     snapshots={corpSnapshots}
                     localDecks={localDecks.filter((deck) => deck.side === "corp")}
                     source={participantBCorpDeckSource}
@@ -2817,7 +2812,7 @@ export default function Page() {
   return (
     <main className="app" data-theme={colorScheme}>
       <header className="topbar">
-        <Brand subtitle={`${APP_STATUS_LABEL} · ${session.side === "runner" ? "Runner" : "Corp"}${opponentDisplayName ? ` gegen ${opponentDisplayName}` : ""}`} />
+        <Brand subtitle={`${APP_STATUS_LABEL} · ${sideLabel(session.side)}${opponentDisplayName ? ` gegen ${opponentDisplayName}` : ""}`} />
         <div className="toolbar">
           <ConnectionBadge text={statusText} state={connection} />
           <button className="button iconOnly" onClick={() => setOptionsDialogOpen(true)} title="Optionen öffnen" aria-label="Optionen öffnen" type="button">
@@ -2879,6 +2874,7 @@ export default function Page() {
             onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
           />
           <LegalActionsPanel
+            view={activeView}
             primaryActions={legalActionSplit.primaryActions}
             contextualActions={selectedPanelContextActions}
             selectedContext={selectedPanelContext}
@@ -2887,6 +2883,7 @@ export default function Page() {
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
             onAction={submitAction}
+            onChoiceOption={submitChoiceOption}
             onClearContext={() => setSelectedActionContext(null)}
           />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
@@ -2910,7 +2907,7 @@ export default function Page() {
             <div className="runBar">
               <Sparkles size={18} />
               <span className="winner">
-                {payload.winner === "runner" ? "Runner" : payload.winner === "corp" ? "Corp" : "Draw"} gewinnt.
+                {payload.winner === "runner" ? "Runner" : payload.winner === "corp" ? "Korp" : "Draw"} gewinnt.
               </span>
             </div>
           ) : null}
@@ -3361,7 +3358,7 @@ function AccessRevealModal({
             <div className="accessRevealActions">
               {primaryActions.map((action) => (
                 <button className={`button primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
-                  {action.type === "trash_accessed_card" || action.type === "trash_resource" ? <Trash2 size={15} /> : <Shield size={15} />}
+                  {action.type === "trash_accessed_card" || action.type === "trash_resource" ? <Trash2 size={15} /> : <AgendaIcon size={15} />}
                   {accessDecisionLabel(action)}
                 </button>
               ))}
@@ -3427,8 +3424,8 @@ function GameOverModal({
           <p>{resultReasonLabel(result.reason)}</p>
         </div>
         <div className="gameOverStats">
-          <Stat label="Runner Agenda" value={result.runnerAgendaPoints} />
-          <Stat label="Corp Agenda" value={result.corpAgendaPoints} />
+          <Stat label="Runner Agenda" value={`${result.runnerAgendaPoints} / ${result.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
+          <Stat label="Korp Agenda" value={`${result.corpAgendaPoints} / ${result.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
           <Stat label="Zielwert" value={result.agendaPointsToWin} />
           <Stat label="Aktionen" value={result.actionCount} />
           <Stat label="Runs" value={result.runCount} />
@@ -3482,7 +3479,7 @@ function matchFormatLabel(format: MatchFormat): string {
 
 function resultReasonLabel(reason: GameResultSummary["reason"]): string {
   if (reason === "agenda_points") return "Das Agenda-Ziel wurde erreicht.";
-  if (reason === "corp_deck_empty") return "Die Corp konnte keine Karte mehr ziehen.";
+  if (reason === "corp_deck_empty") return "Die Korp konnte keine Karte mehr ziehen.";
   if (reason === "flatline") return "Der Runner wurde flatlined.";
   if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
   if (reason === "forfeit") return "Das Spiel wurde durch Aufgabe beendet.";
@@ -4038,6 +4035,7 @@ function serverLabelFromId(serverId: string): string {
 }
 
 function LegalActionsPanel({
+  view,
   primaryActions,
   contextualActions,
   selectedContext,
@@ -4046,8 +4044,10 @@ function LegalActionsPanel({
   disabled,
   highlighted = false,
   onAction,
+  onChoiceOption,
   onClearContext
 }: {
+  view: PlayerView;
   primaryActions: LegalAction[];
   contextualActions: LegalAction[];
   selectedContext: ActionContext | null;
@@ -4056,8 +4056,38 @@ function LegalActionsPanel({
   disabled: boolean;
   highlighted?: boolean;
   onAction(action: LegalAction): void;
+  onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
   onClearContext(): void;
 }) {
+  const setupChoice = view.pendingChoice?.source === "setup.mulligan" ? view.pendingChoice : undefined;
+  const setupAction = setupChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
+  if (setupChoice && setupAction) {
+    return (
+      <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="setup-mulligan-panel">
+        <h2>
+          {view.side === "runner" ? <RunnerRoleIcon size={16} /> : <CorpRoleIcon size={16} />}
+          Setup
+        </h2>
+        <p className="meta">{setupChoice.prompt}</p>
+        <div className="actions setupActions">
+          {setupChoice.options.map((option) => (
+            <button className="button actionButton primary" key={option.id} onClick={() => onChoiceOption(setupAction, setupChoice.choiceId, option.id)} disabled={disabled} data-testid="setup-choice-button">
+              {option.id === "keep" ? <Check size={15} /> : <RotateCcw size={15} />}
+              <span className="actionButtonLabel">{option.label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+    );
+  }
+  if (view.phase === "setup") {
+    return (
+      <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="setup-waiting-panel">
+        <h2>Setup</h2>
+        <p className="meta">{setupWaitingLabel(view)}</p>
+      </section>
+    );
+  }
   const grouped = primaryActions.reduce<Record<string, LegalAction[]>>((acc, action) => {
     const group = actionGroupLabel(action.type);
     acc[group] = [...(acc[group] ?? []), action];
@@ -4120,6 +4150,12 @@ function CostChips({ action }: { action: LegalAction }) {
   );
 }
 
+function setupWaitingLabel(view: PlayerView): string {
+  if (view.timingPoint === "setup.mulligan.runner") return "Runner entscheidet über die Starthand.";
+  if (view.timingPoint === "setup.mulligan.corp") return "Korp entscheidet über die Starthand.";
+  return "Setup läuft.";
+}
+
 function UndoPanel({
   pendingUndo,
   latestEventId,
@@ -4138,7 +4174,7 @@ function UndoPanel({
       <h2>Zurücknehmen</h2>
       {pendingUndo?.needsResponse ? (
         <div className="undoBox">
-          <p className="meta">{pendingUndo.requestedBy === "runner" ? "Runner" : "Corp"} fragt Zurücknehmen an.</p>
+          <p className="meta">{sideLabel(pendingUndo.requestedBy)} fragt Zurücknehmen an.</p>
           <div className="splitButtons">
             <button className="button primary" onClick={() => onResolve(true)}>
               <Check size={15} />
@@ -4387,9 +4423,9 @@ function ChronicleIcon({ category }: { category: ChronicleCategory }) {
     case "card":
       return <Layers3 size={15} />;
     case "run":
-      return <Cable size={15} />;
+      return <RunIcon size={15} />;
     case "agenda":
-      return <Shield size={15} />;
+      return <AgendaIcon size={15} />;
     case "danger":
       return <X size={15} />;
     case "hidden":
@@ -4814,7 +4850,7 @@ function DeckEditorPanel({
         <div>
           <h2>Meine Decks</h2>
           <p className="meta">
-            Meine Decks · {localDecks.length} gespeichert · Runner {runnerDeckCount} · Corp {corpDeckCount}
+            Meine Decks · {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp {corpDeckCount}
           </p>
         </div>
         <div className="deckHeaderActions">
@@ -4824,7 +4860,7 @@ function DeckEditorPanel({
           </button>
           <button className="button corp" onClick={() => createBlankDeck("corp")}>
             <Plus size={15} />
-            Neues Corp-Deck
+            Neues Korp-Deck
           </button>
           <button className={`button ${importOpen ? "primary" : ""}`} onClick={() => setImportOpen((current) => !current)} type="button" aria-expanded={importOpen}>
             <Upload size={15} />
@@ -4857,7 +4893,7 @@ function DeckEditorPanel({
                 Runner
               </button>
               <button className={deckSideFilter === "corp" ? "active corp" : "corp"} onClick={() => handleDeckSideFilter("corp")} type="button" aria-pressed={deckSideFilter === "corp"}>
-                Corp
+                Korp
               </button>
             </div>
           </div>
@@ -5196,13 +5232,14 @@ function OpponentPanel({ view, connected, displayName, actionCapacity }: { view:
   const side = opponentSide(view.side);
   const turnSide = turnSideForView(view);
   const isTurn = turnSide === side;
+  const RoleIcon = side === "runner" ? RunnerRoleIcon : CorpRoleIcon;
   return (
     <section className={`section sideStatusPanel side-${side} ${isTurn ? "turnActive" : ""}`}>
-      <h2>{displayName ? `${displayName} · ${sideLabel(side)}` : sideLabel(side)}</h2>
+      <h2><RoleIcon size={16} />{displayName ? `${displayName} · ${sideLabel(side)}` : sideLabel(side)}</h2>
       <div className="stats">
         <CreditBadge credits={view.opponent.credits} />
-        <Stat label="Agenda" value={view.opponent.agendaPoints} />
-        {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} /> : null}
+        <Stat label="Agenda" value={`${view.opponent.agendaPoints} / ${view.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
+        {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} icon={<TagIcon size={14} />} /> : null}
       </div>
       <ActionSlotMeter side={side} currentClicks={view.opponent.clicks} displayCapacity={actionCapacity} active={isTurn} compact />
       <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {isTurn ? "Am Zug" : "Wartet"}</p>
@@ -5213,13 +5250,14 @@ function OpponentPanel({ view, connected, displayName, actionCapacity }: { view:
 function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title: string; actionCapacity: number }) {
   const turnSide = turnSideForView(view);
   const isTurn = turnSide === view.side;
+  const RoleIcon = view.side === "runner" ? RunnerRoleIcon : CorpRoleIcon;
   return (
     <section className={`section sideStatusPanel side-${view.side} ${isTurn ? "turnActive" : ""}`}>
-      <h2>{title}</h2>
+      <h2><RoleIcon size={16} />{title}</h2>
       <div className="stats">
         <CreditBadge credits={view.own.credits} />
-        <Stat label="Agenda" value={view.own.agendaPoints} />
-        {view.side === "runner" ? <Stat label="Tags" value={view.own.tags} /> : null}
+        <Stat label="Agenda" value={`${view.own.agendaPoints} / ${view.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
+        {view.side === "runner" ? <Stat label="Tags" value={view.own.tags} icon={<TagIcon size={14} />} /> : null}
       </div>
       <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={isTurn} />
       {view.deckMetadata ? (
@@ -5262,10 +5300,13 @@ function CreditBadge({ credits }: { credits: number }) {
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({ label, value, icon }: { label: string; value: number | string; icon?: ReactNode }) {
   return (
     <div className="stat">
-      <strong>{value}</strong>
+      <strong>
+        {icon ? <span className="statIcon">{icon}</span> : null}
+        {value}
+      </strong>
       <span>{label}</span>
     </div>
   );
@@ -5279,7 +5320,7 @@ function SimulationResult({ summary }: { summary: AiSimulationSummary }) {
         <Stat label="Züge" value={summary.turns} />
       </div>
       <p className="meta statusLine">
-        {summary.winner === "action_limit_reached" ? "Limit erreicht" : `${summary.winner === "runner" ? "Runner" : summary.winner === "corp" ? "Corp" : "Draw"} gewinnt`}
+        {summary.winner === "action_limit_reached" ? "Limit erreicht" : `${summary.winner === "runner" ? "Runner" : summary.winner === "corp" ? "Korp" : "Draw"} gewinnt`}
         {" · "}
         {summary.replayOk ? "Replay ok" : "Replay prüfen"}
       </p>
