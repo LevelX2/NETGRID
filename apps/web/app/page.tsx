@@ -96,11 +96,20 @@ import {
   type HumanSideSelection,
   type PlayMode
 } from "./match-start";
+import {
+  clearStoredSession,
+  loadRecentSession,
+  loadStoredSession,
+  persistSession,
+  rememberRecentSession,
+  removeRecentSession,
+  storedSessionMatches,
+  type RecentSessionInfo,
+  type SessionInfo
+} from "./session-recovery";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
 const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
-const SESSION_KEY = "netrunner-mvp-0-3-session";
-const RECENT_SESSIONS_KEY = "netrunner.recentSessions";
 const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
 const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
 const ACTION_CUE_SETTINGS_STORAGE_KEY = "netrunner.actionCueSettings.v1";
@@ -264,26 +273,6 @@ type LobbyClientPayload = {
     message: string;
   };
   startLobby?: MatchStartLobby;
-};
-
-type SessionInfo = {
-  matchId: string;
-  side: Side;
-  sessionToken: string;
-  reconnectToken: string;
-  webSocketUrl: string;
-  joinUrl?: string;
-  displayName: string;
-  pendingDeckHandshake?: boolean;
-};
-
-type RecentSessionInfo = {
-  matchId: string;
-  side: Side;
-  displayName: string;
-  opponentDisplayName?: string;
-  matchStatus?: MatchStatus;
-  savedAt: string;
 };
 
 type ServerMessage =
@@ -1125,25 +1114,30 @@ export default function Page() {
       return;
     }
     if (storedDisplayName) setDisplayName(storedDisplayName);
-    const stored = window.sessionStorage.getItem(SESSION_KEY);
+    const stored = loadStoredSession();
     if (!stored) {
       setRecentSession(loadRecentSession());
       return;
     }
-    const parsed = JSON.parse(stored) as SessionInfo;
-    setSession(parsed);
-    void bootstrap(parsed)
+    setSession(stored);
+    void bootstrap(stored)
       .then((bootstrapped) => {
         if (bootstrapped && "playerView" in bootstrapped) {
           setPayload(bootstrapped);
           setLobby(null);
+          persistSession(stored, bootstrapped);
         } else if (bootstrapped) {
           setLobby(bootstrapped);
           setPayload(null);
-        }
-        else setNotice("Session konnte nicht geladen werden.");
+          persistSession(stored, bootstrapped);
+        } else if (stored.reconnectToken) {
+          void reconnectSession(stored, "Session konnte nicht geladen werden.");
+        } else setNotice("Session konnte nicht geladen werden.");
       })
-      .catch((error) => setNotice(serverErrorNotice(error, "Session konnte nicht geladen werden.")));
+      .catch(() => {
+        if (stored.reconnectToken) void reconnectSession(stored, "Session konnte nicht geladen werden.");
+        else setNotice("Session konnte nicht geladen werden.");
+      });
   }, []);
 
   useEffect(() => {
@@ -1787,25 +1781,31 @@ export default function Page() {
     setNotice(`Beigetreten. Du startest als ${sideLabel(joined.side)}.`);
   };
 
-  const reconnect = async () => {
-    if (!session || !canReconnect) return;
+  const reconnectSession = async (baseSession: SessionInfo, fallbackNotice = "Wiederverbindung konnte nicht gestartet werden.") => {
     let reconnected: JoinMatchResponse;
     try {
-      reconnected = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/reconnect`, {
-        side: session.side,
-        reconnectToken: session.reconnectToken,
-        displayName: session.displayName
+      reconnected = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(baseSession.matchId)}/reconnect`, {
+        side: baseSession.side,
+        reconnectToken: baseSession.reconnectToken,
+        displayName: baseSession.displayName
       });
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Wiederverbindung konnte nicht gestartet werden."));
-      return;
+      setNotice(serverErrorNotice(error, fallbackNotice));
+      return false;
     }
     if (reconnected.error) {
       setNotice(reconnected.error.message);
-      return;
+      clearStoredSession(baseSession);
+      removeRecentSession(baseSession);
+      setRecentSession(loadRecentSession());
+      setSession(null);
+      setPayload(null);
+      setLobby(null);
+      setConnection("offline");
+      return false;
     }
     const nextSession = {
-      ...session,
+      ...baseSession,
       sessionToken: reconnected.sessionToken,
       reconnectToken: reconnected.reconnectToken,
       webSocketUrl: reconnected.webSocketUrl
@@ -1820,6 +1820,12 @@ export default function Page() {
       setLobby(null);
     }
     setNotice("Wiederverbindung abgeschlossen.");
+    return true;
+  };
+
+  const reconnect = async () => {
+    if (!session || !canReconnect) return;
+    await reconnectSession(session);
   };
 
   function applyRemotePayload(remotePayload: ClientPayload | LobbyClientPayload) {
@@ -1835,9 +1841,20 @@ export default function Page() {
       setRecentSession(loadRecentSession());
     }
     if (isInvalidatingTerminalStatus(remotePayload.matchStatus)) {
-      window.sessionStorage.removeItem(SESSION_KEY);
+      if (session) {
+        clearStoredSession(session);
+        removeRecentSession(session);
+        setRecentSession(loadRecentSession());
+      } else {
+        clearStoredSession();
+      }
       socketRef.current?.close();
       setConnection("offline");
+    }
+    if (session && shouldForgetRecoveryStatus(remotePayload.matchStatus)) {
+      clearStoredSession(session);
+      removeRecentSession(session);
+      setRecentSession(loadRecentSession());
     }
   }
 
@@ -2092,7 +2109,7 @@ export default function Page() {
   const leaveMatch = () => {
     const leavingSession = session;
     socketRef.current?.close();
-    window.sessionStorage.removeItem(SESSION_KEY);
+    clearStoredSession(leavingSession ?? undefined);
     if (leavingSession) removeRecentSession(leavingSession);
     setRecentSession(loadRecentSession());
     setSession(null);
@@ -2403,6 +2420,11 @@ export default function Page() {
             }
           : current
       );
+      if (session && shouldForgetRecoveryStatus(message.payload.matchStatus)) {
+        clearStoredSession(session);
+        removeRecentSession(session);
+        setRecentSession(loadRecentSession());
+      }
       return;
     }
     if (message.type === "error") {
@@ -3487,20 +3509,8 @@ function isInvalidatingTerminalStatus(status: MatchStatus): boolean {
   return status === "cancelled" || status === "abandoned";
 }
 
-function isKnownMatchStatus(status: string): status is MatchStatus {
-  return (
-    status === "pending" ||
-    status === "waiting_for_runner" ||
-    status === "waiting_for_corp" ||
-    status === "waiting_for_joiner_decks" ||
-    status === "ready_check" ||
-    status === "countdown" ||
-    status === "active" ||
-    status === "cancelled" ||
-    status === "abandoned" ||
-    status === "forfeited" ||
-    status === "finished"
-  );
+function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
+  return status === "cancelled" || status === "abandoned" || status === "finished" || status === "forfeited";
 }
 
 function seriesStatusText(series: SeriesResultSummary): string {
@@ -5811,91 +5821,4 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
     default:
       return [{ frequency: 330, duration: 0.1, gain: 0.05, type: "sine" }];
   }
-}
-
-function persistSession(session: SessionInfo, remotePayload?: ClientPayload | LobbyClientPayload) {
-  window.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  rememberRecentSession(session, remotePayload);
-}
-
-function rememberRecentSession(session: SessionInfo, remotePayload?: ClientPayload | LobbyClientPayload) {
-  const recent = loadRecentSessions().filter((candidate) => !(candidate.matchId === session.matchId && candidate.side === session.side));
-  const next: RecentSessionInfo[] = [safeRecentSession(session, remotePayload), ...recent].slice(0, 4);
-  window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(next));
-}
-
-function safeRecentSession(session: SessionInfo, remotePayload?: ClientPayload | LobbyClientPayload): RecentSessionInfo {
-  return {
-    matchId: session.matchId,
-    side: session.side,
-    displayName: session.displayName,
-    ...(remotePayload?.opponentStatus.displayName ? { opponentDisplayName: remotePayload.opponentStatus.displayName } : {}),
-    ...(remotePayload?.matchStatus ? { matchStatus: remotePayload.matchStatus } : {}),
-    savedAt: new Date().toISOString()
-  };
-}
-
-function loadRecentSession(): RecentSessionInfo | null {
-  return loadRecentSessions()[0] ?? null;
-}
-
-function loadRecentSessions(): RecentSessionInfo[] {
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(RECENT_SESSIONS_KEY) ?? "[]") as unknown[];
-    const sanitized = parsed
-      .map(sanitizeRecentSession)
-      .filter((session): session is RecentSessionInfo => Boolean(session))
-      .sort((left, right) => right.savedAt.localeCompare(left.savedAt))
-      .slice(0, 4);
-    if (sanitized.length > 0) window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(sanitized));
-    else window.localStorage.removeItem(RECENT_SESSIONS_KEY);
-    return sanitized;
-  } catch {
-    window.localStorage.removeItem(RECENT_SESSIONS_KEY);
-    return [];
-  }
-}
-
-function sanitizeRecentSession(value: unknown): RecentSessionInfo | null {
-  if (!value || typeof value !== "object") return null;
-  const candidate = value as Record<string, unknown>;
-  if (typeof candidate.matchId !== "string") return null;
-  if (candidate.side !== "runner" && candidate.side !== "corp") return null;
-  const savedAt = typeof candidate.savedAt === "string" ? candidate.savedAt : new Date().toISOString();
-  const displayName = typeof candidate.displayName === "string" && candidate.displayName.trim() ? candidate.displayName : "Du";
-  const matchStatus = typeof candidate.matchStatus === "string" && isKnownMatchStatus(candidate.matchStatus) ? candidate.matchStatus : undefined;
-  const opponentDisplayName = typeof candidate.opponentDisplayName === "string" && candidate.opponentDisplayName.trim() ? candidate.opponentDisplayName : undefined;
-  return {
-    matchId: candidate.matchId,
-    side: candidate.side,
-    displayName,
-    ...(opponentDisplayName ? { opponentDisplayName } : {}),
-    ...(matchStatus ? { matchStatus } : {}),
-    savedAt
-  };
-}
-
-function loadStoredSession(): SessionInfo | null {
-  try {
-    const stored = window.sessionStorage.getItem(SESSION_KEY);
-    if (!stored) return null;
-    const parsed = JSON.parse(stored) as SessionInfo;
-    if (!parsed.matchId || !parsed.sessionToken || !parsed.reconnectToken || (parsed.side !== "runner" && parsed.side !== "corp")) return null;
-    return parsed;
-  } catch {
-    window.sessionStorage.removeItem(SESSION_KEY);
-    return null;
-  }
-}
-
-function storedSessionMatches(recent: RecentSessionInfo | null): boolean {
-  if (!recent) return false;
-  const stored = loadStoredSession();
-  return Boolean(stored && stored.matchId === recent.matchId && stored.side === recent.side);
-}
-
-function removeRecentSession(session: Pick<RecentSessionInfo | SessionInfo, "matchId" | "side">): void {
-  const next = loadRecentSessions().filter((candidate) => !(candidate.matchId === session.matchId && candidate.side === session.side));
-  if (next.length > 0) window.localStorage.setItem(RECENT_SESSIONS_KEY, JSON.stringify(next));
-  else window.localStorage.removeItem(RECENT_SESSIONS_KEY);
 }

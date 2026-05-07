@@ -6,16 +6,20 @@ import { deckSnapshotsResponse, deckTemplatesResponse, deckValidationResponse } 
 describe("Client visibility contract", () => {
   it("keeps the browser page away from full GameState and engine authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     expect(page).not.toContain("@netrunner/engine");
     expect(page).not.toContain("@netrunner/server");
     expect(page).not.toContain("GameState");
     expect(page).toContain("state_update");
     expect(page).toContain("submit_action");
     expect(page).toContain("PlayerView");
-    expect(page).toContain("window.sessionStorage");
+    expect(`${page}\n${recovery}`).toContain("window.sessionStorage");
     expect(page).toContain("DECK_STORAGE_KEY");
     expect(page).not.toContain("window.localStorage.setItem(SESSION_KEY");
     expect(page).not.toContain("window.localStorage.getItem(SESSION_KEY");
+    expect(recovery).toContain("netrunner.recovery.v1");
+    expect(recovery).not.toContain("window.localStorage.setItem(SESSION_STORAGE_KEY");
+    expect(recovery).not.toContain("window.localStorage.getItem(SESSION_STORAGE_KEY");
   });
 
   it("keeps the V0.7 UI shell image-ready with local asset gates", () => {
@@ -60,6 +64,7 @@ describe("Client visibility contract", () => {
 
   it("keeps the V1.0.5 matchstart lobby and lifecycle recovery explicit without adding browser authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
     expect(page).toContain('const APP_STATUS_LABEL = "V1.0.9"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
@@ -83,14 +88,17 @@ describe("Client visibility contract", () => {
     expect(page).toContain("serverDisplayLabel");
     expect(readFileSync("apps/web/app/action-board-ui.ts", "utf8")).toContain('if (serverIdOrLabel === "hq" || serverIdOrLabel === "HQ") return "HQ"');
     expect(page).toContain("netrunner.displayName");
-    expect(page).toContain("netrunner.recentSessions");
+    expect(recovery).toContain("netrunner.recentSessions");
+    expect(recovery).toContain("netrunner.recovery.v1");
     expect(page).toContain("Letzte Sitzung");
     expect(page).toContain("Fortsetzen");
     expect(page).toContain("Wieder verbinden über Link");
     expect(page).toContain("Verwerfen");
     expect(page).toContain("storedSessionMatches");
-    expect(page).toContain("safeRecentSession");
-    expect(page).toContain("sanitizeRecentSession");
+    expect(recovery).toContain("safeRecentSession");
+    expect(recovery).toContain("sanitizeRecentSession");
+    expect(recovery).toContain("serializeRecoverableSessionForStorage");
+    expect(recovery).toContain("parseRecoverableSessionFromStorage");
     expect(page).not.toContain("RecentSessionInfo = SessionInfo");
     expect(page).not.toContain("{ ...session, savedAt");
     expect(page).not.toContain("typeof session.reconnectToken");
