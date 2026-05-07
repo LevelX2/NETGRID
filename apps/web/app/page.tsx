@@ -5393,7 +5393,7 @@ function ActionSlotMeter({ side, currentClicks, displayCapacity, active, compact
     <div className={`actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
       <div className="resourceStatTop">
         <strong>{display.available}</strong>
-        <span>Aktionen</span>
+        <span className="statLabel">Aktionen</span>
       </div>
       <div className="actionSlots" aria-hidden="true">
         {display.slots.map((slot) => (
@@ -5411,7 +5411,7 @@ function CreditBadge({ credits }: { credits: number }) {
         <span className="creditCoin" aria-hidden="true" />
         <strong>{credits}</strong>
       </div>
-      <span>Credits</span>
+      <span className="statLabel">Credits</span>
     </div>
   );
 }
@@ -5424,7 +5424,7 @@ function Stat({ label, value, unit, icon }: { label?: string; value: number | st
         <span className="statValue">{value}</span>
         {unit ? <span className="statUnit">{unit}</span> : null}
       </strong>
-      {label ? <span>{label}</span> : null}
+      {label ? <span className="statLabel">{label}</span> : null}
     </div>
   );
 }

@@ -10,6 +10,7 @@
   --runner: #52d6b8;
   --corp: #ff816f;
   --agenda: #4aa3ff;
+  --corp-status-accent: #3f9fff;
   --credit: #f4c95d;
   --credit-deep: #7a4f13;
   --ice: #7db5ff;
@@ -1497,18 +1498,22 @@ select {
 
 .sideStatusPanel {
   --side-status-accent: var(--chronicle-system);
+  --side-status-bg-panel-mix: 88%;
+  --side-status-gradient-fade: 83%;
   position: relative;
   display: grid;
   gap: 9px;
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--side-status-accent), transparent 83%), transparent 72%),
-    color-mix(in srgb, var(--side-status-accent), var(--panel) 88%);
+    linear-gradient(135deg, color-mix(in srgb, var(--side-status-accent), transparent var(--side-status-gradient-fade)), transparent 72%),
+    color-mix(in srgb, var(--side-status-accent), var(--panel) var(--side-status-bg-panel-mix));
   border-bottom-color: color-mix(in srgb, var(--side-status-accent), var(--line) 58%);
   box-shadow: inset 4px 0 0 color-mix(in srgb, var(--side-status-accent), white 4%);
 }
 
 .sideStatusPanel.side-corp {
-  --side-status-accent: var(--chronicle-economy);
+  --side-status-accent: var(--corp-status-accent);
+  --side-status-bg-panel-mix: 80%;
+  --side-status-gradient-fade: 72%;
 }
 
 .sideStatusPanel.side-runner {
@@ -1545,6 +1550,9 @@ select {
 
 .stat {
   min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 7px;
   padding: 8px;
   border: 1px solid var(--line);
   border-radius: 6px;
@@ -1552,28 +1560,44 @@ select {
 }
 
 .stat strong {
-  display: inline-flex;
+  min-width: 0;
+  min-height: 22px;
+  display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 7px;
   font-size: 18px;
+  line-height: 1;
 }
 
 .statValue {
-  display: inline-block;
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .statUnit {
-  display: inline-block;
-  margin-left: 2px;
+  display: block;
+  min-width: 0;
   color: color-mix(in srgb, var(--text), var(--muted) 24%);
   font-size: 12px;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
 }
 
 .statIcon {
   display: inline-flex;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  align-items: center;
+  justify-content: center;
   color: var(--agenda);
+}
+
+.statIcon svg {
+  width: 18px;
+  height: 18px;
 }
 
 .setupPanel h2 {
@@ -1586,9 +1610,13 @@ select {
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 }
 
-.stat span {
-  color: var(--muted);
-  font-size: 12px;
+.statLabel {
+  display: block;
+  min-width: 0;
+  color: var(--text);
+  font-size: 16px;
+  line-height: normal;
+  overflow-wrap: anywhere;
 }
 
 .stat .statIcon {
@@ -1640,9 +1668,9 @@ select {
   flex: 0 0 auto;
 }
 
-.actionResource .resourceStatTop span {
-  color: var(--muted);
-  font-size: 12px;
+.actionResource .resourceStatTop .statLabel {
+  color: var(--text);
+  font-size: 16px;
   white-space: nowrap;
 }
 
@@ -3118,6 +3146,7 @@ select {
   --runner: #1565d8;
   --corp: #b9571b;
   --agenda: #156fd8;
+  --corp-status-accent: #176eb8;
   --ice: #4867c7;
   --danger: #b42335;
   --ok: #1d7a45;
