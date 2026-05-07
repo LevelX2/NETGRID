@@ -499,6 +499,12 @@ type DeckValidationResponse = {
   error?: { message: string };
 };
 
+type DeckLibraryResponse = {
+  decks?: EditableDeck[];
+  storagePath?: string;
+  error?: { message: string };
+};
+
 const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
   imported: "imported",
   validated: "validated",
@@ -1040,6 +1046,7 @@ export default function Page() {
   const [localDecks, setLocalDecks] = useState<EditableDeck[]>([]);
   const [localDecksLoaded, setLocalDecksLoaded] = useState(false);
   const [savedDeckFingerprints, setSavedDeckFingerprints] = useState<Record<string, string>>({});
+  const [deckLibraryStoragePath, setDeckLibraryStoragePath] = useState("");
   const [selectedLocalDeckId, setSelectedLocalDeckId] = useState<string | null>(null);
   const [deckValidation, setDeckValidation] = useState<DeckValidationResult | null>(null);
   const [validatedSnapshot, setValidatedSnapshot] = useState<DeckSnapshot | null>(null);
@@ -1154,30 +1161,35 @@ export default function Page() {
   }, [colorScheme, colorSchemeLoaded]);
 
   useEffect(() => {
-    const storedDecks = window.localStorage.getItem(DECK_STORAGE_KEY);
-    if (storedDecks) {
+    let cancelled = false;
+    const legacyDecks = readLegacyBrowserDecks();
+    async function loadDeckLibrary() {
       try {
-        const parsed = JSON.parse(storedDecks) as EditableDeck[];
-        setLocalDecks(parsed);
-        setSelectedLocalDeckId(parsed[0]?.deckId ?? null);
-        setSavedDeckFingerprints(Object.fromEntries(parsed.map((deck) => [deck.deckId, deckFingerprint(deck)])));
-        setSelectedRunnerLocalDeckId(parsed.find((deck) => deck.side === "runner")?.deckId ?? "");
-        setSelectedCorpLocalDeckId(parsed.find((deck) => deck.side === "corp")?.deckId ?? "");
-        setSelectedParticipantBRunnerLocalDeckId(parsed.find((deck) => deck.side === "runner")?.deckId ?? "");
-        setSelectedParticipantBCorpLocalDeckId(parsed.find((deck) => deck.side === "corp")?.deckId ?? "");
-        if (parsed.some((deck) => deck.side === "runner")) {
-          setRunnerDeckSource("local");
-          setParticipantBRunnerDeckSource("local");
+        const response = await fetch("/api/decks/library", { cache: "no-store" });
+        const data = (await response.json()) as DeckLibraryResponse;
+        if (!response.ok || data.error) throw new Error(data.error?.message ?? "deck_library_load_failed");
+        let decks = data.decks ?? [];
+        if (decks.length === 0 && legacyDecks.length > 0) {
+          const migrated = await persistDeckLibrary(legacyDecks);
+          decks = migrated.decks;
+          if (!cancelled) setNotice("Bisherige Browser-Decks wurden in die lokale Datei-Deckbibliothek übernommen.");
         }
-        if (parsed.some((deck) => deck.side === "corp")) {
-          setCorpDeckSource("local");
-          setParticipantBCorpDeckSource("local");
-        }
+        if (cancelled) return;
+        setDeckLibraryStoragePath(data.storagePath ?? "");
+        applyLoadedDecks(decks);
       } catch {
-        window.localStorage.removeItem(DECK_STORAGE_KEY);
+        if (!cancelled) {
+          applyLoadedDecks(legacyDecks);
+          if (legacyDecks.length > 0) setNotice("Datei-Deckbibliothek nicht erreichbar; Browser-Decks wurden nur als Übergang geladen.");
+        }
+      } finally {
+        if (!cancelled) setLocalDecksLoaded(true);
       }
     }
-    setLocalDecksLoaded(true);
+    void loadDeckLibrary();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -1741,6 +1753,7 @@ export default function Page() {
     if (source === "local") {
       const deck = localDecks.find((candidate) => candidate.deckId === localDeckId && candidate.side === side);
       if (!deck) throw new Error(`Bitte wähle ein gespeichertes ${sideLabel(side)}-Deck.`);
+      if (savedDeckFingerprints[deck.deckId] !== deckFingerprint(deck)) throw new Error(`Bitte speichere das ${sideLabel(side)}-Deck vor dem Matchstart.`);
       const snapshot = await validateDeckForMatch(deck);
       return side === "runner" ? { runnerDeckSnapshot: snapshot } : { corpDeckSnapshot: snapshot };
     }
@@ -2226,11 +2239,12 @@ export default function Page() {
       createdAt: now,
       updatedAt: now
     };
-    setLocalDecks((current) => saveDeckLibrary([...current, deck]));
+    const nextDecks = [...localDecks, deck];
+    setLocalDecks(nextDecks);
+    void commitDeckLibrary(nextDecks, "Neues Deck gespeichert. Füge Karten hinzu und speichere Änderungen bewusst.");
     setSelectedLocalDeckId(deck.deckId);
     selectDeckForSide(deck);
     clearDeckValidation();
-    setNotice("Neues Deck gespeichert. Füge Karten hinzu und speichere Änderungen bewusst.");
   };
 
   const updateSelectedDeck = (nextDeck: EditableDeck) => {
@@ -2240,8 +2254,7 @@ export default function Page() {
 
   const saveSelectedDeck = () => {
     if (!selectedLocalDeck) return;
-    setLocalDecks((current) => saveDeckLibrary(current));
-    setNotice("Deck gespeichert.");
+    void commitDeckLibrary(localDecks, "Deck gespeichert.");
   };
 
   const updateDeckCardQuantity = (cardId: string, quantity: number) => {
@@ -2266,20 +2279,20 @@ export default function Page() {
       createdAt: now,
       updatedAt: now
     };
-    setLocalDecks((current) => saveDeckLibrary([...current, copy]));
+    const nextDecks = [...localDecks, copy];
+    setLocalDecks(nextDecks);
+    void commitDeckLibrary(nextDecks, "Deck-Kopie gespeichert.");
     setSelectedLocalDeckId(copy.deckId);
     selectDeckForSide(copy);
     clearDeckValidation();
-    setNotice("Deck-Kopie gespeichert.");
   };
 
   const deleteSelectedDeck = () => {
     if (!selectedLocalDeck) return;
-    setLocalDecks((current) => {
-      const next = current.filter((deck) => deck.deckId !== selectedLocalDeck.deckId);
-      setSelectedLocalDeckId(next[0]?.deckId ?? null);
-      return saveDeckLibrary(next);
-    });
+    const nextDecks = localDecks.filter((deck) => deck.deckId !== selectedLocalDeck.deckId);
+    setLocalDecks(nextDecks);
+    setSelectedLocalDeckId(nextDecks[0]?.deckId ?? null);
+    void commitDeckLibrary(nextDecks, "Deck gelöscht.");
     clearDeckValidation();
   };
 
@@ -2338,11 +2351,12 @@ export default function Page() {
       createdAt: parsed.deck.createdAt || now,
       updatedAt: now
     };
-    setLocalDecks((current) => saveDeckLibrary([...current.filter((deck) => deck.deckId !== imported.deckId), imported]));
+    const nextDecks = [...localDecks.filter((deck) => deck.deckId !== imported.deckId), imported];
+    setLocalDecks(nextDecks);
+    void commitDeckLibrary(nextDecks, "Deck importiert und gespeichert.");
     setSelectedLocalDeckId(imported.deckId);
     selectDeckForSide(imported);
     clearDeckValidation();
-    setNotice("Deck importiert und gespeichert.");
   };
 
   function clearDeckValidation() {
@@ -2350,10 +2364,57 @@ export default function Page() {
     setValidatedSnapshot(null);
   }
 
-  function saveDeckLibrary(nextDecks: EditableDeck[]): EditableDeck[] {
-    window.localStorage.setItem(DECK_STORAGE_KEY, JSON.stringify(nextDecks));
-    setSavedDeckFingerprints(Object.fromEntries(nextDecks.map((deck) => [deck.deckId, deckFingerprint(deck)])));
-    return nextDecks;
+  async function commitDeckLibrary(nextDecks: EditableDeck[], successNotice: string) {
+    try {
+      const result = await persistDeckLibrary(nextDecks);
+      setLocalDecks(result.decks);
+      setSavedDeckFingerprints(Object.fromEntries(result.decks.map((deck) => [deck.deckId, deckFingerprint(deck)])));
+      if (result.storagePath) setDeckLibraryStoragePath(result.storagePath);
+      setNotice(successNotice);
+    } catch {
+      setNotice("Deck konnte nicht in der lokalen Datei-Deckbibliothek gespeichert werden.");
+    }
+  }
+
+  async function persistDeckLibrary(nextDecks: EditableDeck[]): Promise<{ decks: EditableDeck[]; storagePath?: string }> {
+    const response = await fetch("/api/decks/library", {
+      method: "PUT",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ decks: nextDecks })
+    });
+    const data = (await response.json()) as DeckLibraryResponse;
+    if (!response.ok || data.error) throw new Error(data.error?.message ?? "deck_library_save_failed");
+    return { decks: data.decks ?? nextDecks, ...(data.storagePath ? { storagePath: data.storagePath } : {}) };
+  }
+
+  function applyLoadedDecks(decks: EditableDeck[]) {
+    setLocalDecks(decks);
+    setSelectedLocalDeckId(decks[0]?.deckId ?? null);
+    setSavedDeckFingerprints(Object.fromEntries(decks.map((deck) => [deck.deckId, deckFingerprint(deck)])));
+    setSelectedRunnerLocalDeckId(decks.find((deck) => deck.side === "runner")?.deckId ?? "");
+    setSelectedCorpLocalDeckId(decks.find((deck) => deck.side === "corp")?.deckId ?? "");
+    setSelectedParticipantBRunnerLocalDeckId(decks.find((deck) => deck.side === "runner")?.deckId ?? "");
+    setSelectedParticipantBCorpLocalDeckId(decks.find((deck) => deck.side === "corp")?.deckId ?? "");
+    if (decks.some((deck) => deck.side === "runner")) {
+      setRunnerDeckSource("local");
+      setParticipantBRunnerDeckSource("local");
+    }
+    if (decks.some((deck) => deck.side === "corp")) {
+      setCorpDeckSource("local");
+      setParticipantBCorpDeckSource("local");
+    }
+  }
+
+  function readLegacyBrowserDecks(): EditableDeck[] {
+    const storedDecks = window.localStorage.getItem(DECK_STORAGE_KEY);
+    if (!storedDecks) return [];
+    try {
+      const parsed = JSON.parse(storedDecks) as EditableDeck[];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      window.localStorage.removeItem(DECK_STORAGE_KEY);
+      return [];
+    }
   }
 
   function selectDeckForSide(deck: EditableDeck) {
@@ -2924,6 +2985,7 @@ export default function Page() {
             localDecks={localDecks}
             selectedDeck={selectedLocalDeck}
             selectedDeckDirty={selectedDeckDirty}
+            storagePath={deckLibraryStoragePath}
             validation={deckValidation}
             validatedSnapshot={validatedSnapshot}
             playableCards={playableCatalogCards}
@@ -5053,6 +5115,7 @@ function DeckEditorPanel({
   localDecks,
   selectedDeck,
   selectedDeckDirty,
+  storagePath,
   validation,
   validatedSnapshot,
   playableCards,
@@ -5075,6 +5138,7 @@ function DeckEditorPanel({
   localDecks: EditableDeck[];
   selectedDeck: EditableDeck | null;
   selectedDeckDirty: boolean;
+  storagePath: string;
   validation: DeckValidationResult | null;
   validatedSnapshot: DeckSnapshot | null;
   playableCards: CatalogCardSummary[];
@@ -5158,6 +5222,9 @@ function DeckEditorPanel({
           <h2>Meine Decks</h2>
           <p className="meta">
             Meine Decks · {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp {corpDeckCount}
+          </p>
+          <p className="meta" title={storagePath || "Lokale Datei-Deckbibliothek"}>
+            Lokale Datei-Deckbibliothek {storagePath ? "aktiv" : "wird geladen"}
           </p>
         </div>
         <div className="deckHeaderActions">

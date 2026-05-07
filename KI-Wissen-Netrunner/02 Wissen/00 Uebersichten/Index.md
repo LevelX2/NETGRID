@@ -175,6 +175,7 @@
 - `docs/derived/V1_1_2_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für V1.1.2 Full Archives Access und Matchstart Entry UX.
 - `docs/derived/V1_1_2_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.1.2; `V1_1_2_done: true`.
 - `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`: angepasste Anschlussroadmap nach V1.1.2 für fehlende Spielmechaniken, Kartenfreigabe und kontinuierliche KI-Weiterentwicklung nach dem NETGRID-KI-Briefing.
+- `docs/derived/LOCAL_FILE_DECK_LIBRARY_2026_05_07.md`: Entscheidung und Verhalten der lokalen Datei-Deckbibliothek für persönliche bearbeitbare Decks.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
