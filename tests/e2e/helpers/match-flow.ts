@@ -39,6 +39,8 @@ export async function createHumanVsHumanLobby(page: Page, seed: string, side: "r
   await page.getByLabel("Name").fill(side === "corp" ? "Host Corp V107" : "Host Runner V107");
   await page.getByTestId("create-match").click();
   await expect(page.getByTestId("start-lobby")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("heading", { name: /Du startest als/ })).toBeVisible();
+  await expect(page.getByText("Gegenüber: Wartet auf Gegenüber")).toBeVisible();
   const joinUrl = await page.getByTestId("join-link").inputValue();
   expect(joinUrl).toContain("joinToken=");
   return joinUrl;

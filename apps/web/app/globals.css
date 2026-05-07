@@ -420,7 +420,7 @@ select {
 .deckSlotGrid {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr));
   gap: 10px;
 }
 
@@ -556,6 +556,16 @@ select {
 }
 
 .deckSlotSelect {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.deckSlotSelect select {
+  width: 100%;
   min-width: 0;
 }
 

@@ -3350,7 +3350,9 @@ function StartLobbyPanel({
   const opponentReady = opponent?.ready ?? false;
   const terminal = isInvalidatingTerminalStatus(lobby.matchStatus) || lobby.matchStatus === "forfeited" || lobby.matchStatus === "finished";
   const isHost = selfPlayer === "player_a";
-  const opponentName = lobby.opponentStatus.displayName ?? opponent?.displayName ?? "Gegenüber";
+  const canUseReadiness = Boolean(start && (lobby.matchStatus === "ready_check" || lobby.matchStatus === "countdown"));
+  const showJoinLink = Boolean(joinUrl && !terminal && (lobby.pendingDeckHandshake || lobby.matchStatus === "pending"));
+  const opponentName = lobby.opponentStatus.displayName ?? (opponent?.connected ? opponent.displayName : "Wartet auf Gegenüber");
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const element = chatMessagesRef.current;
@@ -3385,7 +3387,7 @@ function StartLobbyPanel({
           )}
         </div>
       </div>
-      {joinUrl && lobby.pendingDeckHandshake ? (
+      {showJoinLink ? (
         <div className="joinLinkRow">
           <input value={joinUrl} readOnly aria-label="Join-Link" data-testid="join-link" />
           <button className="button" onClick={onCopyJoinLink} type="button">
@@ -3407,53 +3409,65 @@ function StartLobbyPanel({
             <LobbyParticipantCard title="Du" participant={self} />
             <LobbyParticipantCard title="Gegenüber" participant={opponent} />
           </div>
-          <div className="readinessSummary">
-            <span>{selfReady ? "Du bist bereit." : "Du bist noch nicht bereit."}</span>
-            <span>{opponentReady ? "Gegenüber ist bereit." : "Gegenüber ist noch nicht bereit."}</span>
-          </div>
-          <div className="lobbyActions">
-            <button className="button primary" onClick={() => onReady(!selfReady)} type="button" disabled={connection !== "online"} data-testid="ready-toggle">
-              <Check size={15} />
-              {selfReady ? "Bereitschaft zurücknehmen" : "Ich bin bereit"}
-            </button>
-            {countdownActive ? (
-              <button className="button" onClick={onCancel} type="button">
+          {canUseReadiness ? (
+            <>
+              <div className="readinessSummary">
+                <span>{selfReady ? "Du bist bereit." : "Du bist noch nicht bereit."}</span>
+                <span>{opponentReady ? "Gegenüber ist bereit." : "Gegenüber ist noch nicht bereit."}</span>
+              </div>
+              <div className="lobbyActions">
+                <button className="button primary" onClick={() => onReady(!selfReady)} type="button" disabled={connection !== "online"} data-testid="ready-toggle">
+                  <Check size={15} />
+                  {selfReady ? "Bereitschaft zurücknehmen" : "Ich bin bereit"}
+                </button>
+                {countdownActive ? (
+                  <button className="button" onClick={onCancel} type="button">
+                    <X size={15} />
+                    Countdown abbrechen
+                  </button>
+                ) : null}
+                <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" disabled={connection !== "online"} data-testid={isHost ? "cancel-match" : "leave-lobby"}>
+                  <X size={15} />
+                  {isHost ? "Match abbrechen" : "Lobby verlassen"}
+                </button>
+                <span className="countdownText">{countdownActive ? `Countdown bis ${formatLobbyTime(start.countdownEndsAt)}` : "Startet automatisch, sobald beide bereit sind."}</span>
+              </div>
+              <div className="lobbyChat">
+                <div className="lobbyChatMessages" ref={chatMessagesRef}>
+                  {start.chatMessages.length === 0 ? <p className="muted">Noch keine Nachrichten.</p> : null}
+                  {start.chatMessages.map((message) => (
+                    <p key={message.id}>
+                      <strong>{message.displayName}</strong>
+                      <span>{formatLobbyTime(message.sentAt)}</span>
+                      {message.text}
+                    </p>
+                  ))}
+                </div>
+                <div className="lobbyChatInput">
+                  <input
+                    value={chatText}
+                    maxLength={300}
+                    onChange={(event) => onChatText(event.target.value)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter") onSendChat();
+                    }}
+                    placeholder="Kurze Nachricht"
+                  />
+                  <button className="button" onClick={onSendChat} type="button">
+                    Senden
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="lobbyActions">
+              <span className="countdownText">{lobby.pendingDeckHandshake?.message ?? "Gegenüber kann jetzt über den Join-Link beitreten."}</span>
+              <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" disabled={connection !== "online"} data-testid={isHost ? "cancel-match" : "leave-lobby"}>
                 <X size={15} />
-                Countdown abbrechen
-              </button>
-            ) : null}
-            <button className="button dangerButton" onClick={isHost ? onCancelMatch : onLeaveMatch} type="button" disabled={connection !== "online"} data-testid={isHost ? "cancel-match" : "leave-lobby"}>
-              <X size={15} />
-              {isHost ? "Match abbrechen" : "Lobby verlassen"}
-            </button>
-            <span className="countdownText">{countdownActive ? `Countdown bis ${formatLobbyTime(start.countdownEndsAt)}` : "Startet automatisch, sobald beide bereit sind."}</span>
-          </div>
-          <div className="lobbyChat">
-            <div className="lobbyChatMessages" ref={chatMessagesRef}>
-              {start.chatMessages.length === 0 ? <p className="muted">Noch keine Nachrichten.</p> : null}
-              {start.chatMessages.map((message) => (
-                <p key={message.id}>
-                  <strong>{message.displayName}</strong>
-                  <span>{formatLobbyTime(message.sentAt)}</span>
-                  {message.text}
-                </p>
-              ))}
-            </div>
-            <div className="lobbyChatInput">
-              <input
-                value={chatText}
-                maxLength={300}
-                onChange={(event) => onChatText(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") onSendChat();
-                }}
-                placeholder="Kurze Nachricht"
-              />
-              <button className="button" onClick={onSendChat} type="button">
-                Senden
+                {isHost ? "Match abbrechen" : "Lobby verlassen"}
               </button>
             </div>
-          </div>
+          )}
         </>
       ) : (
         <>

@@ -1736,7 +1736,7 @@ export class MultiplayerService {
             }
           }
         : {}),
-      ...(lobby && record.match.status !== "waiting_for_joiner_decks" && !(record.match.status === "pending" && !record.gameState) ? { startLobby: this.publicStartLobbyFor(record, lobby) } : {})
+      ...(lobby && record.match.status !== "waiting_for_joiner_decks" ? { startLobby: this.publicStartLobbyFor(record, lobby) } : {})
     };
   }
 
@@ -1762,11 +1762,12 @@ export class MultiplayerService {
     const side = sideForSeriesPlayer(lobby.sideAssignment, player);
     const session = record.sessions.find((candidate) => candidate.side === side);
     const decks = record.privateDeckSnapshots?.participants?.[player];
+    const hasParticipantSession = Boolean(session);
     return {
       displayName: session?.displayName ?? (player === "player_a" ? "Teilnehmer A" : "Teilnehmer B"),
       side,
-      runnerDeckReady: Boolean(decks?.runner),
-      corpDeckReady: Boolean(decks?.corp),
+      runnerDeckReady: hasParticipantSession && Boolean(decks?.runner),
+      corpDeckReady: hasParticipantSession && Boolean(decks?.corp),
       connected: session?.connected ?? false,
       connectionQuality: connectionQualityFor(session, this.now()),
       ready: player === "player_a" ? lobby.hostReady : lobby.joinerReady
