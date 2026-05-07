@@ -147,6 +147,8 @@ describe("Client visibility contract", () => {
     expect(page).toContain("aiDeckPolicy");
     expect(page).toContain("viewerAgendaPoints");
     expect(page).toContain("opponentAgendaPoints");
+    expect(page).toContain("viewerSeriesOutcome");
+    expect(page).toContain("seriesDecision");
     expect(page).not.toContain("applyAction(");
     expect(page).not.toContain("createGame(");
   });
@@ -235,6 +237,9 @@ describe("Client visibility contract", () => {
     expect(page).toContain("Aktionen");
     expect(page).toContain("Kartenanzeige");
     expect(page).toContain("Vorschau");
+    expect(page).toContain("matchId: string;");
+    expect(page).toContain("focusedCard?.matchId === payload?.matchId");
+    expect(page).toContain("setFocusedCard(null);");
     expect(page).not.toContain('label="Clicks"');
     expect(page).not.toContain('label="Klicks"');
     expect(page).not.toContain("Card Display");

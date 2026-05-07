@@ -14,8 +14,9 @@ import {
   Download,
   Eye,
   EyeOff,
-  FileText,
   Fingerprint,
+  Award,
+  Goal,
   Image,
   Keyboard,
   Layers3,
@@ -29,7 +30,6 @@ import {
   RotateCcw,
   Save,
   Search,
-  ScanLine,
   Shield,
   SlidersHorizontal,
   Sparkles,
@@ -134,8 +134,8 @@ const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Route;
 const RunnerRoleIcon = Fingerprint;
 const CorpRoleIcon = Building2;
-const AgendaIcon = FileText;
-const TagIcon = ScanLine;
+const AgendaIcon = Award;
+const TagIcon = Goal;
 const RUNNER_BASE_HAND_LIMIT = 5;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
@@ -184,6 +184,8 @@ type SeriesResultSummary = {
   draws: number;
   viewerAgendaPoints: number;
   opponentAgendaPoints: number;
+  viewerSeriesOutcome: "won" | "lost" | "draw";
+  seriesDecision: "wins" | "agenda_points" | "draw";
   nextAvailable: boolean;
   nextMatchId?: string;
 };
@@ -409,6 +411,7 @@ type DisplayVisibleCard = VisibleCard & {
 
 type FocusedCard = {
   card: VisibleCard;
+  matchId: string;
   hiddenSide?: Side;
 };
 
@@ -1355,8 +1358,9 @@ export default function Page() {
   );
   const gripPreviewCard = activeView?.own.gripOrHq.find((card) => card.known) ?? null;
   const rigPreviewCard = activeView?.own.rig?.find((card) => card.known) ?? null;
+  const currentFocusedCard = focusedCard?.matchId === payload?.matchId ? focusedCard : null;
   const previewSelection =
-    focusedCard ??
+    currentFocusedCard ??
     (activeView?.run?.encounteredIce ? { card: activeView.run.encounteredIce, hiddenSide: "corp" as const } : null) ??
     (gripPreviewCard ? { card: gripPreviewCard } : null) ??
     (rigPreviewCard ? { card: rigPreviewCard } : null);
@@ -1364,7 +1368,10 @@ export default function Page() {
   const previewHiddenSide = previewSelection?.hiddenSide;
   const enrichCard = (card: VisibleCard) => enrichVisibleCard(card, catalogDetailsById);
   const enrichedPreviewCard = previewCard ? enrichCard(previewCard) : null;
-  const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) => setFocusedCard({ card, ...(hiddenSide ? { hiddenSide } : {}) });
+  const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) => {
+    if (!payload?.matchId) return;
+    setFocusedCard({ card, matchId: payload.matchId, ...(hiddenSide ? { hiddenSide } : {}) });
+  };
   const selectActionCard = (card: DisplayVisibleCard, hiddenSide?: Side) => {
     focusCard(card, hiddenSide);
     if (card.known) {
@@ -1464,6 +1471,7 @@ export default function Page() {
     setActionCueQueue([]);
     setCurrentActionCue(null);
     pendingAiAdvanceKeyRef.current = null;
+    setFocusedCard(null);
   }, [session?.matchId, session?.sessionToken]);
 
   useEffect(() => {
@@ -3476,14 +3484,14 @@ function GameOverModal({
           <p>{resultReasonLabel(result.reason)}</p>
         </div>
         <div className="gameOverStats">
-          <Stat label="Runner Agenda" value={`${result.runnerAgendaPoints} / ${result.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
-          <Stat label="Korp Agenda" value={`${result.corpAgendaPoints} / ${result.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
-          <Stat label="Zielwert" value={result.agendaPointsToWin} />
-          <Stat label="Aktionen" value={result.actionCount} />
-          <Stat label="Runs" value={result.runCount} />
-          <Stat label="Erfolgreich" value={result.successfulRunCount} />
-          <Stat label="Gestohlen" value={result.stolenAgendaCount} />
-          <Stat label="Gescored" value={result.scoredAgendaCount} />
+          <Stat label="Agenda" value={`${result.runnerAgendaPoints} / ${result.agendaPointsToWin}`} unit="Runner" icon={<AgendaIcon size={14} />} />
+          <Stat label="Agenda" value={`${result.corpAgendaPoints} / ${result.agendaPointsToWin}`} unit="Korp" icon={<AgendaIcon size={14} />} />
+          <Stat value={result.agendaPointsToWin} unit="Zielwert" />
+          <Stat value={result.actionCount} unit="Aktionen" />
+          <Stat value={result.runCount} unit="Runs" />
+          <Stat value={result.successfulRunCount} unit="Erfolgreich" />
+          <Stat value={result.stolenAgendaCount} unit="Gestohlen" />
+          <Stat value={result.scoredAgendaCount} unit="Gescored" />
         </div>
         {result.series ? (
           <div className="seriesStrip">
@@ -3564,8 +3572,8 @@ function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
 
 function seriesStatusText(series: SeriesResultSummary): string {
   if (series.status === "finished") {
-    if (series.viewerWins > series.opponentWins) return "Du hast die Matchserie gewonnen.";
-    if (series.viewerWins < series.opponentWins) return "Du hast die Matchserie verloren.";
+    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "agenda_points" ? "Du hast die Matchserie nach Agenda-Punkten gewonnen." : "Du hast die Matchserie gewonnen.";
+    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "agenda_points" ? "Du hast die Matchserie nach Agenda-Punkten verloren." : "Du hast die Matchserie verloren.";
     return "Die Matchserie endet unentschieden.";
   }
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
@@ -5408,14 +5416,15 @@ function CreditBadge({ credits }: { credits: number }) {
   );
 }
 
-function Stat({ label, value, icon }: { label: string; value: number | string; icon?: ReactNode }) {
+function Stat({ label, value, unit, icon }: { label?: string; value: number | string; unit?: string; icon?: ReactNode }) {
   return (
     <div className="stat">
       <strong>
         {icon ? <span className="statIcon">{icon}</span> : null}
-        {value}
+        <span className="statValue">{value}</span>
+        {unit ? <span className="statUnit">{unit}</span> : null}
       </strong>
-      <span>{label}</span>
+      {label ? <span>{label}</span> : null}
     </div>
   );
 }
@@ -5856,9 +5865,7 @@ function serverErrorNotice(error: unknown, fallback: string): string {
 
 function seriesAudioOutcome(result: GameResultSummary): GameResultSummary["viewerOutcome"] {
   if (result.series?.status !== "finished") return result.viewerOutcome;
-  if (result.series.viewerWins > result.series.opponentWins) return "won";
-  if (result.series.viewerWins < result.series.opponentWins) return "lost";
-  return "draw";
+  return result.series.viewerSeriesOutcome;
 }
 
 function primeAudio(volume: number): void {

@@ -30,6 +30,12 @@ Ein Serienmatch nutzt `matchFormat: "two_game_side_swap"` und ergänzt den Match
 
 Nach Spielende erzeugt der Server eine side-sichere `series`-Zusammenfassung innerhalb von `GameResultSummary`.
 
+## Serienwertung
+
+Die private Zwei-Spiel-Serie wird zuerst nach Spielgewinnen entschieden. Wenn beide Spieler nach den zwei Spielen gleich viele Spielgewinne haben, entscheidet die Summe der side-sicher gespeicherten Agenda-Punkte über die Serie. Sind auch die Agenda-Punkte gleich, endet die private Matchserie unentschieden.
+
+Diese Serienwertung ist eine private Produktregel für NETGRID. Sie bleibt getrennt von offizieller öffentlicher Turnierlogik und verändert nicht den Engine-Vertrag für einzelne Spiele.
+
 ## Folgespiel
 
 Das Folgespiel wird über `POST /api/matches/:matchId/series-next` erstellt.
@@ -55,6 +61,7 @@ Das neue Spiel nutzt dieselben Deck-Snapshots und Matchsettings, aber die Seite 
 Die Umsetzung ist über Server-Tests und Visibility-Vertrag abgedeckt:
 
 - Spiel 1 einer Serie endet mit side-sicherem Serienstand.
+- Geteilte Spielgewinne werden per Agenda-Punkte-Summe als Serien-Tiebreaker entschieden.
 - `series-next` erstellt Spiel 2 mit Seitenwechsel.
 - doppeltes Erstellen des Folgespiels wird abgelehnt.
 - UI-Vertrag enthält private Matchserie, Folgespiel-Aktion und keine verbotenen ResultSummary-Felder.

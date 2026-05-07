@@ -1731,6 +1731,8 @@ describe("MVP 0.2 multiplayer service", () => {
       viewerWins: 1,
       opponentWins: 0,
       draws: 0,
+      viewerSeriesOutcome: "won",
+      seriesDecision: "wins",
       nextAvailable: true
     });
 
@@ -1769,6 +1771,70 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in duplicate).toBe(true);
     if (!("error" in duplicate)) throw new Error("Expected duplicate series-next rejection");
     expect(duplicate.error.code).toBe("series_next_exists");
+  });
+
+  it("uses total agenda points as the private series tiebreaker after split game wins", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "series-agenda-tiebreak" });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "series-agenda-tiebreak",
+      settings: { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" }
+    });
+    const record = await storage.load(created.matchId);
+    if (!record?.gameState || !record.match.series) throw new Error("Expected active series record");
+
+    record.gameState.winner = "runner";
+    record.match.status = "finished";
+    record.match.winner = "runner";
+    record.match.series = {
+      ...record.match.series,
+      status: "finished",
+      gameNumber: 2,
+      gamesPlanned: 2,
+      runnerPlayer: "player_b",
+      corpPlayer: "player_a",
+      results: [
+        {
+          matchId: "series-game-1",
+          gameNumber: 1,
+          winner: "runner",
+          runnerPlayer: "player_a",
+          corpPlayer: "player_b",
+          runnerAgendaPoints: 7,
+          corpAgendaPoints: 0,
+          finishedAt: "2026-05-07T10:00:00.000Z",
+          finalStateHash: "hash-game-1"
+        },
+        {
+          matchId: created.matchId,
+          gameNumber: 2,
+          winner: "runner",
+          runnerPlayer: "player_b",
+          corpPlayer: "player_a",
+          runnerAgendaPoints: 7,
+          corpAgendaPoints: 1,
+          finishedAt: "2026-05-07T10:30:00.000Z",
+          finalStateHash: hashState(record.gameState)
+        }
+      ]
+    };
+    await storage.save(record);
+
+    const payload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in payload).toBe(false);
+    if ("error" in payload) throw new Error(payload.error.message);
+    expect(payload.resultSummary?.viewerOutcome).toBe("lost");
+    expect(payload.resultSummary?.series).toMatchObject({
+      status: "finished",
+      viewerWins: 1,
+      opponentWins: 1,
+      viewerAgendaPoints: 8,
+      opponentAgendaPoints: 7,
+      viewerSeriesOutcome: "won",
+      seriesDecision: "agenda_points"
+    });
   });
 
   it("keeps personal Runner/Corp deck pairs across a private side-swap series", async () => {

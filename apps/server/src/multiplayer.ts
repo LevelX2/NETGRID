@@ -106,6 +106,8 @@ export type SeriesResultSummary = {
   draws: number;
   viewerAgendaPoints: number;
   opponentAgendaPoints: number;
+  viewerSeriesOutcome: "won" | "lost" | "draw";
+  seriesDecision: "wins" | "agenda_points" | "draw";
   nextAvailable: boolean;
   nextMatchId?: string;
 };
@@ -2244,6 +2246,7 @@ function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSu
     agendaPoints[result.corpPlayer] += result.corpAgendaPoints;
   }
   const opponentPlayer = oppositeSeriesPlayer(viewerPlayer);
+  const seriesDecision = seriesDecisionFor(wins[viewerPlayer], wins[opponentPlayer], agendaPoints[viewerPlayer], agendaPoints[opponentPlayer]);
   return {
     seriesId: series.seriesId,
     mode: series.mode,
@@ -2256,9 +2259,24 @@ function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSu
     draws,
     viewerAgendaPoints: agendaPoints[viewerPlayer],
     opponentAgendaPoints: agendaPoints[opponentPlayer],
+    viewerSeriesOutcome: seriesDecision.outcome,
+    seriesDecision: seriesDecision.decision,
     nextAvailable: series.status === "between_games" && !series.nextMatchId,
     ...(series.nextMatchId ? { nextMatchId: series.nextMatchId } : {})
   };
+}
+
+function seriesDecisionFor(
+  viewerWins: number,
+  opponentWins: number,
+  viewerAgendaPoints: number,
+  opponentAgendaPoints: number
+): { outcome: "won" | "lost" | "draw"; decision: "wins" | "agenda_points" | "draw" } {
+  if (viewerWins > opponentWins) return { outcome: "won", decision: "wins" };
+  if (viewerWins < opponentWins) return { outcome: "lost", decision: "wins" };
+  if (viewerAgendaPoints > opponentAgendaPoints) return { outcome: "won", decision: "agenda_points" };
+  if (viewerAgendaPoints < opponentAgendaPoints) return { outcome: "lost", decision: "agenda_points" };
+  return { outcome: "draw", decision: "draw" };
 }
 
 function winningSeriesPlayer(result: SeriesGameResult): SeriesPlayerSlot | "draw" {

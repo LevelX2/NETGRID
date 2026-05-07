@@ -98,7 +98,7 @@ V1.0 soll keine neuen Regeln und keine neue Kartenbreite einführen. Der Schnitt
 
 Stand 2026-05-04, als V1.0-Arbeitsannahmen festgelegt:
 
-1. Serienwertung: Die private Zwei-Spiel-Serie wird autoritativ nur nach Siegen, Niederlagen und Draws gewertet. Aggregierte Agenda-Punkte werden side-sicher angezeigt und gespeichert, aber in V1.0 nicht als Tie-Breaker verwendet. Bei gleicher Siegzahl endet die Serie als Draw.
+1. Serienwertung: Historische V1.0-Arbeitsannahme war eine Wertung nur nach Siegen, Niederlagen und Draws. Seit der Korrektur vom 2026-05-07 entscheidet bei gleicher Siegzahl die Summe der side-sicher gespeicherten Agenda-Punkte; nur bei gleicher Sieg- und Agenda-Punkte-Summe endet die private Serie als Draw.
 2. KI-Deckpolitik: KI-Gegner unterstützen drei Modi. `fixed` nutzt das feste V0.8-Standarddeckpaar. `selected` nutzt die explizit im Matchstart gewählten KI-Runner-/Corp-Decks. `seeded_random` wählt deterministisch aus serverseitig eingefrorenen, matchstartfähigen Snapshots; private lokale O:NR-Snapshots werden nur bei expliziter Auswahl verwendet, nicht zufällig.
 3. UI-Modell: Teilnehmer A ist die hostende/lokale Person, Teilnehmer B ist Gast oder KI. Die vier Slots heißen `Teilnehmer A · Runner-Deck`, `Teilnehmer A · Corp-Deck`, `Teilnehmer B · Runner-Deck` und `Teilnehmer B · Corp-Deck`; bei KI-Modi zeigt die UI Teilnehmer B als KI. Einzelspiele verwenden die Decks der aktuell zugewiesenen Seiten, Serien behalten die persönlichen Deckpaare und wechseln in Spiel 2 nur die Seite.
 
@@ -110,7 +110,7 @@ Umgesetzt:
 
 - Matchstart akzeptiert explizite persönliche Deckpaare für Teilnehmer A und B.
 - Private Serien behalten diese persönlichen Runner-/Corp-Deckpaare über den Seitenwechsel.
-- Serienwertung bleibt bei Siegen/Niederlagen/Draws; aggregierte Agenda-Punkte werden side-sicher angezeigt und gespeichert.
+- Serienwertung nutzt Siege/Niederlagen/Draws und seit 2026-05-07 aggregierte Agenda-Punkte als Tiebreaker.
 - KI-Deckpolitik unterstützt `fixed`, `selected` und `seeded_random`.
 - Deterministische KI-Random-Auswahl nutzt nur eingefrorene, validierte Snapshots.
 - Die Web-UI zeigt V1.0, vier Deckslots und bietet im Matchstart nur validierte versionierte Snapshots sowie validierte lokale Snapshots an.
