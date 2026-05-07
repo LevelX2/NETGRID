@@ -1,12 +1,21 @@
 export type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "upgrade" | "operation" | "event" | "hardware" | "resource" | "program";
 
 export type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
+export type CatalogSetFilterKey = "all" | "original" | "test" | "other";
 
 export type CatalogCardForTypeFilter = {
   catalogCardId: string;
   type: string;
   subtypes: string[];
 };
+
+export type CatalogCardForSetFilter = {
+  catalogCardId: string;
+  setId: string;
+};
+
+const ORIGINAL_SET_PREFIXES = ["onr-"];
+const TEST_SET_PREFIXES = ["mvp-", "v"];
 
 export function catalogTypeKeysForCard(card: Pick<CatalogCardForTypeFilter, "type" | "subtypes">): CatalogTypeFilterKey[] {
   const type = card.type.toLowerCase();
@@ -58,6 +67,29 @@ export function summarizeCatalogTypeFilters(cards: CatalogCardForTypeFilter[]): 
     for (const key of catalogTypeKeysForCard(card)) {
       counts[key] = (counts[key] ?? 0) + 1;
     }
+  }
+  return counts;
+}
+
+export function catalogSetKeyForCard(card: CatalogCardForSetFilter): Exclude<CatalogSetFilterKey, "all"> {
+  const setId = card.setId.toLowerCase();
+  if (ORIGINAL_SET_PREFIXES.some((prefix) => setId.startsWith(prefix))) return "original";
+  if (TEST_SET_PREFIXES.some((prefix) => setId.startsWith(prefix))) return "test";
+  return "other";
+}
+
+export function catalogCardMatchesSetFilter(card: CatalogCardForSetFilter, filter: CatalogSetFilterKey): boolean {
+  return filter === "all" || catalogSetKeyForCard(card) === filter;
+}
+
+export function filterCatalogCardsBySet<T extends CatalogCardForSetFilter>(cards: T[], filter: CatalogSetFilterKey): T[] {
+  return cards.filter((card) => catalogCardMatchesSetFilter(card, filter));
+}
+
+export function summarizeCatalogSetFilters(cards: CatalogCardForSetFilter[]): Record<CatalogSetFilterKey, number> {
+  const counts: Record<CatalogSetFilterKey, number> = { all: cards.length, original: 0, test: 0, other: 0 };
+  for (const card of cards) {
+    counts[catalogSetKeyForCard(card)] += 1;
   }
   return counts;
 }

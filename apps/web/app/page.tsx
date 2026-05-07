@@ -107,10 +107,13 @@ import {
 } from "./match-start";
 import {
   catalogCardMatchesTypeFilters,
+  filterCatalogCardsBySet,
   catalogTypeKeysForCard,
   filterCatalogCardsByType,
   nextCatalogSelection,
+  summarizeCatalogSetFilters,
   summarizeCatalogTypeFilters,
+  type CatalogSetFilterKey,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-ui";
@@ -534,6 +537,13 @@ const CORP_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: strin
 const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Array<{ key: CatalogTypeFilterKey; label: string }> }> = [
   { title: "Runner", side: "runner", filters: RUNNER_CATALOG_TYPE_FILTERS },
   { title: "Korp", side: "corp", filters: CORP_CATALOG_TYPE_FILTERS }
+];
+
+const DECK_SOURCE_FILTERS: Array<{ key: CatalogSetFilterKey; label: string }> = [
+  { key: "all", label: "Alle Sets" },
+  { key: "original", label: "Original Netrunner" },
+  { key: "test", label: "Testkarten" },
+  { key: "other", label: "Andere Sets" }
 ];
 
 const ALL_CATALOG_TYPE_FILTERS: CatalogTypeFilterState = {
@@ -5160,6 +5170,7 @@ function DeckEditorPanel({
 }) {
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderTypeFilters, setBuilderTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
+  const [builderSetFilter, setBuilderSetFilter] = useState<CatalogSetFilterKey>("all");
   const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
@@ -5167,14 +5178,16 @@ function DeckEditorPanel({
   const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
   const deckQuantities = useMemo(() => new Map(selectedDeck?.cards.map((entry) => [entry.cardId, entry.quantity]) ?? []), [selectedDeck?.cards]);
   const cardLookup = useMemo(() => new Map(playableCards.map((card) => [card.catalogCardId, card])), [playableCards]);
-  const builderTypeCounts = useMemo(() => summarizeCatalogTypeFilters(playableCards), [playableCards]);
+  const sourceFilteredPlayableCards = useMemo(() => filterCatalogCardsBySet(playableCards, builderSetFilter), [builderSetFilter, playableCards]);
+  const builderSetCounts = useMemo(() => summarizeCatalogSetFilters(playableCards), [playableCards]);
+  const builderTypeCounts = useMemo(() => summarizeCatalogTypeFilters(sourceFilteredPlayableCards), [sourceFilteredPlayableCards]);
   const runnerDeckCount = localDecks.filter((deck) => deck.side === "runner").length;
   const corpDeckCount = localDecks.filter((deck) => deck.side === "corp").length;
   const filteredLocalDecks = useMemo(() => (deckSideFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === deckSideFilter)), [deckSideFilter, localDecks]);
   const visibleTypeFilterGroups = selectedDeck ? CATALOG_TYPE_FILTER_GROUPS.filter((group) => group.side === selectedDeck.side) : CATALOG_TYPE_FILTER_GROUPS;
   const libraryCards = useMemo(() => {
     const search = builderSearch.trim().toLowerCase();
-    return playableCards
+    return sourceFilteredPlayableCards
       .filter((card) => {
         if (builderOnlyInDeck && !deckQuantities.has(card.catalogCardId)) return false;
         if (!catalogCardMatchesTypeFilters(card, builderTypeFilters)) return false;
@@ -5182,7 +5195,7 @@ function DeckEditorPanel({
         return [card.title, card.type, card.faction, ...card.subtypes].some((value) => value.toLowerCase().includes(search));
       })
       .sort((left, right) => deckBuilderCardGroup(left).localeCompare(deckBuilderCardGroup(right)) || left.title.localeCompare(right.title));
-  }, [builderOnlyInDeck, builderSearch, builderTypeFilters, deckQuantities, playableCards]);
+  }, [builderOnlyInDeck, builderSearch, builderTypeFilters, deckQuantities, sourceFilteredPlayableCards]);
   const deckRows = useMemo(
     () =>
       (selectedDeck?.cards ?? [])
@@ -5196,6 +5209,10 @@ function DeckEditorPanel({
     if (!selectedDeck || deckSideFilter === "all" || selectedDeck.side === deckSideFilter) return;
     setDeckSideFilter(selectedDeck.side);
   }, [deckSideFilter, selectedDeck?.side]);
+  useEffect(() => {
+    if (builderSetFilter === "all" || builderSetCounts[builderSetFilter] > 0) return;
+    setBuilderSetFilter("all");
+  }, [builderSetCounts, builderSetFilter]);
   const handleDeckSideFilter = (nextFilter: DeckSideFilter) => {
     setDeckSideFilter(nextFilter);
     const candidates = nextFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === nextFilter);
@@ -5321,7 +5338,7 @@ function DeckEditorPanel({
                     <div>
                       <h3>Kartenbibliothek</h3>
                       <p className="meta">
-                        {libraryCards.length} von {playableCards.length} gültigen {sideLabel(selectedDeck.side)}-Karten
+                        {libraryCards.length} von {sourceFilteredPlayableCards.length} sichtbaren gültigen {sideLabel(selectedDeck.side)}-Karten
                       </p>
                     </div>
                     <Search size={17} />
@@ -5330,6 +5347,14 @@ function DeckEditorPanel({
                     Suche
                     <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Typ, Subtyp" />
                   </label>
+                  <div className="deckSourceFilter" role="group" aria-label="Kartenset anzeigen">
+                    {DECK_SOURCE_FILTERS.map((filter) => (
+                      <button className={builderSetFilter === filter.key ? "active" : ""} disabled={builderSetCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderSetFilter(filter.key)} type="button" aria-pressed={builderSetFilter === filter.key}>
+                        <span>{filter.label}</span>
+                        <small>{builderSetCounts[filter.key]}</small>
+                      </button>
+                    ))}
+                  </div>
                   <div className="deckBuilderFilterLine">
                     <label className={`deckBuilderToggle ${builderOnlyInDeck ? "checked" : ""}`}>
                       <input checked={builderOnlyInDeck} onChange={(event) => setBuilderOnlyInDeck(event.target.checked)} type="checkbox" />
@@ -5452,7 +5477,7 @@ function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card:
   const metrics = deckBuilderMetricLine(detail);
   return (
     <section className="deckBuilderPreview" aria-label="Kartenpreview">
-      <DeckCardThumb cardId={card.catalogCardId} title={card.title} large />
+      <DeckCardThumb cardId={card.catalogCardId} title={card.title} preview />
       <div className="deckBuilderPreviewText">
         <span>{deckBuilderCardGroup(card)}</span>
         <strong>{card.title}</strong>
@@ -5559,10 +5584,10 @@ function DeckListCard({
   );
 }
 
-function DeckCardThumb({ cardId, title, large = false }: { cardId: string; title: string; large?: boolean }) {
+function DeckCardThumb({ cardId, title, large = false, preview = false }: { cardId: string; title: string; large?: boolean; preview?: boolean }) {
   const imageUrl = localCardImageUrl(cardId);
   return (
-    <span className={`deckCardThumb ${large ? "large" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
+    <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
       {imageUrl ? <img src={imageUrl} alt="" /> : <span>{title.slice(0, 1)}</span>}
     </span>
   );

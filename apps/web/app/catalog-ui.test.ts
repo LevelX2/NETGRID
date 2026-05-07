@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextCatalogSelection, type CatalogTypeFilterState } from "./catalog-ui";
+import { catalogSetKeyForCard, filterCatalogCardsBySet, nextCatalogSelection, summarizeCatalogSetFilters, type CatalogTypeFilterState } from "./catalog-ui";
 
 const allTypes: CatalogTypeFilterState = {
   ice: true,
@@ -47,5 +47,20 @@ describe("catalog UI filtering", () => {
     expect(nextCatalogSelection("implemented_event", cards, onlyIce)).toBe("implemented_ice");
     expect(nextCatalogSelection("implemented_ice", cards, onlyIce)).toBe("implemented_ice");
     expect(nextCatalogSelection(null, cards, allTypes)).toBe("implemented_event");
+  });
+
+  it("separates original cards from local test cards in the deck editor source filter", () => {
+    const cards = [
+      { catalogCardId: "onr", setId: "onr-v1-limited-private-local" },
+      { catalogCardId: "demo", setId: "mvp-0.8-demo" },
+      { catalogCardId: "future", setId: "future-private-set" }
+    ];
+
+    expect(catalogSetKeyForCard(cards[0]!)).toBe("original");
+    expect(catalogSetKeyForCard(cards[1]!)).toBe("test");
+    expect(catalogSetKeyForCard(cards[2]!)).toBe("other");
+    expect(filterCatalogCardsBySet(cards, "original").map((card) => card.catalogCardId)).toEqual(["onr"]);
+    expect(filterCatalogCardsBySet(cards, "test").map((card) => card.catalogCardId)).toEqual(["demo"]);
+    expect(summarizeCatalogSetFilters(cards)).toEqual({ all: 3, original: 1, test: 1, other: 1 });
   });
 });

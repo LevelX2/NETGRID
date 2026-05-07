@@ -1062,7 +1062,7 @@ select {
 
 .deckBuilderPreview {
   display: grid;
-  grid-template-columns: 76px minmax(0, 1fr) auto;
+  grid-template-columns: minmax(132px, 176px) minmax(0, 1fr) auto;
   gap: 12px;
   align-items: start;
   min-width: 0;
@@ -1129,6 +1129,42 @@ select {
 .deckBuilderSearch {
   display: grid;
   gap: 6px;
+}
+
+.deckSourceFilter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(128px, 1fr));
+  gap: 6px;
+}
+
+.deckSourceFilter button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: var(--panel);
+  cursor: pointer;
+}
+
+.deckSourceFilter button.active {
+  border-color: var(--focus);
+  color: var(--catalog-active-text);
+  background: var(--catalog-active-bg);
+}
+
+.deckSourceFilter button:disabled {
+  cursor: not-allowed;
+  opacity: 0.46;
+}
+
+.deckSourceFilter small {
+  font-size: 11px;
+  font-weight: 800;
 }
 
 .deckBuilderFilterLine {
@@ -1227,6 +1263,13 @@ select {
 
 .deckCardThumb.large {
   width: 76px;
+}
+
+.deckCardThumb.preview {
+  width: 100%;
+  min-width: 132px;
+  max-width: 176px;
+  box-shadow: var(--card-shadow);
 }
 
 .deckCardThumb img {
@@ -4298,7 +4341,7 @@ select,
   }
 
   .deckBuilderPreview {
-    grid-template-columns: 58px minmax(0, 1fr);
+    grid-template-columns: minmax(94px, 112px) minmax(0, 1fr);
   }
 
   .deckBuilderPreview .deckQuantityControls {
@@ -4319,6 +4362,11 @@ select,
 
   .deckCardThumb.large {
     width: 58px;
+  }
+
+  .deckCardThumb.preview {
+    min-width: 94px;
+    max-width: 112px;
   }
 
   .entryTabs {
