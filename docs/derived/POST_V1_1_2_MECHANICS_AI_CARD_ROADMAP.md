@@ -1,8 +1,18 @@
 # Post V1.1.2 Mechanik-, Karten- und KI-Roadmap
 
-Status: planning
+Status: verbindliche Anschlussplanung
 Stand: 2026-05-07
 Startpunkt: nach Umsetzung und Final Gate von V1.1.2
+
+## Verbindlichkeit
+
+Dieses Dokument ist die maßgebliche Anschlussroadmap für Releaseplanung nach V1.1.2, solange `docs/codex/CODEX_STATUS.md` keinen neueren Planungsstand benennt.
+
+Es ersetzt nicht die eingefrorene V1.1.2-Planung. V1.1.2 wird unverändert umgesetzt.
+
+Ältere Langfristplanungen, die eine isolierte späte `V1.7 AI v2`-Umsetzung nahelegen, sind ab diesem Stand nur noch historisch zu lesen. Die KI-Weiterentwicklung ist ab V1.1.3 als laufende Spur in Mechanik- und Kartenreleases zu führen.
+
+Diese Roadmap begründet keine halböffentlichen oder öffentlichen Plattformfunktionen.
 
 ## Kurzentscheidung
 
