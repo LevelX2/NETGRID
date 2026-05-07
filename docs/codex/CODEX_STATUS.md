@@ -42,7 +42,7 @@ Latest V1.0.2 final review artifact: `docs/derived/V1_0_2_FINAL_REVIEW.md`.
 Latest V1.0.3 planning artifact: `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`.
 Latest V1.0.3 final review artifact: `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`.
 Latest V1.0.4 candidate backlog artifact: `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`.
-Latest release planning artifact: `docs/derived/RELEASE_PLANNING_2026-05-05.md`.
+Latest historical general release planning artifact: `docs/derived/RELEASE_PLANNING_2026-05-05.md`.
 Latest V1.0.4 planning artifact: `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`.
 Latest V1.0.4 requirements artifact: `docs/derived/V1_0_4_REQUIREMENTS.md`.
 Latest V1.0.4 implementation review artifact: `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md`.
