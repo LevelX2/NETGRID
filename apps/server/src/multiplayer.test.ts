@@ -2275,7 +2275,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(advanced.requesterPayload)).not.toContain("Simple Fracter");
   });
 
-  it("continues paced Runner AI runs through Corp rez windows by auto-declining after the timer", async () => {
+  it("waits for an explicit Human Corp rez decision during Runner AI runs", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-rez-window" });
     const created = await service.createMatch({
@@ -2307,7 +2307,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
     expect("error" in before).toBe(false);
     if ("error" in before) throw new Error(before.error.message);
-    expect(before.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(before.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
+    expect(before.legalActions.map((action) => action.type).sort()).toEqual(["decline_rez", "rez_ice"]);
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
@@ -2317,12 +2318,39 @@ describe("MVP 0.2 multiplayer service", () => {
       knownMatchVersion: before.matchVersion,
       mode: "single_step"
     });
-    expect(advanced.ok).toBe(true);
-    if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(advanced.publicEvent?.publicPayload).toMatchObject({ actionType: "decline_rez", autoPacedPass: true });
-    expect(advanced.requesterPayload.playerView.activeSide).toBe("runner");
-    expect(advanced.requesterPayload.playerView.timingPoint).toBe("access.resolve_card");
-    expect(advanced.requesterPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(advanced.ok).toBe(false);
+    if (advanced.ok) throw new Error("Expected advance_ai to wait for the human Corp rez decision");
+    expect(advanced.error.code).toBe("ai_not_active");
+
+    const declineRez = before.legalActions.find((action) => action.type === "decline_rez");
+    if (!declineRez) throw new Error("Missing decline rez action");
+    const declined = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: declineRez.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "human-corp-decline-rez"
+    });
+    expect(declined.ok).toBe(true);
+    if (!declined.ok) throw new Error(declined.error.message);
+    expect(declined.actorPayload.playerView.activeSide).toBe("runner");
+    expect(declined.actorPayload.playerView.timingPoint).toBe("access.resolve_card");
+    expect(declined.actorPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(declined.publicEvent?.publicPayload).toMatchObject({ actionType: "decline_rez" });
+    expect(declined.publicEvent?.publicPayload).not.toHaveProperty("autoPacedPass");
+
+    const continued = await service.advanceAi({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: declined.actorPayload.playerView.stateVersion,
+      knownMatchVersion: declined.actorPayload.matchVersion,
+      mode: "single_step"
+    });
+    expect(continued.ok).toBe(true);
+    if (!continued.ok) throw new Error(continued.error.message);
+    expect(continued.requesterPayload.playerView.stateVersion).toBeGreaterThan(declined.actorPayload.playerView.stateVersion);
   });
 
   it("redacts central access card identities from Corp payloads", async () => {

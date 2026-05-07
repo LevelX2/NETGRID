@@ -1919,7 +1919,6 @@ export class MultiplayerService {
   private runAiStep(record: StoredMatch): boolean {
     const state = record.gameState;
     if (!state || record.match.status !== "active" || state.winner || !this.aiControllableSide(record)) return false;
-    if (this.isAiRunnerRunCorpReactionWindow(record)) return this.runPacedCorpPassStep(record);
     const side = state.pendingChoice && this.isAiSide(record, state.pendingChoice.side) ? state.pendingChoice.side : state.activeSide;
     if (!this.isAiSide(record, side)) return false;
     const legalActions = getLegalActions(state, side);
@@ -1962,37 +1961,6 @@ export class MultiplayerService {
     return true;
   }
 
-  private runPacedCorpPassStep(record: StoredMatch): boolean {
-    const state = record.gameState;
-    if (!state || record.match.status !== "active" || state.winner || !this.isAiRunnerRunCorpReactionWindow(record)) return false;
-    const legalAction = getLegalActions(state, "corp").find((candidate) => candidate.type === "decline_rez");
-    if (!legalAction) return false;
-    const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
-    const result = applyAction(state, {
-      matchId: record.match.matchId,
-      side: "corp",
-      actionId: legalAction.actionId,
-      clientKnownStateVersion: state.stateVersion,
-      idempotencyKey: `ai-paced-corp-pass-${state.stateVersion}`
-    });
-    if (!result.ok) return false;
-    const event: GameEvent = {
-      ...result.event,
-      publicPayload: {
-        ...result.event.publicPayload,
-        autoPacedPass: true
-      }
-    };
-    const barrier = isHiddenInfoBarrier(event);
-    record.stateSnapshots.push({ ...snapshot, hiddenInfoBarrier: barrier });
-    record.gameState = result.state;
-    record.eventLog.push(toEventRecord(record.match.matchId, event, barrier));
-    record.match.matchVersion += 1;
-    record.match.updatedAt = this.now();
-    if (result.state.winner) this.finalizeFinishedMatch(record);
-    return true;
-  }
-
   private aiTurnPresentationFor(record: StoredMatch, side: Side): AiTurnPresentationState | undefined {
     if (!record.gameState || !record.match.aiControllers) return undefined;
     if (record.match.status !== "active") {
@@ -2014,19 +1982,7 @@ export class MultiplayerService {
     if (!state) return undefined;
     if (state.pendingChoice && this.isAiSide(record, state.pendingChoice.side)) return state.pendingChoice.side;
     if (this.isAiSide(record, state.activeSide)) return state.activeSide;
-    if (this.isAiRunnerRunCorpReactionWindow(record)) return "runner";
     return undefined;
-  }
-
-  private isAiRunnerRunCorpReactionWindow(record: StoredMatch): boolean {
-    const state = record.gameState;
-    return Boolean(
-      state?.run &&
-        state.timingPoint === "run.approach_ice" &&
-        state.activeSide === "corp" &&
-        this.isAiSide(record, "runner") &&
-        !this.isAiSide(record, "corp")
-    );
   }
 
   private isAiSide(record: StoredMatch, side: Side): boolean {
