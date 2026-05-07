@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.1.2k",
+  "id": "v1.1.2k-card-release-manifest",
+  "status": "implemented_for_v1.1.2k_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.0.6k.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "additionalPlayableCardCountIs20": true,
+    "previousV105KCardsRemainPlayable": true,
+    "previousV106KCardsRemainPlayable": true,
+    "allPlayableCardsHaveResolver": true,
+    "allPlayableCardsHaveUnitScenarioVisibilityReplayAndMultiplayerCoverage": true,
+    "privateLocalDataNotVersioned": true,
+    "noOfficialCardsOrAssets": true,
+    "noExternalCardDatabaseDependency": true,
+    "importDoesNotGrantPlayability": true,
+    "nonReleaseLocalOnrCardsRemainRuntimeDeckIllegal": true,
+    "noNewMechanicFamily": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_006_black-dahlia",
+      "title": "Black Dahlia",
+      "status": "playable_mvp",
+      "resolver": "runner_icebreaker_pump_break_sentry",
+      "roleTags": ["runner", "program", "icebreaker", "sentry_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_014_codecracker",
+      "title": "Codecracker",
+      "status": "playable_mvp",
+      "resolver": "runner_icebreaker_pump_break_code_gate",
+      "roleTags": ["runner", "program", "icebreaker", "code_gate_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_016_cyfermaster",
+      "title": "Cyfermaster™",
+      "status": "playable_mvp",
+      "resolver": "runner_icebreaker_pump_break_code_gate",
+      "roleTags": ["runner", "program", "icebreaker", "code_gate_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "status": "playable_mvp",
+      "resolver": "runner_icebreaker_pump_break_sentry",
+      "roleTags": ["runner", "program", "icebreaker", "sentry_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_060_shaka",
+      "title": "Shaka",
+      "status": "playable_mvp",
+      "resolver": "runner_icebreaker_pump_break_sentry",
+      "roleTags": ["runner", "program", "icebreaker", "sentry_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_073_wizards-book",
+      "title": "Wizard's Book",
+      "status": "playable_mvp",
+      "resolver": "runner_icebreaker_pump_break_code_gate",
+      "roleTags": ["runner", "program", "icebreaker", "code_gate_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_253_laser-wire",
+      "title": "Laser Wire",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_wall_net_damage_end_the_run",
+      "roleTags": ["corp", "ice", "wall", "net_damage", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_257_nerve-labyrinth",
+      "title": "Nerve Labyrinth",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_code_gate_net_damage_end_the_run",
+      "roleTags": ["corp", "ice", "code_gate", "net_damage", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_259_in-the-face",
+      "title": "π in the 'Face",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_sentry_end_the_run",
+      "roleTags": ["corp", "ice", "sentry", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_261_quandary",
+      "title": "Quandary",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_code_gate_end_the_run",
+      "roleTags": ["corp", "ice", "code_gate", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_262_razor-wire",
+      "title": "Razor Wire",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_wall_net_damage_end_the_run",
+      "roleTags": ["corp", "ice", "wall", "net_damage", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_263_reinforced-wall",
+      "title": "Reinforced Wall",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_wall_end_the_run",
+      "roleTags": ["corp", "ice", "wall", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_265_rock-is-strong",
+      "title": "Rock Is Strong",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_wall_end_the_run",
+      "roleTags": ["corp", "ice", "wall", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_266_scramble",
+      "title": "Scramble",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_code_gate_end_the_run",
+      "roleTags": ["corp", "ice", "code_gate", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_269_shotgun-wire",
+      "title": "Shotgun Wire",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_wall_net_damage_end_the_run",
+      "roleTags": ["corp", "ice", "wall", "net_damage", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_270_sleeper",
+      "title": "Sleeper",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_code_gate_end_the_run",
+      "roleTags": ["corp", "ice", "code_gate", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_wall_net_damage_end_the_run",
+      "roleTags": ["corp", "ice", "wall", "net_damage", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_279_wall-of-static",
+      "title": "Wall of Static",
+      "status": "playable_mvp",
+      "resolver": "corp_ice_wall_end_the_run",
+      "roleTags": ["corp", "ice", "wall", "end_the_run"]
+    },
+    {
+      "cardCode": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_runner_tagged_add_tag_gain_1",
+      "roleTags": ["corp", "operation", "tagged_runner_punishment", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_295_night-shift",
+      "title": "Night Shift",
+      "status": "playable_mvp",
+      "resolver": "corp_operation_gain_2_draw_1",
+      "roleTags": ["corp", "operation", "economy", "draw"]
+    }
+  ],
+  "coverage": {
+    "unitTests": ["packages/engine/src/index.test.ts::V1.1.2K Card Release"],
+    "scenarioTests": ["data/scenarios/v112k-card-release-smoke.json"],
+    "visibilityTests": [
+      "packages/engine/src/index.test.ts::V1.1.2K Card Release",
+      "apps/server/src/multiplayer.test.ts::private local O:NR V1.1.2K matches"
+    ],
+    "replayTests": ["packages/engine/src/index.test.ts::V1.1.2K Card Release"],
+    "deckTests": ["packages/decks/src/index.test.ts::V1.1.2K O:NR decks"],
+    "catalogTests": ["packages/catalog/src/index.test.ts::V1.0.5K, V1.0.6K and V1.1.2K release gates"],
+    "aiSmokeTests": ["packages/ai/src/index.test.ts::V1.1.2K local O:NR release cards"]
+  }
+}

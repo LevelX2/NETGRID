@@ -1100,6 +1100,133 @@ describe("V1.0.6K Card Release", () => {
   });
 });
 
+describe("V1.1.2K Card Release", () => {
+  it("adds exactly 20 further O:NR cards backed by existing engine definitions", () => {
+    expect(ONR_V1_1_2K_FINAL_CARD_IDS).toHaveLength(20);
+    for (const definitionId of ONR_V1_1_2K_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" ")).not.toMatch(/prevention|avoid|replacement|hosting|virus|recurring_credit|bad_publicity/);
+    }
+
+    expect(DEMO_CARDS_BY_ID["onr_v1_006_black-dahlia"]).toMatchObject({ installCost: 5, memoryCost: 1, strength: 10 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_014_codecracker"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_016_cyfermaster"]).toMatchObject({ installCost: 5, memoryCost: 1, strength: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_040_loony-goon"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_060_shaka"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_073_wizards-book"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 5 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_253_laser-wire"]).toMatchObject({ rezCost: 4, strength: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_257_nerve-labyrinth"]).toMatchObject({ rezCost: 6, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_278_wall-of-ice"]).toMatchObject({ rezCost: 13, strength: 6 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_293_netwatch-credit-voucher"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_295_night-shift"]).toMatchObject({ cost: 0 });
+  });
+
+  it("validates V1.1.2K smoke decks and keeps previous card releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_1_2K_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_1_2K_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v112kCardReleaseGame("v112k-validation");
+
+    expect(runnerValidation.errors).toEqual([]);
+    expect(runnerValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
+    expect(DEMO_CARDS_BY_ID["onr_v1_220_tycho-extension"]).toBeDefined();
+  });
+
+  it("installs V1.1.2K breakers and uses the existing code-gate and sentry break rules", () => {
+    let installState = toRunnerTurn(v112kCardReleaseGame("v112k-runner-breakers"));
+    installState.runner.credits = 50;
+    installState.runner.clicks = 12;
+    installState.runner.memoryLimit = 10;
+    for (const definitionId of ["onr_v1_006_black-dahlia", "onr_v1_014_codecracker", "onr_v1_016_cyfermaster", "onr_v1_040_loony-goon", "onr_v1_060_shaka", "onr_v1_073_wizards-book"] as const) {
+      moveRunnerCardToGrip(installState, definitionId);
+      installState = apply(installState, "runner", (action) => action.type === "install_card" && sourceDefinition(installState, action) === definitionId);
+    }
+    expect(installState.runner.memoryUsed).toBe(6);
+
+    let codeGateState = toRunnerTurn(v112kCardReleaseGame("v112k-codecracker-quandary"));
+    codeGateState.runner.credits = 20;
+    installRunnerProgramForTest(codeGateState, "onr_v1_014_codecracker");
+    putCorpIceOnServer(codeGateState, "rd", "onr_v1_261_quandary");
+    putCorpCardOnTopOfRd(codeGateState, "simple_economy_operation");
+    codeGateState.corp.credits = 20;
+
+    codeGateState = apply(codeGateState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    codeGateState = apply(codeGateState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(codeGateState, action) === "onr_v1_261_quandary");
+    codeGateState = apply(codeGateState, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker");
+    codeGateState = apply(codeGateState, "runner", (action) => action.type === "continue_run");
+    codeGateState = apply(codeGateState, "runner", (action) => action.type === "access_card");
+    expect(codeGateState.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation" });
+
+    let sentryState = toRunnerTurn(v112kCardReleaseGame("v112k-loony-goon-face"));
+    sentryState.runner.credits = 20;
+    installRunnerProgramForTest(sentryState, "onr_v1_040_loony-goon");
+    putCorpIceOnServer(sentryState, "rd", "onr_v1_259_in-the-face");
+    putCorpCardOnTopOfRd(sentryState, "simple_economy_operation");
+    sentryState.corp.credits = 20;
+
+    sentryState = apply(sentryState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    sentryState = apply(sentryState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(sentryState, action) === "onr_v1_259_in-the-face");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "continue_run");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "access_card");
+    expect(sentryState.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation" });
+  });
+
+  it("plays V1.1.2K Corp operations and resolves new ICE through visibility-safe replayable paths", () => {
+    let operationState = createGameAfterSetup({ seed: "v112k-corp-operations", runnerDeck: ONR_V1_1_2K_RUNNER_DECK, corpDeck: ONR_V1_1_2K_CORP_DECK, agendaPointsToWin: 7 });
+    operationState = apply(operationState, "corp", (action) => action.type === "mandatory_draw");
+    operationState.corp.credits = 20;
+    operationState.corp.clicks = 8;
+    operationState.runner.tags = 1;
+    moveCorpCardToHq(operationState, "onr_v1_293_netwatch-credit-voucher");
+    moveCorpCardToHq(operationState, "onr_v1_295_night-shift");
+
+    const beforeVoucherTags = operationState.runner.tags;
+    const beforeVoucherCredits = operationState.corp.credits;
+    operationState = apply(operationState, "corp", (action) => action.type === "play_operation" && sourceDefinition(operationState, action) === "onr_v1_293_netwatch-credit-voucher");
+    expect(operationState.runner.tags).toBe(beforeVoucherTags + 1);
+    expect(operationState.corp.credits).toBe(beforeVoucherCredits + 1);
+
+    const beforeNightShiftCards = operationState.corp.hq.length;
+    const beforeNightShiftCredits = operationState.corp.credits;
+    operationState = apply(operationState, "corp", (action) => action.type === "play_operation" && sourceDefinition(operationState, action) === "onr_v1_295_night-shift");
+    expect(operationState.corp.credits).toBe(beforeNightShiftCredits + 2);
+    expect(operationState.corp.hq.length).toBe(beforeNightShiftCards);
+
+    for (const definitionId of [
+      "onr_v1_253_laser-wire",
+      "onr_v1_257_nerve-labyrinth",
+      "onr_v1_262_razor-wire",
+      "onr_v1_263_reinforced-wall",
+      "onr_v1_265_rock-is-strong",
+      "onr_v1_266_scramble",
+      "onr_v1_269_shotgun-wire",
+      "onr_v1_270_sleeper",
+      "onr_v1_278_wall-of-ice",
+      "onr_v1_279_wall-of-static"
+    ] as const) {
+      let state = toRunnerTurn(v112kCardReleaseGame(`v112k-ice-${definitionId}`));
+      putCorpIceOnServer(state, "rd", definitionId);
+      state.corp.credits = 30;
+
+      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(DEMO_CARDS_BY_ID[definitionId]?.title);
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === definitionId);
+      expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(DEMO_CARDS_BY_ID[definitionId]?.title);
+
+      const beforeContinue = structuredClone(state);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      expect(state.run).toBeUndefined();
+      expect(replayEvents(beforeContinue, state.eventLog.slice(beforeContinue.eventLog.length)).ok).toBe(true);
+    }
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -2279,6 +2406,29 @@ const ONR_V1_0_6K_FINAL_CARD_IDS = [
   "onr_v1_256_mazer"
 ] as const;
 
+const ONR_V1_1_2K_FINAL_CARD_IDS = [
+  "onr_v1_006_black-dahlia",
+  "onr_v1_014_codecracker",
+  "onr_v1_016_cyfermaster",
+  "onr_v1_040_loony-goon",
+  "onr_v1_060_shaka",
+  "onr_v1_073_wizards-book",
+  "onr_v1_253_laser-wire",
+  "onr_v1_257_nerve-labyrinth",
+  "onr_v1_259_in-the-face",
+  "onr_v1_261_quandary",
+  "onr_v1_262_razor-wire",
+  "onr_v1_263_reinforced-wall",
+  "onr_v1_265_rock-is-strong",
+  "onr_v1_266_scramble",
+  "onr_v1_269_shotgun-wire",
+  "onr_v1_270_sleeper",
+  "onr_v1_278_wall-of-ice",
+  "onr_v1_279_wall-of-static",
+  "onr_v1_293_netwatch-credit-voucher",
+  "onr_v1_295_night-shift"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -2355,6 +2505,49 @@ const ONR_V1_0_6K_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_232_crystal-wall", quantity: 1 },
     { id: "simple_sentry_ice", quantity: 1 },
     { id: "simple_economy_operation", quantity: 1 }
+  ]
+};
+
+const ONR_V1_1_2K_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v112k_smoke_094",
+  name: "O:NR V1.1.2K Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_006_black-dahlia", quantity: 2 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_016_cyfermaster", quantity: 2 },
+    { id: "onr_v1_040_loony-goon", quantity: 2 },
+    { id: "onr_v1_060_shaka", quantity: 2 },
+    { id: "onr_v1_073_wizards-book", quantity: 2 },
+    { id: "onr_v1_145_wutech-mem-chip", quantity: 2 },
+    { id: "simple_economy_event", quantity: 8 }
+  ]
+};
+
+const ONR_V1_1_2K_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v112k_smoke_094",
+  name: "O:NR V1.1.2K Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
+    { id: "onr_v1_295_night-shift", quantity: 1 },
+    { id: "onr_v1_253_laser-wire", quantity: 1 },
+    { id: "onr_v1_257_nerve-labyrinth", quantity: 1 },
+    { id: "onr_v1_259_in-the-face", quantity: 1 },
+    { id: "onr_v1_261_quandary", quantity: 1 },
+    { id: "onr_v1_262_razor-wire", quantity: 1 },
+    { id: "onr_v1_263_reinforced-wall", quantity: 1 },
+    { id: "onr_v1_265_rock-is-strong", quantity: 1 },
+    { id: "onr_v1_266_scramble", quantity: 1 },
+    { id: "onr_v1_269_shotgun-wire", quantity: 1 },
+    { id: "onr_v1_270_sleeper", quantity: 1 },
+    { id: "onr_v1_278_wall-of-ice", quantity: 1 },
+    { id: "onr_v1_279_wall-of-static", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 2 }
   ]
 };
 
@@ -2521,6 +2714,15 @@ function v106kCardReleaseGame(seed: string): GameState {
     seed,
     runnerDeck: ONR_V1_0_6K_RUNNER_DECK,
     corpDeck: ONR_V1_0_6K_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v112kCardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
+    corpDeck: ONR_V1_1_2K_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

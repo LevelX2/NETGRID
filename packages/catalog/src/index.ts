@@ -172,10 +172,34 @@ export const ONR_V1_0_6K_RELEASE_CARD_IDS = [
   "onr_v1_256_mazer"
 ] as const;
 
-export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [...ONR_V1_0_5K_RELEASE_CARD_IDS, ...ONR_V1_0_6K_RELEASE_CARD_IDS] as const;
+export const ONR_V1_1_2K_RELEASE_CARD_IDS = [
+  "onr_v1_006_black-dahlia",
+  "onr_v1_014_codecracker",
+  "onr_v1_016_cyfermaster",
+  "onr_v1_040_loony-goon",
+  "onr_v1_060_shaka",
+  "onr_v1_073_wizards-book",
+  "onr_v1_253_laser-wire",
+  "onr_v1_257_nerve-labyrinth",
+  "onr_v1_259_in-the-face",
+  "onr_v1_261_quandary",
+  "onr_v1_262_razor-wire",
+  "onr_v1_263_reinforced-wall",
+  "onr_v1_265_rock-is-strong",
+  "onr_v1_266_scramble",
+  "onr_v1_269_shotgun-wire",
+  "onr_v1_270_sleeper",
+  "onr_v1_278_wall-of-ice",
+  "onr_v1_279_wall-of-static",
+  "onr_v1_293_netwatch-credit-voucher",
+  "onr_v1_295_night-shift"
+] as const;
+
+export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [...ONR_V1_0_5K_RELEASE_CARD_IDS, ...ONR_V1_0_6K_RELEASE_CARD_IDS, ...ONR_V1_1_2K_RELEASE_CARD_IDS] as const;
 
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
+const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -193,6 +217,15 @@ const ONR_V1_0_6K_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["packages/engine/src/index.test.ts::V1.0.6K Card Release"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.0.6K Card Release", "apps/server/src/multiplayer.test.ts::private local O:NR V1.0.6K matches"],
   replayTests: ["packages/engine/src/index.test.ts::V1.0.6K Card Release"]
+};
+
+const ONR_V1_1_2K_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.1.2k",
+  status: "playable_mvp_v1_1_2k",
+  unitTests: ["packages/engine/src/index.test.ts::V1.1.2K Card Release"],
+  scenarioTests: ["packages/engine/src/index.test.ts::V1.1.2K Card Release"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.1.2K Card Release", "apps/server/src/multiplayer.test.ts::private local O:NR V1.1.2K matches"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.1.2K Card Release"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -231,6 +264,29 @@ const ONR_V1_0_6K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
   "onr_v1_256_mazer": { rezCost: 5, strength: 5 }
 };
 
+const ONR_V1_1_2K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_006_black-dahlia": { installCost: 5, memoryCost: 1, strength: 10 },
+  "onr_v1_014_codecracker": { installCost: 0, memoryCost: 1, strength: 2 },
+  "onr_v1_016_cyfermaster": { installCost: 5, memoryCost: 1, strength: 2 },
+  "onr_v1_040_loony-goon": { installCost: 0, memoryCost: 1, strength: 4 },
+  "onr_v1_060_shaka": { installCost: 2, memoryCost: 1, strength: 4 },
+  "onr_v1_073_wizards-book": { installCost: 2, memoryCost: 1, strength: 5 },
+  "onr_v1_253_laser-wire": { rezCost: 4, strength: 2 },
+  "onr_v1_257_nerve-labyrinth": { rezCost: 6, strength: 4 },
+  "onr_v1_259_in-the-face": { rezCost: 5, strength: 3 },
+  "onr_v1_261_quandary": { rezCost: 2, strength: 2 },
+  "onr_v1_262_razor-wire": { rezCost: 6, strength: 3 },
+  "onr_v1_263_reinforced-wall": { rezCost: 8, strength: 4 },
+  "onr_v1_265_rock-is-strong": { rezCost: 6, strength: 5 },
+  "onr_v1_266_scramble": { rezCost: 3, strength: 3 },
+  "onr_v1_269_shotgun-wire": { rezCost: 8, strength: 5 },
+  "onr_v1_270_sleeper": { rezCost: 1, strength: 1 },
+  "onr_v1_278_wall-of-ice": { rezCost: 13, strength: 6 },
+  "onr_v1_279_wall-of-static": { rezCost: 3, strength: 2 },
+  "onr_v1_293_netwatch-credit-voucher": { cost: 0, installCost: null },
+  "onr_v1_295_night-shift": { cost: 0, installCost: null }
+};
+
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
   "onr_v1_052_raffles": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
@@ -267,6 +323,29 @@ const ONR_V1_0_6K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_245_fire-wall": "[Subroutine] End the run.",
   "onr_v1_252_keeper": "[Subroutine] End the run.",
   "onr_v1_256_mazer": "[Subroutine] End the run."
+};
+
+const ONR_V1_1_2K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_006_black-dahlia": "2 credits: Break sentry subroutine.\n2 credits: +1 strength.",
+  "onr_v1_014_codecracker": "0 credits: Break code gate subroutine.\n1 credit: +1 strength.",
+  "onr_v1_016_cyfermaster": "2 credits: Break code gate subroutine.\n1 credit: +1 strength.",
+  "onr_v1_040_loony-goon": "1 credit: Break sentry subroutine.\n1 credit: +1 strength.",
+  "onr_v1_060_shaka": "1 credit: Break sentry subroutine.\n2 credits: +1 strength.",
+  "onr_v1_073_wizards-book": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
+  "onr_v1_253_laser-wire": "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+  "onr_v1_257_nerve-labyrinth": "[Subroutine] Do 2 net damage.\n[Subroutine] End the run.",
+  "onr_v1_259_in-the-face": "[Subroutine] End the run.",
+  "onr_v1_261_quandary": "[Subroutine] End the run.",
+  "onr_v1_262_razor-wire": "[Subroutine] Do 2 net damage.\n[Subroutine] End the run.",
+  "onr_v1_263_reinforced-wall": "[Subroutine] End the run.\n[Subroutine] End the run.",
+  "onr_v1_265_rock-is-strong": "[Subroutine] End the run.",
+  "onr_v1_266_scramble": "[Subroutine] End the run.",
+  "onr_v1_269_shotgun-wire": "[Subroutine] Do 2 net damage.\n[Subroutine] End the run.",
+  "onr_v1_270_sleeper": "[Subroutine] End the run.",
+  "onr_v1_278_wall-of-ice": "[Subroutine] Do 2 net damage.\n[Subroutine] Do 2 net damage.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+  "onr_v1_279_wall-of-static": "[Subroutine] End the run.",
+  "onr_v1_293_netwatch-credit-voucher": "Play only if Runner is tagged. Give Runner 1 tag and gain 1.",
+  "onr_v1_295_night-shift": "Gain 2 and draw one card."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -577,10 +656,11 @@ function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV106K ? ONR_V1_0_6K_TEXT_OVERRIDES : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV106K ? ONR_V1_0_6K_NUMERIC_OVERRIDES : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV106K ? ONR_V1_0_6K_RELEASE_MANIFEST : ONR_V1_0_5K_RELEASE_MANIFEST;
+  const textOverrides = isV112K ? ONR_V1_1_2K_TEXT_OVERRIDES : isV106K ? ONR_V1_0_6K_TEXT_OVERRIDES : ONR_V1_0_5K_TEXT_OVERRIDES;
+  const numericOverrides = isV112K ? ONR_V1_1_2K_NUMERIC_OVERRIDES : isV106K ? ONR_V1_0_6K_NUMERIC_OVERRIDES : ONR_V1_0_5K_NUMERIC_OVERRIDES;
+  const manifest = isV112K ? ONR_V1_1_2K_RELEASE_MANIFEST : isV106K ? ONR_V1_0_6K_RELEASE_MANIFEST : ONR_V1_0_5K_RELEASE_MANIFEST;
   return {
     ...card,
     engineCardId: card.catalogCardId,

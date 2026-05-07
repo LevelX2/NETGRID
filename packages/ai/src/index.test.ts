@@ -413,6 +413,40 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(replayEvents(initial, state.eventLog).ok).toBe(true);
   });
 
+  it("keeps V1.1.2K local O:NR release cards inside side-safe AI LegalAction smokes", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-v112k-card-release",
+      runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
+      corpDeck: ONR_V1_1_2K_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    const initial = structuredClone(state);
+
+    for (let step = 0; step < 50 && !state.winner; step += 1) {
+      const side = state.activeSide;
+      const input = buildAiDecisionInput(state, side, { actionNumber: step });
+      expect(assertAiInputIsSideSafe(input)).toBe(true);
+      expect(JSON.stringify(input)).not.toContain("cardInstances");
+      const decision = chooseAiAction(input);
+      const action = input.legalActions.find((candidate) => candidate.actionId === decision.actionId);
+      expect(action).toBeDefined();
+      if (!action) break;
+      const result = applyAction(state, {
+        matchId: state.matchId,
+        side,
+        actionId: action.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
+        idempotencyKey: `ai-v112k-${step}`
+      });
+      expect(result.ok).toBe(true);
+      if (!result.ok) break;
+      state = result.state;
+    }
+
+    expect(replayEvents(initial, state.eventLog).ok).toBe(true);
+  });
+
   it("runs V0.4 expanded decks through the simulation harness", () => {
     const summary = simulateAiGame({
       seed: "ai-v04-expanded",
@@ -614,6 +648,49 @@ const V095_CORP_DECK: DeckDefinition = {
     { id: "simple_economy_asset", quantity: 2 },
     { id: "simple_tag_ice", quantity: 2 },
     { id: "simple_barrier_ice", quantity: 2 }
+  ]
+};
+
+const ONR_V1_1_2K_RUNNER_DECK: DeckDefinition = {
+  id: "ai_onr_v112k_runner",
+  name: "AI O:NR V1.1.2K Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_006_black-dahlia", quantity: 2 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_016_cyfermaster", quantity: 2 },
+    { id: "onr_v1_040_loony-goon", quantity: 2 },
+    { id: "onr_v1_060_shaka", quantity: 2 },
+    { id: "onr_v1_073_wizards-book", quantity: 2 },
+    { id: "onr_v1_145_wutech-mem-chip", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_1_2K_CORP_DECK: DeckDefinition = {
+  id: "ai_onr_v112k_corp",
+  name: "AI O:NR V1.1.2K Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
+    { id: "onr_v1_295_night-shift", quantity: 1 },
+    { id: "onr_v1_253_laser-wire", quantity: 1 },
+    { id: "onr_v1_257_nerve-labyrinth", quantity: 1 },
+    { id: "onr_v1_259_in-the-face", quantity: 1 },
+    { id: "onr_v1_261_quandary", quantity: 1 },
+    { id: "onr_v1_262_razor-wire", quantity: 1 },
+    { id: "onr_v1_263_reinforced-wall", quantity: 1 },
+    { id: "onr_v1_265_rock-is-strong", quantity: 1 },
+    { id: "onr_v1_266_scramble", quantity: 1 },
+    { id: "onr_v1_269_shotgun-wire", quantity: 1 },
+    { id: "onr_v1_270_sleeper", quantity: 1 },
+    { id: "onr_v1_278_wall-of-ice", quantity: 1 },
+    { id: "onr_v1_279_wall-of-static", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 2 }
   ]
 };
 

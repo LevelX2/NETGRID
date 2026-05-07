@@ -11,6 +11,7 @@ import {
   getCatalogCard,
   ONR_V1_0_5K_RELEASE_CARD_IDS,
   ONR_V1_0_6K_RELEASE_CARD_IDS,
+  ONR_V1_1_2K_RELEASE_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateSnapshot,
@@ -100,13 +101,14 @@ describe("catalog import and status logic", () => {
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 
-  it("applies the V1.0.5K and V1.0.6K release gates to private local O:NR runtime cards when present", () => {
+  it("applies the V1.0.5K, V1.0.6K and V1.1.2K release gates to private local O:NR runtime cards when present", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
 
     expect(ONR_V1_0_5K_RELEASE_CARD_IDS).toHaveLength(12);
     expect(ONR_V1_0_6K_RELEASE_CARD_IDS).toHaveLength(20);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(32);
+    expect(ONR_V1_1_2K_RELEASE_CARD_IDS).toHaveLength(20);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(52);
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
@@ -114,9 +116,12 @@ describe("catalog import and status logic", () => {
       expect(card?.statuses.implemented).toBe(true);
       expect(card?.statuses.playable).toBe(true);
       expect(card?.statuses.deck_legal).toBe(true);
-      expect(card?.implementationManifest?.manifestVersion).toBe(
-        (ONR_V1_0_6K_RELEASE_CARD_IDS as readonly string[]).includes(cardId) ? "card-implementation-manifest-v1.0.6k" : "card-implementation-manifest-v1.0.5k"
-      );
+      const expectedManifest = (ONR_V1_1_2K_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.1.2k"
+        : (ONR_V1_0_6K_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+          ? "card-implementation-manifest-v1.0.6k"
+          : "card-implementation-manifest-v1.0.5k";
+      expect(card?.implementationManifest?.manifestVersion).toBe(expectedManifest);
       expect(card?.implementationManifest?.unitTests.length).toBeGreaterThan(0);
       expect(card?.implementationManifest?.scenarioTests.length).toBeGreaterThan(0);
       expect(card?.implementationManifest?.visibilityTests.length).toBeGreaterThan(0);
@@ -138,11 +143,20 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_220_tycho-extension"]?.numeric.agendaPoints).toBe(4);
     expect(cardsById["onr_v1_244_filter"]?.numeric.rezCost).toBe(0);
     expect(cardsById["onr_v1_256_mazer"]?.numeric.strength).toBe(5);
+    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(true);
+    expect(cardsById["onr_v1_006_black-dahlia"]?.engineCardId).toBe("onr_v1_006_black-dahlia");
+    expect(cardsById["onr_v1_006_black-dahlia"]?.text).toBe("2 credits: Break sentry subroutine.\n2 credits: +1 strength.");
+    expect(cardsById["onr_v1_014_codecracker"]?.numeric.installCost).toBe(0);
+    expect(cardsById["onr_v1_073_wizards-book"]?.text).toBe("0 credits: Break code gate subroutine.\n2 credits: +1 strength.");
+    expect(cardsById["onr_v1_253_laser-wire"]?.text).toBe("[Subroutine] Do 1 net damage.\n[Subroutine] End the run.");
+    expect(cardsById["onr_v1_278_wall-of-ice"]?.numeric.rezCost).toBe(13);
+    expect(cardsById["onr_v1_293_netwatch-credit-voucher"]?.text).toBe("Play only if Runner is tagged. Give Runner 1 tag and gain 1.");
+    expect(cardsById["onr_v1_295_night-shift"]?.numeric.cost).toBe(0);
     expect(cardsById["onr_v1_075_zetatech-software-installer"]?.text).toBe(
       "Put 2 bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overlying Software Installer itself. If you use any of these bits, replace them at the start of your next turn."
     );
     expect(cardsById["onr_v1_001_afreet"]?.text).toContain("Afreet can have up to 3 MU");
-    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(false);
-    expect(cardsById["onr_v1_006_black-dahlia"]?.engineCardId).toBeNull();
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(false);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.engineCardId).toBeNull();
   });
 });

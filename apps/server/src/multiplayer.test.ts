@@ -420,7 +420,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
     expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal).toBe(true);
-    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(false);
+    expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(true);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(false);
 
     const profile = (profilesData08.profiles as DeckFormatProfile[]).find((candidate) => candidate.profileId === "local-demo-v0.8");
     if (!profile) throw new Error("Missing V0.8 deck format profile");
@@ -447,6 +448,12 @@ describe("MVP 0.2 multiplayer service", () => {
         { cardId: "onr_v1_108_score", quantity: 1 },
         { cardId: "onr_v1_072_wild-card", quantity: 1 },
         { cardId: "onr_v1_145_wutech-mem-chip", quantity: 1 },
+        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
+        { cardId: "onr_v1_014_codecracker", quantity: 1 },
+        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
+        { cardId: "onr_v1_040_loony-goon", quantity: 1 },
+        { cardId: "onr_v1_060_shaka", quantity: 1 },
+        { cardId: "onr_v1_073_wizards-book", quantity: 1 },
         { cardId: "simple_economy_event", quantity: 2 }
       ],
       createdAt: now,
@@ -482,6 +489,20 @@ describe("MVP 0.2 multiplayer service", () => {
         { cardId: "onr_v1_245_fire-wall", quantity: 1 },
         { cardId: "onr_v1_252_keeper", quantity: 1 },
         { cardId: "onr_v1_256_mazer", quantity: 1 },
+        { cardId: "onr_v1_253_laser-wire", quantity: 1 },
+        { cardId: "onr_v1_257_nerve-labyrinth", quantity: 1 },
+        { cardId: "onr_v1_259_in-the-face", quantity: 1 },
+        { cardId: "onr_v1_261_quandary", quantity: 1 },
+        { cardId: "onr_v1_262_razor-wire", quantity: 1 },
+        { cardId: "onr_v1_263_reinforced-wall", quantity: 1 },
+        { cardId: "onr_v1_265_rock-is-strong", quantity: 1 },
+        { cardId: "onr_v1_266_scramble", quantity: 1 },
+        { cardId: "onr_v1_269_shotgun-wire", quantity: 1 },
+        { cardId: "onr_v1_270_sleeper", quantity: 1 },
+        { cardId: "onr_v1_278_wall-of-ice", quantity: 1 },
+        { cardId: "onr_v1_279_wall-of-static", quantity: 1 },
+        { cardId: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
+        { cardId: "onr_v1_295_night-shift", quantity: 1 },
         { cardId: "simple_economy_operation", quantity: 2 }
       ],
       createdAt: now,
@@ -596,6 +617,13 @@ describe("MVP 0.2 multiplayer service", () => {
 
     expect(created.matchStatus).toBe("pending");
     expect(created.pendingDeckHandshake).toBe(true);
+    expect(created.lobby?.hostReady).toBe(false);
+    expect(created.lobby?.joinerReady).toBe(false);
+    expect(created.lobby?.participants.player_a.runnerDeckReady).toBe(true);
+    expect(created.lobby?.participants.player_a.corpDeckReady).toBe(true);
+    expect(created.lobby?.participants.player_b.connected).toBe(false);
+    expect(created.lobby?.participants.player_b.runnerDeckReady).toBe(false);
+    expect(created.lobby?.participants.player_b.corpDeckReady).toBe(false);
     expect(pending?.match.status).toBe("pending");
     expect(pending?.gameState).toBeFalsy();
     expect(JSON.stringify(pending?.match.deckSetup)).not.toContain("cards");
@@ -2221,7 +2249,13 @@ describe("MVP 0.2 multiplayer service", () => {
         })
       );
       const waitingUpdate = await waitForMessage(hostSocket, "lobby_update");
-      expect(messagePayload(waitingUpdate).matchStatus).toBe("pending");
+      const waitingPayload = messagePayload(waitingUpdate) as {
+        matchStatus?: string;
+        startLobby?: { participants?: { player_b?: { connected?: boolean; runnerDeckReady?: boolean } } };
+      };
+      expect(waitingPayload.matchStatus).toBe("pending");
+      expect(waitingPayload.startLobby?.participants?.player_b?.connected).toBe(false);
+      expect(waitingPayload.startLobby?.participants?.player_b?.runnerDeckReady).toBe(false);
 
       const joinedResponse = await fetch(`http://127.0.0.1:${address.port}/api/matches/${encodeURIComponent(created.matchId)}/join`, {
         method: "POST",

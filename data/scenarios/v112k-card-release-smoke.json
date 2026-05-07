@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v112k-card-release-smoke",
+  "title": "V1.1.2K local O:NR card release adds exactly 20 confirmed cards",
+  "release": "V1.1.2K",
+  "status": "implemented",
+  "extends": "data/scenarios/v106k-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_006_black-dahlia",
+    "onr_v1_014_codecracker",
+    "onr_v1_016_cyfermaster",
+    "onr_v1_040_loony-goon",
+    "onr_v1_060_shaka",
+    "onr_v1_073_wizards-book",
+    "onr_v1_253_laser-wire",
+    "onr_v1_257_nerve-labyrinth",
+    "onr_v1_259_in-the-face",
+    "onr_v1_261_quandary",
+    "onr_v1_262_razor-wire",
+    "onr_v1_263_reinforced-wall",
+    "onr_v1_265_rock-is-strong",
+    "onr_v1_266_scramble",
+    "onr_v1_269_shotgun-wire",
+    "onr_v1_270_sleeper",
+    "onr_v1_278_wall-of-ice",
+    "onr_v1_279_wall-of-static",
+    "onr_v1_293_netwatch-credit-voucher",
+    "onr_v1_295_night-shift"
+  ],
+  "preconditions": [
+    "The private local O:NR v1 overlay exists under data/local.",
+    "The previous V1.0.5K and V1.0.6K releases remain active.",
+    "Non-release O:NR cards remain not deck_legal in the runtime catalog."
+  ],
+  "steps": [
+    "Apply the runtime release gate and promote exactly the 20 V1.1.2K cards to implemented, playable and deck_legal.",
+    "Validate V1.1.2K Runner and Corp smoke decks through the deck validator.",
+    "Install the six Runner breakers and use existing code-gate and sentry break rules.",
+    "Play Netwatch Credit Voucher and Night Shift through existing operation resolvers.",
+    "Rez the V1.1.2K ICE, verify unrezzed titles remain hidden until rez, and replay the resulting StateHash path."
+  ],
+  "expected": [
+    "V1.1.2K adds exactly 20 further local O:NR cards.",
+    "Runtime catalog contains 52 local O:NR release cards total, including V1.0.5K and V1.0.6K.",
+    "Deck validation and private match setup accept the new cards.",
+    "Visibility, replay, StateHash and AI input contracts remain covered.",
+    "Private local text and image artifacts remain ignored and are not versioned."
+  ]
+}

@@ -99,7 +99,7 @@ describe("deck validation and snapshots", () => {
     expect(buildEngineDeck(corp).cards.some((entry) => entry.id === "v08_project_agenda")).toBe(true);
   });
 
-  it("validates V1.0.6K O:NR decks through the runtime release gate when the local overlay is present", () => {
+  it("validates V1.1.2K O:NR decks through the runtime release gate when the local overlay is present", () => {
     const runtimeCardsById = createRuntimeCardsById();
     if (!runtimeCardsById["onr_v1_015_codeslinger"]) return;
 
@@ -107,8 +107,8 @@ describe("deck validation and snapshots", () => {
     const now = "2026-05-05T12:00:00.000Z";
     const runnerDeck: EditableDeck = {
       deckId: "local_onr_runner_v105k_validation",
-      deckVersion: "1.0.6k-local-onr",
-      name: "O:NR V1.0.6K Runner Validation",
+      deckVersion: "1.1.2k-local-onr",
+      name: "O:NR V1.1.2K Runner Validation",
       side: "runner",
       identityCardId: "runner_identity_001",
       cardPoolSnapshotId: "card-snapshot-0.8",
@@ -126,6 +126,12 @@ describe("deck validation and snapshots", () => {
         { cardId: "onr_v1_108_score", quantity: 1 },
         { cardId: "onr_v1_072_wild-card", quantity: 1 },
         { cardId: "onr_v1_145_wutech-mem-chip", quantity: 1 },
+        { cardId: "onr_v1_006_black-dahlia", quantity: 1 },
+        { cardId: "onr_v1_014_codecracker", quantity: 1 },
+        { cardId: "onr_v1_016_cyfermaster", quantity: 1 },
+        { cardId: "onr_v1_040_loony-goon", quantity: 1 },
+        { cardId: "onr_v1_060_shaka", quantity: 1 },
+        { cardId: "onr_v1_073_wizards-book", quantity: 1 },
         { cardId: "simple_economy_event", quantity: 2 }
       ],
       createdAt: now,
@@ -133,8 +139,8 @@ describe("deck validation and snapshots", () => {
     };
     const corpDeck: EditableDeck = {
       deckId: "local_onr_corp_v105k_validation",
-      deckVersion: "1.0.6k-local-onr",
-      name: "O:NR V1.0.6K Corp Validation",
+      deckVersion: "1.1.2k-local-onr",
+      name: "O:NR V1.1.2K Corp Validation",
       side: "corp",
       identityCardId: "corp_identity_001",
       cardPoolSnapshotId: "card-snapshot-0.8",
@@ -161,6 +167,20 @@ describe("deck validation and snapshots", () => {
         { cardId: "onr_v1_245_fire-wall", quantity: 1 },
         { cardId: "onr_v1_252_keeper", quantity: 1 },
         { cardId: "onr_v1_256_mazer", quantity: 1 },
+        { cardId: "onr_v1_253_laser-wire", quantity: 1 },
+        { cardId: "onr_v1_257_nerve-labyrinth", quantity: 1 },
+        { cardId: "onr_v1_259_in-the-face", quantity: 1 },
+        { cardId: "onr_v1_261_quandary", quantity: 1 },
+        { cardId: "onr_v1_262_razor-wire", quantity: 1 },
+        { cardId: "onr_v1_263_reinforced-wall", quantity: 1 },
+        { cardId: "onr_v1_265_rock-is-strong", quantity: 1 },
+        { cardId: "onr_v1_266_scramble", quantity: 1 },
+        { cardId: "onr_v1_269_shotgun-wire", quantity: 1 },
+        { cardId: "onr_v1_270_sleeper", quantity: 1 },
+        { cardId: "onr_v1_278_wall-of-ice", quantity: 1 },
+        { cardId: "onr_v1_279_wall-of-static", quantity: 1 },
+        { cardId: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
+        { cardId: "onr_v1_295_night-shift", quantity: 1 },
         { cardId: "simple_economy_operation", quantity: 2 }
       ],
       createdAt: now,
@@ -175,10 +195,10 @@ describe("deck validation and snapshots", () => {
     const oldOnrDeck: EditableDeck = {
       ...runnerDeck,
       deckId: "local_onr_runner_v105k_blocked_old_card",
-      cards: [...runnerDeck.cards, { cardId: "onr_v1_006_black-dahlia", quantity: 1 }]
+      cards: [...runnerDeck.cards, { cardId: "onr_v1_018_dogcatcher", quantity: 1 }]
     };
     const blocked = validateEditableDeck(oldOnrDeck, contextV105K);
     expect(blocked.ok).toBe(false);
-    expect(blocked.errors.join(" ")).toContain("onr_v1_006_black-dahlia");
+    expect(blocked.errors.join(" ")).toContain("onr_v1_018_dogcatcher");
   });
 });
