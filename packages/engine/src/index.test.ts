@@ -630,6 +630,7 @@ describe("O:NR v1 Limited local private test access", () => {
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     codeGateState = apply(codeGateState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(codeGateState, action) === "onr_v1_261_quandary");
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "break_subroutine");
+    expect(getLegalActions(codeGateState, "runner").find((action) => action.type === "continue_run")?.label).toBe("ICE passieren");
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "continue_run");
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "access_card");
     expect(codeGateState.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "onr_v1_220_tycho-extension" });
@@ -655,6 +656,15 @@ describe("O:NR v1 Limited local private test access", () => {
 
     wallState = apply(wallState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     wallState = apply(wallState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(wallState, action) === "onr_v1_278_wall-of-ice");
+    const continueIntoWall = getLegalActions(wallState, "runner").find((action) => action.type === "continue_run");
+    expect(continueIntoWall).toMatchObject({
+      label: "Subroutinen auslösen (Run endet)",
+      payload: {
+        encounterContinue: true,
+        unbrokenSubroutineCount: 4,
+        encounterWillEndRun: true
+      }
+    });
     wallState = apply(wallState, "runner", (action) => action.type === "continue_run");
 
     expect(wallState.run).toBeUndefined();

@@ -64,6 +64,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const zoneLabel = stringValue(payload.zoneLabel);
   const result = stringValue(payload.result);
   const runPhase = stringValue(payload.runPhase);
+  const encounterContinue = payload.encounterContinue === true;
   const redactedKind = stringValue(payload.redactedKind);
   const agendaPoints = numberValue(payload.agendaPoints) ?? context.agendaPoints;
   const actionUse = actionUseFromPayload(payload);
@@ -189,8 +190,10 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "continue_run":
       category = "run";
-      title = phrase(subject, result === "ended" ? "den Run beendet" : "den Run fortgesetzt");
-      chips.push("Run", ...(runPhase ? [runPhaseLabel(runPhase)] : []));
+      title = encounterContinue
+        ? phrase(subject, result === "ended" ? "ungebrochene Subroutinen ausgelöst und der Run endete" : "ungebrochene Subroutinen ausgelöst")
+        : phrase(subject, result === "ended" ? "den Run beendet" : "den Run fortgesetzt");
+      chips.push("Run", ...(encounterContinue ? ["Subroutinen"] : runPhase ? [runPhaseLabel(runPhase)] : []));
       break;
     case "access_card":
       category = "run";

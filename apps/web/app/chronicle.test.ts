@@ -80,6 +80,22 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("R&D");
   });
 
+  it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        result: "ended",
+        encounterContinue: true,
+        encounterWillEndRun: true,
+        unbrokenSubroutineCount: 1
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast ungebrochene Subroutinen ausgelöst und der Run endete.");
+    expect(item.chips).toContain("Subroutinen");
+  });
+
   it("names visible Runner installs from the public label and Rig zone", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {

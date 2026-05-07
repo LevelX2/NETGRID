@@ -35,6 +35,7 @@ import {
   type PlayerView,
   type PublicGameEvent,
   type ReplayResult,
+  type RunState,
   type RulesBaseline,
   type ModifierKind,
   type ServerId,
@@ -1148,8 +1149,28 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       });
     }
   }
-  actions.push(action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"));
+  const nextSubroutines = encounterSubroutinesForNextContinue(run, iceDefinition.subroutines ?? []);
+  const willEndRun = nextSubroutines.some((subroutine) => subroutine.type === "end_the_run");
+  const continueLabel = nextSubroutines.length === 0 ? "ICE passieren" : willEndRun ? "Subroutinen auslösen (Run endet)" : "Subroutinen auslösen";
+  actions.push(
+    action(state, "runner", "continue_run", continueLabel, "game_rule", [], {
+      encounterContinue: true,
+      unbrokenSubroutineCount: nextSubroutines.length,
+      encounterWillEndRun: willEndRun
+    })
+  );
   return actions;
+}
+
+function encounterSubroutinesForNextContinue(run: RunState, subroutines: NonNullable<CardDefinition["subroutines"]>): NonNullable<CardDefinition["subroutines"]> {
+  const nextSubroutines: NonNullable<CardDefinition["subroutines"]> = [];
+  for (let index = 0; index < subroutines.length; index += 1) {
+    const subroutine = subroutines[index];
+    if (!subroutine || run.brokenSubroutineIndexes.includes(index) || run.resolvedSubroutineIndexes.includes(index)) continue;
+    nextSubroutines.push(subroutine);
+    if (subroutine.type === "initiate_trace") break;
+  }
+  return nextSubroutines;
 }
 
 function runnerMovementActions(state: GameState): LegalAction[] {
@@ -2871,7 +2892,14 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
       if (value !== undefined) context[key] = value;
     }
   }
-  if (legalAction.type === "continue_run") context.result = state.run ? "continued" : "ended";
+  if (legalAction.type === "continue_run") {
+    context.result = state.run ? "continued" : "ended";
+    if (legalAction.payload?.encounterContinue === true) {
+      context.encounterContinue = true;
+      context.unbrokenSubroutineCount = legalAction.payload.unbrokenSubroutineCount;
+      context.encounterWillEndRun = legalAction.payload.encounterWillEndRun;
+    }
+  }
   if (legalAction.payload?.traceStarted === true) {
     context.traceStarted = true;
     context.traceId = legalAction.payload.traceId;

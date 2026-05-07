@@ -57,6 +57,9 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(serverDisplayLabel("remote_2")).toBe("Außenserver 2");
     expect(serverDisplayLabel("Remote 3")).toBe("Außenserver 3");
     expect(actionButtonLabel(legalAction("corp", "advance_card", "basic_action", "Agenda in Remote 2 advancen"))).toBe("Installation ausbauen");
+    expect(actionButtonLabel(legalAction("runner", "continue_run", "game_rule", "Subroutinen auslösen (Run endet)", undefined, "run.encounter_ice"))).toBe(
+      "Subroutinen auslösen (Run endet)"
+    );
   });
 
   it("shows access progress only from PlayerView breach data", () => {
