@@ -2,6 +2,7 @@ export type PlayMode = "human_vs_human" | "human_vs_ai" | "ai_vs_ai";
 export type HumanSideSelection = "runner" | "corp" | "random";
 export type HumanAiSideSelection = "runner" | "corp" | "random";
 export type TechnicalMatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
+export type MatchFormatSelection = "rules_match" | "two_game_side_swap";
 
 export type DerivedMatchStart = {
   requestedPlayMode: PlayMode;
@@ -57,6 +58,68 @@ export function playModeLabel(mode: PlayMode): string {
   if (mode === "human_vs_human") return "Mensch gegen Mensch · privater Link";
   if (mode === "human_vs_ai") return "Mensch gegen KI";
   return "KI gegen KI · Simulation";
+}
+
+export function playModeCardLabel(mode: PlayMode): { title: string; description: string } {
+  if (mode === "human_vs_human") return { title: "Privates Duell", description: "Zwei Menschen per Link" };
+  if (mode === "human_vs_ai") return { title: "Gegen KI", description: "Schnelles Spiel gegen eine KI-Seite" };
+  return { title: "Simulation", description: "KI gegen KI zum Beobachten und Testen" };
+}
+
+export function matchFormatCardLabel(format: MatchFormatSelection): { title: string; description: string } {
+  if (format === "two_game_side_swap") return { title: "Matchserie", description: "Zwei Spiele mit Seitenwechsel" };
+  return { title: "Regelmatch", description: "7 Agendapunkte, ein Spiel" };
+}
+
+export function parseJoinLinkInput(input: string): { matchId: string; joinToken: string } | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed, "http://netgrid.local");
+    const matchId = url.searchParams.get("matchId")?.trim();
+    const joinToken = url.searchParams.get("joinToken")?.trim();
+    if (!matchId || !joinToken) return null;
+    return { matchId, joinToken };
+  } catch {
+    return null;
+  }
+}
+
+export function matchStartSummary(input: {
+  playMode: PlayMode;
+  matchFormat: MatchFormatSelection;
+  humanSideSelection: HumanSideSelection;
+  humanAiSideSelection: HumanAiSideSelection;
+  aiDeckPolicy?: "selected" | "fixed" | "seeded_random";
+  testSetupMode?: boolean;
+}): string[] {
+  const playMode = playModeCardLabel(input.playMode).title;
+  const format = input.matchFormat === "two_game_side_swap" ? "Matchserie mit Seitenwechsel" : "Regelmatch bis 7 Agendapunkte";
+  const side =
+    input.playMode === "human_vs_human"
+      ? input.humanSideSelection === "random"
+        ? "Seite wird ausgelost"
+        : `Du startest als ${input.humanSideSelection === "runner" ? "Runner" : "Korp"}`
+      : input.playMode === "human_vs_ai"
+        ? input.humanAiSideSelection === "random"
+          ? "Deine Seite wird ausgelost"
+          : `Du spielst ${input.humanAiSideSelection === "runner" ? "Runner" : "Korp"}`
+        : "KI gegen KI";
+  const deckPolicy =
+    input.playMode === "human_vs_human"
+      ? input.testSetupMode
+        ? "Testkonstellation mit beiden Deckpaaren"
+        : "Teilnehmer B wählt Decks beim Beitritt"
+      : input.playMode === "human_vs_ai"
+        ? input.aiDeckPolicy === "fixed"
+          ? "KI-Decks: Standard"
+          : input.aiDeckPolicy === "seeded_random"
+            ? "KI-Decks: deterministisch zufällig"
+            : "KI-Decks: ausgewählt"
+        : input.aiDeckPolicy === "seeded_random"
+          ? "Simulationsdecks: deterministisch zufällig"
+          : "Simulationsdecks: ausgewählt";
+  return [playMode, side, format, deckPolicy];
 }
 
 export function sideSelectionLabel(selection: HumanSideSelection): string {

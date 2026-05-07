@@ -1484,6 +1484,84 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
   });
 });
 
+describe("V1.1.2 Full Archives Access", () => {
+  it("builds a deterministic mixed Archives queue without revealing facedown entries before access", () => {
+    let state = toRunnerTurn(v097RunGame("v112-archives-queue"));
+    const faceupOperation = moveCorpCardToArchives(state, "simple_economy_operation", true);
+    const facedownAsset = moveCorpCardToArchives(state, "simple_economy_asset", false);
+    const facedownAgenda = moveCorpCardToArchives(state, "simple_agenda", false);
+    keepOnlyCorpArchivesCards(state, [faceupOperation, facedownAsset, facedownAgenda]);
+
+    const runnerBefore = getPlayerView(state, "runner");
+    const corpBefore = getPlayerView(state, "corp");
+
+    expect(runnerBefore.opponent.discardCount).toBe(3);
+    expect(JSON.stringify(runnerBefore)).toContain("Simple Economy Operation");
+    expect(JSON.stringify(runnerBefore)).not.toContain("Simple Economy Asset");
+    expect(JSON.stringify(runnerBefore)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(corpBefore)).toContain("Simple Economy Asset");
+    expect(JSON.stringify(corpBefore)).toContain("Simple Agenda");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "archives");
+
+    expect(state.run?.breach?.queue.map((entry) => entry.cardInstanceId)).toEqual([faceupOperation, facedownAsset, facedownAgenda]);
+    expect(state.run?.breach?.queue.map((entry) => entry.hiddenInfo)).toEqual([false, true, true]);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Economy Asset");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Agenda");
+  });
+
+  it("reveals only the current Archives card, preserves queue progress, and replays deterministically", () => {
+    let state = toRunnerTurn(v097RunGame("v112-archives-access"));
+    state.runner.credits = 10;
+    const faceupOperation = moveCorpCardToArchives(state, "simple_economy_operation", true);
+    const facedownAsset = moveCorpCardToArchives(state, "simple_economy_asset", false);
+    const facedownAgenda = moveCorpCardToArchives(state, "simple_agenda", false);
+    keepOnlyCorpArchivesCards(state, [faceupOperation, facedownAsset, facedownAgenda]);
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "archives");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation",
+      serverLabel: "Archives"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Economy Asset");
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Agenda");
+    expect(state.run?.breach?.currentIndex).toBe(1);
+    expect(state.run?.breach?.accessedSummaries).toEqual([
+      { entryId: `${state.run?.runId}.breach.0`, status: "accessed", cardDefinitionId: "simple_economy_operation" }
+    ]);
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.cardInstances[facedownAsset]?.faceup).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_economy_asset",
+      title: "Simple Economy Asset",
+      serverLabel: "Archives"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Agenda");
+
+    state = apply(state, "runner", (action) => action.type === "trash_accessed_card");
+    expect(state.corp.archives.filter((id) => id === facedownAsset)).toHaveLength(1);
+    expect(state.corp.archives).toEqual([faceupOperation, facedownAsset, facedownAgenda]);
+    expect(state.run?.breach?.currentIndex).toBe(2);
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.cardInstances[facedownAgenda]?.faceup).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+
+    expect(state.runner.scoreArea).toContain(facedownAgenda);
+    expect(state.run).toBeUndefined();
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+});
+
 describe("MVP 0.98a Identity and modifiers", () => {
   it("creates deterministic V0.98 games with setup and static identity modifiers", () => {
     const first = v098IdentityGame("v098-identity-setup");
@@ -2644,11 +2722,11 @@ function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceI
   return id;
 }
 
-function moveCorpCardToArchives(state: GameState, definitionId: string): CardInstanceId {
+function moveCorpCardToArchives(state: GameState, definitionId: string, faceup = true): CardInstanceId {
   const id = findCard(state, definitionId);
   removeEverywhere(state, id);
   state.corp.archives.unshift(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "archives" }, faceup: true, rezzed: true };
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "archives" }, faceup, rezzed: faceup };
   return id;
 }
 
@@ -2665,6 +2743,16 @@ function keepOnlyCorpHqCards(state: GameState, ids: CardInstanceId[]): void {
   const keep = new Set(ids);
   const movedToRd = state.corp.hq.filter((cardId) => !keep.has(cardId));
   state.corp.hq = ids.slice();
+  for (const cardId of movedToRd) {
+    state.corp.rd.push(cardId);
+    state.cardInstances[cardId] = { ...state.cardInstances[cardId]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+  }
+}
+
+function keepOnlyCorpArchivesCards(state: GameState, ids: CardInstanceId[]): void {
+  const keep = new Set(ids);
+  const movedToRd = state.corp.archives.filter((cardId) => !keep.has(cardId));
+  state.corp.archives = ids.slice();
   for (const cardId of movedToRd) {
     state.corp.rd.push(cardId);
     state.cardInstances[cardId] = { ...state.cardInstances[cardId]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };

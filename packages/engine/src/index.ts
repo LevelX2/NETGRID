@@ -1676,7 +1676,8 @@ function accessQueueZone(serverId: Exclude<ServerId, "new_remote">): ActiveBreac
 
 function isBreachEntryHidden(state: GameState, cardId: CardInstanceId): boolean {
   const instance = mustInstance(state.cardInstances, cardId);
-  return !instance.rezzed && !instance.faceup && !state.corp.archives.includes(cardId);
+  if (state.corp.archives.includes(cardId)) return !instance.faceup;
+  return !instance.rezzed && !instance.faceup;
 }
 
 function randomHqAccessQueue(state: GameState, runId: string, accessCount: number): CardInstanceId[] {
@@ -1762,6 +1763,16 @@ function stealAgenda(state: GameState, cardId: string): void {
 function trashAccessedCard(state: GameState, cardId: string): void {
   const definition = definitionFor(state, cardId);
   spendCredits(state, "runner", definition.trashCost ?? 0);
+  const sourceZone = mustInstance(state.cardInstances, cardId).zone;
+  if (sourceZone.side === "corp" && sourceZone.zone === "archives") {
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
+    if (state.run?.breach) {
+      completeCurrentBreachAccess(state, "trashed");
+      return;
+    }
+    finishRun(state, true);
+    return;
+  }
   removeFromAllZones(state, cardId);
   state.corp.archives.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };

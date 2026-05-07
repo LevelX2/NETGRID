@@ -95,8 +95,12 @@ import {
 import {
   deriveMatchStart,
   humanAiSideLabel,
-  playModeLabel,
+  matchFormatCardLabel,
+  matchStartSummary,
+  parseJoinLinkInput,
+  playModeCardLabel,
   sideSelectionLabel,
+  type MatchFormatSelection,
   type HumanAiSideSelection,
   type HumanSideSelection,
   type PlayMode
@@ -139,7 +143,7 @@ const TagIcon = Goal;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.1.1";
+const APP_STATUS_LABEL = "V1.1.2";
 const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
@@ -996,6 +1000,7 @@ export default function Page() {
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
   const [seed, setSeed] = useState("mvp-0.3-ai-demo");
+  const [joinLinkInput, setJoinLinkInput] = useState("");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
   const [session, setSession] = useState<SessionInfo | null>(null);
@@ -1098,6 +1103,7 @@ export default function Page() {
     if (matchId && token) {
       setEntryTab("play");
       setMode("join");
+      setJoinLinkInput(window.location.href);
       setJoinMatchId(matchId);
       setJoinToken(token);
       setDisplayName(storedDisplayName || "Teilnehmer B");
@@ -1348,6 +1354,14 @@ export default function Page() {
   const hasAiOpponent = matchStart.hasAiOpponent;
   const isHumanVsHuman = playMode === "human_vs_human";
   const isHumanVsAi = playMode === "human_vs_ai";
+  const startSummary = matchStartSummary({
+    playMode,
+    matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
+    humanSideSelection,
+    humanAiSideSelection,
+    aiDeckPolicy,
+    testSetupMode
+  });
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const selectedDeckDirty = selectedLocalDeck ? savedDeckFingerprints[selectedLocalDeck.deckId] !== deckFingerprint(selectedLocalDeck) : false;
@@ -1732,6 +1746,14 @@ export default function Page() {
     }
     return side === "runner" ? { runnerDeckSnapshotId: snapshotId } : { corpDeckSnapshotId: snapshotId };
   }
+
+  const updateJoinLinkInput = (value: string) => {
+    setJoinLinkInput(value);
+    const parsed = parseJoinLinkInput(value);
+    if (!parsed) return;
+    setJoinMatchId(parsed.matchId);
+    setJoinToken(parsed.joinToken);
+  };
 
   const joinMatch = async () => {
     setNotice("");
@@ -2584,25 +2606,61 @@ export default function Page() {
             </div>
 
             {mode === "host" ? (
-              <div className="formGrid">
+              <div className="matchStartConsole">
+                <section className="matchStartSection" aria-label="Spielart">
+                  <p className="eyebrow">Spielart</p>
+                  <div className="choiceCardGrid playModeCards">
+                    {(["human_vs_human", "human_vs_ai", "ai_vs_ai"] as PlayMode[]).map((option) => {
+                      const label = playModeCardLabel(option);
+                      const Icon = option === "human_vs_human" ? Link2 : option === "human_vs_ai" ? Bot : Activity;
+                      return (
+                        <button
+                          key={option}
+                          className={`choiceCard ${playMode === option ? "active" : ""}`}
+                          onClick={() => setPlayMode(option)}
+                          type="button"
+                          aria-pressed={playMode === option}
+                          data-testid={`play-mode-${option.replaceAll("_", "-")}`}
+                        >
+                          <Icon size={18} />
+                          <span>
+                            <strong>{label.title}</strong>
+                            <small>{label.description}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+                <section className="matchStartSection" aria-label="Spielziel">
+                  <p className="eyebrow">Format</p>
+                  <div className="choiceCardGrid formatCards">
+                    {(["rules_match", "two_game_side_swap"] as MatchFormatSelection[]).map((option) => {
+                      const label = matchFormatCardLabel(option);
+                      return (
+                        <button
+                          key={option}
+                          className={`choiceCard ${matchFormat === option ? "active" : ""}`}
+                          onClick={() => setMatchFormat(option)}
+                          type="button"
+                          aria-pressed={matchFormat === option}
+                          data-testid={option === "rules_match" ? "match-format-rules-match" : "match-format-series"}
+                        >
+                          <Flag size={18} />
+                          <span>
+                            <strong>{label.title}</strong>
+                            <small>{label.description}</small>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </section>
+                <div className="formGrid primaryStartGrid">
                 <label>
-                  Spielart
-                  <select value={playMode} onChange={(event) => setPlayMode(event.target.value as PlayMode)}>
-                    <option value="human_vs_human">{playModeLabel("human_vs_human")}</option>
-                    <option value="human_vs_ai">{playModeLabel("human_vs_ai")}</option>
-                    <option value="ai_vs_ai">{playModeLabel("ai_vs_ai")}</option>
-                  </select>
+                  Name
+                  <input value={displayName} onChange={(event) => updateDisplayName(event.target.value)} />
                 </label>
-                {isHumanVsHuman ? (
-                  <label>
-                    Seitenzuteilung
-                    <select value={humanSideSelection} onChange={(event) => setHumanSideSelection(event.target.value as HumanSideSelection)}>
-                      <option value="random">{sideSelectionLabel("random")}</option>
-                      <option value="runner">{sideSelectionLabel("runner")}</option>
-                      <option value="corp">{sideSelectionLabel("corp")}</option>
-                    </select>
-                  </label>
-                ) : null}
                 {isHumanVsAi ? (
                   <label>
                     Deine Seite
@@ -2613,34 +2671,7 @@ export default function Page() {
                     </select>
                   </label>
                 ) : null}
-                <label>
-                  Spielziel
-                  <select value={matchFormat} onChange={(event) => setMatchFormat(event.target.value as MatchFormat)}>
-                    <option value="rules_match">Regelmatch · 7 Agendapunkte</option>
-                    <option value="two_game_side_swap">Private Matchserie · Seitenwechsel</option>
-                  </select>
-                </label>
-                <label>
-                  Name
-                  <input value={displayName} onChange={(event) => updateDisplayName(event.target.value)} />
-                </label>
-                {isHumanVsHuman ? (
-                  <label>
-                    Countdown
-                    <select value={countdownSeconds} onChange={(event) => setCountdownSeconds(Number(event.target.value) as 3 | 5 | 10)}>
-                      <option value={3}>3 Sekunden</option>
-                      <option value={5}>5 Sekunden</option>
-                      <option value={10}>10 Sekunden</option>
-                    </select>
-                  </label>
-                ) : null}
-                {isHumanVsHuman ? (
-                  <label className={`deckBuilderToggle ${testSetupMode ? "checked" : ""}`}>
-                    <input checked={testSetupMode} onChange={(event) => setTestSetupMode(event.target.checked)} type="checkbox" />
-                    Testkonstellation · beide Teilnehmer festlegen
-                  </label>
-                ) : null}
-                {(isHumanVsAi && humanAiSideSelection !== "runner") || gameMode === "ai_vs_ai" ? (
+                {gameMode === "ai_vs_ai" ? (
                   <label>
                     Runner-KI
                     <select value={runnerDifficulty} onChange={(event) => setRunnerDifficulty(event.target.value as AiDifficulty)}>
@@ -2650,7 +2681,7 @@ export default function Page() {
                     </select>
                   </label>
                 ) : null}
-                {(isHumanVsAi && humanAiSideSelection !== "corp") || gameMode === "ai_vs_ai" ? (
+                {gameMode === "ai_vs_ai" ? (
                   <label>
                     Korp-KI
                     <select value={corpDifficulty} onChange={(event) => setCorpDifficulty(event.target.value as AiDifficulty)}>
@@ -2660,20 +2691,7 @@ export default function Page() {
                     </select>
                   </label>
                 ) : null}
-                <label>
-                  Seed
-                  <input value={seed} onChange={(event) => setSeed(event.target.value)} />
-                </label>
-                {hasAiOpponent ? (
-                  <label>
-                    KI-Decks
-                    <select value={aiDeckPolicy} onChange={(event) => setAiDeckPolicy(event.target.value as AiDeckPolicy)}>
-                      <option value="selected">Explizit gewählte KI-Decks</option>
-                      <option value="fixed">Feste Standard-Decks</option>
-                      <option value="seeded_random">Deterministisch zufällig</option>
-                    </select>
-                  </label>
-                ) : null}
+                </div>
                 <div className="deckSlotGrid">
                   <DeckSlotSelect
                     label="Teilnehmer A · Runner-Deck"
@@ -2700,7 +2718,85 @@ export default function Page() {
                   {isHumanVsHuman && !testSetupMode ? (
                     <p className="deckHandshakeHint">Teilnehmer B wählt eigene Decks beim Beitritt.</p>
                   ) : null}
+                </div>
+                <div className="matchStartSummary" data-testid="match-start-summary">
+                  {startSummary.map((item) => (
+                    <span key={item}>{item}</span>
+                  ))}
+                </div>
+                <button className="button primary wide" onClick={createMatch} data-testid="create-match">
+                  {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
+                  {gameMode === "ai_vs_ai" ? "Simulation starten" : isHumanVsHuman ? "Lobby erstellen" : "Match erstellen"}
+                </button>
+                <details className="advancedMatchOptions" data-testid="advanced-match-options">
+                  <summary>
+                    <SlidersHorizontal size={15} />
+                    Erweiterte Optionen
+                  </summary>
+                  <div className="formGrid advancedMatchGrid">
+                    {isHumanVsHuman ? (
+                      <label>
+                        Seitenzuteilung
+                        <select value={humanSideSelection} onChange={(event) => setHumanSideSelection(event.target.value as HumanSideSelection)}>
+                          <option value="random">{sideSelectionLabel("random")}</option>
+                          <option value="runner">{sideSelectionLabel("runner")}</option>
+                          <option value="corp">{sideSelectionLabel("corp")}</option>
+                        </select>
+                      </label>
+                    ) : null}
+                    {isHumanVsHuman ? (
+                      <label>
+                        Countdown
+                        <select value={countdownSeconds} onChange={(event) => setCountdownSeconds(Number(event.target.value) as 3 | 5 | 10)}>
+                          <option value={3}>3 Sekunden</option>
+                          <option value={5}>5 Sekunden</option>
+                          <option value={10}>10 Sekunden</option>
+                        </select>
+                      </label>
+                    ) : null}
+                    <label>
+                      Seed
+                      <input value={seed} onChange={(event) => setSeed(event.target.value)} />
+                    </label>
+                    {isHumanVsHuman ? (
+                      <label className={`deckBuilderToggle ${testSetupMode ? "checked" : ""}`}>
+                        <input checked={testSetupMode} onChange={(event) => setTestSetupMode(event.target.checked)} type="checkbox" />
+                        Testkonstellation · beide Teilnehmer festlegen
+                      </label>
+                    ) : null}
+                    {(isHumanVsAi && humanAiSideSelection !== "runner") ? (
+                      <label>
+                        Runner-KI
+                        <select value={runnerDifficulty} onChange={(event) => setRunnerDifficulty(event.target.value as AiDifficulty)}>
+                          <option value="easy">Easy</option>
+                          <option value="normal">Normal</option>
+                          <option value="hard">Hard</option>
+                        </select>
+                      </label>
+                    ) : null}
+                    {(isHumanVsAi && humanAiSideSelection !== "corp") ? (
+                      <label>
+                        Korp-KI
+                        <select value={corpDifficulty} onChange={(event) => setCorpDifficulty(event.target.value as AiDifficulty)}>
+                          <option value="easy">Easy</option>
+                          <option value="normal">Normal</option>
+                          <option value="hard">Hard</option>
+                        </select>
+                      </label>
+                    ) : null}
+                    {hasAiOpponent ? (
+                      <label>
+                        KI-Decks
+                        <select value={aiDeckPolicy} onChange={(event) => setAiDeckPolicy(event.target.value as AiDeckPolicy)}>
+                          <option value="selected">Explizit gewählte KI-Decks</option>
+                          <option value="fixed">Feste Standard-Decks</option>
+                          <option value="seeded_random">Deterministisch zufällig</option>
+                        </select>
+                      </label>
+                    ) : null}
+                  </div>
                   {(isHumanVsHuman && testSetupMode) || (hasAiOpponent && aiDeckPolicy === "selected") ? (
+                    <div className="deckSlotGrid advancedDeckSlots">
                     <>
                       <DeckSlotSelect
                         label={hasAiOpponent ? "KI · Runner-Deck" : "Teilnehmer B · Runner-Deck"}
@@ -2727,8 +2823,9 @@ export default function Page() {
                         onLocalDeck={setSelectedParticipantBCorpLocalDeckId}
                       />
                     </>
+                    </div>
                   ) : null}
-                </div>
+                </details>
                 <DeckMetadataLine
                   entries={[
                     { label: "A Runner", metadata: participantARunnerMetadata },
@@ -2741,25 +2838,17 @@ export default function Page() {
                         ])
                   ]}
                 />
-                <button className="button primary wide" onClick={createMatch} data-testid="create-match">
-                  {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
-                  {gameMode === "ai_vs_ai" ? "Simulation starten" : "Match erstellen"}
-                </button>
                 {simulation ? <SimulationResult summary={simulation} /> : null}
               </div>
             ) : (
-              <div className="formGrid">
+              <div className="matchStartConsole joinConsole">
+                <label className="joinLinkField">
+                  Join-Link
+                  <input value={joinLinkInput} onChange={(event) => updateJoinLinkInput(event.target.value)} data-testid="join-link-input" />
+                </label>
                 <label>
                   Name
                   <input value={displayName} onChange={(event) => updateDisplayName(event.target.value)} />
-                </label>
-                <label>
-                  Match
-                  <input value={joinMatchId} onChange={(event) => setJoinMatchId(event.target.value)} />
-                </label>
-                <label>
-                  Token
-                  <input value={joinToken} onChange={(event) => setJoinToken(event.target.value)} />
                 </label>
                 <div className="deckSlotGrid">
                   <DeckSlotSelect
@@ -2785,6 +2874,22 @@ export default function Page() {
                     onLocalDeck={setSelectedParticipantBCorpLocalDeckId}
                   />
                 </div>
+                <details className="advancedMatchOptions" data-testid="manual-join-options">
+                  <summary>
+                    <Keyboard size={15} />
+                    Manuell eingeben
+                  </summary>
+                  <div className="formGrid advancedMatchGrid">
+                    <label>
+                      Match
+                      <input value={joinMatchId} onChange={(event) => setJoinMatchId(event.target.value)} />
+                    </label>
+                    <label>
+                      Token
+                      <input value={joinToken} onChange={(event) => setJoinToken(event.target.value)} />
+                    </label>
+                  </div>
+                </details>
                 <button className="button primary wide" onClick={joinMatch} disabled={!joinMatchId || !joinToken} data-testid="join-match">
                   <Link2 size={16} />
                   Mit Decks beitreten

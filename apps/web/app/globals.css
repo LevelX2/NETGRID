@@ -424,6 +424,137 @@ select {
   gap: 10px;
 }
 
+.matchStartConsole {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.matchStartSection {
+  display: grid;
+  gap: 8px;
+}
+
+.choiceCardGrid {
+  display: grid;
+  gap: 10px;
+}
+
+.playModeCards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.formatCards {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.choiceCard {
+  min-width: 0;
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--field-bg);
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.choiceCard:hover,
+.choiceCard:focus-visible {
+  border-color: var(--runner);
+  outline: 0;
+}
+
+.choiceCard.active {
+  border-color: var(--active-control-border);
+  background: var(--catalog-active-bg);
+}
+
+.choiceCard strong,
+.choiceCard small {
+  display: block;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.choiceCard small {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.primaryStartGrid,
+.advancedMatchGrid {
+  padding: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.matchStartSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.matchStartSummary span {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--system-chip-border);
+  border-radius: 6px;
+  color: var(--system-chip-text);
+  background: var(--system-chip-bg);
+  padding: 5px 8px;
+  font-size: 13px;
+}
+
+.advancedMatchOptions {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field-bg);
+  padding: 0;
+}
+
+.advancedMatchOptions summary {
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.advancedMatchOptions[open] {
+  padding-bottom: 12px;
+}
+
+.advancedMatchOptions[open] summary {
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.advancedMatchOptions .formGrid,
+.advancedDeckSlots {
+  padding: 0 12px;
+}
+
+.joinConsole {
+  grid-template-columns: 1fr;
+}
+
+.joinLinkField {
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .deckSlotSelect {
   min-width: 0;
 }
@@ -4141,6 +4272,13 @@ select,
 
   .deckSelectGrid,
   .deckSlotGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .playModeCards,
+  .formatCards,
+  .primaryStartGrid,
+  .advancedMatchGrid {
     grid-template-columns: 1fr;
   }
 

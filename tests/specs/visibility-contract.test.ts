@@ -39,6 +39,7 @@ describe("Client visibility contract", () => {
 
   it("keeps the S01 result overlay side-safe and outside engine authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
     expect(page).toContain("function GameOverModal");
     expect(page).toContain("GameResultSummary");
     expect(page).toContain("Du hast das Spiel gewonnen.");
@@ -52,8 +53,8 @@ describe("Client visibility contract", () => {
     expect(page).toContain("Runner-Rig");
     expect(page).toContain("RunnerRigStrip");
     expect(page).toContain("runnerRigStrip");
-    expect(page).toContain("Regelmatch · 7 Agendapunkte");
-    expect(page).toContain("Private Matchserie · Seitenwechsel");
+    expect(matchStart).toContain("Regelmatch bis 7 Agendapunkte");
+    expect(matchStart).toContain("Matchserie mit Seitenwechsel");
     expect(page).not.toContain("Einzelspiel · Deckziel");
     expect(page).toContain("Nächstes Serienspiel");
     expect(page).toContain("seriesAudioOutcome");
@@ -66,7 +67,7 @@ describe("Client visibility contract", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.1.1"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.1.2"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");

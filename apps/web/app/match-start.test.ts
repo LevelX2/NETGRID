@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveMatchStart } from "./match-start";
+import { deriveMatchStart, matchFormatCardLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
 
 describe("V1.0.4 match start derivation", () => {
   it("keeps Human-vs-Human side assignment server-readable", () => {
@@ -40,5 +40,40 @@ describe("V1.0.4 match start derivation", () => {
       isSimulation: true,
       createRequest: { simulation: "ai_vs_ai" }
     });
+  });
+
+  it("labels V1.1.2 play mode and format cards without changing technical modes", () => {
+    expect(playModeCardLabel("human_vs_human")).toEqual({ title: "Privates Duell", description: "Zwei Menschen per Link" });
+    expect(playModeCardLabel("human_vs_ai")).toEqual({ title: "Gegen KI", description: "Schnelles Spiel gegen eine KI-Seite" });
+    expect(playModeCardLabel("ai_vs_ai")).toEqual({ title: "Simulation", description: "KI gegen KI zum Beobachten und Testen" });
+    expect(matchFormatCardLabel("rules_match")).toEqual({ title: "Regelmatch", description: "7 Agendapunkte, ein Spiel" });
+    expect(matchFormatCardLabel("two_game_side_swap")).toEqual({ title: "Matchserie", description: "Zwei Spiele mit Seitenwechsel" });
+  });
+
+  it("parses Join-Links and ignores unknown query parameters", () => {
+    expect(parseJoinLinkInput("https://netgrid.local/?matchId=match_123&joinToken=join_456&x=1")).toEqual({
+      matchId: "match_123",
+      joinToken: "join_456"
+    });
+    expect(parseJoinLinkInput("/?matchId=local_match&joinToken=local_token")).toEqual({
+      matchId: "local_match",
+      joinToken: "local_token"
+    });
+    expect(parseJoinLinkInput("not a join link")).toBeNull();
+    expect(parseJoinLinkInput("?matchId=missing-token")).toBeNull();
+  });
+
+  it("builds a side-safe match start summary without token or deck details", () => {
+    const summary = matchStartSummary({
+      playMode: "human_vs_human",
+      matchFormat: "rules_match",
+      humanSideSelection: "random",
+      humanAiSideSelection: "random"
+    });
+
+    expect(summary).toContain("Privates Duell");
+    expect(summary).toContain("Seite wird ausgelost");
+    expect(summary).toContain("Regelmatch bis 7 Agendapunkte");
+    expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
   });
 });

@@ -1417,6 +1417,66 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(blocked.error.code).toBe("undo_blocked");
   });
 
+  it("keeps V1.1.2 Archives breach reconnect and payloads side-safe", async () => {
+    const match = await joinedV112ArchivesMatch("mp-v112-archives");
+    const before = await bootstrap(match.service, match.matchId, match.runner);
+
+    expect(before.playerView.opponent.discardCount).toBe(3);
+    expect(JSON.stringify(before)).toContain("Simple Economy Operation");
+    expect(JSON.stringify(before)).not.toContain("Simple Economy Asset");
+    expect(JSON.stringify(before)).not.toContain("Simple Agenda");
+
+    const started = await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "archives", "v112-run-archives");
+    expect(started.actorPayload.playerView.run?.breach).toMatchObject({ serverId: "archives", remainingCount: 3 });
+    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Economy Asset");
+    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Agenda");
+
+    const reconnected = await match.service.reconnectMatch(match.matchId, {
+      side: "runner",
+      reconnectToken: match.runner.reconnectToken
+    });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.playerView.run?.breach?.remainingCount).toBe(3);
+    expect(JSON.stringify(reconnected)).toContain("Simple Economy Operation");
+    expect(JSON.stringify(reconnected)).not.toContain("Simple Economy Asset");
+    expect(JSON.stringify(reconnected)).not.toContain("Simple Agenda");
+
+    const firstAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-faceup");
+    expect(firstAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation", serverLabel: "Archives" });
+    expect(JSON.stringify(firstAccess.actorPayload)).not.toContain("Simple Economy Asset");
+    expect(JSON.stringify(firstAccess.actorPayload)).not.toContain("Simple Agenda");
+
+    const secondAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-facedown");
+    expect(secondAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_asset", serverLabel: "Archives" });
+    expect(JSON.stringify(secondAccess.actorPayload)).toContain("Simple Economy Asset");
+    expect(JSON.stringify(secondAccess.actorPayload)).not.toContain("Simple Agenda");
+
+    const duplicate = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.runner.side,
+      sessionToken: reconnected.sessionToken,
+      actionId: secondAccess.receipt.idempotencyKey,
+      clientKnownStateVersion: secondAccess.receipt.stateVersionBefore,
+      idempotencyKey: "v112-access-facedown"
+    });
+    expect(duplicate.ok).toBe(true);
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.receipt.stateVersionAfter).toBe(secondAccess.receipt.stateVersionAfter);
+
+    const blocked = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnected.sessionToken,
+      targetEventId: `evt_${started.receipt.stateVersionAfter}`,
+      reason: "Archives reveal undo"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected undo_blocked");
+    expect(blocked.error.code).toBe("undo_blocked");
+    expect(JSON.stringify(blocked.error)).not.toContain("Simple Agenda");
+  });
+
   it("handles V0.98 Hidden-Zone Search through submit, idempotency, reconnect and undo barrier", async () => {
     const match = await joinedV098HiddenSearchMatch("mp-v098-hidden-search");
     const before = await bootstrap(match.service, match.matchId, match.runner);
@@ -2959,6 +3019,55 @@ async function joinedV097BreachMatch(seed: string) {
   };
 }
 
+async function joinedV112ArchivesMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  const gameState = toRunnerTurnEngine(
+    createGameAfterSetup({
+      matchId: created.matchId,
+      seed,
+      runnerDeckId: "demo_runner_097",
+      corpDeckId: "demo_corp_097",
+      agendaPointsToWin: 7
+    })
+  );
+  gameState.runner.credits = 10;
+  const faceupOperation = moveCorpCardToArchivesForTest(gameState, "simple_economy_operation", true);
+  const facedownAsset = moveCorpCardToArchivesForTest(gameState, "simple_economy_asset", false);
+  const facedownAgenda = moveCorpCardToArchivesForTest(gameState, "simple_agenda", false);
+  keepOnlyCorpArchivesCardsForTest(gameState, [faceupOperation, facedownAsset, facedownAgenda]);
+  record.gameState = gameState;
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v112_archives_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
 async function joinedV098HiddenSearchMatch(seed: string) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
@@ -3139,6 +3248,24 @@ function putCorpCardOnTopOfRdForTest(state: GameState, definitionId: string): Ca
   state.corp.rd.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
   return id;
+}
+
+function moveCorpCardToArchivesForTest(state: GameState, definitionId: string, faceup = true): CardInstanceId {
+  const id = findCardForTest(state, definitionId);
+  removeEverywhereForTest(state, id);
+  state.corp.archives.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "archives" }, faceup, rezzed: faceup };
+  return id;
+}
+
+function keepOnlyCorpArchivesCardsForTest(state: GameState, ids: CardInstanceId[]): void {
+  const keep = new Set(ids);
+  const movedToRd = state.corp.archives.filter((cardId) => !keep.has(cardId));
+  state.corp.archives = ids.slice();
+  for (const cardId of movedToRd) {
+    state.corp.rd.push(cardId);
+    state.cardInstances[cardId] = { ...state.cardInstances[cardId]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+  }
 }
 
 function moveRunnerCardToGripForTest(state: GameState, definitionId: string): CardInstanceId {
