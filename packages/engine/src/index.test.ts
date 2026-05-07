@@ -364,6 +364,7 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "gain_credit");
     state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (state.pendingChoice?.source === "discard_phase") state = applyChoice(state, "corp", String(state.pendingChoice.options[0]?.id));
     state = apply(state, "runner", (action) => action.type === "gain_credit");
 
     const replay = replayEvents(initial, state.eventLog);
@@ -434,7 +435,7 @@ describe("MVP 0.94 Damage and Flatline", () => {
     expect(getPlayerView(state, "runner").gameEndReason).toBe("flatline");
   });
 
-  it("supports meat damage through the V0.94 EffectCommand path and rejects core damage", () => {
+  it("supports meat and core damage through the EffectCommand path", () => {
     const state = v094DamageGame("v094-meat-effect");
     const beforeHash = hashState(state);
     const next = applyEffectCommands(state, [{ type: "do_damage", damageType: "meat", amount: 2, source: "v094_test_meat" }]);
@@ -444,7 +445,90 @@ describe("MVP 0.94 Damage and Flatline", () => {
     expect(next.runner.grip.length).toBe(state.runner.grip.length - 2);
     expect(next.randomDrawRecords.slice(-2).every((record) => record.purpose.includes("damage:"))).toBe(true);
     expect(new Set(next.runner.heap).size).toBe(2);
-    expect(() => applyEffectCommands(state, [{ type: "do_damage", damageType: "core", amount: 1, source: "v094_test_core" }])).toThrow("Core Damage");
+
+    const core = applyEffectCommands(state, [{ type: "do_damage", damageType: "core", amount: 2, source: "v111_test_core" }]);
+    expect(core.runner.heap.length).toBe(2);
+    expect(core.runner.coreDamage).toBe(2);
+    expect(getPlayerView(core, "runner").own.maxHandSize).toBe(3);
+    expect(getPlayerView(core, "corp").opponent.coreDamage).toBe(2);
+    expect(core.randomDrawRecords.slice(-2).every((record) => record.purpose.includes(":core:"))).toBe(true);
+
+    let operationState = createGameAfterSetup({ seed: "v111-core-operation", runnerDeck: V094_RUNNER_DECK, corpDeck: V111_CORP_DECK, agendaPointsToWin: 7 });
+    operationState = apply(operationState, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(operationState, "v111_core_damage_operation");
+    operationState = apply(operationState, "corp", (action) => action.type === "play_operation" && sourceDefinition(operationState, action) === "v111_core_damage_operation");
+    expect(operationState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "core",
+      damageAmount: 1,
+      cardsTrashed: 1,
+      coreDamageAfter: 1,
+      runnerMaxHandSizeAfter: 4
+    });
+  });
+
+  it("runs V1.1.1 Discard phases through private LegalActions", () => {
+    let state = createGameAfterSetup({ seed: "v111-discard" });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    expect(state.corp.hq.length).toBe(6);
+
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.phase).toBe("corp_discard_phase");
+    expect(state.timingPoint).toBe("corp_discard.select_cards");
+    expect(state.pendingChoice).toMatchObject({ side: "corp", source: "discard_phase", minSelections: 1, maxSelections: 1 });
+    expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(6);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+
+    const discarded = String(state.pendingChoice?.options[0]?.value);
+    state = applyChoice(state, "corp", String(state.pendingChoice?.options[0]?.id));
+    expect(state.phase).toBe("runner_action_phase");
+    expect(state.timingPoint).toBe("runner_action.main");
+    expect(state.corp.hq).not.toContain(discarded);
+    expect(state.corp.archives).toContain(discarded);
+    expect(state.cardInstances[discarded]?.faceup).toBe(false);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ discardResolved: true, discardSide: "corp", discardCount: 1, discardZone: "archives" });
+    expect(JSON.stringify(getPlayerView(state, "runner").publicEvents.at(-1))).not.toContain(String(state.cardInstances[discarded]?.definitionId));
+  });
+
+  it("revalidates Runner Discard choices and moves selected cards to the heap", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v111-runner-discard" }));
+    drawRunnerCardsForTest(state, 2);
+    expect(state.runner.grip.length).toBe(7);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.pendingChoice).toMatchObject({ side: "runner", source: "discard_phase", minSelections: 2, maxSelections: 2 });
+
+    const action = mustAction(state, "runner", (candidate) => candidate.type === "resolve_choice");
+    const oneOption = state.pendingChoice?.options[0]?.id;
+    const wrongCount = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: [oneOption] }
+    });
+    expect(wrongCount.ok).toBe(false);
+    if (wrongCount.ok) throw new Error("Expected invalid choice");
+    expect(wrongCount.error.code).toBe("ERR_INVALID_CHOICE");
+
+    const selectedOptionIds = state.pendingChoice?.options.slice(0, 2).map((option) => option.id) ?? [];
+    const selectedCardIds = state.pendingChoice?.options.slice(0, 2).map((option) => String(option.value)) ?? [];
+    state = applyChoices(state, "runner", selectedOptionIds);
+    expect(state.phase).toBe("corp_draw_phase");
+    expect(state.runner.grip.length).toBe(5);
+    expect(selectedCardIds.every((id) => state.runner.heap.includes(id))).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ discardResolved: true, discardSide: "runner", discardCount: 2, discardZone: "heap" });
+  });
+
+  it("flatlines at the start of the Runner discard step when core damage makes handlimit negative", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v111-negative-handlimit" }));
+    state.runner.coreDamage = 6;
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.winner).toBe("corp");
+    expect(state.gameEndReason).toBe("flatline");
+    expect(state.phase).toBe("game_over");
+    expect(state.pendingChoice).toBeUndefined();
   });
 
   it("replays damage and reproduces the final StateHash", () => {
@@ -1377,8 +1461,8 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
     expect(queueIds).toHaveLength(2);
     expect(new Set(queueIds)).toEqual(new Set([operationId, agendaId]));
     expect(state.randomDrawRecords.slice(randomBefore).map((record) => record.purpose)).toEqual([
-      "hq_multiaccess:run_3:selection:0",
-      "hq_multiaccess:run_3:selection:1"
+      `${state.run?.runId}:selection:0`.replace(/^/, "hq_multiaccess:"),
+      `${state.run?.runId}:selection:1`.replace(/^/, "hq_multiaccess:")
     ]);
 
     const runnerView = getPlayerView(state, "runner");
@@ -1716,6 +1800,7 @@ describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (state.pendingChoice?.source === "discard_phase") state = applyChoice(state, "corp", String(state.pendingChoice.options[0]?.id));
 
     expect(state.cardInstances[chip]?.counters?.recurring_credit).toBe(1);
     expect(validateGameState(state).ok).toBe(true);
@@ -2288,6 +2373,13 @@ const V094_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const V111_CORP_DECK: DeckDefinition = {
+  ...V094_CORP_DECK,
+  id: "demo_corp_111",
+  name: "Corp Demo Deck 1.1.1 - Core Damage Harness",
+  cards: [...V094_CORP_DECK.cards, { id: "v111_core_damage_operation", quantity: 2 }]
+};
+
 const V095_RUNNER_DECK: DeckDefinition = {
   id: "demo_runner_095",
   name: "Runner Demo Deck 0.95 - Resource Harness",
@@ -2458,11 +2550,18 @@ function mustAction(state: GameState, side: Side, predicate: (action: LegalActio
 function toRunnerTurn(state: GameState): GameState {
   let next = apply(state, "corp", (action) => action.type === "mandatory_draw");
   next = apply(next, "corp", (action) => action.type === "end_turn");
+  if (next.pendingChoice?.source === "discard_phase" && next.pendingChoice.side === "corp") {
+    next = applyChoice(next, "corp", String(next.pendingChoice.options[0]?.id));
+  }
   return next;
 }
 
 function toRunnerTurnFromCorpMain(state: GameState): GameState {
-  return apply(state, "corp", (action) => action.type === "end_turn");
+  let next = apply(state, "corp", (action) => action.type === "end_turn");
+  if (next.pendingChoice?.source === "discard_phase" && next.pendingChoice.side === "corp") {
+    next = applyChoice(next, "corp", String(next.pendingChoice.options[0]?.id));
+  }
+  return next;
 }
 
 function sourceDefinition(state: GameState, action: LegalAction): string | undefined {
@@ -2525,6 +2624,16 @@ function putRunnerCardOnTopOfStack(state: GameState, definitionId: string): Card
   state.runner.stack.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "stack" }, faceup: true, rezzed: true };
   return id;
+}
+
+function drawRunnerCardsForTest(state: GameState, amount: number): void {
+  for (let index = 0; index < amount; index += 1) {
+    const id = state.runner.stack.shift();
+    expect(id).toBeDefined();
+    if (!id) throw new Error("Missing runner stack card");
+    state.runner.grip.push(id);
+    state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  }
 }
 
 function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceId {

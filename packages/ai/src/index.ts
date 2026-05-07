@@ -471,6 +471,18 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
 function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
+  if (choice.kind === "select_cards" && choice.source === "discard_phase") {
+    const count = Math.max(choice.minSelections, Math.min(choice.maxSelections, choice.maxSelections));
+    const selected = choice.options
+      .slice()
+      .sort((left, right) => {
+        const labelCompare = left.label.localeCompare(right.label, "de");
+        return labelCompare !== 0 ? labelCompare : left.id.localeCompare(right.id);
+      })
+      .slice(0, count)
+      .map((option) => option.id);
+    return { choiceId: choice.choiceId, selectedOptionIds: selected };
+  }
   if (choice.kind !== "bid_amount") {
     const firstOption = choice.options[0];
     return firstOption ? { choiceId: choice.choiceId, selectedOptionIds: [firstOption.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };

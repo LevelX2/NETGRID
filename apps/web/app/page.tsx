@@ -136,11 +136,10 @@ const RunnerRoleIcon = Fingerprint;
 const CorpRoleIcon = Building2;
 const AgendaIcon = Award;
 const TagIcon = Goal;
-const RUNNER_BASE_HAND_LIMIT = 5;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.1.0";
+const APP_STATUS_LABEL = "V1.1.1";
 const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
@@ -1948,6 +1947,23 @@ export default function Page() {
     );
   };
 
+  const submitChoiceOptions = (action: LegalAction, choiceId: string, selectedOptionIds: string[]) => {
+    if (!session || !payload || !ensureSocketConnected()) return;
+    socketRef.current?.send(
+      JSON.stringify({
+        type: "submit_action",
+        payload: {
+          matchId: session.matchId,
+          side: session.side,
+          actionId: action.actionId,
+          clientKnownStateVersion: payload.playerView.stateVersion,
+          selectedChoices: { choiceId, selectedOptionIds },
+          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${crypto.randomUUID()}`
+        }
+      })
+    );
+  };
+
   const setReady = (ready: boolean) => {
     if (!session || !ensureSocketConnected()) return;
     socketRef.current?.send(JSON.stringify({ type: "set_ready", payload: { ready } }));
@@ -2939,10 +2955,11 @@ export default function Page() {
             cardContextActive={selectedActionContext?.kind === "card"}
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
-            onAction={submitAction}
-            onChoiceOption={submitChoiceOption}
-            onClearContext={() => setSelectedActionContext(null)}
-          />
+                        onAction={submitAction}
+                        onChoiceOption={submitChoiceOption}
+                        onChoiceOptions={submitChoiceOptions}
+                        onClearContext={() => setSelectedActionContext(null)}
+                      />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
           <PlayerPanel view={activeView} title={`Du · ${sideLabel(activeView.side)}`} actionCapacity={actionSlotCapacities[activeView.side]} />
         </aside>
@@ -3068,7 +3085,7 @@ export default function Page() {
           <section className="section panel boardSection">
             <div className="sectionTitleLine boardSectionTitle">
               <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
-              {activeView.side === "runner" ? <ZoneLimitBadge label="Grip" value={`${activeView.own.gripOrHq.length}/${runnerHandLimit(activeView)}`} /> : null}
+              <ZoneLimitBadge label={activeView.side === "runner" ? "Grip" : "HQ"} value={`${activeView.own.gripOrHq.length}/${activeView.own.maxHandSize}`} />
             </div>
             <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, activeView.side === "runner" ? "grip" : "hq") ? "cueHighlightSoft" : ""}`}>
               {activeView.own.gripOrHq.map((card) => {
@@ -4152,6 +4169,7 @@ function LegalActionsPanel({
   highlighted = false,
   onAction,
   onChoiceOption,
+  onChoiceOptions,
   onClearContext
 }: {
   view: PlayerView;
@@ -4164,6 +4182,7 @@ function LegalActionsPanel({
   highlighted?: boolean;
   onAction(action: LegalAction): void;
   onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
+  onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
   onClearContext(): void;
 }) {
   const setupChoice = view.pendingChoice?.source === "setup.mulligan" ? view.pendingChoice : undefined;
@@ -4186,6 +4205,11 @@ function LegalActionsPanel({
         </div>
       </section>
     );
+  }
+  const discardChoice = view.pendingChoice?.source === "discard_phase" ? view.pendingChoice : undefined;
+  const discardAction = discardChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
+  if (discardChoice && discardAction) {
+    return <DiscardChoicePanel choice={discardChoice} action={discardAction} disabled={disabled} highlighted={highlighted} onChoiceOptions={onChoiceOptions} />;
   }
   if (view.phase === "setup") {
     return (
@@ -4238,6 +4262,54 @@ function LegalActionsPanel({
         ) : null}
         {primaryActions.length === 0 && !selectedContext && !cardContextActive ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
+    </section>
+  );
+}
+
+function DiscardChoicePanel({
+  choice,
+  action,
+  disabled,
+  highlighted,
+  onChoiceOptions
+}: {
+  choice: NonNullable<PlayerView["pendingChoice"]>;
+  action: LegalAction;
+  disabled: boolean;
+  highlighted: boolean;
+  onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+}) {
+  const [selected, setSelected] = useState<string[]>([]);
+  const required = choice.maxSelections;
+  const toggle = (optionId: string) => {
+    setSelected((current) => {
+      if (current.includes(optionId)) return current.filter((id) => id !== optionId);
+      if (current.length >= required) return current;
+      return [...current, optionId];
+    });
+  };
+  return (
+    <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="discard-choice-panel">
+      <h2>
+        <Trash2 size={16} />
+        Discard
+      </h2>
+      <p className="meta">{choice.prompt} · {selected.length}/{required}</p>
+      <div className="choiceCards">
+        {choice.options.map((option) => {
+          const active = selected.includes(option.id);
+          return (
+            <button className={`button actionButton ${active ? "primary" : ""}`} key={option.id} onClick={() => toggle(option.id)} disabled={disabled} type="button" data-testid="discard-choice-option" aria-pressed={active}>
+              {active ? <Check size={15} /> : <Clipboard size={15} />}
+              <span className="actionButtonLabel">{option.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      <button className="button primary wide" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || selected.length !== required} type="button" data-testid="discard-choice-submit">
+        <Trash2 size={15} />
+        Abwerfen
+      </button>
     </section>
   );
 }
@@ -5356,6 +5428,7 @@ function OpponentPanel({ view, connected, displayName, actionCapacity }: { view:
         <CreditBadge credits={view.opponent.credits} />
         <Stat label="Agenda" value={`${view.opponent.agendaPoints} / ${view.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
         {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} icon={<TagIcon size={14} />} /> : null}
+        {side === "runner" ? <Stat label="Core" value={view.opponent.coreDamage ?? 0} /> : null}
       </div>
       <ActionSlotMeter side={side} currentClicks={view.opponent.clicks} displayCapacity={actionCapacity} active={isTurn} compact />
       <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {isTurn ? "Am Zug" : "Wartet"}</p>
@@ -5374,6 +5447,7 @@ function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title:
         <CreditBadge credits={view.own.credits} />
         <Stat label="Agenda" value={`${view.own.agendaPoints} / ${view.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
         {view.side === "runner" ? <Stat label="Tags" value={view.own.tags} icon={<TagIcon size={14} />} /> : null}
+        {view.side === "runner" ? <Stat label="Core" value={view.own.coreDamage ?? 0} /> : null}
       </div>
       <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={isTurn} />
       {view.deckMetadata ? (
@@ -5721,10 +5795,6 @@ function developmentCountLabel(count: number): string {
 
 function neededDevelopmentLabel(count: number | undefined): string | null {
   return count === undefined ? null : `Benötigt ${count} ${count === 1 ? "Entwicklung" : "Entwicklungen"}`;
-}
-
-function runnerHandLimit(_view: PlayerView): number {
-  return RUNNER_BASE_HAND_LIMIT;
 }
 
 function ZoneLimitBadge({ label, value }: { label: string; value: string }) {

@@ -128,6 +128,8 @@ type DamageSummary = {
   amount: number;
   cardsTrashed: number;
   flatline: boolean;
+  coreDamageAfter?: number;
+  runnerMaxHandSizeAfter?: number;
 };
 
 type ActiveRun = NonNullable<GameState["run"]>;
@@ -136,6 +138,7 @@ type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
 
 const STANDARD_AGENDA_POINTS_TO_WIN = 7;
 const INITIAL_HAND_SIZE = 5;
+const BASE_MAX_HAND_SIZE = 5;
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_economy_event: {
@@ -248,6 +251,12 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     name: "corp_operation_gain_credits_4",
     resolve: (state) => {
       state.corp.credits += 4;
+    }
+  },
+  v111_core_damage_operation: {
+    name: "corp_operation_core_damage_1",
+    resolve: (state, legalAction) => {
+      resolveDamageOperation(state, legalAction, "core", 1, "v111_core_damage_operation");
     }
   },
   simple_draw_operation: {
@@ -443,6 +452,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       identity: corpIdentity.instanceId,
       credits: 5,
       clicks: 3,
+      maxHandSize: BASE_MAX_HAND_SIZE,
       badPublicity: 0,
       hq: corpHq,
       rd: corpRd,
@@ -458,6 +468,8 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       identity: runnerIdentity.instanceId,
       credits: 5,
       clicks: 0,
+      maxHandSize: BASE_MAX_HAND_SIZE,
+      coreDamage: 0,
       tags: 0,
       memoryUsed: 0,
       memoryLimit: 4,
@@ -635,6 +647,8 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           rig: [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].map((id) => visibleOwnCard(state, id)),
           memoryUsed: state.runner.memoryUsed,
           memoryLimit: state.runner.memoryLimit,
+          maxHandSize: maxHandSize(state, "runner"),
+          coreDamage: state.runner.coreDamage,
           tags: state.runner.tags
         }
       : {
@@ -646,6 +660,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           stackOrRdCount: state.corp.rd.length,
           heapOrArchives: state.corp.archives.map((id) => visibleOwnCard(state, id)),
           scoreArea: state.corp.scoreArea.map((id) => visibleOwnCard(state, id)),
+          maxHandSize: maxHandSize(state, "corp"),
           tags: state.runner.tags
         },
     opponent: runnerSide
@@ -656,6 +671,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           agendaPoints: agendaPoints(state, "corp"),
           tags: state.runner.tags,
           handCount: state.corp.hq.length,
+          maxHandSize: maxHandSize(state, "corp"),
           deckCount: state.corp.rd.length,
           discardCount: state.corp.archives.length,
           scoreArea: state.corp.scoreArea.map((id) => visibleOwnCard(state, id))
@@ -667,6 +683,8 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           agendaPoints: agendaPoints(state, "runner"),
           tags: state.runner.tags,
           handCount: state.runner.grip.length,
+          maxHandSize: maxHandSize(state, "runner"),
+          coreDamage: state.runner.coreDamage,
           deckCount: state.runner.stack.length,
           discardCount: state.runner.heap.length,
           scoreArea: state.runner.scoreArea.map((id) => visibleOwnCard(state, id)),
@@ -724,6 +742,9 @@ export function validateGameState(state: GameState): ValidationResult {
 
   if (state.corp.credits < 0 || state.runner.credits < 0) errors.push("Credits must not be negative.");
   if (state.corp.clicks < 0 || state.runner.clicks < 0) errors.push("Clicks must not be negative.");
+  if (!Number.isInteger(state.corp.maxHandSize) || state.corp.maxHandSize < 0) errors.push("Corp max hand size must be a non-negative integer.");
+  if (!Number.isInteger(state.runner.maxHandSize) || state.runner.maxHandSize < 0) errors.push("Runner base max hand size must be a non-negative integer.");
+  if (!Number.isInteger(state.runner.coreDamage) || state.runner.coreDamage < 0) errors.push("Runner core damage must be a non-negative integer.");
   if (!Number.isInteger(state.corp.badPublicity) || state.corp.badPublicity < 0) errors.push("Corp bad publicity must be a non-negative integer.");
   if (state.runner.tags < 0) errors.push("Runner tags must not be negative.");
   if (!Number.isInteger(state.runner.memoryLimit) || state.runner.memoryLimit < 0) errors.push("Runner memory limit must be a non-negative integer.");
@@ -1845,20 +1866,75 @@ function finishRun(state: GameState, successful: boolean): void {
 }
 
 function endTurn(state: GameState, side: Side): void {
+  startDiscardPhase(state, side);
+}
+
+function startDiscardPhase(state: GameState, side: Side): void {
+  state.activeSide = side;
   if (side === "runner") {
-    state.activeSide = "corp";
-    state.phase = "corp_draw_phase";
-    state.timingPoint = "corp_draw.mandatory_draw";
-    state.corp.clicks = 3;
-    state.runner.clicks = 0;
+    state.phase = "runner_discard_phase";
+    state.timingPoint = "runner_discard.flatline_check";
+    if (maxHandSize(state, "runner") < 0) {
+      state.winner = "corp";
+      state.gameEndReason = "flatline";
+      state.phase = "game_over";
+      state.timingPoint = "game.checkpoint";
+      delete state.pendingChoice;
+      delete state.run;
+      return;
+    }
+    processDiscardStep(state, "runner");
     return;
   }
+
+  state.phase = "corp_discard_phase";
+  state.timingPoint = "corp_discard.select_cards";
+  processDiscardStep(state, "corp");
+}
+
+function processDiscardStep(state: GameState, side: Side): void {
+  const hand = handForSide(state, side);
+  const requiredDiscardCount = hand.length - maxHandSize(state, side);
+  if (requiredDiscardCount <= 0) {
+    completeDiscardPhase(state, side);
+    return;
+  }
+  state.timingPoint = side === "corp" ? "corp_discard.select_cards" : "runner_discard.select_cards";
+  state.pendingChoice = discardChoice(state, side, requiredDiscardCount, state.stateVersion + 1);
+}
+
+function completeDiscardPhase(state: GameState, side: Side): void {
+  if (side === "runner") {
+    startCorpTurn(state);
+    return;
+  }
+  startRunnerTurn(state);
+}
+
+function startCorpTurn(state: GameState): void {
+  state.activeSide = "corp";
+  state.phase = "corp_draw_phase";
+  state.timingPoint = "corp_draw.mandatory_draw";
+  state.corp.clicks = 3;
+  state.runner.clicks = 0;
+}
+
+function startRunnerTurn(state: GameState): void {
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
   state.timingPoint = "runner_action.main";
   state.runner.clicks = 4;
   state.corp.clicks = 0;
   refreshRecurringCredits(state, "runner");
+}
+
+function handForSide(state: GameState, side: Side): CardInstanceId[] {
+  return side === "corp" ? state.corp.hq : state.runner.grip;
+}
+
+function maxHandSize(state: GameState, side: Side): number {
+  if (side === "corp") return state.corp.maxHandSize;
+  return state.runner.maxHandSize - state.runner.coreDamage;
 }
 
 function drawCorpCard(state: GameState): void {
@@ -1898,7 +1974,6 @@ function doDamage(
     source: string;
   }
 ): DamageSummary {
-  if (request.damageType === "core") throw new Error("Core Damage ist in V0.94 nicht spielbar.");
   assertPositiveIntegerAmount(request.amount);
   if (request.amount > state.runner.grip.length) {
     state.winner = "corp";
@@ -1926,16 +2001,35 @@ function doDamage(
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
   }
 
-  return { damageType: request.damageType, amount: request.amount, cardsTrashed: selected.length, flatline: false };
+  if (request.damageType === "core") state.runner.coreDamage += request.amount;
+
+  return {
+    damageType: request.damageType,
+    amount: request.amount,
+    cardsTrashed: selected.length,
+    flatline: false,
+    ...(request.damageType === "core"
+      ? {
+          coreDamageAfter: state.runner.coreDamage,
+          runnerMaxHandSizeAfter: maxHandSize(state, "runner")
+        }
+      : {})
+  };
 }
 
 function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {
   const first = mustArrayValue(summaries, 0, "Damage-Zusammenfassung fehlt.");
+  const lastCoreSummary = summaries
+    .slice()
+    .reverse()
+    .find((summary) => summary.coreDamageAfter !== undefined || summary.runnerMaxHandSizeAfter !== undefined);
   return {
     damageType: first.damageType,
     amount: summaries.reduce((total, summary) => total + summary.amount, 0),
     cardsTrashed: summaries.reduce((total, summary) => total + summary.cardsTrashed, 0),
-    flatline: summaries.some((summary) => summary.flatline)
+    flatline: summaries.some((summary) => summary.flatline),
+    ...(lastCoreSummary?.coreDamageAfter !== undefined ? { coreDamageAfter: lastCoreSummary.coreDamageAfter } : {}),
+    ...(lastCoreSummary?.runnerMaxHandSizeAfter !== undefined ? { runnerMaxHandSizeAfter: lastCoreSummary.runnerMaxHandSizeAfter } : {})
   };
 }
 
@@ -1946,7 +2040,9 @@ function setDamagePayload(legalAction: LegalAction, summary: DamageSummary): voi
     damageType: summary.damageType,
     damageAmount: summary.amount,
     cardsTrashed: summary.cardsTrashed,
-    flatline: summary.flatline
+    flatline: summary.flatline,
+    ...(summary.coreDamageAfter !== undefined ? { coreDamageAfter: summary.coreDamageAfter } : {}),
+    ...(summary.runnerMaxHandSizeAfter !== undefined ? { runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter } : {})
   };
 }
 
@@ -2090,6 +2186,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveSetupMulliganChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source === "discard_phase") {
+    resolveDiscardChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.trace) {
     if (state.trace.status === "corp_bid") {
       resolveTraceCorpBid(state, legalAction, playerAction);
@@ -2129,6 +2229,72 @@ function setupMulliganChoice(state: GameState, side: Side, stateVersion = state.
     stateVersion,
     visibility: "hidden_info_barrier"
   };
+}
+
+function discardChoice(state: GameState, side: Side, requiredDiscardCount: number, stateVersion = state.stateVersion): ChoiceRequest {
+  const hand = handForSide(state, side);
+  return {
+    choiceId: `discard_${side}_${stateVersion}`,
+    side,
+    source: "discard_phase",
+    prompt: side === "corp" ? "Korp-Discard wählen" : "Runner-Discard wählen",
+    kind: "select_cards",
+    options: hand.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: definitionFor(state, cardId).title,
+      publicLabel: "Handkarte",
+      value: cardId
+    })),
+    minSelections: requiredDiscardCount,
+    maxSelections: requiredDiscardCount,
+    stateVersion,
+    visibility: "hidden_info_barrier"
+  };
+}
+
+function resolveDiscardChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || choice.source !== "discard_phase") throw new Error("Es ist keine Discard-Choice offen.");
+  const side = choice.side;
+  if (state.timingPoint !== (side === "corp" ? "corp_discard.select_cards" : "runner_discard.select_cards")) {
+    throw new Error("Discard ist im aktuellen Timingpoint nicht legal.");
+  }
+  const selectedIds = selectedChoiceIds(playerAction.selectedChoices);
+  const selectedCards = selectedIds.map((optionId) => {
+    const option = choice.options.find((candidate) => candidate.id === optionId);
+    if (typeof option?.value !== "string") throw new Error("Die Discard-Auswahl ist ungueltig.");
+    return option.value;
+  });
+  const expectedCount = handForSide(state, side).length - maxHandSize(state, side);
+  if (expectedCount !== choice.minSelections || expectedCount !== selectedCards.length) throw new Error("Die Discard-Anzahl ist nicht mehr gueltig.");
+  const hand = handForSide(state, side);
+  for (const cardId of selectedCards) {
+    const instance = mustInstance(state.cardInstances, cardId);
+    if (instance.owner !== side || !hand.includes(cardId)) throw new Error("Eine Discard-Karte liegt nicht in der Hand.");
+  }
+
+  for (const cardId of selectedCards) {
+    removeFromAllZones(state, cardId);
+    if (side === "corp") {
+      state.corp.archives.push(cardId);
+      state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "archives" } };
+    } else {
+      state.runner.heap.push(cardId);
+      state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+    }
+  }
+
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    discardResolved: true,
+    discardSide: side,
+    discardCount: selectedCards.length,
+    discardZone: side === "corp" ? "archives" : "heap",
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "discard_phase"
+  };
+  delete state.pendingChoice;
+  completeDiscardPhase(state, side);
 }
 
 function resolveSetupMulliganChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
@@ -2635,6 +2801,7 @@ function baseClicksForSide(side: Side): number {
 
 function publicLabel(legalAction: LegalAction): string {
   if (legalAction.type === "resolve_choice" && legalAction.payload?.setupStep === "mulligan") return "Setup-Entscheidung wurde beantwortet.";
+  if (legalAction.type === "resolve_choice" && legalAction.payload?.discardResolved === true) return "Discard wurde abgeschlossen.";
   if (legalAction.type === "resolve_choice") return "Choice wurde beantwortet.";
   if (legalAction.side === "corp" && legalAction.type === "install_card") return "Korp installiert eine Karte.";
   if (legalAction.side === "corp" && legalAction.type === "advance_card") return "Korp advanced eine Karte.";
@@ -2663,6 +2830,13 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   if (legalAction.type === "gain_credit" || legalAction.type === "draw_card" || legalAction.type === "remove_tag") context.amount = 1;
   if (legalAction.type === "resolve_choice") {
     context.choiceKind = legalAction.payload?.choiceKind;
+    if (legalAction.payload?.discardResolved === true) {
+      context.discardResolved = true;
+      context.discardSide = legalAction.payload.discardSide;
+      context.discardCount = legalAction.payload.discardCount;
+      context.discardZone = legalAction.payload.discardZone;
+      context.redactedKind = "discard";
+    }
     if (legalAction.payload?.setupStep === "mulligan") {
       context.setupStep = "mulligan";
       context.setupSide = legalAction.payload.setupSide;
@@ -2700,6 +2874,8 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.damageAmount = legalAction.payload.damageAmount;
     context.cardsTrashed = legalAction.payload.cardsTrashed;
     context.flatline = legalAction.payload.flatline;
+    if (typeof legalAction.payload.coreDamageAfter === "number") context.coreDamageAfter = legalAction.payload.coreDamageAfter;
+    if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number") context.runnerMaxHandSizeAfter = legalAction.payload.runnerMaxHandSizeAfter;
   }
   if (legalAction.type === "purge_virus_counters") {
     context.purgedCounterType = "virus";

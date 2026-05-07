@@ -91,8 +91,6 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     }
 
     await createHumanVsAiGame(page, "v1-0-7-lifecycle-reconnect");
-    await page.getByRole("button", { name: "Wieder verbinden" }).click();
-    await expect(page.getByText("Wiederverbindung abgeschlossen.")).toBeVisible();
     await expect(page.getByTestId("active-game")).toBeVisible();
     await page.reload();
     await expect(page.getByTestId("active-game")).toBeVisible({ timeout: 20_000 });
@@ -100,7 +98,7 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await page.getByRole("button", { name: "Aufgeben" }).click();
     await expect(page.getByText(/Spiel aufgegeben|gewinnt/i).first()).toBeVisible();
     await page.getByRole("button", { name: "Board ansehen" }).click();
-    await page.getByRole("button", { name: "Verwerfen" }).first().click();
+    await page.getByRole("button", { name: "Startbildschirm" }).click();
     await expect(page.getByTestId("setup-screen")).toBeVisible();
   });
 

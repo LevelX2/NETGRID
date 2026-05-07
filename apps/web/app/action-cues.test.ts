@@ -177,6 +177,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
       heapOrArchives: [],
       scoreArea: [],
       rig: [],
+      maxHandSize: 5,
       tags: 0
     },
     opponent: {
@@ -185,6 +186,7 @@ function view(side: Side, overrides: Partial<PlayerView> = {}): PlayerView {
       agendaPoints: 0,
       tags: 0,
       handCount: 4,
+      maxHandSize: 5,
       deckCount: 5,
       discardCount: 0,
       identity: {

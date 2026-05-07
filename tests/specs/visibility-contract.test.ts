@@ -66,7 +66,7 @@ describe("Client visibility contract", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.1.0"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.1.1"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
@@ -151,6 +151,21 @@ describe("Client visibility contract", () => {
     expect(page).toContain("seriesDecision");
     expect(page).not.toContain("applyAction(");
     expect(page).not.toContain("createGame(");
+  });
+
+  it("keeps V1.1.1 Discard and Core-Damage UI side-safe", () => {
+    const page = readFileSync("apps/web/app/page.tsx", "utf8");
+    const chronicle = readFileSync("apps/web/app/chronicle.ts", "utf8");
+    expect(page).toContain("function DiscardChoicePanel");
+    expect(page).toContain('view.pendingChoice?.source === "discard_phase"');
+    expect(page).toContain("selectedChoices: { choiceId, selectedOptionIds }");
+    expect(page).toContain("activeView.own.maxHandSize");
+    expect(page).toContain("view.own.coreDamage");
+    expect(page).toContain("view.opponent.coreDamage");
+    expect(page).toContain("discard-choice-panel");
+    expect(page).not.toContain("RUNNER_BASE_HAND_LIMIT");
+    expect(chronicle).toContain("payload.discardResolved === true");
+    expect(chronicle).toContain("Discard");
   });
 
   it("keeps the V1.0.5 active board UI presentational and side-safe", () => {

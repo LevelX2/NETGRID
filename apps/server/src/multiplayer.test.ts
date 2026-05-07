@@ -9,7 +9,7 @@ import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { createRuntimeCardsById } from "@netrunner/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netrunner/decks";
-import { applyAction, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netrunner/engine";
+import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netrunner/engine";
 import { createConfiguredStorage, createNetrunnerHttpServer } from "./http-server";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
@@ -957,6 +957,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const accessMatch = await joinedMatch("mp-win-1");
     await submit(accessMatch.service, accessMatch.matchId, accessMatch.corp, (action) => action.type === "mandatory_draw", "mandatory");
     await submit(accessMatch.service, accessMatch.matchId, accessMatch.corp, (action) => action.type === "end_turn", "end-turn");
+    await submitFirstChoice(accessMatch.service, accessMatch.matchId, accessMatch.corp, "discard");
     await submit(accessMatch.service, accessMatch.matchId, accessMatch.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
     const accessReconnect = await accessMatch.service.reconnectMatch(accessMatch.matchId, {
       side: "runner",
@@ -1024,6 +1025,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const second = await joinedMatch("undo-blocked");
     await submit(second.service, second.matchId, second.corp, (action) => action.type === "mandatory_draw", "mandatory");
     await submit(second.service, second.matchId, second.corp, (action) => action.type === "end_turn", "end-turn");
+    await submitFirstChoice(second.service, second.matchId, second.corp, "discard");
     const run = await submit(second.service, second.matchId, second.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
     await submit(second.service, second.matchId, second.runner, (action) => action.type === "access_card", "access");
 
@@ -1109,6 +1111,47 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(blocked.ok).toBe(false);
     if (blocked.ok) throw new Error("Expected Damage hidden-info barrier");
     expect(blocked.error.code).toBe("undo_blocked");
+  });
+
+  it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {
+    const match = await joinedMatch("mp-v111-discard");
+    await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "v111-mandatory");
+    const endTurn = await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "v111-end-turn");
+
+    expect(endTurn.actorPayload.pendingChoice?.source).toBe("discard_phase");
+    expect(endTurn.actorPayload.pendingChoice?.kind).toBe("select_cards");
+    expect(endTurn.opponentPayload.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(endTurn.opponentPayload)).not.toContain(endTurn.actorPayload.pendingChoice?.options[0]?.label ?? "not-present");
+
+    const discarded = await submitFirstChoice(match.service, match.matchId, match.corp, "v111-discard");
+    expect(discarded.playerView.phase).toBe("runner_action_phase");
+    expect(discarded.eventTail.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(discarded.eventTail.at(-1)?.publicPayload).toMatchObject({ discardResolved: true, discardSide: "corp", discardCount: 1 });
+
+    const blocked = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: match.corp.sessionToken,
+      targetEventId: `evt_${discarded.playerView.stateVersion}`,
+      reason: "Discard undo"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected discard undo barrier");
+    expect(blocked.error.code).toBe("undo_blocked");
+
+    const record = await match.service.loadForTest(match.matchId);
+    expect(record).toBeTruthy();
+    if (!record?.gameState) throw new Error("Missing game state");
+    record.gameState = applyEffectCommands(record.gameState, [{ type: "do_damage", damageType: "core", amount: 1, source: "server_v111_core" }]);
+    record.eventLog = record.gameState.eventLog.map((event) => toEventRecordForTest(match.matchId, event));
+    await (match.service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+
+    const reconnectedCorp = await match.service.reconnectMatch(match.matchId, { side: "corp", reconnectToken: match.corp.reconnectToken });
+    expect("error" in reconnectedCorp).toBe(false);
+    if ("error" in reconnectedCorp) throw new Error(reconnectedCorp.error.message);
+    expect(reconnectedCorp.playerView.opponent.coreDamage).toBe(1);
+    expect(reconnectedCorp.playerView.opponent.maxHandSize).toBe(4);
+    expect(JSON.stringify(reconnectedCorp)).not.toContain("Simple Fracter");
   });
 
   it("handles V0.95 Resource trash through submit, idempotency, reconnect and undo", async () => {
@@ -2258,20 +2301,27 @@ describe("MVP 0.2 multiplayer service", () => {
     if (!endTurnResult.ok) throw new Error(endTurnResult.error.message);
 
     expect(endTurnResult.actorPayload.playerView.stateVersion).toBe(afterMandatory.playerView.stateVersion + 1);
-    expect(endTurnResult.actorPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
-    expect(endTurnResult.actorPayload.opponentStatus.connected).toBe(true);
-    expect(JSON.stringify(endTurnResult.actorPayload)).not.toContain("Simple Fracter");
+    expect(endTurnResult.actorPayload.pendingChoice?.source).toBe("discard_phase");
+    const afterDiscard = await submitFirstChoice(
+      service,
+      created.matchId,
+      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "corp-ai-mode-discard"
+    );
+    expect(afterDiscard.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(afterDiscard.opponentStatus.connected).toBe(true);
+    expect(JSON.stringify(afterDiscard)).not.toContain("Simple Fracter");
 
     const advanced = await service.advanceAi({
       matchId: created.matchId,
       side: "corp",
       sessionToken: created.hostSessionToken,
-      knownStateVersion: endTurnResult.actorPayload.playerView.stateVersion,
-      knownMatchVersion: endTurnResult.actorPayload.matchVersion
+      knownStateVersion: afterDiscard.playerView.stateVersion,
+      knownMatchVersion: afterDiscard.matchVersion
     });
     expect(advanced.ok).toBe(true);
     if (!advanced.ok) throw new Error(advanced.error.message);
-    expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(endTurnResult.actorPayload.playerView.stateVersion);
+    expect(advanced.requesterPayload.playerView.stateVersion).toBeGreaterThan(afterDiscard.playerView.stateVersion);
     expect(JSON.stringify(advanced.requesterPayload)).not.toContain("Simple Fracter");
   });
 
@@ -2290,6 +2340,7 @@ describe("MVP 0.2 multiplayer service", () => {
     let gameState = createGameAfterSetup({ matchId: created.matchId, seed: "server-runner-ai-rez-window" });
     gameState = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
     gameState = applyEngineAction(gameState, "corp", (action) => action.type === "end_turn");
+    if (gameState.pendingChoice?.source === "discard_phase") gameState = applyEngineChoice(gameState, "corp", [String(gameState.pendingChoice.options[0]?.id)]);
     putCorpIceOnServerForTest(gameState, "rd", "simple_barrier_ice");
     gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     expect(gameState.activeSide).toBe("corp");
@@ -3011,6 +3062,9 @@ async function bootstrap(service: MultiplayerService, matchId: string, session: 
 function toRunnerTurnEngine(state: GameState): GameState {
   let next = applyEngineAction(state, "corp", (action) => action.type === "mandatory_draw");
   next = applyEngineAction(next, "corp", (action) => action.type === "end_turn");
+  if (next.pendingChoice?.source === "discard_phase" && next.pendingChoice.side === "corp") {
+    next = applyEngineChoice(next, "corp", [String(next.pendingChoice.options[0]?.id)]);
+  }
   return next;
 }
 
@@ -3033,6 +3087,13 @@ async function submitChoice(service: MultiplayerService, matchId: string, sessio
   return result.actorPayload;
 }
 
+async function submitFirstChoice(service: MultiplayerService, matchId: string, session: PlayerSession, key: string): Promise<SidePayload> {
+  const before = await bootstrap(service, matchId, session);
+  const optionId = before.playerView.pendingChoice?.options[0]?.id;
+  if (!optionId) throw new Error("Missing first choice option");
+  return submitChoice(service, matchId, session, optionId, key);
+}
+
 function applyEngineAction(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
   const selected = getLegalActions(state, side).find(predicate);
   if (!selected) throw new Error(`Missing engine action for ${side}`);
@@ -3042,6 +3103,21 @@ function applyEngineAction(state: GameState, side: Side, predicate: (action: Leg
     actionId: selected.actionId,
     clientKnownStateVersion: state.stateVersion,
     idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}`
+  });
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
+}
+
+function applyEngineChoice(state: GameState, side: Side, selectedOptionIds: string[]): GameState {
+  const selected = getLegalActions(state, side).find((action) => action.type === "resolve_choice");
+  if (!selected) throw new Error(`Missing engine choice action for ${side}`);
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: selected.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds },
+    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionIds.join(".")}`
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;

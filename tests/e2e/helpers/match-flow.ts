@@ -74,8 +74,15 @@ export async function installFirstCorpCard(page: Page): Promise<string> {
     const slot = cardSlots.nth(index);
     const card = slot.getByTestId("known-card");
     const marker = slot.getByTestId("card-action-marker");
-    if (!(await marker.isVisible().catch(() => false))) continue;
     const title = (await card.innerText()).split("\n")[0]?.trim() ?? "";
+    await card.click();
+    const panelInstall = page.locator('[data-testid="action-button"][data-action-type="install_card"]').first();
+    if (await panelInstall.isVisible().catch(() => false)) {
+      await panelInstall.click();
+      await expect(page.locator('[data-testid="server"] [data-testid="known-card"]').first()).toBeVisible();
+      return title;
+    }
+    if (!(await marker.isVisible().catch(() => false))) continue;
     await marker.click();
     const install = page.locator('[data-testid="card-action-button"][data-action-type="install_card"]').first();
     if (await install.isVisible().catch(() => false)) {

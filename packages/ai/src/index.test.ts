@@ -82,6 +82,24 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(serialized).not.toContain("Simple Killer");
   });
 
+  it("resolves V1.1.1 Discard choices deterministically from PlayerView and LegalActions", () => {
+    let state = createGameAfterSetup({ seed: "ai-v111-discard" });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const decision = chooseCorpAction(input);
+    const sortedFirst = input.playerView.pendingChoice?.options.slice().sort((left, right) => left.label.localeCompare(right.label, "de") || left.id.localeCompare(right.id))[0]?.id;
+    const serializedRunner = JSON.stringify(buildAiDecisionInput(state, "runner", { difficulty: "normal" }));
+
+    expect(input.playerView.pendingChoice?.source).toBe("discard_phase");
+    expect(input.legalActions.map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(decision.selectedChoices).toEqual({ choiceId: state.pendingChoice?.choiceId, selectedOptionIds: [sortedFirst] });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(serializedRunner).not.toContain(input.playerView.pendingChoice?.options[0]?.label ?? "not-present");
+    expect(serializedRunner).not.toContain("cardInstances");
+  });
+
   it("keeps V0.95 Resource trash decisions LegalActions-only and side-safe", () => {
     const state = installedResourceCorpTurn("ai-v095-resource");
     const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
@@ -673,7 +691,25 @@ function mustAction(state: GameState, side: Side, predicate: (action: LegalActio
 function toRunnerTurn(state: GameState): GameState {
   let next = apply(state, "corp", (action) => action.type === "mandatory_draw");
   next = apply(next, "corp", (action) => action.type === "end_turn");
+  if (next.pendingChoice?.source === "discard_phase" && next.pendingChoice.side === "corp") {
+    next = applyChoice(next, "corp", [String(next.pendingChoice.options[0]?.id)]);
+  }
   return next;
+}
+
+function applyChoice(state: GameState, side: Side, selectedOptionIds: string[]): GameState {
+  const selected = mustAction(state, side, (action) => action.type === "resolve_choice");
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: selected.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds },
+    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionIds.join(".")}`
+  });
+  expect(result.ok, result.ok ? "" : result.error.message).toBe(true);
+  if (!result.ok) throw new Error(result.error.message);
+  return result.state;
 }
 
 function ensureRemoteServer(state: GameState, serverId: `remote_${number}`): void {

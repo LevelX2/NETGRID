@@ -93,6 +93,13 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (payload.discardResolved === true) {
+        category = "hidden";
+        visibility = "redacted";
+        title = phrase(subject, `${cardCountText(numberValue(payload.discardCount) ?? 0)} abgeworfen`);
+        chips.push("Discard", stringValue(payload.discardZone) === "archives" ? "Archive" : "Heap");
+        break;
+      }
       if (payload.setupStep === "mulligan") {
         category = "system";
         visibility = "system";
@@ -314,6 +321,8 @@ function summarizeEffect(cardText: string | undefined): EffectSummary {
   if (lose) return { category: "danger", sentence: `Der Runner verliert bis zu ${lose[1]} Credits.`, chips: [`-${lose[1]} Runner-Credits`] };
   const tag = cardText.match(/Gib dem Runner\s+(\d+)\s+Tag/i);
   if (tag) return { category: "danger", sentence: `Der Runner erhält ${tag[1]} Tag.`, chips: [`+${tag[1]} Tag`] };
+  const coreDamage = cardText.match(/(\d+)\s+Core Damage/i);
+  if (coreDamage) return { category: "danger", sentence: `Der Runner erleidet ${coreDamage[1]} Core Damage.`, chips: [`${coreDamage[1]} Core`] };
   if (/Run auf einen Server/i.test(cardText)) return { category: "run", suffix: "Run-Druck aufgebaut", chips: ["Run"] };
   return { chips: [] };
 }

@@ -4,7 +4,9 @@ export type Phase =
   | "setup"
   | "corp_draw_phase"
   | "corp_action_phase"
+  | "corp_discard_phase"
   | "runner_action_phase"
+  | "runner_discard_phase"
   | "run"
   | "game_over";
 
@@ -13,7 +15,12 @@ export type TimingPointId =
   | "setup.mulligan.corp"
   | "corp_draw.mandatory_draw"
   | "corp_action.main"
+  | "corp_discard.select_cards"
+  | "corp_discard.complete"
   | "runner_action.main"
+  | "runner_discard.flatline_check"
+  | "runner_discard.select_cards"
+  | "runner_discard.complete"
   | "run.approach_ice"
   | "run.encounter_ice"
   | "run.jack_out_window"
@@ -323,6 +330,7 @@ export type CorpState = {
   identity: CardInstanceId;
   credits: number;
   clicks: number;
+  maxHandSize: number;
   badPublicity: number;
   hq: CardInstanceId[];
   rd: CardInstanceId[];
@@ -341,6 +349,8 @@ export type RunnerState = {
   identity: CardInstanceId;
   credits: number;
   clicks: number;
+  maxHandSize: number;
+  coreDamage: number;
   tags: number;
   memoryUsed: number;
   memoryLimit: number;
@@ -575,6 +585,8 @@ export type PlayerView = {
     rig?: VisibleCard[];
     memoryUsed?: number;
     memoryLimit?: number;
+    maxHandSize: number;
+    coreDamage?: number;
     tags: number;
   };
   opponent: {
@@ -584,6 +596,8 @@ export type PlayerView = {
     agendaPoints: number;
     tags: number;
     handCount: number;
+    maxHandSize: number;
+    coreDamage?: number;
     deckCount: number;
     discardCount: number;
     scoreArea: VisibleCard[];
@@ -1564,6 +1578,17 @@ export const DEMO_CARDS: CardDefinition[] = [
     cost: 0,
     rulesText: "Erhalte 4 Credits.",
     mechanics: ["play_operation", "gain_credits"]
+  },
+  {
+    id: "v111_core_damage_operation",
+    title: "Core Damage Harness",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Do 1 Core Damage.",
+    mechanics: ["play_operation", "damage", "core_damage", "flatline", "v111_local_original"]
   },
   {
     id: "simple_economy_asset",
