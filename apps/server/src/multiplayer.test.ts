@@ -20,8 +20,8 @@ describe("V1.0.9 private internet hardening", () => {
   it("validates local and private internet deployment profiles", () => {
     const local = loadDeploymentConfig({ NETRUNNER_DEPLOYMENT_PROFILE: "local" } as NodeJS.ProcessEnv);
     expect(local.profile).toBe("local");
-    expect(local.webBaseUrl).toBe("http://127.0.0.1:3000");
-    expect(local.allowedOrigins).toContain("http://127.0.0.1:3000");
+    expect(local.webBaseUrl).toBe("http://127.0.0.1:3100");
+    expect(local.allowedOrigins).toContain("http://127.0.0.1:3100");
 
     expect(() =>
       loadDeploymentConfig({
@@ -1943,7 +1943,7 @@ describe("MVP 0.2 multiplayer service", () => {
   it("keeps personal Runner/Corp deck pairs across a private side-swap series", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "series-personal-decks",
-      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:8787"
     });
     const created = await service.createMatch({
@@ -2027,7 +2027,7 @@ describe("MVP 0.2 multiplayer service", () => {
   it("sends side-filtered bootstrap messages over WebSocket", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-test",
-      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:0"
     });
     const created = await service.createMatch({ hostSide: "runner", seed: "ws-bootstrap" });
@@ -2076,7 +2076,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, {
       tokenSalt: "ws-choice-test",
-      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:0"
     });
     const created = await service.createMatch({ hostSide: "runner", seed: "ws-choice" });
@@ -2139,7 +2139,7 @@ describe("MVP 0.2 multiplayer service", () => {
   it("broadcasts active match status to the host when the second player joins by WebSocket", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-status-test",
-      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:0"
     });
     const created = await service.createMatch({ hostSide: "corp", seed: "ws-status" });
@@ -2188,7 +2188,7 @@ describe("MVP 0.2 multiplayer service", () => {
   it("keeps both browser tabs in the ready lobby after the joiner submits decks", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-join-deck-lobby",
-      publicWebBaseUrl: "http://127.0.0.1:3000",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:0"
     });
     const created = await service.createMatch({
@@ -2685,7 +2685,7 @@ const V095_CORP_DECK: DeckDefinition = {
 async function joinedMatch(seed = "service-test", settings?: Partial<MatchSettings>) {
   const service = new MultiplayerService(new InMemoryMatchStorage(), {
     tokenSalt: "test-salt",
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed, ...(settings ? { settings } : {}) });
@@ -2766,7 +2766,7 @@ async function putTopCorpAgendaForMatch(service: MultiplayerService, matchId: st
 async function pendingDeckMatch(seed: string, countdownSeconds: 3 | 5 | 10 = 5) {
   const service = new MultiplayerService(new InMemoryMatchStorage(), {
     tokenSalt: `v104-${seed}`,
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({
@@ -2841,7 +2841,7 @@ async function joinedV094DamageMatch(seed: string, options: { emptyRunnerGrip?: 
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
@@ -2880,7 +2880,7 @@ async function joinedV095ResourceMatch(seed: string) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
@@ -2925,7 +2925,7 @@ async function joinedV096TraceMatch(seed: string) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
@@ -2975,7 +2975,7 @@ async function joinedV097BreachMatch(seed: string) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
@@ -3023,7 +3023,7 @@ async function joinedV112ArchivesMatch(seed: string) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
@@ -3072,7 +3072,7 @@ async function joinedV098HiddenSearchMatch(seed: string) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed });
@@ -3118,7 +3118,7 @@ async function joinedV099HostingMatch(seed: string) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
     tokenSalt: `test-salt-${seed}`,
-    publicWebBaseUrl: "http://127.0.0.1:3000",
+    publicWebBaseUrl: "http://127.0.0.1:3100",
     publicServerBaseUrl: "http://127.0.0.1:8787"
   });
   const created = await service.createMatch({ hostSide: "corp", seed });

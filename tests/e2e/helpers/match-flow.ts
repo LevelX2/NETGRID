@@ -1,7 +1,7 @@
 import { expect, type Browser, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
 import { VIEWPORTS, type ViewportName } from "./viewports";
 
-export const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000";
+export const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3100";
 
 export async function newContextPage(browser: Browser, viewport: ViewportName): Promise<{ context: BrowserContext; page: Page }> {
   const context = await browser.newContext({ viewport: VIEWPORTS[viewport] });

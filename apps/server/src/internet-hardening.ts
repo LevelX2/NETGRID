@@ -3,6 +3,8 @@ import { createHash } from "node:crypto";
 import type { StorageHealth } from "./storage-sqlite";
 
 export const LOCAL_DEFAULT_TOKEN_SALT = "local-dev-netrunner-token-salt";
+export const LOCAL_DEFAULT_WEB_BASE_URL = "http://127.0.0.1:3100";
+export const LOCAL_DEFAULT_SERVER_BASE_URL = "http://127.0.0.1:8787";
 
 export type DeploymentProfile = "local" | "private_internet";
 export type RateLimitProfile = "off" | "local" | "private_internet" | "test";
@@ -28,14 +30,14 @@ export class DeploymentConfigError extends Error {
 
 export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): DeploymentConfig {
   const profile = env.NETRUNNER_DEPLOYMENT_PROFILE === "private_internet" ? "private_internet" : "local";
-  const webBaseUrl = trimTrailingSlash(env.NETRUNNER_WEB_BASE_URL ?? "http://127.0.0.1:3000");
-  const serverBaseUrl = trimTrailingSlash(env.NETRUNNER_SERVER_BASE_URL ?? "http://127.0.0.1:8787");
+  const webBaseUrl = trimTrailingSlash(env.NETRUNNER_WEB_BASE_URL ?? LOCAL_DEFAULT_WEB_BASE_URL);
+  const serverBaseUrl = trimTrailingSlash(env.NETRUNNER_SERVER_BASE_URL ?? LOCAL_DEFAULT_SERVER_BASE_URL);
   const configuredOrigins = parseOrigins(env.NETRUNNER_ALLOWED_ORIGINS);
   const localOrigins = uniqueOrigins([
     originOf(webBaseUrl),
     originOf(serverBaseUrl),
-    "http://127.0.0.1:3000",
-    "http://localhost:3000",
+    "http://127.0.0.1:3100",
+    "http://localhost:3100",
     "http://127.0.0.1:8787",
     "http://localhost:8787"
   ]);

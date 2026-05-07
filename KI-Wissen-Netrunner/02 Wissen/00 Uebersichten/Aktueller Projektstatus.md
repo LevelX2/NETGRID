@@ -2,6 +2,7 @@
 
 ## Umgesetzt
 
+- Lokaler NETGRID-Web-Standardport ist seit 2026-05-07 `http://127.0.0.1:3100`, damit die Anwendung nicht mit anderen lokalen Projekten auf Port 3000 kollidiert. Der Multiplayer-Server bleibt standardmäßig auf `http://127.0.0.1:8787`.
 - Bestandsaufnahme vom 2026-05-04 abgeschlossen und in `docs/derived/BESTANDSAUFNAHME_2026-05-04.md` dokumentiert.
 - README und Codex-Status wurden auf den tatsächlichen Stand V0.99/S01 aktualisiert.
 - Testentdeckung korrigiert: `apps/web/app/chronicle.test.ts` läuft jetzt über den normalen Web-Testbefehl.

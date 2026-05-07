@@ -60,11 +60,11 @@ corepack pnpm -F @netrunner/server dev
 corepack pnpm -F @netrunner/web dev
 ```
 
-Der Multiplayer-Server läuft standardmäßig unter `http://127.0.0.1:8787`. Die Weboberfläche läuft standardmäßig unter `http://127.0.0.1:3000` und nutzt `NEXT_PUBLIC_NETRUNNER_SERVER_URL`, falls der Server nicht auf dem Default-Port läuft.
+Der Multiplayer-Server läuft standardmäßig unter `http://127.0.0.1:8787`. Die Weboberfläche läuft standardmäßig unter `http://127.0.0.1:3100` und nutzt `NEXT_PUBLIC_NETRUNNER_SERVER_URL`, falls der Server nicht auf dem Default-Port läuft.
 
 Für ein privates Match im lokalen Netz:
 
-- Host öffnet `http://127.0.0.1:3000`, erstellt ein Match und kopiert den Join-Link.
+- Host öffnet `http://127.0.0.1:3100`, erstellt ein Match und kopiert den Join-Link.
 - Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link und wählt beim Beitritt eigene gespeicherte Runner-/Corp-Decks.
 - KI-Partien können in der Startansicht als Runner vs Corp-KI, Corp vs Runner-KI oder KI vs KI gestartet werden.
 - Außerhalb von localhost HTTPS/WSS verwenden und Tokens wie Passwörter behandeln.

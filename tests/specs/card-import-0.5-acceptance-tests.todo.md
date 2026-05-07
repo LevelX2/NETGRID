@@ -38,4 +38,4 @@ Stand: 2026-05-03
 - Pakettests: `packages/catalog/src/index.test.ts`.
 - Artefakt- und Hash-Tests: `tests/specs/phase1-artifacts.test.ts`.
 - API-/Visibility-Vertrag: `tests/specs/visibility-contract.test.ts`.
-- Browser-Smoke: Katalogsuche und blocked-Karte auf `http://127.0.0.1:3000`.
+- Browser-Smoke: Katalogsuche und blocked-Karte auf `http://127.0.0.1:3100`.

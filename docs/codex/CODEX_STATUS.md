@@ -2073,6 +2073,7 @@ Remaining known limits:
 
 - Node target files exist: `.nvmrc` and `.node-version` both specify `24`.
 - Root `package.json` declares `pnpm@10.33.2` via `packageManager`.
+- Local web dev default is `http://127.0.0.1:3100` so NETGRID does not collide with other local apps on port 3000. The multiplayer server default remains `http://127.0.0.1:8787`.
 - If `pnpm` is not directly on PATH, use `corepack pnpm ...`.
 
 ## Next step

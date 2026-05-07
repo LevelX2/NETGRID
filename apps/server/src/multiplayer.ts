@@ -35,7 +35,7 @@ import {
   type ResolvedParticipantDeckPair,
   type ResolvedParticipantDeckSetup
 } from "./deck-setup";
-import { LOCAL_DEFAULT_TOKEN_SALT } from "./internet-hardening";
+import { LOCAL_DEFAULT_SERVER_BASE_URL, LOCAL_DEFAULT_TOKEN_SALT, LOCAL_DEFAULT_WEB_BASE_URL } from "./internet-hardening";
 import type { BackupManifest, StorageHealth } from "./storage-sqlite";
 
 export type MatchStatus =
@@ -568,8 +568,8 @@ export class MultiplayerService {
     options: { tokenSalt?: string; publicWebBaseUrl?: string; publicServerBaseUrl?: string; now?: () => string } = {}
   ) {
     this.tokenSalt = options.tokenSalt ?? process.env.NETRUNNER_TOKEN_SALT ?? LOCAL_DEFAULT_TOKEN_SALT;
-    this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? process.env.NETRUNNER_WEB_BASE_URL ?? "http://127.0.0.1:3000");
-    this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? process.env.NETRUNNER_SERVER_BASE_URL ?? "http://127.0.0.1:8787");
+    this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? process.env.NETRUNNER_WEB_BASE_URL ?? LOCAL_DEFAULT_WEB_BASE_URL);
+    this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? process.env.NETRUNNER_SERVER_BASE_URL ?? LOCAL_DEFAULT_SERVER_BASE_URL);
     this.now = options.now ?? (() => new Date().toISOString());
   }
 

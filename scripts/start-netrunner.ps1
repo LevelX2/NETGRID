@@ -1,7 +1,7 @@
 $ErrorActionPreference = "Stop"
 
 $projectRoot = "C:\Projekte\Netrunner"
-$webUrl = "http://127.0.0.1:3000"
+$webUrl = "http://127.0.0.1:3100"
 $serverUrl = "http://127.0.0.1:8787/health"
 $logDir = Join-Path $env:TEMP "netrunner"
 $serverLog = Join-Path $logDir "server.log"
