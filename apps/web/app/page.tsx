@@ -156,7 +156,7 @@ const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
 const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.4.1";
+const APP_STATUS_LABEL = "V1.6.0";
 const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
@@ -729,6 +729,49 @@ function SubroutineIcon() {
   return (
     <span className="subroutineIcon" role="img" aria-label="Subroutine">
       ↩
+    </span>
+  );
+}
+
+function isHardwareCardType(type: string | undefined | null): boolean {
+  return (type ?? "").toLowerCase() === "hardware";
+}
+
+function hasGeneratedCardArt(cardId: string | undefined | null): boolean {
+  return typeof cardId === "string" && LOCAL_CARD_IMAGE_IDS.has(cardId);
+}
+
+function HardwareImageOverlay({
+  title,
+  rulesText,
+  installCost,
+  className,
+  maxLines = 2
+}: {
+  title: string;
+  rulesText?: string;
+  installCost?: number;
+  className?: string;
+  maxLines?: number;
+}) {
+  const overlayRules = rulesText ? rulesTextLines(rulesText).slice(0, Math.max(0, maxLines)) : [];
+  const overlayClassName = className ? `hardwareImageOverlay ${className}` : "hardwareImageOverlay";
+  return (
+    <span className={overlayClassName} aria-hidden="true">
+      <span className="hardwareImageOverlayTop">
+        <span className="hardwareImageOverlayName">{title}</span>
+      </span>
+      {installCost !== undefined ? <span className="hardwareImageOverlayCost">{installCost}</span> : null}
+      <span className="hardwareImageOverlayFrame">
+        <span className="hardwareImageOverlayKind">Hardware</span>
+        {overlayRules.length > 0 ? (
+          <span className="hardwareImageOverlayRules">
+            {overlayRules.map((line, index) => (
+              <span key={`${title}-hardware-overlay-rule-${index}`}>{renderRuleTextSegments(line, `${title}-hardware-overlay-rule-${index}`)}</span>
+            ))}
+          </span>
+        ) : null}
+      </span>
     </span>
   );
 }
@@ -5072,6 +5115,7 @@ function CatalogPanel({
   onClearTypeFilters(): void;
 }) {
   const catalogImageUrl = detail ? localCardImageUrl(detail.catalogCardId) : undefined;
+  const showCatalogHardwareOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isHardwareCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const visibleStatusKeys = showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS;
   const availableStatusKeys = new Set(filters?.statuses ?? CATALOG_STATUS_FILTER_KEYS);
   const statusOptions = visibleStatusKeys.filter((value) => availableStatusKeys.has(value));
@@ -5207,8 +5251,16 @@ function CatalogPanel({
                 <span className={`sideBadge ${detail.side}`}>{detail.side}</span>
               </div>
               {catalogImageUrl ? (
-                <div className="catalogImagePreview">
+                <div className={`catalogImagePreview ${showCatalogHardwareOverlay ? "hardware" : ""}`}>
                   <img src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} />
+                  {showCatalogHardwareOverlay ? (
+                    <HardwareImageOverlay
+                      title={detail.title}
+                      rulesText={detail.text}
+                      className="catalogHardwareOverlay"
+                      {...(detail.numeric.installCost !== null ? { installCost: detail.numeric.installCost } : {})}
+                    />
+                  ) : null}
                 </div>
               ) : null}
               <StatusBadges statuses={detail.statuses} showExpert={showExpertStatuses} />
@@ -5671,7 +5723,14 @@ function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card:
   const metrics = deckBuilderMetricLine(detail);
   return (
     <section className="deckBuilderPreview" aria-label="Kartenpreview">
-      <DeckCardThumb cardId={card.catalogCardId} title={card.title} preview />
+      <DeckCardThumb
+        cardId={card.catalogCardId}
+        title={card.title}
+        cardType={card.type}
+        preview
+        {...(detail?.text ? { rulesText: detail.text } : {})}
+        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+      />
       <div className="deckBuilderPreviewText">
         <span>{deckBuilderCardGroup(card)}</span>
         <strong>{card.title}</strong>
@@ -5713,7 +5772,13 @@ function DeckLibraryCard({
   const title = deckBuilderCardTooltip(card, detail);
   return (
     <article className={`deckLibraryCard ${quantity > 0 ? "inDeck" : ""} ${selected ? "selected" : ""}`} onClick={onSelect} title={title}>
-      <DeckCardThumb cardId={card.catalogCardId} title={card.title} />
+      <DeckCardThumb
+        cardId={card.catalogCardId}
+        title={card.title}
+        cardType={card.type}
+        {...(detail?.text ? { rulesText: detail.text } : {})}
+        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+      />
       <div className="deckBuilderCardText">
         <strong>{card.title}</strong>
         <span>{formatCatalogTypeLine(card)}</span>
@@ -5756,7 +5821,13 @@ function DeckListCard({
   const metrics = deckBuilderMetricLine(detail);
   return (
     <article className="deckListCard" onClick={onSelect} title={title}>
-      <DeckCardThumb cardId={card?.catalogCardId ?? cardId} title={card?.title ?? cardId} />
+      <DeckCardThumb
+        cardId={card?.catalogCardId ?? cardId}
+        title={card?.title ?? cardId}
+        {...(card?.type ? { cardType: card.type } : {})}
+        {...(detail?.text ? { rulesText: detail.text } : {})}
+        {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+      />
       <div className="deckBuilderCardText">
         <strong>{card?.title ?? cardId}</strong>
         <span>{card ? formatCatalogTypeLine(card) : "Nicht im gültigen Kartenpool"}</span>
@@ -5778,11 +5849,43 @@ function DeckListCard({
   );
 }
 
-function DeckCardThumb({ cardId, title, large = false, preview = false }: { cardId: string; title: string; large?: boolean; preview?: boolean }) {
+function DeckCardThumb({
+  cardId,
+  title,
+  cardType,
+  rulesText,
+  installCost,
+  large = false,
+  preview = false
+}: {
+  cardId: string;
+  title: string;
+  cardType?: string;
+  rulesText?: string;
+  installCost?: number;
+  large?: boolean;
+  preview?: boolean;
+}) {
   const imageUrl = localCardImageUrl(cardId);
+  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedCardArt(cardId);
   return (
     <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
-      {imageUrl ? <img src={imageUrl} alt="" /> : <span>{title.slice(0, 1)}</span>}
+      {imageUrl ? (
+        <>
+          <img src={imageUrl} alt="" />
+          {showHardwareOverlay ? (
+            <HardwareImageOverlay
+              title={title}
+              className={preview ? "deckHardwareOverlay preview" : "deckHardwareOverlay"}
+              maxLines={preview ? 2 : 1}
+              {...(rulesText ? { rulesText } : {})}
+              {...(installCost !== undefined ? { installCost } : {})}
+            />
+          ) : null}
+        </>
+      ) : (
+        <span>{title.slice(0, 1)}</span>
+      )}
     </span>
   );
 }
@@ -6121,6 +6224,7 @@ function CardView({
   const nativeTitle = showTooltip || showCardActions || suppressCardTooltip ? undefined : tooltipText;
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
   const visualImageUrl = cardImageUrl;
+  const isHardwareImageCard = Boolean(visualImageUrl) && card.known && isHardwareCardType(card.type) && hasGeneratedCardArt(card.definitionId);
   const showArtBlock = !visualImageUrl && displayMode === "placeholder";
   const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
@@ -6177,6 +6281,13 @@ function CardView({
         data-known={card.known ? "true" : "false"}
       >
         {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
+        {isHardwareImageCard ? (
+          <HardwareImageOverlay
+            title={card.title ?? "Hardware"}
+            rulesText={rulesText}
+            {...(card.installCost !== undefined ? { installCost: card.installCost } : {})}
+          />
+        ) : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
         {installedState && installedStateLabel ? <InstalledStateMark state={installedState} label={installedStateLabel} /> : null}

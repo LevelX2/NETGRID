@@ -2,6 +2,8 @@
 .env.*
 !.env.example
 AGENTS.local.md
+.codex/
+.codex-runlogs/
 
 node_modules/
 .pnpm-store/
@@ -23,6 +25,10 @@ data/local/
 data/local-assets/
 tmp*/
 *.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 *.tsbuildinfo
 
 docs/source/PrivateScans/

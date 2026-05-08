@@ -1051,8 +1051,11 @@ select {
 }
 
 .catalogImagePreview {
+  position: relative;
   width: min(230px, 100%);
   margin: 10px auto 12px;
+  overflow: hidden;
+  border-radius: 8px;
 }
 
 .catalogImagePreview img {
@@ -1062,6 +1065,22 @@ select {
   border: 1px solid var(--card-image-border);
   border-radius: 8px;
   box-shadow: var(--card-shadow);
+}
+
+.catalogImagePreview.hardware .catalogHardwareOverlay {
+  border-radius: 8px;
+}
+
+.catalogHardwareOverlay .hardwareImageOverlayName {
+  font-size: 10px;
+}
+
+.catalogHardwareOverlay .hardwareImageOverlayCost {
+  min-width: 28px;
+  height: 28px;
+  font-size: 16px;
+  top: 8px;
+  right: 8px;
 }
 
 .catalogNotice {
@@ -1375,6 +1394,7 @@ select {
 }
 
 .deckCardThumb {
+  position: relative;
   width: 52px;
   aspect-ratio: 5 / 7;
   display: grid;
@@ -1402,6 +1422,93 @@ select {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.deckHardwareOverlay {
+  border-radius: 6px;
+  padding: 3px;
+}
+
+.deckHardwareOverlay .hardwareImageOverlayTop {
+  top: 3px;
+  left: 3px;
+  right: 3px;
+  min-height: 13px;
+  padding: 1px 4px;
+}
+
+.deckHardwareOverlay .hardwareImageOverlayName {
+  font-size: 7px;
+}
+
+.deckHardwareOverlay .hardwareImageOverlayCost {
+  top: 4px;
+  right: 4px;
+  min-width: 13px;
+  height: 13px;
+  padding: 0 3px;
+  font-size: 7px;
+}
+
+.deckHardwareOverlay .hardwareImageOverlayFrame {
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  height: 41%;
+  padding: 2px 4px 3px;
+  gap: 1px;
+}
+
+.deckHardwareOverlay .hardwareImageOverlayKind {
+  font-size: 6px;
+}
+
+.deckHardwareOverlay .hardwareImageOverlayRules {
+  display: none;
+}
+
+.deckHardwareOverlay.preview {
+  padding: 5px;
+}
+
+.deckHardwareOverlay.preview .hardwareImageOverlayTop {
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  min-height: 18px;
+  padding: 2px 6px;
+}
+
+.deckHardwareOverlay.preview .hardwareImageOverlayName {
+  font-size: 9px;
+}
+
+.deckHardwareOverlay.preview .hardwareImageOverlayCost {
+  top: 6px;
+  right: 6px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+.deckHardwareOverlay.preview .hardwareImageOverlayFrame {
+  left: 5px;
+  right: 5px;
+  bottom: 5px;
+  height: 44%;
+  gap: 2px;
+  padding: 5px 6px;
+}
+
+.deckHardwareOverlay.preview .hardwareImageOverlayKind {
+  font-size: 8px;
+}
+
+.deckHardwareOverlay.preview .hardwareImageOverlayRules {
+  display: grid;
+  font-size: 9px;
+  line-height: 1.2;
 }
 
 .deckCardThumb.hasImage > span {
@@ -4242,6 +4349,163 @@ select,
   height: 100%;
   border-radius: 6px;
   object-fit: cover;
+}
+
+.card.withImage.hardware {
+  position: relative;
+  overflow: hidden;
+}
+
+.hardwareImageOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  padding: 5px;
+  pointer-events: none;
+  color: #f3f7f8;
+  background: linear-gradient(180deg, rgb(10 16 24 / 0.04) 0%, rgb(9 15 22 / 0.12) 48%, rgb(7 12 18 / 0.3) 100%);
+}
+
+.hardwareImageOverlayTop {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  right: 5px;
+  min-height: 19px;
+  padding: 3px 7px;
+  border: 1px solid rgb(211 178 113 / 0.84);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgb(172 138 81 / 0.9) 0%, rgb(97 73 34 / 0.95) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 241 198 / 0.36),
+    0 1px 4px rgb(0 0 0 / 0.3);
+}
+
+.hardwareImageOverlayName {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #f7efdc;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.45);
+}
+
+.hardwareImageOverlayCost {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border: 1px solid rgb(238 222 180 / 0.88);
+  border-radius: 999px;
+  background: radial-gradient(circle at 32% 25%, rgb(248 233 197 / 0.95) 0%, rgb(195 161 98 / 0.98) 45%, rgb(121 88 43 / 1) 100%);
+  color: #160f05;
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1;
+  box-shadow:
+    inset 0 1px 0 rgb(255 245 211 / 0.55),
+    0 2px 5px rgb(0 0 0 / 0.38);
+}
+
+.hardwareImageOverlayFrame {
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  height: 45%;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 3px;
+  padding: 6px 7px 7px;
+  border: 1px solid rgb(216 184 123 / 0.68);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgb(29 34 41 / 0.82) 0%, rgb(13 18 24 / 0.95) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(247 227 182 / 0.18),
+    0 2px 6px rgb(0 0 0 / 0.3);
+}
+
+.hardwareImageOverlayFrame::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border: 1px solid rgb(206 174 114 / 0.4);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.hardwareImageOverlayKind {
+  position: relative;
+  z-index: 1;
+  color: #f5dfb3;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.hardwareImageOverlayRules {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 2px;
+  color: #e7edf2;
+  font-size: 10px;
+  line-height: 1.25;
+  white-space: pre-line;
+}
+
+.card.withImage.hardware:not(.preview) .hardwareImageOverlay {
+  padding: 4px;
+}
+
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayTop {
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  min-height: 16px;
+  padding: 2px 5px;
+}
+
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayName {
+  font-size: 8px;
+}
+
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayCost {
+  top: 5px;
+  right: 5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 10px;
+}
+
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayFrame {
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  height: 43%;
+  gap: 2px;
+  padding: 4px 5px 5px;
+}
+
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayKind {
+  font-size: 8px;
+}
+
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayRules {
+  display: none;
 }
 
 .lane .cardSlot {
