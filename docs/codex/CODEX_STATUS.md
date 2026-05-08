@@ -4,6 +4,8 @@
 
 V1.2.0 Event Modification Foundation und V1.2.1 Replacement Effects sind am 2026-05-08 umgesetzt und lokal verifiziert. V1.1.3 wurde davor als Baseline-Preflight ohne Codeänderung geprüft: Statusmodell, Mechanik-Coverage, AI-Level-Audit und Handoff tragen die V1.2.x-Umsetzung. V1.2.0 ergänzt `ImminentEvent`, side-private `would`/`prevent`/`avoid`/enge `interrupt`-Fenster und Damage Prevention als test-only Pilot. V1.2.1 ergänzt danach eine getrennte Replacement-Pipeline mit Originalevent, Replacementevent, einmal-pro-Fenster-Regeln, deterministischer Kandidatenordnung und sichtbaren Konfliktblockern. Keine neuen Runtime-Karten, keine KI-Deckfreigabe, keine Special Zones, keine Ownership-/Control-Wechsel, keine offiziellen Assets und keine öffentlichen Plattformfunktionen wurden eingeführt.
 
+Die Detailplanung fuer die naechsten drei Releases nach V1.2.1 ist am 2026-05-08 requirements-gefroren: V1.2.2 Special Zones, Ownership und Control; V1.2.3 Mechanic Unlock Card Release 1; V1.3.0 Format und Deckbuilding Foundation. Erzeugt wurden je Release Detailplan, Requirements, Spezifikation, Testmatrix und Requirements Review sowie das gemeinsame Handoff `docs/derived/V1_2_2_TO_V1_3_0_IMPLEMENTATION_HANDOFF.md`. Gate-Ergebnis: `V1_2_2_requirements_freeze_done: true`; `V1_2_3_requirements_freeze_done: true`; `V1_3_0_requirements_freeze_done: true`; `ready_for_V1_2_2_implementation: true`; `ready_for_V1_2_3_implementation_after_V1_2_2: true`; `ready_for_V1_3_0_implementation_after_V1_2_3: true`.
+
 NETGRID ist seit 2026-05-08 der aktive App-/Projektname für Anwendung, technische Konfiguration, Workspace-Pakete, Server-Symbole, Storage-Namen, Browser-Speicherkeys, Startskript und E2E-Harness. Netrunner bleibt als fachliche Spiel-, Regel- und Quellenreferenz erhalten. Alte technische `netrunner`-/`NETRUNNER`-Namen bleiben nur als Legacy-Fallback, Importpfad oder historische Referenz bestehen. Verifikation der Umbenennung: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build` und `corepack pnpm e2e` bestanden; der erste E2E-Versuch war nur durch einen bereits laufenden lokalen Next-Dev-Server blockiert und wurde nach Beenden dieses Prozesses erfolgreich wiederholt.
 
 V1.1.2K kleines Kartenrelease nach V1.1.2 ist umgesetzt und lokal verifiziert. Es aktiviert genau 20 weitere lokal geprüfte O:NR-v1-Karten: Black Dahlia, Codecracker, Cyfermaster™, Loony Goon, Shaka, Wizard's Book, Laser Wire, Nerve Labyrinth, π in the 'Face, Quandary, Razor Wire, Reinforced Wall, Rock Is Strong, Scramble, Shotgun Wire, Sleeper, Wall of Ice, Wall of Static, Netwatch Credit Voucher und Night Shift. V1.0.5K und V1.0.6K bleiben aktiv; der private lokale Runtime-Katalog gibt damit 52 O:NR-v1-Karten `playable` und `deck_legal`. Keine weiteren Karten, keine neuen Mechanikfamilien, keine Prevention/Avoid/Replacement-Pfade, keine generischen Asset-/Node-/Upgrade-Fähigkeiten und keine offiziellen Assets wurden eingeführt.
@@ -2159,11 +2161,12 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Plan the next post-V1.2.1 scope from `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
-2. Keep further card releases behind the new `listed`/`engine_supported`/`human_playable`/`ai_supported` model.
-3. Treat V1.2.0/V1.2.1 as completed foundations, not as upcoming implementation work.
-4. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
-5. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
+1. Implement V1.2.2 from `docs/derived/V1_2_2_TO_V1_3_0_IMPLEMENTATION_HANDOFF.md`.
+2. Treat V1.2.3 and V1.3.0 as planned follow-up releases, but do not start them before the preceding release final gate is green.
+3. Keep further card releases behind the `listed`/`engine_supported`/`human_playable`/`ai_supported` model.
+4. Treat V1.2.0/V1.2.1 as completed foundations, not as upcoming implementation work.
+5. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
+6. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 
 Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates. Prevention/Avoid/Interrupt and Replacement have foundation coverage through V1.2.0/V1.2.1, but real cards, broad eventfamilies, Avoid-/Interrupt-Runtime-Pilots and KI-Deckfreigaben still need their own gates.
 

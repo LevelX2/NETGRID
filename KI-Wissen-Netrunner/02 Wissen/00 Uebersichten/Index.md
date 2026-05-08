@@ -28,6 +28,10 @@
 - `docs/derived/V1_2_1_REPLACEMENT_EFFECTS_DETAILED_PLAN.md`: eingefrorener V1.2.1-Plan für Replacement Effects als getrennte Pipeline.
 - `docs/derived/REPLACEMENT_EFFECTS_1_2_1_SPEC.md`: Spezifikation für Originalevent, Replacementevent, einmal-pro-Fenster-Regeln, deterministische Reihenfolge und Konfliktblocker.
 - `docs/derived/V1_2_1_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_2_1_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis der getrennten Replacement-Pipeline.
+- `docs/derived/V1_2_2_TO_V1_3_0_IMPLEMENTATION_HANDOFF.md`: gemeinsames Umsetzungshandoff für V1.2.2 Special Zones/Ownership/Control, V1.2.3 Mechanic Unlock Card Release 1 und V1.3.0 Format/Deckbuilding Foundation.
+- `docs/derived/V1_2_2_SPECIAL_ZONES_OWNERSHIP_CONTROL_DETAILED_PLAN.md`, `docs/derived/V1_2_2_REQUIREMENTS.md`, `docs/derived/SPECIAL_ZONES_OWNERSHIP_CONTROL_1_2_2_SPEC.md`, `docs/derived/V1_2_2_TEST_MATRIX.md` und `docs/derived/V1_2_2_REQUIREMENTS_REVIEW.md`: eingefrorene V1.2.2-Planung für Set Aside, Removed from Game, Owner/Controller und Control-Wechsel ohne Kartenfreigabe.
+- `docs/derived/V1_2_3_MECHANIC_UNLOCK_CARD_RELEASE_1_DETAILED_PLAN.md`, `docs/derived/V1_2_3_REQUIREMENTS.md`, `docs/derived/CARD_UNLOCK_1_2_3_SPEC.md`, `docs/derived/V1_2_3_TEST_MATRIX.md` und `docs/derived/V1_2_3_REQUIREMENTS_REVIEW.md`: eingefrorene V1.2.3-Planung für den ersten kontrollierten Karten-Unlock nach Mechanik-Coverage.
+- `docs/derived/V1_3_0_FORMAT_DECKBUILDING_FOUNDATION_DETAILED_PLAN.md`, `docs/derived/V1_3_0_REQUIREMENTS.md`, `docs/derived/FORMAT_DECKBUILDING_FOUNDATION_1_3_0_SPEC.md`, `docs/derived/V1_3_0_TEST_MATRIX.md` und `docs/derived/V1_3_0_REQUIREMENTS_REVIEW.md`: eingefrorene V1.3.0-Planung für lokale Formatprofile, Deckvalidierung, Snapshots und Matchstart-Revalidierung.
 - `data/rules/mechanics-coverage-1.2.1.json`: maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.0/V1.2.1.
 
 ## Prozesse
