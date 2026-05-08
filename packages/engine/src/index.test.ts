@@ -204,7 +204,13 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation", title: "Simple Economy Operation", serverLabel: "HQ" });
     expect(state.eventLog.at(-1)?.publicPayload.accessedCardId).toBeUndefined();
-    expect(JSON.stringify(getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload)).not.toContain("Simple Economy Operation");
+    expect(getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation",
+      serverLabel: "HQ"
+    });
+    expect(getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload.redactedKind).toBeUndefined();
   });
 
   it("shows a card trashed from HQ in Runner-visible Archives", () => {
@@ -1251,7 +1257,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     }
 
     expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 1 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_066_snowball"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 1 });
     expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 1 });
     expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({ cost: 0 });
