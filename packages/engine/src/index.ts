@@ -3653,7 +3653,7 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
     }
   }
   const revealsCard =
-    ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation"].includes(legalAction.type) ||
+    ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation", "pump_breaker", "break_subroutine"].includes(legalAction.type) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;

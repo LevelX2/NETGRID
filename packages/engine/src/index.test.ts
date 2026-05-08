@@ -258,9 +258,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
 
 
   it("lets the Runner break Barrier ICE and access R&D", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "break-barrier" }));
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "break-barrier", runnerDeckId: "demo_runner_004", corpDeckId: "demo_corp_004" }));
     state.runner.credits = 10;
-    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, "efficient_fracter");
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpCardOnTopOfRd(state, "simple_economy_operation");
     state.corp.credits = 5;
@@ -268,7 +268,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     state = apply(state, "corp", (action) => action.type === "rez_ice");
     state = apply(state, "runner", (action) => action.type === "pump_breaker");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "pump_breaker", cardDefinitionId: "efficient_fracter", title: "Efficient Fracter" });
     state = apply(state, "runner", (action) => action.type === "break_subroutine");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "break_subroutine", cardDefinitionId: "efficient_fracter", title: "Efficient Fracter" });
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
 
