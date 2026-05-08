@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "card-pipeline-report-v1.3.1",
+  "reportId": "card-pipeline-report-1.3.1",
+  "snapshotId": "card-pipeline-snapshot-1.3.1",
+  "snapshotHash": "fnv1a:f2210868",
+  "pipelineVersion": "1.3.1",
+  "statusSummary": {
+    "imported": 38,
+    "validated": 38,
+    "catalog_ready": 38,
+    "blocked": 1,
+    "implemented": 36,
+    "engine_supported": 36,
+    "playable": 36,
+    "human_playable": 36,
+    "deck_legal": 36,
+    "format_legal": 36
+  },
+  "blockedCards": [
+    {
+      "cardId": "catalog_preview_resource_001",
+      "reasons": []
+    }
+  ],
+  "missingMechanics": [],
+  "missingResolvers": [],
+  "missingTests": [],
+  "missingAiHints": [],
+  "noScopeAssertions": {
+    "noCardTextParser": true,
+    "noAutomaticPlayability": true,
+    "noNewCardRelease": true,
+    "noNewMechanics": true,
+    "noOfficialAssets": true,
+    "noPublicPlatformFeatures": true
+  }
+}

@@ -2,7 +2,38 @@ import { applyAction, createGame, getLegalActions, getPlayerView, hashState, rep
 import aiProfilesData from "../../../data/ai/ai-profiles-0.9.json";
 import soakSeedsData from "../../../data/ai/ai-soak-seeds-0.9.json";
 import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
+import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
+import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import type { AiDecision, AiDecisionInput, AiDifficulty, DeckDefinition, DeckPublicMetadata, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
+export {
+  chooseCorpPlanAction,
+  chooseCorpPlanDecision,
+  corpPlanUsesOnlyAiSupportedCards,
+  evaluateAgendaRisk,
+  evaluateCorpPlan,
+  evaluateEconomyReserve,
+  evaluateIceRez,
+  evaluateRemoteIntentMemory,
+  evaluateScoringWindow,
+  evaluateServerThreat,
+  generateCorpPlanCandidates,
+  hasCorpPlanAction
+} from "./corp-plans";
+export type { CorpPlanCandidate, CorpPlanDebug, CorpPlanDecision, CorpPlanEvaluatorResult, CorpPlanKind, CorpPlanScore, CorpPlanStep } from "./corp-plans";
+export {
+  chooseRunnerPlanAction,
+  chooseRunnerPlanDecision,
+  estimateRunCost,
+  evaluateCorpScoringThreat,
+  evaluateRemoteThreat,
+  evaluateRunnerPlan,
+  evaluateRunnerRig,
+  evaluateServerAccessValue,
+  generateRunnerPlanCandidates,
+  hasRunnerPlanAction,
+  runnerPlanUsesOnlyAiSupportedCards
+} from "./runner-plans";
+export type { RunnerPlanCandidate, RunnerPlanDebug, RunnerPlanDecision, RunnerPlanEvaluatorResult, RunnerPlanKind, RunnerPlanScore, RunnerPlanStep } from "./runner-plans";
 
 type RankedChoice = {
   action: LegalAction | undefined;
@@ -180,11 +211,45 @@ export function chooseAiAction(input: AiDecisionInput): AiDecision {
 }
 
 export function chooseCorpAction(input: AiDecisionInput): AiDecision {
+  const baselineDecision = chooseCorpBaselineAction(input);
+  return hasCorpPlanAction(input) && !isCorpReactiveBaselineDecision(baselineDecision) ? chooseCorpPlanAction(input, baselineDecision) : baselineDecision;
+}
+
+export function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
   return decisionFromChoices(input, scoreActions(input, "corp"));
 }
 
 export function chooseRunnerAction(input: AiDecisionInput): AiDecision {
+  const baselineDecision = chooseRunnerBaselineAction(input);
+  return hasRunnerPlanAction(input) && !isRunnerReactiveBaselineDecision(baselineDecision) ? chooseRunnerPlanAction(input, baselineDecision) : baselineDecision;
+}
+
+export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
   return decisionFromChoices(input, scoreActions(input, "runner"));
+}
+
+function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {
+  return (
+    decision.reasonCode === "corp.choice.resolve" ||
+    decision.reasonCode === "corp.trace.bid_visible_amount" ||
+    decision.reasonCode === "corp.mandatory_draw" ||
+    decision.reasonCode === "corp.rez.defensive_card" ||
+    decision.reasonCode === "corp.rez.decline" ||
+    decision.reasonCode === "corp.tag.trash_visible_resource" ||
+    decision.reasonCode === "corp.purge.visible_virus_counters"
+  );
+}
+
+function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
+  return (
+    decision.reasonCode === "runner.choice.resolve" ||
+    decision.reasonCode === "runner.trace.bid_visible_amount" ||
+    decision.reasonCode === "runner.access.steal_agenda" ||
+    decision.reasonCode === "runner.access.open_card" ||
+    decision.reasonCode === "runner.encounter.break_etr" ||
+    decision.reasonCode === "runner.encounter.pump_breaker" ||
+    decision.reasonCode === "runner.tag.clear_visible_tag"
+  );
 }
 
 export function assertAiInputIsSideSafe(input: AiDecisionInput): boolean {

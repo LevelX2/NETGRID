@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "card-pipeline-rollback-v1.3.1",
+  "fromSnapshotId": "card-pipeline-snapshot-1.3.1-review-fixture",
+  "toSnapshotId": "card-pipeline-snapshot-1.3.1",
+  "fromHash": "fnv1a:c79ef9fb",
+  "toHash": "fnv1a:f2210868",
+  "matchSnapshotsUntouched": true,
+  "replayStateHashUntouched": true,
+  "privateAssetsUntouched": true,
+  "summary": "Rollback switches active card pipeline data from card-pipeline-snapshot-1.3.1-review-fixture to card-pipeline-snapshot-1.3.1; match snapshots, replay StateHash data and private assets are not rewritten."
+}

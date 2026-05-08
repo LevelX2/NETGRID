@@ -1,0 +1,1319 @@
+{
+  "schemaVersion": "card-support-manifest-v1.3.1",
+  "id": "card-support-manifest-1.3.1",
+  "derivedFromSnapshotId": "card-pipeline-snapshot-1.3.1",
+  "snapshotHash": "fnv1a:f2210868",
+  "status": "implemented_for_v1.3.1_final_gate",
+  "gateAssertions": {
+    "sourceRegistryV2Valid": true,
+    "pipelineSnapshotHashStable": true,
+    "aiHintsDoNotGrantSupport": true,
+    "importTextDoesNotGrantPlayability": true,
+    "resolverRefsRequiredForEngineSupport": true,
+    "deckLegalRequiresHumanPlayable": true,
+    "formatLegalRequiresDeckLegal": true,
+    "noPrivatePathsOrTokens": true,
+    "noCardTextParser": true,
+    "noNewCardUnlocks": true,
+    "noNewMechanics": true,
+    "noOfficialAssets": true,
+    "noPublicPlatformFeatures": true
+  },
+  "cards": [
+    {
+      "cardId": "catalog_preview_operation_001",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": false
+      },
+      "requiredMechanics": [],
+      "resolverRef": null,
+      "abilityRefs": [],
+      "aiHintsRef": null,
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "unreviewed"
+      }
+    },
+    {
+      "cardId": "catalog_preview_resource_001",
+      "side": "runner",
+      "type": "resource",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "requiredMechanics": [],
+      "resolverRef": null,
+      "abilityRefs": [],
+      "aiHintsRef": null,
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "unreviewed"
+      }
+    },
+    {
+      "cardId": "corp_identity_001",
+      "side": "corp",
+      "type": "identity",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "identity_setup"
+      ],
+      "resolverRef": "engine:corp_identity_001",
+      "abilityRefs": [
+        "corp_identity_001:resolver_contract"
+      ],
+      "aiHintsRef": null,
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "unreviewed"
+      }
+    },
+    {
+      "cardId": "efficient_fracter",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:efficient_fracter",
+      "abilityRefs": [
+        "efficient_fracter:ability_contract",
+        "efficient_fracter:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:efficient_fracter",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "runner_identity_001",
+      "side": "runner",
+      "type": "identity",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "identity_setup"
+      ],
+      "resolverRef": "engine:runner_identity_001",
+      "abilityRefs": [
+        "runner_identity_001:resolver_contract"
+      ],
+      "aiHintsRef": null,
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "unreviewed"
+      }
+    },
+    {
+      "cardId": "simple_agenda",
+      "side": "corp",
+      "type": "agenda",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "resolverRef": "engine:simple_agenda",
+      "abilityRefs": [
+        "simple_agenda:resolver_contract",
+        "simple_agenda:score_steal_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_agenda",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_barrier_ice",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "resolverRef": "engine:simple_barrier_ice",
+      "abilityRefs": [
+        "simple_barrier_ice:resolver_contract",
+        "simple_barrier_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_barrier_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_code_gate_ice",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_code_gate"
+      ],
+      "resolverRef": "engine:simple_code_gate_ice",
+      "abilityRefs": [
+        "simple_code_gate_ice:resolver_contract",
+        "simple_code_gate_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_code_gate_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_decoder",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_decoder",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:simple_decoder",
+      "abilityRefs": [
+        "simple_decoder:ability_contract",
+        "simple_decoder:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_decoder",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_draw_event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:simple_draw_event",
+      "abilityRefs": [
+        "simple_draw_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_draw_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_draw_operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:simple_draw_operation",
+      "abilityRefs": [
+        "simple_draw_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_draw_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_economy_asset",
+      "side": "corp",
+      "type": "asset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "resolverRef": "engine:simple_economy_asset",
+      "abilityRefs": [
+        "simple_economy_asset:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_economy_asset",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_economy_event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:simple_economy_event",
+      "abilityRefs": [
+        "simple_economy_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_economy_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_economy_operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:simple_economy_operation",
+      "abilityRefs": [
+        "simple_economy_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_economy_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_fracter",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:simple_fracter",
+      "abilityRefs": [
+        "simple_fracter:ability_contract",
+        "simple_fracter:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_fracter",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_killer",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_icebreaker",
+        "subtype_killer"
+      ],
+      "resolverRef": "engine:simple_killer",
+      "abilityRefs": [
+        "simple_killer:ability_contract",
+        "simple_killer:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_killer",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_priority_agenda",
+      "side": "corp",
+      "type": "agenda",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "resolverRef": "engine:simple_priority_agenda",
+      "abilityRefs": [
+        "simple_priority_agenda:resolver_contract",
+        "simple_priority_agenda:score_steal_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_priority_agenda",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_run_event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:simple_run_event",
+      "abilityRefs": [
+        "simple_run_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_run_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_sentry_ice",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "resolverRef": "engine:simple_sentry_ice",
+      "abilityRefs": [
+        "simple_sentry_ice:resolver_contract",
+        "simple_sentry_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_sentry_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_setup_hardware",
+      "side": "runner",
+      "type": "hardware",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_hardware"
+      ],
+      "resolverRef": "engine:simple_setup_hardware",
+      "abilityRefs": [
+        "simple_setup_hardware:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_setup_hardware",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_tag_ice",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "resolverRef": "engine:simple_tag_ice",
+      "abilityRefs": [
+        "simple_tag_ice:resolver_contract",
+        "simple_tag_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_tag_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_tag_punishment_operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:simple_tag_punishment_operation",
+      "abilityRefs": [
+        "simple_tag_punishment_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_tag_punishment_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_taxing_barrier_ice",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "resolverRef": "engine:simple_taxing_barrier_ice",
+      "abilityRefs": [
+        "simple_taxing_barrier_ice:resolver_contract",
+        "simple_taxing_barrier_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_taxing_barrier_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "simple_upgrade",
+      "side": "corp",
+      "type": "upgrade",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "resolverRef": "engine:simple_upgrade",
+      "abilityRefs": [
+        "simple_upgrade:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_upgrade",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_adaptive_killer",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_icebreaker",
+        "subtype_killer"
+      ],
+      "resolverRef": "engine:v08_adaptive_killer",
+      "abilityRefs": [
+        "v08_adaptive_killer:ability_contract",
+        "v08_adaptive_killer:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_adaptive_killer",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_archive_planning_operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:v08_archive_planning_operation",
+      "abilityRefs": [
+        "v08_archive_planning_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_archive_planning_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_burst_credit_event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:v08_burst_credit_event",
+      "abilityRefs": [
+        "v08_burst_credit_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_burst_credit_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_cashout_asset",
+      "side": "corp",
+      "type": "asset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "resolverRef": "engine:v08_cashout_asset",
+      "abilityRefs": [
+        "v08_cashout_asset:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_cashout_asset",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_credit_surge_operation",
+      "side": "corp",
+      "type": "operation",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:v08_credit_surge_operation",
+      "abilityRefs": [
+        "v08_credit_surge_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_credit_surge_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_deep_draw_event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:v08_deep_draw_event",
+      "abilityRefs": [
+        "v08_deep_draw_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_deep_draw_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_gate_ice",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_code_gate"
+      ],
+      "resolverRef": "engine:v08_gate_ice",
+      "abilityRefs": [
+        "v08_gate_ice:resolver_contract",
+        "v08_gate_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_gate_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_memory_chip",
+      "side": "runner",
+      "type": "hardware",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_hardware"
+      ],
+      "resolverRef": "engine:v08_memory_chip",
+      "abilityRefs": [
+        "v08_memory_chip:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_memory_chip",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_overclock_run_event",
+      "side": "runner",
+      "type": "event",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:v08_overclock_run_event",
+      "abilityRefs": [
+        "v08_overclock_run_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_overclock_run_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_precise_decoder",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_decoder",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:v08_precise_decoder",
+      "abilityRefs": [
+        "v08_precise_decoder:ability_contract",
+        "v08_precise_decoder:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_precise_decoder",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_project_agenda",
+      "side": "corp",
+      "type": "agenda",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "resolverRef": "engine:v08_project_agenda",
+      "abilityRefs": [
+        "v08_project_agenda:resolver_contract",
+        "v08_project_agenda:score_steal_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_project_agenda",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_steady_fracter",
+      "side": "runner",
+      "type": "program",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:v08_steady_fracter",
+      "abilityRefs": [
+        "v08_steady_fracter:ability_contract",
+        "v08_steady_fracter:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_steady_fracter",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_wall_ice",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "resolverRef": "engine:v08_wall_ice",
+      "abilityRefs": [
+        "v08_wall_ice:resolver_contract",
+        "v08_wall_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_wall_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "cardId": "v08_watchdog_ice",
+      "side": "corp",
+      "type": "ice",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "resolverRef": "engine:v08_watchdog_ice",
+      "abilityRefs": [
+        "v08_watchdog_ice:resolver_contract",
+        "v08_watchdog_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_watchdog_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    }
+  ]
+}

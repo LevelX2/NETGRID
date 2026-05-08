@@ -805,6 +805,7 @@ export type AiDecision = {
   fallbackUsed: boolean;
   confidence?: number;
   evidence?: string[];
+  decisionDebug?: Record<string, unknown>;
   timeoutUsed?: boolean;
   profileId?: string;
   difficulty?: AiDifficulty;

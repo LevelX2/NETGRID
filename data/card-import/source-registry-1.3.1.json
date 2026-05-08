@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "card-source-registry-v1.3.1",
+  "registryId": "source-registry-1.3.1",
+  "createdAt": "2026-05-08T00:00:00.000+02:00",
+  "sources": [
+    {
+      "sourceId": "v131-versioned-card-snapshot-0.8",
+      "sourceType": "project_file",
+      "scope": "versioned_project",
+      "pathOrReference": "data/card-import/card-snapshot-0.8.json",
+      "provenance": "Versioned NETGRID demo and catalog snapshot carried forward from V0.8.",
+      "usageDecision": "allowed_project_data",
+      "reviewStatus": "reviewed",
+      "notes": "Snapshot text remains display-only and cannot grant playability."
+    },
+    {
+      "sourceId": "v131-card-implementation-manifests",
+      "sourceType": "manual_review",
+      "scope": "versioned_project",
+      "pathOrReference": "data/manifests/card-implementation-manifest*.json",
+      "provenance": "Manual release gate manifests through V1.2.3.",
+      "usageDecision": "allowed_project_data",
+      "reviewStatus": "reviewed",
+      "notes": "Resolvers, mechanics and tests are reviewed gate evidence only."
+    },
+    {
+      "sourceId": "v131-ai-card-role-manifest-0.9",
+      "sourceType": "manual_review",
+      "scope": "versioned_project",
+      "pathOrReference": "data/ai/card-role-manifest-0.9.json",
+      "provenance": "Manual AI role data from the V0.9 AI quality gate.",
+      "usageDecision": "allowed_project_data",
+      "reviewStatus": "reviewed",
+      "notes": "Roles and AI hints do not set ai_supported."
+    },
+    {
+      "sourceId": "v131-private-local-onr-v1-overlay",
+      "sourceType": "local_private_file",
+      "scope": "private_local",
+      "pathOrReference": "private-local-onr-v1-overlay",
+      "provenance": "Optional private local card import overlay available only on the operator machine.",
+      "usageDecision": "private_display_only",
+      "reviewStatus": "reviewed",
+      "notes": "The registry stores a logical reference only; private local paths and assets are not versioned."
+    }
+  ]
+}

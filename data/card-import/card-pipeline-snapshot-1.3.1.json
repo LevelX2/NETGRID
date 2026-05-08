@@ -1,0 +1,1996 @@
+{
+  "schemaVersion": "card-pipeline-snapshot-v1.3.1",
+  "snapshotId": "card-pipeline-snapshot-1.3.1",
+  "pipelineVersion": "1.3.1",
+  "sourceRegistryId": "source-registry-1.3.1",
+  "createdAt": "2026-05-08T00:00:00.000+02:00",
+  "normalization": {
+    "sortOrder": [
+      "catalogCardId"
+    ],
+    "textPolicy": "display_only",
+    "rulesPolicy": "resolver_refs_only",
+    "assetPolicy": "private_display_separate"
+  },
+  "cards": [
+    {
+      "catalogCardId": "catalog_preview_operation_001",
+      "sourceCardId": "catalog_preview_operation_001",
+      "engineCardId": null,
+      "title": "Catalog Preview Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Fiktive Katalogkarte für Importtests. Nicht implementiert und nicht decklegal.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": false
+      },
+      "requiredMechanics": [],
+      "resolverRef": null,
+      "abilityRefs": [],
+      "aiHintsRef": null,
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "unreviewed"
+      }
+    },
+    {
+      "catalogCardId": "catalog_preview_resource_001",
+      "sourceCardId": "catalog_preview_resource_001",
+      "engineCardId": null,
+      "title": "Catalog Preview Resource",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Fiktive Katalogkarte mit absichtlich nicht unterstütztem Typ für Blocked-Status.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "requiredMechanics": [],
+      "resolverRef": null,
+      "abilityRefs": [],
+      "aiHintsRef": null,
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "unreviewed"
+      }
+    },
+    {
+      "catalogCardId": "corp_identity_001",
+      "sourceCardId": "corp_identity_001",
+      "engineCardId": "corp_identity_001",
+      "title": "Corp Identity",
+      "side": "corp",
+      "type": "identity",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Testidentität ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "identity_setup"
+      ],
+      "resolverRef": "engine:corp_identity_001",
+      "abilityRefs": [
+        "corp_identity_001:resolver_contract"
+      ],
+      "aiHintsRef": null,
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "unreviewed"
+      }
+    },
+    {
+      "catalogCardId": "efficient_fracter",
+      "sourceCardId": "efficient_fracter",
+      "engineCardId": "efficient_fracter",
+      "title": "Efficient Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "fracter",
+        "icebreaker"
+      ],
+      "faction": "neutral_demo",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:efficient_fracter",
+      "abilityRefs": [
+        "efficient_fracter:ability_contract",
+        "efficient_fracter:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:efficient_fracter",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "runner_identity_001",
+      "sourceCardId": "runner_identity_001",
+      "engineCardId": "runner_identity_001",
+      "title": "Runner Identity",
+      "side": "runner",
+      "type": "identity",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Testidentität ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "identity_setup"
+      ],
+      "resolverRef": "engine:runner_identity_001",
+      "abilityRefs": [
+        "runner_identity_001:resolver_contract"
+      ],
+      "aiHintsRef": null,
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "unreviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_agenda",
+      "sourceCardId": "simple_agenda",
+      "engineCardId": "simple_agenda",
+      "title": "Simple Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "resolverRef": "engine:simple_agenda",
+      "abilityRefs": [
+        "simple_agenda:resolver_contract",
+        "simple_agenda:score_steal_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_agenda",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_barrier_ice",
+      "sourceCardId": "simple_barrier_ice",
+      "engineCardId": "simple_barrier_ice",
+      "title": "Simple Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "faction": "neutral_demo",
+      "text": "End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "resolverRef": "engine:simple_barrier_ice",
+      "abilityRefs": [
+        "simple_barrier_ice:resolver_contract",
+        "simple_barrier_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_barrier_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_code_gate_ice",
+      "sourceCardId": "simple_code_gate_ice",
+      "engineCardId": "simple_code_gate_ice",
+      "title": "Simple Code Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "faction": "neutral_demo",
+      "text": "Die Corp erhält 1 Credit. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 2,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_code_gate"
+      ],
+      "resolverRef": "engine:simple_code_gate_ice",
+      "abilityRefs": [
+        "simple_code_gate_ice:resolver_contract",
+        "simple_code_gate_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_code_gate_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_decoder",
+      "sourceCardId": "simple_decoder",
+      "engineCardId": "simple_decoder",
+      "title": "Simple Decoder",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "decoder",
+        "icebreaker"
+      ],
+      "faction": "neutral_demo",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Code-Gate-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_decoder",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:simple_decoder",
+      "abilityRefs": [
+        "simple_decoder:ability_contract",
+        "simple_decoder:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_decoder",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_draw_event",
+      "sourceCardId": "simple_draw_event",
+      "engineCardId": "simple_draw_event",
+      "title": "Simple Draw Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Ziehe 2 Karten.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:simple_draw_event",
+      "abilityRefs": [
+        "simple_draw_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_draw_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_draw_operation",
+      "sourceCardId": "simple_draw_operation",
+      "engineCardId": "simple_draw_operation",
+      "title": "Simple Draw Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Ziehe 2 Karten.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:simple_draw_operation",
+      "abilityRefs": [
+        "simple_draw_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_draw_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_economy_asset",
+      "sourceCardId": "simple_economy_asset",
+      "engineCardId": "simple_economy_asset",
+      "title": "Simple Economy Asset",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 1,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "resolverRef": "engine:simple_economy_asset",
+      "abilityRefs": [
+        "simple_economy_asset:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_economy_asset",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_economy_event",
+      "sourceCardId": "simple_economy_event",
+      "engineCardId": "simple_economy_event",
+      "title": "Simple Economy Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Erhalte 4 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:simple_economy_event",
+      "abilityRefs": [
+        "simple_economy_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_economy_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_economy_operation",
+      "sourceCardId": "simple_economy_operation",
+      "engineCardId": "simple_economy_operation",
+      "title": "Simple Economy Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Erhalte 4 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:simple_economy_operation",
+      "abilityRefs": [
+        "simple_economy_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_economy_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_fracter",
+      "sourceCardId": "simple_fracter",
+      "engineCardId": "simple_fracter",
+      "title": "Simple Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "fracter",
+        "icebreaker"
+      ],
+      "faction": "neutral_demo",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:simple_fracter",
+      "abilityRefs": [
+        "simple_fracter:ability_contract",
+        "simple_fracter:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_fracter",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_killer",
+      "sourceCardId": "simple_killer",
+      "engineCardId": "simple_killer",
+      "title": "Simple Killer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "faction": "neutral_demo",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Sentry-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 1,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_icebreaker",
+        "subtype_killer"
+      ],
+      "resolverRef": "engine:simple_killer",
+      "abilityRefs": [
+        "simple_killer:ability_contract",
+        "simple_killer:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_killer",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_priority_agenda",
+      "sourceCardId": "simple_priority_agenda",
+      "engineCardId": "simple_priority_agenda",
+      "title": "Simple Priority Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 3
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "resolverRef": "engine:simple_priority_agenda",
+      "abilityRefs": [
+        "simple_priority_agenda:resolver_contract",
+        "simple_priority_agenda:score_steal_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_priority_agenda",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_run_event",
+      "sourceCardId": "simple_run_event",
+      "engineCardId": "simple_run_event",
+      "title": "Simple Run Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 2 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:simple_run_event",
+      "abilityRefs": [
+        "simple_run_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_run_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_sentry_ice",
+      "sourceCardId": "simple_sentry_ice",
+      "engineCardId": "simple_sentry_ice",
+      "title": "Simple Sentry ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "faction": "neutral_demo",
+      "text": "Der Runner verliert 2 Credits, falls möglich. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "resolverRef": "engine:simple_sentry_ice",
+      "abilityRefs": [
+        "simple_sentry_ice:resolver_contract",
+        "simple_sentry_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_sentry_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_setup_hardware",
+      "sourceCardId": "simple_setup_hardware",
+      "engineCardId": "simple_setup_hardware",
+      "title": "Simple Setup Hardware",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "+1 Memory Limit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_hardware"
+      ],
+      "resolverRef": "engine:simple_setup_hardware",
+      "abilityRefs": [
+        "simple_setup_hardware:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_setup_hardware",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_tag_ice",
+      "sourceCardId": "simple_tag_ice",
+      "engineCardId": "simple_tag_ice",
+      "title": "Simple Tag ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "faction": "neutral_demo",
+      "text": "Gib dem Runner 1 Tag. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "resolverRef": "engine:simple_tag_ice",
+      "abilityRefs": [
+        "simple_tag_ice:resolver_contract",
+        "simple_tag_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_tag_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_tag_punishment_operation",
+      "sourceCardId": "simple_tag_punishment_operation",
+      "engineCardId": "simple_tag_punishment_operation",
+      "title": "Simple Tag Punishment Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Spiele nur, wenn der Runner getaggt ist. Der Runner verliert 2 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:simple_tag_punishment_operation",
+      "abilityRefs": [
+        "simple_tag_punishment_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_tag_punishment_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_taxing_barrier_ice",
+      "sourceCardId": "simple_taxing_barrier_ice",
+      "engineCardId": "simple_taxing_barrier_ice",
+      "title": "Simple Taxing Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "faction": "neutral_demo",
+      "text": "Der Runner verliert 1 Credit. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "resolverRef": "engine:simple_taxing_barrier_ice",
+      "abilityRefs": [
+        "simple_taxing_barrier_ice:resolver_contract",
+        "simple_taxing_barrier_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_taxing_barrier_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "simple_upgrade",
+      "sourceCardId": "simple_upgrade",
+      "engineCardId": "simple_upgrade",
+      "title": "Simple Upgrade",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Einfache Root-Karte ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "resolverRef": "engine:simple_upgrade",
+      "abilityRefs": [
+        "simple_upgrade:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:simple_upgrade",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_adaptive_killer",
+      "sourceCardId": "v08_adaptive_killer",
+      "engineCardId": "v08_adaptive_killer",
+      "title": "Adaptive Killer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "faction": "neutral_demo",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Sentry-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_icebreaker",
+        "subtype_killer"
+      ],
+      "resolverRef": "engine:v08_adaptive_killer",
+      "abilityRefs": [
+        "v08_adaptive_killer:ability_contract",
+        "v08_adaptive_killer:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_adaptive_killer",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_archive_planning_operation",
+      "sourceCardId": "v08_archive_planning_operation",
+      "engineCardId": "v08_archive_planning_operation",
+      "title": "Archive Planning Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Ziehe 3 Karten.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:v08_archive_planning_operation",
+      "abilityRefs": [
+        "v08_archive_planning_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_archive_planning_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_burst_credit_event",
+      "sourceCardId": "v08_burst_credit_event",
+      "engineCardId": "v08_burst_credit_event",
+      "title": "Burst Credit Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Erhalte 6 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:v08_burst_credit_event",
+      "abilityRefs": [
+        "v08_burst_credit_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_burst_credit_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_cashout_asset",
+      "sourceCardId": "v08_cashout_asset",
+      "engineCardId": "v08_cashout_asset",
+      "title": "Cashout Asset",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Wenn diese Karte gerezzt wird, erhält die Corp 4 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 2,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "resolverRef": "engine:v08_cashout_asset",
+      "abilityRefs": [
+        "v08_cashout_asset:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_cashout_asset",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_credit_surge_operation",
+      "sourceCardId": "v08_credit_surge_operation",
+      "engineCardId": "v08_credit_surge_operation",
+      "title": "Credit Surge Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Erhalte 7 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "resolverRef": "engine:v08_credit_surge_operation",
+      "abilityRefs": [
+        "v08_credit_surge_operation:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_credit_surge_operation",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_deep_draw_event",
+      "sourceCardId": "v08_deep_draw_event",
+      "engineCardId": "v08_deep_draw_event",
+      "title": "Deep Draw Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Ziehe 3 Karten.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:v08_deep_draw_event",
+      "abilityRefs": [
+        "v08_deep_draw_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_deep_draw_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_gate_ice",
+      "sourceCardId": "v08_gate_ice",
+      "engineCardId": "v08_gate_ice",
+      "title": "Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "faction": "neutral_demo",
+      "text": "Die Corp erhält 2 Credits. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_code_gate"
+      ],
+      "resolverRef": "engine:v08_gate_ice",
+      "abilityRefs": [
+        "v08_gate_ice:resolver_contract",
+        "v08_gate_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_gate_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_memory_chip",
+      "sourceCardId": "v08_memory_chip",
+      "engineCardId": "v08_memory_chip",
+      "title": "Memory Chip",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "+1 Memory Limit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_hardware"
+      ],
+      "resolverRef": "engine:v08_memory_chip",
+      "abilityRefs": [
+        "v08_memory_chip:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_memory_chip",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_overclock_run_event",
+      "sourceCardId": "v08_overclock_run_event",
+      "engineCardId": "v08_overclock_run_event",
+      "title": "Overclock Run Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 3 Credits.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "resolverRef": "engine:v08_overclock_run_event",
+      "abilityRefs": [
+        "v08_overclock_run_event:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_overclock_run_event",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_precise_decoder",
+      "sourceCardId": "v08_precise_decoder",
+      "engineCardId": "v08_precise_decoder",
+      "title": "Precise Decoder",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "decoder",
+        "icebreaker"
+      ],
+      "faction": "neutral_demo",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Code-Gate-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_decoder",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:v08_precise_decoder",
+      "abilityRefs": [
+        "v08_precise_decoder:ability_contract",
+        "v08_precise_decoder:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_precise_decoder",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_project_agenda",
+      "sourceCardId": "v08_project_agenda",
+      "engineCardId": "v08_project_agenda",
+      "title": "Project Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "faction": "neutral_demo",
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "resolverRef": "engine:v08_project_agenda",
+      "abilityRefs": [
+        "v08_project_agenda:resolver_contract",
+        "v08_project_agenda:score_steal_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_project_agenda",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_steady_fracter",
+      "sourceCardId": "v08_steady_fracter",
+      "engineCardId": "v08_steady_fracter",
+      "title": "Steady Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "fracter",
+        "icebreaker"
+      ],
+      "faction": "neutral_demo",
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 4,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "resolverRef": "engine:v08_steady_fracter",
+      "abilityRefs": [
+        "v08_steady_fracter:ability_contract",
+        "v08_steady_fracter:resolver_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_steady_fracter",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_wall_ice",
+      "sourceCardId": "v08_wall_ice",
+      "engineCardId": "v08_wall_ice",
+      "title": "Wall ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "faction": "neutral_demo",
+      "text": "End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 5,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "resolverRef": "engine:v08_wall_ice",
+      "abilityRefs": [
+        "v08_wall_ice:resolver_contract",
+        "v08_wall_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_wall_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    },
+    {
+      "catalogCardId": "v08_watchdog_ice",
+      "sourceCardId": "v08_watchdog_ice",
+      "engineCardId": "v08_watchdog_ice",
+      "title": "Watchdog ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "faction": "neutral_demo",
+      "text": "Gib dem Runner 1 Tag. End the run.",
+      "displayOnlyText": true,
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "resolverRef": "engine:v08_watchdog_ice",
+      "abilityRefs": [
+        "v08_watchdog_ice:resolver_contract",
+        "v08_watchdog_ice:subroutine_contract"
+      ],
+      "aiHintsRef": "ai-hints-v1.3.1:v08_watchdog_ice",
+      "review": {
+        "cardData": "reviewed",
+        "mechanics": "reviewed",
+        "resolver": "reviewed",
+        "aiHints": "reviewed"
+      }
+    }
+  ],
+  "hash": "fnv1a:f2210868"
+}

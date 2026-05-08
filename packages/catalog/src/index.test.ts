@@ -2,12 +2,28 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import snapshotData from "../../../data/card-import/card-snapshot-0.5.json";
 import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
+import pipelineSnapshotData from "../../../data/card-import/card-pipeline-snapshot-1.3.1.json";
+import sourceRegistry131Data from "../../../data/card-import/source-registry-1.3.1.json";
+import aiHints131Data from "../../../data/ai/ai-card-hints-1.3.1.json";
+import aiHintsReport131Data from "../../../data/ai/ai-card-hints-report-1.3.1.json";
+import cardSupportManifest131Data from "../../../data/manifests/card-support-manifest-1.3.1.json";
+import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.3.1.json";
+import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
+import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
 import {
+  assertPipelinePayloadSafe,
   assertCatalogPayloadSafe,
+  computeCardPipelineSnapshotHash,
   computeSnapshotHash,
   createCatalogIndex,
+  createAiCardHintsV2,
+  createCardPipelineReport,
+  createCardPipelineSnapshot,
+  createPipelineRollbackReport,
   createRuntimeCardsById,
+  createSourceRegistryV2,
+  diffCardPipelineSnapshots,
   getCatalogCard,
   ONR_V1_0_5K_RELEASE_CARD_IDS,
   ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -15,12 +31,19 @@ import {
   ONR_V1_2_3_RELEASE_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
+  validateAiCardHintsV2,
+  validateCardPipelineSnapshot,
   validateSnapshot,
+  validateSourceRegistryV2,
+  type AiCardHintsV2,
+  type CardPipelineSnapshot,
   type CardSnapshot
 } from "./index";
 
 const snapshot = snapshotData as unknown as CardSnapshot;
 const snapshot08 = snapshotData08 as unknown as CardSnapshot;
+const pipelineSnapshot131 = pipelineSnapshotData as unknown as CardPipelineSnapshot;
+const aiHints131 = aiHints131Data as unknown as AiCardHintsV2;
 
 describe("catalog import and status logic", () => {
   it("validates the local V0.5 snapshot", () => {
@@ -174,5 +197,110 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(false);
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.format_legal).toBe(false);
     expect(cardsById["onr_v1_018_dogcatcher"]?.engineCardId).toBeNull();
+  });
+});
+
+describe("V1.3.1 Card Data Pipeline v2", () => {
+  it("validates the versioned Source Registry v2 without exposing private local paths", () => {
+    expect(validateSourceRegistryV2(sourceRegistry131Data as ReturnType<typeof createSourceRegistryV2>)).toEqual({ ok: true, errors: [] });
+    expect(assertPipelinePayloadSafe(sourceRegistry131Data)).toEqual({ ok: true, errors: [] });
+
+    const generated = createSourceRegistryV2();
+    expect(generated.sources.map((source) => source.sourceId)).toEqual((sourceRegistry131Data as ReturnType<typeof createSourceRegistryV2>).sources.map((source) => source.sourceId));
+    expect(generated.sources.find((source) => source.scope === "private_local")?.pathOrReference).toBe("private-local-onr-v1-overlay");
+  });
+
+  it("recreates the V1.3.1 pipeline snapshot deterministically with a stable hash", () => {
+    const hints = createAiCardHintsV2(createCardPipelineSnapshot(snapshot08, { sourceRegistryId: "source-registry-1.3.1" }), aiHints131.cards, { hintsId: "ai-card-hints-1.3.1" });
+    const recreated = createCardPipelineSnapshot(snapshot08, { sourceRegistryId: "source-registry-1.3.1", aiHints: hints });
+    const hashFile = readFileSync(new URL("../../../data/card-import/card-pipeline-snapshot-1.3.1.hash", import.meta.url), "utf8").trim();
+
+    expect(validateCardPipelineSnapshot(pipelineSnapshot131, aiHints131)).toEqual({ ok: true, errors: [] });
+    expect(computeCardPipelineSnapshotHash(pipelineSnapshot131)).toBe("fnv1a:f2210868");
+    expect(pipelineSnapshot131.hash).toBe(hashFile);
+    expect(recreated.hash).toBe(pipelineSnapshot131.hash);
+    expect(recreated.cards.map((card) => card.catalogCardId)).toEqual(pipelineSnapshot131.cards.map((card) => card.catalogCardId));
+    expect(assertPipelinePayloadSafe(pipelineSnapshot131)).toEqual({ ok: true, errors: [] });
+  });
+
+  it("keeps all V1.3.1 status chains separated and blocks automatic playability", () => {
+    const importOnly = pipelineSnapshot131.cards.find((card) => card.catalogCardId === "catalog_preview_operation_001")!;
+    expect(importOnly.statuses.imported).toBe(true);
+    expect(importOnly.statuses.catalog_ready).toBe(true);
+    expect(importOnly.statuses.engine_supported).toBe(false);
+    expect(importOnly.statuses.human_playable).toBe(false);
+    expect(importOnly.statuses.deck_legal).toBe(false);
+    expect(importOnly.resolverRef).toBeNull();
+
+    const invalid = structuredClone(pipelineSnapshot131);
+    const invalidCard = invalid.cards.find((card) => card.catalogCardId === "catalog_preview_operation_001")!;
+    invalidCard.statuses.deck_legal = true;
+    invalid.hash = computeCardPipelineSnapshotHash(invalid);
+
+    const validation = validateCardPipelineSnapshot(invalid, aiHints131);
+    expect(validation.ok).toBe(false);
+    expect(validation.errors.join(" ")).toContain("deck_legal");
+  });
+
+  it("validates AI-Hints v2 without letting hints grant ai_supported", () => {
+    expect(validateAiCardHintsV2(aiHints131, pipelineSnapshot131)).toEqual({ ok: true, errors: [] });
+    expect(aiHints131.cards.length).toBeGreaterThan(0);
+    expect(aiHints131.cards.every((hint) => hint.roles.length > 0 && hint.planRoles.length > 0)).toBe(true);
+    expect(aiHints131.cards.every((hint) => Object.values(hint.valueHints).every((value) => value >= -10 && value <= 10))).toBe(true);
+    expect(aiHints131.cards.filter((hint) => hint.aiSupportStatus === "ai_supported").every((hint) => hint.scenarioRefs.length > 0)).toBe(true);
+
+    const hintedOnly = structuredClone(aiHints131);
+    hintedOnly.cards[0] = { ...hintedOnly.cards[0]!, aiSupportStatus: "ai_supported", scenarioRefs: [] };
+    expect(validateAiCardHintsV2(hintedOnly, pipelineSnapshot131).errors.join(" ")).toContain("without card support and scenarios");
+    expect(assertPipelinePayloadSafe(aiHintsReport131Data)).toEqual({ ok: true, errors: [] });
+  });
+
+  it("classifies import diffs and preserves a rollback contract without touching matches", () => {
+    expect(diffReport131Data.schemaVersion).toBe("card-pipeline-diff-v1.3.1");
+    expect(diffReport131Data.entries.map((entry: { category: string }) => entry.category)).toEqual([
+      "ability_refs_changed",
+      "review_status_changed",
+      "numeric_changed",
+      "required_mechanics_changed",
+      "text_changed",
+      "status_changed",
+      "resolver_ref_changed",
+      "ai_hints_changed",
+    ]);
+    expect(diffReport131Data.entries.some((entry: { severity: string }) => entry.severity === "blocking")).toBe(true);
+
+    const candidate = structuredClone(pipelineSnapshot131);
+    candidate.cards[0] = { ...candidate.cards[0]!, text: `${candidate.cards[0]!.text} Errata fixture.` };
+    candidate.hash = computeCardPipelineSnapshotHash(candidate);
+    const diff = diffCardPipelineSnapshots(pipelineSnapshot131, candidate);
+    expect(diff.entries).toEqual([{ category: "text_changed", severity: "review_required", cardId: candidate.cards[0]!.catalogCardId, summary: "Card display text changed." }]);
+
+    const rollback = createPipelineRollbackReport(candidate, pipelineSnapshot131);
+    expect(rollback.matchSnapshotsUntouched).toBe(true);
+    expect(rollback.replayStateHashUntouched).toBe(true);
+    expect(rollback.privateAssetsUntouched).toBe(true);
+    expect(rollbackReport131Data).toMatchObject({ matchSnapshotsUntouched: true, replayStateHashUntouched: true, privateAssetsUntouched: true });
+    expect(assertPipelinePayloadSafe({ diffReport131Data, rollbackReport131Data })).toEqual({ ok: true, errors: [] });
+  });
+
+  it("publishes safe V1.3.1 support and status reports with explicit no-scope assertions", () => {
+    const recreatedReport = createCardPipelineReport(pipelineSnapshot131, aiHints131);
+
+    expect(cardSupportManifest131Data.gateAssertions.noCardTextParser).toBe(true);
+    expect(cardSupportManifest131Data.gateAssertions.noNewCardUnlocks).toBe(true);
+    expect(cardSupportManifest131Data.gateAssertions.noPrivatePathsOrTokens).toBe(true);
+    expect(cardSupportManifest131Data.cards.filter((card: { statuses: { ai_supported: boolean } }) => card.statuses.ai_supported)).toEqual([]);
+    expect(cardSupportManifest131Data.cards.every((card: { statuses: { deck_legal: boolean; human_playable: boolean } }) => !card.statuses.deck_legal || card.statuses.human_playable)).toBe(true);
+
+    expect(pipelineReport131Data.noScopeAssertions).toEqual({
+      noCardTextParser: true,
+      noAutomaticPlayability: true,
+      noNewCardRelease: true,
+      noNewMechanics: true,
+      noOfficialAssets: true,
+      noPublicPlatformFeatures: true
+    });
+    expect(recreatedReport.statusSummary).toEqual(pipelineReport131Data.statusSummary);
+    expect(assertPipelinePayloadSafe({ cardSupportManifest131Data, pipelineReport131Data })).toEqual({ ok: true, errors: [] });
   });
 });

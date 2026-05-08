@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "card-pipeline-diff-v1.3.1",
+  "fromSnapshotId": "card-pipeline-snapshot-1.3.1",
+  "toSnapshotId": "card-pipeline-snapshot-1.3.1-review-fixture",
+  "fromHash": "fnv1a:f2210868",
+  "toHash": "fnv1a:c79ef9fb",
+  "entries": [
+    {
+      "category": "ability_refs_changed",
+      "severity": "blocking",
+      "cardId": "efficient_fracter",
+      "summary": "Ability references changed."
+    },
+    {
+      "category": "review_status_changed",
+      "severity": "review_required",
+      "cardId": "runner_identity_001",
+      "summary": "Review status changed."
+    },
+    {
+      "category": "numeric_changed",
+      "severity": "review_required",
+      "cardId": "simple_barrier_ice",
+      "summary": "Numeric card fields changed."
+    },
+    {
+      "category": "required_mechanics_changed",
+      "severity": "blocking",
+      "cardId": "simple_decoder",
+      "summary": "Required mechanics changed."
+    },
+    {
+      "category": "text_changed",
+      "severity": "review_required",
+      "cardId": "simple_economy_event",
+      "summary": "Card display text changed."
+    },
+    {
+      "category": "status_changed",
+      "severity": "review_required",
+      "cardId": "simple_fracter",
+      "summary": "Card support statuses changed."
+    },
+    {
+      "category": "resolver_ref_changed",
+      "severity": "blocking",
+      "cardId": "simple_killer",
+      "summary": "Resolver reference changed."
+    },
+    {
+      "category": "ai_hints_changed",
+      "severity": "review_required",
+      "cardId": "v08_project_agenda",
+      "summary": "AI hint reference changed."
+    }
+  ]
+}

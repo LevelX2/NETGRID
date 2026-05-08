@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "ai-card-hints-report-v1.3.1",
+  "id": "ai-card-hints-report-1.3.1",
+  "hintsId": "ai-card-hints-1.3.1",
+  "derivedFromSnapshotId": "card-pipeline-snapshot-1.3.1",
+  "validation": {
+    "ok": true,
+    "errors": []
+  },
+  "hintedCards": 34,
+  "aiSupportedByHints": 0,
+  "hintedOnly": 34,
+  "gateAssertions": {
+    "hintsAreManualData": true,
+    "hintsDoNotSetAiSupported": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true,
+    "noHiddenInfoClaims": true
+  }
+}

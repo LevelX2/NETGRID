@@ -8,12 +8,31 @@ import {
   buildObservedFacts,
   buildAiDecisionInput,
   chooseAiAction,
+  chooseCorpBaselineAction,
   chooseCorpAction,
+  chooseCorpPlanDecision,
+  chooseRunnerBaselineAction,
+  corpPlanUsesOnlyAiSupportedCards,
+  chooseRunnerPlanDecision,
+  estimateRunCost,
+  evaluateAgendaRisk,
+  evaluateEconomyReserve,
+  evaluateIceRez,
+  evaluateRemoteIntentMemory,
+  evaluateScoringWindow,
+  evaluateServerThreat,
+  evaluateCorpScoringThreat,
+  evaluateRemoteThreat,
+  evaluateRunnerRig,
+  evaluateServerAccessValue,
+  generateCorpPlanCandidates,
+  generateRunnerPlanCandidates,
+  runnerPlanUsesOnlyAiSupportedCards,
   chooseRunnerAction,
   simulateAiGame,
   simulateAiSoak
 } from "./index";
-import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netgrid/shared";
+import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
 import { MVP_0_99_BASELINE } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
@@ -301,7 +320,7 @@ describe("MVP 0.3 Runner AI", () => {
     const emptyOnly = chooseRunnerAction({ ...input, legalActions: [emptyRemoteRun] });
     const betterTarget = chooseRunnerAction({ ...input, legalActions: [emptyRemoteRun, rdRun] });
 
-    expect(emptyOnly.reasonCode).toBe("runner.run.empty_remote_low_value");
+    expect(emptyOnly.reasonCode).toBe("runner.plan.safe_probe_run");
     expect(emptyOnly.evidence).toContain("ice_count:1");
     expect(emptyOnly.evidence).toContain("root_count:0");
     expect(betterTarget.actionId).toBe(rdRun.actionId);
@@ -319,7 +338,8 @@ describe("MVP 0.3 Runner AI", () => {
     const decision = chooseRunnerAction({ ...input, legalActions: [remoteRun] });
     const serializedDecision = JSON.stringify(decision);
 
-    expect(decision.reasonCode).toBe("runner.run.visible_pressure");
+    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(decision.decisionDebug).toMatchObject({ aiLevel: 2, planKind: "contest_remote" });
     expect(decision.evidence).toContain("root_count:2");
     expect(serializedDecision).not.toContain("Simple Agenda");
     expect(serializedDecision).not.toContain("Simple Economy Asset");
@@ -346,7 +366,7 @@ describe("MVP 0.3 Runner AI", () => {
     const decision = chooseRunnerAction({ ...input, legalActions: [blockedRun, gain] });
 
     expect(decision.actionId).toBe(gain.actionId);
-    expect(decision.reasonCode).toBe("runner.economy.basic_credit");
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
   it("prioritizes removing public tags when legal", () => {
@@ -374,7 +394,302 @@ describe("MVP 0.3 Corp AI v2", () => {
     const decision = chooseCorpAction(input);
 
     expect(input.legalActions.find((action) => action.actionId === decision.actionId)?.type).toBe("score_agenda");
-    expect(decision.reasonCode).toBe("corp.score_available_agenda");
+    expect(decision.reasonCode).toBe("corp.plan.score_now");
+    expect(decision.decisionDebug).toMatchObject({ aiLevel: 2, planKind: "score_now", fallbackUsed: false });
+  });
+});
+
+describe("V1.4.0 plan-based Corp AI", () => {
+  it("generates only current LegalAction-backed Corp plans", () => {
+    let state = createGameAfterSetup({ seed: "ai-v140-generator" });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 8;
+    state.corp.clicks = 3;
+    moveCorpCardToHq(state, "simple_agenda");
+    moveCorpCardToHq(state, "simple_barrier_ice");
+    moveCorpCardToHq(state, "simple_economy_operation");
+    moveCorpCardToHq(state, "simple_economy_asset");
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const candidates = generateCorpPlanCandidates(input);
+    const legalIds = new Set(input.legalActions.map((action) => action.actionId));
+
+    expect(candidates.map((candidate) => candidate.kind)).toEqual(expect.arrayContaining(["score_next_turn", "build_scoring_remote", "protect_hq", "protect_rnd", "recover_economy", "bait_runner"]));
+    for (const candidate of candidates) {
+      expect(candidate.legalActionIds.every((actionId) => legalIds.has(actionId))).toBe(true);
+      expect(corpPlanUsesOnlyAiSupportedCards(input, candidate)).toBe(true);
+    }
+  });
+
+  it("scores plan evaluators from visible PlayerView and public event data", () => {
+    let state = createGameAfterSetup({ seed: "ai-v140-evaluators" });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 2;
+    state.corp.clicks = 3;
+    moveCorpCardToHq(state, "simple_barrier_ice");
+    moveCorpCardToHq(state, "simple_economy_operation");
+    const input = withPublicServerEventTail(buildAiDecisionInput(state, "corp", { difficulty: "normal" }), ["hq", "rd", "remote_1"]);
+    const candidates = generateCorpPlanCandidates(input);
+    const economy = candidates.find((candidate) => candidate.kind === "recover_economy");
+    const hq = candidates.find((candidate) => candidate.kind === "protect_hq");
+
+    expect(economy).toBeDefined();
+    expect(hq).toBeDefined();
+    if (!economy || !hq) throw new Error("Missing V1.4.0 evaluator fixtures");
+    expect(evaluateEconomyReserve(input, economy).score).toBeGreaterThan(150);
+    expect(evaluateServerThreat(input, hq).evidence).toContain("hq_runs:1");
+    expect(evaluateIceRez(input, hq).reasons).toContain("ice_roles_available");
+    expect(evaluateRemoteIntentMemory(input).remoteInstallSignals).toBe(1);
+    expect(JSON.stringify(evaluateAgendaRisk(input, economy))).not.toContain("cardInstances");
+    expect(JSON.stringify(evaluateScoringWindow(input, economy))).not.toContain("privatePayload");
+  });
+
+  it("selects score-next-turn, remote-build and economy-recovery plans in focused Corp fixtures", () => {
+    const scoreNextInput = corpActionPhaseInput("ai-v140-score-next", (state) => {
+      state.corp.credits = 6;
+      putCorpRootInRemote(state, "simple_agenda", 2);
+    });
+    const remoteBuildInput = corpActionPhaseInput("ai-v140-remote-build", (state) => {
+      state.corp.credits = 7;
+      moveCorpCardToHq(state, "simple_agenda");
+    });
+    const economyInput = corpActionPhaseInput("ai-v140-economy", (state) => {
+      state.corp.credits = 1;
+      moveCorpCardToHq(state, "simple_economy_operation");
+    });
+
+    expect(chooseCorpPlanDecision(scoreNextInput).debug.planKind).toBe("score_next_turn");
+    expect(generateCorpPlanCandidates(remoteBuildInput).some((candidate) => candidate.kind === "build_scoring_remote")).toBe(true);
+    expect(chooseCorpPlanDecision(economyInput).debug.planKind).toBe("recover_economy");
+  });
+
+  it("keeps DecisionDebug side-safe and falls back legally under zero budget", () => {
+    const input = corpActionPhaseInput("ai-v140-debug", (state) => {
+      state.corp.credits = 8;
+      putCorpRootInRemote(state, "simple_agenda", 3);
+    });
+    const decision = chooseCorpAction(input);
+    const fallback = chooseCorpPlanDecision(input, { timeBudgetMs: 0 });
+    const serializedDebug = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.reasonCode).toBe("corp.plan.score_now");
+    expect(decision.decisionDebug).toMatchObject({ aiLevel: 2, planKind: "score_now", fallbackUsed: false, timeoutUsed: false });
+    expect(serializedDebug).not.toContain("cardInstances");
+    expect(serializedDebug).not.toContain("privatePayload");
+    expect(serializedDebug).not.toContain("Simple Fracter");
+    expect(fallback.fallbackUsed).toBe(true);
+    expect(fallback.debug.timeoutUsed).toBe(true);
+    expect(input.legalActions.some((action) => action.actionId === fallback.selectedActionId)).toBe(true);
+  });
+
+  it("kept Runner AI on the pre-V1.4.1 heuristic path before the Runner gate", () => {
+    const input = buildAiDecisionInput(toRunnerTurn(createGameAfterSetup({ seed: "ai-v140-runner-regression" })), "runner", { difficulty: "normal" });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.reasonCode.startsWith("runner.")).toBe(true);
+    expect(decision.decisionDebug).toMatchObject({ aiLevel: 2 });
+  });
+
+  it("keeps human-only cards out of Corp strategic plan roles", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-v140-unsupported-card",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+      corpDeck: ONR_V1_2_3_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const unsupportedId = moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const unsupportedAction = input.legalActions.find((action) => action.source === unsupportedId);
+
+    expect(unsupportedAction).toBeDefined();
+    expect(generateCorpPlanCandidates(input).every((candidate) => !candidate.legalActionIds.includes(unsupportedAction?.actionId ?? ""))).toBe(true);
+  });
+
+  it("keeps plan-based Corp AI playable in Human-vs-Corp-KI and KI-vs-KI smokes", () => {
+    const hvAi = runCorpAiOnlySmoke("ai-v140-human-corp-smoke", 24);
+    const aiVsAi = simulateAiGame({ seed: "ai-v140-ai-vs-ai-smoke", maxActions: 40, corpProfileId: "corp-ai-v1.4.0-normal" });
+
+    expect(hvAi.errors).toEqual([]);
+    expect(hvAi.actions).toBeGreaterThan(8);
+    expect(aiVsAi.errors).toEqual([]);
+    expect(aiVsAi.replayOk).toBe(true);
+    expect(JSON.stringify(aiVsAi)).not.toContain("cardInstances");
+    expect(aiVsAi.actionSequence.some((entry) => entry.reasonCode.startsWith("corp.plan."))).toBe(true);
+  });
+
+  it("benchmarks plan decisions against the old Corp heuristic baseline", () => {
+    const scoreInput = corpActionPhaseInput("ai-v140-benchmark-score", (state) => {
+      state.corp.credits = 8;
+      putCorpRootInRemote(state, "simple_agenda", 3);
+    });
+    const economyInput = corpActionPhaseInput("ai-v140-benchmark-economy", (state) => {
+      state.corp.credits = 1;
+      moveCorpCardToHq(state, "simple_economy_operation");
+    });
+    const planScore = chooseCorpAction(scoreInput);
+    const baselineScore = chooseCorpBaselineAction(scoreInput);
+    const planEconomy = chooseCorpAction(economyInput);
+    const baselineEconomy = chooseCorpBaselineAction(economyInput);
+
+    expect(planScore.actionId).toBe(baselineScore.actionId);
+    expect(planScore.reasonCode).toBe("corp.plan.score_now");
+    expect(baselineScore.reasonCode).toBe("corp.score_available_agenda");
+    expect(planEconomy.reasonCode).toBe("corp.plan.recover_economy");
+    expect(baselineEconomy.reasonCode.startsWith("corp.plan.")).toBe(false);
+    expect(economyInput.legalActions.some((action) => action.actionId === baselineEconomy.actionId)).toBe(true);
+  });
+});
+
+describe("V1.4.1 plan-based Runner AI", () => {
+  it("generates only current LegalAction-backed Runner plans", () => {
+    const input = runnerActionPhaseInput("ai-v141-generator", (state) => {
+      ensureRemoteServer(state, "remote_1");
+      putCorpRootInRemote(state, "simple_agenda", 1);
+      moveRunnerCardToGrip(state, "simple_fracter");
+      moveRunnerCardToGrip(state, "simple_economy_event");
+    });
+    const candidates = generateRunnerPlanCandidates(input);
+    const legalIds = new Set(input.legalActions.map((action) => action.actionId));
+
+    expect(candidates.map((candidate) => candidate.kind)).toEqual(expect.arrayContaining(["pressure_rnd", "pressure_hq", "contest_remote", "build_rig", "recover_economy", "draw_for_answers", "safe_probe_run"]));
+    for (const candidate of candidates) {
+      expect(candidate.legalActionIds.every((actionId) => legalIds.has(actionId))).toBe(true);
+      expect(runnerPlanUsesOnlyAiSupportedCards(input, candidate)).toBe(true);
+    }
+  });
+
+  it("scores Runner evaluators from visible board, public events and uncertainty", () => {
+    const input = runnerActionPhaseInput("ai-v141-evaluators", (state) => {
+      ensureRemoteServer(state, "remote_1");
+      putCorpRootInRemote(state, "simple_agenda", 2);
+      moveRunnerCardToGrip(state, "simple_fracter");
+    });
+    const remoteInput = withPublicServerEventTail(input, ["rd", "hq", "remote_1"]);
+    const candidates = generateRunnerPlanCandidates(remoteInput);
+    const remote = candidates.find((candidate) => candidate.kind === "contest_remote");
+    const build = candidates.find((candidate) => candidate.kind === "build_rig");
+
+    expect(remote).toBeDefined();
+    expect(build).toBeDefined();
+    if (!remote || !build) throw new Error("Missing V1.4.1 evaluator fixtures");
+    expect(evaluateRunnerRig(remoteInput, build).score).toBeGreaterThan(150);
+    expect(estimateRunCost(remoteInput, remote).evidence).toContain("target:remote_1");
+    expect(evaluateServerAccessValue(remoteInput, remote).evidence).toContain("root_count:1");
+    expect(evaluateRemoteThreat(remoteInput, remote).score).toBeGreaterThan(100);
+    expect(evaluateCorpScoringThreat(remoteInput, remote).evidence).toContain("corp_agenda:0");
+  });
+
+  it("selects pressure, remote contest, rig, economy and safe probe plans in focused fixtures", () => {
+    const pressureInput = runnerActionPhaseInput("ai-v141-pressure", () => undefined);
+    const remoteInput = runnerActionPhaseInput("ai-v141-contest", (state) => {
+      ensureRemoteServer(state, "remote_1");
+      putCorpRootInRemote(state, "simple_agenda", 2);
+    });
+    const buildInput = runnerActionPhaseInput("ai-v141-build", (state) => {
+      moveRunnerCardToGrip(state, "simple_fracter");
+    });
+    const economyInput = runnerActionPhaseInput("ai-v141-economy", (state) => {
+      state.runner.credits = 1;
+      moveRunnerCardToGrip(state, "simple_economy_event");
+    });
+    const safeProbeInput = runnerActionPhaseInput("ai-v141-safe-probe", (state) => {
+      ensureRemoteServer(state, "remote_1");
+      putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    });
+    const pressureRun = pressureInput.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const pressureGain = pressureInput.legalActions.find((action) => action.type === "gain_credit");
+    const remoteRun = remoteInput.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    const economyAction = economyInput.legalActions.find((action) => action.type === "play_event" && sourceDefinitionFromInput(economyInput, action) === "simple_economy_event") ?? economyInput.legalActions.find((action) => action.type === "gain_credit");
+    const safeProbeRun = safeProbeInput.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+
+    expect(pressureRun).toBeDefined();
+    expect(pressureGain).toBeDefined();
+    expect(remoteRun).toBeDefined();
+    expect(economyAction).toBeDefined();
+    if (!pressureRun || !pressureGain || !remoteRun || !economyAction) throw new Error("Missing V1.4.1 focused fixture actions");
+    expect(chooseRunnerPlanDecision({ ...pressureInput, legalActions: [pressureRun, pressureGain] }).debug.planKind).toBe("pressure_rnd");
+    expect(chooseRunnerPlanDecision({ ...remoteInput, legalActions: [remoteRun] }).debug.planKind).toBe("contest_remote");
+    expect(chooseRunnerPlanDecision(buildInput).debug.planKind).toBe("build_rig");
+    expect(chooseRunnerPlanDecision({ ...economyInput, legalActions: [economyAction] }).debug.planKind).toBe("recover_economy");
+    expect(safeProbeRun).toBeDefined();
+    if (!safeProbeRun) throw new Error("Missing safe probe run");
+    expect(chooseRunnerPlanDecision({ ...safeProbeInput, legalActions: [safeProbeRun] }).debug.planKind).toBe("safe_probe_run");
+  });
+
+  it("handles access trash, jack-out and legal fallback without hidden-info claims", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v141-trash-jackout" }));
+    const assetId = moveCorpCardToHq(state, "simple_economy_asset");
+    keepOnlyCorpHqCard(state, assetId);
+    state.runner.credits = 6;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const trashInput = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const trashDecision = chooseRunnerAction(trashInput);
+    const fallback = chooseRunnerPlanDecision(trashInput, { timeBudgetMs: 0 });
+    const serializedDebug = JSON.stringify(trashDecision.decisionDebug);
+
+    expect(trashInput.legalActions.find((action) => action.actionId === trashDecision.actionId)?.type).toBe("trash_accessed_card");
+    expect(trashDecision.reasonCode).toBe("runner.plan.trash_asset");
+    expect(serializedDebug).toContain("hidden_corp_information_not_used");
+    expect(serializedDebug).not.toContain("cardInstances");
+    expect(serializedDebug).not.toContain("corp_simple_agenda");
+    expect(fallback.fallbackUsed).toBe(true);
+    expect(fallback.debug.timeoutUsed).toBe(true);
+    expect(trashInput.legalActions.some((action) => action.actionId === fallback.selectedActionId)).toBe(true);
+
+    const jackInput = runnerJackOutInput("ai-v141-jackout");
+    const jack =
+      jackInput.legalActions.find((action) => action.type === "jack_out") ??
+      ({
+        ...jackInput.legalActions[0]!,
+        actionId: "runner.jack_out.synthetic_v141",
+        type: "jack_out" as const,
+        source: "game_rule" as const,
+        label: "Jack out",
+        timingPoint: "run.jack_out_window" as const,
+        costs: [],
+        payload: {}
+      } satisfies LegalAction);
+    expect(jack).toBeDefined();
+    expect(chooseRunnerPlanDecision({ ...jackInput, legalActions: [jack] }).debug.planKind).toBe("safe_probe_run");
+  });
+
+  it("keeps hidden-state invariance for equal Runner-visible projections", () => {
+    const stateA = toRunnerTurn(createGameAfterSetup({ seed: "ai-v141-invariance" }));
+    const stateB = structuredClone(stateA);
+    const hiddenId = stateA.corp.rd[0];
+    expect(hiddenId).toBeDefined();
+    if (!hiddenId) throw new Error("Missing hidden R&D card");
+    stateA.cardInstances[hiddenId] = { ...stateA.cardInstances[hiddenId]!, definitionId: "simple_agenda", faceup: false, rezzed: false };
+    stateB.cardInstances[hiddenId] = { ...stateB.cardInstances[hiddenId]!, definitionId: "simple_economy_asset", faceup: false, rezzed: false };
+    const inputA = buildAiDecisionInput(stateA, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const inputB = buildAiDecisionInput(stateB, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const decisionA = chooseRunnerAction(inputA);
+    const decisionB = chooseRunnerAction(inputB);
+
+    expect(JSON.stringify(inputA.playerView)).toBe(JSON.stringify(inputB.playerView));
+    expect(inputA.legalActions.map((action) => action.type)).toEqual(inputB.legalActions.map((action) => action.type));
+    expect(decisionA.reasonCode).toBe(decisionB.reasonCode);
+    expect(decisionA.decisionDebug?.planKind).toBe(decisionB.decisionDebug?.planKind);
+    expect(inputA.legalActions.find((action) => action.actionId === decisionA.actionId)?.type).toBe(inputB.legalActions.find((action) => action.actionId === decisionB.actionId)?.type);
+  });
+
+  it("keeps V1.4.0 Corp plan regression green while Runner plans run against basic and planned Corp", () => {
+    const scoreInput = corpActionPhaseInput("ai-v141-corp-regression", (state) => {
+      state.corp.credits = 8;
+      putCorpRootInRemote(state, "simple_agenda", 3);
+    });
+    const basicCorp = runRunnerAiSmoke("ai-v141-basic-corp-smoke", 34, "baseline");
+    const plannedCorp = simulateAiGame({ seed: "ai-v141-planned-corp-smoke", maxActions: 50, runnerProfileId: "runner-ai-v1.4.1-normal", corpProfileId: "corp-ai-v1.4.0-normal" });
+
+    expect(chooseCorpAction(scoreInput).reasonCode).toBe("corp.plan.score_now");
+    expect(basicCorp.errors).toEqual([]);
+    expect(basicCorp.runnerPlanDecisions).toBeGreaterThan(0);
+    expect(plannedCorp.errors).toEqual([]);
+    expect(plannedCorp.replayOk).toBe(true);
+    expect(plannedCorp.actionSequence.some((entry) => entry.reasonCode.startsWith("runner.plan."))).toBe(true);
+    expect(plannedCorp.actionSequence.some((entry) => entry.reasonCode.startsWith("corp.plan."))).toBe(true);
   });
 });
 
@@ -947,6 +1262,123 @@ function traceCorpBidState(seed: string): GameState {
   return apply(state, "runner", (action) => action.type === "continue_run");
 }
 
+function corpActionPhaseInput(seed: string, mutate: (state: GameState) => void) {
+  let state = createGameAfterSetup({ seed });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  mutate(state);
+  return buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.0-normal" });
+}
+
+function runnerActionPhaseInput(seed: string, mutate: (state: GameState) => void) {
+  const state = toRunnerTurn(createGameAfterSetup({ seed }));
+  mutate(state);
+  return buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+}
+
+function runnerJackOutInput(seed: string) {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeckId: "demo_runner_096",
+      corpDeckId: "demo_corp_096",
+      agendaPointsToWin: 7
+    })
+  );
+  putCorpIceOnServer(state, "rd", "v096_trace_probe_ice");
+  state.corp.credits = 8;
+  state.runner.credits = 5;
+  state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+  state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v096_trace_probe_ice");
+  state = apply(state, "runner", (action) => action.type === "continue_run");
+  state = applyChoice(state, "corp", ["bid_0"]);
+  state = applyChoice(state, "runner", ["bid_2"]);
+  state = apply(state, "runner", (action) => action.type === "continue_run");
+  return buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+}
+
+function withPublicServerEventTail(input: ReturnType<typeof buildAiDecisionInput>, servers: string[]) {
+  const eventTail: PublicGameEvent[] = servers.map((serverId, index) => ({
+    eventId: `v140-visible-event-${index}`,
+    type: serverId.startsWith("remote_") ? "install_remote_card" : "run_started",
+    stateVersionBefore: index,
+    stateVersionAfter: index + 1,
+    stateHashAfter: `fnv1a:v140${index}`,
+    visibilityClass: "public",
+    publicPayload: { serverId }
+  }));
+  return { ...input, eventTail };
+}
+
+function runCorpAiOnlySmoke(seed: string, maxActions: number): { actions: number; errors: string[] } {
+  let state = createGameAfterSetup({ seed });
+  const errors: string[] = [];
+  for (let step = 0; step < maxActions && !state.winner; step += 1) {
+    const side = state.activeSide;
+    const input = buildAiDecisionInput(state, side, {
+      difficulty: "normal",
+      actionNumber: step,
+      decisionId: `${seed}:${step}:${side}`,
+      profileId: side === "corp" ? "corp-ai-v1.4.0-normal" : "runner-ai-v0.9-normal"
+    });
+    const decision = side === "corp" ? chooseCorpAction(input) : chooseRunnerAction(input);
+    const action = input.legalActions.find((candidate) => candidate.actionId === decision.actionId);
+    if (!action) {
+      errors.push(`missing legal action ${side} ${step}`);
+      break;
+    }
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side,
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
+      idempotencyKey: `${seed}-${step}-${action.actionId}`
+    });
+    if (!result.ok) {
+      errors.push(`${result.error.code}:${result.error.message}`);
+      break;
+    }
+    state = result.state;
+  }
+  return { actions: state.stateVersion, errors };
+}
+
+function runRunnerAiSmoke(seed: string, maxActions: number, corpMode: "baseline" | "planned"): { actions: number; errors: string[]; runnerPlanDecisions: number } {
+  let state = createGameAfterSetup({ seed });
+  const errors: string[] = [];
+  let runnerPlanDecisions = 0;
+  for (let step = 0; step < maxActions && !state.winner; step += 1) {
+    const side = state.activeSide;
+    const input = buildAiDecisionInput(state, side, {
+      difficulty: "normal",
+      actionNumber: step,
+      decisionId: `${seed}:${step}:${side}`,
+      profileId: side === "runner" ? "runner-ai-v1.4.1-normal" : "corp-ai-v1.4.0-normal"
+    });
+    const decision = side === "runner" ? chooseRunnerAction(input) : corpMode === "baseline" ? chooseCorpBaselineAction(input) : chooseCorpAction(input);
+    if (decision.reasonCode.startsWith("runner.plan.")) runnerPlanDecisions += 1;
+    const action = input.legalActions.find((candidate) => candidate.actionId === decision.actionId);
+    if (!action) {
+      errors.push(`missing legal action ${side} ${step}`);
+      break;
+    }
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side,
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
+      idempotencyKey: `${seed}-${step}-${action.actionId}`
+    });
+    if (!result.ok) {
+      errors.push(`${result.error.code}:${result.error.message}`);
+      break;
+    }
+    state = result.state;
+  }
+  return { actions: state.stateVersion, errors, runnerPlanDecisions };
+}
+
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
   const selected = mustAction(state, side, predicate);
   const result = applyAction(state, {
@@ -1034,6 +1466,14 @@ function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceI
   return id;
 }
 
+function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {
+  for (const cardId of state.corp.hq.filter((candidate) => candidate !== id)) {
+    state.corp.rd.push(cardId);
+    state.cardInstances[cardId] = { ...state.cardInstances[cardId]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+  }
+  state.corp.hq = [id];
+}
+
 function putRunnerCardOnTopOfStack(state: GameState, definitionId: string): CardInstanceId {
   const id = findCard(state, definitionId);
   removeEverywhere(state, id);
@@ -1045,6 +1485,20 @@ function putRunnerCardOnTopOfStack(state: GameState, definitionId: string): Card
 function sourceDefinition(state: GameState, action: LegalAction): string | undefined {
   if (typeof action.source !== "string" || action.source === "basic_action" || action.source === "game_rule") return undefined;
   return state.cardInstances[action.source]?.definitionId;
+}
+
+function sourceDefinitionFromInput(input: ReturnType<typeof buildAiDecisionInput>, action: LegalAction): string | undefined {
+  if (typeof action.source !== "string" || action.source === "basic_action" || action.source === "game_rule") return undefined;
+  const visible = [
+    input.playerView.own.gripOrHq,
+    input.playerView.own.heapOrArchives,
+    input.playerView.own.scoreArea,
+    input.playerView.own.rig ?? [],
+    ...input.playerView.servers.flatMap((server) => [server.ice, server.root])
+  ]
+    .flat()
+    .find((card) => card.instanceId === action.source && card.known);
+  return visible?.definitionId;
 }
 
 function choiceRequest(state: GameState, side: Side): ChoiceRequest {

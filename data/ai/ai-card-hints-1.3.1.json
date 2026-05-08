@@ -1,0 +1,859 @@
+{
+  "schemaVersion": "ai-card-hints-v1.3.1",
+  "hintsId": "ai-card-hints-1.3.1",
+  "derivedFromSnapshotId": "card-pipeline-snapshot-1.3.1",
+  "cards": [
+    {
+      "cardId": "efficient_fracter",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_fracter",
+        "efficient_breaker"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_agenda",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda_2pt",
+        "score_plan"
+      ],
+      "planRoles": [
+        "score_next_turn"
+      ],
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "valueHints": {
+        "scoring": 4
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_barrier_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_code_gate_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_decoder",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_decoder"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_decoder",
+        "subtype_icebreaker"
+      ],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_draw_event",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "draw",
+        "setup"
+      ],
+      "planRoles": [
+        "draw_for_answers"
+      ],
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "valueHints": {
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "hidden_zone_change"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_draw_operation",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "draw_operation",
+        "setup"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "valueHints": {
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "hidden_zone_change"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_economy_asset",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target",
+        "economy_asset"
+      ],
+      "planRoles": [
+        "bait_runner",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_economy_event",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy",
+        "event"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "public_play"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_economy_operation",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "economy_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "public_play"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_fracter",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_fracter"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_killer",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_killer"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_icebreaker",
+        "subtype_killer"
+      ],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_priority_agenda",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda_3pt",
+        "score_plan"
+      ],
+      "planRoles": [
+        "score_next_turn"
+      ],
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "valueHints": {
+        "scoring": 4
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_run_event",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "run"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_sentry_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_setup_hardware",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "memory",
+        "setup"
+      ],
+      "planRoles": [
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [
+        "install_hardware"
+      ],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "install_runner"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_tag_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "sentry_ice",
+        "tag_ice"
+      ],
+      "planRoles": [
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "tag"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_tag_punishment_operation",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "tag_punishment"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "public_play",
+        "tag"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_taxing_barrier_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "taxing_ice"
+      ],
+      "planRoles": [
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "simple_upgrade",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_adaptive_killer",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_killer"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_icebreaker",
+        "subtype_killer"
+      ],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_archive_planning_operation",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "draw_operation",
+        "setup"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "valueHints": {
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "hidden_zone_change"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_burst_credit_event",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy",
+        "tempo"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "public_play"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_cashout_asset",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target",
+        "economy_asset"
+      ],
+      "planRoles": [
+        "bait_runner",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "install_remote",
+        "rez_card",
+        "trash_cost",
+        "trash_on_access"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_credit_surge_operation",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "economy_operation",
+        "tempo"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "public_play"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_deep_draw_event",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "draw",
+        "setup"
+      ],
+      "planRoles": [
+        "draw_for_answers"
+      ],
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "valueHints": {
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "hidden_zone_change"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_gate_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "taxing_ice"
+      ],
+      "planRoles": [
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_memory_chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "memory",
+        "setup"
+      ],
+      "planRoles": [
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [
+        "install_hardware"
+      ],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "install_runner"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_overclock_run_event",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_event"
+      ],
+      "valueHints": {
+        "economy": 3,
+        "runPressure": 2
+      },
+      "riskTags": [
+        "run"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_precise_decoder",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_decoder"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_decoder",
+        "subtype_icebreaker"
+      ],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_project_agenda",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda_2pt",
+        "score_plan"
+      ],
+      "planRoles": [
+        "score_next_turn"
+      ],
+      "requiredMechanics": [
+        "advance",
+        "advancement_requirement",
+        "agenda_points",
+        "install_remote",
+        "score",
+        "steal"
+      ],
+      "valueHints": {
+        "scoring": 4
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_steady_fracter",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_fracter"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [
+        "install_program",
+        "memory",
+        "subtype_fracter",
+        "subtype_icebreaker"
+      ],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_wall_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_barrier"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "v08_watchdog_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "sentry_ice",
+        "tag_ice"
+      ],
+      "planRoles": [
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "rez_ice",
+        "subtype_sentry"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "tag"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "ai-scenario-matrix-v1.4.0",
+  "id": "ai-v140-corp-plan-smokes",
+  "status": "implemented_v1.4.0",
+  "sourceTests": [
+    "packages/ai/src/index.test.ts::V1.4.0 plan-based Corp AI"
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "v140-score-now",
+      "planKind": "score_now",
+      "coveredBy": "prioritizes scoring an advanced remote agenda"
+    },
+    {
+      "scenarioId": "v140-score-next-turn",
+      "planKind": "score_next_turn",
+      "coveredBy": "selects score-next-turn, remote-build and economy-recovery plans in focused Corp fixtures"
+    },
+    {
+      "scenarioId": "v140-build-scoring-remote",
+      "planKind": "build_scoring_remote",
+      "coveredBy": "generates only current LegalAction-backed Corp plans"
+    },
+    {
+      "scenarioId": "v140-protect-hq",
+      "planKind": "protect_hq",
+      "coveredBy": "scores plan evaluators from visible PlayerView and public event data"
+    },
+    {
+      "scenarioId": "v140-protect-rnd",
+      "planKind": "protect_rnd",
+      "coveredBy": "generates only current LegalAction-backed Corp plans"
+    },
+    {
+      "scenarioId": "v140-recover-economy",
+      "planKind": "recover_economy",
+      "coveredBy": "selects score-next-turn, remote-build and economy-recovery plans in focused Corp fixtures"
+    },
+    {
+      "scenarioId": "v140-bait-runner",
+      "planKind": "bait_runner",
+      "coveredBy": "generates only current LegalAction-backed Corp plans"
+    }
+  ],
+  "safetyAssertions": {
+    "decisionDebugSideSafe": true,
+    "fallbackLegal": true,
+    "runnerAiRemainsHeuristic": true,
+    "aiSupportedGateChecked": true,
+    "humanVsCorpAiSmoke": true,
+    "aiVsAiSmoke": true
+  }
+}

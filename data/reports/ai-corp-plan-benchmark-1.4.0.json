@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "ai-corp-plan-benchmark-v1.4.0",
+  "id": "ai-corp-plan-benchmark-1.4.0",
+  "status": "implemented_v1.4.0",
+  "generatedAt": "2026-05-08",
+  "sourceTests": [
+    "packages/ai/src/index.test.ts::V1.4.0 plan-based Corp AI"
+  ],
+  "baselineContract": {
+    "baselineChooser": "chooseCorpBaselineAction",
+    "planChooser": "chooseCorpAction",
+    "legalActionOnly": true,
+    "playerViewOnly": true,
+    "noFullStateSimulation": true,
+    "noBeliefState": true
+  },
+  "focusedComparisons": [
+    {
+      "scenarioId": "v140-score-now",
+      "goal": "score_now",
+      "plan": {
+        "actionType": "score_agenda",
+        "reasonCode": "corp.plan.score_now",
+        "fallbackUsed": false,
+        "timeoutUsed": false
+      },
+      "baseline": {
+        "actionType": "score_agenda",
+        "reasonCode": "corp.score_available_agenda",
+        "fallbackUsed": false,
+        "timeoutUsed": false
+      },
+      "result": "same_legal_action_with_plan_debug"
+    },
+    {
+      "scenarioId": "v140-economy-recovery",
+      "goal": "recover_economy",
+      "plan": {
+        "actionType": "play_operation",
+        "reasonCode": "corp.plan.recover_economy",
+        "fallbackUsed": false,
+        "timeoutUsed": false
+      },
+      "baseline": {
+        "actionType": "install_card",
+        "reasonCode": "corp.remote.install_score_plan",
+        "fallbackUsed": false,
+        "timeoutUsed": false
+      },
+      "result": "plan_prefers_visible_credit_recovery"
+    }
+  ],
+  "smokeMetrics": {
+    "seed": "ai-v140-ai-vs-ai-smoke",
+    "maxActions": 40,
+    "errors": 0,
+    "replayOk": true,
+    "hiddenInfoLeakMarkers": 0,
+    "corpPlanReasonCodesObserved": true
+  },
+  "noScopeAssertions": {
+    "noRunnerPlanAi": true,
+    "noNewCards": true,
+    "noNewMechanics": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true,
+    "noLiveLlmActor": true
+  }
+}

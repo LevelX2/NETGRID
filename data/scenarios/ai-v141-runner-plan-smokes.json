@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "ai-scenario-matrix-v1.4.1",
+  "id": "ai-v141-runner-plan-smokes",
+  "status": "implemented_v1.4.1",
+  "sourceTests": [
+    "packages/ai/src/index.test.ts::V1.4.1 plan-based Runner AI"
+  ],
+  "scenarios": [
+    {
+      "scenarioId": "v141-pressure-rnd",
+      "planKind": "pressure_rnd",
+      "coveredBy": "selects pressure, remote contest, rig, economy and safe probe plans in focused fixtures"
+    },
+    {
+      "scenarioId": "v141-pressure-hq",
+      "planKind": "pressure_hq",
+      "coveredBy": "generates only current LegalAction-backed Runner plans"
+    },
+    {
+      "scenarioId": "v141-contest-remote",
+      "planKind": "contest_remote",
+      "coveredBy": "selects pressure, remote contest, rig, economy and safe probe plans in focused fixtures"
+    },
+    {
+      "scenarioId": "v141-build-rig",
+      "planKind": "build_rig",
+      "coveredBy": "selects pressure, remote contest, rig, economy and safe probe plans in focused fixtures"
+    },
+    {
+      "scenarioId": "v141-recover-economy",
+      "planKind": "recover_economy",
+      "coveredBy": "selects pressure, remote contest, rig, economy and safe probe plans in focused fixtures"
+    },
+    {
+      "scenarioId": "v141-draw-for-answers",
+      "planKind": "draw_for_answers",
+      "coveredBy": "generates only current LegalAction-backed Runner plans"
+    },
+    {
+      "scenarioId": "v141-trash-asset",
+      "planKind": "trash_asset",
+      "coveredBy": "handles access trash, jack-out and legal fallback without hidden-info claims"
+    },
+    {
+      "scenarioId": "v141-safe-probe-run",
+      "planKind": "safe_probe_run",
+      "coveredBy": "handles access trash, jack-out and legal fallback without hidden-info claims"
+    }
+  ],
+  "safetyAssertions": {
+    "decisionDebugUsesUncertainty": true,
+    "fallbackLegal": true,
+    "hiddenStateInvariance": true,
+    "aiSupportedGateChecked": true,
+    "basicCorpSmoke": true,
+    "plannedCorpSmoke": true,
+    "corpPlanRegression": true
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "ai-runner-plan-benchmark-v1.4.1",
+  "id": "ai-runner-plan-benchmark-1.4.1",
+  "status": "implemented_v1.4.1",
+  "generatedAt": "2026-05-08",
+  "sourceTests": [
+    "packages/ai/src/index.test.ts::V1.4.1 plan-based Runner AI"
+  ],
+  "benchmarkContract": {
+    "runnerChooser": "chooseRunnerAction",
+    "baselineChooser": "chooseRunnerBaselineAction",
+    "legalActionOnly": true,
+    "playerViewOnly": true,
+    "hiddenStateInvariance": true,
+    "noFullStateSimulation": true,
+    "noBeliefState": true
+  },
+  "focusedComparisons": [
+    {
+      "scenarioId": "v141-pressure-rnd",
+      "goal": "pressure_rnd",
+      "plan": {
+        "actionType": "start_run",
+        "reasonCode": "runner.plan.pressure_rnd",
+        "uncertainty": ["unknown_corp_cards_remain_unknown", "unrezzed_ice_identity_not_assumed"]
+      },
+      "result": "runner_applies_visible_rd_pressure"
+    },
+    {
+      "scenarioId": "v141-contest-remote",
+      "goal": "contest_remote",
+      "plan": {
+        "actionType": "start_run",
+        "reasonCode": "runner.plan.contest_remote",
+        "uncertainty": ["unknown_corp_cards_remain_unknown", "unrezzed_ice_identity_not_assumed"]
+      },
+      "result": "runner_contests_visible_remote_pressure"
+    },
+    {
+      "scenarioId": "v141-recover-economy",
+      "goal": "recover_economy",
+      "plan": {
+        "actionType": "play_event",
+        "reasonCode": "runner.plan.recover_economy",
+        "fallbackUsed": false,
+        "timeoutUsed": false
+      },
+      "result": "runner_prefers_credit_recovery_over_bad_run"
+    },
+    {
+      "scenarioId": "v141-trash-asset",
+      "goal": "trash_asset",
+      "plan": {
+        "actionType": "trash_accessed_card",
+        "reasonCode": "runner.plan.trash_asset",
+        "fallbackUsed": false,
+        "timeoutUsed": false
+      },
+      "result": "runner_trashes_visible_access_target"
+    }
+  ],
+  "smokeMetrics": {
+    "basicCorpSmoke": {
+      "errors": 0,
+      "runnerPlanDecisionsObserved": true
+    },
+    "plannedCorpSmoke": {
+      "errors": 0,
+      "replayOk": true,
+      "runnerPlanReasonCodesObserved": true,
+      "corpPlanReasonCodesObserved": true
+    },
+    "hiddenInfoLeakMarkers": 0
+  },
+  "noScopeAssertions": {
+    "noNewCards": true,
+    "noNewMechanics": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true,
+    "noLiveLlmActor": true,
+    "corpPlanRegressionProtected": true
+  }
+}
