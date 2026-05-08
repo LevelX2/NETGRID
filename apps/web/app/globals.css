@@ -1067,7 +1067,8 @@ select {
   box-shadow: var(--card-shadow);
 }
 
-.catalogImagePreview.hardware .catalogHardwareOverlay {
+.catalogImagePreview.hardware .catalogHardwareOverlay,
+.catalogImagePreview.operation .catalogHardwareOverlay {
   border-radius: 8px;
 }
 
@@ -1511,7 +1512,7 @@ select {
   line-height: 1.2;
 }
 
-.deckCardThumb.hasImage > span {
+.deckCardThumb.hasImage > .deckCardThumbFallback {
   display: none;
 }
 
@@ -3334,6 +3335,17 @@ select {
   border-radius: 6px;
 }
 
+.chronicleCardImageFrame {
+  position: relative;
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.chronicleHardwareOverlay {
+  border-radius: 6px;
+}
+
 .chronicleCardTooltip strong {
   color: var(--text);
   font-size: 13px;
@@ -3587,6 +3599,74 @@ select {
 
 .boardSectionTitle h2 {
   margin: 0;
+}
+
+.runnerGripHeapLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 230px);
+  gap: 10px;
+  align-items: start;
+}
+
+.runnerGripColumn,
+.runnerHeapColumn {
+  min-width: 0;
+}
+
+.runnerHeapColumn {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  padding: 6px;
+  border: 1px dashed var(--lane-border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--lane-bg), var(--panel) 55%);
+}
+
+.runnerHeapHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.runnerHeapHead strong {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.runnerHeapHead .zoneLimitBadge {
+  min-height: 20px;
+  padding: 2px 6px;
+}
+
+.runnerHeapOverlapRow {
+  display: flex;
+  align-items: flex-start;
+  min-height: 78px;
+  padding-right: 4px;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.runnerHeapOverlapRow .cardSlot {
+  flex: 0 0 56px;
+  width: 56px;
+  max-width: 56px;
+  z-index: 1;
+}
+
+.runnerHeapOverlapRow .cardSlot + .cardSlot {
+  margin-left: -39px;
+}
+
+.runnerHeapOverlapRow .cardSlot:hover,
+.runnerHeapOverlapRow .cardSlot:focus-within {
+  z-index: 38;
 }
 
 .zoneLimitBadge {
@@ -4351,7 +4431,8 @@ select,
   object-fit: cover;
 }
 
-.card.withImage.hardware {
+.card.withImage.hardware,
+.card.withImage.operation {
   position: relative;
   overflow: hidden;
 }
@@ -4362,8 +4443,33 @@ select,
   z-index: 2;
   padding: 5px;
   pointer-events: none;
+  --overlay-name-font-size: 11px;
+  --overlay-kind-font-size: 10px;
+  --overlay-rules-font-size: 11px;
+  --overlay-rules-line-height: 1.28;
+  --overlay-frame-gap: 3px;
+  --overlay-frame-top-padding: 6px;
+  --overlay-frame-horizontal-padding: 7px;
+  --overlay-frame-bottom-padding: 10px;
+  --overlay-rules-bottom-padding: 3px;
   color: #f3f7f8;
   background: linear-gradient(180deg, rgb(10 16 24 / 0.04) 0%, rgb(9 15 22 / 0.12) 48%, rgb(7 12 18 / 0.3) 100%);
+}
+
+.hardwareImageOverlay.overlayTextDensityMedium {
+  --overlay-name-font-size: 10px;
+  --overlay-kind-font-size: 9px;
+  --overlay-rules-font-size: 10px;
+  --overlay-rules-line-height: 1.24;
+}
+
+.hardwareImageOverlay.overlayTextDensityCompact {
+  --overlay-name-font-size: 9px;
+  --overlay-kind-font-size: 8px;
+  --overlay-rules-font-size: 9px;
+  --overlay-rules-line-height: 1.2;
+  --overlay-frame-bottom-padding: 9px;
+  --overlay-rules-bottom-padding: 2px;
 }
 
 .hardwareImageOverlayTop {
@@ -4387,7 +4493,7 @@ select,
   white-space: nowrap;
   text-overflow: ellipsis;
   color: #f7efdc;
-  font-size: 10px;
+  font-size: var(--overlay-name-font-size);
   font-weight: 800;
   letter-spacing: 0.02em;
   line-height: 1.2;
@@ -4425,8 +4531,8 @@ select,
   height: 45%;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 3px;
-  padding: 6px 7px 7px;
+  gap: var(--overlay-frame-gap);
+  padding: var(--overlay-frame-top-padding) var(--overlay-frame-horizontal-padding) var(--overlay-frame-bottom-padding);
   border: 1px solid rgb(216 184 123 / 0.68);
   border-radius: 4px;
   background: linear-gradient(180deg, rgb(29 34 41 / 0.82) 0%, rgb(13 18 24 / 0.95) 100%);
@@ -4448,7 +4554,7 @@ select,
   position: relative;
   z-index: 1;
   color: #f5dfb3;
-  font-size: 9px;
+  font-size: var(--overlay-kind-font-size);
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -4461,16 +4567,62 @@ select,
   display: grid;
   gap: 2px;
   color: #e7edf2;
-  font-size: 10px;
-  line-height: 1.25;
+  font-size: var(--overlay-rules-font-size);
+  line-height: var(--overlay-rules-line-height);
+  padding-bottom: var(--overlay-rules-bottom-padding);
   white-space: pre-line;
 }
 
-.card.withImage.hardware:not(.preview) .hardwareImageOverlay {
+.operationImageOverlay {
+  color: #fdf3ed;
+  background: linear-gradient(180deg, rgb(19 9 11 / 0.05) 0%, rgb(24 11 13 / 0.16) 50%, rgb(18 8 11 / 0.34) 100%);
+}
+
+.operationImageOverlay .hardwareImageOverlayTop {
+  border-color: rgb(232 148 124 / 0.88);
+  background: linear-gradient(180deg, rgb(171 69 52 / 0.92) 0%, rgb(106 33 24 / 0.96) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 210 197 / 0.32),
+    0 1px 4px rgb(0 0 0 / 0.34);
+}
+
+.operationImageOverlay .hardwareImageOverlayName {
+  color: #fff2ea;
+}
+
+.operationImageOverlay .hardwareImageOverlayCost {
+  border-color: rgb(255 210 192 / 0.92);
+  background: radial-gradient(circle at 32% 25%, rgb(255 228 216 / 0.97) 0%, rgb(231 153 126 / 0.98) 46%, rgb(157 70 49 / 1) 100%);
+  color: #2b0f08;
+}
+
+.operationImageOverlay .hardwareImageOverlayFrame {
+  border-color: rgb(238 159 136 / 0.72);
+  background: linear-gradient(180deg, rgb(41 18 20 / 0.84) 0%, rgb(22 10 12 / 0.95) 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 208 194 / 0.2),
+    0 2px 6px rgb(0 0 0 / 0.32);
+}
+
+.operationImageOverlay .hardwareImageOverlayFrame::before {
+  border-color: rgb(232 148 124 / 0.42);
+}
+
+.operationImageOverlay .hardwareImageOverlayKind {
+  color: #ffd7c7;
+}
+
+.operationImageOverlay .hardwareImageOverlayRules {
+  color: #f8edeb;
+}
+
+.card.withImage.hardware:not(.preview) .hardwareImageOverlay,
+.card.withImage.operation:not(.preview) .hardwareImageOverlay {
   padding: 4px;
 }
 
-.card.withImage.hardware:not(.preview) .hardwareImageOverlayTop {
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayTop,
+.card.withImage.operation:not(.preview) .hardwareImageOverlayTop {
   top: 4px;
   left: 4px;
   right: 4px;
@@ -4478,11 +4630,13 @@ select,
   padding: 2px 5px;
 }
 
-.card.withImage.hardware:not(.preview) .hardwareImageOverlayName {
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayName,
+.card.withImage.operation:not(.preview) .hardwareImageOverlayName {
   font-size: 8px;
 }
 
-.card.withImage.hardware:not(.preview) .hardwareImageOverlayCost {
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayCost,
+.card.withImage.operation:not(.preview) .hardwareImageOverlayCost {
   top: 5px;
   right: 5px;
   min-width: 18px;
@@ -4491,7 +4645,8 @@ select,
   font-size: 10px;
 }
 
-.card.withImage.hardware:not(.preview) .hardwareImageOverlayFrame {
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayFrame,
+.card.withImage.operation:not(.preview) .hardwareImageOverlayFrame {
   left: 4px;
   right: 4px;
   bottom: 4px;
@@ -4500,11 +4655,13 @@ select,
   padding: 4px 5px 5px;
 }
 
-.card.withImage.hardware:not(.preview) .hardwareImageOverlayKind {
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayKind,
+.card.withImage.operation:not(.preview) .hardwareImageOverlayKind {
   font-size: 8px;
 }
 
-.card.withImage.hardware:not(.preview) .hardwareImageOverlayRules {
+.card.withImage.hardware:not(.preview) .hardwareImageOverlayRules,
+.card.withImage.operation:not(.preview) .hardwareImageOverlayRules {
   display: none;
 }
 
@@ -4597,6 +4754,31 @@ select,
   font-size: 16px;
 }
 
+.specialZoneStrip.compact {
+  gap: 6px;
+  padding: 10px;
+  border-style: dashed;
+  background: color-mix(in srgb, var(--panel), var(--section-bg) 35%);
+}
+
+.specialZoneStrip.compact h2 {
+  font-size: 13px;
+}
+
+.specialZoneStrip.compact .specialZoneGroups {
+  gap: 7px;
+}
+
+.specialZoneStrip.compact .specialZoneHead {
+  font-size: 11px;
+}
+
+.specialZoneStrip.compact .specialZoneHead span {
+  min-width: 20px;
+  height: 20px;
+  font-size: 10px;
+}
+
 .specialZoneGroups {
   display: grid;
   gap: 9px;
@@ -4627,6 +4809,31 @@ select,
   border-radius: 999px;
   background: var(--panel-bg);
   color: var(--text);
+}
+
+.specialZoneOverlapRow {
+  display: flex;
+  align-items: flex-start;
+  min-height: 76px;
+  padding-right: 4px;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.specialZoneOverlapRow .cardSlot {
+  flex: 0 0 56px;
+  width: 56px;
+  max-width: 56px;
+  z-index: 1;
+}
+
+.specialZoneOverlapRow .cardSlot + .cardSlot {
+  margin-left: -38px;
+}
+
+.specialZoneOverlapRow .cardSlot:hover,
+.specialZoneOverlapRow .cardSlot:focus-within {
+  z-index: 38;
 }
 
 .rigGroups {
@@ -4824,6 +5031,30 @@ select,
 }
 
 @media (max-width: 720px) {
+  .runnerGripHeapLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .runnerHeapOverlapRow .cardSlot {
+    flex: 0 0 52px;
+    width: 52px;
+    max-width: 52px;
+  }
+
+  .runnerHeapOverlapRow .cardSlot + .cardSlot {
+    margin-left: -36px;
+  }
+
+  .specialZoneOverlapRow .cardSlot {
+    flex: 0 0 52px;
+    width: 52px;
+    max-width: 52px;
+  }
+
+  .specialZoneOverlapRow .cardSlot + .cardSlot {
+    margin-left: -35px;
+  }
+
   .topbar,
   .toolbar,
   .matchStrip,

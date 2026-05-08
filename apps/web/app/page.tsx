@@ -671,6 +671,8 @@ const LOCAL_CARD_IMAGE_IDS = new Set([
 
 const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-generated-card-art-1";
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
+const RUNNER_HEAP_PREVIEW_LIMIT = 18;
+const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
 
 function localCardImageUrl(cardId: string): string | undefined {
   const encodedCardId = encodeURIComponent(cardId);
@@ -709,6 +711,26 @@ function rulesTextLines(text: string): string[] {
     .filter(Boolean);
 }
 
+type OverlayTextDensityClass = "overlayTextDensityLarge" | "overlayTextDensityMedium" | "overlayTextDensityCompact";
+
+function normalizedOverlayLineLength(line: string): number {
+  return line.replace(/\s+/g, " ").trim().length;
+}
+
+function overlayTextDensityClass(title: string, rulesLines: string[]): OverlayTextDensityClass {
+  const lineCount = rulesLines.length;
+  const titleLength = title.trim().length;
+  const ruleLength = rulesLines.reduce((sum, line) => sum + normalizedOverlayLineLength(line), 0);
+  if (lineCount === 0) return titleLength > 24 ? "overlayTextDensityMedium" : "overlayTextDensityLarge";
+  if (lineCount === 1) {
+    if (ruleLength <= 28 && titleLength <= 24) return "overlayTextDensityLarge";
+    if (ruleLength <= 52) return "overlayTextDensityMedium";
+    return "overlayTextDensityCompact";
+  }
+  if (ruleLength <= 64 && titleLength <= 24) return "overlayTextDensityMedium";
+  return "overlayTextDensityCompact";
+}
+
 function shouldShowSubroutineMarkers(cardType: string, text: string): boolean {
   return cardType.toLowerCase() === "ice" && rulesTextLines(text).length > 1;
 }
@@ -737,8 +759,52 @@ function isHardwareCardType(type: string | undefined | null): boolean {
   return (type ?? "").toLowerCase() === "hardware";
 }
 
+function isOperationCardType(type: string | undefined | null): boolean {
+  return (type ?? "").toLowerCase() === "operation";
+}
+
 function hasGeneratedCardArt(cardId: string | undefined | null): boolean {
   return typeof cardId === "string" && LOCAL_CARD_IMAGE_IDS.has(cardId);
+}
+
+function CardImageOverlay({
+  title,
+  kindLabel,
+  rulesText,
+  cost,
+  variantClassName,
+  className,
+  maxLines = 2
+}: {
+  title: string;
+  kindLabel: string;
+  rulesText?: string;
+  cost?: number;
+  variantClassName?: string;
+  className?: string;
+  maxLines?: number;
+}) {
+  const overlayRules = rulesText ? rulesTextLines(rulesText).slice(0, Math.max(0, maxLines)) : [];
+  const typographyClassName = overlayTextDensityClass(title, overlayRules);
+  const overlayClassName = ["hardwareImageOverlay", variantClassName, className, typographyClassName].filter(Boolean).join(" ");
+  return (
+    <span className={overlayClassName} aria-hidden="true">
+      <span className="hardwareImageOverlayTop">
+        <span className="hardwareImageOverlayName">{title}</span>
+      </span>
+      {cost !== undefined ? <span className="hardwareImageOverlayCost">{cost}</span> : null}
+      <span className="hardwareImageOverlayFrame">
+        <span className="hardwareImageOverlayKind">{kindLabel}</span>
+        {overlayRules.length > 0 ? (
+          <span className="hardwareImageOverlayRules">
+            {overlayRules.map((line, index) => (
+              <span key={`${title}-${kindLabel}-overlay-rule-${index}`}>{renderRuleTextSegments(line, `${title}-${kindLabel}-overlay-rule-${index}`)}</span>
+            ))}
+          </span>
+        ) : null}
+      </span>
+    </span>
+  );
 }
 
 function HardwareImageOverlay({
@@ -754,25 +820,41 @@ function HardwareImageOverlay({
   className?: string;
   maxLines?: number;
 }) {
-  const overlayRules = rulesText ? rulesTextLines(rulesText).slice(0, Math.max(0, maxLines)) : [];
-  const overlayClassName = className ? `hardwareImageOverlay ${className}` : "hardwareImageOverlay";
   return (
-    <span className={overlayClassName} aria-hidden="true">
-      <span className="hardwareImageOverlayTop">
-        <span className="hardwareImageOverlayName">{title}</span>
-      </span>
-      {installCost !== undefined ? <span className="hardwareImageOverlayCost">{installCost}</span> : null}
-      <span className="hardwareImageOverlayFrame">
-        <span className="hardwareImageOverlayKind">Hardware</span>
-        {overlayRules.length > 0 ? (
-          <span className="hardwareImageOverlayRules">
-            {overlayRules.map((line, index) => (
-              <span key={`${title}-hardware-overlay-rule-${index}`}>{renderRuleTextSegments(line, `${title}-hardware-overlay-rule-${index}`)}</span>
-            ))}
-          </span>
-        ) : null}
-      </span>
-    </span>
+    <CardImageOverlay
+      title={title}
+      kindLabel="Hardware"
+      maxLines={maxLines}
+      {...(rulesText ? { rulesText } : {})}
+      {...(installCost !== undefined ? { cost: installCost } : {})}
+      {...(className ? { className } : {})}
+    />
+  );
+}
+
+function OperationImageOverlay({
+  title,
+  rulesText,
+  cost,
+  className,
+  maxLines = 2
+}: {
+  title: string;
+  rulesText?: string;
+  cost?: number;
+  className?: string;
+  maxLines?: number;
+}) {
+  return (
+    <CardImageOverlay
+      title={title}
+      kindLabel="Operation"
+      variantClassName="operationImageOverlay"
+      maxLines={maxLines}
+      {...(rulesText ? { rulesText } : {})}
+      {...(cost !== undefined ? { cost } : {})}
+      {...(className ? { className } : {})}
+    />
   );
 }
 
@@ -3289,6 +3371,7 @@ export default function Page() {
                       />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
           <PlayerPanel view={activeView} title={`Du · ${sideLabel(activeView.side)}`} actionCapacity={actionSlotCapacities[activeView.side]} />
+          <SpecialZonesStrip view={activeView} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} compact onFocus={focusCard} />
         </aside>
 
         <section className="board boardPanel" data-testid="active-board">
@@ -3304,7 +3387,6 @@ export default function Page() {
             onAction={submitAction}
           />
           <RunTimeline view={activeView} legalActions={payload.legalActions} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} />
-          <SpecialZonesStrip view={activeView} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} />
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -3431,25 +3513,83 @@ export default function Page() {
               <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
               <ZoneLimitBadge label={activeView.side === "runner" ? "Grip" : "HQ"} value={`${activeView.own.gripOrHq.length}/${activeView.own.maxHandSize}`} />
             </div>
-            <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, activeView.side === "runner" ? "grip" : "hq") ? "cueHighlightSoft" : ""}`}>
-              {activeView.own.gripOrHq.map((card) => {
-                const displayCard = enrichCard(card);
-                return (
-                  <CardView
-                    key={card.instanceId}
-                    card={displayCard}
-                    displayMode={cardDisplayMode}
-                    hiddenSide={activeView.side}
-                    selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                    actions={cardActionsFor(card)}
-                    actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                    onAction={submitAction}
-                    onFocus={focusCard}
-                    onActionContextSelect={selectActionCard}
-                  />
-                );
-              })}
-            </div>
+            {activeView.side === "runner" ? (
+              <div className="runnerGripHeapLayout">
+                <div className="runnerGripColumn">
+                  <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "grip") ? "cueHighlightSoft" : ""}`}>
+                    {activeView.own.gripOrHq.map((card) => {
+                      const displayCard = enrichCard(card);
+                      return (
+                        <CardView
+                          key={card.instanceId}
+                          card={displayCard}
+                          displayMode={cardDisplayMode}
+                          hiddenSide={activeView.side}
+                          selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                          actions={cardActionsFor(card)}
+                          actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                          onAction={submitAction}
+                          onFocus={focusCard}
+                          onActionContextSelect={selectActionCard}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+                <div className={`runnerHeapColumn ${zoneHighlighted(activeCueHighlight, activeView.side, "heap") ? "cueHighlightSoft" : ""}`}>
+                  <div className="runnerHeapHead">
+                    <strong>Heap</strong>
+                    <ZoneLimitBadge label="Heap" value={String(activeView.own.heapOrArchives.length)} />
+                  </div>
+                  {activeView.own.heapOrArchives.length > 0 ? (
+                    <div className="runnerHeapOverlapRow">
+                      {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
+                        const displayCard = enrichCard(card);
+                        return (
+                          <CardView
+                            key={card.instanceId}
+                            card={displayCard}
+                            compact
+                            displayMode={cardDisplayMode}
+                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                            actions={cardActionsFor(card)}
+                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                            onAction={submitAction}
+                            onFocus={focusCard}
+                            onActionContextSelect={selectActionCard}
+                          />
+                        );
+                      })}
+                      {activeView.own.heapOrArchives.length > RUNNER_HEAP_PREVIEW_LIMIT ? (
+                        <span className="archivesOverflowBadge">+{activeView.own.heapOrArchives.length - RUNNER_HEAP_PREVIEW_LIMIT}</span>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <p className="archivesPileEmpty">Keine Karten im Heap.</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
+                {activeView.own.gripOrHq.map((card) => {
+                  const displayCard = enrichCard(card);
+                  return (
+                    <CardView
+                      key={card.instanceId}
+                      card={displayCard}
+                      displayMode={cardDisplayMode}
+                      hiddenSide={activeView.side}
+                      selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                      actions={cardActionsFor(card)}
+                      actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                      onAction={submitAction}
+                      onFocus={focusCard}
+                      onActionContextSelect={selectActionCard}
+                    />
+                  );
+                })}
+              </div>
+            )}
           </section>
         </section>
 
@@ -4462,7 +4602,19 @@ function RunnerRigStrip({
   );
 }
 
-function SpecialZonesStrip({ view, cardDetailsById, displayMode }: { view: PlayerView; cardDetailsById: Record<string, CatalogCardDetail>; displayMode: CardDisplayMode }) {
+function SpecialZonesStrip({
+  view,
+  cardDetailsById,
+  displayMode,
+  compact = false,
+  onFocus
+}: {
+  view: PlayerView;
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  displayMode: CardDisplayMode;
+  compact?: boolean;
+  onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+}) {
   const zones = view.specialZones;
   if (!zones || (zones.setAsideCount === 0 && zones.removedFromGameCount === 0)) return null;
   const groups = [
@@ -4471,7 +4623,7 @@ function SpecialZonesStrip({ view, cardDetailsById, displayMode }: { view: Playe
   ].filter((group) => group.count > 0);
 
   return (
-    <section className="specialZoneStrip" data-testid="special-zones">
+    <section className={`specialZoneStrip${compact ? " compact" : ""}`} data-testid="special-zones">
       <div className="sectionTitleLine">
         <h2>Spezialzonen</h2>
         <Layers3 size={16} />
@@ -4483,12 +4635,22 @@ function SpecialZonesStrip({ view, cardDetailsById, displayMode }: { view: Playe
               <strong>{group.label}</strong>
               <span>{group.count}</span>
             </div>
-            <div className="cards miniCards">
-              {group.cards.map((card) => {
-                const displayCard = enrichVisibleCard(card, cardDetailsById);
-                return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled />;
-              })}
-            </div>
+            {compact ? (
+              <div className="specialZoneOverlapRow">
+                {group.cards.slice(0, SPECIAL_ZONE_PREVIEW_LIMIT).map((card) => {
+                  const displayCard = enrichVisibleCard(card, cardDetailsById);
+                  return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled {...(onFocus ? { onFocus } : {})} />;
+                })}
+                {group.cards.length > SPECIAL_ZONE_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{group.cards.length - SPECIAL_ZONE_PREVIEW_LIMIT}</span> : null}
+              </div>
+            ) : (
+              <div className="cards miniCards">
+                {group.cards.map((card) => {
+                  const displayCard = enrichVisibleCard(card, cardDetailsById);
+                  return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled {...(onFocus ? { onFocus } : {})} />;
+                })}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -4984,10 +5146,33 @@ function ChronicleTitle({
 function ChronicleCardHover({ card, item, displayMode }: { card: CatalogCardDetail | null; item: ChronicleItem; displayMode: CardDisplayMode }) {
   if (!card) return null;
   const imageUrl = displayMode === "placeholder" ? localCardImageUrl(card.catalogCardId) : undefined;
+  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(card.type);
+  const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(card.type);
+  const installCost = card.numeric.installCost;
+  const operationCost = card.numeric.cost;
   return (
     <span className={`chronicleCardTooltip ${imageUrl ? "imageMode" : "textMode"}`} role="tooltip">
       {imageUrl ? (
-        <img className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
+        <span className={`chronicleCardImageFrame ${showHardwareOverlay || showOperationOverlay ? "withOverlay" : ""}`}>
+          <img className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
+          {showHardwareOverlay ? (
+            <HardwareImageOverlay
+              title={card.title}
+              rulesText={card.text}
+              className="chronicleHardwareOverlay"
+              maxLines={2}
+              {...(typeof installCost === "number" ? { installCost } : {})}
+            />
+          ) : showOperationOverlay ? (
+            <OperationImageOverlay
+              title={card.title}
+              rulesText={card.text}
+              className="chronicleHardwareOverlay"
+              maxLines={2}
+              {...(typeof operationCost === "number" ? { cost: operationCost } : {})}
+            />
+          ) : null}
+        </span>
       ) : (
         <>
           <strong>{card.title}</strong>
@@ -5116,6 +5301,8 @@ function CatalogPanel({
 }) {
   const catalogImageUrl = detail ? localCardImageUrl(detail.catalogCardId) : undefined;
   const showCatalogHardwareOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isHardwareCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
+  const showCatalogOperationOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isOperationCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
+  const catalogImagePreviewMode = showCatalogHardwareOverlay ? "hardware" : showCatalogOperationOverlay ? "operation" : "";
   const visibleStatusKeys = showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS;
   const availableStatusKeys = new Set(filters?.statuses ?? CATALOG_STATUS_FILTER_KEYS);
   const statusOptions = visibleStatusKeys.filter((value) => availableStatusKeys.has(value));
@@ -5251,7 +5438,7 @@ function CatalogPanel({
                 <span className={`sideBadge ${detail.side}`}>{detail.side}</span>
               </div>
               {catalogImageUrl ? (
-                <div className={`catalogImagePreview ${showCatalogHardwareOverlay ? "hardware" : ""}`}>
+                <div className={`catalogImagePreview ${catalogImagePreviewMode}`}>
                   <img src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} />
                   {showCatalogHardwareOverlay ? (
                     <HardwareImageOverlay
@@ -5259,6 +5446,13 @@ function CatalogPanel({
                       rulesText={detail.text}
                       className="catalogHardwareOverlay"
                       {...(detail.numeric.installCost !== null ? { installCost: detail.numeric.installCost } : {})}
+                    />
+                  ) : showCatalogOperationOverlay ? (
+                    <OperationImageOverlay
+                      title={detail.title}
+                      rulesText={detail.text}
+                      className="catalogHardwareOverlay"
+                      {...(detail.numeric.cost !== null ? { cost: detail.numeric.cost } : {})}
                     />
                   ) : null}
                 </div>
@@ -5730,6 +5924,7 @@ function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card:
         preview
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
       />
       <div className="deckBuilderPreviewText">
         <span>{deckBuilderCardGroup(card)}</span>
@@ -5778,6 +5973,7 @@ function DeckLibraryCard({
         cardType={card.type}
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
       />
       <div className="deckBuilderCardText">
         <strong>{card.title}</strong>
@@ -5827,6 +6023,7 @@ function DeckListCard({
         {...(card?.type ? { cardType: card.type } : {})}
         {...(detail?.text ? { rulesText: detail.text } : {})}
         {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+        {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
       />
       <div className="deckBuilderCardText">
         <strong>{card?.title ?? cardId}</strong>
@@ -5855,6 +6052,7 @@ function DeckCardThumb({
   cardType,
   rulesText,
   installCost,
+  cost,
   large = false,
   preview = false
 }: {
@@ -5863,11 +6061,13 @@ function DeckCardThumb({
   cardType?: string;
   rulesText?: string;
   installCost?: number;
+  cost?: number;
   large?: boolean;
   preview?: boolean;
 }) {
   const imageUrl = localCardImageUrl(cardId);
-  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedCardArt(cardId);
+  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType);
+  const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(cardType);
   return (
     <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
       {imageUrl ? (
@@ -5881,10 +6081,18 @@ function DeckCardThumb({
               {...(rulesText ? { rulesText } : {})}
               {...(installCost !== undefined ? { installCost } : {})}
             />
+          ) : showOperationOverlay ? (
+            <OperationImageOverlay
+              title={title}
+              className={preview ? "deckHardwareOverlay preview" : "deckHardwareOverlay"}
+              maxLines={preview ? 2 : 1}
+              {...(rulesText ? { rulesText } : {})}
+              {...(cost !== undefined ? { cost } : {})}
+            />
           ) : null}
         </>
       ) : (
-        <span>{title.slice(0, 1)}</span>
+        <span className="deckCardThumbFallback">{title.slice(0, 1)}</span>
       )}
     </span>
   );
@@ -6225,6 +6433,7 @@ function CardView({
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const isHardwareImageCard = Boolean(visualImageUrl) && card.known && isHardwareCardType(card.type) && hasGeneratedCardArt(card.definitionId);
+  const isOperationImageCard = Boolean(visualImageUrl) && card.known && isOperationCardType(card.type) && hasGeneratedCardArt(card.definitionId);
   const showArtBlock = !visualImageUrl && displayMode === "placeholder";
   const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
@@ -6287,6 +6496,8 @@ function CardView({
             rulesText={rulesText}
             {...(card.installCost !== undefined ? { installCost: card.installCost } : {})}
           />
+        ) : isOperationImageCard ? (
+          <OperationImageOverlay title={card.title ?? "Operation"} rulesText={rulesText} {...(card.cost !== undefined ? { cost: card.cost } : {})} />
         ) : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
