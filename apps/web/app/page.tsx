@@ -5400,11 +5400,11 @@ function DeckEditorPanel({
           </p>
         </div>
         <div className="deckHeaderActions">
-          <button className="button" onClick={() => createBlankDeck("runner")}>
+          <button className="button deckRunner" onClick={() => createBlankDeck("runner")}>
             <Plus size={15} />
             Neues Runner-Deck
           </button>
-          <button className="button corp" onClick={() => createBlankDeck("corp")}>
+          <button className="button deckCorp" onClick={() => createBlankDeck("corp")}>
             <Plus size={15} />
             Neues Korp-Deck
           </button>

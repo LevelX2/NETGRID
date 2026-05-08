@@ -231,6 +231,28 @@ select {
   color: var(--corp-button-text);
 }
 
+.button.deckRunner {
+  background: color-mix(in srgb, var(--chronicle-run), var(--panel) 64%);
+  border-color: color-mix(in srgb, var(--chronicle-run), white 20%);
+  color: color-mix(in srgb, var(--chronicle-run), white 76%);
+}
+
+.button.deckRunner:hover {
+  border-color: color-mix(in srgb, var(--chronicle-run), white 32%);
+  background: color-mix(in srgb, var(--chronicle-run), var(--panel) 52%);
+}
+
+.button.deckCorp {
+  background: color-mix(in srgb, var(--corp-status-accent), var(--panel) 64%);
+  border-color: color-mix(in srgb, var(--corp-status-accent), white 20%);
+  color: color-mix(in srgb, var(--corp-status-accent), white 78%);
+}
+
+.button.deckCorp:hover {
+  border-color: color-mix(in srgb, var(--corp-status-accent), white 32%);
+  background: color-mix(in srgb, var(--corp-status-accent), var(--panel) 52%);
+}
+
 .button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -1090,9 +1112,24 @@ select {
   grid-template-columns: repeat(3, minmax(70px, 1fr));
 }
 
+.deckSideFilter button.runner {
+  border-color: color-mix(in srgb, var(--chronicle-run), var(--line) 42%);
+  background: color-mix(in srgb, var(--chronicle-run), transparent 90%);
+}
+
+.deckSideFilter button.corp {
+  border-color: color-mix(in srgb, var(--corp-status-accent), var(--line) 42%);
+  background: color-mix(in srgb, var(--corp-status-accent), transparent 90%);
+}
+
+.deckSideFilter button.active.runner {
+  color: var(--accent-mix-text);
+  background: var(--chronicle-run);
+}
+
 .deckSideFilter button.active.corp {
-  color: var(--segmented-active-text);
-  background: var(--corp);
+  color: var(--accent-mix-text);
+  background: var(--corp-status-accent);
 }
 
 .deckWorkspace {
