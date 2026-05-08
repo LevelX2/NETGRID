@@ -18,6 +18,7 @@ export type OpponentActionCue = {
   highlight?: BoardHighlight;
   relatedCard?: VisibleCard;
   sound?: ActionSoundKind;
+  soundCount?: number;
   requiresLocalAttention: boolean;
   aiExplanation?: string;
 };
@@ -77,6 +78,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     const highlight = deriveHighlight(actionType, payload, actor, visibility, visibleCards);
     const relatedCard = deriveRelatedCard(payload, visibility, visibleCards);
     const sound = actionSoundForActionType(actionType, visibility);
+    const soundCount = sound ? actionSoundCountForAction(actionType, payload) : 1;
 
     const cue: OpponentActionCue = {
       cueId: `${input.viewerSide}:${event.eventId}`,
@@ -94,6 +96,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       ...(highlight ? { highlight } : {}),
       ...(relatedCard ? { relatedCard } : {}),
       ...(sound ? { sound } : {}),
+      ...(sound && soundCount > 1 ? { soundCount } : {}),
       requiresLocalAttention: localAttention,
       ...(aiExplanation ? { aiExplanation } : {})
     };
@@ -213,6 +216,12 @@ export function actionSoundForActionType(actionType: string, visibility: Chronic
     default:
       return undefined;
   }
+}
+
+export function actionSoundCountForAction(actionType: string, payload: Record<string, unknown> | undefined): number {
+  if (actionType !== "mandatory_draw" && actionType !== "draw_card") return 1;
+  const amount = typeof payload?.amount === "number" ? payload.amount : 1;
+  return Math.min(5, Math.max(1, Math.floor(amount)));
 }
 
 function visibleCardsByDefinition(view: PlayerView): Map<string, VisibleCard> {

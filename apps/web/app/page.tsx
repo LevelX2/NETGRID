@@ -54,6 +54,7 @@ import {
   type ChronicleItem
 } from "./chronicle";
 import {
+  actionSoundCountForAction,
   actionSoundForActionType,
   deriveOpponentActionCues,
   type ActionSoundKind,
@@ -1613,8 +1614,9 @@ export default function Page() {
     for (const event of newEvents) {
       if (overlayEventIds.has(event.eventId)) continue;
       const item = formatChronicleEvent(event, payload.side, contextByEventId[event.eventId] ?? {});
-      const sound = actionSoundForActionType(eventActionType(event), item.visibility);
-      if (sound) playActionCueSound(sound, audioVolume);
+      const actionType = eventActionType(event);
+      const sound = actionSoundForActionType(actionType, item.visibility);
+      if (sound) playActionCueSound(sound, audioVolume, actionSoundCountForAction(actionType, event.publicPayload));
     }
   }, [actionCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById]);
 
@@ -1628,7 +1630,7 @@ export default function Page() {
 
   useEffect(() => {
     if (!currentActionCue) return;
-    if (audioEnabled && currentActionCue.sound) playActionCueSound(currentActionCue.sound, audioVolume);
+    if (audioEnabled && currentActionCue.sound) playActionCueSound(currentActionCue.sound, audioVolume, currentActionCue.soundCount);
     if (currentActionCue.actionType === "access_card" && localAiPacingMode === "manual") return;
     if (actionCueAutoDismissMs === 0) return;
     const timeout = window.setTimeout(() => setCurrentActionCue(null), actionCueAutoDismissMs);
@@ -6404,10 +6406,14 @@ function playResultSound(outcome: GameResultSummary["viewerOutcome"], volume: nu
   });
 }
 
-function playActionCueSound(kind: ActionSoundKind, volume: number): void {
+function playActionCueSound(kind: ActionSoundKind, volume: number, repeatCount = 1): void {
   const context = audioContext();
   if (!context) return;
   const safeVolume = Math.min(1, Math.max(0, volume));
+  if (kind === "draw") {
+    playCardDrawSnap(context, safeVolume, repeatCount);
+    return;
+  }
   const pattern = actionSoundPattern(kind);
   pattern.forEach((note, index) => {
     const oscillator = context.createOscillator();
@@ -6423,6 +6429,45 @@ function playActionCueSound(kind: ActionSoundKind, volume: number): void {
     oscillator.start(start);
     oscillator.stop(start + note.duration + 0.02);
   });
+}
+
+function playCardDrawSnap(context: AudioContext, volume: number, repeatCount: number): void {
+  const safeCount = Math.min(5, Math.max(1, Math.floor(repeatCount)));
+  for (let index = 0; index < safeCount; index += 1) {
+    const start = context.currentTime + index * 0.085;
+    const noiseBuffer = context.createBuffer(1, Math.max(1, Math.floor(context.sampleRate * 0.035)), context.sampleRate);
+    const samples = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < samples.length; i += 1) {
+      const decay = 1 - i / samples.length;
+      samples[i] = (Math.random() * 2 - 1) * decay;
+    }
+    const noise = context.createBufferSource();
+    const noiseGain = context.createGain();
+    const highpass = context.createBiquadFilter();
+    noise.buffer = noiseBuffer;
+    highpass.type = "highpass";
+    highpass.frequency.setValueAtTime(1800, start);
+    noiseGain.gain.setValueAtTime(Math.max(0.0001, volume * 0.14), start);
+    noiseGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.045);
+    noise.connect(highpass);
+    highpass.connect(noiseGain);
+    noiseGain.connect(context.destination);
+    noise.start(start);
+    noise.stop(start + 0.05);
+
+    const click = context.createOscillator();
+    const clickGain = context.createGain();
+    click.type = "square";
+    click.frequency.setValueAtTime(1220, start);
+    click.frequency.exponentialRampToValueAtTime(520, start + 0.035);
+    clickGain.gain.setValueAtTime(0.0001, start);
+    clickGain.gain.exponentialRampToValueAtTime(Math.max(0.0001, volume * 0.07), start + 0.004);
+    clickGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.04);
+    click.connect(clickGain);
+    clickGain.connect(context.destination);
+    click.start(start);
+    click.stop(start + 0.055);
+  }
 }
 
 function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; duration: number; gain: number; type: OscillatorType }> {

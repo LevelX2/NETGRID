@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
-import { actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues } from "./action-cues";
+import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues } from "./action-cues";
 
 describe("deriveOpponentActionCues", () => {
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
@@ -127,6 +127,21 @@ describe("deriveOpponentActionCues", () => {
     expect(cues).toHaveLength(1);
     expect(cues[0]?.eventId).toBe("evt_credit");
     expect(cues[0]?.requiresLocalAttention).toBe(true);
+  });
+
+  it("keeps card draw audio generic and repeats only for visible draw amount", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [event("evt_draw", "draw_card", { actor: "runner", amount: 3 })]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.sound).toBe("draw");
+    expect(cues[0]?.soundCount).toBe(3);
+    expect(actionSoundCountForAction("draw_card", { amount: 12 })).toBe(5);
+    expect(actionSoundCountForAction("mandatory_draw", {})).toBe(1);
+    expect(actionSoundCountForAction("gain_credit", { amount: 3 })).toBe(1);
   });
 });
 
