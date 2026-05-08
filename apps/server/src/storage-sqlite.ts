@@ -8,7 +8,7 @@ import type { MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./
 export const SQLITE_STORAGE_SCHEMA_VERSION = 1;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
-export const LEGACY_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netrunner.sqlite";
+export const LEGACY_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
 export const DEFAULT_LEGACY_MATCH_STORAGE_PATH = "data/runtime/multiplayer/matches.json";
 export const DEFAULT_STORAGE_BACKUP_DIR = "data/runtime/backups";
 

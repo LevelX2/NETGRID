@@ -38,7 +38,7 @@ V1.1.1 ist umgesetzt. Discard-Phasen fuer Korp und Runner laufen als Engine-Timi
 - `apps/web/app/action-cues.test.ts`
 - `tests/specs/visibility-contract.test.ts`
 - `tests/e2e/helpers/match-flow.ts`
-- `tests/e2e/netrunner-v1-0-7.spec.ts`
+- `tests/e2e/netgrid-v1-0-7.spec.ts`
 - `docs/derived/V1_1_1_REQUIREMENTS.md`
 - `docs/derived/DISCARD_HANDLIMIT_CORE_DAMAGE_1_1_1_SPEC.md`
 - `docs/derived/V1_1_1_TEST_MATRIX.md`

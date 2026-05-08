@@ -367,7 +367,7 @@ V1.3.0 macht größere Kartenmengen praktisch nutzbar, ohne ungedeckte oder ille
 #### Allgemeine Produkt- und Feature-Ziele
 
 1. Lokale Formatprofile versionieren.
-2. Deckvalidierung näher an echte Netrunner-Deckregeln bringen.
+2. Deckvalidierung näher an echte NETGRID-Deckregeln bringen.
 3. Matchstart-Revalidierung stärken.
 4. Deckeditor-Feedback für Formatfehler verbessern.
 5. Deck-Snapshots und persönliche Deckbibliothek sauber trennen.

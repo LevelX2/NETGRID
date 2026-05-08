@@ -1,6 +1,6 @@
 # NETGRID
 
-Private NETGRID-Webapplikation für regelgeführtes, deterministisches Spiel auf Basis des Netrunner-Regelspiels, lokale Tests und private Stabilisierung.
+Private NETGRID-Webapplikation für regelgeführtes, deterministisches Spiel auf Basis des NETGRID-Regelspiels, lokale Tests und private Stabilisierung.
 
 ## Aktueller Stand
 
@@ -18,7 +18,7 @@ Umgesetzt sind:
 
 ## Grenzen
 
-- NETGRID ist der App- und Projektname. Netrunner bleibt als fachliche Spiel-, Quellen- und Regelreferenz erhalten.
+- NETGRID ist der App- und Projektname. NETGRID bleibt als fachliche Spiel-, Quellen- und Regelreferenz erhalten.
 - Die Engine bleibt die einzige Regelautorität.
 - UI, Server, KI und menschliche Spieler reichen nur Actions aus `LegalActions` ein.
 - Hidden Info darf nicht in PlayerViews, PublicEvents, KI-Input, WebSocket, Reconnect, Undo, Replay, Logs oder Clientfehler leaken.
@@ -30,8 +30,8 @@ Umgesetzt sind:
 Für Codex-Arbeit gelten zuerst:
 
 1. `AGENTS.md`
-2. `KI-Wissen-Netrunner/00 Projektstart.md`
-3. `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
+2. `KI-Wissen-NETGRID/00 Projektstart.md`
+3. `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
 4. `docs/codex/CODEX_STATUS.md`
 5. `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
 
@@ -55,7 +55,7 @@ corepack pnpm -F @netgrid/server dev
 corepack pnpm -F @netgrid/web dev
 ```
 
-Der Multiplayer-Server läuft standardmäßig unter `http://127.0.0.1:8787`. Die Weboberfläche läuft standardmäßig unter `http://127.0.0.1:3100` und nutzt `NEXT_PUBLIC_NETGRID_SERVER_URL`, falls der Server nicht auf dem Default-Port läuft. Der alte Name `NEXT_PUBLIC_NETRUNNER_SERVER_URL` bleibt als lokaler Legacy-Fallback lesbar.
+Der Multiplayer-Server läuft standardmäßig unter `http://127.0.0.1:8787`. Die Weboberfläche läuft standardmäßig unter `http://127.0.0.1:3100` und nutzt `NEXT_PUBLIC_NETGRID_SERVER_URL`, falls der Server nicht auf dem Default-Port läuft.
 
 Für ein privates Match im lokalen Netz:
 
@@ -63,7 +63,7 @@ Für ein privates Match im lokalen Netz:
 - Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link und wählt beim Beitritt eigene gespeicherte Runner-/Korp-Decks.
 - KI-Partien können in der Startansicht als Runner vs Korp-KI, Korp vs Runner-KI oder KI vs KI gestartet werden.
 - Außerhalb von localhost HTTPS/WSS verwenden und Tokens wie Passwörter behandeln.
-- Runtime-Storage liegt unter `data/runtime/` und ist nicht versioniert; Default ist `data/runtime/multiplayer/netgrid.sqlite`. Eine vorhandene `netrunner.sqlite` wird nur als Legacy-Import/Fallback behandelt.
+- Runtime-Storage liegt unter `data/runtime/` und ist nicht versioniert; Default ist `data/runtime/multiplayer/netgrid.sqlite`.
 
 ## Checks
 

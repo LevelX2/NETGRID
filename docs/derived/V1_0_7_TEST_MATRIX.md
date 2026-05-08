@@ -32,8 +32,8 @@ Status: Requirements-Freeze-Testmatrix
 ## Pflichtchecks für Implementierung
 
 - Browser-E2E-Gate-Befehl für V1.0.7.
-- `corepack pnpm --filter @netrunner/web test`
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/web test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

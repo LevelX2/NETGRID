@@ -360,7 +360,7 @@ Dateibereiche:
 - `tests/e2e`
 - `docs/derived`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner` nur bei finaler, wiederverwendbarer Statusänderung
+- `KI-Wissen-NETGRID` nur bei finaler, wiederverwendbarer Statusänderung
 
 Aufgaben:
 
@@ -371,11 +371,11 @@ Aufgaben:
 
 ## Empfohlene Prüfbefehle
 
-- `corepack pnpm --filter @netrunner/shared typecheck`
-- `corepack pnpm --filter @netrunner/engine test -- --run`
-- `corepack pnpm --filter @netrunner/server test -- --run`
-- `corepack pnpm --filter @netrunner/ai test -- --run`
-- `corepack pnpm --filter @netrunner/web test -- --run`
+- `corepack pnpm --filter @netgrid/shared typecheck`
+- `corepack pnpm --filter @netgrid/engine test -- --run`
+- `corepack pnpm --filter @netgrid/server test -- --run`
+- `corepack pnpm --filter @netgrid/ai test -- --run`
+- `corepack pnpm --filter @netgrid/web test -- --run`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
@@ -402,18 +402,18 @@ V1.1.1 kann nach Freigabe als Requirements-Freeze beauftragt werden. Die Impleme
 ## Auftragsprompt nach Freigabe
 
 ```text
-Arbeite im Projekt Netrunner wiki-first.
+Arbeite im Projekt NETGRID wiki-first.
 
 Lies zuerst:
 - AGENTS.md
 - AGENTS.local.md, falls vorhanden
-- KI-Wissen-Netrunner/00 Projektstart.md
-- KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md
+- KI-Wissen-NETGRID/00 Projektstart.md
+- KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
 - docs/codex/CODEX_STATUS.md
 - docs/derived/V1_1_1_DISCARD_HANDLIMIT_CORE_DAMAGE_PLAN.md
 - docs/derived/V1_1_0_FINAL_REVIEW.md
 - docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md
-- docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf nur gezielt fuer Discard, maximale Handgroesse und Core Damage
+- docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf nur gezielt fuer Discard, maximale Handgroesse und Core Damage
 
 Aufgabe:
 Erstelle den V1.1.1 Requirements Freeze fuer Discard, Handlimit und Core Damage. Implementiere noch keinen Code.

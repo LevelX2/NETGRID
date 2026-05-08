@@ -19,7 +19,7 @@ Dieser Smoke prüft den privaten Match-Lifecycle in zwei Browser-Tabs. Er ist be
 
 1. Tab A öffnet die Web-App, erstellt ein Human-vs-Human-Match als Host mit Anzeigename `Host V104` und kopiert den Join-Link.
 2. Tab B öffnet den Join-Link, setzt Anzeigename `Joiner V104`, wählt Runner- und Corp-Decks und tritt bei.
-3. Prüfen: Beide Tabs zeigen die Startbereitschaftslobby, die Gegnernamen erscheinen side-sicher, und `netrunner.recentSessions` enthält nur MatchId, Seite, Anzeigename, optionalen Gegnernamen, Status und Zeitstempel.
+3. Prüfen: Beide Tabs zeigen die Startbereitschaftslobby, die Gegnernamen erscheinen side-sicher, und `netgrid.recentSessions` enthält nur MatchId, Seite, Anzeigename, optionalen Gegnernamen, Status und Zeitstempel.
 4. Tab A nutzt `Match abbrechen`.
 5. Prüfen: Beide Tabs zeigen terminal `cancelled`; der alte Join-Link ist ungültig; `sessionStorage` ist nach Refresh kein stiller Fortsetzen-Pfad mehr.
 6. Tab A nutzt `Neu erstellen`.
@@ -37,7 +37,7 @@ Dieser Smoke prüft den privaten Match-Lifecycle in zwei Browser-Tabs. Er ist be
 
 ## Pflicht-Stichproben
 
-- `localStorage.netrunner.recentSessions` enthält keine `sessionToken`, `reconnectToken`, `hostSessionToken`, `hostReconnectToken`, `joinToken`, Decklisten, Deckhashes oder verdeckte Karteninformationen.
+- `localStorage.netgrid.recentSessions` enthält keine `sessionToken`, `reconnectToken`, `hostSessionToken`, `hostReconnectToken`, `joinToken`, Decklisten, Deckhashes oder verdeckte Karteninformationen.
 - WebSocket-Kommandos werden nicht für explizite Lifecycle-Schreibpfade genutzt; Cancel, Leave, Forfeit und Recreate laufen über REST.
 - `PublicEvents`, Reconnect-Payloads, Lifecycle-Payloads und AI-Inputs enthalten keine neuen Lifecycle-Tokens.
 - Gegnernamen erscheinen in Lobby, Header, Result Modal, Reconnect Panel, OpponentPanel und `opponent_status` ohne Deck-/Token-/Hidden-Info-Anhänge.

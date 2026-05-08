@@ -19,11 +19,11 @@ V1.1.2 ist vollständig implementiert und lokal verifiziert.
 
 | Gate | Ergebnis |
 | --- | --- |
-| `corepack pnpm --filter @netrunner/shared typecheck` | pass |
-| `corepack pnpm --filter @netrunner/engine test -- --run` | pass, 90 Tests |
-| `corepack pnpm --filter @netrunner/server test -- --run` | pass, 53 Tests |
-| `corepack pnpm --filter @netrunner/ai test -- --run` | pass, 29 Tests |
-| `corepack pnpm --filter @netrunner/web test -- --run` | pass, 41 Tests |
+| `corepack pnpm --filter @netgrid/shared typecheck` | pass |
+| `corepack pnpm --filter @netgrid/engine test -- --run` | pass, 90 Tests |
+| `corepack pnpm --filter @netgrid/server test -- --run` | pass, 53 Tests |
+| `corepack pnpm --filter @netgrid/ai test -- --run` | pass, 29 Tests |
+| `corepack pnpm --filter @netgrid/web test -- --run` | pass, 41 Tests |
 | `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts` | pass, 14 Tests |
 | `corepack pnpm lint` | pass |
 | `corepack pnpm typecheck` | pass |

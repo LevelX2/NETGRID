@@ -58,7 +58,7 @@ Empfohlene Struktur:
 
 ```txt
 tests/e2e/
-  netrunner-smoke.spec.ts
+  netgrid-smoke.spec.ts
   helpers/
     app-harness.ts
     match-flow.ts

@@ -196,7 +196,7 @@ Die Web-UI soll den zuletzt verwendeten menschlichen Anzeigenamen lokal im Brows
 
 Empfehlung:
 
-- localStorage-Key z. B. `netrunner.displayName`.
+- localStorage-Key z. B. `netgrid.displayName`.
 - Beim Ändern oder erfolgreichen Matchstart/Join speichern.
 - Beim nächsten Öffnen als Vorbelegung nutzen.
 - Ohne gespeicherten Namen weiter `Teilnehmer A` bzw. `Teilnehmer B` verwenden.
@@ -217,7 +217,7 @@ V1.0.3 sollte die sichtbaren Startbereich-Texte in deutsches UI-Deutsch überfü
 - Default-Name `Runner` -> `Teilnehmer A`
 - Join-Default-Name `Runner` -> `Teilnehmer B`
 
-Runner und Corp bleiben als Rollennamen erhalten, weil sie im Netrunner-Kontext Fachrollen sind.
+Runner und Corp bleiben als Rollennamen erhalten, weil sie im NETGRID-Kontext Fachrollen sind.
 
 ## Empfohlenes UI-Modell
 
@@ -699,8 +699,8 @@ Browser-Smokes:
 
 Pflichtchecks:
 
-- `corepack pnpm --filter @netrunner/web test`
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/web test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

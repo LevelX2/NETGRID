@@ -41,9 +41,9 @@ V0.7 wurde als UI-Neugestaltung innerhalb des eingefrorenen Scopes umgesetzt. Di
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass.
-- `corepack pnpm --filter @netrunner/web build`: pass.
+- `corepack pnpm --filter @netgrid/web build`: pass.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.

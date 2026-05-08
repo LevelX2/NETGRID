@@ -31,8 +31,8 @@ V0.9 Requirements, Implementierung, Validierung, Hardening und Dokumentation sin
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
 - `corepack pnpm build`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass.
+- `corepack pnpm --filter @netgrid/server test`: pass.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass.
 - V0.9-Soak-Smoke: pass.
 

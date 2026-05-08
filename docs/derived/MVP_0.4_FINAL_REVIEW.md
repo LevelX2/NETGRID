@@ -27,8 +27,8 @@ MVP 0.4 ist abgeschlossen. Die Anwendung hat jetzt einen kleinen kontrollierten 
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/engine test`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
 - `corepack pnpm lint`: pass.

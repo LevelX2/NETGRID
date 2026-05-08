@@ -38,7 +38,7 @@ describe("V1.0.9 private internet hardening", () => {
         NETGRID_WEB_BASE_URL: "https://netgrid.example",
         NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
         NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
-        NETGRID_TOKEN_SALT: "local-dev-netrunner-token-salt"
+        NETGRID_TOKEN_SALT: "local-dev-netgrid-token-salt"
       } as NodeJS.ProcessEnv)
     ).toThrow(/NETGRID_TOKEN_SALT/);
 
@@ -58,11 +58,11 @@ describe("V1.0.9 private internet hardening", () => {
     expect(privateConfig.allowedOrigins).toEqual(["https://netgrid.example", "https://tablet.netgrid.example"]);
 
     const legacyPrivateConfig = loadDeploymentConfig({
-      NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
-      NETRUNNER_WEB_BASE_URL: "https://legacy.netgrid.example",
-      NETRUNNER_SERVER_BASE_URL: "https://legacy-api.netgrid.example",
-      NETRUNNER_ALLOWED_ORIGINS: "https://legacy.netgrid.example",
-      NETRUNNER_TOKEN_SALT: "legacy-private-test-salt"
+      NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+      NETGRID_WEB_BASE_URL: "https://legacy.netgrid.example",
+      NETGRID_SERVER_BASE_URL: "https://legacy-api.netgrid.example",
+      NETGRID_ALLOWED_ORIGINS: "https://legacy.netgrid.example",
+      NETGRID_TOKEN_SALT: "legacy-private-test-salt"
     } as NodeJS.ProcessEnv);
     expect(legacyPrivateConfig).toMatchObject({
       profile: "private_internet",
@@ -277,9 +277,9 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     reopenedStorage.close();
   });
 
-  it("imports the legacy netrunner.sqlite path non-destructively when the NETGRID default is empty", async () => {
+  it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
     const dir = await tempStorageDir();
-    const legacyPath = join(dir, "netrunner.sqlite");
+    const legacyPath = join(dir, "netgrid.sqlite");
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const legacyStorage = new SqliteMatchStorage({ dbPath: legacyPath, backupDir, autoImportLegacy: false });

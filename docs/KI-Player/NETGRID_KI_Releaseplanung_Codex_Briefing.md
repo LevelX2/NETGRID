@@ -33,7 +33,7 @@ Die vorhandene Planung enthält bereits mehrere wichtige Entscheidungen, die nic
 
 ### 1.1 MVP 0.1
 
-MVP 0.1 ist als private Netrunner-/NETGRID-Demo mit einem menschlichen Runner gegen eine einfache Corp-KI geplant bzw. angelegt. Die wichtigsten Grundsätze sind:
+MVP 0.1 ist als private NETGRID-/NETGRID-Demo mit einem menschlichen Runner gegen eine einfache Corp-KI geplant bzw. angelegt. Die wichtigsten Grundsätze sind:
 
 - Die Rules Engine ist alleinige Regelautorität.
 - UI, menschliche Spieler und KI wählen nur aus `LegalActions`.
@@ -985,7 +985,7 @@ Pflichtumfang:
 
 ## 6. Abhängigkeitsliste: Welche Mechaniken blockieren welche KI-Stufen?
 
-Die KI-Entwicklung ist nicht unabhängig vom Vorhandensein der Mechaniken. Man braucht nicht alle Netrunner-Mechaniken vor der ersten KI, aber jede KI-Stufe hat harte Voraussetzungen.
+Die KI-Entwicklung ist nicht unabhängig vom Vorhandensein der Mechaniken. Man braucht nicht alle NETGRID-Mechaniken vor der ersten KI, aber jede KI-Stufe hat harte Voraussetzungen.
 
 ### 6.1 LegalActions
 
@@ -1142,7 +1142,7 @@ Blockiert:
 - alle kompetenten KI-Stufen.
 ```
 
-Credits sind in Netrunner nicht nur Ressource, sondern Entscheidungsgrundlage.
+Credits sind in NETGRID nicht nur Ressource, sondern Entscheidungsgrundlage.
 
 Planungsvermerk:
 

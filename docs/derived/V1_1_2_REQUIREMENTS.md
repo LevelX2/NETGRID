@@ -23,7 +23,7 @@ Wenn Track A in der Umsetzung zusätzliche Risiken oder Blocker zeigt, hat Track
 - `docs/derived/V1_1_0_FINAL_REVIEW.md`
 - `docs/derived/V1_1_1_REQUIREMENTS.md`
 - `docs/derived/V1_1_1_TEST_MATRIX.md`
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`, gezielt für Archives-Zugriff und Access/Breach-Grundregeln
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`, gezielt für Archives-Zugriff und Access/Breach-Grundregeln
 
 ## Track A Must-Anforderungen
 

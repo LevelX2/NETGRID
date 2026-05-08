@@ -48,14 +48,14 @@ V0.97 implementiert Run/Jack-out/Breach/Multiaccess als enges, baseline-gesteuer
 
 ## Prüfläufe
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 46 Tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 21 Tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 19 Tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 46 Tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 21 Tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 19 Tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 24 Tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 Tests.
 

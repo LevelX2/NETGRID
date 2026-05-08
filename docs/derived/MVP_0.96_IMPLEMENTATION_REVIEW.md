@@ -47,14 +47,14 @@ V0.96 implementiert Trace/Link/Bidding als engen, side-sicheren Mechanik-Slice:
 
 ## Prüfläufe
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 41 Tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 19 Tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 18 Tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 41 Tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 19 Tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 18 Tests.
 
 ## Review-Ergebnis
 

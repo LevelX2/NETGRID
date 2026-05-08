@@ -37,7 +37,7 @@ Vorhanden aus MVP 0.1:
 
 - deterministische Engine mit `createGame`, `getLegalActions`, `applyAction`, `getPlayerView`, `validateGameState`, `checkWinConditions`, `replayEvents`, `hashState`,
 - feste Demo-Decks und 13 `playable_mvp` Karten,
-- einfache Corp-KI im Paket `@netrunner/ai`,
+- einfache Corp-KI im Paket `@netgrid/ai`,
 - AI-Input-Sicherheitsprüfung für Corp,
 - 100-Step-Smoke-Test mit Corp-KI und Runner-Fallback,
 - Replay/StateHash und Visibility-Basistests.
@@ -597,9 +597,9 @@ Read:
 - docs/derived/POST_MVP_0.2_ROADMAP.md
 - docs/derived/MVP_0.3_DETAILED_PLAN.md
 - docs/derived/MVP_0.2_FINAL_REVIEW.md
-- docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md
-- docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Kartenimplementierungsleitfaden.md
-- docs/Netrunner_Detailliertes_Testkonzept_MVP_0_1_0_2.md
+- docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md
+- docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Kartenimplementierungsleitfaden.md
+- docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md
 - packages/ai/src/index.ts
 - packages/ai/src/index.test.ts
 

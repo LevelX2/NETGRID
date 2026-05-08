@@ -35,11 +35,11 @@ V0.9 wurde als stärkere KI innerhalb des eingefrorenen Scopes umgesetzt. Die KI
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass, 15 Tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 12 Tests.
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 15 Tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 12 Tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 20 Tests.
 - V0.9-Soak-Smoke: pass, 27 Läufe, 0 IllegalActions, 0 ReplayFailures, FallbackRate 0,02, TimeoutRate 0.
 

@@ -1,0 +1,46 @@
+# Quellenlage und Aktualität
+
+## Stand
+
+Stand dieser Übersicht: 2026-05-04.
+
+## Vorhandene Primärquellen
+
+- `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
+- `docs/source/NETGRID_MVP_0.2_Plan.md`
+- `docs/source/Erstes Testdeck.txt`
+- `docs/source/Erstes Testdeck.md`
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
+- `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
+
+## Fehlende Primärquelle
+
+- Keine bekannte fehlende Primärquelle für die Setup-Phase.
+
+## Strukturierte Deckdaten
+
+- `data/decks/demo-decks.json`
+
+Diese Datei wurde aus dem nachgereichten Demo-Deck-Paket positioniert. Sie ist als vorhandene strukturierte Deckquelle zu behandeln, aber noch nicht als geprüfter oder eingefrorener Derived-Requirements-Stand.
+
+## Lokale Nicht Versionierte Quellen Und Artefakte
+
+- `data/local/card-import/onr-v1-limited/`
+- `data/local-assets/card-images/`
+
+Diese Ordner sind bewusst ignoriert und enthalten private lokale O:NR-v1-/O:NR-1996-Artefakte auf dieser Maschine. Sie dürfen nicht als versionierte Primärquelle behandelt werden. Für eine reguläre Projektphase braucht der O:NR-Testzugang ein eigenes Gate mit versionierter Scope-, Manifest-, Test- und Review-Dokumentation.
+
+## Ergänzende Quellen im Repository
+
+- `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`
+- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/README_Dokumentenpaket.md`
+- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/`
+- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/03_tests/`
+- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/04_betrieb/`
+- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/05_planung/`
+
+Diese Dokumente sind als ergänzende Arbeitsgrundlagen relevant, dürfen aber die Quellenpriorität aus `AGENTS.md` nicht stillschweigend überschreiben.
+
+## Aktualitätsregel
+
+Wenn neue Quellen oder aktualisierte Fassungen hinzukommen, zuerst die Quellenlage prüfen, dann die betroffenen Wissensseiten und `docs/codex/CODEX_STATUS.md` aktualisieren. Widersprüche zwischen Quellen sichtbar machen.

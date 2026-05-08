@@ -13,8 +13,8 @@ Default:
 
 ```txt
 data/runtime/backups/
-  netrunner-storage-YYYYMMDD-HHMMSS/
-    netrunner.sqlite
+  netgrid-storage-YYYYMMDD-HHMMSS/
+    netgrid.sqlite
     manifest.json
 ```
 

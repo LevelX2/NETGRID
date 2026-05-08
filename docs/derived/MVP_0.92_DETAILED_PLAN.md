@@ -22,8 +22,8 @@ Verbindliche Grundlage:
 - `docs/derived/TIMING_AND_RUN_MODEL.md`
 - `docs/derived/MVP_0.8_FINAL_REVIEW.md`
 - `docs/derived/MVP_0.9_FINAL_REVIEW.md`
-- `docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf` nur als Regelreferenz, nicht als Scope-Erweiterung
+- `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` nur als Regelreferenz, nicht als Scope-Erweiterung
 
 Zusätzlich zu prüfen, aber nicht unbesehen als Spezifikation zu übernehmen:
 

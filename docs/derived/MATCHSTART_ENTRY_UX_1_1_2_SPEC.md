@@ -221,7 +221,7 @@ Erlaubt:
 
 Nicht erlaubt:
 
-- offizielle Netrunner-/NSG-Assets,
+- offizielle NETGRID-/NSG-Assets,
 - Cardbacks,
 - Cardframes,
 - Marketing-Hero,

@@ -177,7 +177,7 @@ Der Smoke erweitert keine Karten, keine Engine-Regeln, keine offiziellen Assets 
 ## Pflicht-Stichproben
 
 - Browsercode importiert keine Engine-Regelmodule in die aktive Spielseite.
-- `localStorage.netrunner.recentSessions` enthält weiterhin keine Tokens, Decklisten, Deckhashes oder Hidden Info.
+- `localStorage.netgrid.recentSessions` enthält weiterhin keine Tokens, Decklisten, Deckhashes oder Hidden Info.
 - SidePayloads, WebSocket-Payloads und Reconnect-Payloads enthalten keine neuen versteckten Kartendaten.
 - Audio-Einstellung bleibt lokal.
 - V1.0.4-Lifecycle-Aktionen Cancel, Leave, Forfeit, Recreate und Fortsetzen bleiben erreichbar und side-sicher.

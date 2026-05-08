@@ -15,22 +15,22 @@ SQLite ist jetzt der private lokale Standard-Storage für Multiplayer-Matches. D
 
 - SQLite-API: `node:sqlite` mit `DatabaseSync`, passend zur Node-24-Zielumgebung.
 - Persistenzmodell: hybrides Modell mit `matches.record_json` als vollständigem Roundtrip-Anker plus relationalen Spiegeltabellen für Meta, Sessions, Tokens, GameState, Events, Receipts, Snapshots, PendingUndo, private Decksnapshots und StartLobby.
-- Schema-Version: `storage_meta` mit `schema_version = 1`, `storage_format = netrunner_multiplayer_sqlite`, Erstell-/Migrations- und Legacy-Import-Marken.
-- Runtime-Default: `data/runtime/multiplayer/netrunner.sqlite`.
-- JSON-Storage: bleibt über `NETRUNNER_STORAGE_KIND=json` als Legacy-/Testpfad nutzbar.
-- Legacy-Import: kontrollierter Import aus `NETRUNNER_LEGACY_MATCH_STORAGE_PATH` oder `data/runtime/multiplayer/matches.json`, nur wenn SQLite leer ist, mit Strukturvalidierung, Pre-Migration-Backup und enger Normalisierung älterer Records ohne `match.mode`.
+- Schema-Version: `storage_meta` mit `schema_version = 1`, `storage_format = netgrid_multiplayer_sqlite`, Erstell-/Migrations- und Legacy-Import-Marken.
+- Runtime-Default: `data/runtime/multiplayer/netgrid.sqlite`.
+- JSON-Storage: bleibt über `NETGRID_STORAGE_KIND=json` als Legacy-/Testpfad nutzbar.
+- Legacy-Import: kontrollierter Import aus `NETGRID_LEGACY_MATCH_STORAGE_PATH` oder `data/runtime/multiplayer/matches.json`, nur wenn SQLite leer ist, mit Strukturvalidierung, Pre-Migration-Backup und enger Normalisierung älterer Records ohne `match.mode`.
 - Backup/Restore: lokale Helfer erzeugen Manifest, SHA-256-Prüfsummen, Schema-/Integritätsprüfung und Pre-Restore-Backup.
-- E2E-Isolation: `corepack pnpm e2e` setzt `NETRUNNER_STORAGE_KIND=sqlite` und nutzt `tmp/e2e-runtime-*/netrunner.sqlite`.
+- E2E-Isolation: `corepack pnpm e2e` setzt `NETGRID_STORAGE_KIND=sqlite` und nutzt `tmp/e2e-runtime-*/netgrid.sqlite`.
 
 ## Konfiguration
 
 | Variable | Verhalten |
 | --- | --- |
-| `NETRUNNER_STORAGE_KIND` | `sqlite` als Standard; `json` Legacy/Test; `memory` gezielte Entwicklung/Tests. |
-| `NETRUNNER_SQLITE_STORAGE_PATH` | SQLite-Datei; Default `data/runtime/multiplayer/netrunner.sqlite`. |
-| `NETRUNNER_MATCH_STORAGE_PATH` | Legacy-JSON-Pfad, wenn `NETRUNNER_STORAGE_KIND=json`. |
-| `NETRUNNER_LEGACY_MATCH_STORAGE_PATH` | JSON-Importquelle; Default `data/runtime/multiplayer/matches.json`. |
-| `NETRUNNER_STORAGE_BACKUP_DIR` | Backup-Ziel; Default `data/runtime/backups/`. |
+| `NETGRID_STORAGE_KIND` | `sqlite` als Standard; `json` Legacy/Test; `memory` gezielte Entwicklung/Tests. |
+| `NETGRID_SQLITE_STORAGE_PATH` | SQLite-Datei; Default `data/runtime/multiplayer/netgrid.sqlite`. |
+| `NETGRID_MATCH_STORAGE_PATH` | Legacy-JSON-Pfad, wenn `NETGRID_STORAGE_KIND=json`. |
+| `NETGRID_LEGACY_MATCH_STORAGE_PATH` | JSON-Importquelle; Default `data/runtime/multiplayer/matches.json`. |
+| `NETGRID_STORAGE_BACKUP_DIR` | Backup-Ziel; Default `data/runtime/backups/`. |
 
 ## Lokale Admin-Helfer
 

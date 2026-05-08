@@ -49,8 +49,8 @@ Nicht geändert wurden:
 
 Bestanden am 2026-05-04:
 
-- `corepack pnpm --filter @netrunner/web test -- action-cues.test.ts`: pass, Web-Cue- und Chronicle-Tests grün.
-- `corepack pnpm --filter @netrunner/server test -- multiplayer.test.ts`: pass, 27 Server-Multiplayer-Tests.
+- `corepack pnpm --filter @netgrid/web test -- action-cues.test.ts`: pass, Web-Cue- und Chronicle-Tests grün.
+- `corepack pnpm --filter @netgrid/server test -- multiplayer.test.ts`: pass, 27 Server-Multiplayer-Tests.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm test`: pass, 182 Tests.

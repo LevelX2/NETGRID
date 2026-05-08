@@ -129,7 +129,7 @@ Die Reihenfolge ist hart:
 ```text
 Setze V1.4.2 Belief State und Gegner-Modell um. Beginne keine V1.4.3-, V1.5.0- oder V1.6.0-Arbeit.
 
-Repository: C:\Projekte\Netrunner
+Repository: C:\Projekte\NETGRID
 
 Arbeite wiki-first und gemäß AGENTS.md. Lies zuerst:
 - AGENTS.md

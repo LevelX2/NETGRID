@@ -17,7 +17,7 @@ V1.0.8 Storage/Backup-Härtung ist umgesetzt und lokal verifiziert.
 
 - SQLite ist der private lokale Standard-Storage für Multiplayer-Matches.
 - `MultiplayerStorage` bleibt fachlich stabil; Service und Transport kennen keine SQL-Details.
-- JSON bleibt als Legacy-/Test-/Migrationseingang über `NETRUNNER_STORAGE_KIND=json` verfügbar.
+- JSON bleibt als Legacy-/Test-/Migrationseingang über `NETGRID_STORAGE_KIND=json` verfügbar.
 - Legacy-Import aus `data/runtime/multiplayer/matches.json` ist validiert, transaktional, normalisiert ältere Records ohne `match.mode` eng und erzeugt vorher ein Backup.
 - `storage_meta` enthält Schema-Version, Storage-Format und Migrations-/Import-Marken.
 - Backup/Restore erzeugt Manifest, SHA-256-Prüfsummen, Integritätsprüfung und Pre-Restore-Backup.
@@ -48,7 +48,7 @@ corepack pnpm storage:import-legacy
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/server test`: pass, 42 Tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 42 Tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 13 Tests.
 - `corepack pnpm e2e`: pass, 7/7 Playwright-Tests mit temporärer SQLite-Datenbank.
 - `corepack pnpm lint`: pass.

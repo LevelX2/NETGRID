@@ -19,7 +19,7 @@ export type DeckLibraryReadResult = {
 };
 
 export function defaultDeckLibraryPath(env: NodeJS.ProcessEnv = process.env): string {
-  const configuredPath = env.NETGRID_DECK_LIBRARY_PATH ?? env.NETRUNNER_DECK_LIBRARY_PATH;
+  const configuredPath = env.NETGRID_DECK_LIBRARY_PATH;
   if (configuredPath) return resolve(configuredPath);
   if (env.APPDATA) return join(env.APPDATA, "NetGrid", "Decks");
   if (env.XDG_DATA_HOME) return join(env.XDG_DATA_HOME, "netgrid", "decks");

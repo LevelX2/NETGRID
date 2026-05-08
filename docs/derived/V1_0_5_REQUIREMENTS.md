@@ -25,7 +25,7 @@ V1.0.5 ist ein UI-/Präsentations- und Regression-Release. Die Phase verbessert 
 - `apps/web/app/chronicle.ts`
 - `tests/specs/visibility-contract.test.ts`
 
-Die lokale V1.0.5-UI-Terminologie in diesem Dokument ist ein projektintern freigegebenes UI-Glossar. Sie ist keine Behauptung einer offiziellen deutschen Netrunner-Übersetzung. Technische Engine-IDs, Action-Typen, Event-Typen, Test-IDs und Code-Symbole bleiben englisch.
+Die lokale V1.0.5-UI-Terminologie in diesem Dokument ist ein projektintern freigegebenes UI-Glossar. Sie ist keine Behauptung einer offiziellen deutschen NETGRID-Übersetzung. Technische Engine-IDs, Action-Typen, Event-Typen, Test-IDs und Code-Symbole bleiben englisch.
 
 ## Scope
 
@@ -79,7 +79,7 @@ V1.0.5 umfasst:
 | `Access` / `access` | Zugriff | RunTimeline, Zugriff-Fenster und Chronicle. |
 | `Breach` | Zugriffsphase | UI-Beschreibung des erfolgreichen Run-/Access-Abschnitts. |
 | `Complete` / `complete` | Abschluss | RunTimeline. |
-| `HQ` | HQ | Zentraler Server, als bekanntes Netrunner-Kürzel erlaubt. |
+| `HQ` | HQ | Zentraler Server, als bekanntes NETGRID-Kürzel erlaubt. |
 | `R&D` | F&E (R&D) | Zentraler Server; erste Anzeige deutsch, Kürzel zur Wiedererkennung. |
 | `Archives` | Archive | Zentraler Server. |
 | `Runner-Rig` | Runner-Rig | Erlaubt, weil im Projekt bereits etabliert; intern nach Programm, Hardware, Ressource gruppieren. |
@@ -166,8 +166,8 @@ Nicht als normale Endnutzerlabels erlaubt sind `LegalActions`, `Runner View`, `C
 
 ## Pflichtchecks
 
-- `corepack pnpm --filter @netrunner/web test`
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/web test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

@@ -15,7 +15,7 @@ Der Release erweitert keine Karten, keine Mechaniken, keine Accounts, keine öff
 - `StoredMatch` enthält Matchdaten, Sessions, Token-Hashes, `GameState`, LifecycleResult, StartLobby, private Decksnapshots, EventLog, ActionReceipts, UndoSnapshots, StateSnapshots und PendingUndo.
 - `apps/server/src/http-server.ts` erzeugt aktuell standardmäßig `JsonFileMatchStorage`.
 - Der normale Legacy-Pfad ist `data/runtime/multiplayer/matches.json`.
-- `scripts/run-e2e.mjs` isoliert V1.0.7-E2E aktuell über `NETRUNNER_MATCH_STORAGE_PATH` auf eine temporäre `matches.json`.
+- `scripts/run-e2e.mjs` isoliert V1.0.7-E2E aktuell über `NETGRID_MATCH_STORAGE_PATH` auf eine temporäre `matches.json`.
 - Node 24 ist Projektziel; die lokale Umgebung stellt `node:sqlite` bereit. V1.0.8 bevorzugt deshalb `node:sqlite`, sofern die Umsetzung damit grün bleibt.
 
 ## Anforderungen
@@ -25,7 +25,7 @@ Der Release erweitert keine Karten, keine Mechaniken, keine Accounts, keine öff
 | V108-MUST-001 | Must | SQLite ist der dokumentierte private lokale Standard-Storage für Multiplayer-Matches. | V108-T001, V108-T002 |
 | V108-MUST-002 | Must | Der bestehende `MultiplayerStorage`-Port bleibt fachlich stabil: Service, Engine, WebSocket, REST und PlayerViews arbeiten weiterhin mit `StoredMatch`-Records. | V108-T003 |
 | V108-MUST-003 | Must | Die Server-Storage-Konstruktion ist explizit konfigurierbar, mindestens über Storage-Art und Storage-Pfad. | V108-T004 |
-| V108-MUST-004 | Must | Der Default-SQLite-Pfad ist `data/runtime/multiplayer/netrunner.sqlite`; Runtime-Daten bleiben nicht versioniert. | V108-T001, V108-T004 |
+| V108-MUST-004 | Must | Der Default-SQLite-Pfad ist `data/runtime/multiplayer/netgrid.sqlite`; Runtime-Daten bleiben nicht versioniert. | V108-T001, V108-T004 |
 | V108-MUST-005 | Must | Der JSON-Pfad `data/runtime/multiplayer/matches.json` bleibt als kontrollierte Legacy-Importquelle erhalten und wird nicht still überschrieben. | V108-T005, V108-T006 |
 | V108-MUST-006 | Must | Beim ersten SQLite-Start mit leerer Datenbank und vorhandener Legacy-Datei wird vor dem Import ein Backup der Legacy-Datei oder des gesamten Runtime-Quellstands erzeugt. | V108-T006, V108-T016 |
 | V108-MUST-007 | Must | JSON-Legacy-Import validiert alle Records strukturell, bevor sie in SQLite übernommen werden. | V108-T007 |
@@ -60,13 +60,13 @@ Die Umsetzung soll folgende Konfigurationsform unterstützen:
 
 | Variable | Bedeutung |
 | --- | --- |
-| `NETRUNNER_STORAGE_KIND` | `sqlite` als Standard, `json` nur Legacy/Test, `memory` nur Tests/gezielte Entwicklung. |
-| `NETRUNNER_SQLITE_STORAGE_PATH` | SQLite-Datei; Default `data/runtime/multiplayer/netrunner.sqlite`. |
-| `NETRUNNER_MATCH_STORAGE_PATH` | Legacy-Kompatibilität für JSON und bestehende E2E-Harnesses; nicht der neue Standard für SQLite. |
-| `NETRUNNER_LEGACY_MATCH_STORAGE_PATH` | optionale explizite Legacy-Importquelle; Default `data/runtime/multiplayer/matches.json`. |
-| `NETRUNNER_STORAGE_BACKUP_DIR` | Backup-Ziel; Default `data/runtime/backups/`. |
+| `NETGRID_STORAGE_KIND` | `sqlite` als Standard, `json` nur Legacy/Test, `memory` nur Tests/gezielte Entwicklung. |
+| `NETGRID_SQLITE_STORAGE_PATH` | SQLite-Datei; Default `data/runtime/multiplayer/netgrid.sqlite`. |
+| `NETGRID_MATCH_STORAGE_PATH` | Legacy-Kompatibilität für JSON und bestehende E2E-Harnesses; nicht der neue Standard für SQLite. |
+| `NETGRID_LEGACY_MATCH_STORAGE_PATH` | optionale explizite Legacy-Importquelle; Default `data/runtime/multiplayer/matches.json`. |
+| `NETGRID_STORAGE_BACKUP_DIR` | Backup-Ziel; Default `data/runtime/backups/`. |
 
-Wenn `NETRUNNER_STORAGE_KIND` fehlt, startet der Server mit SQLite. Für V1.0.8-E2E soll der Harness explizit `NETRUNNER_STORAGE_KIND=sqlite` und eine temporäre `NETRUNNER_SQLITE_STORAGE_PATH` setzen. Bestehende JSON-E2E-Isolation darf nur als Übergangs-/Fallbackpfad bleiben, nicht als dokumentierter Zielzustand.
+Wenn `NETGRID_STORAGE_KIND` fehlt, startet der Server mit SQLite. Für V1.0.8-E2E soll der Harness explizit `NETGRID_STORAGE_KIND=sqlite` und eine temporäre `NETGRID_SQLITE_STORAGE_PATH` setzen. Bestehende JSON-E2E-Isolation darf nur als Übergangs-/Fallbackpfad bleiben, nicht als dokumentierter Zielzustand.
 
 ## Nicht-Ziele
 

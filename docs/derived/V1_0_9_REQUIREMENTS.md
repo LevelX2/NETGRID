@@ -23,12 +23,12 @@ Der Release erweitert keine Karten, keine Mechaniken, keine Accounts, keine Publ
 | ID | Priorität | Anforderung | Testspur |
 | --- | --- | --- | --- |
 | V109-MUST-001 | Must | V1.0.9 definiert ein explizites Betriebsprofil `local` und ein privates Internet-Profil, z. B. `private_internet`. | V109-T001 |
-| V109-MUST-002 | Must | Im privaten Internet-Profil müssen `NETRUNNER_WEB_BASE_URL` und `NETRUNNER_SERVER_BASE_URL` explizit gesetzt sein. | V109-T002 |
+| V109-MUST-002 | Must | Im privaten Internet-Profil müssen `NETGRID_WEB_BASE_URL` und `NETGRID_SERVER_BASE_URL` explizit gesetzt sein. | V109-T002 |
 | V109-MUST-003 | Must | Im privaten Internet-Profil sind öffentliche URLs nur mit `https://` für Web und Server zulässig; WebSocket-Clients leiten daraus `wss://` ab oder nutzen eine ausdrücklich sichere WSS-Konfiguration. | V109-T003, V109-T004 |
 | V109-MUST-004 | Must | `http://127.0.0.1`, `http://localhost` und lokale Testports bleiben für Entwicklung und E2E erlaubt. | V109-T004 |
 | V109-MUST-005 | Must | Unsichere Internet-Konfigurationen werden beim Start oder beim Health-/Config-Check kontrolliert abgelehnt. | V109-T005 |
 | V109-MUST-006 | Must | REST-CORS verwendet eine explizite Origin-Allowlist; `*` ist im privaten Internet-Profil verboten. | V109-T006 |
-| V109-MUST-007 | Must | `NETRUNNER_ALLOWED_ORIGINS` oder äquivalente Konfiguration unterstützt mehrere erlaubte Origins. | V109-T007 |
+| V109-MUST-007 | Must | `NETGRID_ALLOWED_ORIGINS` oder äquivalente Konfiguration unterstützt mehrere erlaubte Origins. | V109-T007 |
 | V109-MUST-008 | Must | Preflight-Antworten erlauben nur notwendige Methoden und Header für die bestehende App. | V109-T008 |
 | V109-MUST-009 | Must | REST-Anfragen mit unbekannter Origin werden mit side-sicherer Antwort abgelehnt, ohne Match-, Token-, Deck- oder Hidden-Info-Daten. | V109-T009, V109-T030 |
 | V109-MUST-010 | Must | WebSocket-Verbindungen auf `/ws` prüfen die Origin gegen dieselbe Allowlist oder einen dokumentierten äquivalenten WSS-Origin-Vertrag. | V109-T010 |
@@ -38,7 +38,7 @@ Der Release erweitert keine Karten, keine Mechaniken, keine Accounts, keine Publ
 | V109-MUST-014 | Must | WebSocket-Handshake oder `join_match` besitzt eine einfache Rate-Limit- oder Abuse-Bremse. | V109-T014 |
 | V109-MUST-015 | Must | Rate-Limit-Antworten enthalten keine Tokens, TokenHashes, Decklisten, Match-Interna oder Hidden Info. | V109-T015, V109-T030 |
 | V109-MUST-016 | Must | Rate-Limits bleiben lokal konfigurierbar und in Tests stabil, ohne echte Wartezeiten über lange Zeitfenster. | V109-T016 |
-| V109-MUST-017 | Must | Im privaten Internet-Profil ist ein expliziter `NETRUNNER_TOKEN_SALT` Pflicht; der lokale Default-Salt ist nicht zulässig. | V109-T017 |
+| V109-MUST-017 | Must | Im privaten Internet-Profil ist ein expliziter `NETGRID_TOKEN_SALT` Pflicht; der lokale Default-Salt ist nicht zulässig. | V109-T017 |
 | V109-MUST-018 | Must | Logs, Serverfehler, Health, E2E-Ausgaben und Diagnoseflächen redaktionieren Join-, Session- und Reconnect-Tokens sowie TokenHashes. | V109-T018, V109-T030 |
 | V109-MUST-019 | Must | Join-URLs werden nicht vollständig mit Klartext-`joinToken` geloggt. | V109-T019 |
 | V109-MUST-020 | Must | `Authorization: Bearer` bleibt für sessionToken-sensitive REST-Kommandos bevorzugt; Query-/Body-Token-Kompatibilität wird dokumentiert und darf nicht in Logs erscheinen. | V109-T020 |
@@ -74,14 +74,14 @@ Der Release erweitert keine Karten, keine Mechaniken, keine Accounts, keine Publ
 
 | Variable | Bedeutung |
 | --- | --- |
-| `NETRUNNER_DEPLOYMENT_PROFILE` | `local` als Default, `private_internet` für gehärteten Internetbetrieb. |
-| `NETRUNNER_WEB_BASE_URL` | öffentliche private Web-Origin; im Internet-Profil `https://...`. |
-| `NETRUNNER_SERVER_BASE_URL` | öffentliche private Server-Origin; im Internet-Profil `https://...`. |
-| `NETRUNNER_ALLOWED_ORIGINS` | kommaseparierte erlaubte Browser-Origins für REST und WS. |
-| `NETRUNNER_TOKEN_SALT` | im Internet-Profil Pflicht, kein Default-Salt. |
-| `NETRUNNER_RATE_LIMIT_PROFILE` | z. B. `off`, `local`, `private_internet`; Tests dürfen ein deterministisches Profil verwenden. |
-| `NETRUNNER_TRUST_PROXY_HEADERS` | nur bei bewusstem Reverse-Proxy-Betrieb aktivieren. |
-| `NETRUNNER_HEALTH_DETAIL` | `safe` als Default; detailliertere Diagnose nur lokal/geschützt. |
+| `NETGRID_DEPLOYMENT_PROFILE` | `local` als Default, `private_internet` für gehärteten Internetbetrieb. |
+| `NETGRID_WEB_BASE_URL` | öffentliche private Web-Origin; im Internet-Profil `https://...`. |
+| `NETGRID_SERVER_BASE_URL` | öffentliche private Server-Origin; im Internet-Profil `https://...`. |
+| `NETGRID_ALLOWED_ORIGINS` | kommaseparierte erlaubte Browser-Origins für REST und WS. |
+| `NETGRID_TOKEN_SALT` | im Internet-Profil Pflicht, kein Default-Salt. |
+| `NETGRID_RATE_LIMIT_PROFILE` | z. B. `off`, `local`, `private_internet`; Tests dürfen ein deterministisches Profil verwenden. |
+| `NETGRID_TRUST_PROXY_HEADERS` | nur bei bewusstem Reverse-Proxy-Betrieb aktivieren. |
+| `NETGRID_HEALTH_DETAIL` | `safe` als Default; detailliertere Diagnose nur lokal/geschützt. |
 
 ## Nicht-Ziele
 

@@ -17,7 +17,7 @@ MVP 0.5 Card Import und Card Catalog sind requirements-gefroren, implementiert, 
 - Deterministischer V0.5-Card-Snapshot mit Snapshot-Hash.
 - Import-Report, Katalogindex und Statusmanifest.
 - Statusmodell mit `imported`, `validated`, `catalog_ready`, `implemented`, `playable`, `deck_legal` und `blocked`.
-- Reines TypeScript-Paket `@netrunner/catalog`.
+- Reines TypeScript-Paket `@netgrid/catalog`.
 - Read-only Katalog-API unter `/api/cards/catalog`, `/api/cards/catalog/:id` und `/api/cards/status-summary`.
 - Funktionale Katalogansicht mit Suche, Filtern, Liste, Detail und Statusanzeige.
 - Tests für Snapshot-Validierung, Hash, Index, Suche, Statusinvarianten und Payload-Sicherheit.

@@ -1,4 +1,4 @@
-# Erste feste Demo-Decks für Netrunner MVP 0.1
+# Erste feste Demo-Decks für NETGRID MVP 0.1
 
 Stand: 2026-05-03T06:48:51.659016+00:00
 

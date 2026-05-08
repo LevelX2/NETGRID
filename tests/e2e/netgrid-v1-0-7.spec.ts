@@ -163,8 +163,8 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     expect(runtimePath).not.toContain("data/runtime/multiplayer/matches.json");
     expect(runtimePath).not.toContain("data\\runtime\\multiplayer\\netgrid.sqlite");
     expect(runtimePath).not.toContain("data/runtime/multiplayer/netgrid.sqlite");
-    expect(runtimePath).not.toContain("data\\runtime\\multiplayer\\netrunner.sqlite");
-    expect(runtimePath).not.toContain("data/runtime/multiplayer/netrunner.sqlite");
+    expect(runtimePath).not.toContain("data\\runtime\\multiplayer\\netgrid.sqlite");
+    expect(runtimePath).not.toContain("data/runtime/multiplayer/netgrid.sqlite");
     await expect(async () => stat(runtimePath!)).toPass();
     const health = await request.get(`${process.env.NETGRID_E2E_SERVER_URL}/health`);
     const body = (await health.json()) as { profile?: string; realtime?: { ready?: boolean }; storage?: { kind?: string; database?: string; matchCount?: number } };

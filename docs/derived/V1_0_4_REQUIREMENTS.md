@@ -68,11 +68,11 @@ Recreate erstellt immer ein neues Match:
 
 Wenn Recreate aus `pending`, `ready_check` oder `countdown` ausgelöst wird, muss das alte Match zuerst terminal `cancelled` werden. Aus `cancelled` oder `abandoned` darf direkt neu erstellt werden. Aus `active` ist Recreate erst nach `forfeited` oder `finished` zulässig.
 
-`netrunner.recentSessions` darf beim Recreate nur nicht-sensitive Metadaten anpassen oder entfernen. Erlaubt sind MatchId, Seite, eigener Anzeigename, safe Gegnername, letzter bekannter Status, Zeitstempel und lokale UI-Hinweise. Verboten bleiben Decklisten, Deckhashes, Session-Tokens, Reconnect-Tokens und verdeckte Kartendaten.
+`netgrid.recentSessions` darf beim Recreate nur nicht-sensitive Metadaten anpassen oder entfernen. Erlaubt sind MatchId, Seite, eigener Anzeigename, safe Gegnername, letzter bekannter Status, Zeitstempel und lokale UI-Hinweise. Verboten bleiben Decklisten, Deckhashes, Session-Tokens, Reconnect-Tokens und verdeckte Kartendaten.
 
 ## Session-Recovery
 
-`sessionStorage` bleibt der einzige Browser-Speicherort für Session-/Reconnect-Tokens. `netrunner.recentSessions` bleibt eine nicht-sensitive Komfortliste.
+`sessionStorage` bleibt der einzige Browser-Speicherort für Session-/Reconnect-Tokens. `netgrid.recentSessions` bleibt eine nicht-sensitive Komfortliste.
 
 Die UI unterscheidet verbindlich:
 
@@ -119,7 +119,7 @@ Automatisierte oder reproduzierbare Tests müssen abdecken:
 - Forfeit erhält letzten Engine-StateHash und fälscht keinen Engine-Sieg.
 - `advance_ai` und KI-Timer stoppen nach Forfeit.
 - Recreate erzeugt neue MatchId, neuen Link, neuen Seed und neue Tokens.
-- `netrunner.recentSessions` enthält keine Tokens, Decklisten, Deckhashes oder Hidden Info.
+- `netgrid.recentSessions` enthält keine Tokens, Decklisten, Deckhashes oder Hidden Info.
 - Gegnername erscheint an den freigegebenen UI-/Payload-Stellen ohne zusätzliche sensible Daten.
 - REST ist Lifecycle-Schreibpfad; WebSocket ist Broadcast-Pfad.
 - Mindestens ein wiederholbarer Zwei-Tab-Smoke deckt Host/Join/Cancel/Recreate/Reconnect/Forfeit mit klaren Prüfpunkten ab.

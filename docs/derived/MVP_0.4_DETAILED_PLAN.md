@@ -615,9 +615,9 @@ Read:
 - docs/derived/POST_MVP_0.2_ROADMAP.md
 - docs/derived/MVP_0.3_DETAILED_PLAN.md
 - docs/derived/MVP_0.4_DETAILED_PLAN.md
-- docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Kartenimplementierungsleitfaden.md
-- docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Rules_Engine_Spezifikation.md
-- docs/Netrunner_Detailliertes_Testkonzept_MVP_0_1_0_2.md
+- docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Kartenimplementierungsleitfaden.md
+- docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Rules_Engine_Spezifikation.md
+- docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md
 - data/cards/demo-cards.json
 - data/decks/demo-decks.json
 - data/manifests/card-implementation-manifest.json

@@ -165,7 +165,7 @@ V1.0.5-Cues dürfen in der Standardkonfiguration nicht mittig als dauerhaftes Mo
 
 Persistenz- und Viewport-Regeln:
 
-- Empfohlener lokaler Schlüssel: `netrunner.actionCuePosition.v1`.
+- Empfohlener lokaler Schlüssel: `netgrid.actionCuePosition.v1`.
 - Custom-Positionen werden viewport-relativ gespeichert, z. B. als Prozentwerte, nicht als Matchdaten.
 - Beim Resize werden Positionen in den sichtbaren Bereich geklemmt; bei ungültigen gespeicherten Daten fällt die UI auf `Oben rechts` zurück.
 - Drag darf keine Textauswahl, Buttonklicks oder Dismiss-Aktion unbedienbar machen.

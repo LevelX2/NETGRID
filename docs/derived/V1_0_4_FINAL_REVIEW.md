@@ -16,7 +16,7 @@ V1.0.4 Private Match Lifecycle und Session Recovery ist funktional umgesetzt. De
 - `result.reason: "forfeit"`, Gewinner-/Verliererseite und `finalEngineStateHash` werden side-sicher geliefert.
 - Recreate erzeugt neue MatchId, neuen Join-Link, neuen Seed und neue Tokens.
 - Alte Join-/Session-/Reconnect-Tokens werden für Join, Bootstrap, Reconnect und Live-Aktionen ungültig.
-- `netrunner.recentSessions` bleibt token-, decklisten-, deckhash- und hidden-info-frei.
+- `netgrid.recentSessions` bleibt token-, decklisten-, deckhash- und hidden-info-frei.
 - Fortsetzen, Reconnect und Verwerfen sind in der UI getrennte Pfade.
 - Gegnernamen erscheinen in den freigegebenen UI- und Payload-Stellen ohne neue sensible Anhänge.
 

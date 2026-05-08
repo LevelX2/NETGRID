@@ -74,11 +74,11 @@ Recreate erstellt immer ein neues Match:
 
 Wenn Recreate aus `pending`, `ready_check` oder `countdown` ausgelöst wird, wird das alte Match zuerst terminal `cancelled`. Aus `cancelled` oder `abandoned` kann direkt neu erstellt werden. Aus `active` ist Recreate erst nach terminalem `forfeited` oder `finished` zulässig und bleibt ein neues Match, kein Fortsetzen.
 
-`netrunner.recentSessions` darf dabei nur nicht-sensitive Metadaten aktualisieren oder verwerfen: MatchId, Seite, Anzeigename, safe Gegnername, letzter bekannter Status, Zeitstempel und lokaler UI-Hinweis sind erlaubt; Decklisten, Deckhashes, Session-Tokens, Reconnect-Tokens und verdeckte Kartendaten bleiben verboten.
+`netgrid.recentSessions` darf dabei nur nicht-sensitive Metadaten aktualisieren oder verwerfen: MatchId, Seite, Anzeigename, safe Gegnername, letzter bekannter Status, Zeitstempel und lokaler UI-Hinweis sind erlaubt; Decklisten, Deckhashes, Session-Tokens, Reconnect-Tokens und verdeckte Kartendaten bleiben verboten.
 
 ### Session-Recovery ohne Token-Leak
 
-`sessionStorage` bleibt der einzige Browser-Ort für Session-/Reconnect-Tokens. `netrunner.recentSessions` ist nur eine Merkliste für nicht-sensitive Sitzungsmetadaten.
+`sessionStorage` bleibt der einzige Browser-Ort für Session-/Reconnect-Tokens. `netgrid.recentSessions` ist nur eine Merkliste für nicht-sensitive Sitzungsmetadaten.
 
 Die UI unterscheidet:
 
@@ -105,7 +105,7 @@ Für V1.0.4 gilt: REST-Endpunkte sind die einzige Autorität für explizite Life
 | V104-MUST-005 | Ein Match kann aus UI-Sicht mit denselben lokalen Einstellungen und Deckauswahlen neu erstellt werden; Recreate erzeugt immer neue MatchId, neuen Join-Link, neuen Seed und neue Tokens. |
 | V104-MUST-006 | Reconnect bleibt tokenbasiert, rotiert Session-/Reconnect-Token und liefert nur side-sichere Payloads. |
 | V104-MUST-007 | Die UI zeigt eine aktuell gemerkte lokale Sitzung verständlich an und trennt Fortsetzen mit vorhandenem Token, Reconnect über Link/Eingabe und rein lokales Verwerfen. |
-| V104-MUST-008 | Die mit V1.0.3 eingeführte lokale Merkliste `netrunner.recentSessions` bleibt ein reiner lokaler Komfortpfad; sie darf keine Decklisten, Deckhashes, Session-Tokens, Reconnect-Tokens oder verdeckten Kartendaten enthalten. |
+| V104-MUST-008 | Die mit V1.0.3 eingeführte lokale Merkliste `netgrid.recentSessions` bleibt ein reiner lokaler Komfortpfad; sie darf keine Decklisten, Deckhashes, Session-Tokens, Reconnect-Tokens oder verdeckten Kartendaten enthalten. |
 | V104-MUST-009 | Gegnernamen aus `displayName` werden side-sicher in Lobby, aktivem Spiel, Result Modal, Reconnect Panel, OpponentPanel und `opponent_status`-Updates angezeigt. |
 | V104-MUST-010 | Nicht aktive Lobby-Zustände zeigen klar: wartet auf Joiner, wartet auf Decks, ready_check, countdown, cancelled, abandoned, gestartet oder nicht mehr verfügbar. |
 | V104-MUST-011 | Hidden-Info-, Token-, Decklisten-, Reconnect-, Undo-, PublicEvent-, AI-Input- und Fehlerpayload-Verträge bleiben grün. |
@@ -119,7 +119,7 @@ Für V1.0.4 gilt: REST-Endpunkte sind die einzige Autorität für explizite Life
 - Kein Matchmaking.
 - Keine Accounts, Cloud-Sessions oder öffentlichen Spielerprofile.
 - Kein Ranking, keine Turniere.
-- Keine neue Netrunner-Regelmechanik.
+- Keine neue NETGRID-Regelmechanik.
 - Keine Änderung der Engine-Regelautorität.
 - Kein persistentes Session-Merken ohne ausdrückliches lokales Opt-in.
 - Kein vollständiger Spectator- oder Replay-Browser.
@@ -150,7 +150,7 @@ Für V1.0.4 gilt: REST-Endpunkte sind die einzige Autorität für explizite Life
 | Risiko | Gegenmaßnahme |
 | --- | --- |
 | Aufgabe wird fälschlich als Engine-Winner modelliert und verfälscht Replay/StateHash. | Aufgabe als Match-Lifecycle-Event dokumentieren; finalen Spiel-StateHash des letzten Engine-Zustands beibehalten; Tests für Replay bis letztem Engine-Event. |
-| Reconnect-Tokens landen dauerhaft unsicher im Browser. | `sessionStorage` bleibt Token-Speicher; `netrunner.recentSessions` darf nur nicht-sensitive Sitzungsmetadaten enthalten und bekommt explizite Leak-Tests. |
+| Reconnect-Tokens landen dauerhaft unsicher im Browser. | `sessionStorage` bleibt Token-Speicher; `netgrid.recentSessions` darf nur nicht-sensitive Sitzungsmetadaten enthalten und bekommt explizite Leak-Tests. |
 | Cancel/Leave verrät, welche Seite oder welche Decks existierten. | Payloads nur mit safe Status, Side und Anzeigename; keine Decklisten, Deckhashes oder Tokens. |
 | Zwei parallele Join-/Cancel-Aktionen erzeugen inkonsistenten Status. | Match-Lock für Lifecycle-Operationen verwenden; Race-Tests ergänzen. |
 | Recreate erzeugt versehentlich zwei aktive Matches. | Recreate atomar als Cancel-alt-plus-Create-neu oder erst nach terminalem Status; neue MatchId, neuer Link, neuer Seed, neue Tokens. |
@@ -195,7 +195,7 @@ Für V1.0.4 gilt: REST-Endpunkte sind die einzige Autorität für explizite Life
 4. Zwei Tabs treten bei, einer lädt neu, Reconnect fortsetzen.
 5. Aktives Human-vs-Human-Spiel: Runner gibt auf, Corp sieht Ergebnis, Runner sieht Verlust, keine Decklisten im Payload.
 6. Human-vs-KI-Spiel: Mensch gibt auf, KI-Status bleibt side-sicher.
-7. Token-/Leak-Stichprobe im Browser: keine Session-/Reconnect-Tokens in `netrunner.recentSessions`, sichtbaren Logs oder Diagnostics.
+7. Token-/Leak-Stichprobe im Browser: keine Session-/Reconnect-Tokens in `netgrid.recentSessions`, sichtbaren Logs oder Diagnostics.
 8. Wiederholbarer Zwei-Tab-Smoke für Host/Join/Cancel/Recreate/Reconnect/Forfeit mit festen Prüfpunkten.
 
 ## Dokumentationsbedarf

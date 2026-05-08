@@ -1,7 +1,7 @@
 {
   "schemaVersion": "rules-baseline-v1",
   "id": "rules-baseline-mvp-0.1",
-  "name": "Netrunner MVP 0.1 rules baseline",
+  "name": "NETGRID MVP 0.1 rules baseline",
   "status": "frozen_for_implementation",
   "rulesVersion": "26.03",
   "cardTextSource": "manual",
@@ -11,9 +11,9 @@
   "deviationRegistryVersion": "0.1.0",
   "agendaPointsToWin": 6,
   "sourceDocuments": [
-    "docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md",
+    "docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md",
     "docs/source/Erstes Testdeck.txt",
-    "docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf"
+    "docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf"
   ],
   "officialRulesReferences": [
     "CR 1.6 Starting the Game",

@@ -28,9 +28,9 @@ Aktueller Stand vor V1.0.8:
 
 - V1.0.7 Browser-E2E und Visual QA ist umgesetzt und lokal verifiziert.
 - Der Server nutzt `MultiplayerStorage` mit `load(matchId)`, `save(record)` und optional `list()`.
-- Produktiv wird aktuell `JsonFileMatchStorage` über `NETRUNNER_MATCH_STORAGE_PATH` erzeugt.
+- Produktiv wird aktuell `JsonFileMatchStorage` über `NETGRID_MATCH_STORAGE_PATH` erzeugt.
 - Standardpfad ist derzeit `data/runtime/multiplayer/matches.json`.
-- E2E nutzt bereits isolierte temporäre Runtime-Daten über `NETRUNNER_MATCH_STORAGE_PATH`.
+- E2E nutzt bereits isolierte temporäre Runtime-Daten über `NETGRID_MATCH_STORAGE_PATH`.
 - `StoredMatch` enthält Match-Metadaten, Sessions, Token-Hashes, GameState, LifecycleResult, StartLobby, private Decksnapshots, EventLog, ActionReceipts, UndoSnapshots, StateSnapshots und PendingUndo.
 - Der Service besitzt bereits per-Match-Locks auf Anwendungsebene; Storage muss diese Annahme nicht ersetzen, darf sie aber nicht unterlaufen.
 
@@ -40,7 +40,7 @@ Aktueller Stand vor V1.0.8:
 
 - SQLite als bevorzugten privaten Storage-Pfad festlegen und dokumentieren.
 - Einen migrationsfähigen Storage-Entwurf für `StoredMatch` und seine Bestandteile erstellen.
-- Einen klaren Runtime-Pfad für SQLite definieren, z. B. `data/runtime/multiplayer/netrunner.sqlite`.
+- Einen klaren Runtime-Pfad für SQLite definieren, z. B. `data/runtime/multiplayer/netgrid.sqlite`.
 - JSON-Bestandsdaten aus `matches.json` vor einer Migration sichern, statt sie still zu überschreiben.
 - `schemaVersion` oder äquivalente Migrationstabelle einführen.
 - Serverstart-Verhalten für fehlenden, gültigen, alten, unbekannten und beschädigten Storage definieren.
@@ -146,8 +146,8 @@ Empfohlener Pfad:
 
 ```txt
 data/runtime/backups/
-  netrunner-storage-YYYYMMDD-HHMMSS/
-    netrunner.sqlite
+  netgrid-storage-YYYYMMDD-HHMMSS/
+    netgrid.sqlite
     manifest.json
 ```
 

@@ -30,7 +30,7 @@ V1.2.0 Event Modification Foundation und V1.2.1 Replacement Effects sind am 2026
 
 Die Detailplanung fuer V1.2.2, V1.2.3 und V1.3.0 ist am 2026-05-08 requirements-gefroren. Alle drei Releases wurden strikt sequenziell umgesetzt und abgeschlossen. Erzeugt wurden je Release Detailplan, Requirements, Spezifikation, Testmatrix und Requirements Review sowie das gemeinsame Handoff `docs/derived/V1_2_2_TO_V1_3_0_IMPLEMENTATION_HANDOFF.md`.
 
-NETGRID ist seit 2026-05-08 der aktive App-/Projektname für Anwendung, technische Konfiguration, Workspace-Pakete, Server-Symbole, Storage-Namen, Browser-Speicherkeys, Startskript und E2E-Harness. Netrunner bleibt als fachliche Spiel-, Regel- und Quellenreferenz erhalten. Alte technische `netrunner`-/`NETRUNNER`-Namen bleiben nur als Legacy-Fallback, Importpfad oder historische Referenz bestehen. Verifikation der Umbenennung: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build` und `corepack pnpm e2e` bestanden; der erste E2E-Versuch war nur durch einen bereits laufenden lokalen Next-Dev-Server blockiert und wurde nach Beenden dieses Prozesses erfolgreich wiederholt.
+NETGRID ist seit 2026-05-08 der aktive App-/Projektname für Anwendung, technische Konfiguration, Workspace-Pakete, Server-Symbole, Storage-Namen, Browser-Speicherkeys, Startskript und E2E-Harness. NETGRID bleibt als fachliche Spiel-, Regel- und Quellenreferenz erhalten. Alte technische `netgrid`-/`NETGRID`-Namen bleiben nur als Legacy-Fallback, Importpfad oder historische Referenz bestehen. Verifikation der Umbenennung: `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `corepack pnpm build` und `corepack pnpm e2e` bestanden; der erste E2E-Versuch war nur durch einen bereits laufenden lokalen Next-Dev-Server blockiert und wurde nach Beenden dieses Prozesses erfolgreich wiederholt.
 
 V1.1.2K kleines Kartenrelease nach V1.1.2 ist umgesetzt und lokal verifiziert. Es aktiviert genau 20 weitere lokal geprüfte O:NR-v1-Karten: Black Dahlia, Codecracker, Cyfermaster™, Loony Goon, Shaka, Wizard's Book, Laser Wire, Nerve Labyrinth, π in the 'Face, Quandary, Razor Wire, Reinforced Wall, Rock Is Strong, Scramble, Shotgun Wire, Sleeper, Wall of Ice, Wall of Static, Netwatch Credit Voucher und Night Shift. V1.0.5K und V1.0.6K bleiben aktiv; der private lokale Runtime-Katalog gibt damit 52 O:NR-v1-Karten `playable` und `deck_legal`. Keine weiteren Karten, keine neuen Mechanikfamilien, keine Prevention/Avoid/Replacement-Pfade, keine generischen Asset-/Node-/Upgrade-Fähigkeiten und keine offiziellen Assets wurden eingeführt.
 
@@ -58,7 +58,7 @@ Aktuelle lokale UI-/Ablaufkorrektur vom 2026-05-06/2026-05-07: Die aktive Spielo
 
 Aktuelle lokale Ergebnis- und Symbolkorrektur vom 2026-05-07: Die private Zwei-Spiel-Serie nutzt bei gleicher Spielgewinnzahl jetzt die Summe der Agenda-Punkte als Tiebreaker; nur gleiche Siege und gleiche Agenda-Punkte ergeben ein Serien-Unentschieden. `GameResultSummary.series` liefert dafür `viewerSeriesOutcome` und `seriesDecision`. Das Ergebnisfenster trennt Zahlen und Einheiten lesbarer, Agenda nutzt ein Auszeichnungs-/Score-Icon statt eines Dokument-Icons, Tags nutzen ein Zielscheiben-Icon, und Credits/Kostenchips sind wieder goldfarben, damit Geld klar von Agenda-Blau getrennt ist.
 
-Aktuelle lokale Deckbibliothekskorrektur vom 2026-05-07, aktualisiert mit der NETGRID-Umbenennung am 2026-05-08: Persönliche bearbeitbare Decks werden über eine lokale Datei-Deckbibliothek gespeichert statt nur im Browser-`localStorage`. Standardpfad ist `%APPDATA%\NetGrid\Decks`, überschreibbar per `NETGRID_DECK_LIBRARY_PATH`; `NETRUNNER_DECK_LIBRARY_PATH` bleibt als Legacy-Fallback lesbar. Alte Browser-Decks unter `netrunner-v0-6-local-decks` werden beim ersten leeren Datei-Start in den neuen `netgrid-v0-6-local-decks`-Kompatibilitätspfad und danach in die Datei-Deckbibliothek übernommen. Match-Snapshots bleiben weiterhin getrennt in der Multiplayer-Persistenz.
+Aktuelle lokale Deckbibliothekskorrektur vom 2026-05-07, aktualisiert mit der NETGRID-Umbenennung am 2026-05-08: Persönliche bearbeitbare Decks werden über eine lokale Datei-Deckbibliothek gespeichert statt nur im Browser-`localStorage`. Standardpfad ist `%APPDATA%\NetGrid\Decks`, überschreibbar per `NETGRID_DECK_LIBRARY_PATH`; `NETGRID_DECK_LIBRARY_PATH` bleibt als Legacy-Fallback lesbar. Alte Browser-Decks unter `netgrid-v0-6-local-decks` werden beim ersten leeren Datei-Start in den neuen `netgrid-v0-6-local-decks`-Kompatibilitätspfad und danach in die Datei-Deckbibliothek übernommen. Match-Snapshots bleiben weiterhin getrennt in der Multiplayer-Persistenz.
 
 V1.0.8 Storage/Backup-Härtung ist umgesetzt und lokal verifiziert. SQLite ist jetzt der private lokale Standard-Storage für Multiplayer-Matches; JSON bleibt Legacy-/Test-/Migrationseingang. Der Release ergänzt kontrollierten Legacy-Import aus `data/runtime/multiplayer/matches.json`, `storage_meta` mit Schema-Versionierung, Backup/Restore mit Manifest und Prüfsummen, Recovery-Verhalten, redaktionierte Health-/Diagnoseflächen und V1.0.7-E2E-Isolation über temporäre SQLite-Datenbanken.
 
@@ -550,7 +550,7 @@ V1.0.9 Private Internet Hardening implementation is complete and locally verifie
 
 V1.0.9 verification:
 
-- `corepack pnpm --filter @netrunner/server test`: pass, 49 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 49 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 13 tests.
 - `corepack pnpm e2e`: pass, 7/7 Playwright tests with explicit local Origin, redacted Join-URLs and temporary SQLite runtime storage.
 - `corepack pnpm lint`: pass.
@@ -561,7 +561,7 @@ V1.0.9 verification:
 
 V1.0.8 verification:
 
-- `corepack pnpm --filter @netrunner/server test`: pass, 42 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 42 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 13 tests.
 - `corepack pnpm e2e`: pass, 7/7 Playwright tests with temporary SQLite runtime storage.
 - `corepack pnpm lint`: pass.
@@ -573,8 +573,8 @@ V1.0.8 verification:
 V1.0.7 verification:
 
 - `corepack pnpm e2e`: pass, 7/7 Playwright tests.
-- `corepack pnpm --filter @netrunner/web test`: pass, 27 tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 34 tests.
+- `corepack pnpm --filter @netgrid/web test`: pass, 27 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 34 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 13 tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
@@ -607,8 +607,8 @@ Current verification after V1.0.3 implementation:
 
 - Implemented: separated Matchstart play-mode/side/goal choices, server-side Human-vs-KI random side derivation, German Match erstellen/Beitreten labels, local display-name persistence, side-safe Human-vs-Human start readiness lobby, ready flags, countdown 3/5/10 seconds, countdown cancel, reconnect-to-lobby payloads, private lobbychat, and server-side `single_game` deck-target finalization after Joiner deck handshake.
 - Regression constraints: no new Engine rules, cards, official assets, accounts, matchmaking, rankings, Replay changes, StateHash changes, AI-input changes or PublicGameEvent chat payloads.
-- `corepack pnpm --filter @netrunner/web test`: pass, 14 tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 28 tests.
+- `corepack pnpm --filter @netgrid/web test`: pass, 14 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 28 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 11 tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
@@ -620,8 +620,8 @@ Current verification after V1.0.4 implementation:
 
 - Implemented: REST lifecycle commands for Cancel, Leave, Forfeit and Recreate; terminal `cancelled`, `abandoned` and `forfeited` payloads; Human-vs-KI Forfeit stop behavior; Recreate token/link/seed rotation; Recent-Session sanitizing; explicit Fortsetzen/Reconnect/Verwerfen UI; side-safe opponent names.
 - Regression constraints: no new Engine rules, cards, official assets, accounts, matchmaking, rankings, Replay stream expansion, AI hidden-info input expansion or public platform features.
-- `corepack pnpm --filter @netrunner/web test`: pass, 14 tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 34 tests.
+- `corepack pnpm --filter @netgrid/web test`: pass, 14 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 34 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 11 tests.
 - Full final gate commands are recorded in `docs/derived/V1_0_4_FINAL_REVIEW.md`.
 - V1.0.4 gate: `V1_0_4_private_match_lifecycle_done: true`.
@@ -649,7 +649,7 @@ Audit findings:
 
 ## Goal
 
-Active thread goal: Netrunner gated MVP delivery.
+Active thread goal: NETGRID gated MVP delivery.
 
 Gate flow:
 
@@ -770,7 +770,7 @@ Docs:
 - `tests/specs/visibility-contract.test.ts`
 - `docs/codex/CODEX_STATUS.md`
 - `README.md`
-- `KI-Wissen-Netrunner/`
+- `KI-Wissen-NETGRID/`
 
 ## Phase 3 checks
 
@@ -834,7 +834,7 @@ Implementation has started and remains constrained to the private multiplayer sc
 
 ## MVP 0.2 Implementation checks
 
-- `corepack pnpm --filter @netrunner/server test`: pass, 7 Multiplayer tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 7 Multiplayer tests.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
 - `corepack pnpm lint`: pass.
@@ -856,11 +856,11 @@ Phase 3 has validated and hardened MVP 0.2.
 - `apps/server/src/multiplayer.ts`
 - `apps/server/src/multiplayer.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/`
+- `KI-Wissen-NETGRID/`
 
 ## MVP 0.2 Final checks
 
-- `corepack pnpm --filter @netrunner/server test`: pass, 7 Multiplayer tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 7 Multiplayer tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
@@ -878,11 +878,11 @@ Phase 3 has validated and hardened MVP 0.2.
 - `docs/derived/POST_MVP_0.2_ROADMAP.md`
 - `docs/derived/MVP_0.3_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.4_DETAILED_PLAN.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.2.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Projektueberblick.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.2.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Projektueberblick.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 - `docs/codex/CODEX_STATUS.md`
 
 ## Post-MVP 0.2 roadmap decision
@@ -927,8 +927,8 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 
 ## MVP 0.3 Final checks
 
-- `corepack pnpm --filter @netrunner/ai test`: pass, 8 AI tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 11 tests.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 8 AI tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 11 tests.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass, 35 tests.
 - `corepack pnpm lint`: pass.
@@ -975,8 +975,8 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 
 ## MVP 0.4 Final checks
 
-- `corepack pnpm --filter @netrunner/engine test`: pass, 15 Engine tests.
-- `corepack pnpm --filter @netrunner/ai test`: pass, 10 AI tests.
+- `corepack pnpm --filter @netgrid/engine test`: pass, 15 Engine tests.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 10 AI tests.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass, 42 tests.
 - `corepack pnpm lint`: pass.
@@ -1041,7 +1041,7 @@ V0.5 uses only local versioned demo/project data and fiktive local catalog fixtu
 ## MVP 0.5 Implementation checks
 
 - `corepack pnpm install`: pass.
-- `corepack pnpm --filter @netrunner/catalog test`: pass, 5 Catalog tests.
+- `corepack pnpm --filter @netgrid/catalog test`: pass, 5 Catalog tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 12 root spec tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
@@ -1064,7 +1064,7 @@ The implementation preserves the V0.5 safety boundary: catalog data is read-only
 - `README.md`
 - `tests/specs/card-import-0.5-acceptance-tests.todo.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/`
+- `KI-Wissen-NETGRID/`
 
 ## MVP 0.5 Final checks
 
@@ -1133,13 +1133,13 @@ V0.6 starts from V0.5 catalog status and versioned demo decks. The requirements 
 ## MVP 0.6 Implementation checks
 
 - `corepack pnpm install`: pass.
-- `corepack pnpm --filter @netrunner/decks test`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass.
-- `corepack pnpm --filter @netrunner/engine test`: pass.
+- `corepack pnpm --filter @netgrid/decks test`: pass.
+- `corepack pnpm --filter @netgrid/server test`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
@@ -1162,8 +1162,8 @@ V0.6 now supports local deck models, validation v2, deterministic snapshots, ser
 - `tests/specs/deck-editor-0.6-acceptance-tests.todo.md`
 - `README.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.6 Final checks
 
@@ -1200,8 +1200,8 @@ Checks from the original QA pass: `corepack pnpm install --frozen-lockfile`, `co
 - `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.7 Requirements checks
 
@@ -1228,9 +1228,9 @@ V0.7 is frozen as a UI redesign/design phase. Design C is the main structure, De
 
 ## MVP 0.7 Implementation checks
 
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 5 tests.
-- `corepack pnpm --filter @netrunner/web build`: pass.
+- `corepack pnpm --filter @netgrid/web build`: pass.
 - Local Entry UI smoke on `http://127.0.0.1:3007`: pass.
 - Local RunnerBoard smoke through generated private Runner-vs-Corp-KI match: pass.
 - Local CorpBoard smoke through generated private Corp-vs-Runner-KI match: pass.
@@ -1248,8 +1248,8 @@ V0.7 now has a light Design-C-oriented shell, Entry preflight, Card Display sett
 - `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`
 - `README.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.7 Final checks
 
@@ -1332,13 +1332,13 @@ V0.8 is frozen as a small local/fictitious playable starter slice. The slice con
 
 ## MVP 0.8 Implementation checks
 
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test`: pass, 20 tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 12 tests.
-- `corepack pnpm --filter @netrunner/ai test`: pass, 11 tests.
-- `corepack pnpm --filter @netrunner/decks test`: pass, 7 tests.
-- `corepack pnpm --filter @netrunner/catalog test`: pass, 6 tests.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass, 20 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 12 tests.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 11 tests.
+- `corepack pnpm --filter @netgrid/decks test`: pass, 7 tests.
+- `corepack pnpm --filter @netgrid/catalog test`: pass, 6 tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 19 tests.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
@@ -1357,8 +1357,8 @@ V0.8 now provides a playable local/fictitious starter slice with 14 new cards, e
 - `docs/derived/MVP_0.8_IMPLEMENTATION_REVIEW.md`
 - `tests/specs/playable-card-slice-0.8-acceptance-tests.todo.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.8 Final checks
 
@@ -1383,9 +1383,9 @@ Next gate: V0.9 Requirements for stronger AI. V0.9 remains constrained to LegalA
 
 - `docs/derived/MVP_0.8_DETAILED_PLAN.md`
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 - `docs/codex/CODEX_STATUS.md`
 
 V0.8 remains a future gated phase after V0.7. This planning update does not implement cards, engine behavior, UI changes or server behavior. The detailed plan now includes hard entry gates, source/usage decision for base/starter-set scope, candidate scoring, per-card deviation/approximation, resolver registry as a Must artifact, minimal AI role tags for V0.9, playability/balance smokes, Golden Hash review process and performance budgets for core engine/view/AI-smoke paths.
@@ -1394,10 +1394,10 @@ V0.8 remains a future gated phase after V0.7. This planning update does not impl
 
 - `docs/derived/MVP_0.9_DETAILED_PLAN.md`
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 - `docs/codex/CODEX_STATUS.md`
 
 V0.9 remains a future gated phase after V0.8. This planning update does not implement AI behavior, engine behavior, cards, UI changes or server behavior. The scope is stronger AI through visible-information-only heuristics, role metadata, risk scoring, difficulty profiles, bounded lookaheads, better reason codes and multi-seed soak/regression tests.
@@ -1445,11 +1445,11 @@ V0.9 is frozen as a stronger-AI phase on the completed V0.8 starter slice. It ma
 
 ## MVP 0.9 Implementation checks
 
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass, 15 tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 12 tests.
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 15 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 12 tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 20 tests.
 - V0.9 Soak smoke: pass, 27 runs, 0 illegal actions, 0 replay failures, fallback rate 0.02, timeout rate 0.
 
@@ -1465,8 +1465,8 @@ V0.9 now has role-aware Runner and Corp scorers, difficulty profiles, side-safe 
 - `docs/derived/MVP_0.9_IMPLEMENTATION_REVIEW.md`
 - `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.9 Final checks
 
@@ -1486,10 +1486,10 @@ Next recommended scope: later V1.0/stabilization/operations decision. V1.0, V0.1
 
 - `docs/derived/MVP_0.91_DETAILED_PLAN.md`
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 - `docs/codex/CODEX_STATUS.md`
 
 V0.91 remains a future gated phase after V0.9. This planning update does not implement image import, image display, cards, engine behavior, AI behavior, UI changes or server behavior. The scope is a separate card image asset gate: source and usage decision, local non-versioned image cache, deterministic image metadata, display only for known cards, fallback to text or placeholders, and hidden-info tests against image URLs, alt text, DOM metadata and distinguishable loading states.
@@ -1505,10 +1505,10 @@ V0.91 remains a future gated phase after V0.9. This planning update does not imp
 - `data/card-assets/card-image-source-registry-0.91.json`
 - `data/card-assets/card-image-policy-0.91.json`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.91 Requirements gate
 
@@ -1516,7 +1516,7 @@ V0.91 remains a future gated phase after V0.9. This planning update does not imp
 
 `ready_for_implementation: true`
 
-The technical and hidden-info requirements are testable, and every Must requirement has a test trail. Public or general official card image use remains blocked: NetrunnerDB provides technical image metadata, but the reviewed primary sources do not grant explicit public permission for this project to download, cache or display official full card images. For this private local project, the project owner accepts private local use of own scans/local card front images as display-only artifacts. This is not a public license and excludes public distribution, official logos, standalone card frames, card backs, external card database dependencies, and any Engine/AI/GameState/Replay/StateHash use of images.
+The technical and hidden-info requirements are testable, and every Must requirement has a test trail. Public or general official card image use remains blocked: NETGRIDDB provides technical image metadata, but the reviewed primary sources do not grant explicit public permission for this project to download, cache or display official full card images. For this private local project, the project owner accepts private local use of own scans/local card front images as display-only artifacts. This is not a public license and excludes public distribution, official logos, standalone card frames, card backs, external card database dependencies, and any Engine/AI/GameState/Replay/StateHash use of images.
 
 ## MVP 0.92 Requirements and final gate files created or updated
 
@@ -1529,8 +1529,8 @@ The technical and hidden-info requirements are testable, and every Must requirem
 - `docs/derived/MVP_0.92_FINAL_REVIEW.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.92 Final gate
 
@@ -1557,9 +1557,9 @@ V0.92 normalizes the current mechanics inventory after V0.9/S01, adds a versione
 - `apps/server/src/multiplayer.test.ts`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.93 Final gate
 
@@ -1571,13 +1571,13 @@ V0.93 adds additive Shared/Engine contracts for Effects, Abilities, Timing, Choi
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 25 tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 16 tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 14 tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 25 tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 16 tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 14 tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 17 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
 - `corepack pnpm test`: pass.
@@ -1591,9 +1591,9 @@ Checks:
 - `docs/derived/MVP_0.94_DETAILED_PLAN.md`
 - `docs/derived/MVP_0.95_DETAILED_PLAN.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.94/V0.95 Planning decision
 
@@ -1610,9 +1610,9 @@ The assumption review confirms the existing sequence with one sharpening: V0.94 
 - `docs/derived/MVP_0.94_TEST_MATRIX.md`
 - `docs/derived/MVP_0.94_REQUIREMENTS_REVIEW.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.94 Requirements Freeze decision
 
@@ -1644,9 +1644,9 @@ V0.94 is frozen as a narrow Damage/Flatline gate. Net and Meat Damage are in sco
 - `apps/web/app/page.tsx`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.94 Final gate
 
@@ -1658,13 +1658,13 @@ V0.94 implements Net/Meat Damage and Flatline as a narrow, high-safety mechanics
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 32 tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 17 tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 16 tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 32 tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 17 tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 16 tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 18 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
 - `corepack pnpm lint`: pass.
@@ -1680,9 +1680,9 @@ Checks:
 - `docs/derived/MVP_0.95_REQUIREMENTS_REVIEW.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.95 Requirements Freeze decision
 
@@ -1714,9 +1714,9 @@ V0.95 is frozen as a narrow Runner Resource and tag-interaction gate. It adds a 
 - `apps/web/app/page.tsx`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.95 Final gate
 
@@ -1728,14 +1728,14 @@ V0.95 implements Runner Resources and tag-based Resource trash as a narrow publi
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 36 tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 18 tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 17 tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 36 tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 18 tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 17 tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 20 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
 - `corepack pnpm lint`: pass.
@@ -1751,9 +1751,9 @@ Checks:
 - `docs/derived/MVP_0.96_REQUIREMENTS_REVIEW.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.96 Requirements Freeze decision
 
@@ -1784,9 +1784,9 @@ V0.96 is frozen as a narrow Trace/Link/Bidding gate. The CR v26.03 reference che
 - `apps/server/src/multiplayer.test.ts`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.96 Final gate
 
@@ -1798,14 +1798,14 @@ V0.96 implements Trace/Link/Bidding as a narrow public-choice mechanics gate. `v
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 41 tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 19 tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 18 tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 41 tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 19 tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 18 tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 22 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
 - `corepack pnpm lint`: pass.
@@ -1821,9 +1821,9 @@ Checks:
 - `docs/derived/MVP_0.97_REQUIREMENTS_REVIEW.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.97 Requirements Freeze decision
 
@@ -1863,14 +1863,14 @@ V0.97 implements Jack-out, Breach and narrow Multiaccess as a baseline-gated sli
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 46 tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 21 tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 19 tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 46 tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 21 tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 19 tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 24 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
 - `corepack pnpm lint`: pass.
@@ -1887,9 +1887,9 @@ Checks:
 - `docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## MVP 0.98 Requirements Freeze decision
 
@@ -1930,13 +1930,13 @@ V0.98 implements Identity setup/static modifiers and narrow Hidden-Zone-Tools as
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test`: pass, 54 tests.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass, 23 tests.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass, 20 tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass, 54 tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 23 tests.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server test`: pass, 20 tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 26 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
 - `corepack pnpm lint`: pass.
@@ -1981,13 +1981,13 @@ V0.99 implements Counter, direct Hosting, Virus/Purge, Recurring Credits and Bad
 
 Checks before final workspace-wide gates:
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test`: pass, 60 tests.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass, 25 tests.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass, 21 tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass, 60 tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 25 tests.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server test`: pass, 21 tests.
 
 ## V1.0.2 Requirements Freeze files created or updated
 
@@ -1996,9 +1996,9 @@ Checks before final workspace-wide gates:
 - `docs/derived/V1_0_2_TEST_MATRIX.md`
 - `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log 2026-05.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
 
 ## V1.0.2 Requirements Freeze decision
 
@@ -2021,9 +2021,9 @@ V1.0.2 is frozen as a presentation/orchestration release. Implementation may add
 - `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/V1_0_2_FINAL_REVIEW.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log 2026-05.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
 
 ## V1.0.2 Final gate
 
@@ -2037,8 +2037,8 @@ V1.0.2 implements side-safe opponent action cues, local cue queue, board highlig
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/web test -- action-cues.test.ts`: pass.
-- `corepack pnpm --filter @netrunner/server test -- multiplayer.test.ts`: pass.
+- `corepack pnpm --filter @netgrid/web test -- action-cues.test.ts`: pass.
+- `corepack pnpm --filter @netgrid/server test -- multiplayer.test.ts`: pass.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm test`: pass, 182 tests.
@@ -2059,9 +2059,9 @@ Checks:
 - `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`
 - `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log 2026-05.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
 
 ## V1.0.3 Final gate
 
@@ -2071,8 +2071,8 @@ V1.0.3 implements separated Matchstart choices, server-side Human-vs-KI random s
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/web test`: pass, 14 tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 28 tests.
+- `corepack pnpm --filter @netgrid/web test`: pass, 14 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 28 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 11 tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
@@ -2112,7 +2112,7 @@ Implemented scope:
 
 Checks:
 
-- `corepack pnpm --filter @netrunner/server test`: pass, 13 tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 13 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.

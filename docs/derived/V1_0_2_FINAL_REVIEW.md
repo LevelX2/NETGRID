@@ -23,8 +23,8 @@ Die Version macht gegnerische Aktionen und KI-Züge nachvollziehbar, ohne die Ru
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/web test -- action-cues.test.ts`: pass.
-- `corepack pnpm --filter @netrunner/server test -- multiplayer.test.ts`: pass.
+- `corepack pnpm --filter @netgrid/web test -- action-cues.test.ts`: pass.
+- `corepack pnpm --filter @netgrid/server test -- multiplayer.test.ts`: pass.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm test`: pass, 182 Tests.

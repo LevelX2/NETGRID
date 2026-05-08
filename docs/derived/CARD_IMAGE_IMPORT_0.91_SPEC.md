@@ -7,7 +7,7 @@ Stand: 2026-05-03
 
 Diese Spezifikation beschreibt den späteren Bildmetadaten- und Bildcache-Import nach bestandenem Asset-Gate. In diesem V0.91-Freeze wird kein Importcode geschrieben, kein Bild heruntergeladen und keine offizielle Asset-Datei genutzt.
 
-Freigegeben ist nur der spätere private lokale Import von Original-Netrunner-1996-Frontbildern. Bevorzugte Quelle sind eigene Scans aus der physischen Sammlung des Projektverantwortlichen; Community-Archive dürfen nur als private lokale Referenz oder Gap-Fill genutzt werden.
+Freigegeben ist nur der spätere private lokale Import von Original-NETGRID-1996-Frontbildern. Bevorzugte Quelle sind eigene Scans aus der physischen Sammlung des Projektverantwortlichen; Community-Archive dürfen nur als private lokale Referenz oder Gap-Fill genutzt werden.
 
 ## Grundsatz
 
@@ -69,7 +69,7 @@ Solange `image_url_versioning_allowed: false` gilt, enthält ein Manifest nur lo
 
 ## Lokaler Cache
 
-Ein späterer Cache ist für Original-Netrunner-1996-Frontbilder erlaubt, wenn die Policy `local_cache_allowed: true` setzt.
+Ein späterer Cache ist für Original-NETGRID-1996-Frontbilder erlaubt, wenn die Policy `local_cache_allowed: true` setzt.
 
 Pflichtregeln:
 

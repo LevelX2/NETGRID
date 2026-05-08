@@ -25,7 +25,7 @@ Begründung: Der private Human-vs-Human-Multiplayer ist innerhalb des freigegebe
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/server test`: pass, 7 Multiplayer-Tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 7 Multiplayer-Tests.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass nach Aktualisierung des Visibility-Vertrags.
 - `corepack pnpm lint`: pass.
@@ -37,7 +37,7 @@ Begründung: Der private Human-vs-Human-Multiplayer ist innerhalb des freigegebe
 ## Annahmen
 
 - JSON-File-Storage ist für den ersten privaten MVP-0.2-Stand zulässig; SQLite bleibt späteres Härtungsziel.
-- Der lokale Dev-Server läuft standardmäßig auf `127.0.0.1:8787`; die Weboberfläche nutzt `NEXT_PUBLIC_NETRUNNER_SERVER_URL` oder diesen Default.
+- Der lokale Dev-Server läuft standardmäßig auf `127.0.0.1:8787`; die Weboberfläche nutzt `NEXT_PUBLIC_NETGRID_SERVER_URL` oder diesen Default.
 - HTTPS/WSS ist außerhalb von localhost Betriebsanforderung, aber nicht lokale MVP-Pflicht.
 
 ## Risiken Für Phase 3

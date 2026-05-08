@@ -26,8 +26,8 @@ Erstellt:
 Aktualisiert:
 
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 - `tests/specs/phase1-artifacts.test.ts`
 
 ## Wichtige Entscheidungen

@@ -12,7 +12,7 @@ Arbeitsbasis:
 - `docs/derived/RULE_MECHANICS_0.8_SPEC.md`
 - `docs/derived/DEVIATION_REGISTRY.md`
 - `docs/derived/OPEN_QUESTIONS.md`
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 
 ## 1. Kurzentscheidung
 
@@ -503,7 +503,7 @@ Lies:
 - docs/derived/DEVIATION_REGISTRY.md
 - docs/derived/MVP_0.8_FINAL_REVIEW.md
 - docs/derived/MVP_0.9_FINAL_REVIEW.md
-- docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf
+- docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf
 
 Erstelle:
 - docs/derived/MECHANICS_COVERAGE_MATRIX.md

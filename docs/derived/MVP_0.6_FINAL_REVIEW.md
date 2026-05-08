@@ -38,10 +38,10 @@ Der nächste empfohlene Scope ist V0.7 Requirements/Design Freeze. V0.7 wurde in
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
 - `corepack pnpm build`: pass.
-- `corepack pnpm --filter @netrunner/decks test`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass.
-- `corepack pnpm --filter @netrunner/engine test`: pass.
+- `corepack pnpm --filter @netgrid/decks test`: pass.
+- `corepack pnpm --filter @netgrid/server test`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass.
 - Deck API smoke: pass.
 - Deck validation smoke: pass.
 - Matchstart API smoke with V0.6 snapshots: pass.

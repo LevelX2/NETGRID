@@ -1,7 +1,7 @@
 # Realismusprüfung der UI-Designsets
 
 Stand: 2026-05-03
-Scope: privater Netrunner-Client für MVP 0.2, mit Blick auf spätere UI-Politur
+Scope: privater NETGRID-Client für MVP 0.2, mit Blick auf spätere UI-Politur
 
 ## Bewertungsmaßstab
 
@@ -253,7 +253,7 @@ Nötige Anpassungen für 100 % Umsetzbarkeit:
    - Match-/Session-Metadaten ohne Klartexttokens
 
 3. Alle nicht sicheren Bildideen entfernen:
-   - echte oder erkennbare Netrunner-Kartennamen
+   - echte oder erkennbare NETGRID-Kartennamen
    - offizielle Framing-Anmutungen
    - Tokenwerte in Logs
    - Full-GameState-Debug

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Side } from "@netgrid/shared";
 
-const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
+const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
 type ReplayPerspective = Side | "local_analysis";
 type ReplayExportPerspective = Side;

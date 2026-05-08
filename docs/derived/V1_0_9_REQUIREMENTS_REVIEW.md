@@ -108,8 +108,8 @@ Keine neuen Karten, Mechaniken, Accounts, öffentlichen Lobbys, Matchmaking-, Ra
 Lies zuerst:
 - AGENTS.md
 - AGENTS.local.md, falls vorhanden
-- KI-Wissen-Netrunner/00 Projektstart.md
-- KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md
+- KI-Wissen-NETGRID/00 Projektstart.md
+- KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
 - docs/codex/CODEX_STATUS.md
 - docs/derived/V1_0_9_PRIVATE_INTERNET_HARDENING_PLAN.md
 - docs/derived/V1_0_9_REQUIREMENTS.md

@@ -24,9 +24,9 @@ describe("deck file library", () => {
     expect(defaultDeckLibraryPath({ APPDATA: "C:\\Users\\Lui\\AppData\\Roaming" } as unknown as NodeJS.ProcessEnv)).toBe(join("C:\\Users\\Lui\\AppData\\Roaming", "NetGrid", "Decks"));
   });
 
-  it("prefers the NETGRID deck library env name and keeps the legacy fallback", () => {
-    expect(defaultDeckLibraryPath({ NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Netgrid", NETRUNNER_DECK_LIBRARY_PATH: "C:\\Decks\\Legacy" } as unknown as NodeJS.ProcessEnv)).toBe("C:\\Decks\\Netgrid");
-    expect(defaultDeckLibraryPath({ NETRUNNER_DECK_LIBRARY_PATH: "C:\\Decks\\Legacy" } as unknown as NodeJS.ProcessEnv)).toBe("C:\\Decks\\Legacy");
+  it("uses the NETGRID deck library env name when set", () => {
+    expect(defaultDeckLibraryPath({ NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Netgrid" } as unknown as NodeJS.ProcessEnv)).toBe("C:\\Decks\\Netgrid");
+    expect(defaultDeckLibraryPath({ NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Custom" } as unknown as NodeJS.ProcessEnv)).toBe("C:\\Decks\\Custom");
   });
 
   it("writes editable decks as local JSON files and reads them back", async () => {

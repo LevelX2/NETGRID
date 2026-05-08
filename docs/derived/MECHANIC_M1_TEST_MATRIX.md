@@ -26,10 +26,10 @@ Ziel: V0.93-Implementierung
 
 ## Mindestbefehle fuer V0.93
 
-- `corepack pnpm --filter @netrunner/shared typecheck`
-- `corepack pnpm --filter @netrunner/engine test`
-- `corepack pnpm --filter @netrunner/ai test`
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/shared typecheck`
+- `corepack pnpm --filter @netgrid/engine test`
+- `corepack pnpm --filter @netgrid/ai test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

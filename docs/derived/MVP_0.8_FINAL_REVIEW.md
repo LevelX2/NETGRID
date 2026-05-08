@@ -25,11 +25,11 @@ V0.8 Requirements, Implementierung, Validierung, Hardening und Dokumentation sin
 
 ## Finale Checks
 
-- `corepack pnpm --filter @netrunner/engine test`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass.
-- `corepack pnpm --filter @netrunner/decks test`: pass.
-- `corepack pnpm --filter @netrunner/catalog test`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass.
+- `corepack pnpm --filter @netgrid/server test`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass.
+- `corepack pnpm --filter @netgrid/decks test`: pass.
+- `corepack pnpm --filter @netgrid/catalog test`: pass.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.

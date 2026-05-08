@@ -41,10 +41,10 @@ Postgres ist kein Fallback für V1.0.8.
 
 | Zweck | Default |
 | --- | --- |
-| SQLite-Datenbank | `data/runtime/multiplayer/netrunner.sqlite` |
+| SQLite-Datenbank | `data/runtime/multiplayer/netgrid.sqlite` |
 | Legacy-JSON | `data/runtime/multiplayer/matches.json` |
 | Backups | `data/runtime/backups/` |
-| E2E-SQLite | `tmp/e2e-runtime-*/netrunner.sqlite` |
+| E2E-SQLite | `tmp/e2e-runtime-*/netgrid.sqlite` |
 
 Runtime-Dateien, SQLite-WAL/SHM-Dateien, Backups und temporäre E2E-Daten bleiben nicht versioniert.
 
@@ -61,7 +61,7 @@ Mindesttabelle:
 Pflichtwerte:
 
 - `schema_version = 1`
-- `storage_format = netrunner_multiplayer_sqlite`
+- `storage_format = netgrid_multiplayer_sqlite`
 - `created_at`
 - `last_migration_at`
 - `last_legacy_import_at`, falls importiert
@@ -121,12 +121,12 @@ Vor Persistenz und nach Laden müssen mindestens diese Strukturregeln prüfbar s
 
 Importquelle:
 
-- explizit `NETRUNNER_LEGACY_MATCH_STORAGE_PATH`, falls gesetzt,
+- explizit `NETGRID_LEGACY_MATCH_STORAGE_PATH`, falls gesetzt,
 - sonst `data/runtime/multiplayer/matches.json`.
 
 Import wird nur automatisch versucht, wenn:
 
-- `NETRUNNER_STORAGE_KIND=sqlite` aktiv ist oder fehlt,
+- `NETGRID_STORAGE_KIND=sqlite` aktiv ist oder fehlt,
 - die SQLite-Datenbank neu oder leer ist,
 - keine erfolgreiche Legacy-Importmarke existiert,
 - die Legacy-Datei existiert.
@@ -194,10 +194,10 @@ Erlaubt in Diagnose:
 
 Der V1.0.7-Harness wird für V1.0.8 angepasst:
 
-- `scripts/run-e2e.mjs` setzt `NETRUNNER_STORAGE_KIND=sqlite`.
-- `NETRUNNER_SQLITE_STORAGE_PATH` zeigt auf `tmp/e2e-runtime-*/netrunner.sqlite`.
-- `NETRUNNER_E2E_RUNTIME_PATH` zeigt auf denselben SQLite-Pfad.
-- Der Runtime-Isolationstest prüft die temporäre SQLite-Datei und stellt sicher, dass weder `data/runtime/multiplayer/netrunner.sqlite` noch `data/runtime/multiplayer/matches.json` beschrieben werden.
+- `scripts/run-e2e.mjs` setzt `NETGRID_STORAGE_KIND=sqlite`.
+- `NETGRID_SQLITE_STORAGE_PATH` zeigt auf `tmp/e2e-runtime-*/netgrid.sqlite`.
+- `NETGRID_E2E_RUNTIME_PATH` zeigt auf denselben SQLite-Pfad.
+- Der Runtime-Isolationstest prüft die temporäre SQLite-Datei und stellt sicher, dass weder `data/runtime/multiplayer/netgrid.sqlite` noch `data/runtime/multiplayer/matches.json` beschrieben werden.
 
 ## Dokumentation nach Umsetzung
 

@@ -52,7 +52,7 @@ V1.0.9 muss keinen konkreten Proxy implementieren. Die Doku soll aber einen Ziel
 Internet
   -> HTTPS Reverse Proxy
        /          -> Next.js Web
-       /api, /ws  -> Netrunner Server
+       /api, /ws  -> NETGRID Server
 ```
 
 oder:
@@ -130,11 +130,11 @@ V1.0.9 soll eine kurze Checkliste liefern oder im Final Review ausfüllen:
 2. Dependencies installiert.
 3. SQLite-Storage-Pfad liegt in privatem Runtime-Ordner.
 4. Backup-Pfad existiert und Backup funktioniert.
-5. `NETRUNNER_DEPLOYMENT_PROFILE=private_internet`.
-6. `NETRUNNER_TOKEN_SALT` explizit gesetzt.
-7. `NETRUNNER_WEB_BASE_URL=https://...`.
-8. `NETRUNNER_SERVER_BASE_URL=https://...`.
-9. `NETRUNNER_ALLOWED_ORIGINS` enthält die Web-Origin.
+5. `NETGRID_DEPLOYMENT_PROFILE=private_internet`.
+6. `NETGRID_TOKEN_SALT` explizit gesetzt.
+7. `NETGRID_WEB_BASE_URL=https://...`.
+8. `NETGRID_SERVER_BASE_URL=https://...`.
+9. `NETGRID_ALLOWED_ORIGINS` enthält die Web-Origin.
 10. Reverse Proxy terminiert TLS und leitet WebSocket-Upgrade weiter.
 11. `/health` ist erreichbar und redaktioniert.
 12. Host erstellt Human-vs-Human-Lobby.

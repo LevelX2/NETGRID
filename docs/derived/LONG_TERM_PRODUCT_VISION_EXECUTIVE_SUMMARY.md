@@ -12,7 +12,7 @@ Nachtrag 2026-05-08: Die langfristige Produktvision und die Post-V1.1.2-Anschlus
 
 ## Ideales Endprodukt
 
-Das ideale Produkt ist eine regelgeführte Netrunner-Plattform mit vollständiger Rules Engine, vollständigem rechtlich sauberem Karten-/Formatdatenpfad, privatem und später optional öffentlichem Internet-Multiplayer, Deckbuilder, Replays, Tutorials, Regelhilfe, KI-Gegnern, Accessibility, Betriebssicherheit, Moderation und langfristiger Wartbarkeit.
+Das ideale Produkt ist eine regelgeführte NETGRID-Plattform mit vollständiger Rules Engine, vollständigem rechtlich sauberem Karten-/Formatdatenpfad, privatem und später optional öffentlichem Internet-Multiplayer, Deckbuilder, Replays, Tutorials, Regelhilfe, KI-Gegnern, Accessibility, Betriebssicherheit, Moderation und langfristiger Wartbarkeit.
 
 Nicht verhandelbar bleiben:
 

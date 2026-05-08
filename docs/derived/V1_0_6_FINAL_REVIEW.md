@@ -17,7 +17,7 @@ Die formalen V1.0.5-Finalartefakte fehlen weiterhin. V1.0.6 wurde dennoch ausgef
 
 | Check | Ergebnis |
 | --- | --- |
-| `corepack pnpm --filter @netrunner/web test` | pass, 4 Dateien, 23 Tests |
+| `corepack pnpm --filter @netgrid/web test` | pass, 4 Dateien, 23 Tests |
 | `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts` | pass, 1 Datei, 13 Tests |
 | `corepack pnpm lint` | pass |
 | `corepack pnpm typecheck` | pass |

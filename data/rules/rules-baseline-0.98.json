@@ -76,7 +76,7 @@
   },
   "notes": [
     "V0.98 is split internally into V0.98a Identity/Modifier and V0.98b Hidden-Zone-Tools.",
-    "All V0.98 cards are local fictional harness cards and do not use official Netrunner card text, art, frames, logos or external databases.",
+    "All V0.98 cards are local fictional harness cards and do not use official NETGRID card text, art, frames, logos or external databases.",
     "Search and Arrange expose private options only through side-owned PendingChoice data; public events are redacted hidden-info barriers."
   ]
 }

@@ -163,7 +163,7 @@ Technische Umsetzungsentscheidungen:
 ```text
 Setze V1.2.2 Special Zones, Ownership und Control um und bereite danach V1.2.3 sowie V1.3.0 entlang des Handoffs vor.
 
-Repository: C:\Projekte\Netrunner
+Repository: C:\Projekte\NETGRID
 
 Arbeite wiki-first und gemaess AGENTS.md. Lies zuerst:
 - AGENTS.md

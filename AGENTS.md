@@ -4,13 +4,13 @@ Bitte den Benutzer im Chat mit `Du` oder `Meister` ansprechen.
 
 ## Projekt
 
-Private NETGRID-Webapplikation für regelgeführtes Netrunner-Spiel. MVP 0.1 ist Human Runner gegen einfache Corp-KI mit festen Demo-Decks. MVP 0.2 ist privates Human-vs-Human-Multiplayer über dieselbe Engine.
+Private NETGRID-Webapplikation für regelgeführtes NETGRID-Spiel. MVP 0.1 ist Human Runner gegen einfache Corp-KI mit festen Demo-Decks. MVP 0.2 ist privates Human-vs-Human-Multiplayer über dieselbe Engine.
 
 ## Projektbezogene Wissensbasis
 
 Für dieses Projekt existiert eine projektbezogene KI-Wissensbasis im Ordner:
 
-`KI-Wissen-Netrunner/`
+`KI-Wissen-NETGRID/`
 
 Falls lokal vorhanden, zusätzlich `AGENTS.local.md` lesen. Diese Datei enthält private systemlokale Pfade und ist nicht Teil des versionierten Projektwissens.
 
@@ -20,23 +20,23 @@ Bei neuen Threads, neuen Aufgaben und Projektfragen ist diese Wissensbasis prim�
 
 Zu Beginn projektbezogener Arbeit zuerst diese Dateien lesen:
 
-1. `KI-Wissen-Netrunner/00 Projektstart.md`
-2. `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-3. `KI-Wissen-Netrunner/02 Wissen/Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen.md`
-4. `KI-Wissen-Netrunner/00 Steuerung/Regeldatei KI-Wissenspflege.md`
+1. `KI-Wissen-NETGRID/00 Projektstart.md`
+2. `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+3. `KI-Wissen-NETGRID/02 Wissen/Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen.md`
+4. `KI-Wissen-NETGRID/00 Steuerung/Regeldatei KI-Wissenspflege.md`
 5. `docs/codex/CODEX_STATUS.md`
-6. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`
+6. `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
 
 Für Anschlussplanung ab V1.1.3 ist zusätzlich `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` verbindlich, sobald `docs/codex/CODEX_STATUS.md` auf diesen Stand verweist. Die ältere Post-V1.1.2-Roadmap bleibt als historische Grundlage erhalten.
 
 ## Quellenpriorität
 
-1. `docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md` für MVP 0.1.
-2. `docs/source/Netrunner_MVP_0.2_Plan.md` für MVP 0.2 nach bestandenem MVP-0.1-Gate.
+1. `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md` für MVP 0.1.
+2. `docs/source/NETGRID_MVP_0.2_Plan.md` für MVP 0.2 nach bestandenem MVP-0.1-Gate.
 3. `docs/source/Erstes Testdeck.txt` für Demo-Karten und Demo-Decks.
-4. `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf` als Regelreferenz, nicht als Scope-Erweiterung.
-5. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md` für Codex-Workflow.
-6. Ergänzende Spezifikations-, Test-, Betriebs- und Planungsdokumente unter `docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/` und `docs/Netrunner_Detailliertes_Testkonzept_MVP_0_1_0_2.md`.
+4. `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` als Regelreferenz, nicht als Scope-Erweiterung.
+5. `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md` für Codex-Workflow.
+6. Ergänzende Spezifikations-, Test-, Betriebs- und Planungsdokumente unter `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/` und `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`.
 
 Aktuelle Releaseplanung hat Vorrang vor älteren Langfristskizzen: `docs/codex/CODEX_STATUS.md` nennt jeweils den aktuellen Gate-Stand und die gültigen Planungsartefakte. Für die Anschlussplanung ab V1.1.3 gilt `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`. Sie hält die Post-V1.1.2-Grundlinie aufrecht, integriert die ältere V2/V3/V4-Produktvision und ersetzt die Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur.
 

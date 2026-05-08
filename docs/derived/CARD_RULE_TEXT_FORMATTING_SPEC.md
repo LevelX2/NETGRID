@@ -109,7 +109,7 @@ Import und Normalisierung verwenden semantische Tokens. Die UI entscheidet, ob d
 | `bad_publicity` | Bad Publicity | `Bad Publicity` |
 | `virus_counter` | Virus-Counter | `Virus-Counter` |
 
-Offizielle Netrunner-Symbole, offizielle Card Frames, offizielle Card Backs, Logos oder externe Asset-Abhängigkeiten bleiben ausgeschlossen, solange kein späteres Asset-Gate das ausdrücklich ändert. Generische Icons und CSS-Formen sind erlaubt.
+Offizielle NETGRID-Symbole, offizielle Card Frames, offizielle Card Backs, Logos oder externe Asset-Abhängigkeiten bleiben ausgeschlossen, solange kein späteres Asset-Gate das ausdrücklich ändert. Generische Icons und CSS-Formen sind erlaubt.
 
 ## Rendering-Regeln
 
@@ -195,7 +195,7 @@ Beispiele:
 Erhalte [4 Credit-Symbol].
 ```
 
-Das Credit-Symbol ist ein projektspezifisches generisches UI-Symbol. Es darf kein offizielles Netrunner-Symbol, kein offizielles Asset und kein Teil eines offiziellen Card Frames sein.
+Das Credit-Symbol ist ein projektspezifisches generisches UI-Symbol. Es darf kein offizielles NETGRID-Symbol, kein offizielles Asset und kein Teil eines offiziellen Card Frames sein.
 
 ### Zeilenumbrüche
 

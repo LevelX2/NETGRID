@@ -24,10 +24,10 @@ Stand: 2026-05-04
 
 ## Pflichtchecks
 
-- `corepack pnpm --filter @netrunner/shared typecheck`
-- `corepack pnpm --filter @netrunner/engine typecheck`
-- `corepack pnpm --filter @netrunner/server typecheck`
-- `corepack pnpm --filter @netrunner/ai typecheck`
+- `corepack pnpm --filter @netgrid/shared typecheck`
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/server typecheck`
+- `corepack pnpm --filter @netgrid/ai typecheck`
 - Engine-Tests für Resource-Install, Resource-Trash, IllegalActions, Visibility und Replay/StateHash
 - Server-Multiplayer-Smokes für Submit, Idempotency, Reconnect und Undo-Barrieren
 - AI-Smokes für LegalActions-only Resource-/Tag-Situationen

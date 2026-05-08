@@ -18,7 +18,7 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("window.localStorage.setItem(SESSION_KEY");
     expect(page).not.toContain("window.localStorage.getItem(SESSION_KEY");
     expect(recovery).toContain("netgrid.recovery.v1");
-    expect(recovery).toContain("netrunner.recovery.v1");
+    expect(recovery).toContain("netgrid.recovery.v1");
     expect(recovery).not.toContain("window.localStorage.setItem(SESSION_STORAGE_KEY");
     expect(recovery).not.toContain("window.localStorage.getItem(SESSION_STORAGE_KEY");
   });
@@ -90,11 +90,11 @@ describe("Client visibility contract", () => {
     expect(page).toContain("serverDisplayLabel");
     expect(readFileSync("apps/web/app/action-board-ui.ts", "utf8")).toContain('if (serverIdOrLabel === "hq" || serverIdOrLabel === "HQ") return "HQ"');
     expect(page).toContain("netgrid.displayName");
-    expect(page).toContain("netrunner.displayName");
+    expect(page).toContain("netgrid.displayName");
     expect(recovery).toContain("netgrid.recentSessions");
-    expect(recovery).toContain("netrunner.recentSessions");
+    expect(recovery).toContain("netgrid.recentSessions");
     expect(recovery).toContain("netgrid.recovery.v1");
-    expect(recovery).toContain("netrunner.recovery.v1");
+    expect(recovery).toContain("netgrid.recovery.v1");
     expect(page).toContain("Letzte Sitzung");
     expect(page).toContain("Fortsetzen");
     expect(page).toContain("Wieder verbinden über Link");
@@ -202,7 +202,7 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain("Dein Fenster");
     expect(page).not.toContain('<p className="eyebrow">Access</p>');
     expect(helpers).toContain("netgrid.actionCuePosition.v1");
-    expect(helpers).toContain("netrunner.actionCuePosition.v1");
+    expect(helpers).toContain("netgrid.actionCuePosition.v1");
     expect(helpers).toContain("Ausgewählte Karte");
     expect(helpers).toContain("Ausgewähltes Objekt");
     expect(helpers).toContain("splitLegalActions");

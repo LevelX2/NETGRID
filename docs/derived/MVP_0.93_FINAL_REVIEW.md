@@ -33,19 +33,19 @@ Aktualisiert:
 - `apps/server/src/multiplayer.test.ts`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log.md`
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 25 Tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 16 Tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 14 Tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 25 Tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 16 Tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 14 Tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 17 Tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 Tests.
 - `corepack pnpm test`: pass.

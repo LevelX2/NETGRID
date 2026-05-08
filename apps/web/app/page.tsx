@@ -133,17 +133,17 @@ import {
   type SessionInfo
 } from "./session-recovery";
 
-const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
+const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
 const DECK_STORAGE_KEY = "netgrid-v0-6-local-decks";
-const LEGACY_DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
+const LEGACY_DECK_STORAGE_KEY = "netgrid-v0-6-local-decks";
 const AUDIO_STORAGE_KEY = "netgrid-s01-audio";
-const LEGACY_AUDIO_STORAGE_KEY = "netrunner-s01-audio";
+const LEGACY_AUDIO_STORAGE_KEY = "netgrid-s01-audio";
 const ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
-const LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY = "netrunner.actionCueSettings.v1";
+const LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
-const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netrunner.displayName";
+const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Route;
@@ -587,7 +587,7 @@ const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Ar
 
 const DECK_SOURCE_FILTERS: Array<{ key: CatalogSetFilterKey; label: string }> = [
   { key: "all", label: "Alle Sets" },
-  { key: "original", label: "Original Netrunner" },
+  { key: "original", label: "Original NETGRID" },
   { key: "test", label: "Testkarten" },
   { key: "other", label: "Andere Sets" }
 ];

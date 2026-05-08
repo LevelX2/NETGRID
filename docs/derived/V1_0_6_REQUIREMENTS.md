@@ -56,7 +56,7 @@ V1.0.6 umfasst:
 | Technischer Begriff | Sichtbares V1.0.6-Label | Regel |
 | --- | --- | --- |
 | `clicks` | Aktionen | Normale aktive UI. Technische IDs bleiben unverändert. |
-| `credits` | Credits | Darf als Netrunner-Begriff stehen, bekommt aber eine generische Münz-/Credit-Optik. |
+| `credits` | Credits | Darf als NETGRID-Begriff stehen, bekommt aber eine generische Münz-/Credit-Optik. |
 | `Card Display` | Kartenanzeige | Sichtbare UI deutsch. |
 | `Preview` | Vorschau | Rechte Detailspalte. |
 | `placeholder` | Bild | Bildmodus oder bildbereiter Modus. |
@@ -92,7 +92,7 @@ V1.0.6 umfasst:
 - Aktionsslots werden aus `view.own.clicks`, `view.opponent.clicks`, `view.activeSide`, Side-Basiswerten und lokaler Turnbeobachtung abgeleitet.
 - Die lokale Slotkapazität darf in React-State oder local UI state liegen, aber nicht persistiert oder an Server/Engine gesendet werden.
 - Falls die Implementierung ausnahmsweise ein neues side-sicheres Displayfeld braucht, muss vor Code-Änderung ein Requirements-Amendment erfolgen.
-- Credit-Icons sind generische UI-Grafik oder CSS; keine offiziellen Netrunner-Symbole.
+- Credit-Icons sind generische UI-Grafik oder CSS; keine offiziellen NETGRID-Symbole.
 - Card-Display-Modi dürfen keine verdeckten Titel, Definition-IDs, Bild-URLs oder kartenspezifischen CSS-Klassen für verdeckte Karten erzeugen.
 
 ## Betroffene Codebereiche
@@ -110,7 +110,7 @@ V1.0.6 umfasst:
 
 ## Pflichtchecks
 
-- `corepack pnpm --filter @netrunner/web test`
+- `corepack pnpm --filter @netgrid/web test`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

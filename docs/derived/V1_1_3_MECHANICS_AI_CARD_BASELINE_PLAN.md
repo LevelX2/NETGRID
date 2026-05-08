@@ -41,7 +41,7 @@ V1.1.3 implementiert keinen Engine-, Server-, Web-, KI- oder Test-Code und gibt 
 - Keine öffentlichen Plattformfunktionen, Accounts, Matchmaking, Rankings oder Turnierfunktionen.
 - Keine offiziellen Assets, Card Frames, Logos, Card Backs oder externen Kartendatenbank-Abhängigkeiten.
 - Keine automatische Interpretation von Kartentext.
-- Keine Umbenennungsarbeit von Netrunner zu NETGRID außerhalb der vorhandenen Pfade und Begriffe.
+- Keine Umbenennungsarbeit von NETGRID zu NETGRID außerhalb der vorhandenen Pfade und Begriffe.
 
 ## Leitentscheidung
 

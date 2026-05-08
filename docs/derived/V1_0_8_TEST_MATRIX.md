@@ -66,11 +66,11 @@ Status: Requirements-Freeze-Testmatrix
 - Lifecycle/Reconnect.
 - Tablet- und schmaler Viewport.
 - Hidden-Info-Installation ohne Runner-Leak.
-- Runtime-Isolation gegen `data/runtime/multiplayer/netrunner.sqlite` und `data/runtime/multiplayer/matches.json`.
+- Runtime-Isolation gegen `data/runtime/multiplayer/netgrid.sqlite` und `data/runtime/multiplayer/matches.json`.
 
 ## Pflicht-Projektchecks für Umsetzung
 
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm e2e`
 - `corepack pnpm lint`

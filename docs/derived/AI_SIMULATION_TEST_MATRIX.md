@@ -37,8 +37,8 @@ Stand: 2026-05-03
 
 ## Gates
 
-- `corepack pnpm --filter @netrunner/ai test`
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/ai test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`
 - `corepack pnpm test`

@@ -206,7 +206,7 @@
     {
       "mechanicId": "mechanic.setup.mulligan",
       "label": "Mulligan",
-      "sourceRefs": ["docs/derived/DEVIATION_REGISTRY.md", "docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf"],
+      "sourceRefs": ["docs/derived/DEVIATION_REGISTRY.md", "docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf"],
       "currentStatus": "open",
       "currentScopeNote": "Nicht spielbar; spaeter als deterministischer Choice-Schritt.",
       "priority": "P1",

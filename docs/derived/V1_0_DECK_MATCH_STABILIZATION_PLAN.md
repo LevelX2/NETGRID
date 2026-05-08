@@ -37,7 +37,7 @@ Aktuelle Grenzen:
 
 - Lokale Decks sind browserlokal und nicht synchronisiert.
 - Der Editor arbeitet mit einem festen Identity-Feld; Identity-Auswahl ist kein eigener Workflow.
-- Import im Web ist praktisch, aber noch nicht so streng über das zentrale `@netrunner/decks`-Importmodell geführt wie das Paket selbst.
+- Import im Web ist praktisch, aber noch nicht so streng über das zentrale `@netgrid/decks`-Importmodell geführt wie das Paket selbst.
 - Vollständige offizielle Deckbuilding-Regeln, Einfluss, Rotation, Banlist und Turnierlegalität sind nicht umgesetzt.
 
 ### Angebotene Karten
@@ -139,7 +139,7 @@ Must:
 
 Should:
 
-- Web-Deckimport über das zentrale `@netrunner/decks`-Importmodell führen.
+- Web-Deckimport über das zentrale `@netgrid/decks`-Importmodell führen.
 - Browser-Smoke für Deck erstellen, validieren, im Matchstart verwenden und Match starten ergänzen.
 - UI-Texte im Startbereich so trennen, dass Einzelspiel, Regelmatch und private Serie verständlich unterscheidbar sind.
 - O:NR-Overlay als privaten lokalen Test-Scope durch Manifest-, Smoke- und Final-Review-Abdeckung härten.

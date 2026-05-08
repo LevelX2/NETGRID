@@ -1,6 +1,6 @@
 # Logo-Exploration
 
-Explorative Logo-Entwürfe für das private Netrunner-Tool. Diese Dateien sind Bildkonzepte, noch keine finalen SVG-/Icon-Assets.
+Explorative Logo-Entwürfe für das private NETGRID-Tool. Diese Dateien sind Bildkonzepte, noch keine finalen SVG-/Icon-Assets.
 
 Aktuelle Auswahl: [Vorläufige Branding-Entscheidung: NETGRID](BRANDING_DECISION.md).
 

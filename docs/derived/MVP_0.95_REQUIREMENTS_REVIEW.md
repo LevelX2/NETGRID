@@ -21,7 +21,7 @@ Die V0.95-Requirements sind ausreichend eng, testbar und an die bestehende Mecha
 - `docs/derived/MVP_0.95_TEST_MATRIX.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `data/rules/mechanics-coverage-0.94.json`
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 
 ## Befund
 

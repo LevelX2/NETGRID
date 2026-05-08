@@ -31,7 +31,7 @@ Status: Requirements-Freeze-Testmatrix
 
 ## Pflichtchecks für Implementierung
 
-- `corepack pnpm --filter @netrunner/web test`
+- `corepack pnpm --filter @netgrid/web test`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

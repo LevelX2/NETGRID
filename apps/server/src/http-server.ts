@@ -755,17 +755,17 @@ function defaultService(deploymentConfig: DeploymentConfig): MultiplayerService 
 
 export function createConfiguredStorage() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-  const storageKind = storageKindFromEnv(envValue(process.env, "NETGRID_STORAGE_KIND", "NETRUNNER_STORAGE_KIND"));
+  const storageKind = storageKindFromEnv(envValue(process.env, "NETGRID_STORAGE_KIND"));
   if (storageKind === "memory") return new InMemoryMatchStorage();
   if (storageKind === "json") {
-    const configuredPath = envValue(process.env, "NETGRID_MATCH_STORAGE_PATH", "NETRUNNER_MATCH_STORAGE_PATH");
+    const configuredPath = envValue(process.env, "NETGRID_MATCH_STORAGE_PATH");
     const storagePath = configuredPath ? resolve(configuredPath) : resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
     return new JsonFileMatchStorage(storagePath);
   }
-  const configuredSqlitePath = envValue(process.env, "NETGRID_SQLITE_STORAGE_PATH", "NETRUNNER_SQLITE_STORAGE_PATH");
+  const configuredSqlitePath = envValue(process.env, "NETGRID_SQLITE_STORAGE_PATH");
   const sqlitePath = configuredSqlitePath ? resolve(configuredSqlitePath) : resolve(root, DEFAULT_SQLITE_STORAGE_PATH);
-  const legacyJsonPath = envValue(process.env, "NETGRID_LEGACY_MATCH_STORAGE_PATH", "NETRUNNER_LEGACY_MATCH_STORAGE_PATH") ?? resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
-  const backupDir = envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR", "NETRUNNER_STORAGE_BACKUP_DIR") ?? resolve(root, DEFAULT_STORAGE_BACKUP_DIR);
+  const legacyJsonPath = envValue(process.env, "NETGRID_LEGACY_MATCH_STORAGE_PATH") ?? resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
+  const backupDir = envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR") ?? resolve(root, DEFAULT_STORAGE_BACKUP_DIR);
   try {
     return new SqliteMatchStorage({
       dbPath: sqlitePath,

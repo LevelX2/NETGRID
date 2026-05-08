@@ -53,14 +53,14 @@ Nicht umgesetzt oder freigeschaltet:
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test`: pass, 60 Tests.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass, 25 Tests.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass, 21 Tests.
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass, 60 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 25 Tests.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server test`: pass, 21 Tests.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 37 Tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.

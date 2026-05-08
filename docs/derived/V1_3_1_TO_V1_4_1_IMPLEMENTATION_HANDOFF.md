@@ -156,7 +156,7 @@ Priorität:
 ```text
 Setze V1.3.1 Card Data Pipeline v2 um und bereite danach V1.4.0 sowie V1.4.1 entlang des Handoffs vor.
 
-Repository: C:\Projekte\Netrunner
+Repository: C:\Projekte\NETGRID
 
 Arbeite wiki-first und gemäß AGENTS.md. Lies zuerst:
 - AGENTS.md
