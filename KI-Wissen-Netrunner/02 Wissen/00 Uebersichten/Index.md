@@ -10,6 +10,7 @@
 - [[Roadmap nach MVP 0.4]]: produktnähere Folge-Roadmap mit Kartenimport, Deckeditor, UI-Schnitt in V0.7, Basisset-Spielbarkeit, besserer KI und V0.91-Kartenbild-Asset-Gate.
 - Konsolidierte Release-Roadmap ab V1.1.3: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` führt die aktive Post-V1.1.2-Mechanik-/Karten-/KI-Linie mit der älteren V2/V3/V4-Produktvision zusammen.
 - Planungs- und Umsetzungshandoff V1.1.3 bis V1.2.1: `docs/derived/V1_1_3_TO_V1_2_1_IMPLEMENTATION_HANDOFF.md` bündelt Mechanics-AI-Card Baseline, Event Modification Foundation und Replacement Effects.
+- Formaler Abschluss V1.1.3: `docs/derived/V1_1_3_FINAL_REVIEW.md` bestätigt V1.1.3 als abgeschlossenes Planungs-/Normalisierungsrelease ohne Codeimplementierung.
 - S01: Sonderphase für Spielende, Ergebnisfenster, Spielziel, private Matchserie und Audio; Repository-Artefakte unter `docs/derived/S01_*.md`.
 - [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]: Workflow für wiki-first Arbeit und Rückführung von Erkenntnissen.
 
@@ -49,7 +50,7 @@
 - `docs/derived/MVP_0.91_REQUIREMENTS.md`: eingefrorene V0.91-Anforderungen; private lokale Scan-/Asset-Nutzung ist nur als Anzeige-Artefakt erlaubt.
 - `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`: Quellen-, Nutzungs- und Asset-Policy-Grenzen für Kartenbilder.
 - `docs/derived/MVP_0.92_REQUIREMENTS.md`: eingefrorene V0.92-Anforderungen für Mechanik-Inventar und M1-Gate.
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`: normalisierte Mechanik-Coverage nach V1.1.3/V1.1.2K; maschinenlesbarer letzter JSON-Stand bleibt vorerst V0.99.
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`: normalisierte Mechanik-Coverage nach V1.1.3/V1.1.2K, aktualisiert nach V1.2.0/V1.2.1; aktueller maschinenlesbarer JSON-Stand ist `data/rules/mechanics-coverage-1.2.1.json`.
 - `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`: Spezifikation für V0.93 Effects, Abilities, Timing, Choices und Eventklassifikation.
 - `docs/derived/MVP_0.93_REQUIREMENTS.md`: umgesetzte V0.93-Anforderungen für das M1-Engine-Fundament und M2 als Requirements-only Scope.
 - `docs/derived/SETUP_GAME_END_0.93_SPEC.md`: M2-Spezifikation für Setup, Mulligan, Siegwerte, Deckout/Flatline-Vorbereitung, Identity Setup und Archives/facedown.

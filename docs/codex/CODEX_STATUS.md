@@ -8,7 +8,7 @@ NETGRID ist seit 2026-05-08 der aktive App-/Projektname für Anwendung, technisc
 
 V1.1.2K kleines Kartenrelease nach V1.1.2 ist umgesetzt und lokal verifiziert. Es aktiviert genau 20 weitere lokal geprüfte O:NR-v1-Karten: Black Dahlia, Codecracker, Cyfermaster™, Loony Goon, Shaka, Wizard's Book, Laser Wire, Nerve Labyrinth, π in the 'Face, Quandary, Razor Wire, Reinforced Wall, Rock Is Strong, Scramble, Shotgun Wire, Sleeper, Wall of Ice, Wall of Static, Netwatch Credit Voucher und Night Shift. V1.0.5K und V1.0.6K bleiben aktiv; der private lokale Runtime-Katalog gibt damit 52 O:NR-v1-Karten `playable` und `deck_legal`. Keine weiteren Karten, keine neuen Mechanikfamilien, keine Prevention/Avoid/Replacement-Pfade, keine generischen Asset-/Node-/Upgrade-Fähigkeiten und keine offiziellen Assets wurden eingeführt.
 
-V1.1.3 bis V1.2.1 Planungsgrundlage ist am 2026-05-08 abgeschlossen. V1.1.3 normalisiert Mechanik-Coverage, Kartenstatus und KI-Level ohne Codeimplementierung; die 52 O:NR-v1-Runtime-Karten bleiben `human_playable`/`deck_legal`, werden aber nicht automatisch `ai_supported`. V1.2.0 ist requirements-gefroren als Event Modification Foundation mit `would`/`prevent`/`avoid`/engem `interrupt`, bevorzugtem Damage-Prevention-Pilot und ausdrücklich ohne Replacement Effects. V1.2.1 ist requirements-gefroren als getrenntes Replacement-Gate mit Originalevent, Replacementevent, einmal-pro-Fenster-Regeln, deterministischer Kandidatenordnung und sichtbaren Konfliktblockern. Beide V1.2.x-Releases geben keine neuen Karten und keine KI-Decks frei.
+V1.1.3 Mechanics-AI-Card Baseline ist am 2026-05-08 formal abgeschlossen. Der Release war ein Planungs- und Normalisierungsrelease ohne Engine-, Server-, Web-, KI- oder Test-Codeimplementierung; `ready_for_implementation: false` und `ready_for_next_release_implementation: true`. V1.1.3 normalisiert Mechanik-Coverage, Kartenstatus und KI-Level; die 52 O:NR-v1-Runtime-Karten bleiben `human_playable`/`deck_legal`, werden aber nicht automatisch `ai_supported`. Das 52-Karten-Mapping ist derzeit dokumentarisch, ein zusätzliches maschinenlesbares Kartenstatus-Artefakt existiert nicht.
 
 V1.1.2 Full Archives Access und Matchstart Entry UX ist umgesetzt und lokal verifiziert. Der Release ergänzt vollständigen Runner-Access auf gemischte faceup/facedown Korp-Archives über die bestehende Breach-/Access-Pipeline, Archives-spezifische Hidden-Info-Klassifikation, side-sichere PlayerViews/Reconnect-Payloads, Reveal nur beim tatsächlichen Access, deterministischen Queue-Fortschritt, Trash aus Archives ohne doppelte Archives-Einträge, Replay-/StateHash-Abdeckung, Multiplayer-/Undo-/Idempotency-Tests und eine klarere NETGRID-Startkonsole mit Spielart-/Format-Kacheln, Join-Link-Beitritt, eingeklappten Sonderoptionen und side-sicherer Startzusammenfassung. Prevention, Avoid, Interrupts, Replacement Effects, Runner-Deckout-Siegbedingung, neue Karten, offizielle Assets und Plattformfeatures bleiben außerhalb des Scopes.
 
@@ -20,7 +20,7 @@ V1.1.2 Implementation und Final Review liegen vor: `docs/derived/V1_1_2_IMPLEMEN
 
 V1.1.2K Plan, Manifest, Szenario und Implementation Review liegen vor: `docs/derived/V1_1_2K_CARD_RELEASE_PLAN.md`, `data/manifests/card-implementation-manifest-1.1.2k.json`, `data/scenarios/v112k-card-release-smoke.json` und `docs/derived/V1_1_2K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`. Gate-Ergebnis: `V1_1_2K_card_release_done: true`.
 
-V1.1.3/V1.2.0/V1.2.1 Planungs-, Requirements-, Implementation- und Final-Artefakte liegen vor: `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_PLAN.md`, `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_REQUIREMENTS.md`, `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_TEST_MATRIX.md`, `docs/derived/V1_1_3_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_2_0_EVENT_MODIFICATION_DETAILED_PLAN.md`, `docs/derived/V1_2_0_REQUIREMENTS.md`, `docs/derived/EVENT_MODIFICATION_1_2_0_SPEC.md`, `docs/derived/V1_2_0_TEST_MATRIX.md`, `docs/derived/V1_2_0_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_2_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_2_0_FINAL_REVIEW.md`, `docs/derived/V1_2_1_REPLACEMENT_EFFECTS_DETAILED_PLAN.md`, `docs/derived/V1_2_1_REQUIREMENTS.md`, `docs/derived/REPLACEMENT_EFFECTS_1_2_1_SPEC.md`, `docs/derived/V1_2_1_TEST_MATRIX.md`, `docs/derived/V1_2_1_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_2_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_2_1_FINAL_REVIEW.md` und `docs/derived/V1_1_3_TO_V1_2_1_IMPLEMENTATION_HANDOFF.md`. Mechanik-Coverage ist zusätzlich in `data/rules/mechanics-coverage-1.2.1.json` festgehalten. Gate-Ergebnis: `V1_1_3_preflight_checked: true`; `V1_2_0_implemented: true`; `V1_2_0_verified: true`; `V1_2_0_done: true`; `V1_2_1_implemented: true`; `V1_2_1_verified: true`; `V1_2_1_done: true`.
+V1.1.3/V1.2.0/V1.2.1 Planungs-, Requirements-, Implementation- und Final-Artefakte liegen vor: `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_PLAN.md`, `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_REQUIREMENTS.md`, `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_TEST_MATRIX.md`, `docs/derived/V1_1_3_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_1_3_FINAL_REVIEW.md`, `docs/derived/V1_2_0_EVENT_MODIFICATION_DETAILED_PLAN.md`, `docs/derived/V1_2_0_REQUIREMENTS.md`, `docs/derived/EVENT_MODIFICATION_1_2_0_SPEC.md`, `docs/derived/V1_2_0_TEST_MATRIX.md`, `docs/derived/V1_2_0_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_2_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_2_0_FINAL_REVIEW.md`, `docs/derived/V1_2_1_REPLACEMENT_EFFECTS_DETAILED_PLAN.md`, `docs/derived/V1_2_1_REQUIREMENTS.md`, `docs/derived/REPLACEMENT_EFFECTS_1_2_1_SPEC.md`, `docs/derived/V1_2_1_TEST_MATRIX.md`, `docs/derived/V1_2_1_REQUIREMENTS_REVIEW.md`, `docs/derived/V1_2_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_2_1_FINAL_REVIEW.md` und `docs/derived/V1_1_3_TO_V1_2_1_IMPLEMENTATION_HANDOFF.md`. Mechanik-Coverage ist zusätzlich in `data/rules/mechanics-coverage-1.2.1.json` festgehalten. Gate-Ergebnis: `V1_1_3_preflight_checked: true`; `V1_1_3_done: true`; `V1_2_0_implemented: true`; `V1_2_0_verified: true`; `V1_2_0_done: true`; `V1_2_1_implemented: true`; `V1_2_1_verified: true`; `V1_2_1_done: true`.
 
 Post-V1.1.2 Anschlussplanung vom 2026-05-07: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` legt fest, dass V1.1.2 unverändert bleibt und danach eine kombinierte Mechanik-/Karten-/KI-Linie startet. Schwerpunkt ist mehr spielbare Karten durch fehlende Mechaniken; die KI wird nicht als spätes isoliertes V1.7-Feature behandelt, sondern bekommt in jedem Mechanik- und Kartenrelease eine eigene Support-Spur. Empfohlener erster Schritt nach V1.1.2 ist V1.1.3 Mechanics-AI-Card Baseline ohne Codeimplementierung.
 
@@ -134,6 +134,7 @@ Latest V1.1.3 baseline plan artifact: `docs/derived/V1_1_3_MECHANICS_AI_CARD_BAS
 Latest V1.1.3 baseline requirements artifact: `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_REQUIREMENTS.md`.
 Latest V1.1.3 baseline test matrix artifact: `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_TEST_MATRIX.md`.
 Latest V1.1.3 requirements review artifact: `docs/derived/V1_1_3_REQUIREMENTS_REVIEW.md`.
+Latest V1.1.3 final review artifact: `docs/derived/V1_1_3_FINAL_REVIEW.md`.
 Latest V1.2.0 event modification plan artifact: `docs/derived/V1_2_0_EVENT_MODIFICATION_DETAILED_PLAN.md`.
 Latest V1.2.0 requirements artifact: `docs/derived/V1_2_0_REQUIREMENTS.md`.
 Latest V1.2.0 event modification spec artifact: `docs/derived/EVENT_MODIFICATION_1_2_0_SPEC.md`.
@@ -596,7 +597,7 @@ Audit findings:
 - README was stale and has been updated from V0.7/V0.8 planning to V0.99/S01 current state.
 - `vitest.config.ts` now includes `app/**/*.test.ts`, so `apps/web/app/chronicle.test.ts` runs in the normal Web package test command.
 - `docs/derived/MECHANICS_COMPLETION_PLAN.md` is now historical for M0 to M10; V0.94 to V0.99 are complete.
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md` was the current V0.99 matrix at this audit point and is now normalized to V1.1.3/V1.1.2K in the latest planning update.
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md` was the current V0.99 matrix at this audit point and is now normalized through V1.1.3 with V1.2.0/V1.2.1 foundation updates; the current machine-readable companion is `data/rules/mechanics-coverage-1.2.1.json`.
 - Local private O:NR-v1 data under ignored `data/local/` and `data/local-assets/` is present on this machine. It remains private/local and not versioned.
 - O:NR-v1 playable test access is accepted for private local use. Engine harness, Web overlay, server deck revalidation, AI/multiplayer smokes and manifest/review checks are covered for the private local scope.
 - Deck Editor and Match Setup are functional for versioned V0.8 snapshots and private local O:NR runtime cards. V1.0 adds player-owned Runner/Corp deck pairs for private series and explicit KI deck policy.
@@ -2148,7 +2149,7 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 - V1.1.1: Discard, Handlimit und Core Damage, implementation complete and locally verified.
 - V1.1.2: Full Archives Access plus independent Matchstart Entry UX, implementation complete and locally verified.
 
-Current gate: V1.1.3/V1.2.0/V1.2.1 planning and requirements freeze are complete. V1.1.3 is planning-only and has `ready_for_implementation: false`; V1.2.0 has `ready_for_implementation: true`; V1.2.1 has `ready_for_implementation: true` after a green V1.2.0 gate. V1.2.0 must implement Event Modification without Replacement; V1.2.1 must implement Replacement without broadening Prevention/Avoid. V1.1.2K kleines Kartenrelease implementation and final verification are complete. V1.1.2 Full Archives Access und Matchstart Entry UX, V1.1.1 Discard/Handlimit/Core Damage, V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening, V1.0.8 Storage/Backup-Härtung and V1.0.7 Browser-E2E und Visual QA are complete and locally verified. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits, Bad Publicity and Core Damage are playable only in their narrow gated scopes.
+Current gate: V1.1.3/V1.2.0/V1.2.1 are complete. V1.1.3 is planning-only and has `ready_for_implementation: false`; `ready_for_next_release_implementation: true` is confirmed by the completed V1.2.0/V1.2.1 follow-up releases. V1.2.0 Event Modification Foundation and V1.2.1 Replacement Effects are implemented and locally verified. V1.1.2K kleines Kartenrelease implementation and final verification are complete. V1.1.2 Full Archives Access und Matchstart Entry UX, V1.1.1 Discard/Handlimit/Core Damage, V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening, V1.0.8 Storage/Backup-Härtung and V1.0.7 Browser-E2E und Visual QA are complete and locally verified. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits, Bad Publicity, Core Damage, Event Modification and Replacement are playable only in their narrow gated scopes.
 
 V1.1.0 final review: `docs/derived/V1_1_0_FINAL_REVIEW.md` documents the completed Setup/Game-End M2 scope after V1.0.9. It confirms explicit setup, private mulligan, 7-point agenda normalization, game-end reason contract, Archives-facedown foundation, identity setup, visible spelling `Korp`, Lucide role icons, project/dossier-style agenda icon in agenda blue, tag icon, side-safe Setup UI and Browser-E2E regression.
 
@@ -2158,13 +2159,13 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Implement V1.2.0 Event Modification Foundation from the frozen V1.2.0 artefacts.
-2. Implement V1.2.1 Replacement Effects only after V1.2.0 is green.
-3. Keep further card releases behind the new `listed`/`engine_supported`/`human_playable`/`ai_supported` model.
+1. Plan the next post-V1.2.1 scope from `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
+2. Keep further card releases behind the new `listed`/`engine_supported`/`human_playable`/`ai_supported` model.
+3. Treat V1.2.0/V1.2.1 as completed foundations, not as upcoming implementation work.
 4. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
 5. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 
-Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates. Prevention/Avoid/Interrupt are planned for V1.2.0; Replacement is planned for V1.2.1.
+Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates. Prevention/Avoid/Interrupt and Replacement have foundation coverage through V1.2.0/V1.2.1, but real cards, broad eventfamilies, Avoid-/Interrupt-Runtime-Pilots and KI-Deckfreigaben still need their own gates.
 
 Detailed planning artifacts available:
 
@@ -2288,6 +2289,8 @@ Detailed planning artifacts available:
 - `docs/derived/MVP_0.99_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/MVP_0.99_FINAL_REVIEW.md`
 - `data/rules/mechanics-coverage-0.99.json`
+- `docs/derived/V1_1_3_FINAL_REVIEW.md`
+- `data/rules/mechanics-coverage-1.2.1.json`
 
 UI design exploration artifacts available:
 
