@@ -4427,6 +4427,27 @@ function LegalActionsPanel({
   if (discardChoice && discardAction) {
     return <DiscardChoicePanel choice={discardChoice} action={discardAction} disabled={disabled} highlighted={highlighted} onChoiceOptions={onChoiceOptions} />;
   }
+  const genericChoice = view.pendingChoice;
+  const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
+  if (genericChoice && genericChoiceAction) {
+    return (
+      <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="generic-choice-panel">
+        <h2>
+          <Check size={16} />
+          Entscheidung
+        </h2>
+        <p className="meta">{genericChoice.prompt}</p>
+        <div className="actions setupActions">
+          {genericChoice.options.map((option) => (
+            <button className="button actionButton primary" key={option.id} onClick={() => onChoiceOption(genericChoiceAction, genericChoice.choiceId, option.id)} disabled={disabled} data-testid="generic-choice-button">
+              <Play size={15} />
+              <span className="actionButtonLabel">{option.label}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+    );
+  }
   if (view.phase === "setup") {
     return (
       <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="setup-waiting-panel">

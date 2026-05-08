@@ -124,6 +124,101 @@ export type EffectSource =
   | { kind: "core_rule"; ruleId: string }
   | { kind: "system"; systemId: string };
 
+export type ImminentEventType = "damage" | "add_tag" | "test_interrupt";
+export type EventModificationKind = "prevent" | "avoid" | "interrupt";
+
+export type ImminentEvent = {
+  eventId: string;
+  eventType: ImminentEventType;
+  source: {
+    kind: "card" | "basic_action" | "game_rule" | "test_harness";
+    instanceId?: CardInstanceId;
+    definitionId?: CardDefinitionId;
+  };
+  controller: Side | "system";
+  affectedSide?: Side;
+  payload: Record<string, unknown>;
+  visibility: EventVisibilityClass;
+  createdAtStateVersion: number;
+  modificationWindowId?: string;
+};
+
+export type EventModificationCandidate = {
+  candidateId: string;
+  eventId: string;
+  kind: EventModificationKind;
+  controller: Side;
+  sourceRef: {
+    kind: "card" | "game_rule" | "test_harness";
+    instanceId?: CardInstanceId;
+    definitionId?: CardDefinitionId;
+    label: string;
+  };
+  priority: number;
+  visibility: EventVisibilityClass;
+  optional: boolean;
+  preventAmount?: number;
+};
+
+export type EventModificationWindow = {
+  windowId: string;
+  eventId: string;
+  eventType: ImminentEventType;
+  kind: EventModificationKind;
+  side: Side;
+  candidates: EventModificationCandidate[];
+  createdAtStateVersion: number;
+  optional: boolean;
+  conflictBlocked?: boolean;
+};
+
+export type ReplacementCandidate = {
+  candidateId: string;
+  controller: Side;
+  sourceRef: {
+    kind: "card" | "game_rule" | "test_harness";
+    instanceId?: CardInstanceId;
+    definitionId?: CardDefinitionId;
+    label: string;
+  };
+  replacesEventType: ImminentEventType;
+  replacementEventType: ImminentEventType;
+  priority: number;
+  visibility: EventVisibilityClass;
+  optional: boolean;
+  tagAmount?: number;
+};
+
+export type ReplacementWindow = {
+  windowId: string;
+  originalEventId: string;
+  eventType: ImminentEventType;
+  candidates: ReplacementCandidate[];
+  consumedCandidateIds: string[];
+  createdAtStateVersion: number;
+  optional: boolean;
+  conflictBlocked?: boolean;
+};
+
+export type EventModificationTestHarness = {
+  damagePrevention?: {
+    side: Side;
+    preventAmount: number;
+    optional?: boolean;
+    sourceLabel?: string;
+    visibility?: EventVisibilityClass;
+  };
+  damageReplacement?: {
+    side: Side;
+    tagAmount: number;
+    optional?: boolean;
+    sourceLabel?: string;
+    visibility?: EventVisibilityClass;
+    priority?: number;
+  };
+  damageReplacementConflict?: boolean;
+};
+
 export type EffectCommand =
   | { type: "gain_credits"; side: Side; amount: number }
   | { type: "spend_credits"; side: Side; amount: number }
@@ -452,6 +547,10 @@ export type GameState = {
   agendaPointsToWin: number;
   setup?: SetupState;
   pendingChoice?: PendingChoice;
+  imminentEvent?: ImminentEvent;
+  eventModificationWindow?: EventModificationWindow;
+  replacementWindow?: ReplacementWindow;
+  eventModificationHarness?: EventModificationTestHarness;
   deckMetadata?: {
     runner: DeckPublicMetadata;
     corp: DeckPublicMetadata;

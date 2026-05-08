@@ -1174,6 +1174,170 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(blocked.error.code).toBe("undo_blocked");
   });
 
+  it("handles V1.2.0 Event Modification pending choices through submit, reconnect, idempotency and undo barriers", async () => {
+    const match = await joinedV120EventModificationMatch("mp-v120-event-modification");
+    const beforeOperation = await bootstrap(match.service, match.matchId, match.corp);
+    const operation = mustAction(beforeOperation, (action) => action.type === "play_operation" && action.label.includes("Core Damage"));
+
+    const opened = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: match.corp.sessionToken,
+      actionId: operation.actionId,
+      clientKnownStateVersion: beforeOperation.playerView.stateVersion,
+      idempotencyKey: "v120-open-window"
+    });
+    expect(opened.ok).toBe(true);
+    if (!opened.ok) throw new Error(opened.error.message);
+    expect(opened.actorPayload.pendingChoice).toBeUndefined();
+    expect(opened.opponentPayload.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    expect(opened.publicEvent?.publicPayload).toMatchObject({ eventModificationWindowOpened: true, imminentEventType: "damage" });
+    expect(JSON.stringify(opened.actorPayload)).not.toContain("v120_damage_prevent");
+
+    const duplicateOpen = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: match.corp.sessionToken,
+      actionId: operation.actionId,
+      clientKnownStateVersion: beforeOperation.playerView.stateVersion,
+      idempotencyKey: "v120-open-window"
+    });
+    expect(duplicateOpen.ok).toBe(true);
+    if (!duplicateOpen.ok) throw new Error(duplicateOpen.error.message);
+    expect(duplicateOpen.receipt.stateVersionAfter).toBe(opened.receipt.stateVersionAfter);
+
+    const reconnectedRunner = await match.service.reconnectMatch(match.matchId, {
+      side: "runner",
+      reconnectToken: match.runner.reconnectToken
+    });
+    expect("error" in reconnectedRunner).toBe(false);
+    if ("error" in reconnectedRunner) throw new Error(reconnectedRunner.error.message);
+    expect(reconnectedRunner.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    expect(JSON.stringify(reconnectedRunner)).not.toContain("Test-only Damage Prevention");
+
+    const staleChoice = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnectedRunner.sessionToken,
+      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      clientKnownStateVersion: reconnectedRunner.playerView.stateVersion - 1,
+      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: ["pass"] },
+      idempotencyKey: "v120-stale-choice"
+    });
+    expect(staleChoice.ok).toBe(false);
+    if (staleChoice.ok) throw new Error("Expected stale choice rejection");
+    expect(staleChoice.error.code).toBe("stale_state");
+
+    const preventOption = reconnectedRunner.pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    if (!preventOption) throw new Error("Missing prevent option");
+    const prevented = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnectedRunner.sessionToken,
+      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
+      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: [preventOption] },
+      idempotencyKey: "v120-prevent"
+    });
+    expect(prevented.ok).toBe(true);
+    if (!prevented.ok) throw new Error(prevented.error.message);
+    expect(prevented.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
+    expect(prevented.publicEvent?.publicPayload).toMatchObject({ eventModificationDecision: "apply", eventModificationOutcome: "prevented", damageAmount: 0 });
+    expect(prevented.actorPayload.playerView.own.coreDamage).toBe(0);
+    expect(prevented.opponentPayload.playerView.opponent.coreDamage).toBe(0);
+
+    const duplicatePrevent = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnectedRunner.sessionToken,
+      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
+      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: [preventOption] },
+      idempotencyKey: "v120-prevent"
+    });
+    expect(duplicatePrevent.ok).toBe(true);
+    if (!duplicatePrevent.ok) throw new Error(duplicatePrevent.error.message);
+    expect(duplicatePrevent.receipt.stateVersionAfter).toBe(prevented.receipt.stateVersionAfter);
+
+    const blocked = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnectedRunner.sessionToken,
+      targetEventId: `evt_${prevented.receipt.stateVersionAfter}`,
+      reason: "Event modification undo"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected Event Modification hidden-info barrier");
+    expect(blocked.error.code).toBe("undo_blocked");
+  });
+
+  it("handles V1.2.1 Replacement pending choices without applying original damage twice", async () => {
+    const match = await joinedV121ReplacementMatch("mp-v121-replacement");
+    const beforeOperation = await bootstrap(match.service, match.matchId, match.corp);
+    const operation = mustAction(beforeOperation, (action) => action.type === "play_operation" && action.label.includes("Core Damage"));
+
+    const opened = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: match.corp.sessionToken,
+      actionId: operation.actionId,
+      clientKnownStateVersion: beforeOperation.playerView.stateVersion,
+      idempotencyKey: "v121-open-window"
+    });
+    expect(opened.ok).toBe(true);
+    if (!opened.ok) throw new Error(opened.error.message);
+    expect(opened.actorPayload.pendingChoice).toBeUndefined();
+    expect(opened.opponentPayload.pendingChoice?.source).toBe("v121.replacement.damage");
+    expect(opened.publicEvent?.publicPayload).toMatchObject({ replacementWindowOpened: true, originalEventType: "damage" });
+
+    const reconnectedRunner = await match.service.reconnectMatch(match.matchId, {
+      side: "runner",
+      reconnectToken: match.runner.reconnectToken
+    });
+    expect("error" in reconnectedRunner).toBe(false);
+    if ("error" in reconnectedRunner) throw new Error(reconnectedRunner.error.message);
+    expect(reconnectedRunner.pendingChoice?.source).toBe("v121.replacement.damage");
+    expect(JSON.stringify(reconnectedRunner)).not.toContain("Test-only Damage Replacement");
+
+    const replaceOption = reconnectedRunner.pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    if (!replaceOption) throw new Error("Missing replacement option");
+    const replaced = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnectedRunner.sessionToken,
+      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
+      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: [replaceOption] },
+      idempotencyKey: "v121-replace"
+    });
+    expect(replaced.ok).toBe(true);
+    if (!replaced.ok) throw new Error(replaced.error.message);
+    expect(replaced.publicEvent?.publicPayload).toMatchObject({
+      replacementDecision: "apply",
+      replacementOutcome: "replaced",
+      originalEventType: "damage",
+      replacementEventType: "add_tag",
+      tagsAdded: 1
+    });
+    expect(replaced.actorPayload.playerView.own.coreDamage).toBe(0);
+    expect(replaced.actorPayload.playerView.own.tags).toBe(1);
+    expect(replaced.opponentPayload.playerView.opponent.coreDamage).toBe(0);
+    expect(replaced.opponentPayload.playerView.opponent.tags).toBe(1);
+
+    const duplicateReplace = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: reconnectedRunner.sessionToken,
+      actionId: reconnectedRunner.legalActions[0]?.actionId ?? "",
+      clientKnownStateVersion: reconnectedRunner.playerView.stateVersion,
+      selectedChoices: { choiceId: reconnectedRunner.pendingChoice?.choiceId, selectedOptionIds: [replaceOption] },
+      idempotencyKey: "v121-replace"
+    });
+    expect(duplicateReplace.ok).toBe(true);
+    if (!duplicateReplace.ok) throw new Error(duplicateReplace.error.message);
+    expect(duplicateReplace.receipt.stateVersionAfter).toBe(replaced.receipt.stateVersionAfter);
+  });
+
   it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {
     const match = await joinedMatch("mp-v111-discard");
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "v111-mandatory");
@@ -2719,6 +2883,13 @@ const V094_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const V111_CORP_DECK: DeckDefinition = {
+  ...V094_CORP_DECK,
+  id: "demo_corp_111",
+  name: "Corp Demo Deck 1.1.1 - Multiplayer Core Damage Harness",
+  cards: [...V094_CORP_DECK.cards, { id: "v111_core_damage_operation", quantity: 2 }]
+};
+
 const V095_RUNNER_DECK: DeckDefinition = {
   id: "demo_runner_095",
   name: "Runner Demo Deck 0.95 - Multiplayer Resource Harness",
@@ -2930,6 +3101,86 @@ async function joinedV094DamageMatch(seed: string, options: { emptyRunnerGrip?: 
   record.match.settings.agendaPointsToWin = 7;
   record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
   record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v094_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
+async function joinedV120EventModificationMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3100",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  const gameState = createGameAfterSetup({ matchId: created.matchId, seed, runnerDeck: V094_RUNNER_DECK, corpDeck: V111_CORP_DECK, agendaPointsToWin: 7 });
+  let ready = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
+  ready.eventModificationHarness = { damagePrevention: { side: "runner", preventAmount: 1 } };
+  moveCorpCardToHqForTest(ready, "v111_core_damage_operation");
+  ready.corp.credits = 10;
+  record.gameState = ready;
+  record.match.baseline = ready.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = ready.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, ready, record.match.matchVersion, "snap_v120_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
+async function joinedV121ReplacementMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3100",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  const gameState = createGameAfterSetup({ matchId: created.matchId, seed, runnerDeck: V094_RUNNER_DECK, corpDeck: V111_CORP_DECK, agendaPointsToWin: 7 });
+  let ready = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
+  ready.eventModificationHarness = { damageReplacement: { side: "runner", tagAmount: 1 } };
+  moveCorpCardToHqForTest(ready, "v111_core_damage_operation");
+  ready.corp.credits = 10;
+  record.gameState = ready;
+  record.match.baseline = ready.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = ready.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, ready, record.match.matchVersion, "snap_v121_ready")];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
@@ -3314,6 +3565,14 @@ function putCorpCardOnTopOfRdForTest(state: GameState, definitionId: string): Ca
   removeEverywhereForTest(state, id);
   state.corp.rd.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+  return id;
+}
+
+function moveCorpCardToHqForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCardForTest(state, definitionId);
+  removeEverywhereForTest(state, id);
+  state.corp.hq.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
   return id;
 }
 

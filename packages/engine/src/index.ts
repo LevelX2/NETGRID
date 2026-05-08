@@ -26,14 +26,19 @@ import {
   type EngineResult,
   type EventVisibilityClass,
   type EffectCommand,
+  type EventModificationCandidate,
+  type EventModificationWindow,
   type GameEvent,
   type GameEndReason,
   type GameState,
+  type ImminentEvent,
   type LegalAction,
   type PlayerAction,
   type PlayerController,
   type PlayerView,
   type PublicGameEvent,
+  type ReplacementCandidate,
+  type ReplacementWindow,
   type ReplayResult,
   type RunState,
   type RulesBaseline,
@@ -80,14 +85,19 @@ export type {
   EngineError,
   EngineResult,
   EventVisibilityClass,
+  EventModificationCandidate,
+  EventModificationWindow,
   EffectCommand,
   GameEvent,
   GameEndReason,
   GameState,
+  ImminentEvent,
   LegalAction,
   PlayerAction,
   PlayerView,
   PublicGameEvent,
+  ReplacementCandidate,
+  ReplacementWindow,
   ReplayResult,
   RulesBaseline,
   SetupState,
@@ -822,6 +832,19 @@ export function validateGameState(state: GameState): ValidationResult {
     if (state.pendingChoice.minSelections < 0 || state.pendingChoice.maxSelections < state.pendingChoice.minSelections) errors.push("PendingChoice has invalid selection bounds.");
     const optionIds = new Set(state.pendingChoice.options.map((option) => option.id));
     if (optionIds.size !== state.pendingChoice.options.length) errors.push("PendingChoice option ids must be unique.");
+  }
+  if (state.eventModificationWindow) {
+    if (!state.imminentEvent) errors.push("EventModificationWindow requires an ImminentEvent.");
+    if (state.eventModificationWindow.eventId !== state.imminentEvent?.eventId) errors.push("EventModificationWindow eventId must match ImminentEvent.");
+    if (state.eventModificationWindow.candidates.some((candidate) => candidate.eventId !== state.eventModificationWindow?.eventId)) {
+      errors.push("EventModification candidates must reference the open event.");
+    }
+  }
+  if (state.replacementWindow) {
+    if (!state.imminentEvent) errors.push("ReplacementWindow requires an ImminentEvent.");
+    if (state.replacementWindow.originalEventId !== state.imminentEvent?.eventId) errors.push("ReplacementWindow originalEventId must match ImminentEvent.");
+    const consumed = new Set(state.replacementWindow.consumedCandidateIds);
+    if (consumed.size !== state.replacementWindow.consumedCandidateIds.length) errors.push("Replacement consumedCandidateIds must be unique.");
   }
 
   return { ok: errors.length === 0, errors };
@@ -2079,13 +2102,386 @@ function setDamagePayload(legalAction: LegalAction, summary: DamageSummary): voi
 }
 
 function resolveDamageOperation(state: GameState, legalAction: LegalAction, damageType: DamageType, amount: number, source: string): void {
-  const summary = doDamage(state, {
+  const request = {
     damageId: `${state.matchId}.${state.stateVersion}.${source}`,
     damageType,
     amount,
     source: `operation:${source}`
-  });
+  };
+  const event = createDamageImminentEvent(state, request);
+  if (openReplacementWindow(state, event, legalAction)) return;
+  if (openEventModificationWindow(state, event, legalAction)) return;
+  const summary = resolveDamageImminentEvent(state, event);
   setDamagePayload(legalAction, summary);
+}
+
+function createDamageImminentEvent(
+  state: GameState,
+  request: {
+    damageId: string;
+    damageType: DamageType;
+    amount: number;
+    source: string;
+  }
+): ImminentEvent {
+  return {
+    eventId: `imminent_damage_${state.stateVersion + 1}_${sanitizeId(request.damageId)}`,
+    eventType: "damage",
+    source: { kind: "game_rule" },
+    controller: "corp",
+    affectedSide: "runner",
+    payload: {
+      damageId: request.damageId,
+      damageType: request.damageType,
+      amount: request.amount,
+      source: request.source
+    },
+    visibility: "hidden_info_barrier",
+    createdAtStateVersion: state.stateVersion + 1
+  };
+}
+
+function openEventModificationWindow(state: GameState, event: ImminentEvent, legalAction: LegalAction): boolean {
+  const candidates = collectEventModificationCandidates(state, event);
+  if (candidates.length === 0) return false;
+  const sorted = candidates.slice().sort(compareEventModificationCandidate);
+  if (hasEventModificationConflict(sorted)) throw new Error("Event-Modification-Konflikt blockiert.");
+  const candidate = sorted[0];
+  if (!candidate) return false;
+  const windowId = `v120_window_${event.eventId}`;
+  const window: EventModificationWindow = {
+    windowId,
+    eventId: event.eventId,
+    eventType: event.eventType,
+    kind: candidate.kind,
+    side: candidate.controller,
+    candidates: sorted,
+    createdAtStateVersion: state.stateVersion + 1,
+    optional: candidate.optional
+  };
+  state.imminentEvent = { ...event, modificationWindowId: windowId };
+  state.eventModificationWindow = window;
+  state.pendingChoice = eventModificationChoice(window, state.imminentEvent, state.stateVersion + 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    eventModificationWindowOpened: true,
+    eventModificationKind: window.kind,
+    eventModificationWindowId: window.windowId,
+    imminentEventId: event.eventId,
+    imminentEventType: event.eventType,
+    affectedSide: event.affectedSide ?? "",
+    candidateCount: window.candidates.length,
+    redactedKind: "event_modification"
+  };
+  return true;
+}
+
+function collectEventModificationCandidates(state: GameState, event: ImminentEvent): EventModificationCandidate[] {
+  if (event.eventType !== "damage") return [];
+  const harness = state.eventModificationHarness?.damagePrevention;
+  const amount = numberPayload(event, "amount");
+  if (!harness || amount <= 0) return [];
+  const preventAmount = Math.min(harness.preventAmount, amount);
+  if (!Number.isInteger(preventAmount) || preventAmount <= 0) return [];
+  return [
+    {
+      candidateId: `v120_damage_prevent_${sanitizeId(String(harness.sourceLabel ?? "test_harness"))}_${preventAmount}`,
+      eventId: event.eventId,
+      kind: "prevent",
+      controller: harness.side,
+      sourceRef: {
+        kind: "test_harness",
+        label: harness.sourceLabel ?? "Test-only Damage Prevention"
+      },
+      priority: 100,
+      visibility: harness.visibility ?? "hidden_info_barrier",
+      optional: harness.optional ?? true,
+      preventAmount
+    }
+  ];
+}
+
+function openReplacementWindow(state: GameState, event: ImminentEvent, legalAction: LegalAction): boolean {
+  const candidates = collectReplacementCandidates(state, event).sort(compareReplacementCandidate);
+  if (candidates.length === 0) return false;
+  if (hasReplacementConflict(candidates)) throw new Error("Replacement-Konflikt blockiert.");
+  const candidate = candidates[0];
+  if (!candidate) return false;
+  const windowId = `v121_window_${event.eventId}`;
+  const window: ReplacementWindow = {
+    windowId,
+    originalEventId: event.eventId,
+    eventType: event.eventType,
+    candidates,
+    consumedCandidateIds: [],
+    createdAtStateVersion: state.stateVersion + 1,
+    optional: candidate.optional
+  };
+  state.imminentEvent = { ...event, modificationWindowId: windowId };
+  state.replacementWindow = window;
+  state.pendingChoice = replacementChoice(window, state.imminentEvent, state.stateVersion + 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    replacementWindowOpened: true,
+    replacementWindowId: window.windowId,
+    originalEventId: event.eventId,
+    originalEventType: event.eventType,
+    replacementCandidateCount: window.candidates.length,
+    affectedSide: event.affectedSide ?? "",
+    redactedKind: "replacement"
+  };
+  return true;
+}
+
+function collectReplacementCandidates(state: GameState, event: ImminentEvent): ReplacementCandidate[] {
+  if (event.eventType !== "damage") return [];
+  const harness = state.eventModificationHarness?.damageReplacement;
+  const amount = numberPayload(event, "amount");
+  if (!harness || amount <= 0) return [];
+  const base: ReplacementCandidate = {
+    candidateId: `v121_damage_replace_${sanitizeId(String(harness.sourceLabel ?? "test_harness"))}_${harness.tagAmount}`,
+    controller: harness.side,
+    sourceRef: {
+      kind: "test_harness",
+      label: harness.sourceLabel ?? "Test-only Damage Replacement"
+    },
+    replacesEventType: "damage",
+    replacementEventType: "add_tag",
+    priority: harness.priority ?? 100,
+    visibility: harness.visibility ?? "hidden_info_barrier",
+    optional: harness.optional ?? true,
+    tagAmount: harness.tagAmount
+  };
+  if (!state.eventModificationHarness?.damageReplacementConflict) return [base];
+  return [
+    base,
+    {
+      ...base,
+      candidateId: `${base.candidateId}_conflict`,
+      tagAmount: base.tagAmount ? base.tagAmount + 1 : 2
+    }
+  ];
+}
+
+function replacementChoice(window: ReplacementWindow, event: ImminentEvent, stateVersion: number): ChoiceRequest {
+  const candidate = mustArrayValue(window.candidates, 0, "Replacement-Kandidat fehlt.");
+  return {
+    choiceId: `v121_choice_${window.windowId}`,
+    side: candidate.controller,
+    source: "v121.replacement.damage",
+    prompt: "Damage Replacement",
+    kind: "select_option",
+    options: [
+      { id: "pass", label: "Nicht ersetzen", publicLabel: "Replacement" },
+      {
+        id: candidate.candidateId,
+        label: `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
+        publicLabel: "Replacement"
+      }
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion,
+    visibility: candidate.visibility
+  };
+}
+
+function eventModificationChoice(window: EventModificationWindow, event: ImminentEvent, stateVersion: number): ChoiceRequest {
+  const candidate = mustArrayValue(window.candidates, 0, "Event-Modification-Kandidat fehlt.");
+  const amount = numberPayload(event, "amount");
+  const options = [
+    { id: "pass", label: "Nicht verhindern", publicLabel: "Event Modification" },
+    {
+      id: candidate.candidateId,
+      label: `${candidate.preventAmount ?? amount} Schaden verhindern`,
+      publicLabel: "Event Modification"
+    }
+  ];
+  return {
+    choiceId: `v120_choice_${window.windowId}`,
+    side: window.side,
+    source: `v120.event_modification.${window.kind}`,
+    prompt: "Damage Prevention",
+    kind: "select_option",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion,
+    visibility: candidate.visibility
+  };
+}
+
+function resolveEventModificationChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const window = state.eventModificationWindow;
+  const event = state.imminentEvent;
+  if (!window || !event) throw new Error("Es ist kein Event-Modification-Fenster offen.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
+  if (!selected) throw new Error("Es wurde keine Event-Modification-Option gewählt.");
+  const basePayload = {
+    ...(legalAction.payload ?? {}),
+    eventModificationWindowId: window.windowId,
+    eventModificationKind: window.kind,
+    imminentEventId: event.eventId,
+    imminentEventType: event.eventType,
+    affectedSide: event.affectedSide ?? "",
+    redactedKind: "event_modification"
+  };
+  if (selected === "pass") {
+    const summary = resolveDamageImminentEvent(state, event);
+    legalAction.payload = {
+      ...basePayload,
+      eventModificationDecision: "pass",
+      eventModificationOutcome: "original_resolved",
+      originalAmount: numberPayload(event, "amount")
+    };
+    setDamagePayload(legalAction, summary);
+    clearEventModificationState(state);
+    return;
+  }
+  const candidate = window.candidates.find((item) => item.candidateId === selected);
+  if (!candidate) throw new Error("Dieser Event-Modification-Kandidat ist nicht legal.");
+  if (candidate.eventId !== event.eventId || candidate.kind !== "prevent") throw new Error("Dieser Event-Modification-Kandidat passt nicht zum Fenster.");
+  const originalAmount = numberPayload(event, "amount");
+  const preventedAmount = Math.min(candidate.preventAmount ?? 0, originalAmount);
+  const finalAmount = Math.max(0, originalAmount - preventedAmount);
+  const summary = resolveDamageImminentEvent(state, {
+    ...event,
+    payload: { ...event.payload, amount: finalAmount }
+  });
+  legalAction.payload = {
+    ...basePayload,
+    eventModificationDecision: "apply",
+    eventModificationOutcome: finalAmount === 0 ? "prevented" : "partially_prevented",
+    candidateId: candidate.candidateId,
+    originalAmount,
+    preventedAmount,
+    finalAmount,
+    sourceKind: candidate.sourceRef.kind
+  };
+  setDamagePayload(legalAction, summary);
+  clearEventModificationState(state);
+}
+
+function resolveReplacementChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const window = state.replacementWindow;
+  const event = state.imminentEvent;
+  if (!window || !event) throw new Error("Es ist kein Replacement-Fenster offen.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
+  if (!selected) throw new Error("Es wurde keine Replacement-Option gewählt.");
+  const basePayload = {
+    ...(legalAction.payload ?? {}),
+    replacementWindowId: window.windowId,
+    originalEventId: event.eventId,
+    originalEventType: event.eventType,
+    affectedSide: event.affectedSide ?? "",
+    redactedKind: "replacement"
+  };
+  if (selected === "pass") {
+    const summary = resolveDamageImminentEvent(state, event);
+    legalAction.payload = {
+      ...basePayload,
+      replacementDecision: "pass",
+      replacementOutcome: "original_resolved",
+      originalAmount: numberPayload(event, "amount")
+    };
+    setDamagePayload(legalAction, summary);
+    clearReplacementState(state);
+    return;
+  }
+  const candidate = window.candidates.find((item) => item.candidateId === selected);
+  if (!candidate) throw new Error("Dieser Replacement-Kandidat ist nicht legal.");
+  if (window.consumedCandidateIds.includes(candidate.candidateId)) throw new Error("Dieser Replacement-Kandidat wurde in diesem Fenster bereits genutzt.");
+  if (candidate.replacesEventType !== event.eventType || candidate.replacementEventType !== "add_tag") {
+    throw new Error("Dieser Replacement-Kandidat passt nicht zum Originalevent.");
+  }
+  window.consumedCandidateIds.push(candidate.candidateId);
+  const tagAmount = candidate.tagAmount ?? 1;
+  state.runner.tags += tagAmount;
+  legalAction.payload = {
+    ...basePayload,
+    replacementDecision: "apply",
+    replacementOutcome: "replaced",
+    candidateId: candidate.candidateId,
+    replacementEventId: `replacement_${event.eventId}`,
+    replacementEventType: "add_tag",
+    originalAmount: numberPayload(event, "amount"),
+    tagsAdded: tagAmount,
+    sourceKind: candidate.sourceRef.kind
+  };
+  clearReplacementState(state);
+}
+
+function resolveDamageImminentEvent(state: GameState, event: ImminentEvent): DamageSummary {
+  if (event.eventType !== "damage") throw new Error("Nur Damage-ImminentEvents sind in V1.2.0 auflösbar.");
+  const amount = numberPayload(event, "amount");
+  const damageType = damageTypePayload(event);
+  if (amount <= 0) return { damageType, amount: 0, cardsTrashed: 0, flatline: false };
+  return doDamage(state, {
+    damageId: stringPayload(event, "damageId"),
+    damageType,
+    amount,
+    source: stringPayload(event, "source")
+  });
+}
+
+function clearEventModificationState(state: GameState): void {
+  delete state.pendingChoice;
+  delete state.eventModificationWindow;
+  delete state.imminentEvent;
+}
+
+function clearReplacementState(state: GameState): void {
+  delete state.pendingChoice;
+  delete state.replacementWindow;
+  delete state.imminentEvent;
+}
+
+function compareEventModificationCandidate(left: EventModificationCandidate, right: EventModificationCandidate): number {
+  return left.priority - right.priority || left.controller.localeCompare(right.controller) || left.candidateId.localeCompare(right.candidateId);
+}
+
+function hasEventModificationConflict(candidates: EventModificationCandidate[]): boolean {
+  if (candidates.length <= 1) return false;
+  const first = candidates[0];
+  return candidates.some((candidate) => candidate.priority === first?.priority && candidate.kind !== first.kind);
+}
+
+function compareReplacementCandidate(left: ReplacementCandidate, right: ReplacementCandidate): number {
+  return (
+    left.priority - right.priority ||
+    left.controller.localeCompare(right.controller) ||
+    (left.sourceRef.instanceId ?? "").localeCompare(right.sourceRef.instanceId ?? "") ||
+    left.candidateId.localeCompare(right.candidateId)
+  );
+}
+
+function hasReplacementConflict(candidates: ReplacementCandidate[]): boolean {
+  if (candidates.length <= 1) return false;
+  const first = candidates[0];
+  return candidates.some(
+    (candidate) =>
+      candidate.priority === first?.priority &&
+      (candidate.replacementEventType !== first.replacementEventType || candidate.tagAmount !== first.tagAmount || candidate.controller !== first.controller)
+  );
+}
+
+function numberPayload(event: ImminentEvent, key: string): number {
+  const value = event.payload[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function stringPayload(event: ImminentEvent, key: string): string {
+  const value = event.payload[key];
+  return typeof value === "string" ? value : "";
+}
+
+function damageTypePayload(event: ImminentEvent): DamageType {
+  const value = event.payload.damageType;
+  return value === "meat" || value === "core" ? value : "net";
+}
+
+function sanitizeId(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_.-]+/g, "_").slice(0, 80);
 }
 
 function requireRunnerTagged(state: GameState): void {
@@ -2220,6 +2616,14 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
   }
   if (state.pendingChoice.source === "discard_phase") {
     resolveDiscardChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v121.replacement")) {
+    resolveReplacementChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v120.event_modification")) {
+    resolveEventModificationChoice(state, legalAction, playerAction);
     return;
   }
   if (state.trace) {
@@ -2834,6 +3238,8 @@ function baseClicksForSide(side: Side): number {
 function publicLabel(legalAction: LegalAction): string {
   if (legalAction.type === "resolve_choice" && legalAction.payload?.setupStep === "mulligan") return "Setup-Entscheidung wurde beantwortet.";
   if (legalAction.type === "resolve_choice" && legalAction.payload?.discardResolved === true) return "Discard wurde abgeschlossen.";
+  if (legalAction.type === "resolve_choice" && legalAction.payload?.replacementDecision) return "Replacement-Entscheidung wurde beantwortet.";
+  if (legalAction.type === "resolve_choice" && legalAction.payload?.eventModificationDecision) return "Event-Modification-Entscheidung wurde beantwortet.";
   if (legalAction.type === "resolve_choice") return "Choice wurde beantwortet.";
   if (legalAction.side === "corp" && legalAction.type === "install_card") return "Korp installiert eine Karte.";
   if (legalAction.side === "corp" && legalAction.type === "advance_card") return "Korp advanced eine Karte.";
@@ -2877,6 +3283,34 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (legalAction.payload?.choiceVisibility === "public") context.choiceId = legalAction.payload?.choiceId;
     else context.redactedKind = "choice";
     for (const key of [
+      "eventModificationWindowId",
+      "eventModificationKind",
+      "eventModificationDecision",
+      "eventModificationOutcome",
+      "imminentEventId",
+      "imminentEventType",
+      "affectedSide",
+      "originalAmount",
+      "preventedAmount",
+      "finalAmount"
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+    for (const key of [
+      "replacementWindowId",
+      "replacementDecision",
+      "replacementOutcome",
+      "originalEventId",
+      "originalEventType",
+      "replacementEventId",
+      "replacementEventType",
+      "tagsAdded"
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+    for (const key of [
       "traceId",
       "traceStep",
       "baseTraceStrength",
@@ -2915,6 +3349,25 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.flatline = legalAction.payload.flatline;
     if (typeof legalAction.payload.coreDamageAfter === "number") context.coreDamageAfter = legalAction.payload.coreDamageAfter;
     if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number") context.runnerMaxHandSizeAfter = legalAction.payload.runnerMaxHandSizeAfter;
+  }
+  if (legalAction.payload?.eventModificationWindowOpened === true) {
+    context.eventModificationWindowOpened = true;
+    context.eventModificationKind = legalAction.payload.eventModificationKind;
+    context.eventModificationWindowId = legalAction.payload.eventModificationWindowId;
+    context.imminentEventId = legalAction.payload.imminentEventId;
+    context.imminentEventType = legalAction.payload.imminentEventType;
+    context.affectedSide = legalAction.payload.affectedSide;
+    context.candidateCount = legalAction.payload.candidateCount;
+    context.redactedKind = "event_modification";
+  }
+  if (legalAction.payload?.replacementWindowOpened === true) {
+    context.replacementWindowOpened = true;
+    context.replacementWindowId = legalAction.payload.replacementWindowId;
+    context.originalEventId = legalAction.payload.originalEventId;
+    context.originalEventType = legalAction.payload.originalEventType;
+    context.replacementCandidateCount = legalAction.payload.replacementCandidateCount;
+    context.affectedSide = legalAction.payload.affectedSide;
+    context.redactedKind = "replacement";
   }
   if (legalAction.type === "purge_virus_counters") {
     context.purgedCounterType = "virus";

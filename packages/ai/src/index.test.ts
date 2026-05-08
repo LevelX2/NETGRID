@@ -447,6 +447,62 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(replayEvents(initial, state.eventLog).ok).toBe(true);
   });
 
+  it("passes V1.2.0 Event Modification windows through side-safe LegalActions fallback", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-v120-event-modification",
+      runnerDeck: V094_RUNNER_DECK,
+      corpDeck: V111_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    state.eventModificationHarness = { damagePrevention: { side: "runner", preventAmount: 1 } };
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, "v111_core_damage_operation");
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "v111_core_damage_operation");
+
+    const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const runnerDecision = chooseRunnerAction(runnerInput);
+    const corpInput = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const serializedDecision = JSON.stringify(runnerDecision);
+
+    expect(runnerInput.playerView.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    expect(runnerInput.legalActions.map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(runnerDecision.selectedChoices).toEqual({ choiceId: state.pendingChoice?.choiceId, selectedOptionIds: ["pass"] });
+    expect(runnerDecision.reasonCode).toBe("runner.choice.resolve");
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+    expect(corpInput.playerView.pendingChoice).toBeUndefined();
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
+    expect(serializedDecision).not.toContain("Test-only Damage Prevention");
+    expect(JSON.stringify(corpInput)).not.toContain("v120_damage_prevent");
+  });
+
+  it("passes V1.2.1 Replacement windows through side-safe LegalActions fallback", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-v121-replacement",
+      runnerDeck: V094_RUNNER_DECK,
+      corpDeck: V111_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    state.eventModificationHarness = { damageReplacement: { side: "runner", tagAmount: 1 } };
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, "v111_core_damage_operation");
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "v111_core_damage_operation");
+
+    const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const runnerDecision = chooseRunnerAction(runnerInput);
+    const corpInput = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const serializedDecision = JSON.stringify(runnerDecision);
+
+    expect(runnerInput.playerView.pendingChoice?.source).toBe("v121.replacement.damage");
+    expect(runnerInput.legalActions.map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(runnerDecision.selectedChoices).toEqual({ choiceId: state.pendingChoice?.choiceId, selectedOptionIds: ["pass"] });
+    expect(runnerDecision.reasonCode).toBe("runner.choice.resolve");
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+    expect(corpInput.playerView.pendingChoice).toBeUndefined();
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
+    expect(serializedDecision).not.toContain("Test-only Damage Replacement");
+    expect(JSON.stringify(corpInput)).not.toContain("v121_damage_replace");
+  });
+
   it("runs V0.4 expanded decks through the simulation harness", () => {
     const summary = simulateAiGame({
       seed: "ai-v04-expanded",
@@ -619,6 +675,13 @@ const V094_CORP_DECK: DeckDefinition = {
     { id: "v094_neural_sentry_ice", quantity: 3 },
     { id: "simple_barrier_ice", quantity: 2 }
   ]
+};
+
+const V111_CORP_DECK: DeckDefinition = {
+  ...V094_CORP_DECK,
+  id: "demo_corp_111",
+  name: "Corp Demo Deck 1.1.1 - AI Core Damage Harness",
+  cards: [...V094_CORP_DECK.cards, { id: "v111_core_damage_operation", quantity: 2 }]
 };
 
 const V095_RUNNER_DECK: DeckDefinition = {
@@ -819,6 +882,14 @@ function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInsta
   removeEverywhere(state, id);
   state.runner.grip.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.corp.hq.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
   return id;
 }
 

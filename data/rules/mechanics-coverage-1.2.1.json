@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "1.2.1",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.2.1",
+  "generatedFor": "V1.2.0 Event Modification Foundation and V1.2.1 Replacement Effects final gates",
+  "generatedAt": "2026-05-08",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-0.99.json",
+  "gateAssertions": {
+    "v113PreflightChecked": true,
+    "v120EventModificationImplemented": true,
+    "v120DamagePreventionPilotImplemented": true,
+    "v120ReplacementEffectsNotImplemented": true,
+    "v121ReplacementPipelineImplemented": true,
+    "v121ReplacementSeparateFromPreventionAvoid": true,
+    "noNewRuntimeCards": true,
+    "noAiDeckRelease": true,
+    "noSpecialZonesOwnershipControlSetAsideOrRemoveFromGame": true,
+    "noOfficialAssetsOrExternalCardDatabaseDependency": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.event_modification.prevent_avoid_interrupt",
+      "label": "Event Modification: would/prevent/avoid/interrupt",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.2.0",
+      "currentScopeNote": "V1.2.0 implements the ImminentEvent foundation and a test-only Damage Prevention pilot. Avoid and interrupt remain foundation-only with no runtime pilot.",
+      "coverage": ["unit", "visibility", "undo", "ai", "multiplayer", "reconnect", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.event_modification.replacement",
+      "label": "Replacement Effects",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.2.1",
+      "currentScopeNote": "V1.2.1 implements a separate test-only Damage Replacement pipeline with original and replacement event logging, once-per-window handling, deterministic candidate order and visible conflict blockers.",
+      "coverage": ["unit", "visibility", "undo", "ai", "multiplayer", "reconnect", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.hosting.viruses.counters",
+      "label": "Hosting, Viren, Purge und Counter-Familien",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.99",
+      "currentScopeNote": "Unchanged from V0.99."
+    },
+    {
+      "mechanicId": "mechanic.identities.abilities",
+      "label": "Identity Abilities, Setup und Static Modifier",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.98",
+      "currentScopeNote": "Unchanged from V0.98."
+    },
+    {
+      "mechanicId": "mechanic.hidden_zone_tools",
+      "label": "Search, Reveal, Expose, Arrange, Shuffle und Swap",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.98",
+      "currentScopeNote": "Unchanged from V0.98."
+    },
+    {
+      "mechanicId": "mechanic.runs.jackout_multiaccess_breach",
+      "label": "Jack-out, Breach-Objekt, Multiaccess",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.97",
+      "currentScopeNote": "Unchanged from V0.97/V1.1.2."
+    },
+    {
+      "mechanicId": "mechanic.trace.link_bidding",
+      "label": "Trace, Link und Bidding",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.96",
+      "currentScopeNote": "Unchanged from V0.96."
+    },
+    {
+      "mechanicId": "mechanic.resources",
+      "label": "Runner Resources und Tag-Resource-Interaktion",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.95",
+      "currentScopeNote": "Unchanged from V0.95."
+    },
+    {
+      "mechanicId": "mechanic.damage.flatline",
+      "label": "Damage und Flatline",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v0.94",
+      "currentScopeNote": "V1.2.0 and V1.2.1 hook into the existing Damage path through test-only prevention and replacement pilots without expanding runtime cards."
+    },
+    {
+      "mechanicId": "mechanic.special_zones_ownership_control",
+      "label": "Special Zones, Ownership, Control, Set Aside und Remove from Game",
+      "currentStatus": "open",
+      "targetGate": "future",
+      "currentScopeNote": "Explicitly out of scope for V1.2.0 and V1.2.1."
+    }
+  ]
+}

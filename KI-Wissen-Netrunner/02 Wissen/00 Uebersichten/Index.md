@@ -23,8 +23,11 @@
 - `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_PLAN.md`: V1.1.3-Planungsbaseline nach V1.1.2K; normalisiert Mechanik-Coverage, Kartenstatus, AI-Level und die V1.2.x-Reihenfolge.
 - `docs/derived/V1_2_0_EVENT_MODIFICATION_DETAILED_PLAN.md`: eingefrorener V1.2.0-Plan für Event Modification ohne Replacement Effects.
 - `docs/derived/EVENT_MODIFICATION_1_2_0_SPEC.md`: Spezifikation für `would`/`prevent`/`avoid`/eng geführte `interrupt`-Fenster.
+- `docs/derived/V1_2_0_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_2_0_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis der Event-Modification-Foundation mit Damage-Prevention-Pilot.
 - `docs/derived/V1_2_1_REPLACEMENT_EFFECTS_DETAILED_PLAN.md`: eingefrorener V1.2.1-Plan für Replacement Effects als getrennte Pipeline.
 - `docs/derived/REPLACEMENT_EFFECTS_1_2_1_SPEC.md`: Spezifikation für Originalevent, Replacementevent, einmal-pro-Fenster-Regeln, deterministische Reihenfolge und Konfliktblocker.
+- `docs/derived/V1_2_1_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_2_1_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis der getrennten Replacement-Pipeline.
+- `data/rules/mechanics-coverage-1.2.1.json`: maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.0/V1.2.1.
 
 ## Prozesse
 
