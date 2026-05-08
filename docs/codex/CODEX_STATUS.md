@@ -2,6 +2,10 @@
 
 ## Current phase
 
+Die Detailplanung fuer die vier naechsten Roadmap-Schritte nach V1.4.1 ist am 2026-05-08 requirements-vorbereitend abgeschlossen. Geplant wurden V1.4.2 Belief State und Gegner-Modell, V1.4.3 Simulation/Selfplay/Exploit-Regression, V1.5.0 Private Replay/Analyse/Lernhilfe als konkreter erster V1.5.x-Slice und V1.6.0 Tutorial/Regelhilfe als konkreter erster V1.6.x-Slice. Die Planung bestaetigt: Die vier Schritte sind sinnvoll, aber nicht als gemeinsames Implementierungsbundle; sie muessen strikt sequenziell umgesetzt werden. `R&D access freshness` aus der Playtest-Beobachtung wird als side-sicherer Memory-Fall in V1.4.2 aufgenommen. Deck-Legal AI Approval Batch B-G, neue Karten, neue Mechaniken, Kartentextparser, offizielle Assets, Public-Plattformfunktionen, LLM-Regelakteure und echte Hidden-State-/FullState-Simulation bleiben ausgeschlossen. Neue Fuehrungsartefakte: `docs/derived/V1_4_2_TO_V1_6_0_PLANNING_REVIEW.md` und `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`. Je Release wurden Detailplan, Requirements, Spezifikation, Testmatrix und Requirements Review erstellt. Gate-Ergebnis: `V1_4_2_to_V1_6_0_planning_done: true`; `ready_for_V1_4_2_implementation: true_after_V1_4_1`.
+
+Runner-KI-Playtest-Härtung vom 2026-05-08: Zwei lokale Beobachtungen sind in `docs/derived/RUNNER_AI_RND_REPEAT_ACCESS_OBSERVATION_2026_05_08.md` dokumentiert. `R&D access freshness` bleibt als side-sicherer Memory-Fall in V1.4.2 eingeordnet. Der zweite beobachtete Fall ist bereits umgesetzt: Die Runner-KI pumpte zuvor `Efficient Fracter` gegen `Crystal Wall`, obwohl dieser Breaker das ICE nach Engine-Subtype-Vertrag nicht brechen kann, und lief danach erneut auf denselben sichtbar blockierten Außenserver. Jetzt bewertet die reaktive Runner-KI `pump_breaker` nur hoch, wenn derselbe Breaker das aktuelle ICE grundsätzlich brechen kann; der Runner-Planer erkennt sichtbar gerezztes End-the-run-ICE als Blocker, wenn kein installiertes Programm es nach echten Card-Ability-/ICE-Subtype-Regeln brechen kann. Regressionstest: `packages/ai/src/index.test.ts` deckt `Efficient Fracter` gegen `Crystal Wall` ab. Belief State, FullState-Simulation und Hidden-Info-Zugriff bleiben ausgeschlossen.
+
 Deck-Legal AI Approval Batch A `Runner Rig Low Risk` ist am 2026-05-08 umgesetzt und lokal verifiziert. Genau acht bereits decklegale Runner-Rig-Karten sind nach Gate-Prüfung jetzt `ai_supported`: Codecracker, Codeslinger, Dwarf, Krash, Snowball, Worm, Tycho Mem Chip und Zetatech Mem Chip. Neue Artefakte: `data/ai/ai-card-hints-deck-legal-batch-a.json`, `data/manifests/deck-legal-ai-approval-batch-a-manifest.json`, `data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json` und `docs/derived/DECK_LEGAL_AI_APPROVAL_BATCH_A_IMPLEMENTATION_REVIEW.md`. Die Runner-KI bewertet Batch-A-Rig-Installationen weiterhin nur aus PlayerView, LegalActions und AI-supported Rollen; MU-Druck, Credit-Reserve, Safe-Probe-Runs und sichtbare Stopper sind getestet. `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` bestanden; der Build meldete nur die bekannte nicht-blockierende Turbopack-NFT-Warnung. Keine Batch-B- bis Batch-G-Karten, keine nicht deckbau-erlaubten Karten, keine pauschale O:NR-KI-Freigabe, kein lokales Korp-Deck, keine neuen Mechaniken, kein Kartentextparser, kein Belief State, keine FullState-Simulation, keine offiziellen Assets und keine Public-Plattformfunktionen wurden eingeführt. Gate-Ergebnis: `deck_legal_ai_approval_batch_a_done: true`.
 
 Der Slice `King of the Road AI Approval` ist am 2026-05-08 umgesetzt und lokal verifiziert. Das lokale Runner-Deck `King of the Road` (`local_runner_adb10896`) liegt als versionierter Runner-KI-Snapshot `king_of_the_road_runner_ai_snapshot_v1` mit Deck-Hash `fnv1a:23f11fed` vor. Genau die 14 eindeutigen Deckkarten haben slice-spezifische AI-Hints, Szenario-Referenzen und nach Gate-Pruefung `ai_supported`; weitere lokale O:NR-Karten brauchen eigene Folgefreigaben wie Batch A. Human-Korp-vs-Runner-KI startet mit diesem Runner-Snapshot und dem Standard-Korp-KI-Snapshot `demo_corp_008_snapshot_v0_8`. Keine lokalen Korp-Decks, keine pauschale O:NR-KI-Freigabe, keine neuen Mechaniken, kein Kartentextparser, kein Belief State, keine FullState-Simulation, keine offiziellen Assets und keine Public-Plattformfunktionen wurden eingefuehrt. Gate-Ergebnis: `king_of_the_road_ai_approval_done: true`.
@@ -2192,17 +2196,39 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Implement V1.4.0 from `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
-2. Treat V1.4.1 as planned follow-up release, but do not start it before the V1.4.0 final gate is green.
-3. Keep AI-Hints separate from `ai_supported`; Hints prepare KI support but do not grant it.
-4. Keep plan-based KI behind PlayerView, LegalActions, side-filtered PublicEvents, own deck/hint data and explicit public metadata.
-5. Treat V1.4.2 Belief State and V1.4.3 Simulation/Selfplay as later gates, not as V1.4.0/V1.4.1 scope.
-6. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
+1. Implement V1.4.2 from `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`.
+2. Do not start V1.4.3 before the V1.4.2 final gate is green.
+3. Treat V1.5.0 and V1.6.0 as the first narrow implementation slices of the broader V1.5.x/V1.6.x roadmap families.
+4. Keep Belief State behind PlayerView, LegalActions, side-filtered PublicEvents, own private facts, revealed facts and replay history.
+5. Keep Simulation/Selfplay behind fair Belief State; no real Hidden State or FullState simulation.
+6. Keep Deck-Legal AI Approval Batch B-G, accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of these four releases unless explicitly gated separately.
 
-Card Data Pipeline v2 and AI-Hints v2 are implemented as V1.3.1 data/review artifacts. Planbasierte KI remains planned only until the V1.4.0/V1.4.1 implementation/final gates. Event Modification, Replacement, Special Zones, Format/Deckbuilding and the current O:NR-v1 card pool remain limited to their completed narrow gates; further cards, broad eventfamilies, Avoid-/Interrupt-Runtime-Pilots and KI-Deckfreigaben still need their own gates.
+Card Data Pipeline v2, AI-Hints v2, planbasierte Corp-KI and planbasierte Runner-KI are implemented through V1.4.1. Event Modification, Replacement, Special Zones, Format/Deckbuilding and the current O:NR-v1 card pool remain limited to their completed narrow gates; further cards, broad eventfamilies, Avoid-/Interrupt-Runtime-Pilots and KI-Deckfreigaben still need their own gates. The next implementation gate is V1.4.2 Belief State und Gegner-Modell.
 
 Detailed planning artifacts available:
 
+- `docs/derived/V1_4_2_TO_V1_6_0_PLANNING_REVIEW.md`
+- `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`
+- `docs/derived/V1_4_2_BELIEF_STATE_OPPONENT_MODEL_DETAILED_PLAN.md`
+- `docs/derived/V1_4_2_REQUIREMENTS.md`
+- `docs/derived/BELIEF_STATE_OPPONENT_MODEL_1_4_2_SPEC.md`
+- `docs/derived/V1_4_2_TEST_MATRIX.md`
+- `docs/derived/V1_4_2_REQUIREMENTS_REVIEW.md`
+- `docs/derived/V1_4_3_SIMULATION_SELFPLAY_EXPLOIT_REGRESSION_DETAILED_PLAN.md`
+- `docs/derived/V1_4_3_REQUIREMENTS.md`
+- `docs/derived/SIMULATION_SELFPLAY_EXPLOIT_REGRESSION_1_4_3_SPEC.md`
+- `docs/derived/V1_4_3_TEST_MATRIX.md`
+- `docs/derived/V1_4_3_REQUIREMENTS_REVIEW.md`
+- `docs/derived/V1_5_0_PRIVATE_REPLAY_ANALYSIS_LEARNING_DETAILED_PLAN.md`
+- `docs/derived/V1_5_0_REQUIREMENTS.md`
+- `docs/derived/PRIVATE_REPLAY_ANALYSIS_LEARNING_1_5_0_SPEC.md`
+- `docs/derived/V1_5_0_TEST_MATRIX.md`
+- `docs/derived/V1_5_0_REQUIREMENTS_REVIEW.md`
+- `docs/derived/V1_6_0_TUTORIAL_RULE_HELP_DETAILED_PLAN.md`
+- `docs/derived/V1_6_0_REQUIREMENTS.md`
+- `docs/derived/TUTORIAL_RULE_HELP_1_6_0_SPEC.md`
+- `docs/derived/V1_6_0_TEST_MATRIX.md`
+- `docs/derived/V1_6_0_REQUIREMENTS_REVIEW.md`
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`
