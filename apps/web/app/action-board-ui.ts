@@ -29,7 +29,11 @@ const DECISION_ACTION_TYPES = new Set<LegalAction["type"]>([
   "rez_ice",
   "decline_rez",
   "pump_breaker",
-  "break_subroutine"
+  "break_subroutine",
+  "move_to_set_aside",
+  "move_to_removed_from_game",
+  "return_from_set_aside",
+  "change_card_control"
 ]);
 
 const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
@@ -55,6 +59,10 @@ const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
   decline_trash: "Zugriff",
   remove_tag: "Tags/Ressourcen",
   purge_virus_counters: "Virus-Counter",
+  move_to_set_aside: "Spezialzonen",
+  move_to_removed_from_game: "Spezialzonen",
+  return_from_set_aside: "Spezialzonen",
+  change_card_control: "Kontrolle",
   resolve_choice: "Entscheidung",
   trigger_ability: "Weitere Aktionen",
   end_turn: "Zug"

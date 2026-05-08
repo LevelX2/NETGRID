@@ -16,7 +16,7 @@ import {
   validateDeckDefinition,
   validateGameState
 } from "./index";
-import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netgrid/shared";
+import { MVP_0_99_BASELINE, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameState, type LegalAction, type Side } from "@netgrid/shared";
 
 describe("MVP 0.1 engine foundation", () => {
   it("creates deterministic games for the same seed", () => {
@@ -1234,6 +1234,147 @@ describe("V1.1.2K Card Release", () => {
       expect(state.run).toBeUndefined();
       expect(replayEvents(beforeContinue, state.eventLog.slice(beforeContinue.eventLog.length)).ok).toBe(true);
     }
+  });
+});
+
+describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
+  it("adds exactly eight human-playable O:NR cards without opening deferred mechanics", () => {
+    expect(ONR_V1_2_3_FINAL_CARD_IDS).toHaveLength(8);
+    for (const definitionId of ONR_V1_2_3_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" ")).not.toMatch(/prevention|avoid|replacement|hosting|virus|recurring_credit|bad_publicity|format|deckbuilder|parser/);
+    }
+
+    expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_066_snowball"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_297_overtime-incentives"]).toMatchObject({ cost: 0 });
+  });
+
+  it("validates V1.2.3 smoke decks after the V1.2.2 gate", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_2_3_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_2_3_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v123CardReleaseGame("v123-validation");
+
+    expect(runnerValidation.errors).toEqual([]);
+    expect(runnerValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(state.specialZones).toEqual({ setAside: [], removedFromGame: [] });
+    expect(DEMO_CARDS_BY_ID["onr_v1_018_dogcatcher"]).toBeUndefined();
+  });
+
+  it("installs the four unlocked breakers and resolves wall, sentry and universal break rules", () => {
+    let installState = toRunnerTurn(v123CardReleaseGame("v123-runner-breakers"));
+    installState.runner.credits = 50;
+    installState.runner.clicks = 12;
+    installState.runner.memoryLimit = 10;
+    for (const definitionId of ["onr_v1_021_dwarf", "onr_v1_039_krash", "onr_v1_066_snowball", "onr_v1_074_worm"] as const) {
+      moveRunnerCardToGrip(installState, definitionId);
+      installState = apply(installState, "runner", (action) => action.type === "install_card" && sourceDefinition(installState, action) === definitionId);
+    }
+    expect(installState.runner.memoryUsed).toBe(4);
+
+    const breakCases = [
+      { breaker: "onr_v1_021_dwarf", ice: "onr_v1_237_data-wall", seed: "dwarf-wall" },
+      { breaker: "onr_v1_074_worm", ice: "onr_v1_237_data-wall", seed: "worm-wall" },
+      { breaker: "onr_v1_066_snowball", ice: "onr_v1_259_in-the-face", seed: "snowball-sentry" },
+      { breaker: "onr_v1_039_krash", ice: "onr_v1_261_quandary", seed: "krash-code-gate" }
+    ] as const;
+
+    for (const testCase of breakCases) {
+      let state = toRunnerTurn(v123CardReleaseGame(`v123-${testCase.seed}`));
+      state.runner.credits = 20;
+      state.corp.credits = 20;
+      installRunnerProgramForTest(state, testCase.breaker);
+      putCorpIceOnServer(state, "rd", testCase.ice);
+      putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === testCase.ice);
+      for (let pumpCount = 0; pumpCount < 5 && !getLegalActions(state, "runner").some((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === testCase.breaker); pumpCount += 1) {
+        state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === testCase.breaker);
+      }
+      state = apply(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === testCase.breaker);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      for (let continueCount = 0; continueCount < 3 && !getLegalActions(state, "runner").some((action) => action.type === "access_card"); continueCount += 1) {
+        state = apply(state, "runner", (action) => action.type === "continue_run");
+      }
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation" });
+    }
+  });
+
+  it("plays the unlocked R&D and HQ multiaccess events with hidden queues", () => {
+    let rdState = toRunnerTurn(v123CardReleaseGame("v123-custodial-position"));
+    moveRunnerCardToGrip(rdState, "onr_v1_081_custodial-position");
+    putCorpCardOnTopOfRd(rdState, "simple_economy_operation");
+    putCorpCardOnTopOfRd(rdState, "onr_v1_203_hostile-takeover");
+    putCorpCardOnTopOfRd(rdState, "onr_v1_220_tycho-extension");
+
+    rdState = apply(rdState, "runner", (action) => action.type === "play_event" && sourceDefinition(rdState, action) === "onr_v1_081_custodial-position" && action.payload?.serverId === "rd");
+
+    expect(rdState.timingPoint).toBe("access.resolve_card");
+    expect(rdState.run?.breach).toMatchObject({ serverId: "rd", accessMode: "multi", currentIndex: 0 });
+    expect(rdState.run?.breach?.queue).toHaveLength(3);
+    expect(JSON.stringify(rdState.eventLog.at(-1)?.publicPayload)).not.toContain("Tycho Extension");
+
+    let hqState = toRunnerTurn(v123CardReleaseGame("v123-executive-wiretaps"));
+    moveRunnerCardToGrip(hqState, "onr_v1_085_executive-wiretaps");
+    const first = moveCorpCardToHq(hqState, "simple_economy_operation");
+    const second = moveCorpCardToHq(hqState, "onr_v1_203_hostile-takeover");
+    const third = moveCorpCardToHq(hqState, "onr_v1_220_tycho-extension");
+    keepOnlyCorpHqCards(hqState, [first, second, third]);
+
+    hqState = apply(hqState, "runner", (action) => action.type === "play_event" && sourceDefinition(hqState, action) === "onr_v1_085_executive-wiretaps" && action.payload?.serverId === "hq");
+
+    expect(hqState.run?.breach).toMatchObject({ serverId: "hq", accessMode: "multi", currentIndex: 0 });
+    expect(hqState.run?.breach?.queue).toHaveLength(3);
+    expect(JSON.stringify(getPlayerView(hqState, "runner"))).not.toContain("Tycho Extension");
+    expect(getPlayerView(hqState, "runner").run?.breach?.remainingCount).toBe(3);
+  });
+
+  it("removes MIT West Tier from the game after a deterministic hidden shuffle and draw", () => {
+    let state = toRunnerTurn(v123CardReleaseGame("v123-mit-west-tier"));
+    emptyRunnerGripForTest(state);
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_101_mit-west-tier");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_101_mit-west-tier");
+
+    expect(state.runner.grip).toHaveLength(5);
+    expect(state.runner.heap).not.toContain(eventId);
+    expect(state.specialZones?.removedFromGame).toEqual([eventId]);
+    expect(state.cardInstances[eventId]?.zone).toMatchObject({ side: "special", zone: "removed_from_game", visibility: "public" });
+    expect(getPlayerView(state, "runner").specialZones?.removedFromGame[0]).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier", owner: "runner", controller: "runner" });
+    expect(getPlayerView(state, "corp").specialZones?.removedFromGame[0]).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("runner_");
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("plays Overtime Incentives as a LegalAction-only Corp action gain", () => {
+    let state = v123CardReleaseGame("v123-overtime");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.clicks = 3;
+    state.corp.credits = 5;
+    moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+
+    const before = state.corp.clicks;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_297_overtime-incentives");
+
+    expect(state.corp.clicks).toBe(before + 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation", cardDefinitionId: "onr_v1_297_overtime-incentives", gainedActions: 2 });
+    expect(JSON.stringify(getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload)).not.toContain("corp_");
   });
 });
 
@@ -2623,6 +2764,126 @@ describe("V1.2.1 Replacement Effects", () => {
   });
 });
 
+describe("V1.2.2 Special Zones, Ownership and Control", () => {
+  it("moves a card to side-private Set Aside atomically without public identity leaks and replays deterministically", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v122-set-aside" }));
+    const cardId = moveRunnerCardToGrip(state, "simple_economy_event");
+    state.specialZoneHarness = {
+      actor: "runner",
+      cardInstanceId: cardId,
+      setAside: { visibility: "side_private", visibilitySide: "runner", reason: "v122_side_private_set_aside", allowReturn: true }
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "move_to_set_aside" && action.payload?.cardId === cardId);
+
+    expect(validateGameState(state).ok).toBe(true);
+    expect(state.runner.grip).not.toContain(cardId);
+    expect(state.specialZones?.setAside).toEqual([cardId]);
+    expect(state.cardInstances[cardId]?.zone).toMatchObject({ side: "special", zone: "set_aside", visibility: "side_private", visibilitySide: "runner" });
+    expect(getPlayerView(state, "runner").specialZones?.setAside[0]).toMatchObject({ definitionId: "simple_economy_event", owner: "runner", controller: "runner" });
+    expect(getPlayerView(state, "corp").specialZones?.setAside[0]).toMatchObject({ known: false });
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Simple Economy Event");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "move_to_set_aside", specialZone: "set_aside", redactedKind: "special_zone" });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Economy Event");
+    expect(isHiddenInfoBarrierEvent(state.eventLog.at(-1)!)).toBe(true);
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("supports test-only return from Set Aside without enabling Removed from Game return", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v122-return-terminal" }));
+    const setAsideId = moveRunnerCardToGrip(state, "simple_economy_event");
+    state.specialZoneHarness = {
+      actor: "runner",
+      cardInstanceId: setAsideId,
+      setAside: { visibility: "public", reason: "v122_public_set_aside", allowReturn: true, returnZone: { side: "runner", zone: "grip" } }
+    };
+    state = apply(state, "runner", (action) => action.type === "move_to_set_aside");
+    expect(getLegalActions(state, "runner").some((action) => action.type === "return_from_set_aside")).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "return_from_set_aside");
+    expect(state.runner.grip).toContain(setAsideId);
+    expect(state.specialZones?.setAside).toEqual([]);
+
+    const removedId = moveRunnerCardToGrip(state, "simple_run_event");
+    state.specialZoneHarness = {
+      actor: "runner",
+      cardInstanceId: removedId,
+      removedFromGame: { visibility: "hidden", reason: "v122_terminal_removed" }
+    };
+    state = apply(state, "runner", (action) => action.type === "move_to_removed_from_game");
+    expect(state.specialZones?.removedFromGame).toEqual([removedId]);
+    expect(state.cardInstances[removedId]?.zone).toMatchObject({ side: "special", zone: "removed_from_game", visibility: "hidden" });
+    expect(getLegalActions(state, "runner").some((action) => action.type === "return_from_set_aside")).toBe(false);
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Simple Run Event");
+  });
+
+  it("changes controller deterministically without changing owner and rejects wrong-side or stale actions", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "v122-control" }));
+    const cardId = installRunnerProgramForTest(state, "simple_fracter");
+    const beforeHash = hashState(state);
+    state.specialZoneHarness = {
+      actor: "runner",
+      cardInstanceId: cardId,
+      controlChange: { newController: "corp", visibility: "public", reason: "v122_limited_control_change" }
+    };
+    const action = mustAction(state, "runner", (candidate) => candidate.type === "change_card_control");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion
+    });
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: action.actionId,
+      clientKnownStateVersion: state.stateVersion - 1
+    });
+    expect(wrongSide.ok).toBe(false);
+    expect(stale.ok).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (candidate) => candidate.actionId === action.actionId);
+
+    expect(state.cardInstances[cardId]?.owner).toBe("runner");
+    expect(state.cardInstances[cardId]?.controller).toBe("corp");
+    expect(hashState(state)).not.toBe(beforeHash);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "change_card_control", oldController: "runner", newController: "corp", ownershipChanged: false });
+    expect(getPlayerView(state, "runner").own.rig?.find((card) => card.instanceId === cardId)?.controller).toBe("corp");
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps hosted card invariants when a controlled host is trashed", () => {
+    let state = installedResourceCorpTurn("v122-host-control-trash");
+    const resourceId = state.runner.rig.resources[0]!;
+    const hostedId = installRunnerProgramForTest(state, "simple_decoder");
+    state.cardInstances[hostedId] = { ...state.cardInstances[hostedId]!, hostedOn: resourceId };
+    state.specialZoneHarness = {
+      actor: "corp",
+      cardInstanceId: resourceId,
+      controlChange: { newController: "corp", visibility: "public", reason: "v122_controlled_host" }
+    };
+    state = apply(state, "corp", (action) => action.type === "change_card_control");
+    state = apply(state, "corp", (action) => action.type === "trash_resource" && action.payload?.resourceId === resourceId);
+
+    expect(validateGameState(state).ok).toBe(true);
+    expect(state.runner.heap).toContain(resourceId);
+    expect(state.runner.heap).toContain(hostedId);
+    expect(state.cardInstances[resourceId]?.owner).toBe("runner");
+    expect(state.cardInstances[resourceId]?.controller).toBe("corp");
+    expect(state.cardInstances[hostedId]?.owner).toBe("runner");
+    expect(state.cardInstances[hostedId]?.controller).toBe("runner");
+    expect(state.cardInstances[hostedId]?.hostedOn).toBeUndefined();
+  });
+});
+
 const ONR_V1_0_5K_FINAL_CARD_IDS = [
   "onr_v1_015_codeslinger",
   "onr_v1_052_raffles",
@@ -2682,6 +2943,17 @@ const ONR_V1_1_2K_FINAL_CARD_IDS = [
   "onr_v1_279_wall-of-static",
   "onr_v1_293_netwatch-credit-voucher",
   "onr_v1_295_night-shift"
+] as const;
+
+const ONR_V1_2_3_FINAL_CARD_IDS = [
+  "onr_v1_021_dwarf",
+  "onr_v1_039_krash",
+  "onr_v1_066_snowball",
+  "onr_v1_074_worm",
+  "onr_v1_081_custodial-position",
+  "onr_v1_085_executive-wiretaps",
+  "onr_v1_101_mit-west-tier",
+  "onr_v1_297_overtime-incentives"
 ] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
@@ -2803,6 +3075,40 @@ const ONR_V1_1_2K_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_278_wall-of-ice", quantity: 1 },
     { id: "onr_v1_279_wall-of-static", quantity: 1 },
     { id: "simple_economy_operation", quantity: 2 }
+  ]
+};
+
+const ONR_V1_2_3_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v123_smoke_094",
+  name: "O:NR V1.2.3 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "onr_v1_039_krash", quantity: 2 },
+    { id: "onr_v1_066_snowball", quantity: 2 },
+    { id: "onr_v1_074_worm", quantity: 2 },
+    { id: "onr_v1_081_custodial-position", quantity: 1 },
+    { id: "onr_v1_085_executive-wiretaps", quantity: 1 },
+    { id: "onr_v1_101_mit-west-tier", quantity: 2 }
+  ]
+};
+
+const ONR_V1_2_3_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v123_smoke_094",
+  name: "O:NR V1.2.3 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_297_overtime-incentives", quantity: 3 },
+    { id: "onr_v1_237_data-wall", quantity: 2 },
+    { id: "onr_v1_261_quandary", quantity: 2 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "onr_v1_259_in-the-face", quantity: 2 },
+    { id: "onr_v1_295_night-shift", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
   ]
 };
 
@@ -2978,6 +3284,16 @@ function v112kCardReleaseGame(seed: string): GameState {
     seed,
     runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
     corpDeck: ONR_V1_1_2K_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v123CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+    corpDeck: ONR_V1_2_3_CORP_DECK,
     agendaPointsToWin: 7
   });
 }
@@ -3317,4 +3633,8 @@ function removeEverywhere(state: GameState, id: string): void {
   state.runner.rig.programs = state.runner.rig.programs.filter((cardId) => cardId !== id);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((cardId) => cardId !== id);
   state.runner.rig.resources = state.runner.rig.resources.filter((cardId) => cardId !== id);
+  if (state.specialZones) {
+    state.specialZones.setAside = state.specialZones.setAside.filter((cardId) => cardId !== id);
+    state.specialZones.removedFromGame = state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
+  }
 }

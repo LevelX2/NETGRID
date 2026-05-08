@@ -22,6 +22,10 @@ const ACTION_TYPES = [
   "trash_accessed_card",
   "decline_trash",
   "remove_tag",
+  "move_to_set_aside",
+  "move_to_removed_from_game",
+  "return_from_set_aside",
+  "change_card_control",
   "end_turn",
   "game_created"
 ] as const;

@@ -1,4 +1,5 @@
 import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
+import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import { createHash } from "node:crypto";
@@ -44,7 +45,7 @@ export type ResolvedParticipantDeckSetup = Record<SeriesPlayerSlot, ResolvedPart
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const cardsById = createRuntimeCardsById() as DeckValidationContext["cardsById"];
-const profiles = profilesData.profiles as DeckFormatProfile[];
+const profiles = [...(profilesData.profiles as DeckFormatProfile[]), ...(profilesData130.profiles as DeckFormatProfile[])];
 const frozenSnapshots = snapshotsData.snapshots as DeckSnapshot[];
 const aiDeckPool = aiDeckPoolData.entries as Array<{ snapshotId: string; side: "runner" | "corp"; tags: string[] }>;
 
@@ -72,10 +73,12 @@ export function resolveParticipantDeckSetup(
     ...(input.runnerDeckSnapshot ? { runnerDeckSnapshot: input.runnerDeckSnapshot } : {}),
     ...(input.corpDeckSnapshot ? { corpDeckSnapshot: input.corpDeckSnapshot } : {})
   };
-  return {
+  const setup: ResolvedParticipantDeckSetup = {
     player_a: resolveParticipantPair(deckInputForPlayer("player_a", input.participantADecks ?? legacyPair, options.seed, options.aiPlayer, policy)),
     player_b: resolveParticipantPair(deckInputForPlayer("player_b", input.participantBDecks ?? legacyPair, options.seed, options.aiPlayer, policy))
   };
+  if (options.aiPlayer && !participantPairUsesAiSupportedCards(setup[options.aiPlayer])) throw new Error("ai_deck_snapshot_not_supported");
+  return setup;
 }
 
 export function deckSetupForParticipants(
@@ -158,16 +161,25 @@ function resolveSnapshot(side: "runner" | "corp", supplied: DeckSnapshot | undef
   if (!profile) throw new Error("deck_format_profile_not_found");
   const validation = validateDeckSnapshot(snapshot, { cardsById, profile });
   if (!validation.ok) throw new Error("deck_snapshot_invalid");
+  if (snapshot.formatProfileId === "netgrid_private_local_v1" && (!snapshot.formatProfileVersion || !snapshot.cardPoolVersion)) throw new Error("deck_snapshot_needs_revalidation");
   return structuredClone(snapshot) as DeckSnapshot;
 }
 
 function deterministicSnapshotId(side: "runner" | "corp", seed: string, salt: string): string {
   const candidates = frozenSnapshots
-    .filter((candidate) => candidate.side === side && candidate.validation.ok && aiDeckPool.some((entry) => entry.side === side && entry.snapshotId === candidate.deckSnapshotId))
+    .filter((candidate) => candidate.side === side && candidate.validation.ok && aiDeckPool.some((entry) => entry.side === side && entry.snapshotId === candidate.deckSnapshotId) && snapshotUsesAiSupportedCards(candidate))
     .map((candidate) => candidate.deckSnapshotId)
     .sort();
   if (candidates.length === 0) return side === "runner" ? DEFAULT_RUNNER_SNAPSHOT_ID : DEFAULT_CORP_SNAPSHOT_ID;
   const digest = createHash("sha256").update(`${seed}:${salt}`).digest();
   const value = digest.readUInt32BE(0);
   return candidates[value % candidates.length]!;
+}
+
+function snapshotUsesAiSupportedCards(snapshot: DeckSnapshot): boolean {
+  return snapshot.cards.every((entry) => cardsById[entry.cardId]?.statuses.ai_supported === true);
+}
+
+function participantPairUsesAiSupportedCards(pair: ResolvedParticipantDeckPair): boolean {
+  return snapshotUsesAiSupportedCards(pair.runnerSnapshot) && snapshotUsesAiSupportedCards(pair.corpSnapshot);
 }

@@ -12,14 +12,15 @@ import {
   ONR_V1_0_5K_RELEASE_CARD_IDS,
   ONR_V1_0_6K_RELEASE_CARD_IDS,
   ONR_V1_1_2K_RELEASE_CARD_IDS,
+  ONR_V1_2_3_RELEASE_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateSnapshot,
   type CardSnapshot
 } from "./index";
 
-const snapshot = snapshotData as CardSnapshot;
-const snapshot08 = snapshotData08 as CardSnapshot;
+const snapshot = snapshotData as unknown as CardSnapshot;
+const snapshot08 = snapshotData08 as unknown as CardSnapshot;
 
 describe("catalog import and status logic", () => {
   it("validates the local V0.5 snapshot", () => {
@@ -101,22 +102,29 @@ describe("catalog import and status logic", () => {
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 
-  it("applies the V1.0.5K, V1.0.6K and V1.1.2K release gates to private local O:NR runtime cards when present", () => {
+  it("applies the V1.0.5K, V1.0.6K, V1.1.2K and V1.2.3 release gates to private local O:NR runtime cards when present", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
 
     expect(ONR_V1_0_5K_RELEASE_CARD_IDS).toHaveLength(12);
     expect(ONR_V1_0_6K_RELEASE_CARD_IDS).toHaveLength(20);
     expect(ONR_V1_1_2K_RELEASE_CARD_IDS).toHaveLength(20);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(52);
+    expect(ONR_V1_2_3_RELEASE_CARD_IDS).toHaveLength(8);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(60);
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
       expect(card?.engineCardId).toBe(cardId);
       expect(card?.statuses.implemented).toBe(true);
+      expect(card?.statuses.engine_supported).toBe(true);
       expect(card?.statuses.playable).toBe(true);
+      expect(card?.statuses.human_playable).toBe(true);
+      expect(card?.statuses.ai_supported).toBe(false);
       expect(card?.statuses.deck_legal).toBe(true);
-      const expectedManifest = (ONR_V1_1_2K_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+      expect(card?.statuses.format_legal).toBe(true);
+      const expectedManifest = (ONR_V1_2_3_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.2.3"
+        : (ONR_V1_1_2K_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.1.2k"
         : (ONR_V1_0_6K_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
           ? "card-implementation-manifest-v1.0.6k"
@@ -152,11 +160,19 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_278_wall-of-ice"]?.numeric.rezCost).toBe(13);
     expect(cardsById["onr_v1_293_netwatch-credit-voucher"]?.text).toBe("Play only if Runner is tagged. Give Runner 1 tag and gain 1.");
     expect(cardsById["onr_v1_295_night-shift"]?.numeric.cost).toBe(0);
+    expect(cardsById["onr_v1_021_dwarf"]?.text).toBe("1 credit: Break wall subroutine.\n1 credit: +1 strength.");
+    expect(cardsById["onr_v1_039_krash"]?.text).toBe("2 credits: Break ice subroutine.\n2 credits: +1 strength.");
+    expect(cardsById["onr_v1_081_custodial-position"]?.text).toBe("Make a run on R&D. If successful, access two additional cards from R&D.");
+    expect(cardsById["onr_v1_085_executive-wiretaps"]?.text).toBe("Make a run on HQ. If successful, access two additional cards from HQ.");
+    expect(cardsById["onr_v1_101_mit-west-tier"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.2.3");
+    expect(cardsById["onr_v1_101_mit-west-tier"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_297_overtime-incentives"]?.numeric.cost).toBe(0);
     expect(cardsById["onr_v1_075_zetatech-software-installer"]?.text).toBe(
       "Put 2 bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overlying Software Installer itself. If you use any of these bits, replace them at the start of your next turn."
     );
     expect(cardsById["onr_v1_001_afreet"]?.text).toContain("Afreet can have up to 3 MU");
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(false);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.format_legal).toBe(false);
     expect(cardsById["onr_v1_018_dogcatcher"]?.engineCardId).toBeNull();
   });
 });

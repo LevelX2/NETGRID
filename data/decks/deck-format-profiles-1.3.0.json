@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "deck-format-profiles-v1.3.0",
+  "id": "deck-format-profiles-1.3.0",
+  "status": "private_local_foundation_v1_3_0",
+  "profiles": [
+    {
+      "profileId": "netgrid_private_local_v1",
+      "name": "NETGRID Private Local V1",
+      "version": "1.3.0",
+      "scope": "private_local",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "rulesBaselineIds": [
+        "rules-baseline-mvp-0.1",
+        "rules-baseline-mvp-0.4",
+        "rules-baseline-mvp-0.8",
+        "rules-baseline-mvp-0.94"
+      ],
+      "allowedCardStatuses": [
+        "playable",
+        "human_playable",
+        "deck_legal"
+      ],
+      "maxCopiesPerCard": 3,
+      "copyLimit": {
+        "defaultLimit": 3,
+        "exceptions": []
+      },
+      "minimumDeckCards": {
+        "runner": 12,
+        "corp": 18
+      },
+      "minimumAgendaPoints": {
+        "corp": 7
+      },
+      "agenda": {
+        "policy": "points_minimum",
+        "missingDataPolicy": "block",
+        "minimumAgendaPoints": {
+          "corp": 7
+        }
+      },
+      "requireIdentity": true,
+      "allowedIdentityCards": {
+        "runner": [
+          "runner_identity_001"
+        ],
+        "corp": [
+          "corp_identity_001"
+        ]
+      },
+      "identityRules": {
+        "runner": {
+          "runner_identity_001": {
+            "faction": "neutral_demo",
+            "influenceLimit": 15,
+            "minimumDeckCards": 12,
+            "allowedFactions": [
+              "neutral_demo",
+              "onr1996_neutral"
+            ]
+          }
+        },
+        "corp": {
+          "corp_identity_001": {
+            "faction": "neutral_demo",
+            "influenceLimit": 15,
+            "minimumDeckCards": 18,
+            "allowedFactions": [
+              "neutral_demo",
+              "onr1996_neutral"
+            ]
+          }
+        }
+      },
+      "influence": {
+        "enabled": true,
+        "missingDataPolicy": "block",
+        "neutralFactions": [
+          "neutral_demo",
+          "onr1996_neutral"
+        ],
+        "defaultInfluenceCost": 1,
+        "cardInfluenceCosts": {}
+      },
+      "formatLegal": {
+        "privateLocalOnly": true,
+        "requiresDeckLegal": true,
+        "requiresHumanPlayable": true
+      },
+      "ai": {
+        "requireAiSupportedForAiDecks": true
+      },
+      "hiddenInfoPolicy": {
+        "opponentDecklistPrivateByDefault": true,
+        "publicMetadataFields": [
+          "side",
+          "identityCardId",
+          "deckName",
+          "cardPoolSnapshotId",
+          "cardPoolVersion",
+          "formatProfileId",
+          "formatProfileVersion",
+          "deckHash"
+        ]
+      },
+      "nonGoals": [
+        "official_tournament_legality",
+        "rotation",
+        "banlist",
+        "public_platform_decklists",
+        "account_system",
+        "ranked_play",
+        "official_asset_usage",
+        "card_text_parser"
+      ]
+    }
+  ]
+}

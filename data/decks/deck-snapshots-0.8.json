@@ -445,6 +445,260 @@
         "deckHash": "fnv1a:29b7fc41"
       },
       "deckHash": "fnv1a:29b7fc41"
+    },
+    {
+      "deckSnapshotId": "demo_runner_123_snapshot_v1_2_3",
+      "sourceDeckId": "demo_runner_123",
+      "deckVersion": "1.2.3-local",
+      "name": "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "formatProfileId": "local-demo-v0.8",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_021_dwarf",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_039_krash",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_066_snowball",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_074_worm",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_081_custodial-position",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_085_executive-wiretaps",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_101_mit-west-tier",
+          "quantity": 2
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 12,
+        "agendaPoints": null
+      },
+      "publicMetadata": {
+        "side": "runner",
+        "identityCardId": "runner_identity_001",
+        "deckName": "Runner Demo Deck 1.2.3 - Mechanic Unlock 1",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:f57f1d98"
+      },
+      "deckHash": "fnv1a:f57f1d98"
+    },
+    {
+      "deckSnapshotId": "demo_corp_123_snapshot_v1_2_3",
+      "sourceDeckId": "demo_corp_123",
+      "deckVersion": "1.2.3-local",
+      "name": "Corp Demo Deck 1.2.3 - Mechanic Unlock 1",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "formatProfileId": "local-demo-v0.8",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_220_tycho-extension",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_259_in-the-face",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_261_quandary",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_297_overtime-incentives",
+          "quantity": 3
+        },
+        {
+          "cardId": "simple_economy_operation",
+          "quantity": 1
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 18,
+        "agendaPoints": 7
+      },
+      "publicMetadata": {
+        "side": "corp",
+        "identityCardId": "corp_identity_001",
+        "deckName": "Corp Demo Deck 1.2.3 - Mechanic Unlock 1",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "formatProfileId": "local-demo-v0.8",
+        "deckHash": "fnv1a:03efc0db"
+      },
+      "deckHash": "fnv1a:03efc0db"
+    },
+    {
+      "deckSnapshotId": "demo_runner_130_snapshot_v1_3_0",
+      "sourceDeckId": "demo_runner_130",
+      "deckVersion": "1.3.0-local",
+      "name": "Runner Demo Deck 1.3.0 - Private Local Format",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_021_dwarf",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_039_krash",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_066_snowball",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_074_worm",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_081_custodial-position",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_085_executive-wiretaps",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_101_mit-west-tier",
+          "quantity": 2
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 12,
+        "agendaPoints": null,
+        "influenceSpent": 0
+      },
+      "publicMetadata": {
+        "side": "runner",
+        "identityCardId": "runner_identity_001",
+        "deckName": "Runner Demo Deck 1.3.0 - Private Local Format",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "cardPoolVersion": "private-local-onr-v1",
+        "formatProfileId": "netgrid_private_local_v1",
+        "formatProfileVersion": "1.3.0",
+        "deckHash": "fnv1a:1f64d517"
+      },
+      "deckHash": "fnv1a:1f64d517"
+    },
+    {
+      "deckSnapshotId": "demo_corp_130_snapshot_v1_3_0",
+      "sourceDeckId": "demo_corp_130",
+      "deckVersion": "1.3.0-local",
+      "name": "Corp Demo Deck 1.3.0 - Private Local Format",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_220_tycho-extension",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_259_in-the-face",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_261_quandary",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_297_overtime-incentives",
+          "quantity": 3
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 18,
+        "agendaPoints": 7,
+        "influenceSpent": 0
+      },
+      "publicMetadata": {
+        "side": "corp",
+        "identityCardId": "corp_identity_001",
+        "deckName": "Corp Demo Deck 1.3.0 - Private Local Format",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "cardPoolVersion": "private-local-onr-v1",
+        "formatProfileId": "netgrid_private_local_v1",
+        "formatProfileVersion": "1.3.0",
+        "deckHash": "fnv1a:551ee643"
+      },
+      "deckHash": "fnv1a:551ee643"
     }
   ]
 }

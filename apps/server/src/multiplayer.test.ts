@@ -576,23 +576,17 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(joined)).not.toContain("onr_v1_015_codeslinger");
     expect(JSON.stringify(joined)).not.toContain("cardInstances");
 
-    const aiCreated = await service.createMatch({
-      hostSide: "runner",
-      mode: "human_runner_vs_corp_ai",
-      seed: "onr-local-ai-match",
-      participantADecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
-      participantBDecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
-      aiDeckPolicy: "selected",
-      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
-    });
-    const aiStored = await service.loadForTest(aiCreated.matchId);
-    expect(aiCreated.baseline.engineSchemaVersion).toBe("0.94.0");
-    expect(aiStored?.match.mode).toBe("human_runner_vs_corp_ai");
-    expect(aiStored?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_a", corpPlayer: "player_b" });
-    expect(aiStored?.match.deckSetup.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
-    expect(aiStored?.match.deckSetup.participants?.player_b.corpSnapshotId).toBe("local_onr_corp_match_smoke_snapshot");
-    expect(JSON.stringify(aiCreated)).not.toContain("onr_v1_203_hostile-takeover");
-    expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
+    await expect(
+      service.createMatch({
+        hostSide: "runner",
+        mode: "human_runner_vs_corp_ai",
+        seed: "onr-local-ai-match",
+        participantADecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
+        participantBDecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
+        aiDeckPolicy: "selected",
+        settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+      })
+    ).rejects.toThrow("ai_deck_snapshot_not_supported");
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {
@@ -1336,6 +1330,197 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(duplicateReplace.ok).toBe(true);
     if (!duplicateReplace.ok) throw new Error(duplicateReplace.error.message);
     expect(duplicateReplace.receipt.stateVersionAfter).toBe(replaced.receipt.stateVersionAfter);
+  });
+
+  it("handles V1.2.2 Special Zone submit, reconnect, idempotency, stale rejection and undo barrier side-safely", async () => {
+    const match = await joinedV122SpecialZoneMatch("mp-v122-special-zone");
+    const before = await bootstrap(match.service, match.matchId, match.runner);
+    const special = mustAction(before, (action) => action.type === "move_to_set_aside");
+
+    const moved = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken,
+      actionId: special.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v122-set-aside"
+    });
+    expect(moved.ok).toBe(true);
+    if (!moved.ok) throw new Error(moved.error.message);
+    expect(moved.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
+    expect(moved.publicEvent?.publicPayload).toMatchObject({ actionType: "move_to_set_aside", specialZone: "set_aside", redactedKind: "special_zone" });
+    expect(JSON.stringify(moved.publicEvent?.publicPayload)).not.toContain("Simple Economy Event");
+    expect(moved.actorPayload.playerView.specialZones?.setAside[0]).toMatchObject({ definitionId: "simple_economy_event", controller: "runner" });
+    expect(moved.opponentPayload.playerView.specialZones?.setAside[0]).toMatchObject({ known: false });
+    expect(JSON.stringify(moved.opponentPayload)).not.toContain("Simple Economy Event");
+
+    const duplicate = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken,
+      actionId: special.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v122-set-aside"
+    });
+    expect(duplicate.ok).toBe(true);
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.receipt.stateVersionAfter).toBe(moved.receipt.stateVersionAfter);
+
+    const stale = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken,
+      actionId: special.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v122-stale-set-aside"
+    });
+    expect(stale.ok).toBe(false);
+    if (stale.ok) throw new Error("Expected stale rejection");
+    expect(stale.error.code).toBe("stale_state");
+
+    const reconnectedCorp = await match.service.reconnectMatch(match.matchId, {
+      side: "corp",
+      reconnectToken: match.corp.reconnectToken
+    });
+    expect("error" in reconnectedCorp).toBe(false);
+    if ("error" in reconnectedCorp) throw new Error(reconnectedCorp.error.message);
+    expect(reconnectedCorp.playerView.specialZones?.setAside[0]).toMatchObject({ known: false });
+    expect(JSON.stringify(reconnectedCorp)).not.toContain("Simple Economy Event");
+
+    const blocked = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken,
+      targetEventId: `evt_${moved.receipt.stateVersionAfter}`,
+      reason: "Special zone undo"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected Special Zone hidden-info barrier");
+    expect(blocked.error.code).toBe("undo_blocked");
+  });
+
+  it("starts V1.2.3 decks from snapshots and handles MIT West Tier through reconnect, idempotency and undo barrier", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "mp-v123-card-release" });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "mp-v123-mit-west-tier",
+      runnerDeckSnapshotId: "demo_runner_123_snapshot_v1_2_3",
+      corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+    });
+    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.playerView.deckMetadata?.opponent.deckName).toBe("Runner Demo Deck 1.2.3 - Mechanic Unlock 1");
+    expect(JSON.stringify(created)).not.toContain("onr_v1_101_mit-west-tier");
+    expect(created.joinUrl).toBeTruthy();
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+
+    await prepareV123MitRunnerTurn(service, created.matchId);
+    const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    const before = await bootstrap(service, created.matchId, runner);
+    expect(before.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:f57f1d98");
+    const mit = mustAction(before, (action) => action.type === "play_event" && action.label.includes("MIT West Tier"));
+
+    const played = await service.submitAction({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: runner.sessionToken,
+      actionId: mit.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v123-mit-west-tier"
+    });
+    expect(played.ok).toBe(true);
+    if (!played.ok) throw new Error(played.error.message);
+    expect(played.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
+    expect(played.publicEvent?.publicPayload).toMatchObject({ actionType: "play_event", cardDefinitionId: "onr_v1_101_mit-west-tier", hiddenZoneBarrier: true });
+    expect(JSON.stringify(played.publicEvent?.publicPayload)).not.toContain("runner_");
+    expect(played.actorPayload.playerView.specialZones?.removedFromGame[0]).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier", controller: "runner" });
+    expect(played.opponentPayload.playerView.specialZones?.removedFromGame[0]).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+
+    const duplicate = await service.submitAction({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: runner.sessionToken,
+      actionId: mit.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "v123-mit-west-tier"
+    });
+    expect(duplicate.ok).toBe(true);
+    if (!duplicate.ok) throw new Error(duplicate.error.message);
+    expect(duplicate.receipt.stateVersionAfter).toBe(played.receipt.stateVersionAfter);
+
+    const reconnectedCorp = await service.reconnectMatch(created.matchId, { side: "corp", reconnectToken: created.hostReconnectToken });
+    expect("error" in reconnectedCorp).toBe(false);
+    if ("error" in reconnectedCorp) throw new Error(reconnectedCorp.error.message);
+    expect(reconnectedCorp.playerView.specialZones?.removedFromGame[0]).toMatchObject({ definitionId: "onr_v1_101_mit-west-tier" });
+    expect(JSON.stringify(reconnectedCorp)).not.toContain("Dwarf");
+    expect(JSON.stringify(reconnectedCorp)).not.toContain("Krash");
+
+    const blocked = await service.requestUndo({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: runner.sessionToken,
+      targetEventId: `evt_${played.receipt.stateVersionAfter}`,
+      reason: "V1.2.3 hidden-zone shuffle undo"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected MIT hidden-info barrier");
+    expect(blocked.error.code).toBe("undo_blocked");
+  });
+
+  it("starts V1.3.0 private local format snapshots and revalidates invalid or AI-unsupported decks server-side", async () => {
+    const cardsById = createRuntimeCardsById();
+    if (!cardsById["onr_v1_021_dwarf"]) return;
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "mp-v130-format-foundation" });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "mp-v130-private-local",
+      runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+      corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+    });
+
+    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_v1");
+    expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.3.0");
+    expect(JSON.stringify(created)).not.toContain("onr_v1_021_dwarf");
+    expect(JSON.stringify(created)).not.toContain("decklist");
+
+    const record = await service.loadForTest(created.matchId);
+    expect(record?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_130_snapshot_v1_3_0");
+    expect(JSON.stringify(record?.match.deckSetup)).not.toContain("cards");
+
+    const invalidRunner = structuredClone((snapshotsData08.snapshots as DeckSnapshot[]).find((snapshot) => snapshot.deckSnapshotId === "demo_runner_130_snapshot_v1_3_0"));
+    if (!invalidRunner) throw new Error("Missing V1.3.0 runner snapshot");
+    invalidRunner.cards.push({ cardId: "onr_v1_018_dogcatcher", quantity: 1 });
+    await expect(
+      service.createMatch({
+        hostSide: "runner",
+        seed: "mp-v130-invalid-runner",
+        runnerDeckSnapshot: invalidRunner,
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+      })
+    ).rejects.toThrow("deck_snapshot_invalid");
+
+    await expect(
+      service.createMatch({
+        hostSide: "corp",
+        mode: "human_corp_vs_runner_ai",
+        seed: "mp-v130-ai-blocked",
+        participantADecks: {
+          runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+          corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        },
+        participantBDecks: {
+          runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+          corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+        },
+        aiDeckPolicy: "selected"
+      })
+    ).rejects.toThrow("ai_deck_snapshot_not_supported");
   });
 
   it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {
@@ -3194,6 +3379,74 @@ async function joinedV121ReplacementMatch(seed: string) {
   };
 }
 
+async function joinedV122SpecialZoneMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3100",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  let ready = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed, agendaPointsToWin: 7 }));
+  const cardId = moveRunnerCardToGripForTest(ready, "simple_economy_event");
+  ready.specialZoneHarness = {
+    actor: "runner",
+    cardInstanceId: cardId,
+    setAside: { visibility: "side_private", visibilitySide: "runner", reason: "mp_v122_side_private_set_aside" }
+  };
+  record.gameState = ready;
+  record.match.baseline = ready.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = ready.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, ready, record.match.matchVersion, "snap_v122_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
+async function prepareV123MitRunnerTurn(service: MultiplayerService, matchId: string): Promise<void> {
+  const record = await service.loadForTest(matchId);
+  if (!record?.gameState) throw new Error("Missing stored V1.2.3 match");
+  const gameState = structuredClone(record.gameState);
+  record.match.status = "active";
+  gameState.activeSide = "runner";
+  gameState.phase = "runner_action_phase";
+  gameState.timingPoint = "runner_action.main";
+  gameState.runner.clicks = 4;
+  gameState.runner.credits = 5;
+  gameState.setup = { status: "complete", initialHandSize: 5, resolved: { runner: "keep", corp: "keep" }, mulligansTaken: {} };
+  delete gameState.pendingChoice;
+  moveRunnerCardToGripForTest(gameState, "onr_v1_101_mit-west-tier");
+  const latestEventIndex = gameState.eventLog.length - 1;
+  if (latestEventIndex >= 0) gameState.eventLog[latestEventIndex] = { ...gameState.eventLog[latestEventIndex]!, stateHashAfter: hashState(gameState) };
+  record.gameState = gameState;
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(matchId, gameState, record.match.matchVersion, "snap_v123_mit_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await (service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+}
+
 async function joinedV095ResourceMatch(seed: string) {
   const storage = new InMemoryMatchStorage();
   const service = new MultiplayerService(storage, {
@@ -3640,6 +3893,10 @@ function removeEverywhereForTest(state: GameState, cardId: string): void {
   state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
   state.runner.rig.resources = state.runner.rig.resources.filter((id) => id !== cardId);
+  if (state.specialZones) {
+    state.specialZones.setAside = state.specialZones.setAside.filter((id) => id !== cardId);
+    state.specialZones.removedFromGame = state.specialZones.removedFromGame.filter((id) => id !== cardId);
+  }
 }
 
 function toEventRecordForTest(matchId: string, event: GameEvent): EventRecord {

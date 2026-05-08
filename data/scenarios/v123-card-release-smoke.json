@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v123-card-release-smoke",
+  "title": "V1.2.3 local O:NR Mechanic Unlock Card Release 1",
+  "release": "V1.2.3",
+  "status": "implemented",
+  "extends": "data/scenarios/v112k-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_021_dwarf",
+    "onr_v1_039_krash",
+    "onr_v1_066_snowball",
+    "onr_v1_074_worm",
+    "onr_v1_081_custodial-position",
+    "onr_v1_085_executive-wiretaps",
+    "onr_v1_101_mit-west-tier",
+    "onr_v1_297_overtime-incentives"
+  ],
+  "preconditions": [
+    "V1.2.2 Special Zones, Ownership and Control has passed its final gate.",
+    "The private local O:NR v1 overlay exists under data/local.",
+    "Only the eight listed cards are promoted for V1.2.3.",
+    "V1.2.3 cards are human_playable and deck_legal, but not ai_supported."
+  ],
+  "steps": [
+    "Start a deterministic game with the V1.2.3 smoke decks and MVP 0.99 baseline mechanics enabled.",
+    "Resolve Corp mandatory draw.",
+    "Play Overtime Incentives as a Corp operation and verify gainedActions is public without hidden card ids.",
+    "End the Corp turn.",
+    "Play MIT West Tier as the Runner, shuffle grip/heap/stack, draw cards and move MIT West Tier to Removed from Game.",
+    "Replay all events from the initial state."
+  ],
+  "expected": [
+    "Final StateHash is fnv1a:f8247e94.",
+    "Replay succeeds and returns fnv1a:f8247e94.",
+    "MIT West Tier is public in Removed from Game.",
+    "The MIT West Tier event is a hidden-info barrier and does not expose internal runner card ids.",
+    "The AI deck pool remains unchanged and contains no V1.2.3 snapshots."
+  ],
+  "finalStateHash": "fnv1a:f8247e94",
+  "replay": {
+    "ok": true,
+    "finalStateHash": "fnv1a:f8247e94"
+  },
+  "publicEventSummary": [
+    { "type": "mandatory_draw", "visibilityClass": "private_to_side" },
+    { "type": "play_operation", "visibilityClass": "hidden_info_barrier", "cardDefinitionId": "onr_v1_297_overtime-incentives" },
+    { "type": "end_turn", "visibilityClass": "private_to_side" },
+    { "type": "play_event", "visibilityClass": "hidden_info_barrier", "cardDefinitionId": "onr_v1_101_mit-west-tier" }
+  ]
+}

@@ -174,4 +174,42 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     expect(body.storage?.matchCount).toBeUndefined();
     expect(JSON.stringify(body)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
   });
+
+  test("V1.3.0 Deckvalidierung prüft legalen und illegalen privaten Formatpfad ohne Decklist-Leak", async ({ request }) => {
+    const legalDeck = {
+      deckId: "e2e_v130_runner",
+      deckVersion: "1.3.0-local",
+      name: "E2E V1.3.0 Runner",
+      side: "runner",
+      identityCardId: "runner_identity_001",
+      cardPoolSnapshotId: "card-snapshot-0.8",
+      cardPoolVersion: "private-local-onr-v1",
+      formatProfileId: "netgrid_private_local_v1",
+      formatProfileVersion: "1.3.0",
+      cards: [
+        { cardId: "onr_v1_021_dwarf", quantity: 2 },
+        { cardId: "onr_v1_039_krash", quantity: 2 },
+        { cardId: "onr_v1_066_snowball", quantity: 2 },
+        { cardId: "onr_v1_074_worm", quantity: 2 },
+        { cardId: "onr_v1_081_custodial-position", quantity: 1 },
+        { cardId: "onr_v1_085_executive-wiretaps", quantity: 1 },
+        { cardId: "onr_v1_101_mit-west-tier", quantity: 2 }
+      ],
+      createdAt: "2026-05-08T12:00:00.000Z",
+      updatedAt: "2026-05-08T12:00:00.000Z"
+    };
+
+    const valid = await request.post("/api/decks/validate", { data: { deck: legalDeck } });
+    const validBody = await valid.json();
+    expect(validBody.validation.ok).toBe(true);
+    expect(validBody.snapshot.formatProfileVersion).toBe("1.3.0");
+    expect(validBody.snapshot.publicMetadata).not.toHaveProperty("cards");
+
+    const invalid = await request.post("/api/decks/validate", { data: { deck: { ...legalDeck, deckId: "e2e_v130_invalid", cards: [...legalDeck.cards, { cardId: "onr_v1_018_dogcatcher", quantity: 1 }] } } });
+    const invalidBody = await invalid.json();
+    expect(invalidBody.validation.ok).toBe(false);
+    expect(invalidBody.validation.errorCodes).toContain("card_missing_required_status");
+    expect(invalidBody.validation.errorCodes).toContain("format_legal_requires_deck_legal");
+    expect(JSON.stringify(invalidBody)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
+  });
 });

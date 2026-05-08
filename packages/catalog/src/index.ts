@@ -16,7 +16,18 @@ export type CatalogCardType =
   | "upgrade"
   | "ice";
 
-export type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "playable" | "deck_legal" | "blocked";
+export type CatalogStatusKey =
+  | "imported"
+  | "validated"
+  | "catalog_ready"
+  | "implemented"
+  | "engine_supported"
+  | "playable"
+  | "human_playable"
+  | "ai_supported"
+  | "deck_legal"
+  | "format_legal"
+  | "blocked";
 
 export type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
@@ -120,7 +131,19 @@ export type RuntimeCardPool = {
   cardsById: Record<string, CatalogCard>;
 };
 
-export const CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["imported", "validated", "catalog_ready", "implemented", "playable", "deck_legal", "blocked"];
+export const CATALOG_STATUS_KEYS: CatalogStatusKey[] = [
+  "imported",
+  "validated",
+  "catalog_ready",
+  "implemented",
+  "engine_supported",
+  "playable",
+  "human_playable",
+  "ai_supported",
+  "deck_legal",
+  "format_legal",
+  "blocked"
+];
 
 export const FORBIDDEN_CATALOG_PAYLOAD_KEYS = [
   "GameState",
@@ -195,11 +218,23 @@ export const ONR_V1_1_2K_RELEASE_CARD_IDS = [
   "onr_v1_295_night-shift"
 ] as const;
 
-export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [...ONR_V1_0_5K_RELEASE_CARD_IDS, ...ONR_V1_0_6K_RELEASE_CARD_IDS, ...ONR_V1_1_2K_RELEASE_CARD_IDS] as const;
+export const ONR_V1_2_3_RELEASE_CARD_IDS = [
+  "onr_v1_021_dwarf",
+  "onr_v1_039_krash",
+  "onr_v1_066_snowball",
+  "onr_v1_074_worm",
+  "onr_v1_081_custodial-position",
+  "onr_v1_085_executive-wiretaps",
+  "onr_v1_101_mit-west-tier",
+  "onr_v1_297_overtime-incentives"
+] as const;
+
+export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [...ONR_V1_0_5K_RELEASE_CARD_IDS, ...ONR_V1_0_6K_RELEASE_CARD_IDS, ...ONR_V1_1_2K_RELEASE_CARD_IDS, ...ONR_V1_2_3_RELEASE_CARD_IDS] as const;
 
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
+const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -226,6 +261,15 @@ const ONR_V1_1_2K_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["packages/engine/src/index.test.ts::V1.1.2K Card Release"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.1.2K Card Release", "apps/server/src/multiplayer.test.ts::private local O:NR V1.1.2K matches"],
   replayTests: ["packages/engine/src/index.test.ts::V1.1.2K Card Release"]
+};
+
+const ONR_V1_2_3_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.2.3",
+  status: "human_playable_v1_2_3",
+  unitTests: ["packages/engine/src/index.test.ts::V1.2.3 Mechanic Unlock Card Release 1"],
+  scenarioTests: ["data/scenarios/v123-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.2.3 Mechanic Unlock Card Release 1", "apps/server/src/multiplayer.test.ts::V1.2.3 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.2.3 Mechanic Unlock Card Release 1"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -285,6 +329,17 @@ const ONR_V1_1_2K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
   "onr_v1_279_wall-of-static": { rezCost: 3, strength: 2 },
   "onr_v1_293_netwatch-credit-voucher": { cost: 0, installCost: null },
   "onr_v1_295_night-shift": { cost: 0, installCost: null }
+};
+
+const ONR_V1_2_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_021_dwarf": { installCost: 3, memoryCost: 1, strength: 1 },
+  "onr_v1_039_krash": { installCost: 3, memoryCost: 1, strength: 2 },
+  "onr_v1_066_snowball": { installCost: 3, memoryCost: 1, strength: 1 },
+  "onr_v1_074_worm": { installCost: 2, memoryCost: 1, strength: 1 },
+  "onr_v1_081_custodial-position": { cost: 0, installCost: null },
+  "onr_v1_085_executive-wiretaps": { cost: 0, installCost: null },
+  "onr_v1_101_mit-west-tier": { cost: 0, installCost: null },
+  "onr_v1_297_overtime-incentives": { cost: 0, installCost: null }
 };
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
@@ -348,6 +403,17 @@ const ONR_V1_1_2K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_295_night-shift": "Gain 2 and draw one card."
 };
 
+const ONR_V1_2_3_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_021_dwarf": "1 credit: Break wall subroutine.\n1 credit: +1 strength.",
+  "onr_v1_039_krash": "2 credits: Break ice subroutine.\n2 credits: +1 strength.",
+  "onr_v1_066_snowball": "1 credit: Break sentry subroutine.\n1 credit: +1 strength.",
+  "onr_v1_074_worm": "0 credits: Break wall subroutine.\n3 credits: +1 strength.",
+  "onr_v1_081_custodial-position": "Make a run on R&D. If successful, access two additional cards from R&D.",
+  "onr_v1_085_executive-wiretaps": "Make a run on HQ. If successful, access two additional cards from HQ.",
+  "onr_v1_101_mit-west-tier": "Shuffle your grip, heap and stack together, draw five cards, then remove MIT West Tier from the game.",
+  "onr_v1_297_overtime-incentives": "Gain two actions."
+};
+
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
   return {
     ...snapshot,
@@ -387,7 +453,12 @@ export function validateSnapshot(snapshot: CardSnapshot): CatalogValidationResul
     if (!card.statuses.catalog_ready && card.statuses.deck_legal) errors.push(`Card ${card.catalogCardId} is deck_legal but not catalog_ready.`);
     if (card.statuses.catalog_ready && !card.statuses.validated) errors.push(`Card ${card.catalogCardId} is catalog_ready without validated.`);
     if (card.statuses.playable && !card.statuses.implemented) errors.push(`Card ${card.catalogCardId} is playable without implemented.`);
+    if (card.statuses.engine_supported && !card.statuses.implemented) errors.push(`Card ${card.catalogCardId} is engine_supported without implemented.`);
+    if (card.statuses.human_playable && (!card.statuses.engine_supported || !card.statuses.playable)) errors.push(`Card ${card.catalogCardId} is human_playable without engine_supported/playable.`);
+    if (card.statuses.ai_supported && !card.statuses.human_playable) errors.push(`Card ${card.catalogCardId} is ai_supported without human_playable.`);
     if (card.statuses.deck_legal && !card.statuses.playable) errors.push(`Card ${card.catalogCardId} is deck_legal without playable.`);
+    if (card.statuses.deck_legal && Object.prototype.hasOwnProperty.call(card.statuses, "human_playable") && !card.statuses.human_playable) errors.push(`Card ${card.catalogCardId} is deck_legal without human_playable.`);
+    if (card.statuses.format_legal && !card.statuses.deck_legal) errors.push(`Card ${card.catalogCardId} is format_legal without deck_legal.`);
     if (card.statuses.blocked && card.blockReasons.length === 0) errors.push(`Card ${card.catalogCardId} is blocked without reason.`);
     if (!card.statuses.implemented && card.engineCardId) errors.push(`Card ${card.catalogCardId} has engineCardId without implemented.`);
   }
@@ -414,7 +485,7 @@ export function createCatalogIndex(snapshot: CardSnapshot, snapshotHash: string)
       types: unique(summaries.map((card) => card.type)),
       factions: unique(summaries.map((card) => card.faction)),
       sets: unique(summaries.map((card) => card.setId)),
-      statuses: CATALOG_STATUS_KEYS
+      statuses: statusKeysForCards(normalized.cards)
     },
     searchIndex: Object.fromEntries(normalized.cards.map((card) => [card.catalogCardId, searchableText(card)])),
     statusSummary: summarizeStatuses(normalized.cards)
@@ -464,6 +535,10 @@ export function summarizeStatuses(cards: CatalogCard[]): Partial<Record<CatalogS
   return summary;
 }
 
+function statusKeysForCards(cards: CatalogCard[]): CatalogStatusKey[] {
+  return CATALOG_STATUS_KEYS.filter((key) => cards.some((card) => Object.prototype.hasOwnProperty.call(card.statuses, key)));
+}
+
 export function assertCatalogPayloadSafe(payload: unknown): CatalogValidationResult {
   const serialized = JSON.stringify(payload);
   const errors = FORBIDDEN_CATALOG_PAYLOAD_KEYS.filter((key) => serialized.includes(key)).map((key) => `Catalog payload contains forbidden key ${key}.`);
@@ -483,9 +558,10 @@ export function createRuntimeCardPool(): RuntimeCardPool {
 }
 
 export function createRuntimeCardSnapshot(): CardSnapshot {
-  const baseSnapshot = snapshotData as CardSnapshot;
+  const baseSnapshot = snapshotData as unknown as CardSnapshot;
   const localOnrSnapshot = readLocalOnrSnapshot();
-  if (!localOnrSnapshot) return baseSnapshot;
+  const baseCards = applyRuntimeBaseStatusModel(baseSnapshot.cards);
+  if (!localOnrSnapshot) return { ...baseSnapshot, cards: baseCards };
   const confirmedTextOverrides = readLocalConfirmedTextOverrides();
   const localCardsWithConfirmedText = applyLocalConfirmedTextOverrides(localOnrSnapshot.cards, confirmedTextOverrides);
   const v105kCards = applyOnrV105KReleaseGate(localCardsWithConfirmedText);
@@ -500,7 +576,7 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
       textPolicy: `${baseSnapshot.normalization.textPolicy} Lokale O:NR-v1-Texte bleiben Anzeigeinformation und sind kein Regelparser.`,
       assetPolicy: `${baseSnapshot.normalization.assetPolicy} Lokale O:NR-v1-Bilder werden nur aus data/local-assets gelesen.`
     },
-    cards: [...baseSnapshot.cards, ...v105kCards]
+    cards: [...baseCards, ...v105kCards]
   };
 }
 
@@ -655,12 +731,32 @@ function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
   return cards.map((card) => (ONR_V1_RUNTIME_RELEASE_CARD_ID_SET.has(card.catalogCardId) ? promoteOnrRuntimeReleaseCard(card) : demoteLocalOnrCard(card)));
 }
 
+function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
+  return cards.map((card) => {
+    const engineSupported = Boolean(card.statuses.implemented && card.statuses.playable);
+    const humanPlayable = Boolean(engineSupported && card.statuses.deck_legal);
+    return {
+      ...card,
+      subtypes: [...card.subtypes],
+      numeric: { ...card.numeric },
+      statuses: {
+        ...card.statuses,
+        engine_supported: card.statuses.engine_supported ?? engineSupported,
+        human_playable: card.statuses.human_playable ?? humanPlayable,
+        ai_supported: card.statuses.ai_supported ?? humanPlayable,
+        format_legal: card.statuses.format_legal ?? humanPlayable
+      }
+    };
+  });
+}
+
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV112K ? ONR_V1_1_2K_TEXT_OVERRIDES : isV106K ? ONR_V1_0_6K_TEXT_OVERRIDES : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV112K ? ONR_V1_1_2K_NUMERIC_OVERRIDES : isV106K ? ONR_V1_0_6K_NUMERIC_OVERRIDES : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV112K ? ONR_V1_1_2K_RELEASE_MANIFEST : isV106K ? ONR_V1_0_6K_RELEASE_MANIFEST : ONR_V1_0_5K_RELEASE_MANIFEST;
+  const textOverrides = isV123 ? ONR_V1_2_3_TEXT_OVERRIDES : isV112K ? ONR_V1_1_2K_TEXT_OVERRIDES : isV106K ? ONR_V1_0_6K_TEXT_OVERRIDES : ONR_V1_0_5K_TEXT_OVERRIDES;
+  const numericOverrides = isV123 ? ONR_V1_2_3_NUMERIC_OVERRIDES : isV112K ? ONR_V1_1_2K_NUMERIC_OVERRIDES : isV106K ? ONR_V1_0_6K_NUMERIC_OVERRIDES : ONR_V1_0_5K_NUMERIC_OVERRIDES;
+  const manifest = isV123 ? ONR_V1_2_3_RELEASE_MANIFEST : isV112K ? ONR_V1_1_2K_RELEASE_MANIFEST : isV106K ? ONR_V1_0_6K_RELEASE_MANIFEST : ONR_V1_0_5K_RELEASE_MANIFEST;
   return {
     ...card,
     engineCardId: card.catalogCardId,
@@ -673,8 +769,12 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
       validated: true,
       catalog_ready: true,
       implemented: true,
+      engine_supported: true,
       playable: true,
+      human_playable: true,
+      ai_supported: false,
       deck_legal: true,
+      format_legal: true,
       blocked: false
     },
     blockReasons: [],
@@ -691,8 +791,12 @@ function demoteLocalOnrCard(card: CatalogCard): CatalogCard {
     statuses: {
       ...card.statuses,
       implemented: false,
+      engine_supported: false,
       playable: false,
-      deck_legal: false
+      human_playable: false,
+      ai_supported: false,
+      deck_legal: false,
+      format_legal: false
     },
     blockReasons: [...card.blockReasons],
     implementationManifest: null

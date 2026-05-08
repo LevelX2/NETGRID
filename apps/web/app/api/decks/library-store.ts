@@ -4,6 +4,9 @@ import { homedir } from "node:os";
 import type { EditableDeck } from "@netgrid/decks";
 
 const LIBRARY_SCHEMA_VERSION = "netgrid-editable-deck-v1";
+const PRIVATE_LOCAL_PROFILE_ID = "netgrid_private_local_v1";
+const PRIVATE_LOCAL_PROFILE_VERSION = "1.3.0";
+const PRIVATE_LOCAL_CARD_POOL_VERSION = "private-local-onr-v1";
 
 type DeckLibraryFile = {
   schemaVersion: typeof LIBRARY_SCHEMA_VERSION;
@@ -33,7 +36,7 @@ export async function readDeckLibrary(storagePath = defaultDeckLibraryPath()): P
       const raw = await readFile(join(storagePath, entry.name), "utf8");
       const parsed = JSON.parse(raw) as Partial<DeckLibraryFile>;
       if (parsed.schemaVersion !== LIBRARY_SCHEMA_VERSION || !isEditableDeck(parsed.deck)) continue;
-      decks.push(parsed.deck);
+      decks.push(markRevalidationIfNeeded(parsed.deck));
     } catch {
       continue;
     }
@@ -72,6 +75,7 @@ function normalizeDecks(decks: EditableDeck[]): EditableDeck[] {
     if (!isEditableDeck(deck)) continue;
     byId.set(deck.deckId, {
       ...deck,
+      ...revalidationFields(deck),
       name: deck.name.slice(0, 120),
       cards: deck.cards
         .filter((entry) => typeof entry.cardId === "string" && Number.isFinite(entry.quantity))
@@ -81,6 +85,22 @@ function normalizeDecks(decks: EditableDeck[]): EditableDeck[] {
     });
   }
   return [...byId.values()].sort((left, right) => left.updatedAt.localeCompare(right.updatedAt) || left.name.localeCompare(right.name));
+}
+
+function markRevalidationIfNeeded(deck: EditableDeck): EditableDeck {
+  return { ...deck, ...revalidationFields(deck) };
+}
+
+function revalidationFields(deck: EditableDeck): Partial<EditableDeck> {
+  if (deck.formatProfileId !== PRIVATE_LOCAL_PROFILE_ID) return { validationStatus: "needs_revalidation" };
+  if (deck.formatProfileVersion !== PRIVATE_LOCAL_PROFILE_VERSION || deck.cardPoolVersion !== PRIVATE_LOCAL_CARD_POOL_VERSION) {
+    return {
+      formatProfileVersion: deck.formatProfileVersion ?? PRIVATE_LOCAL_PROFILE_VERSION,
+      cardPoolVersion: deck.cardPoolVersion ?? PRIVATE_LOCAL_CARD_POOL_VERSION,
+      validationStatus: "needs_revalidation"
+    };
+  }
+  return deck.validationStatus ? { validationStatus: deck.validationStatus } : {};
 }
 
 function isEditableDeck(value: unknown): value is EditableDeck {

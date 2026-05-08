@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "netgrid-scenario-v1",
+  "id": "v130-format-deckbuilding-smoke",
+  "release": "V1.3.0 Format und Deckbuilding Foundation",
+  "baselineId": "rules-baseline-mvp-0.94",
+  "formatProfileId": "netgrid_private_local_v1",
+  "formatProfileVersion": "1.3.0",
+  "cardPoolSnapshotId": "card-snapshot-0.8",
+  "cardPoolVersion": "private-local-onr-v1",
+  "runnerDeckSnapshotId": "demo_runner_130_snapshot_v1_3_0",
+  "corpDeckSnapshotId": "demo_corp_130_snapshot_v1_3_0",
+  "requirementIds": [
+    "V130-FORMAT-001",
+    "V130-FORMAT-002",
+    "V130-DECK-001",
+    "V130-DECK-002",
+    "V130-DECK-003",
+    "V130-SERVER-001",
+    "V130-AI-001",
+    "V130-VIS-001"
+  ],
+  "expected": {
+    "runnerDeckHash": "fnv1a:1f64d517",
+    "corpDeckHash": "fnv1a:551ee643",
+    "runnerTotalCards": 12,
+    "corpTotalCards": 18,
+    "corpAgendaPoints": 7,
+    "influenceSpent": 0,
+    "publicMetadataDecklistFree": true,
+    "serverMatchstartRevalidates": true,
+    "aiUnsupportedSnapshotsBlocked": true
+  },
+  "negativeCases": [
+    {
+      "id": "v130-nondecklegal-card-blocked",
+      "cardId": "onr_v1_018_dogcatcher",
+      "expectedErrorCodes": [
+        "card_missing_required_status",
+        "format_legal_requires_deck_legal"
+      ]
+    },
+    {
+      "id": "v130-copy-limit-blocked",
+      "cardId": "onr_v1_021_dwarf",
+      "quantity": 4,
+      "expectedErrorCodes": [
+        "too_many_copies"
+      ]
+    },
+    {
+      "id": "v130-ai-human-only-snapshot-blocked",
+      "runnerDeckSnapshotId": "demo_runner_130_snapshot_v1_3_0",
+      "corpDeckSnapshotId": "demo_corp_130_snapshot_v1_3_0",
+      "expectedErrorCode": "ai_deck_snapshot_not_supported"
+    }
+  ],
+  "nonGoals": [
+    "public_platform_features",
+    "official_assets",
+    "card_text_parser",
+    "new_card_unlocks"
+  ]
+}

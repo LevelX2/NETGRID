@@ -1,4 +1,7 @@
 import { describe, expect, it } from "vitest";
+import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
+import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
+import { createRuntimeCardsById } from "@netgrid/catalog";
 import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, replayEvents } from "@netgrid/engine";
 import {
   assertAiInputIsSideSafe,
@@ -11,6 +14,7 @@ import {
   simulateAiSoak
 } from "./index";
 import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netgrid/shared";
+import { MVP_0_99_BASELINE } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -503,6 +507,98 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(JSON.stringify(corpInput)).not.toContain("v121_damage_replace");
   });
 
+  it("keeps V1.2.2 hidden Special Zones out of AI input", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v122-special-zone" }));
+    const cardId = moveRunnerCardToGrip(state, "simple_economy_event");
+    state.specialZoneHarness = {
+      actor: "runner",
+      cardInstanceId: cardId,
+      setAside: { visibility: "hidden", reason: "ai_v122_hidden_set_aside" }
+    };
+    state = apply(state, "runner", (action) => action.type === "move_to_set_aside");
+
+    const corpInput = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const corpSerialized = JSON.stringify(corpInput);
+
+    expect(corpInput.playerView.specialZones?.setAside[0]).toMatchObject({ known: false });
+    expect(corpSerialized).not.toContain("Simple Economy Event");
+    expect(corpSerialized).not.toContain("simple_economy_event");
+    expect(corpSerialized).not.toContain(cardId);
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+  });
+
+  it("uses LegalActions-only fallback for V1.2.2 control-change windows", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v122-control-fallback" }));
+    const cardId = moveRunnerCardToGrip(state, "simple_economy_event");
+    state.specialZoneHarness = {
+      actor: "runner",
+      cardInstanceId: cardId,
+      controlChange: { newController: "corp", visibility: "private_to_side", reason: "ai_v122_control_change" }
+    };
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const specialOnly = {
+      ...input,
+      legalActions: input.legalActions.filter((action) => action.type === "change_card_control")
+    };
+    const decision = chooseRunnerAction(specialOnly);
+
+    expect(specialOnly.legalActions).toHaveLength(1);
+    expect(decision.actionId).toBe(specialOnly.legalActions[0]?.actionId);
+    expect(decision.fallbackUsed).toBe(true);
+    expect(decision.reasonCode).toBe("fallback.first_legal_action");
+    expect(JSON.stringify(decision)).not.toContain("Simple Economy Event");
+    expect(assertAiInputIsSideSafe(specialOnly)).toBe(true);
+  });
+
+  it("keeps V1.2.3 human-playable cards out of the AI deck pool", () => {
+    const serializedPool = JSON.stringify(aiDeckPoolData);
+    const snapshots = snapshotsData08.snapshots as Array<{ deckSnapshotId: string; cards: Array<{ cardId: string }> }>;
+    const runtimeCardsById = createRuntimeCardsById();
+
+    expect(serializedPool).not.toContain("demo_runner_123_snapshot_v1_2_3");
+    expect(serializedPool).not.toContain("demo_corp_123_snapshot_v1_2_3");
+    for (const cardId of ONR_V1_2_3_CARD_IDS) {
+      expect(serializedPool).not.toContain(cardId);
+      expect(runtimeCardsById[cardId]?.statuses.ai_supported).toBe(false);
+    }
+    for (const entry of aiDeckPoolData.entries) {
+      const snapshot = snapshots.find((candidate) => candidate.deckSnapshotId === entry.snapshotId);
+      expect(snapshot, entry.snapshotId).toBeDefined();
+      for (const card of snapshot?.cards ?? []) {
+        expect(runtimeCardsById[card.cardId]?.statuses.ai_supported, card.cardId).toBe(true);
+      }
+    }
+  });
+
+  it("uses only generic LegalActions for V1.2.3 human-only card actions", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v123-human-only-mit",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+        corpDeck: ONR_V1_2_3_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    moveRunnerCardToGrip(state, "onr_v1_101_mit-west-tier");
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const mitOnly = {
+      ...input,
+      legalActions: input.legalActions.filter((action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_101_mit-west-tier").slice(0, 1)
+    };
+    const decision = chooseRunnerAction(mitOnly);
+
+    expect(mitOnly.legalActions).toHaveLength(1);
+    expect(decision.actionId).toBe(mitOnly.legalActions[0]?.actionId);
+    expect(decision.reasonCode).toBe("runner.economy.event");
+    expect(assertAiInputIsSideSafe(mitOnly)).toBe(true);
+    expect(JSON.stringify(decision)).not.toContain("Dwarf");
+    expect(JSON.stringify(decision)).not.toContain("MIT West Tier");
+    expect(JSON.stringify(mitOnly)).not.toContain("cardInstances");
+  });
+
   it("runs V0.4 expanded decks through the simulation harness", () => {
     const summary = simulateAiGame({
       seed: "ai-v04-expanded",
@@ -757,6 +853,51 @@ const ONR_V1_1_2K_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_2_3_CARD_IDS = [
+  "onr_v1_021_dwarf",
+  "onr_v1_039_krash",
+  "onr_v1_066_snowball",
+  "onr_v1_074_worm",
+  "onr_v1_081_custodial-position",
+  "onr_v1_085_executive-wiretaps",
+  "onr_v1_101_mit-west-tier",
+  "onr_v1_297_overtime-incentives"
+] as const;
+
+const ONR_V1_2_3_RUNNER_DECK: DeckDefinition = {
+  id: "ai_onr_v123_runner",
+  name: "AI O:NR V1.2.3 Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "onr_v1_039_krash", quantity: 2 },
+    { id: "onr_v1_066_snowball", quantity: 2 },
+    { id: "onr_v1_074_worm", quantity: 2 },
+    { id: "onr_v1_081_custodial-position", quantity: 1 },
+    { id: "onr_v1_085_executive-wiretaps", quantity: 1 },
+    { id: "onr_v1_101_mit-west-tier", quantity: 2 }
+  ]
+};
+
+const ONR_V1_2_3_CORP_DECK: DeckDefinition = {
+  id: "ai_onr_v123_corp",
+  name: "AI O:NR V1.2.3 Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_297_overtime-incentives", quantity: 3 },
+    { id: "onr_v1_237_data-wall", quantity: 2 },
+    { id: "onr_v1_261_quandary", quantity: 2 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "onr_v1_259_in-the-face", quantity: 2 },
+    { id: "onr_v1_295_night-shift", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 1 }
+  ]
+};
+
 function v094DamageGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
@@ -963,4 +1104,8 @@ function removeEverywhere(state: GameState, id: string): void {
   state.runner.rig.programs = state.runner.rig.programs.filter((cardId) => cardId !== id);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((cardId) => cardId !== id);
   state.runner.rig.resources = state.runner.rig.resources.filter((cardId) => cardId !== id);
+  if (state.specialZones) {
+    state.specialZones.setAside = state.specialZones.setAside.filter((cardId) => cardId !== id);
+    state.specialZones.removedFromGame = state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
+  }
 }

@@ -232,6 +232,29 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       title = phrase(subject, "einen Tag entfernt");
       chips.push("Tag entfernt");
       break;
+    case "move_to_set_aside":
+      category = "card";
+      importance = "important";
+      title = phrase(subject, `${cardTitle ?? "eine Karte"} in Set Aside bewegt`);
+      chips.push("Set Aside");
+      break;
+    case "move_to_removed_from_game":
+      category = "danger";
+      importance = "important";
+      title = phrase(subject, `${cardTitle ?? "eine Karte"} aus dem Spiel entfernt`);
+      chips.push("Removed");
+      break;
+    case "return_from_set_aside":
+      category = "card";
+      title = phrase(subject, `${cardTitle ?? "eine Karte"} aus Set Aside zurückgeholt`);
+      chips.push("Set Aside");
+      break;
+    case "change_card_control":
+      category = "card";
+      importance = "important";
+      title = phrase(subject, `die Kontrolle von ${cardTitle ?? "einer Karte"} geändert`);
+      chips.push("Kontrolle");
+      break;
     case "end_turn":
       category = "turn";
       title = phrase(subject, "den Zug beendet");

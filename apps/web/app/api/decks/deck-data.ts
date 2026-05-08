@@ -1,4 +1,5 @@
 import profilesData from "../../../../../data/decks/deck-format-profiles-0.8.json";
+import profilesData130 from "../../../../../data/decks/deck-format-profiles-1.3.0.json";
 import snapshotsData from "../../../../../data/decks/deck-snapshots-0.8.json";
 import templatesData from "../../../../../data/decks/deck-templates-0.8.json";
 import {
@@ -14,7 +15,7 @@ import {
 } from "@netgrid/decks";
 import { createRuntimeCardsById } from "../card-pool-runtime";
 
-const profiles = profilesData.profiles as DeckFormatProfile[];
+const profiles = [...(profilesData.profiles as DeckFormatProfile[]), ...(profilesData130.profiles as DeckFormatProfile[])];
 const profile = profiles.find((candidate) => candidate.profileId === "local-demo-v0.8") ?? profiles[0]!;
 const templates = templatesData.templates as DeckTemplate[];
 const snapshots = snapshotsData.snapshots as DeckSnapshot[];
@@ -41,7 +42,21 @@ export function deckSnapshotsResponse() {
 }
 
 export function deckValidationResponse(deck: EditableDeck) {
-  const context = contextForProfile(profile);
+  const selectedProfile = profiles.find((candidate) => candidate.profileId === deck.formatProfileId);
+  if (!selectedProfile) {
+    return safeDeckPayload({
+      validation: {
+        ok: false,
+        errors: ["Deck format profile is not supported."],
+        errorCodes: ["format_profile_unsupported"],
+        warnings: [],
+        totalCards: deck.cards?.reduce((sum, entry) => sum + (Number.isFinite(entry.quantity) ? entry.quantity : 0), 0) ?? 0,
+        agendaPoints: null
+      },
+      snapshot: null
+    });
+  }
+  const context = contextForProfile(selectedProfile);
   const validation = validateEditableDeck(deck, context);
   return safeDeckPayload({
     validation,

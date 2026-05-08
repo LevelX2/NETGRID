@@ -50,6 +50,10 @@ export type ActionType =
   | "decline_trash"
   | "remove_tag"
   | "purge_virus_counters"
+  | "move_to_set_aside"
+  | "move_to_removed_from_game"
+  | "return_from_set_aside"
+  | "change_card_control"
   | "resolve_choice"
   | "trigger_ability"
   | "end_turn";
@@ -94,6 +98,8 @@ export type SubroutineDefinition = {
 };
 
 export type EventVisibilityClass = "public" | "private_to_side" | "hidden_info_barrier" | "replay_only";
+export type SpecialZoneKind = "set_aside" | "removed_from_game";
+export type SpecialZoneVisibility = "public" | "side_private" | "hidden" | "replay_only";
 
 export type CostRequirement =
   | { kind: "click"; amount: number }
@@ -219,6 +225,28 @@ export type EventModificationTestHarness = {
   damageReplacementConflict?: boolean;
 };
 
+export type SpecialZoneTestHarness = {
+  actor: Side;
+  cardInstanceId: CardInstanceId;
+  setAside?: {
+    visibility: SpecialZoneVisibility;
+    visibilitySide?: Side;
+    reason?: string;
+    allowReturn?: boolean;
+    returnZone?: NormalZoneRef;
+  };
+  removedFromGame?: {
+    visibility: SpecialZoneVisibility;
+    visibilitySide?: Side;
+    reason?: string;
+  };
+  controlChange?: {
+    newController: Side;
+    visibility?: EventVisibilityClass;
+    reason?: string;
+  };
+};
+
 export type EffectCommand =
   | { type: "gain_credits"; side: Side; amount: number }
   | { type: "spend_credits"; side: Side; amount: number }
@@ -332,7 +360,9 @@ export type DeckPublicMetadata = {
   identityCardId: CardDefinitionId;
   deckName: string;
   cardPoolSnapshotId: string;
+  cardPoolVersion?: string;
   formatProfileId: string;
+  formatProfileVersion?: string;
   deckHash: string;
 };
 
@@ -394,10 +424,14 @@ export type SetupState = {
   mulligansTaken: Partial<Record<Side, number>>;
 };
 
-export type ZoneRef =
+export type NormalZoneRef =
   | { side: "corp"; zone: "hq" | "rd" | "archives" | "scoreArea" }
   | { side: "corp"; zone: "serverIce" | "serverRoot"; serverId: Exclude<ServerId, "new_remote"> }
   | { side: "runner"; zone: "grip" | "stack" | "heap" | "scoreArea" | "rig" };
+
+export type ZoneRef =
+  | NormalZoneRef
+  | { side: "special"; zone: SpecialZoneKind; visibility: SpecialZoneVisibility; visibilitySide?: Side; returnZone?: NormalZoneRef };
 
 export type CardInstance = {
   instanceId: CardInstanceId;
@@ -432,6 +466,11 @@ export type CorpState = {
   archives: CardInstanceId[];
   scoreArea: CardInstanceId[];
   servers: CorpServer[];
+};
+
+export type SpecialZoneState = {
+  setAside: CardInstanceId[];
+  removedFromGame: CardInstanceId[];
 };
 
 export type RunnerRig = {
@@ -540,6 +579,7 @@ export type GameState = {
   timingPoint: TimingPointId;
   corp: CorpState;
   runner: RunnerState;
+  specialZones?: SpecialZoneState;
   cardInstances: Record<CardInstanceId, CardInstance>;
   eventLog: GameEvent[];
   winner: Winner | null;
@@ -551,6 +591,7 @@ export type GameState = {
   eventModificationWindow?: EventModificationWindow;
   replacementWindow?: ReplacementWindow;
   eventModificationHarness?: EventModificationTestHarness;
+  specialZoneHarness?: SpecialZoneTestHarness;
   deckMetadata?: {
     runner: DeckPublicMetadata;
     corp: DeckPublicMetadata;
@@ -664,6 +705,8 @@ export type VisibleCard = {
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;
   hostedOn?: CardInstanceId;
+  owner?: Side;
+  controller?: Side;
 };
 
 export type PlayerView = {
@@ -708,6 +751,12 @@ export type PlayerView = {
     ice: VisibleCard[];
     root: VisibleCard[];
   }>;
+  specialZones?: {
+    setAside: VisibleCard[];
+    removedFromGame: VisibleCard[];
+    setAsideCount: number;
+    removedFromGameCount: number;
+  };
   run?: {
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
@@ -922,6 +971,26 @@ function onrBreaker(params: {
   };
 }
 
+function onrUniversalBreaker(params: { id: string; title: string; subtypes: string[]; installCost: number; memoryCost: number; strength: number; breakCost: number; pumpCost: number }): CardDefinition {
+  return {
+    id: params.id,
+    title: params.title,
+    side: "runner",
+    type: "program",
+    subtypes: params.subtypes,
+    implementationStatus: "playable_mvp",
+    installCost: params.installCost,
+    memoryCost: params.memoryCost,
+    strength: params.strength,
+    rulesText: `${params.breakCost} Credits: Break 1 ice subroutine. ${params.pumpCost} Credits: +1 strength.`,
+    abilities: [
+      { id: `${params.id}_pump`, type: "pump_strength", cost: { credits: params.pumpCost }, amount: 1, timingPoint: "run.encounter_ice" },
+      { id: `${params.id}_break`, type: "break_subroutine", cost: { credits: params.breakCost }, count: 1, timingPoint: "run.encounter_ice" }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", ONR_V1_LOCAL_PRIVATE]
+  };
+}
+
 function onrIce(params: {
   id: string;
   title: string;
@@ -1098,6 +1167,28 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceLabel: "code gate"
   }),
   onrBreaker({
+    id: "onr_v1_021_dwarf",
+    title: "Dwarf",
+    subtypes: ["icebreaker"],
+    installCost: 3,
+    memoryCost: 1,
+    strength: 1,
+    breakCost: 1,
+    pumpCost: 1,
+    iceSubtype: "wall",
+    iceLabel: "wall"
+  }),
+  onrUniversalBreaker({
+    id: "onr_v1_039_krash",
+    title: "Krash",
+    subtypes: ["icebreaker"],
+    installCost: 3,
+    memoryCost: 1,
+    strength: 2,
+    breakCost: 2,
+    pumpCost: 2
+  }),
+  onrBreaker({
     id: "onr_v1_040_loony-goon",
     title: "Loony Goon",
     subtypes: ["icebreaker", "killer"],
@@ -1122,6 +1213,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceLabel: "sentry"
   }),
   onrBreaker({
+    id: "onr_v1_066_snowball",
+    title: "Snowball",
+    subtypes: ["icebreaker", "killer"],
+    installCost: 3,
+    memoryCost: 1,
+    strength: 1,
+    breakCost: 1,
+    pumpCost: 1,
+    iceSubtype: "sentry",
+    iceLabel: "sentry"
+  }),
+  onrBreaker({
     id: "onr_v1_072_wild-card",
     title: "Wild Card",
     subtypes: ["icebreaker", "killer"],
@@ -1133,6 +1236,51 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceSubtype: "sentry",
     iceLabel: "sentry"
   }),
+  onrBreaker({
+    id: "onr_v1_074_worm",
+    title: "Worm",
+    subtypes: ["icebreaker"],
+    installCost: 2,
+    memoryCost: 1,
+    strength: 1,
+    breakCost: 0,
+    pumpCost: 3,
+    iceSubtype: "wall",
+    iceLabel: "wall"
+  }),
+  {
+    id: "onr_v1_081_custodial-position",
+    title: "Custodial Position",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Make a run on R&D. If successful, access two additional cards from R&D.",
+    mechanics: ["play_event", "start_run", "breach", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_085_executive-wiretaps",
+    title: "Executive Wiretaps",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Make a run on HQ. If successful, access two additional cards from HQ.",
+    mechanics: ["play_event", "start_run", "breach", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_101_mit-west-tier",
+    title: "MIT West Tier",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Shuffle your grip, heap and stack together, draw five cards, then remove MIT West Tier from the game.",
+    mechanics: ["play_event", "shuffle", "draw_cards", "removed_from_game", ONR_V1_LOCAL_PRIVATE]
+  },
   onrBreaker({
     id: "onr_v1_073_wizards-book",
     title: "Wizard's Book",
@@ -1279,6 +1427,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 0,
     rulesText: "Gain 2 credits and draw one card.",
     mechanics: ["play_operation", "gain_credits", "draw_cards", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_297_overtime-incentives",
+    title: "Overtime Incentives",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Gain two actions.",
+    mechanics: ["play_operation", "gain_actions", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_301_punitive-counterstrike",

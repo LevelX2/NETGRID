@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "deck-validation-manifest-v1.3.0",
+  "id": "deck-validation-manifest-1.3.0",
+  "release": "V1.3.0 Format und Deckbuilding Foundation",
+  "status": "implemented_pending_final_verification",
+  "formatProfileId": "netgrid_private_local_v1",
+  "formatProfileVersion": "1.3.0",
+  "cardPoolSnapshotId": "card-snapshot-0.8",
+  "cardPoolVersion": "private-local-onr-v1",
+  "gateAssertions": {
+    "formatProfilesRestrictOnly": true,
+    "formatLegalRequiresDeckLegal": true,
+    "deckLegalRequiresHumanPlayable": true,
+    "serverMatchstartRevalidates": true,
+    "legacyLocalDecksNeedRevalidation": true,
+    "aiDeckPoolRequiresAiSupportedCards": true,
+    "noPublicDecklists": true,
+    "noOfficialPlatformLegalityClaim": true,
+    "noCardTextParser": true,
+    "noPublicPlatformFeatures": true
+  },
+  "snapshots": [
+    {
+      "deckSnapshotId": "demo_runner_130_snapshot_v1_3_0",
+      "side": "runner",
+      "validation": {
+        "ok": true,
+        "totalCards": 12,
+        "agendaPoints": null,
+        "influenceSpent": 0
+      },
+      "publicMetadataFields": [
+        "side",
+        "identityCardId",
+        "deckName",
+        "cardPoolSnapshotId",
+        "cardPoolVersion",
+        "formatProfileId",
+        "formatProfileVersion",
+        "deckHash"
+      ],
+      "deckHash": "fnv1a:1f64d517"
+    },
+    {
+      "deckSnapshotId": "demo_corp_130_snapshot_v1_3_0",
+      "side": "corp",
+      "validation": {
+        "ok": true,
+        "totalCards": 18,
+        "agendaPoints": 7,
+        "influenceSpent": 0
+      },
+      "publicMetadataFields": [
+        "side",
+        "identityCardId",
+        "deckName",
+        "cardPoolSnapshotId",
+        "cardPoolVersion",
+        "formatProfileId",
+        "formatProfileVersion",
+        "deckHash"
+      ],
+      "deckHash": "fnv1a:551ee643"
+    }
+  ],
+  "negativeCoverage": [
+    "unknown_format_profile",
+    "deck_legal_without_human_playable",
+    "non_deck_legal_card_in_format",
+    "copy_limit_exceeded",
+    "influence_limit_exceeded",
+    "server_matchstart_invalid_snapshot",
+    "ai_unsupported_human_only_snapshot"
+  ],
+  "nonGoals": [
+    "public_decklists",
+    "accounts",
+    "ranked_play",
+    "tournaments",
+    "official_assets",
+    "card_text_parser",
+    "new_card_unlocks"
+  ]
+}

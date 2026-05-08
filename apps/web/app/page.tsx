@@ -149,7 +149,9 @@ const CorpRoleIcon = Building2;
 const AgendaIcon = Award;
 const TagIcon = Goal;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
-const DEFAULT_DECK_FORMAT_PROFILE_ID = "local-demo-v0.8";
+const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
+const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
+const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = "V1.1.2";
 const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
@@ -259,6 +261,14 @@ type ClientPayload = {
   resultSummary?: GameResultSummary;
   lifecycleResult?: LifecycleResultSummary;
 };
+
+function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPayload["aiTurnPresentation"] | undefined {
+  const presentation = payload?.aiTurnPresentation;
+  if (!payload || !presentation?.activeAiSide) return presentation;
+  const aiHasCurrentControl = payload.playerView.activeSide === presentation.activeAiSide || payload.playerView.pendingChoice?.side === presentation.activeAiSide;
+  if (aiHasCurrentControl) return presentation;
+  return { ...presentation, canAdvanceAi: false };
+}
 
 type LobbyParticipant = {
   displayName: string;
@@ -379,7 +389,7 @@ type AiSimulationSummary = {
   errors: string[];
 };
 
-type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "playable" | "deck_legal" | "blocked";
+type CatalogStatusKey = "imported" | "validated" | "catalog_ready" | "implemented" | "engine_supported" | "playable" | "human_playable" | "ai_supported" | "deck_legal" | "format_legal" | "blocked";
 
 type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
@@ -451,7 +461,10 @@ type EditableDeck = {
   side: Side;
   identityCardId: string;
   cardPoolSnapshotId: string;
+  cardPoolVersion?: string;
   formatProfileId: string;
+  formatProfileVersion?: string;
+  validationStatus?: "valid" | "invalid" | "needs_revalidation";
   cards: DeckCardEntry[];
   createdAt: string;
   updatedAt: string;
@@ -471,9 +484,11 @@ type DeckTemplate = {
 type DeckValidationResult = {
   ok: boolean;
   errors: string[];
+  errorCodes?: string[];
   warnings: string[];
   totalCards: number;
   agendaPoints: number | null;
+  influenceSpent?: number | null;
 };
 
 type DeckSnapshot = {
@@ -484,7 +499,9 @@ type DeckSnapshot = {
   side: Side;
   identityCardId: string;
   cardPoolSnapshotId: string;
+  cardPoolVersion?: string;
   formatProfileId: string;
+  formatProfileVersion?: string;
   rulesBaselineId: string;
   immutable: boolean;
   cards: DeckCardEntry[];
@@ -518,8 +535,12 @@ const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
   validated: "validated",
   catalog_ready: "catalog_ready",
   implemented: "implemented",
+  engine_supported: "engine_supported",
   playable: "playable",
+  human_playable: "human_playable",
+  ai_supported: "ai_supported",
   deck_legal: "deck_legal",
+  format_legal: "format_legal",
   blocked: "blocked"
 };
 
@@ -924,7 +945,9 @@ function deckMetadataFromEditable(deck: EditableDeck | null): DeckPublicMetadata
     identityCardId: deck.identityCardId,
     deckName: deck.name,
     cardPoolSnapshotId: deck.cardPoolSnapshotId,
+    ...(deck.cardPoolVersion ? { cardPoolVersion: deck.cardPoolVersion } : {}),
     formatProfileId: deck.formatProfileId,
+    ...(deck.formatProfileVersion ? { formatProfileVersion: deck.formatProfileVersion } : {}),
     deckHash: "wird beim Start geprüft"
   };
 }
@@ -1382,6 +1405,7 @@ export default function Page() {
   const hasAiOpponent = matchStart.hasAiOpponent;
   const isHumanVsHuman = playMode === "human_vs_human";
   const isHumanVsAi = playMode === "human_vs_ai";
+  const aiTurnPresentation = effectiveAiTurnPresentation(payload);
   const startSummary = matchStartSummary({
     playMode,
     matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
@@ -1587,7 +1611,7 @@ export default function Page() {
   }, [actionCueAutoDismissMs, audioEnabled, audioVolume, currentActionCue, localAiPacingMode]);
 
   useEffect(() => {
-    if (!payload?.aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online") return;
+    if (!payload || !aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online") return;
     const delayMs = aiPacingDelayMs(localAiPacingMode, Boolean(currentActionCue) || actionCueQueue.length > 0, actionCueAutoDismissMs);
     if (delayMs === null) return;
     const advanceKey = `${payload.matchId}:${payload.matchVersion}:${payload.playerView.stateVersion}:${localAiPacingMode}`;
@@ -1606,7 +1630,7 @@ export default function Page() {
       window.clearTimeout(retryTimeout);
       if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
     };
-  }, [actionCueAutoDismissMs, actionCueQueue.length, connection, currentActionCue, localAiPacingMode, payload?.aiTurnPresentation?.canAdvanceAi, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
+  }, [actionCueAutoDismissMs, actionCueQueue.length, aiTurnPresentation?.canAdvanceAi, connection, currentActionCue, localAiPacingMode, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
 
   const createMatch = async () => {
     setNotice("");
@@ -2183,7 +2207,7 @@ export default function Page() {
   };
 
   const advanceAi = (mode: "single_step" | "until_human" = "single_step"): boolean => {
-    if (!session || !payload || !payload.aiTurnPresentation?.canAdvanceAi) return false;
+    if (!session || !payload || !aiTurnPresentation?.canAdvanceAi) return false;
     if (!ensureSocketConnected()) return false;
     try {
       socketRef.current?.send(
@@ -2273,7 +2297,10 @@ export default function Page() {
       side,
       identityCardId: templateIdentity ?? DEFAULT_IDENTITY_BY_SIDE[side],
       cardPoolSnapshotId: DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
+      cardPoolVersion: DEFAULT_DECK_CARD_POOL_VERSION,
       formatProfileId: DEFAULT_DECK_FORMAT_PROFILE_ID,
+      formatProfileVersion: DEFAULT_DECK_FORMAT_PROFILE_VERSION,
+      validationStatus: "needs_revalidation",
       cards: [],
       createdAt: now,
       updatedAt: now
@@ -3128,7 +3155,7 @@ export default function Page() {
         position={cuePosition}
         cardDetailsById={catalogDetailsById}
         displayMode={cardDisplayMode}
-        canAdvanceAi={Boolean(payload.aiTurnPresentation?.canAdvanceAi && connection === "online")}
+        canAdvanceAi={Boolean(aiTurnPresentation?.canAdvanceAi && connection === "online")}
         onPosition={setCuePosition}
         onDismiss={() => setCurrentActionCue(null)}
         onAdvanceAi={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
@@ -3143,7 +3170,7 @@ export default function Page() {
             {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})}
           />
           <AiPacingControls
-            presentation={payload.aiTurnPresentation}
+            presentation={aiTurnPresentation}
             mode={localAiPacingMode}
             connection={connection}
             onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
@@ -3179,6 +3206,7 @@ export default function Page() {
             onAction={submitAction}
           />
           <RunTimeline view={activeView} legalActions={payload.legalActions} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} />
+          <SpecialZonesStrip view={activeView} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} />
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -4316,6 +4344,40 @@ function RunnerRigStrip({
       ) : (
         <p className="meta">Keine installierten Runner-Karten.</p>
       )}
+    </section>
+  );
+}
+
+function SpecialZonesStrip({ view, cardDetailsById, displayMode }: { view: PlayerView; cardDetailsById: Record<string, CatalogCardDetail>; displayMode: CardDisplayMode }) {
+  const zones = view.specialZones;
+  if (!zones || (zones.setAsideCount === 0 && zones.removedFromGameCount === 0)) return null;
+  const groups = [
+    { key: "set-aside", label: "Set Aside", count: zones.setAsideCount, cards: zones.setAside },
+    { key: "removed", label: "Aus dem Spiel entfernt", count: zones.removedFromGameCount, cards: zones.removedFromGame }
+  ].filter((group) => group.count > 0);
+
+  return (
+    <section className="specialZoneStrip" data-testid="special-zones">
+      <div className="sectionTitleLine">
+        <h2>Spezialzonen</h2>
+        <Layers3 size={16} />
+      </div>
+      <div className="specialZoneGroups">
+        {groups.map((group) => (
+          <div className="specialZoneGroup" key={group.key}>
+            <div className="specialZoneHead">
+              <strong>{group.label}</strong>
+              <span>{group.count}</span>
+            </div>
+            <div className="cards miniCards">
+              {group.cards.map((card) => {
+                const displayCard = enrichVisibleCard(card, cardDetailsById);
+                return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled />;
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

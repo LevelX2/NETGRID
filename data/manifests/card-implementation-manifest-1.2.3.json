@@ -1,0 +1,111 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.2.3",
+  "id": "v1.2.3-card-release-manifest",
+  "status": "implemented_for_v1.2.3_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.1.2k.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "additionalPlayableCardCountIs8": true,
+    "finalCardListAtOrBelow20": true,
+    "previousReleaseCardsRemainPlayable": true,
+    "allPlayableCardsHaveExplicitResolver": true,
+    "allPlayableCardsHaveRequiredMechanics": true,
+    "runtimeAllowlistIsExact": true,
+    "deckLegalRequiresHumanPlayable": true,
+    "aiSupportedCardsCountIs0": true,
+    "aiDeckPoolUnchanged": true,
+    "nonReleaseLocalOnrCardsRemainRuntimeDeckIllegal": true,
+    "noOfficialCardsOrAssets": true,
+    "noExternalCardDatabaseDependency": true,
+    "noCardTextParser": true,
+    "noFormatOrPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_021_dwarf",
+      "title": "Dwarf",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_icebreaker_pump_break_wall",
+      "requiredMechanics": ["install_program", "memory", "pump_breaker", "break_subroutine"],
+      "roleTags": ["runner", "program", "icebreaker", "wall_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_039_krash",
+      "title": "Krash",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_icebreaker_pump_break_any_ice_subroutine",
+      "requiredMechanics": ["install_program", "memory", "pump_breaker", "break_subroutine"],
+      "roleTags": ["runner", "program", "icebreaker", "universal_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_066_snowball",
+      "title": "Snowball",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_icebreaker_pump_break_sentry",
+      "requiredMechanics": ["install_program", "memory", "pump_breaker", "break_subroutine"],
+      "roleTags": ["runner", "program", "icebreaker", "sentry_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_074_worm",
+      "title": "Worm",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_icebreaker_pump_break_wall",
+      "requiredMechanics": ["install_program", "memory", "pump_breaker", "break_subroutine"],
+      "roleTags": ["runner", "program", "icebreaker", "wall_breaker"]
+    },
+    {
+      "cardCode": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_run_rd_multiaccess_3",
+      "requiredMechanics": ["play_event", "start_run", "breach", "multiaccess"],
+      "roleTags": ["runner", "event", "rd_run", "multiaccess"]
+    },
+    {
+      "cardCode": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_run_hq_multiaccess_3",
+      "requiredMechanics": ["play_event", "start_run", "breach", "multiaccess"],
+      "roleTags": ["runner", "event", "hq_run", "multiaccess"]
+    },
+    {
+      "cardCode": "onr_v1_101_mit-west-tier",
+      "title": "MIT West Tier",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_shuffle_grip_heap_stack_draw_5_removed_from_game",
+      "requiredMechanics": ["play_event", "shuffle", "draw_cards", "removed_from_game"],
+      "roleTags": ["runner", "event", "hidden_zone_shuffle", "draw", "removed_from_game"]
+    },
+    {
+      "cardCode": "onr_v1_297_overtime-incentives",
+      "title": "Overtime Incentives",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_operation_gain_two_actions",
+      "requiredMechanics": ["play_operation", "gain_actions"],
+      "roleTags": ["corp", "operation", "click_gain"]
+    }
+  ],
+  "coverage": {
+    "unitTests": [
+      "packages/engine/src/index.test.ts::V1.2.3 Mechanic Unlock Card Release 1",
+      "packages/catalog/src/index.test.ts::catalog import and status logic",
+      "packages/decks/src/index.test.ts::deck validation and snapshots"
+    ],
+    "scenarioTests": ["data/scenarios/v123-card-release-smoke.json"],
+    "visibilityTests": [
+      "packages/engine/src/index.test.ts::V1.2.3 Mechanic Unlock Card Release 1",
+      "apps/server/src/multiplayer.test.ts::starts V1.2.3 decks from snapshots"
+    ],
+    "aiTests": ["packages/ai/src/index.test.ts::keeps V1.2.3 human-playable cards out of the AI deck pool"],
+    "replayTests": ["packages/engine/src/index.test.ts::removes MIT West Tier from the game"]
+  }
+}

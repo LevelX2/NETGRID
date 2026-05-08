@@ -477,6 +477,23 @@ const MVP_0_99_DATA_FILES = [
 
 const REQUIRED_MVP_0_99_SCENARIOS = ["v099-counter-hosting.json", "v099-virus-recurring-bad-publicity.json", "v099-multiplayer-hosting-smoke.json"];
 
+const V1_2_3_RELEASE_CARDS = [
+  "onr_v1_021_dwarf",
+  "onr_v1_039_krash",
+  "onr_v1_066_snowball",
+  "onr_v1_074_worm",
+  "onr_v1_081_custodial-position",
+  "onr_v1_085_executive-wiretaps",
+  "onr_v1_101_mit-west-tier",
+  "onr_v1_297_overtime-incentives"
+];
+
+const V1_3_0_REQUIRED_FILES = [
+  "data/decks/deck-format-profiles-1.3.0.json",
+  "data/manifests/deck-validation-manifest-1.3.0.json",
+  "data/scenarios/v130-format-deckbuilding-smoke.json"
+];
+
 describe("Phase 1 derived artifacts", () => {
   it("keeps all MVP 0.1 JSON data artifacts parseable", () => {
     for (const file of DATA_FILES) {
@@ -1576,6 +1593,79 @@ describe("Phase 1 derived artifacts", () => {
       expect(scenario.coversCards?.length, file).toBeGreaterThan(0);
       expect(scenario.expected, file).toBeDefined();
     }
+  });
+
+  it("keeps V1.2.3 card-release manifest and scenario coverage documented", () => {
+    const manifest = JSON.parse(readFileSync("data/manifests/card-implementation-manifest-1.2.3.json", "utf8")) as {
+      schemaVersion?: string;
+      gateAssertions?: Record<string, boolean>;
+      cards?: Array<{ cardCode?: string; releaseStatus?: string; aiSupported?: boolean; requiredMechanics?: string[] }>;
+    };
+    const scenario = JSON.parse(readFileSync("data/scenarios/v123-card-release-smoke.json", "utf8")) as {
+      id?: string;
+      finalStateHash?: string;
+      replay?: { ok?: boolean; finalStateHash?: string };
+      additionalCards?: string[];
+    };
+
+    expect(manifest.schemaVersion).toBe("card-implementation-manifest-v1.2.3");
+    expect(manifest.gateAssertions?.additionalPlayableCardCountIs8).toBe(true);
+    expect(manifest.gateAssertions?.aiSupportedCardsCountIs0).toBe(true);
+    expect(manifest.gateAssertions?.noCardTextParser).toBe(true);
+    expect(manifest.cards?.map((card) => card.cardCode)).toEqual(V1_2_3_RELEASE_CARDS);
+    for (const card of manifest.cards ?? []) {
+      expect(card.releaseStatus, card.cardCode).toBe("human_playable");
+      expect(card.aiSupported, card.cardCode).toBe(false);
+      expect(card.requiredMechanics?.length, card.cardCode).toBeGreaterThan(0);
+    }
+
+    expect(scenario.id).toBe("v123-card-release-smoke");
+    expect(scenario.additionalCards).toEqual(V1_2_3_RELEASE_CARDS);
+    expect(scenario.finalStateHash).toBe("fnv1a:f8247e94");
+    expect(scenario.replay).toEqual({ ok: true, finalStateHash: "fnv1a:f8247e94" });
+  });
+
+  it("keeps V1.3.0 private local format and deckbuilding foundation artifacts documented", () => {
+    for (const file of V1_3_0_REQUIRED_FILES) {
+      expect(() => JSON.parse(readFileSync(file, "utf8")), file).not.toThrow();
+    }
+    const profiles = JSON.parse(readFileSync("data/decks/deck-format-profiles-1.3.0.json", "utf8")) as {
+      profiles?: Array<{
+        profileId?: string;
+        version?: string;
+        scope?: string;
+        allowedCardStatuses?: string[];
+        formatLegal?: { requiresDeckLegal?: boolean; requiresHumanPlayable?: boolean };
+        ai?: { requireAiSupportedForAiDecks?: boolean };
+      }>;
+    };
+    const manifest = JSON.parse(readFileSync("data/manifests/deck-validation-manifest-1.3.0.json", "utf8")) as {
+      gateAssertions?: Record<string, boolean>;
+      snapshots?: Array<{ deckSnapshotId?: string; deckHash?: string; publicMetadataFields?: string[] }>;
+      nonGoals?: string[];
+    };
+    const scenario = JSON.parse(readFileSync("data/scenarios/v130-format-deckbuilding-smoke.json", "utf8")) as {
+      id?: string;
+      formatProfileId?: string;
+      expected?: Record<string, unknown>;
+      negativeCases?: Array<{ expectedErrorCodes?: string[]; expectedErrorCode?: string }>;
+    };
+    const profile = profiles.profiles?.find((candidate) => candidate.profileId === "netgrid_private_local_v1");
+
+    expect(profile?.version).toBe("1.3.0");
+    expect(profile?.scope).toBe("private_local");
+    expect(profile?.allowedCardStatuses).toEqual(["playable", "human_playable", "deck_legal"]);
+    expect(profile?.formatLegal).toMatchObject({ requiresDeckLegal: true, requiresHumanPlayable: true });
+    expect(profile?.ai?.requireAiSupportedForAiDecks).toBe(true);
+    expect(manifest.gateAssertions?.formatProfilesRestrictOnly).toBe(true);
+    expect(manifest.gateAssertions?.noPublicPlatformFeatures).toBe(true);
+    expect(manifest.snapshots?.map((snapshot) => snapshot.deckHash)).toEqual(["fnv1a:1f64d517", "fnv1a:551ee643"]);
+    expect(manifest.snapshots?.every((snapshot) => !snapshot.publicMetadataFields?.includes("cards"))).toBe(true);
+    expect(manifest.nonGoals).toContain("card_text_parser");
+    expect(scenario.id).toBe("v130-format-deckbuilding-smoke");
+    expect(scenario.formatProfileId).toBe("netgrid_private_local_v1");
+    expect(scenario.expected?.serverMatchstartRevalidates).toBe(true);
+    expect(scenario.negativeCases?.some((entry) => entry.expectedErrorCode === "ai_deck_snapshot_not_supported")).toBe(true);
   });
 });
 

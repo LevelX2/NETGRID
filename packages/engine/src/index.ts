@@ -42,6 +42,9 @@ import {
   type ReplayResult,
   type RunState,
   type RulesBaseline,
+  type SpecialZoneKind,
+  type SpecialZoneState,
+  type SpecialZoneVisibility,
   type ModifierKind,
   type ServerId,
   type SetupState,
@@ -100,6 +103,9 @@ export type {
   ReplacementWindow,
   ReplayResult,
   RulesBaseline,
+  SpecialZoneKind,
+  SpecialZoneState,
+  SpecialZoneVisibility,
   SetupState,
   Side,
   StateHash,
@@ -254,6 +260,30 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     resolve: (state) => {
       state.runner.credits += 9;
     }
+  },
+  "onr_v1_081_custodial-position": {
+    name: "onr_runner_event_run_rd_multiaccess_3",
+    requiresServer: true,
+    canPlayForServer: (_state, serverId) => serverId === "rd",
+    resolve: (state, legalAction) => {
+      startRun(state, "rd", undefined, 3);
+      legalAction.payload = { ...(legalAction.payload ?? {}), serverId: "rd", accessCount: 3 };
+    }
+  },
+  "onr_v1_085_executive-wiretaps": {
+    name: "onr_runner_event_run_hq_multiaccess_3",
+    requiresServer: true,
+    canPlayForServer: (_state, serverId) => serverId === "hq",
+    resolve: (state, legalAction) => {
+      startRun(state, "hq", undefined, 3);
+      legalAction.payload = { ...(legalAction.payload ?? {}), serverId: "hq", accessCount: 3 };
+    }
+  },
+  "onr_v1_101_mit-west-tier": {
+    name: "onr_runner_event_mit_west_tier",
+    resolve: (state, legalAction) => {
+      resolveMitWestTier(state, legalAction);
+    }
   }
 };
 
@@ -393,6 +423,13 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       requireRunnerTagged(state);
       resolveDamageOperation(state, legalAction, "meat", 5, "onr_v1_307_urban-renewal");
     }
+  },
+  "onr_v1_297_overtime-incentives": {
+    name: "onr_corp_operation_gain_two_actions",
+    resolve: (state, legalAction) => {
+      state.corp.clicks += 2;
+      legalAction.payload = { ...(legalAction.payload ?? {}), gainedActions: 2, corpClicksAfter: state.corp.clicks };
+    }
   }
 };
 
@@ -490,6 +527,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       scoreArea: [],
       rig: { programs: [], hardware: [], resources: [] }
     },
+    specialZones: { setAside: [], removedFromGame: [] },
     cardInstances: instances,
     eventLog: [],
     winner: null,
@@ -702,6 +740,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           rig: [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].map((id) => visibleOwnCard(state, id))
         },
     servers: visibleServers,
+    specialZones: visibleSpecialZones(state, side),
     ...(run ? { run } : {}),
     ...(state.pendingChoice?.side === side ? { pendingChoice: visibleChoice(state.pendingChoice) } : {}),
     ...(state.deckMetadata
@@ -746,9 +785,28 @@ export function validateGameState(state: GameState): ValidationResult {
   for (const id of state.runner.rig.programs) addPlacement(id, "runner.rig.programs");
   for (const id of state.runner.rig.hardware) addPlacement(id, "runner.rig.hardware");
   for (const id of state.runner.rig.resources) addPlacement(id, "runner.rig.resources");
+  for (const id of state.specialZones?.setAside ?? []) addPlacement(id, "special.set_aside");
+  for (const id of state.specialZones?.removedFromGame ?? []) addPlacement(id, "special.removed_from_game");
 
   for (const id of Object.keys(state.cardInstances)) {
     if (!placements.has(id)) errors.push(`CardInstance ${id} is not in any zone.`);
+  }
+
+  for (const [id, instance] of Object.entries(state.cardInstances)) {
+    const placement = placements.get(id);
+    const expected = placementForZoneRef(instance.zone);
+    if (id !== state.corp.identity && id !== state.runner.identity && placement && expected && placement !== expected) {
+      errors.push(`CardInstance ${id} zoneRef ${expected} does not match placement ${placement}.`);
+    }
+    if (instance.owner !== "corp" && instance.owner !== "runner") errors.push(`CardInstance ${id} has invalid owner.`);
+    if (instance.controller !== "corp" && instance.controller !== "runner") errors.push(`CardInstance ${id} has invalid controller.`);
+    if (instance.zone.side === "special") {
+      if (instance.zone.zone !== "set_aside" && instance.zone.zone !== "removed_from_game") errors.push(`CardInstance ${id} has invalid special zone.`);
+      if (instance.zone.visibility !== "public" && instance.zone.visibility !== "side_private" && instance.zone.visibility !== "hidden" && instance.zone.visibility !== "replay_only") {
+        errors.push(`CardInstance ${id} has invalid special zone visibility.`);
+      }
+      if (instance.zone.zone === "removed_from_game" && instance.zone.returnZone) errors.push(`Removed-from-game CardInstance ${id} must not have a return zone.`);
+    }
   }
 
   if (state.corp.credits < 0 || state.runner.credits < 0) errors.push("Credits must not be negative.");
@@ -848,6 +906,25 @@ export function validateGameState(state: GameState): ValidationResult {
   }
 
   return { ok: errors.length === 0, errors };
+}
+
+function placementForZoneRef(zone: CardInstance["zone"]): string | undefined {
+  if (zone.side === "corp" && zone.zone === "hq") return "corp.hq";
+  if (zone.side === "corp" && zone.zone === "rd") return "corp.rd";
+  if (zone.side === "corp" && zone.zone === "archives") return "corp.archives";
+  if (zone.side === "corp" && zone.zone === "scoreArea") return "corp.scoreArea";
+  if (zone.side === "corp" && zone.zone === "serverIce") return `${zone.serverId}.ice`;
+  if (zone.side === "corp" && zone.zone === "serverRoot") return `${zone.serverId}.root`;
+  if (zone.side === "runner" && zone.zone === "grip") return "runner.grip";
+  if (zone.side === "runner" && zone.zone === "stack") return "runner.stack";
+  if (zone.side === "runner" && zone.zone === "heap") return "runner.heap";
+  if (zone.side === "runner" && zone.zone === "scoreArea") return "runner.scoreArea";
+  if (zone.side === "runner" && zone.zone === "rig") {
+    return undefined;
+  }
+  if (zone.side === "special" && zone.zone === "set_aside") return "special.set_aside";
+  if (zone.side === "special" && zone.zone === "removed_from_game") return "special.removed_from_game";
+  return undefined;
 }
 
 export function validateDeckDefinition(
@@ -958,6 +1035,13 @@ export function applyEffectCommands(state: GameState, commands: EffectCommand[])
 }
 
 export function eventVisibilityForAction(legalAction: LegalAction): EventVisibilityClass {
+  if (legalAction.type === "move_to_set_aside" || legalAction.type === "move_to_removed_from_game" || legalAction.type === "return_from_set_aside") {
+    return legalAction.payload?.specialZoneVisibility === "public" ? "public" : "hidden_info_barrier";
+  }
+  if (legalAction.type === "change_card_control") {
+    const visibility = legalAction.payload?.controlChangeVisibility;
+    return visibility === "hidden_info_barrier" || visibility === "private_to_side" || visibility === "replay_only" || visibility === "public" ? visibility : "public";
+  }
   if (legalAction.type === "resolve_choice") {
     const choiceVisibility = legalAction.payload?.choiceVisibility;
     return choiceVisibility === "hidden_info_barrier" || choiceVisibility === "private_to_side" || choiceVisibility === "replay_only" || choiceVisibility === "public"
@@ -980,6 +1064,7 @@ export function isHiddenInfoBarrierEvent(event: GameEvent): boolean {
   if (event.visibilityClass === "hidden_info_barrier") return true;
   if (event.publicPayload.damageResolved === true) return true;
   if (event.publicPayload.hiddenZoneBarrier === true) return true;
+  if (event.publicPayload.specialZoneVisibility && event.publicPayload.specialZoneVisibility !== "public") return true;
   return ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "play_operation"].includes(event.type);
 }
 
@@ -1052,6 +1137,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       }
     }
   }
+  actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
   return actions;
 }
@@ -1110,7 +1196,91 @@ function runnerMainActions(state: GameState): LegalAction[] {
   for (const server of state.corp.servers) {
     actions.push(action(state, "runner", "start_run", `Run auf ${server.label}`, "basic_action", [{ clicks: 1 }], { serverId: server.id }));
   }
+  actions.push(...specialZoneHarnessActions(state, "runner"));
   actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
+  return actions;
+}
+
+function specialZoneHarnessActions(state: GameState, side: Side): LegalAction[] {
+  const harness = state.specialZoneHarness;
+  if (!harness || harness.actor !== side || !state.cardInstances[harness.cardInstanceId]) return [];
+  const cardId = harness.cardInstanceId;
+  const instance = mustInstance(state.cardInstances, cardId);
+  const actions: LegalAction[] = [];
+  if (harness.setAside && instance.zone.side !== "special") {
+    actions.push(
+      action(
+        state,
+        side,
+        "move_to_set_aside",
+        "Karte testweise set-aside legen",
+        "game_rule",
+        [],
+        {
+          cardId,
+          specialZone: "set_aside",
+          specialZoneVisibility: harness.setAside.visibility,
+          ...(harness.setAside.visibilitySide ? { specialZoneVisibilitySide: harness.setAside.visibilitySide } : {}),
+          specialZoneReason: harness.setAside.reason ?? "v1.2.2_test_harness"
+        },
+        { targetRequirements: [{ id: "card", kind: "card", visibility: "engine_only" }] }
+      )
+    );
+  }
+  if (harness.removedFromGame && instance.zone.side !== "special") {
+    actions.push(
+      action(
+        state,
+        side,
+        "move_to_removed_from_game",
+        "Karte testweise aus dem Spiel entfernen",
+        "game_rule",
+        [],
+        {
+          cardId,
+          specialZone: "removed_from_game",
+          specialZoneVisibility: harness.removedFromGame.visibility,
+          ...(harness.removedFromGame.visibilitySide ? { specialZoneVisibilitySide: harness.removedFromGame.visibilitySide } : {}),
+          specialZoneReason: harness.removedFromGame.reason ?? "v1.2.2_test_harness"
+        },
+        { targetRequirements: [{ id: "card", kind: "card", visibility: "engine_only" }] }
+      )
+    );
+  }
+  if (harness.setAside?.allowReturn && instance.zone.side === "special" && instance.zone.zone === "set_aside") {
+    actions.push(
+      action(
+        state,
+        side,
+        "return_from_set_aside",
+        "Karte testweise aus Set Aside zurückholen",
+        "game_rule",
+        [],
+        { cardId, specialZone: "set_aside", specialZoneReason: harness.setAside.reason ?? "v1.2.2_test_harness_return" },
+        { targetRequirements: [{ id: "card", kind: "card", zoneScope: ["special.set_aside"], visibility: "engine_only" }] }
+      )
+    );
+  }
+  if (harness.controlChange && instance.controller !== harness.controlChange.newController) {
+    actions.push(
+      action(
+        state,
+        side,
+        "change_card_control",
+        "Kartenkontrolle testweise wechseln",
+        "game_rule",
+        [],
+        {
+          cardId,
+          oldController: instance.controller,
+          newController: harness.controlChange.newController,
+          controlChangeVisibility: harness.controlChange.visibility ?? "public",
+          controlChangeReason: harness.controlChange.reason ?? "v1.2.2_test_harness"
+        },
+        { targetRequirements: [{ id: "card", kind: "card", visibility: "engine_only" }, { id: "controller", kind: "side", allowedSides: ["corp", "runner"] }] }
+      )
+    );
+  }
   return actions;
 }
 
@@ -1151,7 +1321,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
         )
       );
     }
-    const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && ability.iceSubtype && iceDefinition.subtypes.includes(ability.iceSubtype));
+    const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype)));
     if (breakAbility && breakerStrength >= (iceDefinition.strength ?? 0) && availableRunnerRunCredits(state) >= breakAbility.cost.credits) {
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
@@ -1332,6 +1502,18 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       legalAction.payload = { ...(legalAction.payload ?? {}), purgedVirusCounters: purged, purgedCounterType: "virus" };
       return;
     }
+    case "move_to_set_aside":
+      moveToSpecialZone(state, legalAction, "set_aside");
+      return;
+    case "move_to_removed_from_game":
+      moveToSpecialZone(state, legalAction, "removed_from_game");
+      return;
+    case "return_from_set_aside":
+      returnFromSetAside(state, legalAction);
+      return;
+    case "change_card_control":
+      changeCardControl(state, legalAction);
+      return;
     case "resolve_choice":
       resolvePendingChoice(state, legalAction, playerAction);
       return;
@@ -1354,6 +1536,37 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
   const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
   if (!resolver) throw new Error(`Kein Event-Resolver fuer ${definition.id}.`);
   resolver.resolve(state, legalAction);
+}
+
+function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
+  const cardId = String(legalAction.payload?.cardId);
+  removeFromAllZones(state, cardId);
+  const specialZones = ensureSpecialZones(state);
+  specialZones.removedFromGame.push(cardId);
+  specialZones.removedFromGame.sort();
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    zone: { side: "special", zone: "removed_from_game", visibility: "public" }
+  };
+
+  const allIds = [...state.runner.grip, ...state.runner.heap, ...state.runner.stack].filter((id) => id !== cardId);
+  state.runner.grip = [];
+  state.runner.heap = [];
+  state.runner.stack = shuffleStateIds(state, allIds, `onr_v1_101_mit_west_tier:${state.stateVersion + 1}`);
+  for (const id of state.runner.stack) {
+    state.cardInstances[id] = { ...mustInstance(state.cardInstances, id), zone: { side: "runner", zone: "stack" } };
+  }
+  drawRunnerCards(state, 5);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    cardId,
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "mit_west_tier_shuffle_grip_heap_stack",
+    specialZone: "removed_from_game",
+    specialZoneVisibility: "public",
+    specialZoneReason: "onr_v1_101_mit_west_tier"
+  };
 }
 
 function installCard(state: GameState, legalAction: LegalAction): void {
@@ -3241,6 +3454,10 @@ function publicLabel(legalAction: LegalAction): string {
   if (legalAction.type === "resolve_choice" && legalAction.payload?.replacementDecision) return "Replacement-Entscheidung wurde beantwortet.";
   if (legalAction.type === "resolve_choice" && legalAction.payload?.eventModificationDecision) return "Event-Modification-Entscheidung wurde beantwortet.";
   if (legalAction.type === "resolve_choice") return "Choice wurde beantwortet.";
+  if (legalAction.type === "move_to_set_aside") return "Eine Karte wurde in Set Aside bewegt.";
+  if (legalAction.type === "move_to_removed_from_game") return "Eine Karte wurde aus dem Spiel entfernt.";
+  if (legalAction.type === "return_from_set_aside") return "Eine Karte ist aus Set Aside zurückgekehrt.";
+  if (legalAction.type === "change_card_control") return "Die Kontrolle einer Karte wurde geändert.";
   if (legalAction.side === "corp" && legalAction.type === "install_card") return "Korp installiert eine Karte.";
   if (legalAction.side === "corp" && legalAction.type === "advance_card") return "Korp advanced eine Karte.";
   return legalAction.label;
@@ -3379,9 +3596,23 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.redactedKind = "hidden_zone";
   }
   if (legalAction.payload?.publicRevealKind) context.revealKind = legalAction.payload.publicRevealKind;
+  if (legalAction.type === "move_to_set_aside" || legalAction.type === "move_to_removed_from_game" || legalAction.type === "return_from_set_aside") {
+    context.specialZone = legalAction.payload?.specialZone;
+    context.specialZoneVisibility = legalAction.payload?.specialZoneVisibility;
+    context.specialZoneReason = legalAction.payload?.specialZoneReason;
+    context.redactedKind = "special_zone";
+  }
+  if (legalAction.type === "change_card_control") {
+    context.oldController = legalAction.payload?.oldController;
+    context.newController = legalAction.payload?.newController;
+    context.ownershipChanged = false;
+    context.controlChangeReason = legalAction.payload?.controlChangeReason;
+    context.redactedKind = "control_change";
+  }
   if (typeof legalAction.payload?.badPublicityAfter === "number") context.badPublicityAfter = legalAction.payload.badPublicityAfter;
   if (typeof legalAction.payload?.onScoreGainCredits === "number") context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
   if (typeof legalAction.payload?.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
+  if (typeof legalAction.payload?.gainedActions === "number") context.gainedActions = legalAction.payload.gainedActions;
   if (state.winner && state.gameEndReason) context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
   if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {
@@ -3410,6 +3641,16 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
   if (typeof legalAction.payload?.publicRevealDefinitionId === "string") {
     const definition = DEMO_CARDS_BY_ID[legalAction.payload.publicRevealDefinitionId];
     if (definition) return { cardDefinitionId: definition.id, title: definition.title };
+  }
+  if (
+    (legalAction.type === "move_to_set_aside" || legalAction.type === "move_to_removed_from_game" || legalAction.type === "return_from_set_aside" || legalAction.type === "change_card_control") &&
+    (legalAction.payload?.specialZoneVisibility === "public" || legalAction.payload?.controlChangeVisibility === "public")
+  ) {
+    const cardId = typeof legalAction.payload?.cardId === "string" ? legalAction.payload.cardId : undefined;
+    if (cardId && state.cardInstances[cardId]) {
+      const definition = definitionFor(state, cardId);
+      return { cardDefinitionId: definition.id, title: definition.title };
+    }
   }
   const revealsCard =
     ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation"].includes(legalAction.type) ||
@@ -3481,7 +3722,9 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(definition.agendaPoints !== undefined ? { agendaPoints: definition.agendaPoints } : {}),
     ...(definition.trashCost !== undefined ? { trashCost: definition.trashCost } : {}),
     ...(instance.counters ? { counters: cloneCounters(instance.counters) } : {}),
-    ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {})
+    ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
+    owner: instance.owner,
+    controller: instance.controller
   };
 }
 
@@ -3505,6 +3748,33 @@ function visibleCorpArchives(state: GameState, viewer: Side): VisibleCard[] {
   return state.corp.archives
     .filter((id) => viewer === "corp" || mustInstance(state.cardInstances, id).faceup)
     .map((id) => visibleCorpCard(state, id, viewer, "root"));
+}
+
+function visibleSpecialZones(state: GameState, viewer: Side): NonNullable<PlayerView["specialZones"]> {
+  const zones = state.specialZones ?? { setAside: [], removedFromGame: [] };
+  return {
+    setAside: zones.setAside.map((id) => visibleSpecialZoneCard(state, id, viewer)),
+    removedFromGame: zones.removedFromGame.map((id) => visibleSpecialZoneCard(state, id, viewer)),
+    setAsideCount: zones.setAside.length,
+    removedFromGameCount: zones.removedFromGame.length
+  };
+}
+
+function visibleSpecialZoneCard(state: GameState, id: CardInstanceId, viewer: Side): VisibleCard {
+  const instance = mustInstance(state.cardInstances, id);
+  if (instance.zone.side !== "special") return visibleOwnCard(state, id);
+  if (canSeeSpecialZoneCard(instance, viewer)) return visibleOwnCard(state, id);
+  return {
+    instanceId: hiddenVisibleCardId(id),
+    known: false
+  };
+}
+
+function canSeeSpecialZoneCard(instance: CardInstance, viewer: Side): boolean {
+  if (instance.zone.side !== "special") return true;
+  if (instance.zone.visibility === "public") return true;
+  if (instance.zone.visibility === "side_private") return viewer === (instance.zone.visibilitySide ?? instance.owner);
+  return false;
 }
 
 
@@ -3939,6 +4209,140 @@ function removeFromAllZones(state: GameState, cardId: string): void {
   state.runner.rig.programs = state.runner.rig.programs.filter((id) => id !== cardId);
   state.runner.rig.hardware = state.runner.rig.hardware.filter((id) => id !== cardId);
   state.runner.rig.resources = state.runner.rig.resources.filter((id) => id !== cardId);
+  const specialZones = ensureSpecialZones(state);
+  specialZones.setAside = specialZones.setAside.filter((id) => id !== cardId);
+  specialZones.removedFromGame = specialZones.removedFromGame.filter((id) => id !== cardId);
+}
+
+function ensureSpecialZones(state: GameState): SpecialZoneState {
+  state.specialZones ??= { setAside: [], removedFromGame: [] };
+  state.specialZones.setAside ??= [];
+  state.specialZones.removedFromGame ??= [];
+  return state.specialZones;
+}
+
+function moveToSpecialZone(state: GameState, legalAction: LegalAction, zone: SpecialZoneKind): void {
+  const cardId = stringLegalPayload(legalAction, "cardId");
+  const instance = mustInstance(state.cardInstances, cardId);
+  const harness = state.specialZoneHarness;
+  const harnessConfig = zone === "set_aside" ? harness?.setAside : harness?.removedFromGame;
+  if (!harness || harness.actor !== legalAction.side || harness.cardInstanceId !== cardId || !harnessConfig) {
+    throw new Error("Special-Zone-Harness ist fuer diese Aktion nicht freigegeben.");
+  }
+  if (instance.zone.side === "special") throw new Error("Karte liegt bereits in einer Spezialzone.");
+  const previousZone = instance.zone as Exclude<CardInstance["zone"], { side: "special" }>;
+  const visibility = specialZoneVisibilityPayload(legalAction, harnessConfig.visibility);
+  const visibilitySide = specialZoneVisibilitySidePayload(legalAction, harnessConfig.visibilitySide);
+  removeFromAllZones(state, cardId);
+  const specialZones = ensureSpecialZones(state);
+  const target = zone === "set_aside" ? specialZones.setAside : specialZones.removedFromGame;
+  target.push(cardId);
+  target.sort();
+  state.cardInstances[cardId] = {
+    ...instance,
+    zone: {
+      side: "special",
+      zone,
+      visibility,
+      ...(visibilitySide ? { visibilitySide } : {}),
+      ...(zone === "set_aside" ? { returnZone: harness.setAside?.returnZone ?? previousZone } : {})
+    }
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    cardId,
+    specialZone: zone,
+    specialZoneVisibility: visibility,
+    ...(visibilitySide ? { specialZoneVisibilitySide: visibilitySide } : {}),
+    specialZoneReason: String(legalAction.payload?.specialZoneReason ?? harnessConfig.reason ?? "v1.2.2_test_harness"),
+    redactedKind: "special_zone"
+  };
+}
+
+function returnFromSetAside(state: GameState, legalAction: LegalAction): void {
+  const cardId = stringLegalPayload(legalAction, "cardId");
+  const instance = mustInstance(state.cardInstances, cardId);
+  const harness = state.specialZoneHarness;
+  if (!harness?.setAside?.allowReturn || harness.actor !== legalAction.side || harness.cardInstanceId !== cardId) {
+    throw new Error("Rueckkehr aus Set Aside ist nur test-only freigegeben.");
+  }
+  if (instance.zone.side !== "special" || instance.zone.zone !== "set_aside") throw new Error("Karte liegt nicht in Set Aside.");
+  const returnZone = harness.setAside.returnZone ?? instance.zone.returnZone;
+  if (!returnZone) throw new Error("Keine Rueckkehrzone fuer Set Aside definiert.");
+  removeFromAllZones(state, cardId);
+  placeCardInZone(state, cardId, returnZone);
+  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: returnZone };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    cardId,
+    specialZone: "set_aside",
+    specialZoneReason: String(legalAction.payload?.specialZoneReason ?? harness.setAside.reason ?? "v1.2.2_test_harness_return"),
+    redactedKind: "special_zone"
+  };
+}
+
+function changeCardControl(state: GameState, legalAction: LegalAction): void {
+  const cardId = stringLegalPayload(legalAction, "cardId");
+  const instance = mustInstance(state.cardInstances, cardId);
+  const newController = sideLegalPayload(legalAction, "newController");
+  const harness = state.specialZoneHarness;
+  if (!harness?.controlChange || harness.actor !== legalAction.side || harness.cardInstanceId !== cardId || harness.controlChange.newController !== newController) {
+    throw new Error("Control-Wechsel ist fuer diese Aktion nicht freigegeben.");
+  }
+  if (instance.controller === newController) throw new Error("Die Karte hat diesen Controller bereits.");
+  state.cardInstances[cardId] = { ...instance, controller: newController };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    cardId,
+    oldController: instance.controller,
+    newController,
+    controlChangeVisibility: harness.controlChange.visibility ?? "public",
+    controlChangeReason: harness.controlChange.reason ?? "v1.2.2_test_harness",
+    ownershipChanged: false,
+    redactedKind: "control_change"
+  };
+}
+
+function placeCardInZone(state: GameState, cardId: CardInstanceId, zone: Exclude<CardInstance["zone"], { side: "special" }>): void {
+  if (zone.side === "corp" && zone.zone === "hq") state.corp.hq.push(cardId);
+  else if (zone.side === "corp" && zone.zone === "rd") state.corp.rd.push(cardId);
+  else if (zone.side === "corp" && zone.zone === "archives") state.corp.archives.push(cardId);
+  else if (zone.side === "corp" && zone.zone === "scoreArea") state.corp.scoreArea.push(cardId);
+  else if (zone.side === "corp" && zone.zone === "serverIce") mustServer(state, zone.serverId).ice.push(cardId);
+  else if (zone.side === "corp" && zone.zone === "serverRoot") mustServer(state, zone.serverId).root.push(cardId);
+  else if (zone.side === "runner" && zone.zone === "grip") state.runner.grip.push(cardId);
+  else if (zone.side === "runner" && zone.zone === "stack") state.runner.stack.push(cardId);
+  else if (zone.side === "runner" && zone.zone === "heap") state.runner.heap.push(cardId);
+  else if (zone.side === "runner" && zone.zone === "scoreArea") state.runner.scoreArea.push(cardId);
+  else if (zone.side === "runner" && zone.zone === "rig") {
+    const definition = definitionFor(state, cardId);
+    if (definition.type === "program") state.runner.rig.programs.push(cardId);
+    else if (definition.type === "hardware") state.runner.rig.hardware.push(cardId);
+    else if (definition.type === "resource") state.runner.rig.resources.push(cardId);
+    else throw new Error("Nur Runner-Programme, Hardware und Resources koennen in die Rig zurueckkehren.");
+  }
+}
+
+function specialZoneVisibilityPayload(legalAction: LegalAction, fallback: SpecialZoneVisibility): SpecialZoneVisibility {
+  const value = legalAction.payload?.specialZoneVisibility;
+  return value === "public" || value === "side_private" || value === "hidden" || value === "replay_only" ? value : fallback;
+}
+
+function specialZoneVisibilitySidePayload(legalAction: LegalAction, fallback: Side | undefined): Side | undefined {
+  const value = legalAction.payload?.specialZoneVisibilitySide;
+  return value === "corp" || value === "runner" ? value : fallback;
+}
+
+function stringLegalPayload(legalAction: LegalAction, key: string): string {
+  const value = legalAction.payload?.[key];
+  if (typeof value !== "string" || value.length === 0) throw new Error(`Payload ${key} fehlt.`);
+  return value;
+}
+
+function sideLegalPayload(legalAction: LegalAction, key: string): Side {
+  const value = legalAction.payload?.[key];
+  if (value !== "corp" && value !== "runner") throw new Error(`Payload ${key} ist keine Seite.`);
+  return value;
 }
 
 function createRemote(state: GameState): CorpServer {

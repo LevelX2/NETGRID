@@ -17,6 +17,7 @@ const runnerDeck: EditableDeck = {
   createdAt: "2026-05-07T10:00:00.000Z",
   updatedAt: "2026-05-07T10:00:00.000Z"
 };
+const runnerDeckNeedsRevalidation = { ...runnerDeck, validationStatus: "needs_revalidation" };
 
 describe("deck file library", () => {
   it("uses the application data folder on Windows by default", () => {
@@ -35,7 +36,7 @@ describe("deck file library", () => {
       const file = await readFile(join(dir, "local_runner_test.json"), "utf8");
       expect(file).toContain("netgrid-editable-deck-v1");
       const result = await readDeckLibrary(dir);
-      expect(result.decks).toEqual([runnerDeck]);
+      expect(result.decks).toEqual([runnerDeckNeedsRevalidation]);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
@@ -46,7 +47,7 @@ describe("deck file library", () => {
     try {
       await writeDeckLibrary([runnerDeck], dir);
       await writeFile(join(dir, "broken.json"), "{", "utf8");
-      expect((await readDeckLibrary(dir)).decks).toEqual([runnerDeck]);
+      expect((await readDeckLibrary(dir)).decks).toEqual([runnerDeckNeedsRevalidation]);
       await writeDeckLibrary([], dir);
       expect((await readDeckLibrary(dir)).decks).toEqual([]);
     } finally {

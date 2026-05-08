@@ -30,9 +30,14 @@
 - `docs/derived/V1_2_1_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_2_1_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis der getrennten Replacement-Pipeline.
 - `docs/derived/V1_2_2_TO_V1_3_0_IMPLEMENTATION_HANDOFF.md`: gemeinsames Umsetzungshandoff für V1.2.2 Special Zones/Ownership/Control, V1.2.3 Mechanic Unlock Card Release 1 und V1.3.0 Format/Deckbuilding Foundation.
 - `docs/derived/V1_2_2_SPECIAL_ZONES_OWNERSHIP_CONTROL_DETAILED_PLAN.md`, `docs/derived/V1_2_2_REQUIREMENTS.md`, `docs/derived/SPECIAL_ZONES_OWNERSHIP_CONTROL_1_2_2_SPEC.md`, `docs/derived/V1_2_2_TEST_MATRIX.md` und `docs/derived/V1_2_2_REQUIREMENTS_REVIEW.md`: eingefrorene V1.2.2-Planung für Set Aside, Removed from Game, Owner/Controller und Control-Wechsel ohne Kartenfreigabe.
+- `docs/derived/V1_2_2_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_2_2_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis der Special-Zones-/Ownership-/Control-Foundation.
 - `docs/derived/V1_2_3_MECHANIC_UNLOCK_CARD_RELEASE_1_DETAILED_PLAN.md`, `docs/derived/V1_2_3_REQUIREMENTS.md`, `docs/derived/CARD_UNLOCK_1_2_3_SPEC.md`, `docs/derived/V1_2_3_TEST_MATRIX.md` und `docs/derived/V1_2_3_REQUIREMENTS_REVIEW.md`: eingefrorene V1.2.3-Planung für den ersten kontrollierten Karten-Unlock nach Mechanik-Coverage.
+- `docs/derived/V1_2_3_IMPLEMENTATION_PREFLIGHT.md`, `docs/derived/V1_2_3_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_2_3_FINAL_REVIEW.md`: finale Kartenliste, Umsetzung und Gate-Ergebnis des ersten Mechanic-Unlock-Kartenrelease.
+- `data/manifests/card-implementation-manifest-1.2.3.json` und `data/scenarios/v123-card-release-smoke.json`: maschinenlesbarer V1.2.3-Kartenmanifest- und Szenario-/StateHash-Nachweis.
 - `docs/derived/V1_3_0_FORMAT_DECKBUILDING_FOUNDATION_DETAILED_PLAN.md`, `docs/derived/V1_3_0_REQUIREMENTS.md`, `docs/derived/FORMAT_DECKBUILDING_FOUNDATION_1_3_0_SPEC.md`, `docs/derived/V1_3_0_TEST_MATRIX.md` und `docs/derived/V1_3_0_REQUIREMENTS_REVIEW.md`: eingefrorene V1.3.0-Planung für lokale Formatprofile, Deckvalidierung, Snapshots und Matchstart-Revalidierung.
-- `data/rules/mechanics-coverage-1.2.1.json`: maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.0/V1.2.1.
+- `docs/derived/V1_3_0_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_3_0_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis der privaten lokalen Format- und Deckbuilding-Foundation.
+- `data/decks/deck-format-profiles-1.3.0.json`, `data/manifests/deck-validation-manifest-1.3.0.json` und `data/scenarios/v130-format-deckbuilding-smoke.json`: maschinenlesbarer V1.3.0-Formatprofil-, Deckvalidierungs- und Szenario-Nachweis.
+- `data/rules/mechanics-coverage-1.2.2.json`: maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.2.
 
 ## Prozesse
 
@@ -54,7 +59,7 @@
 - `docs/derived/MVP_0.91_REQUIREMENTS.md`: eingefrorene V0.91-Anforderungen; private lokale Scan-/Asset-Nutzung ist nur als Anzeige-Artefakt erlaubt.
 - `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`: Quellen-, Nutzungs- und Asset-Policy-Grenzen für Kartenbilder.
 - `docs/derived/MVP_0.92_REQUIREMENTS.md`: eingefrorene V0.92-Anforderungen für Mechanik-Inventar und M1-Gate.
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`: normalisierte Mechanik-Coverage nach V1.1.3/V1.1.2K, aktualisiert nach V1.2.0/V1.2.1; aktueller maschinenlesbarer JSON-Stand ist `data/rules/mechanics-coverage-1.2.1.json`.
+- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`: normalisierte Mechanik-Coverage nach V1.1.3/V1.1.2K, aktualisiert nach V1.2.0/V1.2.1/V1.2.2; aktueller maschinenlesbarer JSON-Stand ist `data/rules/mechanics-coverage-1.2.2.json`.
 - `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`: Spezifikation für V0.93 Effects, Abilities, Timing, Choices und Eventklassifikation.
 - `docs/derived/MVP_0.93_REQUIREMENTS.md`: umgesetzte V0.93-Anforderungen für das M1-Engine-Fundament und M2 als Requirements-only Scope.
 - `docs/derived/SETUP_GAME_END_0.93_SPEC.md`: M2-Spezifikation für Setup, Mulligan, Siegwerte, Deckout/Flatline-Vorbereitung, Identity Setup und Archives/facedown.
