@@ -2,6 +2,8 @@
 
 ## Current phase
 
+Die Detailplanung fuer V1.3.1 Card Data Pipeline v2, V1.4.0 Planbasierte Corp-KI und V1.4.1 Planbasierte Runner-KI ist am 2026-05-08 requirements-gefroren. Erzeugt wurden je Release Detailplan, Requirements, Spezifikation, Testmatrix und Requirements Review sowie das gemeinsame Handoff `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`. V1.3.1 ist der naechste Umsetzungsschritt nach abgeschlossenem V1.3.0-Gate; V1.4.0 startet erst nach gruenem V1.3.1-Final-Gate, V1.4.1 erst nach gruenem V1.4.0-Final-Gate. Keine Engine-, Server-, Web-, KI- oder Test-Codeimplementierung wurde in diesem Planungsschritt geschrieben.
+
 V1.3.0 Format und Deckbuilding Foundation ist am 2026-05-08 nach abgeschlossenem V1.2.3-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release fuehrt das private lokale Formatprofil `netgrid_private_local_v1` Version `1.3.0`, Format-/Card-Pool-Versionierung, restriktive Side-/Identity-/Faction-/Influence-/Agenda-/Copy-Limit-Deckvalidierung, `needs_revalidation` fuer alte lokale Decks, V1.3.0-Snapshots, serverseitige Matchstart-Revalidierung, decklistenfreie Public Metadata und ein AI-Gate auf `ai_supported` ein. `format_legal` ist getrennt sichtbar und kann nur einschraenken, nicht freigeben. Keine Public-Plattformfunktionen, keine offiziellen Assets, kein Kartentextparser und keine neuen Kartenfreigaben wurden eingefuehrt. Gate-Ergebnis: `V1_3_0_implemented: true`; `V1_3_0_verified: true`; `V1_3_0_done: true`.
 
 V1.2.3 Mechanic Unlock Card Release 1 ist am 2026-05-08 nach abgeschlossenem V1.2.2-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release aktiviert exakt 8 lokale O:NR-v1-Karten als `human_playable` und `deck_legal`: Dwarf, Krash, Snowball, Worm, Custodial Position, Executive Wiretaps, MIT West Tier und Overtime Incentives. Keine Karte ist `ai_supported`; der KI-Deckpool bleibt unverändert. Gate-Ergebnis: `V1_2_3_implemented: true`; `V1_2_3_verified: true`; `V1_2_3_done: true`; `ready_for_V1_3_0_implementation: true`.
@@ -166,13 +168,17 @@ Latest V1.2.2 special zones implementation review artifact: `docs/derived/V1_2_2
 Latest V1.2.2 special zones final review artifact: `docs/derived/V1_2_2_FINAL_REVIEW.md`.
 Latest V1.2.2 mechanics coverage artifact: `data/rules/mechanics-coverage-1.2.2.json`.
 Latest V1.1.3-to-V1.2.1 implementation handoff artifact: `docs/derived/V1_1_3_TO_V1_2_1_IMPLEMENTATION_HANDOFF.md`.
+Latest V1.3.1 planning artifacts: `docs/derived/V1_3_1_CARD_DATA_PIPELINE_V2_DETAILED_PLAN.md`, `docs/derived/V1_3_1_REQUIREMENTS.md`, `docs/derived/CARD_DATA_PIPELINE_1_3_1_SPEC.md`, `docs/derived/V1_3_1_TEST_MATRIX.md`, `docs/derived/V1_3_1_REQUIREMENTS_REVIEW.md`.
+Latest V1.4.0 planning artifacts: `docs/derived/V1_4_0_PLAN_BASED_CORP_AI_DETAILED_PLAN.md`, `docs/derived/V1_4_0_REQUIREMENTS.md`, `docs/derived/PLAN_BASED_CORP_AI_1_4_0_SPEC.md`, `docs/derived/V1_4_0_TEST_MATRIX.md`, `docs/derived/V1_4_0_REQUIREMENTS_REVIEW.md`.
+Latest V1.4.1 planning artifacts: `docs/derived/V1_4_1_PLAN_BASED_RUNNER_AI_DETAILED_PLAN.md`, `docs/derived/V1_4_1_REQUIREMENTS.md`, `docs/derived/PLAN_BASED_RUNNER_AI_1_4_1_SPEC.md`, `docs/derived/V1_4_1_TEST_MATRIX.md`, `docs/derived/V1_4_1_REQUIREMENTS_REVIEW.md`.
+Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
 Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`.
 Latest consolidated release roadmap artifact: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
 Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.3.0 Format und Deckbuilding Foundation gemäß `docs/derived/V1_2_2_TO_V1_3_0_IMPLEMENTATION_HANDOFF.md`, erst nach abgeschlossenem V1.2.3-Gate. V1.1.3 Baseline-Preflight, V1.2.0 Event Modification Foundation, V1.2.1 Replacement Effects, V1.2.2 Special Zones/Ownership/Control und V1.2.3 Mechanic Unlock Card Release 1 sind abgeschlossen und lokal verifiziert. V1.1.2K kleines Kartenrelease, V1.1.2 Full Archives Access und Matchstart Entry UX, V1.1.1 Discard/Handlimit/Core Damage, V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening and V1.0.8 Storage/Backup-Härtung are complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
+Current selected next scope: V1.3.1 Card Data Pipeline v2 gemäß `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`, nach abgeschlossenem V1.3.0-Gate. V1.4.0 Planbasierte Corp-KI und V1.4.1 Planbasierte Runner-KI sind requirements-gefrorene Folge-Releases, duerfen aber erst nach dem jeweils vorherigen gruenen Final-Gate starten. V1.1.3 Baseline-Preflight, V1.2.0 Event Modification Foundation, V1.2.1 Replacement Effects, V1.2.2 Special Zones/Ownership/Control, V1.2.3 Mechanic Unlock Card Release 1 und V1.3.0 Format und Deckbuilding Foundation sind abgeschlossen und lokal verifiziert. V1.1.2K kleines Kartenrelease, V1.1.2 Full Archives Access und Matchstart Entry UX, V1.1.1 Discard/Handlimit/Core Damage, V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening and V1.0.8 Storage/Backup-Härtung are complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
 
 ## Status
 
@@ -2174,14 +2180,14 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Implement V1.2.2 from `docs/derived/V1_2_2_TO_V1_3_0_IMPLEMENTATION_HANDOFF.md`.
-2. Treat V1.2.3 and V1.3.0 as planned follow-up releases, but do not start them before the preceding release final gate is green.
-3. Keep further card releases behind the `listed`/`engine_supported`/`human_playable`/`ai_supported` model.
-4. Treat V1.2.0/V1.2.1 as completed foundations, not as upcoming implementation work.
-5. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
+1. Implement V1.3.1 from `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
+2. Treat V1.4.0 and V1.4.1 as planned follow-up releases, but do not start them before the preceding release final gate is green.
+3. Keep AI-Hints separate from `ai_supported`; Hints prepare KI support but do not grant it.
+4. Keep plan-based KI behind PlayerView, LegalActions, side-filtered PublicEvents, own deck/hint data and explicit public metadata.
+5. Treat V1.4.2 Belief State and V1.4.3 Simulation/Selfplay as later gates, not as V1.4.0/V1.4.1 scope.
 6. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.
 
-Set Aside, Remove from Game, Ownership/Control changes and full official deckbuilding/format rules remain planned only until their own gates. Prevention/Avoid/Interrupt and Replacement have foundation coverage through V1.2.0/V1.2.1, but real cards, broad eventfamilies, Avoid-/Interrupt-Runtime-Pilots and KI-Deckfreigaben still need their own gates.
+Card Data Pipeline v2, AI-Hints v2 and planbasierte KI remain planned only until their implementation/final gates. Event Modification, Replacement, Special Zones, Format/Deckbuilding and the current O:NR-v1 card pool remain limited to their completed narrow gates; further cards, broad eventfamilies, Avoid-/Interrupt-Runtime-Pilots and KI-Deckfreigaben still need their own gates.
 
 Detailed planning artifacts available:
 
