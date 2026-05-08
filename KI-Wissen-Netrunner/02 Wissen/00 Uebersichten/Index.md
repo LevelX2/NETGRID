@@ -47,6 +47,10 @@
 - `docs/derived/V1_4_1_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_4_1_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis der planbasierten Runner-KI mit AI-Level-2-Planmodell, acht Planarten, fünf Evaluatoren, DecisionDebug mit Unsicherheit, Hidden-State-Invariance, legalem Fallback, Runner-vs-Basic-Corp-/Runner-vs-planbasierte-Corp-Smokes und V1.4.0-Corp-Regression.
 - `data/ai/runner-plan-profiles-1.4.1.json`, `data/reports/ai-runner-plan-benchmark-1.4.1.json` und `data/scenarios/ai-v141-runner-plan-smokes.json`: maschinenlesbarer V1.4.1-Profil-, Benchmark- und Szenario-Nachweis.
 - `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`: gemeinsames Umsetzungshandoff für V1.3.1 Card Data Pipeline v2, V1.4.0 planbasierte Corp-KI und V1.4.1 planbasierte Runner-KI.
+- `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_SLICE_PLAN.md`: geplanter kleiner Freigabe-Slice fuer das lokale Runner-Deck `King of the Road` als Runner-KI-Deck; umfasst Karten-AI-Support, AI-Hints, Runner-KI-Szenarien, Hidden-Info-Gate und Snapshot-/Deckpool-Entscheidung.
+- `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json` und `data/scenarios/ai-kotr-runner-approval-smokes.json`: Umsetzung und maschinenlesbarer Nachweis für `King of the Road` als explizit wählbaren Runner-KI-Snapshot ohne lokale Korp-Deck- oder pauschale O:NR-KI-Freigabe.
+- `docs/derived/DECK_LEGAL_AI_APPROVAL_BATCH_PLAN.md`: Batchplan für die kontrollierte KI-Freigabe der restlichen decklegalen Karten.
+- `docs/derived/DECK_LEGAL_AI_APPROVAL_BATCH_A_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-deck-legal-batch-a.json`, `data/manifests/deck-legal-ai-approval-batch-a-manifest.json` und `data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json`: Umsetzung und Nachweis für Batch A `Runner Rig Low Risk`; genau Codecracker, Codeslinger, Dwarf, Krash, Snowball, Worm, Tycho Mem Chip und Zetatech Mem Chip sind zusätzlich KI-abgenommen.
 - `data/rules/mechanics-coverage-1.2.2.json`: maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.2.
 
 ## Prozesse
