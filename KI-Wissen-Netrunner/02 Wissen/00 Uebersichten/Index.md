@@ -7,6 +7,7 @@
 - [[Quellenlage und Aktualitaet]]: vorhandene, fehlende und ergänzende Projektquellen.
 - [[Roadmap nach MVP 0.2]]: konsolidierte Roadmap ab V0.3 und Begründung der KI-/Simulationsphase.
 - [[Roadmap nach MVP 0.4]]: produktnähere Folge-Roadmap mit Kartenimport, Deckeditor, UI-Schnitt in V0.7, Basisset-Spielbarkeit, besserer KI und V0.91-Kartenbild-Asset-Gate.
+- Konsolidierte Release-Roadmap ab V1.1.3: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` führt die aktive Post-V1.1.2-Mechanik-/Karten-/KI-Linie mit der älteren V2/V3/V4-Produktvision zusammen.
 - S01: Sonderphase für Spielende, Ergebnisfenster, Spielziel, private Matchserie und Audio; Repository-Artefakte unter `docs/derived/S01_*.md`.
 - [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]: Workflow für wiki-first Arbeit und Rückführung von Erkenntnissen.
 
@@ -16,6 +17,7 @@
 - [[Quellenlage und Aktualitaet]]: Quellenpriorität und bekannte Lücken.
 - [[Roadmap nach MVP 0.2]]: Folgephasen, V0.3-Scope und aktuelle Planungsentscheidung.
 - [[Roadmap nach MVP 0.4]]: aktuelle Folgephasen nach abgeschlossenem MVP 0.4.
+- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`: verbindliche Roadmap ab V1.1.3 mit je Release drei Spuren: Produkt/Features, Mechaniken/Karten/Effekte und KI-Spieler.
 
 ## Prozesse
 
@@ -31,6 +33,7 @@
 - `AGENTS.md`: verbindliche Codex-Regeln für das Repository.
 - `docs/codex/CODEX_STATUS.md`: aktueller Codex-Setup- und Phasenstand.
 - `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`: Codex-Runbook für Setup, MVP 0.1 und MVP 0.2.
+- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`: führende konsolidierte Release-Roadmap ab V1.1.3.
 - `docs/derived/MVP_0.9_DETAILED_PLAN.md`: detaillierte spätere V0.9-Planung für bessere KI nach V0.8.
 - `docs/derived/MVP_0.91_DETAILED_PLAN.md`: detaillierte spätere V0.91-Planung für Kartenbild-Asset-Gate und Bild-Import nach V0.9.
 - `docs/derived/MVP_0.91_REQUIREMENTS.md`: eingefrorene V0.91-Anforderungen; private lokale Scan-/Asset-Nutzung ist nur als Anzeige-Artefakt erlaubt.
@@ -174,7 +177,7 @@
 - `docs/derived/V1_1_2_REQUIREMENTS_REVIEW.md`: Requirements Review für V1.1.2; `ready_for_implementation: true`.
 - `docs/derived/V1_1_2_IMPLEMENTATION_REVIEW.md`: Umsetzungsergebnis für V1.1.2 Full Archives Access und Matchstart Entry UX.
 - `docs/derived/V1_1_2_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V1.1.2; `V1_1_2_done: true`.
-- `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`: angepasste Anschlussroadmap nach V1.1.2 für fehlende Spielmechaniken, Kartenfreigabe und kontinuierliche KI-Weiterentwicklung nach dem NETGRID-KI-Briefing.
+- `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`: historische Anschlussroadmap nach V1.1.2; fachlich in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` konsolidiert.
 - `docs/derived/LOCAL_FILE_DECK_LIBRARY_2026_05_07.md`: Entscheidung und Verhalten der lokalen Datei-Deckbibliothek für persönliche bearbeitbare Decks.
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.

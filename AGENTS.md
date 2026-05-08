@@ -27,7 +27,7 @@ Zu Beginn projektbezogener Arbeit zuerst diese Dateien lesen:
 5. `docs/codex/CODEX_STATUS.md`
 6. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`
 
-Für Anschlussplanung nach V1.1.2 ist zusätzlich `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` verbindlich, sobald `docs/codex/CODEX_STATUS.md` auf diesen Stand verweist.
+Für Anschlussplanung ab V1.1.3 ist zusätzlich `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` verbindlich, sobald `docs/codex/CODEX_STATUS.md` auf diesen Stand verweist. Die ältere Post-V1.1.2-Roadmap bleibt als historische Grundlage erhalten.
 
 ## Quellenpriorität
 
@@ -38,7 +38,7 @@ Für Anschlussplanung nach V1.1.2 ist zusätzlich `docs/derived/POST_V1_1_2_MECH
 5. `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md` für Codex-Workflow.
 6. Ergänzende Spezifikations-, Test-, Betriebs- und Planungsdokumente unter `docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/` und `docs/Netrunner_Detailliertes_Testkonzept_MVP_0_1_0_2.md`.
 
-Aktuelle Releaseplanung hat Vorrang vor älteren Langfristskizzen: `docs/codex/CODEX_STATUS.md` nennt jeweils den aktuellen Gate-Stand und die gültigen Planungsartefakte. Für die Anschlussplanung nach V1.1.2 gilt `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`. Sie hält V1.1.2 unverändert und ersetzt die ältere Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur ab V1.1.3.
+Aktuelle Releaseplanung hat Vorrang vor älteren Langfristskizzen: `docs/codex/CODEX_STATUS.md` nennt jeweils den aktuellen Gate-Stand und die gültigen Planungsartefakte. Für die Anschlussplanung ab V1.1.3 gilt `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`. Sie hält die Post-V1.1.2-Grundlinie aufrecht, integriert die ältere V2/V3/V4-Produktvision und ersetzt die Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur.
 
 Alte Konzeptdateien, Zwischenstände oder frühere Prompts dürfen nicht als gleichrangige Spezifikation verwendet werden.
 

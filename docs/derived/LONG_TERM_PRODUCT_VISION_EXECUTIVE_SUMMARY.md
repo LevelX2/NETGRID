@@ -8,6 +8,8 @@ Nachtrag 2026-05-06: V1.0.4, V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind inzwischen
 
 Nachtrag 2026-05-07: Nach V1.1.2 gilt die Anschlussroadmap `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`. V1.1.2 bleibt unverändert. Danach werden fehlende Spielmechaniken, Kartenfreigabe und KI-Weiterentwicklung zusammen geplant; `AI v2` ist kein isolierter später Block mehr, sondern eine kontinuierliche Spur in den Mechanik- und Kartenreleases.
 
+Nachtrag 2026-05-08: Die langfristige Produktvision und die Post-V1.1.2-Anschlussplanung sind in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` konsolidiert. Für konkrete Releaseplanung ab V1.1.3 ist die konsolidierte Roadmap führend.
+
 ## Ideales Endprodukt
 
 Das ideale Produkt ist eine regelgeführte Netrunner-Plattform mit vollständiger Rules Engine, vollständigem rechtlich sauberem Karten-/Formatdatenpfad, privatem und später optional öffentlichem Internet-Multiplayer, Deckbuilder, Replays, Tutorials, Regelhilfe, KI-Gegnern, Accessibility, Betriebssicherheit, Moderation und langfristiger Wartbarkeit.

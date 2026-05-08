@@ -6,7 +6,7 @@
 **Primäre Zielgruppe:** Codex Root Agent, Subagents und menschlicher Projektverantwortlicher  
 **Wichtig:** Dieses Dokument ist ein Runbook. Es ersetzt nicht die Fachkonzepte, sondern übersetzt sie in eine Codex-taugliche Arbeitsweise.
 
-**Aktueller Vorranghinweis 2026-05-07:** Dieses Runbook bleibt für MVP 0.1, MVP 0.2 und den grundsätzlichen Codex-Workflow gültig. Für den aktuellen Release-Stand und alle Anschlussplanungen nach V1.1.2 sind `docs/codex/CODEX_STATUS.md` und `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` maßgeblich. Die Post-V1.1.2-Roadmap hält V1.1.2 unverändert und ersetzt die ältere Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur ab V1.1.3.
+**Aktueller Vorranghinweis 2026-05-08:** Dieses Runbook bleibt für MVP 0.1, MVP 0.2 und den grundsätzlichen Codex-Workflow gültig. Für den aktuellen Release-Stand und alle Anschlussplanungen ab V1.1.3 sind `docs/codex/CODEX_STATUS.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` maßgeblich. Die konsolidierte Roadmap hält die Post-V1.1.2-Grundlinie aufrecht, integriert die ältere V2/V3/V4-Produktvision und ersetzt die ältere Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur.
 
 ---
 

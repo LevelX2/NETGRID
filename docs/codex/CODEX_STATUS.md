@@ -16,6 +16,8 @@ V1.1.2K Plan, Manifest, Szenario und Implementation Review liegen vor: `docs/der
 
 Post-V1.1.2 Anschlussplanung vom 2026-05-07: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` legt fest, dass V1.1.2 unverändert bleibt und danach eine kombinierte Mechanik-/Karten-/KI-Linie startet. Schwerpunkt ist mehr spielbare Karten durch fehlende Mechaniken; die KI wird nicht als spätes isoliertes V1.7-Feature behandelt, sondern bekommt in jedem Mechanik- und Kartenrelease eine eigene Support-Spur. Empfohlener erster Schritt nach V1.1.2 ist V1.1.3 Mechanics-AI-Card Baseline ohne Codeimplementierung.
 
+Konsolidierte Releaseplanung vom 2026-05-08: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` ist ab V1.1.3 die führende Roadmap. Sie übernimmt die neuere Post-V1.1.2-Grundlinie, integriert die ältere V2/V3/V4-Produktvision als spätere Gate-Schicht und schreibt für jeden Release die drei Pflichtspuren Allgemeine Produkt-/Feature-Ziele, Mechaniken/Karten/Effekt-Vervollständigung und KI-Spieler fest.
+
 V1.0.9 Private Internet Hardening ist umgesetzt und lokal verifiziert. Der Release ergänzt getrennte Deployment-Profile `local`/`private_internet`, HTTPS/WSS-Konfigurationsprüfungen für privaten Internetbetrieb, explizite REST-/WebSocket-Origin-Allowlist, deterministische Rate-Limits für sensible Flows, verpflichtenden Internet-Token-Salt, Token-/Hash-/Hidden-Info-Redaction, sichere Health-/Ops-Signale und internetnahe Smokes. Er führt keine öffentlichen Plattformfunktionen, Accounts, Matchmaking, Rankings, Turniere, neuen Karten, neuen Mechaniken, Postgres-, Replay-/StateHash- oder Engine-Autoritätsänderungen ein.
 
 Aktuelle lokale UI-/Ablaufkorrektur vom 2026-05-06/2026-05-07: Die aktive Spieloberfläche hält zentrale Corp-Server unten fest in der Reihenfolge `HQ`, `F&E (R&D)`, `Archive`; Außenserver entstehen darüber. Der eigene Statusbereich sitzt links unter Aktionen/Zurücknehmen, Spielerwert-Flächen sind seitenfarbig hinterlegt und markieren die aktuelle Zugseite mit Rahmen, Aktionen erscheinen als eigene horizontale Leiste, Tags werden nur beim Runner angezeigt, die Kartenvorschau ist vollständig einklappbar, getaktete KI-Zugriffshinweise laufen nach Anzeige automatisch weiter, zentrale HQ-/F&E-Zugriffe werden aus Corp-Sicht in PlayerViews/WebSocket-Payloads redigiert, bestehende Außenserver mit Agenda/Asset im Root bieten keine weitere Agenda-/Asset-Installation in denselben Root mehr an, KI-Erklärtexte werden nicht mehr als normale Chronikbeschreibung angezeigt, Runner-KI-Runs bleiben im getakteten Modus nicht mehr an Hinweis-Timern hängen, Corp-Rezfenster im Human-Corp-vs-Runner-KI-Modus warten wieder explizit auf `Rezzen` oder `Nicht rezzen`, und das Spielziel ist wieder regelhaft auf 7 Agendapunkte festgezogen. Der alte deckabhängige Modus `Einzelspiel · Deckziel` ist keine auswählbare Produktoption mehr; alte `single_game`-Eingaben werden als `rules_match` behandelt.
@@ -121,11 +123,12 @@ Latest V1.1.2 final review artifact: `docs/derived/V1_1_2_FINAL_REVIEW.md`.
 Latest V1.1.2K card-release plan artifact: `docs/derived/V1_1_2K_CARD_RELEASE_PLAN.md`.
 Latest V1.1.2K card-release implementation review artifact: `docs/derived/V1_1_2K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`.
 Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`.
+Latest consolidated release roadmap artifact: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
 Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.1.2K kleines Kartenrelease is complete and locally verified. The recommended next planning step remains V1.1.3 Mechanics-AI-Card Baseline to align missing mechanics, card unlocks and continuous KI support before V1.2.x mechanism implementation. V1.1.2 Full Archives Access und Matchstart Entry UX, V1.1.1 Discard/Handlimit/Core Damage, V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening and V1.0.8 Storage/Backup-Härtung are complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
+Current selected next scope: V1.1.2K kleines Kartenrelease is complete and locally verified. The recommended next planning step remains V1.1.3 Mechanics-AI-Card Baseline from `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`, to align missing mechanics, card unlocks and continuous KI support before V1.2.x mechanism implementation. V1.1.2 Full Archives Access und Matchstart Entry UX, V1.1.1 Discard/Handlimit/Core Damage, V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening and V1.0.8 Storage/Backup-Härtung are complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
 
 ## Status
 
@@ -2127,7 +2130,7 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Plan and freeze V1.1.3 Mechanics-AI-Card Baseline from `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`.
+1. Plan and freeze V1.1.3 Mechanics-AI-Card Baseline from `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
 2. Optionally backfill dedicated V1.0.5 implementation/final review artifacts if the project history needs a formal V1.0.5 gate.
 3. Keep further card or mechanic breadth behind resolver, manifest, Visibility, Replay/StateHash, AI and Multiplayer gates.
 4. Keep accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of scope until explicitly approved.

@@ -53,3 +53,4 @@ V1.1.2 ist vollständig implementiert und lokal verifiziert.
 
 - Keine blockierenden Restpunkte für V1.1.2.
 - Nächster empfohlener Gate-Schritt gemäß `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`: V1.1.3 Mechanics-AI-Card Baseline als Planungs-/Normalisierungsschritt ohne direkte Codeimplementierung.
+- Nachtrag 2026-05-08: Die damalige Post-V1.1.2-Empfehlung ist in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` konsolidiert. Für aktuelle Releaseplanung ab V1.1.3 ist die konsolidierte Roadmap verbindlich.

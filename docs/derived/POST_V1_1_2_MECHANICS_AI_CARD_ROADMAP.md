@@ -1,12 +1,12 @@
 # Post V1.1.2 Mechanik-, Karten- und KI-Roadmap
 
-Status: verbindliche Anschlussplanung
+Status: historische Anschlussplanung; in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` konsolidiert
 Stand: 2026-05-07
 Startpunkt: nach Umsetzung und Final Gate von V1.1.2
 
 ## Verbindlichkeit
 
-Dieses Dokument ist die maßgebliche Anschlussroadmap für Releaseplanung nach V1.1.2, solange `docs/codex/CODEX_STATUS.md` keinen neueren Planungsstand benennt.
+Dieses Dokument war die maßgebliche Anschlussroadmap für die Releaseplanung nach V1.1.2. Seit 2026-05-08 ist es in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` aufgegangen. Die fachliche Grundlinie bleibt erhalten, aber die konsolidierte Roadmap ist ab V1.1.3 die führende Planung.
 
 Es ersetzt nicht die eingefrorene V1.1.2-Planung. V1.1.2 wird unverändert umgesetzt.
 

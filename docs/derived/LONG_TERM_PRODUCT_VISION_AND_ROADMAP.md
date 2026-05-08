@@ -8,6 +8,8 @@ Nachtrag 2026-05-06: Die kurzfristige V1.x-Linie wurde durch den tatsächlichen 
 
 Nachtrag 2026-05-07: Die Anschlussplanung nach V1.1.2 ist in `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` neu geschnitten. V1.1.2 bleibt unverändert. Danach liegt der Schwerpunkt auf fehlenden Spielmechaniken, mechanikgebundener Kartenfreigabe und kontinuierlicher KI-Weiterentwicklung je Mechanik- und Kartenrelease. Die ältere isolierte Zeile `V1.7.0 AI v2` ist dadurch als alleinstehender später KI-Schnitt überholt; KI-Unterstützung wird ab Post-V1.1.2 laufend mitgeführt.
 
+Nachtrag 2026-05-08: Die langfristige Produktvision und die Post-V1.1.2-Planung sind in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` zusammengeführt. Dieses Dokument bleibt als Produktvision und historische Gate-Begründung relevant; bei konkreter Releaseplanung ab V1.1.3 führt die konsolidierte Roadmap.
+
 ## Kurzfazit
 
 Das realistische Zielbild ist kein sofort öffentliches "alles kann alles"-Netrunner, sondern ein stufenweise gehärtetes Produkt:
@@ -293,7 +295,7 @@ flowchart LR
 | V1.4.1 Search/Translations | Suchindex, Filter, locale fallback, Kartentextversionen | keine inoffiziellen Übersetzungen ohne Quelle | catalog/web | i18n policy | search tests, text snapshots | Nutzer finden Karten zuverlässig |
 | V1.5.0 Private Replay Browser | private Replays mit Timeline, StateHash Verify, Export lokal | kein Public Replay | replay/web/server | replay spec | replay verification, no hidden public mode | private Analyse nutzbar |
 | V1.6.0 Tutorial und Regelhilfe | geführte Szenarien, Kontext-Hilfe, Rule links | kein KI-Coaching mit LLM-Regelautorität | web/engine scenario | tutorial spec | scripted scenario replay | neue Spieler können Kernabläufe lernen |
-| V1.7.0 AI v2 | historischer Platzhalter, durch die Post-V1.1.2-Mechanik-/Karten-/KI-Roadmap überholt | kein isolierter später KI-Großschnitt | ai/server/web | siehe `POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` | je Mechanik- und Kartenrelease: AI-Hints, Szenarien, Soaks, hidden invariance | KI wird kontinuierlich mit Mechanik- und Kartenfreigaben verbessert |
+| V1.7.0 AI v2 | historischer Platzhalter, durch die konsolidierte V1.1.3+-Roadmap überholt | kein isolierter später KI-Großschnitt | ai/server/web | siehe `NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` | je Mechanik- und Kartenrelease: AI-Hints, Szenarien, Soaks, hidden invariance | KI wird kontinuierlich mit Mechanik- und Kartenfreigaben verbessert |
 
 ### Langfristig: öffentlich nutzbarer Multiplayer
 
