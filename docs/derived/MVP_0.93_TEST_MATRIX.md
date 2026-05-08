@@ -7,7 +7,7 @@ Stand: 2026-05-03
 
 | Test-ID | Deckt ab | Prüfpfad | Ergebnis |
 |---|---|---|---|
-| V093-T001 | M093-M1-SHARED-001 | `corepack pnpm --filter @netrunner/shared typecheck` | pass |
+| V093-T001 | M093-M1-SHARED-001 | `corepack pnpm --filter @netgrid/shared typecheck` | pass |
 | V093-T002 | M093-M1-CHOICE-001 | Engine pendingChoice PlayerView-Test | pass |
 | V093-T003 | M093-M1-CHOICE-002 | Engine Choice-Revalidierung mit ungültiger Option | pass |
 | V093-T004 | M093-M1-CHOICE-001 | Engine LegalActions bei offener Choice | pass |
@@ -24,13 +24,13 @@ Stand: 2026-05-03
 
 ## Ausgeführte Checks
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 25 Tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 16 Tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 14 Tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 25 Tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 16 Tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 14 Tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`: pass, 17 Tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 9 Tests.
 - `corepack pnpm test`: pass.

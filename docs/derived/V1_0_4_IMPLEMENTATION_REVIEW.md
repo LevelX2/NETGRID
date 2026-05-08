@@ -22,7 +22,7 @@ Maßgeblich für die Umsetzung sind:
 - Human-vs-KI-Forfeit erlaubt nur die menschliche Seite; KI-Pacing und `advance_ai` stoppen nach `forfeited`.
 - Recreate erzeugt neue MatchId, neuen Join-Link, neuen Seed sowie neue Session-/Reconnect-Tokens und lässt die alte Lobby terminal.
 - Alte Join-, Session- und Reconnect-Tokens werden für Bootstrap, Join, Reconnect und weitere Aktionen ungültig; terminale Recreate-Autorisierung nutzt nur den serverseitig bekannten Host-Kontext.
-- `netrunner.recentSessions` ist auf nicht-sensitive Komfortmetadaten begrenzt; Tokens, Decklisten, Deckhashes und Hidden Info bleiben im Browser-`localStorage` ausgeschlossen.
+- `netgrid.recentSessions` ist auf nicht-sensitive Komfortmetadaten begrenzt; Tokens, Decklisten, Deckhashes und Hidden Info bleiben im Browser-`localStorage` ausgeschlossen.
 - Die Web-UI trennt Fortsetzen, Reconnect über Link/Eingabe und Verwerfen.
 - Gegnernamen aus `displayName` werden side-sicher in Lobby, Header, Result Modal, Reconnect Panel, OpponentPanel und `opponent_status` angezeigt.
 

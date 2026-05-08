@@ -33,15 +33,15 @@ V1.0.9 ist als schmaler Private-Internet-Härtungsrelease umgesetzt. Die neuen G
 - `apps/server/src/multiplayer.ts`
 - `apps/web/app/page.tsx`
 - `scripts/run-e2e.mjs`
-- `tests/e2e/netrunner-v1-0-7.spec.ts`
+- `tests/e2e/netgrid-v1-0-7.spec.ts`
 - `tests/e2e/helpers/match-flow.ts`
 - `tests/specs/visibility-contract.test.ts`
 - `docs/derived/V1_0_9_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/V1_0_9_FINAL_REVIEW.md`
 - `docs/codex/CODEX_STATUS.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log 2026-05.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
 
 ## Testabdeckung
 
@@ -60,6 +60,6 @@ V1.0.9 führt keine Accounts, öffentliche Lobby, Public Discovery, Matchmaking,
 ## Grenzen
 
 - TLS wird weiterhin bevorzugt durch einen privaten Reverse Proxy terminiert; die Node-App implementiert keine eigene TLS-Terminierung.
-- Forwarded-Headers werden nur bei `NETRUNNER_TRUST_PROXY_HEADERS=true` vertraut.
+- Forwarded-Headers werden nur bei `NETGRID_TRUST_PROXY_HEADERS=true` vertraut.
 - Rate-Limits sind bewusst einfache In-Memory-Missbrauchsbremsen für privaten Betrieb, keine Public-Scale-Abuse-Plattform.
 - Query-Token-Kompatibilität für bestehende Join-/Bootstrap-Flows bleibt erhalten, wird aber redaktioniert; session-sensitive REST-Kommandos bevorzugen weiterhin `Authorization: Bearer`.

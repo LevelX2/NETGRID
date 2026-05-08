@@ -52,7 +52,7 @@ Das ist der Kern von V1.0.4.
 
 ### Reconnect und Session Recovery
 
-Reconnect ist tokenbasiert und side-sicher vorhanden. Die UI merkt inzwischen letzte lokale Sitzungen unter `netrunner.recentSessions`, damit ein Reconnect ohne erneute Link-Eingabe möglich ist. V1.0.4 sollte daraus einen klaren kontrollierbaren Recovery-Fluss machen: Fortsetzen, Verwerfen, abgebrochen/nicht mehr verfügbar verstehen und keine Tokens oder Deckdaten leaken.
+Reconnect ist tokenbasiert und side-sicher vorhanden. Die UI merkt inzwischen letzte lokale Sitzungen unter `netgrid.recentSessions`, damit ein Reconnect ohne erneute Link-Eingabe möglich ist. V1.0.4 sollte daraus einen klaren kontrollierbaren Recovery-Fluss machen: Fortsetzen, Verwerfen, abgebrochen/nicht mehr verfügbar verstehen und keine Tokens oder Deckdaten leaken.
 
 ### Gegnernamen
 

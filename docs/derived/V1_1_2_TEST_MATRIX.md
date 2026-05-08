@@ -55,11 +55,11 @@ Status: eingefroren
 
 ## Pflichtchecks
 
-- `corepack pnpm --filter @netrunner/shared typecheck`
-- `corepack pnpm --filter @netrunner/engine test -- --run`
-- `corepack pnpm --filter @netrunner/server test -- --run`
-- `corepack pnpm --filter @netrunner/ai test -- --run`
-- `corepack pnpm --filter @netrunner/web test -- --run`
+- `corepack pnpm --filter @netgrid/shared typecheck`
+- `corepack pnpm --filter @netgrid/engine test -- --run`
+- `corepack pnpm --filter @netgrid/server test -- --run`
+- `corepack pnpm --filter @netgrid/ai test -- --run`
+- `corepack pnpm --filter @netgrid/web test -- --run`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

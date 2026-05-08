@@ -60,9 +60,9 @@ Nicht implementiert und nicht freigeschaltet:
 
 ## Targeted Checks
 
-- `corepack pnpm --filter @netrunner/shared typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- --run`: pass, 32 Tests.
-- `corepack pnpm --filter @netrunner/ai test -- --run`: pass, 17 Tests.
-- `corepack pnpm --filter @netrunner/server test -- --run`: pass, 16 Tests.
+- `corepack pnpm --filter @netgrid/shared typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- --run`: pass, 32 Tests.
+- `corepack pnpm --filter @netgrid/ai test -- --run`: pass, 17 Tests.
+- `corepack pnpm --filter @netgrid/server test -- --run`: pass, 16 Tests.
 
 Root- und Finalchecks werden im Final Review dokumentiert.

@@ -38,7 +38,7 @@ describe("V1.0.9 private internet hardening", () => {
         NETGRID_WEB_BASE_URL: "https://netgrid.example",
         NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
         NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
-        NETGRID_TOKEN_SALT: "local-dev-netrunner-token-salt"
+        NETGRID_TOKEN_SALT: "local-dev-netgrid-token-salt"
       } as NodeJS.ProcessEnv)
     ).toThrow(/NETGRID_TOKEN_SALT/);
 
@@ -58,11 +58,11 @@ describe("V1.0.9 private internet hardening", () => {
     expect(privateConfig.allowedOrigins).toEqual(["https://netgrid.example", "https://tablet.netgrid.example"]);
 
     const legacyPrivateConfig = loadDeploymentConfig({
-      NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
-      NETRUNNER_WEB_BASE_URL: "https://legacy.netgrid.example",
-      NETRUNNER_SERVER_BASE_URL: "https://legacy-api.netgrid.example",
-      NETRUNNER_ALLOWED_ORIGINS: "https://legacy.netgrid.example",
-      NETRUNNER_TOKEN_SALT: "legacy-private-test-salt"
+      NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+      NETGRID_WEB_BASE_URL: "https://legacy.netgrid.example",
+      NETGRID_SERVER_BASE_URL: "https://legacy-api.netgrid.example",
+      NETGRID_ALLOWED_ORIGINS: "https://legacy.netgrid.example",
+      NETGRID_TOKEN_SALT: "legacy-private-test-salt"
     } as NodeJS.ProcessEnv);
     expect(legacyPrivateConfig).toMatchObject({
       profile: "private_internet",
@@ -277,9 +277,9 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     reopenedStorage.close();
   });
 
-  it("imports the legacy netrunner.sqlite path non-destructively when the NETGRID default is empty", async () => {
+  it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
     const dir = await tempStorageDir();
-    const legacyPath = join(dir, "netrunner.sqlite");
+    const legacyPath = join(dir, "netgrid.sqlite");
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const legacyStorage = new SqliteMatchStorage({ dbPath: legacyPath, backupDir, autoImportLegacy: false });
@@ -3085,7 +3085,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(continued.requesterPayload.playerView.stateVersion).toBeGreaterThan(declined.actorPayload.playerView.stateVersion);
   });
 
-  it("redacts central access card identities from Corp payloads", async () => {
+  it("redacts R&D access card identities from Corp payloads", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "central-access-redaction" });
     const created = await service.createMatch({ hostSide: "corp", seed: "central-access-redaction" });
@@ -3111,6 +3111,41 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(corpPayload.eventTail)).not.toContain("Simple Agenda");
     expect(JSON.stringify(corpPayload.playerView.publicEvents)).not.toContain("Simple Agenda");
     expect(corpPayload.eventTail.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", serverLabel: "R&D", redactedKind: "accessed_card" });
+  });
+
+  it("keeps HQ access card identities visible in Corp payloads", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "hq-access-visible" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "hq-access-visible" });
+    if (!created.joinUrl) throw new Error("Missing join URL");
+    const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing record");
+    let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed: "hq-access-visible-engine" }));
+    moveCorpCardToHqForTest(gameState, "simple_economy_operation");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "access_card");
+    record.gameState = gameState;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.match.matchVersion += 1;
+    await storage.save(record);
+
+    const corpPayload = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in corpPayload).toBe(false);
+    if ("error" in corpPayload) throw new Error(corpPayload.error.message);
+    const eventTailPayload = corpPayload.eventTail.at(-1)?.publicPayload;
+    const playerViewPayload = corpPayload.playerView.publicEvents.at(-1)?.publicPayload;
+    expect(eventTailPayload?.actionType).toBe("access_card");
+    expect(eventTailPayload?.serverLabel).toBe("HQ");
+    expect(typeof eventTailPayload?.title).toBe("string");
+    expect(eventTailPayload).not.toHaveProperty("redactedKind");
+    expect(playerViewPayload?.actionType).toBe("access_card");
+    expect(playerViewPayload?.serverLabel).toBe("HQ");
+    expect(typeof playerViewPayload?.title).toBe("string");
+    expect(playerViewPayload).not.toHaveProperty("redactedKind");
   });
 
   it("rejects advance_ai when the session or version is wrong", async () => {

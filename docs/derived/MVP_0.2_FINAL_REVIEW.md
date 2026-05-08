@@ -30,7 +30,7 @@ Begründung: MVP 0.2 erfüllt den freigegebenen privaten Human-vs-Human-Multipla
 - Snapshot-Semantik bereinigt: Action-Snapshots liegen in `stateSnapshots`, echte Undo-Anfragen in `undoSnapshots`.
 - WebSocket-Reconnect-Ersetzung gehärtet: Das Close-Event einer ersetzten Verbindung kann die neue Verbindung nicht mehr als offline markieren.
 - REST-Settings-Härtung: `agendaPointsToWin` wird nur als Zahl aus HTTP-Requests übernommen.
-- Browser-Client bleibt ohne `@netrunner/engine`, `@netrunner/server` und `GameState`-Import.
+- Browser-Client bleibt ohne `@netgrid/engine`, `@netgrid/server` und `GameState`-Import.
 - Runner-Payload-Smoke bestätigt keinen Leak versteckter Corp-Agenda-Titel.
 
 ## Finale Checks
@@ -39,7 +39,7 @@ Begründung: MVP 0.2 erfüllt den freigegebenen privaten Human-vs-Human-Multipla
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.
 - `corepack pnpm build`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass, 7 Multiplayer-Tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 7 Multiplayer-Tests.
 - Multiplayer-Server-Health: pass auf `http://127.0.0.1:8787/health`.
 - REST/WebSocket-Smoke: pass für Create, Join, Host/Runner-WebSocket, Corp mandatory action und Runner-Leak-Scan.
 - Next-Web-Smoke: pass auf `http://127.0.0.1:3000`.

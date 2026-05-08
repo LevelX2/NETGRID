@@ -7,9 +7,9 @@
   "decidedAt": "2026-05-03",
   "decisionOwner": "project_owner",
   "readyForImplementation": true,
-  "decisionSummary": "The project owner accepts private local use of Original Netrunner 1996 WotC card front images for personal and family use only, based on ownership of the physical cards. This is not a public license and does not allow redistribution.",
+  "decisionSummary": "The project owner accepts private local use of Original NETGRID 1996 WotC card front images for personal and family use only, based on ownership of the physical cards. This is not a public license and does not allow redistribution.",
   "assetScope": {
-    "allowedGame": "Original Netrunner CCG",
+    "allowedGame": "Original NETGRID CCG",
     "allowedPublisher": "Wizards of the Coast",
     "allowedYears": [
       1996,
@@ -30,7 +30,7 @@
     "requiresPhysicalOwnershipOrPrivateFamilyUse": true
   },
   "assetUse": {
-    "originalNetrunner1996FrontImagesAllowed": true,
+    "originalNETGRID1996FrontImagesAllowed": true,
     "officialCardImagesAllowedBroadly": false,
     "officialLogosAllowedStandalone": false,
     "officialCardFramesAllowedStandalone": false,
@@ -66,7 +66,7 @@
     "official_card_backs",
     "standalone_card_frames",
     "standalone_logos",
-    "android_netrunner_ffg_front_images_without_separate_decision",
+    "android_netgrid_ffg_front_images_without_separate_decision",
     "null_signal_games_front_images_without_separate_decision",
     "publicly_redistributed_binary_card_images",
     "versioned_binary_card_images",
@@ -77,7 +77,7 @@
     "mustBeVersioned": false,
     "requiresGitIgnore": true,
     "requiresPositivePolicyBeforeCreation": true,
-    "mayContainOriginalNetrunner1996FrontImagesNow": true,
+    "mayContainOriginalNETGRID1996FrontImagesNow": true,
     "mayContainCardBacksNow": false,
     "mayContainStandaloneFramesNow": false,
     "manifestMayStoreLocalAssetIds": true,

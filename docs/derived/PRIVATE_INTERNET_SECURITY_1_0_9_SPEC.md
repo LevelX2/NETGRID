@@ -77,7 +77,7 @@ Die Origin-Prüfung findet vor `join_match` statt. Unbekannte Origins dürfen ke
 
 ### Token-Salt
 
-Im privaten Internet-Profil ist ein expliziter `NETRUNNER_TOKEN_SALT` Pflicht.
+Im privaten Internet-Profil ist ein expliziter `NETGRID_TOKEN_SALT` Pflicht.
 
 Nicht erlaubt:
 
@@ -128,7 +128,7 @@ Schlüsselung:
 - lokale Tests dürfen deterministische Keys nutzen,
 - Internetbetrieb nutzt IP oder vertrauenswürdige Proxy-Client-IP,
 - MatchId und Aktionstyp sollen sensible Flows zusätzlich trennen,
-- Forwarded-Headers werden nur bei `NETRUNNER_TRUST_PROXY_HEADERS=true` oder äquivalentem explizitem Trust-Profil genutzt.
+- Forwarded-Headers werden nur bei `NETGRID_TRUST_PROXY_HEADERS=true` oder äquivalentem explizitem Trust-Profil genutzt.
 
 Antwort:
 

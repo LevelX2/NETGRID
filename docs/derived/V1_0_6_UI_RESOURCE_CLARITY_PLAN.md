@@ -46,7 +46,7 @@ Der Requirements Review meldet `V1_0_6_requirements_freeze_done: true` und `read
 | V106-MUST-005 | Actionkosten in LegalActions, Cues oder Detailtexten verwenden nutzerverständliche Kostenchips für Aktionen und Credits statt roher `{ clicks, credits }`-Darstellung. |
 | V106-MUST-006 | Credits werden in Spieler- und Gegnerstatus mit einer eindeutigen Münz-/Credit-Optik dargestellt, nicht nur als Zahl. |
 | V106-MUST-007 | Credit-Anzeige und Aktionsslots sind visuell klar unterscheidbar: Münz-/runde Credit-Optik gegen eckige Aktionsslots. |
-| V106-MUST-008 | Credit-Visualisierung nutzt keine offiziellen Netrunner-Symbole, Card Frames, Logos oder externen Assets. |
+| V106-MUST-008 | Credit-Visualisierung nutzt keine offiziellen NETGRID-Symbole, Card Frames, Logos oder externen Assets. |
 | V106-MUST-009 | Die Card-Display-Moduswahl in der rechten Detailspalte wird zu kompakten Icon-/Segment-Buttons direkt am Preview-Header oder unmittelbar darüber. |
 | V106-MUST-010 | Die normale aktive Spieloberfläche zeigt keine platzraubende `Card Display`-Einstellungsbox mit doppelten Außenlinien. |
 | V106-MUST-011 | Die drei Card-Display-Modi haben eindeutige Aufgaben: Bildmodus, Textmodus und Kompaktmodus unterscheiden sich sichtbar und funktional. |

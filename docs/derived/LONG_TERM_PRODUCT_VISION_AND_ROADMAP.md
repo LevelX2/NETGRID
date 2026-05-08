@@ -2,7 +2,7 @@
 
 Status: planning
 Stand: 2026-05-05
-Scope: langfristige Produktvision, Roadmap, Gates und Idealarchitektur für ein quasi vollständiges Netrunner-Endprodukt
+Scope: langfristige Produktvision, Roadmap, Gates und Idealarchitektur für ein quasi vollständiges NETGRID-Endprodukt
 
 Nachtrag 2026-05-06: Die kurzfristige V1.x-Linie wurde durch den tatsächlichen Projektverlauf fortgeschrieben. V1.0.4, V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind inzwischen umgesetzt bzw. verifiziert; V1.0.8 Storage/Backup-Härtung ist requirements-frozen und bevorzugt SQLite als privaten lokalen Storage-Pfad. Die ursprünglich skizzierte V1.0.6-Position "Private Lobby Comfort" wurde faktisch durch V1.0.6 Aktionen, Credits und Kartenanzeige ersetzt; verbleibende Lobby-Politur ist kein aktiver V1.0.8-Scope.
 
@@ -12,7 +12,7 @@ Nachtrag 2026-05-08: Die langfristige Produktvision und die Post-V1.1.2-Planung 
 
 ## Kurzfazit
 
-Das realistische Zielbild ist kein sofort öffentliches "alles kann alles"-Netrunner, sondern ein stufenweise gehärtetes Produkt:
+Das realistische Zielbild ist kein sofort öffentliches "alles kann alles"-NETGRID, sondern ein stufenweise gehärtetes Produkt:
 
 1. **Privat lokal sehr gut spielbar**: die heutige Basis plus V1.0.4 bis V1.0.6 stabilisiert Match-Lifecycle, Reconnect, KI-Pacing, Board-Klarheit, Aktionen, Credits und Kartenanzeige.
 2. **Privat über Internet belastbar**: sicherer privater Betrieb mit HTTPS/WSS, SQLite/Postgres-Pfad, Backups, Monitoring, Rate Limits, Browser-E2E und Datenschutzgrenzen.
@@ -30,12 +30,12 @@ Gelesen und ausgewertet wurden unter anderem:
 
 - `AGENTS.md`
 - `AGENTS.local.md`
-- `KI-Wissen-Netrunner/00 Projektstart.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
-- `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
-- `KI-Wissen-Netrunner/03 Betrieb/Log 2026-05.md`
+- `KI-Wissen-NETGRID/00 Projektstart.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
+- `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
+- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
 - `docs/codex/CODEX_STATUS.md`
-- `docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md`
+- `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
 - `docs/derived/RELEASE_PLANNING_2026-05-05.md`
 - `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`
 - `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`
@@ -84,11 +84,11 @@ Aktuelle Prüfläufe am 2026-05-05:
 Die externe Prüfung wurde nur zur aktuellen Einordnung von Regeln, Formaten und Asset-/IP-Gates genutzt. Sie ersetzt keine Rechtsberatung.
 
 - [Null Signal Comprehensive Rules Hub](https://nullsignal.games/rules/comp-rules/) führt Comprehensive Rules v26.03 als aktuelle Regeln und verweist auf die Webfassung.
-- [Netrunner Comprehensive Rules Web](https://rules.nullsignal.games/) ist die lebende Regelreferenz.
+- [NETGRID Comprehensive Rules Web](https://rules.nullsignal.games/) ist die lebende Regelreferenz.
 - [Null Signal Supported Formats](https://nullsignal.games/players/supported-formats/) beschreibt aktuelle Formate, Rotation, Banlists und Legalitätsdaten. Stand der Seite: Vantage Point, Standard Ban List 26.05 und aktuelle Startup-/Standard-Informationen.
 - [Null Signal Visual Assets](https://nullsignal.games/about/nsg-visual-assets/) erlaubt nur das freigegebene Visual-Assets-Pack; Card Art, Frames und Card Backs sind nicht öffentlich freigegeben.
 - [Null Signal FAQ](https://nullsignal.games/about/frequently-asked-questions/) bestätigt unter anderem, dass Print-and-Play-Dateien keine Card Backs enthalten und Card Backs nicht verteilt werden.
-- [NetrunnerDB API](https://netrunnerdb.com/api/doc) ist eine technische Datenquelle für Karten-, Format- und Deckdaten; die Lizenz-/Asset-Frage wird dadurch nicht automatisch gelöst.
+- [NETGRIDDB API](https://netgriddb.com/api/doc) ist eine technische Datenquelle für Karten-, Format- und Deckdaten; die Lizenz-/Asset-Frage wird dadurch nicht automatisch gelöst.
 - [Null Signal Products](https://nullsignal.games/products/) beschreibt Print-and-Play/POD-Verfügbarkeit, aber keine App-Asset-Freigabe.
 
 ## Heutiger belegter Stand im Repo
@@ -119,7 +119,7 @@ Nicht belegbar oder bewusst offen:
 
 ### Leitbild
 
-Das ideale Endprodukt ist eine private oder öffentlich betreibbare Netrunner-Plattform, die sich wie ein sehr guter digitaler Tisch anfühlt, aber technisch härter ist als ein normaler Tabletop-Simulator:
+Das ideale Endprodukt ist eine private oder öffentlich betreibbare NETGRID-Plattform, die sich wie ein sehr guter digitaler Tisch anfühlt, aber technisch härter ist als ein normaler Tabletop-Simulator:
 
 - Die Engine kennt und erzwingt die Regeln.
 - Alle Spieler, KI, UI, Server und Tools handeln ausschließlich über erlaubte Aktionen.
@@ -153,7 +153,7 @@ Legende:
 | Alle Karten und Sets | Lokaler/fiktiver Starter-Slice und privater lokaler O:NR-Testpool; Import/Katalog vorhanden. | Vollständige Karten brauchen rechtlich saubere Datenquelle, Mechanikcoverage, Resolver, Errata, Formate, Übersetzungen. Kein Import darf Spielbarkeit erzeugen. | Card-by-card Manifest mit Status `imported`, `playable`, `deck_legal`; jede spielbare Karte mit Unit/Szenario/Visibility/Replay/AI/MP. |
 | Setrotation, Formate, Banlists | Lokale Deckprofile/Snapshots; offizielle Formatregeln nicht vollständig. | Unterstützte Formate ändern sich. Banlists/Rotation sind lebendige Daten. Fehler kann illegale Decks zulassen. | Versionierte Formatdaten mit effective dates, Deckvalidierungstests, Regression gegen Beispieldecks, Format-Snapshot-Replay. |
 | Deckbuilder | Lokale gespeicherte Decks, Validierung und Matchstart-Snapshots vorhanden. | Vollkomfort fehlt: Suche, Statistik, Influence, Agenda-Dichte, Rotation, Import/Export, Cloud-Sync, öffentliche Listen. | Deckvalidierung je Format, Diff/Save/Import/Export, invalid-but-saveable, serverseitige Revalidierung, keine gegnerischen Decklisten in Payloads. |
-| Kartenimport und Kartendatenpflege | `@netrunner/catalog`, lokale Snapshots, Statusmodell vorhanden. | Vollständige Datenpipeline fehlt: Source Registry, Diff, Review, Errata, Sync, Provenienz, Rollback, Übersetzungen. | Deterministische Imports, Schema-Validierung, Hashes, Reports, Review-Gate, keine Runtime-Abhängigkeit im Match. |
+| Kartenimport und Kartendatenpflege | `@netgrid/catalog`, lokale Snapshots, Statusmodell vorhanden. | Vollständige Datenpipeline fehlt: Source Registry, Diff, Review, Errata, Sync, Provenienz, Rollback, Übersetzungen. | Deterministische Imports, Schema-Validierung, Hashes, Reports, Review-Gate, keine Runtime-Abhängigkeit im Match. |
 | Kartentexte, Übersetzungen, Suche | Katalog und display-only Texte für aktuellen Stand; deutsche UI teilweise. | Offizielle Kartentexte können urheberrechtlich geschützt sein und ändern sich. Mehrsprachigkeit braucht versionierte Quellen und Fallbacks. | Suchindex-Tests, Text-Versionierung, locale-Fallback, keine Kartentextparser als Regelquelle. |
 | Kartenbilder und Asset-Rechte | V0.91: private lokale O:NR-Frontbilder als Anzeige-Artefakte erlaubt; keine öffentlichen Assets. | Öffentliche Nutzung offizieller Card Art, Frames, Backs, Logos bleibt blockiert. Hidden Cards dürfen keine Bild-/DOM-/Asset-Spuren leaken. | Asset-Policy, Source Registry, lokale nicht versionierte Caches, Hidden-Card DOM/Payload-Leaktests, keine Bilddaten in Engine/AI/StateHash. |
 | Human-vs-Human Internet-Multiplayer | Privater Multiplayer lokal, serverautoritative Actions, WebSocket, Reconnect, Undo vorhanden. | Internetbetrieb braucht HTTPS/WSS, origin/cors, rate limits, robuste Persistenz, Reconnect über Browserneustart, Betriebshärtung. | Zwei-Tab/E2E, Netzwerkunterbrechung, stale actions, duplicate idempotency, token rotation, leak scans. |
@@ -192,7 +192,7 @@ Legende:
 | Gate | Entscheidung | Blockiert |
 |---|---|---|
 | G1 Lizenz-/Rechtefreigabe | Welche Kartentexte, Bilder, Logos, Frames, Card Backs und Daten dürfen in welchem Produktmodus genutzt werden? | alle vollständigen Karten-/Asset-/öffentlichen Produktpfade |
-| G2 Vollständige Kartendatenquelle | NetrunnerDB/NSG/API/ eigene Datenpflege, Caching, Attribution, Terms, Rate Limits, Datenmodell | vollständige Sets, Deckbuilder, Formate |
+| G2 Vollständige Kartendatenquelle | NETGRIDDB/NSG/API/ eigene Datenpflege, Caching, Attribution, Terms, Rate Limits, Datenmodell | vollständige Sets, Deckbuilder, Formate |
 | G3 Offizieller vs. privater Assetpfad | Private lokale Scans, generische eigene Assets, lizenzierte offizielle Assets oder keine Bilder | Kartenbilder, Public Product, mobile UX |
 | G4 Accountsystem | Kein Account, private Accounts, OAuth/Passkey, eigene Auth | Freunde, Profile, Stats, Ranked, Moderation |
 | G5 Hostingmodell | Lokal, privater VPS, geschlossene Community, öffentlich skalierbar | Betrieb, Security, Datenschutz, Kosten |
@@ -348,7 +348,7 @@ Empfohlen:
 
 ### Realistische Vision
 
-Realistisch ist ein hervorragendes privates bis halböffentliches Netrunner-Produkt, wenn die aktuelle Gate-Disziplin beibehalten wird. Ein voll öffentliches Endprodukt ist möglich, aber nicht als direkte Fortsetzung von V1.0.x: Es braucht eigene Rechts-, Auth-, Datenschutz-, Moderations-, Abuse-, Betriebs- und Skalierungsgates.
+Realistisch ist ein hervorragendes privates bis halböffentliches NETGRID-Produkt, wenn die aktuelle Gate-Disziplin beibehalten wird. Ein voll öffentliches Endprodukt ist möglich, aber nicht als direkte Fortsetzung von V1.0.x: Es braucht eigene Rechts-, Auth-, Datenschutz-, Moderations-, Abuse-, Betriebs- und Skalierungsgates.
 
 ### Zwingende Features
 

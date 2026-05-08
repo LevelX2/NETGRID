@@ -7,7 +7,7 @@ Initial setup was performed in the current Codex thread without starting a persi
 Recommended first persistent goal:
 
 ```text
-Netrunner repository setup and Codex guidance
+NETGRID repository setup and Codex guidance
 ```
 
 Recommended next persistent goal:

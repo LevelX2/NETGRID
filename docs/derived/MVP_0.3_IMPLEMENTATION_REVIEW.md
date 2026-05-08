@@ -38,8 +38,8 @@ Stand: 2026-05-03
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/ai test`: pass, 8 AI tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 11 Server/Multiplayer/AI-mode tests.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 8 AI tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 11 Server/Multiplayer/AI-mode tests.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass, 35 Tests.
 - `corepack pnpm lint`: pass.

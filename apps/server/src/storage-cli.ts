@@ -12,8 +12,8 @@ import {
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const command = process.argv[2] ?? "inspect";
-const dbPath = resolve(envValue(process.env, "NETGRID_SQLITE_STORAGE_PATH", "NETRUNNER_SQLITE_STORAGE_PATH") ?? resolve(root, DEFAULT_SQLITE_STORAGE_PATH));
-const backupDir = resolve(envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR", "NETRUNNER_STORAGE_BACKUP_DIR") ?? resolve(root, DEFAULT_STORAGE_BACKUP_DIR));
+const dbPath = resolve(envValue(process.env, "NETGRID_SQLITE_STORAGE_PATH") ?? resolve(root, DEFAULT_SQLITE_STORAGE_PATH));
+const backupDir = resolve(envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR") ?? resolve(root, DEFAULT_STORAGE_BACKUP_DIR));
 
 try {
   if (command === "backup") {

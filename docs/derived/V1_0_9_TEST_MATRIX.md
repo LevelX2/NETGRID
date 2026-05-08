@@ -95,7 +95,7 @@ Der Smoke muss prüfen:
 
 ## Pflicht-Projektchecks für Umsetzung
 
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm e2e`
 - `corepack pnpm lint`

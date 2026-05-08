@@ -91,7 +91,7 @@ Optionale Assets:
 - `apps/web/public/result-backgrounds/`
 - `apps/web/public/audio/`
 
-Asset-Dateien dürfen keine offiziellen Netrunner-Artworks, Logos, Card Frames oder Card Backs enthalten.
+Asset-Dateien dürfen keine offiziellen NETGRID-Artworks, Logos, Card Frames oder Card Backs enthalten.
 
 ## 7. Ergebnisfenster
 

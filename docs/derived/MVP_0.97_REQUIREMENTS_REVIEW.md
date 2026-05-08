@@ -11,7 +11,7 @@ Stand: 2026-05-04
 - `docs/derived/MVP_0.96_FINAL_REVIEW.md`
 - `docs/derived/MVP_0.97_DETAILED_PLAN.md` aus dem ursprünglichen Arbeitsbaum als read-only Arbeitsbasis
 - `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md` aus dem ursprünglichen Arbeitsbaum als read-only Arbeitsbasis
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`, gezielt für CR 6.1.5, 6.6, 6.7, 7.3, 7.4 und 7.5
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`, gezielt für CR 6.1.5, 6.6, 6.7, 7.3, 7.4 und 7.5
 
 ## Prüfergebnis
 

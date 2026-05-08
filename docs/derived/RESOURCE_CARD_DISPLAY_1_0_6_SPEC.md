@@ -117,7 +117,7 @@ Die Anzeige besteht aus:
 - generischem Coin-/Credit-Symbol,
 - optionalem kleinen Stapel-/Münzhintergrund.
 
-Die Credit-Optik darf über CSS oder ein generisches Icon entstehen. Sie darf kein offizielles Netrunner-Symbol, keine offiziellen Assets und keine Card-Frame-Bestandteile verwenden.
+Die Credit-Optik darf über CSS oder ein generisches Icon entstehen. Sie darf kein offizielles NETGRID-Symbol, keine offiziellen Assets und keine Card-Frame-Bestandteile verwenden.
 
 ### Abgrenzung zu Aktionen
 

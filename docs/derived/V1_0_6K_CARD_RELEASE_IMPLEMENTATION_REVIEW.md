@@ -29,10 +29,10 @@ V1.0.6K führt keine neue Prevention-/Avoid-/Interrupt-/Replacement-Engine ein u
 
 ## Abschlusschecks
 
-- `corepack pnpm --filter @netrunner/catalog test`: pass.
-- `corepack pnpm --filter @netrunner/decks test`: pass.
-- `corepack pnpm --filter @netrunner/engine test -- index.test.ts`: pass.
-- `corepack pnpm --filter @netrunner/server test -- multiplayer.test.ts`: pass.
+- `corepack pnpm --filter @netgrid/catalog test`: pass.
+- `corepack pnpm --filter @netgrid/decks test`: pass.
+- `corepack pnpm --filter @netgrid/engine test -- index.test.ts`: pass.
+- `corepack pnpm --filter @netgrid/server test -- multiplayer.test.ts`: pass.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.

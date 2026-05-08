@@ -123,7 +123,7 @@ Beide Entscheidungen dürfen keine Runtime-Karte freigeben.
 ```text
 Setze V1.2.0 Event Modification Foundation um und bereite danach V1.2.1 Replacement Effects vor.
 
-Repository: C:\Projekte\Netrunner
+Repository: C:\Projekte\NETGRID
 
 Arbeite wiki-first und gemäß AGENTS.md. Lies zuerst:
 - AGENTS.md

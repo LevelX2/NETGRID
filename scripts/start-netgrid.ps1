@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$projectRoot = "C:\Projekte\Netrunner"
+$projectRoot = "C:\Projekte\NETGRID"
 $webUrl = "http://127.0.0.1:3100"
 $serverUrl = "http://127.0.0.1:8787/health"
 $logDir = Join-Path $env:TEMP "netgrid"

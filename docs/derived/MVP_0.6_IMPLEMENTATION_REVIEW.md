@@ -10,7 +10,7 @@ MVP 0.6 Deck Editor und Match Setup Foundation sind implementiert und lokal gezi
 
 ## Implementierter Scope
 
-- Neues reines TypeScript-Paket `@netrunner/decks` für editierbare Decks, Templates, Validierung v2, deterministische Snapshots, Deckhashes, Import/Export und Engine-Deck-Übergabe.
+- Neues reines TypeScript-Paket `@netgrid/decks` für editierbare Decks, Templates, Validierung v2, deterministische Snapshots, Deckhashes, Import/Export und Engine-Deck-Übergabe.
 - Server-seitige Matchstart-Revalidierung validierter, unveränderlicher Deck-Snapshots für Human-vs-Human, Human-vs-KI und KI-vs-KI-Pfade.
 - Engine-Unterstützung für allgemeine Deckdefinitionen jenseits von `DemoDeckId` sowie erlaubte öffentliche Deckmetadaten in `PlayerView`.
 - AI-Simulation kann validierte Snapshot-Decks übergeben bekommen, ohne FullState oder gegnerische Hidden Info zu erhalten.
@@ -27,13 +27,13 @@ MVP 0.6 Deck Editor und Match Setup Foundation sind implementiert und lokal gezi
 
 ## Tests
 
-- `corepack pnpm --filter @netrunner/decks test`: pass.
-- `corepack pnpm --filter @netrunner/server test`: pass.
-- `corepack pnpm --filter @netrunner/ai test`: pass.
-- `corepack pnpm --filter @netrunner/engine test`: pass.
+- `corepack pnpm --filter @netgrid/decks test`: pass.
+- `corepack pnpm --filter @netgrid/server test`: pass.
+- `corepack pnpm --filter @netgrid/ai test`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass.
-- `corepack pnpm --filter @netrunner/server typecheck`: pass.
-- `corepack pnpm --filter @netrunner/web typecheck`: pass.
+- `corepack pnpm --filter @netgrid/server typecheck`: pass.
+- `corepack pnpm --filter @netgrid/web typecheck`: pass.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.

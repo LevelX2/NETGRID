@@ -118,7 +118,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(clampCuePosition(98, 98, 400, 300, 180, 120)).toEqual({ kind: "custom", xPercent: 52, yPercent: 56 });
   });
 
-  it("groups remotes above central servers for the board", () => {
+  it("groups central servers above remotes for the board", () => {
     const servers = [
       { id: "hq", label: "HQ", ice: [], root: [] },
       { id: "rd", label: "R&D", ice: [], root: [] },
@@ -128,8 +128,8 @@ describe("V1.0.5 action board UI helpers", () => {
     ];
 
     expect(serverBoardRows(servers).map((row) => [row.kind, row.servers.map((server) => server.id)])).toEqual([
-      ["remotes", ["remote_1", "remote_2"]],
-      ["centrals", ["hq", "rd", "archives"]]
+      ["centrals", ["hq", "rd", "archives"]],
+      ["remotes", ["remote_1", "remote_2"]]
     ]);
   });
 

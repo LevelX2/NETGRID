@@ -25,7 +25,7 @@ Alias:
 corepack pnpm test:e2e
 ```
 
-Der Befehl startet den Multiplayer-Server und die Next-Web-App auf freien lokalen Ports, setzt `NETRUNNER_MATCH_STORAGE_PATH` auf eine temporäre Datei unter `tmp/e2e-runtime-*` und führt Playwright Chromium aus.
+Der Befehl startet den Multiplayer-Server und die Next-Web-App auf freien lokalen Ports, setzt `NETGRID_MATCH_STORAGE_PATH` auf eine temporäre Datei unter `tmp/e2e-runtime-*` und führt Playwright Chromium aus.
 
 ## Geprüfte Viewports
 
@@ -66,15 +66,15 @@ Zusätzliche Playwright-Artefakte:
 
 Kein Hidden-Info-, Token-, Decklisten-, Bildpfad- oder DOM-Leak wurde im V1.0.7-Gate festgestellt.
 
-Geprüft wurden DOM-Text, relevante Attribute, LocalStorage, `netrunner.recentSessions` und empfangene WebSocket-Payloads. Gesperrte sichtbare Muster umfassen Session-/Reconnect-/Join-Tokens, private Payloads, `cardInstances`, `decklist`, sichtbare `deckHash`-/`cardDefinitionId`-Lecks, Card-Back-Bildrouten und konkrete verdeckte Kartentitel.
+Geprüft wurden DOM-Text, relevante Attribute, LocalStorage, `netgrid.recentSessions` und empfangene WebSocket-Payloads. Gesperrte sichtbare Muster umfassen Session-/Reconnect-/Join-Tokens, private Payloads, `cardInstances`, `decklist`, sichtbare `deckHash`-/`cardDefinitionId`-Lecks, Card-Back-Bildrouten und konkrete verdeckte Kartentitel.
 
 Hinweis: `deckHash` bleibt in bestehenden side-sicheren Serverpayloads Vertragsmetadatum und wurde in V1.0.7 nicht als Serververtragsänderung entfernt. Der Browser-Gate stellt sicher, dass es nicht mehr im DOM/Storage als sichtbare lokale UI-Leakfläche auftaucht.
 
 ## Checks
 
 - `corepack pnpm e2e`: pass, 7/7 Playwright-Tests.
-- `corepack pnpm --filter @netrunner/web test`: pass, 4 Testdateien, 27 Tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 1 Testdatei, 34 Tests.
+- `corepack pnpm --filter @netgrid/web test`: pass, 4 Testdateien, 27 Tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 1 Testdatei, 34 Tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 13 Tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.

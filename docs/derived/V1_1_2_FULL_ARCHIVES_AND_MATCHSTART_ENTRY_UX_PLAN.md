@@ -129,7 +129,7 @@ Der Spiel-Startscreen wird von einer langen gleichrangigen Optionsliste zu einer
 - `apps/web/app/action-board-ui.ts`
 - `tests/specs/visibility-contract.test.ts`
 - `tests/e2e/helpers/match-flow.ts`
-- `tests/e2e/netrunner-v1-0-7.spec.ts`
+- `tests/e2e/netgrid-v1-0-7.spec.ts`
 
 ### Track B betroffene Bereiche
 
@@ -253,10 +253,10 @@ Akzeptanz:
 
 Pflichtchecks:
 
-- `corepack pnpm --filter @netrunner/shared typecheck`
-- `corepack pnpm --filter @netrunner/engine test -- --run`
-- `corepack pnpm --filter @netrunner/server test -- --run`
-- `corepack pnpm --filter @netrunner/web test -- --run`
+- `corepack pnpm --filter @netgrid/shared typecheck`
+- `corepack pnpm --filter @netgrid/engine test -- --run`
+- `corepack pnpm --filter @netgrid/server test -- --run`
+- `corepack pnpm --filter @netgrid/web test -- --run`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

@@ -8,13 +8,13 @@ Scope: Human Runner gegen einfache Corp-KI mit festen Demo-Decks
 
 Primär:
 
-- `docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
+- `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
 - `docs/source/Erstes Testdeck.txt`
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf` als Regelreferenz
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` als Regelreferenz
 
 Zukunftskompatibilität:
 
-- `docs/source/Netrunner_MVP_0.2_Plan.md`, ohne Scope-Erweiterung vor bestandenem MVP-0.1-Gate
+- `docs/source/NETGRID_MVP_0.2_Plan.md`, ohne Scope-Erweiterung vor bestandenem MVP-0.1-Gate
 
 ## Gate
 

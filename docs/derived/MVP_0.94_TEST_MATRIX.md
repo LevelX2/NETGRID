@@ -29,11 +29,11 @@ Stand: 2026-05-04
 
 ## Pflichtchecks für Implementierung und Finalgate
 
-- `corepack pnpm --filter @netrunner/shared typecheck`
-- `corepack pnpm --filter @netrunner/engine typecheck`
-- `corepack pnpm --filter @netrunner/engine test -- --run`
-- `corepack pnpm --filter @netrunner/ai test -- --run`
-- `corepack pnpm --filter @netrunner/server test -- --run`
+- `corepack pnpm --filter @netgrid/shared typecheck`
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/engine test -- --run`
+- `corepack pnpm --filter @netgrid/ai test -- --run`
+- `corepack pnpm --filter @netgrid/server test -- --run`
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`

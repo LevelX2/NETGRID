@@ -29,7 +29,7 @@ V1.0.9 ist implementiert und lokal verifiziert. Alle Pflicht-Gates sind am 2026-
 
 | Gate | Ergebnis |
 | --- | --- |
-| `corepack pnpm --filter @netrunner/server test` | pass, 49 Tests |
+| `corepack pnpm --filter @netgrid/server test` | pass, 49 Tests |
 | `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts` | pass, 13 Tests |
 | `corepack pnpm e2e` | pass, 7 Browser-E2E-Tests |
 | `corepack pnpm lint` | pass |

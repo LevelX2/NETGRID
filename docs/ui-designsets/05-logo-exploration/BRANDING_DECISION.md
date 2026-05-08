@@ -32,6 +32,6 @@ Für Client- und Desktop-Icons wird aktuell die neu gezeichnete rechte Kachel `n
 
 ## Grenzen
 
-- Keine offiziellen Netrunner-/Null-Signal-Games-Logos, Faction-Symbole, Cardbacks, Cardframes oder offiziellen Artworks verwenden.
+- Keine offiziellen NETGRID-/Null-Signal-Games-Logos, Faction-Symbole, Cardbacks, Cardframes oder offiziellen Artworks verwenden.
 - Die Marke bleibt eigenständig und projektintern.
 - Typografie und Feinschliff sind noch nicht final.

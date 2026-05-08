@@ -5,7 +5,7 @@ Stand: 2026-05-06
 
 ## Ziel
 
-V1.0.9 macht den privaten Netrunner-Betrieb für eingeladene Spieler über das Internet belastbar genug, ohne daraus eine öffentliche Plattform zu machen.
+V1.0.9 macht den privaten NETGRID-Betrieb für eingeladene Spieler über das Internet belastbar genug, ohne daraus eine öffentliche Plattform zu machen.
 
 Der Release härtet die Ränder des bestehenden privaten Systems: Transport, erlaubte Browser-Ursprünge, einfache Missbrauchsbremsen, Secrets, Logs, Healthchecks, Betriebsdiagnose und reproduzierbare Internet-Smokes. Die Rules Engine, Karten, Mechaniken, Replay, StateHash, Randomness, Decklegalität und KI-Regelautorität bleiben unverändert.
 
@@ -37,12 +37,12 @@ Aktueller Stand vor V1.0.9:
 
 - V1.0.8 Storage/Backup-Härtung ist umgesetzt und lokal verifiziert.
 - SQLite ist privater lokaler Standard-Storage; JSON bleibt Legacy/Test/Migration.
-- `apps/server/src/http-server.ts` startet lokal per `HOST`/`PORT` und erzeugt Join-URLs über `NETRUNNER_WEB_BASE_URL`.
+- `apps/server/src/http-server.ts` startet lokal per `HOST`/`PORT` und erzeugt Join-URLs über `NETGRID_WEB_BASE_URL`.
 - REST und WebSocket sind bereits serverautoritativ und tokenbasiert.
 - Session-, Reconnect- und Join-Tokens werden als Hashes persistiert; Klartext-Tokens werden nur bei Erstellung/Join/Reconnect an die berechtigte Seite ausgegeben.
 - `setCors` erlaubt derzeit pauschal `access-control-allow-origin: *`; das ist für privaten Internetbetrieb zu offen.
 - WebSocket-Verbindungen prüfen aktuell keine explizite Origin.
-- `startNetrunnerServer` liefert eine `http://`-URL; Internetbetrieb soll hinter TLS-fähigem Reverse Proxy oder gleichwertigem privatem HTTPS/WSS-Pfad laufen.
+- `startNETGRIDServer` liefert eine `http://`-URL; Internetbetrieb soll hinter TLS-fähigem Reverse Proxy oder gleichwertigem privatem HTTPS/WSS-Pfad laufen.
 - V1.0.7/V1.0.8-E2E deckt lokale zwei Browser-Kontexte, Viewports, Lifecycle/Reconnect und Leak-Scans ab.
 - E2E-Logs werden bereits auf Token- und Hash-Muster redaktioniert.
 - `/health` liefert sichere Basissignale inklusive Storage-Health; V1.0.9 muss daraus einen internetgeeigneten Health-Vertrag machen.
@@ -59,7 +59,7 @@ Funktion:
 
 Muss klären:
 
-- zulässige `NETRUNNER_WEB_BASE_URL` und `NETRUNNER_SERVER_BASE_URL`,
+- zulässige `NETGRID_WEB_BASE_URL` und `NETGRID_SERVER_BASE_URL`,
 - Verhalten bei unsicherem `http://`/`ws://` in Internet-Profilen,
 - Reverse-Proxy-Annahmen für TLS und WebSocket-Upgrade,
 - Host-/Port-Bindung für `127.0.0.1`, LAN und privaten Server,
@@ -74,7 +74,7 @@ Funktion:
 
 Muss klären:
 
-- `NETRUNNER_ALLOWED_ORIGINS` als explizite Allowlist,
+- `NETGRID_ALLOWED_ORIGINS` als explizite Allowlist,
 - lokale Defaults für Entwicklung,
 - Ablehnung unbekannter Origins mit side-sicherem Fehler,
 - `OPTIONS`/Preflight-Verhalten,
@@ -105,7 +105,7 @@ Funktion:
 
 Muss klären:
 
-- `NETRUNNER_TOKEN_SALT` ist im Internet-Profil Pflicht und darf nicht der lokale Default sein,
+- `NETGRID_TOKEN_SALT` ist im Internet-Profil Pflicht und darf nicht der lokale Default sein,
 - Join-URLs bleiben private Einladungstokens und dürfen nicht geloggt werden,
 - `Authorization: Bearer` wird bevorzugt, Query-Token-Kompatibilität wird bewertet und eingegrenzt,
 - Log-Redaction für Tokens, TokenHashes, Join-URLs, Decksnapshots, `cardInstances`, `privatePayload`,
@@ -184,7 +184,7 @@ V1.0.9 braucht drei Testschichten:
 
 Pflicht bleibt:
 
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`
 - `corepack pnpm e2e`
 - `corepack pnpm lint`

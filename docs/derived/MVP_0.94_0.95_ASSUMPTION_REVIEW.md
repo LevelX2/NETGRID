@@ -26,7 +26,7 @@ V0.94 darf Damage nur umsetzen, wenn es vorher einen schmalen Game-End-Grundvert
 - `docs/derived/SETUP_GAME_END_0.93_SPEC.md`
 - `docs/derived/MVP_0.93_FINAL_REVIEW.md`
 - `docs/derived/DEVIATION_REGISTRY.md`
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 
 ## Annahmenstatus
 

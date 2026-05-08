@@ -1,7 +1,7 @@
 {
   "schemaVersion": "rules-baseline-v1",
   "id": "rules-baseline-mvp-0.4",
-  "name": "Netrunner MVP 0.4 card pool and tags baseline",
+  "name": "NETGRID MVP 0.4 card pool and tags baseline",
   "status": "frozen_for_implementation",
   "rulesVersion": "26.03",
   "cardTextSource": "manual",

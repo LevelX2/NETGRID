@@ -1,7 +1,7 @@
 import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
 
 export const ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
-export const LEGACY_ACTION_CUE_POSITION_STORAGE_KEY = "netrunner.actionCuePosition.v1";
+export const LEGACY_ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
 
 export type ActionContext = {
   kind: "card" | "server";
@@ -281,8 +281,8 @@ export function serverBoardRows<T extends { id: string }>(servers: T[]): Array<{
   const remotes = servers.filter((server) => /^remote_\d+$/.test(server.id)).sort((left, right) => remoteNumber(left.id) - remoteNumber(right.id));
   const other = servers.filter((server) => !centralOrder.has(server.id) && !/^remote_\d+$/.test(server.id));
   return [
-    { kind: "remotes", servers: [...remotes, ...other] },
-    { kind: "centrals", servers: central }
+    { kind: "centrals", servers: central },
+    { kind: "remotes", servers: [...remotes, ...other] }
   ];
 }
 

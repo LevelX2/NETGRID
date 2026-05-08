@@ -49,4 +49,4 @@ Das Modal darf keine FullState-Daten, `cardInstances`, privaten Payloads, Tokens
 
 ## Grafik
 
-Der Hintergrund ist eine lokale, abstrakte UI-Grafik per CSS. Er nutzt keine offiziellen Netrunner-Artworks, Logos, Frames oder Backs.
+Der Hintergrund ist eine lokale, abstrakte UI-Grafik per CSS. Er nutzt keine offiziellen NETGRID-Artworks, Logos, Frames oder Backs.

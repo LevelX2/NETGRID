@@ -17,7 +17,7 @@ Status: ready
 - `docs/derived/V1_1_1_DISCARD_HANDLIMIT_CORE_DAMAGE_PLAN.md`
 - `docs/derived/V1_1_0_FINAL_REVIEW.md`
 - `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 
 ## Befund
 

@@ -7,7 +7,7 @@ Stand: 2026-05-03
 
 Diese Spezifikation definiert das V0.91-Asset-Gate für offizielle Kartenbilder. Sie ist absichtlich strenger als eine reine technische Importplanung: Bilder dürfen erst genutzt werden, wenn Quelle, Nutzungsumfang, Cache, Versionierung, Attribution, Hidden-Info-Schutz und Tests positiv entschieden sind.
 
-Nach Nutzerentscheidung vom 2026-05-03 ist der freigegebene Korridor eng begrenzt: **Original Netrunner 1996 WotC Frontbilder**, privat und lokal, für den Projektverantwortlichen und Familie. Der Projektverantwortliche besitzt die physischen Karten. Diese Entscheidung ist keine öffentliche Lizenz.
+Nach Nutzerentscheidung vom 2026-05-03 ist der freigegebene Korridor eng begrenzt: **Original NETGRID 1996 WotC Frontbilder**, privat und lokal, für den Projektverantwortlichen und Familie. Der Projektverantwortliche besitzt die physischen Karten. Diese Entscheidung ist keine öffentliche Lizenz.
 
 ## Primärquellen
 
@@ -16,11 +16,11 @@ Nach Nutzerentscheidung vom 2026-05-03 ist der freigegebene Korridor eng begrenz
 | Null Signal Games Visual Assets | https://nullsignal.games/about/nsg-visual-assets/ | Primäre Asset-Guidelines von Null Signal Games. |
 | Null Signal Games Purchase Guide | https://nullsignal.games/players/purchase-guide/ | Primäre Hinweise zu Print-and-Play-PDFs und Heimdruck. |
 | Null Signal Games FAQ | https://nullsignal.games/about/frequently-asked-questions/ | Primärer Hinweis zu nicht verteilten offiziellen Card Backs. |
-| NetrunnerDB API v2 | https://netrunnerdb.com/api/2.0/doc | Primäre API-Nutzungs- und Caching-Hinweise. |
-| NetrunnerDB API v3 Printings | https://api.netrunnerdb.com/api/docs/printings%2Fall_printings | Technische Bildmetadaten in Printing-Ressourcen. |
+| NETGRIDDB API v2 | https://netgriddb.com/api/2.0/doc | Primäre API-Nutzungs- und Caching-Hinweise. |
+| NETGRIDDB API v3 Printings | https://api.netgriddb.com/api/docs/printings%2Fall_printings | Technische Bildmetadaten in Printing-Ressourcen. |
 | Physische O:NR-1996-Sammlung | lokal beim Projektverantwortlichen | Bevorzugte private Quelle für eigene Frontbild-Scans. |
-| Reddit O:NR MPC-formatted | https://www.reddit.com/r/Netrunner/comments/hu282l/original_netrunner_mpcformatted/ | Community-Hinweis auf vollständige O:NR-Scanarchive. |
-| CCG Trader NetRunner CCG | https://www.ccgtrader.net/games/netrunner-ccg/ | Set- und Kartenlistenreferenz für O:NR. |
+| Reddit O:NR MPC-formatted | https://www.reddit.com/r/NETGRID/comments/hu282l/original_netgrid_mpcformatted/ | Community-Hinweis auf vollständige O:NR-Scanarchive. |
+| CCG Trader NetRunner CCG | https://www.ccgtrader.net/games/netgrid-ccg/ | Set- und Kartenlistenreferenz für O:NR. |
 
 ## Quellenbefund
 
@@ -32,15 +32,15 @@ Print-and-Play-PDFs sind laut Purchase Guide direkt verfügbar und für Heimdruc
 
 Die FAQ bestätigt zusätzlich, dass Null Signal offizielle Card Backs nicht verteilt und für Alternativkarten generische/community backs empfiehlt. V0.91 nutzt deshalb keine offiziellen Rückseiten.
 
-### NetrunnerDB
+### NETGRIDDB
 
-NetrunnerDB stellt öffentliche API-Endpunkte bereit und beschreibt die API als Ergänzung für Deckbuilder, Kartendatenbanken, Turniermanager und ähnliche Tools. Die API v2 weist auf urheberrechtlich geschützte Texte und grafische Inhalte hin und fordert HTTP-Caching-Best-Practices.
+NETGRIDDB stellt öffentliche API-Endpunkte bereit und beschreibt die API als Ergänzung für Deckbuilder, Kartendatenbanken, Turniermanager und ähnliche Tools. Die API v2 weist auf urheberrechtlich geschützte Texte und grafische Inhalte hin und fordert HTTP-Caching-Best-Practices.
 
 Die API v3 `printings`-Ressourcen enthalten technische Bildmetadaten mit Größenprofilen. Das belegt technische Verfügbarkeit, aber keine eigenständige Bildlizenz für lokale Downloads, Versionierung oder Anzeige.
 
-### Original Netrunner 1996
+### Original NETGRID 1996
 
-Original Netrunner wurde 1996 von Wizards of the Coast veröffentlicht und ist out of print. Die beste Projektquelle ist die physische Sammlung des Projektverantwortlichen. Community-Archive können als private lokale Referenz oder Gap-Fill dienen, insbesondere der Reddit-Thread `Original Netrunner / MPC-formatted`, der auf EmergencyShutdown.net, NetrunnerOnline/Wayback und frische Community-Scans verweist.
+Original NETGRID wurde 1996 von Wizards of the Coast veröffentlicht und ist out of print. Die beste Projektquelle ist die physische Sammlung des Projektverantwortlichen. Community-Archive können als private lokale Referenz oder Gap-Fill dienen, insbesondere der Reddit-Thread `Original NETGRID / MPC-formatted`, der auf EmergencyShutdown.net, NETGRIDOnline/Wayback und frische Community-Scans verweist.
 
 Diese Quellen sind keine öffentliche Lizenz. Die Freigabe beruht auf der bewusst eingegrenzten privaten lokalen Nutzungsentscheidung des Projektverantwortlichen.
 
@@ -50,7 +50,7 @@ Diese Quellen sind keine öffentliche Lizenz. Die Freigabe beruht auf der bewuss
 |---|---|
 | `source_candidate` | `project_owner_physical_onr_1996_collection` |
 | `usage_decision` | `private_local_usage_decision_accepted` |
-| `original_netrunner_1996_front_images_allowed` | `true` |
+| `original_netgrid_1996_front_images_allowed` | `true` |
 | `self_scan_allowed` | `true` |
 | `approved_community_archive_download_allowed` | `true` |
 | `local_cache_allowed` | `true` |
@@ -65,7 +65,7 @@ Diese Quellen sind keine öffentliche Lizenz. Die Freigabe beruht auf der bewuss
 
 Das Asset-Gate bleibt nur unter diesen Bedingungen auf `ready_for_implementation: true`:
 
-- der konkrete Nutzungsumfang bleibt Original Netrunner 1996 Frontbilder,
+- der konkrete Nutzungsumfang bleibt Original NETGRID 1996 Frontbilder,
 - die Nutzung bleibt privat, lokal und auf Projektverantwortlichen/Familie beschränkt,
 - Quelle, Sets, Bildgrößen und Dateikonventionen sind dokumentiert,
 - Download und Cache sind nur für einen nicht versionierten lokalen Ordner freigegeben,

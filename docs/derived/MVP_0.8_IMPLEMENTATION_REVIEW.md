@@ -35,13 +35,13 @@ V0.8 wurde als lokaler spielbarer Starterset-Slice umgesetzt. Der neue Kartenpoo
 
 ## Checks
 
-- `corepack pnpm --filter @netrunner/engine typecheck`: pass.
-- `corepack pnpm --filter @netrunner/ai typecheck`: pass.
-- `corepack pnpm --filter @netrunner/engine test`: pass, 20 Tests.
-- `corepack pnpm --filter @netrunner/server test`: pass, 12 Tests.
-- `corepack pnpm --filter @netrunner/ai test`: pass, 11 Tests.
-- `corepack pnpm --filter @netrunner/decks test`: pass, 7 Tests.
-- `corepack pnpm --filter @netrunner/catalog test`: pass, 6 Tests.
+- `corepack pnpm --filter @netgrid/engine typecheck`: pass.
+- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- `corepack pnpm --filter @netgrid/engine test`: pass, 20 Tests.
+- `corepack pnpm --filter @netgrid/server test`: pass, 12 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: pass, 11 Tests.
+- `corepack pnpm --filter @netgrid/decks test`: pass, 7 Tests.
+- `corepack pnpm --filter @netgrid/catalog test`: pass, 6 Tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 19 Tests.
 - `corepack pnpm typecheck`: pass.
 - `corepack pnpm test`: pass.

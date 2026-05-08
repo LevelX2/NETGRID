@@ -50,7 +50,7 @@
   },
   "notes": [
     "V0.97 extends V0.96 with a gated Movement phase, Runner jack-out window, internal BreachState and narrow multiaccess.",
-    "The playable V0.97 card is a local fictional harness event, not an official Netrunner card.",
+    "The playable V0.97 card is a local fictional harness event, not an official NETGRID card.",
     "HQ multiaccess selection is deterministic through Seed, RandomCounter and RandomDrawRecords; future queued hidden cards are not exposed in PlayerViews or PublicEvents."
   ]
 }

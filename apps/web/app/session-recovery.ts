@@ -52,11 +52,11 @@ type RecoverableSessionRecord = {
 };
 
 export const SESSION_STORAGE_KEY = "netgrid-mvp-0-3-session";
-export const LEGACY_SESSION_STORAGE_KEY = "netrunner-mvp-0-3-session";
+export const LEGACY_SESSION_STORAGE_KEY = "netgrid-mvp-0-3-session";
 export const RECENT_SESSIONS_KEY = "netgrid.recentSessions";
-export const LEGACY_RECENT_SESSIONS_KEY = "netrunner.recentSessions";
+export const LEGACY_RECENT_SESSIONS_KEY = "netgrid.recentSessions";
 const RECOVERY_STORAGE_KEY = "netgrid.recovery.v1";
-const LEGACY_RECOVERY_STORAGE_KEY = "netrunner.recovery.v1";
+const LEGACY_RECOVERY_STORAGE_KEY = "netgrid.recovery.v1";
 
 export function persistSession(session: SessionInfo, remotePayload?: RemoteSessionSummary) {
   window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));

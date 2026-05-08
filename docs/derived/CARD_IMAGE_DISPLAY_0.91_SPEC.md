@@ -7,7 +7,7 @@ Stand: 2026-05-03
 
 Diese Spezifikation erweitert die V0.7-CardView-Planung um spätere echte Kartenbilder, ohne den bestehenden Hidden-Info-Vertrag aufzuweichen. Sie beschreibt Anzeigeorte, Fallbacks, Alt-Texte, DOM-Regeln und Matchgrenzen.
 
-Im aktuellen V0.91-Gate ist nur die Anzeige von Original-Netrunner-1996-Frontbildern aus einem nicht versionierten lokalen Cache freigegeben. Die Nutzung bleibt privat/familiär lokal. Android:Netrunner-/NSG-Bilder, Card Backs, standalone Frames/Logos und öffentliche Verteilung bleiben blockiert.
+Im aktuellen V0.91-Gate ist nur die Anzeige von Original-NETGRID-1996-Frontbildern aus einem nicht versionierten lokalen Cache freigegeben. Die Nutzung bleibt privat/familiär lokal. Android:NETGRID-/NSG-Bilder, Card Backs, standalone Frames/Logos und öffentliche Verteilung bleiben blockiert.
 
 ## Anzeigeorte
 
@@ -113,4 +113,4 @@ Bildmodus ist eine lokale Anzeigepräferenz:
 
 ## Bestehende V0.7-Grenze
 
-V0.7 bleibt gültig: Außerhalb der ausdrücklich freigegebenen privaten lokalen O:NR-1996-Frontbilder rendert die App weiterhin ausschließlich generische Platzhalter und Textkarten. V0.91 hebt keine Sperre für Android:Netrunner, NSG-Bilder, Card Backs oder öffentliche Assetnutzung auf.
+V0.7 bleibt gültig: Außerhalb der ausdrücklich freigegebenen privaten lokalen O:NR-1996-Frontbilder rendert die App weiterhin ausschließlich generische Platzhalter und Textkarten. V0.91 hebt keine Sperre für Android:NETGRID, NSG-Bilder, Card Backs oder öffentliche Assetnutzung auf.

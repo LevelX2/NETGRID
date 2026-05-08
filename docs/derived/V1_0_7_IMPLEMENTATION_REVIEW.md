@@ -19,14 +19,14 @@ Alternativ ist dasselbe Ziel über `corepack pnpm test:e2e` erreichbar.
 
 - `playwright.config.ts`: Playwright-Konfiguration mit Chromium-Projekt, `tests/e2e`, `test-results/e2e`, HTML-Report und Trace/Screenshot/Video bei Fehlschlag.
 - `scripts/run-e2e.mjs`: Harness für dynamische Ports, Web-/Server-Start, Health-Wait, isolierte Matchdatei und Prozess-Cleanup.
-- `tests/e2e/netrunner-v1-0-7.spec.ts`: V1.0.7-Flow-Gate.
+- `tests/e2e/netgrid-v1-0-7.spec.ts`: V1.0.7-Flow-Gate.
 - `tests/e2e/helpers/match-flow.ts`: gekapselte Matchstart-, Join-, Ready-, Board-, Card-Display- und Screenshot-Hilfen.
 - `tests/e2e/helpers/leak-scan.ts`: DOM-, Storage- und WebSocket-Payload-Leak-Scans.
 - `tests/e2e/helpers/viewports.ts`: Desktop 1280x720, Tablet 1024x768, Schmal 390x844.
 
 ## Produktänderungen
 
-- Der Server akzeptiert für Testläufe `NETRUNNER_MATCH_STORAGE_PATH`; ohne diese Variable bleibt der normale Pfad `data/runtime/multiplayer/matches.json` unverändert.
+- Der Server akzeptiert für Testläufe `NETGRID_MATCH_STORAGE_PATH`; ohne diese Variable bleibt der normale Pfad `data/runtime/multiplayer/matches.json` unverändert.
 - Die Weboberfläche hat stabile `data-testid`-Hooks für bestehende UI-Ziele erhalten.
 - Der Start-/Boardbereich blendet sichtbare Deckhashes nicht mehr im DOM ein; Decknamen und der Hinweis `Deck geprüft` bleiben als side-sichere UI-Information erhalten.
 - Installierte Corp-Karten zeigen für die eigene Corp-Seite wieder side-sichere `Ungerezzt`-/`Gerezzt`-Statusmarken, damit das V1.0.5-Boardziel im Browser-Gate prüfbar bleibt.

@@ -1,6 +1,6 @@
 # UI-Designsets
 
-Diese Bilder sind explorative UI-Mockups für den privaten Netrunner-Client. Sie sind keine verbindliche Implementierungsvorgabe, sondern visuelle Richtungen für spätere UI-Entscheidungen.
+Diese Bilder sind explorative UI-Mockups für den privaten NETGRID-Client. Sie sind keine verbindliche Implementierungsvorgabe, sondern visuelle Richtungen für spätere UI-Entscheidungen.
 
 Eine gesonderte Bewertung der Umsetzungsrealistik liegt hier: [Realismusprüfung](REALISM_REVIEW.md).
 

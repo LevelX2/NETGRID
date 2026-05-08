@@ -3709,8 +3709,8 @@ export function redactPublicEventForSide(event: PublicGameEvent, viewerSide: Sid
   if (actionType !== "access_card" || actor !== "runner" || viewerSide !== "corp") return event;
   const serverLabel = typeof event.publicPayload.serverLabel === "string" ? event.publicPayload.serverLabel : "";
   const serverId = typeof event.publicPayload.serverId === "string" ? event.publicPayload.serverId : "";
-  const centralHiddenAccess = serverId === "hq" || serverId === "rd" || serverLabel === "HQ" || serverLabel === "R&D" || serverLabel === "F&E (R&D)";
-  if (!centralHiddenAccess) return event;
+  const rdHiddenAccess = serverId === "rd" || serverLabel === "R&D" || serverLabel === "F&E (R&D)" || serverLabel === "F&E";
+  if (!rdHiddenAccess) return event;
   const { cardDefinitionId: _cardDefinitionId, title: _title, ...publicPayload } = event.publicPayload;
   void _cardDefinitionId;
   void _title;

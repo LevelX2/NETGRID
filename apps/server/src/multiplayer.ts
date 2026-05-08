@@ -647,9 +647,9 @@ export class MultiplayerService {
     private readonly storage: MultiplayerStorage = new InMemoryMatchStorage(),
     options: { tokenSalt?: string; publicWebBaseUrl?: string; publicServerBaseUrl?: string; now?: () => string } = {}
   ) {
-    this.tokenSalt = options.tokenSalt ?? envValue(process.env, "NETGRID_TOKEN_SALT", "NETRUNNER_TOKEN_SALT") ?? LOCAL_DEFAULT_TOKEN_SALT;
-    this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? envValue(process.env, "NETGRID_WEB_BASE_URL", "NETRUNNER_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL);
-    this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? envValue(process.env, "NETGRID_SERVER_BASE_URL", "NETRUNNER_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL);
+    this.tokenSalt = options.tokenSalt ?? envValue(process.env, "NETGRID_TOKEN_SALT") ?? LOCAL_DEFAULT_TOKEN_SALT;
+    this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? envValue(process.env, "NETGRID_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL);
+    this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? envValue(process.env, "NETGRID_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL);
     this.now = options.now ?? (() => new Date().toISOString());
   }
 

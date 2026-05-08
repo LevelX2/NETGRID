@@ -23,8 +23,8 @@ Stand: 2026-05-03
 
 ## Pflicht-Checks
 
-- `corepack pnpm --filter @netrunner/ai test`
-- `corepack pnpm --filter @netrunner/server test`
+- `corepack pnpm --filter @netgrid/ai test`
+- `corepack pnpm --filter @netgrid/server test`
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`
 - `corepack pnpm lint`
 - `corepack pnpm typecheck`

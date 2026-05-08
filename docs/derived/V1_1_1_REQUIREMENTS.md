@@ -14,7 +14,7 @@ V1.1.1 schließt nach V1.1.0 den engen M2+-Grundpfad für Discard-Phasen, maxima
 - `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`
 - `docs/derived/MVP_0.94_REQUIREMENTS.md`
 - `docs/derived/MVP_0.94_TEST_MATRIX.md`
-- `docs/source/Null_Signal_Games_Netrunner_Comprehensive_Rules_v26.03.pdf`, gezielt zu Discard Phase, Maximum Hand Size, Core Damage und Flatline
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`, gezielt zu Discard Phase, Maximum Hand Size, Core Damage und Flatline
 
 ## Must-Anforderungen
 

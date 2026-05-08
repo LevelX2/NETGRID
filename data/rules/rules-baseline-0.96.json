@@ -53,7 +53,7 @@
   },
   "notes": [
     "V0.96 extends V0.95 with a narrow Trace/Link/Bidding gate.",
-    "The playable V0.96 card is a local fictional harness card, not an official Netrunner card.",
+    "The playable V0.96 card is a local fictional harness card, not an official NETGRID card.",
     "Trace effects are limited to add_tag; trace damage, multiaccess, hosting, viruses, counters and prevention remain blocked."
   ]
 }

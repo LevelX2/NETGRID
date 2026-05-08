@@ -19,8 +19,8 @@ Gesicherter Stand:
 
 Quellenkonflikt:
 
-- `docs/source/Netrunner_MVP_0.1_Konsolidiertes_Konzept_geprueft.md` nennt V0.3 als "Beide Seiten gegen KI spielbar" mit Runner-KI, verbesserter Corp-KI, KI-vs-KI, Erklärmodus und Simulationstests.
-- `docs/Netrunner_Dokumentenpaket_MVP_0_1_0_2/05_planung/Backlog_und_Roadmap.md` nennt V0.3 als "Kartenpool und Regelbreite" mit weiteren ICE-/Breaker-Varianten, Assets/Upgrades, Tags, Damage, größeren Demo-Decks und eingeschränkter Deckvalidierung.
+- `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md` nennt V0.3 als "Beide Seiten gegen KI spielbar" mit Runner-KI, verbesserter Corp-KI, KI-vs-KI, Erklärmodus und Simulationstests.
+- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/05_planung/Backlog_und_Roadmap.md` nennt V0.3 als "Kartenpool und Regelbreite" mit weiteren ICE-/Breaker-Varianten, Assets/Upgrades, Tags, Damage, größeren Demo-Decks und eingeschränkter Deckvalidierung.
 
 Entscheidung:
 
@@ -56,7 +56,7 @@ Begründung:
 | V0.7 | UI-Neugestaltung und Designgestaltung | neues Spielbrett, Matchfluss, Run-Flow, Action-Panel, Karten-/Deckansichten, Replay-/Log-Darstellung, KI-Erklärungen | neue Regelbreite als Hauptziel, ungetestete Kartenfreigabe |
 | V0.8 | Basisset-/Starterset-Spielbarkeit | ausgewählter spielbarer Slice aus importiertem Datenbestand, Damage/Resources/Traces/Identitäten nur als Teilgates | vollständiges Basisset auf einmal, Freitext-Regelinterpretation |
 | V0.9 | Bessere KI | deck- und rollenbewusste Heuristiken, Schwierigkeitsgrade, Risikoabschätzung, Simulationen, bessere Reason-Codes | KI mit FullState, LLM-KI als Regelakteur |
-| V1.0 | Private stabile Netrunner-Plattform | Human-vs-KI, KI-vs-Human, Human-vs-Human, KI-vs-KI, Deckeditor, Kartenkatalog, Replays, private Hostingfähigkeit | öffentliche Plattform nur nach neuer Scope-Entscheidung |
+| V1.0 | Private stabile NETGRID-Plattform | Human-vs-KI, KI-vs-Human, Human-vs-Human, KI-vs-KI, Deckeditor, Kartenkatalog, Replays, private Hostingfähigkeit | öffentliche Plattform nur nach neuer Scope-Entscheidung |
 
 ## 5. V0.2.1 als optionaler Härtungsstrang
 
@@ -166,7 +166,7 @@ V0.9 verbessert die KI über deck- und rollenbewusste Heuristiken, Schwierigkeit
 
 ## 9. V1.0
 
-V1.0 ist erreicht, wenn die Anwendung als private, stabile Netrunner-Plattform taugt:
+V1.0 ist erreicht, wenn die Anwendung als private, stabile NETGRID-Plattform taugt:
 
 - Human-vs-KI in beide Richtungen,
 - Human-vs-Human privat,

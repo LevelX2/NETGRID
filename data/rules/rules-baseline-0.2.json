@@ -1,7 +1,7 @@
 {
   "schemaVersion": "rules-baseline-v1",
   "id": "rules-baseline-mvp-0.2",
-  "name": "Netrunner MVP 0.2 multiplayer baseline",
+  "name": "NETGRID MVP 0.2 multiplayer baseline",
   "status": "frozen_for_implementation",
   "rulesVersion": "26.03",
   "cardTextSource": "manual",
@@ -13,7 +13,7 @@
   "playerViewSchemaVersion": "0.2.0",
   "agendaPointsToWin": 6,
   "sourceDocuments": [
-    "docs/source/Netrunner_MVP_0.2_Plan.md",
+    "docs/source/NETGRID_MVP_0.2_Plan.md",
     "docs/derived/MVP_0.1_FINAL_REVIEW.md"
   ]
 }

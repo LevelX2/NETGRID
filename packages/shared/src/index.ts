@@ -1189,7 +1189,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["icebreaker"],
     installCost: 3,
     memoryCost: 1,
-    strength: 2,
+    strength: 0,
     breakCost: 2,
     pumpCost: 2
   }),

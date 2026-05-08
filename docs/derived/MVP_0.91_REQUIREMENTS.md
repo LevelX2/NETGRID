@@ -8,9 +8,9 @@ Phase: V0.91 Kartenbild-Asset-Gate und Bild-Import
 
 V0.91 friert die Anforderungen für offizielle Kartenbilder als rein lokales Anzeige-Feature ein. Die Phase startet erst nach dokumentiertem V0.9-Finalgate; `MVP_0.9_done: true` ist in `docs/codex/CODEX_STATUS.md` und in der Wissensbasis dokumentiert.
 
-Die technische und sicherheitsbezogene Spezifikation ist testbar. Für Android:Netrunner-/NSG-/NetrunnerDB-Bilder liegt weiterhin keine allgemeine öffentliche Asset-Freigabe vor.
+Die technische und sicherheitsbezogene Spezifikation ist testbar. Für Android:NETGRID-/NSG-/NETGRIDDB-Bilder liegt weiterhin keine allgemeine öffentliche Asset-Freigabe vor.
 
-Nach Nutzerentscheidung vom 2026-05-03 wird der V0.91-Implementierungskorridor jedoch auf **Original Netrunner 1996 WotC Frontbilder** begrenzt: private lokale Nutzung nur für den Projektverantwortlichen und Familie, auf Basis der physisch vorhandenen Sammlung. Das ist keine öffentliche Lizenz und keine Freigabe für Redistribution, Cloud-Hosting, öffentliche Assets, Card Backs, standalone Frames oder Logos.
+Nach Nutzerentscheidung vom 2026-05-03 wird der V0.91-Implementierungskorridor jedoch auf **Original NETGRID 1996 WotC Frontbilder** begrenzt: private lokale Nutzung nur für den Projektverantwortlichen und Familie, auf Basis der physisch vorhandenen Sammlung. Das ist keine öffentliche Lizenz und keine Freigabe für Redistribution, Cloud-Hosting, öffentliche Assets, Card Backs, standalone Frames oder Logos.
 
 Kernformel:
 
@@ -31,10 +31,10 @@ Kernformel:
 | Null Signal Games Visual Assets | Das freigegebene Visual-Assets-Pack steht unter CC BY-ND 4.0, aber die Freigabe gilt nur für dieses Pack; Card Art, Frames und Card Backs sind dort ausdrücklich nicht für die öffentliche Nutzung freigegeben. | Keine Freigabe für Kartenbilder, Frames oder Backs. |
 | Null Signal Games Purchase Guide | Print-and-Play-PDFs sind pay-what-you-want und für den Heimdruck gedacht. | PnP-Verfügbarkeit ersetzt keine App-Asset-Lizenz. |
 | Null Signal Games FAQ | Null Signal verteilt Card Backs nicht und empfiehlt für Alternativkarten generische/community backs statt offizieller Rückseiten. | Offizielle Card Backs bleiben ausgeschlossen. |
-| NetrunnerDB API v2 | Die API ist für ergänzende Tools vorgesehen; NetrunnerDB weist auf urheberrechtlich geschützte Texte und grafische Inhalte hin und fordert HTTP-Caching. | Technische Metadatenquelle möglich, aber keine Bildnutzungsfreigabe. |
-| NetrunnerDB API v3 Printings | Printing-Ressourcen enthalten `images` mit Größen wie `tiny`, `small`, `medium`, `large`. | URL-Metadaten dürfen erst nach positiver Policy in versionierte Manifeste. |
-| Physische O:NR-1996-Sammlung | Der Projektverantwortliche besitzt die Original-Netrunner-1996-Karten physisch und will sie nur privat/familiär lokal nutzen. | Bevorzugte lokale Quelle für private Frontbild-Scans. |
-| Community-Archive O:NR 1996 | Der Reddit-Thread `Original Netrunner / MPC-formatted` verweist auf vollständige aufbereitete O:NR-Scans aus EmergencyShutdown, NetrunnerOnline/Wayback und Community-Scans. | Nur als private lokale Referenz/Gaps, nicht als öffentliche Lizenz. |
+| NETGRIDDB API v2 | Die API ist für ergänzende Tools vorgesehen; NETGRIDDB weist auf urheberrechtlich geschützte Texte und grafische Inhalte hin und fordert HTTP-Caching. | Technische Metadatenquelle möglich, aber keine Bildnutzungsfreigabe. |
+| NETGRIDDB API v3 Printings | Printing-Ressourcen enthalten `images` mit Größen wie `tiny`, `small`, `medium`, `large`. | URL-Metadaten dürfen erst nach positiver Policy in versionierte Manifeste. |
+| Physische O:NR-1996-Sammlung | Der Projektverantwortliche besitzt die Original-NETGRID-1996-Karten physisch und will sie nur privat/familiär lokal nutzen. | Bevorzugte lokale Quelle für private Frontbild-Scans. |
+| Community-Archive O:NR 1996 | Der Reddit-Thread `Original NETGRID / MPC-formatted` verweist auf vollständige aufbereitete O:NR-Scans aus EmergencyShutdown, NETGRIDOnline/Wayback und Community-Scans. | Nur als private lokale Referenz/Gaps, nicht als öffentliche Lizenz. |
 
 Quellenlinks sind in `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md` und `data/card-assets/card-image-source-registry-0.91.json` dokumentiert.
 
@@ -42,7 +42,7 @@ Quellenlinks sind in `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md` und `data
 
 Aktueller V0.91-Entscheid:
 
-- `original_netrunner_1996_front_images_allowed: true`
+- `original_netgrid_1996_front_images_allowed: true`
 - `private_family_local_use_allowed: true`
 - `self_scan_allowed: true`
 - `approved_community_archive_download_allowed: true`
@@ -53,7 +53,7 @@ Aktueller V0.91-Entscheid:
 - `public_redistribution_allowed: false`
 - `ready_for_implementation: true`
 
-Begründung: Für öffentliche oder allgemeine Nutzung offizieller Kartenbilder gibt es weiterhin keine ausreichend ausdrückliche Freigabe. Der Projektverantwortliche akzeptiert aber eine bewusst eingegrenzte private lokale Nutzung der selbst physisch vorhandenen Original-Netrunner-1996-Frontbilder. Die App darf diese später nur aus einem nicht versionierten lokalen Cache anzeigen.
+Begründung: Für öffentliche oder allgemeine Nutzung offizieller Kartenbilder gibt es weiterhin keine ausreichend ausdrückliche Freigabe. Der Projektverantwortliche akzeptiert aber eine bewusst eingegrenzte private lokale Nutzung der selbst physisch vorhandenen Original-NETGRID-1996-Frontbilder. Die App darf diese später nur aus einem nicht versionierten lokalen Cache anzeigen.
 
 ## Nicht-Ziele
 
@@ -86,7 +86,7 @@ V0.91 baut nicht:
 | V091-MUST-012 | Fallbacks | Fehlende, blockierte, beschädigte oder nicht freigegebene Bilder fallen auf Textkarte oder einheitlichen generischen Platzhalter zurück. | V091-T012 |
 | V091-MUST-013 | Anzeigeorte | Katalog, Deckeditor, Match-Setup-Deckvorschau, Board, Card Preview und Zoom sind spezifiziert und nach öffentlichem Katalogkontext vs. Matchkontext getrennt. | V091-T013 |
 | V091-MUST-014 | Keine Runtime-Fetches im Match | Matches starten und laufen ohne externe Bildquelle; Runtime nutzt nur lokale freigegebene Metadaten/Cache oder Fallback. | V091-T014 |
-| V091-MUST-015 | Private O:NR-Asset-Grenze | Nach Policy-Freigabe sind nur Original-Netrunner-1996-Frontbilder für private lokale Anzeige erlaubt; Card Backs, standalone Frames/Logos, öffentliche Verteilung und Bildversionierung bleiben verboten. | V091-T015 |
+| V091-MUST-015 | Private O:NR-Asset-Grenze | Nach Policy-Freigabe sind nur Original-NETGRID-1996-Frontbilder für private lokale Anzeige erlaubt; Card Backs, standalone Frames/Logos, öffentliche Verteilung und Bildversionierung bleiben verboten. | V091-T015 |
 | V091-MUST-016 | Must-Testabdeckung | Jede Must-Anforderung ist in `docs/derived/MVP_0.91_TEST_MATRIX.md` abgedeckt. | V091-T016 |
 
 ## Should-Anforderungen
@@ -110,7 +110,7 @@ V0.91 baut nicht:
 
 ## Gate-Ergebnis
 
-Der Requirements-Freeze ist abgeschlossen und testbar. Das Asset-Gate ist für private lokale Original-Netrunner-1996-Frontbilder bestanden, bleibt aber für öffentliche Nutzung, Card Backs, standalone Frames/Logos, Android:Netrunner-Bilder und NSG-Bilder gesperrt.
+Der Requirements-Freeze ist abgeschlossen und testbar. Das Asset-Gate ist für private lokale Original-NETGRID-1996-Frontbilder bestanden, bleibt aber für öffentliche Nutzung, Card Backs, standalone Frames/Logos, Android:NETGRID-Bilder und NSG-Bilder gesperrt.
 
 `MVP_0.91_requirements_freeze_done: true`
 

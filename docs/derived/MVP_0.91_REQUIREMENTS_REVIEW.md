@@ -13,7 +13,7 @@ Stand: 2026-05-03
 
 Der V0.91 Requirements Freeze ist abgeschlossen. Die Anforderungen für Asset-Gate, Quelle, Nutzungsentscheidung, lokalen Cache, Bildmetadaten, APIs, UI-Orte, Fallbacks und Hidden-Info-Grenzen sind testbar formuliert. Jede Must-Anforderung hat Testabdeckung in `docs/derived/MVP_0.91_TEST_MATRIX.md`.
 
-Die Implementierung ist nur für private lokale Original-Netrunner-1996-Frontbilder freigegeben. Der Projektverantwortliche hat am 2026-05-03 erklärt, die physischen O:NR-Karten zu besitzen und die Bilder nur selbst bzw. in der Familie zu nutzen. Das ist eine dokumentierte private lokale Risikoentscheidung, keine öffentliche Lizenz.
+Die Implementierung ist nur für private lokale Original-NETGRID-1996-Frontbilder freigegeben. Der Projektverantwortliche hat am 2026-05-03 erklärt, die physischen O:NR-Karten zu besitzen und die Bilder nur selbst bzw. in der Familie zu nutzen. Das ist eine dokumentierte private lokale Risikoentscheidung, keine öffentliche Lizenz.
 
 ## Geprüfte Punkte
 
@@ -24,7 +24,7 @@ Die Implementierung ist nur für private lokale Original-Netrunner-1996-Frontbil
 | Kein Bilddownload durchgeführt | pass |
 | Keine offiziellen Assets genutzt | pass |
 | Primärquellen geprüft | pass |
-| NetrunnerDB als technische Metadatenquelle identifiziert | pass, nicht aktueller O:NR-Scope |
+| NETGRIDDB als technische Metadatenquelle identifiziert | pass, nicht aktueller O:NR-Scope |
 | O:NR-1996-Privatentscheidung dokumentiert | pass |
 | Physische Sammlung als bevorzugte Quelle | pass |
 | Community-Archive als private Referenz eingeordnet | pass |
@@ -48,7 +48,7 @@ Die Implementierung ist nur für private lokale Original-Netrunner-1996-Frontbil
 - Die O:NR-1996-Nutzung bleibt privat, lokal, nicht öffentlich und auf Projektverantwortlichen/Familie beschränkt.
 - Eigene Scans aus physischer Sammlung sind die bevorzugte Quelle.
 - Community-Archive dürfen nur lokal privat als Referenz oder Gap-Fill genutzt werden.
-- Android:Netrunner-, NSG- und NetrunnerDB-Bilder bleiben außerhalb dieses Freigabekorridors.
+- Android:NETGRID-, NSG- und NETGRIDDB-Bilder bleiben außerhalb dieses Freigabekorridors.
 
 ## Nächster Schritt
 

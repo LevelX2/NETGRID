@@ -11,7 +11,7 @@ V0.5 Card Import und Card Catalog sind implementiert. Die Implementierung bleibt
 
 ## Implementierter Scope
 
-- Neues reines TypeScript-Paket `@netrunner/catalog`.
+- Neues reines TypeScript-Paket `@netgrid/catalog`.
 - Deterministische Snapshot-Validierung und Snapshot-Hash-Prüfung.
 - Katalogindex-Erzeugung, Suche, Filter und Statuszusammenfassung.
 - Statusinvarianten für `imported`, `validated`, `catalog_ready`, `implemented`, `playable`, `deck_legal` und `blocked`.
@@ -39,7 +39,7 @@ V0.5 Card Import und Card Catalog sind implementiert. Die Implementierung bleibt
 ## Checks
 
 - `corepack pnpm install`: pass.
-- `corepack pnpm --filter @netrunner/catalog test`: pass, 5 Catalog tests.
+- `corepack pnpm --filter @netgrid/catalog test`: pass, 5 Catalog tests.
 - `corepack pnpm exec vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts`: pass, 12 root spec tests.
 - `corepack pnpm lint`: pass.
 - `corepack pnpm typecheck`: pass.

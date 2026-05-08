@@ -12,7 +12,7 @@
       "kind": "private_primary_physical_source",
       "owner": "project_owner",
       "technicalUse": "preferred_private_scan_source",
-      "usageFinding": "The project owner states that the Original Netrunner 1996 cards are physically owned and will be used only privately and with family.",
+      "usageFinding": "The project owner states that the Original NETGRID 1996 cards are physically owned and will be used only privately and with family.",
       "decision": "allowed_for_private_local_front_scan_cache",
       "allowedForV091": true,
       "allowedAssets": [
@@ -29,12 +29,12 @@
       ]
     },
     {
-      "sourceId": "reddit_original_netrunner_mpc_formatted",
+      "sourceId": "reddit_original_netgrid_mpc_formatted",
       "kind": "community_archive_index",
-      "url": "https://www.reddit.com/r/Netrunner/comments/hu282l/original_netrunner_mpcformatted/",
+      "url": "https://www.reddit.com/r/NETGRID/comments/hu282l/original_netgrid_mpcformatted/",
       "owner": "community",
       "technicalUse": "candidate_gap_fill_or_quality_reference",
-      "usageFinding": "Community thread points to prepared Original Netrunner scans for Limited 1.0, Unlimited 2.0, Proteus 2.1, Classic 2.2 and some promo/Silent Impact material. The thread describes sources such as EmergencyShutdown.net, Wayback copies of NetrunnerOnline and fresh community scans.",
+      "usageFinding": "Community thread points to prepared Original NETGRID scans for Limited 1.0, Unlimited 2.0, Proteus 2.1, Classic 2.2 and some promo/Silent Impact material. The thread describes sources such as EmergencyShutdown.net, Wayback copies of NETGRIDOnline and fresh community scans.",
       "decision": "allowed_for_private_local_reference_only",
       "allowedForV091": true,
       "conditions": [
@@ -46,12 +46,12 @@
       ]
     },
     {
-      "sourceId": "netrunneronline_wayback_archive",
+      "sourceId": "netgridonline_wayback_archive",
       "kind": "historical_archive_candidate",
-      "url": "https://www.netrunneronline.com/",
+      "url": "https://www.netgridonline.com/",
       "owner": "historical_community_site",
       "technicalUse": "candidate_historical_reference",
-      "usageFinding": "Historical community references identify NetrunnerOnline and Wayback copies as a source for Original Netrunner card images and data. It is not treated as a public license.",
+      "usageFinding": "Historical community references identify NETGRIDOnline and Wayback copies as a source for Original NETGRID card images and data. It is not treated as a public license.",
       "decision": "candidate_private_reference_only",
       "allowedForV091": false,
       "blockReasons": [
@@ -65,7 +65,7 @@
       "url": "https://emergencyshutdown.net/",
       "owner": "historical_community_site",
       "technicalUse": "candidate_historical_reference",
-      "usageFinding": "Community threads identify EmergencyShutdown.net as a former full Original Netrunner database with images, but the site is currently not a stable live source.",
+      "usageFinding": "Community threads identify EmergencyShutdown.net as a former full Original NETGRID database with images, but the site is currently not a stable live source.",
       "decision": "candidate_private_reference_only",
       "allowedForV091": false,
       "blockReasons": [
@@ -77,10 +77,10 @@
     {
       "sourceId": "ccg_trader_onr_set_database",
       "kind": "set_and_card_database_reference",
-      "url": "https://www.ccgtrader.net/games/netrunner-ccg/",
+      "url": "https://www.ccgtrader.net/games/netgrid-ccg/",
       "owner": "CCG Trader",
       "technicalUse": "set_list_and_card_identity_reference",
-      "usageFinding": "CCG Trader provides a current database page for Original Netrunner CCG sets and confirms set names and card counts.",
+      "usageFinding": "CCG Trader provides a current database page for Original NETGRID CCG sets and confirms set names and card counts.",
       "decision": "allowed_for_metadata_reference_only",
       "allowedForV091": true,
       "allowedAssets": [
@@ -91,12 +91,12 @@
       ]
     },
     {
-      "sourceId": "netrunnerdb_api_v3_printings",
-      "kind": "android_netrunner_api_schema_reference",
-      "url": "https://api.netrunnerdb.com/api/docs/printings%2Fall_printings",
-      "owner": "NetrunnerDB / Null Signal Games",
+      "sourceId": "netgriddb_api_v3_printings",
+      "kind": "android_netgrid_api_schema_reference",
+      "url": "https://api.netgriddb.com/api/docs/printings%2Fall_printings",
+      "owner": "NETGRIDDB / Null Signal Games",
       "technicalUse": "not_selected_for_onr_1996",
-      "usageFinding": "NetrunnerDB image metadata is useful for Android: Netrunner, not the selected Original Netrunner 1996 scope.",
+      "usageFinding": "NETGRIDDB image metadata is useful for Android: NETGRID, not the selected Original NETGRID 1996 scope.",
       "decision": "not_selected_for_current_scope",
       "allowedForV091": false
     },
@@ -106,19 +106,19 @@
       "url": "https://nullsignal.games/about/nsg-visual-assets/",
       "owner": "Null Signal Games",
       "technicalUse": "policy_reference_only",
-      "usageFinding": "Null Signal public visual asset permission excludes card art, card frames and card backs; it is not relevant as a positive source for Original Netrunner 1996 scans.",
+      "usageFinding": "Null Signal public visual asset permission excludes card art, card frames and card backs; it is not relevant as a positive source for Original NETGRID 1996 scans.",
       "decision": "not_selected_for_current_scope",
       "allowedForV091": false
     }
   ],
   "selectedSource": "project_owner_physical_onr_1996_collection",
   "secondaryPrivateReferenceSources": [
-    "reddit_original_netrunner_mpc_formatted",
+    "reddit_original_netgrid_mpc_formatted",
     "ccg_trader_onr_set_database"
   ],
   "decision": {
     "decision": "private_local_usage_decision_accepted",
-    "originalNetrunner1996FrontImagesAllowed": true,
+    "originalNETGRID1996FrontImagesAllowed": true,
     "selfScanAllowed": true,
     "approvedCommunityArchiveDownloadAllowed": true,
     "localCacheAllowed": true,

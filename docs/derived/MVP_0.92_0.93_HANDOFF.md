@@ -19,20 +19,20 @@ Hinweis: V0.92 ist abgeschlossen und V0.93 wurde umgesetzt. Der frühere Überga
 Setze zu Beginn ein Goal:
 
 Goal:
-V0.92 und V0.93 für das private Netrunner-Projekt sauber umsetzen: zuerst V0.92 als Mechanik-Inventar-, Requirements- und Spezifikationsgate abschließen, danach V0.93 als M1-Engine-Fundament für Effects, Abilities, Timing, Choices und Eventklassifikation implementieren. M2 nur als Requirements planen, keine M2-Mechanik implementieren.
+V0.92 und V0.93 für das private NETGRID-Projekt sauber umsetzen: zuerst V0.92 als Mechanik-Inventar-, Requirements- und Spezifikationsgate abschließen, danach V0.93 als M1-Engine-Fundament für Effects, Abilities, Timing, Choices und Eventklassifikation implementieren. M2 nur als Requirements planen, keine M2-Mechanik implementieren.
 
 Wichtige Projektentscheidung:
 Der Benutzer erlaubt für dieses private lokale Projekt die Nutzung eigener privater Kartenscans und lokaler Kartenbilder. Das gilt nur für den Privatgebrauch und nicht für öffentliche Distribution, offizielle Logos, offizielle Card Frames, Card Backs oder externe Kartendatenbank-Abhängigkeiten. Bitte V0.91 entsprechend als private lokale Asset-Entscheidung einordnen und sauber dokumentieren.
 
-Bitte setze V0.92 + V0.93 für das Netrunner-Projekt gemäß den bestehenden Projektregeln um.
+Bitte setze V0.92 + V0.93 für das NETGRID-Projekt gemäß den bestehenden Projektregeln um.
 
 Arbeitsbasis zuerst lesen:
-- KI-Wissen-Netrunner/00 Projektstart.md
-- KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md
-- KI-Wissen-Netrunner/02 Wissen/Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen.md
-- KI-Wissen-Netrunner/00 Steuerung/Regeldatei KI-Wissenspflege.md
+- KI-Wissen-NETGRID/00 Projektstart.md
+- KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
+- KI-Wissen-NETGRID/02 Wissen/Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen.md
+- KI-Wissen-NETGRID/00 Steuerung/Regeldatei KI-Wissenspflege.md
 - docs/codex/CODEX_STATUS.md
-- docs/codex/CODEX_RUNBOOK_NETRUNNER_MVP_0_1_0_2.md
+- docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md
 - docs/derived/MECHANICS_COMPLETION_PLAN.md
 - docs/derived/MVP_0.92_DETAILED_PLAN.md
 - docs/derived/MVP_0.93_DETAILED_PLAN.md

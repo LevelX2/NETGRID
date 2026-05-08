@@ -28,7 +28,7 @@ Die Umsetzung darf auf Basis dieses Plans starten. Die verbindlichen V1.0.5-Anfo
 - `docs/derived/V1_0_5_REQUIREMENTS_REVIEW.md`
 - `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md`
 
-Der Requirements Review meldet `V1_0_5_requirements_freeze_done: true` und `ready_for_implementation: true`. Das deutsche UI-Glossar ist projektintern freigegeben und beansprucht keine offizielle deutsche Netrunner-Übersetzung; technische IDs bleiben unverändert.
+Der Requirements Review meldet `V1_0_5_requirements_freeze_done: true` und `ready_for_implementation: true`. Das deutsche UI-Glossar ist projektintern freigegeben und beansprucht keine offizielle deutsche NETGRID-Übersetzung; technische IDs bleiben unverändert.
 
 ## Muss-Anforderungen
 
