@@ -354,6 +354,11 @@ export function corpInstalledCardState(card: VisibleCard): "hidden" | "unrezzed"
   return "known";
 }
 
+export function showInstalledCorpState(serverId: PlayerView["servers"][number]["id"], laneKind: "ice" | "root"): boolean {
+  if (laneKind === "ice") return true;
+  return serverId !== "archives";
+}
+
 export function parseCuePositionPreference(raw: string | null): CuePositionPreference {
   if (!raw) return DEFAULT_CUE_POSITION;
   try {

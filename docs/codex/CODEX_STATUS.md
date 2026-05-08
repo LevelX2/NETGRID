@@ -2,7 +2,9 @@
 
 ## Current phase
 
-Die Detailplanung fuer die vier naechsten Roadmap-Schritte nach V1.4.1 ist am 2026-05-08 requirements-vorbereitend abgeschlossen. Geplant wurden V1.4.2 Belief State und Gegner-Modell, V1.4.3 Simulation/Selfplay/Exploit-Regression, V1.5.0 Private Replay/Analyse/Lernhilfe als konkreter erster V1.5.x-Slice und V1.6.0 Tutorial/Regelhilfe als konkreter erster V1.6.x-Slice. Die Planung bestaetigt: Die vier Schritte sind sinnvoll, aber nicht als gemeinsames Implementierungsbundle; sie muessen strikt sequenziell umgesetzt werden. `R&D access freshness` aus der Playtest-Beobachtung wird als side-sicherer Memory-Fall in V1.4.2 aufgenommen. Deck-Legal AI Approval Batch B-G, neue Karten, neue Mechaniken, Kartentextparser, offizielle Assets, Public-Plattformfunktionen, LLM-Regelakteure und echte Hidden-State-/FullState-Simulation bleiben ausgeschlossen. Neue Fuehrungsartefakte: `docs/derived/V1_4_2_TO_V1_6_0_PLANNING_REVIEW.md` und `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`. Je Release wurden Detailplan, Requirements, Spezifikation, Testmatrix und Requirements Review erstellt. Gate-Ergebnis: `V1_4_2_to_V1_6_0_planning_done: true`; `ready_for_V1_4_2_implementation: true_after_V1_4_1`.
+V1.6.0 Tutorial und Regelhilfe ist am 2026-05-08 nach grünem V1.5.0-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Neu sind ein getrennter Tutorialmodus (`tutorial_local`) unter `/tutorial`, ein Tutorial-Szenarioformat mit acht Kernlektionen, LegalAction-basierte Hinweise, ein projektinternes Regelhilfe-Glossar, replaybare Tutorial-StateHash-Prüfung sowie side-sicheres KI-Sparring ohne Hidden-Info-Vorteil. Gate-Ergebnis: `V1_6_0_implemented: true`; `V1_6_0_verified: true`; `V1_6_0_done: true`; `ready_for_next_scope_decision: true`.
+
+V1.5.0 Private Replay, Analyse und Lernhilfe bleibt die verpflichtende Grundlage für V1.6.0. Replay-Index, Timeline-StateHash-Prüfung, Perspektiventrennung und DecisionDebug-Redaction bleiben unverändert aktiv.
 
 Runner-KI-Playtest-Härtung vom 2026-05-08: Zwei lokale Beobachtungen sind in `docs/derived/RUNNER_AI_RND_REPEAT_ACCESS_OBSERVATION_2026_05_08.md` dokumentiert. `R&D access freshness` bleibt als side-sicherer Memory-Fall in V1.4.2 eingeordnet. Der zweite beobachtete Fall ist bereits umgesetzt: Die Runner-KI pumpte zuvor `Efficient Fracter` gegen `Crystal Wall`, obwohl dieser Breaker das ICE nach Engine-Subtype-Vertrag nicht brechen kann, und lief danach erneut auf denselben sichtbar blockierten Außenserver. Jetzt bewertet die reaktive Runner-KI `pump_breaker` nur hoch, wenn derselbe Breaker das aktuelle ICE grundsätzlich brechen kann; der Runner-Planer erkennt sichtbar gerezztes End-the-run-ICE als Blocker, wenn kein installiertes Programm es nach echten Card-Ability-/ICE-Subtype-Regeln brechen kann. Regressionstest: `packages/ai/src/index.test.ts` deckt `Efficient Fracter` gegen `Crystal Wall` ab. Belief State, FullState-Simulation und Hidden-Info-Zugriff bleiben ausgeschlossen.
 
@@ -186,6 +188,9 @@ Latest V1.3.1 planning artifacts: `docs/derived/V1_3_1_CARD_DATA_PIPELINE_V2_DET
 Latest V1.3.1 implementation/final artifacts: `docs/derived/V1_3_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_3_1_FINAL_REVIEW.md`, `data/card-import/source-registry-1.3.1.json`, `data/card-import/card-pipeline-snapshot-1.3.1.json`, `data/card-import/card-pipeline-snapshot-1.3.1.hash`, `data/manifests/card-support-manifest-1.3.1.json`, `data/ai/ai-card-hints-1.3.1.json`, `data/ai/ai-card-hints-report-1.3.1.json` and `data/reports/card-pipeline-report-1.3.1.json`.
 Latest V1.4.0 planning artifacts: `docs/derived/V1_4_0_PLAN_BASED_CORP_AI_DETAILED_PLAN.md`, `docs/derived/V1_4_0_REQUIREMENTS.md`, `docs/derived/PLAN_BASED_CORP_AI_1_4_0_SPEC.md`, `docs/derived/V1_4_0_TEST_MATRIX.md`, `docs/derived/V1_4_0_REQUIREMENTS_REVIEW.md`.
 Latest V1.4.1 planning artifacts: `docs/derived/V1_4_1_PLAN_BASED_RUNNER_AI_DETAILED_PLAN.md`, `docs/derived/V1_4_1_REQUIREMENTS.md`, `docs/derived/PLAN_BASED_RUNNER_AI_1_4_1_SPEC.md`, `docs/derived/V1_4_1_TEST_MATRIX.md`, `docs/derived/V1_4_1_REQUIREMENTS_REVIEW.md`.
+Latest V1.4.3 implementation/final artifacts: `docs/derived/V1_4_3_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_4_3_FINAL_REVIEW.md`, `data/ai/ai-benchmark-profiles-1.4.3.json`, `data/ai/ai-soak-seeds-1.4.3.json`, `data/scenarios/ai-v143-exploit-regression-fixtures.json`.
+Latest V1.5.0 implementation/final artifacts: `docs/derived/V1_5_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_5_0_FINAL_REVIEW.md`, `apps/web/app/replays/page.tsx`, `docs/derived/artifacts/v1_5_0_replay_smoke.json`, `docs/derived/artifacts/v1_5_0_replay_smoke.png`.
+Latest V1.6.0 implementation/final artifacts: `docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_0_FINAL_REVIEW.md`, `docs/derived/V1_6_0_RULE_HELP_GLOSSARY.md`, `apps/web/app/tutorial.ts`, `apps/web/app/tutorial/page.tsx`, `apps/web/app/tutorial.test.ts`, `data/scenarios/tutorial-v160-scenarios.json`, `docs/derived/artifacts/v1_6_0_tutorial_smoke.json`, `docs/derived/artifacts/v1_6_0_tutorial_smoke.png`.
 Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
 Latest King of the Road AI approval artifacts: `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_SLICE_PLAN.md`, `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json`, `data/scenarios/ai-kotr-runner-approval-smokes.json` and `data/decks/deck-snapshots-0.8.json`.
 Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`.
@@ -194,7 +199,7 @@ Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTI
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.4.0 Planbasierte Corp-KI, V1.4.1 Planbasierte Runner-KI und der enge `King of the Road AI Approval`-Slice sind abgeschlossen und lokal verifiziert. Der nächste Release nach V1.4.1 braucht eine neue Gate-Entscheidung aus der konsolidierten Roadmap. V1.1.3 Baseline-Preflight, V1.2.0 Event Modification Foundation, V1.2.1 Replacement Effects, V1.2.2 Special Zones/Ownership/Control, V1.2.3 Mechanic Unlock Card Release 1, V1.3.0 Format und Deckbuilding Foundation sowie V1.3.1 Card Data Pipeline v2 sind abgeschlossen und lokal verifiziert. V1.1.2K kleines Kartenrelease, V1.1.2 Full Archives Access und Matchstart Entry UX, V1.1.1 Discard/Handlimit/Core Damage, V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening and V1.0.8 Storage/Backup-Härtung are complete and locally verified. The V1.0.5 formal gate remains historically incomplete because no dedicated V1.0.5 implementation/final review artifacts exist, but the workspace code supplied the required V1.0.5 UI baseline for V1.0.6 and V1.0.7 QA.
+Current selected next scope: V1.6.0 Tutorial und Regelhilfe ist abgeschlossen und lokal verifiziert (`docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_0_FINAL_REVIEW.md`). Die Sequenz V1.4.2 bis V1.6.0 ist damit vollständig grün. Der nächste Schritt ist ein neuer, separat zu planender Folge-Slice; Deck-Legal AI Approval Batch B-G bleibt weiterhin ein eigenständiger Gate-Strang.
 
 ## Status
 
@@ -2196,16 +2201,14 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Implement V1.4.2 from `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`.
-2. Do not start V1.4.3 before the V1.4.2 final gate is green.
-3. Treat V1.5.0 and V1.6.0 as the first narrow implementation slices of the broader V1.5.x/V1.6.x roadmap families.
-4. Keep Belief State behind PlayerView, LegalActions, side-filtered PublicEvents, own private facts, revealed facts and replay history.
-5. Keep Simulation/Selfplay behind fair Belief State; no real Hidden State or FullState simulation.
-6. Keep Deck-Legal AI Approval Batch B-G, accounts, cloud decks, public decklists, matchmaking, rankings and tournament legality out of these four releases unless explicitly gated separately.
+1. Einen neuen Folge-Slice nach V1.6.0 festlegen (z. B. V1.6.1 oder separater KI-/Karten-Gate-Strang).
+2. Tutorial-/Regelhilfe- und Replay-Flächen weiter side-sicher und LegalAction-basiert halten.
+3. Deck-Legal AI Approval Batch B-G weiterhin nur als separaten expliziten Gate-Strang behandeln.
+4. No-Scope-Grenzen weiter halten: keine Public-Plattformfunktionen, keine neuen Karten-/Mechanikfreigaben ohne eigenen Gate-Beschluss, kein LLM-Live-Regelakteur.
 
-Card Data Pipeline v2, AI-Hints v2, planbasierte Corp-KI and planbasierte Runner-KI are implemented through V1.4.1. Event Modification, Replacement, Special Zones, Format/Deckbuilding and the current O:NR-v1 card pool remain limited to their completed narrow gates; further cards, broad eventfamilies, Avoid-/Interrupt-Runtime-Pilots and KI-Deckfreigaben still need their own gates. The next implementation gate is V1.4.2 Belief State und Gegner-Modell.
+Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe und Tutorial/Regelhilfe sind durch V1.6.0 umgesetzt. Event Modification, Replacement, Special Zones, Format/Deckbuilding und der aktuelle O:NR-v1-Kartenpool bleiben auf ihre abgeschlossenen schmalen Gates begrenzt; weitere Karten, breite Eventfamilien, Avoid-/Interrupt-Runtime-Pilots und KI-Deckfreigaben brauchen weiterhin eigene Gates. Aus der Vierer-Sequenz V1.4.2 bis V1.6.0 ist kein weiterer Implementierungsgate offen.
 
-Detailed planning artifacts available:
+Detailed planning and completion artifacts available:
 
 - `docs/derived/V1_4_2_TO_V1_6_0_PLANNING_REVIEW.md`
 - `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`
@@ -2229,6 +2232,9 @@ Detailed planning artifacts available:
 - `docs/derived/TUTORIAL_RULE_HELP_1_6_0_SPEC.md`
 - `docs/derived/V1_6_0_TEST_MATRIX.md`
 - `docs/derived/V1_6_0_REQUIREMENTS_REVIEW.md`
+- `docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/V1_6_0_FINAL_REVIEW.md`
+- `docs/derived/V1_6_0_RULE_HELP_GLOSSARY.md`
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
 - `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`

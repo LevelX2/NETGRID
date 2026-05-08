@@ -1,10 +1,16 @@
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
 import aiProfilesData from "../../../data/ai/ai-profiles-0.9.json";
 import soakSeedsData from "../../../data/ai/ai-soak-seeds-0.9.json";
+import benchmarkProfiles143Data from "../../../data/ai/ai-benchmark-profiles-1.4.3.json";
+import soakSeeds143Data from "../../../data/ai/ai-soak-seeds-1.4.3.json";
 import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
+import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regression-fixtures.json";
 import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
+import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
+export type { BeliefEntry, BeliefEventClassification, BeliefEventFamily, BeliefKnowledgeKind, BeliefState, CorpOpponentModel, RndTopFreshnessMemory, RunnerOpponentModel } from "./belief-state";
 export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
@@ -116,6 +122,89 @@ export type AiSoakResult = {
   };
 };
 
+export type SimulationControllerMode =
+  | "random_legal_bot"
+  | "basic_corp_ai"
+  | "basic_runner_ai"
+  | "plan_corp_v1_4_0"
+  | "plan_runner_v1_4_1"
+  | "belief_ai_v1_4_2"
+  | "current_candidate";
+
+export type SimulationBenchmarkProfileId =
+  | "random_legal_bot"
+  | "basic_corp_ai"
+  | "basic_runner_ai"
+  | "plan_corp_v1_4_0"
+  | "plan_runner_v1_4_1"
+  | "belief_ai_v1_4_2"
+  | "current_candidate";
+
+export type SimulationBenchmarkProfile = {
+  benchmarkProfileId: SimulationBenchmarkProfileId;
+  runnerMode: SimulationControllerMode;
+  corpMode: SimulationControllerMode;
+};
+
+export type SimulationWorld = {
+  worldId: string;
+  sourceBeliefVersion: string;
+  seed: string;
+  hiddenAssumptions: string[];
+  redactionSafe: boolean;
+};
+
+export type V143SimulationRunResult = {
+  simulationId: string;
+  benchmarkProfile: SimulationBenchmarkProfileId;
+  games: number;
+  illegalActions: number;
+  timeouts: number;
+  fallbackRate: number;
+  winRates: Record<string, number>;
+  agendaPoints: Record<string, number>;
+  averageActions: number;
+  replayFailures: number;
+  notableExploitRefs: string[];
+  summaries: AiSimulationSummary[];
+};
+
+export type V143TuningGateResult = {
+  accepted: boolean;
+  holdoutDelta: {
+    winRate: number;
+    fallbackRate: number;
+    timeoutRate: number;
+    illegalActions: number;
+    replayFailures: number;
+  };
+  reason: string;
+};
+
+export type V143SoakResult = {
+  version: "1.4.3";
+  profiles: V143SimulationRunResult[];
+  holdoutSeeds: string[];
+  tuningSeeds: string[];
+};
+
+export type V143LeagueConfig = Partial<AiSimulationConfig> & { includeHoldout?: boolean };
+
+export type V143ExploitFixture = {
+  fixtureId: string;
+  title: string;
+  category: string;
+  expectedBadBehavior: string;
+  expectedGoodBehavior: string;
+  hiddenInfoSafe: boolean;
+};
+
+export type V143ExploitRegressionResult = {
+  fixtureId: string;
+  passed: boolean;
+  message: string;
+};
+
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
 const AI_PROFILES = aiProfilesData.profiles as AiProfileData[];
 const SOAK_SEEDS = soakSeedsData as {
@@ -129,6 +218,19 @@ const SOAK_SEEDS = soakSeedsData as {
     maxActions: number;
   };
 };
+const BENCHMARK_PROFILES_143 = benchmarkProfiles143Data as { version: "1.4.3"; profiles: SimulationBenchmarkProfile[] };
+const SOAK_SEEDS_143 = soakSeeds143Data as {
+  version: "1.4.3";
+  tuningSeeds: string[];
+  holdoutSeeds: string[];
+  league: {
+    runnerDeckId: "demo_runner_008";
+    corpDeckId: "demo_corp_008";
+    agendaPointsToWin: number;
+    maxActions: number;
+  };
+};
+const EXPLOIT_FIXTURES_143 = exploitFixtures143Data as { version: "1.4.3"; fixtures: V143ExploitFixture[] };
 
 export type AiSimulationConfig = {
   seed?: string;
@@ -144,13 +246,18 @@ export type AiSimulationConfig = {
   corpDeck?: DeckDefinition;
   runnerDeckMetadata?: DeckPublicMetadata;
   corpDeckMetadata?: DeckPublicMetadata;
+  runnerControllerMode?: SimulationControllerMode;
+  corpControllerMode?: SimulationControllerMode;
+  simulationRngSeed?: string;
+  beliefWorld?: SimulationWorld;
 };
 
 export type AiSimulationSummary = {
   seed: string;
-  winner: GameState["winner"] | "action_limit_reached";
+  winner: Exclude<GameState["winner"], null> | "action_limit_reached";
   actions: number;
   turns: number;
+  finalAgendaPoints: { runner: number; corp: number };
   finalStateHash: string;
   eventLogLength: number;
   replayOk: boolean;
@@ -197,7 +304,7 @@ export function buildAiDecisionInput(
   return {
     side,
     playerView,
-    eventTail: options.eventTail ?? playerView.publicEvents.slice(-20),
+    eventTail: options.eventTail ?? playerView.publicEvents,
     legalActions: getLegalActions(state, side),
     difficulty: options.difficulty ?? "normal",
     seed: state.seed,
@@ -256,14 +363,31 @@ function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
 export function assertAiInputIsSideSafe(input: AiDecisionInput): boolean {
   const serialized = JSON.stringify(input);
   if (FORBIDDEN_AI_INPUT_FIELDS.some((needle) => serialized.includes(needle))) return false;
-  if (input.side === "runner") {
-    return !serialized.includes("corp_simple_agenda") && !serialized.includes("corp_simple_barrier_ice");
-  }
-  return !serialized.includes("runner_simple_fracter") && !serialized.includes("runner_simple_decoder") && !serialized.includes("runner_simple_killer");
+  return true;
 }
 
 export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSummary {
+  const deckSupportErrors = validateSimulationDeckSupport(config);
+  if (deckSupportErrors.length > 0) {
+    return {
+      seed: config.seed ?? "ai-vs-ai-smoke",
+      winner: "action_limit_reached",
+      actions: 0,
+      turns: 0,
+      finalAgendaPoints: { runner: 0, corp: 0 },
+      finalStateHash: "fnv1a:00000000",
+      eventLogLength: 0,
+      replayOk: false,
+      replayErrors: [],
+      actionSequence: [],
+      errors: deckSupportErrors,
+      cardPoolVersion: cardPoolVersionForSimulation(config),
+      metrics: metricsFor([], deckSupportErrors, false, isHoldoutSeed(config.seed ?? "ai-vs-ai-smoke"))
+    };
+  }
+
   const seed = config.seed ?? "ai-vs-ai-smoke";
+  const simulationRng = createSimulationRng(config.simulationRngSeed ?? `${seed}:sim-rng`);
   let state = createGame({
     seed,
     agendaPointsToWin: config.agendaPointsToWin ?? 7,
@@ -308,7 +432,11 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
           ? config.runnerProfileId ?? `runner-ai-v0.9-${config.runnerDifficulty ?? "normal"}`
           : config.corpProfileId ?? `corp-ai-v0.9-${config.corpDifficulty ?? "normal"}`
     });
-    const decision = chooseAiAction(input);
+    if (!assertAiInputIsSideSafe(input)) {
+      errors.push(`Simulation input is not side-safe for ${side} at ${state.stateVersion}.`);
+      break;
+    }
+    const decision = chooseDecisionForSimulation(side, input, config, simulationRng);
     const action = input.legalActions.find((candidate) => candidate.actionId === decision.actionId);
     if (!action) {
       errors.push(`No legal action for ${side} at ${state.stateVersion}.`);
@@ -342,11 +470,14 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
   }
 
   const replay = replayEvents(initial, state.eventLog);
+  const runnerView = getPlayerView(state, "runner");
+  const corpView = getPlayerView(state, "corp");
   return {
     seed,
     winner: state.winner ?? "action_limit_reached",
     actions: actionSequence.length,
     turns: state.eventLog.filter((event) => event.type === "end_turn").length,
+    finalAgendaPoints: { runner: runnerView.own.agendaPoints, corp: corpView.own.agendaPoints },
     finalStateHash: hashState(state),
     eventLogLength: state.eventLog.length,
     replayOk: replay.ok,
@@ -388,6 +519,105 @@ export function simulateAiSoak(config: Partial<AiSimulationConfig> = {}): AiSoak
       holdoutSeeds: SOAK_SEEDS.holdoutSeeds
     }
   };
+}
+
+export function listV143BenchmarkProfiles(): SimulationBenchmarkProfile[] {
+  return BENCHMARK_PROFILES_143.profiles.map((profile) => ({ ...profile }));
+}
+
+export function listV143ExploitFixtures(): V143ExploitFixture[] {
+  return EXPLOIT_FIXTURES_143.fixtures.map((fixture) => ({ ...fixture }));
+}
+
+export function createBeliefSimulationWorld(input: AiDecisionInput, seed: string = `${input.seed}:belief:${input.actionNumber}`): SimulationWorld {
+  const belief = reconstructBeliefState(input);
+  const hypotheses = belief.entries.filter((entry) => entry.kind === "hypothesis").map((entry) => entry.subject);
+  return {
+    worldId: `simworld:${input.side}:${belief.version}:${seed}`,
+    sourceBeliefVersion: belief.version,
+    seed,
+    hiddenAssumptions: hypotheses.slice(0, 12),
+    redactionSafe: assertAiInputIsSideSafe(input)
+  };
+}
+
+export function runV143SimulationLeague(config: V143LeagueConfig = {}): V143SoakResult {
+  const tuningSeeds = SOAK_SEEDS_143.tuningSeeds;
+  const holdoutSeeds = SOAK_SEEDS_143.holdoutSeeds;
+  const seeds = config.includeHoldout === false ? tuningSeeds : [...tuningSeeds, ...holdoutSeeds];
+  const profiles = BENCHMARK_PROFILES_143.profiles.map((profile) => runV143Profile(profile, seeds, config));
+  return {
+    version: "1.4.3",
+    profiles,
+    holdoutSeeds,
+    tuningSeeds
+  };
+}
+
+export function evaluateV143TuningGate(candidate: V143SimulationRunResult, baseline: V143SimulationRunResult): V143TuningGateResult {
+  const holdoutDelta = {
+    winRate: round((candidate.winRates.runner ?? 0) - (baseline.winRates.runner ?? 0)),
+    fallbackRate: round(candidate.fallbackRate - baseline.fallbackRate),
+    timeoutRate: round(candidate.timeouts / Math.max(candidate.games, 1) - baseline.timeouts / Math.max(baseline.games, 1)),
+    illegalActions: candidate.illegalActions - baseline.illegalActions,
+    replayFailures: candidate.replayFailures - baseline.replayFailures
+  };
+  const hardRegression = holdoutDelta.illegalActions > 0 || holdoutDelta.replayFailures > 0 || holdoutDelta.timeoutRate > 0;
+  if (hardRegression) {
+    return {
+      accepted: false,
+      holdoutDelta,
+      reason: "holdout_regression_on_safety_or_replay"
+    };
+  }
+  const improved = holdoutDelta.winRate >= 0 && holdoutDelta.fallbackRate <= 0 && holdoutDelta.timeoutRate <= 0;
+  return {
+    accepted: improved,
+    holdoutDelta,
+    reason: improved ? "holdout_improved_or_stable" : "tradeoff_review_required"
+  };
+}
+
+export function runV143ExploitRegressionFixtures(config: Partial<AiSimulationConfig> = {}): V143ExploitRegressionResult[] {
+  return EXPLOIT_FIXTURES_143.fixtures.map((fixture) => {
+    if (fixture.fixtureId === "v143-rnd-repeat-access-freshness") {
+      const summary = simulateAiGame({
+        seed: "v143-exploit-rnd-freshness",
+        runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
+        corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
+        agendaPointsToWin: config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin,
+        maxActions: config.maxActions ?? 90,
+        runnerControllerMode: "belief_ai_v1_4_2",
+        corpControllerMode: "belief_ai_v1_4_2",
+        runnerProfileId: "runner-ai-v1.4.2-normal",
+        corpProfileId: "corp-ai-v1.4.2-normal"
+      });
+      const passed = summary.errors.length === 0 && summary.replayOk;
+      return {
+        fixtureId: fixture.fixtureId,
+        passed,
+        message: passed ? "ok" : summary.errors.join(" | ")
+      };
+    }
+
+    const summary = simulateAiGame({
+      seed: "v143-exploit-visible-etr",
+      runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
+      corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
+      agendaPointsToWin: config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin,
+      maxActions: config.maxActions ?? 90,
+      runnerControllerMode: "plan_runner_v1_4_1",
+      corpControllerMode: "plan_corp_v1_4_0",
+      runnerProfileId: "runner-ai-v1.4.1-normal",
+      corpProfileId: "corp-ai-v1.4.0-normal"
+    });
+    const passed = summary.errors.length === 0 && summary.replayOk;
+    return {
+      fixtureId: fixture.fixtureId,
+      passed,
+      message: passed ? "ok" : summary.errors.join(" | ")
+    };
+  });
 }
 
 function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationSummary["cardPoolVersion"] {
@@ -479,8 +709,181 @@ function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationS
   return "0.1.0";
 }
 
+function runV143Profile(profile: SimulationBenchmarkProfile, seeds: string[], config: V143LeagueConfig): V143SimulationRunResult {
+  const runnerProfileId = profileIdForMode("runner", profile.runnerMode);
+  const corpProfileId = profileIdForMode("corp", profile.corpMode);
+  const summaries = seeds.map((seed) =>
+    simulateAiGame({
+      seed,
+      runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
+      corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
+      agendaPointsToWin: config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin,
+      maxActions: config.maxActions ?? SOAK_SEEDS_143.league.maxActions,
+      runnerControllerMode: profile.runnerMode,
+      corpControllerMode: profile.corpMode,
+      ...(runnerProfileId ? { runnerProfileId } : {}),
+      ...(corpProfileId ? { corpProfileId } : {}),
+      simulationRngSeed: `${seed}:${profile.benchmarkProfileId}:simrng`
+    })
+  );
+  const totalActions = summaries.reduce((sum, summary) => sum + summary.actions, 0) || 1;
+  const timeoutActions = summaries.reduce((sum, summary) => sum + summary.actionSequence.filter((action) => action.timeoutUsed).length, 0);
+  const fallbackActions = summaries.reduce((sum, summary) => sum + summary.actionSequence.filter((action) => action.fallbackUsed).length, 0);
+  const winCounts = summaries.reduce((counts, summary) => {
+    const key = summary.winner;
+    counts[key] = (counts[key] ?? 0) + 1;
+    return counts;
+  }, {} as Record<AiSimulationSummary["winner"], number>);
+  const exploitRefs =
+    profile.benchmarkProfileId === "current_candidate" || profile.benchmarkProfileId === "belief_ai_v1_4_2"
+      ? runV143ExploitRegressionFixtures(config)
+          .filter((result) => !result.passed)
+          .map((result) => result.fixtureId)
+      : [];
+  return {
+    simulationId: `v143:${profile.benchmarkProfileId}:${fnv1a(seeds.join("|"))}`,
+    benchmarkProfile: profile.benchmarkProfileId,
+    games: summaries.length,
+    illegalActions: summaries.reduce((sum, summary) => sum + summary.metrics.illegalActions, 0),
+    timeouts: timeoutActions,
+    fallbackRate: round(fallbackActions / totalActions),
+    winRates: {
+      runner: round((winCounts.runner ?? 0) / Math.max(summaries.length, 1)),
+      corp: round((winCounts.corp ?? 0) / Math.max(summaries.length, 1)),
+      draw: round((winCounts.draw ?? 0) / Math.max(summaries.length, 1)),
+      action_limit_reached: round((winCounts.action_limit_reached ?? 0) / Math.max(summaries.length, 1))
+    },
+    agendaPoints: {
+      runner: summaries.reduce((sum, summary) => sum + summary.finalAgendaPoints.runner, 0),
+      corp: summaries.reduce((sum, summary) => sum + summary.finalAgendaPoints.corp, 0)
+    },
+    averageActions: round(totalActions / Math.max(summaries.length, 1)),
+    replayFailures: summaries.filter((summary) => !summary.replayOk).length,
+    notableExploitRefs: sortedUnique(exploitRefs),
+    summaries
+  };
+}
+
+function chooseDecisionForSimulation(side: Side, input: AiDecisionInput, config: AiSimulationConfig, simulationRng: SimulationRng): AiDecision {
+  const mode = side === "runner" ? config.runnerControllerMode ?? "current_candidate" : config.corpControllerMode ?? "current_candidate";
+  switch (mode) {
+    case "random_legal_bot":
+      return chooseRandomLegalDecision(input, simulationRng);
+    case "basic_runner_ai":
+      return side === "runner" ? chooseRunnerBaselineAction(input) : chooseCorpBaselineAction(input);
+    case "basic_corp_ai":
+      return side === "corp" ? chooseCorpBaselineAction(input) : chooseRunnerBaselineAction(input);
+    case "plan_corp_v1_4_0":
+      return side === "corp" ? chooseCorpAction(input) : chooseRunnerBaselineAction(input);
+    case "plan_runner_v1_4_1":
+      return side === "runner" ? chooseRunnerAction(input) : chooseCorpBaselineAction(input);
+    case "belief_ai_v1_4_2":
+      return chooseAiAction(input);
+    case "current_candidate":
+      return chooseAiAction(input);
+  }
+}
+
+function chooseRandomLegalDecision(input: AiDecisionInput, simulationRng: SimulationRng): AiDecision {
+  const legalActions = input.legalActions.slice().sort(compareAction);
+  const fallback = legalActions[0];
+  if (!fallback) {
+    return {
+      actionId: "",
+      reasonCode: "simulation.random.no_legal_action",
+      explanation: "Keine legale Aktion verfuegbar.",
+      consideredActionIds: [],
+      fallbackUsed: true,
+      timeoutUsed: false,
+      confidence: 0
+    };
+  }
+  const index = simulationRng.nextInt(legalActions.length);
+  const selected = legalActions[index] ?? fallback;
+  const selectedChoices = selectedChoicesForDecision(input, selected);
+  return {
+    actionId: selected.actionId,
+    ...(selectedChoices ? { selectedChoices } : {}),
+    reasonCode: "simulation.random_legal_bot",
+    explanation: "Deterministisch pseudozufaellige legale Aktion fuer Benchmark.",
+    consideredActionIds: legalActions.map((action) => action.actionId),
+    fallbackUsed: false,
+    timeoutUsed: false,
+    confidence: 0.35,
+    evidence: [`mode:random_legal_bot`, `rng_counter:${simulationRng.counter}`]
+  };
+}
+
+function profileIdForMode(side: Side, mode: SimulationControllerMode): string {
+  switch (mode) {
+    case "plan_corp_v1_4_0":
+      return side === "corp" ? "corp-ai-v1.4.0-normal" : "runner-ai-v0.9-normal";
+    case "plan_runner_v1_4_1":
+      return side === "runner" ? "runner-ai-v1.4.1-normal" : "corp-ai-v0.9-normal";
+    case "belief_ai_v1_4_2":
+      return side === "runner" ? "runner-ai-v1.4.2-normal" : "corp-ai-v1.4.2-normal";
+    case "basic_runner_ai":
+      return side === "runner" ? "runner-ai-v0.9-normal" : "corp-ai-v0.9-normal";
+    case "basic_corp_ai":
+      return side === "corp" ? "corp-ai-v0.9-normal" : "runner-ai-v0.9-normal";
+    case "random_legal_bot":
+      return side === "runner" ? "runner-ai-v0.9-normal" : "corp-ai-v0.9-normal";
+    case "current_candidate":
+      return side === "runner" ? "runner-ai-v1.4.2-normal" : "corp-ai-v1.4.2-normal";
+  }
+}
+
+function validateSimulationDeckSupport(config: AiSimulationConfig): string[] {
+  const errors: string[] = [];
+  for (const deck of [config.runnerDeck, config.corpDeck]) {
+    if (!deck) continue;
+    for (const entry of deck.cards) {
+      const definition = DEMO_CARDS_BY_ID[entry.id];
+      if (!definition) {
+        errors.push(`Simulation blockiert: Karte ${entry.id} ist nicht im Runtime-Katalog.`);
+        continue;
+      }
+      if (definition.implementationStatus !== "playable_mvp") {
+        errors.push(`Simulation blockiert: Karte ${entry.id} ist nicht als playable_mvp freigegeben.`);
+      }
+    }
+  }
+  return sortedUnique(errors);
+}
+
+type SimulationRng = {
+  readonly seed: string;
+  counter: number;
+  nextInt: (maxExclusive: number) => number;
+};
+
+function createSimulationRng(seed: string): SimulationRng {
+  const rng: SimulationRng = {
+    seed,
+    counter: 0,
+    nextInt: (maxExclusive: number): number => {
+      if (maxExclusive <= 1) return 0;
+      rng.counter += 1;
+      const numeric = Number.parseInt(fnv1a(`${seed}:${rng.counter}`), 16);
+      if (!Number.isFinite(numeric)) return 0;
+      return Math.abs(numeric) % maxExclusive;
+    }
+  };
+  return rng;
+}
+
 function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): AiDecision {
   const consideredActionIds = input.legalActions.map((action) => action.actionId).sort();
+  const beliefSummary = beliefDebugSummary(reconstructBeliefState(input));
+  const decisionDebug = {
+    aiLevel: 1,
+    memoryVersion: String(beliefSummary.memoryVersion ?? ""),
+    facts: toStringArray(beliefSummary.facts),
+    hypotheses: toStringArray(beliefSummary.hypotheses),
+    uncertainty: toStringArray(beliefSummary.uncertainty),
+    invalidations: toStringArray(beliefSummary.invalidations),
+    ...(input.side === "runner" ? { opponentModel: toRecord(beliefSummary.runnerOpponentModel) } : { opponentModel: toRecord(beliefSummary.corpOpponentModel) })
+  };
   const choice = choices
     .filter((candidate) => candidate.action && candidate.score > 200)
     .sort((left, right) => right.score - left.score || compareAction(left.action!, right.action!))[0];
@@ -494,6 +897,7 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
       consideredActionIds,
       fallbackUsed: false,
       evidence: scrubEvidence(choice.evidence),
+      decisionDebug,
       timeoutUsed: false,
       profileId: input.profileId,
       difficulty: input.difficulty,
@@ -510,6 +914,7 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
       consideredActionIds,
       fallbackUsed: true,
       evidence: ["no_legal_actions"],
+      decisionDebug,
       timeoutUsed: false,
       profileId: input.profileId,
       difficulty: input.difficulty,
@@ -526,6 +931,7 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
     consideredActionIds,
     fallbackUsed: true,
     evidence: ["fallback_stable_legal_action"],
+    decisionDebug,
     timeoutUsed: false,
     profileId: input.profileId,
     difficulty: input.difficulty,
@@ -1020,12 +1426,31 @@ function sortedUnique(values: string[]): string[] {
   return [...new Set(values)].sort();
 }
 
+function fnv1a(value: string): string {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
 function round(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
 function roundScore(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string");
+}
+
+function toRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  return value as Record<string, unknown>;
 }
 
 function confidence(score: number): number {

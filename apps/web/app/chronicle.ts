@@ -11,6 +11,7 @@ export type ChronicleContext = {
   cardType?: string | null;
   cardDetailLines?: string[];
   agendaPoints?: number | null;
+  turnNumber?: number | null;
 };
 
 export type ChronicleItem = {
@@ -67,6 +68,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const encounterContinue = payload.encounterContinue === true;
   const redactedKind = stringValue(payload.redactedKind);
   const agendaPoints = numberValue(payload.agendaPoints) ?? context.agendaPoints;
+  const turnNumber = positiveIntegerValue(context.turnNumber);
+  const turnChip = turnLabel(actor, turnNumber);
   const actionUse = actionUseFromPayload(payload);
   const label = stringValue(payload.label);
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
@@ -116,7 +119,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     case "mandatory_draw":
       category = "turn";
       title = phrase(subject, `${possessiveFor(subject)} Pflichtkarte gezogen`);
-      chips.push("Pflichtkarte");
+      chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "gain_credit":
       category = "economy";
@@ -257,8 +260,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "end_turn":
       category = "turn";
-      title = phrase(subject, "den Zug beendet");
-      chips.push("Zugende");
+      title = phrase(subject, `den Zug beendet${turnChip ? ` (${turnChip})` : ""}`);
+      chips.push("Zugende", ...(turnChip ? [turnChip] : []));
       break;
     default:
       category = "system";
@@ -284,7 +287,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     ...(cardTitle && visibility !== "redacted" ? { cardTitle } : {}),
     ...(cardText && visibility !== "redacted" ? { cardText } : {}),
     cardDetailLines: visibility === "redacted" ? [] : cardDetailLines,
-    groupLabel: groupLabelFor(category, actor, label, serverLabel)
+    groupLabel: groupLabelFor(category, actor, label, serverLabel, turnNumber)
   };
 }
 
@@ -444,12 +447,19 @@ function runPhaseLabel(phase: string): string {
   return labels[phase] ?? phase;
 }
 
-function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined): string {
+function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined, turnNumber?: number): string {
   if (category === "system") return "System";
   if (category === "run") return `Run${serverLabel ? ` auf ${serverLabel}` : label && /Run auf/i.test(label) ? ` auf ${runTargetFromLabel(label)}` : ""}`;
+  if (category === "turn" && actor === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
+  if (category === "turn" && actor === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
   if (actor === "corp") return "Korp-Zug";
   if (actor === "runner") return "Runner-Zug";
   return "Spiel";
+}
+
+function turnLabel(side: Side | undefined, turnNumber: number | undefined): string | undefined {
+  if (!side || !turnNumber) return undefined;
+  return `${side === "corp" ? "Korpzug" : "Runnerzug"} ${turnNumber}`;
 }
 
 function agendaPointSuffix(points: number | null | undefined): string {

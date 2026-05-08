@@ -369,6 +369,86 @@ export type LobbyPayload = {
 
 export type ServicePayload = SidePayload | LobbyPayload;
 
+export type ReplayPerspective = Side | "local_analysis";
+
+export type ReplayIndexEntry = {
+  replayId: string;
+  matchId: string;
+  status: MatchStatus;
+  baseline: RulesBaseline;
+  matchMode: MatchMode;
+  matchFormat: MatchFormat;
+  createdAt: string;
+  updatedAt: string;
+  winner?: Side | "draw";
+  finalStateHash: string;
+  replayOk: boolean;
+  participantNames: {
+    runner?: string;
+    corp?: string;
+  };
+};
+
+export type ReplayStateHashCheck = {
+  ok: boolean;
+  expected: string;
+  actual?: string;
+  reason?: string;
+};
+
+export type ReplayTimelineStep = {
+  eventId: string;
+  index: number;
+  side?: Side;
+  actionType: string;
+  timingPoint: string;
+  label: string;
+  serverLabel?: string;
+  stateVersionBefore: number;
+  stateVersionAfter: number;
+  stateHashAfter: string;
+  stateHashCheck: ReplayStateHashCheck;
+  visibilityClass: PublicGameEvent["visibilityClass"] | "public";
+  hiddenInfoBarrier: boolean;
+  randomDrawCounters: number[];
+  eventFamily: string;
+  learningHint: string;
+  decisionDebug?: Record<string, unknown>;
+};
+
+export type ReplayRandomDrawEntry = {
+  counter: number;
+  purpose: string;
+  valueHash: string;
+};
+
+export type ReplayExploitSuggestion = {
+  candidateId: string;
+  eventId: string;
+  reason: string;
+  status: "review_suggestion";
+};
+
+export type ReplayView = {
+  replayId: string;
+  matchId: string;
+  perspective: ReplayPerspective;
+  metadata: ReplayIndexEntry;
+  timeline: ReplayTimelineStep[];
+  replayErrors: string[];
+  randomDrawRecords: ReplayRandomDrawEntry[];
+  exploitSuggestions: ReplayExploitSuggestion[];
+  localAnalysis: boolean;
+};
+
+export type ReplayExportArtifact = {
+  version: "1.5.0";
+  exportedAt: string;
+  baseline: RulesBaseline;
+  perspective: Side;
+  replay: ReplayView;
+};
+
 export type SafeErrorPayload = {
   code: string;
   message: string;
@@ -1506,6 +1586,69 @@ export class MultiplayerService {
     return { ok: replay.ok, finalStateHash: replay.actualFinalStateHash, errors: replay.errors };
   }
 
+  async listReplayIndex(): Promise<ReplayIndexEntry[]> {
+    if (!this.storage.list) return [];
+    const records = await this.storage.list();
+    return records
+      .filter((record) => Boolean(record.gameState))
+      .map((record) => replayIndexEntryFor(record))
+      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  }
+
+  async loadReplayView(matchId: string, perspective: ReplayPerspective): Promise<{ ok: true; replay: ReplayView } | { ok: false; error: SafeErrorPayload }> {
+    const record = await this.mustLoad(matchId);
+    if (!record || !record.gameState) return { ok: false, error: safeError("not_found", "Dieses Replay ist nicht verfügbar.") };
+    if (!isReplayPerspective(perspective)) return { ok: false, error: safeError("bad_request", "Die Replay-Perspektive ist ungültig.") };
+
+    const metadata = replayIndexEntryFor(record);
+    const checks = replayStateHashChecks(record);
+    const publicEvents = replayEventsForPerspective(record, perspective);
+    const localAnalysis = perspective === "local_analysis";
+    const timeline = publicEvents.map((event, index) =>
+      replayTimelineStepFor({
+        event,
+        index,
+        perspective,
+        stateHashCheck: checks.byEventId[event.eventId] ?? {
+          ok: false,
+          expected: event.stateHashAfter,
+          reason: "state_hash_check_missing",
+          randomDrawCounters: []
+        }
+      })
+    );
+    const replay: ReplayView = {
+      replayId: metadata.replayId,
+      matchId: metadata.matchId,
+      perspective,
+      metadata,
+      timeline,
+      replayErrors: checks.errors,
+      randomDrawRecords: replayRandomDrawEntries(record),
+      exploitSuggestions: replayExploitSuggestions(timeline),
+      localAnalysis
+    };
+    return { ok: true, replay };
+  }
+
+  async exportReplay(matchId: string, perspective: ReplayPerspective): Promise<{ ok: true; artifact: ReplayExportArtifact } | { ok: false; error: SafeErrorPayload }> {
+    if (perspective === "local_analysis") {
+      return { ok: false, error: safeError("bad_request", "Die lokale Analyseperspektive ist nur in der lokalen Replay-Ansicht verfügbar.") };
+    }
+    const loaded = await this.loadReplayView(matchId, perspective);
+    if (!loaded.ok) return loaded;
+    return {
+      ok: true,
+      artifact: {
+        version: "1.5.0",
+        exportedAt: this.now(),
+        baseline: loaded.replay.metadata.baseline,
+        perspective,
+        replay: loaded.replay
+      }
+    };
+  }
+
   async loadForTest(matchId: string): Promise<StoredMatch | undefined> {
     return this.storage.load(matchId);
   }
@@ -1949,7 +2092,11 @@ export class MultiplayerService {
       publicPayload: {
         ...result.event.publicPayload,
         aiReasonCode: decision.reasonCode,
-        aiExplanation: decision.explanation
+        aiExplanation: decision.explanation,
+        ...(decision.decisionDebug ? { aiDecisionDebug: replayDecisionDebug(decision.decisionDebug, side) } : {}),
+        ...(decision.fallbackUsed ? { aiFallbackUsed: true } : {}),
+        ...(decision.timeoutUsed ? { aiTimeoutUsed: true } : {}),
+        ...(typeof decision.confidence === "number" ? { aiConfidence: decision.confidence } : {})
       }
     };
     const barrier = isHiddenInfoBarrier(event);
@@ -2151,6 +2298,297 @@ function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): Eve
     privatePayloadLocalOnly: Boolean(event.privatePayload),
     hiddenInfoBarrier: barrier
   };
+}
+
+function replayIndexEntryFor(record: StoredMatch): ReplayIndexEntry {
+  const names = participantNamesForReplay(record);
+  const winner = record.match.winner ?? record.gameState.winner ?? undefined;
+  return {
+    replayId: `replay:${record.match.matchId}`,
+    matchId: record.match.matchId,
+    status: record.match.status,
+    baseline: record.match.baseline,
+    matchMode: record.match.mode,
+    matchFormat: record.match.settings.matchFormat,
+    createdAt: record.match.createdAt,
+    updatedAt: record.match.updatedAt,
+    ...(winner ? { winner } : {}),
+    finalStateHash: hashState(record.gameState),
+    replayOk: replayStateHashChecks(record).errors.length === 0,
+    participantNames: names
+  };
+}
+
+function participantNamesForReplay(record: StoredMatch): ReplayIndexEntry["participantNames"] {
+  const bySide: ReplayIndexEntry["participantNames"] = {};
+  for (const session of record.sessions) {
+    if (session.side === "runner" && !bySide.runner) bySide.runner = session.displayName;
+    if (session.side === "corp" && !bySide.corp) bySide.corp = session.displayName;
+  }
+  return bySide;
+}
+
+function replayEventsForPerspective(record: StoredMatch, perspective: ReplayPerspective): PublicGameEvent[] {
+  if (perspective === "local_analysis") return record.eventLog.map((event) => event.publicPayload);
+  return record.eventLog.map((event) => redactPublicEventForSide(event.publicPayload, perspective));
+}
+
+function replayStateHashChecks(record: StoredMatch): {
+  byEventId: Record<string, ReplayStateHashCheck & { randomDrawCounters: number[] }>;
+  errors: string[];
+} {
+  const byEventId: Record<string, ReplayStateHashCheck & { randomDrawCounters: number[] }> = {};
+  const errors: string[] = [];
+  const initial = record.stateSnapshots[0]?.gameState;
+  if (!initial) {
+    errors.push("initial_snapshot_missing");
+    return { byEventId, errors };
+  }
+
+  let replayState = clone(initial);
+  for (const event of record.gameState.eventLog) {
+    const replayAction = replayActionFromEvent(event);
+    if (!replayAction) {
+      if (event.type === "game_created") {
+        const actual = hashState(replayState);
+        const ok = actual === event.stateHashAfter;
+        byEventId[event.eventId] = {
+          ok,
+          expected: event.stateHashAfter,
+          actual,
+          ...(ok ? {} : { reason: "state_hash_mismatch" }),
+          randomDrawCounters: []
+        };
+        if (!ok) errors.push(`state_hash_mismatch:${event.eventId}`);
+        continue;
+      }
+      byEventId[event.eventId] = {
+        ok: false,
+        expected: event.stateHashAfter,
+        reason: "missing_replay_action",
+        randomDrawCounters: []
+      };
+      errors.push(`missing_replay_action:${event.eventId}`);
+      continue;
+    }
+
+    const beforeRandomCounter = replayState.randomCounter;
+    const result = applyAction(replayState, replayAction);
+    if (!result.ok) {
+      byEventId[event.eventId] = {
+        ok: false,
+        expected: event.stateHashAfter,
+        reason: result.error.code,
+        randomDrawCounters: []
+      };
+      errors.push(`replay_failed:${event.eventId}:${result.error.code}`);
+      continue;
+    }
+
+    const counters: number[] = [];
+    for (let counter = beforeRandomCounter; counter < result.state.randomCounter; counter += 1) counters.push(counter);
+    const ok = result.stateHash === event.stateHashAfter;
+    byEventId[event.eventId] = {
+      ok,
+      expected: event.stateHashAfter,
+      actual: result.stateHash,
+      ...(ok ? {} : { reason: "state_hash_mismatch" }),
+      randomDrawCounters: counters
+    };
+    if (!ok) errors.push(`state_hash_mismatch:${event.eventId}`);
+    replayState = result.state;
+  }
+
+  return { byEventId, errors };
+}
+
+function replayActionFromEvent(event: GameEvent): PlayerAction | undefined {
+  const payload = event.privatePayload;
+  if (!payload || typeof payload !== "object") return undefined;
+  for (const side of ["runner", "corp"] as const) {
+    const local = payload[side];
+    if (!local || typeof local !== "object" || !("action" in local)) continue;
+    const action = (local as { action?: unknown }).action;
+    if (!action || typeof action !== "object") continue;
+    const candidate = action as Partial<PlayerAction>;
+    if (candidate.side !== "runner" && candidate.side !== "corp") continue;
+    if (typeof candidate.matchId !== "string" || typeof candidate.actionId !== "string" || typeof candidate.clientKnownStateVersion !== "number") continue;
+    if (typeof candidate.idempotencyKey !== "string") continue;
+    return candidate as PlayerAction;
+  }
+  return undefined;
+}
+
+function replayTimelineStepFor(input: {
+  event: PublicGameEvent;
+  index: number;
+  perspective: ReplayPerspective;
+  stateHashCheck: ReplayStateHashCheck & { randomDrawCounters: number[] };
+}): ReplayTimelineStep {
+  const { event, stateHashCheck } = input;
+  const actor = sideValue(event.publicPayload.actor);
+  const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+  const label = stringValue(event.publicPayload.label) ?? actionType;
+  const decisionDebug = replayDecisionDebugForPerspective(event.publicPayload.aiDecisionDebug, actor, input.perspective);
+  return {
+    eventId: event.eventId,
+    index: input.index,
+    ...(actor ? { side: actor } : {}),
+    actionType,
+    timingPoint: stringValue(event.publicPayload.timingPoint) ?? "unknown",
+    label,
+    ...(stringValue(event.publicPayload.serverLabel) ? { serverLabel: stringValue(event.publicPayload.serverLabel)! } : {}),
+    stateVersionBefore: event.stateVersionBefore,
+    stateVersionAfter: event.stateVersionAfter,
+    stateHashAfter: event.stateHashAfter,
+    stateHashCheck,
+    visibilityClass: event.visibilityClass ?? "public",
+    hiddenInfoBarrier: event.visibilityClass === "hidden_info_barrier",
+    randomDrawCounters: stateHashCheck.randomDrawCounters,
+    eventFamily: replayEventFamily(actionType, event.publicPayload),
+    learningHint: replayLearningHint(actionType, event.publicPayload),
+    ...(decisionDebug ? { decisionDebug } : {})
+  };
+}
+
+function replayDecisionDebugForPerspective(debug: unknown, actor: Side | undefined, perspective: ReplayPerspective): Record<string, unknown> | undefined {
+  if (!debug || typeof debug !== "object" || Array.isArray(debug)) return undefined;
+  if (perspective !== "local_analysis" && actor && perspective !== actor) {
+    return { redacted: true, reason: "side_private_ai_debug" };
+  }
+  return replayDecisionDebug(debug as Record<string, unknown>, actor);
+}
+
+function replayDecisionDebug(debug: Record<string, unknown>, actor: Side | undefined): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  if (typeof debug.aiLevel === "number") result.aiLevel = debug.aiLevel;
+  if (typeof debug.planKind === "string") result.planKind = debug.planKind;
+  if (typeof debug.memoryVersion === "string") result.memoryVersion = debug.memoryVersion;
+  if (Array.isArray(debug.facts)) result.facts = debug.facts.filter((entry): entry is string => typeof entry === "string").slice(0, 8);
+  if (Array.isArray(debug.hypotheses)) result.hypotheses = debug.hypotheses.filter((entry): entry is string => typeof entry === "string").slice(0, 8);
+  if (Array.isArray(debug.uncertainty)) result.uncertainty = debug.uncertainty.filter((entry): entry is string => typeof entry === "string").slice(0, 8);
+  if (typeof debug.fallbackUsed === "boolean") result.fallbackUsed = debug.fallbackUsed;
+  if (typeof debug.timeoutUsed === "boolean") result.timeoutUsed = debug.timeoutUsed;
+  if (typeof debug.confidence === "number") result.confidence = debug.confidence;
+  if (actor) result.actor = actor;
+  return result;
+}
+
+function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {
+  return record.gameState.randomDrawRecords.map((entry) => ({
+    counter: entry.counter,
+    purpose: entry.purpose,
+    valueHash: `fnv1a:${fnv1a(String(entry.value))}`
+  }));
+}
+
+function replayExploitSuggestions(timeline: ReplayTimelineStep[]): ReplayExploitSuggestion[] {
+  const suggestions: ReplayExploitSuggestion[] = [];
+  const lastRunnerRunByServer = new Map<string, number>();
+  for (let index = 0; index < timeline.length; index += 1) {
+    const current = timeline[index];
+    if (!current) continue;
+    if (current.side === "runner" && current.actionType === "start_run" && isRdLabel(current.serverLabel)) {
+      const lastRunIndex = current.serverLabel ? lastRunnerRunByServer.get(current.serverLabel) : undefined;
+      if (lastRunIndex !== undefined) {
+        let corpInterruption = false;
+        for (let stepIndex = lastRunIndex + 1; stepIndex < index; stepIndex += 1) {
+          if (timeline[stepIndex]?.side === "corp") {
+            corpInterruption = true;
+            break;
+          }
+        }
+        if (!corpInterruption) {
+          suggestions.push({
+            candidateId: `candidate:${current.eventId}:repeat_rd`,
+            eventId: current.eventId,
+            reason: "Mehrfacher R&D-Run ohne sichtbare Zwischenänderung prüfen.",
+            status: "review_suggestion"
+          });
+        }
+      }
+      if (current.serverLabel) lastRunnerRunByServer.set(current.serverLabel, index);
+    }
+    if (current.decisionDebug && current.decisionDebug.fallbackUsed === true) {
+      suggestions.push({
+        candidateId: `candidate:${current.eventId}:fallback`,
+        eventId: current.eventId,
+        reason: "KI-Fallback in kritischem Timingfenster prüfen.",
+        status: "review_suggestion"
+      });
+    }
+  }
+  return dedupeReplaySuggestions(suggestions);
+}
+
+function dedupeReplaySuggestions(items: ReplayExploitSuggestion[]): ReplayExploitSuggestion[] {
+  const seen = new Set<string>();
+  const unique: ReplayExploitSuggestion[] = [];
+  for (const item of items) {
+    const key = `${item.eventId}:${item.reason}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(item);
+  }
+  return unique;
+}
+
+function replayEventFamily(actionType: string, payload: Record<string, unknown>): string {
+  if (payload.traceStarted === true || typeof payload.traceStep === "string" || typeof payload.traceSuccessful === "boolean") return "trace_and_tags";
+  if (payload.replacementWindowOpened === true || typeof payload.replacementDecision === "string" || typeof payload.eventModificationDecision === "string") return "replacement_and_prevention";
+  if (payload.damageResolved === true || typeof payload.damageType === "string" || typeof payload.flatline === "boolean") return "damage_and_survival";
+  if (typeof payload.specialZone === "string" || typeof payload.controlChange === "string") return "special_zones_and_control";
+  if (actionType === "mandatory_draw" || actionType === "draw_card" || actionType === "gain_credit" || actionType === "end_turn") return "turn_and_economy";
+  if (actionType === "start_run" || actionType === "continue_run" || actionType === "jack_out" || actionType === "break_subroutine" || actionType === "pump_breaker" || actionType === "access_card" || actionType === "trash_accessed_card" || actionType === "decline_trash") return "run_and_access";
+  if (actionType === "score_agenda" || actionType === "steal_agenda") return "agenda";
+  if (actionType === "resolve_choice") return "choice";
+  if (actionType === "trash_resource" || actionType === "remove_tag" || actionType === "purge_virus_counters") return "tags_and_board";
+  if (actionType.includes("set_aside") || actionType.includes("removed_from_game") || actionType.includes("change_card_control")) return "special_zones_and_control";
+  if (actionType.includes("damage") || actionType.includes("flatline")) return "damage_and_survival";
+  if (actionType.includes("trace") || actionType.includes("tag")) return "trace_and_tags";
+  if (actionType.includes("replacement") || actionType.includes("prevention")) return "replacement_and_prevention";
+  return "general";
+}
+
+function replayLearningHint(actionType: string, payload: Record<string, unknown>): string {
+  const family = replayEventFamily(actionType, payload);
+  if (family === "trace_and_tags") return "Trace- und Tag-Schritte zeigen nur legale Bids und sichtbare Folgen pro Perspektive.";
+  if (family === "replacement_and_prevention") return "Replacement-/Prevention-Fenster erklären nur legale Optionen und Ergebnisse.";
+  if (family === "damage_and_survival") return "Damage-Folgen bleiben side-sicher; verdeckte Karten bleiben redigiert.";
+  if (family === "special_zones_and_control") return "Special-Zone- und Kontrollwechsel-Hinweise bleiben abstrakt und leak-frei.";
+  if (actionType === "start_run") return "Run-Entscheidungen bleiben legal-action-basiert und side-sicher.";
+  if (actionType === "access_card" || actionType === "steal_agenda" || actionType === "trash_accessed_card") return "Access-Folgen nur aus sichtbaren Access-Fakten und LegalActions ableiten.";
+  if (actionType === "resolve_choice") return "Choices im Replay zeigen nur erlaubte Optionen der jeweiligen Perspektive.";
+  if (actionType === "mandatory_draw" || actionType === "draw_card") return "Kartenzug-Hinweise erklären Reihenfolge und Timing ohne Kartennamen-Leaks.";
+  if (actionType === "score_agenda") return "Scoring-Fenster sind regelautoritativ aus der Engine; Replay erklärt nur den Ablauf.";
+  return "Analysehinweise bleiben beschreibend und ersetzen keine Regelautorität.";
+}
+
+function isRdLabel(label: string | undefined): boolean {
+  if (!label) return false;
+  const normalized = label.toLowerCase();
+  return normalized.includes("r&d") || normalized.includes("f&e");
+}
+
+function sideValue(value: unknown): Side | undefined {
+  return value === "runner" || value === "corp" ? value : undefined;
+}
+
+function isReplayPerspective(value: unknown): value is ReplayPerspective {
+  return value === "runner" || value === "corp" || value === "local_analysis";
+}
+
+function fnv1a(value: string): string {
+  let hash = 0x811c9dc5;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 function isHiddenInfoBarrier(event: GameEvent): boolean {

@@ -17,6 +17,7 @@ import {
   runTargetServerIds,
   serverBoardRows,
   serverDisplayLabel,
+  showInstalledCorpState,
   splitLegalActions
 } from "./action-board-ui";
 
@@ -87,6 +88,13 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(corpInstalledCardState({ instanceId: "hidden_ice", known: false, rezzed: false })).toBe("hidden");
     expect(corpInstalledCardState(card("corp_ice", "Wall", "ice", false))).toBe("unrezzed");
     expect(corpInstalledCardState(card("rezzed_ice", "Wall", "ice", true))).toBe("rezzed");
+  });
+
+  it("shows installed state only for installed corp lanes, not Archives root cards", () => {
+    expect(showInstalledCorpState("archives", "root")).toBe(false);
+    expect(showInstalledCorpState("archives", "ice")).toBe(true);
+    expect(showInstalledCorpState("hq", "root")).toBe(true);
+    expect(showInstalledCorpState("remote_1", "root")).toBe(true);
   });
 
   it("keeps cue position local, resettable and clamped", () => {

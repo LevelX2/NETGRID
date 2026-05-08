@@ -1,0 +1,134 @@
+{
+  "version": "1.6.0",
+  "mode": "tutorial_local",
+  "scenarios": [
+    {
+      "scenarioId": "v160_setup_mulligan",
+      "title": "Setup und Mulligan",
+      "rulesBaseline": "0.94.0",
+      "allowedMechanics": ["mechanic.setup.mulligan"],
+      "deckSnapshotRefs": ["demo_runner_008_snapshot_v0_8", "demo_corp_008_snapshot_v0_8"],
+      "steps": [
+        {
+          "stepId": "setup_keep_or_mulligan",
+          "expectedTimingPoint": "setup.mulligan.runner",
+          "legalActionRefs": ["resolve_choice"],
+          "hintRefs": ["keep_or_mulligan"],
+          "successCondition": "Runner beantwortet die Setup-Entscheidung über LegalActions."
+        }
+      ]
+    },
+    {
+      "scenarioId": "v160_clicks_credits_draw",
+      "title": "Klicks, Credits und Draw",
+      "rulesBaseline": "0.94.0",
+      "allowedMechanics": ["mechanic.turn_structure.basic_actions"],
+      "deckSnapshotRefs": ["demo_runner_008_snapshot_v0_8", "demo_corp_008_snapshot_v0_8"],
+      "steps": [
+        {
+          "stepId": "credits_and_draw_actions",
+          "expectedTimingPoint": "corp_action",
+          "legalActionRefs": ["gain_credit", "draw_card"],
+          "hintRefs": ["clicks_credits_draw"],
+          "successCondition": "Es werden nur legale Basisaktionen genutzt."
+        }
+      ]
+    },
+    {
+      "scenarioId": "v160_run_basics",
+      "title": "Run auf zentralen Server",
+      "rulesBaseline": "0.94.0",
+      "allowedMechanics": ["mechanic.run.start"],
+      "deckSnapshotRefs": ["demo_runner_008_snapshot_v0_8", "demo_corp_008_snapshot_v0_8"],
+      "steps": [
+        {
+          "stepId": "start_run",
+          "expectedTimingPoint": "runner_action",
+          "legalActionRefs": ["start_run"],
+          "hintRefs": ["run_basics"],
+          "successCondition": "Ein Run wird über eine legale Start-Run-Aktion gestartet."
+        }
+      ]
+    },
+    {
+      "scenarioId": "v160_encounter_breaker",
+      "title": "Encounter und Breaker",
+      "rulesBaseline": "0.94.0",
+      "allowedMechanics": ["mechanic.run.encounter", "mechanic.breaker.pump_and_break", "mechanic.ice.rez"],
+      "deckSnapshotRefs": ["demo_runner_008_snapshot_v0_8", "demo_corp_008_snapshot_v0_8"],
+      "steps": [
+        {
+          "stepId": "encounter_decision",
+          "expectedTimingPoint": "run.encounter",
+          "legalActionRefs": ["continue_run", "pump_breaker", "break_subroutine"],
+          "hintRefs": ["encounter_breaker"],
+          "successCondition": "Im Encounter werden nur aktuell legale Optionen genutzt."
+        }
+      ]
+    },
+    {
+      "scenarioId": "v160_access_basics",
+      "title": "Access und Agenda Steal",
+      "rulesBaseline": "0.94.0",
+      "allowedMechanics": ["mechanic.run.access", "mechanic.agenda.steal"],
+      "deckSnapshotRefs": ["demo_runner_008_snapshot_v0_8", "demo_corp_008_snapshot_v0_8"],
+      "steps": [
+        {
+          "stepId": "access_decision",
+          "expectedTimingPoint": "run.access",
+          "legalActionRefs": ["access_card", "steal_agenda", "decline_trash"],
+          "hintRefs": ["access_basics"],
+          "successCondition": "Access-Entscheidungen erfolgen über die aktuellen LegalActions."
+        }
+      ]
+    },
+    {
+      "scenarioId": "v160_score_basics",
+      "title": "Korp Score",
+      "rulesBaseline": "0.94.0",
+      "allowedMechanics": ["mechanic.agenda.score"],
+      "deckSnapshotRefs": ["demo_runner_008_snapshot_v0_8", "demo_corp_008_snapshot_v0_8"],
+      "steps": [
+        {
+          "stepId": "score_agenda",
+          "expectedTimingPoint": "corp_action",
+          "legalActionRefs": ["score_agenda"],
+          "hintRefs": ["score_basics"],
+          "successCondition": "Korp scored nur über score_agenda als LegalAction."
+        }
+      ]
+    },
+    {
+      "scenarioId": "v160_game_end_basics",
+      "title": "Game-End-Grundlagen",
+      "rulesBaseline": "0.94.0",
+      "allowedMechanics": ["mechanic.agenda.steal", "mechanic.game_end.agenda_points"],
+      "deckSnapshotRefs": ["demo_runner_008_snapshot_v0_8", "demo_corp_008_snapshot_v0_8"],
+      "steps": [
+        {
+          "stepId": "steal_for_win",
+          "expectedTimingPoint": "run.access",
+          "legalActionRefs": ["steal_agenda", "access_card"],
+          "hintRefs": ["steal_game_end"],
+          "successCondition": "Ein legaler Steal kann den Siegpunkt-Gate auslösen."
+        }
+      ]
+    },
+    {
+      "scenarioId": "v160_damage_flatline",
+      "title": "Damage und Flatline",
+      "rulesBaseline": "0.94.0",
+      "allowedMechanics": ["mechanic.damage.net", "mechanic.game_end.flatline"],
+      "deckSnapshotRefs": ["demo_runner_094", "demo_corp_094"],
+      "steps": [
+        {
+          "stepId": "damage_window",
+          "expectedTimingPoint": "run.encounter",
+          "legalActionRefs": ["continue_run", "jack_out"],
+          "hintRefs": ["damage_flatline"],
+          "successCondition": "Damage/Flatline wird nur mit bestehenden Mechaniken erklärt."
+        }
+      ]
+    }
+  ]
+}

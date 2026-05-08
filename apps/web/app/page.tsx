@@ -86,6 +86,7 @@ import {
   parseCuePositionPreference,
   runTargetServerIds,
   serializeCuePositionPreference,
+  showInstalledCorpState,
   serverBoardRows,
   serverDisplayLabel,
   splitLegalActions,
@@ -1027,6 +1028,7 @@ function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq
 }
 
 function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Record<string, CatalogCardDetail>): Record<string, Omit<ChronicleContext, "side">> {
+  const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   return Object.fromEntries(
     events.map((event) => {
       const card = eventCardDetail(event, detailsById);
@@ -1037,11 +1039,35 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
           cardText: card?.text ?? null,
           cardType: card?.type ?? null,
           cardDetailLines: card ? catalogDetailLines(card) : [],
-          agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null
+          agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null,
+          turnNumber: turnNumberByEventId[event.eventId] ?? null
         }
       ];
     })
   );
+}
+
+function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<string, number> {
+  const numbers: Record<string, number> = {};
+  let corpTurn = 0;
+  let runnerTurn = 0;
+  for (const event of events) {
+    const actionType = eventActionType(event);
+    const actor = payloadSide(event.publicPayload, "actor");
+    if (!actor) continue;
+    if (actionType === "end_turn") {
+      if (actor === "corp") {
+        corpTurn += 1;
+        numbers[event.eventId] = corpTurn;
+      } else {
+        runnerTurn += 1;
+        numbers[event.eventId] = runnerTurn;
+      }
+      continue;
+    }
+    if (actionType === "mandatory_draw" && actor === "corp") numbers[event.eventId] = corpTurn + 1;
+  }
+  return numbers;
 }
 
 function formatCardCount(count: number): string {
@@ -3292,7 +3318,7 @@ export default function Page() {
                                     compact
                                     displayMode={cardDisplayMode}
                                     hiddenSide="corp"
-                                    installedCorpCard
+                                    installedCorpCard={showInstalledCorpState(server.id, lane.kind)}
                                     selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                                     actions={cardActionsFor(card)}
                                     actionDisabled={Boolean(payload.winner) || connection !== "online"}
@@ -4763,18 +4789,13 @@ function ChroniclePanel({
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const contextByEventId = chronicleContextByEventId(events, cardDetailsById);
   const entries = events
     .slice()
     .reverse()
     .map((event) => {
       const card = eventCardDetail(event, cardDetailsById);
-      const item = formatChronicleEvent(event, side, {
-        cardTitle: card?.title ?? null,
-        cardText: card?.text ?? null,
-        cardType: card?.type ?? null,
-        cardDetailLines: card ? catalogDetailLines(card) : [],
-        agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null
-      });
+      const item = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});
       return { card, item };
     });
 

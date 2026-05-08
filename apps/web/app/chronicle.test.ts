@@ -234,6 +234,29 @@ describe("formatChronicleEvent", () => {
     expect(free.actionUse).toBeUndefined();
     expect(multi.actionUse).toMatchObject({ label: "1-3", title: "Aktionen 1 bis 3 in diesem Zug", clicks: 3 });
   });
+
+  it("shows side-specific turn numbers for turn entries when provided by context", () => {
+    const runnerTurnEnd = formatChronicleEvent(
+      makeEvent("end_turn", {
+        actor: "runner"
+      }),
+      "runner",
+      { turnNumber: 6 }
+    );
+    const corpMandatoryDraw = formatChronicleEvent(
+      makeEvent("mandatory_draw", {
+        actor: "corp"
+      }),
+      "runner",
+      { turnNumber: 5 }
+    );
+
+    expect(runnerTurnEnd.title).toBe("Du hast den Zug beendet (Runnerzug 6).");
+    expect(runnerTurnEnd.chips).toContain("Runnerzug 6");
+    expect(runnerTurnEnd.groupLabel).toBe("Runner-Zug 6");
+    expect(corpMandatoryDraw.chips).toContain("Korpzug 5");
+    expect(corpMandatoryDraw.groupLabel).toBe("Korp-Zug 5");
+  });
 });
 
 function makeEvent(actionType: string, payload: Record<string, unknown> = {}): PublicGameEvent {

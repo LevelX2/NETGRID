@@ -7,6 +7,7 @@ import {
   JsonFileMatchStorage,
   InMemoryMatchStorage,
   MultiplayerService,
+  type ReplayPerspective,
   type ActionReceipt,
   type AiTurnPresentationState,
   type GameResultSummary,
@@ -576,6 +577,32 @@ async function routeHttp(
       return;
     }
 
+    if (request.method === "GET" && url.pathname === "/api/replays") {
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "replay-index")) return;
+      sendJson(response, 200, { replays: await service.listReplayIndex() });
+      return;
+    }
+
+    const replayRoute = /^\/api\/replays\/([^/]+)(?:\/(export))?$/.exec(url.pathname);
+    if (replayRoute && request.method === "GET") {
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `replay:${replayRoute[1]}`)) return;
+      const matchId = decodeURIComponent(replayRoute[1] ?? "");
+      const perspective = replayPerspectiveFromParam(url.searchParams.get("perspective"));
+      if (!perspective) {
+        sendJson(response, 400, { error: { code: "bad_request", message: "Unbekannte Replay-Perspektive." } });
+        return;
+      }
+      if (replayRoute[2] === "export") {
+        const exported = await service.exportReplay(matchId, perspective);
+        const status = exported.ok ? 200 : exported.error.code === "bad_request" ? 400 : 404;
+        sendJson(response, status, exported.ok ? exported.artifact : { error: exported.error });
+        return;
+      }
+      const replay = await service.loadReplayView(matchId, perspective);
+      sendJson(response, replay.ok ? 200 : 404, replay.ok ? replay.replay : { error: replay.error });
+      return;
+    }
+
     const matchRoute = /^\/api\/matches\/([^/]+)\/([^/]+)$/.exec(url.pathname);
     if (matchRoute) {
       const matchId = decodeURIComponent(matchRoute[1] ?? "");
@@ -834,6 +861,12 @@ function isDifficulty(value: unknown): value is AiDifficulty {
 
 function isAiPacingMode(value: unknown): value is NonNullable<Parameters<MultiplayerService["createMatch"]>[0]["aiPacingMode"]> {
   return value === "fast" || value === "paced" || value === "manual";
+}
+
+function replayPerspectiveFromParam(value: string | null): ReplayPerspective | undefined {
+  if (!value) return "runner";
+  if (value === "runner" || value === "corp" || value === "local_analysis") return value;
+  return undefined;
 }
 
 function deckSelectionFromBody(body: Record<string, unknown>): MatchDeckSelectionInput {
