@@ -4,7 +4,7 @@ import soakSeedsData from "../../../data/ai/ai-soak-seeds-0.9.json";
 import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
 import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
-import type { AiDecision, AiDecisionInput, AiDifficulty, DeckDefinition, DeckPublicMetadata, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
@@ -68,6 +68,7 @@ type AiFeatures = {
   memoryRemaining: number;
   handCount: number;
   rigRoles: Set<string>;
+  rigDefinitionIds: Set<string>;
   handRoles: Set<string>;
   eventCounts: Record<string, number>;
   knownServerPressure: number;
@@ -629,10 +630,17 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       evidence.push("encounter_solution");
       break;
     case "pump_breaker":
-      score = 690;
-      reasonCode = "runner.encounter.pump_breaker";
-      explanation = "Ein installierter Breaker kann die Begegnung verbessern.";
-      evidence.push("breaker_visible");
+      if (pumpCanLeadToBreak(input, action)) {
+        score = 690;
+        reasonCode = "runner.encounter.pump_breaker";
+        explanation = "Ein installierter Breaker kann die Begegnung verbessern.";
+        evidence.push("breaker_visible", "pump_can_enable_break");
+      } else {
+        score = 90;
+        reasonCode = "runner.encounter.pump_without_matching_breaker";
+        explanation = "Der sichtbare Breaker passt nicht zu diesem ICE; Pumpen verbessert die Begegnung nicht.";
+        evidence.push("breaker_visible", "pump_cannot_break_encountered_ice");
+      }
       break;
     case "continue_run":
       score = input.difficulty === "easy" ? 360 : 520;
@@ -798,13 +806,14 @@ function scoreCorpAction(input: AiDecisionInput, features: AiFeatures, action: L
 function extractAiFeatures(input: AiDecisionInput): AiFeatures {
   const ownCards = [...input.playerView.own.gripOrHq, ...input.playerView.own.heapOrArchives, ...input.playerView.own.scoreArea, ...(input.playerView.own.rig ?? [])];
   const rigRoles = new Set((input.playerView.own.rig ?? []).flatMap((card) => rolesForCardId(card.definitionId)));
+  const rigDefinitionIds = new Set((input.playerView.own.rig ?? []).map((card) => card.definitionId).filter((id): id is string => Boolean(id)));
   const handRoles = new Set(input.playerView.own.gripOrHq.flatMap((card) => rolesForCardId(card.definitionId)));
   const eventCounts = buildObservedFacts(input).eventCounts;
   const serverFeaturesById = buildServerFeatures(input);
   const knownServerPressure = input.playerView.servers.reduce((sum, server) => sum + server.ice.filter((card) => card.known || card.rezzed).length + server.root.filter((card) => card.known).length, 0);
   const blockedRunServers = new Set(
     input.playerView.servers
-      .filter((server) => isBlockedByKnownRezzedIce(server.ice[0], rigRoles))
+      .filter((server) => isBlockedByKnownRezzedIce(server.ice[0], rigDefinitionIds))
       .map((server) => server.id)
   );
   return {
@@ -817,6 +826,7 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
     memoryRemaining: (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0),
     handCount: input.playerView.own.gripOrHq.length,
     rigRoles,
+    rigDefinitionIds,
     handRoles: new Set([...handRoles, ...ownCards.flatMap((card) => rolesForCardId(card.definitionId)).filter((role) => role === "tag_punishment")]),
     eventCounts,
     knownServerPressure,
@@ -926,20 +936,33 @@ function runTargetEvidence(action: LegalAction, features: AiFeatures): string[] 
   return [`ice_count:${server.iceCount}`, `root_count:${server.rootCount}`, `known_root_count:${server.knownRootCount}`, `rezzed_root_count:${server.rezzedRootCount}`];
 }
 
-function isBlockedByKnownRezzedIce(ice: { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[] } | undefined, rigRoles: Set<string>): boolean {
+function isBlockedByKnownRezzedIce(ice: { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[] } | undefined, rigDefinitionIds: Set<string>): boolean {
   if (!ice?.definitionId || !ice.known || ice.rezzed !== true) return false;
-  const roles = rolesForCardId(ice.definitionId);
-  if (!roles.includes("etr_ice")) return false;
-  const breakerRole = breakerRoleForIce(roles, ice.subtypes ?? []);
-  return breakerRole ? !rigRoles.has(breakerRole) : rigRoles.size === 0;
+  const iceDefinitionId = ice.definitionId;
+  if (!iceHasEndTheRun(iceDefinitionId)) return false;
+  return ![...rigDefinitionIds].some((breakerDefinitionId) => canBreakerDefinitionBreakIce(breakerDefinitionId, iceDefinitionId));
 }
 
-function breakerRoleForIce(roles: string[], subtypes: string[]): string | null {
-  const normalizedSubtypes = subtypes.map((subtype) => subtype.toLowerCase());
-  if (roles.includes("barrier_ice") || normalizedSubtypes.includes("barrier")) return "breaker_fracter";
-  if (roles.includes("code_gate_ice") || normalizedSubtypes.includes("code gate")) return "breaker_decoder";
-  if (roles.includes("sentry_ice") || normalizedSubtypes.includes("sentry")) return "breaker_killer";
-  return null;
+function pumpCanLeadToBreak(input: AiDecisionInput, action: LegalAction): boolean {
+  const breaker = findVisibleCard(input, action.source);
+  const encounteredIce = input.playerView.run?.encounteredIce;
+  if (!breaker?.definitionId || !encounteredIce?.definitionId) return true;
+  return canBreakerDefinitionBreakIce(breaker.definitionId, encounteredIce.definitionId);
+}
+
+function canBreakerDefinitionBreakIce(breakerDefinitionId: string, iceDefinitionId: string): boolean {
+  const breakerDefinition = DEMO_CARDS_BY_ID[breakerDefinitionId];
+  const iceDefinition = DEMO_CARDS_BY_ID[iceDefinitionId];
+  if (!breakerDefinition || !iceDefinition) return false;
+  return Boolean(
+    breakerDefinition.abilities?.some(
+      (ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype))
+    )
+  );
+}
+
+function iceHasEndTheRun(iceDefinitionId: string): boolean {
+  return Boolean(DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.some((subroutine) => subroutine.type === "end_the_run"));
 }
 
 function scoreCorpRootInstall(roles: string[], action: LegalAction, features: AiFeatures, profile: Record<string, number>): number {

@@ -369,6 +369,53 @@ describe("MVP 0.3 Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
+  it("does not pump or repeat a remote run when the visible breaker cannot break the rezzed ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-crystal-wall-loop",
+        runnerDeckId: "demo_runner_004",
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          cards: [...ONR_V1_1_2K_CORP_DECK.cards, { id: "onr_v1_232_crystal-wall", quantity: 1 }]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 8;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "efficient_fracter");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "efficient_fracter");
+    ensureRemoteServer(state, "remote_1");
+    putCorpIceOnServer(state, "remote_1", "onr_v1_232_crystal-wall");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_232_crystal-wall");
+
+    const encounterInput = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const pump = encounterInput.legalActions.find((action) => action.type === "pump_breaker" && sourceDefinitionFromInput(encounterInput, action) === "efficient_fracter");
+    const breakAction = encounterInput.legalActions.find((action) => action.type === "break_subroutine" && sourceDefinitionFromInput(encounterInput, action) === "efficient_fracter");
+    const encounterDecision = chooseRunnerAction(encounterInput);
+    const encounterSelected = encounterInput.legalActions.find((action) => action.actionId === encounterDecision.actionId);
+
+    expect(pump).toBeDefined();
+    expect(breakAction).toBeUndefined();
+    expect(encounterSelected?.type).toBe("continue_run");
+    expect(encounterDecision.reasonCode).toBe("runner.plan.safe_probe_run");
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const afterRunInput = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const repeatRemoteRun = afterRunInput.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    const gain = afterRunInput.legalActions.find((action) => action.type === "gain_credit");
+    expect(repeatRemoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!repeatRemoteRun || !gain) throw new Error("Missing post-run fixture actions");
+
+    const afterRunDecision = chooseRunnerAction({ ...afterRunInput, legalActions: [repeatRemoteRun, gain] });
+
+    expect(afterRunDecision.actionId).toBe(gain.actionId);
+    expect(afterRunDecision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
   it("prioritizes removing public tags when legal", () => {
     const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-remove-tag" }));
     state.runner.tags = 1;

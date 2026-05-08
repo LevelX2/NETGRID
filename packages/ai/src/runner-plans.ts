@@ -5,7 +5,7 @@ import kingOfTheRoadAiHintsData from "../../../data/ai/ai-card-hints-king-of-the
 import deckLegalBatchAAiHintsData from "../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
-import type { AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 
 export type RunnerPlanKind =
   | "pressure_rnd"
@@ -108,6 +108,7 @@ type RunnerFeatures = {
   memoryRemaining: number;
   handCount: number;
   rigRoles: Set<string>;
+  rigDefinitionIds: Set<string>;
   handRoles: Set<string>;
   serverFeatures: Map<string, { iceCount: number; rootCount: number; knownRootCount: number; rezzedIceCount: number; advancedRootCount: number }>;
   blockedRunServers: Set<string>;
@@ -410,6 +411,7 @@ function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDeci
 function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
   const rigCards = input.playerView.own.rig ?? [];
   const rigRoles = new Set(rigCards.flatMap((card) => rolesForCardId(card.definitionId)));
+  const rigDefinitionIds = new Set(rigCards.map((card) => card.definitionId).filter((id): id is string => Boolean(id)));
   const handRoles = new Set(input.playerView.own.gripOrHq.flatMap((card) => rolesForCardId(card.definitionId)));
   const serverFeatures = new Map(
     input.playerView.servers.map((server) => [
@@ -424,7 +426,7 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
     ])
   );
   const blockedRunServers = new Set(
-    input.playerView.servers.filter((server) => isBlockedByKnownRezzedIce(server.ice[0], rigRoles)).map((server) => server.id)
+    input.playerView.servers.filter((server) => isBlockedByKnownRezzedIce(server.ice[0], rigDefinitionIds)).map((server) => server.id)
   );
   return {
     credits: input.playerView.own.credits,
@@ -433,6 +435,7 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
     memoryRemaining: (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0),
     handCount: input.playerView.own.gripOrHq.length,
     rigRoles,
+    rigDefinitionIds,
     handRoles,
     serverFeatures,
     blockedRunServers
@@ -527,20 +530,26 @@ function isLowInformationRunTarget(features: RunnerFeatures, serverId: string): 
   return server.iceCount <= 1 && server.rootCount === 0;
 }
 
-function isBlockedByKnownRezzedIce(ice: { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[] } | undefined, rigRoles: Set<string>): boolean {
+function isBlockedByKnownRezzedIce(ice: { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[] } | undefined, rigDefinitionIds: Set<string>): boolean {
   if (!ice?.definitionId || !ice.known || ice.rezzed !== true) return false;
-  const roles = rolesForCardId(ice.definitionId);
-  if (!roles.includes("etr_ice")) return false;
-  const breakerRole = breakerRoleForIce(roles, ice.subtypes ?? []);
-  return breakerRole ? !rigRoles.has(breakerRole) : rigRoles.size === 0;
+  const iceDefinitionId = ice.definitionId;
+  if (!iceHasEndTheRun(iceDefinitionId)) return false;
+  return ![...rigDefinitionIds].some((breakerDefinitionId) => canBreakerDefinitionBreakIce(breakerDefinitionId, iceDefinitionId));
 }
 
-function breakerRoleForIce(roles: string[], subtypes: string[]): string | null {
-  const normalizedSubtypes = subtypes.map((subtype) => subtype.toLowerCase());
-  if (roles.includes("barrier_ice") || normalizedSubtypes.includes("barrier")) return "breaker_fracter";
-  if (roles.includes("code_gate_ice") || normalizedSubtypes.includes("code gate")) return "breaker_decoder";
-  if (roles.includes("sentry_ice") || normalizedSubtypes.includes("sentry")) return "breaker_killer";
-  return null;
+function canBreakerDefinitionBreakIce(breakerDefinitionId: string, iceDefinitionId: string): boolean {
+  const breakerDefinition = DEMO_CARDS_BY_ID[breakerDefinitionId];
+  const iceDefinition = DEMO_CARDS_BY_ID[iceDefinitionId];
+  if (!breakerDefinition || !iceDefinition) return false;
+  return Boolean(
+    breakerDefinition.abilities?.some(
+      (ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype))
+    )
+  );
+}
+
+function iceHasEndTheRun(iceDefinitionId: string): boolean {
+  return Boolean(DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.some((subroutine) => subroutine.type === "end_the_run"));
 }
 
 function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudgetMs: number, timeoutUsed: boolean): RunnerPlanDecision {
