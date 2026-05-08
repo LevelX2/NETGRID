@@ -2333,6 +2333,92 @@ select {
   margin: 8px 0 4px;
 }
 
+.archivesDualStack {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 10px;
+  width: 100%;
+}
+
+.archivesPile {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.archivesPileHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.archivesPileTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.archivesPileCount {
+  display: inline-grid;
+  place-items: center;
+  min-width: 24px;
+  height: 18px;
+  padding: 0 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--zone-chip-bg);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.archivesOverlapRow {
+  display: flex;
+  align-items: flex-start;
+  min-height: 108px;
+  padding-right: 6px;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.archivesOverlapRow .cardSlot {
+  flex: 0 0 76px;
+  width: 76px;
+  max-width: 76px;
+  z-index: 1;
+}
+
+.archivesOverlapRow .cardSlot + .cardSlot {
+  margin-left: -54px;
+}
+
+.archivesOverlapRow .cardSlot:hover,
+.archivesOverlapRow .cardSlot:focus-within {
+  z-index: 38;
+}
+
+.archivesOverflowBadge {
+  flex: 0 0 auto;
+  margin-left: 8px;
+  margin-top: 40px;
+  padding: 4px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel), var(--zone-chip-bg) 65%);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.archivesPileEmpty {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));

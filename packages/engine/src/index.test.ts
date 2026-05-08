@@ -149,7 +149,9 @@ describe("MVP 0.1 turns and cards", () => {
       cardDefinitionId: "simple_economy_operation",
       title: "Simple Economy Operation"
     });
-    expect(state.corp.archives.map((id) => state.cardInstances[id]?.definitionId)).toContain("simple_economy_operation");
+    const archivedOperation = state.corp.archives.find((id) => state.cardInstances[id]?.definitionId === "simple_economy_operation");
+    expect(archivedOperation).toBeDefined();
+    expect(state.cardInstances[archivedOperation!]).toMatchObject({ faceup: true, rezzed: true });
   });
 
   it("lets the Corp create a new remote by installing ICE", () => {

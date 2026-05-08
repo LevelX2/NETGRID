@@ -1427,7 +1427,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         const definition = definitionFor(state, cardId);
         removeFromAllZones(state, cardId);
         state.corp.archives.push(cardId);
-        state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "corp", zone: "archives" } };
+        state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
         resolveCorpOperation(state, definition, legalAction);
         if (definition.id === "v098_hq_rd_swap_operation") {
           legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "swap_hq_rd" };

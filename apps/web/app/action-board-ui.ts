@@ -354,6 +354,31 @@ export function corpInstalledCardState(card: VisibleCard): "hidden" | "unrezzed"
   return "known";
 }
 
+export function showInstalledCorpState(serverId: PlayerView["servers"][number]["id"], laneKind: "ice" | "root"): boolean {
+  if (laneKind === "ice") return true;
+  return serverId !== "archives";
+}
+
+export function splitArchiveCardsForDisplay(
+  viewerSide: Side,
+  cards: VisibleCard[],
+  totalArchivesCount: number
+): { faceupCards: VisibleCard[]; facedownCount: number } {
+  if (viewerSide === "runner") {
+    const faceupCards = cards.filter((card) => card.known);
+    return {
+      faceupCards,
+      facedownCount: Math.max(0, totalArchivesCount - faceupCards.length)
+    };
+  }
+
+  const faceupCards = cards.filter((card) => card.rezzed === true);
+  return {
+    faceupCards,
+    facedownCount: Math.max(0, totalArchivesCount - faceupCards.length)
+  };
+}
+
 export function parseCuePositionPreference(raw: string | null): CuePositionPreference {
   if (!raw) return DEFAULT_CUE_POSITION;
   try {

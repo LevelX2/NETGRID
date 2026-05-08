@@ -86,8 +86,10 @@ import {
   parseCuePositionPreference,
   runTargetServerIds,
   serializeCuePositionPreference,
+  showInstalledCorpState,
   serverBoardRows,
   serverDisplayLabel,
+  splitArchiveCardsForDisplay,
   splitLegalActions,
   currentRunTimelineStep,
   type ActionContext,
@@ -668,6 +670,7 @@ const LOCAL_CARD_IMAGE_IDS = new Set([
 ]);
 
 const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-generated-card-art-1";
+const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 
 function localCardImageUrl(cardId: string): string | undefined {
   const encodedCardId = encodeURIComponent(cardId);
@@ -3283,26 +3286,42 @@ export default function Page() {
                               <span>{lane.label}</span>
                             </div>
                             <div className="lane">
-                              {lane.cards.map((card, index) => {
-                                const displayCard = enrichCard(card);
-                                return (
-                                  <CardView
-                                    key={card.instanceId}
-                                    card={displayCard}
-                                    compact
-                                    displayMode={cardDisplayMode}
-                                    hiddenSide="corp"
-                                    installedCorpCard
-                                    selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                                    actions={cardActionsFor(card)}
-                                    actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                                    {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
-                                    onAction={submitAction}
-                                    onFocus={focusCard}
-                                    onActionContextSelect={selectActionCard}
-                                  />
-                                );
-                              })}
+                              {server.id === "archives" && lane.kind === "root" ? (
+                                <ArchivesDualStackLane
+                                  viewerSide={activeView.side}
+                                  visibleCards={lane.cards}
+                                  totalArchivesCount={activeView.side === "runner" ? (activeView.opponent.discardCount ?? lane.cards.length) : lane.cards.length}
+                                  displayMode={cardDisplayMode}
+                                  selectedContext={selectedActionContext}
+                                  actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                  cardActionsFor={cardActionsFor}
+                                  onAction={submitAction}
+                                  onFocus={focusCard}
+                                  onActionContextSelect={selectActionCard}
+                                  enrichCard={enrichCard}
+                                />
+                              ) : (
+                                lane.cards.map((card, index) => {
+                                  const displayCard = enrichCard(card);
+                                  return (
+                                    <CardView
+                                      key={card.instanceId}
+                                      card={displayCard}
+                                      compact
+                                      displayMode={cardDisplayMode}
+                                      hiddenSide="corp"
+                                      installedCorpCard={showInstalledCorpState(server.id, lane.kind)}
+                                      selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                                      actions={cardActionsFor(card)}
+                                      actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                      {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
+                                      onAction={submitAction}
+                                      onFocus={focusCard}
+                                      onActionContextSelect={selectActionCard}
+                                    />
+                                  );
+                                })
+                              )}
                             </div>
                           </div>
                         ))}
@@ -5934,6 +5953,101 @@ function SimulationResult({ summary }: { summary: AiSimulationSummary }) {
       </p>
       <p className="meta hashLine">{summary.finalStateHash}</p>
       {summary.errors.length > 0 ? <p className="notice">{summary.errors.join(", ")}</p> : null}
+    </div>
+  );
+}
+
+function ArchivesDualStackLane({
+  viewerSide,
+  visibleCards,
+  totalArchivesCount,
+  displayMode,
+  selectedContext,
+  actionDisabled,
+  cardActionsFor,
+  onAction,
+  onFocus,
+  onActionContextSelect,
+  enrichCard
+}: {
+  viewerSide: Side;
+  visibleCards: VisibleCard[];
+  totalArchivesCount: number;
+  displayMode: CardDisplayMode;
+  selectedContext: ActionContext | null;
+  actionDisabled: boolean;
+  cardActionsFor(card: VisibleCard): LegalAction[];
+  onAction(action: LegalAction): void;
+  onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  enrichCard(card: VisibleCard): DisplayVisibleCard;
+}) {
+  const { faceupCards, facedownCount } = splitArchiveCardsForDisplay(viewerSide, visibleCards, totalArchivesCount);
+  const shownFaceupCards = faceupCards.slice(0, ARCHIVES_STACK_PREVIEW_LIMIT);
+  const shownFacedownCount = Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
+  const faceupOverflow = Math.max(0, faceupCards.length - shownFaceupCards.length);
+  const facedownOverflow = Math.max(0, facedownCount - shownFacedownCount);
+
+  return (
+    <div className="archivesDualStack" data-testid="archives-dual-stack">
+      <div className="archivesPile">
+        <div className="archivesPileHeader">
+          <span className="archivesPileTitle">Offen</span>
+          <span className="archivesPileCount">{faceupCards.length}</span>
+        </div>
+        {shownFaceupCards.length > 0 ? (
+          <div className="archivesOverlapRow">
+            {shownFaceupCards.map((card) => {
+              const displayCard = enrichCard(card);
+              return (
+                <CardView
+                  key={card.instanceId}
+                  card={displayCard}
+                  compact
+                  displayMode={displayMode}
+                  hiddenSide="corp"
+                  installedCorpCard={false}
+                  selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                  actions={cardActionsFor(card)}
+                  actionDisabled={actionDisabled}
+                  onAction={onAction}
+                  onFocus={onFocus}
+                  onActionContextSelect={onActionContextSelect}
+                />
+              );
+            })}
+            {faceupOverflow > 0 ? <span className="archivesOverflowBadge">+{faceupOverflow}</span> : null}
+          </div>
+        ) : (
+          <p className="archivesPileEmpty">Keine offenen Karten.</p>
+        )}
+      </div>
+
+      <div className="archivesPile">
+        <div className="archivesPileHeader">
+          <span className="archivesPileTitle">Verdeckt</span>
+          <span className="archivesPileCount">{facedownCount}</span>
+        </div>
+        {shownFacedownCount > 0 ? (
+          <div className="archivesOverlapRow">
+            {Array.from({ length: shownFacedownCount }, (_, index) => (
+              <CardView
+                key={`archives-facedown-${index}`}
+                card={{ instanceId: `archives-facedown-${index}`, known: false, rezzed: false }}
+                compact
+                displayMode={displayMode}
+                hiddenSide="corp"
+                installedCorpCard={false}
+                actions={[]}
+                actionDisabled
+              />
+            ))}
+            {facedownOverflow > 0 ? <span className="archivesOverflowBadge">+{facedownOverflow}</span> : null}
+          </div>
+        ) : (
+          <p className="archivesPileEmpty">Keine verdeckten Karten.</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -11,6 +11,8 @@ import {
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
+  showInstalledCorpState,
+  splitArchiveCardsForDisplay,
   currentRunTimelineStep,
   groupRunnerRigCards,
   parseCuePositionPreference,
@@ -87,6 +89,27 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(corpInstalledCardState({ instanceId: "hidden_ice", known: false, rezzed: false })).toBe("hidden");
     expect(corpInstalledCardState(card("corp_ice", "Wall", "ice", false))).toBe("unrezzed");
     expect(corpInstalledCardState(card("rezzed_ice", "Wall", "ice", true))).toBe("rezzed");
+  });
+
+  it("shows installed marker only on true installed corp lanes", () => {
+    expect(showInstalledCorpState("archives", "root")).toBe(false);
+    expect(showInstalledCorpState("archives", "ice")).toBe(true);
+    expect(showInstalledCorpState("hq", "root")).toBe(true);
+    expect(showInstalledCorpState("remote_1", "root")).toBe(true);
+  });
+
+  it("splits archives into faceup and facedown stacks for runner and corp views", () => {
+    const faceupA = card("archive_a", "Faceup A", "asset", true);
+    const faceupB = card("archive_b", "Faceup B", "operation", true);
+    const facedown = card("archive_c", "Facedown C", "agenda", false);
+
+    const runnerSplit = splitArchiveCardsForDisplay("runner", [faceupA, faceupB], 3);
+    expect(runnerSplit.faceupCards.map((entry) => entry.instanceId)).toEqual(["archive_a", "archive_b"]);
+    expect(runnerSplit.facedownCount).toBe(1);
+
+    const corpSplit = splitArchiveCardsForDisplay("corp", [faceupA, facedown, faceupB], 3);
+    expect(corpSplit.faceupCards.map((entry) => entry.instanceId)).toEqual(["archive_a", "archive_b"]);
+    expect(corpSplit.facedownCount).toBe(1);
   });
 
   it("keeps cue position local, resettable and clamped", () => {
