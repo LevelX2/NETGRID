@@ -155,20 +155,22 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
   });
 
   test("Runtime-Isolation nutzt die temporäre SQLite-Datenbank statt normaler lokaler Runtime-Dateien", async ({ request }) => {
-    const runtimePath = process.env.NETRUNNER_E2E_RUNTIME_PATH;
+    const runtimePath = process.env.NETGRID_E2E_RUNTIME_PATH;
     expect(runtimePath).toBeTruthy();
-    expect(path.basename(runtimePath!)).toBe("netrunner.sqlite");
+    expect(path.basename(runtimePath!)).toBe("netgrid.sqlite");
     expect(runtimePath).not.toContain("data\\runtime\\multiplayer\\matches.json");
     expect(runtimePath).not.toContain("data/runtime/multiplayer/matches.json");
+    expect(runtimePath).not.toContain("data\\runtime\\multiplayer\\netgrid.sqlite");
+    expect(runtimePath).not.toContain("data/runtime/multiplayer/netgrid.sqlite");
     expect(runtimePath).not.toContain("data\\runtime\\multiplayer\\netrunner.sqlite");
     expect(runtimePath).not.toContain("data/runtime/multiplayer/netrunner.sqlite");
     await expect(async () => stat(runtimePath!)).toPass();
-    const health = await request.get(`${process.env.NETRUNNER_E2E_SERVER_URL}/health`);
+    const health = await request.get(`${process.env.NETGRID_E2E_SERVER_URL}/health`);
     const body = (await health.json()) as { profile?: string; realtime?: { ready?: boolean }; storage?: { kind?: string; database?: string; matchCount?: number } };
     expect(body.profile).toBe("local");
     expect(body.realtime?.ready).toBe(true);
     expect(body.storage?.kind).toBe("sqlite");
-    expect(body.storage?.database).toBe("netrunner.sqlite");
+    expect(body.storage?.database).toBe("netgrid.sqlite");
     expect(body.storage?.matchCount).toBeUndefined();
     expect(JSON.stringify(body)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
   });

@@ -1,6 +1,6 @@
 # Projektstart
 
-Diese Wissensbasis dokumentiert das Projekt `Netrunner`: eine private Netrunner-Webapplikation mit deterministischer Rules Engine, Hidden-Info-Schutz und schrittweiser MVP-Entwicklung.
+Diese Wissensbasis dokumentiert das Projekt `NETGRID`: eine private Webapplikation für regelgeführtes Netrunner-Spiel mit deterministischer Rules Engine, Hidden-Info-Schutz und schrittweiser MVP-Entwicklung.
 
 ## Kernseiten
 

@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import { Fragment, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
-import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netrunner/shared";
+import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netgrid/shared";
 import {
   CHRONICLE_CATEGORY_LABELS,
   chronicleGroupLabel,
@@ -63,6 +63,7 @@ import {
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
+  LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
   RUN_TIMELINE_STEPS,
   actionButtonLabel,
   actionContextStillVisible,
@@ -129,13 +130,17 @@ import {
   type SessionInfo
 } from "./session-recovery";
 
-const SERVER_HTTP = process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
+const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? process.env.NEXT_PUBLIC_NETRUNNER_SERVER_URL ?? "http://127.0.0.1:8787";
 const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
-const DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
-const AUDIO_STORAGE_KEY = "netrunner-s01-audio";
-const ACTION_CUE_SETTINGS_STORAGE_KEY = "netrunner.actionCueSettings.v1";
+const DECK_STORAGE_KEY = "netgrid-v0-6-local-decks";
+const LEGACY_DECK_STORAGE_KEY = "netrunner-v0-6-local-decks";
+const AUDIO_STORAGE_KEY = "netgrid-s01-audio";
+const LEGACY_AUDIO_STORAGE_KEY = "netrunner-s01-audio";
+const ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
+const LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY = "netrunner.actionCueSettings.v1";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
-const DISPLAY_NAME_STORAGE_KEY = "netrunner.displayName";
+const DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
+const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netrunner.displayName";
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
 const RunIcon = Route;
@@ -1101,7 +1106,7 @@ export default function Page() {
     const token = params.get("joinToken");
     const reconnectToken = params.get("reconnectToken");
     const reconnectSide = params.get("side");
-    const storedDisplayName = window.localStorage.getItem(DISPLAY_NAME_STORAGE_KEY)?.trim();
+    const storedDisplayName = readLocalStorageWithLegacy(DISPLAY_NAME_STORAGE_KEY, LEGACY_DISPLAY_NAME_STORAGE_KEY)?.trim();
     if (matchId && reconnectToken && (reconnectSide === "runner" || reconnectSide === "corp")) {
       setEntryTab("play");
       setMode("join");
@@ -1212,14 +1217,14 @@ export default function Page() {
   }, [localDecks, localDecksLoaded, selectedRunnerLocalDeckId, selectedCorpLocalDeckId, selectedParticipantBRunnerLocalDeckId, selectedParticipantBCorpLocalDeckId]);
 
   useEffect(() => {
-    const storedAudio = window.localStorage.getItem(AUDIO_STORAGE_KEY);
+    const storedAudio = readLocalStorageWithLegacy(AUDIO_STORAGE_KEY, LEGACY_AUDIO_STORAGE_KEY);
     if (!storedAudio) return;
     try {
       const parsed = JSON.parse(storedAudio) as { enabled?: boolean; volume?: number };
       setAudioEnabled(Boolean(parsed.enabled));
       if (typeof parsed.volume === "number") setAudioVolume(Math.min(1, Math.max(0, parsed.volume)));
     } catch {
-      window.localStorage.removeItem(AUDIO_STORAGE_KEY);
+      removeLocalStorageKeys(AUDIO_STORAGE_KEY, LEGACY_AUDIO_STORAGE_KEY);
     }
   }, []);
 
@@ -1228,14 +1233,14 @@ export default function Page() {
   }, [audioEnabled, audioVolume]);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(ACTION_CUE_SETTINGS_STORAGE_KEY);
+    const stored = readLocalStorageWithLegacy(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
     if (!stored) return;
     try {
       const parsed = JSON.parse(stored) as { enabled?: boolean; autoDismissMs?: number };
       if (typeof parsed.enabled === "boolean") setActionCuesEnabled(parsed.enabled);
       setActionCueAutoDismissMs(normalizeCueAutoDismissMs(parsed.autoDismissMs));
     } catch {
-      window.localStorage.removeItem(ACTION_CUE_SETTINGS_STORAGE_KEY);
+      removeLocalStorageKeys(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
     }
   }, []);
 
@@ -1244,7 +1249,7 @@ export default function Page() {
   }, [actionCuesEnabled, actionCueAutoDismissMs]);
 
   useEffect(() => {
-    setCuePosition(parseCuePositionPreference(window.localStorage.getItem(ACTION_CUE_POSITION_STORAGE_KEY)));
+    setCuePosition(parseCuePositionPreference(readLocalStorageWithLegacy(ACTION_CUE_POSITION_STORAGE_KEY, LEGACY_ACTION_CUE_POSITION_STORAGE_KEY)));
   }, []);
 
   useEffect(() => {
@@ -2440,13 +2445,13 @@ export default function Page() {
   }
 
   function readLegacyBrowserDecks(): EditableDeck[] {
-    const storedDecks = window.localStorage.getItem(DECK_STORAGE_KEY);
+    const storedDecks = readLocalStorageWithLegacy(DECK_STORAGE_KEY, LEGACY_DECK_STORAGE_KEY);
     if (!storedDecks) return [];
     try {
       const parsed = JSON.parse(storedDecks) as EditableDeck[];
       return Array.isArray(parsed) ? parsed : [];
     } catch {
-      window.localStorage.removeItem(DECK_STORAGE_KEY);
+      removeLocalStorageKeys(DECK_STORAGE_KEY, LEGACY_DECK_STORAGE_KEY);
       return [];
     }
   }
@@ -6134,6 +6139,19 @@ function formatLobbyTime(value: string | undefined): string {
 function rememberDisplayName(name: string): void {
   const trimmed = name.trim();
   if (trimmed) window.localStorage.setItem(DISPLAY_NAME_STORAGE_KEY, trimmed);
+}
+
+function readLocalStorageWithLegacy(key: string, legacyKey: string): string | null {
+  const current = window.localStorage.getItem(key);
+  if (current !== null) return current;
+  const legacy = window.localStorage.getItem(legacyKey);
+  if (legacy !== null) window.localStorage.setItem(key, legacy);
+  return legacy;
+}
+
+function removeLocalStorageKeys(key: string, legacyKey: string): void {
+  window.localStorage.removeItem(key);
+  window.localStorage.removeItem(legacyKey);
 }
 
 async function postJson<T>(path: string, body: unknown): Promise<T> {

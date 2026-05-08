@@ -1,34 +1,29 @@
-# Netrunner
+# NETGRID
 
-Private Netrunner-Webapplikation für regelgeführtes, deterministisches Spiel, lokale Tests und spätere private Stabilisierung.
+Private NETGRID-Webapplikation für regelgeführtes, deterministisches Spiel auf Basis des Netrunner-Regelspiels, lokale Tests und private Stabilisierung.
 
 ## Aktueller Stand
 
-Der versionierte Projektstand ist bis **V1.0.1 Deckbibliothek und Join-Deck-Handshake** umgesetzt und lokal grün geprüft.
+Der versionierte Projektstand ist bis **V1.1.2K kleines Kartenrelease nach V1.1.2** umgesetzt und lokal verifiziert. Die führende Anschlussplanung ab V1.1.3 liegt in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
 
 Umgesetzt sind:
 
-- Human Runner gegen Corp-KI, Human Corp gegen Runner-KI, KI-vs-KI-Simulation und privater Human-vs-Human-Multiplayer.
+- Human Runner gegen Korp-KI, Human Korp gegen Runner-KI, KI-vs-KI-Simulation und privater Human-vs-Human-Multiplayer.
 - Serverautoritative Rules Engine mit `LegalActions`/`PlayerActions`, `applyAction`-Revalidierung, PlayerViews, PublicEvents, Replay und StateHash.
-- Lokaler Kartenkatalog, lokaler Deckeditor, validierte Deck-Snapshots und Match Setup.
-- V0.94 bis V0.99 als enge Mechanik-Gates: Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viren, Purge, Recurring Credits und Bad Publicity.
-- S01: Ergebnisfenster, Spielziel-Auswahl, private Zwei-Spiel-Serie mit Seitenwechsel und opt-in Audio.
-- V1.0: explizite Deckslots für Teilnehmer A/B mit Runner-/Corp-Deckpaaren, stabile Serien-Deckzuordnung über Seitenwechsel, KI-Deckpolitik `fixed`/`selected`/`seeded_random` und validierte Matchstart-Deckauswahl.
-- V1.0.1: lokale Deckbibliothek als normaler Arbeitsfluss, explizites Speichern, gespeicherte Decks direkt im Matchstart, eingeklappte Vorlagen und Human-vs-Human-Join-Deck-Handshake.
-- Eine lokale, nicht versionierte O:NR-v1-Testumgebung ist für privaten Gebrauch in den erlaubten lokalen Datenpool aufgenommen. Sie nutzt ignorierte Daten unter `data/local/` und `data/local-assets/`, bleibt privat/lokal und ist kein öffentlicher oder versionierter Kartenpool.
+- Lokaler Kartenkatalog, lokale Datei-Deckbibliothek, Deckeditor, validierte Deck-Snapshots und Match Setup.
+- SQLite als privater lokaler Standard-Storage mit Backup/Restore und Legacy-Import.
+- V0.94 bis V1.1.2 als enge Mechanik-Gates inklusive Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viren, Purge, Recurring Credits, Bad Publicity, Setup/Mulligan/Game-End, Discard/Handlimit/Core Damage und Full Archives Access.
+- S01: Ergebnisfenster, regelhaftes Spielziel, private Zwei-Spiel-Serie mit Seitenwechsel und opt-in Audio.
+- Ein privater, lokaler O:NR-v1-Testpool mit 52 spielbaren und decklegalen Karten über versionierte Release-Gates. Er bleibt lokal/privat und ist kein öffentlicher Kartenpool.
 
-Die aktuelle Bestandsaufnahme liegt unter `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
-Der V1.0-Plan und Final Review liegen unter `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md` und `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`.
-Der V1.0.1-Plan liegt unter `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`.
+## Grenzen
 
-## Wichtige Grenzen
-
+- NETGRID ist der App- und Projektname. Netrunner bleibt als fachliche Spiel-, Quellen- und Regelreferenz erhalten.
 - Die Engine bleibt die einzige Regelautorität.
 - UI, Server, KI und menschliche Spieler reichen nur Actions aus `LegalActions` ein.
 - Hidden Info darf nicht in PlayerViews, PublicEvents, KI-Input, WebSocket, Reconnect, Undo, Replay, Logs oder Clientfehler leaken.
 - Bilder, lokale Scans und Bildmetadaten sind reine Anzeige-Artefakte. Sie dürfen Engine, KI, Decklegalität, Replay, StateHash oder Match-State nicht beeinflussen.
 - Keine öffentliche Plattform: kein Matchmaking, keine Rankings, keine Accounts, keine Turniere.
-- Nicht allgemein umgesetzt sind unter anderem Mulligan, vollständiges Setup-/Deckout-/Archives-Modell, Prevention, Avoid, Interrupt, Replacement, Set Aside, Remove from Game, Ownership-/Control-Wechsel und vollständige offizielle Deckbuilding-/Formatregeln.
 
 ## Einstieg
 
@@ -38,7 +33,7 @@ Für Codex-Arbeit gelten zuerst:
 2. `KI-Wissen-Netrunner/00 Projektstart.md`
 3. `KI-Wissen-Netrunner/02 Wissen/00 Uebersichten/Index.md`
 4. `docs/codex/CODEX_STATUS.md`
-5. `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`
+5. `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
 
 Die verbindlichen Quellen liegen unter `docs/source/`. Ergänzende und abgeleitete Spezifikationen liegen unter `docs/derived/`.
 
@@ -50,25 +45,25 @@ Die verbindlichen Quellen liegen unter `docs/source/`. Ergänzende und abgeleite
 - Vitest
 - Next.js/React für die Web-UI
 - Reines TypeScript-Engine-Paket ohne UI-, Netzwerk-, Datenbank- oder KI-Abhängigkeiten
-- JSON-Storage im aktuellen privaten Stand; SQLite bleibt ein späterer Härtungskandidat
+- SQLite als privater lokaler Standard-Storage
 
 ## Lokaler Start
 
 ```powershell
 corepack pnpm install
-corepack pnpm -F @netrunner/server dev
-corepack pnpm -F @netrunner/web dev
+corepack pnpm -F @netgrid/server dev
+corepack pnpm -F @netgrid/web dev
 ```
 
-Der Multiplayer-Server läuft standardmäßig unter `http://127.0.0.1:8787`. Die Weboberfläche läuft standardmäßig unter `http://127.0.0.1:3100` und nutzt `NEXT_PUBLIC_NETRUNNER_SERVER_URL`, falls der Server nicht auf dem Default-Port läuft.
+Der Multiplayer-Server läuft standardmäßig unter `http://127.0.0.1:8787`. Die Weboberfläche läuft standardmäßig unter `http://127.0.0.1:3100` und nutzt `NEXT_PUBLIC_NETGRID_SERVER_URL`, falls der Server nicht auf dem Default-Port läuft. Der alte Name `NEXT_PUBLIC_NETRUNNER_SERVER_URL` bleibt als lokaler Legacy-Fallback lesbar.
 
 Für ein privates Match im lokalen Netz:
 
 - Host öffnet `http://127.0.0.1:3100`, erstellt ein Match und kopiert den Join-Link.
-- Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link und wählt beim Beitritt eigene gespeicherte Runner-/Corp-Decks.
-- KI-Partien können in der Startansicht als Runner vs Corp-KI, Corp vs Runner-KI oder KI vs KI gestartet werden.
+- Zweites Browserfenster oder zweiter lokaler Client öffnet den Join-Link und wählt beim Beitritt eigene gespeicherte Runner-/Korp-Decks.
+- KI-Partien können in der Startansicht als Runner vs Korp-KI, Korp vs Runner-KI oder KI vs KI gestartet werden.
 - Außerhalb von localhost HTTPS/WSS verwenden und Tokens wie Passwörter behandeln.
-- Runtime-Storage liegt unter `data/runtime/` und ist nicht versioniert; bei längerer Nutzung regelmäßig sichern.
+- Runtime-Storage liegt unter `data/runtime/` und ist nicht versioniert; Default ist `data/runtime/multiplayer/netgrid.sqlite`. Eine vorhandene `netrunner.sqlite` wird nur als Legacy-Import/Fallback behandelt.
 
 ## Checks
 
@@ -77,18 +72,5 @@ corepack pnpm lint
 corepack pnpm typecheck
 corepack pnpm test
 corepack pnpm build
+corepack pnpm e2e
 ```
-
-Zuletzt geprüft am 2026-05-04 für V1.0.1:
-
-- `corepack pnpm lint`: bestanden.
-- `corepack pnpm typecheck`: bestanden.
-- `corepack pnpm test`: bestanden, 176 Pakettests plus 39 Root-Specs inklusive V1.0.1-Join-Deck-Handshake, Web-Chronicle-Test, V1.0-Deckserien-/KI-Policy-Smokes, O:NR-AI-/Multiplayer-Smokes und Visibility-Verträgen.
-- `corepack pnpm build`: bestanden. Die frühere Turbopack-NFT-Warnung zur `card-images`-Route ist durch feste repo-relative Datenpfade behoben.
-
-## Nächste Entscheidungen
-
-V1.0.1 ist abgeschlossen. Vor neuer Karten- oder Mechanikbreite sollte der nächste Scope wieder als eigenes Gate festgelegt werden:
-
-- Weitere Karten oder offizielle Mechaniken nur mit eigenem Resolver-, Manifest-, Visibility-, Replay/StateHash-, AI- und Multiplayer-Gate.
-- Vollständige offizielle Deckbuilding-/Formatregeln, Accounts, Cloud-Decks, öffentliche Decklisten, Matchmaking, Rankings und Turnierlegalität bleiben außerhalb von V1.0.

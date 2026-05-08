@@ -1,8 +1,8 @@
-import { applyAction, createGame, getLegalActions, getPlayerView, hashState, replayEvents } from "@netrunner/engine";
+import { applyAction, createGame, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
 import aiProfilesData from "../../../data/ai/ai-profiles-0.9.json";
 import soakSeedsData from "../../../data/ai/ai-soak-seeds-0.9.json";
 import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
-import type { AiDecision, AiDecisionInput, AiDifficulty, DeckDefinition, DeckPublicMetadata, GameState, LegalAction, PublicGameEvent, Side } from "@netrunner/shared";
+import type { AiDecision, AiDecisionInput, AiDifficulty, DeckDefinition, DeckPublicMetadata, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
 
 type RankedChoice = {
   action: LegalAction | undefined;

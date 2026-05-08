@@ -3,7 +3,7 @@ $ErrorActionPreference = "Stop"
 $projectRoot = "C:\Projekte\Netrunner"
 $webUrl = "http://127.0.0.1:3100"
 $serverUrl = "http://127.0.0.1:8787/health"
-$logDir = Join-Path $env:TEMP "netrunner"
+$logDir = Join-Path $env:TEMP "netgrid"
 $serverLog = Join-Path $logDir "server.log"
 $webLog = Join-Path $logDir "web.log"
 
@@ -20,7 +20,7 @@ function Test-Endpoint {
   }
 }
 
-function Start-NetrunnerProcess {
+function Start-NetgridProcess {
   param(
     [Parameter(Mandatory = $true)][string]$Command,
     [Parameter(Mandatory = $true)][string]$LogPath
@@ -49,11 +49,11 @@ function Wait-Endpoint {
 Set-Location $projectRoot
 
 if (-not (Test-Endpoint -Url $serverUrl)) {
-  Start-NetrunnerProcess -Command "corepack pnpm --filter @netrunner/server dev" -LogPath $serverLog
+  Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/server dev" -LogPath $serverLog
 }
 
 if (-not (Test-Endpoint -Url $webUrl)) {
-  Start-NetrunnerProcess -Command "corepack pnpm --filter @netrunner/web dev" -LogPath $webLog
+  Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/web dev" -LogPath $webLog
 }
 
 $serverReady = Wait-Endpoint -Url $serverUrl

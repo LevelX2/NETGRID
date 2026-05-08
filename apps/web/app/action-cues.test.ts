@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PlayerView, PublicGameEvent, Side } from "@netrunner/shared";
+import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
 import { actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues } from "./action-cues";
 
 describe("deriveOpponentActionCues", () => {

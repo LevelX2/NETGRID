@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { deckValidationResponse } from "../deck-data";
-import type { EditableDeck } from "@netrunner/decks";
+import type { EditableDeck } from "@netgrid/decks";
 
 export async function POST(request: Request) {
   const body = (await request.json()) as { deck?: EditableDeck };

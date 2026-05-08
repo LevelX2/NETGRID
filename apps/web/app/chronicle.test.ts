@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PublicGameEvent, Side } from "@netrunner/shared";
+import type { PublicGameEvent, Side } from "@netgrid/shared";
 import { formatChronicleEvent } from "./chronicle";
 
 const ACTION_TYPES = [

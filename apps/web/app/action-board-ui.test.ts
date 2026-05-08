@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netrunner/shared";
+import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
 import {
   DEFAULT_CUE_POSITION,
   actionButtonLabel,

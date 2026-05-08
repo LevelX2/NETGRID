@@ -1,5 +1,5 @@
 {
-  "name": "@netrunner/server",
+  "name": "@netgrid/server",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -15,11 +15,11 @@
     "build": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@netrunner/ai": "workspace:*",
-    "@netrunner/catalog": "workspace:*",
-    "@netrunner/decks": "workspace:*",
-    "@netrunner/engine": "workspace:*",
-    "@netrunner/shared": "workspace:*",
+    "@netgrid/ai": "workspace:*",
+    "@netgrid/catalog": "workspace:*",
+    "@netgrid/decks": "workspace:*",
+    "@netgrid/engine": "workspace:*",
+    "@netgrid/shared": "workspace:*",
     "ws": "^8.20.0"
   },
   "devDependencies": {

@@ -4,6 +4,7 @@
 
 - [[Projektueberblick]]: Zielbild, Scope, Architekturgrundsätze und MVP-Phasen.
 - [[Aktueller Projektstatus]]: aktueller Stand von Workspace, Setup, Quellen und offenen Punkten.
+- Aktiver App-/Projektname: `NETGRID`; Netrunner bleibt fachliche Spiel-, Regel- und Quellenreferenz.
 - [[Quellenlage und Aktualitaet]]: vorhandene, fehlende und ergänzende Projektquellen.
 - [[Roadmap nach MVP 0.2]]: konsolidierte Roadmap ab V0.3 und Begründung der KI-/Simulationsphase.
 - [[Roadmap nach MVP 0.4]]: produktnähere Folge-Roadmap mit Kartenimport, Deckeditor, UI-Schnitt in V0.7, Basisset-Spielbarkeit, besserer KI und V0.91-Kartenbild-Asset-Gate.

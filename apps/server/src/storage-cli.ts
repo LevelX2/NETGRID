@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { basename, dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { envValue } from "./internet-hardening";
 import {
   DEFAULT_SQLITE_STORAGE_PATH,
   DEFAULT_STORAGE_BACKUP_DIR,
@@ -11,8 +12,8 @@ import {
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 const command = process.argv[2] ?? "inspect";
-const dbPath = resolve(process.env.NETRUNNER_SQLITE_STORAGE_PATH ?? resolve(root, DEFAULT_SQLITE_STORAGE_PATH));
-const backupDir = resolve(process.env.NETRUNNER_STORAGE_BACKUP_DIR ?? resolve(root, DEFAULT_STORAGE_BACKUP_DIR));
+const dbPath = resolve(envValue(process.env, "NETGRID_SQLITE_STORAGE_PATH", "NETRUNNER_SQLITE_STORAGE_PATH") ?? resolve(root, DEFAULT_SQLITE_STORAGE_PATH));
+const backupDir = resolve(envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR", "NETRUNNER_STORAGE_BACKUP_DIR") ?? resolve(root, DEFAULT_STORAGE_BACKUP_DIR));
 
 try {
   if (command === "backup") {
@@ -27,7 +28,7 @@ try {
     console.log(JSON.stringify({ ok: true, ...result }, null, 2));
   } else if (command === "inspect") {
     if (!existsSync(dbPath)) {
-      console.log(JSON.stringify({ ok: true, kind: "sqlite", database: "netrunner.sqlite", matchCount: 0, exists: false }, null, 2));
+      console.log(JSON.stringify({ ok: true, kind: "sqlite", database: basename(dbPath), matchCount: 0, exists: false }, null, 2));
     } else {
       console.log(JSON.stringify(inspectSqliteStorage(dbPath), null, 2));
     }

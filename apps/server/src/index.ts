@@ -1,8 +1,8 @@
-import { buildAiDecisionInput, chooseCorpAction } from "@netrunner/ai";
-import { applyAction, createGame, getLegalActions, getPlayerView } from "@netrunner/engine";
-import type { EngineResult, GameState, PlayerAction } from "@netrunner/shared";
+import { buildAiDecisionInput, chooseCorpAction } from "@netgrid/ai";
+import { applyAction, createGame, getLegalActions, getPlayerView } from "@netgrid/engine";
+import type { EngineResult, GameState, PlayerAction } from "@netgrid/shared";
 import { pathToFileURL } from "node:url";
-import { startNetrunnerServer } from "./http-server";
+import { startNetgridServer } from "./http-server";
 
 export * from "./http-server";
 export * from "./internet-hardening";
@@ -47,6 +47,6 @@ function views(state: GameState): LocalDemoMatch {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const started = await startNetrunnerServer();
-  console.log(`Netrunner multiplayer server listening on ${started.url}`);
+  const started = await startNetgridServer();
+  console.log(`NETGRID multiplayer server listening on ${started.url}`);
 }

@@ -20,7 +20,7 @@ import {
   type DeckTemplate,
   type EditableDeck
 } from "./index";
-import { createRuntimeCardsById, type CatalogCard } from "@netrunner/catalog";
+import { createRuntimeCardsById, type CatalogCard } from "@netgrid/catalog";
 
 const cardsById = Object.fromEntries((snapshotData.cards as CatalogCard[]).map((card) => [card.catalogCardId, card]));
 const profile = profilesData.profiles[0] as DeckFormatProfile;

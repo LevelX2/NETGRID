@@ -1,4 +1,4 @@
-import type { CatalogCard, CatalogStatusKey } from "@netrunner/catalog";
+import type { CatalogCard, CatalogStatusKey } from "@netgrid/catalog";
 
 export type DeckSide = "runner" | "corp";
 

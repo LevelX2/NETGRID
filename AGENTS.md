@@ -4,7 +4,7 @@ Bitte den Benutzer im Chat mit `Du` oder `Meister` ansprechen.
 
 ## Projekt
 
-Private Netrunner-Webapplikation. MVP 0.1 ist Human Runner gegen einfache Corp-KI mit festen Demo-Decks. MVP 0.2 ist privates Human-vs-Human-Multiplayer über dieselbe Engine.
+Private NETGRID-Webapplikation für regelgeführtes Netrunner-Spiel. MVP 0.1 ist Human Runner gegen einfache Corp-KI mit festen Demo-Decks. MVP 0.2 ist privates Human-vs-Human-Multiplayer über dieselbe Engine.
 
 ## Projektbezogene Wissensbasis
 
@@ -57,7 +57,7 @@ Alte Konzeptdateien, Zwischenstände oder frühere Prompts dürfen nicht als gle
 - Der Benutzer wird im Chat und in direkt formulierten Anwendungstexten grundsätzlich mit `Du` angesprochen.
 - Technische Dateinamen, Pfade, Code-Symbole, IDs, Markdown-Links und originale Quellzitate bleiben in ihrer technischen oder originalen Schreibweise.
 
-## Verbindliche Netrunner-Prinzipien
+## Verbindliche NETGRID-Prinzipien
 
 - Engine-Korrektheit zuerst.
 - Die Rules Engine ist die einzige Regelautorität.

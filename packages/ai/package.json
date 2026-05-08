@@ -1,5 +1,5 @@
 {
-  "name": "@netrunner/ai",
+  "name": "@netgrid/ai",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
     "build": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@netrunner/engine": "workspace:*",
-    "@netrunner/shared": "workspace:*"
+    "@netgrid/engine": "workspace:*",
+    "@netgrid/shared": "workspace:*"
   }
 }

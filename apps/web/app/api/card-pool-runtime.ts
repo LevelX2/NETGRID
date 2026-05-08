@@ -1,1 +1,1 @@
-export { createRuntimeCardPool, createRuntimeCardSnapshot, createRuntimeCardsById, type RuntimeCardPool } from "@netrunner/catalog";
+export { createRuntimeCardPool, createRuntimeCardSnapshot, createRuntimeCardsById, type RuntimeCardPool } from "@netgrid/catalog";

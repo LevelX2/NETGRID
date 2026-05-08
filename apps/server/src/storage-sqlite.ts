@@ -2,12 +2,13 @@ import { createHash, randomBytes } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { hashState } from "@netrunner/engine";
+import { hashState } from "@netgrid/engine";
 import type { MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./multiplayer";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 1;
-export const SQLITE_STORAGE_FORMAT = "netrunner_multiplayer_sqlite";
-export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netrunner.sqlite";
+export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
+export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
+export const LEGACY_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netrunner.sqlite";
 export const DEFAULT_LEGACY_MATCH_STORAGE_PATH = "data/runtime/multiplayer/matches.json";
 export const DEFAULT_STORAGE_BACKUP_DIR = "data/runtime/backups";
 
@@ -27,6 +28,7 @@ export type StorageHealth = {
 
 export type SqliteMatchStorageOptions = {
   dbPath: string;
+  legacySqlitePath?: string;
   legacyJsonPath?: string;
   backupDir?: string;
   autoImportLegacy?: boolean;
@@ -72,10 +74,15 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
   constructor(options: SqliteMatchStorageOptions) {
     this.dbPath = resolve(options.dbPath);
+    const legacySqlitePath = options.legacySqlitePath ? resolve(options.legacySqlitePath) : undefined;
     this.legacyJsonPath = resolve(options.legacyJsonPath ?? DEFAULT_LEGACY_MATCH_STORAGE_PATH);
     this.backupDir = resolve(options.backupDir ?? DEFAULT_STORAGE_BACKUP_DIR);
     mkdirSync(dirname(this.dbPath), { recursive: true });
     mkdirSync(this.backupDir, { recursive: true });
+    if (!existsSync(this.dbPath) && legacySqlitePath && legacySqlitePath !== this.dbPath && existsSync(legacySqlitePath)) {
+      copyFileSync(legacySqlitePath, this.dbPath);
+      this.legacyImportState = "completed";
+    }
     try {
       this.db = new DatabaseSync(this.dbPath);
       this.db.exec("PRAGMA foreign_keys = ON");
@@ -488,13 +495,13 @@ export function createSqliteStorageBackup(input: {
   source: BackupManifest["source"];
 }): { backupDir: string; manifest: BackupManifest } {
   mkdirSync(input.backupDir, { recursive: true });
-  const backupId = `netrunner-storage-${timestampId()}-${randomBytes(3).toString("hex")}`;
+  const backupId = `netgrid-storage-${timestampId()}-${randomBytes(3).toString("hex")}`;
   const targetDir = join(input.backupDir, backupId);
   mkdirSync(targetDir, { recursive: true });
 
   const files: BackupManifest["files"] = [];
   if (input.dbPath && existsSync(input.dbPath)) {
-    const targetName = "netrunner.sqlite";
+    const targetName = "netgrid.sqlite";
     copyFileSync(input.dbPath, join(targetDir, targetName));
     files.push(fileManifestEntry(targetDir, targetName));
   }

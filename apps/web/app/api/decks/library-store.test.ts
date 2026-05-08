@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { describe, expect, it } from "vitest";
-import type { EditableDeck } from "@netrunner/decks";
+import type { EditableDeck } from "@netgrid/decks";
 import { defaultDeckLibraryPath, readDeckLibrary, writeDeckLibrary } from "./library-store";
 
 const runnerDeck: EditableDeck = {
@@ -21,6 +21,11 @@ const runnerDeck: EditableDeck = {
 describe("deck file library", () => {
   it("uses the application data folder on Windows by default", () => {
     expect(defaultDeckLibraryPath({ APPDATA: "C:\\Users\\Lui\\AppData\\Roaming" } as unknown as NodeJS.ProcessEnv)).toBe(join("C:\\Users\\Lui\\AppData\\Roaming", "NetGrid", "Decks"));
+  });
+
+  it("prefers the NETGRID deck library env name and keeps the legacy fallback", () => {
+    expect(defaultDeckLibraryPath({ NETGRID_DECK_LIBRARY_PATH: "C:\\Decks\\Netgrid", NETRUNNER_DECK_LIBRARY_PATH: "C:\\Decks\\Legacy" } as unknown as NodeJS.ProcessEnv)).toBe("C:\\Decks\\Netgrid");
+    expect(defaultDeckLibraryPath({ NETRUNNER_DECK_LIBRARY_PATH: "C:\\Decks\\Legacy" } as unknown as NodeJS.ProcessEnv)).toBe("C:\\Decks\\Legacy");
   });
 
   it("writes editable decks as local JSON files and reads them back", async () => {

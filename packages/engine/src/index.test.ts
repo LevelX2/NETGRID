@@ -16,7 +16,7 @@ import {
   validateDeckDefinition,
   validateGameState
 } from "./index";
-import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netrunner/shared";
+import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netgrid/shared";
 
 describe("MVP 0.1 engine foundation", () => {
   it("creates deterministic games for the same seed", () => {

@@ -1,5 +1,5 @@
 {
-  "name": "@netrunner/web",
+  "name": "@netgrid/web",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -11,11 +11,11 @@
     "build": "next build"
   },
   "dependencies": {
-    "@netrunner/ai": "workspace:*",
-    "@netrunner/catalog": "workspace:*",
-    "@netrunner/decks": "workspace:*",
-    "@netrunner/engine": "workspace:*",
-    "@netrunner/shared": "workspace:*",
+    "@netgrid/ai": "workspace:*",
+    "@netgrid/catalog": "workspace:*",
+    "@netgrid/decks": "workspace:*",
+    "@netgrid/engine": "workspace:*",
+    "@netgrid/shared": "workspace:*",
     "lucide-react": "^1.14.0",
     "next": "^16.2.4",
     "react": "^19.2.5",

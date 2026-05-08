@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, replayEvents } from "@netrunner/engine";
+import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, replayEvents } from "@netgrid/engine";
 import {
   assertAiInputIsSideSafe,
   buildObservedFacts,
@@ -10,7 +10,7 @@ import {
   simulateAiGame,
   simulateAiSoak
 } from "./index";
-import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netrunner/shared";
+import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, Side } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {

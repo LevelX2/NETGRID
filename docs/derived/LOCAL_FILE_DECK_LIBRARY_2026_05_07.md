@@ -9,7 +9,7 @@ Persönliche, bearbeitbare Decks werden nicht mehr nur im Browser-`localStorage`
 ## Speicherorte
 
 - Standard Windows: `%APPDATA%\NetGrid\Decks`
-- Konfigurierbar: `NETRUNNER_DECK_LIBRARY_PATH`
+- Konfigurierbar: `NETGRID_DECK_LIBRARY_PATH`; `NETRUNNER_DECK_LIBRARY_PATH` bleibt als Legacy-Fallback lesbar.
 - Fallback außerhalb Windows: lokaler Benutzer-Datenordner beziehungsweise `~/.netgrid/decks`
 
 Jedes Deck wird als eigene JSON-Datei gespeichert. Der Dateiname basiert auf der lokalen `deckId`.
@@ -23,7 +23,7 @@ Jedes Deck wird als eigene JSON-Datei gespeichert. Der Dateiname basiert auf der
 
 ## Migration
 
-Beim Laden der Deckansicht liest NETGRID zuerst die Datei-Deckbibliothek. Wenn sie leer ist und alte Browser-Decks unter `netrunner-v0-6-local-decks` existieren, werden diese in die Datei-Deckbibliothek übernommen.
+Beim Laden der Deckansicht liest NETGRID zuerst die Datei-Deckbibliothek. Wenn sie leer ist und alte Browser-Decks unter `netrunner-v0-6-local-decks` existieren, werden diese einmalig über den neuen `netgrid-v0-6-local-decks`-Kompatibilitätspfad in die Datei-Deckbibliothek übernommen.
 
 ## Produktverhalten
 

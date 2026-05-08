@@ -1,6 +1,7 @@
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netrunner/shared";
+import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
 
-export const ACTION_CUE_POSITION_STORAGE_KEY = "netrunner.actionCuePosition.v1";
+export const ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
+export const LEGACY_ACTION_CUE_POSITION_STORAGE_KEY = "netrunner.actionCuePosition.v1";
 
 export type ActionContext = {
   kind: "card" | "server";

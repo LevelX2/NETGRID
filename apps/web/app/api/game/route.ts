@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { buildAiDecisionInput, chooseCorpAction } from "@netrunner/ai";
-import { applyAction, createGame, getLegalActions, getPlayerView } from "@netrunner/engine";
-import type { GameState } from "@netrunner/shared";
+import { buildAiDecisionInput, chooseCorpAction } from "@netgrid/ai";
+import { applyAction, createGame, getLegalActions, getPlayerView } from "@netgrid/engine";
+import type { GameState } from "@netgrid/shared";
 
 let gameState = startGame("mvp-0.1-web-demo");
 

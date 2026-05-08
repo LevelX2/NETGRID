@@ -1,4 +1,4 @@
-import type { PublicGameEvent, Side } from "@netrunner/shared";
+import type { PublicGameEvent, Side } from "@netgrid/shared";
 
 export type ChronicleCategory = "turn" | "economy" | "card" | "run" | "agenda" | "danger" | "system" | "hidden";
 export type ChronicleImportance = "normal" | "important" | "critical";

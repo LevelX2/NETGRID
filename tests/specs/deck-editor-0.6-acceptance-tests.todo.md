@@ -6,8 +6,8 @@ Stand: 2026-05-03
 ## Artifact Tests
 
 - T-V06-MODEL-001: V0.6 Deckprofile, Templates, Snapshots und Manifest parsen. Covered by `tests/specs/phase1-artifacts.test.ts`.
-- T-V06-SNAPSHOT-001: Deck-Snapshot-Hashes sind deterministisch. Covered by `@netrunner/decks` tests and `tests/specs/phase1-artifacts.test.ts`.
-- T-V06-VALID-001: Versionierte Demo-Snapshots sind valide. Covered by `@netrunner/decks` tests.
+- T-V06-SNAPSHOT-001: Deck-Snapshot-Hashes sind deterministisch. Covered by `@netgrid/decks` tests and `tests/specs/phase1-artifacts.test.ts`.
+- T-V06-VALID-001: Versionierte Demo-Snapshots sind valide. Covered by `@netgrid/decks` tests.
 - T-V06-VIS-001: Öffentliche Deckmetadaten enthalten keine vollständigen Kartenlisten. Covered by server and visibility tests.
 
 ## Validation Tests

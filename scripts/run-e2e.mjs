@@ -14,38 +14,38 @@ const webPort = await freePort();
 const serverUrl = `http://127.0.0.1:${serverPort}`;
 const webUrl = `http://127.0.0.1:${webPort}`;
 const runtimeDir = path.join(root, "tmp", `e2e-runtime-${Date.now()}`);
-const runtimePath = path.join(runtimeDir, "netrunner.sqlite");
+const runtimePath = path.join(runtimeDir, "netgrid.sqlite");
 const backupDir = path.join(runtimeDir, "backups");
 
 await rm(runtimeDir, { recursive: true, force: true });
 await mkdir(runtimeDir, { recursive: true });
 
 try {
-  start("server", ["pnpm", "--filter", "@netrunner/server", "exec", "tsx", "src/index.ts"], {
+  start("server", ["pnpm", "--filter", "@netgrid/server", "exec", "tsx", "src/index.ts"], {
     PORT: String(serverPort),
     HOST: "127.0.0.1",
-    NETRUNNER_STORAGE_KIND: "sqlite",
-    NETRUNNER_SQLITE_STORAGE_PATH: runtimePath,
-    NETRUNNER_STORAGE_BACKUP_DIR: backupDir,
-    NETRUNNER_LEGACY_MATCH_STORAGE_PATH: path.join(runtimeDir, "legacy-matches.json"),
-    NETRUNNER_TOKEN_SALT: "v1-0-7-e2e-token-salt",
-    NETRUNNER_DEPLOYMENT_PROFILE: "local",
-    NETRUNNER_WEB_BASE_URL: webUrl,
-    NETRUNNER_SERVER_BASE_URL: serverUrl,
-    NETRUNNER_ALLOWED_ORIGINS: webUrl,
-    NETRUNNER_RATE_LIMIT_PROFILE: "local"
+    NETGRID_STORAGE_KIND: "sqlite",
+    NETGRID_SQLITE_STORAGE_PATH: runtimePath,
+    NETGRID_STORAGE_BACKUP_DIR: backupDir,
+    NETGRID_LEGACY_MATCH_STORAGE_PATH: path.join(runtimeDir, "legacy-matches.json"),
+    NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
+    NETGRID_DEPLOYMENT_PROFILE: "local",
+    NETGRID_WEB_BASE_URL: webUrl,
+    NETGRID_SERVER_BASE_URL: serverUrl,
+    NETGRID_ALLOWED_ORIGINS: webUrl,
+    NETGRID_RATE_LIMIT_PROFILE: "local"
   });
   await waitForUrl(`${serverUrl}/health`, "server");
 
-  start("web", ["pnpm", "--filter", "@netrunner/web", "exec", "next", "dev", "--hostname", "127.0.0.1", "--port", String(webPort)], {
-    NEXT_PUBLIC_NETRUNNER_SERVER_URL: serverUrl
+  start("web", ["pnpm", "--filter", "@netgrid/web", "exec", "next", "dev", "--hostname", "127.0.0.1", "--port", String(webPort)], {
+    NEXT_PUBLIC_NETGRID_SERVER_URL: serverUrl
   });
   await waitForUrl(webUrl, "web");
 
   const result = await run(corepack, ["pnpm", "exec", "playwright", "test"], {
     PLAYWRIGHT_BASE_URL: webUrl,
-    NETRUNNER_E2E_SERVER_URL: serverUrl,
-    NETRUNNER_E2E_RUNTIME_PATH: runtimePath
+    NETGRID_E2E_SERVER_URL: serverUrl,
+    NETGRID_E2E_RUNTIME_PATH: runtimePath
   });
   process.exitCode = result;
 } finally {

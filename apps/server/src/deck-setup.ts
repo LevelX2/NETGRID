@@ -2,8 +2,8 @@ import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import { createHash } from "node:crypto";
-import { createRuntimeCardsById } from "@netrunner/catalog";
-import { buildEngineDeck, validateDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type DeckValidationContext } from "@netrunner/decks";
+import { createRuntimeCardsById } from "@netgrid/catalog";
+import { buildEngineDeck, validateDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type DeckValidationContext } from "@netgrid/decks";
 
 export type SeriesPlayerSlot = "player_a" | "player_b";
 export type AiDeckPolicy = "fixed" | "selected" | "seeded_random";

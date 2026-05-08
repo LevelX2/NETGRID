@@ -2,7 +2,7 @@ import { createServer, type IncomingMessage, type Server, type ServerResponse } 
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
-import { simulateAiGame } from "@netrunner/ai";
+import { simulateAiGame } from "@netgrid/ai";
 import {
   JsonFileMatchStorage,
   InMemoryMatchStorage,
@@ -22,6 +22,7 @@ import {
   DEFAULT_LEGACY_MATCH_STORAGE_PATH,
   DEFAULT_SQLITE_STORAGE_PATH,
   DEFAULT_STORAGE_BACKUP_DIR,
+  LEGACY_SQLITE_STORAGE_PATH,
   SqliteMatchStorage,
   StorageError,
   type StorageKind
@@ -31,6 +32,7 @@ import {
   applyCors,
   clientIdentity,
   createRateLimiter,
+  envValue,
   FixedWindowRateLimiter,
   hashClientKey,
   isOriginAllowed,
@@ -42,8 +44,8 @@ import {
   type DeploymentConfig,
   type RateLimitCategory
 } from "./internet-hardening";
-import type { Side } from "@netrunner/shared";
-import type { AiDifficulty } from "@netrunner/shared";
+import type { Side } from "@netgrid/shared";
+import type { AiDifficulty } from "@netgrid/shared";
 
 type ClientWsMessage =
   | { type: "join_match"; payload: { matchId: string; sessionToken: string; side: Side } }
@@ -93,20 +95,20 @@ type Connection = {
   context: WsContext;
 };
 
-export type NetrunnerServerHandle = {
+export type NetgridServerHandle = {
   server: Server;
   service: MultiplayerService;
-  realtime: NetrunnerRealtimeServer;
+  realtime: NetgridRealtimeServer;
   deploymentConfig: DeploymentConfig;
   close(): Promise<void>;
 };
 
-type NetrunnerServerOptions = {
+type NetgridServerOptions = {
   deploymentConfig?: DeploymentConfig;
   rateLimiter?: FixedWindowRateLimiter;
 };
 
-export class NetrunnerRealtimeServer {
+export class NetgridRealtimeServer {
   private readonly connections = new Map<string, Map<Side, Connection>>();
   private readonly countdownTimers = new Map<string, ReturnType<typeof setTimeout>>();
   private readonly socketClients = new WeakMap<WebSocket, { clientKey: string }>();
@@ -448,11 +450,11 @@ export class NetrunnerRealtimeServer {
   }
 }
 
-export function createNetrunnerHttpServer(service?: MultiplayerService, options: NetrunnerServerOptions = {}): NetrunnerServerHandle {
+export function createNetgridHttpServer(service?: MultiplayerService, options: NetgridServerOptions = {}): NetgridServerHandle {
   const deploymentConfig = options.deploymentConfig ?? loadDeploymentConfig();
   const activeService = service ?? defaultService(deploymentConfig);
   const rateLimiter = options.rateLimiter ?? createRateLimiter(deploymentConfig.rateLimitProfile);
-  const realtime = new NetrunnerRealtimeServer(activeService, deploymentConfig, rateLimiter);
+  const realtime = new NetgridRealtimeServer(activeService, deploymentConfig, rateLimiter);
   const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, request, response));
   realtime.attach(server);
   return {
@@ -475,8 +477,8 @@ export function createNetrunnerHttpServer(service?: MultiplayerService, options:
   };
 }
 
-export async function startNetrunnerServer(options: { port?: number; host?: string; service?: MultiplayerService } = {}): Promise<NetrunnerServerHandle & { url: string }> {
-  const handle = createNetrunnerHttpServer(options.service);
+export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService } = {}): Promise<NetgridServerHandle & { url: string }> {
+  const handle = createNetgridHttpServer(options.service);
   const port = options.port ?? Number(process.env.PORT ?? 8787);
   const host = options.host ?? process.env.HOST ?? "127.0.0.1";
   await new Promise<void>((resolveListen) => handle.server.listen(port, host, resolveListen));
@@ -485,7 +487,7 @@ export async function startNetrunnerServer(options: { port?: number; host?: stri
 
 async function routeHttp(
   service: MultiplayerService,
-  realtime: NetrunnerRealtimeServer,
+  realtime: NetgridRealtimeServer,
   deploymentConfig: DeploymentConfig,
   rateLimiter: FixedWindowRateLimiter,
   request: IncomingMessage,
@@ -726,17 +728,24 @@ function defaultService(deploymentConfig: DeploymentConfig): MultiplayerService 
 
 export function createConfiguredStorage() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-  const storageKind = storageKindFromEnv(process.env.NETRUNNER_STORAGE_KIND);
+  const storageKind = storageKindFromEnv(envValue(process.env, "NETGRID_STORAGE_KIND", "NETRUNNER_STORAGE_KIND"));
   if (storageKind === "memory") return new InMemoryMatchStorage();
   if (storageKind === "json") {
-    const storagePath = process.env.NETRUNNER_MATCH_STORAGE_PATH ? resolve(process.env.NETRUNNER_MATCH_STORAGE_PATH) : resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
+    const configuredPath = envValue(process.env, "NETGRID_MATCH_STORAGE_PATH", "NETRUNNER_MATCH_STORAGE_PATH");
+    const storagePath = configuredPath ? resolve(configuredPath) : resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
     return new JsonFileMatchStorage(storagePath);
   }
-  const sqlitePath = process.env.NETRUNNER_SQLITE_STORAGE_PATH ? resolve(process.env.NETRUNNER_SQLITE_STORAGE_PATH) : resolve(root, DEFAULT_SQLITE_STORAGE_PATH);
-  const legacyJsonPath = process.env.NETRUNNER_LEGACY_MATCH_STORAGE_PATH ? resolve(process.env.NETRUNNER_LEGACY_MATCH_STORAGE_PATH) : resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
-  const backupDir = process.env.NETRUNNER_STORAGE_BACKUP_DIR ? resolve(process.env.NETRUNNER_STORAGE_BACKUP_DIR) : resolve(root, DEFAULT_STORAGE_BACKUP_DIR);
+  const configuredSqlitePath = envValue(process.env, "NETGRID_SQLITE_STORAGE_PATH", "NETRUNNER_SQLITE_STORAGE_PATH");
+  const sqlitePath = configuredSqlitePath ? resolve(configuredSqlitePath) : resolve(root, DEFAULT_SQLITE_STORAGE_PATH);
+  const legacyJsonPath = envValue(process.env, "NETGRID_LEGACY_MATCH_STORAGE_PATH", "NETRUNNER_LEGACY_MATCH_STORAGE_PATH") ?? resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
+  const backupDir = envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR", "NETRUNNER_STORAGE_BACKUP_DIR") ?? resolve(root, DEFAULT_STORAGE_BACKUP_DIR);
   try {
-    return new SqliteMatchStorage({ dbPath: sqlitePath, legacyJsonPath, backupDir });
+    return new SqliteMatchStorage({
+      dbPath: sqlitePath,
+      ...(configuredSqlitePath ? {} : { legacySqlitePath: resolve(root, LEGACY_SQLITE_STORAGE_PATH) }),
+      legacyJsonPath: resolve(legacyJsonPath),
+      backupDir: resolve(backupDir)
+    });
   } catch (error) {
     if (error instanceof StorageError) throw error;
     throw new StorageError("storage_corrupt", "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.");

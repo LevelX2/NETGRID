@@ -7,47 +7,47 @@ import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
-import { createRuntimeCardsById } from "@netrunner/catalog";
-import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netrunner/decks";
-import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netrunner/engine";
-import { createConfiguredStorage, createNetrunnerHttpServer } from "./http-server";
+import { createRuntimeCardsById } from "@netgrid/catalog";
+import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
+import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
+import { createConfiguredStorage, createNetgridHttpServer } from "./http-server";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
-import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netrunner/shared";
+import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
 
 describe("V1.0.9 private internet hardening", () => {
   it("validates local and private internet deployment profiles", () => {
-    const local = loadDeploymentConfig({ NETRUNNER_DEPLOYMENT_PROFILE: "local" } as NodeJS.ProcessEnv);
+    const local = loadDeploymentConfig({ NETGRID_DEPLOYMENT_PROFILE: "local" } as NodeJS.ProcessEnv);
     expect(local.profile).toBe("local");
     expect(local.webBaseUrl).toBe("http://127.0.0.1:3100");
     expect(local.allowedOrigins).toContain("http://127.0.0.1:3100");
 
     expect(() =>
       loadDeploymentConfig({
-        NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
-        NETRUNNER_WEB_BASE_URL: "http://netgrid.example",
-        NETRUNNER_SERVER_BASE_URL: "https://api.netgrid.example",
-        NETRUNNER_ALLOWED_ORIGINS: "https://netgrid.example",
-        NETRUNNER_TOKEN_SALT: "private-test-salt"
+        NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+        NETGRID_WEB_BASE_URL: "http://netgrid.example",
+        NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+        NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
+        NETGRID_TOKEN_SALT: "private-test-salt"
       } as NodeJS.ProcessEnv)
     ).toThrow(/HTTPS/);
     expect(() =>
       loadDeploymentConfig({
-        NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
-        NETRUNNER_WEB_BASE_URL: "https://netgrid.example",
-        NETRUNNER_SERVER_BASE_URL: "https://api.netgrid.example",
-        NETRUNNER_ALLOWED_ORIGINS: "https://netgrid.example",
-        NETRUNNER_TOKEN_SALT: "local-dev-netrunner-token-salt"
+        NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+        NETGRID_WEB_BASE_URL: "https://netgrid.example",
+        NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+        NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
+        NETGRID_TOKEN_SALT: "local-dev-netrunner-token-salt"
       } as NodeJS.ProcessEnv)
-    ).toThrow(/NETRUNNER_TOKEN_SALT/);
+    ).toThrow(/NETGRID_TOKEN_SALT/);
 
     const privateConfig = loadDeploymentConfig({
-      NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
-      NETRUNNER_WEB_BASE_URL: "https://netgrid.example",
-      NETRUNNER_SERVER_BASE_URL: "https://api.netgrid.example",
-      NETRUNNER_ALLOWED_ORIGINS: "https://netgrid.example,https://tablet.netgrid.example",
-      NETRUNNER_TOKEN_SALT: "private-test-salt"
+      NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+      NETGRID_WEB_BASE_URL: "https://netgrid.example",
+      NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+      NETGRID_ALLOWED_ORIGINS: "https://netgrid.example,https://tablet.netgrid.example",
+      NETGRID_TOKEN_SALT: "private-test-salt"
     } as NodeJS.ProcessEnv);
     expect(privateConfig).toMatchObject({
       profile: "private_internet",
@@ -56,6 +56,19 @@ describe("V1.0.9 private internet hardening", () => {
       rateLimitProfile: "private_internet"
     });
     expect(privateConfig.allowedOrigins).toEqual(["https://netgrid.example", "https://tablet.netgrid.example"]);
+
+    const legacyPrivateConfig = loadDeploymentConfig({
+      NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
+      NETRUNNER_WEB_BASE_URL: "https://legacy.netgrid.example",
+      NETRUNNER_SERVER_BASE_URL: "https://legacy-api.netgrid.example",
+      NETRUNNER_ALLOWED_ORIGINS: "https://legacy.netgrid.example",
+      NETRUNNER_TOKEN_SALT: "legacy-private-test-salt"
+    } as NodeJS.ProcessEnv);
+    expect(legacyPrivateConfig).toMatchObject({
+      profile: "private_internet",
+      webBaseUrl: "https://legacy.netgrid.example",
+      serverBaseUrl: "https://legacy-api.netgrid.example"
+    });
   });
 
   it("uses explicit REST CORS origins and keeps health redacted", async () => {
@@ -64,7 +77,7 @@ describe("V1.0.9 private internet hardening", () => {
       publicWebBaseUrl: "https://netgrid.example",
       publicServerBaseUrl: "https://api.netgrid.example"
     });
-    const handle = createNetrunnerHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
     const baseUrl = await listen(handle);
     try {
       const preflight = await fetch(`${baseUrl}/api/matches`, {
@@ -100,7 +113,7 @@ describe("V1.0.9 private internet hardening", () => {
       publicServerBaseUrl: "https://api.netgrid.example"
     });
     const created = await service.createMatch({ hostSide: "runner", seed: "v109-ws-origin" });
-    const handle = createNetrunnerHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
     const baseUrl = await listen(handle);
     const wsUrl = baseUrl.replace(/^http:/, "ws:") + "/ws";
     const deniedMessages: string[] = [];
@@ -132,7 +145,7 @@ describe("V1.0.9 private internet hardening", () => {
       publicWebBaseUrl: "https://netgrid.example",
       publicServerBaseUrl: "https://api.netgrid.example"
     });
-    const handle = createNetrunnerHttpServer(service, { deploymentConfig: privateDeploymentConfig(), rateLimiter: createRateLimiter("test") });
+    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig(), rateLimiter: createRateLimiter("test") });
     const baseUrl = await listen(handle);
     try {
       for (let index = 0; index < 2; index += 1) {
@@ -170,7 +183,7 @@ describe("V1.0.9 private internet hardening", () => {
       ws_handshake: { limit: 10, windowMs: 60_000 },
       ws_join: { limit: 1, windowMs: 60_000 }
     });
-    const wsHandle = createNetrunnerHttpServer(wsService, { deploymentConfig: privateDeploymentConfig(), rateLimiter: wsLimiter });
+    const wsHandle = createNetgridHttpServer(wsService, { deploymentConfig: privateDeploymentConfig(), rateLimiter: wsLimiter });
     const wsBaseUrl = await listen(wsHandle);
     const wsUrl = wsBaseUrl.replace(/^http:/, "ws:") + "/ws";
     const socket = new WebSocket(wsUrl, { headers: { Origin: "https://netgrid.example" } });
@@ -210,33 +223,34 @@ describe("V1.0.9 private internet hardening", () => {
 describe("V1.0.8 SQLite storage and backup hardening", () => {
   it("uses SQLite as configurable default storage and reports only redacted health signals", async () => {
     const dir = await tempStorageDir();
-    const previousKind = process.env.NETRUNNER_STORAGE_KIND;
-    const previousSqlite = process.env.NETRUNNER_SQLITE_STORAGE_PATH;
-    const previousBackup = process.env.NETRUNNER_STORAGE_BACKUP_DIR;
-    const previousLegacy = process.env.NETRUNNER_LEGACY_MATCH_STORAGE_PATH;
-    process.env.NETRUNNER_STORAGE_KIND = "";
-    process.env.NETRUNNER_SQLITE_STORAGE_PATH = join(dir, "configured.sqlite");
-    process.env.NETRUNNER_STORAGE_BACKUP_DIR = join(dir, "backups");
-    process.env.NETRUNNER_LEGACY_MATCH_STORAGE_PATH = join(dir, "missing-legacy.json");
+    const previousKind = process.env.NETGRID_STORAGE_KIND;
+    const previousSqlite = process.env.NETGRID_SQLITE_STORAGE_PATH;
+    const previousBackup = process.env.NETGRID_STORAGE_BACKUP_DIR;
+    const previousLegacy = process.env.NETGRID_LEGACY_MATCH_STORAGE_PATH;
+    process.env.NETGRID_STORAGE_KIND = "";
+    process.env.NETGRID_SQLITE_STORAGE_PATH = join(dir, "configured.sqlite");
+    process.env.NETGRID_STORAGE_BACKUP_DIR = join(dir, "backups");
+    process.env.NETGRID_LEGACY_MATCH_STORAGE_PATH = join(dir, "missing-legacy.json");
     try {
       const storage = createConfiguredStorage();
       const service = new MultiplayerService(storage, { tokenSalt: "v108-default-storage" });
       const health = await service.storageHealth();
       expect(health.kind).toBe("sqlite");
       expect(health.schemaVersion).toBe(1);
+      expect(health.storageFormat).toBe("netgrid_multiplayer_sqlite");
       expect(JSON.stringify(health)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
       service.closeStorage();
     } finally {
-      restoreEnv("NETRUNNER_STORAGE_KIND", previousKind);
-      restoreEnv("NETRUNNER_SQLITE_STORAGE_PATH", previousSqlite);
-      restoreEnv("NETRUNNER_STORAGE_BACKUP_DIR", previousBackup);
-      restoreEnv("NETRUNNER_LEGACY_MATCH_STORAGE_PATH", previousLegacy);
+      restoreEnv("NETGRID_STORAGE_KIND", previousKind);
+      restoreEnv("NETGRID_SQLITE_STORAGE_PATH", previousSqlite);
+      restoreEnv("NETGRID_STORAGE_BACKUP_DIR", previousBackup);
+      restoreEnv("NETGRID_LEGACY_MATCH_STORAGE_PATH", previousLegacy);
     }
   });
 
   it("roundtrips full StoredMatch records through SQLite without persisting cleartext tokens", async () => {
     const dir = await tempStorageDir();
-    const dbPath = join(dir, "netrunner.sqlite");
+    const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-roundtrip" });
@@ -263,10 +277,27 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     reopenedStorage.close();
   });
 
+  it("imports the legacy netrunner.sqlite path non-destructively when the NETGRID default is empty", async () => {
+    const dir = await tempStorageDir();
+    const legacyPath = join(dir, "netrunner.sqlite");
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const legacyStorage = new SqliteMatchStorage({ dbPath: legacyPath, backupDir, autoImportLegacy: false });
+    const legacyService = new MultiplayerService(legacyStorage, { tokenSalt: "v108-legacy-sqlite-copy" });
+    const created = await legacyService.createMatch({ hostSide: "runner", seed: "v108-legacy-sqlite-copy" });
+    legacyService.closeStorage();
+
+    const storage = new SqliteMatchStorage({ dbPath, legacySqlitePath: legacyPath, backupDir, autoImportLegacy: false });
+    expect((await storage.load(created.matchId))?.match.matchId).toBe(created.matchId);
+    expect((await storage.health()).database).toBe("netgrid.sqlite");
+    expect((await readFile(legacyPath)).byteLength).toBeGreaterThan(0);
+    storage.close();
+  });
+
   it("imports valid legacy JSON transactionally after creating a pre-migration backup", async () => {
     const fixture = await storedMatchFixture("v108-legacy-import");
     const dir = await tempStorageDir();
-    const dbPath = join(dir, "netrunner.sqlite");
+    const dbPath = join(dir, "netgrid.sqlite");
     const legacyPath = join(dir, "matches.json");
     const backupDir = join(dir, "backups");
     const legacyRecord = structuredClone(fixture.record) as StoredMatch;
@@ -292,7 +323,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
   it("rejects invalid legacy JSON without partial SQLite import", async () => {
     const fixture = await storedMatchFixture("v108-legacy-invalid");
     const dir = await tempStorageDir();
-    const dbPath = join(dir, "netrunner.sqlite");
+    const dbPath = join(dir, "netgrid.sqlite");
     const legacyPath = join(dir, "matches.json");
     const invalid = structuredClone(fixture.record) as StoredMatch;
     (invalid.match as unknown as { status: string }).status = "future_status";
@@ -320,12 +351,14 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
 
   it("creates validated backups and restores them after a pre-restore backup", async () => {
     const dir = await tempStorageDir();
-    const dbPath = join(dir, "netrunner.sqlite");
+    const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-backup-restore" });
     const first = await service.createMatch({ hostSide: "runner", seed: "v108-backup-first" });
     const backup = await service.backupStorageForTest("manual");
+    expect(backup.manifest.backupId).toMatch(/^netgrid-storage-/);
+    expect(backup.manifest.files.map((file) => file.name)).toContain("netgrid.sqlite");
     const second = await service.createMatch({ hostSide: "corp", seed: "v108-backup-second" });
     expect((await storage.list()).map((record) => record.match.matchId)).toEqual([first.matchId, second.matchId]);
     service.closeStorage();
@@ -343,14 +376,14 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
 
   it("rejects manipulated backups before restore", async () => {
     const dir = await tempStorageDir();
-    const dbPath = join(dir, "netrunner.sqlite");
+    const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
     const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-bad-backup" });
     await service.createMatch({ hostSide: "runner", seed: "v108-bad-backup" });
     const backup = await service.backupStorageForTest("manual");
     service.closeStorage();
-    await writeFile(join(backup.backupDir, "netrunner.sqlite"), "tampered", "utf8");
+    await writeFile(join(backup.backupDir, "netgrid.sqlite"), "tampered", "utf8");
     expect(() => restoreSqliteStorageBackup({ backupDir: backup.backupDir, targetPath: dbPath, backupRootDir: backupDir })).toThrow(/Prüfsumme/);
   });
 
@@ -2059,7 +2092,7 @@ describe("MVP 0.2 multiplayer service", () => {
       publicServerBaseUrl: "http://127.0.0.1:0"
     });
     const created = await service.createMatch({ hostSide: "runner", seed: "ws-bootstrap" });
-    const handle = createNetrunnerHttpServer(service);
+    const handle = createNetgridHttpServer(service);
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
     if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -2139,7 +2172,7 @@ describe("MVP 0.2 multiplayer service", () => {
     if ("error" in reconnected) throw new Error(reconnected.error.message);
     expect(reconnected.pendingChoice?.choiceId).toBe("choice_v093_runner");
 
-    const handle = createNetrunnerHttpServer(service);
+    const handle = createNetgridHttpServer(service);
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
     if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -2171,7 +2204,7 @@ describe("MVP 0.2 multiplayer service", () => {
       publicServerBaseUrl: "http://127.0.0.1:0"
     });
     const created = await service.createMatch({ hostSide: "corp", seed: "ws-status" });
-    const handle = createNetrunnerHttpServer(service);
+    const handle = createNetgridHttpServer(service);
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
     if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -2233,7 +2266,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
     if (!joinToken) throw new Error("Missing join token");
 
-    const handle = createNetrunnerHttpServer(service);
+    const handle = createNetgridHttpServer(service);
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
     if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -2591,7 +2624,7 @@ describe("MVP 0.2 multiplayer service", () => {
       "keep",
       "ai-rest-setup"
     );
-    const handle = createNetrunnerHttpServer(service);
+    const handle = createNetgridHttpServer(service);
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
     if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -2628,7 +2661,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
   it("exposes a side-safe AI-vs-AI simulation API", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-api-service" });
-    const handle = createNetrunnerHttpServer(service);
+    const handle = createNetgridHttpServer(service);
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
     if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -3459,16 +3492,16 @@ function messagePayload(message: unknown): { matchStatus?: string } {
 
 function privateDeploymentConfig(): DeploymentConfig {
   return loadDeploymentConfig({
-    NETRUNNER_DEPLOYMENT_PROFILE: "private_internet",
-    NETRUNNER_WEB_BASE_URL: "https://netgrid.example",
-    NETRUNNER_SERVER_BASE_URL: "https://api.netgrid.example",
-    NETRUNNER_ALLOWED_ORIGINS: "https://netgrid.example",
-    NETRUNNER_TOKEN_SALT: "private-test-salt",
-    NETRUNNER_RATE_LIMIT_PROFILE: "private_internet"
+    NETGRID_DEPLOYMENT_PROFILE: "private_internet",
+    NETGRID_WEB_BASE_URL: "https://netgrid.example",
+    NETGRID_SERVER_BASE_URL: "https://api.netgrid.example",
+    NETGRID_ALLOWED_ORIGINS: "https://netgrid.example",
+    NETGRID_TOKEN_SALT: "private-test-salt",
+    NETGRID_RATE_LIMIT_PROFILE: "private_internet"
   } as NodeJS.ProcessEnv);
 }
 
-async function listen(handle: ReturnType<typeof createNetrunnerHttpServer>): Promise<string> {
+async function listen(handle: ReturnType<typeof createNetgridHttpServer>): Promise<string> {
   await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
   const address = handle.server.address();
   if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -3483,7 +3516,7 @@ function waitForClosedOrErrored(socket: WebSocket): Promise<void> {
 }
 
 async function tempStorageDir(): Promise<string> {
-  return mkdtemp(join(tmpdir(), "netrunner-v108-"));
+  return mkdtemp(join(tmpdir(), "netgrid-v108-"));
 }
 
 async function storedMatchFixture(seed: string): Promise<{ record: StoredMatch; hostSessionToken: string; hostReconnectToken: string; joinToken: string }> {

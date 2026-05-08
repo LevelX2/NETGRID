@@ -45,7 +45,7 @@ import {
   type ValidationResult,
   type VisibleCard,
   type Winner
-} from "@netrunner/shared";
+} from "@netgrid/shared";
 
 export {
   DEMO_CARDS,
@@ -62,7 +62,7 @@ export {
   MVP_0_97_BASELINE,
   MVP_0_98_BASELINE,
   MVP_0_99_BASELINE
-} from "@netrunner/shared";
+} from "@netgrid/shared";
 
 export type {
   ActionType,
@@ -96,7 +96,7 @@ export type {
   ValidationResult,
   VisibleCard,
   Winner
-} from "@netrunner/shared";
+} from "@netgrid/shared";
 
 const DEFAULT_CONTROLLERS: { runner: PlayerController; corp: PlayerController } = {
   runner: { controllerId: "runner-local", side: "runner", type: "human_local", displayName: "Runner" },

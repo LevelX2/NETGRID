@@ -2,11 +2,11 @@
 
 ## Zweck
 
-Diese Wissensbasis dient der dauerhaften, strukturierten und verlinkten Dokumentation des Projekts `Netrunner`.
+Diese Wissensbasis dient der dauerhaften, strukturierten und verlinkten Dokumentation des Projekts `NETGRID`.
 
 ## Projektgrenze
 
-- Diese Wissensbasis behandelt nur dieses Projekt.
+- Diese Wissensbasis behandelt nur dieses Projekt: NETGRID als Anwendung und das Netrunner-Regelspiel als fachliche Grundlage.
 - Führende globale Projektanlage- und Codex-Standards bleiben im persönlichen Haupt-Vault `mein-wissen`.
 - Dieses lokale KI-Wissen hält projektspezifische Entscheidungen, Quellenlage, Anforderungen, Risiken, Runbooks, Status und Betriebswissen.
 - MVP 0.1 und MVP 0.2 bleiben getrennte Phasen. MVP 0.2 darf erst nach dokumentiertem MVP-0.1-Gate begonnen werden.

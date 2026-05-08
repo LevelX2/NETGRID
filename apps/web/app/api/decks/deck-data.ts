@@ -11,7 +11,7 @@ import {
   type DeckTemplate,
   type DeckValidationContext,
   type EditableDeck
-} from "@netrunner/decks";
+} from "@netgrid/decks";
 import { createRuntimeCardsById } from "../card-pool-runtime";
 
 const profiles = profilesData.profiles as DeckFormatProfile[];

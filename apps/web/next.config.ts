@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  transpilePackages: ["@netrunner/shared", "@netrunner/engine", "@netrunner/ai"]
+  transpilePackages: ["@netgrid/shared", "@netgrid/engine", "@netgrid/ai"]
 };
 
 export default nextConfig;

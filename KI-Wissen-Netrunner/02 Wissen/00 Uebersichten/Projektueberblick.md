@@ -2,7 +2,7 @@
 
 ## Zielbild
 
-Netrunner ist eine private Webapplikation für regelgeführtes, deterministisches Netrunner-Spiel und spätere Simulation. Der erste spielbare Kern bleibt bewusst klein: Ein Mensch spielt als Runner gegen eine einfache Corp-KI. Danach folgt privates Human-vs-Human-Multiplayer über dieselbe Engine.
+NETGRID ist eine private Webapplikation für regelgeführtes, deterministisches Netrunner-Spiel und spätere Simulation. Der erste spielbare Kern blieb bewusst klein: Ein Mensch spielt als Runner gegen eine einfache Corp-KI. Danach folgte privates Human-vs-Human-Multiplayer über dieselbe Engine.
 
 ## MVP-Phasen
 

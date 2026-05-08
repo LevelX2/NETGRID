@@ -1,9 +1,9 @@
 import { createHash, randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { buildAiDecisionInput, chooseAiAction } from "@netrunner/ai";
-import { buildEngineDeck, type DeckSnapshot } from "@netrunner/decks";
-import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, redactPublicEventForSide, replayEvents } from "@netrunner/engine";
+import { buildAiDecisionInput, chooseAiAction } from "@netgrid/ai";
+import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
+import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, redactPublicEventForSide, replayEvents } from "@netgrid/engine";
 import {
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
@@ -21,7 +21,7 @@ import {
   type PublicGameEvent,
   type RulesBaseline,
   type Side
-} from "@netrunner/shared";
+} from "@netgrid/shared";
 import {
   deckSetupForParticipants,
   resolveParticipantDeckSetup,
@@ -35,7 +35,7 @@ import {
   type ResolvedParticipantDeckPair,
   type ResolvedParticipantDeckSetup
 } from "./deck-setup";
-import { LOCAL_DEFAULT_SERVER_BASE_URL, LOCAL_DEFAULT_TOKEN_SALT, LOCAL_DEFAULT_WEB_BASE_URL } from "./internet-hardening";
+import { envValue, LOCAL_DEFAULT_SERVER_BASE_URL, LOCAL_DEFAULT_TOKEN_SALT, LOCAL_DEFAULT_WEB_BASE_URL } from "./internet-hardening";
 import type { BackupManifest, StorageHealth } from "./storage-sqlite";
 
 export type MatchStatus =
@@ -567,9 +567,9 @@ export class MultiplayerService {
     private readonly storage: MultiplayerStorage = new InMemoryMatchStorage(),
     options: { tokenSalt?: string; publicWebBaseUrl?: string; publicServerBaseUrl?: string; now?: () => string } = {}
   ) {
-    this.tokenSalt = options.tokenSalt ?? process.env.NETRUNNER_TOKEN_SALT ?? LOCAL_DEFAULT_TOKEN_SALT;
-    this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? process.env.NETRUNNER_WEB_BASE_URL ?? LOCAL_DEFAULT_WEB_BASE_URL);
-    this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? process.env.NETRUNNER_SERVER_BASE_URL ?? LOCAL_DEFAULT_SERVER_BASE_URL);
+    this.tokenSalt = options.tokenSalt ?? envValue(process.env, "NETGRID_TOKEN_SALT", "NETRUNNER_TOKEN_SALT") ?? LOCAL_DEFAULT_TOKEN_SALT;
+    this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? envValue(process.env, "NETGRID_WEB_BASE_URL", "NETRUNNER_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL);
+    this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? envValue(process.env, "NETGRID_SERVER_BASE_URL", "NETRUNNER_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL);
     this.now = options.now ?? (() => new Date().toISOString());
   }
 

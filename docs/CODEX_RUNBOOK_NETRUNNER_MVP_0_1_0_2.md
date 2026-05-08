@@ -1,10 +1,11 @@
-# Codex-Runbook für Netrunner MVP 0.1 und MVP 0.2
+# Codex-Runbook für NETGRID MVP 0.1 und MVP 0.2
 
-**Zweck:** Dieses Dokument erklärt Codex, wie das Repository vorbereitet, `AGENTS.md` eingerichtet, die Verzeichnisstruktur erzeugt und die Umsetzung von MVP 0.1 und MVP 0.2 mit `/goal` und Multiagent-Workflows gesteuert werden soll.
+**Zweck:** Dieses Dokument erklärt Codex, wie das NETGRID-Repository vorbereitet, `AGENTS.md` eingerichtet, die Verzeichnisstruktur erzeugt und die Umsetzung von MVP 0.1 und MVP 0.2 mit `/goal` und Multiagent-Workflows gesteuert werden soll.
 
 **Stand:** 03.05.2026  
 **Primäre Zielgruppe:** Codex Root Agent, Subagents und menschlicher Projektverantwortlicher  
 **Wichtig:** Dieses Dokument ist ein Runbook. Es ersetzt nicht die Fachkonzepte, sondern übersetzt sie in eine Codex-taugliche Arbeitsweise.
+**Namensstand 2026-05-08:** NETGRID ist der aktive App- und Projektname. Netrunner bleibt in diesem Runbook als fachliche Spiel-, Regel- und Quellenreferenz erhalten.
 
 ---
 
@@ -151,7 +152,7 @@ Subagents sind riskant für:
 Codex soll zuerst die Struktur erzeugen, bevor Implementierung beginnt. Diese Struktur ist Zielbild; nicht alle Dateien müssen in Phase 0 vollständig befüllt sein.
 
 ```txt
-/netrunner-app
+/netgrid-app
   AGENTS.md
   README.md
   package.json

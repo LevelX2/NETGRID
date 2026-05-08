@@ -2,7 +2,8 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { createHash } from "node:crypto";
 import type { StorageHealth } from "./storage-sqlite";
 
-export const LOCAL_DEFAULT_TOKEN_SALT = "local-dev-netrunner-token-salt";
+export const LOCAL_DEFAULT_TOKEN_SALT = "local-dev-netgrid-token-salt";
+const LEGACY_LOCAL_DEFAULT_TOKEN_SALT = "local-dev-netrunner-token-salt";
 export const LOCAL_DEFAULT_WEB_BASE_URL = "http://127.0.0.1:3100";
 export const LOCAL_DEFAULT_SERVER_BASE_URL = "http://127.0.0.1:8787";
 
@@ -29,10 +30,10 @@ export class DeploymentConfigError extends Error {
 }
 
 export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): DeploymentConfig {
-  const profile = env.NETRUNNER_DEPLOYMENT_PROFILE === "private_internet" ? "private_internet" : "local";
-  const webBaseUrl = trimTrailingSlash(env.NETRUNNER_WEB_BASE_URL ?? LOCAL_DEFAULT_WEB_BASE_URL);
-  const serverBaseUrl = trimTrailingSlash(env.NETRUNNER_SERVER_BASE_URL ?? LOCAL_DEFAULT_SERVER_BASE_URL);
-  const configuredOrigins = parseOrigins(env.NETRUNNER_ALLOWED_ORIGINS);
+  const profile = envValue(env, "NETGRID_DEPLOYMENT_PROFILE", "NETRUNNER_DEPLOYMENT_PROFILE") === "private_internet" ? "private_internet" : "local";
+  const webBaseUrl = trimTrailingSlash(envValue(env, "NETGRID_WEB_BASE_URL", "NETRUNNER_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL);
+  const serverBaseUrl = trimTrailingSlash(envValue(env, "NETGRID_SERVER_BASE_URL", "NETRUNNER_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL);
+  const configuredOrigins = parseOrigins(envValue(env, "NETGRID_ALLOWED_ORIGINS", "NETRUNNER_ALLOWED_ORIGINS"));
   const localOrigins = uniqueOrigins([
     originOf(webBaseUrl),
     originOf(serverBaseUrl),
@@ -47,32 +48,41 @@ export function loadDeploymentConfig(env: NodeJS.ProcessEnv = process.env): Depl
     webBaseUrl,
     serverBaseUrl,
     allowedOrigins,
-    rateLimitProfile: rateLimitProfileFromEnv(env.NETRUNNER_RATE_LIMIT_PROFILE, profile),
-    trustProxyHeaders: env.NETRUNNER_TRUST_PROXY_HEADERS === "true",
-    healthDetail: env.NETRUNNER_HEALTH_DETAIL === "local_diagnostics" ? "local_diagnostics" : "safe"
+    rateLimitProfile: rateLimitProfileFromEnv(envValue(env, "NETGRID_RATE_LIMIT_PROFILE", "NETRUNNER_RATE_LIMIT_PROFILE"), profile),
+    trustProxyHeaders: envValue(env, "NETGRID_TRUST_PROXY_HEADERS", "NETRUNNER_TRUST_PROXY_HEADERS") === "true",
+    healthDetail: envValue(env, "NETGRID_HEALTH_DETAIL", "NETRUNNER_HEALTH_DETAIL") === "local_diagnostics" ? "local_diagnostics" : "safe"
   };
-  if (env.NETRUNNER_TOKEN_SALT) config.tokenSalt = env.NETRUNNER_TOKEN_SALT;
+  const tokenSalt = envValue(env, "NETGRID_TOKEN_SALT", "NETRUNNER_TOKEN_SALT");
+  if (tokenSalt) config.tokenSalt = tokenSalt;
   validateDeploymentConfig(config, env);
   return config;
 }
 
 export function validateDeploymentConfig(config: DeploymentConfig, env: NodeJS.ProcessEnv = process.env): void {
   if (config.profile !== "private_internet") return;
-  if (!env.NETRUNNER_WEB_BASE_URL || !env.NETRUNNER_SERVER_BASE_URL) {
+  if (!hasEnvValue(env, "NETGRID_WEB_BASE_URL", "NETRUNNER_WEB_BASE_URL") || !hasEnvValue(env, "NETGRID_SERVER_BASE_URL", "NETRUNNER_SERVER_BASE_URL")) {
     throw new DeploymentConfigError("insecure_deployment_config", "Private Internet verlangt explizite Web- und Server-Base-URLs.");
   }
   if (!isHttpsUrl(config.webBaseUrl) || !isHttpsUrl(config.serverBaseUrl)) {
     throw new DeploymentConfigError("unsafe_base_url", "Private Internet erlaubt nur HTTPS-Base-URLs; WebSocket-Clients leiten daraus WSS ab.");
   }
-  if (!env.NETRUNNER_ALLOWED_ORIGINS || config.allowedOrigins.length === 0) {
+  if (!hasEnvValue(env, "NETGRID_ALLOWED_ORIGINS", "NETRUNNER_ALLOWED_ORIGINS") || config.allowedOrigins.length === 0) {
     throw new DeploymentConfigError("origin_not_allowed", "Private Internet verlangt eine explizite Origin-Allowlist.");
   }
   if (config.allowedOrigins.some((origin) => origin === "*" || origin.includes("*"))) {
     throw new DeploymentConfigError("origin_not_allowed", "Private Internet erlaubt keine Wildcard-Origin.");
   }
-  if (!config.tokenSalt || config.tokenSalt === LOCAL_DEFAULT_TOKEN_SALT) {
-    throw new DeploymentConfigError("missing_required_secret", "Private Internet verlangt einen eigenen NETRUNNER_TOKEN_SALT.");
+  if (!config.tokenSalt || config.tokenSalt === LOCAL_DEFAULT_TOKEN_SALT || config.tokenSalt === LEGACY_LOCAL_DEFAULT_TOKEN_SALT) {
+    throw new DeploymentConfigError("missing_required_secret", "Private Internet verlangt einen eigenen NETGRID_TOKEN_SALT.");
   }
+}
+
+export function envValue(env: NodeJS.ProcessEnv, key: string, legacyKey: string): string | undefined {
+  return env[key] ?? env[legacyKey];
+}
+
+export function hasEnvValue(env: NodeJS.ProcessEnv, key: string, legacyKey: string): boolean {
+  return Boolean(envValue(env, key, legacyKey));
 }
 
 export type OriginDecision = "allowed" | "denied";
@@ -189,7 +199,7 @@ export function deploymentErrorPayload(error: DeploymentConfigError): { error: {
 export function redactedHealth(storage: StorageHealth, config: DeploymentConfig): Record<string, unknown> {
   return {
     ok: true,
-    service: "netrunner-multiplayer",
+    service: "netgrid-multiplayer",
     release: "V1.0.9",
     profile: config.profile,
     realtime: { webSocketPath: "/ws", ready: true },

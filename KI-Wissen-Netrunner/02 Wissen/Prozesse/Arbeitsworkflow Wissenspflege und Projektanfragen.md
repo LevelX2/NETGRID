@@ -2,7 +2,7 @@
 
 ## Kurzfassung
 
-Dieser Workflow beschreibt, wie Codex im Projekt Netrunner arbeiten soll: erst vorhandenes Wissen lesen, dann Quellen gezielt prüfen, danach Erkenntnisse in Wissensseiten oder Codex-Status zurückführen.
+Dieser Workflow beschreibt, wie Codex im Projekt NETGRID arbeiten soll: erst vorhandenes Wissen lesen, dann Quellen gezielt prüfen, danach Erkenntnisse in Wissensseiten oder Codex-Status zurückführen. Netrunner bleibt dabei fachliche Spiel- und Regelreferenz, nicht der aktive App-Name.
 
 ## Fall 1: Projektfrage beantworten
 

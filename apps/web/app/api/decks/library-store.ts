@@ -1,7 +1,7 @@
 import { mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { homedir } from "node:os";
-import type { EditableDeck } from "@netrunner/decks";
+import type { EditableDeck } from "@netgrid/decks";
 
 const LIBRARY_SCHEMA_VERSION = "netgrid-editable-deck-v1";
 
@@ -16,7 +16,8 @@ export type DeckLibraryReadResult = {
 };
 
 export function defaultDeckLibraryPath(env: NodeJS.ProcessEnv = process.env): string {
-  if (env.NETRUNNER_DECK_LIBRARY_PATH) return resolve(env.NETRUNNER_DECK_LIBRARY_PATH);
+  const configuredPath = env.NETGRID_DECK_LIBRARY_PATH ?? env.NETRUNNER_DECK_LIBRARY_PATH;
+  if (configuredPath) return resolve(configuredPath);
   if (env.APPDATA) return join(env.APPDATA, "NetGrid", "Decks");
   if (env.XDG_DATA_HOME) return join(env.XDG_DATA_HOME, "netgrid", "decks");
   return join(homedir(), ".netgrid", "decks");

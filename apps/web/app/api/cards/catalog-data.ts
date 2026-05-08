@@ -6,7 +6,7 @@ import {
   type CatalogQuery,
   type CatalogSide,
   type CatalogStatusKey
-} from "@netrunner/catalog";
+} from "@netgrid/catalog";
 import { createRuntimeCardPool } from "../card-pool-runtime";
 
 export function catalogListResponse(searchParams: URLSearchParams) {

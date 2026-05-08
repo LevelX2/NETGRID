@@ -1,4 +1,4 @@
-import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netrunner/shared";
+import type { PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import { formatChronicleEvent, type ChronicleContext, type ChronicleImportance, type ChronicleVisibility } from "./chronicle";
 import { serverDisplayLabel } from "./action-board-ui";
 

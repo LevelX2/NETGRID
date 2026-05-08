@@ -1,5 +1,5 @@
 {
-  "name": "netrunner-app",
+  "name": "netgrid-app",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,10 +10,10 @@
   "scripts": {
     "e2e": "node scripts/run-e2e.mjs",
     "test:e2e": "node scripts/run-e2e.mjs",
-    "storage:backup": "pnpm --filter @netrunner/server exec tsx src/storage-cli.ts backup",
-    "storage:restore": "pnpm --filter @netrunner/server exec tsx src/storage-cli.ts restore",
-    "storage:inspect": "pnpm --filter @netrunner/server exec tsx src/storage-cli.ts inspect",
-    "storage:import-legacy": "pnpm --filter @netrunner/server exec tsx src/storage-cli.ts import-legacy",
+    "storage:backup": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
+    "storage:restore": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
+    "storage:inspect": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts inspect",
+    "storage:import-legacy": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts import-legacy",
     "lint": "corepack pnpm -r --if-present lint",
     "typecheck": "corepack pnpm -r --if-present typecheck",
     "test": "corepack pnpm -r --if-present test && vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts --passWithNoTests",

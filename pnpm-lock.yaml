@@ -26,19 +26,19 @@ importers:
 
   apps/server:
     dependencies:
-      '@netrunner/ai':
+      '@netgrid/ai':
         specifier: workspace:*
         version: link:../../packages/ai
-      '@netrunner/catalog':
+      '@netgrid/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
-      '@netrunner/decks':
+      '@netgrid/decks':
         specifier: workspace:*
         version: link:../../packages/decks
-      '@netrunner/engine':
+      '@netgrid/engine':
         specifier: workspace:*
         version: link:../../packages/engine
-      '@netrunner/shared':
+      '@netgrid/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       ws:
@@ -54,19 +54,19 @@ importers:
 
   apps/web:
     dependencies:
-      '@netrunner/ai':
+      '@netgrid/ai':
         specifier: workspace:*
         version: link:../../packages/ai
-      '@netrunner/catalog':
+      '@netgrid/catalog':
         specifier: workspace:*
         version: link:../../packages/catalog
-      '@netrunner/decks':
+      '@netgrid/decks':
         specifier: workspace:*
         version: link:../../packages/decks
-      '@netrunner/engine':
+      '@netgrid/engine':
         specifier: workspace:*
         version: link:../../packages/engine
-      '@netrunner/shared':
+      '@netgrid/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       lucide-react:
@@ -91,10 +91,10 @@ importers:
 
   packages/ai:
     dependencies:
-      '@netrunner/engine':
+      '@netgrid/engine':
         specifier: workspace:*
         version: link:../engine
-      '@netrunner/shared':
+      '@netgrid/shared':
         specifier: workspace:*
         version: link:../shared
 
@@ -102,13 +102,13 @@ importers:
 
   packages/decks:
     dependencies:
-      '@netrunner/catalog':
+      '@netgrid/catalog':
         specifier: workspace:*
         version: link:../catalog
 
   packages/engine:
     dependencies:
-      '@netrunner/shared':
+      '@netgrid/shared':
         specifier: workspace:*
         version: link:../shared
 

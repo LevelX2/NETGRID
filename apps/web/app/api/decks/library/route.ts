@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import type { EditableDeck } from "@netrunner/decks";
+import type { EditableDeck } from "@netgrid/decks";
 import { readDeckLibrary, writeDeckLibrary } from "../library-store";
 
 export const runtime = "nodejs";

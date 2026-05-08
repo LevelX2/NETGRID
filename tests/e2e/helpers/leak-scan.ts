@@ -75,7 +75,7 @@ export function expectNoServerPayloadLeaks(capture: FrameCapture): void {
 }
 
 export async function expectRecentSessionsAreSanitized(page: Page): Promise<void> {
-  const recent = await page.evaluate(() => window.localStorage.getItem("netrunner.recentSessions") ?? "");
+  const recent = await page.evaluate(() => window.localStorage.getItem("netgrid.recentSessions") ?? "");
   for (const pattern of DOM_FORBIDDEN) {
     expect(recent, `recent session leak pattern ${pattern}`).not.toMatch(pattern);
   }
