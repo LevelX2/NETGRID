@@ -1242,8 +1242,8 @@ describe("V1.1.2K Card Release", () => {
 });
 
 describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
-  it("adds exactly eight human-playable O:NR cards without opening deferred mechanics", () => {
-    expect(ONR_V1_2_3_FINAL_CARD_IDS).toHaveLength(8);
+  it("adds exactly eleven human-playable O:NR cards without opening deferred mechanics", () => {
+    expect(ONR_V1_2_3_FINAL_CARD_IDS).toHaveLength(11);
     for (const definitionId of ONR_V1_2_3_FINAL_CARD_IDS) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
@@ -1257,7 +1257,10 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({ cost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({ cost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_243_fetch-4-0-1"]).toMatchObject({ rezCost: 0, strength: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_249_hunter"]).toMatchObject({ rezCost: 2, strength: 5 });
     expect(DEMO_CARDS_BY_ID["onr_v1_297_overtime-incentives"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_306_trojan-horse"]).toMatchObject({ cost: 2 });
   });
 
   it("validates V1.2.3 smoke decks after the V1.2.2 gate", () => {
@@ -1379,6 +1382,39 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.corp.clicks).toBe(before + 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation", cardDefinitionId: "onr_v1_297_overtime-incentives", gainedActions: 2 });
     expect(JSON.stringify(getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload)).not.toContain("corp_");
+  });
+
+  it("gates Trojan Horse on runner agenda theft in the last turn and gives 1 tag when legal", () => {
+    let state = v123CardReleaseGame("v123-trojan-horse");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const trojanId = moveCorpCardToHq(state, "onr_v1_306_trojan-horse");
+    keepOnlyCorpHqCard(state, trojanId);
+    state.corp.credits = 8;
+
+    const beforeRunnerTurn = apply(state, "corp", (action) => action.type === "end_turn");
+    const beforeTheftInput = getLegalActions(beforeRunnerTurn, "corp").filter(
+      (action) => action.type === "play_operation" && sourceDefinition(beforeRunnerTurn, action) === "onr_v1_306_trojan-horse"
+    );
+    expect(beforeTheftInput).toHaveLength(0);
+    moveCorpCardToArchives(beforeRunnerTurn, "onr_v1_220_tycho-extension");
+
+    let afterTheft = apply(beforeRunnerTurn, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "archives");
+    afterTheft = apply(afterTheft, "runner", (action) => action.type === "access_card");
+    afterTheft = apply(afterTheft, "runner", (action) => action.type === "steal_agenda");
+    afterTheft = apply(afterTheft, "runner", (action) => action.type === "end_turn");
+    afterTheft = apply(afterTheft, "corp", (action) => action.type === "mandatory_draw");
+    const trojanAfterTheft = moveCorpCardToHq(afterTheft, "onr_v1_306_trojan-horse");
+    keepOnlyCorpHqCard(afterTheft, trojanAfterTheft);
+    afterTheft.corp.credits = 8;
+    const beforeTags = afterTheft.runner.tags;
+
+    afterTheft = apply(afterTheft, "corp", (action) => action.type === "play_operation" && sourceDefinition(afterTheft, action) === "onr_v1_306_trojan-horse");
+
+    expect(afterTheft.runner.tags).toBe(beforeTags + 1);
+    expect(afterTheft.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      cardDefinitionId: "onr_v1_306_trojan-horse"
+    });
   });
 });
 
@@ -2957,7 +2993,10 @@ const ONR_V1_2_3_FINAL_CARD_IDS = [
   "onr_v1_081_custodial-position",
   "onr_v1_085_executive-wiretaps",
   "onr_v1_101_mit-west-tier",
-  "onr_v1_297_overtime-incentives"
+  "onr_v1_243_fetch-4-0-1",
+  "onr_v1_249_hunter",
+  "onr_v1_297_overtime-incentives",
+  "onr_v1_306_trojan-horse"
 ] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
@@ -3106,7 +3145,10 @@ const ONR_V1_2_3_CORP_DECK: DeckDefinition = {
   cards: [
     { id: "onr_v1_220_tycho-extension", quantity: 1 },
     { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_243_fetch-4-0-1", quantity: 2 },
+    { id: "onr_v1_249_hunter", quantity: 2 },
     { id: "onr_v1_297_overtime-incentives", quantity: 3 },
+    { id: "onr_v1_306_trojan-horse", quantity: 1 },
     { id: "onr_v1_237_data-wall", quantity: 2 },
     { id: "onr_v1_261_quandary", quantity: 2 },
     { id: "onr_v1_279_wall-of-static", quantity: 2 },

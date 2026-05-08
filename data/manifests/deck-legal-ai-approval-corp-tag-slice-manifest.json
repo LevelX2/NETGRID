@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-batch-manifest-v1",
+  "id": "deck-legal-ai-approval-corp-tag-slice-manifest",
+  "batchId": "corp_tag_approval_slice",
+  "status": "implemented_for_ai_approval",
+  "aiHintsId": "ai-card-hints-corp-tag-approval-slice",
+  "scenarioId": "ai-corp-tag-approval-slice-smokes",
+  "gateAssertions": {
+    "allSliceCardsRuntimeCatalogReady": true,
+    "allSliceCardsEngineSupported": true,
+    "allSliceCardsHumanPlayable": true,
+    "allSliceCardsDeckLegal": true,
+    "allSliceCardsFormatLegal": true,
+    "allSliceCardsHaveAiHints": true,
+    "allSliceCardsHaveScenarioRefs": true,
+    "aiSupportedRequiresHumanPlayableDeckLegalFormatLegal": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "tagPunishmentOnlyWithVisibleRunnerTag": true,
+    "tagIcePressureCovered": true,
+    "decisionDebugSideSafe": true,
+    "hiddenInfoSafe": true,
+    "v140CorpPlanRegressionGreen": true,
+    "v141RunnerPlanRegressionGreen": true,
+    "noBatchBToGBulkApproval": true,
+    "noNewMechanics": true,
+    "noCardTextParser": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true,
+    "noOfficialAssets": true,
+    "noPublicPlatformFeatures": true
+  },
+  "cards": [
+    {
+      "cardId": "simple_tag_ice",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-corp-tag-approval-slice:simple_tag_ice",
+      "scenarioRefs": ["tag_ice_pressure", "no_tag_punishment_without_runner_tag"]
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-corp-tag-approval-slice:onr_v1_287_datapool-by-zetatech",
+      "scenarioRefs": ["tag_operation_punish_visible_tag", "no_tag_punishment_without_runner_tag"]
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-corp-tag-approval-slice:onr_v1_293_netwatch-credit-voucher",
+      "scenarioRefs": ["tag_operation_punish_visible_tag", "no_tag_punishment_without_runner_tag"]
+    },
+    {
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-corp-tag-approval-slice:onr_v1_243_fetch-4-0-1",
+      "scenarioRefs": ["tag_trace_ice_pressure"]
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-corp-tag-approval-slice:onr_v1_249_hunter",
+      "scenarioRefs": ["tag_trace_ice_pressure"]
+    },
+    {
+      "cardId": "onr_v1_306_trojan-horse",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-corp-tag-approval-slice:onr_v1_306_trojan-horse",
+      "scenarioRefs": ["trojan_horse_after_agenda_theft"]
+    }
+  ],
+  "deferredCards": []
+}

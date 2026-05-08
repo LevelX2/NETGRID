@@ -599,6 +599,10 @@ export type GameState = {
   run?: RunState;
   trace?: TraceState;
   identityAbilityUsage?: Partial<Record<Side, { setupAbilities: string[]; turn: number; usedThisTurn: string[] }>>;
+  runnerTurnFlags?: {
+    stoleAgendaThisTurn: boolean;
+    stoleAgendaLastTurn: boolean;
+  };
 };
 
 export type Cost = {
@@ -1463,6 +1467,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_operation", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_306_trojan-horse",
+    title: "Trojan Horse",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 2,
+    rulesText: "Play only if Runner stole any agendas during his or her last turn. Give Runner a tag.",
+    mechanics: ["play_operation", "runner_stole_agenda_last_turn", "give_runner_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_307_urban-renewal",
     title: "Urban Renewal",
     side: "corp",
@@ -1524,6 +1539,23 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["end_the_run"]
   }),
   onrIce({
+    id: "onr_v1_243_fetch-4-0-1",
+    title: "Fetch 4.0.1",
+    subtypes: ["sentry", "bloodhound"],
+    rezCost: 0,
+    strength: 3,
+    rulesText: "[Subroutine] Trace 3 - If trace is successful, give Runner a tag.",
+    subroutines: [
+      {
+        id: "onr_v1_243_fetch_4_0_1_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 3,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag"]
+  }),
+  onrIce({
     id: "onr_v1_244_filter",
     title: "Filter",
     subtypes: ["code_gate"],
@@ -1542,6 +1574,23 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_245_fire_wall_etr")],
     mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_249_hunter",
+    title: "Hunter",
+    subtypes: ["sentry", "bloodhound"],
+    rezCost: 2,
+    strength: 5,
+    rulesText: "[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
+    subroutines: [
+      {
+        id: "onr_v1_249_hunter_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag"]
   }),
   onrIce({
     id: "onr_v1_252_keeper",

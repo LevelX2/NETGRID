@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "ai-corp-card-approval-scenarios-v1",
+  "id": "ai-corp-tag-approval-slice-smokes",
+  "batchId": "corp_tag_approval_slice",
+  "corpAiProfileId": "corp-ai-v1.4.0-normal",
+  "status": "implemented_for_deck_legal_ai_approval_corp_tag_slice",
+  "assertions": {
+    "allSliceCardsHaveAiHints": true,
+    "allSliceCardsHaveScenarioRefs": true,
+    "aiSupportedOnlyAfterGate": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "tagPunishmentOnlyWithVisibleRunnerTag": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "tag_ice_pressure",
+      "planKinds": ["protect_rnd"],
+      "cards": ["simple_tag_ice"],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::uses Corp Tag slice ICE pressure without hidden-info leakage"
+      ]
+    },
+    {
+      "id": "tag_operation_punish_visible_tag",
+      "planKinds": ["recover_economy", "bait_runner"],
+      "cards": ["onr_v1_287_datapool-by-zetatech", "onr_v1_293_netwatch-credit-voucher"],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::uses Corp Tag slice punishment operations when the Runner is visibly tagged"
+      ]
+    },
+    {
+      "id": "no_tag_punishment_without_runner_tag",
+      "planKinds": ["recover_economy"],
+      "cards": ["simple_tag_ice", "onr_v1_287_datapool-by-zetatech", "onr_v1_293_netwatch-credit-voucher"],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::skips Corp Tag slice punishment operations when the Runner is not tagged"
+      ]
+    },
+    {
+      "id": "tag_trace_ice_pressure",
+      "planKinds": ["protect_rnd"],
+      "cards": ["onr_v1_243_fetch-4-0-1", "onr_v1_249_hunter"],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::uses Corp Tag slice unreleased trace ICE pressure without hidden-info leakage"
+      ]
+    },
+    {
+      "id": "trojan_horse_after_agenda_theft",
+      "planKinds": ["recover_economy", "bait_runner"],
+      "cards": ["onr_v1_306_trojan-horse"],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::uses Corp Tag slice Trojan Horse after visible agenda theft"
+      ]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "DecisionDebug may include uncertainty markers such as hidden_runner_cards_remain_unknown.",
+    "DecisionDebug must not include hidden Runner grip identities, private decklists, cardInstances or privatePayload.",
+    "Equal Corp-visible projections must keep the same selected Corp action."
+  ]
+}

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "ai-card-hints-v1.3.1",
+  "hintsId": "ai-card-hints-corp-tag-approval-slice",
+  "derivedFromSnapshotId": "runtime-card-snapshot-current",
+  "scope": "corp_tag_approval_slice",
+  "cards": [
+    {
+      "cardId": "simple_tag_ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": ["sentry_ice", "tag_ice", "etr_ice"],
+      "planRoles": ["protect_hq", "protect_rnd"],
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "give_runner_tag", "end_the_run", "subtype_sentry"],
+      "valueHints": { "defense": 3, "threat": 2 },
+      "riskTags": ["hidden_ice", "tag"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#tag_ice_pressure",
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#no_tag_punishment_without_runner_tag"
+      ]
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": ["operation", "tag_punishment", "tag_punishment_operation"],
+      "planRoles": ["recover_economy", "bait_runner"],
+      "requiredMechanics": ["play_operation", "runner_is_tagged", "give_runner_tag", "tags", "subtype_gray_ops"],
+      "valueHints": { "threat": 3 },
+      "riskTags": ["tag", "public_play"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#tag_operation_punish_visible_tag",
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#no_tag_punishment_without_runner_tag"
+      ]
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": ["operation", "economy_operation", "tag_punishment", "tag_punishment_operation"],
+      "planRoles": ["recover_economy", "bait_runner"],
+      "requiredMechanics": ["play_operation", "runner_is_tagged", "give_runner_tag", "gain_credits", "tags", "subtype_gray_ops"],
+      "valueHints": { "economy": 3, "threat": 3 },
+      "riskTags": ["tag", "public_play"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#tag_operation_punish_visible_tag",
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#no_tag_punishment_without_runner_tag"
+      ]
+    },
+    {
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": ["sentry_ice", "tag_ice", "trace_ice"],
+      "planRoles": ["protect_hq", "protect_rnd"],
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "trace", "link", "bid_amount", "add_tag", "subtype_sentry"],
+      "valueHints": { "defense": 2, "threat": 2 },
+      "riskTags": ["hidden_ice", "tag", "trace"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#tag_trace_ice_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": ["sentry_ice", "tag_ice", "trace_ice"],
+      "planRoles": ["protect_hq", "protect_rnd"],
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "trace", "link", "bid_amount", "add_tag", "subtype_sentry"],
+      "valueHints": { "defense": 2, "threat": 3 },
+      "riskTags": ["hidden_ice", "tag", "trace"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#tag_trace_ice_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_306_trojan-horse",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": ["operation", "tag_enabler", "tag_operation"],
+      "planRoles": ["recover_economy", "bait_runner"],
+      "requiredMechanics": ["play_operation", "runner_stole_agenda_last_turn", "give_runner_tag", "tags"],
+      "valueHints": { "threat": 3 },
+      "riskTags": ["tag", "public_play"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-corp-tag-approval-slice-smokes.json#trojan_horse_after_agenda_theft"
+      ]
+    }
+  ]
+}

@@ -12,6 +12,7 @@ import aiCardHintsData from "../../../../../data/ai/ai-card-hints-1.3.1.json";
 import kingOfTheRoadAiHintsData from "../../../../../data/ai/ai-card-hints-king-of-the-road-ai-approval.json";
 import deckLegalBatchAAiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
 import runtimeSupplementAiHintsData from "../../../../../data/ai/ai-card-hints-runtime-supplement.json";
+import corpTagSliceAiHintsData from "../../../../../data/ai/ai-card-hints-corp-tag-approval-slice.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
 
 type CatalogAiHint = {
@@ -26,7 +27,15 @@ type CatalogAiHint = {
 };
 
 const AI_HINTS_BY_CARD_ID = new Map(
-  ([...(aiCardHintsData.cards as CatalogAiHint[]), ...(kingOfTheRoadAiHintsData.cards as CatalogAiHint[]), ...(runtimeSupplementAiHintsData.cards as CatalogAiHint[]), ...(deckLegalBatchAAiHintsData.cards as CatalogAiHint[])]).map((hint) => [hint.cardId, hint])
+  (
+    [
+      ...(aiCardHintsData.cards as CatalogAiHint[]),
+      ...(kingOfTheRoadAiHintsData.cards as CatalogAiHint[]),
+      ...(runtimeSupplementAiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalBatchAAiHintsData.cards as CatalogAiHint[]),
+      ...(corpTagSliceAiHintsData.cards as CatalogAiHint[])
+    ]
+  ).map((hint) => [hint.cardId, hint])
 );
 
 export function catalogListResponse(searchParams: URLSearchParams) {

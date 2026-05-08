@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
-import { createRuntimeCardsById, DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS } from "@netgrid/catalog";
+import { createRuntimeCardsById, DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS, DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS } from "@netgrid/catalog";
 import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
 import {
   assertAiInputIsSideSafe,
@@ -559,6 +559,175 @@ describe("V1.4.0 plan-based Corp AI", () => {
 
     expect(unsupportedAction).toBeDefined();
     expect(generateCorpPlanCandidates(input).every((candidate) => !candidate.legalActionIds.includes(unsupportedAction?.actionId ?? ""))).toBe(true);
+  });
+
+  it("uses Corp Tag slice ICE pressure without hidden-info leakage", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-slice-ice-pressure",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
+      corpDeck: CORP_TAG_SLICE_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 8;
+    moveCorpCardToHq(state, "simple_tag_ice");
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.0-normal" });
+    const rdTagIceInstall = input.legalActions.find(
+      (action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "rd" && sourceDefinitionFromInput(input, action) === "simple_tag_ice"
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(rdTagIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdTagIceInstall || !gain) throw new Error("Missing Corp Tag slice ICE fixture actions");
+    const decision = chooseCorpAction({ ...input, legalActions: [rdTagIceInstall, gain] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+    expect(selected?.type).toBe("install_card");
+    expect(decision.reasonCode).toBe("corp.plan.protect_rnd");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|simple_run_event|Simple Run Event/);
+  });
+
+  it("uses Corp Tag slice unreleased trace ICE pressure without hidden-info leakage", () => {
+    if (!createRuntimeCardsById()["onr_v1_243_fetch-4-0-1"]) return;
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-slice-unreleased-ice-pressure",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
+      corpDeck: CORP_TAG_SLICE_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 8;
+    moveCorpCardToHq(state, "onr_v1_243_fetch-4-0-1");
+    moveCorpCardToHq(state, "onr_v1_249_hunter");
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.0-normal" });
+    const rdTraceTagIceInstalls = input.legalActions.filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "rd" &&
+        ["onr_v1_243_fetch-4-0-1", "onr_v1_249_hunter"].includes(sourceDefinitionFromInput(input, action) ?? "")
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(rdTraceTagIceInstalls.length).toBeGreaterThan(0);
+    expect(gain).toBeDefined();
+    if (!gain) throw new Error("Missing Corp Tag slice gain-credit fallback action");
+    const decision = chooseCorpAction({ ...input, legalActions: [...rdTraceTagIceInstalls, gain] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+    const selectedDefinition = selected ? sourceDefinitionFromInput(input, selected) : undefined;
+    expect(selected?.type).toBe("install_card");
+    expect(["onr_v1_243_fetch-4-0-1", "onr_v1_249_hunter"]).toContain(selectedDefinition);
+    expect(decision.reasonCode).toBe("corp.plan.protect_rnd");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|simple_run_event|Simple Run Event/);
+  });
+
+  it("uses Corp Tag slice punishment operations when the Runner is visibly tagged", () => {
+    if (!createRuntimeCardsById()["onr_v1_287_datapool-by-zetatech"]) return;
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-slice-positive",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
+      corpDeck: CORP_TAG_SLICE_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.runner.tags = 1;
+    state.corp.credits = 10;
+    moveCorpCardToHq(state, "onr_v1_287_datapool-by-zetatech");
+    moveCorpCardToHq(state, "onr_v1_293_netwatch-credit-voucher");
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.0-normal" });
+    const tagOperations = input.legalActions.filter(
+      (action) =>
+        action.type === "play_operation" &&
+        ["onr_v1_287_datapool-by-zetatech", "onr_v1_293_netwatch-credit-voucher"].includes(sourceDefinitionFromInput(input, action) ?? "")
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS).toEqual(
+      expect.arrayContaining([
+        "simple_tag_ice",
+        "onr_v1_287_datapool-by-zetatech",
+        "onr_v1_293_netwatch-credit-voucher",
+        "onr_v1_243_fetch-4-0-1",
+        "onr_v1_249_hunter",
+        "onr_v1_306_trojan-horse"
+      ])
+    );
+    expect(tagOperations.length).toBeGreaterThan(0);
+    expect(gain).toBeDefined();
+    if (!gain) throw new Error("Missing Corp Tag slice gain-credit fallback action");
+    const decision = chooseCorpAction({ ...input, legalActions: [...tagOperations, gain] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+    const selectedDefinition = selected ? sourceDefinitionFromInput(input, selected) : undefined;
+    expect(selected?.type).toBe("play_operation");
+    expect(["onr_v1_287_datapool-by-zetatech", "onr_v1_293_netwatch-credit-voucher"]).toContain(selectedDefinition);
+    expect(["corp.plan.recover_economy", "corp.tag.punish_visible_tag"]).toContain(decision.reasonCode);
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|simple_run_event|Simple Run Event/);
+  });
+
+  it("skips Corp Tag slice punishment operations when the Runner is not tagged", () => {
+    if (!createRuntimeCardsById()["onr_v1_287_datapool-by-zetatech"]) return;
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-slice-negative",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
+      corpDeck: CORP_TAG_SLICE_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.runner.tags = 0;
+    moveCorpCardToHq(state, "onr_v1_287_datapool-by-zetatech");
+    moveCorpCardToHq(state, "onr_v1_293_netwatch-credit-voucher");
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.0-normal" });
+    const tagOperations = input.legalActions.filter(
+      (action) =>
+        action.type === "play_operation" &&
+        ["onr_v1_287_datapool-by-zetatech", "onr_v1_293_netwatch-credit-voucher"].includes(sourceDefinitionFromInput(input, action) ?? "")
+    );
+
+    expect(tagOperations).toHaveLength(0);
+  });
+
+  it("uses Corp Tag slice Trojan Horse after visible agenda theft", () => {
+    if (!createRuntimeCardsById()["onr_v1_306_trojan-horse"]) return;
+    let state = createGameAfterSetup({
+      seed: "ai-corp-tag-slice-trojan-positive",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
+      corpDeck: CORP_TAG_SLICE_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    const trojanId = moveCorpCardToHq(state, "onr_v1_306_trojan-horse");
+    keepOnlyCorpHqCard(state, trojanId);
+    putCorpRootInRemote(state, "simple_agenda", 0);
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const trojanAfterTheft = moveCorpCardToHq(state, "onr_v1_306_trojan-horse");
+    keepOnlyCorpHqCard(state, trojanAfterTheft);
+
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.0-normal" });
+    const trojanActions = input.legalActions.filter(
+      (action) => action.type === "play_operation" && sourceDefinitionFromInput(input, action) === "onr_v1_306_trojan-horse"
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(trojanActions.length).toBeGreaterThan(0);
+    expect(gain).toBeDefined();
+    if (!gain) throw new Error("Missing Corp Tag slice gain-credit fallback action");
+    const decision = chooseCorpAction({ ...input, legalActions: [...trojanActions, gain] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+    const selectedDefinition = selected ? sourceDefinitionFromInput(input, selected) : undefined;
+    expect(selected?.type).toBe("play_operation");
+    expect(selectedDefinition).toBe("onr_v1_306_trojan-horse");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|simple_run_event|Simple Run Event/);
   });
 
   it("keeps plan-based Corp AI playable in Human-vs-Corp-KI and KI-vs-KI smokes", () => {
@@ -1649,6 +1818,39 @@ const V095_CORP_DECK: DeckDefinition = {
     { id: "simple_economy_asset", quantity: 2 },
     { id: "simple_tag_ice", quantity: 2 },
     { id: "simple_barrier_ice", quantity: 2 }
+  ]
+};
+
+const CORP_TAG_SLICE_RUNNER_DECK: DeckDefinition = {
+  id: "ai_corp_tag_slice_runner",
+  name: "AI Corp Tag Slice Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_economy_event", quantity: 3 },
+    { id: "simple_run_event", quantity: 3 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_killer", quantity: 2 }
+  ]
+};
+
+const CORP_TAG_SLICE_CORP_DECK: DeckDefinition = {
+  id: "ai_corp_tag_slice_corp",
+  name: "AI Corp Tag Slice Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_priority_agenda", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "simple_tag_ice", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "onr_v1_287_datapool-by-zetatech", quantity: 2 },
+    { id: "onr_v1_293_netwatch-credit-voucher", quantity: 2 },
+    { id: "onr_v1_243_fetch-4-0-1", quantity: 2 },
+    { id: "onr_v1_249_hunter", quantity: 2 },
+    { id: "onr_v1_306_trojan-horse", quantity: 1 }
   ]
 };
 

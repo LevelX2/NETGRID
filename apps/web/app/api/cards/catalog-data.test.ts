@@ -32,7 +32,12 @@ describe("catalog API filters", () => {
       "onr_v1_108_score",
       "onr_v1_144_tycho-mem-chip",
       "onr_v1_145_wutech-mem-chip",
-      "onr_v1_146_zetatech-mem-chip"
+      "onr_v1_146_zetatech-mem-chip",
+      "onr_v1_243_fetch-4-0-1",
+      "onr_v1_249_hunter",
+      "onr_v1_287_datapool-by-zetatech",
+      "onr_v1_293_netwatch-credit-voucher",
+      "onr_v1_306_trojan-horse"
     ]);
   });
 
@@ -76,5 +81,45 @@ describe("catalog API filters", () => {
     expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
     expect(body.card.aiHints?.riskTags).toContain("credit_reserve");
     expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json#safe_probe_run");
+  });
+
+  it("adds Corp Tag slice AI hints for newly approved Corp tag cards", () => {
+    const response = catalogDetailResponse("onr_v1_293_netwatch-credit-voucher");
+
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        aiHints: {
+          roles: string[];
+          planRoles: string[];
+          aiSupportStatus: string;
+          scenarioRefs: string[];
+        } | null;
+      };
+    };
+    expect(body.card.aiHints?.roles).toContain("tag_punishment");
+    expect(body.card.aiHints?.planRoles).toContain("recover_economy");
+    expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
+    expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-corp-tag-approval-slice-smokes.json#tag_operation_punish_visible_tag");
+  });
+
+  it("adds Corp Tag slice AI hints for unreleased trace/tag approvals", () => {
+    const response = catalogDetailResponse("onr_v1_306_trojan-horse");
+
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        aiHints: {
+          roles: string[];
+          planRoles: string[];
+          aiSupportStatus: string;
+          scenarioRefs: string[];
+        } | null;
+      };
+    };
+    expect(body.card.aiHints?.roles).toContain("tag_enabler");
+    expect(body.card.aiHints?.planRoles).toContain("recover_economy");
+    expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
+    expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-corp-tag-approval-slice-smokes.json#trojan_horse_after_agenda_theft");
   });
 });
