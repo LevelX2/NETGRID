@@ -1121,6 +1121,7 @@ export default function Page() {
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
+  const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
 
   useEffect(() => {
@@ -1562,6 +1563,12 @@ export default function Page() {
     if (connection === "online") pendingAiAdvanceKeyRef.current = null;
   }, [connection]);
 
+  const updateLocalAiPacingMode = (mode: AiPacingMode) => {
+    localAiPacingModeRef.current = mode;
+    pendingAiAdvanceKeyRef.current = null;
+    setLocalAiPacingMode(mode);
+  };
+
   useEffect(() => {
     if (!payload) return;
     const latestId = payload.eventTail.at(-1)?.eventId ?? null;
@@ -1618,8 +1625,12 @@ export default function Page() {
     if (pendingAiAdvanceKeyRef.current === advanceKey) return;
     pendingAiAdvanceKeyRef.current = advanceKey;
     const timeout = window.setTimeout(() => {
+      if (localAiPacingModeRef.current !== localAiPacingMode || localAiPacingModeRef.current === "manual") {
+        if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
+        return;
+      }
       if (currentActionCue) setCurrentActionCue(null);
-      const sent = advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
+      const sent = advanceAi(localAiPacingModeRef.current === "fast" ? "until_human" : "single_step");
       if (!sent && pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
     }, delayMs);
     const retryTimeout = window.setTimeout(() => {
@@ -3085,7 +3096,7 @@ export default function Page() {
               onCardDisplayMode={setCardDisplayMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
-              onAiPacingMode={setLocalAiPacingMode}
+              onAiPacingMode={updateLocalAiPacingMode}
             />
           ) : null}
           </div>
@@ -3400,7 +3411,7 @@ export default function Page() {
             onCardDisplayMode={setCardDisplayMode}
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
-            onAiPacingMode={setLocalAiPacingMode}
+            onAiPacingMode={updateLocalAiPacingMode}
             onCopyReconnectLink={copyReconnectLink}
             onDiscardLocalSession={discardLocalActiveSession}
           />

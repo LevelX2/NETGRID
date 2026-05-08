@@ -27,6 +27,7 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await expect(page.getByTestId("server-run-action").first().getByTestId("cost-chips")).toBeVisible();
     await page.getByRole("button", { name: "Optionen öffnen" }).click();
     await page.getByRole("button", { name: "Einzelschritt" }).click();
+    await expect(page.getByRole("button", { name: "Einzelschritt" })).toHaveClass(/active/);
     await page.getByRole("button", { name: "Optionen schließen" }).click();
     await page.locator('[data-testid="action-button"][data-action-type="gain_credit"]').first().click();
     await page.locator('[data-testid="action-button"][data-action-type="end_turn"]').first().click();
