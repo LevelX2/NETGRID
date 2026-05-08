@@ -236,6 +236,7 @@ function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {
     decision.reasonCode === "corp.mandatory_draw" ||
     decision.reasonCode === "corp.rez.defensive_card" ||
     decision.reasonCode === "corp.rez.decline" ||
+    decision.reasonCode === "corp.tag.punish_visible_tag" ||
     decision.reasonCode === "corp.tag.trash_visible_resource" ||
     decision.reasonCode === "corp.purge.visible_virus_counters"
   );

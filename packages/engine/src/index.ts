@@ -416,6 +416,14 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       resolveDamageOperation(state, legalAction, "meat", 4, "onr_v1_302_scorched-earth");
     }
   },
+  "onr_v1_306_trojan-horse": {
+    name: "onr_corp_operation_trojan_horse_tag",
+    canPlay: (state) => runnerStoleAgendaLastTurn(state),
+    resolve: (state) => {
+      if (!runnerStoleAgendaLastTurn(state)) throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
+      state.runner.tags += 1;
+    }
+  },
   "onr_v1_307_urban-renewal": {
     name: "onr_corp_operation_meat_damage_5",
     canPlay: (state) => state.runner.tags > 0,
@@ -549,6 +557,10 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     deckMetadata: {
       runner: runnerDeckMetadata,
       corp: corpDeckMetadata
+    },
+    runnerTurnFlags: {
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: false
     }
   };
 
@@ -2007,6 +2019,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
 
 function stealAgenda(state: GameState, cardId: string): void {
   if (!cardId) throw new Error("Keine Agenda wird accessed.");
+  ensureRunnerTurnFlags(state).stoleAgendaThisTurn = true;
   removeFromAllZones(state, cardId);
   state.runner.scoreArea.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "scoreArea" } };
@@ -2134,6 +2147,11 @@ function finishRun(state: GameState, successful: boolean): void {
 }
 
 function endTurn(state: GameState, side: Side): void {
+  if (side === "runner") {
+    const flags = ensureRunnerTurnFlags(state);
+    flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
+    flags.stoleAgendaThisTurn = false;
+  }
   startDiscardPhase(state, side);
 }
 
@@ -2193,6 +2211,9 @@ function startRunnerTurn(state: GameState): void {
   state.timingPoint = "runner_action.main";
   state.runner.clicks = 4;
   state.corp.clicks = 0;
+  const flags = ensureRunnerTurnFlags(state);
+  flags.stoleAgendaThisTurn = false;
+  flags.stoleAgendaLastTurn = false;
   refreshRecurringCredits(state, "runner");
 }
 
@@ -2699,6 +2720,10 @@ function sanitizeId(value: string): string {
 
 function requireRunnerTagged(state: GameState): void {
   if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+}
+
+function runnerStoleAgendaLastTurn(state: GameState): boolean {
+  return state.runnerTurnFlags?.stoleAgendaLastTurn === true;
 }
 
 function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction): void {
@@ -4219,6 +4244,14 @@ function ensureSpecialZones(state: GameState): SpecialZoneState {
   state.specialZones.setAside ??= [];
   state.specialZones.removedFromGame ??= [];
   return state.specialZones;
+}
+
+function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerTurnFlags"]> {
+  state.runnerTurnFlags ??= {
+    stoleAgendaThisTurn: false,
+    stoleAgendaLastTurn: false
+  };
+  return state.runnerTurnFlags;
 }
 
 function moveToSpecialZone(state: GameState, legalAction: LegalAction, zone: SpecialZoneKind): void {

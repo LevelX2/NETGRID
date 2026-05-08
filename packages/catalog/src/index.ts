@@ -388,7 +388,10 @@ export const ONR_V1_2_3_RELEASE_CARD_IDS = [
   "onr_v1_081_custodial-position",
   "onr_v1_085_executive-wiretaps",
   "onr_v1_101_mit-west-tier",
-  "onr_v1_297_overtime-incentives"
+  "onr_v1_243_fetch-4-0-1",
+  "onr_v1_249_hunter",
+  "onr_v1_297_overtime-incentives",
+  "onr_v1_306_trojan-horse"
 ] as const;
 
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [...ONR_V1_0_5K_RELEASE_CARD_IDS, ...ONR_V1_0_6K_RELEASE_CARD_IDS, ...ONR_V1_1_2K_RELEASE_CARD_IDS, ...ONR_V1_2_3_RELEASE_CARD_IDS] as const;
@@ -421,8 +424,21 @@ export const DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS = [
   "onr_v1_146_zetatech-mem-chip"
 ] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS = [
+  "simple_tag_ice",
+  "onr_v1_287_datapool-by-zetatech",
+  "onr_v1_293_netwatch-credit-voucher",
+  "onr_v1_243_fetch-4-0-1",
+  "onr_v1_249_hunter",
+  "onr_v1_306_trojan-horse"
+] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
-const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS, ...DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS]);
+const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
+  ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS
+]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
 const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_IDS);
@@ -530,7 +546,10 @@ const ONR_V1_2_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_081_custodial-position": { cost: 0, installCost: null },
   "onr_v1_085_executive-wiretaps": { cost: 0, installCost: null },
   "onr_v1_101_mit-west-tier": { cost: 0, installCost: null },
-  "onr_v1_297_overtime-incentives": { cost: 0, installCost: null }
+  "onr_v1_243_fetch-4-0-1": { rezCost: 0, strength: 3 },
+  "onr_v1_249_hunter": { rezCost: 2, strength: 5 },
+  "onr_v1_297_overtime-incentives": { cost: 0, installCost: null },
+  "onr_v1_306_trojan-horse": { cost: 2, installCost: null }
 };
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
@@ -602,7 +621,10 @@ const ONR_V1_2_3_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_081_custodial-position": "Make a run on R&D. If successful, access two additional cards from R&D.",
   "onr_v1_085_executive-wiretaps": "Make a run on HQ. If successful, access two additional cards from HQ.",
   "onr_v1_101_mit-west-tier": "Shuffle your grip, heap and stack together, draw five cards, then remove MIT West Tier from the game.",
-  "onr_v1_297_overtime-incentives": "Gain two actions."
+  "onr_v1_243_fetch-4-0-1": "[Subroutine] Trace 3 - If trace is successful, give Runner a tag.",
+  "onr_v1_249_hunter": "[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
+  "onr_v1_297_overtime-incentives": "Gain two actions.",
+  "onr_v1_306_trojan-horse": "Play only if Runner stole any agendas during his or her last turn. Give Runner a tag."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
