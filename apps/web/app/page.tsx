@@ -1024,6 +1024,7 @@ export default function Page() {
   const [lobby, setLobby] = useState<LobbyClientPayload | null>(null);
   const [lobbyChatText, setLobbyChatText] = useState("");
   const [simulation, setSimulation] = useState<AiSimulationSummary | null>(null);
+  const [simulationPending, setSimulationPending] = useState(false);
   const [connection, setConnection] = useState<"offline" | "connecting" | "online">("offline");
   const [notice, setNotice] = useState("");
   const [catalogSearch, setCatalogSearch] = useState("");
@@ -1385,6 +1386,25 @@ export default function Page() {
     testSetupMode
   });
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
+  const visibleDeckMetadataEntries =
+    gameMode === "ai_vs_ai"
+      ? aiDeckPolicy === "selected"
+        ? [
+            { label: "Runner-KI", metadata: participantARunnerMetadata },
+            { label: "Korp-KI", metadata: participantACorpMetadata }
+          ]
+        : []
+      : [
+          { label: "A Runner", metadata: participantARunnerMetadata },
+          { label: "A Korp", metadata: participantACorpMetadata },
+          ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
+            ? []
+            : [
+                { label: hasAiOpponent ? "KI Runner" : "B Runner", metadata: participantBRunnerMetadata },
+                { label: hasAiOpponent ? "KI Korp" : "B Korp", metadata: participantBCorpMetadata }
+              ])
+        ];
+  const simulationStatusText = simulationPending ? "Simulation läuft..." : gameMode === "ai_vs_ai" ? notice : "";
   const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
   const selectedDeckDirty = selectedLocalDeck ? savedDeckFingerprints[selectedLocalDeck.deckId] !== deckFingerprint(selectedLocalDeck) : false;
   const playableCatalogCards = useMemo(
@@ -1683,16 +1703,11 @@ export default function Page() {
 
   const runSimulation = async () => {
     setNotice("");
-    let deckPayload: Record<string, unknown>;
+    setSimulation(null);
+    setSimulationPending(true);
     try {
-      deckPayload = await matchDeckPayload();
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Deckauswahl ist nicht matchstartfähig.");
-      return;
-    }
-    let result: { summary: AiSimulationSummary };
-    try {
-      result = await postJson<{ summary: AiSimulationSummary }>("/api/simulations/ai-vs-ai", {
+      const deckPayload = await matchDeckPayload();
+      const result = await postJson<{ summary?: AiSimulationSummary; error?: { message: string } }>("/api/simulations/ai-vs-ai", {
         seed,
         runnerDifficulty,
         corpDifficulty,
@@ -1700,12 +1715,21 @@ export default function Page() {
         agendaPointsToWin: effectiveAgendaTarget,
         maxActions: 120
       });
+      if (result.error) {
+        setNotice(result.error.message);
+        return;
+      }
+      if (!result.summary) {
+        setNotice("Simulation konnte keine Ergebnisdaten liefern.");
+        return;
+      }
+      setSimulation(result.summary);
+      setNotice("Simulation abgeschlossen.");
     } catch (error) {
       setNotice(serverErrorNotice(error, "Simulation konnte nicht gestartet werden."));
-      return;
+    } finally {
+      setSimulationPending(false);
     }
-    setSimulation(result.summary);
-    setNotice("Simulation abgeschlossen.");
   };
 
   async function matchDeckPayload() {
@@ -1733,7 +1757,7 @@ export default function Page() {
     return {
       aiDeckPolicy,
       ...(await deckSidePayload("runner", runnerDeckSource, selectedRunnerSnapshotId, selectedRunnerLocalDeckId)),
-      ...(await deckSidePayload("corp", participantBCorpDeckSource, selectedParticipantBCorpSnapshotId, selectedParticipantBCorpLocalDeckId))
+      ...(await deckSidePayload("corp", corpDeckSource, selectedCorpSnapshotId, selectedCorpLocalDeckId))
     };
   }
 
@@ -2763,42 +2787,49 @@ export default function Page() {
                   </label>
                 ) : null}
                 </div>
-                <div className="deckSlotGrid">
-                  <DeckSlotSelect
-                    label="Teilnehmer A · Runner-Deck"
-                    snapshots={runnerSnapshots}
-                    localDecks={localDecks.filter((deck) => deck.side === "runner")}
-                    source={runnerDeckSource}
-                    selectedSnapshotId={selectedRunnerSnapshotId}
-                    selectedLocalDeckId={selectedRunnerLocalDeckId}
-                    onSource={setRunnerDeckSource}
-                    onSnapshot={setSelectedRunnerSnapshotId}
-                    onLocalDeck={setSelectedRunnerLocalDeckId}
-                  />
-                  <DeckSlotSelect
-                    label="Teilnehmer A · Korp-Deck"
-                    snapshots={corpSnapshots}
-                    localDecks={localDecks.filter((deck) => deck.side === "corp")}
-                    source={corpDeckSource}
-                    selectedSnapshotId={selectedCorpSnapshotId}
-                    selectedLocalDeckId={selectedCorpLocalDeckId}
-                    onSource={setCorpDeckSource}
-                    onSnapshot={setSelectedCorpSnapshotId}
-                    onLocalDeck={setSelectedCorpLocalDeckId}
-                  />
-                  {isHumanVsHuman && !testSetupMode ? (
-                    <p className="deckHandshakeHint">Teilnehmer B wählt eigene Decks beim Beitritt.</p>
-                  ) : null}
-                </div>
+                {gameMode !== "ai_vs_ai" || aiDeckPolicy === "selected" ? (
+                  <div className="deckSlotGrid">
+                    <DeckSlotSelect
+                      label={gameMode === "ai_vs_ai" ? "Runner-KI · Runner-Deck" : "Teilnehmer A · Runner-Deck"}
+                      snapshots={runnerSnapshots}
+                      localDecks={localDecks.filter((deck) => deck.side === "runner")}
+                      source={runnerDeckSource}
+                      selectedSnapshotId={selectedRunnerSnapshotId}
+                      selectedLocalDeckId={selectedRunnerLocalDeckId}
+                      onSource={setRunnerDeckSource}
+                      onSnapshot={setSelectedRunnerSnapshotId}
+                      onLocalDeck={setSelectedRunnerLocalDeckId}
+                    />
+                    <DeckSlotSelect
+                      label={gameMode === "ai_vs_ai" ? "Korp-KI · Korp-Deck" : "Teilnehmer A · Korp-Deck"}
+                      snapshots={corpSnapshots}
+                      localDecks={localDecks.filter((deck) => deck.side === "corp")}
+                      source={corpDeckSource}
+                      selectedSnapshotId={selectedCorpSnapshotId}
+                      selectedLocalDeckId={selectedCorpLocalDeckId}
+                      onSource={setCorpDeckSource}
+                      onSnapshot={setSelectedCorpSnapshotId}
+                      onLocalDeck={setSelectedCorpLocalDeckId}
+                    />
+                    {isHumanVsHuman && !testSetupMode ? (
+                      <p className="deckHandshakeHint">Teilnehmer B wählt eigene Decks beim Beitritt.</p>
+                    ) : null}
+                  </div>
+                ) : null}
                 <div className="matchStartSummary" data-testid="match-start-summary">
                   {startSummary.map((item) => (
                     <span key={item}>{item}</span>
                   ))}
                 </div>
-                <button className="button primary wide" onClick={createMatch} data-testid="create-match">
+                <button className="button primary wide" onClick={createMatch} data-testid="create-match" disabled={simulationPending}>
                   {gameMode === "ai_vs_ai" ? <Bot size={16} /> : <UserPlus size={16} />}
-                  {gameMode === "ai_vs_ai" ? "Simulation starten" : isHumanVsHuman ? "Lobby erstellen" : "Match erstellen"}
+                  {gameMode === "ai_vs_ai" ? (simulationPending ? "Simulation läuft" : "Simulation starten") : isHumanVsHuman ? "Lobby erstellen" : "Match erstellen"}
                 </button>
+                {simulationStatusText ? (
+                  <p className="notice startFeedback" role="status" aria-live="polite">
+                    {simulationStatusText}
+                  </p>
+                ) : null}
                 <details className="advancedMatchOptions" data-testid="advanced-match-options">
                   <summary>
                     <SlidersHorizontal size={15} />
@@ -2866,7 +2897,7 @@ export default function Page() {
                       </label>
                     ) : null}
                   </div>
-                  {(isHumanVsHuman && testSetupMode) || (hasAiOpponent && aiDeckPolicy === "selected") ? (
+                  {(isHumanVsHuman && testSetupMode) || (isHumanVsAi && aiDeckPolicy === "selected") ? (
                     <div className="deckSlotGrid advancedDeckSlots">
                     <>
                       <DeckSlotSelect
@@ -2897,18 +2928,7 @@ export default function Page() {
                     </div>
                   ) : null}
                 </details>
-                <DeckMetadataLine
-                  entries={[
-                    { label: "A Runner", metadata: participantARunnerMetadata },
-                    { label: "A Korp", metadata: participantACorpMetadata },
-                    ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
-                      ? []
-                      : [
-                          { label: hasAiOpponent ? "KI Runner" : "B Runner", metadata: participantBRunnerMetadata },
-                          { label: hasAiOpponent ? "KI Korp" : "B Korp", metadata: participantBCorpMetadata }
-                        ])
-                  ]}
-                />
+                <DeckMetadataLine entries={visibleDeckMetadataEntries} />
                 {simulation ? <SimulationResult summary={simulation} /> : null}
               </div>
             ) : (

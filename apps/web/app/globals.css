@@ -1483,6 +1483,10 @@ select {
   background: var(--section-bg);
 }
 
+.startFeedback {
+  margin: 0;
+}
+
 .hashLine {
   overflow-wrap: anywhere;
 }
