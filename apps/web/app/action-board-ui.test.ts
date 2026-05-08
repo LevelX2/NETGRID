@@ -91,7 +91,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(corpInstalledCardState(card("rezzed_ice", "Wall", "ice", true))).toBe("rezzed");
   });
 
-  it("shows installed marker only on true installed corp lanes", () => {
+  it("shows installed state only for installed corp lanes, not Archives root cards", () => {
     expect(showInstalledCorpState("archives", "root")).toBe(false);
     expect(showInstalledCorpState("archives", "ice")).toBe(true);
     expect(showInstalledCorpState("hq", "root")).toBe(true);
@@ -111,7 +111,6 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(corpSplit.faceupCards.map((entry) => entry.instanceId)).toEqual(["archive_a", "archive_b"]);
     expect(corpSplit.facedownCount).toBe(1);
   });
-
   it("keeps cue position local, resettable and clamped", () => {
     expect(parseCuePositionPreference(null)).toEqual(DEFAULT_CUE_POSITION);
     expect(parseCuePositionPreference(JSON.stringify({ kind: "preset", preset: "center" }))).toEqual({ kind: "preset", preset: "center" });

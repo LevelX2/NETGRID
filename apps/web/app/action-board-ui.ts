@@ -378,7 +378,6 @@ export function splitArchiveCardsForDisplay(
     facedownCount: Math.max(0, totalArchivesCount - faceupCards.length)
   };
 }
-
 export function parseCuePositionPreference(raw: string | null): CuePositionPreference {
   if (!raw) return DEFAULT_CUE_POSITION;
   try {

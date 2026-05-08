@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import { createRuntimeCardsById, DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS } from "@netgrid/catalog";
-import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, replayEvents } from "@netgrid/engine";
+import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
 import {
   assertAiInputIsSideSafe,
+  beliefStateInvariantSignature,
   buildObservedFacts,
   buildAiDecisionInput,
   chooseAiAction,
@@ -25,9 +26,16 @@ import {
   evaluateRemoteThreat,
   evaluateRunnerRig,
   evaluateServerAccessValue,
+  evaluateV143TuningGate,
+  listV143BenchmarkProfiles,
+  listV143ExploitFixtures,
+  createBeliefSimulationWorld,
+  runV143ExploitRegressionFixtures,
+  runV143SimulationLeague,
   generateCorpPlanCandidates,
   generateRunnerPlanCandidates,
   runnerPlanUsesOnlyAiSupportedCards,
+  reconstructBeliefState,
   chooseRunnerAction,
   simulateAiGame,
   simulateAiSoak
@@ -936,6 +944,279 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(plannedCorp.replayOk).toBe(true);
     expect(plannedCorp.actionSequence.some((entry) => entry.reasonCode.startsWith("runner.plan."))).toBe(true);
     expect(plannedCorp.actionSequence.some((entry) => entry.reasonCode.startsWith("corp.plan."))).toBe(true);
+  });
+});
+
+describe("V1.4.2 belief state and opponent model", () => {
+  it("reconstructs deterministic side-safe belief knowledge kinds with hypotheses", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-kinds" }));
+    putCorpRootInRemote(state, "simple_agenda", 1);
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const belief = reconstructBeliefState(input);
+    const kinds = new Set(belief.entries.map((entry) => entry.kind));
+
+    expect(kinds.has("own_private_fact")).toBe(true);
+    expect(kinds.has("public_fact")).toBe(true);
+    expect(kinds.has("revealed_opponent_fact")).toBe(true);
+    expect(kinds.has("hypothesis")).toBe(true);
+    expect(kinds.has("unknown")).toBe(true);
+    expect(belief.assumptions).toContain("belief_state_reconstructed_from_side_safe_history");
+    expect(JSON.stringify(belief)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
+  });
+
+  it("keeps hidden-state invariance and deterministic signature for equal projections", () => {
+    const stateA = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-invariance" }));
+    const stateB = structuredClone(stateA);
+    const hiddenId = stateA.corp.rd[0];
+    expect(hiddenId).toBeDefined();
+    if (!hiddenId) throw new Error("Missing hidden R&D card");
+    stateA.cardInstances[hiddenId] = { ...stateA.cardInstances[hiddenId]!, definitionId: "simple_agenda", faceup: false, rezzed: false };
+    stateB.cardInstances[hiddenId] = { ...stateB.cardInstances[hiddenId]!, definitionId: "simple_economy_asset", faceup: false, rezzed: false };
+
+    const beliefA = reconstructBeliefState(buildAiDecisionInput(stateA, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+    const beliefB = reconstructBeliefState(buildAiDecisionInput(stateB, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+
+    expect(JSON.stringify(getPlayerView(stateA, "runner"))).toBe(JSON.stringify(getPlayerView(stateB, "runner")));
+    expect(beliefStateInvariantSignature(beliefA)).toBe(beliefStateInvariantSignature(beliefB));
+    expect(JSON.stringify(beliefA)).not.toMatch(/simple_agenda|simple_economy_asset|cardInstances|privatePayload/);
+  });
+
+  it("tracks R&D access freshness and invalidates after Corp draw, then reconstructs after undo-like rollback", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-rnd-freshness" }));
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    if (getLegalActions(state, "runner").some((action) => action.type === "trash_accessed_card")) {
+      state = apply(state, "runner", (action) => action.type === "decline_trash");
+    }
+    if (getLegalActions(state, "runner").some((action) => action.type === "continue_run" || action.type === "jack_out")) {
+      state = apply(state, "runner", (action) => action.type === "continue_run" || action.type === "jack_out");
+    }
+    const staleState = structuredClone(state);
+    const staleBelief = reconstructBeliefState(buildAiDecisionInput(staleState, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+    expect(staleBelief.runnerOpponentModel?.rndTopFreshness.freshness).toBe("stale_known_same_top");
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const invalidatedBelief = reconstructBeliefState(buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+    expect(invalidatedBelief.runnerOpponentModel?.rndTopFreshness.freshness).toBe("invalidated");
+    expect(invalidatedBelief.runnerOpponentModel?.rndTopFreshness.invalidationReasons.join("|")).toContain("corp_draw_from_rd");
+
+    const reconstructedAfterUndo = reconstructBeliefState(buildAiDecisionInput(staleState, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+    expect(reconstructedAfterUndo.runnerOpponentModel?.rndTopFreshness.freshness).toBe("stale_known_same_top");
+  });
+
+  it("applies R&D repeat-access penalty only while top-card freshness is stale", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-rnd-penalty" }));
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    if (getLegalActions(state, "runner").some((action) => action.type === "trash_accessed_card")) {
+      state = apply(state, "runner", (action) => action.type === "decline_trash");
+    }
+    if (getLegalActions(state, "runner").some((action) => action.type === "continue_run" || action.type === "jack_out")) {
+      state = apply(state, "runner", (action) => action.type === "continue_run" || action.type === "jack_out");
+    }
+
+    const staleInput = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const staleBelief = reconstructBeliefState(staleInput);
+    const pressureCandidate = generateRunnerPlanCandidates(staleInput).find((candidate) => candidate.kind === "pressure_rnd");
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_rnd candidate");
+    const staleScore = evaluateServerAccessValue(staleInput, pressureCandidate, staleBelief);
+
+    const syntheticInvalidation: PublicGameEvent = {
+      eventId: "v142-corp-draw-synthetic",
+      type: "mandatory_draw",
+      stateVersionBefore: staleInput.playerView.stateVersion,
+      stateVersionAfter: staleInput.playerView.stateVersion + 1,
+      stateHashAfter: "fnv1a:v142invalidated",
+      visibilityClass: "private_to_side",
+      publicPayload: { actor: "corp", actionType: "mandatory_draw", label: "Korp Pflichtkarte ziehen" }
+    };
+    const invalidatedInput = { ...staleInput, eventTail: [...staleInput.eventTail, syntheticInvalidation] };
+    const invalidatedBelief = reconstructBeliefState(invalidatedInput);
+    const invalidatedScore = evaluateServerAccessValue(invalidatedInput, pressureCandidate, invalidatedBelief);
+
+    expect(staleBelief.runnerOpponentModel?.rndTopFreshness.freshness).toBe("stale_known_same_top");
+    expect(invalidatedBelief.runnerOpponentModel?.rndTopFreshness.freshness).toBe("invalidated");
+    expect(staleScore.reasons).toContain("known_rnd_top_not_fresh");
+    expect(invalidatedScore.score).toBeGreaterThan(staleScore.score);
+  });
+
+  it("provides Corp and Runner opponent models and keeps DecisionDebug side-safe", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-opponent-models" }));
+    const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const corpInput = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.2-normal" });
+    const runnerBelief = reconstructBeliefState(runnerInput);
+    const corpBelief = reconstructBeliefState(corpInput);
+    const runnerDecision = chooseRunnerAction(runnerInput);
+    const corpDecision = chooseCorpAction(corpInput);
+    const serializedDebug = JSON.stringify({ runner: runnerDecision.decisionDebug, corp: corpDecision.decisionDebug });
+
+    expect(runnerBelief.runnerOpponentModel).toBeDefined();
+    expect(corpBelief.corpOpponentModel).toBeDefined();
+    expect(runnerBelief.runnerOpponentModel?.corpPlanEstimate).toBeDefined();
+    expect(corpBelief.corpOpponentModel?.runnerThreatModel).toBeDefined();
+    expect(serializedDebug).toContain("memoryVersion");
+    expect(serializedDebug).toContain("facts");
+    expect(serializedDebug).toContain("hypotheses");
+    expect(serializedDebug).toContain("beliefUncertainty");
+    expect(serializedDebug).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
+  });
+
+  it("does not mutate real game state hash while building belief state and choosing actions", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-statehash-isolation" }));
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const beforeHash = hashState(state);
+
+    const belief = reconstructBeliefState(input);
+    const decision = chooseRunnerAction(input);
+    const afterHash = hashState(state);
+
+    expect(belief.version).toMatch(/^belief-v1\.4\.2:/);
+    expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
+    expect(beforeHash).toBe(afterHash);
+  });
+});
+
+describe("V1.4.3 simulation, selfplay and exploit regression", () => {
+  it("provides versioned benchmark profiles and exploit fixtures", () => {
+    const profiles = listV143BenchmarkProfiles();
+    const fixtures = listV143ExploitFixtures();
+
+    expect(profiles.map((profile) => profile.benchmarkProfileId)).toEqual([
+      "random_legal_bot",
+      "basic_corp_ai",
+      "basic_runner_ai",
+      "plan_corp_v1_4_0",
+      "plan_runner_v1_4_1",
+      "belief_ai_v1_4_2",
+      "current_candidate"
+    ]);
+    expect(fixtures.map((fixture) => fixture.fixtureId)).toEqual(["v143-rnd-repeat-access-freshness", "v143-visible-etr-blocker-no-repeat-run"]);
+    expect(fixtures.every((fixture) => fixture.hiddenInfoSafe)).toBe(true);
+  });
+
+  it("builds a redaction-safe belief simulation world", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v143-belief-world" }));
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const world = createBeliefSimulationWorld(input, "v143-world-seed");
+
+    expect(world.sourceBeliefVersion).toMatch(/^belief-v1\.4\.2:/);
+    expect(world.worldId).toContain("simworld:runner");
+    expect(world.seed).toBe("v143-world-seed");
+    expect(world.redactionSafe).toBe(true);
+    expect(JSON.stringify(world)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
+  });
+
+  it("keeps simulation deterministic by simulation RNG and isolated from real match state", () => {
+    const state = createGameAfterSetup({ seed: "ai-v143-isolation-source" });
+    const beforeHash = hashState(state);
+    const beforeEvents = state.eventLog.length;
+
+    const first = simulateAiGame({
+      seed: "ai-v143-rng-deterministic",
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 70,
+      runnerControllerMode: "random_legal_bot",
+      corpControllerMode: "random_legal_bot",
+      simulationRngSeed: "v143-rng-a"
+    });
+    const second = simulateAiGame({
+      seed: "ai-v143-rng-deterministic",
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 70,
+      runnerControllerMode: "random_legal_bot",
+      corpControllerMode: "random_legal_bot",
+      simulationRngSeed: "v143-rng-a"
+    });
+    const otherRng = simulateAiGame({
+      seed: "ai-v143-rng-deterministic",
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 70,
+      runnerControllerMode: "random_legal_bot",
+      corpControllerMode: "random_legal_bot",
+      simulationRngSeed: "v143-rng-b"
+    });
+
+    expect(first.errors).toEqual([]);
+    expect(first.replayOk).toBe(true);
+    expect(first.actionSequence).toEqual(second.actionSequence);
+    expect(first.finalStateHash).toBe(second.finalStateHash);
+    expect(first.actionSequence.map((entry) => entry.stateHashAfter)).not.toEqual(otherRng.actionSequence.map((entry) => entry.stateHashAfter));
+    expect(hashState(state)).toBe(beforeHash);
+    expect(state.eventLog.length).toBe(beforeEvents);
+  });
+
+  it("runs a local V1.4.3 league with holdout separation and metrics", () => {
+    const league = runV143SimulationLeague({
+      includeHoldout: false,
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 50
+    });
+
+    expect(league.version).toBe("1.4.3");
+    expect(league.tuningSeeds.length).toBeGreaterThan(0);
+    expect(league.holdoutSeeds.length).toBeGreaterThan(0);
+    expect(league.profiles.length).toBe(7);
+    expect(league.profiles.every((profile) => profile.games === league.tuningSeeds.length)).toBe(true);
+    expect(league.profiles.every((profile) => profile.illegalActions === 0)).toBe(true);
+    expect(league.profiles.every((profile) => profile.replayFailures === 0)).toBe(true);
+    expect(JSON.stringify(league)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
+  });
+
+  it("evaluates holdout tuning gate for regression and improvement", () => {
+    const baseline: Parameters<typeof evaluateV143TuningGate>[0] = {
+      simulationId: "baseline",
+      benchmarkProfile: "current_candidate",
+      games: 20,
+      illegalActions: 0,
+      timeouts: 0,
+      fallbackRate: 0.2,
+      winRates: { runner: 0.45, corp: 0.45, draw: 0.1, action_limit_reached: 0 },
+      agendaPoints: { runner: 35, corp: 38 },
+      averageActions: 55,
+      replayFailures: 0,
+      notableExploitRefs: [],
+      summaries: []
+    };
+    const regressed = {
+      ...baseline,
+      simulationId: "regressed",
+      illegalActions: 1
+    };
+    const improved = {
+      ...baseline,
+      simulationId: "improved",
+      fallbackRate: 0.15,
+      winRates: { ...baseline.winRates, runner: 0.5 }
+    };
+
+    const gateRegression = evaluateV143TuningGate(regressed, baseline);
+    const gateImproved = evaluateV143TuningGate(improved, baseline);
+
+    expect(gateRegression.accepted).toBe(false);
+    expect(gateRegression.reason).toBe("holdout_regression_on_safety_or_replay");
+    expect(gateImproved.accepted).toBe(true);
+    expect(gateImproved.reason).toBe("holdout_improved_or_stable");
+  });
+
+  it("runs persistent exploit fixtures as deterministic regression checks", () => {
+    const fixtures = listV143ExploitFixtures();
+    const results = runV143ExploitRegressionFixtures({
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 80
+    });
+
+    expect(results.map((result) => result.fixtureId).sort()).toEqual(fixtures.map((fixture) => fixture.fixtureId).sort());
+    expect(results.every((result) => result.passed)).toBe(true);
+    expect(JSON.stringify(results)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
   });
 });
 

@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-05-08T19:25:31.679Z",
+  "target": "http://127.0.0.1:3100/replays",
+  "checks": [
+    {
+      "name": "heading",
+      "ok": true
+    },
+    {
+      "name": "replay_select",
+      "ok": true
+    },
+    {
+      "name": "perspective_select",
+      "ok": true
+    },
+    {
+      "name": "export_runner_button",
+      "ok": true
+    },
+    {
+      "name": "export_corp_button",
+      "ok": true
+    }
+  ],
+  "allPassed": true
+}

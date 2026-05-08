@@ -4,6 +4,7 @@ import aiCardHintsData from "../../../data/ai/ai-card-hints-1.3.1.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
 import type { AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
 
 export type CorpPlanKind =
   | "score_now"
@@ -54,6 +55,12 @@ export type CorpPlanDebug = {
   profileId: string;
   timeBudgetMs: number;
   timeoutUsed: boolean;
+  memoryVersion?: string;
+  facts?: string[];
+  hypotheses?: string[];
+  invalidations?: string[];
+  beliefUncertainty?: string[];
+  opponentModel?: Record<string, unknown>;
 };
 
 export type CorpPlanDecision = {
@@ -163,21 +170,24 @@ export function chooseCorpPlanAction(input: AiDecisionInput, fallbackDecision: A
 
 export function chooseCorpPlanDecision(input: AiDecisionInput, options: { timeBudgetMs?: number } = {}): CorpPlanDecision {
   const profile = corpPlanProfile(input);
+  const beliefState = reconstructBeliefState(input);
   const timeBudgetMs = options.timeBudgetMs ?? profile.timeBudgetMs;
   if (timeBudgetMs <= 0) {
-    return fallbackPlanDecision(input, "time_budget_exhausted", timeBudgetMs, true);
+    return fallbackPlanDecision(input, "time_budget_exhausted", timeBudgetMs, true, beliefState);
   }
   const candidates = generateCorpPlanCandidates(input).slice(0, profile.planBreadth);
   if (candidates.length === 0) {
-    return fallbackPlanDecision(input, "no_plan_candidate", timeBudgetMs, false);
+    return fallbackPlanDecision(input, "no_plan_candidate", timeBudgetMs, false, beliefState);
   }
   const scored = candidates
-    .map((candidate) => ({ candidate, score: evaluateCorpPlan(input, candidate) }))
+    .map((candidate) => ({ candidate, score: evaluateCorpPlan(input, candidate, beliefState) }))
     .sort((left, right) => right.score.score - left.score.score || left.candidate.planId.localeCompare(right.candidate.planId));
   const selected = scored[0];
-  if (!selected) return fallbackPlanDecision(input, "no_scored_plan", timeBudgetMs, false);
+  if (!selected) return fallbackPlanDecision(input, "no_scored_plan", timeBudgetMs, false, beliefState);
   const action = selectPlanAction(input, selected.candidate);
-  if (!action) return fallbackPlanDecision(input, "plan_without_legal_action", timeBudgetMs, false);
+  if (!action) return fallbackPlanDecision(input, "plan_without_legal_action", timeBudgetMs, false, beliefState);
+  const beliefSummary = beliefDebugSummary(beliefState);
+  const opponentModel = toRecord(beliefSummary.corpOpponentModel);
   return {
     selectedPlanId: selected.candidate.planId,
     selectedActionId: action.actionId,
@@ -197,7 +207,13 @@ export function chooseCorpPlanDecision(input: AiDecisionInput, options: { timeBu
       seed: input.seed,
       profileId: profile.profileId,
       timeBudgetMs,
-      timeoutUsed: false
+      timeoutUsed: false,
+      memoryVersion: String(beliefSummary.memoryVersion ?? ""),
+      facts: toStringArray(beliefSummary.facts),
+      hypotheses: toStringArray(beliefSummary.hypotheses),
+      invalidations: toStringArray(beliefSummary.invalidations),
+      beliefUncertainty: toStringArray(beliefSummary.uncertainty),
+      ...(opponentModel ? { opponentModel } : {})
     }
   };
 }
@@ -232,14 +248,14 @@ export function generateCorpPlanCandidates(input: AiDecisionInput): CorpPlanCand
   ].filter((candidate): candidate is CorpPlanCandidate => candidate !== null);
 }
 
-export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCandidate): CorpPlanScore {
+export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): CorpPlanScore {
   const profile = corpPlanProfile(input);
   const agendaRisk = evaluateAgendaRisk(input, candidate);
-  const serverThreat = evaluateServerThreat(input, candidate);
+  const serverThreat = evaluateServerThreat(input, candidate, beliefState);
   const economyReserve = evaluateEconomyReserve(input, candidate);
   const iceRez = evaluateIceRez(input, candidate);
   const scoringWindow = evaluateScoringWindow(input, candidate);
-  const remoteIntent = evaluateRemoteIntentMemory(input);
+  const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
   const base = baseScoreForPlan(candidate.kind);
   const score =
     base +
@@ -260,7 +276,9 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     ...economyReserve.evidence,
     ...iceRez.evidence,
     ...scoringWindow.evidence,
-    ...remoteIntent.evidence
+    ...remoteIntent.evidence,
+    `belief_version:${beliefState.version}`,
+    ...(beliefState.corpOpponentModel ? [`runner_contest_probability:${round(beliefState.corpOpponentModel.remoteContestProbability)}`] : [])
   ];
   return {
     planId: candidate.planId,
@@ -283,13 +301,14 @@ export function evaluateAgendaRisk(input: AiDecisionInput, candidate: CorpPlanCa
   };
 }
 
-export function evaluateServerThreat(input: AiDecisionInput, candidate: CorpPlanCandidate): CorpPlanEvaluatorResult {
+export function evaluateServerThreat(input: AiDecisionInput, candidate: CorpPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): CorpPlanEvaluatorResult {
   const features = extractCorpPlanFeatures(input);
-  const memory = evaluateRemoteIntentMemory(input);
+  const memory = evaluateRemoteIntentMemory(input, beliefState);
+  const threatModel = beliefState.corpOpponentModel?.runnerThreatModel;
   const hq = features.serverFeatures.get("hq");
   const rd = features.serverFeatures.get("rd");
-  const hqThreat = memory.centralRunSignals.hq * 45 - (hq?.iceCount ?? 0) * 25;
-  const rdThreat = memory.centralRunSignals.rd * 45 - (rd?.iceCount ?? 0) * 25;
+  const hqThreat = memory.centralRunSignals.hq * 45 - (hq?.iceCount ?? 0) * 25 + (threatModel?.hqPressure ?? 0) * 40;
+  const rdThreat = memory.centralRunSignals.rd * 45 - (rd?.iceCount ?? 0) * 25 + (threatModel?.rndPressure ?? 0) * 40;
   const score =
     candidate.kind === "protect_hq"
       ? 120 + hqThreat
@@ -301,7 +320,7 @@ export function evaluateServerThreat(input: AiDecisionInput, candidate: CorpPlan
   return {
     score,
     reasons: ["server_threat_from_visible_board"],
-    evidence: [`hq_ice:${hq?.iceCount ?? 0}`, `rd_ice:${rd?.iceCount ?? 0}`, `hq_runs:${memory.centralRunSignals.hq}`, `rd_runs:${memory.centralRunSignals.rd}`]
+    evidence: [`hq_ice:${hq?.iceCount ?? 0}`, `rd_ice:${rd?.iceCount ?? 0}`, `hq_runs:${memory.centralRunSignals.hq}`, `rd_runs:${memory.centralRunSignals.rd}`, `runner_remote_pressure:${round(threatModel?.remotePressure ?? 0)}`]
   };
 }
 
@@ -340,7 +359,7 @@ export function evaluateScoringWindow(input: AiDecisionInput, candidate: CorpPla
   };
 }
 
-export function evaluateRemoteIntentMemory(input: AiDecisionInput): RemoteIntentMemory {
+export function evaluateRemoteIntentMemory(input: AiDecisionInput, beliefState: BeliefState = reconstructBeliefState(input)): RemoteIntentMemory {
   let remoteInstallSignals = 0;
   let remoteAdvanceSignals = 0;
   let remoteScoreSignals = 0;
@@ -360,7 +379,12 @@ export function evaluateRemoteIntentMemory(input: AiDecisionInput): RemoteIntent
     remoteAdvanceSignals,
     remoteScoreSignals,
     centralRunSignals,
-    evidence: [`remote_installs:${remoteInstallSignals}`, `remote_advances:${remoteAdvanceSignals}`, `remote_scores:${remoteScoreSignals}`]
+    evidence: [
+      `remote_installs:${remoteInstallSignals}`,
+      `remote_advances:${remoteAdvanceSignals}`,
+      `remote_scores:${remoteScoreSignals}`,
+      `runner_remote_contest_probability:${round(beliefState.corpOpponentModel?.remoteContestProbability ?? 0)}`
+    ]
   };
 }
 
@@ -476,9 +500,9 @@ function corpPlanProfile(input: AiDecisionInput): CorpPlanProfile {
   );
 }
 
-function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudgetMs: number, timeoutUsed: boolean): CorpPlanDecision {
+function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudgetMs: number, timeoutUsed: boolean, beliefState: BeliefState): CorpPlanDecision {
   const fallbackAction = input.legalActions.slice().sort(compareAction)[0];
-  const debug = fallbackDebug(input, undefined, reason, timeBudgetMs, timeoutUsed);
+  const debug = fallbackDebug(input, undefined, reason, timeBudgetMs, timeoutUsed, beliefState);
   return {
     selectedPlanId: "fallback",
     selectedActionId: fallbackAction?.actionId ?? "",
@@ -495,8 +519,17 @@ function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudget
   };
 }
 
-function fallbackDebug(input: AiDecisionInput, fallbackDecision: AiDecision | undefined, reason: string, timeBudgetMs: number | undefined, timeoutUsed = false): CorpPlanDebug {
+function fallbackDebug(
+  input: AiDecisionInput,
+  fallbackDecision: AiDecision | undefined,
+  reason: string,
+  timeBudgetMs: number | undefined,
+  timeoutUsed = false,
+  beliefState: BeliefState = reconstructBeliefState(input)
+): CorpPlanDebug {
   const fallbackAction = fallbackDecision ? input.legalActions.find((action) => action.actionId === fallbackDecision.actionId) : input.legalActions.slice().sort(compareAction)[0];
+  const beliefSummary = beliefDebugSummary(beliefState);
+  const opponentModel = toRecord(beliefSummary.corpOpponentModel);
   return {
     aiLevel: 2,
     planId: "fallback",
@@ -510,14 +543,28 @@ function fallbackDebug(input: AiDecisionInput, fallbackDecision: AiDecision | un
     seed: input.seed,
     profileId: corpPlanProfile(input).profileId,
     timeBudgetMs: timeBudgetMs ?? corpPlanProfile(input).timeBudgetMs,
-    timeoutUsed
+    timeoutUsed,
+    memoryVersion: String(beliefSummary.memoryVersion ?? ""),
+    facts: toStringArray(beliefSummary.facts),
+    hypotheses: toStringArray(beliefSummary.hypotheses),
+    invalidations: toStringArray(beliefSummary.invalidations),
+    beliefUncertainty: toStringArray(beliefSummary.uncertainty),
+    ...(opponentModel ? { opponentModel } : {})
   };
 }
 
 function serverIdFromEvent(event: PublicGameEvent): string | undefined {
   const payload = event.publicPayload;
   const candidate = payload.serverId ?? payload.attackedServerId ?? payload.server ?? payload.targetServerId;
-  return typeof candidate === "string" ? candidate : undefined;
+  if (typeof candidate === "string") return candidate;
+  const label = typeof payload.serverLabel === "string" ? payload.serverLabel : undefined;
+  if (!label) return undefined;
+  if (label === "HQ") return "hq";
+  if (label === "R&D" || label === "F&E (R&D)" || label === "F&E") return "rd";
+  if (label === "Archives" || label === "Archive") return "archives";
+  const remoteMatch = /^Remote\s+(\d+)$/i.exec(label);
+  if (!remoteMatch) return undefined;
+  return `remote_${remoteMatch[1]}`;
 }
 
 function baseScoreForPlan(kind: CorpPlanKind): number {
@@ -613,6 +660,16 @@ function round(value: number): number {
 
 function roundScore(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string");
+}
+
+function toRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  return value as Record<string, unknown>;
 }
 
 function compareAction(left: LegalAction, right: LegalAction): number {

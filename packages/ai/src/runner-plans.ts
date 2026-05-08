@@ -6,6 +6,7 @@ import deckLegalBatchAAiHintsData from "../../../data/ai/ai-card-hints-deck-lega
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
 import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
+import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
 
 export type RunnerPlanKind =
   | "pressure_rnd"
@@ -59,6 +60,12 @@ export type RunnerPlanDebug = {
   profileId: string;
   timeBudgetMs: number;
   timeoutUsed: boolean;
+  memoryVersion?: string;
+  facts?: string[];
+  hypotheses?: string[];
+  invalidations?: string[];
+  beliefUncertainty?: string[];
+  opponentModel?: Record<string, unknown>;
 };
 
 export type RunnerPlanDecision = {
@@ -164,17 +171,20 @@ export function chooseRunnerPlanAction(input: AiDecisionInput, fallbackDecision:
 
 export function chooseRunnerPlanDecision(input: AiDecisionInput, options: { timeBudgetMs?: number } = {}): RunnerPlanDecision {
   const profile = runnerPlanProfile(input);
+  const beliefState = reconstructBeliefState(input);
   const timeBudgetMs = options.timeBudgetMs ?? profile.timeBudgetMs;
-  if (timeBudgetMs <= 0) return fallbackPlanDecision(input, "time_budget_exhausted", timeBudgetMs, true);
+  if (timeBudgetMs <= 0) return fallbackPlanDecision(input, "time_budget_exhausted", timeBudgetMs, true, beliefState);
   const candidates = generateRunnerPlanCandidates(input).slice(0, profile.planBreadth);
-  if (candidates.length === 0) return fallbackPlanDecision(input, "no_plan_candidate", timeBudgetMs, false);
+  if (candidates.length === 0) return fallbackPlanDecision(input, "no_plan_candidate", timeBudgetMs, false, beliefState);
   const scored = candidates
-    .map((candidate) => ({ candidate, score: evaluateRunnerPlan(input, candidate) }))
+    .map((candidate) => ({ candidate, score: evaluateRunnerPlan(input, candidate, beliefState) }))
     .sort((left, right) => right.score.score - left.score.score || left.candidate.planId.localeCompare(right.candidate.planId));
   const selected = scored[0];
-  if (!selected) return fallbackPlanDecision(input, "no_scored_plan", timeBudgetMs, false);
+  if (!selected) return fallbackPlanDecision(input, "no_scored_plan", timeBudgetMs, false, beliefState);
   const action = selectPlanAction(input, selected.candidate);
-  if (!action) return fallbackPlanDecision(input, "plan_without_legal_action", timeBudgetMs, false);
+  if (!action) return fallbackPlanDecision(input, "plan_without_legal_action", timeBudgetMs, false, beliefState);
+  const beliefSummary = beliefDebugSummary(beliefState);
+  const opponentModel = toRecord(beliefSummary.runnerOpponentModel);
   return {
     selectedPlanId: selected.candidate.planId,
     selectedActionId: action.actionId,
@@ -195,7 +205,13 @@ export function chooseRunnerPlanDecision(input: AiDecisionInput, options: { time
       seed: input.seed,
       profileId: profile.profileId,
       timeBudgetMs,
-      timeoutUsed: false
+      timeoutUsed: false,
+      memoryVersion: String(beliefSummary.memoryVersion ?? ""),
+      facts: toStringArray(beliefSummary.facts),
+      hypotheses: toStringArray(beliefSummary.hypotheses),
+      invalidations: toStringArray(beliefSummary.invalidations),
+      beliefUncertainty: toStringArray(beliefSummary.uncertainty),
+      ...(opponentModel ? { opponentModel } : {})
     }
   };
 }
@@ -241,13 +257,13 @@ export function generateRunnerPlanCandidates(input: AiDecisionInput): RunnerPlan
   ].filter((candidate): candidate is RunnerPlanCandidate => candidate !== null);
 }
 
-export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanScore {
+export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanScore {
   const profile = runnerPlanProfile(input);
   const rig = evaluateRunnerRig(input, candidate);
   const runCost = estimateRunCost(input, candidate);
-  const access = evaluateServerAccessValue(input, candidate);
-  const remote = evaluateRemoteThreat(input, candidate);
-  const corpThreat = evaluateCorpScoringThreat(input, candidate);
+  const access = evaluateServerAccessValue(input, candidate, beliefState);
+  const remote = evaluateRemoteThreat(input, candidate, beliefState);
+  const corpThreat = evaluateCorpScoringThreat(input, candidate, beliefState);
   const easyRunPenalty = input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
     baseScoreForPlan(candidate.kind) +
@@ -271,7 +287,9 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ...runCost.evidence,
       ...access.evidence,
       ...remote.evidence,
-      ...corpThreat.evidence
+      ...corpThreat.evidence,
+      `belief_version:${beliefState.version}`,
+      ...(beliefState.runnerOpponentModel ? [`belief_credit_reserve:${beliefState.runnerOpponentModel.corpCreditReserveInterpretation}`] : [])
     ])
   };
 }
@@ -308,14 +326,16 @@ export function estimateRunCost(input: AiDecisionInput, candidate: RunnerPlanCan
   };
 }
 
-export function evaluateServerAccessValue(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
+export function evaluateServerAccessValue(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanEvaluatorResult {
   const features = extractRunnerFeatures(input);
   const target = targetServerId(input, candidate);
   const server = target ? features.serverFeatures.get(target) : undefined;
   const history = publicServerMentions(input, target);
+  const freshness = beliefState.runnerOpponentModel?.rndTopFreshness;
+  const staleRndPenalty = target === "rd" && (candidate.kind === "pressure_rnd" || candidate.kind === "safe_probe_run") && freshness?.freshness === "stale_known_same_top" ? 120 : 0;
   const score =
     candidate.kind === "pressure_rnd"
-      ? 135 + history * 10
+      ? 135 + history * 10 - staleRndPenalty
     : candidate.kind === "pressure_hq"
         ? 110 + Math.max(0, 5 - input.playerView.opponent.handCount) * 4 + history * 8
         : candidate.kind === "contest_remote"
@@ -323,36 +343,53 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
           : candidate.kind === "trash_asset"
             ? 150
             : candidate.kind === "safe_probe_run"
-              ? 55
+              ? 55 - staleRndPenalty * 0.4
               : 0;
+  const reasons = ["server_value_from_visible_projection", ...(staleRndPenalty > 0 ? ["known_rnd_top_not_fresh"] : [])];
   return {
     score,
-    reasons: ["server_value_from_visible_projection"],
-    evidence: [`target:${target ?? "none"}`, `ice_count:${server?.iceCount ?? 0}`, `root_count:${server?.rootCount ?? 0}`, `known_root_count:${server?.knownRootCount ?? 0}`, `server_history:${history}`]
+    reasons,
+    evidence: [
+      `target:${target ?? "none"}`,
+      `ice_count:${server?.iceCount ?? 0}`,
+      `root_count:${server?.rootCount ?? 0}`,
+      `known_root_count:${server?.knownRootCount ?? 0}`,
+      `server_history:${history}`,
+      `rnd_freshness:${freshness?.freshness ?? "unknown"}`
+    ]
   };
 }
 
-export function evaluateRemoteThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
+export function evaluateRemoteThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanEvaluatorResult {
   const features = extractRunnerFeatures(input);
   const target = targetServerId(input, candidate);
   const server = target ? features.serverFeatures.get(target) : undefined;
   const remoteThreat = target?.startsWith("remote_") ? (server?.rootCount ?? 0) * 40 + (server?.advancedRootCount ?? 0) * 55 : 0;
+  const remoteBeliefBoost =
+    target?.startsWith("remote_")
+      ? Math.round(
+          (beliefState.runnerOpponentModel?.remoteCardBelief
+            .filter((belief) => belief.serverId === target)
+            .reduce((sum, belief) => sum + belief.confidence * 25, 0) ?? 0)
+        )
+      : 0;
   return {
-    score: candidate.kind === "contest_remote" ? remoteThreat + 80 : candidate.kind === "safe_probe_run" ? Math.min(30, remoteThreat) : 0,
+    score: candidate.kind === "contest_remote" ? remoteThreat + 80 + remoteBeliefBoost : candidate.kind === "safe_probe_run" ? Math.min(30, remoteThreat) : 0,
     reasons: remoteThreat > 0 ? ["remote_threat_visible"] : ["remote_threat_uncertain"],
-    evidence: [`remote_target:${target?.startsWith("remote_") ? target : "none"}`, `advanced_roots:${server?.advancedRootCount ?? 0}`]
+    evidence: [`remote_target:${target?.startsWith("remote_") ? target : "none"}`, `advanced_roots:${server?.advancedRootCount ?? 0}`, `remote_belief_boost:${remoteBeliefBoost}`]
   };
 }
 
-export function evaluateCorpScoringThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
+export function evaluateCorpScoringThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanEvaluatorResult {
   const corpAgenda = input.playerView.opponent.agendaPoints;
   const toWin = input.playerView.agendaPointsToWin;
   const pressureNeeded = toWin - corpAgenda <= 3;
-  const score = candidate.kind === "contest_remote" && pressureNeeded ? 80 : isRunPlan(candidate.kind) && pressureNeeded ? 35 : 0;
+  const scoringTrend = beliefState.runnerOpponentModel?.corpPlanEstimate.scoring ?? 0;
+  const score = candidate.kind === "contest_remote" && pressureNeeded ? 80 + scoringTrend * 35 : isRunPlan(candidate.kind) && pressureNeeded ? 35 + scoringTrend * 20 : 0;
   return {
     score,
     reasons: pressureNeeded ? ["corp_near_scoring_threshold"] : ["corp_scoring_threshold_not_immediate"],
-    evidence: [`corp_agenda:${corpAgenda}`, `agenda_to_win:${toWin}`, `corp_credits:${input.playerView.opponent.credits}`]
+    evidence: [`corp_agenda:${corpAgenda}`, `agenda_to_win:${toWin}`, `corp_credits:${input.playerView.opponent.credits}`, `corp_scoring_trend:${round(scoringTrend)}`]
   };
 }
 
@@ -521,7 +558,15 @@ function publicServerMentions(input: AiDecisionInput, serverId: string | undefin
 
 function serverIdFromEvent(event: PublicGameEvent): string | undefined {
   const candidate = event.publicPayload.serverId ?? event.publicPayload.attackedServerId ?? event.publicPayload.server ?? event.publicPayload.targetServerId;
-  return typeof candidate === "string" ? candidate : undefined;
+  if (typeof candidate === "string") return candidate;
+  const label = typeof event.publicPayload.serverLabel === "string" ? event.publicPayload.serverLabel : undefined;
+  if (!label) return undefined;
+  if (label === "HQ") return "hq";
+  if (label === "R&D" || label === "F&E (R&D)" || label === "F&E") return "rd";
+  if (label === "Archives" || label === "Archive") return "archives";
+  const remoteMatch = /^Remote\s+(\d+)$/i.exec(label);
+  if (!remoteMatch) return undefined;
+  return `remote_${remoteMatch[1]}`;
 }
 
 function isLowInformationRunTarget(features: RunnerFeatures, serverId: string): boolean {
@@ -552,7 +597,7 @@ function iceHasEndTheRun(iceDefinitionId: string): boolean {
   return Boolean(DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.some((subroutine) => subroutine.type === "end_the_run"));
 }
 
-function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudgetMs: number, timeoutUsed: boolean): RunnerPlanDecision {
+function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudgetMs: number, timeoutUsed: boolean, beliefState: BeliefState): RunnerPlanDecision {
   const fallbackAction = input.legalActions.slice().sort(compareAction)[0];
   return {
     selectedPlanId: "fallback",
@@ -560,12 +605,21 @@ function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudget
     selectedActionType: fallbackAction?.type ?? "none",
     fallbackUsed: true,
     score: { planId: "fallback", score: 0, confidence: 0.2, reasons: [reason], evidence: [reason] },
-    debug: fallbackDebug(input, undefined, reason, timeBudgetMs, timeoutUsed)
+    debug: fallbackDebug(input, undefined, reason, timeBudgetMs, timeoutUsed, beliefState)
   };
 }
 
-function fallbackDebug(input: AiDecisionInput, fallbackDecision: AiDecision | undefined, reason: string, timeBudgetMs: number | undefined, timeoutUsed = false): RunnerPlanDebug {
+function fallbackDebug(
+  input: AiDecisionInput,
+  fallbackDecision: AiDecision | undefined,
+  reason: string,
+  timeBudgetMs: number | undefined,
+  timeoutUsed = false,
+  beliefState: BeliefState = reconstructBeliefState(input)
+): RunnerPlanDebug {
   const fallbackAction = fallbackDecision ? input.legalActions.find((action) => action.actionId === fallbackDecision.actionId) : input.legalActions.slice().sort(compareAction)[0];
+  const beliefSummary = beliefDebugSummary(beliefState);
+  const opponentModel = toRecord(beliefSummary.runnerOpponentModel);
   return {
     aiLevel: 2,
     planId: "fallback",
@@ -580,7 +634,13 @@ function fallbackDebug(input: AiDecisionInput, fallbackDecision: AiDecision | un
     seed: input.seed,
     profileId: runnerPlanProfile(input).profileId,
     timeBudgetMs: timeBudgetMs ?? runnerPlanProfile(input).timeBudgetMs,
-    timeoutUsed
+    timeoutUsed,
+    memoryVersion: String(beliefSummary.memoryVersion ?? ""),
+    facts: toStringArray(beliefSummary.facts),
+    hypotheses: toStringArray(beliefSummary.hypotheses),
+    invalidations: toStringArray(beliefSummary.invalidations),
+    beliefUncertainty: toStringArray(beliefSummary.uncertainty),
+    ...(opponentModel ? { opponentModel } : {})
   };
 }
 
@@ -687,6 +747,16 @@ function round(value: number): number {
 
 function roundScore(value: number): number {
   return Math.round(value * 100) / 100;
+}
+
+function toStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string");
+}
+
+function toRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  return value as Record<string, unknown>;
 }
 
 function compareAction(left: LegalAction, right: LegalAction): number {

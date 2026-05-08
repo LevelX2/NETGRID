@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-05-08T19:43:14.262Z",
+  "target": "http://127.0.0.1:3100/tutorial",
+  "checks": [
+    {
+      "name": "heading",
+      "ok": true
+    },
+    {
+      "name": "lesson_select",
+      "ok": true
+    },
+    {
+      "name": "hint_visible",
+      "ok": true
+    },
+    {
+      "name": "glossary_visible",
+      "ok": true
+    },
+    {
+      "name": "first_tutorial_action_clickable",
+      "ok": true
+    }
+  ],
+  "allPassed": true
+}

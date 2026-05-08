@@ -1,0 +1,22 @@
+{
+  "version": "1.4.3",
+  "tuningSeeds": [
+    "ai-v143-tuning-001",
+    "ai-v143-tuning-002",
+    "ai-v143-tuning-003",
+    "ai-v143-tuning-004",
+    "ai-v143-tuning-005",
+    "ai-v143-tuning-006"
+  ],
+  "holdoutSeeds": [
+    "ai-v143-holdout-001",
+    "ai-v143-holdout-002",
+    "ai-v143-holdout-003"
+  ],
+  "league": {
+    "runnerDeckId": "demo_runner_008",
+    "corpDeckId": "demo_corp_008",
+    "agendaPointsToWin": 7,
+    "maxActions": 160
+  }
+}
