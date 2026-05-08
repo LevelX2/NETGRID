@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
 import snapshotData from "../../../data/card-import/card-snapshot-0.5.json";
 import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
 import profilesData from "../../../data/decks/deck-format-profiles-0.6.json";
@@ -148,6 +149,34 @@ describe("deck validation and snapshots", () => {
     expect(corp.validation.influenceSpent).toBe(0);
     expect(runner.publicMetadata).not.toHaveProperty("cards");
     expect(corp.publicMetadata.formatProfileVersion).toBe("1.3.0");
+  });
+
+  it("validates the versioned King of the Road Runner AI snapshot from the local deck shape", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    if (!runtimeCardsById["onr_v1_006_black-dahlia"]) return;
+    const contextV130 = { cardsById: runtimeCardsById, profile: profile130 };
+    const snapshot = snapshots08.find((candidate) => candidate.deckSnapshotId === "king_of_the_road_runner_ai_snapshot_v1")!;
+
+    expect(snapshot.sourceDeckId).toBe("local_runner_adb10896");
+    expect(snapshot.name).toBe("King of the Road");
+    expect(snapshot.side).toBe("runner");
+    expect(snapshot.formatProfileId).toBe("netgrid_private_local_v1");
+    expect(snapshot.formatProfileVersion).toBe("1.3.0");
+    expect(snapshot.cardPoolVersion).toBe("private-local-onr-v1");
+    expect(validateDeckSnapshot(snapshot, contextV130)).toMatchObject({ ok: true, errors: [] });
+    expect(computeDeckHash(snapshot)).toBe("fnv1a:23f11fed");
+    expect(snapshot.cards).toHaveLength(14);
+    expect(snapshot.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(19);
+    expect(snapshot.publicMetadata).not.toHaveProperty("cards");
+    expect(JSON.stringify(snapshot.publicMetadata)).not.toMatch(/onr_v1_|cardInstances|privatePayload|sessionToken|joinToken|tokenHash/i);
+    expect(snapshot.cards.every((entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === true)).toBe(true);
+
+    const localPath = `${process.env.APPDATA ?? ""}\\NetGrid\\Decks\\local_runner_adb10896.json`;
+    if (process.env.APPDATA && existsSync(localPath)) {
+      const localDeck = JSON.parse(readFileSync(localPath, "utf8")) as { deck: EditableDeck };
+      expect(snapshot.cards).toEqual(localDeck.deck.cards.slice().sort((left, right) => left.cardId.localeCompare(right.cardId)));
+      expect(snapshot.name).toBe(localDeck.deck.name);
+    }
   });
 
   it("keeps V1.3.0 format legality restrictive and reports concrete safe error codes", () => {

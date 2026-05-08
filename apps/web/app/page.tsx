@@ -153,7 +153,7 @@ const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
 const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.1.2";
+const APP_STATUS_LABEL = "V1.4.1";
 const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
@@ -411,6 +411,17 @@ type CatalogCardDetail = CatalogCardSummary & {
   text: string;
   numeric: Record<string, number | null>;
   engineCardId: string | null;
+  aiHints?: CatalogAiHints | null;
+};
+
+type CatalogAiHints = {
+  roles: string[];
+  planRoles: string[];
+  requiredMechanics: string[];
+  valueHints: Record<string, number>;
+  riskTags: string[];
+  aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
+  scenarioRefs: string[];
 };
 
 type CatalogListResponse = {
@@ -531,18 +542,24 @@ type DeckLibraryResponse = {
 };
 
 const CATALOG_STATUS_LABELS: Record<CatalogStatusKey, string> = {
-  imported: "imported",
-  validated: "validated",
-  catalog_ready: "catalog_ready",
-  implemented: "implemented",
-  engine_supported: "engine_supported",
-  playable: "playable",
-  human_playable: "human_playable",
-  ai_supported: "ai_supported",
-  deck_legal: "deck_legal",
-  format_legal: "format_legal",
-  blocked: "blocked"
+  imported: "Importiert",
+  validated: "Geprüft",
+  catalog_ready: "Im Katalog",
+  implemented: "Implementiert",
+  engine_supported: "Engine",
+  playable: "Runtime spielbar",
+  human_playable: "Für Menschen spielbar",
+  ai_supported: "KI geeignet",
+  deck_legal: "Deckbau erlaubt",
+  format_legal: "Im lokalen Format",
+  blocked: "Blockiert"
 };
+
+const PRIMARY_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["human_playable", "deck_legal", "format_legal", "ai_supported", "blocked"];
+
+const TECHNICAL_CATALOG_STATUS_KEYS: CatalogStatusKey[] = ["imported", "validated", "catalog_ready", "implemented", "engine_supported", "playable"];
+
+const CATALOG_STATUS_FILTER_KEYS: CatalogStatusKey[] = [...PRIMARY_CATALOG_STATUS_KEYS, ...TECHNICAL_CATALOG_STATUS_KEYS];
 
 const RUNNER_CATALOG_TYPE_FILTERS: Array<{ key: CatalogTypeFilterKey; label: string }> = [
   { key: "event", label: "Prep" },
@@ -1058,6 +1075,7 @@ export default function Page() {
   const [catalogSearch, setCatalogSearch] = useState("");
   const [catalogSide, setCatalogSide] = useState<Side | "all">("all");
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">("all");
+  const [catalogExpertStatuses, setCatalogExpertStatuses] = useState(false);
   const [catalogTypeFilters, setCatalogTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
   const [catalogFilters, setCatalogFilters] = useState<CatalogListResponse["filters"] | null>(null);
@@ -2474,11 +2492,9 @@ export default function Page() {
     setSelectedParticipantBCorpLocalDeckId(decks.find((deck) => deck.side === "corp")?.deckId ?? "");
     if (decks.some((deck) => deck.side === "runner")) {
       setRunnerDeckSource("local");
-      setParticipantBRunnerDeckSource("local");
     }
     if (decks.some((deck) => deck.side === "corp")) {
       setCorpDeckSource("local");
-      setParticipantBCorpDeckSource("local");
     }
   }
 
@@ -2497,14 +2513,10 @@ export default function Page() {
   function selectDeckForSide(deck: EditableDeck) {
     if (deck.side === "runner") {
       setSelectedRunnerLocalDeckId(deck.deckId);
-      setSelectedParticipantBRunnerLocalDeckId(deck.deckId);
       setRunnerDeckSource("local");
-      setParticipantBRunnerDeckSource("local");
     } else {
       setSelectedCorpLocalDeckId(deck.deckId);
-      setSelectedParticipantBCorpLocalDeckId(deck.deckId);
       setCorpDeckSource("local");
-      setParticipantBCorpDeckSource("local");
     }
   }
 
@@ -3042,12 +3054,14 @@ export default function Page() {
             status={catalogStatus}
             summary={catalogSummary}
             selectedId={selectedCatalogId}
+            showExpertStatuses={catalogExpertStatuses}
             typeCounts={catalogTypeCounts}
             typeFilters={catalogTypeFilters}
             onSearch={setCatalogSearch}
             onSide={setCatalogSide}
             onStatus={setCatalogStatus}
             onSelect={setSelectedCatalogId}
+            onToggleExpertStatuses={setCatalogExpertStatuses}
             onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
             onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
             onClearTypeFilters={() => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })}
@@ -4984,12 +4998,14 @@ function CatalogPanel({
   status,
   summary,
   selectedId,
+  showExpertStatuses,
   typeCounts,
   typeFilters,
   onSearch,
   onSide,
   onStatus,
   onSelect,
+  onToggleExpertStatuses,
   onTypeFilter,
   onSelectAllTypes,
   onClearTypeFilters
@@ -5002,17 +5018,22 @@ function CatalogPanel({
   status: CatalogStatusKey | "all";
   summary: Partial<Record<CatalogStatusKey, number>>;
   selectedId: string | null;
+  showExpertStatuses: boolean;
   typeCounts: Partial<Record<CatalogTypeFilterKey, number>>;
   typeFilters: CatalogTypeFilterState;
   onSearch(value: string): void;
   onSide(value: Side | "all"): void;
   onStatus(value: CatalogStatusKey | "all"): void;
   onSelect(value: string): void;
+  onToggleExpertStatuses(value: boolean): void;
   onTypeFilter(key: CatalogTypeFilterKey, selected: boolean): void;
   onSelectAllTypes(): void;
   onClearTypeFilters(): void;
 }) {
   const catalogImageUrl = detail ? localCardImageUrl(detail.catalogCardId) : undefined;
+  const visibleStatusKeys = showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS;
+  const availableStatusKeys = new Set(filters?.statuses ?? CATALOG_STATUS_FILTER_KEYS);
+  const statusOptions = visibleStatusKeys.filter((value) => availableStatusKeys.has(value));
   const detailRef = useRef<HTMLElement | null>(null);
   const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
 
@@ -5042,7 +5063,7 @@ function CatalogPanel({
         <div>
           <h2>Katalog</h2>
           <p className="meta">
-            {cards.length} Karten · {summary.playable ?? 0} playable · {summary.blocked ?? 0} blocked
+            {cards.length} Karten · {summary.human_playable ?? 0} für Menschen spielbar · {summary.ai_supported ?? 0} KI geeignet
           </p>
         </div>
       </div>
@@ -5072,12 +5093,24 @@ function CatalogPanel({
           Status
           <select value={status} onChange={(event) => onStatus(event.target.value as CatalogStatusKey | "all")}>
             <option value="all">Alle</option>
-            {(filters?.statuses ?? Object.keys(CATALOG_STATUS_LABELS)).map((value) => (
+            {statusOptions.map((value) => (
               <option value={value} key={value}>
-                {value}
+                {CATALOG_STATUS_LABELS[value]}
               </option>
             ))}
           </select>
+        </label>
+        <label className="catalogExpertToggle">
+          <input
+            checked={showExpertStatuses}
+            onChange={(event) => {
+              const next = event.target.checked;
+              onToggleExpertStatuses(next);
+              if (!next && status !== "all" && !PRIMARY_CATALOG_STATUS_KEYS.includes(status)) onStatus("all");
+            }}
+            type="checkbox"
+          />
+          Expertenstatus
         </label>
         <fieldset className="catalogTypeFilters">
           <legend>Kartentypen</legend>
@@ -5115,7 +5148,7 @@ function CatalogPanel({
               <span>
                 {card.side} · {formatCatalogTypeLine(card)}
               </span>
-              <StatusBadges statuses={card.statuses} compact />
+              <StatusBadges statuses={card.statuses} compact showExpert={showExpertStatuses} />
             </button>
           ))}
           {cards.length === 0 ? <p className="meta catalogEmpty">Keine Treffer.</p> : null}
@@ -5137,7 +5170,7 @@ function CatalogPanel({
                   <img src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} />
                 </div>
               ) : null}
-              <StatusBadges statuses={detail.statuses} />
+              <StatusBadges statuses={detail.statuses} showExpert={showExpertStatuses} />
               <p className="catalogText">
                 {rulesTextLines(detail.text).map((line, index) => (
                   <span key={`${detail.catalogCardId}-rules-${index}`} className={isSubroutineRuleLine(detail.type, detail.text, line) ? "subroutineLine" : undefined}>
@@ -5160,6 +5193,7 @@ function CatalogPanel({
                   engine
                 </span>
               </div>
+              {detail.aiHints ? <CatalogAiHintPanel hints={detail.aiHints} /> : null}
               {detail.blockReasons.length > 0 ? <p className="notice catalogNotice">{detail.blockReasons.join(" ")}</p> : null}
             </>
           ) : (
@@ -5728,18 +5762,69 @@ function DeckValidationSummary({ validation, snapshot }: { validation: DeckValid
   );
 }
 
-function StatusBadges({ statuses, compact = false }: { statuses: CatalogStatuses; compact?: boolean }) {
+function StatusBadges({ statuses, compact = false, showExpert = false }: { statuses: CatalogStatuses; compact?: boolean; showExpert?: boolean }) {
+  const statusKeys = showExpert ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS;
   return (
     <div className={`statusBadges ${compact ? "compact" : ""}`}>
-      {Object.entries(CATALOG_STATUS_LABELS)
-        .filter(([key]) => statuses[key as CatalogStatusKey])
-        .map(([key, label]) => (
+      {statusKeys
+        .filter((key) => statuses[key])
+        .map((key) => (
           <span className={`statusBadge ${key}`} key={key}>
-            {label}
+            {CATALOG_STATUS_LABELS[key]}
           </span>
         ))}
     </div>
   );
+}
+
+function CatalogAiHintPanel({ hints }: { hints: CatalogAiHints }) {
+  const valueHintEntries = Object.entries(hints.valueHints).filter(([, value]) => Number.isFinite(value));
+  return (
+    <section className="catalogAiHints">
+      <div className="catalogAiHintsHead">
+        <strong>KI-Hinweise</strong>
+        <span>{CATALOG_STATUS_LABELS.ai_supported}: {hints.aiSupportStatus === "ai_supported" ? "ja" : hints.aiSupportStatus}</span>
+      </div>
+      <AiHintChips title="Rollen" values={hints.roles} />
+      <AiHintChips title="Pläne" values={hints.planRoles} />
+      {valueHintEntries.length > 0 ? (
+        <div className="catalogAiValueGrid">
+          {valueHintEntries.map(([key, value]) => (
+            <span key={key}>
+              <strong>{value}</strong>
+              {formatAiHintLabel(key)}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      <AiHintChips title="Risiken" values={hints.riskTags} quiet />
+      <AiHintChips title="Mechaniken" values={hints.requiredMechanics} quiet />
+      <AiHintChips title="Szenarien" values={hints.scenarioRefs.map((ref) => ref.split("#").at(-1) ?? ref)} quiet />
+    </section>
+  );
+}
+
+function AiHintChips({ title, values, quiet = false }: { title: string; values: string[]; quiet?: boolean }) {
+  if (values.length === 0) return null;
+  return (
+    <div className="catalogAiHintRow">
+      <span>{title}</span>
+      <div>
+        {values.map((value) => (
+          <small className={quiet ? "quiet" : ""} key={value}>
+            {formatAiHintLabel(value)}
+          </small>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function formatAiHintLabel(value: string): string {
+  return value
+    .replace(/_/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .toLowerCase();
 }
 
 function ConnectionBadge({ text, state }: { text: string; state: "offline" | "connecting" | "online" }) {

@@ -150,6 +150,8 @@ describe("Client visibility contract", () => {
     expect(page).toContain("lobby_update");
     expect(page).toContain("validateDeckForMatch");
     expect(page).toContain("aiDeckPolicy");
+    expect(page).not.toContain('setParticipantBRunnerDeckSource("local");');
+    expect(page).not.toContain('setParticipantBCorpDeckSource("local");');
     expect(page).toContain("viewerAgendaPoints");
     expect(page).toContain("opponentAgendaPoints");
     expect(page).toContain("viewerSeriesOutcome");
@@ -340,6 +342,7 @@ describe("Client visibility contract", () => {
     const serialized = JSON.stringify([deckTemplatesResponse().body, deckSnapshotsResponse().body]);
     expect(serialized).toContain("demo_runner_004_snapshot_v0_6");
     expect(serialized).toContain("demo_runner_008_snapshot_v0_8");
+    expect(serialized).toContain("king_of_the_road_runner_ai_snapshot_v1");
     expect(serialized).not.toContain("cardInstances");
     expect(serialized).not.toContain("privatePayload");
     expect(serialized).not.toContain("sessionToken");
@@ -347,6 +350,44 @@ describe("Client visibility contract", () => {
     expect(serialized).not.toContain("joinToken");
     expect(serialized).not.toContain("stateSnapshots");
     expect(serialized).not.toContain("undoSnapshots");
+  });
+
+  it("keeps King of the Road AI approval artifacts free of runtime hidden-info payloads", () => {
+    const hints = JSON.parse(readFileSync("data/ai/ai-card-hints-king-of-the-road-ai-approval.json", "utf8"));
+    const manifest = JSON.parse(readFileSync("data/manifests/king-of-the-road-ai-approval-manifest.json", "utf8"));
+    const scenario = JSON.parse(readFileSync("data/scenarios/ai-kotr-runner-approval-smokes.json", "utf8"));
+    const serialized = JSON.stringify({ hints, manifest, scenario });
+
+    expect(hints.cards).toHaveLength(14);
+    expect(manifest.cards).toHaveLength(14);
+    expect(scenario.deckSnapshotId).toBe("king_of_the_road_runner_ai_snapshot_v1");
+    expect(serialized).not.toMatch(/"cardInstances"\s*:/);
+    expect(serialized).not.toMatch(/"privatePayload"\s*:/);
+    expect(serialized).not.toMatch(/"sessionToken"\s*:/);
+    expect(serialized).not.toMatch(/"reconnectToken"\s*:/);
+    expect(serialized).not.toMatch(/"joinToken"\s*:/);
+    expect(serialized).not.toMatch(/"tokenHash"\s*:/);
+    expect(serialized).not.toMatch(/"fullState"\s*:/);
+    expect(serialized).not.toMatch(/[A-Za-z]:\\/);
+  });
+
+  it("keeps Batch A AI approval artifacts free of runtime hidden-info payloads", () => {
+    const hints = JSON.parse(readFileSync("data/ai/ai-card-hints-deck-legal-batch-a.json", "utf8"));
+    const manifest = JSON.parse(readFileSync("data/manifests/deck-legal-ai-approval-batch-a-manifest.json", "utf8"));
+    const scenario = JSON.parse(readFileSync("data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json", "utf8"));
+    const serialized = JSON.stringify({ hints, manifest, scenario });
+
+    expect(hints.cards).toHaveLength(8);
+    expect(manifest.cards).toHaveLength(8);
+    expect(scenario.id).toBe("ai-runner-rig-low-risk-batch-a-smokes");
+    expect(serialized).not.toMatch(/"cardInstances"\s*:/);
+    expect(serialized).not.toMatch(/"privatePayload"\s*:/);
+    expect(serialized).not.toMatch(/"sessionToken"\s*:/);
+    expect(serialized).not.toMatch(/"reconnectToken"\s*:/);
+    expect(serialized).not.toMatch(/"joinToken"\s*:/);
+    expect(serialized).not.toMatch(/"tokenHash"\s*:/);
+    expect(serialized).not.toMatch(/"fullState"\s*:/);
+    expect(serialized).not.toMatch(/[A-Za-z]:\\/);
   });
 
   it("validates locally playable O:NR cards through the deck API when the local overlay is present", () => {

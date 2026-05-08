@@ -1,4 +1,5 @@
 import {
+  CATALOG_STATUS_KEYS,
   assertCatalogPayloadSafe,
   getCatalogCard,
   searchCatalog,
@@ -7,7 +8,26 @@ import {
   type CatalogSide,
   type CatalogStatusKey
 } from "@netgrid/catalog";
+import aiCardHintsData from "../../../../../data/ai/ai-card-hints-1.3.1.json";
+import kingOfTheRoadAiHintsData from "../../../../../data/ai/ai-card-hints-king-of-the-road-ai-approval.json";
+import deckLegalBatchAAiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
+import runtimeSupplementAiHintsData from "../../../../../data/ai/ai-card-hints-runtime-supplement.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
+
+type CatalogAiHint = {
+  cardId: string;
+  roles: string[];
+  planRoles: string[];
+  requiredMechanics: string[];
+  valueHints: Record<string, number>;
+  riskTags: string[];
+  aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
+  scenarioRefs: string[];
+};
+
+const AI_HINTS_BY_CARD_ID = new Map(
+  ([...(aiCardHintsData.cards as CatalogAiHint[]), ...(kingOfTheRoadAiHintsData.cards as CatalogAiHint[]), ...(runtimeSupplementAiHintsData.cards as CatalogAiHint[]), ...(deckLegalBatchAAiHintsData.cards as CatalogAiHint[])]).map((hint) => [hint.cardId, hint])
+);
 
 export function catalogListResponse(searchParams: URLSearchParams) {
   const { snapshot, snapshotHash, catalogIndex, validation } = createCatalogRuntime();
@@ -36,7 +56,7 @@ export function catalogDetailResponse(catalogCardId: string) {
   if (!validation.ok) return safeCatalogError(500, "catalog_invalid", "Katalogdaten sind ungültig.");
   const card = getCatalogCard(snapshot, catalogCardId);
   if (!card) return safeCatalogError(404, "catalog_card_not_found", "Karte wurde im Katalog nicht gefunden.");
-  return safeCatalogPayload({ snapshotId: snapshot.snapshotId, snapshotHash, card });
+  return safeCatalogPayload({ snapshotId: snapshot.snapshotId, snapshotHash, card: { ...card, aiHints: AI_HINTS_BY_CARD_ID.get(card.catalogCardId) ?? null } });
 }
 
 export function catalogStatusSummaryResponse() {
@@ -69,7 +89,7 @@ function isType(value: string | null): value is CatalogCardType {
 }
 
 function isStatus(value: string | null): value is CatalogStatusKey {
-  return value === "imported" || value === "validated" || value === "catalog_ready" || value === "implemented" || value === "playable" || value === "deck_legal" || value === "blocked";
+  return Boolean(value && (CATALOG_STATUS_KEYS as readonly string[]).includes(value));
 }
 
 function createCatalogRuntime() {

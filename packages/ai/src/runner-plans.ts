@@ -1,6 +1,9 @@
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
 import aiCardHintsData from "../../../data/ai/ai-card-hints-1.3.1.json";
+import kingOfTheRoadAiHintsData from "../../../data/ai/ai-card-hints-king-of-the-road-ai-approval.json";
+import deckLegalBatchAAiHintsData from "../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
+import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
 import type { AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 
@@ -111,7 +114,12 @@ type RunnerFeatures = {
 };
 
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
-const AI_HINTS = new Map((aiCardHintsData.cards as AiCardHint[]).map((hint) => [hint.cardId, hint]));
+const AI_HINTS = new Map(
+  [...(aiCardHintsData.cards as AiCardHint[]), ...(kingOfTheRoadAiHintsData.cards as AiCardHint[]), ...(runtimeSupplementAiHintsData.cards as AiCardHint[]), ...(deckLegalBatchAAiHintsData.cards as AiCardHint[])].map((hint) => [
+    hint.cardId,
+    hint
+  ])
+);
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
 const RUNTIME_CARDS = createRuntimeCardsById();
 const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "gain_credit", "draw_card", "trash_accessed_card"]);
@@ -271,15 +279,16 @@ export function evaluateRunnerRig(input: AiDecisionInput, candidate: RunnerPlanC
   const features = extractRunnerFeatures(input);
   const breakerCount = [...features.rigRoles].filter((role) => role.startsWith("breaker_")).length;
   const handBreakerRoles = [...features.handRoles].filter((role) => role.startsWith("breaker_"));
+  const reservePenalty = candidate.kind === "build_rig" ? lowReserveInstallPenalty(input, candidate, features.credits) : 0;
   const score =
     candidate.kind === "build_rig"
-      ? 150 + Math.max(0, 3 - breakerCount) * 45 + (features.memoryRemaining <= 1 ? 35 : 0)
+      ? 150 + Math.max(0, 3 - breakerCount) * 45 + (features.memoryRemaining <= 1 ? 35 : 0) - reservePenalty
       : isRunPlan(candidate.kind)
         ? breakerCount * 30 - Math.max(0, 2 - features.credits) * 30
         : handBreakerRoles.length * 8;
   return {
     score,
-    reasons: breakerCount > 0 ? ["visible_rig_has_breaker_roles"] : ["visible_rig_incomplete"],
+    reasons: sortedUnique([breakerCount > 0 ? "visible_rig_has_breaker_roles" : "visible_rig_incomplete", ...(reservePenalty > 0 ? ["credit_reserve_after_install_low"] : [])]),
     evidence: [`rig_breakers:${breakerCount}`, `hand_breaker_roles:${handBreakerRoles.length}`, `memory_remaining:${features.memoryRemaining}`, `credits:${features.credits}`]
   };
 }
@@ -382,15 +391,15 @@ function selectPlanAction(input: AiDecisionInput, candidate: RunnerPlanCandidate
   return candidate.legalActionIds
     .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
     .filter((action): action is LegalAction => Boolean(action))
-    .sort((left, right) => actionPriority(candidate.kind, right) - actionPriority(candidate.kind, left) || compareAction(left, right))[0];
+    .sort((left, right) => actionPriority(candidate.kind, right, input) - actionPriority(candidate.kind, left, input) || compareAction(left, right))[0];
 }
 
-function actionPriority(kind: RunnerPlanKind, action: LegalAction): number {
+function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDecisionInput): number {
   if (kind === "trash_asset" && action.type === "trash_accessed_card") return 100;
   if ((kind === "pressure_rnd" || kind === "pressure_hq" || kind === "contest_remote" || kind === "safe_probe_run") && action.type === "start_run") return 90;
   if (kind === "safe_probe_run" && action.type === "jack_out") return 88;
   if (kind === "safe_probe_run" && action.type === "continue_run") return 70;
-  if (kind === "build_rig" && action.type === "install_card") return 85;
+  if (kind === "build_rig" && action.type === "install_card") return runnerInstallPriority(input, action);
   if (kind === "recover_economy" && action.type === "play_event") return 80;
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
   if (kind === "draw_for_answers" && action.type === "play_event") return 70;
@@ -452,6 +461,34 @@ function rolesForCardId(cardId: string | undefined): string[] {
   const roleRecord = CARD_ROLES.get(cardId);
   const hint = AI_HINTS.get(cardId);
   return sortedUnique([...(roleRecord?.roles ?? []), ...(hint?.roles ?? []), ...(hint?.planRoles ?? [])]);
+}
+
+function lowReserveInstallPenalty(input: AiDecisionInput, candidate: RunnerPlanCandidate, credits: number): number {
+  const installActions = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter((action): action is LegalAction => action?.type === "install_card");
+  if (installActions.length === 0) return 0;
+  const bestRemainingCredits = Math.max(...installActions.map((action) => credits - actionCreditCost(action)));
+  return bestRemainingCredits < 2 ? 460 : 0;
+}
+
+function runnerInstallPriority(input: AiDecisionInput, action: LegalAction): number {
+  const features = extractRunnerFeatures(input);
+  const roles = rolesForAction(input, action);
+  const remainingCredits = features.credits - actionCreditCost(action);
+  let priority = 85;
+  if (roles.some((role) => role.startsWith("breaker_") && !features.rigRoles.has(role))) priority += 45;
+  if (roles.includes("memory") || roles.includes("memory_support")) priority += features.memoryRemaining <= 1 ? 70 : 20;
+  if (roles.includes("efficient_breaker")) priority += 12;
+  if (roles.includes("flex_breaker")) priority += 10;
+  if (remainingCredits >= 2) priority += 15;
+  if (remainingCredits < 2) priority -= 55;
+  if (roles.some((role) => role.startsWith("breaker_") && features.rigRoles.has(role))) priority -= 18;
+  return priority;
+}
+
+function actionCreditCost(action: LegalAction): number {
+  return action.costs.reduce((sum, cost) => sum + (Number.isFinite(cost.credits) ? cost.credits ?? 0 : 0), 0);
 }
 
 function isAiSupportedCard(cardId: string | undefined): boolean {

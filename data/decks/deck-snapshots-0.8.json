@@ -699,6 +699,97 @@
         "deckHash": "fnv1a:551ee643"
       },
       "deckHash": "fnv1a:551ee643"
+    },
+    {
+      "deckSnapshotId": "king_of_the_road_runner_ai_snapshot_v1",
+      "sourceDeckId": "local_runner_adb10896",
+      "deckVersion": "king-of-the-road-ai-approval-v1",
+      "name": "King of the Road",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_006_black-dahlia",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_016_cyfermaster",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_040_loony-goon",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_052_raffles",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_054_raptor",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_060_shaka",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_070_tinweasel",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_072_wild-card",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_073_wizards-book",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_145_wutech-mem-chip",
+          "quantity": 1
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 19,
+        "agendaPoints": null,
+        "influenceSpent": 0
+      },
+      "publicMetadata": {
+        "side": "runner",
+        "identityCardId": "runner_identity_001",
+        "deckName": "King of the Road",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "cardPoolVersion": "private-local-onr-v1",
+        "formatProfileId": "netgrid_private_local_v1",
+        "formatProfileVersion": "1.3.0",
+        "deckHash": "fnv1a:23f11fed"
+      },
+      "deckHash": "fnv1a:23f11fed"
     }
   ]
 }

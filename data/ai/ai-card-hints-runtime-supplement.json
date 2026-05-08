@@ -1,0 +1,1149 @@
+{
+  "schemaVersion": "ai-card-hints-v1.3.1",
+  "hintsId": "ai-card-hints-runtime-supplement",
+  "derivedFromSnapshotId": "runtime-card-snapshot-current",
+  "scope": "deck_legal_runtime_cards_without_existing_ai_hints",
+  "generationPolicy": {
+    "source": "deck-legal runtime catalog card type, side, subtypes, numeric fields and reviewed display text",
+    "aiSupportRule": "preserve existing runtime ai_supported status only; generated hints do not grant ai_supported",
+    "scenarioRule": "scenarioRefs are present only for cards already ai_supported by another gate",
+    "safety": "no card text, private paths, decklists, hidden card instances or game state are included"
+  },
+  "cards": [
+    {
+      "cardId": "corp_identity_001",
+      "side": "corp",
+      "cardType": "identity",
+      "roles": [
+        "corp_identity",
+        "setup"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [
+        "identity_setup"
+      ],
+      "valueHints": {},
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "packages/ai/src/index.test.ts::V1.4.0 plan-based Corp AI"
+      ]
+    },
+    {
+      "cardId": "onr_v1_081_custodial-position",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_event",
+        "multiaccess"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "run",
+        "access"
+      ],
+      "valueHints": {
+        "runPressure": 3
+      },
+      "riskTags": [
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_event",
+        "multiaccess"
+      ],
+      "planRoles": [
+        "pressure_rnd",
+        "pressure_hq"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "run",
+        "access"
+      ],
+      "valueHints": {
+        "runPressure": 3
+      },
+      "riskTags": [
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_101_mit-west-tier",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "draw"
+      ],
+      "planRoles": [
+        "draw_for_answers"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "shuffle",
+        "draw"
+      ],
+      "valueHints": {
+        "cardFlow": 3
+      },
+      "riskTags": [
+        "hidden_zone_change",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_203_hostile-takeover",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "agenda_1pt",
+        "score_plan"
+      ],
+      "planRoles": [
+        "score_next_turn",
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [
+        "install_remote",
+        "advance",
+        "score",
+        "steal",
+        "agenda_points",
+        "subtype_gray_ops",
+        "hosting",
+        "credits"
+      ],
+      "valueHints": {
+        "scoring": 2
+      },
+      "riskTags": [
+        "hidden_until_score_or_access",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_220_tycho-extension",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "agenda_4pt",
+        "score_plan"
+      ],
+      "planRoles": [
+        "score_next_turn",
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [
+        "install_remote",
+        "advance",
+        "score",
+        "steal",
+        "agenda_points",
+        "subtype_asset"
+      ],
+      "valueHints": {
+        "scoring": 4
+      },
+      "riskTags": [
+        "hidden_until_score_or_access",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_230_cortical-scanner",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_232_crystal-wall",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_237_data-wall",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall"
+      ],
+      "valueHints": {
+        "defense": 1
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall"
+      ],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_239_endless-corridor",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_244_filter",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 1
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_245_fire-wall",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_252_keeper",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_253_laser-wire",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice",
+        "damage_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall",
+        "damage"
+      ],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice",
+        "damage",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_256_mazer",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 4
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_257_nerve-labyrinth",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice",
+        "damage_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate",
+        "damage"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "damage",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_259_in-the-face",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_sentry",
+        "subtype_deckrash"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_261_quandary",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_262_razor-wire",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice",
+        "damage_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall",
+        "damage"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "damage",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_263_reinforced-wall",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_265_rock-is-strong",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall"
+      ],
+      "valueHints": {
+        "defense": 4
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_266_scramble",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 3
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_269_shotgun-wire",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice",
+        "damage_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall",
+        "damage"
+      ],
+      "valueHints": {
+        "defense": 4
+      },
+      "riskTags": [
+        "hidden_ice",
+        "damage",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_270_sleeper",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_code_gate"
+      ],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_278_wall-of-ice",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice",
+        "damage_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall",
+        "damage"
+      ],
+      "valueHints": {
+        "defense": 4
+      },
+      "riskTags": [
+        "hidden_ice",
+        "damage",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_279_wall-of-static",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "barrier_ice",
+        "etr_ice"
+      ],
+      "planRoles": [
+        "protect_rnd",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "encounter_ice",
+        "subtype_wall"
+      ],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_281_accounts-receivable",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "economy_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "subtype_transactions",
+        "credits"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_282_annual-reviews",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "draw_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "draw"
+      ],
+      "valueHints": {
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "economy_operation",
+        "tag_punishment_operation"
+      ],
+      "planRoles": [
+        "recover_economy",
+        "bait_runner"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "subtype_gray_ops",
+        "tags",
+        "credits"
+      ],
+      "valueHints": {
+        "economy": 3,
+        "threat": 3
+      },
+      "riskTags": [
+        "tag",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "tag_punishment_operation"
+      ],
+      "planRoles": [
+        "bait_runner"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "subtype_gray_ops",
+        "tags"
+      ],
+      "valueHints": {
+        "threat": 3
+      },
+      "riskTags": [
+        "tag",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_288_day-shift",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "economy_operation",
+        "draw_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "draw",
+        "credits"
+      ],
+      "valueHints": {
+        "economy": 3,
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_290_efficiency-experts",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "economy_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "subtype_transactions",
+        "credits"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "economy_operation",
+        "tag_punishment_operation"
+      ],
+      "planRoles": [
+        "recover_economy",
+        "bait_runner"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "subtype_gray_ops",
+        "tags",
+        "credits"
+      ],
+      "valueHints": {
+        "economy": 3,
+        "threat": 3
+      },
+      "riskTags": [
+        "tag",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_295_night-shift",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "economy_operation",
+        "draw_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "draw",
+        "credits"
+      ],
+      "valueHints": {
+        "economy": 3,
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_297_overtime-incentives",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "economy_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "play_operation"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "tag_punishment_operation",
+        "damage_operation"
+      ],
+      "planRoles": [
+        "bait_runner"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "subtype_black_ops",
+        "tags",
+        "damage",
+        "counters"
+      ],
+      "valueHints": {
+        "threat": 4
+      },
+      "riskTags": [
+        "damage",
+        "tag",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "tag_punishment_operation",
+        "damage_operation"
+      ],
+      "planRoles": [
+        "bait_runner"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "subtype_black_ops",
+        "tags",
+        "damage"
+      ],
+      "valueHints": {
+        "threat": 4
+      },
+      "riskTags": [
+        "damage",
+        "tag",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "onr_v1_307_urban-renewal",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "tag_punishment_operation",
+        "damage_operation"
+      ],
+      "planRoles": [
+        "bait_runner"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "subtype_black_ops",
+        "tags",
+        "damage"
+      ],
+      "valueHints": {
+        "threat": 4
+      },
+      "riskTags": [
+        "damage",
+        "tag",
+        "not_ai_approved"
+      ],
+      "aiSupportStatus": "hinted_only",
+      "scenarioRefs": []
+    },
+    {
+      "cardId": "runner_identity_001",
+      "side": "runner",
+      "cardType": "identity",
+      "roles": [
+        "runner_identity",
+        "setup"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [
+        "identity_setup"
+      ],
+      "valueHints": {},
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "packages/ai/src/index.test.ts::V1.4.1 plan-based Runner AI"
+      ]
+    }
+  ]
+}

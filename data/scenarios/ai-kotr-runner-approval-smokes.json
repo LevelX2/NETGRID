@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "ai-runner-deck-approval-scenarios-v1",
+  "id": "ai-kotr-runner-approval-smokes",
+  "deckSnapshotId": "king_of_the_road_runner_ai_snapshot_v1",
+  "corpPairingSnapshotId": "demo_corp_008_snapshot_v0_8",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "status": "implemented_for_king_of_the_road_ai_approval",
+  "sourceDeckId": "local_runner_adb10896",
+  "assertions": {
+    "allUniqueDeckCardsHaveAiHints": true,
+    "allUniqueDeckCardsHaveScenarioRefs": true,
+    "aiSupportedOnlyAfterGate": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "build_rig",
+      "planKinds": ["build_rig"],
+      "cards": [
+        "onr_v1_006_black-dahlia",
+        "onr_v1_016_cyfermaster",
+        "onr_v1_040_loony-goon",
+        "onr_v1_052_raffles",
+        "onr_v1_054_raptor",
+        "onr_v1_060_shaka",
+        "onr_v1_070_tinweasel",
+        "onr_v1_072_wild-card",
+        "onr_v1_073_wizards-book",
+        "onr_v1_145_wutech-mem-chip"
+      ],
+      "coveredBy": ["packages/ai/src/index.test.ts::approves King of the Road Runner AI rig setup and support hints"]
+    },
+    {
+      "id": "recover_economy",
+      "planKinds": ["recover_economy"],
+      "cards": ["onr_v1_097_livewires-contacts", "onr_v1_108_score"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses King of the Road economy and draw plans before low-value runs"]
+    },
+    {
+      "id": "draw_for_answers",
+      "planKinds": ["draw_for_answers"],
+      "cards": ["onr_v1_079_bodyweight-synthetic-blood", "onr_v1_095_jack-n-joe"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses King of the Road economy and draw plans before low-value runs"]
+    },
+    {
+      "id": "pressure_rnd",
+      "planKinds": ["pressure_rnd", "safe_probe_run"],
+      "cards": ["onr_v1_108_score"],
+      "coveredBy": ["packages/ai/src/index.test.ts::runs King of the Road side-safe smokes with legal Runner plans"]
+    },
+    {
+      "id": "negative_visible_stop",
+      "planKinds": ["build_rig", "recover_economy", "draw_for_answers"],
+      "cards": ["onr_v1_079_bodyweight-synthetic-blood", "onr_v1_095_jack-n-joe", "onr_v1_097_livewires-contacts"],
+      "coveredBy": ["packages/ai/src/index.test.ts::avoids bad King of the Road runs into visible stoppers"]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "DecisionDebug may include uncertainty markers such as unknown_corp_cards_remain_unknown.",
+    "DecisionDebug must not include hidden Corp card titles, private decklists, cardInstances or privatePayload.",
+    "Equal Runner-visible projections must keep the same selected Runner action."
+  ]
+}

@@ -870,6 +870,8 @@ function deckErrorMessage(error: unknown): string {
   const code = error instanceof Error ? error.message : String(error);
   if (code === "deck_snapshot_wrong_side") return "Das gewählte Deck hat die falsche Seite.";
   if (code === "deck_snapshot_not_validated" || code === "deck_snapshot_invalid") return "Das gewählte Deck ist nicht matchstartfähig. Bitte prüfe die Validierungsfehler.";
+  if (code === "ai_deck_snapshot_not_supported") return "Das gewählte KI-Deck ist nicht KI-freigegeben. Bitte nutze feste Standard-Decks, deterministisch zufällige KI-Decks oder ein KI-sicheres Snapshot-Deck.";
+  if (code === "deck_snapshot_needs_revalidation") return "Das gewählte Deck muss nach der aktuellen Formatversion neu validiert werden.";
   if (code === "deck_snapshot_not_found") return "Das gewählte Deck wurde nicht gefunden.";
   return "Die gewählten Decks sind nicht matchstartfähig.";
 }

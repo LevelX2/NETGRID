@@ -393,7 +393,36 @@ export const ONR_V1_2_3_RELEASE_CARD_IDS = [
 
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [...ONR_V1_0_5K_RELEASE_CARD_IDS, ...ONR_V1_0_6K_RELEASE_CARD_IDS, ...ONR_V1_1_2K_RELEASE_CARD_IDS, ...ONR_V1_2_3_RELEASE_CARD_IDS] as const;
 
+export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
+  "onr_v1_006_black-dahlia",
+  "onr_v1_016_cyfermaster",
+  "onr_v1_040_loony-goon",
+  "onr_v1_052_raffles",
+  "onr_v1_054_raptor",
+  "onr_v1_060_shaka",
+  "onr_v1_070_tinweasel",
+  "onr_v1_072_wild-card",
+  "onr_v1_073_wizards-book",
+  "onr_v1_079_bodyweight-synthetic-blood",
+  "onr_v1_095_jack-n-joe",
+  "onr_v1_097_livewires-contacts",
+  "onr_v1_108_score",
+  "onr_v1_145_wutech-mem-chip"
+] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS = [
+  "onr_v1_014_codecracker",
+  "onr_v1_015_codeslinger",
+  "onr_v1_021_dwarf",
+  "onr_v1_039_krash",
+  "onr_v1_066_snowball",
+  "onr_v1_074_worm",
+  "onr_v1_144_tycho-mem-chip",
+  "onr_v1_146_zetatech-mem-chip"
+] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
+const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS, ...DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
 const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_IDS);
@@ -1385,7 +1414,7 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
       engine_supported: true,
       playable: true,
       human_playable: true,
-      ai_supported: false,
+      ai_supported: DECK_LEGAL_AI_APPROVED_CARD_ID_SET.has(card.catalogCardId),
       deck_legal: true,
       format_legal: true,
       blocked: false

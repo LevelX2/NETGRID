@@ -1,6 +1,7 @@
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
 import aiCardHintsData from "../../../data/ai/ai-card-hints-1.3.1.json";
+import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
 import type { AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 
@@ -118,7 +119,7 @@ type RemoteIntentMemory = {
 };
 
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
-const AI_HINTS = new Map((aiCardHintsData.cards as AiCardHint[]).map((hint) => [hint.cardId, hint]));
+const AI_HINTS = new Map([...(aiCardHintsData.cards as AiCardHint[]), ...(runtimeSupplementAiHintsData.cards as AiCardHint[])].map((hint) => [hint.cardId, hint]));
 const CORP_PLAN_PROFILES = corpPlanProfilesData.profiles as CorpPlanProfile[];
 const RUNTIME_CARDS = createRuntimeCardsById();
 const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["score_agenda", "advance_card", "install_card", "play_operation", "gain_credit", "draw_card", "end_turn"]);

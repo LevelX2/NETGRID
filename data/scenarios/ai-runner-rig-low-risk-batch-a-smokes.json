@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "ai-runner-card-approval-scenarios-v1",
+  "id": "ai-runner-rig-low-risk-batch-a-smokes",
+  "batchId": "batch_a_runner_rig_low_risk",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "status": "implemented_for_deck_legal_ai_approval_batch_a",
+  "assertions": {
+    "allBatchCardsHaveAiHints": true,
+    "allBatchCardsHaveScenarioRefs": true,
+    "aiSupportedOnlyAfterGate": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "creditAndMemorySafeInstall": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "rig_setup_breaker_roles",
+      "planKinds": ["build_rig"],
+      "cards": [
+        "onr_v1_014_codecracker",
+        "onr_v1_015_codeslinger",
+        "onr_v1_021_dwarf",
+        "onr_v1_039_krash",
+        "onr_v1_066_snowball",
+        "onr_v1_074_worm"
+      ],
+      "coveredBy": ["packages/ai/src/index.test.ts::builds a Batch A Runner rig from additional breaker roles"]
+    },
+    {
+      "id": "memory_hardware_mu_pressure",
+      "planKinds": ["build_rig"],
+      "cards": ["onr_v1_144_tycho-mem-chip", "onr_v1_146_zetatech-mem-chip"],
+      "coveredBy": ["packages/ai/src/index.test.ts::installs Batch A memory hardware under MU pressure"]
+    },
+    {
+      "id": "credit_mu_safe_install",
+      "planKinds": ["build_rig", "recover_economy"],
+      "cards": ["onr_v1_015_codeslinger", "onr_v1_144_tycho-mem-chip", "onr_v1_146_zetatech-mem-chip"],
+      "coveredBy": ["packages/ai/src/index.test.ts::keeps Batch A installation credit- and MU-safe"]
+    },
+    {
+      "id": "safe_probe_run",
+      "planKinds": ["safe_probe_run"],
+      "cards": ["onr_v1_014_codecracker", "onr_v1_039_krash"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses Batch A breaker roles for safe probe runs without hidden claims"]
+    },
+    {
+      "id": "negative_visible_stopper",
+      "planKinds": ["build_rig", "recover_economy", "draw_for_answers"],
+      "cards": ["onr_v1_021_dwarf"],
+      "coveredBy": ["packages/ai/src/index.test.ts::avoids pointless Batch A runs into a visible stopper"]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "DecisionDebug may include uncertainty markers such as unknown_corp_cards_remain_unknown.",
+    "DecisionDebug must not include hidden Corp card titles, private decklists, cardInstances or privatePayload.",
+    "Equal Runner-visible projections must keep the same selected Runner action."
+  ]
+}

@@ -2194,6 +2194,38 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(randomOne)).not.toContain("cardInstances");
   });
 
+  it("starts Human-Korp-vs-Runner-KI with the King of the Road Runner AI snapshot", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "kotr-runner-ai-start" });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "kotr-runner-ai-start",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "king_of_the_road_runner_ai_snapshot_v1",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      aiDeckPolicy: "selected",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+    });
+    const record = await service.loadForTest(created.matchId);
+
+    expect(created.hostSide).toBe("corp");
+    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(record?.match.deckSetup.aiDeckPolicy).toBe("selected");
+    expect(record?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
+    expect(record?.match.deckSetup.runnerSnapshotId).toBe("king_of_the_road_runner_ai_snapshot_v1");
+    expect(record?.match.deckSetup.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
+    expect(record?.match.deckSetup.participants?.player_b.runnerSnapshotId).toBe("king_of_the_road_runner_ai_snapshot_v1");
+    expect(record?.match.deckSetup.participants?.player_b.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
+    expect(created.playerView.deckMetadata?.opponent.deckName).toBe("King of the Road");
+    expect(JSON.stringify(record?.match.deckSetup)).not.toContain("cards");
+    expect(JSON.stringify(created)).not.toMatch(/onr_v1_006_black-dahlia|onr_v1_108_score|cardInstances|privatePayload|joinToken|tokenHash/);
+  });
+
   it("derives Human-vs-KI random side assignment server-side from the seed", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-random-side" });
     const first = await service.createMatch({

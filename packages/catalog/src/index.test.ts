@@ -5,8 +5,15 @@ import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
 import pipelineSnapshotData from "../../../data/card-import/card-pipeline-snapshot-1.3.1.json";
 import sourceRegistry131Data from "../../../data/card-import/source-registry-1.3.1.json";
 import aiHints131Data from "../../../data/ai/ai-card-hints-1.3.1.json";
+import kingOfTheRoadAiHintsData from "../../../data/ai/ai-card-hints-king-of-the-road-ai-approval.json";
+import deckLegalBatchAAiHintsData from "../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
+import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import aiHintsReport131Data from "../../../data/ai/ai-card-hints-report-1.3.1.json";
 import cardSupportManifest131Data from "../../../data/manifests/card-support-manifest-1.3.1.json";
+import kingOfTheRoadManifestData from "../../../data/manifests/king-of-the-road-ai-approval-manifest.json";
+import deckLegalBatchAManifestData from "../../../data/manifests/deck-legal-ai-approval-batch-a-manifest.json";
+import kingOfTheRoadScenarioData from "../../../data/scenarios/ai-kotr-runner-approval-smokes.json";
+import deckLegalBatchAScenarioData from "../../../data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json";
 import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.3.1.json";
 import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
 import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
@@ -22,6 +29,8 @@ import {
   createCardPipelineSnapshot,
   createPipelineRollbackReport,
   createRuntimeCardsById,
+  DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
+  KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
   createSourceRegistryV2,
   diffCardPipelineSnapshots,
   getCatalogCard,
@@ -142,7 +151,8 @@ describe("catalog import and status logic", () => {
       expect(card?.statuses.engine_supported).toBe(true);
       expect(card?.statuses.playable).toBe(true);
       expect(card?.statuses.human_playable).toBe(true);
-      expect(card?.statuses.ai_supported).toBe(false);
+      const approvedAiCards: readonly string[] = [...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS, ...DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS];
+      expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
       expect(card?.statuses.format_legal).toBe(true);
       const expectedManifest = (ONR_V1_2_3_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
@@ -188,6 +198,10 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_081_custodial-position"]?.text).toBe("Make a run on R&D. If successful, access two additional cards from R&D.");
     expect(cardsById["onr_v1_085_executive-wiretaps"]?.text).toBe("Make a run on HQ. If successful, access two additional cards from HQ.");
     expect(cardsById["onr_v1_101_mit-west-tier"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.2.3");
+    expect(cardsById["onr_v1_021_dwarf"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_039_krash"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_066_snowball"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_074_worm"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_101_mit-west-tier"]?.statuses.ai_supported).toBe(false);
     expect(cardsById["onr_v1_297_overtime-incentives"]?.numeric.cost).toBe(0);
     expect(cardsById["onr_v1_075_zetatech-software-installer"]?.text).toBe(
@@ -197,6 +211,115 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(false);
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.format_legal).toBe(false);
     expect(cardsById["onr_v1_018_dogcatcher"]?.engineCardId).toBeNull();
+  });
+
+  it("approves exactly the King of the Road Runner cards for AI after hints and scenario gates", () => {
+    const cardsById = createRuntimeCardsById();
+    if (!cardsById["onr_v1_006_black-dahlia"]) return;
+    const approved = new Set<string>(KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS);
+    const hints = kingOfTheRoadAiHintsData.cards as Array<{
+      cardId: string;
+      roles: string[];
+      planRoles: string[];
+      requiredMechanics: string[];
+      valueHints: Record<string, number>;
+      riskTags: string[];
+      aiSupportStatus: string;
+      scenarioRefs: string[];
+    }>;
+    const manifestCards = kingOfTheRoadManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
+    const scenarioCards = new Set((kingOfTheRoadScenarioData.scenarios as Array<{ cards: string[] }>).flatMap((scenario) => scenario.cards));
+
+    expect(KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS).toHaveLength(14);
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(kingOfTheRoadScenarioData.deckSnapshotId).toBe("king_of_the_road_runner_ai_snapshot_v1");
+    expect(kingOfTheRoadScenarioData.corpPairingSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
+
+    for (const cardId of KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS) {
+      const card = cardsById[cardId];
+      const hint = hints.find((candidate) => candidate.cardId === cardId);
+      const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
+      expect(card?.statuses.human_playable, cardId).toBe(true);
+      expect(card?.statuses.deck_legal, cardId).toBe(true);
+      expect(card?.statuses.ai_supported, cardId).toBe(true);
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(hint?.roles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.requiredMechanics.length, cardId).toBeGreaterThan(0);
+      expect(Object.keys(hint?.valueHints ?? {}).length, cardId).toBeGreaterThan(0);
+      expect(hint?.riskTags.length, cardId).toBeGreaterThan(0);
+      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
+      expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(scenarioCards.has(cardId), cardId).toBe(true);
+    }
+
+    const otherLocalOnrAiSupported = Object.values(cardsById)
+      .filter((card) => card.catalogCardId.startsWith("onr_v1_") && card.statuses.ai_supported)
+      .map((card) => card.catalogCardId)
+      .sort();
+    expect(otherLocalOnrAiSupported).toEqual([...approved, ...DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS].sort());
+    expect(JSON.stringify({ kingOfTheRoadAiHintsData, kingOfTheRoadManifestData, kingOfTheRoadScenarioData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|[A-Za-z]:\\/
+    );
+  });
+
+  it("approves Batch A Runner Rig Low Risk cards only after catalog, hint and scenario gates", () => {
+    const cardsById = createRuntimeCardsById();
+    if (!cardsById["onr_v1_014_codecracker"]) return;
+    const approved = new Set<string>(DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS);
+    const hints = deckLegalBatchAAiHintsData.cards as Array<{
+      cardId: string;
+      roles: string[];
+      planRoles: string[];
+      requiredMechanics: string[];
+      aiSupportStatus: string;
+      scenarioRefs: string[];
+    }>;
+    const manifestCards = deckLegalBatchAManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
+    const scenarioCards = new Set((deckLegalBatchAScenarioData.scenarios as Array<{ cards: string[] }>).flatMap((scenario) => scenario.cards));
+    const supplementalIds = new Set((runtimeSupplementAiHintsData.cards as Array<{ cardId: string }>).map((hint) => hint.cardId));
+
+    expect(DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS).toHaveLength(8);
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(deckLegalBatchAScenarioData.id).toBe("ai-runner-rig-low-risk-batch-a-smokes");
+
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS) {
+      const card = cardsById[cardId];
+      const hint = hints.find((candidate) => candidate.cardId === cardId);
+      const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
+      expect(card?.statuses.human_playable, cardId).toBe(true);
+      expect(card?.statuses.deck_legal, cardId).toBe(true);
+      expect(card?.statuses.format_legal, cardId).toBe(true);
+      expect(card?.statuses.ai_supported, cardId).toBe(true);
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(hint?.roles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.requiredMechanics.length, cardId).toBeGreaterThan(0);
+      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
+      expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(scenarioCards.has(cardId), cardId).toBe(true);
+      expect(supplementalIds.has(cardId), cardId).toBe(false);
+    }
+
+    const batchBToG = [
+      "onr_v1_081_custodial-position",
+      "onr_v1_085_executive-wiretaps",
+      "onr_v1_101_mit-west-tier",
+      "onr_v1_203_hostile-takeover",
+      "onr_v1_220_tycho-extension",
+      "onr_v1_237_data-wall",
+      "onr_v1_297_overtime-incentives",
+      "onr_v1_302_scorched-earth"
+    ];
+    for (const cardId of batchBToG) expect(cardsById[cardId]?.statuses.ai_supported, cardId).toBe(false);
+
+    expect(JSON.stringify({ deckLegalBatchAAiHintsData, deckLegalBatchAManifestData, deckLegalBatchAScenarioData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
+    );
   });
 });
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
-import { createRuntimeCardsById } from "@netgrid/catalog";
+import { createRuntimeCardsById, DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS } from "@netgrid/catalog";
 import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, replayEvents } from "@netgrid/engine";
 import {
   assertAiInputIsSideSafe,
@@ -675,6 +675,205 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(inputA.legalActions.find((action) => action.actionId === decisionA.actionId)?.type).toBe(inputB.legalActions.find((action) => action.actionId === decisionB.actionId)?.type);
   });
 
+  it("approves King of the Road Runner AI rig setup and support hints", () => {
+    const state = kingOfTheRoadRunnerTurn("ai-kotr-build-rig");
+    moveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
+    moveRunnerCardToGrip(state, "onr_v1_145_wutech-mem-chip");
+    state.runner.credits = 8;
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const rigInput = { ...input, legalActions: input.legalActions.filter((action) => action.type === "install_card") };
+    const candidates = generateRunnerPlanCandidates(rigInput);
+    const decision = chooseRunnerPlanDecision(rigInput);
+
+    expect(candidates.some((candidate) => candidate.kind === "build_rig")).toBe(true);
+    expect(candidates.every((candidate) => runnerPlanUsesOnlyAiSupportedCards(rigInput, candidate))).toBe(true);
+    expect(decision.debug.planKind).toBe("build_rig");
+    expect(rigInput.legalActions.find((action) => action.actionId === decision.selectedActionId)?.type).toBe("install_card");
+    expect(JSON.stringify(decision.debug)).not.toMatch(/cardInstances|privatePayload|Simple Agenda|v08_project_agenda/);
+  });
+
+  it("uses King of the Road economy and draw plans before low-value runs", () => {
+    const economyState = kingOfTheRoadRunnerTurn("ai-kotr-economy");
+    moveRunnerCardToGrip(economyState, "onr_v1_097_livewires-contacts");
+    economyState.runner.credits = 1;
+    const economyInput = buildAiDecisionInput(economyState, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const economyEvent = economyInput.legalActions.find((action) => action.type === "play_event" && sourceDefinitionFromInput(economyInput, action) === "onr_v1_097_livewires-contacts");
+
+    const drawState = kingOfTheRoadRunnerTurn("ai-kotr-draw");
+    moveRunnerCardToGrip(drawState, "onr_v1_095_jack-n-joe");
+    const drawInput = buildAiDecisionInput(drawState, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const drawEvent = drawInput.legalActions.find((action) => action.type === "play_event" && sourceDefinitionFromInput(drawInput, action) === "onr_v1_095_jack-n-joe");
+
+    expect(economyEvent).toBeDefined();
+    expect(drawEvent).toBeDefined();
+    if (!economyEvent || !drawEvent) throw new Error("Missing King of the Road event LegalActions");
+    expect(chooseRunnerPlanDecision({ ...economyInput, legalActions: [economyEvent] }).debug.planKind).toBe("recover_economy");
+    expect(chooseRunnerPlanDecision({ ...drawInput, legalActions: [drawEvent] }).debug.planKind).toBe("draw_for_answers");
+  });
+
+  it("avoids bad King of the Road runs into visible stoppers", () => {
+    const state = kingOfTheRoadRunnerTurn("ai-kotr-negative-run");
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId] = { ...state.cardInstances[iceId]!, faceup: true, rezzed: true };
+    moveRunnerCardToGrip(state, "onr_v1_095_jack-n-joe");
+    state.runner.credits = 2;
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const drawEvent = input.legalActions.find((action) => action.type === "play_event" && sourceDefinitionFromInput(input, action) === "onr_v1_095_jack-n-joe");
+
+    expect(rdRun).toBeDefined();
+    expect(drawEvent).toBeDefined();
+    if (!rdRun || !drawEvent) throw new Error("Missing King of the Road negative-run fixture actions");
+    const decision = chooseRunnerAction({ ...input, legalActions: [rdRun, drawEvent] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+    expect(selected?.type).not.toBe("start_run");
+    expect(decision.reasonCode).toBe("runner.plan.draw_for_answers");
+    expect(JSON.stringify(decision.decisionDebug)).toContain("hidden_corp_information_not_used");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|Simple Agenda|v08_project_agenda/);
+  });
+
+  it("runs King of the Road side-safe smokes with legal Runner plans", () => {
+    const summary = simulateAiGame({
+      seed: "ai-kotr-runner-smoke",
+      runnerDeck: kingOfTheRoadRunnerDeck(),
+      corpDeck: deckDefinitionFromSnapshot("demo_corp_008_snapshot_v0_8"),
+      runnerDeckMetadata: kingOfTheRoadSnapshot().publicMetadata,
+      corpDeckMetadata: snapshotById("demo_corp_008_snapshot_v0_8").publicMetadata,
+      agendaPointsToWin: 7,
+      runnerProfileId: "runner-ai-v1.4.1-normal",
+      corpProfileId: "corp-ai-v1.4.0-normal",
+      maxActions: 70
+    });
+
+    expect(summary.errors).toEqual([]);
+    expect(summary.replayOk).toBe(true);
+    expect(summary.actionSequence.some((entry) => entry.side === "runner" && entry.reasonCode.startsWith("runner.plan."))).toBe(true);
+    expect(JSON.stringify(summary)).not.toMatch(/cardInstances|privatePayload|v08_project_agenda_1|Simple Priority Agenda/);
+  });
+
+  it("keeps King of the Road hidden-state variants from changing visible Runner decisions", () => {
+    const stateA = kingOfTheRoadRunnerTurn("ai-kotr-hidden-invariance");
+    const stateB = structuredClone(stateA);
+    const hiddenId = stateA.corp.rd[0];
+    expect(hiddenId).toBeDefined();
+    if (!hiddenId) throw new Error("Missing hidden KOTR R&D card");
+    stateA.cardInstances[hiddenId] = { ...stateA.cardInstances[hiddenId]!, definitionId: "simple_agenda", faceup: false, rezzed: false };
+    stateB.cardInstances[hiddenId] = { ...stateB.cardInstances[hiddenId]!, definitionId: "simple_economy_asset", faceup: false, rezzed: false };
+    moveRunnerCardToGrip(stateA, "onr_v1_097_livewires-contacts");
+    moveRunnerCardToGrip(stateB, "onr_v1_097_livewires-contacts");
+    const inputA = buildAiDecisionInput(stateA, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const inputB = buildAiDecisionInput(stateB, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const decisionA = chooseRunnerAction(inputA);
+    const decisionB = chooseRunnerAction(inputB);
+
+    expect(JSON.stringify(inputA.playerView)).toBe(JSON.stringify(inputB.playerView));
+    expect(decisionA.reasonCode).toBe(decisionB.reasonCode);
+    expect(inputA.legalActions.find((action) => action.actionId === decisionA.actionId)?.type).toBe(inputB.legalActions.find((action) => action.actionId === decisionB.actionId)?.type);
+    expect(assertAiInputIsSideSafe(inputA)).toBe(true);
+    expect(JSON.stringify(decisionA.decisionDebug)).not.toMatch(/cardInstances|privatePayload|Simple Agenda|simple_agenda/);
+  });
+
+  it("builds a Batch A Runner rig from additional breaker roles", () => {
+    const state = batchARunnerTurn("ai-batch-a-build-rig");
+    moveRunnerCardToGrip(state, "onr_v1_014_codecracker");
+    moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    moveRunnerCardToGrip(state, "onr_v1_039_krash");
+    state.runner.credits = 10;
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const rigInput = { ...input, legalActions: input.legalActions.filter((action) => action.type === "install_card") };
+    const candidates = generateRunnerPlanCandidates(rigInput);
+    const decision = chooseRunnerPlanDecision(rigInput);
+    const selectedDefinition = sourceDefinitionFromInput(rigInput, rigInput.legalActions.find((action) => action.actionId === decision.selectedActionId)!);
+
+    expect(candidates.some((candidate) => candidate.kind === "build_rig")).toBe(true);
+    expect(candidates.every((candidate) => runnerPlanUsesOnlyAiSupportedCards(rigInput, candidate))).toBe(true);
+    expect(decision.debug.planKind).toBe("build_rig");
+    expect(DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS).toContain(selectedDefinition);
+    expect(JSON.stringify(decision.debug)).not.toMatch(/cardInstances|privatePayload|Simple Agenda|v08_project_agenda/);
+  });
+
+  it("installs Batch A memory hardware under MU pressure", () => {
+    let state = batchARunnerTurn("ai-batch-a-memory-pressure");
+    state.runner.credits = 20;
+    for (const definitionId of ["onr_v1_014_codecracker", "onr_v1_021_dwarf", "onr_v1_066_snowball", "onr_v1_074_worm"] as const) {
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === definitionId);
+    }
+    state.runner.clicks = 4;
+    moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_144_tycho-mem-chip");
+    moveRunnerCardToGrip(state, "onr_v1_146_zetatech-mem-chip");
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const installActions = input.legalActions.filter((action) => action.type === "install_card");
+    const decision = chooseRunnerPlanDecision({ ...input, legalActions: installActions });
+    const selected = input.legalActions.find((action) => action.actionId === decision.selectedActionId);
+    const selectedDefinition = sourceDefinitionFromInput(input, selected!);
+
+    expect(input.playerView.own.memoryUsed).toBe(input.playerView.own.memoryLimit);
+    expect(installActions.some((action) => sourceDefinitionFromInput(input, action) === "onr_v1_015_codeslinger")).toBe(false);
+    expect(selectedDefinition).toMatch(/mem-chip$/);
+    expect(decision.debug.planKind).toBe("build_rig");
+    expect(decision.debug.evidence).toContain("memory_remaining:0");
+  });
+
+  it("keeps Batch A installation credit- and MU-safe", () => {
+    const state = batchARunnerTurn("ai-batch-a-credit-safe");
+    moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    state.runner.credits = 7;
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const expensiveInstall = input.legalActions.find((action) => action.type === "install_card" && sourceDefinitionFromInput(input, action) === "onr_v1_015_codeslinger");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(expensiveInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!expensiveInstall || !gain) throw new Error("Missing Batch A credit-safe fixture actions");
+    const decision = chooseRunnerAction({ ...input, legalActions: [expensiveInstall, gain] });
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(JSON.stringify(decision.decisionDebug)).toContain("credit_reserve");
+  });
+
+  it("uses Batch A breaker roles for safe probe runs without hidden claims", () => {
+    let state = batchARunnerTurn("ai-batch-a-safe-probe");
+    state.runner.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_014_codecracker");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_014_codecracker");
+    ensureRemoteServer(state, "remote_1");
+    const iceId = putCorpIceOnServer(state, "remote_1", "simple_code_gate_ice");
+    state.cardInstances[iceId] = { ...state.cardInstances[iceId]!, faceup: true, rezzed: true };
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const remoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+
+    expect(remoteRun).toBeDefined();
+    if (!remoteRun) throw new Error("Missing Batch A safe probe run");
+    const decision = chooseRunnerAction({ ...input, legalActions: [remoteRun] });
+    expect(decision.reasonCode).toBe("runner.plan.safe_probe_run");
+    expect(decision.evidence).toContain("rig_breakers:1");
+    expect(JSON.stringify(decision.decisionDebug)).toContain("unknown_corp_cards_remain_unknown");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|Simple Agenda|simple_agenda/);
+  });
+
+  it("avoids pointless Batch A runs into a visible stopper", () => {
+    const state = batchARunnerTurn("ai-batch-a-negative-stopper");
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[iceId] = { ...state.cardInstances[iceId]!, faceup: true, rezzed: true };
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    state.runner.credits = 4;
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const dwarfInstall = input.legalActions.find((action) => action.type === "install_card" && sourceDefinitionFromInput(input, action) === "onr_v1_021_dwarf");
+
+    expect(rdRun).toBeDefined();
+    expect(dwarfInstall).toBeDefined();
+    if (!rdRun || !dwarfInstall) throw new Error("Missing Batch A negative stopper fixture actions");
+    const decision = chooseRunnerAction({ ...input, legalActions: [rdRun, dwarfInstall] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+    expect(selected?.type).toBe("install_card");
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|Simple Agenda|simple_agenda/);
+  });
+
   it("keeps V1.4.0 Corp plan regression green while Runner plans run against basic and planned Corp", () => {
     const scoreInput = corpActionPhaseInput("ai-v141-corp-regression", (state) => {
       state.corp.credits = 8;
@@ -876,7 +1075,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(serializedPool).not.toContain("demo_corp_123_snapshot_v1_2_3");
     for (const cardId of ONR_V1_2_3_CARD_IDS) {
       expect(serializedPool).not.toContain(cardId);
-      expect(runtimeCardsById[cardId]?.statuses.ai_supported).toBe(false);
+      expect(runtimeCardsById[cardId]?.statuses.ai_supported).toBe((DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS as readonly string[]).includes(cardId));
     }
     for (const entry of aiDeckPoolData.entries) {
       const snapshot = snapshots.find((candidate) => candidate.deckSnapshotId === entry.snapshotId);
@@ -1377,6 +1576,84 @@ function runRunnerAiSmoke(seed: string, maxActions: number, corpMode: "baseline"
     state = result.state;
   }
   return { actions: state.stateVersion, errors, runnerPlanDecisions };
+}
+
+function kingOfTheRoadRunnerTurn(seed: string): GameState {
+  return toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: kingOfTheRoadRunnerDeck(),
+      corpDeck: deckDefinitionFromSnapshot("demo_corp_008_snapshot_v0_8"),
+      agendaPointsToWin: 7
+    })
+  );
+}
+
+function kingOfTheRoadRunnerDeck(): DeckDefinition {
+  return deckDefinitionFromSnapshot("king_of_the_road_runner_ai_snapshot_v1");
+}
+
+function batchARunnerTurn(seed: string): GameState {
+  return toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: batchARunnerDeck(),
+      corpDeck: deckDefinitionFromSnapshot("demo_corp_008_snapshot_v0_8"),
+      agendaPointsToWin: 7
+    })
+  );
+}
+
+function batchARunnerDeck(): DeckDefinition {
+  return {
+    id: "ai_batch_a_runner_rig_low_risk",
+    name: "AI Batch A Runner Rig Low Risk",
+    side: "runner",
+    identity: "runner_identity_001",
+    cards: [
+      { id: "onr_v1_014_codecracker", quantity: 2 },
+      { id: "onr_v1_015_codeslinger", quantity: 2 },
+      { id: "onr_v1_021_dwarf", quantity: 2 },
+      { id: "onr_v1_039_krash", quantity: 2 },
+      { id: "onr_v1_066_snowball", quantity: 2 },
+      { id: "onr_v1_074_worm", quantity: 2 },
+      { id: "onr_v1_144_tycho-mem-chip", quantity: 1 },
+      { id: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+      { id: "simple_economy_event", quantity: 4 }
+    ]
+  };
+}
+
+function deckDefinitionFromSnapshot(snapshotId: string): DeckDefinition {
+  const snapshot = snapshotById(snapshotId);
+  return {
+    id: snapshot.deckSnapshotId,
+    name: snapshot.name,
+    side: snapshot.side,
+    identity: snapshot.identityCardId,
+    cards: snapshot.cards.map((entry) => ({ id: entry.cardId, quantity: entry.quantity }))
+  };
+}
+
+function kingOfTheRoadSnapshot() {
+  return snapshotById("king_of_the_road_runner_ai_snapshot_v1");
+}
+
+function snapshotById(snapshotId: string) {
+  const snapshots = snapshotsData08.snapshots as Array<{
+    deckSnapshotId: string;
+    name: string;
+    side: Side;
+    identityCardId: string;
+    cards: Array<{ cardId: string; quantity: number }>;
+    publicMetadata: { side: Side; identityCardId: string; deckName: string; cardPoolSnapshotId: string; formatProfileId: string; deckHash: string };
+  }>;
+  const snapshot = snapshots.find((candidate) => candidate.deckSnapshotId === snapshotId);
+  expect(snapshot, snapshotId).toBeDefined();
+  if (!snapshot) throw new Error(`Missing snapshot ${snapshotId}`);
+  return snapshot;
 }
 
 function apply(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {
