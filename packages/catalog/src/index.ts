@@ -475,11 +475,36 @@ export const DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS = [
   "onr_v1_306_trojan-horse"
 ] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS = [
+  "onr_v1_023_evil-twin",
+  "onr_v1_028_force-shield",
+  "onr_v1_125_dermatech-bodyplating",
+  "onr_v1_229_code-corpse",
+  "onr_v1_231_cortical-scrub",
+  "onr_v1_254_liche",
+  "onr_v1_212_priority-requisition",
+  "onr_v1_215_security-net-optimization",
+  "onr_v1_317_data-masons",
+  "onr_v1_320_encoder-inc",
+  "onr_v1_341_skalderviken-sa-beta-test-site",
+  "onr_v1_233_d-arc-knight",
+  "onr_v1_267_sentinels-prime",
+  "onr_v1_273_triggerman",
+  "onr_v1_350_antiquated-interface-routines",
+  "onr_v1_371_tokyo-chiba-infighting",
+  "onr_v1_011_cloak",
+  "onr_v1_036_jackhammer",
+  "onr_v1_069_succubus",
+  "onr_v1_163_floating-runner-bbs",
+  "onr_v1_180_smiths-pawnshop"
+] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS
 ]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);

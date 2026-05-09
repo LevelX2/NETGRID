@@ -3,6 +3,7 @@ import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
 import aiCardHintsData from "../../../data/ai/ai-card-hints-1.3.1.json";
 import kingOfTheRoadAiHintsData from "../../../data/ai/ai-card-hints-king-of-the-road-ai-approval.json";
 import deckLegalBatchAAiHintsData from "../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
+import deckLegalV161V170AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v161-v170.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
 import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
@@ -123,10 +124,13 @@ type RunnerFeatures = {
 
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
 const AI_HINTS = new Map(
-  [...(aiCardHintsData.cards as AiCardHint[]), ...(kingOfTheRoadAiHintsData.cards as AiCardHint[]), ...(runtimeSupplementAiHintsData.cards as AiCardHint[]), ...(deckLegalBatchAAiHintsData.cards as AiCardHint[])].map((hint) => [
-    hint.cardId,
-    hint
-  ])
+  [
+    ...(aiCardHintsData.cards as AiCardHint[]),
+    ...(kingOfTheRoadAiHintsData.cards as AiCardHint[]),
+    ...(runtimeSupplementAiHintsData.cards as AiCardHint[]),
+    ...(deckLegalBatchAAiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV161V170AiHintsData.cards as AiCardHint[])
+  ].map((hint) => [hint.cardId, hint])
 );
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
 const RUNTIME_CARDS = createRuntimeCardsById();

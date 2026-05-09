@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
-import { createRuntimeCardsById, DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS, DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS } from "@netgrid/catalog";
+import {
+  createRuntimeCardsById,
+  DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS
+} from "@netgrid/catalog";
 import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
 import {
   assertAiInputIsSideSafe,
@@ -1580,6 +1585,19 @@ describe("MVP 0.3 AI simulation harness", () => {
       for (const card of snapshot?.cards ?? []) {
         expect(runtimeCardsById[card.cardId]?.statuses.ai_supported, card.cardId).toBe(true);
       }
+    }
+  });
+
+  it("marks the V1.6.1 to V1.7.0 deck-legal approval slice as AI-supported for custom AI deckbuilding", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    expect(DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS).toHaveLength(21);
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS) {
+      const card = runtimeCardsById[cardId];
+      expect(card, cardId).toBeDefined();
+      expect(card?.statuses.human_playable, cardId).toBe(true);
+      expect(card?.statuses.deck_legal, cardId).toBe(true);
+      expect(card?.statuses.format_legal, cardId).toBe(true);
+      expect(card?.statuses.ai_supported, cardId).toBe(true);
     }
   });
 

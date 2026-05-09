@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "ai-runner-corp-card-approval-scenarios-v1",
+  "id": "ai-deck-legal-v161-v170-smokes",
+  "batchId": "deck_legal_ai_approval_v161_to_v170",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "corpAiProfileId": "corp-ai-v1.4.0-normal",
+  "status": "implemented_for_deck_legal_ai_approval_v161_to_v170",
+  "assertions": {
+    "allBatchCardsHaveAiHints": true,
+    "allBatchCardsHaveScenarioRefs": true,
+    "aiSupportedOnlyAfterGate": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "runner_damage_prevention_tools",
+      "planKinds": ["build_rig", "recover_economy"],
+      "cards": ["onr_v1_023_evil-twin", "onr_v1_028_force-shield", "onr_v1_125_dermatech-bodyplating"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses V1.6.1 runner damage prevention cards with legal actions"]
+    },
+    {
+      "id": "runner_stealth_noisy_credit_gate",
+      "planKinds": ["build_rig", "safe_probe_run"],
+      "cards": ["onr_v1_011_cloak", "onr_v1_036_jackhammer"],
+      "coveredBy": ["packages/ai/src/index.test.ts::handles V1.7.0 stealth and noisy breakers without hidden claims"]
+    },
+    {
+      "id": "runner_daemon_hosting_lifecycle",
+      "planKinds": ["build_rig"],
+      "cards": ["onr_v1_069_succubus"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses V1.7.0 daemon hosting cards under legal action constraints"]
+    },
+    {
+      "id": "runner_start_of_turn_economy",
+      "planKinds": ["recover_economy"],
+      "cards": ["onr_v1_163_floating-runner-bbs", "onr_v1_180_smiths-pawnshop"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses V1.7.0 start-of-turn resource cards safely"]
+    },
+    {
+      "id": "corp_core_damage_ice_pressure",
+      "planKinds": ["protect_hq", "protect_rnd"],
+      "cards": ["onr_v1_229_code-corpse", "onr_v1_231_cortical-scrub", "onr_v1_254_liche"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses V1.6.1 corp core-damage ice with legal actions"]
+    },
+    {
+      "id": "corp_agenda_score_bonus",
+      "planKinds": ["score_now", "score_next_turn", "build_scoring_remote"],
+      "cards": ["onr_v1_212_priority-requisition", "onr_v1_215_security-net-optimization"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses V1.6.2 corp scoring agendas without hidden-state shortcuts"]
+    },
+    {
+      "id": "corp_global_modifier_assets",
+      "planKinds": ["protect_hq", "protect_rnd", "bait_runner"],
+      "cards": ["onr_v1_317_data-masons", "onr_v1_320_encoder-inc", "onr_v1_341_skalderviken-sa-beta-test-site", "onr_v1_350_antiquated-interface-routines"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses V1.6.2 and V1.6.3 corp global ice modifier cards safely"]
+    },
+    {
+      "id": "corp_program_trash_ice",
+      "planKinds": ["protect_hq", "protect_rnd"],
+      "cards": ["onr_v1_233_d-arc-knight", "onr_v1_267_sentinels-prime", "onr_v1_273_triggerman"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses V1.6.3 corp program-trash ice with legal actions"]
+    },
+    {
+      "id": "corp_region_unsuccessful_run_credit",
+      "planKinds": ["build_scoring_remote", "bait_runner"],
+      "cards": ["onr_v1_371_tokyo-chiba-infighting"],
+      "coveredBy": ["packages/ai/src/index.test.ts::uses V1.6.3 region cards with side-safe evidence"]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "DecisionDebug may include uncertainty markers such as unknown_corp_cards_remain_unknown.",
+    "DecisionDebug must not include hidden Corp card titles, private decklists, cardInstances or privatePayload.",
+    "Equal side-visible projections must keep the same selected action for deterministic seeds."
+  ]
+}

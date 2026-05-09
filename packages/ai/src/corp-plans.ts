@@ -3,6 +3,7 @@ import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
 import aiCardHintsData from "../../../data/ai/ai-card-hints-1.3.1.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import corpTagSliceAiHintsData from "../../../data/ai/ai-card-hints-corp-tag-approval-slice.json";
+import deckLegalV161V170AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v161-v170.json";
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
 import type { AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
@@ -128,7 +129,7 @@ type RemoteIntentMemory = {
 
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
 const AI_HINTS = new Map(
-  [...(aiCardHintsData.cards as AiCardHint[]), ...(runtimeSupplementAiHintsData.cards as AiCardHint[]), ...(corpTagSliceAiHintsData.cards as AiCardHint[])].map(
+  [...(aiCardHintsData.cards as AiCardHint[]), ...(runtimeSupplementAiHintsData.cards as AiCardHint[]), ...(corpTagSliceAiHintsData.cards as AiCardHint[]), ...(deckLegalV161V170AiHintsData.cards as AiCardHint[])].map(
     (hint) => [hint.cardId, hint]
   )
 );
