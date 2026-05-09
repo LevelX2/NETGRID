@@ -4,6 +4,8 @@
 
 V1.7.0 Mechanikpaket D ist am 2026-05-09 nach grünem V1.6.3-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau fünf Karten (`onr_v1_011_cloak`, `onr_v1_036_jackhammer`, `onr_v1_069_succubus`, `onr_v1_163_floating-runner-bbs`, `onr_v1_180_smiths-pawnshop`) und ergänzt deterministische Unique-Constraint-Gates in Deck- und Runtimevalidierung, Daemon-Hosting mit Kaskaden-Trash, Recurring-/Start-of-turn-Resolver sowie subtype-basiertes Stealth/Noisy-Gating. Gate-Ergebnis: `V1_7_0_implemented: true`; `V1_7_0_verified: true`; `V1_7_0_done: true`; `ready_for_V1_7_1: true`.
 
+Detailplanung vom 2026-05-09 für die vier nächsten Releases ist dokumentiert in `docs/derived/V1_7_1_TO_V1_8_1_DETAILED_PLAN.md`. Der Plan bestätigt die Sequenz `V1.7.1 -> V1.7.2 -> V1.8.0 -> V1.8.1` als umsetzbar mit hartem Preflight-Schnitt (`freigabefähig`/`deferred`) je Release. Matrixstand für diese Viererlinie: 104 Karten im Zielkorb, davon 21 mit späteren Pflichtabhängigkeiten und 5 mit offenem Mechanikhinweis; als Kernkandidaten ohne spätere Pflichtabhängigkeit und ohne offenen Mechanikhinweis bleiben 80 Karten.
+
 V1.6.3 Mechanikpaket C ist am 2026-05-09 nach grünem V1.6.2-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau fünf Karten (`onr_v1_233_d-arc-knight`, `onr_v1_267_sentinels-prime`, `onr_v1_273_triggerman`, `onr_v1_350_antiquated-interface-routines`, `onr_v1_371_tokyo-chiba-infighting`) und ergänzt deterministische `trash program`-Subroutinen, servergebundene Upgrade-Stärkemodifier, Region-Installlifecycle (rez on install, eine Region je Fort) sowie den Tokyo-Chiba-Bonus nach erfolglosen Runs auf demselben Fort. Gate-Ergebnis: `V1_6_3_implemented: true`; `V1_6_3_verified: true`; `V1_6_3_done: true`; `ready_for_V1_7_0: true`.
 
 V1.6.2 Mechanikpaket B ist am 2026-05-09 nach grünem V1.6.1-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau fünf Karten (`onr_v1_212_priority-requisition`, `onr_v1_215_security-net-optimization`, `onr_v1_317_data-masons`, `onr_v1_320_encoder-inc`, `onr_v1_341_skalderviken-sa-beta-test-site`) und ergänzt deterministische globale ICE-Rez-Kosten-/Stärke-Modifier über rezzed Root- und gescorte Agenda-Quellen sowie den deterministischen Priority-Requisition-Scoreeffekt (kostenfreies Rezzen eines installierten unrezzed ICE). Gate-Ergebnis: `V1_6_2_implemented: true`; `V1_6_2_verified: true`; `V1_6_2_done: true`; `ready_for_V1_6_3: true`.
@@ -2224,6 +2226,7 @@ Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief Stat
 
 Detailed planning and completion artifacts available:
 
+- `docs/derived/V1_7_1_TO_V1_8_1_DETAILED_PLAN.md`
 - `docs/derived/V1_4_2_TO_V1_6_0_PLANNING_REVIEW.md`
 - `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`
 - `docs/derived/V1_4_2_BELIEF_STATE_OPPONENT_MODEL_DETAILED_PLAN.md`
