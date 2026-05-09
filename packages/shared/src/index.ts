@@ -602,6 +602,7 @@ export type GameState = {
   runnerTurnFlags?: {
     stoleAgendaThisTurn: boolean;
     stoleAgendaLastTurn: boolean;
+    damagePreventionUsage?: Record<CardInstanceId, number>;
   };
 };
 
@@ -952,9 +953,17 @@ function onrBreaker(params: {
   pumpCost?: number;
   iceSubtype: string;
   iceLabel: string;
+  extraMechanics?: string[];
 }): CardDefinition {
   const pumpText = params.pumpCost === undefined ? "" : ` ${params.pumpCost} Credits: +1 strength.`;
-  const mechanics = ["install_program", "memory", ...(params.pumpCost === undefined ? [] : ["pump_breaker"]), "break_subroutine", ONR_V1_LOCAL_PRIVATE];
+  const mechanics = [
+    "install_program",
+    "memory",
+    ...(params.pumpCost === undefined ? [] : ["pump_breaker"]),
+    "break_subroutine",
+    ...(params.extraMechanics ?? []),
+    ONR_V1_LOCAL_PRIVATE
+  ];
   return {
     id: params.id,
     title: params.title,
@@ -1027,6 +1036,10 @@ function onrEtr(id: string): SubroutineDefinition {
 
 function onrNetDamage(id: string, amount: number): SubroutineDefinition {
   return { id, type: "do_damage", damageType: "net", amount };
+}
+
+function onrCoreDamage(id: string, amount: number): SubroutineDefinition {
+  return { id, type: "do_damage", damageType: "core", amount };
 }
 
 function onrMemoryChip(params: { id: string; title: string; installCost: number; memoryLimitBonus: number }): CardDefinition {
@@ -1183,6 +1196,31 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceSubtype: "wall",
     iceLabel: "wall"
   }),
+  onrBreaker({
+    id: "onr_v1_023_evil-twin",
+    title: "Evil Twin",
+    subtypes: ["icebreaker", "killer"],
+    installCost: 6,
+    memoryCost: 1,
+    strength: 3,
+    breakCost: 3,
+    pumpCost: 1,
+    iceSubtype: "sentry",
+    iceLabel: "sentry",
+    extraMechanics: ["damage_prevention", "damage_prevention_turn_limit", "core_damage"]
+  }),
+  {
+    id: "onr_v1_028_force-shield",
+    title: "Force Shield",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    rulesText: "Prevents up to 2 net and/or core damage each turn.",
+    mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
+  },
   onrUniversalBreaker({
     id: "onr_v1_039_krash",
     title: "Krash",
@@ -1308,6 +1346,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 1,
     rulesText: "+1 memory limit.",
     mechanics: ["install_hardware", "modify_memory_limit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_125_dermatech-bodyplating",
+    title: "Dermatech Bodyplating",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Prevents 1 meat damage each turn.",
+    mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", ONR_V1_LOCAL_PRIVATE]
   },
   onrMemoryChip({
     id: "onr_v1_144_tycho-mem-chip",
@@ -1489,6 +1538,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_operation", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
   },
   onrIce({
+    id: "onr_v1_229_code-corpse",
+    title: "Code Corpse",
+    subtypes: ["sentry", "ice", "ap", "zombie"],
+    rezCost: 10,
+    strength: 5,
+    rulesText: "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
+    subroutines: [onrCoreDamage("onr_v1_229_code_corpse_core_damage_1", 1), onrCoreDamage("onr_v1_229_code_corpse_core_damage_2", 1), onrEtr("onr_v1_229_code_corpse_etr")],
+    mechanics: ["damage", "core_damage", "flatline", "end_the_run"]
+  }),
+  onrIce({
     id: "onr_v1_230_cortical-scanner",
     title: "Cortical Scanner",
     subtypes: ["code_gate"],
@@ -1497,6 +1556,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "End the run.\nEnd the run.\nEnd the run.",
     subroutines: [onrEtr("onr_v1_230_cortical_scanner_etr_1"), onrEtr("onr_v1_230_cortical_scanner_etr_2"), onrEtr("onr_v1_230_cortical_scanner_etr_3")],
     mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_231_cortical-scrub",
+    title: "Cortical Scrub",
+    subtypes: ["sentry", "black_ice", "ap", "brainwipe"],
+    rezCost: 7,
+    strength: 3,
+    rulesText: "[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
+    subroutines: [onrCoreDamage("onr_v1_231_cortical_scrub_core_damage", 1), onrEtr("onr_v1_231_cortical_scrub_etr")],
+    mechanics: ["damage", "core_damage", "flatline", "end_the_run"]
   }),
   onrIce({
     id: "onr_v1_232_crystal-wall",
@@ -1611,6 +1680,21 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "Do 1 net damage. End the run.",
     subroutines: [onrNetDamage("onr_v1_253_laser_wire_net_damage", 1), onrEtr("onr_v1_253_laser_wire_etr")],
     mechanics: ["damage", "flatline", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_254_liche",
+    title: "Liche",
+    subtypes: ["sentry", "black_ice", "ap"],
+    rezCost: 14,
+    strength: 6,
+    rulesText: "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
+    subroutines: [
+      onrCoreDamage("onr_v1_254_liche_core_damage_1", 1),
+      onrCoreDamage("onr_v1_254_liche_core_damage_2", 1),
+      onrCoreDamage("onr_v1_254_liche_core_damage_3", 1),
+      onrEtr("onr_v1_254_liche_etr")
+    ],
+    mechanics: ["damage", "core_damage", "flatline", "end_the_run"]
   }),
   onrIce({
     id: "onr_v1_256_mazer",

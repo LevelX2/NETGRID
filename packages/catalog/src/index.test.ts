@@ -42,6 +42,7 @@ import {
   ONR_V1_0_6K_RELEASE_CARD_IDS,
   ONR_V1_1_2K_RELEASE_CARD_IDS,
   ONR_V1_2_3_RELEASE_CARD_IDS,
+  ONR_V1_6_1_RELEASE_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateAiCardHintsV2,
@@ -138,7 +139,7 @@ describe("catalog import and status logic", () => {
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 
-  it("applies the V1.0.5K, V1.0.6K, V1.1.2K and V1.2.3 release gates to private local O:NR runtime cards when present", () => {
+  it("applies the V1.0.5K, V1.0.6K, V1.1.2K, V1.2.3 and V1.6.1 release gates to private local O:NR runtime cards when present", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
 
@@ -146,7 +147,8 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_0_6K_RELEASE_CARD_IDS).toHaveLength(20);
     expect(ONR_V1_1_2K_RELEASE_CARD_IDS).toHaveLength(20);
     expect(ONR_V1_2_3_RELEASE_CARD_IDS).toHaveLength(11);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(63);
+    expect(ONR_V1_6_1_RELEASE_CARD_IDS).toHaveLength(6);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(69);
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
@@ -163,7 +165,9 @@ describe("catalog import and status logic", () => {
       expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
       expect(card?.statuses.format_legal).toBe(true);
-      const expectedManifest = (ONR_V1_2_3_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+      const expectedManifest = (ONR_V1_6_1_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.6.1"
+        : (ONR_V1_2_3_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.2.3"
         : (ONR_V1_1_2K_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.1.2k"
@@ -208,6 +212,12 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_243_fetch-4-0-1"]?.text).toBe("[Subroutine] Trace 3 - If trace is successful, give Runner a tag.");
     expect(cardsById["onr_v1_249_hunter"]?.numeric.rezCost).toBe(2);
     expect(cardsById["onr_v1_101_mit-west-tier"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.2.3");
+    expect(cardsById["onr_v1_023_evil-twin"]?.text).toContain("Prevents up to 2 net and/or core damage");
+    expect(cardsById["onr_v1_028_force-shield"]?.numeric.installCost).toBe(2);
+    expect(cardsById["onr_v1_125_dermatech-bodyplating"]?.numeric.installCost).toBe(0);
+    expect(cardsById["onr_v1_229_code-corpse"]?.numeric.rezCost).toBe(10);
+    expect(cardsById["onr_v1_231_cortical-scrub"]?.text).toContain("Do 1 core damage");
+    expect(cardsById["onr_v1_254_liche"]?.numeric.strength).toBe(6);
     expect(cardsById["onr_v1_021_dwarf"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_039_krash"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_066_snowball"]?.statuses.ai_supported).toBe(true);

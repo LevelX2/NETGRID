@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v161-card-release-smoke",
+  "title": "V1.6.1 Mechanikpaket A Kernrelease",
+  "release": "V1.6.1",
+  "status": "implemented_core_subset",
+  "extends": "data/scenarios/v123-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_023_evil-twin",
+    "onr_v1_028_force-shield",
+    "onr_v1_125_dermatech-bodyplating",
+    "onr_v1_229_code-corpse",
+    "onr_v1_231_cortical-scrub",
+    "onr_v1_254_liche"
+  ],
+  "preconditions": [
+    "V1.2.0 Event Modification Foundation und V1.2.1 Replacement Effects sind grün.",
+    "V1.2.3 Runtime-Kartenpfad ist aktiv.",
+    "V1.6.1 Preflight dokumentiert deferred Karten mit späteren Blockereffekten."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.6.1-Smoke-Match mit den V1.6.1 Runner- und Corp-Decks.",
+    "Installiere Force Shield und lasse eine Core-Damage-Operation durch den Event-Modification-Pfad laufen.",
+    "Installiere Dermatech Bodyplating und verhindere 1 Meat Damage aus Scorched Earth.",
+    "Lasse je eine Run-Begegnung gegen Code Corpse, Cortical Scrub und Liche laufen.",
+    "Prüfe Replay/StateHash auf den resultierenden Zuständen."
+  ],
+  "expected": [
+    "Runtime Damage Prevention kann ohne Test-Harness-Karte aus installierten Runner-Karten angeboten werden.",
+    "Core-Damage-ICE erzeugen deterministische Core-Damage-Ergebnisse.",
+    "PublicEvents bleiben side-sicher, ohne Hidden-Info-Leaks.",
+    "Keine neue AI-supported-Freigabe durch den Release."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic"
+  }
+}

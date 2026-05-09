@@ -3,6 +3,7 @@
 Status: verbindliche konsolidierte Release-Roadmap
 Stand: 2026-05-09
 Startpunkt: nach V1.1.2K
+Aktueller Ausführungsstand: V1.6.1 Mechanikpaket A ist abgeschlossen; nächster Umsetzungsscope ist V1.6.2 Mechanikpaket B.
 
 ## Verbindlichkeit
 

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.6.1",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.6.1",
+  "generatedFor": "V1.6.1 Mechanikpaket A final gate",
+  "generatedAt": "2026-05-09",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.2.2.json",
+  "gateAssertions": {
+    "v160TutorialGatePassed": true,
+    "v161CoreSubsetImplemented": true,
+    "v161RuntimeDamagePreventionCardsAdded": true,
+    "v161CoreDamageIceFamilyAdded": true,
+    "v161ReplacementRuntimeExpansionDeferred": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.event_modification.prevent_avoid_interrupt",
+      "label": "Event Modification: prevent/avoid/interrupt",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.1",
+      "currentScopeNote": "Zusätzlich zur V1.2.0 Foundation gibt es jetzt Runtime-Damage-Prevention aus installierten Runner-Karten (Force Shield, Evil Twin, Dermatech Bodyplating). Avoid/Interrupt bleiben für spätere Kartenfamilien eingeschränkt.",
+      "coverage": ["unit", "visibility", "reconnect", "undo", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.damage.flatline",
+      "label": "Damage und Flatline",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.1",
+      "currentScopeNote": "V1.6.1 ergänzt zusätzliche Core-Damage-ICE-Pfade (Code Corpse, Cortical Scrub, Liche) und Meat/Core-Prevention-Interaktion mit bestehenden Damage-Operationen.",
+      "coverage": ["unit", "visibility", "replay", "state_hash", "ai_smoke"]
+    },
+    {
+      "mechanicId": "mechanic.damage.core_brain_extensions",
+      "label": "Core/Brain-Damage-Erweiterungen",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.1",
+      "currentScopeNote": "Core-Damage wird über zusätzliche ICE-Subroutinen in realen Runtime-Karten genutzt und bleibt kompatibel mit Handsize-/Flatline-Logik.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.event_modification.replacement",
+      "label": "Replacement Effects",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.1",
+      "currentScopeNote": "Die V1.2.1-Replacement-Pipeline bleibt intakt; V1.6.1 führt keine zusätzliche Runtime-Replacement-Karte ein.",
+      "coverage": ["regression"]
+    },
+    {
+      "mechanicId": "mechanic.card_release.v1_6_1_core_subset",
+      "label": "V1.6.1 Card Core Subset",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.1",
+      "currentScopeNote": "6 Karten sind als freigabefähiger Kernkorb umgesetzt; restliche V1.6.1-Planungskarten sind über dokumentierte Blocker auf spätere Mechanikpakete verteilt.",
+      "coverage": ["manifest", "scenario", "unit", "visibility", "replay", "state_hash"]
+    }
+  ]
+}

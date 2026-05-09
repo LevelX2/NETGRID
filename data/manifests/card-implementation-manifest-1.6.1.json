@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.6.1",
+  "id": "v1.6.1-card-release-manifest",
+  "status": "implemented_for_v1.6.1_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.2.3.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "plannedReleaseCount111Reviewed": true,
+    "implementedCoreSetCount6": true,
+    "implementedCardsAllHaveResolverCoverage": true,
+    "implementedCardsAllHaveUnitVisibilityReplayCoverage": true,
+    "futureBlockedCardsDeferredAndDocumented": true,
+    "runtimeAllowlistExtendedExactlyBy6": true,
+    "deckLegalRequiresHumanPlayable": true,
+    "noAutomaticAiSupportGrant": true,
+    "noCardTextParser": true,
+    "noPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_023_evil-twin",
+      "title": "Evil Twin",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_icebreaker_pump_break_sentry_with_runtime_damage_prevention",
+      "requiredMechanics": ["install_program", "memory", "pump_breaker", "break_subroutine", "damage_prevention", "core_damage"],
+      "roleTags": ["runner", "program", "icebreaker", "sentry_breaker", "damage_prevention"]
+    },
+    {
+      "cardCode": "onr_v1_028_force-shield",
+      "title": "Force Shield",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_program_runtime_damage_prevention_net_core",
+      "requiredMechanics": ["install_program", "memory", "damage_prevention", "core_damage"],
+      "roleTags": ["runner", "program", "damage_prevention", "net_damage", "core_damage"]
+    },
+    {
+      "cardCode": "onr_v1_125_dermatech-bodyplating",
+      "title": "Dermatech Bodyplating",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_hardware_runtime_damage_prevention_meat",
+      "requiredMechanics": ["install_hardware", "damage_prevention"],
+      "roleTags": ["runner", "hardware", "damage_prevention", "meat_damage"]
+    },
+    {
+      "cardCode": "onr_v1_229_code-corpse",
+      "title": "Code Corpse",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_ice_core_damage_subroutines",
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "damage", "core_damage", "flatline"],
+      "roleTags": ["corp", "ice", "sentry", "core_damage"]
+    },
+    {
+      "cardCode": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_ice_core_damage_subroutines",
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "damage", "core_damage", "flatline"],
+      "roleTags": ["corp", "ice", "sentry", "core_damage"]
+    },
+    {
+      "cardCode": "onr_v1_254_liche",
+      "title": "Liche",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_ice_core_damage_subroutines",
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "damage", "core_damage", "flatline"],
+      "roleTags": ["corp", "ice", "sentry", "core_damage"]
+    }
+  ],
+  "coverage": {
+    "unitTests": [
+      "packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A",
+      "packages/catalog/src/index.test.ts::catalog import and status logic"
+    ],
+    "scenarioTests": ["data/scenarios/v161-card-release-smoke.json"],
+    "visibilityTests": [
+      "packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A",
+      "apps/server/src/multiplayer.test.ts::handles V1.2.0 Event Modification pending choices through submit, reconnect, idempotency and undo barriers"
+    ],
+    "aiTests": ["packages/ai/src/index.test.ts::keeps local O:NR cards without ai_supported out of dynamic plan scoring"],
+    "replayTests": ["packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A"]
+  },
+  "deferred": {
+    "count": 105,
+    "reason": "Future-effect blockers, unresolved per-card resolver mapping or explicit later release assignment from the V1.6.1 preflight matrix."
+  }
+}

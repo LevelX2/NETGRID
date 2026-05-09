@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.6.1 Mechanikpaket A ist am 2026-05-09 nach grünem V1.6.0-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau sechs Karten (`onr_v1_023_evil-twin`, `onr_v1_028_force-shield`, `onr_v1_125_dermatech-bodyplating`, `onr_v1_229_code-corpse`, `onr_v1_231_cortical-scrub`, `onr_v1_254_liche`) und ergänzt Runtime-Damage-Prevention aus installierten Runner-Karten mit turn-basiertem Usage-Tracking sowie zusätzliche Core-Damage-ICE-Pfade. Gate-Ergebnis: `V1_6_1_implemented: true`; `V1_6_1_verified: true`; `V1_6_1_done: true`; `ready_for_V1_6_2: true`.
+
 V1.6.0 Tutorial und Regelhilfe ist am 2026-05-08 nach grünem V1.5.0-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Neu sind ein getrennter Tutorialmodus (`tutorial_local`) unter `/tutorial`, ein Tutorial-Szenarioformat mit acht Kernlektionen, LegalAction-basierte Hinweise, ein projektinternes Regelhilfe-Glossar, replaybare Tutorial-StateHash-Prüfung sowie side-sicheres KI-Sparring ohne Hidden-Info-Vorteil. Gate-Ergebnis: `V1_6_0_implemented: true`; `V1_6_0_verified: true`; `V1_6_0_done: true`; `ready_for_next_scope_decision: true`.
 
 V1.5.0 Private Replay, Analyse und Lernhilfe bleibt die verpflichtende Grundlage für V1.6.0. Replay-Index, Timeline-StateHash-Prüfung, Perspektiventrennung und DecisionDebug-Redaction bleiben unverändert aktiv.
@@ -191,6 +193,7 @@ Latest V1.4.1 planning artifacts: `docs/derived/V1_4_1_PLAN_BASED_RUNNER_AI_DETA
 Latest V1.4.3 implementation/final artifacts: `docs/derived/V1_4_3_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_4_3_FINAL_REVIEW.md`, `data/ai/ai-benchmark-profiles-1.4.3.json`, `data/ai/ai-soak-seeds-1.4.3.json`, `data/scenarios/ai-v143-exploit-regression-fixtures.json`.
 Latest V1.5.0 implementation/final artifacts: `docs/derived/V1_5_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_5_0_FINAL_REVIEW.md`, `apps/web/app/replays/page.tsx`, `docs/derived/artifacts/v1_5_0_replay_smoke.json`, `docs/derived/artifacts/v1_5_0_replay_smoke.png`.
 Latest V1.6.0 implementation/final artifacts: `docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_0_FINAL_REVIEW.md`, `docs/derived/V1_6_0_RULE_HELP_GLOSSARY.md`, `apps/web/app/tutorial.ts`, `apps/web/app/tutorial/page.tsx`, `apps/web/app/tutorial.test.ts`, `data/scenarios/tutorial-v160-scenarios.json`, `docs/derived/artifacts/v1_6_0_tutorial_smoke.json`, `docs/derived/artifacts/v1_6_0_tutorial_smoke.png`.
+Latest V1.6.1 implementation/final artifacts: `docs/derived/V1_6_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_1_FINAL_REVIEW.md`, `docs/derived/V1_6_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_6_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_A_1_6_1_SPEC.md`, `docs/derived/V1_6_1_TEST_MATRIX.md`, `docs/derived/V1_6_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.6.1.json`, `data/rules/mechanics-coverage-1.6.1.json`, `data/scenarios/v161-card-release-smoke.json`.
 Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
 Latest King of the Road AI approval artifacts: `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_SLICE_PLAN.md`, `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json`, `data/scenarios/ai-kotr-runner-approval-smokes.json` and `data/decks/deck-snapshots-0.8.json`.
 Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`.
@@ -199,7 +202,7 @@ Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTI
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.6.1 Mechanikpaket A (Damage/Prevention/Resolver-Gate) ist als nächster Umsetzungsscope ausgewählt. V1.6.0 Tutorial und Regelhilfe ist abgeschlossen und lokal verifiziert (`docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_0_FINAL_REVIEW.md`), die Folgeplanung ist jetzt als verbindliche Sequenz V1.6.1 bis V1.9.0 in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` hinterlegt. Deck-Legal AI Approval Batch B-G bleibt weiterhin ein eigenständiger Gate-Strang.
+Current selected next scope: V1.6.2 Mechanikpaket B (globale statische Modifier, generische Asset/Node-Fähigkeiten, persistente Modifier und Sonderzustände) ist als nächster Umsetzungsscope ausgewählt. V1.6.1 Mechanikpaket A ist abgeschlossen und lokal verifiziert (`docs/derived/V1_6_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_1_FINAL_REVIEW.md`); die Folgeplanung bleibt als verbindliche Sequenz V1.6.2 bis V1.9.0 in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` hinterlegt. Deck-Legal AI Approval Batch B-G bleibt weiterhin ein eigenständiger Gate-Strang.
 
 ## Status
 

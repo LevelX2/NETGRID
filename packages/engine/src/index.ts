@@ -149,6 +149,12 @@ type DamageSummary = {
   runnerMaxHandSizeAfter?: number;
 };
 
+type RuntimeDamagePreventionProfile = {
+  maxPerTurn: number;
+  damageTypes: DamageType[];
+  priority: number;
+};
+
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
@@ -156,6 +162,12 @@ type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
 const STANDARD_AGENDA_POINTS_TO_WIN = 7;
 const INITIAL_HAND_SIZE = 5;
 const BASE_MAX_HAND_SIZE = 5;
+
+const RUNTIME_DAMAGE_PREVENTION_PROFILES: Record<string, RuntimeDamagePreventionProfile> = {
+  "onr_v1_023_evil-twin": { maxPerTurn: 2, damageTypes: ["net", "core"], priority: 90 },
+  "onr_v1_028_force-shield": { maxPerTurn: 2, damageTypes: ["net", "core"], priority: 100 },
+  "onr_v1_125_dermatech-bodyplating": { maxPerTurn: 1, damageTypes: ["meat"], priority: 110 }
+};
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_economy_event: {
@@ -560,7 +572,8 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     },
     runnerTurnFlags: {
       stoleAgendaThisTurn: false,
-      stoleAgendaLastTurn: false
+      stoleAgendaLastTurn: false,
+      damagePreventionUsage: {}
     }
   };
 
@@ -2203,6 +2216,7 @@ function startCorpTurn(state: GameState): void {
   state.timingPoint = "corp_draw.mandatory_draw";
   state.corp.clicks = 3;
   state.runner.clicks = 0;
+  ensureRunnerTurnFlags(state).damagePreventionUsage = {};
 }
 
 function startRunnerTurn(state: GameState): void {
@@ -2214,6 +2228,7 @@ function startRunnerTurn(state: GameState): void {
   const flags = ensureRunnerTurnFlags(state);
   flags.stoleAgendaThisTurn = false;
   flags.stoleAgendaLastTurn = false;
+  flags.damagePreventionUsage = {};
   refreshRecurringCredits(state, "runner");
 }
 
@@ -2412,6 +2427,46 @@ function openEventModificationWindow(state: GameState, event: ImminentEvent, leg
 
 function collectEventModificationCandidates(state: GameState, event: ImminentEvent): EventModificationCandidate[] {
   if (event.eventType !== "damage") return [];
+  const runtime = collectRuntimeDamagePreventionCandidates(state, event);
+  const harness = collectHarnessDamagePreventionCandidates(state, event);
+  return [...runtime, ...harness];
+}
+
+function collectRuntimeDamagePreventionCandidates(state: GameState, event: ImminentEvent): EventModificationCandidate[] {
+  const amount = numberPayload(event, "amount");
+  const damageType = damageTypePayload(event);
+  if (amount <= 0 || event.affectedSide !== "runner") return [];
+  const installed = [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources];
+  const candidates: EventModificationCandidate[] = [];
+  for (const cardId of installed) {
+    const definition = definitionFor(state, cardId);
+    const profile = RUNTIME_DAMAGE_PREVENTION_PROFILES[definition.id];
+    if (!profile || !profile.damageTypes.includes(damageType)) continue;
+    const used = damagePreventionUsedThisTurn(state, cardId);
+    const remaining = Math.max(0, profile.maxPerTurn - used);
+    if (remaining <= 0) continue;
+    const preventAmount = Math.min(amount, remaining);
+    candidates.push({
+      candidateId: `v161_damage_prevent_${sanitizeId(cardId)}_${preventAmount}`,
+      eventId: event.eventId,
+      kind: "prevent",
+      controller: "runner",
+      sourceRef: {
+        kind: "card",
+        instanceId: cardId,
+        definitionId: definition.id,
+        label: definition.title
+      },
+      priority: profile.priority,
+      visibility: "hidden_info_barrier",
+      optional: true,
+      preventAmount
+    });
+  }
+  return candidates;
+}
+
+function collectHarnessDamagePreventionCandidates(state: GameState, event: ImminentEvent): EventModificationCandidate[] {
   const harness = state.eventModificationHarness?.damagePrevention;
   const amount = numberPayload(event, "amount");
   if (!harness || amount <= 0) return [];
@@ -2527,7 +2582,10 @@ function eventModificationChoice(window: EventModificationWindow, event: Imminen
     { id: "pass", label: "Nicht verhindern", publicLabel: "Event Modification" },
     {
       id: candidate.candidateId,
-      label: `${candidate.preventAmount ?? amount} Schaden verhindern`,
+      label:
+        candidate.sourceRef.kind === "card"
+          ? `${candidate.sourceRef.label}: ${candidate.preventAmount ?? amount} Schaden verhindern`
+          : `${candidate.preventAmount ?? amount} Schaden verhindern`,
       publicLabel: "Event Modification"
     }
   ];
@@ -2578,6 +2636,7 @@ function resolveEventModificationChoice(state: GameState, legalAction: LegalActi
   const originalAmount = numberPayload(event, "amount");
   const preventedAmount = Math.min(candidate.preventAmount ?? 0, originalAmount);
   const finalAmount = Math.max(0, originalAmount - preventedAmount);
+  registerDamagePreventionUsage(state, candidate, preventedAmount);
   const summary = resolveDamageImminentEvent(state, {
     ...event,
     payload: { ...event.payload, amount: finalAmount }
@@ -2712,6 +2771,18 @@ function stringPayload(event: ImminentEvent, key: string): string {
 function damageTypePayload(event: ImminentEvent): DamageType {
   const value = event.payload.damageType;
   return value === "meat" || value === "core" ? value : "net";
+}
+
+function damagePreventionUsedThisTurn(state: GameState, cardId: CardInstanceId): number {
+  const flags = ensureRunnerTurnFlags(state);
+  return flags.damagePreventionUsage?.[cardId] ?? 0;
+}
+
+function registerDamagePreventionUsage(state: GameState, candidate: EventModificationCandidate, preventedAmount: number): void {
+  if (preventedAmount <= 0 || candidate.sourceRef.kind !== "card" || !candidate.sourceRef.instanceId) return;
+  const flags = ensureRunnerTurnFlags(state);
+  const usage = (flags.damagePreventionUsage ??= {});
+  usage[candidate.sourceRef.instanceId] = (usage[candidate.sourceRef.instanceId] ?? 0) + preventedAmount;
 }
 
 function sanitizeId(value: string): string {
@@ -4249,8 +4320,10 @@ function ensureSpecialZones(state: GameState): SpecialZoneState {
 function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerTurnFlags"]> {
   state.runnerTurnFlags ??= {
     stoleAgendaThisTurn: false,
-    stoleAgendaLastTurn: false
+    stoleAgendaLastTurn: false,
+    damagePreventionUsage: {}
   };
+  state.runnerTurnFlags.damagePreventionUsage ??= {};
   return state.runnerTurnFlags;
 }
 

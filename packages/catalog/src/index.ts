@@ -394,7 +394,22 @@ export const ONR_V1_2_3_RELEASE_CARD_IDS = [
   "onr_v1_306_trojan-horse"
 ] as const;
 
-export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [...ONR_V1_0_5K_RELEASE_CARD_IDS, ...ONR_V1_0_6K_RELEASE_CARD_IDS, ...ONR_V1_1_2K_RELEASE_CARD_IDS, ...ONR_V1_2_3_RELEASE_CARD_IDS] as const;
+export const ONR_V1_6_1_RELEASE_CARD_IDS = [
+  "onr_v1_023_evil-twin",
+  "onr_v1_028_force-shield",
+  "onr_v1_125_dermatech-bodyplating",
+  "onr_v1_229_code-corpse",
+  "onr_v1_231_cortical-scrub",
+  "onr_v1_254_liche"
+] as const;
+
+export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
+  ...ONR_V1_0_5K_RELEASE_CARD_IDS,
+  ...ONR_V1_0_6K_RELEASE_CARD_IDS,
+  ...ONR_V1_1_2K_RELEASE_CARD_IDS,
+  ...ONR_V1_2_3_RELEASE_CARD_IDS,
+  ...ONR_V1_6_1_RELEASE_CARD_IDS
+] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
   "onr_v1_006_black-dahlia",
@@ -442,6 +457,7 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
 const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_IDS);
+const ONR_V1_6_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_1_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -477,6 +493,15 @@ const ONR_V1_2_3_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v123-card-release-smoke.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.2.3 Mechanic Unlock Card Release 1", "apps/server/src/multiplayer.test.ts::V1.2.3 card release matchstart"],
   replayTests: ["packages/engine/src/index.test.ts::V1.2.3 Mechanic Unlock Card Release 1"]
+};
+
+const ONR_V1_6_1_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.6.1",
+  status: "human_playable_v1_6_1_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A"],
+  scenarioTests: ["data/scenarios/v161-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A", "apps/server/src/multiplayer.test.ts::V1.6.1 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -552,6 +577,15 @@ const ONR_V1_2_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_306_trojan-horse": { cost: 2, installCost: null }
 };
 
+const ONR_V1_6_1_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_023_evil-twin": { installCost: 6, memoryCost: 1, strength: 3 },
+  "onr_v1_028_force-shield": { installCost: 2, memoryCost: 1 },
+  "onr_v1_125_dermatech-bodyplating": { installCost: 0 },
+  "onr_v1_229_code-corpse": { rezCost: 10, strength: 5 },
+  "onr_v1_231_cortical-scrub": { rezCost: 7, strength: 3 },
+  "onr_v1_254_liche": { rezCost: 14, strength: 6 }
+};
+
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
   "onr_v1_052_raffles": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
@@ -625,6 +659,15 @@ const ONR_V1_2_3_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_249_hunter": "[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
   "onr_v1_297_overtime-incentives": "Gain two actions.",
   "onr_v1_306_trojan-horse": "Play only if Runner stole any agendas during his or her last turn. Give Runner a tag."
+};
+
+const ONR_V1_6_1_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_023_evil-twin": "3 credits: Break sentry subroutine.\n1 credit: +1 strength.\nPrevents up to 2 net and/or core damage total each turn.",
+  "onr_v1_028_force-shield": "Prevents up to 2 net and/or core damage total each turn.",
+  "onr_v1_125_dermatech-bodyplating": "Prevents 1 meat damage each turn.",
+  "onr_v1_229_code-corpse": "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
+  "onr_v1_231_cortical-scrub": "[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
+  "onr_v1_254_liche": "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -1415,12 +1458,37 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV161 = ONR_V1_6_1_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV123 ? ONR_V1_2_3_TEXT_OVERRIDES : isV112K ? ONR_V1_1_2K_TEXT_OVERRIDES : isV106K ? ONR_V1_0_6K_TEXT_OVERRIDES : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV123 ? ONR_V1_2_3_NUMERIC_OVERRIDES : isV112K ? ONR_V1_1_2K_NUMERIC_OVERRIDES : isV106K ? ONR_V1_0_6K_NUMERIC_OVERRIDES : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV123 ? ONR_V1_2_3_RELEASE_MANIFEST : isV112K ? ONR_V1_1_2K_RELEASE_MANIFEST : isV106K ? ONR_V1_0_6K_RELEASE_MANIFEST : ONR_V1_0_5K_RELEASE_MANIFEST;
+  const textOverrides = isV161
+    ? ONR_V1_6_1_TEXT_OVERRIDES
+    : isV123
+      ? ONR_V1_2_3_TEXT_OVERRIDES
+      : isV112K
+        ? ONR_V1_1_2K_TEXT_OVERRIDES
+        : isV106K
+          ? ONR_V1_0_6K_TEXT_OVERRIDES
+          : ONR_V1_0_5K_TEXT_OVERRIDES;
+  const numericOverrides = isV161
+    ? ONR_V1_6_1_NUMERIC_OVERRIDES
+    : isV123
+      ? ONR_V1_2_3_NUMERIC_OVERRIDES
+      : isV112K
+        ? ONR_V1_1_2K_NUMERIC_OVERRIDES
+        : isV106K
+          ? ONR_V1_0_6K_NUMERIC_OVERRIDES
+          : ONR_V1_0_5K_NUMERIC_OVERRIDES;
+  const manifest = isV161
+    ? ONR_V1_6_1_RELEASE_MANIFEST
+    : isV123
+      ? ONR_V1_2_3_RELEASE_MANIFEST
+      : isV112K
+        ? ONR_V1_1_2K_RELEASE_MANIFEST
+        : isV106K
+          ? ONR_V1_0_6K_RELEASE_MANIFEST
+          : ONR_V1_0_5K_RELEASE_MANIFEST;
   return {
     ...card,
     engineCardId: card.catalogCardId,
