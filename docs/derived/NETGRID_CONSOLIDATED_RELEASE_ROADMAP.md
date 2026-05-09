@@ -3,7 +3,7 @@
 Status: verbindliche konsolidierte Release-Roadmap
 Stand: 2026-05-09
 Startpunkt: nach V1.1.2K
-Aktueller Ausführungsstand: V1.6.3 Mechanikpaket C ist abgeschlossen; nächster Umsetzungsscope ist V1.7.0 Mechanikpaket D.
+Aktueller Ausführungsstand: V1.7.0 Mechanikpaket D ist abgeschlossen; nächster Umsetzungsscope ist V1.7.1 Mechanikpaket E.
 
 ## Verbindlichkeit
 
@@ -1946,37 +1946,13 @@ Diese Stufe darf erst beginnen, wenn V2.x belastbar läuft und die Produktentsch
 
 ## Nächster verbindlicher Schritt
 
-Der nächste Release nach V1.1.2K ist V1.1.3 Mechanics-AI-Card Baseline.
+Nächster Release nach abgeschlossenem V1.7.0 ist V1.7.1 Mechanikpaket E.
 
-V1.1.3 ist ausdrücklich kein Implementierungsrelease. Es soll den aktuellen Mechanik-, Karten- und KI-Planungsstand normalisieren und die V1.2.x-Reihenfolge belegen.
+Der nächste Auftrag muss strikt sequenziell auf V1.7.1 fokussieren und darf erst nach grünem V1.7.0-Final-Gate starten.
 
-Empfohlener Auftrag:
+Pflicht für den Start:
 
-```text
-Erstelle V1.1.3 Mechanics-AI-Card Baseline nach abgeschlossenem V1.1.2K.
-
-Lies:
-- AGENTS.md
-- docs/codex/CODEX_STATUS.md
-- docs/derived/V1_1_2_FINAL_REVIEW.md
-- docs/derived/V1_1_2K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md
-- docs/derived/MECHANICS_COVERAGE_MATRIX.md
-- docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md
-- docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md
-- docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md
-
-Aufgabe:
-Aktualisiere den Mechanik-, Karten- und KI-Planungsstand nach V1.1.2K. Implementiere keinen Engine-, Server-, Web- oder AI-Code.
-
-Erstelle:
-- docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_PLAN.md
-- docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_REQUIREMENTS.md
-- docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_TEST_MATRIX.md
-- docs/derived/V1_1_3_REQUIREMENTS_REVIEW.md
-
-Ziel:
-- Mechanik-Coverage nach V1.1.2K normalisieren.
-- AI-Level-Audit dokumentieren.
-- Card-Freigabestatus `listed`, `engine_supported`, `human_playable`, `ai_supported` verbindlich planen.
-- Die nächsten Mechanik- und Karten-Gates nach Kartenwert, Mechanikrisiko und KI-Abhängigkeit priorisieren.
-```
+1. `AGENTS.md` und `docs/codex/CODEX_STATUS.md` lesen.
+2. Diese Roadmap als führenden Planungsstand verwenden.
+3. V1.7.1-Requirements, Spezifikation, Testmatrix und Requirements-Review vor Implementierung einfrieren.
+4. No-Scope-Grenzen aus V1.7.0 beibehalten und nur explizit freigegebene V1.7.1-Blöcke aktivieren.

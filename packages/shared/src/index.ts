@@ -1198,7 +1198,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrBreaker({
     id: "onr_v1_021_dwarf",
     title: "Dwarf",
-    subtypes: ["icebreaker"],
+    subtypes: ["icebreaker", "worm"],
     installCost: 3,
     memoryCost: 1,
     strength: 1,
@@ -1232,6 +1232,19 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "Prevents up to 2 net and/or core damage each turn.",
     mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
   },
+  onrBreaker({
+    id: "onr_v1_036_jackhammer",
+    title: "Jackhammer",
+    subtypes: ["icebreaker", "noisy"],
+    installCost: 1,
+    memoryCost: 1,
+    strength: 0,
+    breakCost: 0,
+    pumpCost: 1,
+    iceSubtype: "wall",
+    iceLabel: "wall",
+    extraMechanics: ["subtype_noisy"]
+  }),
   onrUniversalBreaker({
     id: "onr_v1_039_krash",
     title: "Krash",
@@ -1290,10 +1303,36 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceSubtype: "sentry",
     iceLabel: "sentry"
   }),
+  {
+    id: "onr_v1_011_cloak",
+    title: "Cloak",
+    side: "runner",
+    type: "program",
+    subtypes: ["stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 7,
+    memoryCost: 1,
+    recurringCredits: 3,
+    rulesText:
+      "Put 3 from the bank on Cloak when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
+    mechanics: ["install_program", "memory", "subtype_stealth", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_069_succubus",
+    title: "Succubus",
+    side: "runner",
+    type: "program",
+    subtypes: ["daemon"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText: "Succubus can have up to 3 MU of programs installed in it. If Succubus leaves play, trash all programs installed in it.",
+    mechanics: ["install_program", "memory", "hosting", "subtype_daemon", ONR_V1_LOCAL_PRIVATE]
+  },
   onrBreaker({
     id: "onr_v1_074_worm",
     title: "Worm",
-    subtypes: ["icebreaker"],
+    subtypes: ["icebreaker", "worm"],
     installCost: 2,
     memoryCost: 1,
     strength: 1,
@@ -1334,6 +1373,29 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 0,
     rulesText: "Shuffle your grip, heap and stack together, draw five cards, then remove MIT West Tier from the game.",
     mechanics: ["play_event", "shuffle", "draw_cards", "removed_from_game", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_163_floating-runner-bbs",
+    title: "Floating Runner BBS",
+    side: "runner",
+    type: "resource",
+    subtypes: ["bbs", "position"],
+    implementationStatus: "playable_mvp",
+    installCost: 6,
+    rulesText: "Gain 1 credit at the start of each of your turns.",
+    mechanics: ["install_resource", "start_of_turn_credit_gain", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_180_smiths-pawnshop",
+    title: "Smith's Pawnshop",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection", "unique"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText:
+      "At the start of each of your turns, you may trash one of your other installed cards to gain 1 credit.\nOnly one unique card of a particular name can be in play at a time.",
+    mechanics: ["install_resource", "unique_card", "start_of_turn_optional_trash_for_credit", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({
     id: "onr_v1_073_wizards-book",

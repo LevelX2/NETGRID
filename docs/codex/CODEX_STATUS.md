@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.7.0 Mechanikpaket D ist am 2026-05-09 nach grünem V1.6.3-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau fünf Karten (`onr_v1_011_cloak`, `onr_v1_036_jackhammer`, `onr_v1_069_succubus`, `onr_v1_163_floating-runner-bbs`, `onr_v1_180_smiths-pawnshop`) und ergänzt deterministische Unique-Constraint-Gates in Deck- und Runtimevalidierung, Daemon-Hosting mit Kaskaden-Trash, Recurring-/Start-of-turn-Resolver sowie subtype-basiertes Stealth/Noisy-Gating. Gate-Ergebnis: `V1_7_0_implemented: true`; `V1_7_0_verified: true`; `V1_7_0_done: true`; `ready_for_V1_7_1: true`.
+
 V1.6.3 Mechanikpaket C ist am 2026-05-09 nach grünem V1.6.2-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau fünf Karten (`onr_v1_233_d-arc-knight`, `onr_v1_267_sentinels-prime`, `onr_v1_273_triggerman`, `onr_v1_350_antiquated-interface-routines`, `onr_v1_371_tokyo-chiba-infighting`) und ergänzt deterministische `trash program`-Subroutinen, servergebundene Upgrade-Stärkemodifier, Region-Installlifecycle (rez on install, eine Region je Fort) sowie den Tokyo-Chiba-Bonus nach erfolglosen Runs auf demselben Fort. Gate-Ergebnis: `V1_6_3_implemented: true`; `V1_6_3_verified: true`; `V1_6_3_done: true`; `ready_for_V1_7_0: true`.
 
 V1.6.2 Mechanikpaket B ist am 2026-05-09 nach grünem V1.6.1-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau fünf Karten (`onr_v1_212_priority-requisition`, `onr_v1_215_security-net-optimization`, `onr_v1_317_data-masons`, `onr_v1_320_encoder-inc`, `onr_v1_341_skalderviken-sa-beta-test-site`) und ergänzt deterministische globale ICE-Rez-Kosten-/Stärke-Modifier über rezzed Root- und gescorte Agenda-Quellen sowie den deterministischen Priority-Requisition-Scoreeffekt (kostenfreies Rezzen eines installierten unrezzed ICE). Gate-Ergebnis: `V1_6_2_implemented: true`; `V1_6_2_verified: true`; `V1_6_2_done: true`; `ready_for_V1_6_3: true`.
@@ -200,6 +202,7 @@ Latest V1.6.0 implementation/final artifacts: `docs/derived/V1_6_0_IMPLEMENTATIO
 Latest V1.6.1 implementation/final artifacts: `docs/derived/V1_6_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_1_FINAL_REVIEW.md`, `docs/derived/V1_6_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_6_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_A_1_6_1_SPEC.md`, `docs/derived/V1_6_1_TEST_MATRIX.md`, `docs/derived/V1_6_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.6.1.json`, `data/rules/mechanics-coverage-1.6.1.json`, `data/scenarios/v161-card-release-smoke.json`.
 Latest V1.6.2 implementation/final artifacts: `docs/derived/V1_6_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_2_FINAL_REVIEW.md`, `docs/derived/V1_6_2_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_6_2_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_B_1_6_2_SPEC.md`, `docs/derived/V1_6_2_TEST_MATRIX.md`, `docs/derived/V1_6_2_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.6.2.json`, `data/rules/mechanics-coverage-1.6.2.json`, `data/scenarios/v162-card-release-smoke.json`.
 Latest V1.6.3 implementation/final artifacts: `docs/derived/V1_6_3_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_3_FINAL_REVIEW.md`, `docs/derived/V1_6_3_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_6_3_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_C_1_6_3_SPEC.md`, `docs/derived/V1_6_3_TEST_MATRIX.md`, `docs/derived/V1_6_3_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.6.3.json`, `data/rules/mechanics-coverage-1.6.3.json`, `data/scenarios/v163-card-release-smoke.json`.
+Latest V1.7.0 implementation/final artifacts: `docs/derived/V1_7_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_7_0_FINAL_REVIEW.md`, `docs/derived/V1_7_0_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_7_0_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_D_1_7_0_SPEC.md`, `docs/derived/V1_7_0_TEST_MATRIX.md`, `docs/derived/V1_7_0_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.7.0.json`, `data/rules/mechanics-coverage-1.7.0.json`, `data/scenarios/v170-card-release-smoke.json`.
 Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
 Latest King of the Road AI approval artifacts: `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_SLICE_PLAN.md`, `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json`, `data/scenarios/ai-kotr-runner-approval-smokes.json` and `data/decks/deck-snapshots-0.8.json`.
 Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`.
@@ -208,7 +211,7 @@ Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTI
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.7.0 Mechanikpaket D (Unique-Constraint, Hosting/Hosted-Modelle, Recurring-Start-of-turn-Resolver, Programm-Subtypen Daemon/Stealth/Worm/BaseLink) ist als nächster Umsetzungsscope ausgewählt. V1.6.3 Mechanikpaket C ist abgeschlossen und lokal verifiziert (`docs/derived/V1_6_3_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_3_FINAL_REVIEW.md`); die Folgeplanung bleibt als verbindliche Sequenz V1.7.0 bis V1.9.0 in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` hinterlegt. Deck-Legal AI Approval Batch B-G bleibt weiterhin ein eigenständiger Gate-Strang.
+Current selected next scope: V1.7.1 Mechanikpaket E ist als nächster Umsetzungsscope ausgewählt. V1.7.0 Mechanikpaket D ist abgeschlossen und lokal verifiziert (`docs/derived/V1_7_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_7_0_FINAL_REVIEW.md`); die Folgeplanung bleibt als verbindliche Sequenz V1.7.1 bis V1.9.0 in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` hinterlegt. Deck-Legal AI Approval Batch B-G bleibt weiterhin ein eigenständiger Gate-Strang.
 
 ## Status
 
@@ -2210,14 +2213,14 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Nächster Umsetzungsscope ist V1.6.1 (Mechanikpaket A: `L1B_PerCard_Resolver_Test_Gate`, `L2_Damage_Familien_und_Flatline_Integration`, `L3_Core_Brain_Damage_Erweiterungen`, `L3_Prevention_Avoid_Replacement`).
-2. Folge-Sequenz ist verbindlich geplant als V1.6.2, V1.6.3, V1.7.0, V1.7.1, V1.7.2, V1.8.0, V1.8.1 und V1.9.0; die jeweilige Effektzuordnung ist in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` dokumentiert.
+1. Nächster Umsetzungsscope ist V1.7.1 (Mechanikpaket E; Anschlussrelease nach abgeschlossenem V1.7.0-Gate).
+2. Folge-Sequenz ist verbindlich geplant als V1.7.1, V1.7.2, V1.8.0, V1.8.1 und V1.9.0; die jeweilige Effektzuordnung ist in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` dokumentiert.
 3. V2.x-Produktfeatures (Accounts, Cloud-Decks, Datenschutz-/Social-Gates) starten erst nach grün abgeschlossenem V1.9.0-Gate.
 4. Tutorial-/Regelhilfe- und Replay-Flächen bleiben side-sicher und LegalAction-basiert.
 5. Deck-Legal AI Approval Batch B-G bleibt ein separater expliziter Gate-Strang.
 6. No-Scope-Grenzen weiter halten: keine Public-Plattformfunktionen, keine Karten-/Mechanikfreigaben ohne Gate-Beschluss, kein LLM-Live-Regelakteur.
 
-Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe und Tutorial/Regelhilfe sind durch V1.6.0 umgesetzt. Die Anschlusslinie für weitere Mechanik-/Kartenfreigaben ist nun als explizite V1.6.1-bis-V1.9.0-Sequenz vor V2.x definiert; aus der Vierer-Sequenz V1.4.2 bis V1.6.0 ist kein weiterer Implementierungsgate offen.
+Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe und Tutorial/Regelhilfe sind durch V1.6.0 umgesetzt. Die Anschlusslinie für weitere Mechanik-/Kartenfreigaben läuft nach abgeschlossenem V1.7.0 als Sequenz V1.7.1 bis V1.9.0 vor V2.x weiter; aus der Vierer-Sequenz V1.6.1 bis V1.7.0 ist kein weiterer Implementierungsgate offen.
 
 Detailed planning and completion artifacts available:
 

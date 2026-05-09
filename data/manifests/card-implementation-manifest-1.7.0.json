@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.7.0",
+  "id": "v1.7.0-card-release-manifest",
+  "status": "implemented_for_v1.7.0_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.6.3.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount5": true,
+    "uniqueConstraintDeckValidationDeterministic": true,
+    "uniqueConstraintRuntimeInstallDeterministic": true,
+    "daemonHostingLifecycleDeterministic": true,
+    "recurringStealthNoisyGateDeterministic": true,
+    "startOfTurnResourceResolversDeterministic": true,
+    "runtimeAllowlistExtendedExactlyBy5": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_011_cloak",
+      "title": "Cloak",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_program_stealth_recurring_run_spend",
+      "requiredMechanics": ["install_program", "memory", "subtype_stealth", "recurring_credit", "recurring_start_turn", "run_credit_spend_rules"],
+      "roleTags": ["runner", "program", "stealth", "recurring", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_036_jackhammer",
+      "title": "Jackhammer",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_noisy_wall_breaker",
+      "requiredMechanics": ["install_program", "memory", "pump_breaker", "break_subroutine", "subtype_noisy"],
+      "roleTags": ["runner", "program", "icebreaker", "wall_breaker", "noisy"]
+    },
+    {
+      "cardCode": "onr_v1_069_succubus",
+      "title": "Succubus",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_daemon_hosting_with_trash_cascade",
+      "requiredMechanics": ["install_program", "memory", "hosting", "subtype_daemon", "hosted_card_cleanup", "hosted_program_memory_model"],
+      "roleTags": ["runner", "program", "daemon", "hosting"]
+    },
+    {
+      "cardCode": "onr_v1_163_floating-runner-bbs",
+      "title": "Floating Runner BBS",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_resource_start_of_turn_credit_gain",
+      "requiredMechanics": ["install_resource", "start_of_turn_credit_gain", "turn_boundary_resolver"],
+      "roleTags": ["runner", "resource", "economy", "start_of_turn"]
+    },
+    {
+      "cardCode": "onr_v1_180_smiths-pawnshop",
+      "title": "Smith's Pawnshop",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_unique_resource_start_of_turn_optional_trash_credit",
+      "requiredMechanics": ["install_resource", "unique_card", "deck_unique_constraint", "runtime_unique_constraint", "start_of_turn_optional_trash_for_credit", "choice_resolution"],
+      "roleTags": ["runner", "resource", "unique", "start_of_turn", "trash_for_value"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 36,
+    "implementedCardCount": 5,
+    "deferredCardCount": 31,
+    "deferReasons": [
+      "additional dependencies in V1.7.1 run/access/search/multiaccess families",
+      "additional dependencies in V1.7.2 trace/tag/handsize families",
+      "additional dependencies in V1.8.x+ families"
+    ],
+    "uniqueConstraintStatus": "implemented_in_v1_7_0_core"
+  }
+}

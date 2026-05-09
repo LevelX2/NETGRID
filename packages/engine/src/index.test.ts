@@ -1760,6 +1760,188 @@ describe("V1.6.3 Mechanikpaket C", () => {
   });
 });
 
+describe("V1.7.0 Mechanikpaket D", () => {
+  it("adds a controlled V1.7.0 core card set with subtype, hosting, recurring and unique gates", () => {
+    expect(ONR_V1_7_0_FINAL_CARD_IDS).toHaveLength(5);
+    for (const definitionId of ONR_V1_7_0_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" ")).not.toMatch(/search|arrange|shuffle|trace_windowing|run_lock|counter_system|deterministischer_wuerfel/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_011_cloak"]).toMatchObject({ installCost: 7, memoryCost: 1, recurringCredits: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_036_jackhammer"]).toMatchObject({ installCost: 1, memoryCost: 1, strength: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_069_succubus"]).toMatchObject({ installCost: 3, memoryCost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_163_floating-runner-bbs"]).toMatchObject({ installCost: 6 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_180_smiths-pawnshop"]?.subtypes).toContain("unique");
+    expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]?.subtypes).toContain("worm");
+    expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]?.subtypes).toContain("worm");
+  });
+
+  it("validates V1.7.0 smoke decks and keeps previous releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_7_0_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_7_0_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v170CardReleaseGame("v170-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_371_tokyo-chiba-infighting"]).toBeDefined();
+  });
+
+  it("hosts programs on Succubus without MU cost and trashes hosted programs when the daemon is trashed", () => {
+    let state = toRunnerTurn(v170CardReleaseGame("v170-succubus-hosting"));
+    state.runner.credits = 30;
+    moveRunnerCardToGrip(state, "onr_v1_069_succubus");
+    moveRunnerCardToGrip(state, "onr_v1_036_jackhammer");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_069_succubus");
+    const succubusId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_069_succubus");
+    expect(succubusId).toBeDefined();
+    if (!succubusId) throw new Error("Missing installed Succubus");
+    const hostedInstall = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_036_jackhammer" &&
+        action.payload?.hostOnCardId === succubusId
+    );
+    const hostedJackhammerId = String(hostedInstall.payload?.cardId ?? "");
+    expect(hostedJackhammerId).not.toBe("");
+    state = apply(state, "runner", (action) => action.actionId === hostedInstall.actionId);
+    expect(state.cardInstances[hostedJackhammerId]?.hostedOn).toBe(succubusId);
+    expect(state.runner.memoryUsed).toBe(1);
+
+    putCorpIceOnServer(state, "rd", "onr_v1_233_d-arc-knight");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state.corp.credits = 40;
+    state.runner.credits = 20;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_233_d-arc-knight");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.run).toBeUndefined();
+    if (succubusId) {
+      expect(state.runner.rig.programs).not.toContain(succubusId);
+      expect(state.runner.heap).toContain(succubusId);
+    }
+    if (hostedJackhammerId) {
+      expect(state.runner.rig.programs).not.toContain(hostedJackhammerId);
+      expect(state.runner.heap).toContain(hostedJackhammerId);
+    }
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("uses stealth recurring credits for non-noisy breakers and blocks them for noisy breakers", () => {
+    let noisyState = toRunnerTurn(v170CardReleaseGame("v170-noisy-stealth-block"));
+    noisyState.runner.credits = 30;
+    moveRunnerCardToGrip(noisyState, "onr_v1_011_cloak");
+    moveRunnerCardToGrip(noisyState, "onr_v1_036_jackhammer");
+    noisyState = apply(noisyState, "runner", (action) => action.type === "install_card" && sourceDefinition(noisyState, action) === "onr_v1_011_cloak");
+    noisyState = apply(noisyState, "runner", (action) => action.type === "install_card" && sourceDefinition(noisyState, action) === "onr_v1_036_jackhammer");
+    const jackhammerId = noisyState.runner.rig.programs.find((id) => noisyState.cardInstances[id]?.definitionId === "onr_v1_036_jackhammer");
+    noisyState.runner.credits = 0;
+    putCorpIceOnServer(noisyState, "rd", "onr_v1_232_crystal-wall");
+    putCorpCardOnTopOfRd(noisyState, "simple_economy_operation");
+    noisyState.corp.credits = 40;
+    noisyState = apply(noisyState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    noisyState = apply(noisyState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(noisyState, action) === "onr_v1_232_crystal-wall");
+    const noisyPump = getLegalActions(noisyState, "runner").find((action) => action.type === "pump_breaker" && action.payload?.breakerId === jackhammerId);
+    expect(noisyPump).toBeUndefined();
+
+    let nonNoisyState = toRunnerTurn(v170CardReleaseGame("v170-nonnoisy-stealth-allowed"));
+    nonNoisyState.runner.credits = 30;
+    moveRunnerCardToGrip(nonNoisyState, "onr_v1_011_cloak");
+    moveRunnerCardToGrip(nonNoisyState, "onr_v1_021_dwarf");
+    nonNoisyState = apply(nonNoisyState, "runner", (action) => action.type === "install_card" && sourceDefinition(nonNoisyState, action) === "onr_v1_011_cloak");
+    nonNoisyState = apply(nonNoisyState, "runner", (action) => action.type === "install_card" && sourceDefinition(nonNoisyState, action) === "onr_v1_021_dwarf");
+    const cloakId = nonNoisyState.runner.rig.programs.find((id) => nonNoisyState.cardInstances[id]?.definitionId === "onr_v1_011_cloak");
+    const dwarfId = nonNoisyState.runner.rig.programs.find((id) => nonNoisyState.cardInstances[id]?.definitionId === "onr_v1_021_dwarf");
+    nonNoisyState.runner.credits = 0;
+    putCorpIceOnServer(nonNoisyState, "rd", "onr_v1_232_crystal-wall");
+    putCorpCardOnTopOfRd(nonNoisyState, "simple_economy_operation");
+    nonNoisyState.corp.credits = 40;
+    nonNoisyState = apply(nonNoisyState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    nonNoisyState = apply(nonNoisyState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(nonNoisyState, action) === "onr_v1_232_crystal-wall");
+    const nonNoisyPump = mustAction(nonNoisyState, "runner", (action) => action.type === "pump_breaker" && action.payload?.breakerId === dwarfId);
+    nonNoisyState = apply(nonNoisyState, "runner", (action) => action.actionId === nonNoisyPump.actionId);
+    if (cloakId) {
+      expect(nonNoisyState.cardInstances[cloakId]?.counters?.recurring_credit).toBe(2);
+    }
+  });
+
+  it("enforces unique deck/install rules and resolves Smith's Pawnshop start-of-turn choice with Floating Runner BBS income", () => {
+    const invalidUniqueDeck: DeckDefinition = {
+      id: "onr_v1_runner_v170_unique_invalid",
+      name: "O:NR V1.7.0 Unique Invalid",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_180_smiths-pawnshop", quantity: 2 },
+        { id: "simple_economy_event", quantity: 5 }
+      ]
+    };
+    const invalidValidation = validateDeckDefinition(invalidUniqueDeck, { expectedSide: "runner" });
+    expect(invalidValidation.ok).toBe(false);
+    expect(invalidValidation.errors.join(" ")).toMatch(/unique card/i);
+
+    const runtimeUniqueDeck: DeckDefinition = {
+      id: "onr_v1_runner_v170_unique_runtime",
+      name: "O:NR V1.7.0 Unique Runtime",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_180_smiths-pawnshop", quantity: 2 },
+        { id: "simple_economy_event", quantity: 6 }
+      ]
+    };
+    let uniqueState = createGameAfterSetup({
+      seed: "v170-unique-runtime",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: runtimeUniqueDeck,
+      corpDeck: ONR_V1_7_0_CORP_DECK,
+      agendaPointsToWin: 7
+    });
+    uniqueState = toRunnerTurn(uniqueState);
+    uniqueState.runner.credits = 10;
+    moveRunnerCardToGrip(uniqueState, "onr_v1_180_smiths-pawnshop");
+    moveRunnerCardToGrip(uniqueState, "onr_v1_180_smiths-pawnshop");
+    uniqueState = apply(uniqueState, "runner", (action) => action.type === "install_card" && sourceDefinition(uniqueState, action) === "onr_v1_180_smiths-pawnshop");
+    const duplicateInstall = getLegalActions(uniqueState, "runner").find(
+      (action) => action.type === "install_card" && sourceDefinition(uniqueState, action) === "onr_v1_180_smiths-pawnshop"
+    );
+    expect(duplicateInstall).toBeUndefined();
+
+    let smithState = toRunnerTurn(v170CardReleaseGame("v170-smith-floating"));
+    smithState.runner.credits = 20;
+    moveRunnerCardToGrip(smithState, "onr_v1_163_floating-runner-bbs");
+    moveRunnerCardToGrip(smithState, "onr_v1_180_smiths-pawnshop");
+    moveRunnerCardToGrip(smithState, "onr_v1_028_force-shield");
+    smithState = apply(smithState, "runner", (action) => action.type === "install_card" && sourceDefinition(smithState, action) === "onr_v1_163_floating-runner-bbs");
+    smithState = apply(smithState, "runner", (action) => action.type === "install_card" && sourceDefinition(smithState, action) === "onr_v1_180_smiths-pawnshop");
+    smithState = apply(smithState, "runner", (action) => action.type === "install_card" && sourceDefinition(smithState, action) === "onr_v1_028_force-shield");
+    smithState = apply(smithState, "runner", (action) => action.type === "end_turn");
+    smithState = apply(smithState, "corp", (action) => action.type === "mandatory_draw");
+    smithState = apply(smithState, "corp", (action) => action.type === "end_turn");
+    if (smithState.pendingChoice?.source === "discard_phase" && smithState.pendingChoice.side === "corp") {
+      smithState = applyChoice(smithState, "corp", String(smithState.pendingChoice.options[0]?.id));
+    }
+    expect(smithState.pendingChoice?.source.startsWith("v170.smiths_pawnshop")).toBe(true);
+    const forceShieldOption =
+      smithState.pendingChoice?.options.find(
+        (option) => typeof option.value === "string" && smithState.cardInstances[option.value]?.definitionId === "onr_v1_028_force-shield"
+      )?.id ?? "pass";
+    smithState = applyChoice(smithState, "runner", forceShieldOption);
+    expect(smithState.runner.heap.some((id) => smithState.cardInstances[id]?.definitionId === "onr_v1_028_force-shield")).toBe(true);
+    expect(smithState.runner.credits).toBe(14);
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -3366,6 +3548,14 @@ const ONR_V1_6_3_FINAL_CARD_IDS = [
   "onr_v1_371_tokyo-chiba-infighting"
 ] as const;
 
+const ONR_V1_7_0_FINAL_CARD_IDS = [
+  "onr_v1_011_cloak",
+  "onr_v1_036_jackhammer",
+  "onr_v1_069_succubus",
+  "onr_v1_163_floating-runner-bbs",
+  "onr_v1_180_smiths-pawnshop"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -3619,6 +3809,39 @@ const ONR_V1_6_3_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_7_0_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v170_smoke_094",
+  name: "O:NR V1.7.0 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_011_cloak", quantity: 2 },
+    { id: "onr_v1_036_jackhammer", quantity: 2 },
+    { id: "onr_v1_069_succubus", quantity: 2 },
+    { id: "onr_v1_163_floating-runner-bbs", quantity: 2 },
+    { id: "onr_v1_180_smiths-pawnshop", quantity: 1 },
+    { id: "onr_v1_021_dwarf", quantity: 1 },
+    { id: "onr_v1_028_force-shield", quantity: 1 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "simple_economy_event", quantity: 3 }
+  ]
+};
+
+const ONR_V1_7_0_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v170_smoke_094",
+  name: "O:NR V1.7.0 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_233_d-arc-knight", quantity: 2 },
+    { id: "onr_v1_232_crystal-wall", quantity: 2 },
+    { id: "onr_v1_295_night-shift", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -3831,6 +4054,16 @@ function v163CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_6_3_RUNNER_DECK,
     corpDeck: ONR_V1_6_3_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v170CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_7_0_RUNNER_DECK,
+    corpDeck: ONR_V1_7_0_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

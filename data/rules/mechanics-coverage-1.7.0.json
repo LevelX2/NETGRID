@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.7.0",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.7.0",
+  "generatedFor": "V1.7.0 Mechanikpaket D final gate",
+  "generatedAt": "2026-05-09",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.6.3.json",
+  "gateAssertions": {
+    "v163GatePassed": true,
+    "v170CoreSubsetImplemented": true,
+    "v170UniqueConstraintAdded": true,
+    "v170HostingLifecycleAdded": true,
+    "v170RecurringStartOfTurnAdded": true,
+    "v170SubtypeStealthNoisyWormAdded": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.deck.unique_constraint",
+      "label": "Deck- und Runtime-Unique-Constraint",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.0",
+      "currentScopeNote": "V1.7.0 ergänzt Unique-Constraint in Deckvalidierung und Runtime-Installpfaden für Smith's Pawnshop.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.hosting.daemon_hosted_programs",
+      "label": "Daemon-Hosting und Hosted-Program-Lifecycle",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.0",
+      "currentScopeNote": "V1.7.0 ergänzt Succubus-Hosting, MU-Vertrag für hosted Programme und deterministische Host-Trash-Kaskaden.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.recurring.start_of_turn_and_run_spend",
+      "label": "Recurring-Pools und Start-of-turn-Resolver",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.0",
+      "currentScopeNote": "V1.7.0 ergänzt Cloak-Recurring, turnstart-Refresh, Floating Runner BBS Credit-Gain und Smith's-Pawnshop-Choice.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.subtype.daemon_stealth_worm_noisy",
+      "label": "Programm-Subtypen Daemon/Stealth/Worm/Noisy",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.0",
+      "currentScopeNote": "V1.7.0 ergänzt subtype-gesteuerte Resolverpfade für Stealth/Noisy und normalisiert Worm-Subtype auf Dwarf und Worm.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.card_release.v1_7_0_core_subset",
+      "label": "V1.7.0 Card Core Subset",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.0",
+      "currentScopeNote": "5 Karten sind als freigabefähiger Kernkorb umgesetzt; restliche V1.7.0-Planungskarten sind deferred.",
+      "coverage": ["manifest", "scenario", "unit", "visibility", "replay", "state_hash"]
+    }
+  ]
+}

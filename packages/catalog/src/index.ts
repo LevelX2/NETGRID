@@ -419,6 +419,14 @@ export const ONR_V1_6_3_RELEASE_CARD_IDS = [
   "onr_v1_371_tokyo-chiba-infighting"
 ] as const;
 
+export const ONR_V1_7_0_RELEASE_CARD_IDS = [
+  "onr_v1_011_cloak",
+  "onr_v1_036_jackhammer",
+  "onr_v1_069_succubus",
+  "onr_v1_163_floating-runner-bbs",
+  "onr_v1_180_smiths-pawnshop"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -426,7 +434,8 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_2_3_RELEASE_CARD_IDS,
   ...ONR_V1_6_1_RELEASE_CARD_IDS,
   ...ONR_V1_6_2_RELEASE_CARD_IDS,
-  ...ONR_V1_6_3_RELEASE_CARD_IDS
+  ...ONR_V1_6_3_RELEASE_CARD_IDS,
+  ...ONR_V1_7_0_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -478,6 +487,7 @@ const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_I
 const ONR_V1_6_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_1_RELEASE_CARD_IDS);
 const ONR_V1_6_2_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_2_RELEASE_CARD_IDS);
 const ONR_V1_6_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_3_RELEASE_CARD_IDS);
+const ONR_V1_7_0_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_7_0_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -540,6 +550,15 @@ const ONR_V1_6_3_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v163-card-release-smoke.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.6.3 Mechanikpaket C", "apps/server/src/multiplayer.test.ts::V1.6.3 card release matchstart"],
   replayTests: ["packages/engine/src/index.test.ts::V1.6.3 Mechanikpaket C"]
+};
+
+const ONR_V1_7_0_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.7.0",
+  status: "human_playable_v1_7_0_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.7.0 Mechanikpaket D"],
+  scenarioTests: ["data/scenarios/v170-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.7.0 Mechanikpaket D", "apps/server/src/multiplayer.test.ts::V1.7.0 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.7.0 Mechanikpaket D"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -638,6 +657,14 @@ const ONR_V1_6_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_273_triggerman": { rezCost: 7, strength: 3 },
   "onr_v1_350_antiquated-interface-routines": { rezCost: 2, trashCost: 1 },
   "onr_v1_371_tokyo-chiba-infighting": { rezCost: 0, trashCost: 6 }
+};
+
+const ONR_V1_7_0_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_011_cloak": { installCost: 7, memoryCost: 1 },
+  "onr_v1_036_jackhammer": { installCost: 1, memoryCost: 1, strength: 0 },
+  "onr_v1_069_succubus": { installCost: 3, memoryCost: 1 },
+  "onr_v1_163_floating-runner-bbs": { installCost: 6 },
+  "onr_v1_180_smiths-pawnshop": { installCost: 0 }
 };
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
@@ -739,6 +766,16 @@ const ONR_V1_6_3_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_350_antiquated-interface-routines": "All ice on this fort has +1 strength.",
   "onr_v1_371_tokyo-chiba-infighting":
     "Gain 1 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort."
+};
+
+const ONR_V1_7_0_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_011_cloak":
+    "Put 3 credits on Cloak when it is installed. Use these credits only to pay for using icebreakers during runs, but not for noisy icebreakers. If you use any credits, replace them at the start of your next turn.",
+  "onr_v1_036_jackhammer": "0 credits: Break wall subroutine.\n1 credit: +1 strength.",
+  "onr_v1_069_succubus": "Succubus can host up to 3 MU of programs. If Succubus leaves play, trash all hosted programs.",
+  "onr_v1_163_floating-runner-bbs": "Gain 1 credit at the start of each of your turns.",
+  "onr_v1_180_smiths-pawnshop":
+    "At the start of each of your turns, you may trash one of your other installed cards to gain 1 credit.\nOnly one unique card of a particular name can be in play at a time."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -1529,13 +1566,16 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV170 = ONR_V1_7_0_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV163 = ONR_V1_6_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV162 = ONR_V1_6_2_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV161 = ONR_V1_6_1_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV163
+  const textOverrides = isV170
+    ? ONR_V1_7_0_TEXT_OVERRIDES
+    : isV163
     ? ONR_V1_6_3_TEXT_OVERRIDES
     : isV162
     ? ONR_V1_6_2_TEXT_OVERRIDES
@@ -1548,7 +1588,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV163
+  const numericOverrides = isV170
+    ? ONR_V1_7_0_NUMERIC_OVERRIDES
+    : isV163
     ? ONR_V1_6_3_NUMERIC_OVERRIDES
     : isV162
     ? ONR_V1_6_2_NUMERIC_OVERRIDES
@@ -1561,7 +1603,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV163
+  const manifest = isV170
+    ? ONR_V1_7_0_RELEASE_MANIFEST
+    : isV163
     ? ONR_V1_6_3_RELEASE_MANIFEST
     : isV162
     ? ONR_V1_6_2_RELEASE_MANIFEST

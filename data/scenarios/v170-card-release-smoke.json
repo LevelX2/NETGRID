@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v170-card-release-smoke",
+  "title": "V1.7.0 Mechanikpaket D Kernrelease",
+  "release": "V1.7.0",
+  "status": "implemented_core_subset",
+  "extends": "data/scenarios/v163-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_011_cloak",
+    "onr_v1_036_jackhammer",
+    "onr_v1_069_succubus",
+    "onr_v1_163_floating-runner-bbs",
+    "onr_v1_180_smiths-pawnshop"
+  ],
+  "preconditions": [
+    "V1.6.3 Mechanikpaket C ist grün abgeschlossen.",
+    "V1.7.0 Preflight dokumentiert deferred Karten mit späteren Blockereffekten."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.7.0-Smoke-Match mit den V1.7.0 Runner- und Corp-Decks.",
+    "Installiere Succubus und hoste Jackhammer darauf; prüfe MU-Vertrag und Host-Trash-Kaskade bei Host-Verlust.",
+    "Installiere Cloak und prüfe Run-Kostenpfade: Stealth-Credits für nicht-noisy Breaker erlaubt, für noisy Breaker blockiert.",
+    "Installiere Floating Runner BBS und Smith's Pawnshop; prüfe deterministische Start-of-turn-Reihenfolge mit optionalem Trash-für-Credit.",
+    "Prüfe Unique-Constraint in Deckvalidierung und Runtime-Installpfad."
+  ],
+  "expected": [
+    "Unique-/Hosting-/Recurring-/Subtype-Pfade wirken deterministisch in LegalActions und bei Action-Ausführung.",
+    "Start-of-turn-Resolver und Run-Credit-Spend bleiben replay-/statehash-stabil.",
+    "PublicEvents und PlayerViews bleiben side-sicher ohne Hidden-Info-Leaks.",
+    "Keine neue AI-supported-Freigabe durch den Release."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.7.0 Mechanikpaket D",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic"
+  }
+}
