@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v162-card-release-smoke",
+  "title": "V1.6.2 Mechanikpaket B Kernrelease",
+  "release": "V1.6.2",
+  "status": "implemented_core_subset",
+  "extends": "data/scenarios/v161-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_212_priority-requisition",
+    "onr_v1_215_security-net-optimization",
+    "onr_v1_317_data-masons",
+    "onr_v1_320_encoder-inc",
+    "onr_v1_341_skalderviken-sa-beta-test-site"
+  ],
+  "preconditions": [
+    "V1.6.1 Mechanikpaket A ist grün abgeschlossen.",
+    "V1.6.2 Preflight dokumentiert deferred Karten mit späteren Blockereffekten."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.6.2-Smoke-Match mit den V1.6.2 Runner- und Corp-Decks.",
+    "Rezze Data Masons und prüfe Wall-Rez-Kosten und Stärke im Run-Encounter.",
+    "Rezze Encoder, Inc. und Skälderviken SA Beta Test Site und prüfe Code-Gate-/Black-ICE-Rez-Kosten.",
+    "Score Priority Requisition und prüfe den deterministischen kostenfreien Rez-Scoreeffekt.",
+    "Score Security Net Optimization und prüfe globalen ICE-Stärke-Bonus in Encounter/PlayerView."
+  ],
+  "expected": [
+    "Globale Modifier wirken deterministisch in LegalActions und bei Action-Ausführung.",
+    "Score-/Rez-basierte Persistenz bleibt replay-/statehash-stabil.",
+    "PublicEvents und PlayerViews bleiben side-sicher ohne Hidden-Info-Leaks.",
+    "Keine neue AI-supported-Freigabe durch den Release."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic"
+  }
+}

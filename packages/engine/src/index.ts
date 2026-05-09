@@ -1157,8 +1157,9 @@ function corpMainActions(state: GameState): LegalAction[] {
       if (definition.type === "agenda") {
         if (state.corp.credits >= 1) actions.push(action(state, "corp", "advance_card", `Agenda in ${server.label} advancen`, id, [{ clicks: 1, credits: 1 }], { cardId: id }));
       }
-      if ((definition.type === "asset" || definition.type === "upgrade") && !mustInstance(state.cardInstances, id).rezzed && state.corp.credits >= (definition.rezCost ?? 0)) {
-        actions.push(action(state, "corp", "rez_ice", `Karte in ${server.label} rezzen`, id, [{ credits: definition.rezCost ?? 0 }], { cardId: id, rootRez: true }));
+      const rezCost = rezCostForCard(state, id);
+      if ((definition.type === "asset" || definition.type === "upgrade") && !mustInstance(state.cardInstances, id).rezzed && state.corp.credits >= rezCost) {
+        actions.push(action(state, "corp", "rez_ice", `Karte in ${server.label} rezzen`, id, [{ credits: rezCost }], { cardId: id, rootRez: true }));
       }
     }
   }
@@ -1224,6 +1225,71 @@ function runnerMainActions(state: GameState): LegalAction[] {
   actions.push(...specialZoneHarnessActions(state, "runner"));
   actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
   return actions;
+}
+
+function normalizeSubtypeLabel(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
+  const target = normalizeSubtypeLabel(subtype);
+  return definition.subtypes.some((candidate) => normalizeSubtypeLabel(candidate) === target);
+}
+
+function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
+  const ids: CardInstanceId[] = [];
+  for (const server of state.corp.servers) {
+    for (const cardId of server.root) {
+      if (mustInstance(state.cardInstances, cardId).rezzed) ids.push(cardId);
+    }
+  }
+  return ids;
+}
+
+function scoredCorpAgendaIds(state: GameState): CardInstanceId[] {
+  return state.corp.scoreArea.slice();
+}
+
+function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
+  const iceDefinition = definitionFor(state, iceId);
+  let bonus = 0;
+  for (const sourceId of rezzedCorpRootCardIds(state)) {
+    const sourceDefinition = definitionFor(state, sourceId);
+    if (sourceDefinition.id === "onr_v1_317_data-masons" && cardHasSubtype(iceDefinition, "wall")) bonus += 1;
+  }
+  for (const agendaId of scoredCorpAgendaIds(state)) {
+    const agendaDefinition = definitionFor(state, agendaId);
+    if (agendaDefinition.id === "onr_v1_215_security-net-optimization") bonus += 1;
+  }
+  return bonus;
+}
+
+function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
+  const definition = definitionFor(state, iceId);
+  const instance = mustInstance(state.cardInstances, iceId);
+  return (definition.strength ?? 0) + instance.strengthModifier + iceStrengthBonusFor(state, iceId);
+}
+
+function iceRezCostReductionFor(state: GameState, iceDefinition: CardDefinition): number {
+  let reduction = 0;
+  for (const sourceId of rezzedCorpRootCardIds(state)) {
+    const sourceDefinition = definitionFor(state, sourceId);
+    if (sourceDefinition.id === "onr_v1_317_data-masons" && cardHasSubtype(iceDefinition, "wall")) reduction += 2;
+    if (sourceDefinition.id === "onr_v1_320_encoder-inc" && cardHasSubtype(iceDefinition, "code_gate")) reduction += 2;
+    if (sourceDefinition.id === "onr_v1_341_skalderviken-sa-beta-test-site" && cardHasSubtype(iceDefinition, "black_ice")) reduction += 2;
+  }
+  return reduction;
+}
+
+function rezCostForCard(state: GameState, cardId: CardInstanceId): number {
+  const definition = definitionFor(state, cardId);
+  const baseCost = definition.rezCost ?? 0;
+  if (definition.type !== "ice") return baseCost;
+  const reduction = iceRezCostReductionFor(state, definition);
+  return Math.max(0, baseCost - reduction);
 }
 
 function specialZoneHarnessActions(state: GameState, side: Side): LegalAction[] {
@@ -1315,8 +1381,9 @@ function corpApproachActions(state: GameState): LegalAction[] {
   const ice = mustInstance(state.cardInstances, run.approachedIceId);
   const definition = definitionFor(state, run.approachedIceId);
   const actions: LegalAction[] = [];
-  if (!ice.rezzed && state.corp.credits >= (definition.rezCost ?? 0)) {
-    actions.push(action(state, "corp", "rez_ice", `${definition.title} rezzen`, run.approachedIceId, [{ credits: definition.rezCost ?? 0 }], { cardId: run.approachedIceId }));
+  const rezCost = rezCostForCard(state, run.approachedIceId);
+  if (!ice.rezzed && state.corp.credits >= rezCost) {
+    actions.push(action(state, "corp", "rez_ice", `${definition.title} rezzen`, run.approachedIceId, [{ credits: rezCost }], { cardId: run.approachedIceId }));
   }
   actions.push(action(state, "corp", "decline_rez", "Nicht rezzen", "game_rule"));
   return actions;
@@ -1327,6 +1394,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   if (!run.encounteredIceId) return [];
   const encounteredIceId = run.encounteredIceId;
   const iceDefinition = definitionFor(state, run.encounteredIceId);
+  const encounteredIceStrength = iceStrengthFor(state, encounteredIceId);
   const actions: LegalAction[] = [];
   for (const breakerId of state.runner.rig.programs) {
     const breaker = definitionFor(state, breakerId);
@@ -1347,7 +1415,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       );
     }
     const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype)));
-    if (breakAbility && breakerStrength >= (iceDefinition.strength ?? 0) && availableRunnerRunCredits(state) >= breakAbility.cost.credits) {
+    if (breakAbility && breakerStrength >= encounteredIceStrength && availableRunnerRunCredits(state) >= breakAbility.cost.credits) {
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
         if (!run.brokenSubroutineIndexes.includes(index) && !run.resolvedSubroutineIndexes.includes(index)) {
@@ -1673,7 +1741,7 @@ function startRun(state: GameState, serverId: Exclude<ServerId, "new_remote">, p
 
 function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
   const definition = definitionFor(state, cardId);
-  spendCredits(state, "corp", definition.rezCost ?? 0);
+  spendCredits(state, "corp", rezCostForCard(state, cardId));
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), rezzed: true, faceup: true };
   if (rootRez && CORP_ROOT_REZ_RESOLVERS[definition.id]) {
     CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
@@ -2808,6 +2876,31 @@ function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction
     state.corp.credits += 5;
     if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), onScoreGainCredits: 5, corpCreditsAfter: state.corp.credits };
   }
+  if (definition.id === "onr_v1_212_priority-requisition") {
+    const candidates = Object.entries(state.cardInstances)
+      .filter(([, instance]) => instance.zone.side === "corp" && instance.zone.zone === "serverIce" && !instance.rezzed)
+      .map(([instanceId]) => instanceId as CardInstanceId)
+      .sort((left, right) => {
+        const leftCost = definitionFor(state, left).rezCost ?? 0;
+        const rightCost = definitionFor(state, right).rezCost ?? 0;
+        return rightCost - leftCost || left.localeCompare(right);
+      });
+    const freeRezTarget = candidates[0];
+    if (freeRezTarget) {
+      state.cardInstances[freeRezTarget] = { ...mustInstance(state.cardInstances, freeRezTarget), faceup: true, rezzed: true };
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          priorityRequisitionFreeRez: true,
+          priorityRequisitionTarget: freeRezTarget,
+          priorityRequisitionTargetDefinitionId: definitionFor(state, freeRezTarget).id
+        };
+      }
+    }
+  }
+  if (definition.id === "onr_v1_215_security-net-optimization" && legalAction) {
+    legalAction.payload = { ...(legalAction.payload ?? {}), securityNetOptimizationActive: true };
+  }
   cleanupEmptyRemotes(state);
 }
 
@@ -3814,7 +3907,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     rezzed: instance.rezzed,
     advancementCounters: instance.advancementCounters,
     ...(definition.advancementRequirement !== undefined ? { advancementRequirement: definition.advancementRequirement } : {}),
-    ...(definition.strength !== undefined ? { strength: definition.strength + instance.strengthModifier } : {}),
+    ...(definition.strength !== undefined ? { strength: definition.type === "ice" ? iceStrengthFor(state, id) : definition.strength + instance.strengthModifier } : {}),
     ...(definition.agendaPoints !== undefined ? { agendaPoints: definition.agendaPoints } : {}),
     ...(definition.trashCost !== undefined ? { trashCost: definition.trashCost } : {}),
     ...(instance.counters ? { counters: cloneCounters(instance.counters) } : {}),

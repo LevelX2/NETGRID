@@ -1524,6 +1524,109 @@ describe("V1.6.1 Mechanikpaket A", () => {
   });
 });
 
+describe("V1.6.2 Mechanikpaket B", () => {
+  it("adds a controlled V1.6.2 core card set without opening deferred mechanics", () => {
+    expect(ONR_V1_6_2_FINAL_CARD_IDS).toHaveLength(5);
+    for (const definitionId of ONR_V1_6_2_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" ")).not.toMatch(/hosting|daemon|stealth|unique_card|uninstall_runner_program|subtype_noisy/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_212_priority-requisition"]).toMatchObject({ advancementRequirement: 5, agendaPoints: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_215_security-net-optimization"]).toMatchObject({ advancementRequirement: 5, agendaPoints: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_317_data-masons"]).toMatchObject({ rezCost: 1, trashCost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_320_encoder-inc"]).toMatchObject({ rezCost: 0, trashCost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"]).toMatchObject({ rezCost: 0, trashCost: 2 });
+  });
+
+  it("validates V1.6.2 smoke decks and keeps previous card releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_6_2_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_6_2_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v162CardReleaseGame("v162-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_254_liche"]).toBeDefined();
+  });
+
+  it("applies Data Masons rez/strength modifiers and score-based Security Net strength", () => {
+    let dataMasons = v162CardReleaseGame("v162-data-masons");
+    dataMasons = apply(dataMasons, "corp", (action) => action.type === "mandatory_draw");
+    dataMasons.corp.credits = 30;
+    dataMasons.corp.maxHandSize = 100;
+    putCorpRootInRemote(dataMasons, "onr_v1_317_data-masons");
+    putCorpIceOnServer(dataMasons, "rd", "onr_v1_232_crystal-wall");
+    dataMasons = apply(dataMasons, "corp", (action) => action.type === "rez_ice" && sourceDefinition(dataMasons, action) === "onr_v1_317_data-masons");
+    dataMasons = apply(dataMasons, "corp", (action) => action.type === "end_turn");
+    dataMasons = apply(dataMasons, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const wallRez = mustAction(dataMasons, "corp", (action) => action.type === "rez_ice" && sourceDefinition(dataMasons, action) === "onr_v1_232_crystal-wall");
+    expect(wallRez.costs[0]?.credits).toBe(2);
+    dataMasons = apply(dataMasons, "corp", (action) => action.type === "rez_ice" && sourceDefinition(dataMasons, action) === "onr_v1_232_crystal-wall");
+    expect(getPlayerView(dataMasons, "runner").run?.encounteredIce?.strength).toBe(4);
+
+    let securityNet = v162CardReleaseGame("v162-security-net");
+    securityNet = apply(securityNet, "corp", (action) => action.type === "mandatory_draw");
+    securityNet.corp.credits = 30;
+    securityNet.corp.clicks = 10;
+    securityNet.corp.maxHandSize = 100;
+    moveCorpCardToHq(securityNet, "onr_v1_215_security-net-optimization");
+    putCorpIceOnServer(securityNet, "rd", "onr_v1_232_crystal-wall");
+    securityNet = apply(securityNet, "corp", (action) => action.type === "install_card" && sourceDefinition(securityNet, action) === "onr_v1_215_security-net-optimization");
+    for (let index = 0; index < 5; index += 1) {
+      securityNet = apply(securityNet, "corp", (action) => action.type === "advance_card" && sourceDefinition(securityNet, action) === "onr_v1_215_security-net-optimization");
+    }
+    securityNet = apply(securityNet, "corp", (action) => action.type === "score_agenda" && sourceDefinition(securityNet, action) === "onr_v1_215_security-net-optimization");
+    securityNet = apply(securityNet, "corp", (action) => action.type === "end_turn");
+    securityNet = apply(securityNet, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    securityNet = apply(securityNet, "corp", (action) => action.type === "rez_ice" && sourceDefinition(securityNet, action) === "onr_v1_232_crystal-wall");
+    expect(getPlayerView(securityNet, "runner").run?.encounteredIce?.strength).toBe(4);
+  });
+
+  it("reduces code-gate and black-ice rez costs and resolves Priority Requisition free rez deterministically", () => {
+    let encoder = v162CardReleaseGame("v162-encoder");
+    encoder = apply(encoder, "corp", (action) => action.type === "mandatory_draw");
+    encoder.corp.credits = 30;
+    encoder.corp.maxHandSize = 100;
+    putCorpRootInRemote(encoder, "onr_v1_320_encoder-inc");
+    putCorpIceOnServer(encoder, "rd", "onr_v1_230_cortical-scanner");
+    encoder = apply(encoder, "corp", (action) => action.type === "rez_ice" && sourceDefinition(encoder, action) === "onr_v1_320_encoder-inc");
+    encoder = apply(encoder, "corp", (action) => action.type === "end_turn");
+    encoder = apply(encoder, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const codeGateRez = mustAction(encoder, "corp", (action) => action.type === "rez_ice" && sourceDefinition(encoder, action) === "onr_v1_230_cortical-scanner");
+    expect(codeGateRez.costs[0]?.credits).toBe(5);
+
+    let skalderviken = v162CardReleaseGame("v162-skalderviken");
+    skalderviken = apply(skalderviken, "corp", (action) => action.type === "mandatory_draw");
+    skalderviken.corp.credits = 30;
+    skalderviken.corp.maxHandSize = 100;
+    putCorpRootInRemote(skalderviken, "onr_v1_341_skalderviken-sa-beta-test-site");
+    putCorpIceOnServer(skalderviken, "hq", "onr_v1_231_cortical-scrub");
+    skalderviken = apply(skalderviken, "corp", (action) => action.type === "rez_ice" && sourceDefinition(skalderviken, action) === "onr_v1_341_skalderviken-sa-beta-test-site");
+    skalderviken = apply(skalderviken, "corp", (action) => action.type === "end_turn");
+    skalderviken = apply(skalderviken, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    const blackIceRez = mustAction(skalderviken, "corp", (action) => action.type === "rez_ice" && sourceDefinition(skalderviken, action) === "onr_v1_231_cortical-scrub");
+    expect(blackIceRez.costs[0]?.credits).toBe(5);
+
+    let priority = v162CardReleaseGame("v162-priority-requisition");
+    priority = apply(priority, "corp", (action) => action.type === "mandatory_draw");
+    priority.corp.credits = 30;
+    priority.corp.clicks = 10;
+    priority.corp.maxHandSize = 100;
+    moveCorpCardToHq(priority, "onr_v1_212_priority-requisition");
+    const highCostIceId = putCorpIceOnServer(priority, "rd", "onr_v1_230_cortical-scanner");
+    const lowerCostIceId = putCorpIceOnServer(priority, "hq", "onr_v1_232_crystal-wall");
+    priority = apply(priority, "corp", (action) => action.type === "install_card" && sourceDefinition(priority, action) === "onr_v1_212_priority-requisition");
+    for (let index = 0; index < 5; index += 1) {
+      priority = apply(priority, "corp", (action) => action.type === "advance_card" && sourceDefinition(priority, action) === "onr_v1_212_priority-requisition");
+    }
+    priority = apply(priority, "corp", (action) => action.type === "score_agenda" && sourceDefinition(priority, action) === "onr_v1_212_priority-requisition");
+    expect(priority.cardInstances[highCostIceId]?.rezzed).toBe(true);
+    expect(priority.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -3114,6 +3217,14 @@ const ONR_V1_6_1_FINAL_CARD_IDS = [
   "onr_v1_254_liche"
 ] as const;
 
+const ONR_V1_6_2_FINAL_CARD_IDS = [
+  "onr_v1_212_priority-requisition",
+  "onr_v1_215_security-net-optimization",
+  "onr_v1_317_data-masons",
+  "onr_v1_320_encoder-inc",
+  "onr_v1_341_skalderviken-sa-beta-test-site"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -3300,6 +3411,39 @@ const ONR_V1_6_1_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_301_punitive-counterstrike", quantity: 2 },
     { id: "onr_v1_302_scorched-earth", quantity: 2 },
     { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
+const ONR_V1_6_2_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v162_smoke_094",
+  name: "O:NR V1.6.2 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_023_evil-twin", quantity: 2 },
+    { id: "onr_v1_028_force-shield", quantity: 2 },
+    { id: "onr_v1_125_dermatech-bodyplating", quantity: 2 },
+    { id: "simple_economy_event", quantity: 8 }
+  ]
+};
+
+const ONR_V1_6_2_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v162_smoke_094",
+  name: "O:NR V1.6.2 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_212_priority-requisition", quantity: 1 },
+    { id: "onr_v1_215_security-net-optimization", quantity: 1 },
+    { id: "onr_v1_317_data-masons", quantity: 2 },
+    { id: "onr_v1_320_encoder-inc", quantity: 2 },
+    { id: "onr_v1_341_skalderviken-sa-beta-test-site", quantity: 2 },
+    { id: "onr_v1_232_crystal-wall", quantity: 2 },
+    { id: "onr_v1_230_cortical-scanner", quantity: 2 },
+    { id: "onr_v1_231_cortical-scrub", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 2 }
   ]
 };
 
@@ -3495,6 +3639,16 @@ function v161CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_6_1_RUNNER_DECK,
     corpDeck: ONR_V1_6_1_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v162CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_6_2_RUNNER_DECK,
+    corpDeck: ONR_V1_6_2_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

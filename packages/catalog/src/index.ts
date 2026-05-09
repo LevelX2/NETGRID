@@ -403,12 +403,21 @@ export const ONR_V1_6_1_RELEASE_CARD_IDS = [
   "onr_v1_254_liche"
 ] as const;
 
+export const ONR_V1_6_2_RELEASE_CARD_IDS = [
+  "onr_v1_212_priority-requisition",
+  "onr_v1_215_security-net-optimization",
+  "onr_v1_317_data-masons",
+  "onr_v1_320_encoder-inc",
+  "onr_v1_341_skalderviken-sa-beta-test-site"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
   ...ONR_V1_1_2K_RELEASE_CARD_IDS,
   ...ONR_V1_2_3_RELEASE_CARD_IDS,
-  ...ONR_V1_6_1_RELEASE_CARD_IDS
+  ...ONR_V1_6_1_RELEASE_CARD_IDS,
+  ...ONR_V1_6_2_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -458,6 +467,7 @@ const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
 const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_IDS);
 const ONR_V1_6_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_1_RELEASE_CARD_IDS);
+const ONR_V1_6_2_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_2_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -502,6 +512,15 @@ const ONR_V1_6_1_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v161-card-release-smoke.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A", "apps/server/src/multiplayer.test.ts::V1.6.1 card release matchstart"],
   replayTests: ["packages/engine/src/index.test.ts::V1.6.1 Mechanikpaket A"]
+};
+
+const ONR_V1_6_2_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.6.2",
+  status: "human_playable_v1_6_2_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B"],
+  scenarioTests: ["data/scenarios/v162-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B", "apps/server/src/multiplayer.test.ts::V1.6.2 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -586,6 +605,14 @@ const ONR_V1_6_1_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_254_liche": { rezCost: 14, strength: 6 }
 };
 
+const ONR_V1_6_2_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_212_priority-requisition": { advancementRequirement: 5, agendaPoints: 3 },
+  "onr_v1_215_security-net-optimization": { advancementRequirement: 5, agendaPoints: 3 },
+  "onr_v1_317_data-masons": { rezCost: 1, trashCost: 1 },
+  "onr_v1_320_encoder-inc": { rezCost: 0, trashCost: 1 },
+  "onr_v1_341_skalderviken-sa-beta-test-site": { rezCost: 0, trashCost: 2 }
+};
+
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
   "onr_v1_052_raffles": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
@@ -668,6 +695,14 @@ const ONR_V1_6_1_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_229_code-corpse": "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
   "onr_v1_231_cortical-scrub": "[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
   "onr_v1_254_liche": "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run."
+};
+
+const ONR_V1_6_2_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_212_priority-requisition": "When scored, rez one installed piece of ice at no cost.",
+  "onr_v1_215_security-net-optimization": "While scored, ice gets +1 strength.",
+  "onr_v1_317_data-masons": "Walls cost 2 less to rez and get +1 strength while Data Masons is rezzed.",
+  "onr_v1_320_encoder-inc": "Code gates cost 2 less to rez while Encoder, Inc. is rezzed.",
+  "onr_v1_341_skalderviken-sa-beta-test-site": "Black ice costs 2 less to rez while this asset is rezzed."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -1458,11 +1493,14 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV162 = ONR_V1_6_2_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV161 = ONR_V1_6_1_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV161
+  const textOverrides = isV162
+    ? ONR_V1_6_2_TEXT_OVERRIDES
+    : isV161
     ? ONR_V1_6_1_TEXT_OVERRIDES
     : isV123
       ? ONR_V1_2_3_TEXT_OVERRIDES
@@ -1471,7 +1509,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV161
+  const numericOverrides = isV162
+    ? ONR_V1_6_2_NUMERIC_OVERRIDES
+    : isV161
     ? ONR_V1_6_1_NUMERIC_OVERRIDES
     : isV123
       ? ONR_V1_2_3_NUMERIC_OVERRIDES
@@ -1480,7 +1520,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV161
+  const manifest = isV162
+    ? ONR_V1_6_2_RELEASE_MANIFEST
+    : isV161
     ? ONR_V1_6_1_RELEASE_MANIFEST
     : isV123
       ? ONR_V1_2_3_RELEASE_MANIFEST

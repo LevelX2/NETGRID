@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.6.2",
+  "id": "v1.6.2-card-release-manifest",
+  "status": "implemented_for_v1.6.2_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.6.1.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount5": true,
+    "globalIceCostStrengthModifiersDeterministic": true,
+    "priorityRequisitionScoreEffectDeterministic": true,
+    "runtimeAllowlistExtendedExactlyBy5": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_agenda_on_score_rez_ice_free",
+      "requiredMechanics": ["install_remote", "advance", "score", "on_score_rez_ice_free"],
+      "roleTags": ["corp", "agenda", "score_effect"]
+    },
+    {
+      "cardCode": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_agenda_scored_global_ice_strength_modifier",
+      "requiredMechanics": ["install_remote", "advance", "score", "global_ice_strength_modifier", "persistent_modifier"],
+      "roleTags": ["corp", "agenda", "global_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_317_data-masons",
+      "title": "Data Masons",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_asset_global_wall_rez_cost_and_strength_modifier",
+      "requiredMechanics": ["install_remote", "rez_card", "global_ice_rez_cost_modifier", "global_ice_strength_modifier", "persistent_modifier"],
+      "roleTags": ["corp", "asset", "global_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_320_encoder-inc",
+      "title": "Encoder, Inc.",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_asset_global_code_gate_rez_cost_modifier",
+      "requiredMechanics": ["install_remote", "rez_card", "global_ice_rez_cost_modifier", "persistent_modifier"],
+      "roleTags": ["corp", "asset", "global_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_341_skalderviken-sa-beta-test-site",
+      "title": "Skälderviken SA Beta Test Site",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_asset_global_black_ice_rez_cost_modifier",
+      "requiredMechanics": ["install_remote", "rez_card", "global_ice_rez_cost_modifier", "persistent_modifier"],
+      "roleTags": ["corp", "asset", "global_modifier"]
+    }
+  ],
+  "coverage": {
+    "unitTests": [
+      "packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B",
+      "packages/catalog/src/index.test.ts::catalog import and status logic"
+    ],
+    "scenarioTests": ["data/scenarios/v162-card-release-smoke.json"],
+    "visibilityTests": [
+      "packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B",
+      "apps/server/src/multiplayer.test.ts::handles V1.2.0 Event Modification pending choices through submit, reconnect, idempotency and undo barriers"
+    ],
+    "aiTests": ["packages/ai/src/index.test.ts::keeps local O:NR cards without ai_supported out of dynamic plan scoring"],
+    "replayTests": ["packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B"]
+  },
+  "deferred": {
+    "count": 45,
+    "reason": "Future-effect blockers, unresolved per-card resolver mapping or explicit later release assignment from the V1.6.2 preflight matrix."
+  }
+}

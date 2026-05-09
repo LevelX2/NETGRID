@@ -1395,6 +1395,66 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score", "steal", "on_score_gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_212_priority-requisition",
+    title: "Priority Requisition",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 5,
+    agendaPoints: 3,
+    rulesText: "When scored, rez one installed piece of ice at no cost.",
+    mechanics: ["install_remote", "advance", "score", "steal", "on_score_rez_ice_free", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_215_security-net-optimization",
+    title: "Security Net Optimization",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 5,
+    agendaPoints: 3,
+    rulesText: "While scored, ice gets +1 strength.",
+    mechanics: ["install_remote", "advance", "score", "steal", "global_ice_strength_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_317_data-masons",
+    title: "Data Masons",
+    side: "corp",
+    type: "asset",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 1,
+    trashCost: 1,
+    rulesText: "Walls cost 2 less to rez and get +1 strength while Data Masons is rezzed.",
+    mechanics: ["install_remote", "rez_card", "trash_on_access", "global_ice_rez_cost_modifier", "global_ice_strength_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_320_encoder-inc",
+    title: "Encoder, Inc.",
+    side: "corp",
+    type: "asset",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 1,
+    rulesText: "Code gates cost 2 less to rez while Encoder, Inc. is rezzed.",
+    mechanics: ["install_remote", "rez_card", "trash_on_access", "global_ice_rez_cost_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_341_skalderviken-sa-beta-test-site",
+    title: "Skälderviken SA Beta Test Site",
+    side: "corp",
+    type: "asset",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 2,
+    rulesText: "Black ice costs 2 less to rez while this asset is rezzed.",
+    mechanics: ["install_remote", "rez_card", "trash_on_access", "global_ice_rez_cost_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_281_accounts-receivable",
     title: "Accounts Receivable",
     side: "corp",
