@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.6.3",
+  "id": "v1.6.3-card-release-manifest",
+  "status": "implemented_for_v1.6.3_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.6.2.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount5": true,
+    "uninstallIceSubroutinesDeterministic": true,
+    "serverUpgradeStrengthModifierDeterministic": true,
+    "regionInstallLifecycleDeterministic": true,
+    "tokyoChibaUnsuccessfulRunCreditDeterministic": true,
+    "runtimeAllowlistExtendedExactlyBy5": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_233_d-arc-knight",
+      "title": "D'Arc Knight",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "ice_subroutine_trash_program_then_end_run",
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "uninstall_runner_program", "end_the_run"],
+      "roleTags": ["corp", "ice", "sentry", "killer", "uninstall"]
+    },
+    {
+      "cardCode": "onr_v1_267_sentinels-prime",
+      "title": "Sentinels Prime",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "ice_subroutine_trash_program_then_end_run",
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "uninstall_runner_program", "end_the_run"],
+      "roleTags": ["corp", "ice", "sentry", "killer", "uninstall"]
+    },
+    {
+      "cardCode": "onr_v1_273_triggerman",
+      "title": "Triggerman",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "ice_subroutine_trash_program_then_end_run",
+      "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "uninstall_runner_program", "end_the_run"],
+      "roleTags": ["corp", "ice", "sentry", "killer", "uninstall"]
+    },
+    {
+      "cardCode": "onr_v1_350_antiquated-interface-routines",
+      "title": "Antiquated Interface Routines",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_upgrade_server_ice_strength_modifier",
+      "requiredMechanics": ["install_remote", "rez_upgrade", "trash_on_access", "server_ice_strength_modifier", "persistent_modifier"],
+      "roleTags": ["corp", "upgrade", "server_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_371_tokyo-chiba-infighting",
+      "title": "Tokyo-Chiba Infighting",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_region_upgrade_unsuccessful_run_credit_bonus",
+      "requiredMechanics": ["install_remote", "rez_upgrade", "region_install_rules", "run_unsuccessful_credit_bonus", "persistent_modifier"],
+      "roleTags": ["corp", "upgrade", "region", "run_trigger"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 23,
+    "implementedCardCount": 5,
+    "deferredCardCount": 18,
+    "deferReasons": [
+      "additional dependencies in V1.7.0+ families",
+      "additional dependencies in V1.7.1/V1.7.2 families",
+      "additional dependencies in V1.8.x+ families"
+    ],
+    "choiceFlowStatus": "deferred_in_v1_6_3_core"
+  }
+}

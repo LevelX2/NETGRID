@@ -411,13 +411,22 @@ export const ONR_V1_6_2_RELEASE_CARD_IDS = [
   "onr_v1_341_skalderviken-sa-beta-test-site"
 ] as const;
 
+export const ONR_V1_6_3_RELEASE_CARD_IDS = [
+  "onr_v1_233_d-arc-knight",
+  "onr_v1_267_sentinels-prime",
+  "onr_v1_273_triggerman",
+  "onr_v1_350_antiquated-interface-routines",
+  "onr_v1_371_tokyo-chiba-infighting"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
   ...ONR_V1_1_2K_RELEASE_CARD_IDS,
   ...ONR_V1_2_3_RELEASE_CARD_IDS,
   ...ONR_V1_6_1_RELEASE_CARD_IDS,
-  ...ONR_V1_6_2_RELEASE_CARD_IDS
+  ...ONR_V1_6_2_RELEASE_CARD_IDS,
+  ...ONR_V1_6_3_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -468,6 +477,7 @@ const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD
 const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_IDS);
 const ONR_V1_6_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_1_RELEASE_CARD_IDS);
 const ONR_V1_6_2_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_2_RELEASE_CARD_IDS);
+const ONR_V1_6_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_3_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -521,6 +531,15 @@ const ONR_V1_6_2_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v162-card-release-smoke.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B", "apps/server/src/multiplayer.test.ts::V1.6.2 card release matchstart"],
   replayTests: ["packages/engine/src/index.test.ts::V1.6.2 Mechanikpaket B"]
+};
+
+const ONR_V1_6_3_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.6.3",
+  status: "human_playable_v1_6_3_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.6.3 Mechanikpaket C"],
+  scenarioTests: ["data/scenarios/v163-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.6.3 Mechanikpaket C", "apps/server/src/multiplayer.test.ts::V1.6.3 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.6.3 Mechanikpaket C"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -613,6 +632,14 @@ const ONR_V1_6_2_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_341_skalderviken-sa-beta-test-site": { rezCost: 0, trashCost: 2 }
 };
 
+const ONR_V1_6_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_233_d-arc-knight": { rezCost: 6, strength: 2 },
+  "onr_v1_267_sentinels-prime": { rezCost: 8, strength: 4 },
+  "onr_v1_273_triggerman": { rezCost: 7, strength: 3 },
+  "onr_v1_350_antiquated-interface-routines": { rezCost: 2, trashCost: 1 },
+  "onr_v1_371_tokyo-chiba-infighting": { rezCost: 0, trashCost: 6 }
+};
+
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
   "onr_v1_052_raffles": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
@@ -703,6 +730,15 @@ const ONR_V1_6_2_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_317_data-masons": "Walls cost 2 less to rez and get +1 strength while Data Masons is rezzed.",
   "onr_v1_320_encoder-inc": "Code gates cost 2 less to rez while Encoder, Inc. is rezzed.",
   "onr_v1_341_skalderviken-sa-beta-test-site": "Black ice costs 2 less to rez while this asset is rezzed."
+};
+
+const ONR_V1_6_3_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_233_d-arc-knight": "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+  "onr_v1_267_sentinels-prime": "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+  "onr_v1_273_triggerman": "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+  "onr_v1_350_antiquated-interface-routines": "All ice on this fort has +1 strength.",
+  "onr_v1_371_tokyo-chiba-infighting":
+    "Gain 1 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -1493,12 +1529,15 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV163 = ONR_V1_6_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV162 = ONR_V1_6_2_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV161 = ONR_V1_6_1_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV162
+  const textOverrides = isV163
+    ? ONR_V1_6_3_TEXT_OVERRIDES
+    : isV162
     ? ONR_V1_6_2_TEXT_OVERRIDES
     : isV161
     ? ONR_V1_6_1_TEXT_OVERRIDES
@@ -1509,7 +1548,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV162
+  const numericOverrides = isV163
+    ? ONR_V1_6_3_NUMERIC_OVERRIDES
+    : isV162
     ? ONR_V1_6_2_NUMERIC_OVERRIDES
     : isV161
     ? ONR_V1_6_1_NUMERIC_OVERRIDES
@@ -1520,7 +1561,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV162
+  const manifest = isV163
+    ? ONR_V1_6_3_RELEASE_MANIFEST
+    : isV162
     ? ONR_V1_6_2_RELEASE_MANIFEST
     : isV161
     ? ONR_V1_6_1_RELEASE_MANIFEST

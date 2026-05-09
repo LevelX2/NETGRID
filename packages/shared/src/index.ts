@@ -86,7 +86,14 @@ export type CounterType = "advancement" | "virus" | "power" | "agenda" | "recurr
 
 export type TraceSuccessEffect = { type: "add_tag"; amount: number };
 
-export type SubroutineType = "end_the_run" | "corp_gain_credit" | "runner_lose_credits" | "give_runner_tag" | "do_damage" | "initiate_trace";
+export type SubroutineType =
+  | "end_the_run"
+  | "corp_gain_credit"
+  | "runner_lose_credits"
+  | "give_runner_tag"
+  | "do_damage"
+  | "initiate_trace"
+  | "trash_installed_program";
 
 export type SubroutineDefinition = {
   id: string;
@@ -1042,6 +1049,10 @@ function onrCoreDamage(id: string, amount: number): SubroutineDefinition {
   return { id, type: "do_damage", damageType: "core", amount };
 }
 
+function onrTrashInstalledProgram(id: string): SubroutineDefinition {
+  return { id, type: "trash_installed_program" };
+}
+
 function onrMemoryChip(params: { id: string; title: string; installCost: number; memoryLimitBonus: number }): CardDefinition {
   return {
     id: params.id,
@@ -1455,6 +1466,31 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "rez_card", "trash_on_access", "global_ice_rez_cost_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_350_antiquated-interface-routines",
+    title: "Antiquated Interface Routines",
+    side: "corp",
+    type: "upgrade",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 2,
+    trashCost: 1,
+    rulesText: "All ice on this fort has +1 strength.",
+    mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "server_ice_strength_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_371_tokyo-chiba-infighting",
+    title: "Tokyo-Chiba Infighting",
+    side: "corp",
+    type: "upgrade",
+    subtypes: ["region"],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 6,
+    rulesText:
+      "Gain 1 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort.",
+    mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "region_install_rules", "run_unsuccessful_credit_bonus", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_281_accounts-receivable",
     title: "Accounts Receivable",
     side: "corp",
@@ -1636,6 +1672,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_232_crystal_wall_etr")],
     mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_233_d-arc-knight",
+    title: "D'Arc Knight",
+    subtypes: ["sentry", "killer"],
+    rezCost: 6,
+    strength: 2,
+    rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+    subroutines: [onrTrashInstalledProgram("onr_v1_233_d_arc_knight_trash_program"), onrEtr("onr_v1_233_d_arc_knight_etr")],
+    mechanics: ["uninstall_runner_program", "end_the_run"]
   }),
   onrIce({
     id: "onr_v1_237_data-wall",
@@ -1837,6 +1883,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["end_the_run"]
   }),
   onrIce({
+    id: "onr_v1_267_sentinels-prime",
+    title: "Sentinels Prime",
+    subtypes: ["sentry", "killer"],
+    rezCost: 8,
+    strength: 4,
+    rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+    subroutines: [onrTrashInstalledProgram("onr_v1_267_sentinels_prime_trash_program"), onrEtr("onr_v1_267_sentinels_prime_etr")],
+    mechanics: ["uninstall_runner_program", "end_the_run"]
+  }),
+  onrIce({
     id: "onr_v1_269_shotgun-wire",
     title: "Shotgun Wire",
     subtypes: ["wall"],
@@ -1855,6 +1911,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_270_sleeper_etr")],
     mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_273_triggerman",
+    title: "Triggerman",
+    subtypes: ["sentry", "killer"],
+    rezCost: 7,
+    strength: 3,
+    rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+    subroutines: [onrTrashInstalledProgram("onr_v1_273_triggerman_trash_program"), onrEtr("onr_v1_273_triggerman_etr")],
+    mechanics: ["uninstall_runner_program", "end_the_run"]
   }),
   onrIce({
     id: "onr_v1_278_wall-of-ice",

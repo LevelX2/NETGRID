@@ -44,6 +44,7 @@ import {
   ONR_V1_2_3_RELEASE_CARD_IDS,
   ONR_V1_6_1_RELEASE_CARD_IDS,
   ONR_V1_6_2_RELEASE_CARD_IDS,
+  ONR_V1_6_3_RELEASE_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateAiCardHintsV2,
@@ -140,7 +141,7 @@ describe("catalog import and status logic", () => {
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 
-  it("applies the V1.0.5K, V1.0.6K, V1.1.2K, V1.2.3, V1.6.1 and V1.6.2 release gates to private local O:NR runtime cards when present", () => {
+  it("applies the V1.0.5K, V1.0.6K, V1.1.2K, V1.2.3, V1.6.1, V1.6.2 and V1.6.3 release gates to private local O:NR runtime cards when present", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
 
@@ -150,7 +151,8 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_2_3_RELEASE_CARD_IDS).toHaveLength(11);
     expect(ONR_V1_6_1_RELEASE_CARD_IDS).toHaveLength(6);
     expect(ONR_V1_6_2_RELEASE_CARD_IDS).toHaveLength(5);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(74);
+    expect(ONR_V1_6_3_RELEASE_CARD_IDS).toHaveLength(5);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(79);
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
@@ -167,7 +169,9 @@ describe("catalog import and status logic", () => {
       expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
       expect(card?.statuses.format_legal).toBe(true);
-      const expectedManifest = (ONR_V1_6_2_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+      const expectedManifest = (ONR_V1_6_3_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.6.3"
+        : (ONR_V1_6_2_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.6.2"
         : (ONR_V1_6_1_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.6.1"
@@ -226,6 +230,11 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_317_data-masons"]?.numeric.rezCost).toBe(1);
     expect(cardsById["onr_v1_320_encoder-inc"]?.numeric.trashCost).toBe(1);
     expect(cardsById["onr_v1_341_skalderviken-sa-beta-test-site"]?.text).toContain("Black ice costs 2 less to rez");
+    expect(cardsById["onr_v1_233_d-arc-knight"]?.text).toContain("Trash a program");
+    expect(cardsById["onr_v1_267_sentinels-prime"]?.numeric.rezCost).toBe(8);
+    expect(cardsById["onr_v1_273_triggerman"]?.numeric.strength).toBe(3);
+    expect(cardsById["onr_v1_350_antiquated-interface-routines"]?.text).toContain("+1 strength");
+    expect(cardsById["onr_v1_371_tokyo-chiba-infighting"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.6.3");
     expect(cardsById["onr_v1_021_dwarf"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_039_krash"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_066_snowball"]?.statuses.ai_supported).toBe(true);

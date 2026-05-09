@@ -1143,10 +1143,33 @@ function corpMainActions(state: GameState): LegalAction[] {
       }
     }
     if (definition.type === "agenda" || definition.type === "asset" || definition.type === "upgrade") {
-      actions.push(action(state, "corp", "install_card", `Karte in neuem Remote installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: "new_remote", placement: "root" }));
+      const regionInstallCost = isRegionUpgrade(definition) ? rezCostForCard(state, id) : 0;
+      if (state.corp.credits >= regionInstallCost) {
+        actions.push(
+          action(
+            state,
+            "corp",
+            "install_card",
+            `Karte in neuem Remote installieren`,
+            id,
+            [{ clicks: 1, ...(regionInstallCost > 0 ? { credits: regionInstallCost } : {}) }],
+            { cardId: id, serverId: "new_remote", placement: "root" }
+          )
+        );
+      }
       for (const server of state.corp.servers.filter((candidate) => candidate.kind === "remote")) {
-        if (canInstallCorpRootCardInServer(state, definition, server)) {
-          actions.push(action(state, "corp", "install_card", `Karte in ${server.label} installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: server.id, placement: "root" }));
+        if (canInstallCorpRootCardInServer(state, definition, server) && state.corp.credits >= regionInstallCost) {
+          actions.push(
+            action(
+              state,
+              "corp",
+              "install_card",
+              `Karte in ${server.label} installieren`,
+              id,
+              [{ clicks: 1, ...(regionInstallCost > 0 ? { credits: regionInstallCost } : {}) }],
+              { cardId: id, serverId: server.id, placement: "root" }
+            )
+          );
         }
       }
     }
@@ -1239,6 +1262,16 @@ function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
   return definition.subtypes.some((candidate) => normalizeSubtypeLabel(candidate) === target);
 }
 
+function isRegionUpgrade(definition: CardDefinition): boolean {
+  return definition.type === "upgrade" && cardHasSubtype(definition, "region");
+}
+
+function corpServerIdForInstalledCard(state: GameState, cardId: CardInstanceId): Exclude<ServerId, "new_remote"> | undefined {
+  const zone = mustInstance(state.cardInstances, cardId).zone;
+  if (zone.side === "corp" && (zone.zone === "serverIce" || zone.zone === "serverRoot")) return zone.serverId;
+  return undefined;
+}
+
 function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
   const ids: CardInstanceId[] = [];
   for (const server of state.corp.servers) {
@@ -1255,10 +1288,12 @@ function scoredCorpAgendaIds(state: GameState): CardInstanceId[] {
 
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   const iceDefinition = definitionFor(state, iceId);
+  const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let bonus = 0;
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
     if (sourceDefinition.id === "onr_v1_317_data-masons" && cardHasSubtype(iceDefinition, "wall")) bonus += 1;
+    if (sourceDefinition.id === "onr_v1_350_antiquated-interface-routines" && iceServerId && corpServerIdForInstalledCard(state, sourceId) === iceServerId) bonus += 1;
   }
   for (const agendaId of scoredCorpAgendaIds(state)) {
     const agendaDefinition = definitionFor(state, agendaId);
@@ -1701,7 +1736,19 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     throw new Error("In einem Außenserver darf nur eine Agenda oder ein Asset im Root installiert sein.");
   }
   server.root.push(cardId);
-  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "serverRoot", serverId: server.id } };
+  const regionInstall = isRegionUpgrade(definition);
+  if (regionInstall) {
+    spendCredits(state, "corp", legalAction.costs[0]?.credits ?? rezCostForCard(state, cardId));
+  }
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: regionInstall,
+    rezzed: regionInstall,
+    zone: { side: "corp", zone: "serverRoot", serverId: server.id }
+  };
+  if (regionInstall) {
+    trashOlderRegionUpgradesInServer(state, server, cardId);
+  }
 }
 
 function canInstallCorpRootCardInServer(state: GameState, definition: CardDefinition, server: CorpServer): boolean {
@@ -1833,6 +1880,10 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         setDamagePayload(legalAction, aggregateDamageSummaries(damageSummaries));
       }
       if (state.winner) return;
+    }
+    if (subroutine.type === "trash_installed_program") {
+      const targetProgramId = pickRunnerProgramForUninstall(state);
+      if (targetProgramId) trashRunnerInstalledProgram(state, targetProgramId);
     }
     if (subroutine.type === "end_the_run") ended = true;
   }
@@ -2216,9 +2267,71 @@ function trashResource(state: GameState, cardId: string): void {
   }
 }
 
+function pickRunnerProgramForUninstall(state: GameState): CardInstanceId | undefined {
+  return state.runner.rig.programs
+    .slice()
+    .sort((left, right) => {
+      const leftDefinition = definitionFor(state, left);
+      const rightDefinition = definitionFor(state, right);
+      const byInstallCost = (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
+      if (byInstallCost !== 0) return byInstallCost;
+      const byMemoryCost = (rightDefinition.memoryCost ?? 0) - (leftDefinition.memoryCost ?? 0);
+      if (byMemoryCost !== 0) return byMemoryCost;
+      return left.localeCompare(right);
+    })[0];
+}
+
+function trashRunnerInstalledProgram(state: GameState, cardId: CardInstanceId): void {
+  if (!state.runner.rig.programs.includes(cardId)) return;
+  const hostedIds = hostedCardsOn(state, cardId);
+  for (const hostedId of hostedIds) trashRunnerInstalledProgram(state, hostedId);
+  const definition = definitionFor(state, cardId);
+  const instance = mustInstance(state.cardInstances, cardId);
+  const { hostedOn: _hostedOn, ...withoutHost } = instance;
+  void _hostedOn;
+  removeFromAllZones(state, cardId);
+  state.runner.heap.push(cardId);
+  state.runner.memoryUsed = Math.max(0, state.runner.memoryUsed - (definition.memoryCost ?? 0));
+  state.cardInstances[cardId] = { ...withoutHost, faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+}
+
+function trashCorpInstalledCardToArchives(state: GameState, cardId: CardInstanceId): void {
+  const instance = mustInstance(state.cardInstances, cardId);
+  const { hostedOn: _hostedOn, ...withoutHost } = instance;
+  void _hostedOn;
+  removeFromAllZones(state, cardId);
+  state.corp.archives.push(cardId);
+  state.cardInstances[cardId] = { ...withoutHost, faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
+}
+
+function trashOlderRegionUpgradesInServer(state: GameState, server: CorpServer, keepCardId: CardInstanceId): void {
+  const olderRegions = server.root
+    .filter((cardId) => cardId !== keepCardId)
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return definition.type === "upgrade" && cardHasSubtype(definition, "region");
+    })
+    .sort();
+  for (const cardId of olderRegions) trashCorpInstalledCardToArchives(state, cardId);
+}
+
+function tokyoChibaUnsuccessfulRunBonus(state: GameState, run: GameState["run"], successful: boolean): number {
+  if (!run || successful) return 0;
+  const attackedServer = state.corp.servers.find((server) => server.id === run.attackedServerId);
+  if (!attackedServer) return 0;
+  return attackedServer.root.reduce((sum, cardId) => {
+    const instance = mustInstance(state.cardInstances, cardId);
+    if (!instance.rezzed) return sum;
+    return definitionFor(state, cardId).id === "onr_v1_371_tokyo-chiba-infighting" ? sum + 1 : sum;
+  }, 0);
+}
+
 function finishRun(state: GameState, successful: boolean): void {
-  const bonus = successful ? state.run?.pendingSuccessBonusCredits ?? 0 : 0;
+  const run = state.run;
+  const bonus = successful ? run?.pendingSuccessBonusCredits ?? 0 : 0;
+  const corpBonus = tokyoChibaUnsuccessfulRunBonus(state, run, successful);
   state.runner.credits += bonus;
+  state.corp.credits += corpBonus;
   resetBreakerStrength(state);
   delete state.run;
   state.phase = "runner_action_phase";

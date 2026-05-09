@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.6.3",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.6.3",
+  "generatedFor": "V1.6.3 Mechanikpaket C final gate",
+  "generatedAt": "2026-05-09",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.6.2.json",
+  "gateAssertions": {
+    "v162GatePassed": true,
+    "v163CoreSubsetImplemented": true,
+    "v163UninstallDestroyAdded": true,
+    "v163GenericUpgradeServerModifiersAdded": true,
+    "v163RegionLifecycleAdded": true,
+    "v163ChoiceFlowDeferredDocumented": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.uninstall.installed_card_destroy",
+      "label": "Uninstall und InstalledCard Destroy",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.3",
+      "currentScopeNote": "V1.6.3 ergänzt deterministische Trash-Program-Subroutinen für D'Arc Knight, Sentinels Prime und Triggerman.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.generic_server_modifier",
+      "label": "Generische Upgrade-Fähigkeiten (servergebundene Modifier)",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.3",
+      "currentScopeNote": "V1.6.3 ergänzt Antiquated Interface Routines als servergebundenen ICE-Stärkemodifier im eigenen Fort.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.region_install_lifecycle",
+      "label": "Region-Installlifecycle",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.3",
+      "currentScopeNote": "V1.6.3 ergänzt Region-Installregeln (rez on install, eine Region je Fort, ältere Region nach Archives) für Tokyo-Chiba Infighting.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.run.unsuccessful_server_credit_bonus",
+      "label": "Erfolgloser-Run-Bonus je Fort",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.6.3",
+      "currentScopeNote": "V1.6.3 ergänzt für Tokyo-Chiba Infighting den deterministischen Corp-Creditbonus nach erfolglosem Run auf demselben Fort.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.choiceflow.opponent_guessing",
+      "label": "ChoiceFlow Gegnerentscheidung und Guessing",
+      "currentStatus": "deferred",
+      "targetGate": "v1.6.3",
+      "currentScopeNote": "Im freigabefähigen V1.6.3-Kernkorb ist kein belastbarer ChoiceFlow-Fall gemappt; dieser Block bleibt ausdrücklich deferred.",
+      "coverage": ["review"]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v163-card-release-smoke",
+  "title": "V1.6.3 Mechanikpaket C Kernrelease",
+  "release": "V1.6.3",
+  "status": "implemented_core_subset",
+  "extends": "data/scenarios/v162-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_233_d-arc-knight",
+    "onr_v1_267_sentinels-prime",
+    "onr_v1_273_triggerman",
+    "onr_v1_350_antiquated-interface-routines",
+    "onr_v1_371_tokyo-chiba-infighting"
+  ],
+  "preconditions": [
+    "V1.6.2 Mechanikpaket B ist grün abgeschlossen.",
+    "V1.6.3 Preflight dokumentiert deferred Karten mit späteren Blockereffekten."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.6.3-Smoke-Match mit den V1.6.3 Runner- und Corp-Decks.",
+    "Rezze D'Arc Knight/Sentinels Prime/Triggerman und prüfe deterministisches Trashen installierter Runner-Programme.",
+    "Rezze Antiquated Interface Routines und prüfe +1 ICE-Stärke nur im eigenen Fort.",
+    "Installiere Tokyo-Chiba Infighting als Region und prüfe Region-Lifecycle (rez on install, ältere Region wird getrasht).",
+    "Erzeuge einen erfolglosen Run auf dem Tokyo-Chiba-Fort und prüfe den deterministischen Corp-Creditbonus."
+  ],
+  "expected": [
+    "Uninstall-/Upgrade-/Regionpfade wirken deterministisch in LegalActions und bei Action-Ausführung.",
+    "Erfolgloser-Run-Bonus bleibt replay-/statehash-stabil.",
+    "PublicEvents und PlayerViews bleiben side-sicher ohne Hidden-Info-Leaks.",
+    "Keine neue AI-supported-Freigabe durch den Release."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.6.3 Mechanikpaket C",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic"
+  }
+}

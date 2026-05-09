@@ -1627,6 +1627,139 @@ describe("V1.6.2 Mechanikpaket B", () => {
   });
 });
 
+describe("V1.6.3 Mechanikpaket C", () => {
+  it("adds a controlled V1.6.3 core card set without opening deferred mechanics", () => {
+    expect(ONR_V1_6_3_FINAL_CARD_IDS).toHaveLength(5);
+    for (const definitionId of ONR_V1_6_3_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" ")).not.toMatch(/hosting|daemon|stealth|unique_card|recurring_credit/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_233_d-arc-knight"]).toMatchObject({ rezCost: 6, strength: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_267_sentinels-prime"]).toMatchObject({ rezCost: 8, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_273_triggerman"]).toMatchObject({ rezCost: 7, strength: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_350_antiquated-interface-routines"]).toMatchObject({ rezCost: 2, trashCost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_371_tokyo-chiba-infighting"]).toMatchObject({ rezCost: 0, trashCost: 6 });
+  });
+
+  it("validates V1.6.3 smoke decks and keeps previous card releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_6_3_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_6_3_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v163CardReleaseGame("v163-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"]).toBeDefined();
+  });
+
+  it("resolves trash-program ICE subroutines deterministically and replay-safe", () => {
+    const cases = [
+      "onr_v1_233_d-arc-knight",
+      "onr_v1_267_sentinels-prime",
+      "onr_v1_273_triggerman"
+    ] as const;
+
+    for (const iceDefinitionId of cases) {
+      let state = toRunnerTurn(v163CardReleaseGame(`v163-trash-${iceDefinitionId}`));
+      installRunnerProgramForTest(state, "onr_v1_014_codecracker");
+      const installedProgramId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_014_codecracker");
+      expect(installedProgramId).toBeDefined();
+      putCorpIceOnServer(state, "rd", iceDefinitionId);
+      putCorpCardOnTopOfRd(state, "simple_economy_operation");
+      state.corp.credits = 40;
+      state.runner.credits = 10;
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === iceDefinitionId);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+
+      expect(state.run).toBeUndefined();
+      if (installedProgramId) {
+        expect(state.runner.rig.programs).not.toContain(installedProgramId);
+        expect(state.runner.heap).toContain(installedProgramId);
+      }
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("applies Antiquated Interface strength and Tokyo-Chiba unsuccessful-run credit on its fort", () => {
+    let strengthState = v163CardReleaseGame("v163-antiquated-strength");
+    strengthState = apply(strengthState, "corp", (action) => action.type === "mandatory_draw");
+    strengthState.corp.credits = 40;
+    strengthState.corp.maxHandSize = 100;
+    putCorpRootInRemote(strengthState, "onr_v1_350_antiquated-interface-routines");
+    putCorpIceOnServer(strengthState, "remote_1", "onr_v1_232_crystal-wall");
+    putCorpIceOnServer(strengthState, "rd", "onr_v1_233_d-arc-knight");
+    strengthState = apply(strengthState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(strengthState, action) === "onr_v1_350_antiquated-interface-routines");
+    strengthState = apply(strengthState, "corp", (action) => action.type === "end_turn");
+    strengthState = apply(strengthState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    strengthState = apply(strengthState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(strengthState, action) === "onr_v1_232_crystal-wall");
+    expect(getPlayerView(strengthState, "runner").run?.encounteredIce?.strength).toBe(4);
+    strengthState = apply(strengthState, "runner", (action) => action.type === "continue_run");
+    strengthState = apply(strengthState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    strengthState = apply(strengthState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(strengthState, action) === "onr_v1_233_d-arc-knight");
+    expect(getPlayerView(strengthState, "runner").run?.encounteredIce?.strength).toBe(2);
+
+    let tokyoState = v163CardReleaseGame("v163-tokyo-bonus");
+    tokyoState = apply(tokyoState, "corp", (action) => action.type === "mandatory_draw");
+    tokyoState.corp.credits = 40;
+    tokyoState.corp.maxHandSize = 100;
+    tokyoState.corp.clicks = 10;
+    moveCorpCardToHq(tokyoState, "onr_v1_371_tokyo-chiba-infighting");
+    tokyoState = apply(tokyoState, "corp", (action) => action.type === "install_card" && sourceDefinition(tokyoState, action) === "onr_v1_371_tokyo-chiba-infighting");
+    const firstRegionId = tokyoState.corp.servers.find((server) => server.id === "remote_1")?.root.find((id) => tokyoState.cardInstances[id]?.definitionId === "onr_v1_371_tokyo-chiba-infighting");
+    expect(firstRegionId).toBeDefined();
+    if (firstRegionId) {
+      expect(tokyoState.cardInstances[firstRegionId]?.rezzed).toBe(true);
+      expect(tokyoState.cardInstances[firstRegionId]?.faceup).toBe(true);
+    }
+    const secondRegionId =
+      Object.entries(tokyoState.cardInstances).find(
+        ([id, card]) => card.definitionId === "onr_v1_371_tokyo-chiba-infighting" && id !== firstRegionId
+      )?.[0] ?? "";
+    expect(secondRegionId).not.toBe("");
+    if (secondRegionId) {
+      removeEverywhere(tokyoState, secondRegionId);
+      tokyoState.corp.hq.unshift(secondRegionId);
+      tokyoState.cardInstances[secondRegionId] = {
+        ...tokyoState.cardInstances[secondRegionId]!,
+        zone: { side: "corp", zone: "hq" },
+        faceup: false,
+        rezzed: false
+      };
+    }
+    tokyoState = apply(
+      tokyoState,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(tokyoState, action) === "onr_v1_371_tokyo-chiba-infighting" &&
+        action.payload?.serverId === "remote_1"
+    );
+    if (firstRegionId) {
+      expect(tokyoState.corp.archives).toContain(firstRegionId);
+    }
+    const regionCountInRemote = tokyoState.corp.servers
+      .find((server) => server.id === "remote_1")
+      ?.root.filter((id) => tokyoState.cardInstances[id]?.definitionId === "onr_v1_371_tokyo-chiba-infighting").length;
+    expect(regionCountInRemote).toBe(1);
+    putCorpIceOnServer(tokyoState, "remote_1", "onr_v1_233_d-arc-knight");
+    tokyoState = apply(tokyoState, "corp", (action) => action.type === "end_turn");
+    tokyoState = apply(tokyoState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    tokyoState = apply(tokyoState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(tokyoState, action) === "onr_v1_233_d-arc-knight");
+    const creditsBeforeContinue = tokyoState.corp.credits;
+    tokyoState = apply(tokyoState, "runner", (action) => action.type === "continue_run");
+    expect(tokyoState.run).toBeUndefined();
+    expect(tokyoState.corp.credits).toBe(creditsBeforeContinue + 1);
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -3225,6 +3358,14 @@ const ONR_V1_6_2_FINAL_CARD_IDS = [
   "onr_v1_341_skalderviken-sa-beta-test-site"
 ] as const;
 
+const ONR_V1_6_3_FINAL_CARD_IDS = [
+  "onr_v1_233_d-arc-knight",
+  "onr_v1_267_sentinels-prime",
+  "onr_v1_273_triggerman",
+  "onr_v1_350_antiquated-interface-routines",
+  "onr_v1_371_tokyo-chiba-infighting"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -3447,6 +3588,37 @@ const ONR_V1_6_2_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_6_3_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v163_smoke_094",
+  name: "O:NR V1.6.3 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_023_evil-twin", quantity: 2 },
+    { id: "onr_v1_028_force-shield", quantity: 2 },
+    { id: "simple_economy_event", quantity: 8 }
+  ]
+};
+
+const ONR_V1_6_3_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v163_smoke_094",
+  name: "O:NR V1.6.3 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_233_d-arc-knight", quantity: 1 },
+    { id: "onr_v1_267_sentinels-prime", quantity: 1 },
+    { id: "onr_v1_273_triggerman", quantity: 1 },
+    { id: "onr_v1_350_antiquated-interface-routines", quantity: 2 },
+    { id: "onr_v1_371_tokyo-chiba-infighting", quantity: 2 },
+    { id: "onr_v1_232_crystal-wall", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -3649,6 +3821,16 @@ function v162CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_6_2_RUNNER_DECK,
     corpDeck: ONR_V1_6_2_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v163CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_6_3_RUNNER_DECK,
+    corpDeck: ONR_V1_6_3_CORP_DECK,
     agendaPointsToWin: 7
   });
 }
