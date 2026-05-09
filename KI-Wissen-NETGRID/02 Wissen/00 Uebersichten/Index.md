@@ -63,6 +63,7 @@
 - `docs/derived/V1_6_0_TUTORIAL_RULE_HELP_DETAILED_PLAN.md`, `docs/derived/V1_6_0_REQUIREMENTS.md`, `docs/derived/TUTORIAL_RULE_HELP_1_6_0_SPEC.md`, `docs/derived/V1_6_0_TEST_MATRIX.md` und `docs/derived/V1_6_0_REQUIREMENTS_REVIEW.md`: eingefrorene V1.6.0-Planung als erster konkreter V1.6.x-Slice für Tutorialmodus, LegalAction-basierte Regelhilfe, replaybare Kernlektionen und side-sichere Lernhinweise.
 - `docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_0_FINAL_REVIEW.md`, `docs/derived/V1_6_0_RULE_HELP_GLOSSARY.md`, `docs/derived/artifacts/v1_6_0_tutorial_smoke.json` und `docs/derived/artifacts/v1_6_0_tutorial_smoke.png`: Umsetzung und Gate-Ergebnis für V1.6.0 Tutorial/Regelhilfe mit getrenntem Tutorialmodus, LegalAction-Hinweisen, replaybarer StateHash-Prüfung und side-sicherem KI-Sparring.
 - `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`: gemeinsames Umsetzungshandoff für V1.4.2 Belief State, V1.4.3 Simulation/Selfplay, V1.5.0 Private Replay und V1.6.0 Tutorial.
+- `docs/derived/V1_6_1_TO_V1_7_0_DETAILED_PLAN.md`: konsolidierte Detailplanung für die nächsten vier Mechanik-Releases V1.6.1, V1.6.2, V1.6.3 und V1.7.0 mit Release-Reihenfolge, Abhängigkeitsmatrix, Gate-Kriterien, Risiken und Ready-for-Implementation-Checklisten.
 - `data/rules/mechanics-coverage-1.2.2.json`: maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.2.
 
 ## Prozesse
