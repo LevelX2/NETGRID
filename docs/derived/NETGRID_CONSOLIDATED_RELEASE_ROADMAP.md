@@ -1,7 +1,7 @@
 # NETGRID Consolidated Release Roadmap
 
 Status: verbindliche konsolidierte Release-Roadmap
-Stand: 2026-05-08
+Stand: 2026-05-09
 Startpunkt: nach V1.1.2K
 
 ## Verbindlichkeit
@@ -854,9 +854,263 @@ V1.6.x macht NETGRID lernbarer, ohne KI oder LLM zur Regelautorität zu machen.
 - Tutorial ist replaybar.
 - Keine Hilfe wird zur Regelautorität.
 
+## V1.6.1 bis V1.9.x Mechanik-Komplettierung O:NR-v1
+
+Ziel:
+
+Nach V1.6.0 folgt verpflichtend zuerst eine Mechanik- und Kartenfreigabe-Sequenz für das alte O:NR-v1-Set. V2.x-Scopes wie Accounts, Cloud-Decks, Datenschutz- und Social-Gates bleiben nachgelagert.
+
+Geplanter Erst-Release für noch nicht spielbare Karten (Stand 2026-05-09):
+
+- V1.6.1: 111 Karten
+- V1.6.2: 50 Karten
+- V1.6.3: 23 Karten
+- V1.7.0: 36 Karten
+- V1.7.1: 48 Karten
+- V1.7.2: 28 Karten
+- V1.8.0: 13 Karten
+- V1.8.1: 15 Karten
+- V1.9.0: 5 Karten
+
+### V1.6.1 Mechanikpaket A: Damage, Prevention und Resolver-Gate
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Fehlende Kernmechaniken mit höchstem Kartenhebel zuerst schließen.
+2. Release als schmales Mechanik-/Karten-Gate führen.
+3. Keine Account-, Cloud-, Chat- oder Plattformfeatures in diesen Scope ziehen.
+4. Per-Card-Textvalidierung vor Freigabe weiter verpflichtend halten.
+5. Kartenfreigaben nur über Manifest-, Test- und Review-Gate.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L1B_PerCard_Resolver_Test_Gate`.
+2. `L2_Damage_Familien_und_Flatline_Integration`.
+3. `L3_Core_Brain_Damage_Erweiterungen`.
+4. `L3_Prevention_Avoid_Replacement`.
+5. Zielhebel: Erstfreigabe für 111 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. AI-Hints nur für tatsächlich neu freigegebene Karten ergänzen.
+2. Keine pauschale `ai_supported`-Ausweitung.
+3. KI bleibt strikt auf PlayerView, LegalActions und side-sichere PublicEvents begrenzt.
+
+#### Gate
+
+- Alle Effektfamilien sind implementiert, pro Karte getestet und im Manifest verankert.
+- Keine Hidden-Info-Leaks in Damage-, Avoid- oder Replacement-Pfaden.
+
+### V1.6.2 Mechanikpaket B: Assets, Nodes und persistente Modifier
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Häufige Corp-Board-Effekte in generische Bausteine überführen.
+2. Sonderfälle in wiederverwendbare Effektbausteine normalisieren.
+3. Kartenfreigaben weiter releasegebunden und testgetrieben halten.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L2_Globale_Statische_Modifier_ICE_Cost_Strength`.
+2. `L3_Generische_Asset_Node_Faehigkeiten`.
+3. `L3_Persistente_Modifier_und_Sonderzustaende`.
+4. Zielhebel: Erstfreigabe für weitere 50 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. KI-Rollen/Hints für neue Asset-/Node-Muster ergänzen.
+2. Keine Nutzung verdeckter Kartentitel als Heuristikabkürzung.
+3. Neue KI-Soaks nur mit AI-supported Karten fahren.
+
+#### Gate
+
+- Persistente Zustände bleiben replay- und statehash-deterministisch.
+- Neue Asset-/Node-Resolver bestehen Visibility- und Reconnect-Tests.
+
+### V1.6.3 Mechanikpaket C: Upgrades, Uninstall und ChoiceFlow
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Upgrade-/Installations-Sonderfälle auf gemeinsamen Resolververtrag bringen.
+2. Gegnerentscheidungen und Guessing-Fälle deterministisch und side-sicher modellieren.
+3. Karten mit seltenen, aber blockierenden Lebenszyklusfällen freischalten.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L2_ChoiceFlow_Gegnerentscheidung_und_Guessing`.
+2. `L3_Generische_Upgrade_Faehigkeiten`.
+3. `L3_Uninstall_und_InstalledCard_Destroy`.
+4. Zielhebel: Erstfreigabe für weitere 23 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. KI-Choice-Handhabung nur über LegalActions-Choices.
+2. Keine versteckten Guessing-Informationen in DecisionDebug.
+3. Reaktive KI-Fälle mit neuen Upgrade- und Uninstall-Resolvern regressionssichern.
+
+#### Gate
+
+- ChoiceFlow- und Upgrade-Fälle sind deterministisch replaybar.
+- Install-/Uninstall-Lifecycles brechen keine Ownership-/Control-Invarianten.
+
+### V1.7.0 Mechanikpaket D: Subtypen, Hosting, Recurring und Unique
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Programmsubtypen und Hosting-Familien als nächstes großes Kartencluster freigeben.
+2. Recurring- und Start-of-Turn-Resolver vereinheitlichen.
+3. Deck-Unique-Regeln klar und testbar in die Runtime integrieren.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L2_Deck_Unique_Constraint`.
+2. `L2_Hosting_und_Hosted_Resource_Modelle`.
+3. `L2_Recurring_Pools_und_StartOfTurn_Resolver`.
+4. `L3_Programm_Subtypen_Daemon_Stealth_Worm_BaseLink`.
+5. Zielhebel: Erstfreigabe für weitere 36 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. KI-Rigbewertung um Hosting-/Recurring-Muster erweitern.
+2. Subtypen-abhängige Breaker-/Programmrollen nur für AI-supported Karten nutzen.
+3. Keine KI-Abkürzungen an Hidden Hosting-Information.
+
+#### Gate
+
+- Hosting-Kaskaden bleiben deterministisch und leakfrei.
+- Recurring-/Start-of-Turn-Fälle bestehen Simulations- und Replay-Regression.
+
+### V1.7.1 Mechanikpaket E: Search/Reveal, Access und Run-Erweiterungen
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Hidden-Zone-Such- und Reveal-Fälle als breiten Kartenhebel priorisieren.
+2. Access-/Breach- und Run-Lock-Sonderfälle gemeinsam stabilisieren.
+3. Karten mit vielen Text-Sonderfällen auf standardisierte Resolver heben.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L2_Access_Breach_und_Multiaccess_Erweiterungen`.
+2. `L2_HiddenZone_Search_Reveal_Reorder_Shuffle`.
+3. `L2_Run_Flow_Erweiterungen_und_RunLocks`.
+4. Zielhebel: Erstfreigabe für weitere 48 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. Search/Arrange/Shuffle nur aus erlaubter Projektion planen.
+2. Run-Lock-Bewertung ohne Hidden-Info-Annahmen.
+3. Access-Reihenfolge in KI-Entscheidungen replaybar begründen.
+
+#### Gate
+
+- Hidden-Zone- und Access-Fälle sind side-sicher und deterministisch.
+- Run-Locks erzeugen keine Deadlocks oder illegale Actionpfade.
+
+### V1.7.2 Mechanikpaket F: Trace/Tag/Resource und Handsize/Action-Economy
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Trace- und Tag-Interaktionen als große offene Regelfamilie abschließen.
+2. Resource-Tag-Sonderfälle und Handsize-/Action-Modifier konsolidieren.
+3. Restliche häufige Interaktionslogik vor Agenda-/Counter-Folgestufen schließen.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L2_Handsize_und_ActionEconomy_Modifier`.
+2. `L2_Resource_Tag_Interactions`.
+3. `L2_Tag_Bedingungen_Remove_Avoid`.
+4. `L2_Trace_Link_Bidding_und_BaseLink_Windowing`.
+5. Zielhebel: Erstfreigabe für weitere 28 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. KI-Trace-Bidding und Tag-Management pro Difficulty nachvollziehbar machen.
+2. Resource-Risiko nur aus sichtbaren Daten bewerten.
+3. Handsize-/Action-Economy-Modifier in Planbewertung integrieren.
+
+#### Gate
+
+- Trace/Tag-Fenster funktionieren side-sicher in Multiplayer, Replay und Undo.
+- Modifier verändern keine bestehenden Action-Kosten unkontrolliert.
+
+### V1.8.0 Mechanikpaket G: Agenda-Difficulty und Scored-Agenda-Statics
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Agenda-nahe Sonderlogik und Overadvance-Fälle schließen.
+2. Scored-Agenda-Statik in stabile, wiederverwendbare Resolver überführen.
+3. Scoring-/Steal-Familien für breiteren O:NR-v1-Einsatz härten.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L2_Agenda_Difficulty_und_Overadvance_Details`.
+2. `L3_Scored_Agenda_Active_Static_Overadvance`.
+3. Zielhebel: Erstfreigabe für weitere 13 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. KI-Scoringpläne um variable Agenda-Difficulty erweitern.
+2. DecisionDebug trennt sichtbar zwischen statischen Agendaeffekten und situativen Risiken.
+3. Keine KI-Sonderbehandlung für nicht freigegebene Agendaresolver.
+
+#### Gate
+
+- Agenda-Scoring/Steal bleibt statehash-stabil und side-sicher.
+- Overadvance-/Scored-Statics brechen keine bestehenden Siegbedingungen.
+
+### V1.8.1 Mechanikpaket H: Counter-System und Virus/Purge-Trigger
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Counter-Familien übergreifend konsolidieren.
+2. Virus-/Purge-Trigger in robuste Triggerketten bringen.
+3. Hohe Kartenabdeckung mit kleinem, klar testbarem Scope erzielen.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L2_Counter_System_und_Virus_Purge_Trigger`.
+2. Zielhebel: Erstfreigabe für weitere 15 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. KI-Purge-/Counter-Entscheidungen auf freigegebene Counterzustände begrenzen.
+2. Counter-bezogene Hints pro Karte nachziehen.
+3. Keine KI-Annahmen über verdeckte Counter-Zustände.
+
+#### Gate
+
+- Counter-/Purge-Ketten sind deterministisch und replaybar.
+- Triggerreihenfolge ist stabil und vollständig getestet.
+
+### V1.9.0 Mechanikpaket I: Ambush, deterministischer Zufall und Rest-Sonderresolver
+
+#### Allgemeine Produkt- und Feature-Ziele
+
+1. Verbleibende Einzelfälle und seltene Sonderresolver gezielt schließen.
+2. Karten mit kartenindividuellem Zufalls- oder Ambush-Verhalten freigeben.
+3. Mechaniklinie vor V2.x formal komplettieren.
+
+#### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
+
+1. `L2_Ambush_auf_Access_Resolver`.
+2. `L3_Deterministischer_Wuerfel_Zufall`.
+3. `L4_Konkreter_Sonderresolver_noch_offen`.
+4. Zielhebel: Erstfreigabe für weitere 5 aktuell nicht spielbare Karten.
+
+#### KI-Spieler
+
+1. KI behandelt Ambush nur über erlaubte Access-/Reveal-Signale.
+2. Zufallsresolver bleiben seed-deterministisch und debugbar.
+3. Keine Hidden-Info-Anreicherung über Ambush- oder Zufallspfade.
+
+#### Gate
+
+- Ambush- und Zufallsfälle sind deterministisch, side-sicher und regressionsgeprüft.
+- Offene Sonderresolver sind entweder implementiert oder als blockiert dokumentiert.
+
 ## V2.x Geschlossene Community und öffentliche Multiplayer-Basis
 
-V2.x darf erst beginnen, wenn private Internet-Gates stabil sind und Auth-, Datenschutz-, Moderations-, Betriebs- und Rechtsentscheidungen getroffen wurden.
+V2.x darf erst beginnen, wenn die Sequenz V1.6.1 bis V1.9.x grün abgeschlossen ist, private Internet-Gates stabil sind und Auth-, Datenschutz-, Moderations-, Betriebs- und Rechtsentscheidungen getroffen wurden.
 
 ### V2.0 Closed Accounts Alpha
 
@@ -1356,7 +1610,7 @@ Diese Stufe darf erst beginnen, wenn V2.x belastbar läuft und die Produktentsch
 
 #### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
 
-1. Vollständige Formatregeln abbilden.
+1. Vollständige Formatregeln auf Basis der bis V1.9.x freigegebenen Mechaniken abbilden.
 2. Agenda-Dichte und Mindestgrößen je Identity.
 3. Influence und Faction vollständig.
 4. Kopienlimits und Ausnahmen.
@@ -1401,7 +1655,7 @@ Diese Stufe darf erst beginnen, wenn V2.x belastbar läuft und die Produktentsch
 
 #### Mechaniken, Kartenfreigabe und Effekt-Vervollständigung
 
-1. Jede benötigte Mechanik implementiert oder blockiert.
+1. Alle bis V1.9.x geplanten Mechaniken sind umgesetzt oder als blockiert dokumentiert; V3.3 ist kein Erst-Implementierungsrelease für neue Kernmechaniken.
 2. Jede `playable` Karte hat Resolver/Ability.
 3. Jede `playable` Karte hat Unit-/Szenariotest.
 4. Jede Hidden-Info-Karte hat Leaktest.

@@ -50,7 +50,7 @@ V1.1.3/V1.2.0/V1.2.1/V1.2.2/V1.2.3/V1.3.0 Planungs-, Requirements-, Implementati
 
 Post-V1.1.2 Anschlussplanung vom 2026-05-07: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` legt fest, dass V1.1.2 unverändert bleibt und danach eine kombinierte Mechanik-/Karten-/KI-Linie startet. Schwerpunkt ist mehr spielbare Karten durch fehlende Mechaniken; die KI wird nicht als spätes isoliertes V1.7-Feature behandelt, sondern bekommt in jedem Mechanik- und Kartenrelease eine eigene Support-Spur. Empfohlener erster Schritt nach V1.1.2 ist V1.1.3 Mechanics-AI-Card Baseline ohne Codeimplementierung.
 
-Konsolidierte Releaseplanung vom 2026-05-08: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` ist ab V1.1.3 die führende Roadmap. Sie übernimmt die neuere Post-V1.1.2-Grundlinie, integriert die ältere V2/V3/V4-Produktvision als spätere Gate-Schicht und schreibt für jeden Release die drei Pflichtspuren Allgemeine Produkt-/Feature-Ziele, Mechaniken/Karten/Effekt-Vervollständigung und KI-Spieler fest.
+Konsolidierte Releaseplanung vom 2026-05-09: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` ist ab V1.1.3 die führende Roadmap. Sie übernimmt die neuere Post-V1.1.2-Grundlinie, integriert die ältere V2/V3/V4-Produktvision als spätere Gate-Schicht, schreibt für jeden Release die drei Pflichtspuren Allgemeine Produkt-/Feature-Ziele, Mechaniken/Karten/Effekt-Vervollständigung und KI-Spieler fest und enthält jetzt die verbindliche Mechanik-/Karten-Sequenz V1.6.1 bis V1.9.0 vor allen V2.x-Produktfeatures.
 
 V1.0.9 Private Internet Hardening ist umgesetzt und lokal verifiziert. Der Release ergänzt getrennte Deployment-Profile `local`/`private_internet`, HTTPS/WSS-Konfigurationsprüfungen für privaten Internetbetrieb, explizite REST-/WebSocket-Origin-Allowlist, deterministische Rate-Limits für sensible Flows, verpflichtenden Internet-Token-Salt, Token-/Hash-/Hidden-Info-Redaction, sichere Health-/Ops-Signale und internetnahe Smokes. Er führt keine öffentlichen Plattformfunktionen, Accounts, Matchmaking, Rankings, Turniere, neuen Karten, neuen Mechaniken, Postgres-, Replay-/StateHash- oder Engine-Autoritätsänderungen ein.
 
@@ -199,7 +199,7 @@ Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTI
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.6.0 Tutorial und Regelhilfe ist abgeschlossen und lokal verifiziert (`docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_0_FINAL_REVIEW.md`). Die Sequenz V1.4.2 bis V1.6.0 ist damit vollständig grün. Der nächste Schritt ist ein neuer, separat zu planender Folge-Slice; Deck-Legal AI Approval Batch B-G bleibt weiterhin ein eigenständiger Gate-Strang.
+Current selected next scope: V1.6.1 Mechanikpaket A (Damage/Prevention/Resolver-Gate) ist als nächster Umsetzungsscope ausgewählt. V1.6.0 Tutorial und Regelhilfe ist abgeschlossen und lokal verifiziert (`docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_0_FINAL_REVIEW.md`), die Folgeplanung ist jetzt als verbindliche Sequenz V1.6.1 bis V1.9.0 in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` hinterlegt. Deck-Legal AI Approval Batch B-G bleibt weiterhin ein eigenständiger Gate-Strang.
 
 ## Status
 
@@ -2201,12 +2201,14 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Einen neuen Folge-Slice nach V1.6.0 festlegen (z. B. V1.6.1 oder separater KI-/Karten-Gate-Strang).
-2. Tutorial-/Regelhilfe- und Replay-Flächen weiter side-sicher und LegalAction-basiert halten.
-3. Deck-Legal AI Approval Batch B-G weiterhin nur als separaten expliziten Gate-Strang behandeln.
-4. No-Scope-Grenzen weiter halten: keine Public-Plattformfunktionen, keine neuen Karten-/Mechanikfreigaben ohne eigenen Gate-Beschluss, kein LLM-Live-Regelakteur.
+1. Nächster Umsetzungsscope ist V1.6.1 (Mechanikpaket A: `L1B_PerCard_Resolver_Test_Gate`, `L2_Damage_Familien_und_Flatline_Integration`, `L3_Core_Brain_Damage_Erweiterungen`, `L3_Prevention_Avoid_Replacement`).
+2. Folge-Sequenz ist verbindlich geplant als V1.6.2, V1.6.3, V1.7.0, V1.7.1, V1.7.2, V1.8.0, V1.8.1 und V1.9.0; die jeweilige Effektzuordnung ist in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` dokumentiert.
+3. V2.x-Produktfeatures (Accounts, Cloud-Decks, Datenschutz-/Social-Gates) starten erst nach grün abgeschlossenem V1.9.0-Gate.
+4. Tutorial-/Regelhilfe- und Replay-Flächen bleiben side-sicher und LegalAction-basiert.
+5. Deck-Legal AI Approval Batch B-G bleibt ein separater expliziter Gate-Strang.
+6. No-Scope-Grenzen weiter halten: keine Public-Plattformfunktionen, keine Karten-/Mechanikfreigaben ohne Gate-Beschluss, kein LLM-Live-Regelakteur.
 
-Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe und Tutorial/Regelhilfe sind durch V1.6.0 umgesetzt. Event Modification, Replacement, Special Zones, Format/Deckbuilding und der aktuelle O:NR-v1-Kartenpool bleiben auf ihre abgeschlossenen schmalen Gates begrenzt; weitere Karten, breite Eventfamilien, Avoid-/Interrupt-Runtime-Pilots und KI-Deckfreigaben brauchen weiterhin eigene Gates. Aus der Vierer-Sequenz V1.4.2 bis V1.6.0 ist kein weiterer Implementierungsgate offen.
+Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe und Tutorial/Regelhilfe sind durch V1.6.0 umgesetzt. Die Anschlusslinie für weitere Mechanik-/Kartenfreigaben ist nun als explizite V1.6.1-bis-V1.9.0-Sequenz vor V2.x definiert; aus der Vierer-Sequenz V1.4.2 bis V1.6.0 ist kein weiterer Implementierungsgate offen.
 
 Detailed planning and completion artifacts available:
 
