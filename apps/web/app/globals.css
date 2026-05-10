@@ -2126,9 +2126,25 @@ select {
   height: 15px;
   flex: 0 0 auto;
   display: inline-block;
+  position: relative;
+  overflow: hidden;
   border: 1px solid color-mix(in srgb, var(--side-status-accent, var(--runner)), var(--line) 35%);
   border-radius: 3px;
   background: color-mix(in srgb, var(--side-status-accent, var(--runner)), transparent 88%);
+}
+
+.actionSlot::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 5px solid color-mix(in srgb, var(--side-status-accent, var(--runner)), var(--text) 28%);
+  transform: translate(-36%, -50%);
+  opacity: 0.92;
 }
 
 .actionSlot.spent {
@@ -2137,8 +2153,17 @@ select {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--bg), transparent 35%);
 }
 
+.actionSlot.spent::before {
+  border-left-color: color-mix(in srgb, var(--muted), var(--bg) 24%);
+  opacity: 0.72;
+}
+
 .actionSlot.bonus {
   border-color: color-mix(in srgb, var(--agenda), var(--runner) 30%);
+}
+
+.actionSlot.bonus::before {
+  border-left-color: color-mix(in srgb, var(--agenda), var(--text) 30%);
 }
 
 .creditResource {
@@ -2207,14 +2232,77 @@ select {
   width: 11px;
   height: 11px;
   flex: 0 0 auto;
+  position: relative;
+  display: inline-block;
   border: 1px solid color-mix(in srgb, var(--runner), white 12%);
   border-radius: 2px;
-  background: transparent;
+  background: color-mix(in srgb, var(--runner), transparent 90%);
+}
+
+.costActionIcon::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  border-left: 4px solid color-mix(in srgb, var(--runner), var(--text) 22%);
+  transform: translate(-34%, -50%);
 }
 
 .actions {
   display: grid;
   gap: 8px;
+}
+
+.legalActionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  margin: 0 0 8px;
+}
+
+.legalActionsHeader h2 {
+  margin: 0;
+}
+
+.actionAvailability {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 8px;
+}
+
+.actionAvailabilityCount {
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.actionSlotsInline {
+  min-width: 0;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.actionSlotsInline .actionSlots {
+  min-height: 22px;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.actionSlotsInline .actionSlot {
+  width: 22px;
+  height: 22px;
+}
+
+.actionSlotsInline .actionSlot::before {
+  border-top-width: 5px;
+  border-bottom-width: 5px;
+  border-left-width: 8px;
 }
 
 .aiPacingPanel {
@@ -2622,6 +2710,10 @@ select {
   overflow-wrap: anywhere;
   outline: 0;
   z-index: 1;
+  transition:
+    border-color 140ms ease,
+    background 140ms ease,
+    box-shadow 140ms ease;
 }
 
 .card:hover,
@@ -2635,10 +2727,69 @@ select {
 }
 
 .card.unrezzedInstalled {
-  opacity: 0.78;
+  position: relative;
+  isolation: isolate;
   border-style: dashed;
-  border-color: color-mix(in srgb, var(--cue), var(--line) 36%);
-  background: color-mix(in srgb, var(--card-bg), var(--cue-soft) 18%);
+  border-color: color-mix(in srgb, var(--cue), var(--line) 22%);
+  background: color-mix(in srgb, var(--card-bg), var(--cue-soft) 26%);
+}
+
+.card.unrezzedInstalled::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(136deg, rgb(8 13 18 / 0) 0, rgb(8 13 18 / 0) 9px, rgb(8 13 18 / 0.18) 9px, rgb(8 13 18 / 0.18) 18px),
+    linear-gradient(180deg, rgb(7 12 17 / 0.18) 0%, rgb(7 12 17 / 0.38) 100%);
+}
+
+.card.unrezzedInstalled::after {
+  content: "UNGEREZZT";
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  z-index: 4;
+  display: inline-flex;
+  align-items: center;
+  min-height: 13px;
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--cue), white 20%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 36% 26%, rgb(255 255 255 / 0.12), transparent 42%),
+    color-mix(in srgb, var(--cue), transparent 74%);
+  color: color-mix(in srgb, var(--text), var(--muted) 22%);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  box-shadow:
+    0 1px 4px rgb(0 0 0 / 0.26),
+    inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.card.unrezzedInstalled .cardTitle,
+.card.unrezzedInstalled .cardMeta,
+.card.unrezzedInstalled .cardRulesPreview {
+  color: color-mix(in srgb, var(--text), var(--muted) 42%);
+}
+
+.card.unrezzedInstalled.withImage .cardImage,
+.card.unrezzedInstalled.withImage .hardwareImageOverlay {
+  filter: saturate(0.86) brightness(0.84);
+}
+
+.lane .card.unrezzedInstalled::after {
+  font-size: 7px;
+  min-height: 12px;
+  padding: 1px 4px;
+  left: 5px;
+  bottom: 5px;
 }
 
 .card.selectedActionSource {
@@ -2650,7 +2801,7 @@ select {
   position: absolute;
   right: -7px;
   top: 50%;
-  z-index: 55;
+  z-index: 75;
   width: 18px;
   height: 18px;
   display: inline-grid;
@@ -2664,6 +2815,52 @@ select {
     inset 0 0 0 1px rgb(255 255 255 / 0.07);
   transform: translateY(-50%);
   pointer-events: auto;
+}
+
+.installedStateMark::before,
+.installedStateMark::after {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.installedStateMark::before {
+  content: "";
+  right: calc(100% + 2px);
+  top: 50%;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid color-mix(in srgb, var(--runner), var(--line));
+  transform: translateY(-50%) translateX(3px);
+}
+
+.installedStateMark::after {
+  content: attr(data-tooltip);
+  right: calc(100% + 8px);
+  top: 50%;
+  max-width: min(180px, calc(100vw - 32px));
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line));
+  border-radius: 6px;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.25;
+  box-shadow: var(--tooltip-shadow);
+  white-space: nowrap;
+  transform: translateY(-50%) translateX(3px);
+}
+
+.installedStateMark:hover::before,
+.installedStateMark:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
 }
 
 .installedStateMark.hidden,
@@ -2687,20 +2884,18 @@ select {
 
 .cardActionMarker {
   position: absolute;
+  top: -20px;
   right: 6px;
-  bottom: 6px;
-  z-index: 60;
+  z-index: 95;
   width: 20px;
   height: 18px;
   display: inline-grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--runner), white 10%);
+  border: 1px solid color-mix(in srgb, var(--runner), white 18%);
   border-radius: 5px;
-  background: color-mix(in srgb, var(--runner), var(--panel) 68%);
+  background: color-mix(in srgb, var(--runner), transparent 92%);
   color: var(--text);
-  box-shadow:
-    0 2px 6px rgb(0 0 0 / 0.32),
-    inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
   cursor: pointer;
   transition:
     border-color 120ms ease,
@@ -2712,11 +2907,11 @@ select {
 .cardActionMarker:focus-visible,
 .cardActionMarker.active {
   border-color: color-mix(in srgb, var(--runner), white 24%);
-  background: color-mix(in srgb, var(--runner), var(--panel) 50%);
+  background: color-mix(in srgb, var(--runner), var(--panel) 76%);
 }
 
 .cardActionMarker.active svg {
-  transform: rotate(90deg);
+  transform: scale(0.9);
 }
 
 .card.hasActions .cardMeta {
@@ -2742,7 +2937,7 @@ select {
 
 .cardActionsPopover.above {
   top: auto;
-  bottom: calc(100% + 7px);
+  bottom: calc(100% + 28px);
   transform-origin: bottom left;
   animation-name: cardActionPlateAbove;
 }
@@ -2932,9 +3127,10 @@ select {
 }
 
 .cardTooltip {
-  position: absolute;
-  left: 6px;
-  top: calc(100% + 8px);
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  z-index: 50;
   width: min(300px, calc(100vw - 32px));
   display: grid;
   gap: 5px;
@@ -2957,9 +3153,7 @@ select {
 }
 
 .cardTooltip.above {
-  top: auto;
-  bottom: calc(100% + 8px);
-  transform: translateY(3px);
+  transform: translateY(calc(-100% + 3px));
 }
 
 .cardTooltip strong {
@@ -2977,11 +3171,52 @@ select {
   white-space: pre-line;
 }
 
-.card:hover .cardTooltip,
-.card:focus .cardTooltip {
+.cardTooltipStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.cardTooltipStat {
+  min-height: 19px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 35%);
+  border-radius: 999px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--runner), var(--section-bg) 88%);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.cardTooltipStat .icon {
+  color: var(--runner);
+  font-weight: 700;
+}
+
+.cardTooltip.imageOnly {
+  width: min(220px, calc(100vw - 32px));
+  padding: 6px;
+}
+
+.cardTooltipImage {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.cardTooltip.visible {
   opacity: 1;
+  pointer-events: auto;
   transform: translateY(0);
   visibility: visible;
+}
+
+.cardTooltip.above.visible {
+  transform: translateY(-100%);
 }
 
 .runBar {
@@ -3299,9 +3534,9 @@ select {
 }
 
 .chronicleCardTooltip {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 8px);
+  position: fixed;
+  left: 16px;
+  top: 16px;
   width: min(300px, calc(100vw - 32px));
   display: grid;
   gap: 5px;
@@ -3312,6 +3547,7 @@ select {
   color: var(--text);
   font-weight: 400;
   box-shadow: var(--tooltip-shadow);
+  text-align: left;
   line-height: 1.35;
   opacity: 0;
   pointer-events: none;
@@ -3323,8 +3559,12 @@ select {
   z-index: 40;
 }
 
-.chronicleCardTooltip.imageMode {
-  width: min(190px, calc(100vw - 32px));
+.chronicleCardTooltip.above {
+  transform: translateY(calc(-100% + 3px));
+}
+
+.chronicleCardTooltip.imageOnly {
+  width: min(220px, calc(100vw - 32px));
   padding: 6px;
 }
 
@@ -3351,7 +3591,7 @@ select {
   font-size: 13px;
 }
 
-.chronicleCardTooltip span {
+.chronicleCardTooltip > span {
   display: block;
   margin-top: 0;
   color: var(--muted);
@@ -3362,13 +3602,15 @@ select {
   color: var(--text);
 }
 
-.chronicleCardLine:hover .chronicleCardTooltip,
-.chronicleCardLine:focus .chronicleCardTooltip,
-.chronicleCardName:hover .chronicleCardTooltip,
-.chronicleCardName:focus .chronicleCardTooltip {
+.chronicleCardTooltip.visible {
   opacity: 1;
   transform: translateY(0);
+  pointer-events: auto;
   visibility: visible;
+}
+
+.chronicleCardTooltip.above.visible {
+  transform: translateY(-100%);
 }
 
 .winner {
@@ -3696,6 +3938,31 @@ select {
   margin-top: 8px;
 }
 
+.undoPanel {
+  display: grid;
+  gap: 8px;
+}
+
+.undoPanel.collapsed {
+  gap: 0;
+}
+
+.undoPanelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.undoPanelHeader h2 {
+  margin: 0;
+}
+
+.undoPanelToggle {
+  min-width: 28px;
+  min-height: 28px;
+}
+
 .undoBox {
   display: grid;
   gap: 6px;
@@ -3940,6 +4207,7 @@ select,
 
 .colorSchemeSettings,
 .cardDisplaySettings,
+.cardTooltipSettings,
 .aiPacingSettings,
 .actionCueSettings,
 .sessionAccessSettings {
@@ -3957,6 +4225,29 @@ select,
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+
+.cardTooltipSettings {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.9fr) minmax(190px, 1fr) minmax(190px, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+
+.cardTooltipSettings label {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cardTooltipSettings select {
+  min-width: 0;
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--field-bg);
 }
 
 .aiPacingSettings {
@@ -4139,6 +4430,7 @@ select,
   display: grid;
   place-items: center;
   padding: 18px;
+  overflow-y: auto;
 }
 
 .optionsDialogBackdrop {
@@ -4151,14 +4443,27 @@ select,
   position: relative;
   z-index: 1;
   width: min(820px, 100%);
-  max-height: min(780px, calc(100vh - 36px));
+  max-height: min(780px, calc(100dvh - 36px));
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
   border: 1px solid var(--access-modal-border);
   border-radius: 8px;
   background: var(--panel);
   box-shadow: var(--access-modal-shadow);
-  overflow: auto;
+  overflow: hidden;
+}
+
+.optionsPanel.inModal {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.optionsPanel.inModal .optionsContent {
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 20px;
 }
 
 .optionsDialogHeader {
@@ -5078,6 +5383,10 @@ select,
     grid-template-columns: 1fr;
   }
 
+  .cardTooltipSettings {
+    grid-template-columns: 1fr;
+  }
+
   .aiPacingSettings {
     grid-template-columns: 1fr;
   }
@@ -5173,18 +5482,19 @@ select,
   }
 
   .cardTooltip {
-    left: 50%;
     width: min(220px, calc(100vw - 32px));
-    transform: translate(-50%, -3px);
   }
 
   .cardTooltip.above {
-    transform: translate(-50%, 3px);
+    transform: translateY(calc(-100% + 3px));
   }
 
-  .card:hover .cardTooltip,
-  .card:focus .cardTooltip {
-    transform: translate(-50%, 0);
+  .cardTooltip.visible {
+    transform: translateY(0);
+  }
+
+  .cardTooltip.above.visible {
+    transform: translateY(-100%);
   }
 
   .opponentCueIcon {

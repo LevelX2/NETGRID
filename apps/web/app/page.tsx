@@ -4952,7 +4952,7 @@ function LegalActionsPanel({
             {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
           </div>
         ) : hasHiddenContextActions ? (
-          <p className="meta">Wähle eine eigene Karte oder ein sichtbares Boardobjekt für weitere Aktionen.</p>
+          <p className="meta">Wähle hier eine Aktion oder wähle im Spielfeld eine eigene Spielkarte bzw. ein sichtbares Spielobjekt für weitere Optionen.</p>
         ) : null}
         {primaryActions.length === 0 && !selectedContext && !cardContextActive ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
@@ -5042,29 +5042,56 @@ function UndoPanel({
   onRequest(): void;
   onResolve(accepted: boolean): void;
 }) {
+  const hasIncomingRequest = Boolean(pendingUndo?.needsResponse);
+  const hasOutgoingRequest = Boolean(pendingUndo && !pendingUndo.needsResponse);
+  const incomingRequest = pendingUndo?.needsResponse ? pendingUndo : null;
+  const [collapsed, setCollapsed] = useState(true);
+
+  useEffect(() => {
+    if (hasIncomingRequest || hasOutgoingRequest) setCollapsed(false);
+  }, [hasIncomingRequest, hasOutgoingRequest]);
+
   return (
-    <section className="section">
-      <h2>Zurücknehmen</h2>
-      {pendingUndo?.needsResponse ? (
-        <div className="undoBox">
-          <p className="meta">{sideLabel(pendingUndo.requestedBy)} fragt Zurücknehmen an.</p>
-          <div className="splitButtons">
-            <button className="button primary" onClick={() => onResolve(true)}>
-              <Check size={15} />
-              OK
-            </button>
-            <button className="button" onClick={() => onResolve(false)}>
-              <X size={15} />
-              Nein
-            </button>
-          </div>
-        </div>
-      ) : (
-        <button className="button wide" onClick={onRequest} disabled={!latestEventId || connection !== "online"}>
-          <RotateCcw size={15} />
-          Letzte Aktion anfragen
+    <section className={`section undoPanel ${collapsed ? "collapsed" : "expanded"}`} data-testid="undo-panel">
+      <div className="undoPanelHeader">
+        <h2>Zurücknehmen</h2>
+        <button
+          className="button iconOnly undoPanelToggle"
+          type="button"
+          onClick={() => setCollapsed((value) => !value)}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? "Zurücknehmen ausklappen" : "Zurücknehmen einklappen"}
+          title={collapsed ? "Zurücknehmen ausklappen" : "Zurücknehmen einklappen"}
+        >
+          {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
         </button>
-      )}
+      </div>
+      {!collapsed ? (
+        hasIncomingRequest ? (
+          <div className="undoBox">
+            <p className="meta">{sideLabel(incomingRequest!.requestedBy)} fragt Zurücknehmen an.</p>
+            <div className="splitButtons">
+              <button className="button primary" onClick={() => onResolve(true)}>
+                <Check size={15} />
+                OK
+              </button>
+              <button className="button" onClick={() => onResolve(false)}>
+                <X size={15} />
+                Nein
+              </button>
+            </div>
+          </div>
+        ) : hasOutgoingRequest ? (
+          <div className="undoBox">
+            <p className="meta">Anfrage gesendet. Warte auf Antwort.</p>
+          </div>
+        ) : (
+          <button className="button wide" onClick={onRequest} disabled={!latestEventId || connection !== "online"}>
+            <RotateCcw size={15} />
+            Letzte Aktion anfragen
+          </button>
+        )
+      ) : null}
     </section>
   );
 }
@@ -5423,9 +5450,9 @@ function ChronicleCardTrigger({
       onClick={onClick}
       title={title}
       aria-describedby={tooltipId}
-      onFocus={() => {
+      onFocus={(event) => {
         updateTooltipPlacement();
-        if (tooltipEnabled) setTooltipFocusVisible(true);
+        if (tooltipEnabled && event.currentTarget.matches(":focus-visible")) setTooltipFocusVisible(true);
       }}
       onBlur={() => setTooltipFocusVisible(false)}
       onPointerEnter={(event) => {
@@ -6925,9 +6952,9 @@ function CardView({
           updateOverlayPlacement();
           onFocus?.(card, hiddenSide);
         }}
-        onFocus={() => {
+        onFocus={(event) => {
           updateOverlayPlacement();
-          if (tooltipEnabled) setTooltipFocusVisible(true);
+          if (tooltipEnabled && event.currentTarget.matches(":focus-visible")) setTooltipFocusVisible(true);
           onFocus?.(card, hiddenSide);
         }}
         onBlur={() => setTooltipFocusVisible(false)}
@@ -7027,7 +7054,7 @@ function CardView({
         <button
           className={`cardActionMarker${showCardActions ? " active" : ""}`}
           type="button"
-          aria-label={showCardActions ? "Kartenaktionen einklappen" : "Kartenaktionen anzeigen"}
+          aria-label={showCardActions ? "Kartenoptionen einklappen" : "Kartenoptionen anzeigen"}
           aria-expanded={showCardActions}
           data-testid="card-action-marker"
           onClick={() => {
@@ -7042,7 +7069,7 @@ function CardView({
           onPointerEnter={updateOverlayPlacement}
           onPointerLeave={() => setSuppressCardTooltip(false)}
         >
-          <Play size={10} />
+          <Play size={10} strokeWidth={2.35} />
         </button>
       ) : null}
       {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} onAction={onAction!} /> : null}
@@ -7079,7 +7106,7 @@ function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: num
 function InstalledStateMark({ state, label }: { state: "hidden" | "unrezzed" | "rezzed" | "known"; label: string }) {
   if (state === "known") return null;
   return (
-    <span className={`installedStateMark ${state}`} aria-label={label} title={label} data-testid="installed-state-mark">
+    <span className={`installedStateMark ${state}`} aria-label={label} data-tooltip={label} data-testid="installed-state-mark">
       {state === "rezzed" ? <span className="installedStateLetter" aria-hidden="true">R</span> : <EyeOff size={11} strokeWidth={2.4} aria-hidden="true" />}
     </span>
   );
