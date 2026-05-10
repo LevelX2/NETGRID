@@ -1132,6 +1132,11 @@ Verbindliche Reihenfolge der acht Releases:
 7. V1.9.7 Upgrade-/Programm-/Hosting-/Destroy-Lifecycle-Schließung.
 8. V1.9.8 Resolver-Longtail und Vollabdeckungs-Gate.
 
+Ergänzende verbindliche KI-Härtung in dieser Sequenz:
+
+- V1.9.8 enthält zusätzlich ein side-sicheres KI-Gedächtnispräzisions-Gate für rechtmäßig gesehene Hidden-Zone-Informationen (positionsgenaues Nachhalten, deterministische Invalidation, klare Trennung Fakt/Hypothese).
+- Dieser Punkt stärkt die Spielqualität der KI, ohne den Hidden-Info-Vertrag aufzuweichen und ohne V2.x-Scope vorzuziehen.
+
 ## V2.x Geschlossene Community und öffentliche Multiplayer-Basis
 
 V2.x darf erst beginnen, wenn die Sequenz V1.6.1 bis V1.9.x grün abgeschlossen ist, private Internet-Gates stabil sind und Auth-, Datenschutz-, Moderations-, Betriebs- und Rechtsentscheidungen getroffen wurden.

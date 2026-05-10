@@ -7,6 +7,8 @@ Der sequenzielle Soll-Ist-Nachweis ist in `docs/derived/V1_9_1_TO_V1_9_4_SEQUENT
 
 Ergänzende Anschlussplanung für offene Ursprungsset-Punkte liegt seit 2026-05-10 als Grobplanung `docs/derived/V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md` vor. Seit Planentscheid vom 2026-05-10 ist diese Linie als verbindliche Fortsetzungssequenz V1.9.1 bis V1.9.8 vor V2.x übernommen. V2.x darf erst nach grünem Abschluss von V1.9.8 starten.
 
+Ergänzender KI-Planentscheid vom 2026-05-10: In der verbindlichen V1.9.x-Linie ist für V1.9.8 ein side-sicheres KI-Gedächtnispräzisions-Gate eingeplant (positionsgenaues Nachhalten rechtmäßig gesehener Hidden-Zone-Informationen mit deterministischen Invalidationsregeln). Referenzen: `docs/derived/V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md`, `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
+
 Detailplanung für die nächsten vier Pflicht-Releases V1.9.1 bis V1.9.4 ist am 2026-05-10 eingefroren: `docs/derived/V1_9_1_TO_V1_9_4_DETAILED_PLAN.md`, `docs/derived/V1_9_1_TO_V1_9_4_IMPLEMENTATION_HANDOFF.md` sowie je Release Requirements, Spezifikation, Testmatrix und Requirements-Review (`V1_9_1_*` bis `V1_9_4_*`). Der Umsetzungsnachweis für diese Viererlinie ist vollständig erbracht (`V1.9.1 -> V1.9.2 -> V1.9.3 -> V1.9.4`).
 
 Deck-Legal AI Approval Open64 ist am 2026-05-10 vollständig umgesetzt und lokal verifiziert. Alle 64 zuvor noch offenen, bereits `human_playable` O:NR-v1-Karten sind jetzt `ai_supported`; keine Karte außerhalb der Zielmenge wurde neu freigegeben. Umsetzung und Gate-Nachweise liegen in `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_IMPLEMENTATION_REVIEW.md` sowie in den Open64-Artefakten unter `data/ai/`, `data/manifests/` und `data/scenarios/`. Gate-Ergebnis: `deck_legal_ai_approval_open64_done: true`.
@@ -2410,4 +2412,3 @@ UI design exploration artifacts available:
 - `docs/ui-designsets/README.md`
 - `docs/ui-designsets/REALISM_REVIEW.md`
 - `docs/ui-designsets/05-logo-exploration/BRANDING_DECISION.md`: current provisional client name is `NETGRID`; selected clean icon references live under `docs/ui-designsets/05-logo-exploration/selected-netgrid/`.
-

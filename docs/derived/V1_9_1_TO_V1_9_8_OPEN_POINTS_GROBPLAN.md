@@ -59,9 +59,27 @@ Hinweis zur Methode: Die Zuordnung freigegeben/nicht freigegeben wurde über Tit
 | V1.9.5 | Persistente Boardlogik und globale Modifier skalieren | `L3_Generische_Asset_Node_Faehigkeiten`, `L2_Globale_Statische_Modifier_ICE_Cost_Strength`, `L3_Persistente_Modifier_und_Sonderzustaende` | 32 |
 | V1.9.6 | Agenda-/Counter-Schicht schließen | `L2_Counter_System_und_Virus_Purge_Trigger`, `L2_Agenda_Difficulty_und_Overadvance_Details`, `L3_Scored_Agenda_Active_Static_Overadvance` | 43 |
 | V1.9.7 | Upgrade-/Programm-/Hosting-/Destroy-Lifecycles schließen | `L3_Generische_Upgrade_Faehigkeiten`, `L3_Programm_Subtypen_Daemon_Stealth_Worm_BaseLink`, `L2_Hosting_und_Hosted_Resource_Modelle`, `L3_Uninstall_und_InstalledCard_Destroy` | 51 |
-| V1.9.8 | Resolver-Longtail und Vollabdeckungs-Gate | `L1B_PerCard_Resolver_Test_Gate` (Restbestand) + finaler Backlog-Cut auf 0 offene Effektfamilien | 49 |
+| V1.9.8 | Resolver-Longtail, Vollabdeckungs- und KI-Gedächtnispräzisions-Gate | `L1B_PerCard_Resolver_Test_Gate` (Restbestand) + finaler Backlog-Cut auf 0 offene Effektfamilien | 49 |
 
 \*Grobe Backloggröße: heuristische Kartenzuordnung nach „spätest benötigter Effektfamilie“ plus Override für `Cockroach`/`Incubator`/`Grubb` in V1.9.1.
+
+## Ergänzende KI-Härtungsspur (neu)
+
+Planentscheid vom 2026-05-10: Ein zusätzlicher KI-Härtungspunkt „side-sicheres Positionsgedächtnis“ wird verbindlich in V1.9.8 eingeplant.
+
+Zielbild:
+
+- Die KI hält rechtmäßig gesehene Hidden-Zone-Informationen positionsgenau nach (`R&D`, `HQ`, `Remote`), statt nur grobe Wertannahmen zu nutzen.
+- Das Gedächtnis folgt sichtbaren Zonenwanderungen deterministisch (z. B. `R&D -> HQ` nach Corp-Draw, Invalidation bei `shuffle`/`arrange`/`swap`/relevanten Access-Moves).
+- DecisionDebug trennt klar zwischen `sicher gewusst` und `hypothesiert`; Unsicherheit bleibt sichtbar.
+- Hidden-Info-Vertrag bleibt hart: keine Annahmen über unbekannte Kartentitel, keine Einsicht in echte gegnerische Hand-/Deckwahrheit.
+- Difficulty bleibt ein Qualitäts-/Risikoprofil und kein zusätzlicher Informationskanal.
+
+Abnahmekriterien im Zielrelease:
+
+1. Runner-/Corp-Szenarien für positionsgenaues Memory über mehrere Züge inklusive Draw-/Shuffle-/Undo-ähnlicher Rekonstruktion bestehen.
+2. Hidden-State-Invariance bleibt grün: gleiche sichtbare Projektion führt zu gleichem Entscheidungsverhalten.
+3. Replay-/StateHash-Isolation bleibt grün: Belief-/Memory-Rekonstruktion verändert keinen echten GameState.
 
 ## Vollständige Zuordnung der offenen Effektfamilien auf V1.9.x
 
