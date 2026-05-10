@@ -2,11 +2,10 @@
 
 ## Current phase
 
-V1.9.2 Mechanikpaket K ist am 2026-05-10 nach grünem V1.9.1-Final-Gate vollständig umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den V1.9.2-Kernkorb kontrolliert um genau sieben Karten (`onr_v1_076_all-nighter`, `onr_v1_096_kilroy-was-here`, `onr_v1_107_romp-through-hq`, `onr_v1_184_top-runners-conference`, `onr_v1_188_ai-chief-financial-officer`, `onr_v1_211_polymer-breakthrough`, `onr_v1_235_data-naga`) und liefert deterministic Bonus-Run-/Access-/Start-of-turn-/Hidden-Zone-Shuffle-Pfade ohne Scope-Drift nach V1.9.3+ oder V2.x. Gate-Ergebnis: `V1_9_2_implemented: true`; `V1_9_2_verified: true`; `V1_9_2_done: true`; `ready_for_V1_9_3_manual_gate: true`.
-Der sequenzielle Soll-Ist-Nachweis ist in `docs/derived/V1_9_1_TO_V1_9_4_SEQUENTIAL_EXECUTION_AUDIT.md` dokumentiert; der aktive Freigabe-Blocker fuer den Start von V1.9.3 ist in `docs/derived/V1_9_3_GATE_BLOCKER_REPORT.md` festgehalten.
+V1.9.1 bis V1.9.4 (Mechanikpakete J bis M) sind am 2026-05-10 sequenziell in einem einzigen Worktree vollständig umgesetzt, lokal verifiziert und final reviewt. Die vier Release-Schritte wurden ohne zusätzliche Zwischenfreigaben direkt nacheinander abgeschlossen. Gate-Ergebnis: `V1_9_1_done: true`; `V1_9_2_done: true`; `V1_9_3_done: true`; `V1_9_4_done: true`; `V1_9_1_bis_V1_9_4_sequenziell_abgeschlossen: true`.
+Der sequenzielle Soll-Ist-Nachweis ist in `docs/derived/V1_9_1_TO_V1_9_4_SEQUENTIAL_EXECUTION_AUDIT.md` dokumentiert; der frühere Gate-Blocker vor V1.9.3 ist durch die abgeschlossene Sequenz überholt.
 
-Für die sequenzielle Anschlusslinie liegen seit 2026-05-10 die Detail- und Handoff-Artefakte `docs/derived/V1_9_1_TO_V1_9_4_DETAILED_PLAN.md` und `docs/derived/V1_9_1_TO_V1_9_4_IMPLEMENTATION_HANDOFF.md` vor. Der Umsetzungsmodus bleibt strikt sequenziell (`V1.9.1 -> V1.9.2 -> V1.9.3 -> V1.9.4`) mit explizitem manuellen Freigabe-Gate zwischen den Releases.
-
+Für die sequenzielle Anschlusslinie liegen seit 2026-05-10 die Detail- und Handoff-Artefakte `docs/derived/V1_9_1_TO_V1_9_4_DETAILED_PLAN.md` und `docs/derived/V1_9_1_TO_V1_9_4_IMPLEMENTATION_HANDOFF.md` vor. Der Umsetzungsnachweis für diese Linie ist vollständig erbracht (`V1.9.1 -> V1.9.2 -> V1.9.3 -> V1.9.4`).
 Ergänzende Anschlussplanung für offene Ursprungsset-Punkte liegt seit 2026-05-10 als Grobplanung `docs/derived/V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md` vor. Die Linie beschreibt V1.9.1 bis V1.9.8 als optionalen Mechanik-/Karten-Backlogpfad mit vollständiger Zuordnung aller aktuell offenen Effektfamilien; ohne expliziten Gate-Beschluss bleibt sie Planung und ändert den aktiven V2.x-Auswahlscope nicht.
 
 Deck-Legal AI Approval Open64 ist am 2026-05-10 vollständig umgesetzt und lokal verifiziert. Alle 64 zuvor noch offenen, bereits `human_playable` O:NR-v1-Karten sind jetzt `ai_supported`; keine Karte außerhalb der Zielmenge wurde neu freigegeben. Umsetzung und Gate-Nachweise liegen in `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_IMPLEMENTATION_REVIEW.md` sowie in den Open64-Artefakten unter `data/ai/`, `data/manifests/` und `data/scenarios/`. Gate-Ergebnis: `deck_legal_ai_approval_open64_done: true`.
@@ -243,7 +242,7 @@ Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTI
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.9.2 Mechanikpaket K ist abgeschlossen und lokal verifiziert (`docs/derived/V1_9_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`). Nächster Umsetzungsscope ist V1.9.3 ausschließlich nach expliziter manueller Freigabe (`OK V1.9.3`) gemäß sequenzieller V1.9.1->V1.9.4-Linie.
+Current selected next scope: V1.9.1 bis V1.9.4 ist abgeschlossen und lokal verifiziert (`docs/derived/V1_9_1_FINAL_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`, `docs/derived/V1_9_3_FINAL_REVIEW.md`, `docs/derived/V1_9_4_FINAL_REVIEW.md`). Nächster Umsetzungsscope folgt aus der priorisierten Anschlussplanung in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` und `docs/derived/V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md`.
 
 ## Status
 
@@ -2245,14 +2244,12 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. V1.9.2 (Mechanikpaket K) ist grün abgeschlossen; Hidden-Zone-/Access-/Run-Kernverbreiterung wurde im freigegebenen Scope umgesetzt.
-2. Nächster Umsetzungsscope ist V1.9.3 nur nach expliziter manueller Freigabe mit `OK V1.9.3`.
-3. Die aktive Linie bleibt strikt sequenziell `V1.9.3 -> V1.9.4` mit Stop-and-Approve-Gate nach jedem Release.
-4. Harte Gates bleiben unverändert: Engine-Korrektheit, Hidden-Info-Schutz, Replay/StateHash-Determinismus und LegalAction-only.
-5. V2.x-Produktfeatures (Accounts, Cloud-Decks, Datenschutz-/Social-Gates) bleiben außerhalb des aktiven V1.9.2-V1.9.4-Scope.
-6. No-Scope-Grenzen weiter halten: keine Public-Plattformfunktionen, keine Karten-/Mechanikfreigaben ohne Gate-Beschluss, kein LLM-Live-Regelakteur.
+1. V1.9.1 bis V1.9.4 sind grün abgeschlossen; die Sequenz wurde im selben Worktree ohne Zwischenfreigaben vollständig durchgezogen.
+2. Harte Gates bleiben unverändert: Engine-Korrektheit, Hidden-Info-Schutz, Replay/StateHash-Determinismus und LegalAction-only.
+3. V2.x-Produktfeatures (Accounts, Cloud-Decks, Datenschutz-/Social-Gates) bleiben außerhalb des aktiven V1.9.x-Scope.
+4. No-Scope-Grenzen weiter halten: keine Public-Plattformfunktionen, kein impliziter Kartenunlock außerhalb des freigegebenen Kernkorbs, kein LLM-Live-Regelakteur.
 
-Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe, Tutorial/Regelhilfe, V1.9.0 Mechanikpaket I, V1.9.1 Mechanikpaket J und V1.9.2 Mechanikpaket K sind umgesetzt. Die Anschlusslinie läuft nun als manuell freigegebene Sequenz V1.9.3 bis V1.9.4 weiter.
+Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe, Tutorial/Regelhilfe, V1.9.0 Mechanikpaket I sowie V1.9.1 bis V1.9.4 sind umgesetzt. Die sequenzielle V1.9.1->V1.9.4-Linie ist abgeschlossen.
 
 Detailed planning and completion artifacts available:
 
@@ -2410,3 +2407,5 @@ UI design exploration artifacts available:
 - `docs/ui-designsets/README.md`
 - `docs/ui-designsets/REALISM_REVIEW.md`
 - `docs/ui-designsets/05-logo-exploration/BRANDING_DECISION.md`: current provisional client name is `NETGRID`; selected clean icon references live under `docs/ui-designsets/05-logo-exploration/selected-netgrid/`.
+
+

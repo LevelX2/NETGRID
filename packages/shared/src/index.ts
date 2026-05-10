@@ -98,6 +98,8 @@ export type SubroutineType =
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
   | "set_next_encounter_lock"
+  | "set_run_jack_out_lock"
+  | "set_runner_forgo_next_action"
   | "rewind_run_to_rezzed_ice_by_die";
 
 export type SubroutineDefinition = {
@@ -536,6 +538,7 @@ export type RunState = {
   nextEncounterJackOutLock?: boolean;
   noBreakSubroutinesActive?: boolean;
   jackOutLockedUntilEncounterEnds?: boolean;
+  jackOutLockedForRun?: boolean;
   nextEncounterFatalDamage?: number;
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
@@ -647,6 +650,7 @@ export type GameState = {
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
     allNighterBonusRunPending?: boolean;
+    forgoNextActionPending?: boolean;
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -1113,6 +1117,14 @@ function onrSetNextEncounterFatalDamage(id: string, amount: number): SubroutineD
 
 function onrSetNextEncounterLock(id: string): SubroutineDefinition {
   return { id, type: "set_next_encounter_lock" };
+}
+
+function onrSetRunJackOutLock(id: string): SubroutineDefinition {
+  return { id, type: "set_run_jack_out_lock" };
+}
+
+function onrSetRunnerForgoNextAction(id: string): SubroutineDefinition {
+  return { id, type: "set_runner_forgo_next_action" };
 }
 
 function onrRewindRunToRezzedIceByDie(id: string): SubroutineDefinition {
@@ -1896,6 +1908,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score", "steal", "on_score_gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_207_netwatch-operations-office",
+    title: "Netwatch Operations Office",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 5,
+    agendaPoints: 2,
+    rulesText: "[A]: Trace 7 - If trace is successful, give Runner a tag.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_208_on-call-solo-team",
+    title: "On-Call Solo Team",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 3,
+    rulesText: "[A]: Do 1 meat damage. Use this ability only if Runner is tagged.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_209_political-coup",
     title: "Political Coup",
     side: "corp",
@@ -2015,6 +2051,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "Gain 1 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort.",
     mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "region_install_rules", "run_unsuccessful_credit_bonus", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_213_private-cybernet-police",
+    title: "Private Cybernet Police",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 7,
+    agendaPoints: 2,
+    rulesText: "[A]: Trace 7 - If trace is successful, give Runner a tag.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_217_strike-force-kali",
+    title: "Strike Force Kali",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 6,
+    agendaPoints: 3,
+    rulesText: "[A]: Do 2 meat damage. Use this ability only if Runner is tagged.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_281_accounts-receivable",
@@ -2408,6 +2468,24 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["trace", "link", "bid_amount", "add_tag"]
   }),
   onrIce({
+    id: "onr_v1_251_jack-attack",
+    title: "Jack Attack",
+    subtypes: ["sentry", "ap"],
+    rezCost: 3,
+    strength: 3,
+    rulesText: "[Subroutine] For the remainder of the run, Runner cannot jack out.\n[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
+    subroutines: [
+      onrSetRunJackOutLock("onr_v1_251_jack_attack_run_jack_out_lock"),
+      {
+        id: "onr_v1_251_jack_attack_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["run_modifier", "jack_out_lock", "trace", "link", "bid_amount", "add_tag"]
+  }),
+  onrIce({
     id: "onr_v1_252_keeper",
     title: "Keeper",
     subtypes: ["code_gate"],
@@ -2551,6 +2629,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_270_sleeper_etr")],
     mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_271_tko-2-0",
+    title: "TKO 2.0",
+    subtypes: ["sentry", "ap", "knockout"],
+    rezCost: 7,
+    strength: 4,
+    rulesText: "[Subroutine] End the run, and Runner forgoes his or her next action.",
+    subroutines: [onrSetRunnerForgoNextAction("onr_v1_271_tko_2_0_forgo_next_action"), onrEtr("onr_v1_271_tko_2_0_etr")],
+    mechanics: ["end_the_run", "action_economy", "run_modifier"]
   }),
   onrIce({
     id: "onr_v1_273_triggerman",

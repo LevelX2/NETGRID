@@ -3469,6 +3469,164 @@ describe("V1.9.2 Mechanikpaket K", () => {
   });
 });
 
+describe("V1.9.3 Mechanikpaket L", () => {
+  it("adds the V1.9.3 core card set with trace/tag and jack-out-lock coverage", () => {
+    expect(ONR_V1_9_3_FINAL_CARD_IDS).toHaveLength(4);
+    const expectedMechanics: Record<string, RegExp> = {
+      "onr_v1_207_netwatch-operations-office": /trace/,
+      "onr_v1_213_private-cybernet-police": /trace/,
+      "onr_v1_251_jack-attack": /jack_out_lock/,
+      "onr_v1_271_tko-2-0": /action_economy/
+    };
+    for (const definitionId of ONR_V1_9_3_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(expectedMechanics[definitionId]!);
+      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(/damage_prevention|replacement|v2|matchmaking|ranking/);
+    }
+  });
+
+  it("validates V1.9.3 smoke decks and keeps V1.9.2 cards available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_9_3_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_9_3_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v193CardReleaseGame("v193-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_235_data-naga"]).toBeDefined();
+  });
+
+  it("starts V1.9.3 agenda trace actions and keeps Jack Attack jack-out lock active for the run", () => {
+    let state = toRunnerTurn(v193CardReleaseGame("v193-trace-jack-lock"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+
+    const netwatchAgendaId = moveCorpCardToHq(state, "onr_v1_207_netwatch-operations-office");
+    const privatePoliceAgendaId = moveCorpCardToHq(state, "onr_v1_213_private-cybernet-police");
+    removeEverywhere(state, netwatchAgendaId);
+    removeEverywhere(state, privatePoliceAgendaId);
+    state.corp.scoreArea.push(netwatchAgendaId, privatePoliceAgendaId);
+    state.cardInstances[netwatchAgendaId] = { ...state.cardInstances[netwatchAgendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+    state.cardInstances[privatePoliceAgendaId] = { ...state.cardInstances[privatePoliceAgendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinition(state, action) === "onr_v1_207_netwatch-operations-office" &&
+        action.payload?.agendaAbility === "netwatch_operations_office"
+    );
+    expect(state.trace?.status).toBe("corp_bid");
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.runner.tags).toBe(1);
+
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpIceOnServer(state, "rd", "onr_v1_251_jack-attack");
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.clicks = 3;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_251_jack-attack");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.jackOutLockedForRun).toBe(true);
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(getLegalActions(state, "runner").map((action) => action.type)).not.toContain("jack_out");
+
+    let tkoState = toRunnerTurn(v193CardReleaseGame("v193-tko-next-action"));
+    tkoState.runner.credits = 20;
+    tkoState.corp.credits = 20;
+    putCorpIceOnServer(tkoState, "rd", "onr_v1_271_tko-2-0");
+    tkoState = apply(tkoState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    tkoState = apply(tkoState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(tkoState, action) === "onr_v1_271_tko-2-0");
+    const clicksBeforeTkoSubroutine = tkoState.runner.clicks;
+    tkoState = apply(tkoState, "runner", (action) => action.type === "continue_run");
+    expect(tkoState.run).toBeUndefined();
+    expect(tkoState.runner.clicks).toBe(Math.max(0, clicksBeforeTkoSubroutine - 1));
+  });
+});
+
+describe("V1.9.4 Mechanikpaket M", () => {
+  it("adds the V1.9.4 core card set with tagged meat-damage agenda actions", () => {
+    expect(ONR_V1_9_4_FINAL_CARD_IDS).toHaveLength(2);
+    for (const definitionId of ONR_V1_9_4_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/runner_is_tagged/);
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage/);
+      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(/v2|matchmaking|ranking/);
+    }
+  });
+
+  it("validates V1.9.4 smoke decks and keeps V1.9.3 cards available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_9_4_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_9_4_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v194CardReleaseGame("v194-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_251_jack-attack"]).toBeDefined();
+  });
+
+  it("resolves On-Call Solo Team and Strike Force Kali damage actions only while Runner is tagged", () => {
+    let state = toRunnerTurn(v194CardReleaseGame("v194-tagged-damage"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+
+    const onCallAgendaId = moveCorpCardToHq(state, "onr_v1_208_on-call-solo-team");
+    const kaliAgendaId = moveCorpCardToHq(state, "onr_v1_217_strike-force-kali");
+    removeEverywhere(state, onCallAgendaId);
+    removeEverywhere(state, kaliAgendaId);
+    state.corp.scoreArea.push(onCallAgendaId, kaliAgendaId);
+    state.cardInstances[onCallAgendaId] = { ...state.cardInstances[onCallAgendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+    state.cardInstances[kaliAgendaId] = { ...state.cardInstances[kaliAgendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.runner.tags = 1;
+
+    const gripBeforeOnCall = state.runner.grip.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinition(state, action) === "onr_v1_208_on-call-solo-team" &&
+        action.payload?.agendaAbility === "on_call_solo_team"
+    );
+    expect(state.runner.grip.length).toBeLessThan(gripBeforeOnCall);
+
+    const gripBeforeKali = state.runner.grip.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinition(state, action) === "onr_v1_217_strike-force-kali" &&
+        action.payload?.agendaAbility === "strike_force_kali"
+    );
+    expect(state.runner.grip.length).toBeLessThan(gripBeforeKali);
+
+    state.runner.tags = 0;
+    const actionTypes = getLegalActions(state, "corp")
+      .filter((action) => action.payload?.agendaAbility === "on_call_solo_team" || action.payload?.agendaAbility === "strike_force_kali")
+      .map((action) => action.type);
+    expect(actionTypes).toEqual([]);
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -5143,6 +5301,15 @@ const ONR_V1_9_2_FINAL_CARD_IDS = [
   "onr_v1_235_data-naga"
 ] as const;
 
+const ONR_V1_9_3_FINAL_CARD_IDS = [
+  "onr_v1_207_netwatch-operations-office",
+  "onr_v1_213_private-cybernet-police",
+  "onr_v1_251_jack-attack",
+  "onr_v1_271_tko-2-0"
+] as const;
+
+const ONR_V1_9_4_FINAL_CARD_IDS = ["onr_v1_208_on-call-solo-team", "onr_v1_217_strike-force-kali"] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -5657,6 +5824,67 @@ const ONR_V1_9_2_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_3_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v193_smoke_094",
+  name: "O:NR V1.9.3 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "onr_v1_129_hq-interface", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_3_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v193_smoke_094",
+  name: "O:NR V1.9.3 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_207_netwatch-operations-office", quantity: 2 },
+    { id: "onr_v1_213_private-cybernet-police", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_agenda", quantity: 2 },
+    { id: "onr_v1_251_jack-attack", quantity: 2 },
+    { id: "onr_v1_271_tko-2-0", quantity: 2 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 1 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
+const ONR_V1_9_4_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v194_smoke_094",
+  name: "O:NR V1.9.4 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "onr_v1_028_force-shield", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_4_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v194_smoke_094",
+  name: "O:NR V1.9.4 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_208_on-call-solo-team", quantity: 2 },
+    { id: "onr_v1_217_strike-force-kali", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_301_punitive-counterstrike", quantity: 2 },
+    { id: "onr_v1_302_scorched-earth", quantity: 2 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -5949,6 +6177,26 @@ function v192CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_2_RUNNER_DECK,
     corpDeck: ONR_V1_9_2_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v193CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_3_RUNNER_DECK,
+    corpDeck: ONR_V1_9_3_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v194CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_4_RUNNER_DECK,
+    corpDeck: ONR_V1_9_4_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

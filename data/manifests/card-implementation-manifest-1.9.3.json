@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.3",
+  "id": "v1.9.3-card-release-manifest",
+  "status": "implemented_for_v1.9.3_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.9.2.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount4": true,
+    "v193PreflightTkoDecisionExplicit": true,
+    "agendaTrace7ActionsImplemented": true,
+    "jackAttackRunJackOutLockImplemented": true,
+    "tkoForgoNextActionImplemented": true,
+    "runtimeAllowlistExtendedExactlyBy4": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "scored_agenda_action_trace_7_add_tag",
+      "requiredMechanics": ["scored_agenda_action", "trace", "link", "bid_amount", "add_tag"],
+      "roleTags": ["corp", "agenda", "trace", "tag"]
+    },
+    {
+      "cardCode": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "scored_agenda_action_trace_7_add_tag",
+      "requiredMechanics": ["scored_agenda_action", "trace", "link", "bid_amount", "add_tag"],
+      "roleTags": ["corp", "agenda", "trace", "tag"]
+    },
+    {
+      "cardCode": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "run_wide_jack_out_lock_plus_trace_tag_subroutine",
+      "requiredMechanics": ["trace", "link", "bid_amount", "add_tag", "run_modifier", "jack_out_lock"],
+      "roleTags": ["corp", "ice", "sentry", "trace", "run_lock"]
+    },
+    {
+      "cardCode": "onr_v1_271_tko-2-0",
+      "title": "TKO 2.0",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "end_the_run_plus_runner_forgo_next_action",
+      "requiredMechanics": ["end_the_run", "action_economy", "run_modifier"],
+      "roleTags": ["corp", "ice", "sentry", "action_tax"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 4,
+    "implementedCardCount": 4,
+    "deferredCardCount": 0,
+    "deferReasons": [],
+    "deferredCardIds": [],
+    "openMechanicHintsStatus": "v1.9.4_or_later"
+  }
+}

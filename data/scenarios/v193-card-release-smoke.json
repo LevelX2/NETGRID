@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v193-card-release-smoke",
+  "title": "V1.9.3 Mechanikpaket L Kernrelease",
+  "release": "V1.9.3",
+  "status": "implemented_core_release",
+  "extends": "data/scenarios/v192-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_207_netwatch-operations-office",
+    "onr_v1_213_private-cybernet-police",
+    "onr_v1_251_jack-attack",
+    "onr_v1_271_tko-2-0"
+  ],
+  "deferredCards": [],
+  "preconditions": [
+    "V1.9.2 Mechanikpaket K ist gruen abgeschlossen.",
+    "V1.9.3 Preflight friert den 4-Karten-Kernkorb ein und markiert TKO 2.0 als freigabefaehig."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.9.3-Smoke-Match mit den V1.9.3 Runner- und Corp-Decks.",
+    "Verifiziere Netwatch Operations Office und Private Cybernet Police als gescorte Trace-7-Agendaaktionen inklusive Tag-Ergebnis bei Erfolg.",
+    "Verifiziere Jack Attack mit run-weitem Jack-out-Lock und Trace-Tag-Subroutine innerhalb derselben Encounter-Kette.",
+    "Verifiziere TKO 2.0: End-the-run plus deterministischer Next-Action-Verzicht des Runners.",
+    "Verifiziere Replay- und StateHash-Stabilitaet fuer Trace-, Run-Lock- und Action-Economy-Pfade."
+  ],
+  "expected": [
+    "Der Runtime-Allowlist-Zuwachs umfasst exakt die vier V1.9.3-Karten.",
+    "Trace-/Tag-/Run-Lock-/Action-Economy-Pfade bleiben deterministic, replaybar und side-sicher.",
+    "Keine implizite AI-Freigabe fuer V1.9.3-Karten.",
+    "Keine Scope-Ausweitung auf Damage/Prevention/Core oder V2.x-Features."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.9.3 Mechanikpaket L",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic",
+    "server": "apps/server/src/multiplayer.test.ts::V1.9.4 card release matchstart"
+  }
+}

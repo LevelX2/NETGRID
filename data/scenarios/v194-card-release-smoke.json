@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v194-card-release-smoke",
+  "title": "V1.9.4 Mechanikpaket M Kernrelease",
+  "release": "V1.9.4",
+  "status": "implemented_core_release",
+  "extends": "data/scenarios/v193-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_208_on-call-solo-team",
+    "onr_v1_217_strike-force-kali"
+  ],
+  "deferredCards": [
+    "onr_v1_240_data-darts"
+  ],
+  "preconditions": [
+    "V1.9.3 Mechanikpaket L ist gruen abgeschlossen.",
+    "V1.9.4 Preflight friert den 2-Karten-Kernkorb ein und defered Data Darts fuer V1.9.5+."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.9.4-Smoke-Match mit den V1.9.4 Runner- und Corp-Decks.",
+    "Verifiziere On-Call Solo Team: Agenda-Aktion ist nur legal, wenn der Runner getaggt ist, und verursacht dann 1 Meat Damage.",
+    "Verifiziere Strike Force Kali: Agenda-Aktion ist nur legal, wenn der Runner getaggt ist, und verursacht dann 2 Meat Damage.",
+    "Verifiziere, dass ohne Tag keine der beiden Damage-Aktionen als LegalAction angeboten wird.",
+    "Verifiziere Replay- und StateHash-Stabilitaet fuer die neuen Tagged-Damage-Pfade."
+  ],
+  "expected": [
+    "Der Runtime-Allowlist-Zuwachs umfasst exakt die zwei V1.9.4-Karten.",
+    "Tagged-Damage-Pfade bleiben deterministic, replaybar und side-sicher.",
+    "Keine implizite AI-Freigabe fuer V1.9.4-Karten.",
+    "Data Darts bleibt explizit deferred fuer V1.9.5+ ohne Scope-Drift."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.9.4 Mechanikpaket M",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic",
+    "server": "apps/server/src/multiplayer.test.ts::V1.9.4 card release matchstart"
+  }
+}

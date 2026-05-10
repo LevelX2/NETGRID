@@ -16,8 +16,8 @@
 - Releaseabschluss-Regel: Bei jedem umgesetzten Release wird die im Webclient sichtbare Versionsnummer am Ende auf den Zielstand angehoben und im Final Review nachgewiesen.
 - V1.9.2 Mechanikpaket K ist umgesetzt und final reviewt: `docs/derived/V1_9_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`.
 - Sequenzieller Soll-Ist-Nachweis fuer V1.9.1 bis V1.9.4: `docs/derived/V1_9_1_TO_V1_9_4_SEQUENTIAL_EXECUTION_AUDIT.md`.
-- Aktiver Freigabe-Blocker vor V1.9.3: `docs/derived/V1_9_3_GATE_BLOCKER_REPORT.md`.
-- Nächstes manuelles Sequenz-Gate: V1.9.3 startet nur nach explizitem `OK V1.9.3`.
+- Historischer Gate-Vermerk vor V1.9.3 (inzwischen aufgelöst): `docs/derived/V1_9_3_GATE_BLOCKER_REPORT.md`.
+- Sequenz V1.9.1 bis V1.9.4 ist vollständig abgeschlossen; Zwischenfreigaben sind für diese Linie nicht mehr offen.
 
 ## Kernwissen
 
@@ -78,9 +78,10 @@
 - `docs/derived/V1_8_0_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_8_0_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis für V1.8.0 Mechanikpaket G inklusive Agenda-Subtype-Theft-Gates, Agenda-Punkt-Kostenpfaden, Agenda-Difficulty-Modifiers und Project-Babylon-Overadvance-Bonuspunkten sowie Artefakten `data/manifests/card-implementation-manifest-1.8.0.json`, `data/rules/mechanics-coverage-1.8.0.json` und `data/scenarios/v180-card-release-smoke.json`.
 - `docs/derived/V1_8_1_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_8_1_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis für V1.8.1 Mechanikpaket H inklusive Counter-/Virus-/Purge-Verträgen, rungebundenen Folgeflags, servergebundener Installkosten-Taxpfade und scored-agenda-basierter Counteraktionen sowie Artefakten `data/manifests/card-implementation-manifest-1.8.1.json`, `data/rules/mechanics-coverage-1.8.1.json` und `data/scenarios/v181-card-release-smoke.json`.
 - `docs/derived/V1_9_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_0_FINAL_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.0.json`, `data/rules/mechanics-coverage-1.9.0.json` und `data/scenarios/v190-card-release-smoke.json`: Umsetzung und Gate-Ergebnis für V1.9.0 Mechanikpaket I mit deterministischem Würfelresolver, Banpei-Sonderresolver, Vacuum-Link-Rewind und Ambush-on-Access-Foundation bei weiterhin deferred `Cockroach`/`Incubator`/`Grubb`.
-- `docs/derived/V1_9_1_TO_V1_9_4_DETAILED_PLAN.md` und `docs/derived/V1_9_1_TO_V1_9_4_IMPLEMENTATION_HANDOFF.md`: verbindliche sequenzielle Umsetzungsplanung für V1.9.1 bis V1.9.4 mit Stop-and-Approve-Gate nach jedem Release.
+- `docs/derived/V1_9_1_TO_V1_9_4_DETAILED_PLAN.md` und `docs/derived/V1_9_1_TO_V1_9_4_IMPLEMENTATION_HANDOFF.md`: verbindliche sequenzielle Umsetzungsplanung für V1.9.1 bis V1.9.4; die Linie ist inzwischen vollständig abgeschlossen.
 - `docs/derived/V1_9_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_1_FINAL_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.1.json`, `data/rules/mechanics-coverage-1.9.1.json` und `data/scenarios/v191-card-release-smoke.json`: Umsetzung und Gate-Ergebnis für V1.9.1 Mechanikpaket J mit Abschluss des V1.9.0-Deferred-Überhangs (`Cockroach`, `Incubator`, `Grubb`).
 - `docs/derived/V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md`: Grobplanung für die optionale V1.9.x-Anschlusslinie zur vollständigen Umsetzung der nach V1.9.0 offenen Ursprungsset-Mechanik-/Kartenpunkte über acht Releases mit vollständiger Effektfamilien-Zuordnung.
+- `docs/derived/V1_9_3_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_3_FINAL_REVIEW.md`, `docs/derived/V1_9_4_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_9_4_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis für den Abschluss der V1.9.1-bis-V1.9.4-Sequenz.
 - `data/rules/mechanics-coverage-1.2.2.json`: maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.2.
 
 ## Prozesse
@@ -247,3 +248,5 @@
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
 - `docs/ui-designsets/05-logo-exploration/BRANDING_DECISION.md`: vorläufige Branding-Entscheidung für den Client-Namen `NETGRID` und die ausgewählten Logo-/Icon-Referenzen.
+
+

@@ -173,6 +173,10 @@ const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
 const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
+const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
+const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
+const PRIVATE_CYBERNET_POLICE_ID = "onr_v1_213_private-cybernet-police";
+const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
 const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
@@ -1427,6 +1431,45 @@ function corpMainActions(state: GameState): LegalAction[] {
   }
   for (const agendaId of state.corp.scoreArea.slice().sort()) {
     const definition = definitionFor(state, agendaId);
+    if (definition.id === NETWATCH_OPERATIONS_OFFICE_ID || definition.id === PRIVATE_CYBERNET_POLICE_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: Trace 7 starten`,
+          agendaId,
+          [{ clicks: 1 }],
+          {
+            cardId: agendaId,
+            agendaAbility: definition.id === NETWATCH_OPERATIONS_OFFICE_ID ? "netwatch_operations_office" : "private_cybernet_police",
+            traceStrength: 7
+          }
+        )
+      );
+      continue;
+    }
+    if (definition.id === ON_CALL_SOLO_TEAM_ID || definition.id === STRIKE_FORCE_KALI_ID) {
+      if (state.runner.tags <= 0) continue;
+      const damageAmount = definition.id === ON_CALL_SOLO_TEAM_ID ? 1 : 2;
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: ${damageAmount} Meat Damage`,
+          agendaId,
+          [{ clicks: 1 }],
+          {
+            cardId: agendaId,
+            agendaAbility: definition.id === ON_CALL_SOLO_TEAM_ID ? "on_call_solo_team" : "strike_force_kali",
+            damageType: "meat",
+            damageAmount
+          }
+        )
+      );
+      continue;
+    }
     if (definition.id === AI_CHIEF_FINANCIAL_OFFICER_ID) {
       actions.push(
         action(
@@ -2036,7 +2079,7 @@ function encounterSubroutinesForNextContinue(run: RunState, subroutines: NonNull
 
 function runnerMovementActions(state: GameState): LegalAction[] {
   const run = mustRun(state);
-  if (run.jackOutLockedUntilEncounterEnds || run.nextEncounterJackOutLock) {
+  if (run.jackOutLockedUntilEncounterEnds || run.nextEncounterJackOutLock || run.jackOutLockedForRun) {
     return [action(state, "runner", "continue_run", "Run fortsetzen", "game_rule")];
   }
   return [action(state, "runner", "jack_out", "Jack-out", "game_rule"), action(state, "runner", "continue_run", "Run fortsetzen", "game_rule")];
@@ -2163,6 +2206,32 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         const definition = definitionFor(state, sourceCardId);
         if (definition.id !== AI_CHIEF_FINANCIAL_OFFICER_ID) throw new Error("Die Agenda-Aktion passt nicht zur ausgewaehlten AI Chief Financial Officer Agenda.");
         resolveAiChiefFinancialOfficer(state, sourceCardId, legalAction);
+        return;
+      }
+      if (legalAction.payload?.agendaAbility === "netwatch_operations_office" || legalAction.payload?.agendaAbility === "private_cybernet_police") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf diese Agenda-Aktion nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Die gewaehlte Trace-Agenda ist nicht gescort.");
+        const definition = definitionFor(state, sourceCardId);
+        const expectedDefinitionId = legalAction.payload?.agendaAbility === "netwatch_operations_office" ? NETWATCH_OPERATIONS_OFFICE_ID : PRIVATE_CYBERNET_POLICE_ID;
+        if (definition.id !== expectedDefinitionId) throw new Error("Die Agenda-Aktion passt nicht zur ausgewaehlten Trace-Agenda.");
+        const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
+        if (!Number.isInteger(traceStrength) || traceStrength !== 7) throw new Error("Die Agenda-Trace-Staerke ist ungueltig.");
+        startTraceFromOperation(state, definition.id, traceStrength, legalAction);
+        return;
+      }
+      if (legalAction.payload?.agendaAbility === "on_call_solo_team" || legalAction.payload?.agendaAbility === "strike_force_kali") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf diese Agenda-Aktion nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Die gewaehlte Damage-Agenda ist nicht gescort.");
+        const definition = definitionFor(state, sourceCardId);
+        const expectedDefinitionId = legalAction.payload?.agendaAbility === "on_call_solo_team" ? ON_CALL_SOLO_TEAM_ID : STRIKE_FORCE_KALI_ID;
+        if (definition.id !== expectedDefinitionId) throw new Error("Die Agenda-Aktion passt nicht zur ausgewaehlten Damage-Agenda.");
+        requireRunnerTagged(state);
+        const damageAmount = Number(legalAction.payload?.damageAmount ?? 0);
+        const expectedDamageAmount = definition.id === ON_CALL_SOLO_TEAM_ID ? 1 : 2;
+        if (!Number.isInteger(damageAmount) || damageAmount !== expectedDamageAmount) throw new Error("Die Damage-Menge der Agenda-Aktion ist ungueltig.");
+        resolveDamageOperation(state, legalAction, "meat", damageAmount, definition.id);
         return;
       }
       credits(state, legalAction.side, 1);
@@ -2704,6 +2773,12 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     if (subroutine.type === "set_next_encounter_lock") {
       run.nextEncounterNoBreakSubroutines = true;
       run.nextEncounterJackOutLock = true;
+    }
+    if (subroutine.type === "set_run_jack_out_lock") {
+      run.jackOutLockedForRun = true;
+    }
+    if (subroutine.type === "set_runner_forgo_next_action") {
+      applyRunnerForgoNextAction(state);
     }
     if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
       if (resolveVacuumLinkRewindSubroutine(state, run, legalAction)) return;
@@ -3549,6 +3624,14 @@ function completeDiscardPhase(state: GameState, side: Side): void {
   startRunnerTurn(state);
 }
 
+function applyRunnerForgoNextAction(state: GameState): void {
+  if (state.runner.clicks > 0) {
+    state.runner.clicks = Math.max(0, state.runner.clicks - 1);
+    return;
+  }
+  ensureRunnerTurnFlags(state).forgoNextActionPending = true;
+}
+
 function startCorpTurn(state: GameState): void {
   state.activeSide = "corp";
   state.phase = "corp_draw_phase";
@@ -3566,6 +3649,7 @@ function startRunnerTurn(state: GameState): void {
   state.runner.clicks = 4;
   state.corp.clicks = 0;
   const flags = ensureRunnerTurnFlags(state);
+  const forgoPending = flags.forgoNextActionPending === true;
   flags.stoleAgendaThisTurn = false;
   flags.stoleAgendaLastTurn = false;
   flags.stoleGrayOpsAgendaThisTurn = false;
@@ -3575,7 +3659,11 @@ function startRunnerTurn(state: GameState): void {
   flags.damagePreventionUsage = {};
   flags.startOfTurnFloatingCreditsApplied = false;
   flags.allNighterBonusRunPending = false;
+  flags.forgoNextActionPending = false;
   delete flags.incubatorPendingTransforms;
+  if (forgoPending && state.runner.clicks > 0) {
+    state.runner.clicks -= 1;
+  }
   refreshRecurringCredits(state, "runner");
   applyRunnerStartOfTurnEffects(state);
 }
@@ -6078,7 +6166,8 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
     runAttemptsLastTurn: 0,
     damagePreventionUsage: {},
     startOfTurnFloatingCreditsApplied: false,
-    allNighterBonusRunPending: false
+    allNighterBonusRunPending: false,
+    forgoNextActionPending: false
   });
   flags.stoleGrayOpsAgendaThisTurn ??= false;
   flags.stoleBlackOpsAgendaThisTurn ??= false;
@@ -6087,6 +6176,7 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
   flags.damagePreventionUsage ??= {};
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.allNighterBonusRunPending ??= false;
+  flags.forgoNextActionPending ??= false;
   return flags;
 }
 

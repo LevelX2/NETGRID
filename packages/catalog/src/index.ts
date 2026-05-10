@@ -487,6 +487,15 @@ export const ONR_V1_9_2_RELEASE_CARD_IDS = [
   "onr_v1_235_data-naga"
 ] as const;
 
+export const ONR_V1_9_3_RELEASE_CARD_IDS = [
+  "onr_v1_207_netwatch-operations-office",
+  "onr_v1_213_private-cybernet-police",
+  "onr_v1_251_jack-attack",
+  "onr_v1_271_tko-2-0"
+] as const;
+
+export const ONR_V1_9_4_RELEASE_CARD_IDS = ["onr_v1_208_on-call-solo-team", "onr_v1_217_strike-force-kali"] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -502,7 +511,9 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_8_1_RELEASE_CARD_IDS,
   ...ONR_V1_9_0_RELEASE_CARD_IDS,
   ...ONR_V1_9_1_RELEASE_CARD_IDS,
-  ...ONR_V1_9_2_RELEASE_CARD_IDS
+  ...ONR_V1_9_2_RELEASE_CARD_IDS,
+  ...ONR_V1_9_3_RELEASE_CARD_IDS,
+  ...ONR_V1_9_4_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -668,6 +679,8 @@ const ONR_V1_8_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_8_1_RELEASE_CARD_I
 const ONR_V1_9_0_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_0_RELEASE_CARD_IDS);
 const ONR_V1_9_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_1_RELEASE_CARD_IDS);
 const ONR_V1_9_2_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_2_RELEASE_CARD_IDS);
+const ONR_V1_9_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_3_RELEASE_CARD_IDS);
+const ONR_V1_9_4_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_4_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -802,6 +815,24 @@ const ONR_V1_9_2_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v192-card-release-smoke.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.9.2 Mechanikpaket K", "apps/server/src/multiplayer.test.ts::V1.9.2 card release matchstart"],
   replayTests: ["packages/engine/src/index.test.ts::V1.9.2 Mechanikpaket K"]
+};
+
+const ONR_V1_9_3_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.3",
+  status: "human_playable_v1_9_3_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.3 Mechanikpaket L"],
+  scenarioTests: ["data/scenarios/v193-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.3 Mechanikpaket L", "apps/server/src/multiplayer.test.ts::V1.9.4 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.3 Mechanikpaket L"]
+};
+
+const ONR_V1_9_4_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.4",
+  status: "human_playable_v1_9_4_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.4 Mechanikpaket M"],
+  scenarioTests: ["data/scenarios/v194-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.4 Mechanikpaket M", "apps/server/src/multiplayer.test.ts::V1.9.4 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.4 Mechanikpaket M"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -972,6 +1003,18 @@ const ONR_V1_9_2_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_188_ai-chief-financial-officer": { advancementRequirement: 5, agendaPoints: 2 },
   "onr_v1_211_polymer-breakthrough": { advancementRequirement: 6, agendaPoints: 3 },
   "onr_v1_235_data-naga": { rezCost: 9, strength: 5 }
+};
+
+const ONR_V1_9_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_207_netwatch-operations-office": { advancementRequirement: 5, agendaPoints: 2 },
+  "onr_v1_213_private-cybernet-police": { advancementRequirement: 7, agendaPoints: 2 },
+  "onr_v1_251_jack-attack": { rezCost: 3, strength: 3 },
+  "onr_v1_271_tko-2-0": { rezCost: 7, strength: 4 }
+};
+
+const ONR_V1_9_4_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_208_on-call-solo-team": { advancementRequirement: 4, agendaPoints: 3 },
+  "onr_v1_217_strike-force-kali": { advancementRequirement: 6, agendaPoints: 3 }
 };
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
@@ -1163,6 +1206,19 @@ const ONR_V1_9_2_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_188_ai-chief-financial-officer": "[A]: Shuffle cards stored in HQ and the Archives into R&D; then draw five cards.",
   "onr_v1_211_polymer-breakthrough": "Gain 1 at the start of each of your turns.",
   "onr_v1_235_data-naga": "[Subroutine] Trash a program.\n[Subroutine] End the run."
+};
+
+const ONR_V1_9_3_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_207_netwatch-operations-office": "[A]: Trace 7 - If trace is successful, give Runner a tag.",
+  "onr_v1_213_private-cybernet-police": "[A]: Trace 7 - If trace is successful, give Runner a tag.",
+  "onr_v1_251_jack-attack":
+    "[Subroutine] For the remainder of the run, Runner cannot jack out.\n[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
+  "onr_v1_271_tko-2-0": "[Subroutine] End the run, and Runner forgoes his or her next action."
+};
+
+const ONR_V1_9_4_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_208_on-call-solo-team": "[A]: Do 1 meat damage. Use this ability only if Runner is tagged.",
+  "onr_v1_217_strike-force-kali": "[A]: Do 2 meat damage. Use this ability only if Runner is tagged."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -1953,6 +2009,8 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV194 = ONR_V1_9_4_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV193 = ONR_V1_9_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV192 = ONR_V1_9_2_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV191 = ONR_V1_9_1_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV190 = ONR_V1_9_0_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -1967,7 +2025,11 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV192
+  const textOverrides = isV194
+    ? ONR_V1_9_4_TEXT_OVERRIDES
+    : isV193
+    ? ONR_V1_9_3_TEXT_OVERRIDES
+    : isV192
     ? ONR_V1_9_2_TEXT_OVERRIDES
     : isV191
     ? ONR_V1_9_1_TEXT_OVERRIDES
@@ -1996,7 +2058,11 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV192
+  const numericOverrides = isV194
+    ? ONR_V1_9_4_NUMERIC_OVERRIDES
+    : isV193
+    ? ONR_V1_9_3_NUMERIC_OVERRIDES
+    : isV192
     ? ONR_V1_9_2_NUMERIC_OVERRIDES
     : isV191
     ? ONR_V1_9_1_NUMERIC_OVERRIDES
@@ -2025,7 +2091,11 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV192
+  const manifest = isV194
+    ? ONR_V1_9_4_RELEASE_MANIFEST
+    : isV193
+    ? ONR_V1_9_3_RELEASE_MANIFEST
+    : isV192
     ? ONR_V1_9_2_RELEASE_MANIFEST
     : isV191
     ? ONR_V1_9_1_RELEASE_MANIFEST

@@ -591,7 +591,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
-  it("V1.9.2 card release matchstart", async () => {
+  it("V1.9.4 card release matchstart", async () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]) return;
 
@@ -621,6 +621,18 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses.ai_supported).toBe(false);
     expect(cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.ai_supported).toBe(false);
     expect(cardsById["onr_v1_235_data-naga"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_207_netwatch-operations-office"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_213_private-cybernet-police"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_207_netwatch-operations-office"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_213_private-cybernet-police"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_208_on-call-solo-team"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_217_strike-force-kali"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_208_on-call-solo-team"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_217_strike-force-kali"]?.statuses.ai_supported).toBe(false);
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {
