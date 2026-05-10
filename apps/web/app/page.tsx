@@ -73,7 +73,6 @@ import {
   actionContextTitle,
   actionCostChips,
   aiPacingDelayMs,
-  actionGroupLabel,
   actionMatchesContext,
   actionSlotDisplay,
   baseActionSlotCapacity,
@@ -5596,11 +5595,6 @@ function LegalActionsPanel({
       </section>
     );
   }
-  const grouped = primaryActions.reduce<Record<string, LegalAction[]>>((acc, action) => {
-    const group = actionGroupLabel(action.type);
-    acc[group] = [...(acc[group] ?? []), action];
-    return acc;
-  }, {});
   const ownTurn = turnSideForView(view) === view.side;
   const ownActionDisplay = actionSlotDisplay(view.side, view.own.clicks, actionCapacity, ownTurn);
   return (
@@ -5613,17 +5607,12 @@ function LegalActionsPanel({
         <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={ownTurn} compact slotsOnly />
       </div>
       <div className="actions">
-        {Object.entries(grouped).map(([group, groupActions]) => (
-          <div className="actionGroup" key={group}>
-            <span>{group}</span>
-            {groupActions.map((action) => (
-              <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
-                <Play size={15} />
-                <span className="actionButtonLabel">{actionButtonLabel(action)}</span>
-                <CostChips action={action} />
-              </button>
-            ))}
-          </div>
+        {primaryActions.map((action) => (
+          <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
+            <Play size={15} />
+            <span className="actionButtonLabel">{actionButtonLabel(action)}</span>
+            <CostChips action={action} />
+          </button>
         ))}
         {selectedContext ? (
           <div className="actionGroup selectedActionGroup">
