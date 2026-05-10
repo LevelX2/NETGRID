@@ -271,7 +271,7 @@ export function aiPacingDelayMs(mode: AiPacingTriggerMode, hasPendingCue: boolea
   return Math.max(autoDismissMs, minimum);
 }
 
-export function serverBoardRows<T extends { id: string }>(servers: T[]): Array<{ kind: "remotes" | "centrals"; servers: T[] }> {
+export function serverBoardRows<T extends { id: string }>(servers: T[], viewerSide: Side): Array<{ kind: "remotes" | "centrals"; servers: T[] }> {
   const centralOrder = new Map([
     ["hq", 0],
     ["rd", 1],
@@ -280,10 +280,9 @@ export function serverBoardRows<T extends { id: string }>(servers: T[]): Array<{
   const central = servers.filter((server) => centralOrder.has(server.id)).sort((left, right) => centralOrder.get(left.id)! - centralOrder.get(right.id)!);
   const remotes = servers.filter((server) => /^remote_\d+$/.test(server.id)).sort((left, right) => remoteNumber(left.id) - remoteNumber(right.id));
   const other = servers.filter((server) => !centralOrder.has(server.id) && !/^remote_\d+$/.test(server.id));
-  return [
-    { kind: "centrals", servers: central },
-    { kind: "remotes", servers: [...remotes, ...other] }
-  ];
+  const centralRow = { kind: "centrals" as const, servers: central };
+  const remoteRow = { kind: "remotes" as const, servers: [...remotes, ...other] };
+  return viewerSide === "corp" ? [remoteRow, centralRow] : [centralRow, remoteRow];
 }
 
 export function normalizeVisibleTerms(value: string): string {

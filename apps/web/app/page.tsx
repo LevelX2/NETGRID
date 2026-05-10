@@ -42,7 +42,7 @@ import {
   X,
   ZoomIn
 } from "lucide-react";
-import { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netgrid/shared";
 import {
@@ -141,6 +141,8 @@ const AUDIO_STORAGE_KEY = "netgrid-s01-audio";
 const LEGACY_AUDIO_STORAGE_KEY = "netgrid-s01-audio";
 const ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
 const LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
+const CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
+const LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
 const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
@@ -158,6 +160,9 @@ const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = "V1.9.0";
 const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
+const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [300, 500, 750, 1000, 1250, 1500] as const;
+const CARD_TOOLTIP_HOVER_OPEN_DELAY_MS = 1000;
+const CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS = 120;
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -187,6 +192,22 @@ type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
 type DeckSideFilter = Side | "all";
 type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
+type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
+type CardTooltipMode = "simple" | "enhanced" | "image";
+
+type CardTooltipSettings = {
+  hoverOpenDelayMs: CardTooltipHoverDelayMs;
+  mode: CardTooltipMode;
+};
+
+const CardTooltipSettingsContext = createContext<CardTooltipSettings>({
+  hoverOpenDelayMs: CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
+  mode: "enhanced"
+});
+
+function useCardTooltipSettings(): CardTooltipSettings {
+  return useContext(CardTooltipSettingsContext);
+}
 
 type SeriesResultSummary = {
   seriesId: string;
@@ -684,6 +705,14 @@ function localCardImageUrl(cardId: string): string | undefined {
 function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
   if (value === 0 || value === 1500 || value === 2500 || value === 4000 || value === 6000) return value;
   return 2500;
+}
+
+function normalizeCardTooltipHoverDelayMs(value: unknown): CardTooltipHoverDelayMs {
+  return CARD_TOOLTIP_HOVER_DELAY_OPTIONS.includes(value as CardTooltipHoverDelayMs) ? (value as CardTooltipHoverDelayMs) : CARD_TOOLTIP_HOVER_OPEN_DELAY_MS;
+}
+
+function normalizeCardTooltipMode(value: unknown): CardTooltipMode {
+  return value === "simple" || value === "enhanced" || value === "image" ? value : "enhanced";
 }
 
 function formatCatalogTerm(value: string): string {
@@ -1282,6 +1311,8 @@ export default function Page() {
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] = useState<CueAutoDismissMs>(2500);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
+  const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
+  const [cardTooltipMode, setCardTooltipMode] = useState<CardTooltipMode>("enhanced");
   const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
   const [actionSlotCapacities, setActionSlotCapacities] = useState<Record<Side, number>>({
     runner: baseActionSlotCapacity("runner"),
@@ -1443,6 +1474,22 @@ export default function Page() {
   useEffect(() => {
     window.localStorage.setItem(ACTION_CUE_SETTINGS_STORAGE_KEY, JSON.stringify({ enabled: actionCuesEnabled, autoDismissMs: actionCueAutoDismissMs }));
   }, [actionCuesEnabled, actionCueAutoDismissMs]);
+
+  useEffect(() => {
+    const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as { hoverOpenDelayMs?: unknown; mode?: unknown };
+      setCardTooltipHoverDelayMs(normalizeCardTooltipHoverDelayMs(parsed.hoverOpenDelayMs));
+      setCardTooltipMode(normalizeCardTooltipMode(parsed.mode));
+    } catch {
+      removeLocalStorageKeys(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, JSON.stringify({ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }));
+  }, [cardTooltipHoverDelayMs, cardTooltipMode]);
 
   useEffect(() => {
     setCuePosition(parseCuePositionPreference(readLocalStorageWithLegacy(ACTION_CUE_POSITION_STORAGE_KEY, LEGACY_ACTION_CUE_POSITION_STORAGE_KEY)));
@@ -2828,6 +2875,7 @@ export default function Page() {
 
   if (!session || !payload || !activeView) {
     return (
+      <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
           <Brand subtitle={`${APP_STATUS_LABEL} · private Matches`} />
@@ -3254,6 +3302,8 @@ export default function Page() {
               actionCuesEnabled={actionCuesEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
+              cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
+              cardTooltipMode={cardTooltipMode}
               cardDisplayMode={cardDisplayMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
@@ -3262,6 +3312,8 @@ export default function Page() {
               onActionCuesEnabled={setActionCuesEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
+              onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
+              onCardTooltipMode={setCardTooltipMode}
               onCardDisplayMode={setCardDisplayMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
@@ -3271,10 +3323,12 @@ export default function Page() {
           </div>
         </div>
       </main>
+      </CardTooltipSettingsContext.Provider>
     );
   }
 
   return (
+    <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
     <main className="app activeMatch" data-theme={colorScheme}>
       <header className="topbar">
         <Brand subtitle={`${APP_STATUS_LABEL} · ${sideLabel(session.side)}${opponentDisplayName ? ` gegen ${opponentDisplayName}` : ""}`} />
@@ -3362,6 +3416,7 @@ export default function Page() {
             selectedContext={selectedPanelContext}
             hasHiddenContextActions={legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card"}
             cardContextActive={selectedActionContext?.kind === "card"}
+            actionCapacity={actionSlotCapacities[activeView.side]}
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
                         onAction={submitAction}
@@ -3370,7 +3425,7 @@ export default function Page() {
                         onClearContext={() => setSelectedActionContext(null)}
                       />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
-          <PlayerPanel view={activeView} title={`Du · ${sideLabel(activeView.side)}`} actionCapacity={actionSlotCapacities[activeView.side]} />
+          <PlayerPanel view={activeView} title={`Du · ${sideLabel(activeView.side)}`} />
           <SpecialZonesStrip view={activeView} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} compact onFocus={focusCard} />
         </aside>
 
@@ -3396,7 +3451,7 @@ export default function Page() {
             </div>
           ) : null}
           <div className="serverGrid">
-            {serverBoardRows(activeView.servers).map((row) =>
+            {serverBoardRows(activeView.servers, activeView.side).map((row) =>
               row.servers.length > 0 ? (
                 <div className={`serverRow ${row.kind}`} key={row.kind} data-testid={`server-row-${row.kind}`}>
                   {row.servers.map((server) => {
@@ -3641,6 +3696,8 @@ export default function Page() {
             actionCuesEnabled={actionCuesEnabled}
             audioEnabled={audioEnabled}
             audioVolume={audioVolume}
+            cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
+            cardTooltipMode={cardTooltipMode}
             cardDisplayMode={cardDisplayMode}
             colorScheme={colorScheme}
             cuePosition={cuePosition}
@@ -3651,6 +3708,8 @@ export default function Page() {
             onActionCuesEnabled={setActionCuesEnabled}
             onAudioEnabled={updateAudioEnabled}
             onAudioVolume={setAudioVolume}
+            onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
+            onCardTooltipMode={setCardTooltipMode}
             onCardDisplayMode={setCardDisplayMode}
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
@@ -3661,6 +3720,7 @@ export default function Page() {
         </OptionsDialog>
       ) : null}
     </main>
+    </CardTooltipSettingsContext.Provider>
   );
 }
 
@@ -4099,6 +4159,8 @@ function OptionsPanel({
   actionCuesEnabled,
   audioEnabled,
   audioVolume,
+  cardTooltipHoverDelayMs,
+  cardTooltipMode,
   cardDisplayMode,
   colorScheme,
   cuePosition,
@@ -4109,6 +4171,8 @@ function OptionsPanel({
   onActionCuesEnabled,
   onAudioEnabled,
   onAudioVolume,
+  onCardTooltipHoverDelayMs,
+  onCardTooltipMode,
   onCardDisplayMode,
   onColorScheme,
   onCuePosition,
@@ -4120,6 +4184,8 @@ function OptionsPanel({
   actionCuesEnabled: boolean;
   audioEnabled: boolean;
   audioVolume: number;
+  cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
+  cardTooltipMode: CardTooltipMode;
   cardDisplayMode: CardDisplayMode;
   colorScheme: ColorScheme;
   cuePosition: CuePositionPreference;
@@ -4130,6 +4196,8 @@ function OptionsPanel({
   onActionCuesEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
+  onCardTooltipHoverDelayMs(value: CardTooltipHoverDelayMs): void;
+  onCardTooltipMode(value: CardTooltipMode): void;
   onCardDisplayMode(value: CardDisplayMode): void;
   onColorScheme(value: ColorScheme): void;
   onCuePosition(value: CuePositionPreference): void;
@@ -4152,6 +4220,7 @@ function OptionsPanel({
         {session ? <SessionAccessSettings session={session} onCopyReconnectLink={onCopyReconnectLink} onDiscardLocalSession={onDiscardLocalSession} /> : null}
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
+        <CardTooltipSettings mode={cardTooltipMode} hoverOpenDelayMs={cardTooltipHoverDelayMs} onMode={onCardTooltipMode} onHoverOpenDelayMs={onCardTooltipHoverDelayMs} />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings enabled={actionCuesEnabled} position={cuePosition} autoDismissMs={actionCueAutoDismissMs} onEnabled={onActionCuesEnabled} onPosition={onCuePosition} onAutoDismissMs={onActionCueAutoDismissMs} />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
@@ -4284,6 +4353,46 @@ function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: C
         <ZoomIn size={15} />
         {!iconOnly ? "Kompakt" : <span className="srOnly">Kompakt</span>}
       </button>
+    </div>
+  );
+}
+
+function CardTooltipSettings({
+  mode,
+  hoverOpenDelayMs,
+  onMode,
+  onHoverOpenDelayMs
+}: {
+  mode: CardTooltipMode;
+  hoverOpenDelayMs: CardTooltipHoverDelayMs;
+  onMode(value: CardTooltipMode): void;
+  onHoverOpenDelayMs(value: CardTooltipHoverDelayMs): void;
+}) {
+  return (
+    <div className="cardTooltipSettings">
+      <div>
+        <span className="settingsTitle">Kartentooltip</span>
+        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+      </div>
+      <label>
+        Modus
+        <select value={mode} onChange={(event) => onMode(normalizeCardTooltipMode(event.target.value))}>
+          <option value="simple">Einfach</option>
+          <option value="enhanced">Verbessert</option>
+          <option value="image">Kartenbild</option>
+        </select>
+      </label>
+      <label>
+        Hover-Verzögerung
+        <select value={hoverOpenDelayMs} onChange={(event) => onHoverOpenDelayMs(normalizeCardTooltipHoverDelayMs(Number(event.target.value)))}>
+          <option value={300}>0,3 Sekunden</option>
+          <option value={500}>0,5 Sekunden</option>
+          <option value={750}>0,75 Sekunden</option>
+          <option value={1000}>1,0 Sekunden</option>
+          <option value={1250}>1,25 Sekunden</option>
+          <option value={1500}>1,5 Sekunden</option>
+        </select>
+      </label>
     </div>
   );
 }
@@ -4719,6 +4828,7 @@ function LegalActionsPanel({
   selectedContext,
   hasHiddenContextActions,
   cardContextActive = false,
+  actionCapacity,
   disabled,
   highlighted = false,
   onAction,
@@ -4732,6 +4842,7 @@ function LegalActionsPanel({
   selectedContext: ActionContext | null;
   hasHiddenContextActions: boolean;
   cardContextActive?: boolean;
+  actionCapacity: number;
   disabled: boolean;
   highlighted?: boolean;
   onAction(action: LegalAction): void;
@@ -4799,9 +4910,17 @@ function LegalActionsPanel({
     acc[group] = [...(acc[group] ?? []), action];
     return acc;
   }, {});
+  const ownTurn = turnSideForView(view) === view.side;
+  const ownActionDisplay = actionSlotDisplay(view.side, view.own.clicks, actionCapacity, ownTurn);
   return (
     <section className={`section ${highlighted ? "cueHighlight" : ""}`} data-testid="legal-actions">
-      <h2>Mögliche Aktionen</h2>
+      <div className="legalActionsHeader">
+        <h2>Mögliche Aktionen</h2>
+      </div>
+      <div className={`actionAvailability side-${view.side}`} data-testid="action-availability">
+        <span className="actionAvailabilityCount">{`Noch ${ownActionDisplay.available}`}</span>
+        <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={ownTurn} compact slotsOnly />
+      </div>
       <div className="actions">
         {Object.entries(grouped).map(([group, groupActions]) => (
           <div className="actionGroup" key={group}>
@@ -5069,7 +5188,6 @@ function ChronicleEntry({
   displayMode: CardDisplayMode;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
-  const tooltipText = card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle;
   const titleContainsCard = Boolean(item.cardTitle && item.title.includes(item.cardTitle));
   const previewCard = card ? visibleCardFromCatalogDetail(card) : null;
   return (
@@ -5103,10 +5221,17 @@ function ChronicleEntry({
           </div>
         ) : null}
         {item.cardTitle && !titleContainsCard ? (
-          <button className="chronicleCardLine" type="button" disabled={!previewCard} onClick={() => previewCard && onFocusCard(previewCard)} title={tooltipText}>
+          <ChronicleCardTrigger
+            className="chronicleCardLine"
+            card={card}
+            item={item}
+            displayMode={displayMode}
+            disabled={!previewCard}
+            title={item.cardTitle}
+            onClick={() => previewCard && onFocusCard(previewCard)}
+          >
             Karte: {item.cardTitle}
-            <ChronicleCardHover card={card} item={item} displayMode={displayMode} />
-          </button>
+          </ChronicleCardTrigger>
         ) : null}
         {item.cardText ? <p className="chronicleEffect">Effekt: {item.cardText}</p> : null}
       </div>
@@ -5130,59 +5255,259 @@ function ChronicleTitle({
   if (!item.cardTitle) return <>{item.title}</>;
   const index = item.title.indexOf(item.cardTitle);
   if (index < 0) return <>{item.title}</>;
-  const title = card ? [card.title, ...item.cardDetailLines, card.text].filter(Boolean).join("\n") : item.cardTitle;
   return (
     <>
       {item.title.slice(0, index)}
-      <button className={`chronicleCardName ${previewCard ? "hasDetail" : ""}`} type="button" disabled={!previewCard} onClick={() => previewCard && onFocusCard(previewCard)} title={title}>
+      <ChronicleCardTrigger
+        className={`chronicleCardName ${previewCard ? "hasDetail" : ""}`}
+        card={card}
+        item={item}
+        displayMode={displayMode}
+        disabled={!previewCard}
+        title={item.cardTitle}
+        onClick={() => previewCard && onFocusCard(previewCard)}
+      >
         {item.cardTitle}
-        <ChronicleCardHover card={card} item={item} displayMode={displayMode} />
-      </button>
+      </ChronicleCardTrigger>
       {item.title.slice(index + item.cardTitle.length)}
     </>
   );
 }
 
-function ChronicleCardHover({ card, item, displayMode }: { card: CatalogCardDetail | null; item: ChronicleItem; displayMode: CardDisplayMode }) {
-  if (!card) return null;
-  const imageUrl = displayMode === "placeholder" ? localCardImageUrl(card.catalogCardId) : undefined;
-  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(card.type);
-  const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(card.type);
-  const installCost = card.numeric.installCost;
-  const operationCost = card.numeric.cost;
+function ChronicleCardTrigger({
+  className,
+  card,
+  item,
+  displayMode,
+  disabled,
+  title,
+  onClick,
+  children
+}: {
+  className: string;
+  card: CatalogCardDetail | null;
+  item: ChronicleItem;
+  displayMode: CardDisplayMode;
+  disabled: boolean;
+  title: string;
+  onClick(): void;
+  children: ReactNode;
+}) {
+  const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
+  const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
+  const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
+
+  const imageUrl = card ? localCardImageUrl(card.catalogCardId) : undefined;
+  const showImageTooltip = tooltipMode === "image" && Boolean(imageUrl);
+  const rulesLines = card ? rulesTextLines(card.text) : [];
+  const hasTooltipTextContent = Boolean(card && (card.title || item.cardDetailLines.length > 0 || rulesLines.length > 0));
+  const tooltipEnabled = Boolean(card) && !disabled && (showImageTooltip || hasTooltipTextContent);
+  const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
+  const cardType = card?.type ?? "";
+  const tooltipId =
+    tooltipEnabled && card
+      ? `chronicle-card-tooltip-${`${card.catalogCardId}-${item.id}`.replace(/[^A-Za-z0-9_-]/g, "-")}`
+      : undefined;
+  const showHardwareOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isHardwareCardType(cardType);
+  const showOperationOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isOperationCardType(cardType);
+  const tooltipStats = card
+    ? [
+        card.numeric.cost !== null ? { icon: "¢", label: "Kosten", value: String(card.numeric.cost) } : null,
+        card.numeric.installCost !== null ? { icon: "↓", label: "Install", value: String(card.numeric.installCost) } : null,
+        card.numeric.rezCost !== null ? { icon: "R", label: "Rez", value: String(card.numeric.rezCost) } : null,
+        card.numeric.trashCost !== null ? { icon: "🗑", label: "Trash", value: String(card.numeric.trashCost) } : null,
+        card.numeric.strength !== null ? { icon: "⚔", label: "Stärke", value: String(card.numeric.strength) } : null,
+        card.numeric.memoryCost !== null ? { icon: "MU", label: "MU", value: String(card.numeric.memoryCost) } : null
+      ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
+    : [];
+
+  const clearOpenTimer = () => {
+    if (openTimerRef.current !== null) {
+      clearTimeout(openTimerRef.current);
+      openTimerRef.current = null;
+    }
+  };
+
+  const clearCloseTimer = () => {
+    if (closeTimerRef.current !== null) {
+      clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
+  const estimatedTooltipHeight = (): number => {
+    if (showImageTooltip) return 320;
+    const base = tooltipMode === "enhanced" ? 132 : 78;
+    return Math.min(280, base + rulesLines.length * 20);
+  };
+
+  const computedTooltipWidth = (): number => {
+    const viewportLimit = Math.max(160, window.innerWidth - 32);
+    return showImageTooltip ? Math.min(220, viewportLimit) : Math.min(300, viewportLimit);
+  };
+
+  const updateTooltipPlacement = () => {
+    const element = triggerRef.current;
+    if (!element) return;
+    const rect = element.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const tooltipHeight = estimatedTooltipHeight();
+    const nextPlacement = spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
+    if (tooltipEnabled) {
+      const tooltipWidth = computedTooltipWidth();
+      const margin = 16;
+      const left = Math.max(margin, Math.min(rect.left + 6, window.innerWidth - tooltipWidth - margin));
+      setTooltipPositionStyle(
+        nextPlacement === "below"
+          ? { left: `${left}px`, top: `${rect.bottom + 8}px` }
+          : { left: `${left}px`, top: `${rect.top - 8}px` }
+      );
+      setTooltipPlacement(nextPlacement);
+    }
+  };
+
+  const scheduleOpen = () => {
+    if (!tooltipEnabled) return;
+    clearCloseTimer();
+    if (tooltipHoverVisible) return;
+    clearOpenTimer();
+    openTimerRef.current = setTimeout(() => {
+      openTimerRef.current = null;
+      setTooltipHoverVisible(true);
+    }, hoverOpenDelayMs);
+  };
+
+  const scheduleClose = () => {
+    clearOpenTimer();
+    clearCloseTimer();
+    closeTimerRef.current = setTimeout(() => {
+      closeTimerRef.current = null;
+      setTooltipHoverVisible(false);
+    }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
+  };
+
+  useEffect(() => {
+    if (tooltipEnabled) return;
+    clearOpenTimer();
+    clearCloseTimer();
+    setTooltipHoverVisible(false);
+    setTooltipFocusVisible(false);
+    setTooltipPositionStyle({});
+  }, [tooltipEnabled]);
+
+  useEffect(() => {
+    if (!showTooltip) return;
+    updateTooltipPlacement();
+  }, [showTooltip, tooltipMode]);
+
+  useEffect(
+    () => () => {
+      clearOpenTimer();
+      clearCloseTimer();
+    },
+    []
+  );
+
   return (
-    <span className={`chronicleCardTooltip ${imageUrl ? "imageMode" : "textMode"}`} role="tooltip">
-      {imageUrl ? (
-        <span className={`chronicleCardImageFrame ${showHardwareOverlay || showOperationOverlay ? "withOverlay" : ""}`}>
-          <img className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
-          {showHardwareOverlay ? (
-            <HardwareImageOverlay
-              title={card.title}
-              rulesText={card.text}
-              className="chronicleHardwareOverlay"
-              maxLines={2}
-              {...(typeof installCost === "number" ? { installCost } : {})}
-            />
-          ) : showOperationOverlay ? (
-            <OperationImageOverlay
-              title={card.title}
-              rulesText={card.text}
-              className="chronicleHardwareOverlay"
-              maxLines={2}
-              {...(typeof operationCost === "number" ? { cost: operationCost } : {})}
-            />
-          ) : null}
+    <button
+      ref={triggerRef}
+      className={className}
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      title={title}
+      aria-describedby={tooltipId}
+      onFocus={() => {
+        updateTooltipPlacement();
+        if (tooltipEnabled) setTooltipFocusVisible(true);
+      }}
+      onBlur={() => setTooltipFocusVisible(false)}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "touch") return;
+        updateTooltipPlacement();
+        scheduleOpen();
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "touch") return;
+        scheduleClose();
+      }}
+    >
+      {children}
+      {tooltipId && card ? (
+        <span
+          className={`chronicleCardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
+          id={tooltipId}
+          role="tooltip"
+          style={tooltipPositionStyle}
+          onPointerEnter={(event) => {
+            if (event.pointerType === "touch") return;
+            clearCloseTimer();
+            clearOpenTimer();
+            if (!tooltipHoverVisible) setTooltipHoverVisible(true);
+          }}
+          onPointerLeave={(event) => {
+            if (event.pointerType === "touch") return;
+            scheduleClose();
+          }}
+        >
+          {showImageTooltip ? (
+            <span className={`chronicleCardImageFrame ${showHardwareOverlay || showOperationOverlay ? "withOverlay" : ""}`}>
+              <img className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
+              {showHardwareOverlay ? (
+                <HardwareImageOverlay
+                  title={card.title}
+                  rulesText={card.text}
+                  className="chronicleHardwareOverlay"
+                  maxLines={2}
+                  {...(typeof card.numeric.installCost === "number" ? { installCost: card.numeric.installCost } : {})}
+                />
+              ) : showOperationOverlay ? (
+                <OperationImageOverlay
+                  title={card.title}
+                  rulesText={card.text}
+                  className="chronicleHardwareOverlay"
+                  maxLines={2}
+                  {...(typeof card.numeric.cost === "number" ? { cost: card.numeric.cost } : {})}
+                />
+              ) : null}
+            </span>
+          ) : (
+            <>
+              <strong>{card.title}</strong>
+              {tooltipMode === "enhanced" ? (
+                <span className="cardTooltipStats">
+                  {tooltipStats.map((stat) => (
+                    <span key={`${card.catalogCardId}-chronicle-tooltip-stat-${stat.label}`} className="cardTooltipStat" title={stat.label}>
+                      <span className="icon">{stat.icon}</span>
+                      <span>{stat.value}</span>
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+              {tooltipMode === "enhanced"
+                ? item.cardDetailLines.map((line) => (
+                    <span key={line}>{line}</span>
+                  ))
+                : null}
+              <span className="cardTooltipText">
+                {rulesLines.map((line, index) => (
+                  <span key={`${card.catalogCardId}-chronicle-tooltip-rules-${index}`} className={isSubroutineRuleLine(card.type, card.text, line) ? "subroutineLine" : undefined}>
+                    {shouldAddFallbackSubroutineMarker(card.type, card.text, line) ? <SubroutineIcon /> : null}
+                    {renderRuleTextSegments(line, `${card.catalogCardId}-chronicle-tooltip-rules-${index}`)}
+                  </span>
+                ))}
+              </span>
+            </>
+          )}
         </span>
-      ) : (
-        <>
-          <strong>{card.title}</strong>
-          {item.cardDetailLines.map((line) => (
-            <span key={line}>{line}</span>
-          ))}
-          <p>{card.text}</p>
-        </>
-      )}
-    </span>
+      ) : null}
+    </button>
   );
 }
 
@@ -6203,7 +6528,7 @@ function OpponentPanel({ view, connected, displayName, actionCapacity }: { view:
   );
 }
 
-function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title: string; actionCapacity: number }) {
+function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
   const turnSide = turnSideForView(view);
   const isTurn = turnSide === view.side;
   const RoleIcon = view.side === "runner" ? RunnerRoleIcon : CorpRoleIcon;
@@ -6216,7 +6541,6 @@ function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title:
         {view.side === "runner" ? <Stat label="Tags" value={view.own.tags} icon={<TagIcon size={14} />} /> : null}
         {view.side === "runner" ? <Stat label="Core" value={view.own.coreDamage ?? 0} /> : null}
       </div>
-      <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={isTurn} />
       {view.deckMetadata ? (
         <div className="deckMini">
           <span>{view.deckMetadata.own.deckName}</span>
@@ -6228,8 +6552,34 @@ function PlayerPanel({ view, title, actionCapacity }: { view: PlayerView; title:
   );
 }
 
-function ActionSlotMeter({ side, currentClicks, displayCapacity, active, compact = false }: { side: Side; currentClicks: number; displayCapacity: number; active: boolean; compact?: boolean }) {
+function ActionSlotMeter({
+  side,
+  currentClicks,
+  displayCapacity,
+  active,
+  compact = false,
+  slotsOnly = false
+}: {
+  side: Side;
+  currentClicks: number;
+  displayCapacity: number;
+  active: boolean;
+  compact?: boolean;
+  slotsOnly?: boolean;
+}) {
   const display = actionSlotDisplay(side, currentClicks, displayCapacity, active);
+  if (slotsOnly) {
+    return (
+      <div className={`actionSlotsInline ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
+        <span className="srOnly">{display.label}</span>
+        <div className="actionSlots" aria-hidden="true">
+          {display.slots.map((slot) => (
+            <span className={`actionSlot ${slot.state} ${slot.bonus ? "bonus" : ""}`} key={slot.index} />
+          ))}
+        </div>
+      </div>
+    );
+  }
   return (
     <div className={`actionResource ${active ? "active" : "inactive"} ${compact ? "compact" : ""}`} aria-label={`${display.label}${active ? " verfügbar" : " aktuell"}`} data-testid="action-slots">
       <div className="resourceStatTop">
@@ -6412,10 +6762,16 @@ function CardView({
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction?(action: LegalAction): void;
 }) {
+  const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
   const cardRef = useRef<HTMLButtonElement | null>(null);
+  const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const [actionMenuPlacement, setActionMenuPlacement] = useState<"above" | "below">("below");
   const [suppressCardTooltip, setSuppressCardTooltip] = useState(false);
+  const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
+  const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
@@ -6425,11 +6781,26 @@ function CardView({
   const detailLines = card.known ? cardDetailLines(previewCard) : [];
   const rulesText = card.known ? (card.rulesText ?? "") : "";
   const hasRulesText = rulesText.length > 0;
+  const hasRulesLines = rulesTextLines(rulesText).length > 0;
   const hasSubroutineMarkers = rulesTextLines(rulesText).some((line) => isSubroutineRuleLine(card.type ?? "", rulesText, line));
   const tooltipText = card.known ? [card.title, ...detailLines, rulesText].filter(Boolean).join("\n") : undefined;
-  const showTooltip = card.known && hasRulesText && !showCardActions && !suppressCardTooltip;
-  const tooltipId = showTooltip ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
-  const nativeTitle = showTooltip || showCardActions || suppressCardTooltip ? undefined : tooltipText;
+  const tooltipImageUrl = card.known ? (card.definitionId ? localCardImageUrl(card.definitionId) : undefined) ?? card.imageUrl : undefined;
+  const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
+  const hasTooltipTextContent = Boolean(card.title) || detailLines.length > 0 || hasRulesLines;
+  const tooltipEnabled = card.known && !showCardActions && !suppressCardTooltip && (showImageTooltip || hasTooltipTextContent);
+  const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
+  const tooltipId = tooltipEnabled ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const nativeTitle = tooltipEnabled || showCardActions || suppressCardTooltip ? undefined : tooltipText;
+  const tooltipStats = card.known
+    ? [
+        card.cost !== undefined ? { icon: "¢", label: "Kosten", value: String(card.cost) } : null,
+        card.installCost !== undefined ? { icon: "↓", label: "Install", value: String(card.installCost) } : null,
+        card.rezCost !== undefined ? { icon: "R", label: "Rez", value: String(card.rezCost) } : null,
+        card.trashCost !== undefined ? { icon: "🗑", label: "Trash", value: String(card.trashCost) } : null,
+        card.strength !== undefined ? { icon: "⚔", label: "Stärke", value: String(card.strength) } : null,
+        card.memoryCost !== undefined ? { icon: "MU", label: "MU", value: String(card.memoryCost) } : null
+      ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
+    : [];
   const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const isHardwareImageCard = Boolean(visualImageUrl) && card.known && isHardwareCardType(card.type) && hasGeneratedCardArt(card.definitionId);
@@ -6445,21 +6816,98 @@ function CardView({
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const cardAriaLabel = card.known ? `Karte ${card.title}${advancementLabel ? `, ${advancementLabel}` : ""}` : advancementLabel ? `Verdeckte Karte, ${advancementLabel}` : "Verdeckte Karte";
 
+  const estimatedTooltipHeight = (): number => {
+    if (showImageTooltip) return 320;
+    const ruleLineCount = rulesTextLines(rulesText).length;
+    const base = tooltipMode === "enhanced" ? 132 : 78;
+    return Math.min(280, base + ruleLineCount * 20);
+  };
+
+  const computedTooltipWidth = (): number => {
+    const viewportLimit = Math.max(160, window.innerWidth - 32);
+    return showImageTooltip ? Math.min(220, viewportLimit) : Math.min(300, viewportLimit);
+  };
+
+  const clearTooltipOpenTimer = () => {
+    if (tooltipOpenTimerRef.current !== null) {
+      clearTimeout(tooltipOpenTimerRef.current);
+      tooltipOpenTimerRef.current = null;
+    }
+  };
+
+  const clearTooltipCloseTimer = () => {
+    if (tooltipCloseTimerRef.current !== null) {
+      clearTimeout(tooltipCloseTimerRef.current);
+      tooltipCloseTimerRef.current = null;
+    }
+  };
+
   const updateOverlayPlacement = () => {
     const element = cardRef.current;
     if (!element) return;
     const cardRect = element.getBoundingClientRect();
-    const boundary = nearestTooltipBoundary(element);
-    const boundaryTop = Math.max(0, boundary.top);
-    const boundaryBottom = Math.min(window.innerHeight, boundary.bottom);
-    const spaceBelow = boundaryBottom - cardRect.bottom;
-    const spaceAbove = cardRect.top - boundaryTop;
-    const nextTooltipPlacement = spaceBelow < 118 && spaceAbove > spaceBelow ? "above" : "below";
+    const viewportHeight = window.innerHeight;
+    const spaceBelow = viewportHeight - cardRect.bottom;
+    const spaceAbove = cardRect.top;
+    const tooltipHeight = estimatedTooltipHeight();
+    const nextTooltipPlacement = spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
+    if (tooltipEnabled) {
+      const tooltipWidth = computedTooltipWidth();
+      const margin = 16;
+      const left = Math.max(margin, Math.min(cardRect.left + 6, window.innerWidth - tooltipWidth - margin));
+      setTooltipPositionStyle(
+        nextTooltipPlacement === "below"
+          ? { left: `${left}px`, top: `${cardRect.bottom + 8}px` }
+          : { left: `${left}px`, top: `${cardRect.top - 8}px` }
+      );
+    }
     const estimatedActionMenuHeight = Math.min(196, Math.max(58, actions.length * 54 + 16));
     const nextActionMenuPlacement = spaceBelow < estimatedActionMenuHeight && spaceAbove > spaceBelow ? "above" : "below";
-    if (card.known && hasRulesText) setTooltipPlacement(nextTooltipPlacement);
+    if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);
     if (hasCardActions) setActionMenuPlacement(nextActionMenuPlacement);
   };
+
+  const scheduleTooltipOpen = () => {
+    if (!tooltipEnabled) return;
+    clearTooltipCloseTimer();
+    if (tooltipHoverVisible) return;
+    clearTooltipOpenTimer();
+    tooltipOpenTimerRef.current = setTimeout(() => {
+      tooltipOpenTimerRef.current = null;
+      setTooltipHoverVisible(true);
+    }, hoverOpenDelayMs);
+  };
+
+  const scheduleTooltipClose = () => {
+    clearTooltipOpenTimer();
+    clearTooltipCloseTimer();
+    tooltipCloseTimerRef.current = setTimeout(() => {
+      tooltipCloseTimerRef.current = null;
+      setTooltipHoverVisible(false);
+    }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
+  };
+
+  useEffect(() => {
+    if (tooltipEnabled) return;
+    clearTooltipOpenTimer();
+    clearTooltipCloseTimer();
+    setTooltipHoverVisible(false);
+    setTooltipFocusVisible(false);
+    setTooltipPositionStyle({});
+  }, [tooltipEnabled]);
+
+  useEffect(() => {
+    if (!showTooltip) return;
+    updateOverlayPlacement();
+  }, [showTooltip, tooltipMode]);
+
+  useEffect(
+    () => () => {
+      clearTooltipOpenTimer();
+      clearTooltipCloseTimer();
+    },
+    []
+  );
 
   return (
     <div className={`cardSlot${showCardActions ? " actionMenuOpen" : ""}`}>
@@ -6479,10 +6927,20 @@ function CardView({
         }}
         onFocus={() => {
           updateOverlayPlacement();
+          if (tooltipEnabled) setTooltipFocusVisible(true);
           onFocus?.(card, hiddenSide);
         }}
-        onPointerEnter={updateOverlayPlacement}
-        onPointerLeave={() => setSuppressCardTooltip(false)}
+        onBlur={() => setTooltipFocusVisible(false)}
+        onPointerEnter={(event) => {
+          updateOverlayPlacement();
+          if (event.pointerType === "touch") return;
+          scheduleTooltipOpen();
+        }}
+        onPointerLeave={(event) => {
+          setSuppressCardTooltip(false);
+          if (event.pointerType === "touch") return;
+          scheduleTooltipClose();
+        }}
         aria-label={cardAriaLabel}
         aria-describedby={tooltipId}
         title={nativeTitle}
@@ -6516,19 +6974,52 @@ function CardView({
         {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
         {tooltipId ? (
-          <span className={`cardTooltip ${tooltipPlacement}`} id={tooltipId} role="tooltip">
-            <strong>{card.title}</strong>
-            {detailLines.map((line) => (
-              <span key={line}>{line}</span>
-            ))}
-            <span className="cardTooltipText">
-              {rulesTextLines(rulesText).map((line, index) => (
-                <span key={`${card.instanceId}-tooltip-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
-                  {shouldAddFallbackSubroutineMarker(card.type ?? "", rulesText, line) ? <SubroutineIcon /> : null}
-                  {renderRuleTextSegments(line, `${card.instanceId}-tooltip-rules-${index}`)}
+          <span
+            className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
+            id={tooltipId}
+            role="tooltip"
+            style={tooltipPositionStyle}
+            onPointerEnter={(event) => {
+              if (event.pointerType === "touch") return;
+              clearTooltipCloseTimer();
+              clearTooltipOpenTimer();
+              if (!tooltipHoverVisible) setTooltipHoverVisible(true);
+            }}
+            onPointerLeave={(event) => {
+              if (event.pointerType === "touch") return;
+              scheduleTooltipClose();
+            }}
+          >
+            {showImageTooltip ? (
+              <img className="cardTooltipImage" src={tooltipImageUrl} alt={`Kartenbild ${card.title ?? "Karte"}`} />
+            ) : (
+              <>
+                <strong>{card.title}</strong>
+                {tooltipMode === "enhanced" ? (
+                  <span className="cardTooltipStats">
+                    {tooltipStats.map((stat) => (
+                      <span key={`${card.instanceId}-tooltip-stat-${stat.label}`} className="cardTooltipStat" title={stat.label}>
+                        <span className="icon">{stat.icon}</span>
+                        <span>{stat.value}</span>
+                      </span>
+                    ))}
+                  </span>
+                ) : null}
+                {tooltipMode === "enhanced"
+                  ? detailLines.map((line) => (
+                      <span key={line}>{line}</span>
+                    ))
+                  : null}
+                <span className="cardTooltipText">
+                  {rulesTextLines(rulesText).map((line, index) => (
+                    <span key={`${card.instanceId}-tooltip-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
+                      {shouldAddFallbackSubroutineMarker(card.type ?? "", rulesText, line) ? <SubroutineIcon /> : null}
+                      {renderRuleTextSegments(line, `${card.instanceId}-tooltip-rules-${index}`)}
+                    </span>
+                  ))}
                 </span>
-              ))}
-            </span>
+              </>
+            )}
           </span>
         ) : null}
       </button>
@@ -6622,17 +7113,6 @@ function hashString(value: string): number {
     hash = Math.imul(hash, 16777619);
   }
   return hash >>> 0;
-}
-
-function nearestTooltipBoundary(element: HTMLElement): DOMRect {
-  let current = element.parentElement;
-  while (current) {
-    const style = window.getComputedStyle(current);
-    const overflow = `${style.overflow} ${style.overflowY} ${style.overflowX}`;
-    if (/(auto|scroll|hidden|clip)/.test(overflow)) return current.getBoundingClientRect();
-    current = current.parentElement;
-  }
-  return new DOMRect(0, 0, window.innerWidth, window.innerHeight);
 }
 
 function cardDetailLines(card: VisibleCard): string[] {
