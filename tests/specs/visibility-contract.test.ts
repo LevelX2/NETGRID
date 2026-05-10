@@ -428,6 +428,25 @@ describe("Client visibility contract", () => {
     expect(serialized).not.toMatch(/[A-Za-z]:\\/);
   });
 
+  it("keeps V1.9.0 AI approval artifacts free of runtime hidden-info payloads", () => {
+    const hints = JSON.parse(readFileSync("data/ai/ai-card-hints-deck-legal-v190.json", "utf8"));
+    const manifest = JSON.parse(readFileSync("data/manifests/deck-legal-ai-approval-v190-manifest.json", "utf8"));
+    const scenario = JSON.parse(readFileSync("data/scenarios/ai-deck-legal-v190-smokes.json", "utf8"));
+    const serialized = JSON.stringify({ hints, manifest, scenario });
+
+    expect(hints.cards).toHaveLength(5);
+    expect(manifest.cards).toHaveLength(5);
+    expect(scenario.id).toBe("ai-deck-legal-v190-smokes");
+    expect(serialized).not.toMatch(/"cardInstances"\s*:/);
+    expect(serialized).not.toMatch(/"privatePayload"\s*:/);
+    expect(serialized).not.toMatch(/"sessionToken"\s*:/);
+    expect(serialized).not.toMatch(/"reconnectToken"\s*:/);
+    expect(serialized).not.toMatch(/"joinToken"\s*:/);
+    expect(serialized).not.toMatch(/"tokenHash"\s*:/);
+    expect(serialized).not.toMatch(/"fullState"\s*:/);
+    expect(serialized).not.toMatch(/[A-Za-z]:\\/);
+  });
+
   it("validates locally playable O:NR cards through the deck API when the local overlay is present", () => {
     const localPlayableRunnerCards = catalogListResponse(new URLSearchParams()).body.cards.filter(
       (card) => card.catalogCardId.startsWith("onr_v1_") && card.side === "runner" && card.statuses.playable && card.statuses.deck_legal

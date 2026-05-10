@@ -6,6 +6,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS
 } from "@netgrid/catalog";
@@ -1603,7 +1604,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     }
   });
 
-  it("marks the V1.7.1 to V1.8.1 and legacy open64 slices as AI-supported for custom AI deckbuilding", () => {
+  it("marks the V1.7.1 to V1.8.1, legacy open64 and V1.9.0 slices as AI-supported for custom AI deckbuilding", () => {
     const runtimeCardsById = createRuntimeCardsById();
 
     expect(DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS).toHaveLength(28);
@@ -1618,6 +1619,16 @@ describe("MVP 0.3 AI simulation harness", () => {
 
     expect(DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS).toHaveLength(36);
     for (const cardId of DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS) {
+      const card = runtimeCardsById[cardId];
+      expect(card, cardId).toBeDefined();
+      expect(card?.statuses.human_playable, cardId).toBe(true);
+      expect(card?.statuses.deck_legal, cardId).toBe(true);
+      expect(card?.statuses.format_legal, cardId).toBe(true);
+      expect(card?.statuses.ai_supported, cardId).toBe(true);
+    }
+
+    expect(DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS).toHaveLength(5);
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS) {
       const card = runtimeCardsById[cardId];
       expect(card, cardId).toBeDefined();
       expect(card?.statuses.human_playable, cardId).toBe(true);

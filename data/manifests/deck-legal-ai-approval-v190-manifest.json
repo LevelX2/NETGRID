@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-batch-manifest-v1",
+  "id": "deck-legal-ai-approval-v190-manifest",
+  "batchId": "deck_legal_ai_approval_v190",
+  "status": "implemented_for_ai_approval",
+  "aiHintsId": "ai-card-hints-deck-legal-v190",
+  "scenarioId": "ai-deck-legal-v190-smokes",
+  "gateAssertions": {
+    "allSliceCardsRuntimeCatalogReady": true,
+    "allSliceCardsEngineSupported": true,
+    "allSliceCardsHumanPlayable": true,
+    "allSliceCardsDeckLegal": true,
+    "allSliceCardsFormatLegal": true,
+    "allSliceCardsHaveAiHints": true,
+    "allSliceCardsHaveScenarioRefs": true,
+    "aiSupportedRequiresHumanPlayableDeckLegalFormatLegal": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenInfoSafe": true,
+    "v140CorpPlanRegressionGreen": true,
+    "v141RunnerPlanRegressionGreen": true,
+    "noBulkOnrAiApproval": true,
+    "noNewMechanics": true,
+    "noCardTextParser": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true,
+    "noOfficialAssets": true,
+    "noPublicPlatformFeatures": true
+  },
+  "cards": [
+    {
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_005_bartmoss-memorial-icebreaker",
+      "scenarioRefs": [
+        "runner_v190_random_breakers_and_black_ops_punish"
+      ]
+    },
+    {
+      "cardId": "onr_v1_007_blink",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_007_blink",
+      "scenarioRefs": [
+        "runner_v190_random_breakers_and_black_ops_punish"
+      ]
+    },
+    {
+      "cardId": "onr_v1_115_terrorist-reprisal",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_115_terrorist-reprisal",
+      "scenarioRefs": [
+        "runner_v190_random_breakers_and_black_ops_punish"
+      ]
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_223_banpei",
+      "scenarioRefs": [
+        "corp_v190_banpei_and_vacuum_link_defense"
+      ]
+    },
+    {
+      "cardId": "onr_v1_275_vacuum-link",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_275_vacuum-link",
+      "scenarioRefs": [
+        "corp_v190_banpei_and_vacuum_link_defense"
+      ]
+    }
+  ],
+  "deferredCards": []
+}

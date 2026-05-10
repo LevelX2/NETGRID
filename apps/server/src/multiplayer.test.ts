@@ -600,7 +600,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(cardsById["onr_v1_115_terrorist-reprisal"]?.statuses.human_playable).toBe(true);
     expect(cardsById["onr_v1_223_banpei"]?.statuses.human_playable).toBe(true);
     expect(cardsById["onr_v1_275_vacuum-link"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(false);
     expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(false);
     expect(cardsById["onr_v1_030_grubb"]?.statuses.human_playable).toBe(false);
@@ -2416,6 +2416,47 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(created.playerView.deckMetadata?.opponent.deckName).toBe("King of the Road");
     expect(JSON.stringify(record?.match.deckSetup)).not.toContain("cards");
     expect(JSON.stringify(created)).not.toMatch(/onr_v1_006_black-dahlia|onr_v1_108_score|cardInstances|privatePayload|joinToken|tokenHash/);
+  });
+
+  it("accepts O:NR origins AI runner and corp snapshots in selected KI deck mode", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "onr-origins-ai-start" });
+
+    const runnerAiCreated = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "onr-origins-runner-ai",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "onr_origin_runner_ai_snapshot_v1",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      aiDeckPolicy: "selected"
+    });
+    const runnerAiRecord = await service.loadForTest(runnerAiCreated.matchId);
+    expect(runnerAiRecord?.match.deckSetup.runnerSnapshotId).toBe("onr_origin_runner_ai_snapshot_v1");
+    expect(runnerAiCreated.playerView.deckMetadata?.opponent.deckName).toBe("Runner Origins AI - Probe Pressure");
+
+    const corpAiCreated = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "onr-origins-corp-ai",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "onr_origin_corp_ai_snapshot_v1"
+      },
+      aiDeckPolicy: "selected"
+    });
+    const corpAiRecord = await service.loadForTest(corpAiCreated.matchId);
+    expect(corpAiRecord?.match.deckSetup.corpSnapshotId).toBe("onr_origin_corp_ai_snapshot_v1");
+    expect(corpAiCreated.playerView.deckMetadata?.opponent.deckName).toBe("Corp Origins AI - Tax & Punish");
+    expect(JSON.stringify(corpAiCreated)).not.toMatch(/onr_v1_203_hostile-takeover|onr_v1_297_overtime-incentives|cardInstances|privatePayload|joinToken|tokenHash/);
   });
 
   it("derives Human-vs-KI random side assignment server-side from the seed", async () => {

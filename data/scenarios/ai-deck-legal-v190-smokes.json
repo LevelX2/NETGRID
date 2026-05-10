@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "ai-runner-corp-card-approval-scenarios-v1",
+  "id": "ai-deck-legal-v190-smokes",
+  "batchId": "deck_legal_ai_approval_v190",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "corpAiProfileId": "corp-ai-v1.4.0-normal",
+  "status": "implemented_for_deck_legal_ai_approval_v190",
+  "assertions": {
+    "allBatchCardsHaveAiHints": true,
+    "allBatchCardsHaveScenarioRefs": true,
+    "aiSupportedOnlyAfterGate": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "runner_v190_random_breakers_and_black_ops_punish",
+      "planKinds": [
+        "build_rig",
+        "safe_probe_run",
+        "pressure_hq",
+        "contest_remote"
+      ],
+      "cards": [
+        "onr_v1_005_bartmoss-memorial-icebreaker",
+        "onr_v1_007_blink",
+        "onr_v1_115_terrorist-reprisal"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::marks the V1.7.1 to V1.8.1, legacy open64 and V1.9.0 slices as AI-supported for custom AI deckbuilding"
+      ]
+    },
+    {
+      "id": "corp_v190_banpei_and_vacuum_link_defense",
+      "planKinds": [
+        "build_scoring_remote",
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "cards": [
+        "onr_v1_223_banpei",
+        "onr_v1_275_vacuum-link"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::marks the V1.7.1 to V1.8.1, legacy open64 and V1.9.0 slices as AI-supported for custom AI deckbuilding"
+      ]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "DecisionDebug may include uncertainty markers such as unknown_corp_cards_remain_unknown.",
+    "DecisionDebug must not include hidden Corp card titles, private decklists, cardInstances or privatePayload.",
+    "Equal side-visible projections must keep the same selected action for deterministic seeds."
+  ]
+}
