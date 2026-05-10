@@ -375,7 +375,7 @@ function installLocation(serverLabel: string | undefined, zoneLabel: string | un
   if (zoneLabel === "Rig") return " im Rig";
   if (zoneLabel === "Resource") return " als Resource";
   const area = installAreaFromLabel(label);
-  if (area === "Außenserver") return " in einem Außenserver";
+  if (area === "Fort") return " in einem Fort";
   if (area === "ICE") return " als ICE";
   return "";
 }
@@ -388,14 +388,14 @@ function installDestinationForTitle(actor: Side | undefined, serverLabel: string
 
 function installAreaFromPayload(serverLabel: string | undefined, zoneLabel: string | undefined, label: string | undefined): string {
   if (zoneLabel) return zoneLabel;
-  if (serverLabel) return /Außenserver/.test(serverLabel) ? "Außenserver" : serverLabel;
+  if (serverLabel) return /Fort/.test(serverLabel) ? "Fort" : serverLabel;
   return installAreaFromLabel(label);
 }
 
 function installAreaFromLabel(label: string | undefined): string {
   if (!label) return "Installation";
   if (/ice|vor/i.test(label)) return "ICE";
-  if (/remote|außenserver|aussenserver/i.test(label)) return "Außenserver";
+  if (/remote|außenserver|aussenserver|fort/i.test(label)) return "Fort";
   return "Installation";
 }
 
@@ -409,7 +409,7 @@ function advanceTitlePart(cardTitle: string | undefined, cardType: string | null
 
 function displayServerLabel(label: string | undefined): string | undefined {
   if (!label) return undefined;
-  return label.replace(/\bRemote\s+(\d+)\b/g, "Außenserver $1").replace(/\bneuem Remote\b/g, "neuem Außenserver");
+  return label.replace(/\bRemote\s+(\d+)\b/g, "Fort $1").replace(/\bneuem Remote\b/g, "neuem Fort");
 }
 
 function runTargetFromLabel(label: string | undefined): string {

@@ -316,8 +316,8 @@ export function normalizeVisibleTerms(value: string): string {
   return value
     .replace(/\bR&D\b/g, "F&E (R&D)")
     .replace(/\bArchives\b/g, "Archive")
-    .replace(/\bRemote\s+(\d+)\b/g, "Außenserver $1")
-    .replace(/\bneuem Remote\b/g, "neuem Außenserver")
+    .replace(/\bRemote\s+(\d+)\b/g, "Fort $1")
+    .replace(/\bneuem Remote\b/g, "neuem Fort")
     .replace(/\bApproach\b/g, "Annäherung")
     .replace(/\bEncounter\b/g, "Begegnung")
     .replace(/\bAccess\b/g, "Zugriff")
@@ -329,9 +329,9 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   if (serverIdOrLabel === "hq" || serverIdOrLabel === "HQ") return "HQ";
   if (serverIdOrLabel === "rd" || serverIdOrLabel === "R&D") return "F&E (R&D)";
   if (serverIdOrLabel === "archives" || serverIdOrLabel === "Archives") return "Archive";
-  if (serverIdOrLabel === "new_remote") return "neuem Außenserver";
+  if (serverIdOrLabel === "new_remote") return "neuem Fort";
   const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
-  if (remote?.[1]) return `Außenserver ${remote[1]}`;
+  if (remote?.[1]) return `Fort ${remote[1]}`;
   return normalizeVisibleTerms(serverIdOrLabel);
 }
 

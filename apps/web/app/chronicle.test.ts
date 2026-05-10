@@ -200,9 +200,9 @@ describe("formatChronicleEvent", () => {
       }
     );
 
-    expect(hidden.title).toBe("Die Korp hat eine Installation in Außenserver 2 ausgebaut.");
+    expect(hidden.title).toBe("Die Korp hat eine Installation in Fort 2 ausgebaut.");
     expect(hidden.visibility).toBe("redacted");
-    expect(hidden.chips).toEqual(["Korp", "+1 Entwicklung", "Außenserver 2", "Verdeckt"]);
+    expect(hidden.chips).toEqual(["Korp", "+1 Entwicklung", "Fort 2", "Verdeckt"]);
     expect(JSON.stringify(hidden)).not.toContain("Simple Agenda");
     expect(visibleAgenda.title).toBe("Die Korp hat das Projekt Hostile Takeover weiterentwickelt.");
     expect(visibleAgenda.chips).toContain("+1 Entwicklung");

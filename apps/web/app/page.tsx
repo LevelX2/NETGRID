@@ -3535,6 +3535,9 @@ export default function Page() {
                       Aktualisieren
                     </button>
                   </div>
+                  <p className="openLanNotice" data-testid="open-lan-scope-note">
+                    Hier erscheinen nur private Duelle (Mensch gegen Mensch) mit aktivierter LAN-Sichtbarkeit.
+                  </p>
                   {openLanError ? (
                     <p className="notice openLanNotice" role="status">
                       {openLanError}
@@ -3913,27 +3916,27 @@ export default function Page() {
                       >
                         <div className="serverLayout">
                           <div className="serverLead">
-                            <button className="serverContextButton serverContextSideButton rigGroupSideLabel" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
-                              {serverDisplayLabel(server.id)}
-                            </button>
-                            <div className="serverLeadMeta">
-                              {runAction ? (
-                                <button
-                                  className="serverRunButton serverRunButtonSide"
-                                  type="button"
-                                  onClick={() => submitAction(runAction)}
-                                  disabled={Boolean(payload.winner) || connection !== "online"}
-                                  aria-label={`${actionButtonLabel(runAction)} starten`}
-                                  title={actionButtonLabel(runAction)}
-                                  data-testid="server-run-action"
-                                  data-server-id={server.id}
-                                >
-                                  <RunIcon size={13} />
-                                  <CostChips action={runAction} />
-                                </button>
-                              ) : null}
-                              {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
+                            <div className="serverLeadTop">
+                              <button className="serverContextButton serverContextSideButton rigGroupSideLabel" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
+                                {serverDisplayLabel(server.id)}
+                              </button>
+                              {cardCount !== null ? <span className="serverCount serverCountSideLabel">{formatCardCount(cardCount)}</span> : null}
                             </div>
+                            {runAction ? (
+                              <button
+                                className="serverRunButton serverRunButtonSide serverRunButtonCorner"
+                                type="button"
+                                onClick={() => submitAction(runAction)}
+                                disabled={Boolean(payload.winner) || connection !== "online"}
+                                aria-label={`${actionButtonLabel(runAction)} starten`}
+                                title={actionButtonLabel(runAction)}
+                                data-testid="server-run-action"
+                                data-server-id={server.id}
+                              >
+                                <RunIcon size={13} />
+                                <CostChips action={runAction} />
+                              </button>
+                            ) : null}
                           </div>
                           <div className="serverBody">
                             <div className="pairedServerLanes">
@@ -4325,8 +4328,7 @@ function StartLobbyPanel({
                 <span>{opponentReady ? "Gegenüber ist bereit." : "Gegenüber ist noch nicht bereit."}</span>
               </div>
               <div className="lobbyActions">
-                <button className="button primary" onClick={() => onReady(!selfReady)} type="button" disabled={connection !== "online"} data-testid="ready-toggle">
-                  <Check size={15} />
+                <button className={`button lobbyReadyToggle${selfReady ? " is-ready" : ""}`} onClick={() => onReady(!selfReady)} type="button" disabled={connection !== "online"} data-testid="ready-toggle">
                   {selfReady ? "Bereitschaft zurücknehmen" : "Ich bin bereit"}
                 </button>
                 {countdownActive ? (
@@ -5361,20 +5363,71 @@ function RunTimelineOverlay({
   cardDetailsById: Record<string, CatalogCardDetail>;
   highlighted?: boolean;
 }) {
-  if (!view.run) return null;
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
+  const [position, setPosition] = useState<RunOverlayPositionPreference>({ kind: "default" });
+  useEffect(() => {
+    setPosition(parseRunOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY)));
+  }, []);
+  useEffect(() => {
+    window.localStorage.setItem(RUN_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(position));
+  }, [position]);
+  const run = view.run;
+  if (!run) return null;
+
+  const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const rect = overlay.getBoundingClientRect();
+    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const dragOverlay = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const overlay = overlayRef.current;
+    const offset = dragOffsetRef.current;
+    if (!overlay || !offset) return;
+    const rect = overlay.getBoundingClientRect();
+    setPosition(
+      clampRunOverlayPosition(
+        ((event.clientX - offset.x) / window.innerWidth) * 100,
+        ((event.clientY - offset.y) / window.innerHeight) * 100,
+        window.innerWidth,
+        window.innerHeight,
+        rect.width,
+        rect.height
+      )
+    );
+  };
+  const stopDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    dragOffsetRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+
   const currentStep = currentRunTimelineStep(view, legalActions);
-  const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
+  const verticalSteps = [...RUN_TIMELINE_STEPS].reverse();
+  const encounteredIce = run.encounteredIce ? enrichVisibleCard(run.encounteredIce, cardDetailsById) : null;
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
+  const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
+
   return (
-    <div className="runTimelineOverlay" aria-live="polite" aria-atomic="true">
+    <div ref={overlayRef} className={`runTimelineOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} aria-live="polite" aria-atomic="true">
       <div className={`runTimeline active overlay ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline" role="status">
-        <div className="runTimelineHead">
+        <div
+          className="runTimelineHead runTimelineDragHandle"
+          onPointerDown={startDrag}
+          onPointerMove={dragOverlay}
+          onPointerUp={stopDrag}
+          onPointerCancel={stopDrag}
+          title="Run-Fenster verschieben"
+          aria-label="Run-Fenster verschieben"
+        >
           <RunIcon size={18} />
-          <span>{`Run auf ${serverDisplayLabel(view.run.attackedServerId)}`}</span>
+          <span>{`Run auf ${serverDisplayLabel(run.attackedServerId)}`}</span>
+          <Move size={15} aria-hidden="true" />
         </div>
         <div className="runSteps">
-          {RUN_TIMELINE_STEPS.map((step) => (
+          {verticalSteps.map((step) => (
             <span className={currentStep === step.id ? "current" : ""} key={step.id}>
               {step.label}
             </span>
@@ -5385,7 +5438,14 @@ function RunTimelineOverlay({
         {encounteredIce ? (
           <div className="encounterFocus">
             <span>Begegnung</span>
-            <strong>{encounteredIce.known ? [encounteredIce.title, encounteredIce.rulesText].filter(Boolean).join(" · ") : "Verdecktes ICE"}</strong>
+            {encounteredIce.known ? (
+              <div className="encounterFocusBody">
+                <strong>{encounteredIce.title ?? "Sichtbares ICE"}</strong>
+                {encounteredIce.rulesText ? <p>{encounteredIce.rulesText}</p> : null}
+              </div>
+            ) : (
+              <strong>Verdecktes ICE</strong>
+            )}
           </div>
         ) : null}
       </div>
@@ -7892,6 +7952,19 @@ async function fetchOpenLanMatches(): Promise<OpenMatchesResponse> {
   } catch {
     throw new ServerConnectionError();
   }
+  if (!response.ok) {
+    let payload: OpenMatchesResponse | undefined;
+    try {
+      payload = (await response.json()) as OpenMatchesResponse;
+    } catch {
+      payload = undefined;
+    }
+    if (payload?.error?.message) return { error: { message: payload.error.message } };
+    if (response.status === 404) {
+      return { error: { message: "Dein Multiplayer-Server unterstützt die LAN-Liste noch nicht. Bitte den Server neu starten oder auf den aktuellen Stand bringen." } };
+    }
+    return { error: { message: "Offene Spiele konnten nicht geladen werden." } };
+  }
   return (await response.json()) as OpenMatchesResponse;
 }
 
@@ -7922,6 +7995,62 @@ function openMatchAgeLabel(ageSeconds: number): string {
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
   return `${hours} h`;
+}
+
+function parseRunOverlayPositionPreference(raw: string | null): RunOverlayPositionPreference {
+  if (!raw) return { kind: "default" };
+  try {
+    return normalizeRunOverlayPositionPreference(JSON.parse(raw));
+  } catch {
+    return { kind: "default" };
+  }
+}
+
+function normalizeRunOverlayPositionPreference(value: unknown): RunOverlayPositionPreference {
+  if (!value || typeof value !== "object") return { kind: "default" };
+  const candidate = value as { kind?: unknown; xPercent?: unknown; yPercent?: unknown };
+  if (candidate.kind !== "custom" || !finiteRunOverlayPercent(candidate.xPercent) || !finiteRunOverlayPercent(candidate.yPercent)) {
+    return { kind: "default" };
+  }
+  return { kind: "custom", xPercent: candidate.xPercent, yPercent: candidate.yPercent };
+}
+
+function serializeRunOverlayPositionPreference(position: RunOverlayPositionPreference): string {
+  return JSON.stringify(position);
+}
+
+function clampRunOverlayPosition(
+  xPercent: number,
+  yPercent: number,
+  viewportWidth: number,
+  viewportHeight: number,
+  overlayWidth: number,
+  overlayHeight: number
+): RunOverlayPositionPreference {
+  const margin = 8;
+  const safeWidth = Math.max(1, viewportWidth);
+  const safeHeight = Math.max(1, viewportHeight);
+  const maxLeft = Math.max(margin, safeWidth - overlayWidth - margin);
+  const maxTop = Math.max(margin, safeHeight - overlayHeight - margin);
+  const leftPx = clampRunOverlayValue((xPercent / 100) * safeWidth, margin, maxLeft);
+  const topPx = clampRunOverlayValue((yPercent / 100) * safeHeight, margin, maxTop);
+  return {
+    kind: "custom",
+    xPercent: roundRunOverlayPercent((leftPx / safeWidth) * 100),
+    yPercent: roundRunOverlayPercent((topPx / safeHeight) * 100)
+  };
+}
+
+function finiteRunOverlayPercent(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
+}
+
+function clampRunOverlayValue(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
+function roundRunOverlayPercent(value: number): number {
+  return Math.round(value * 100) / 100;
 }
 
 function rememberDisplayName(name: string): void {

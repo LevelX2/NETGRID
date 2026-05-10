@@ -130,7 +130,7 @@ const TUTORIAL_GLOSSARY: TutorialGlossaryEntry[] = [
   { term: "HQ", definition: "Hand der Korp." },
   { term: "F&E (R&D)", definition: "Nachziehstapel der Korp." },
   { term: "Archive", definition: "Ablagebereich der Korp." },
-  { term: "Außenserver", definition: "Von der Korp erstellter Remote-Server für Assets, Upgrades oder Agenden." },
+  { term: "Fort", definition: "Von der Korp erstellter Remote-Server für Assets, Upgrades oder Agenden." },
   { term: "Run", definition: "Angriff des Runners auf einen Server." },
   { term: "Begegnung", definition: "Phase im Run gegen ICE inklusive Rezzen und Subroutinen." },
   { term: "Zugriff", definition: "Access auf Karten nach erfolgreichem Run." },

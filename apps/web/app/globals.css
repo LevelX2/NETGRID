@@ -2590,7 +2590,7 @@ select {
   width: fit-content;
   max-width: 100%;
   min-height: 0;
-  padding: 8px;
+  padding: 6px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--section-bg);
@@ -2599,24 +2599,30 @@ select {
 .serverLayout {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 10px;
-  align-items: start;
+  gap: 8px;
+  align-items: stretch;
 }
 
 .serverLead {
-  display: grid;
-  align-content: start;
-  justify-items: center;
-  gap: 6px;
-  min-width: 30px;
-  padding-right: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 32px;
+  padding-right: 6px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
 }
 
-.serverLeadMeta {
+.serverLeadTop {
   display: grid;
-  gap: 6px;
-  justify-items: center;
+  grid-template-columns: auto auto;
+  align-items: start;
+  gap: 4px;
+}
+
+.serverRunButtonCorner {
+  align-self: flex-start;
 }
 
 .serverBody {
@@ -2726,10 +2732,9 @@ select {
 
 .serverRunButton.serverRunButtonSide {
   height: auto;
-  min-height: 24px;
+  min-height: 22px;
   padding: 2px 5px;
-  flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
 .serverRunButton.serverRunButtonSide .costChip {
@@ -2756,16 +2761,16 @@ select {
   font-weight: 700;
 }
 
-.serverLead .serverCount {
+.serverCountSideLabel {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  padding: 7px 3px;
-  min-height: 42px;
+  padding: 6px 2px;
+  min-height: 0;
   font-size: 11px;
 }
 
 .lane {
-  min-height: 68px;
+  min-height: 58px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -2783,13 +2788,13 @@ select {
   gap: 8px;
   color: var(--muted);
   font-size: 12px;
-  margin: 8px 0 4px;
+  margin: 4px 0 3px;
 }
 
 .pairedServerLanes {
   display: grid;
   grid-template-columns: repeat(2, max-content);
-  gap: 8px;
+  gap: 6px;
   align-items: start;
   width: fit-content;
   max-width: 100%;
@@ -4835,7 +4840,7 @@ select,
 .optionsDialogOverlay {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: 220;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -4999,16 +5004,21 @@ select,
   top: 66px;
   left: 50%;
   z-index: 69;
-  width: min(1080px, calc(100vw - 24px));
+  width: max-content;
+  max-width: calc(100vw - 24px);
   transform: translateX(-50%);
   pointer-events: none;
 }
 
 .runTimeline.overlay {
+  width: max-content;
+  max-width: 100%;
+  pointer-events: auto;
+  background: color-mix(in srgb, var(--run-active-bg), transparent 16%);
   box-shadow:
     0 14px 36px rgb(0 0 0 / 0.34),
     0 0 0 1px color-mix(in srgb, var(--run-active-border), transparent 32%);
-  backdrop-filter: blur(7px);
+  backdrop-filter: blur(9px);
   animation: runOverlaySlideIn 180ms ease-out;
 }
 
@@ -5026,14 +5036,34 @@ select,
 .runTimelineHead {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 1ch;
   font-weight: 800;
+}
+
+.runTimelineDragHandle {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.runTimelineDragHandle:active {
+  cursor: grabbing;
+}
+
+.runTimelineDragHandle > span {
+  text-align: center;
 }
 
 .runSteps {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 6px;
+}
+
+.runTimeline.overlay .runSteps {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 5px;
 }
 
 .runSteps span {
@@ -5047,6 +5077,13 @@ select,
   font-size: 12px;
 }
 
+.runTimeline.overlay .runSteps span {
+  min-height: 28px;
+  place-items: center;
+  text-align: center;
+  padding: 0 8px;
+}
+
 .runSteps .current {
   color: var(--segmented-active-text);
   border-color: var(--runner);
@@ -5054,17 +5091,30 @@ select,
 }
 
 .encounterFocus {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
   padding: 8px;
   border-radius: 6px;
   background: var(--board-bg);
+  text-align: center;
 }
 
 .encounterFocus span {
   color: var(--muted);
+}
+
+.encounterFocusBody {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+}
+
+.encounterFocusBody p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
 }
 
 .runHint {
@@ -5076,6 +5126,7 @@ select,
   background: color-mix(in srgb, var(--runner), var(--section-bg) 91%);
   font-size: 13px;
   line-height: 1.35;
+  text-align: center;
 }
 
 .actionGroup {
@@ -6141,7 +6192,7 @@ select,
 
   .runTimelineOverlay {
     top: 58px;
-    width: min(calc(100vw - 12px), 720px);
+    max-width: calc(100vw - 12px);
   }
 
   .chronicleEntry {
@@ -6272,6 +6323,23 @@ select,
 .lobbyChat {
   display: grid;
   gap: 10px;
+}
+
+.lobbyReadyToggle {
+  background: var(--panel-soft);
+  border-color: var(--line);
+  color: var(--text);
+}
+
+.lobbyReadyToggle.is-ready {
+  background: color-mix(in srgb, var(--ok), var(--panel) 86%);
+  border-color: color-mix(in srgb, var(--ok), white 20%);
+  color: color-mix(in srgb, var(--ok), white 78%);
+}
+
+.lobbyReadyToggle.is-ready:hover {
+  background: color-mix(in srgb, var(--ok), var(--panel) 76%);
+  border-color: color-mix(in srgb, var(--ok), white 34%);
 }
 
 .lobbyChatMessages {

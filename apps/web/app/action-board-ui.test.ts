@@ -56,8 +56,8 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(runTargetServerIds(running)).toEqual(["rd"]);
     expect(serverDisplayLabel("rd")).toBe("F&E (R&D)");
     expect(serverDisplayLabel("archives")).toBe("Archive");
-    expect(serverDisplayLabel("remote_2")).toBe("Außenserver 2");
-    expect(serverDisplayLabel("Remote 3")).toBe("Außenserver 3");
+    expect(serverDisplayLabel("remote_2")).toBe("Fort 2");
+    expect(serverDisplayLabel("Remote 3")).toBe("Fort 3");
     expect(actionButtonLabel(legalAction("corp", "advance_card", "basic_action", "Agenda in Remote 2 advancen"))).toBe("Installation ausbauen");
     expect(actionButtonLabel(legalAction("runner", "continue_run", "game_rule", "Subroutinen auslösen (Run endet)", undefined, "run.encounter_ice"))).toBe(
       "Subroutinen auslösen (Run endet)"
@@ -189,15 +189,15 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf R&D", { cardId: "card_1", serverId: "rd" }))).toBe("Run auf F&E (R&D)");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Draw Event spielen", { cardId: "card_1" }))).toBe("Spielen");
-    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Außenserver 2");
+    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Fort 2");
   });
 
   it("names Corp install destinations in card context actions", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" }))).toBe("Vor HQ");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" }))).toBe("Vor F&E (R&D)");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor Archives installieren", { cardId: "ice_1", serverId: "archives", placement: "ice" }))).toBe("Vor Archive");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Vor neuem Außenserver");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Außenserver");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Vor neuem Fort");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Fort");
     expect(contextualCardActionLabel(legalAction("runner", "install_card", "program_1", "Programm installieren", { cardId: "program_1" }))).toBe("Installieren");
   });
 

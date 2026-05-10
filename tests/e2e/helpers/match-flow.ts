@@ -110,7 +110,7 @@ export async function exerciseCardDisplayModes(page: Page): Promise<void> {
 
 export async function expectActiveBoardBasics(page: Page): Promise<void> {
   await expect(page.getByTestId("legal-actions")).toContainText("Mögliche Aktionen");
-  await expect(page.getByTestId("run-timeline")).toContainText(/Kein aktiver Run|Run auf/);
+  await expect(page.getByTestId("run-timeline")).toHaveCount(0);
   await expect.poll(async () => page.getByTestId("server").count()).toBeGreaterThan(2);
   await expect(page.getByTestId("action-slots").first()).toContainText("Aktionen");
   await expect(page.getByTestId("credit-badge").first()).toContainText("Credits");
