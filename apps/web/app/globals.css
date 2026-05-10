@@ -318,6 +318,25 @@ select {
   background: var(--panel-soft);
 }
 
+.button.rightRailHeaderToggle {
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.button.rightRailHeaderToggle.is-visible {
+  color: var(--text);
+  border-color: var(--runner);
+  background: color-mix(in srgb, var(--runner), var(--panel-soft) 84%);
+}
+
+.button.rightRailHeaderToggle.is-hidden {
+  color: var(--muted);
+  border-color: var(--line);
+  background: var(--panel-soft);
+}
+
 .wide {
   width: 100%;
 }
@@ -1956,6 +1975,12 @@ select {
   min-width: 0;
 }
 
+.rightRail {
+  display: grid;
+  align-content: start;
+  gap: 0;
+}
+
 .section {
   padding: 12px;
   border-bottom: 1px solid var(--line);
@@ -2627,6 +2652,23 @@ select {
   margin: 8px 0 4px;
 }
 
+.remoteServerLanes {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-items: start;
+}
+
+.remoteServerLane {
+  min-width: 0;
+}
+
+.remoteServerLane .lane {
+  width: fit-content;
+  max-width: 100%;
+  min-width: calc(76px * var(--lane-card-scale, 1) + 12px);
+}
+
 .archivesDualStack {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2846,11 +2888,66 @@ select {
 }
 
 .lane .card.unrezzedInstalled::after {
-  font-size: 7px;
-  min-height: 12px;
-  padding: 1px 4px;
-  left: 5px;
-  bottom: 5px;
+  font-size: calc(7px * var(--lane-card-scale, 1));
+  min-height: calc(12px * var(--lane-card-scale, 1));
+  padding: calc(1px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
+  left: calc(5px * var(--lane-card-scale, 1));
+  bottom: calc(5px * var(--lane-card-scale, 1));
+}
+
+.lane .cardPositionBadge {
+  left: calc(-5px * var(--lane-card-scale, 1));
+  top: calc(-5px * var(--lane-card-scale, 1));
+  min-width: calc(20px * var(--lane-card-scale, 1));
+  height: calc(20px * var(--lane-card-scale, 1));
+  font-size: calc(11px * var(--lane-card-scale, 1));
+}
+
+.lane .installedStateMark {
+  right: calc(-7px * var(--lane-card-scale, 1));
+  width: calc(18px * var(--lane-card-scale, 1));
+  height: calc(18px * var(--lane-card-scale, 1));
+}
+
+.lane .installedStateLetter {
+  font-size: calc(11px * var(--lane-card-scale, 1));
+}
+
+.lane .installedStateMark svg {
+  width: calc(11px * var(--lane-card-scale, 1));
+  height: calc(11px * var(--lane-card-scale, 1));
+}
+
+.lane .cardActionMarker {
+  bottom: calc(4px * var(--lane-card-scale, 1));
+  width: calc(20px * var(--lane-card-scale, 1));
+  height: calc(18px * var(--lane-card-scale, 1));
+}
+
+.lane .cardActionMarker svg {
+  width: calc(10px * var(--lane-card-scale, 1));
+  height: calc(10px * var(--lane-card-scale, 1));
+}
+
+.lane .advancementGem {
+  width: calc(13px * var(--lane-card-scale, 1));
+  height: calc(13px * var(--lane-card-scale, 1));
+}
+
+.lane .advancementGemCount {
+  right: calc(6px * var(--lane-card-scale, 1));
+  bottom: calc(6px * var(--lane-card-scale, 1));
+  min-width: calc(23px * var(--lane-card-scale, 1));
+  min-height: calc(20px * var(--lane-card-scale, 1));
+  padding: calc(1px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
+  font-size: calc(11px * var(--lane-card-scale, 1));
+}
+
+.lane .strengthBoostBadge {
+  min-width: calc(46px * var(--lane-card-scale, 1));
+  min-height: calc(20px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(7px * var(--lane-card-scale, 1));
+  font-size: calc(11px * var(--lane-card-scale, 1));
 }
 
 .card.selectedActionSource {
@@ -2945,8 +3042,8 @@ select {
 
 .cardActionMarker {
   position: absolute;
-  top: -20px;
-  right: 6px;
+  left: 50%;
+  bottom: 4px;
   z-index: 95;
   width: 20px;
   height: 18px;
@@ -2954,10 +3051,11 @@ select {
   place-items: center;
   border: 1px solid color-mix(in srgb, var(--runner), white 18%);
   border-radius: 5px;
-  background: color-mix(in srgb, var(--runner), transparent 92%);
+  background: color-mix(in srgb, var(--runner), transparent 80%);
   color: var(--text);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
   cursor: pointer;
+  transform: translateX(-50%);
   transition:
     border-color 120ms ease,
     background 120ms ease,
@@ -4310,6 +4408,7 @@ select,
 .colorSchemeSettings,
 .cardDisplaySettings,
 .cardTooltipSettings,
+.cardSizeSettings,
 .aiPacingSettings,
 .actionCueSettings,
 .sessionAccessSettings {
@@ -4350,6 +4449,33 @@ select,
   border-radius: 6px;
   color: var(--text);
   background: var(--field-bg);
+}
+
+.cardSizeSettings {
+  display: grid;
+  gap: 8px;
+}
+
+.cardSizeSliderRow {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.cardSizeSliderRow input[type="range"] {
+  width: 100%;
+  accent-color: var(--runner);
+}
+
+.cardSizeSliderRow strong {
+  min-width: 46px;
+  text-align: right;
+  color: var(--text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .aiPacingSettings {
@@ -4623,6 +4749,14 @@ select,
   align-items: start;
 }
 
+.main.rightRailCollapsed {
+  grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
+}
+
+.main.rightRailCollapsed .rightRail {
+  display: none;
+}
+
 .sidePanel,
 .rightRail {
   position: sticky;
@@ -4797,7 +4931,7 @@ select,
 }
 
 .cards {
-  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--cards-min-width, 118px), 1fr));
 }
 
 .card {
@@ -5073,13 +5207,13 @@ select,
 }
 
 .lane .cardSlot {
-  flex: 0 0 76px;
-  width: 76px;
-  max-width: 76px;
+  flex: 0 0 calc(76px * var(--lane-card-scale, 1));
+  width: calc(76px * var(--lane-card-scale, 1));
+  max-width: calc(76px * var(--lane-card-scale, 1));
 }
 
 .lane .card {
-  height: 106px;
+  height: calc(106px * var(--lane-card-scale, 1));
 }
 
 .lane .cardTitle {
@@ -5135,16 +5269,11 @@ select,
 
 .runnerRigStrip {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   padding: 12px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--section-bg);
-}
-
-.runnerRigStrip h2 {
-  margin: 0;
-  font-size: 16px;
 }
 
 .specialZoneStrip {
@@ -5248,9 +5377,97 @@ select,
   gap: 9px;
 }
 
+.rigBoardSection {
+  padding-top: 10px;
+}
+
+.rigSectionLayout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 10px;
+}
+
+.rigSectionLayoutCompact {
+  gap: 9px;
+}
+
+.rigSectionLead {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  justify-items: center;
+}
+
+.rigSectionLeadCompact {
+  gap: 7px;
+}
+
+.rigSectionTitle {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.rigSectionTitle.rigGroupSideLabel {
+  font-size: clamp(13px, calc(var(--cards-min-width, 116px) * 0.15), 19px);
+  color: color-mix(in srgb, var(--runner), white 12%);
+  border-right-color: color-mix(in srgb, var(--runner), var(--line) 58%);
+  letter-spacing: 0.07em;
+}
+
+.rigSectionIcon {
+  display: inline-grid;
+  width: 22px;
+  height: 22px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 20%);
+  border-radius: 999px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel), transparent 8%);
+}
+
+.rigSectionLead .zoneLimitBadge {
+  min-height: 20px;
+  padding: 2px 6px;
+  font-size: 10px;
+}
+
+.rigSectionLead .zoneLimitBadge strong {
+  font-size: 10px;
+}
+
+.rigGroupsTrack {
+  min-width: 0;
+}
+
+.rigGroupsHorizontal {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+
 .rigGroup {
   display: grid;
   gap: 6px;
+}
+
+.rigGroupHorizontal {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: stretch;
+  gap: 8px;
+  min-width: fit-content;
+  padding: 0 8px;
+  border-left: 1px solid color-mix(in srgb, var(--line), transparent 22%);
+  border-right: 1px solid color-mix(in srgb, var(--line), transparent 22%);
+  border-top: 0;
+  border-bottom: 0;
+  border-radius: 0;
+  background: color-mix(in srgb, var(--section-bg), transparent 6%);
 }
 
 .rigGroup h3 {
@@ -5261,8 +5478,43 @@ select,
   text-transform: uppercase;
 }
 
+.rigGroupSideLabel {
+  display: inline-grid;
+  place-items: center;
+  align-self: stretch;
+  justify-self: center;
+  padding: 0 1px;
+  border-right: 1px solid color-mix(in srgb, var(--line), transparent 35%);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+  font-size: clamp(10px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.1), 13px);
+  max-block-size: 100%;
+}
+
+.rigGroupCards {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.rigGroupCards .cardSlot {
+  flex: 0 0 var(--rig-group-card-width, 118px);
+  width: var(--rig-group-card-width, 118px);
+  max-width: var(--rig-group-card-width, 118px);
+}
+
+.rigGroupCardsMini {
+  --rig-group-card-width: var(--mini-cards-min-width, 88px);
+}
+
+.rigGroupCardsFull {
+  --rig-group-card-width: var(--cards-min-width, 118px);
+}
+
 .miniCards {
-  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(var(--mini-cards-min-width, 88px), 1fr));
 }
 
 .cardPreviewPanel .card.preview .cardRulesPreview {
@@ -5417,6 +5669,10 @@ select,
     grid-template-columns: 1fr;
   }
 
+  .main.rightRailCollapsed {
+    grid-template-columns: 1fr;
+  }
+
   .boardHeader {
     grid-template-columns: 1fr;
     display: grid;
@@ -5440,6 +5696,10 @@ select,
 @media (max-width: 720px) {
   .runnerGripHeapLayout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .remoteServerLanes {
+    grid-template-columns: 1fr;
   }
 
   .runnerHeapOverlapRow .cardSlot {
@@ -5487,6 +5747,15 @@ select,
 
   .cardTooltipSettings {
     grid-template-columns: 1fr;
+  }
+
+  .cardSizeSliderRow {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .cardSizeSliderRow strong {
+    text-align: left;
   }
 
   .aiPacingSettings {

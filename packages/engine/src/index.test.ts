@@ -1359,6 +1359,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
     const breakCases = [
       { breaker: "onr_v1_021_dwarf", ice: "onr_v1_237_data-wall", seed: "dwarf-wall" },
+      { breaker: "onr_v1_021_dwarf", ice: "onr_v1_279_wall-of-static", seed: "dwarf-wall-of-static" },
       { breaker: "onr_v1_074_worm", ice: "onr_v1_237_data-wall", seed: "worm-wall" },
       { breaker: "onr_v1_066_snowball", ice: "onr_v1_259_in-the-face", seed: "snowball-sentry" },
       { breaker: "onr_v1_039_krash", ice: "onr_v1_261_quandary", seed: "krash-code-gate" }
@@ -1385,6 +1386,26 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       state = apply(state, "runner", (action) => action.type === "access_card");
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation" });
     }
+  });
+
+  it("qualifies breaker encounter labels and keeps wall-breaker pump paths deterministic", () => {
+    let state = toRunnerTurn(v123CardReleaseGame("v123-dwarf-krash-wall-of-static"));
+    state.runner.credits = 30;
+    installRunnerProgramForTest(state, "onr_v1_021_dwarf");
+    installRunnerProgramForTest(state, "onr_v1_039_krash");
+    putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_279_wall-of-static");
+
+    const initialEncounterActions = getLegalActions(state, "runner");
+    const initialPumpLabels = initialEncounterActions.filter((action) => action.type === "pump_breaker").map((action) => action.label);
+    expect(initialPumpLabels).toEqual(expect.arrayContaining(["Dwarf: Stärke +1", "Krash: Stärke +1"]));
+    expect(initialEncounterActions.some((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_021_dwarf")).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
+    const dwarfBreak = mustAction(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
+    expect(dwarfBreak.label).toBe("Dwarf: Subroutine brechen");
   });
 
   it("plays the unlocked R&D and HQ multiaccess events with hidden queues", () => {

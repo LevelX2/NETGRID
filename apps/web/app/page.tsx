@@ -24,6 +24,7 @@ import {
   ListFilter,
   Move,
   Moon,
+  PanelRightClose,
   PanelRightOpen,
   Play,
   Plus,
@@ -145,6 +146,8 @@ const ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
 const LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
 const CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
 const LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
+const CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
+const LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
 const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 const LEGACY_MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
@@ -169,6 +172,12 @@ const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASS
 const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [300, 500, 750, 1000, 1250, 1500] as const;
 const CARD_TOOLTIP_HOVER_OPEN_DELAY_MS = 1000;
 const CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS = 120;
+const CARD_SCALE_PERCENT_MIN = 70;
+const CARD_SCALE_PERCENT_MAX = 150;
+const CARD_SCALE_PERCENT_STEP = 5;
+const CARD_SCALE_DEFAULT_PERCENT = 100;
+const HAND_CARD_SCALE_PERCENT_MIN = 50;
+const HAND_CARD_SCALE_PERCENT_MAX = 170;
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -206,13 +215,31 @@ type CardTooltipSettings = {
   mode: CardTooltipMode;
 };
 
+type CardScaleSettings = {
+  tooltipPercent: number;
+  handPercent: number;
+  boardPercent: number;
+  opponentPercent: number;
+};
+
 const CardTooltipSettingsContext = createContext<CardTooltipSettings>({
   hoverOpenDelayMs: CARD_TOOLTIP_HOVER_OPEN_DELAY_MS,
   mode: "enhanced"
 });
 
+const CardScaleSettingsContext = createContext<CardScaleSettings>({
+  tooltipPercent: CARD_SCALE_DEFAULT_PERCENT,
+  handPercent: CARD_SCALE_DEFAULT_PERCENT,
+  boardPercent: CARD_SCALE_DEFAULT_PERCENT,
+  opponentPercent: CARD_SCALE_DEFAULT_PERCENT
+});
+
 function useCardTooltipSettings(): CardTooltipSettings {
   return useContext(CardTooltipSettingsContext);
+}
+
+function useCardScaleSettings(): CardScaleSettings {
+  return useContext(CardScaleSettingsContext);
 }
 
 type SeriesResultSummary = {
@@ -700,6 +727,9 @@ const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-generated-card-art-1";
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 const RUNNER_HEAP_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
+const HAND_CARD_BASE_MIN_WIDTH = 108;
+const OWN_RIG_CARD_BASE_MIN_WIDTH = 104;
+const OPPONENT_RIG_CARD_BASE_MIN_WIDTH = 80;
 
 function localCardImageUrl(cardId: string): string | undefined {
   const encodedCardId = encodeURIComponent(cardId);
@@ -719,6 +749,14 @@ function normalizeCardTooltipHoverDelayMs(value: unknown): CardTooltipHoverDelay
 
 function normalizeCardTooltipMode(value: unknown): CardTooltipMode {
   return value === "simple" || value === "enhanced" || value === "image" ? value : "enhanced";
+}
+
+function normalizeCardScalePercent(value: unknown, min = CARD_SCALE_PERCENT_MIN, max = CARD_SCALE_PERCENT_MAX): number {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return CARD_SCALE_DEFAULT_PERCENT;
+  const clamped = Math.max(min, Math.min(max, Math.round(numeric)));
+  const snapped = Math.round(clamped / CARD_SCALE_PERCENT_STEP) * CARD_SCALE_PERCENT_STEP;
+  return Math.max(min, Math.min(max, snapped));
 }
 
 function formatCatalogTerm(value: string): string {
@@ -1139,6 +1177,10 @@ function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): 
   return side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane];
 }
 
+function isRemoteServerId(serverId: string): boolean {
+  return /^remote_\d+$/.test(serverId);
+}
+
 function opponentSide(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
 }
@@ -1302,6 +1344,7 @@ export default function Page() {
   const [deckExportText, setDeckExportText] = useState("");
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
   const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
+  const [rightRailCollapsed, setRightRailCollapsed] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
@@ -1321,6 +1364,10 @@ export default function Page() {
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
   const [cardTooltipMode, setCardTooltipMode] = useState<CardTooltipMode>("enhanced");
+  const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardHandScalePercent, setCardHandScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardBoardScalePercent, setCardBoardScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardOpponentScalePercent, setCardOpponentScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
   const [actionSlotCapacities, setActionSlotCapacities] = useState<Record<Side, number>>({
     runner: baseActionSlotCapacity("runner"),
@@ -1570,6 +1617,37 @@ export default function Page() {
   useEffect(() => {
     window.localStorage.setItem(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, JSON.stringify({ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }));
   }, [cardTooltipHoverDelayMs, cardTooltipMode]);
+
+  useEffect(() => {
+    const stored = readLocalStorageWithLegacy(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
+    if (!stored) return;
+    try {
+      const parsed = JSON.parse(stored) as {
+        tooltipPercent?: unknown;
+        handPercent?: unknown;
+        boardPercent?: unknown;
+        opponentPercent?: unknown;
+      };
+      setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
+      setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent, HAND_CARD_SCALE_PERCENT_MIN, HAND_CARD_SCALE_PERCENT_MAX));
+      setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
+      setCardOpponentScalePercent(normalizeCardScalePercent(parsed.opponentPercent));
+    } catch {
+      removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
+    }
+  }, []);
+
+  useEffect(() => {
+    window.localStorage.setItem(
+      CARD_SIZE_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        tooltipPercent: cardTooltipScalePercent,
+        handPercent: cardHandScalePercent,
+        boardPercent: cardBoardScalePercent,
+        opponentPercent: cardOpponentScalePercent
+      })
+    );
+  }, [cardTooltipScalePercent, cardHandScalePercent, cardBoardScalePercent, cardOpponentScalePercent]);
 
   useEffect(() => {
     setCuePosition(parseCuePositionPreference(readLocalStorageWithLegacy(ACTION_CUE_POSITION_STORAGE_KEY, LEGACY_ACTION_CUE_POSITION_STORAGE_KEY)));
@@ -1842,6 +1920,7 @@ export default function Page() {
     return runActions.length === 1 ? runActions[0]! : null;
   };
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
+  const ownRigGroups = activeView ? groupRunnerRigCards(activeView.own.rig ?? []) : [];
   const effectiveAgendaTarget = activeView?.agendaPointsToWin ?? 7;
 
   useEffect(() => {
@@ -3033,9 +3112,28 @@ export default function Page() {
     if (enabled) primeAudio(audioVolume);
     setAudioEnabled(enabled);
   };
+  const handCardScale = Math.max(HAND_CARD_SCALE_PERCENT_MIN / 100, cardHandScalePercent / 100);
+  const boardCardScale = Math.max(0.7, cardBoardScalePercent / 100);
+  const handCardsStyle = useMemo(
+    () => ({ "--cards-min-width": `${Math.round(HAND_CARD_BASE_MIN_WIDTH * handCardScale)}px` } as CSSProperties),
+    [handCardScale]
+  );
+  const ownRigCardsStyle = useMemo(
+    () => ({ "--cards-min-width": `${Math.round(OWN_RIG_CARD_BASE_MIN_WIDTH * handCardScale)}px` } as CSSProperties),
+    [handCardScale]
+  );
+  const boardLaneStyle = useMemo(() => ({ "--lane-card-scale": String(boardCardScale) } as CSSProperties), [boardCardScale]);
 
   if (!session || !payload || !activeView) {
     return (
+      <CardScaleSettingsContext.Provider
+        value={{
+          tooltipPercent: cardTooltipScalePercent,
+          handPercent: cardHandScalePercent,
+          boardPercent: cardBoardScalePercent,
+          opponentPercent: cardOpponentScalePercent
+        }}
+      >
       <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
@@ -3468,6 +3566,10 @@ export default function Page() {
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
               cardTooltipMode={cardTooltipMode}
+              cardTooltipScalePercent={cardTooltipScalePercent}
+              cardHandScalePercent={cardHandScalePercent}
+              cardBoardScalePercent={cardBoardScalePercent}
+              cardOpponentScalePercent={cardOpponentScalePercent}
               cardDisplayMode={cardDisplayMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
@@ -3478,6 +3580,10 @@ export default function Page() {
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
               onCardTooltipMode={setCardTooltipMode}
+              onCardTooltipScalePercent={setCardTooltipScalePercent}
+              onCardHandScalePercent={setCardHandScalePercent}
+              onCardBoardScalePercent={setCardBoardScalePercent}
+              onCardOpponentScalePercent={setCardOpponentScalePercent}
               onCardDisplayMode={setCardDisplayMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
@@ -3488,10 +3594,19 @@ export default function Page() {
         </div>
       </main>
       </CardTooltipSettingsContext.Provider>
+      </CardScaleSettingsContext.Provider>
     );
   }
 
   return (
+    <CardScaleSettingsContext.Provider
+      value={{
+        tooltipPercent: cardTooltipScalePercent,
+        handPercent: cardHandScalePercent,
+        boardPercent: cardBoardScalePercent,
+        opponentPercent: cardOpponentScalePercent
+      }}
+    >
     <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
     <main className="app activeMatch" data-theme={colorScheme}>
       <header className="topbar">
@@ -3531,6 +3646,16 @@ export default function Page() {
               Aufgeben
             </button>
           ) : null}
+          <button
+            className={`button iconOnly rightRailHeaderToggle ${rightRailCollapsed ? "is-hidden" : "is-visible"}`}
+            onClick={() => setRightRailCollapsed((current) => !current)}
+            title={rightRailCollapsed ? "Rechten Bereich einblenden" : "Rechten Bereich ausblenden"}
+            aria-label={rightRailCollapsed ? "Rechten Bereich einblenden" : "Rechten Bereich ausblenden"}
+            aria-pressed={rightRailCollapsed}
+            type="button"
+          >
+            {rightRailCollapsed ? <PanelRightOpen size={16} /> : <PanelRightClose size={16} />}
+          </button>
         </div>
       </header>
 
@@ -3566,7 +3691,7 @@ export default function Page() {
         }}
       />
 
-      <div className="main" data-testid="active-game">
+      <div className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`} data-testid="active-game">
         <aside className="column panel sidePanel">
           <OpponentPanel
             view={activeView}
@@ -3630,6 +3755,48 @@ export default function Page() {
                   {row.servers.map((server) => {
                     const cardCount = centralServerCardCount(activeView, server.id);
                     const runAction = runActionForServer(server.id);
+                    const lanes = serverLanesForSide(activeView.side, server);
+                    const remoteIceLane = lanes.find((lane) => lane.kind === "ice") ?? null;
+                    const remoteRootLane = lanes.find((lane) => lane.kind === "root") ?? null;
+                    const renderLaneCards = (lane: { kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }) => {
+                      if (server.id === "archives" && lane.kind === "root") {
+                        return (
+                          <ArchivesDualStackLane
+                            viewerSide={activeView.side}
+                            visibleCards={lane.cards}
+                            totalArchivesCount={activeView.side === "runner" ? (activeView.opponent.discardCount ?? lane.cards.length) : lane.cards.length}
+                            displayMode={cardDisplayMode}
+                            selectedContext={selectedActionContext}
+                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                            cardActionsFor={cardActionsFor}
+                            onAction={submitAction}
+                            onFocus={focusCard}
+                            onActionContextSelect={selectActionCard}
+                            enrichCard={enrichCard}
+                          />
+                        );
+                      }
+                      return lane.cards.map((card, index) => {
+                        const displayCard = enrichCard(card);
+                        return (
+                          <CardView
+                            key={card.instanceId}
+                            card={displayCard}
+                            compact
+                            displayMode={cardDisplayMode}
+                            hiddenSide="corp"
+                            installedCorpCard={showInstalledCorpState(server.id, lane.kind)}
+                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                            actions={cardActionsFor(card)}
+                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                            {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
+                            onAction={submitAction}
+                            onFocus={focusCard}
+                            onActionContextSelect={selectActionCard}
+                          />
+                        );
+                      });
+                    };
                     return (
                       <article
                         className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
@@ -3658,51 +3825,31 @@ export default function Page() {
                           ) : null}
                           {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
                         </h3>
-                        {serverLanesForSide(activeView.side, server).map((lane) => (
-                          <div className="serverLaneGroup" key={lane.label}>
-                            <div className="laneLabel">
-                              <span>{lane.label}</span>
-                            </div>
-                            <div className="lane">
-                              {server.id === "archives" && lane.kind === "root" ? (
-                                <ArchivesDualStackLane
-                                  viewerSide={activeView.side}
-                                  visibleCards={lane.cards}
-                                  totalArchivesCount={activeView.side === "runner" ? (activeView.opponent.discardCount ?? lane.cards.length) : lane.cards.length}
-                                  displayMode={cardDisplayMode}
-                                  selectedContext={selectedActionContext}
-                                  actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                                  cardActionsFor={cardActionsFor}
-                                  onAction={submitAction}
-                                  onFocus={focusCard}
-                                  onActionContextSelect={selectActionCard}
-                                  enrichCard={enrichCard}
-                                />
-                              ) : (
-                                lane.cards.map((card, index) => {
-                                  const displayCard = enrichCard(card);
-                                  return (
-                                    <CardView
-                                      key={card.instanceId}
-                                      card={displayCard}
-                                      compact
-                                      displayMode={cardDisplayMode}
-                                      hiddenSide="corp"
-                                      installedCorpCard={showInstalledCorpState(server.id, lane.kind)}
-                                      selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                                      actions={cardActionsFor(card)}
-                                      actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                                      {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
-                                      onAction={submitAction}
-                                      onFocus={focusCard}
-                                      onActionContextSelect={selectActionCard}
-                                    />
-                                  );
-                                })
-                              )}
-                            </div>
+                        {isRemoteServerId(server.id) && remoteIceLane && remoteRootLane ? (
+                          <div className="remoteServerLanes">
+                            {[remoteIceLane, remoteRootLane].map((lane) => (
+                              <div className="serverLaneGroup remoteServerLane" key={lane.label}>
+                                <div className="laneLabel">
+                                  <span>{lane.label}</span>
+                                </div>
+                                <div className="lane" style={boardLaneStyle}>
+                                  {renderLaneCards(lane)}
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        ) : (
+                          lanes.map((lane) => (
+                            <div className="serverLaneGroup" key={lane.label}>
+                              <div className="laneLabel">
+                                <span>{lane.label}</span>
+                              </div>
+                              <div className="lane" style={boardLaneStyle}>
+                                {renderLaneCards(lane)}
+                              </div>
+                            </div>
+                          ))
+                        )}
                       </article>
                     );
                   })}
@@ -3711,28 +3858,41 @@ export default function Page() {
             )}
           </div>
           {activeView.own.rig ? (
-            <section className="section panel boardSection">
-              <div className="sectionTitleLine boardSectionTitle">
-                <h2>Rig</h2>
-                <ZoneLimitBadge label="MU" value={`${activeView.own.memoryUsed ?? 0}/${activeView.own.memoryLimit ?? 0}`} />
-              </div>
-              <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>
-                {activeView.own.rig.map((card) => {
-                  const displayCard = enrichCard(card);
-                  return (
-                    <CardView
-                      key={card.instanceId}
-                      card={displayCard}
-                      displayMode={cardDisplayMode}
-                      selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                      actions={cardActionsFor(card)}
-                      actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                      onAction={submitAction}
-                      onFocus={focusCard}
-                      onActionContextSelect={selectActionCard}
-                    />
-                  );
-                })}
+            <section className="section panel boardSection rigBoardSection">
+              <div className={`rigSectionLayout ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>
+                <div className="rigSectionLead">
+                  <h2 className="rigSectionTitle rigGroupSideLabel">Rig</h2>
+                  <ZoneLimitBadge label="MU" value={`${activeView.own.memoryUsed ?? 0}/${activeView.own.memoryLimit ?? 0}`} />
+                </div>
+                {ownRigGroups.length > 0 ? (
+                  <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
+                    {ownRigGroups.map((group) => (
+                      <div className="rigGroup rigGroupHorizontal" key={group.key} style={ownRigCardsStyle}>
+                        <h3 className="rigGroupSideLabel">{group.label}</h3>
+                        <div className="cards rigGroupCards rigGroupCardsFull">
+                          {group.cards.map((card) => {
+                            const displayCard = enrichCard(card);
+                            return (
+                              <CardView
+                                key={card.instanceId}
+                                card={displayCard}
+                                displayMode={cardDisplayMode}
+                                selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                                actions={cardActionsFor(card)}
+                                actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                onAction={submitAction}
+                                onFocus={focusCard}
+                                onActionContextSelect={selectActionCard}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="meta">Keine installierten Runner-Karten.</p>
+                )}
               </div>
             </section>
           ) : null}
@@ -3744,7 +3904,7 @@ export default function Page() {
             {activeView.side === "runner" ? (
               <div className="runnerGripHeapLayout">
                 <div className="runnerGripColumn">
-                  <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "grip") ? "cueHighlightSoft" : ""}`}>
+                  <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "grip") ? "cueHighlightSoft" : ""}`} style={handCardsStyle}>
                     {activeView.own.gripOrHq.map((card) => {
                       const displayCard = enrichCard(card);
                       return (
@@ -3798,7 +3958,7 @@ export default function Page() {
                 </div>
               </div>
             ) : (
-              <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
+              <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`} style={handCardsStyle}>
                 {activeView.own.gripOrHq.map((card) => {
                   const displayCard = enrichCard(card);
                   return (
@@ -3822,22 +3982,26 @@ export default function Page() {
         </section>
 
         <aside className="log panel rightRail">
-          <CardPreviewPanel
-            card={enrichedPreviewCard}
-            displayMode={cardDisplayMode}
-            onDisplayMode={setCardDisplayMode}
-            collapsed={cardPreviewCollapsed}
-            onCollapsed={setCardPreviewCollapsed}
-            {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})}
-          />
-          <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocusCard={focusCard} />
-          <section className="section">
-            <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
-              <PanelRightOpen size={15} />
-              Diagnostics
-            </button>
-          </section>
-          <DiagnosticsDrawer open={diagnosticsOpen} payload={payload} connection={connection} />
+          {!rightRailCollapsed ? (
+            <>
+              <CardPreviewPanel
+                card={enrichedPreviewCard}
+                displayMode={cardDisplayMode}
+                onDisplayMode={setCardDisplayMode}
+                collapsed={cardPreviewCollapsed}
+                onCollapsed={setCardPreviewCollapsed}
+                {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})}
+              />
+              <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocusCard={focusCard} />
+              <section className="section">
+                <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
+                  <PanelRightOpen size={15} />
+                  Diagnostics
+                </button>
+              </section>
+              <DiagnosticsDrawer open={diagnosticsOpen} payload={payload} connection={connection} />
+            </>
+          ) : null}
         </aside>
       </div>
       {showResultModal && resultSummary ? (
@@ -3871,6 +4035,10 @@ export default function Page() {
             audioVolume={audioVolume}
             cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
             cardTooltipMode={cardTooltipMode}
+            cardTooltipScalePercent={cardTooltipScalePercent}
+            cardHandScalePercent={cardHandScalePercent}
+            cardBoardScalePercent={cardBoardScalePercent}
+            cardOpponentScalePercent={cardOpponentScalePercent}
             cardDisplayMode={cardDisplayMode}
             colorScheme={colorScheme}
             cuePosition={cuePosition}
@@ -3883,6 +4051,10 @@ export default function Page() {
             onAudioVolume={setAudioVolume}
             onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
             onCardTooltipMode={setCardTooltipMode}
+            onCardTooltipScalePercent={setCardTooltipScalePercent}
+            onCardHandScalePercent={setCardHandScalePercent}
+            onCardBoardScalePercent={setCardBoardScalePercent}
+            onCardOpponentScalePercent={setCardOpponentScalePercent}
             onCardDisplayMode={setCardDisplayMode}
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
@@ -3894,6 +4066,7 @@ export default function Page() {
       ) : null}
     </main>
     </CardTooltipSettingsContext.Provider>
+    </CardScaleSettingsContext.Provider>
   );
 }
 
@@ -4354,6 +4527,10 @@ function OptionsPanel({
   audioVolume,
   cardTooltipHoverDelayMs,
   cardTooltipMode,
+  cardTooltipScalePercent,
+  cardHandScalePercent,
+  cardBoardScalePercent,
+  cardOpponentScalePercent,
   cardDisplayMode,
   colorScheme,
   cuePosition,
@@ -4366,6 +4543,10 @@ function OptionsPanel({
   onAudioVolume,
   onCardTooltipHoverDelayMs,
   onCardTooltipMode,
+  onCardTooltipScalePercent,
+  onCardHandScalePercent,
+  onCardBoardScalePercent,
+  onCardOpponentScalePercent,
   onCardDisplayMode,
   onColorScheme,
   onCuePosition,
@@ -4379,6 +4560,10 @@ function OptionsPanel({
   audioVolume: number;
   cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
   cardTooltipMode: CardTooltipMode;
+  cardTooltipScalePercent: number;
+  cardHandScalePercent: number;
+  cardBoardScalePercent: number;
+  cardOpponentScalePercent: number;
   cardDisplayMode: CardDisplayMode;
   colorScheme: ColorScheme;
   cuePosition: CuePositionPreference;
@@ -4391,6 +4576,10 @@ function OptionsPanel({
   onAudioVolume(value: number): void;
   onCardTooltipHoverDelayMs(value: CardTooltipHoverDelayMs): void;
   onCardTooltipMode(value: CardTooltipMode): void;
+  onCardTooltipScalePercent(value: number): void;
+  onCardHandScalePercent(value: number): void;
+  onCardBoardScalePercent(value: number): void;
+  onCardOpponentScalePercent(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
   onColorScheme(value: ColorScheme): void;
   onCuePosition(value: CuePositionPreference): void;
@@ -4414,6 +4603,16 @@ function OptionsPanel({
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
         <CardTooltipSettings mode={cardTooltipMode} hoverOpenDelayMs={cardTooltipHoverDelayMs} onMode={onCardTooltipMode} onHoverOpenDelayMs={onCardTooltipHoverDelayMs} />
+        <CardSizeSettings
+          tooltipPercent={cardTooltipScalePercent}
+          handPercent={cardHandScalePercent}
+          boardPercent={cardBoardScalePercent}
+          opponentPercent={cardOpponentScalePercent}
+          onTooltipPercent={onCardTooltipScalePercent}
+          onHandPercent={onCardHandScalePercent}
+          onBoardPercent={onCardBoardScalePercent}
+          onOpponentPercent={onCardOpponentScalePercent}
+        />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings enabled={actionCuesEnabled} position={cuePosition} autoDismissMs={actionCueAutoDismissMs} onEnabled={onActionCuesEnabled} onPosition={onCuePosition} onAutoDismissMs={onActionCueAutoDismissMs} />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
@@ -4587,6 +4786,68 @@ function CardTooltipSettings({
         </select>
       </label>
     </div>
+  );
+}
+
+function CardSizeSettings({
+  tooltipPercent,
+  handPercent,
+  boardPercent,
+  opponentPercent,
+  onTooltipPercent,
+  onHandPercent,
+  onBoardPercent,
+  onOpponentPercent
+}: {
+  tooltipPercent: number;
+  handPercent: number;
+  boardPercent: number;
+  opponentPercent: number;
+  onTooltipPercent(value: number): void;
+  onHandPercent(value: number): void;
+  onBoardPercent(value: number): void;
+  onOpponentPercent(value: number): void;
+}) {
+  return (
+    <div className="cardSizeSettings">
+      <div>
+        <span className="settingsTitle">Kartengrößen</span>
+        <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
+      </div>
+      <CardSizeSliderRow label="Tooltip-Karte" value={tooltipPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onTooltipPercent} />
+      <CardSizeSliderRow label="Handkarten" value={handPercent} min={HAND_CARD_SCALE_PERCENT_MIN} max={HAND_CARD_SCALE_PERCENT_MAX} onChange={onHandPercent} />
+      <CardSizeSliderRow label="Spielfeld/Forts" value={boardPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onBoardPercent} />
+      <CardSizeSliderRow label="Gegnerkarten (Runner-Rig)" value={opponentPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onOpponentPercent} />
+    </div>
+  );
+}
+
+function CardSizeSliderRow({
+  label,
+  value,
+  min,
+  max,
+  onChange
+}: {
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  onChange(value: number): void;
+}) {
+  return (
+    <label className="cardSizeSliderRow">
+      <span>{label}</span>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={CARD_SCALE_PERCENT_STEP}
+        value={value}
+        onChange={(event) => onChange(normalizeCardScalePercent(event.target.value, min, max))}
+      />
+      <strong>{value}%</strong>
+    </label>
   );
 }
 
@@ -4872,6 +5133,12 @@ function RunnerRigStrip({
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
 }) {
+  const { opponentPercent } = useCardScaleSettings();
+  const opponentMiniCardScale = Math.max(0.7, opponentPercent / 100);
+  const opponentMiniCardsStyle = useMemo(
+    () => ({ "--mini-cards-min-width": `${Math.round(OPPONENT_RIG_CARD_BASE_MIN_WIDTH * opponentMiniCardScale)}px` } as CSSProperties),
+    [opponentMiniCardScale]
+  );
   if (opponentSide(view.side) !== "runner") return null;
   const runnerRig = view.opponent.rig ?? [];
   const groups = groupRunnerRigCards(runnerRig);
@@ -4881,40 +5148,44 @@ function RunnerRigStrip({
   };
   return (
     <section className="runnerRigStrip" data-testid="runner-rig">
-      <div className="sectionTitleLine">
-        <h2>Runner-Rig</h2>
-        <RunIcon size={16} />
-      </div>
-      {groups.length > 0 ? (
-        <div className="rigGroups">
-          {groups.map((group) => (
-            <div className="rigGroup" key={group.key}>
-              <h3>{group.label}</h3>
-              <div className="cards miniCards">
-                {group.cards.map((card) => {
-                  const displayCard = enrichVisibleCard(card, cardDetailsById);
-                  return (
-                    <CardView
-                      key={card.instanceId}
-                      card={displayCard}
-                      compact
-                      displayMode={displayMode}
-                      selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
-                      actions={cardActionsForRig(card)}
-                      actionDisabled={actionDisabled}
-                      onFocus={onFocus}
-                      onActionContextSelect={onActionContext}
-                      onAction={onAction}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+      <div className="rigSectionLayout rigSectionLayoutCompact">
+        <div className="rigSectionLead rigSectionLeadCompact">
+          <h2 className="rigSectionTitle rigGroupSideLabel">Rig</h2>
+          <span className="rigSectionIcon" aria-hidden="true">
+            <RunIcon size={14} />
+          </span>
         </div>
-      ) : (
-        <p className="meta">Keine installierten Runner-Karten.</p>
-      )}
+        {groups.length > 0 ? (
+          <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
+            {groups.map((group) => (
+              <div className="rigGroup rigGroupHorizontal" key={group.key} style={opponentMiniCardsStyle}>
+                <h3 className="rigGroupSideLabel">{group.label}</h3>
+                <div className="cards rigGroupCards rigGroupCardsMini">
+                  {group.cards.map((card) => {
+                    const displayCard = enrichVisibleCard(card, cardDetailsById);
+                    return (
+                      <CardView
+                        key={card.instanceId}
+                        card={displayCard}
+                        compact
+                        displayMode={displayMode}
+                        selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                        actions={cardActionsForRig(card)}
+                        actionDisabled={actionDisabled}
+                        onFocus={onFocus}
+                        onActionContextSelect={onActionContext}
+                        onAction={onAction}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="meta">Keine installierten Runner-Karten.</p>
+        )}
+      </div>
     </section>
   );
 }
@@ -5529,6 +5800,7 @@ function ChronicleCardTrigger({
   children: ReactNode;
 }) {
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
+  const { tooltipPercent } = useCardScaleSettings();
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -5560,6 +5832,7 @@ function ChronicleCardTrigger({
         card.numeric.memoryCost !== null ? { icon: "MU", label: "MU", value: String(card.numeric.memoryCost) } : null
       ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
     : [];
+  const tooltipScale = Math.max(0.5, tooltipPercent / 100);
 
   const clearOpenTimer = () => {
     if (openTimerRef.current !== null) {
@@ -5578,12 +5851,13 @@ function ChronicleCardTrigger({
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
     const base = tooltipMode === "enhanced" ? 132 : 78;
-    return Math.min(280, base + rulesLines.length * 20);
+    return Math.min(320, Math.round((base + rulesLines.length * 20) * tooltipScale));
   };
 
   const computedTooltipWidth = (): number => {
     const viewportLimit = Math.max(160, window.innerWidth - 32);
-    return showImageTooltip ? Math.min(220, viewportLimit) : Math.min(300, viewportLimit);
+    const unscaled = showImageTooltip ? 220 : 300;
+    return Math.min(Math.round(unscaled * tooltipScale), viewportLimit);
   };
 
   const updateTooltipPlacement = () => {
@@ -5600,8 +5874,8 @@ function ChronicleCardTrigger({
       const left = Math.max(margin, Math.min(rect.left + 6, window.innerWidth - tooltipWidth - margin));
       setTooltipPositionStyle(
         nextPlacement === "below"
-          ? { left: `${left}px`, top: `${rect.bottom + 8}px` }
-          : { left: `${left}px`, top: `${rect.top - 8}px` }
+          ? { left: `${left}px`, top: `${rect.bottom + 8}px`, width: `${tooltipWidth}px` }
+          : { left: `${left}px`, top: `${rect.top - 8}px`, width: `${tooltipWidth}px` }
       );
       setTooltipPlacement(nextPlacement);
     }
@@ -7036,6 +7310,7 @@ function CardView({
   onAction?(action: LegalAction): void;
 }) {
   const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
+  const { tooltipPercent } = useCardScaleSettings();
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -7082,6 +7357,7 @@ function CardView({
   const metaText = card.known ? detailLines.join(" · ") : "Verdeckt";
   const showMetaLine = !visualImageUrl && Boolean(metaText) && (!card.known || !compact || displayMode === "compact" || preview);
   const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
+  const tooltipScale = Math.max(0.5, tooltipPercent / 100);
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
   const installedStateLabel = installedState === "unrezzed" ? "Ungerezzt" : installedState === "rezzed" ? "Gerezzt" : installedState === "hidden" ? "Verdeckt / ungerezzt" : null;
   const advancementCount = preview ? 0 : Math.max(0, Math.floor(card.advancementCounters ?? 0));
@@ -7093,12 +7369,13 @@ function CardView({
     if (showImageTooltip) return 320;
     const ruleLineCount = rulesTextLines(rulesText).length;
     const base = tooltipMode === "enhanced" ? 132 : 78;
-    return Math.min(280, base + ruleLineCount * 20);
+    return Math.min(320, Math.round((base + ruleLineCount * 20) * tooltipScale));
   };
 
   const computedTooltipWidth = (): number => {
     const viewportLimit = Math.max(160, window.innerWidth - 32);
-    return showImageTooltip ? Math.min(220, viewportLimit) : Math.min(300, viewportLimit);
+    const unscaled = showImageTooltip ? 220 : 300;
+    return Math.min(Math.round(unscaled * tooltipScale), viewportLimit);
   };
 
   const clearTooltipOpenTimer = () => {
@@ -7130,8 +7407,8 @@ function CardView({
       const left = Math.max(margin, Math.min(cardRect.left + 6, window.innerWidth - tooltipWidth - margin));
       setTooltipPositionStyle(
         nextTooltipPlacement === "below"
-          ? { left: `${left}px`, top: `${cardRect.bottom + 8}px` }
-          : { left: `${left}px`, top: `${cardRect.top - 8}px` }
+          ? { left: `${left}px`, top: `${cardRect.bottom + 8}px`, width: `${tooltipWidth}px` }
+          : { left: `${left}px`, top: `${cardRect.top - 8}px`, width: `${tooltipWidth}px` }
       );
     }
     const estimatedActionMenuHeight = Math.min(196, Math.max(58, actions.length * 54 + 16));

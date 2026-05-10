@@ -156,6 +156,10 @@ export function actionButtonLabel(action: LegalAction): string {
       return "Zug beenden";
     case "resolve_choice":
       return normalizeVisibleTerms(action.label || "Entscheidung bestätigen");
+    case "pump_breaker":
+      return pumpBreakerActionLabel(action);
+    case "break_subroutine":
+      return breakSubroutineActionLabel(action);
     default:
       return normalizeVisibleTerms(action.label);
   }
@@ -176,9 +180,9 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "rez_ice":
       return "Rezzen";
     case "pump_breaker":
-      return "Pumpen";
+      return pumpBreakerActionLabel(action);
     case "break_subroutine":
-      return "Brechen";
+      return breakSubroutineActionLabel(action);
     case "trash_accessed_card":
     case "trash_resource":
       return "Trashen";
@@ -189,6 +193,29 @@ export function contextualCardActionLabel(action: LegalAction): string {
     default:
       return actionButtonLabel(action);
   }
+}
+
+function pumpBreakerActionLabel(action: LegalAction): string {
+  const breakerName = breakerNameFromActionLabel(action.label, "pumpen") ?? breakerNameFromActionLabel(action.label, "stärke \\+1");
+  return breakerName ? `Stärke +1 (${normalizeVisibleTerms(breakerName)})` : "Stärke +1";
+}
+
+function breakSubroutineActionLabel(action: LegalAction): string {
+  const rawIndex = action.payload?.subroutineIndex;
+  const hasIndex = typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0;
+  const base = hasIndex ? `Subroutine ${Math.floor(rawIndex) + 1} brechen` : "Subroutine brechen";
+  const breakerName = breakerNameFromActionLabel(action.label, "subroutine \\d+ brechen") ?? breakerNameFromActionLabel(action.label, "subroutine brechen");
+  return breakerName ? `${base} (${normalizeVisibleTerms(breakerName)})` : base;
+}
+
+function breakerNameFromActionLabel(label: string | undefined, actionSuffixPattern: string): string | null {
+  if (!label) return null;
+  const trimmed = label.trim();
+  const prefixed = new RegExp(`^(.+?):\\s*${actionSuffixPattern}$`, "i").exec(trimmed);
+  if (prefixed?.[1]) return prefixed[1].trim();
+  const trailing = new RegExp(`^(.+)\\s+${actionSuffixPattern}$`, "i").exec(trimmed);
+  if (trailing?.[1]) return trailing[1].trim();
+  return null;
 }
 
 function installContextLabel(action: LegalAction): string {

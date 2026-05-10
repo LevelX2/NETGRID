@@ -4,6 +4,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
   KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS
@@ -26,7 +27,8 @@ describe("catalog API filters", () => {
       ...DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
-      ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS
+      ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS
     ].filter((cardId) => cardId.startsWith("onr_v1_"));
     expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual(
       [...new Set(expectedOnrAiApproved)].sort()
@@ -153,5 +155,25 @@ describe("catalog API filters", () => {
     expect(body.card.aiHints?.planRoles).toContain("safe_probe_run");
     expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
     expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v190-smokes.json#runner_v190_random_breakers_and_black_ops_punish");
+  });
+
+  it("adds V1.9.1-V1.9.4 AI hints for newly approved run-bonus cards", () => {
+    const response = catalogDetailResponse("onr_v1_076_all-nighter");
+
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        aiHints: {
+          roles: string[];
+          planRoles: string[];
+          aiSupportStatus: string;
+          scenarioRefs: string[];
+        } | null;
+      };
+    };
+    expect(body.card.aiHints?.roles).toContain("bonus_run");
+    expect(body.card.aiHints?.planRoles).toContain("pressure_rnd");
+    expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
+    expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v192_run_events_and_resource_lifecycle");
   });
 });

@@ -2022,7 +2022,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
           state,
           "runner",
           "pump_breaker",
-          `${breaker.title} pumpen`,
+          `${breaker.title}: Stärke +1`,
           breakerId,
           [{ credits: pump.cost.credits }],
           { breakerId, iceId: encounteredIceId },
@@ -2037,12 +2037,13 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       subroutines.forEach((subroutine, index) => {
         if (breaker.id === BLINK_ID && blinkUsedSubroutines.includes(index)) return;
         if (!run.brokenSubroutineIndexes.includes(index) && !run.resolvedSubroutineIndexes.includes(index)) {
+          const subroutineLabel = subroutines.length > 1 ? `Subroutine ${index + 1} brechen` : "Subroutine brechen";
           actions.push(
             action(
               state,
               "runner",
               "break_subroutine",
-              `${subroutine.id} brechen`,
+              `${breaker.title}: ${subroutineLabel}`,
               breakerId,
               [{ credits: breakAbility.cost.credits }],
               { breakerId, iceId: encounteredIceId, subroutineIndex: index },

@@ -203,13 +203,18 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
   it("moves rig icebreaker actions to their card context", () => {
     const pump = legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder pumpen", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice");
+    const breakAction = legalAction("runner", "break_subroutine", "breaker_1", "Simple Decoder: Subroutine 1 brechen", { breakerId: "breaker_1", iceId: "ice_1", subroutineIndex: 0 }, "run.encounter_ice");
     const continueRun = legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.approach_ice");
 
-    const split = splitLegalActions([pump, continueRun]);
+    const split = splitLegalActions([pump, breakAction, continueRun]);
 
     expect(split.primaryActions.map((action) => action.type)).toEqual(["continue_run"]);
-    expect(split.contextualActions).toEqual([pump]);
+    expect(split.contextualActions).toEqual([pump, breakAction]);
     expect(actionMatchesContext(pump, { kind: "card", id: "breaker_1", label: "Simple Decoder" })).toBe(true);
+    expect(actionButtonLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
+    expect(contextualCardActionLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
+    expect(actionButtonLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
   });
 });
 

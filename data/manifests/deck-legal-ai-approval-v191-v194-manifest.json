@@ -1,0 +1,162 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-batch-manifest-v1",
+  "id": "deck-legal-ai-approval-v191-v194-manifest",
+  "batchId": "deck_legal_ai_approval_v191_to_v194",
+  "status": "implemented_for_ai_approval",
+  "aiHintsId": "ai-card-hints-deck-legal-v191-v194",
+  "scenarioId": "ai-deck-legal-v191-v194-smokes",
+  "gateAssertions": {
+    "allSliceCardsRuntimeCatalogReady": true,
+    "allSliceCardsEngineSupported": true,
+    "allSliceCardsHumanPlayable": true,
+    "allSliceCardsDeckLegal": true,
+    "allSliceCardsFormatLegal": true,
+    "allSliceCardsHaveAiHints": true,
+    "allSliceCardsHaveScenarioRefs": true,
+    "aiSupportedRequiresHumanPlayableDeckLegalFormatLegal": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenInfoSafe": true,
+    "v140CorpPlanRegressionGreen": true,
+    "v141RunnerPlanRegressionGreen": true,
+    "noBulkOnrAiApproval": true,
+    "noNewMechanics": true,
+    "noCardTextParser": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true,
+    "noOfficialAssets": true,
+    "noPublicPlatformFeatures": true
+  },
+  "cards": [
+    {
+      "cardId": "onr_v1_013_cockroach",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_013_cockroach",
+      "scenarioRefs": [
+        "runner_v191_counter_random_and_scaling_programs"
+      ]
+    },
+    {
+      "cardId": "onr_v1_034_incubator",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_034_incubator",
+      "scenarioRefs": [
+        "runner_v191_counter_random_and_scaling_programs"
+      ]
+    },
+    {
+      "cardId": "onr_v1_030_grubb",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_030_grubb",
+      "scenarioRefs": [
+        "runner_v191_counter_random_and_scaling_programs"
+      ]
+    },
+    {
+      "cardId": "onr_v1_076_all-nighter",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_076_all-nighter",
+      "scenarioRefs": [
+        "runner_v192_run_events_and_resource_lifecycle"
+      ]
+    },
+    {
+      "cardId": "onr_v1_096_kilroy-was-here",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_096_kilroy-was-here",
+      "scenarioRefs": [
+        "runner_v192_run_events_and_resource_lifecycle"
+      ]
+    },
+    {
+      "cardId": "onr_v1_107_romp-through-hq",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_107_romp-through-hq",
+      "scenarioRefs": [
+        "runner_v192_run_events_and_resource_lifecycle"
+      ]
+    },
+    {
+      "cardId": "onr_v1_184_top-runners-conference",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_184_top-runners-conference",
+      "scenarioRefs": [
+        "runner_v192_run_events_and_resource_lifecycle"
+      ]
+    },
+    {
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_188_ai-chief-financial-officer",
+      "scenarioRefs": [
+        "corp_v192_agenda_economy_and_program_trash_ice"
+      ]
+    },
+    {
+      "cardId": "onr_v1_211_polymer-breakthrough",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_211_polymer-breakthrough",
+      "scenarioRefs": [
+        "corp_v192_agenda_economy_and_program_trash_ice"
+      ]
+    },
+    {
+      "cardId": "onr_v1_235_data-naga",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_235_data-naga",
+      "scenarioRefs": [
+        "corp_v192_agenda_economy_and_program_trash_ice"
+      ]
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_207_netwatch-operations-office",
+      "scenarioRefs": [
+        "corp_v193_trace_tag_and_run_lock_windows"
+      ]
+    },
+    {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_213_private-cybernet-police",
+      "scenarioRefs": [
+        "corp_v193_trace_tag_and_run_lock_windows"
+      ]
+    },
+    {
+      "cardId": "onr_v1_251_jack-attack",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_251_jack-attack",
+      "scenarioRefs": [
+        "corp_v193_trace_tag_and_run_lock_windows"
+      ]
+    },
+    {
+      "cardId": "onr_v1_271_tko-2-0",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_271_tko-2-0",
+      "scenarioRefs": [
+        "corp_v193_trace_tag_and_run_lock_windows"
+      ]
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_208_on-call-solo-team",
+      "scenarioRefs": [
+        "corp_v194_tag_damage_agenda_conversion"
+      ]
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v191-v194:onr_v1_217_strike-force-kali",
+      "scenarioRefs": [
+        "corp_v194_tag_damage_agenda_conversion"
+      ]
+    }
+  ],
+  "deferredCards": []
+}
