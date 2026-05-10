@@ -272,7 +272,8 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(true);
     expect(cardsById["onr_v1_006_black-dahlia"]?.engineCardId).toBe("onr_v1_006_black-dahlia");
     expect(cardsById["onr_v1_006_black-dahlia"]?.text).toBe("2 credits: Break sentry subroutine.\n2 credits: +1 strength.");
-    expect(cardsById["onr_v1_014_codecracker"]?.numeric.installCost).toBe(0);
+    expect(cardsById["onr_v1_014_codecracker"]?.numeric.installCost).toBe(2);
+    expect(cardsById["onr_v1_014_codecracker"]?.numeric.strength).toBe(0);
     expect(cardsById["onr_v1_073_wizards-book"]?.text).toBe("0 credits: Break code gate subroutine.\n2 credits: +1 strength.");
     expect(cardsById["onr_v1_253_laser-wire"]?.text).toBe("[Subroutine] Do 1 net damage.\n[Subroutine] End the run.");
     expect(cardsById["onr_v1_278_wall-of-ice"]?.numeric.rezCost).toBe(13);
