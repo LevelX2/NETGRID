@@ -376,6 +376,15 @@ export class NetgridRealtimeServer {
     if (result.opponentPayload) this.broadcastPayload(result.opponentPayload);
   }
 
+  async refreshSide(matchId: string, side: Side): Promise<void> {
+    const connection = this.connection(matchId, side);
+    if (!connection) return;
+    const payload = await this.service.bootstrap(matchId, side, connection.context.sessionToken, { allowLobby: true });
+    if ("error" in payload) return;
+    sendBootstrap(connection.socket, payload);
+    this.scheduleCountdownFromPayload(payload);
+  }
+
   private async handleClose(socket: WebSocket): Promise<void> {
     const context = this.findContext(socket);
     if (!context) return;
@@ -621,6 +630,7 @@ async function routeHttp(
         };
         if (typeof body.displayName === "string") joinInput.displayName = body.displayName;
         const joined = await service.joinMatch(matchId, joinInput);
+        if (!("error" in joined)) void realtime.refreshSide(matchId, opposite(joined.side));
         sendJson(response, "error" in joined ? 403 : 200, joined);
         return;
       }

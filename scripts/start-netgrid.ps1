@@ -6,8 +6,14 @@ $localServerUrl = "http://127.0.0.1:8787/health"
 $logDir = Join-Path $env:TEMP "netgrid"
 $serverLog = Join-Path $logDir "server.log"
 $webLog = Join-Path $logDir "web.log"
+$launcherLog = Join-Path $logDir "launcher.log"
 
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
+
+function Write-LauncherLog {
+  param([Parameter(Mandatory = $true)][string]$Message)
+  Add-Content -Path $launcherLog -Value "$(Get-Date -Format o) $Message"
+}
 
 function Test-Endpoint {
   param([Parameter(Mandatory = $true)][string]$Url)
@@ -30,12 +36,13 @@ function Start-NetgridProcess {
   $environmentPrefix = ""
   if ($Environment.Count -gt 0) {
     $setCommands = foreach ($entry in $Environment.GetEnumerator()) {
-      "set $($entry.Key)=$($entry.Value)"
+      "set `"$($entry.Key)=$($entry.Value)`""
     }
     $environmentPrefix = ($setCommands -join " && ") + " && "
   }
 
   $cmd = "$environmentPrefix$Command >> `"$LogPath`" 2>&1"
+  Write-LauncherLog "Start-NetgridProcess command=$Command log=$LogPath"
   Start-Process -FilePath "cmd.exe" -ArgumentList @("/d", "/c", $cmd) -WorkingDirectory $projectRoot -WindowStyle Hidden
 }
 
@@ -84,42 +91,78 @@ function Get-LanIpv4 {
   return "127.0.0.1"
 }
 
+function Stop-PortListeners {
+  param([Parameter(Mandatory = $true)][int[]]$Ports)
+
+  $stopped = $false
+  foreach ($port in $Ports) {
+    $listeners = Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue
+    foreach ($listener in $listeners) {
+      try {
+        Write-LauncherLog "Stopping listener pid=$($listener.OwningProcess) port=$port"
+        Stop-Process -Id $listener.OwningProcess -Force -ErrorAction Stop
+        $stopped = $true
+      } catch {
+        # ignore
+      }
+    }
+  }
+
+  if ($stopped) {
+    Start-Sleep -Seconds 2
+  }
+}
+
 Set-Location $projectRoot
 
 $lanIp = Get-LanIpv4
-$webUrl = "http://$lanIp:3100"
-$serverUrl = "http://$lanIp:8787/health"
+$webUrl = "http://${lanIp}:3100"
+$serverUrl = "http://${lanIp}:8787/health"
+Write-LauncherLog "Launcher start lanIp=$lanIp webUrl=$webUrl serverUrl=$serverUrl"
 
 $serverEnvironment = @{
   HOST = "0.0.0.0"
   NETGRID_DEPLOYMENT_PROFILE = "local"
   NETGRID_WEB_BASE_URL = $webUrl
-  NETGRID_SERVER_BASE_URL = "http://$lanIp:8787"
+  NETGRID_SERVER_BASE_URL = "http://${lanIp}:8787"
   NETGRID_ALLOWED_ORIGINS = "$webUrl,http://127.0.0.1:3100,http://localhost:3100"
 }
 
 $webEnvironment = @{
-  NEXT_PUBLIC_NETGRID_SERVER_URL = "http://$lanIp:8787"
+  NEXT_PUBLIC_NETGRID_SERVER_URL = "http://${lanIp}:8787"
+  NETGRID_ALLOWED_DEV_ORIGINS = "localhost,127.0.0.1,${lanIp}"
 }
 
 $serverReadyLanBefore = Test-Endpoint -Url $serverUrl
 $serverReadyLocalBefore = Test-Endpoint -Url $localServerUrl
+Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore"
 
-if (-not $serverReadyLanBefore -and -not $serverReadyLocalBefore) {
-  Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/server dev" -LogPath $serverLog -Environment $serverEnvironment
+if (-not $serverReadyLanBefore) {
+  if ($serverReadyLocalBefore) {
+    Stop-PortListeners -Ports @(8787)
+  }
+  Write-LauncherLog "Starting server command"
+  Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/server exec tsx src/index.ts" -LogPath $serverLog -Environment $serverEnvironment
 }
 
 $webReadyLanBefore = Test-Endpoint -Url $webUrl
 $webReadyLocalBefore = Test-Endpoint -Url $localWebUrl
+Write-LauncherLog "Web precheck lan=$webReadyLanBefore local=$webReadyLocalBefore"
 
-if (-not $webReadyLanBefore -and -not $webReadyLocalBefore) {
+if (-not $webReadyLanBefore) {
+  if ($webReadyLocalBefore) {
+    Stop-PortListeners -Ports @(3100)
+  }
+  Write-LauncherLog "Starting web command"
   Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/web exec next dev --hostname 0.0.0.0 --port 3100" -LogPath $webLog -Environment $webEnvironment
 }
 
 $serverReady = Wait-Endpoint -Url $serverUrl
 $webReady = Wait-Endpoint -Url $webUrl
+Write-LauncherLog "Postcheck serverReady=$serverReady webReady=$webReady"
 
-if ($webReady) {
+if ($serverReady -and $webReady) {
+  Write-LauncherLog "Launcher success opening $webUrl"
   Start-Process $webUrl
   exit 0
 }
@@ -135,6 +178,7 @@ if (-not $webReady -and $localWebStillRunning) {
 }
 
 $message = "NETGRID konnte nicht im LAN-Modus gestartet werden.`nLAN-IP: $lanIp`nServer bereit: $serverReady`nWeb bereit: $webReady$hint`n`nLogs:`n$serverLog`n$webLog"
+Write-LauncherLog "Launcher failure serverReady=$serverReady webReady=$webReady hint=$hint"
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.MessageBox]::Show($message, "NETGRID starten") | Out-Null
 exit 1
