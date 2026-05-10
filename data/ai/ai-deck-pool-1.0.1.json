@@ -7,12 +7,62 @@
     {
       "snapshotId": "demo_runner_008_snapshot_v0_8",
       "side": "runner",
-      "tags": ["starter", "runner_ai_safe", "normal", "series_safe"]
+      "tags": [
+        "starter",
+        "runner_ai_safe",
+        "normal",
+        "series_safe"
+      ]
     },
     {
       "snapshotId": "demo_corp_008_snapshot_v0_8",
       "side": "corp",
-      "tags": ["starter", "corp_ai_safe", "normal", "series_safe"]
+      "tags": [
+        "starter",
+        "corp_ai_safe",
+        "normal",
+        "series_safe"
+      ]
+    },
+    {
+      "snapshotId": "onr_origin_runner_ai_snapshot_v1",
+      "side": "runner",
+      "tags": [
+        "onr_origin",
+        "runner_ai_safe",
+        "normal",
+        "series_safe"
+      ]
+    },
+    {
+      "snapshotId": "onr_origin_corp_ai_snapshot_v1",
+      "side": "corp",
+      "tags": [
+        "onr_origin",
+        "corp_ai_safe",
+        "normal",
+        "series_safe"
+      ]
+    },
+    {
+      "snapshotId": "onr_origin_runner_ai_event_pressure_snapshot_v1",
+      "side": "runner",
+      "tags": [
+        "onr_origin",
+        "runner_ai_safe",
+        "event_pressure",
+        "series_safe"
+      ]
+    },
+    {
+      "snapshotId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
+      "side": "corp",
+      "tags": [
+        "onr_origin",
+        "corp_ai_safe",
+        "tag_ops_control",
+        "series_safe"
+      ]
     }
   ]
 }

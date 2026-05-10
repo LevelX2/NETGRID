@@ -179,6 +179,37 @@ describe("deck validation and snapshots", () => {
     }
   });
 
+  it("validates the O:NR origins AI snapshots and variant snapshots for both sides", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    if (!runtimeCardsById["onr_v1_203_hostile-takeover"]) return;
+    const contextV130 = { cardsById: runtimeCardsById, profile: profile130 };
+    const runner = snapshots08.find((candidate) => candidate.deckSnapshotId === "onr_origin_runner_ai_snapshot_v1")!;
+    const corp = snapshots08.find((candidate) => candidate.deckSnapshotId === "onr_origin_corp_ai_snapshot_v1")!;
+    const runnerVariant = snapshots08.find((candidate) => candidate.deckSnapshotId === "onr_origin_runner_ai_event_pressure_snapshot_v1")!;
+    const corpVariant = snapshots08.find((candidate) => candidate.deckSnapshotId === "onr_origin_corp_ai_tag_ops_snapshot_v1")!;
+
+    expect(runner.name).toBe("Runner Origins AI - Probe Pressure");
+    expect(corp.name).toBe("Corp Origins AI - Tax & Punish");
+    expect(runnerVariant.name).toBe("Runner Origins AI - Event Pressure");
+    expect(corpVariant.name).toBe("Corp Origins AI - Tag Ops Control");
+    expect(validateDeckSnapshot(runner, contextV130)).toMatchObject({ ok: true, errors: [] });
+    expect(validateDeckSnapshot(corp, contextV130)).toMatchObject({ ok: true, errors: [] });
+    expect(validateDeckSnapshot(runnerVariant, contextV130)).toMatchObject({ ok: true, errors: [] });
+    expect(validateDeckSnapshot(corpVariant, contextV130)).toMatchObject({ ok: true, errors: [] });
+    expect(computeDeckHash(runner)).toBe("fnv1a:7a0470da");
+    expect(computeDeckHash(corp)).toBe("fnv1a:072da05f");
+    expect(computeDeckHash(runnerVariant)).toBe("fnv1a:784e8bbe");
+    expect(computeDeckHash(corpVariant)).toBe("fnv1a:6f425753");
+    expect(runner.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(20);
+    expect(runnerVariant.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(21);
+    expect(corp.validation.agendaPoints).toBeGreaterThanOrEqual(7);
+    expect(corpVariant.validation.agendaPoints).toBeGreaterThanOrEqual(7);
+    expect(runner.cards.every((entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === true)).toBe(true);
+    expect(corp.cards.every((entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === true)).toBe(true);
+    expect(runnerVariant.cards.every((entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === true)).toBe(true);
+    expect(corpVariant.cards.every((entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === true)).toBe(true);
+  });
+
   it("keeps V1.3.0 format legality restrictive and reports concrete safe error codes", () => {
     const runtimeCardsById = createRuntimeCardsById();
     if (!runtimeCardsById["onr_v1_018_dogcatcher"]) return;
