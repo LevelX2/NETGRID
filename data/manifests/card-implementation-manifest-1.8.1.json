@@ -1,0 +1,139 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.8.1",
+  "id": "v1.8.1-card-release-manifest",
+  "status": "implemented_for_v1.8.1_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.8.0.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount12": true,
+    "counterAndPurgeDeterministic": true,
+    "runFollowupFlagsDeterministic": true,
+    "serverInstallTaxDeterministic": true,
+    "coupCounterActionsLegalOnly": true,
+    "runtimeAllowlistExtendedExactlyBy12": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_012_clown",
+      "title": "Clown",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_program_encounter_strength_minus_one",
+      "requiredMechanics": ["install_program", "memory", "encounter_ice", "persistent_modifier"],
+      "roleTags": ["runner", "program", "encounter", "strength_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_046_pattels-virus",
+      "title": "Pattel's Virus",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "successful_run_add_virus_counter_to_fully_broken_ice",
+      "requiredMechanics": ["install_program", "memory", "virus", "counter", "run_success_trigger", "purge"],
+      "roleTags": ["runner", "program", "virus", "counter"]
+    },
+    {
+      "cardCode": "onr_v1_049_pox",
+      "title": "Pox",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "successful_run_add_server_virus_counter_install_tax",
+      "requiredMechanics": ["install_program", "memory", "virus", "counter", "run_success_trigger", "install_cost_modifier", "purge"],
+      "roleTags": ["runner", "program", "virus", "server_tax"]
+    },
+    {
+      "cardCode": "onr_v1_094_inside-job",
+      "title": "Inside Job",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_run_bypass_first_ice",
+      "requiredMechanics": ["play_event", "start_run", "bypass_ice"],
+      "roleTags": ["runner", "event", "run_flow", "bypass"]
+    },
+    {
+      "cardCode": "onr_v1_173_restrictive-net-zoning",
+      "title": "Restrictive Net Zoning",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_resource_select_server_install_tax_plus_one",
+      "requiredMechanics": ["install_resource", "server_selection", "install_cost_modifier"],
+      "roleTags": ["runner", "resource", "server_tax"]
+    },
+    {
+      "cardCode": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "score_add_five_power_and_click_to_credit",
+      "requiredMechanics": ["install_remote", "advance", "score", "counter", "action_economy", "gain_credits"],
+      "roleTags": ["corp", "agenda", "counter", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_209_political-coup",
+      "title": "Political Coup",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "score_add_six_power_and_click_to_credit",
+      "requiredMechanics": ["install_remote", "advance", "score", "counter", "action_economy", "gain_credits"],
+      "roleTags": ["corp", "agenda", "counter", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_222_ball-and-chain",
+      "title": "Ball and Chain",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "subroutine_set_run_future_encounter_tax",
+      "requiredMechanics": ["encounter_ice", "subroutine", "run_modifier", "encounter_tax"],
+      "roleTags": ["corp", "ice", "run_tax"]
+    },
+    {
+      "cardCode": "onr_v1_225_canis-major",
+      "title": "Canis Major",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "subroutine_set_run_future_ice_strength_plus_two",
+      "requiredMechanics": ["encounter_ice", "subroutine", "run_modifier", "strength_modifier"],
+      "roleTags": ["corp", "ice", "run_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_226_canis-minor",
+      "title": "Canis Minor",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "subroutine_set_run_future_ice_strength_plus_one",
+      "requiredMechanics": ["encounter_ice", "subroutine", "run_modifier", "strength_modifier"],
+      "roleTags": ["corp", "ice", "run_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_242_fatal-attractor",
+      "title": "Fatal Attractor",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "subroutine_set_next_encounter_unless_fully_broken_net_damage",
+      "requiredMechanics": ["encounter_ice", "subroutine", "next_encounter_penalty", "damage"],
+      "roleTags": ["corp", "ice", "damage", "run_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "subroutine_set_next_encounter_no_break_and_jackout_lock",
+      "requiredMechanics": ["encounter_ice", "subroutine", "next_encounter_penalty", "jack_out_lock"],
+      "roleTags": ["corp", "ice", "run_lock"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 15,
+    "implementedCardCount": 12,
+    "deferredCardCount": 3,
+    "deferReasons": [
+      "additional deterministic dice dependency in V1.9.0",
+      "open resolver hint outside V1.8.1 counter and purge scope",
+      "deferred cards remain blocked until dedicated follow-up gates"
+    ],
+    "deferredCardIds": ["onr_v1_013_cockroach", "onr_v1_034_incubator", "onr_v1_030_grubb"],
+    "openMechanicHintsStatus": "grubb_deferred_with_resolver_note"
+  }
+}

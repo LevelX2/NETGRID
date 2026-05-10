@@ -1,4 +1,10 @@
 import { describe, expect, it } from "vitest";
+import {
+  DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
+  KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS
+} from "@netgrid/catalog";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
 
 describe("catalog API filters", () => {
@@ -10,35 +16,15 @@ describe("catalog API filters", () => {
     expect(body.cards.length).toBeGreaterThan(14);
     expect(body.cards.length).toBeLessThan(412);
     expect(body.cards.every((card) => card.statuses.ai_supported)).toBe(true);
-    expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual([
-      "onr_v1_006_black-dahlia",
-      "onr_v1_014_codecracker",
-      "onr_v1_015_codeslinger",
-      "onr_v1_016_cyfermaster",
-      "onr_v1_021_dwarf",
-      "onr_v1_039_krash",
-      "onr_v1_040_loony-goon",
-      "onr_v1_052_raffles",
-      "onr_v1_054_raptor",
-      "onr_v1_060_shaka",
-      "onr_v1_066_snowball",
-      "onr_v1_070_tinweasel",
-      "onr_v1_072_wild-card",
-      "onr_v1_073_wizards-book",
-      "onr_v1_074_worm",
-      "onr_v1_079_bodyweight-synthetic-blood",
-      "onr_v1_095_jack-n-joe",
-      "onr_v1_097_livewires-contacts",
-      "onr_v1_108_score",
-      "onr_v1_144_tycho-mem-chip",
-      "onr_v1_145_wutech-mem-chip",
-      "onr_v1_146_zetatech-mem-chip",
-      "onr_v1_243_fetch-4-0-1",
-      "onr_v1_249_hunter",
-      "onr_v1_287_datapool-by-zetatech",
-      "onr_v1_293_netwatch-credit-voucher",
-      "onr_v1_306_trojan-horse"
-    ]);
+    const expectedOnrAiApproved = [
+      ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS
+    ].filter((cardId) => cardId.startsWith("onr_v1_"));
+    expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual(
+      [...new Set(expectedOnrAiApproved)].sort()
+    );
   });
 
   it("adds curated AI hints to card detail responses when available", () => {

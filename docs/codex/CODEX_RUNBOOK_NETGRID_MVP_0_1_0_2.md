@@ -1032,6 +1032,10 @@ Zusätzliche inhaltliche Gates:
 - tokens never logged or stored in plaintext.
 - no hidden data in WebSocket, reconnect, undo, errors or debug UI.
 
+Releaseübergreifender Abschluss-Gate (ab V1.x):
+
+- web client visible version is bumped to the target release version and documented in Final Review.
+
 ---
 
 ## 13. Stop-Regeln
@@ -1083,6 +1087,7 @@ Commands run:
 
 Gates:
 - <gate>: pass | fail | blocked
+- webclient_release_version_updated: pass | fail | not_applicable
 
 Important decisions:
 - ...

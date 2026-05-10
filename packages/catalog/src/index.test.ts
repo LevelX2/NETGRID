@@ -50,6 +50,10 @@ import {
   ONR_V1_6_2_RELEASE_CARD_IDS,
   ONR_V1_6_3_RELEASE_CARD_IDS,
   ONR_V1_7_0_RELEASE_CARD_IDS,
+  ONR_V1_7_1_RELEASE_CARD_IDS,
+  ONR_V1_7_2_RELEASE_CARD_IDS,
+  ONR_V1_8_0_RELEASE_CARD_IDS,
+  ONR_V1_8_1_RELEASE_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateAiCardHintsV2,
@@ -146,7 +150,7 @@ describe("catalog import and status logic", () => {
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 
-  it("applies the V1.0.5K, V1.0.6K, V1.1.2K, V1.2.3, V1.6.1, V1.6.2, V1.6.3 and V1.7.0 release gates to private local O:NR runtime cards when present", () => {
+  it("applies the V1.0.5K, V1.0.6K, V1.1.2K, V1.2.3, V1.6.1, V1.6.2, V1.6.3, V1.7.0, V1.7.1, V1.7.2, V1.8.0 and V1.8.1 release gates to private local O:NR runtime cards when present", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
 
@@ -158,7 +162,11 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_6_2_RELEASE_CARD_IDS).toHaveLength(5);
     expect(ONR_V1_6_3_RELEASE_CARD_IDS).toHaveLength(5);
     expect(ONR_V1_7_0_RELEASE_CARD_IDS).toHaveLength(5);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(84);
+    expect(ONR_V1_7_1_RELEASE_CARD_IDS).toHaveLength(5);
+    expect(ONR_V1_7_2_RELEASE_CARD_IDS).toHaveLength(5);
+    expect(ONR_V1_8_0_RELEASE_CARD_IDS).toHaveLength(6);
+    expect(ONR_V1_8_1_RELEASE_CARD_IDS).toHaveLength(12);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(112);
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
@@ -176,7 +184,15 @@ describe("catalog import and status logic", () => {
       expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
       expect(card?.statuses.format_legal).toBe(true);
-      const expectedManifest = (ONR_V1_7_0_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+      const expectedManifest = (ONR_V1_8_1_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.8.1"
+        : (ONR_V1_8_0_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.8.0"
+        : (ONR_V1_7_2_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.7.2"
+        : (ONR_V1_7_1_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.7.1"
+        : (ONR_V1_7_0_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.7.0"
         : (ONR_V1_6_3_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.6.3"
@@ -250,6 +266,37 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_069_succubus"]?.text).toContain("host up to 3 MU");
     expect(cardsById["onr_v1_163_floating-runner-bbs"]?.numeric.installCost).toBe(6);
     expect(cardsById["onr_v1_180_smiths-pawnshop"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.7.0");
+    expect(cardsById["onr_v1_084_edited-shipping-manifests"]?.numeric.cost).toBe(1);
+    expect(cardsById["onr_v1_084_edited-shipping-manifests"]?.text).toContain("the Corp loses 1");
+    expect(cardsById["onr_v1_106_private-ldl-access"]?.numeric.cost).toBe(0);
+    expect(cardsById["onr_v1_106_private-ldl-access"]?.text).toContain("successful run on R&D");
+    expect(cardsById["onr_v1_114_temple-microcode-outlet"]?.text).toContain("Search your stack for a program");
+    expect(cardsById["onr_v1_118_weather-to-finance-pipe"]?.text).toContain("Corp loses 4 credits");
+    expect(cardsById["onr_v1_129_hq-interface"]?.numeric.installCost).toBe(4);
+    expect(cardsById["onr_v1_129_hq-interface"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.7.1");
+    expect(cardsById["onr_v1_158_danshis-second-id"]?.numeric.installCost).toBe(0);
+    expect(cardsById["onr_v1_179_silicon-saloon-franchise"]?.text).toContain("Gain 1 credit and draw");
+    expect(cardsById["onr_v1_283_audit-of-call-records"]?.text).toContain("Trace 5");
+    expect(cardsById["onr_v1_284_chance-observation"]?.numeric.cost).toBe(2);
+    expect(cardsById["onr_v1_286_corporate-detective-agency"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.7.2");
+    expect(cardsById["onr_v1_083_desperate-competitor"]?.text).toContain("Gray Ops agendas");
+    expect(cardsById["onr_v1_090_hot-tip-for-wns"]?.numeric.cost).toBe(0);
+    expect(cardsById["onr_v1_156_corporate-ally"]?.numeric.installCost).toBe(3);
+    expect(cardsById["onr_v1_159_databroker"]?.text).toContain("Gain 10 credits");
+    expect(cardsById["onr_v1_201_executive-extraction"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.8.0");
+    expect(cardsById["onr_v1_214_project-babylon"]?.numeric.agendaPoints).toBe(1);
+    expect(cardsById["onr_v1_012_clown"]?.numeric.installCost).toBe(4);
+    expect(cardsById["onr_v1_046_pattels-virus"]?.text).toContain("Pattel counter");
+    expect(cardsById["onr_v1_049_pox"]?.text).toContain("Pox counter");
+    expect(cardsById["onr_v1_094_inside-job"]?.numeric.cost).toBe(2);
+    expect(cardsById["onr_v1_173_restrictive-net-zoning"]?.numeric.installCost).toBe(1);
+    expect(cardsById["onr_v1_193_corporate-coup"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.8.1");
+    expect(cardsById["onr_v1_209_political-coup"]?.numeric.advancementRequirement).toBe(4);
+    expect(cardsById["onr_v1_222_ball-and-chain"]?.numeric.strength).toBe(5);
+    expect(cardsById["onr_v1_225_canis-major"]?.numeric.rezCost).toBe(0);
+    expect(cardsById["onr_v1_226_canis-minor"]?.numeric.strength).toBe(5);
+    expect(cardsById["onr_v1_242_fatal-attractor"]?.text).toContain("do 3 Net damage");
+    expect(cardsById["onr_v1_268_shock-r"]?.text).toContain("cannot jack out");
     expect(cardsById["onr_v1_021_dwarf"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_039_krash"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_066_snowball"]?.statuses.ai_supported).toBe(true);

@@ -35,6 +35,7 @@ Dieser Workflow beschreibt, wie Codex im Projekt NETGRID arbeiten soll: erst vor
 2. Gate-Kriterien der laufenden Phase prüfen.
 3. Fehlende Quellen, Tests, Abweichungen oder Risiken dokumentieren.
 4. Erst nach bestandenem oder ausdrücklich akzeptiertem Gate die nächste Phase beginnen.
+5. Bei Releaseabschlüssen vor dem Phasenwechsel die im Webclient sichtbare Versionsnummer auf den erreichten Release-Stand anheben und im Final Review dokumentieren.
 
 ## Fall 5: Abschluss
 

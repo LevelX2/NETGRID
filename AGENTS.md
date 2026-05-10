@@ -86,6 +86,7 @@ Alte Konzeptdateien, Zwischenstände oder frühere Prompts dürfen nicht als gle
 - Subagents nur verwenden, wenn der Nutzer das ausdrücklich verlangt.
 - Der Root-Agent besitzt finale Schreibrechte, sofern keine Worktrees oder klar getrennten Dateibereiche vereinbart wurden.
 - Nicht von MVP 0.1 zu MVP 0.2 wechseln, bevor die MVP-0.1-Gates bestanden sind oder Blocker ausdrücklich dokumentiert wurden.
+- Bei jedem zukünftigen Releaseabschluss die im Webclient sichtbare Versionsnummer auf den Zielrelease-Stand anheben und im Final Review als eigener Gatepunkt dokumentieren.
 - In diesem Setup-Schritt keine Engine-, UI-, Server-, KI- oder Testimplementierung schreiben.
 
 ## Befehle
@@ -127,4 +128,5 @@ Lokaler Minimalkontrakt:
 - Jede `playable_mvp` Karte hat Unit- und Szenarioabdeckung.
 - Visibility-, Replay-, StateHash-, stale-action- und illegal-action-Tests bestehen.
 - Build- und Testbefehle bestehen.
+- Bei Releaseumsetzungen ist die im Webclient sichtbare Versionsnummer auf den abgeschlossenen Release-Stand aktualisiert.
 - Bekannte Abweichungen und offene Fragen sind dokumentiert.

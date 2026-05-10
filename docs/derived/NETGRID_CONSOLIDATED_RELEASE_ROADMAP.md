@@ -50,6 +50,7 @@ Zusätzlich müssen je Release dokumentiert werden:
 - Scope und Nicht-Ziele.
 - Requirements, Spezifikation, Testmatrix und Requirements Review vor Code.
 - Implementation Review und Final Review nach Code.
+- Webclient-Versionsnummer wird am Releaseende auf den Zielstand angehoben und im Final Review als eigener Gatepunkt nachgewiesen.
 - aktualisierte Mechanik-Coverage, Card-Support-Daten und KI-Support-Daten, sofern betroffen.
 - `CODEX_STATUS.md` und Wissensbasis-Update nur für wiederverwendbare Entscheidungen oder Statusänderungen.
 

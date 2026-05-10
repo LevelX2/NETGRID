@@ -14,6 +14,7 @@ Verbindliche Leitlinien:
 - Keine Scope-Verschiebung zu V2.x-Produktfeatures.
 - Deck-Legal-AI-Approval Batch B-G bleibt separater Gate-Strang.
 - Release-Schnitt bleibt `freigabefähig` vs `deferred`, nicht „alles aus Matrix sofort freigeben“.
+- Jeder Releaseabschluss enthält als Pflichtpunkt das Anheben der im Webclient sichtbaren Versionsnummer auf den Zielrelease-Stand inkl. Nachweis im Final Review.
 
 ## Verwendete Quellen
 
@@ -156,6 +157,7 @@ Search/Reveal-/Hidden-Zone-Operationen, Access-/Breach-Erweiterungen und Run-Loc
 - [ ] Die 10 Folgehänger-Karten sind einzeln mit Zielrelease dokumentiert.
 - [ ] `Data Naga` und `Dupré` sind vor Freeze als `ready` oder `deferred` entschieden.
 - [ ] Testmatrix deckt Unit/Szenario/Visibility/Replay/KI getrennt ab.
+- [ ] Releaseabschluss enthält den Pflichtschritt „Webclient-Versionsnummer auf V1.7.1 anheben“ inklusive Final-Review-Nachweis.
 
 ## V1.7.2 - Mechanikpaket F
 
@@ -223,6 +225,7 @@ Trace/Tag/Resource-Interaktionen und Handsize-/ActionEconomy-Modifier konsolidie
 - [ ] `Data Raven` und `Pocket Virtual Reality` sind als Counter-abhängig deferred oder mit Scope-Alternative begründet.
 - [ ] `TKO 2.0` hat vor Freeze eine klare Implementierbarkeitsentscheidung.
 - [ ] Trace-/Tag-/Resource- und Handsize-/ActionEconomy-Gates sind einzeln testbar spezifiziert.
+- [ ] Releaseabschluss enthält den Pflichtschritt „Webclient-Versionsnummer auf V1.7.2 anheben“ inklusive Final-Review-Nachweis.
 
 ## V1.8.0 - Mechanikpaket G
 
@@ -288,6 +291,7 @@ Agenda-Difficulty und Scored-Agenda-Statics als eigener kleiner, klarer Gate-Rel
 - [ ] 13er-Korb ist mit klarer 6/7-Schnittentscheidung dokumentiert.
 - [ ] Alle 7 Counter-abhängigen Karten sind mit Verweis auf V1.8.1 deferred.
 - [ ] Testmatrix enthält explizite Scoring-/Steal-/Overadvance-Regressionen.
+- [ ] Releaseabschluss enthält den Pflichtschritt „Webclient-Versionsnummer auf V1.8.0 anheben“ inklusive Final-Review-Nachweis.
 
 ## V1.8.1 - Mechanikpaket H
 
@@ -345,6 +349,7 @@ Counter-System und Virus-/Purge-Trigger als Schließer für die bisher deferred 
 - [ ] `Cockroach` und `Incubator` sind bis V1.9.0 deferred.
 - [ ] `Grubb` ist vor Freeze als `ready` oder `deferred` dokumentiert.
 - [ ] Trigger-Reihenfolge, Replay und Visibility haben eigene Pflichtgates.
+- [ ] Releaseabschluss enthält den Pflichtschritt „Webclient-Versionsnummer auf V1.8.1 anheben“ inklusive Final-Review-Nachweis.
 
 ## 4) Abhängigkeitsmatrix (Mechanik -> Zielrelease -> Vorbedingungen -> Risiko -> Pflichttests)
 
@@ -413,3 +418,4 @@ Pflicht-Preflight je Release:
 - [ ] Alle Folgehänger (`V1.7.2`-, `V1.8.0`-, `V1.8.1`-, `V1.9.0`-Links) sind je Karte dokumentiert.
 - [ ] Unit/Szenario/Visibility/Replay-StateHash/KI-Smoke-Gates sind je Release explizit und getrennt.
 - [ ] Deck-Legal-AI-Approval Batch B-G bleibt als separater Gate-Track dokumentiert.
+- [ ] Je Release ist der Abschluss-Schritt „Webclient-Versionsnummer anheben + Final-Review-Nachweis“ verpflichtend eingeplant.

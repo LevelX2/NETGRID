@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.7.2",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.7.2",
+  "generatedFor": "V1.7.2 Mechanikpaket F final gate",
+  "generatedAt": "2026-05-09",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.7.1.json",
+  "gateAssertions": {
+    "v171GatePassed": true,
+    "v172CoreSubsetImplemented": true,
+    "v172OperationTraceWindowingAdded": true,
+    "v172LastTurnRunAttemptGateAdded": true,
+    "v172TaggedRunnerResourceTrashAdded": true,
+    "v172RunnerResourceActionsAdded": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.trace.operation_trace_windowing_and_context_return",
+      "label": "Operation-Trace-Windowing mit Context-Return",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.2",
+      "currentScopeNote": "V1.7.2 ergänzt Corp-Operations-Trace (Audit/Chance) mit deterministischer Rückkehr in den Corp-Action-Kontext.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.turnflags.last_turn_runner_run_attempt_gate",
+      "label": "Last-Turn Runner Run Attempt Gate",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.2",
+      "currentScopeNote": "V1.7.2 ergänzt turn-boundary-sichere Run-Attempt-Flags für Corp-Operation-Play-Gates.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.tag.resource_trash_operation_deterministic",
+      "label": "Tagged Runner Resource Trash durch Operation",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.2",
+      "currentScopeNote": "V1.7.2 ergänzt Corporate Detective Agency mit deterministischem Trash von bis zu zwei Runner-Resources.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.runner_resource_action_tag_remove_and_credit_draw",
+      "label": "Runner-Resource-Aktionen für Tag-Remove und Credit+Draw",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.2",
+      "currentScopeNote": "V1.7.2 ergänzt Danshi's Second ID und Silicon Saloon Franchise als installierte Runner-Resource-Aktionen.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.card_release.v1_7_2_core_subset",
+      "label": "V1.7.2 Card Core Subset",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.7.2",
+      "currentScopeNote": "5 Karten sind als freigabefähiger Kernkorb umgesetzt; restliche V1.7.2-Planungskarten bleiben deferred.",
+      "coverage": ["manifest", "scenario", "unit", "visibility", "replay", "state_hash"]
+    }
+  ]
+}

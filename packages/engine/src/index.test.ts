@@ -1942,6 +1942,828 @@ describe("V1.7.0 Mechanikpaket D", () => {
   });
 });
 
+describe("V1.7.1 Mechanikpaket E", () => {
+  it("adds a controlled V1.7.1 core card set for search, access replacement and HQ multiaccess", () => {
+    expect(ONR_V1_7_1_FINAL_CARD_IDS).toHaveLength(5);
+    for (const definitionId of ONR_V1_7_1_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_114_temple-microcode-outlet"]).toMatchObject({ cost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_106_private-ldl-access"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_118_weather-to-finance-pipe"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_084_edited-shipping-manifests"]).toMatchObject({ cost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_129_hq-interface"]).toMatchObject({ installCost: 4 });
+  });
+
+  it("validates V1.7.1 smoke decks and keeps previous releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_7_1_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_7_1_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v171CardReleaseGame("v171-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_180_smiths-pawnshop"]).toBeDefined();
+  });
+
+  it("resolves Temple Microcode Outlet as hidden-zone stack search and deterministic shuffle", () => {
+    let state = toRunnerTurn(v171CardReleaseGame("v171-temple-search"));
+    state.runner.credits = 20;
+    const templeId = moveRunnerCardToGrip(state, "onr_v1_114_temple-microcode-outlet");
+    const selectedProgram = putRunnerCardOnTopOfStack(state, "onr_v1_036_jackhammer");
+    const randomBefore = state.randomDrawRecords.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === templeId &&
+        sourceDefinition(state, action) === "onr_v1_114_temple-microcode-outlet"
+    );
+    expect(state.pendingChoice?.source.startsWith("v098.search_stack")).toBe(true);
+
+    const selectedOption =
+      state.pendingChoice?.options.find((option) => typeof option.value === "string" && option.value === selectedProgram)?.id ?? "";
+    expect(selectedOption).not.toBe("");
+    state = applyChoice(state, "runner", selectedOption);
+
+    expect(state.runner.grip).toContain(selectedProgram);
+    expect(state.runner.stack).not.toContain(selectedProgram);
+    expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneAction: "search_stack" });
+  });
+
+  it("runs Private LDL Access on HQ and accesses R&D instead", () => {
+    let state = toRunnerTurn(v171CardReleaseGame("v171-private-ldl-access"));
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_106_private-ldl-access");
+    putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
+    const hqOperationId = moveCorpCardToHq(state, "simple_economy_operation");
+    keepOnlyCorpHqCard(state, hqOperationId);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_106_private-ldl-access" && action.payload?.serverId === "hq"
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "onr_v1_203_hostile-takeover",
+      title: "Hostile Takeover",
+      serverLabel: "R&D"
+    });
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+    expect(state.run).toBeUndefined();
+    expect(state.corp.hq).toContain(hqOperationId);
+  });
+
+  it("applies successful-run replacement effects for Weather-to-Finance Pipe and Edited Shipping Manifests", () => {
+    let weatherState = toRunnerTurn(v171CardReleaseGame("v171-weather-pipe"));
+    weatherState.runner.credits = 20;
+    weatherState.corp.credits = 10;
+    moveRunnerCardToGrip(weatherState, "onr_v1_118_weather-to-finance-pipe");
+    weatherState = apply(
+      weatherState,
+      "runner",
+      (action) => action.type === "play_event" && sourceDefinition(weatherState, action) === "onr_v1_118_weather-to-finance-pipe" && action.payload?.serverId === "hq"
+    );
+    expect(weatherState.run).toBeUndefined();
+    expect(weatherState.corp.credits).toBe(6);
+    expect(weatherState.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_event" });
+
+    let manifestsState = toRunnerTurn(v171CardReleaseGame("v171-edited-shipping"));
+    manifestsState.runner.credits = 20;
+    manifestsState.corp.credits = 8;
+    moveRunnerCardToGrip(manifestsState, "onr_v1_084_edited-shipping-manifests");
+    const corpHqBefore = manifestsState.corp.hq.length;
+    const corpRdBefore = manifestsState.corp.rd.length;
+    manifestsState = apply(
+      manifestsState,
+      "runner",
+      (action) =>
+        action.type === "play_event" && sourceDefinition(manifestsState, action) === "onr_v1_084_edited-shipping-manifests" && action.payload?.serverId === "hq"
+    );
+    expect(manifestsState.run).toBeUndefined();
+    expect(manifestsState.corp.credits).toBe(7);
+    expect(manifestsState.runner.tags).toBe(1);
+    expect(manifestsState.corp.hq.length).toBe(corpHqBefore + 1);
+    expect(manifestsState.corp.rd.length).toBe(corpRdBefore - 1);
+    expect(manifestsState.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_event" });
+  });
+
+  it("grants one additional HQ access per installed HQ Interface", () => {
+    let state = toRunnerTurn(v171CardReleaseGame("v171-hq-interface"));
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_129_hq-interface");
+    const firstHqCard = moveCorpCardToHq(state, "simple_economy_operation");
+    const secondHqCard = moveCorpCardToHq(state, "onr_v1_295_night-shift");
+    keepOnlyCorpHqCards(state, [firstHqCard, secondHqCard]);
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_129_hq-interface");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+
+    expect(state.run?.breach?.serverId).toBe("hq");
+    expect(state.run?.breach?.queue).toHaveLength(2);
+    expect(state.run?.accessCount).toBe(1);
+  });
+});
+
+describe("V1.7.2 Mechanikpaket F", () => {
+  it("adds a controlled V1.7.2 core card set for trace, tag-resource interaction and runner resource actions", () => {
+    expect(ONR_V1_7_2_FINAL_CARD_IDS).toHaveLength(5);
+    for (const definitionId of ONR_V1_7_2_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_283_audit-of-call-records"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_284_chance-observation"]).toMatchObject({ cost: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_286_corporate-detective-agency"]).toMatchObject({ cost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_158_danshis-second-id"]).toMatchObject({ installCost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_179_silicon-saloon-franchise"]).toMatchObject({ installCost: 8 });
+  });
+
+  it("validates V1.7.2 smoke decks and keeps previous releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_7_2_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_7_2_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v172CardReleaseGame("v172-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_129_hq-interface"]).toBeDefined();
+  });
+
+  it("gates Chance Observation and Audit of Call Records by runner run attempts of the previous turn", () => {
+    let oneAttemptState = toRunnerTurn(v172CardReleaseGame("v172-one-attempt-gate"));
+    oneAttemptState.runner.credits = 30;
+    oneAttemptState.corp.credits = 30;
+    moveCorpCardToHq(oneAttemptState, "onr_v1_283_audit-of-call-records");
+    moveCorpCardToHq(oneAttemptState, "onr_v1_284_chance-observation");
+    putCorpIceOnServer(oneAttemptState, "rd", "onr_v1_232_crystal-wall");
+
+    oneAttemptState = apply(oneAttemptState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    oneAttemptState = apply(oneAttemptState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(oneAttemptState, action) === "onr_v1_232_crystal-wall");
+    oneAttemptState = apply(oneAttemptState, "runner", (action) => action.type === "continue_run");
+    oneAttemptState = apply(oneAttemptState, "runner", (action) => action.type === "end_turn");
+    oneAttemptState = apply(oneAttemptState, "corp", (action) => action.type === "mandatory_draw");
+
+    const oneAttemptOps = getLegalActions(oneAttemptState, "corp")
+      .filter((action) => action.type === "play_operation")
+      .map((action) => sourceDefinition(oneAttemptState, action));
+    expect(oneAttemptOps).toContain("onr_v1_284_chance-observation");
+    expect(oneAttemptOps).not.toContain("onr_v1_283_audit-of-call-records");
+
+    let twoAttemptState = toRunnerTurn(v172CardReleaseGame("v172-two-attempt-gate"));
+    twoAttemptState.runner.credits = 30;
+    twoAttemptState.corp.credits = 30;
+    moveCorpCardToHq(twoAttemptState, "onr_v1_283_audit-of-call-records");
+    moveCorpCardToHq(twoAttemptState, "onr_v1_284_chance-observation");
+    putCorpIceOnServer(twoAttemptState, "rd", "onr_v1_232_crystal-wall");
+
+    twoAttemptState = apply(twoAttemptState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    twoAttemptState = apply(twoAttemptState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(twoAttemptState, action) === "onr_v1_232_crystal-wall");
+    twoAttemptState = apply(twoAttemptState, "runner", (action) => action.type === "continue_run");
+    twoAttemptState = apply(twoAttemptState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    twoAttemptState = apply(twoAttemptState, "runner", (action) => action.type === "continue_run");
+    twoAttemptState = apply(twoAttemptState, "runner", (action) => action.type === "end_turn");
+    twoAttemptState = apply(twoAttemptState, "corp", (action) => action.type === "mandatory_draw");
+
+    const twoAttemptOps = getLegalActions(twoAttemptState, "corp")
+      .filter((action) => action.type === "play_operation")
+      .map((action) => sourceDefinition(twoAttemptState, action));
+    expect(twoAttemptOps).toContain("onr_v1_284_chance-observation");
+    expect(twoAttemptOps).toContain("onr_v1_283_audit-of-call-records");
+
+    twoAttemptState.corp.maxHandSize = 100;
+    twoAttemptState = apply(twoAttemptState, "corp", (action) => action.type === "end_turn");
+    twoAttemptState = apply(twoAttemptState, "runner", (action) => action.type === "end_turn");
+    twoAttemptState = apply(twoAttemptState, "corp", (action) => action.type === "mandatory_draw");
+    const resetOps = getLegalActions(twoAttemptState, "corp")
+      .filter((action) => action.type === "play_operation")
+      .map((action) => sourceDefinition(twoAttemptState, action));
+    expect(resetOps).not.toContain("onr_v1_284_chance-observation");
+    expect(resetOps).not.toContain("onr_v1_283_audit-of-call-records");
+  });
+
+  it("resolves operation traces outside runs and returns deterministically to corp action context", () => {
+    let state = toRunnerTurn(v172CardReleaseGame("v172-operation-trace"));
+    state.runner.credits = 30;
+    state.corp.credits = 30;
+    moveCorpCardToHq(state, "onr_v1_283_audit-of-call-records");
+    putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_232_crystal-wall");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+
+    const beforeTags = state.runner.tags;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_283_audit-of-call-records");
+
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(state.pendingChoice?.source.startsWith("trace:op_trace")).toBe(true);
+    expect(state.trace?.returnPhase).toBe("corp_action_phase");
+    expect(state.trace?.returnTimingPoint).toBe("corp_action.main");
+    expect(state.trace?.returnActiveSide).toBe("corp");
+    state = applyChoice(state, "corp", "bid_2");
+    state = applyChoice(state, "runner", "bid_0");
+
+    expect(state.runner.tags).toBe(beforeTags + 1);
+    expect(state.phase).toBe("corp_action_phase");
+    expect(state.timingPoint).toBe("corp_action.main");
+    expect(state.activeSide).toBe("corp");
+    expect(state.trace).toBeUndefined();
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ traceStep: "runner_bid", traceSuccessful: true, tagsAdded: 1 });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("trashes up to two runner resources with Corporate Detective Agency when the runner is tagged", () => {
+    let state = toRunnerTurn(v172CardReleaseGame("v172-detective-agency"));
+    state.runner.credits = 30;
+    state.corp.credits = 30;
+    moveRunnerCardToGrip(state, "onr_v1_158_danshis-second-id");
+    moveRunnerCardToGrip(state, "onr_v1_179_silicon-saloon-franchise");
+    moveRunnerCardToGrip(state, "onr_v1_163_floating-runner-bbs");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_158_danshis-second-id");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_179_silicon-saloon-franchise");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_163_floating-runner-bbs");
+    state.runner.tags = 1;
+    const resourcesBefore = state.runner.rig.resources.slice();
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, "onr_v1_286_corporate-detective-agency");
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_286_corporate-detective-agency");
+
+    expect(state.runner.rig.resources).toHaveLength(1);
+    expect(state.runner.heap.filter((cardId) => resourcesBefore.includes(cardId))).toHaveLength(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation", cardDefinitionId: "onr_v1_286_corporate-detective-agency" });
+  });
+
+  it("executes Danshi's Second ID and Silicon Saloon Franchise as runner resource actions", () => {
+    let state = toRunnerTurn(v172CardReleaseGame("v172-resource-actions"));
+    state.runner.credits = 30;
+    state.runner.tags = 5;
+    state.runner.clicks = 10;
+    const danshiId = moveRunnerCardToGrip(state, "onr_v1_158_danshis-second-id");
+    const siliconId = moveRunnerCardToGrip(state, "onr_v1_179_silicon-saloon-franchise");
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === danshiId);
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === siliconId);
+
+    const tagsBefore = state.runner.tags;
+    const creditsBeforeDanshi = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "remove_tag" &&
+        action.payload?.resourceAbility === "danshis_second_id" &&
+        String(action.payload?.cardId) === danshiId &&
+        action.payload?.removeTagAmount === 3
+    );
+    expect(state.runner.tags).toBe(tagsBefore - 3);
+    expect(state.runner.credits).toBe(creditsBeforeDanshi);
+    expect(state.runner.heap).toContain(danshiId);
+
+    const creditsBeforeSilicon = state.runner.credits;
+    const gripBeforeSilicon = state.runner.grip.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "gain_credit" && action.payload?.resourceAbility === "silicon_saloon_franchise" && String(action.payload?.cardId) === siliconId
+    );
+    expect(state.runner.credits).toBe(creditsBeforeSilicon + 1);
+    expect(state.runner.grip.length).toBe(gripBeforeSilicon + 1);
+  });
+});
+
+describe("V1.8.0 Mechanikpaket G", () => {
+  it("adds a controlled V1.8.0 core card set for agenda difficulty, scored statics and overadvance points", () => {
+    expect(ONR_V1_8_0_FINAL_CARD_IDS).toHaveLength(6);
+    for (const definitionId of ONR_V1_8_0_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" ")).not.toMatch(/counter_system|virus|purge|deterministischer_wuerfel/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_083_desperate-competitor"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_090_hot-tip-for-wns"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_156_corporate-ally"]).toMatchObject({ installCost: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_159_databroker"]).toMatchObject({ installCost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_201_executive-extraction"]).toMatchObject({ advancementRequirement: 3, agendaPoints: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_214_project-babylon"]).toMatchObject({ advancementRequirement: 3, agendaPoints: 1 });
+  });
+
+  it("validates V1.8.0 smoke decks and keeps previous releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_8_0_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_8_0_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v180CardReleaseGame("v180-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_286_corporate-detective-agency"]).toBeDefined();
+  });
+
+  it("gates Desperate Competitor and Hot Tip for WNS by same-turn agenda subtype theft", () => {
+    let grayState = toRunnerTurn(v180CardReleaseGame("v180-gray-ops-gate"));
+    grayState.runner.credits = 30;
+    const desperateCardId = moveRunnerCardToGrip(grayState, "onr_v1_083_desperate-competitor");
+    const hotTipCardId = moveRunnerCardToGrip(grayState, "onr_v1_090_hot-tip-for-wns");
+    expect(
+      getLegalActions(grayState, "runner").some(
+        (action) => action.type === "play_event" && String(action.payload?.cardId) === desperateCardId
+      )
+    ).toBe(false);
+    expect(
+      getLegalActions(grayState, "runner").some(
+        (action) => action.type === "play_event" && String(action.payload?.cardId) === hotTipCardId
+      )
+    ).toBe(false);
+    putCorpCardOnTopOfRd(grayState, "onr_v1_203_hostile-takeover");
+    grayState = apply(grayState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    grayState = apply(grayState, "runner", (action) => action.type === "access_card");
+    grayState = apply(grayState, "runner", (action) => action.type === "steal_agenda");
+    expect(
+      getLegalActions(grayState, "runner").some(
+        (action) => action.type === "play_event" && String(action.payload?.cardId) === desperateCardId
+      )
+    ).toBe(true);
+    expect(
+      getLegalActions(grayState, "runner").some(
+        (action) => action.type === "play_event" && String(action.payload?.cardId) === hotTipCardId
+      )
+    ).toBe(false);
+    grayState = apply(
+      grayState,
+      "runner",
+      (action) => action.type === "play_event" && String(action.payload?.cardId) === desperateCardId
+    );
+    expect(grayState.runner.scoreArea).toContain(desperateCardId);
+    expect(grayState.cardInstances[desperateCardId]?.counters?.agenda).toBe(1);
+
+    let blackState = toRunnerTurn(v180CardReleaseGame("v180-black-ops-gate"));
+    blackState.runner.credits = 30;
+    const hotTipBlackCardId = moveRunnerCardToGrip(blackState, "onr_v1_090_hot-tip-for-wns");
+    putCorpCardOnTopOfRd(blackState, "onr_v1_214_project-babylon");
+    blackState = apply(blackState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    blackState = apply(blackState, "runner", (action) => action.type === "access_card");
+    blackState = apply(blackState, "runner", (action) => action.type === "steal_agenda");
+    expect(
+      getLegalActions(blackState, "runner").some(
+        (action) => action.type === "play_event" && String(action.payload?.cardId) === hotTipBlackCardId
+      )
+    ).toBe(true);
+    blackState = apply(
+      blackState,
+      "runner",
+      (action) => action.type === "play_event" && String(action.payload?.cardId) === hotTipBlackCardId
+    );
+    expect(blackState.runner.scoreArea).toContain(hotTipBlackCardId);
+    expect(blackState.cardInstances[hotTipBlackCardId]?.counters?.agenda).toBe(1);
+  });
+
+  it("enforces Corporate Ally install agenda-point forfeit and Databroker agenda-point-to-credit action", () => {
+    let state = toRunnerTurn(v180CardReleaseGame("v180-corporate-ally-databroker"));
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    const corporateAllyId = moveRunnerCardToGrip(state, "onr_v1_156_corporate-ally");
+    const databrokerId = moveRunnerCardToGrip(state, "onr_v1_159_databroker");
+    putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+    const stolenAgendaId = state.runner.scoreArea.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_203_hostile-takeover");
+    expect(stolenAgendaId).toBeDefined();
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === corporateAllyId);
+    expect(state.runner.rig.resources).toContain(corporateAllyId);
+    if (stolenAgendaId) {
+      expect(state.runner.scoreArea).not.toContain(stolenAgendaId);
+      expect(state.specialZones?.removedFromGame).toContain(stolenAgendaId);
+    }
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === databrokerId);
+    putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+    const databrokerForfeitTarget = state.runner.scoreArea.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_203_hostile-takeover");
+    const creditsBefore = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.resourceAbility === "databroker" &&
+        String(action.payload?.cardId) === databrokerId
+    );
+    expect(state.runner.credits).toBe(creditsBefore + 10);
+    expect(state.runner.heap).toContain(databrokerId);
+    if (databrokerForfeitTarget) {
+      expect(state.runner.scoreArea).not.toContain(databrokerForfeitTarget);
+      expect(state.specialZones?.removedFromGame).toContain(databrokerForfeitTarget);
+    }
+  });
+
+  it("applies Executive Extraction difficulty reduction for gray_ops only and keeps Corporate Ally difficulty increase active", () => {
+    let state = toRunnerTurn(v180CardReleaseGame("v180-difficulty-statics"));
+    state.runner.credits = 30;
+    const corporateAllyId = moveRunnerCardToGrip(state, "onr_v1_156_corporate-ally");
+    putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === corporateAllyId);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 50;
+    state.corp.clicks = 20;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "simple_agenda");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "simple_agenda" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 3; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "simple_agenda");
+    }
+    expect(getLegalActions(state, "corp").some((action) => action.type === "score_agenda" && sourceDefinition(state, action) === "simple_agenda")).toBe(false);
+    state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "simple_agenda");
+    expect(getLegalActions(state, "corp").some((action) => action.type === "score_agenda" && sourceDefinition(state, action) === "simple_agenda")).toBe(true);
+
+    moveCorpCardToHq(state, "onr_v1_201_executive-extraction");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_201_executive-extraction" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 4; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_201_executive-extraction");
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_201_executive-extraction");
+
+    moveCorpCardToHq(state, "onr_v1_203_hostile-takeover");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_203_hostile-takeover" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 3; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_203_hostile-takeover");
+    }
+    expect(
+      getLegalActions(state, "corp").some((action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_203_hostile-takeover")
+    ).toBe(true);
+  });
+
+  it("awards deterministic Project Babylon bonus points on score with replay-safe statehash", () => {
+    let state = v180CardReleaseGame("v180-project-babylon");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 50;
+    state.corp.clicks = 20;
+    state.corp.maxHandSize = 100;
+    moveCorpCardToHq(state, "onr_v1_214_project-babylon");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_214_project-babylon" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 7; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_214_project-babylon");
+    }
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_214_project-babylon");
+
+    const projectBabylonId = state.corp.scoreArea.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_214_project-babylon");
+    expect(projectBabylonId).toBeDefined();
+    if (projectBabylonId) {
+      expect(state.cardInstances[projectBabylonId]?.counters?.agenda).toBe(2);
+    }
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      agendaPoints: 1,
+      agendaPointBonus: 2,
+      totalAgendaPoints: 3
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("V1.8.1 Mechanikpaket H", () => {
+  it("adds a controlled V1.8.1 core card set for counter, purge and run-follow-up mechanics", () => {
+    expect(ONR_V1_8_1_FINAL_CARD_IDS).toHaveLength(12);
+    for (const definitionId of ONR_V1_8_1_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" ")).not.toMatch(/deterministischer_wuerfel|ambush|v2/);
+    }
+    expect(ONR_V1_8_1_FINAL_CARD_IDS).not.toContain("onr_v1_013_cockroach");
+    expect(ONR_V1_8_1_FINAL_CARD_IDS).not.toContain("onr_v1_034_incubator");
+    expect(ONR_V1_8_1_FINAL_CARD_IDS).not.toContain("onr_v1_030_grubb");
+  });
+
+  it("validates V1.8.1 smoke decks and keeps previous releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_8_1_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_8_1_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v181CardReleaseGame("v181-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_214_project-babylon"]).toBeDefined();
+  });
+
+  it("applies Clown encounter strength reduction to allow earlier breaker interactions", () => {
+    let withoutClown = toRunnerTurn(v181CardReleaseGame("v181-clown-off"));
+    withoutClown.runner.credits = 30;
+    moveRunnerCardToGrip(withoutClown, "onr_v1_021_dwarf");
+    withoutClown = apply(withoutClown, "runner", (action) => action.type === "install_card" && sourceDefinition(withoutClown, action) === "onr_v1_021_dwarf");
+    putCorpIceOnServer(withoutClown, "rd", "onr_v1_279_wall-of-static");
+    withoutClown = apply(withoutClown, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    withoutClown = apply(withoutClown, "corp", (action) => action.type === "rez_ice" && sourceDefinition(withoutClown, action) === "onr_v1_279_wall-of-static");
+    const withoutDwarfId = withoutClown.runner.rig.programs.find((id) => withoutClown.cardInstances[id]?.definitionId === "onr_v1_021_dwarf");
+    expect(withoutDwarfId).toBeDefined();
+    expect(
+      getLegalActions(withoutClown, "runner").some(
+        (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === withoutDwarfId
+      )
+    ).toBe(false);
+
+    let withClown = toRunnerTurn(v181CardReleaseGame("v181-clown-on"));
+    withClown.runner.credits = 30;
+    moveRunnerCardToGrip(withClown, "onr_v1_012_clown");
+    moveRunnerCardToGrip(withClown, "onr_v1_021_dwarf");
+    withClown = apply(withClown, "runner", (action) => action.type === "install_card" && sourceDefinition(withClown, action) === "onr_v1_012_clown");
+    withClown = apply(withClown, "runner", (action) => action.type === "install_card" && sourceDefinition(withClown, action) === "onr_v1_021_dwarf");
+    putCorpIceOnServer(withClown, "rd", "onr_v1_279_wall-of-static");
+    withClown = apply(withClown, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    withClown = apply(withClown, "corp", (action) => action.type === "rez_ice" && sourceDefinition(withClown, action) === "onr_v1_279_wall-of-static");
+    const withDwarfId = withClown.runner.rig.programs.find((id) => withClown.cardInstances[id]?.definitionId === "onr_v1_021_dwarf");
+    expect(withDwarfId).toBeDefined();
+    expect(
+      getLegalActions(withClown, "runner").some((action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === withDwarfId)
+    ).toBe(true);
+  });
+
+  it("creates Pattel/Pox run-success counters and clears card/server virus counters with purge", () => {
+    let state = toRunnerTurn(v181CardReleaseGame("v181-pattel-pox-purge"));
+    state.runner.credits = 40;
+    moveRunnerCardToGrip(state, "onr_v1_046_pattels-virus");
+    moveRunnerCardToGrip(state, "onr_v1_049_pox");
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_046_pattels-virus");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_049_pox");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_279_wall-of-static");
+    const dwarfId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_021_dwarf");
+    expect(dwarfId).toBeDefined();
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && String(action.payload?.breakerId) === dwarfId);
+    state = apply(state, "runner", (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === dwarfId);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.cardInstances[iceId]?.counters?.virus).toBe(1);
+    expect(state.poxCountersByServer?.rd).toBe(1);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    expect(getLegalActions(state, "corp").some((action) => action.type === "purge_virus_counters")).toBe(true);
+    state = apply(state, "corp", (action) => action.type === "purge_virus_counters");
+    expect((state.cardInstances[iceId]?.counters?.virus ?? 0)).toBe(0);
+    expect(state.poxCountersByServer?.rd ?? 0).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ purgedCounterType: "virus" });
+  });
+
+  it("runs Inside Job as deterministic first-ice bypass", () => {
+    let state = toRunnerTurn(v181CardReleaseGame("v181-inside-job"));
+    state.runner.credits = 30;
+    moveRunnerCardToGrip(state, "onr_v1_094_inside-job");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_094_inside-job" && action.payload?.serverId === "rd"
+    );
+    expect(state.run?.attackedServerId).toBe("rd");
+    expect(state.run?.bypassFirstIceRemaining).toBe(false);
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(getLegalActions(state, "runner").some((action) => action.type === "access_card")).toBe(true);
+  });
+
+  it("keeps Restrictive action IDs server-distinct and applies Restrictive plus Pox install tax deterministically", () => {
+    let state = toRunnerTurn(v181CardReleaseGame("v181-restrictive-pox-tax"));
+    state.runner.credits = 40;
+    const restrictiveCardId = moveRunnerCardToGrip(state, "onr_v1_173_restrictive-net-zoning");
+    const restrictiveInstallActions = getLegalActions(state, "runner").filter(
+      (action) => action.type === "install_card" && String(action.payload?.cardId) === restrictiveCardId
+    );
+    expect(restrictiveInstallActions.length).toBeGreaterThan(1);
+    expect(new Set(restrictiveInstallActions.map((action) => action.actionId)).size).toBe(restrictiveInstallActions.length);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_173_restrictive-net-zoning" && action.payload?.selectedServerId === "rd"
+    );
+    installRunnerProgramForTest(state, "onr_v1_049_pox");
+
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.poxCountersByServer?.rd).toBe(2);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, "simple_barrier_ice");
+    const rdInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "simple_barrier_ice" &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "ice"
+    );
+    expect(rdInstall.costs[0]?.credits).toBe(2);
+    expect(rdInstall.payload?.iceInstallAdditionalCost).toBe(2);
+  });
+
+  it("scores Coup agendas with deterministic start counters and spends them via legal click actions", () => {
+    let state = v181CardReleaseGame("v181-coup-actions");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 80;
+    state.corp.clicks = 30;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "onr_v1_193_corporate-coup");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_193_corporate-coup" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 5; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_193_corporate-coup");
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_193_corporate-coup");
+    const corporateCoupId = state.corp.scoreArea.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_193_corporate-coup");
+    expect(corporateCoupId).toBeDefined();
+    if (corporateCoupId) expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(5);
+
+    moveCorpCardToHq(state, "onr_v1_209_political-coup");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_209_political-coup" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 4; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_209_political-coup");
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_209_political-coup");
+    const politicalCoupId = state.corp.scoreArea.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_209_political-coup");
+    expect(politicalCoupId).toBeDefined();
+    if (politicalCoupId) expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(6);
+
+    const creditsBefore = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "corporate_coup");
+    expect(state.corp.credits).toBe(creditsBefore + 1);
+    if (corporateCoupId) expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(4);
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "political_coup");
+    if (politicalCoupId) expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(5);
+  });
+
+  it("resolves Ball/Canis run flags and enforces Fatal/Shock next-encounter penalties deterministically", () => {
+    let ballTaxState = toRunnerTurn(v181CardReleaseGame("v181-ball-tax"));
+    ballTaxState.runner.credits = 20;
+    putCorpIceOnServer(ballTaxState, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(ballTaxState, "rd", "onr_v1_222_ball-and-chain");
+    ballTaxState = apply(ballTaxState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    ballTaxState = apply(ballTaxState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(ballTaxState, action) === "onr_v1_222_ball-and-chain");
+    ballTaxState = apply(ballTaxState, "runner", (action) => action.type === "continue_run");
+    expect(ballTaxState.run?.encounterTaxForFutureIce).toBe(1);
+    ballTaxState = apply(ballTaxState, "runner", (action) => action.type === "continue_run");
+    const creditsBeforeBallTax = ballTaxState.runner.credits;
+    ballTaxState = apply(ballTaxState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(ballTaxState, action) === "simple_barrier_ice");
+    expect(ballTaxState.runner.credits).toBe(creditsBeforeBallTax - 1);
+
+    let canisState = toRunnerTurn(v181CardReleaseGame("v181-canis-strength"));
+    canisState.runner.credits = 20;
+    moveRunnerCardToGrip(canisState, "onr_v1_014_codecracker");
+    canisState = apply(canisState, "runner", (action) => action.type === "install_card" && sourceDefinition(canisState, action) === "onr_v1_014_codecracker");
+    putCorpIceOnServer(canisState, "rd", "simple_code_gate_ice");
+    putCorpIceOnServer(canisState, "rd", "onr_v1_226_canis-minor");
+    putCorpIceOnServer(canisState, "rd", "onr_v1_225_canis-major");
+    canisState = apply(canisState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    canisState = apply(canisState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(canisState, action) === "onr_v1_225_canis-major");
+    canisState = apply(canisState, "runner", (action) => action.type === "continue_run");
+    expect(canisState.run?.futureEncounterIceStrengthBonus).toBe(2);
+    canisState = apply(canisState, "runner", (action) => action.type === "continue_run");
+    canisState = apply(canisState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(canisState, action) === "onr_v1_226_canis-minor");
+    canisState = apply(canisState, "runner", (action) => action.type === "continue_run");
+    expect(canisState.run?.futureEncounterIceStrengthBonus).toBe(3);
+    canisState = apply(canisState, "runner", (action) => action.type === "continue_run");
+    const creditsBeforeCanisThirdEncounter = canisState.runner.credits;
+    canisState = apply(canisState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(canisState, action) === "simple_code_gate_ice");
+    expect(canisState.runner.credits).toBe(creditsBeforeCanisThirdEncounter);
+    const codecrackerId = canisState.runner.rig.programs.find((id) => canisState.cardInstances[id]?.definitionId === "onr_v1_014_codecracker");
+    expect(
+      getLegalActions(canisState, "runner").some(
+        (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === codecrackerId
+      )
+    ).toBe(false);
+
+    let fatalState = toRunnerTurn(v181CardReleaseGame("v181-fatal-shock"));
+    fatalState.runner.credits = 20;
+    putCorpIceOnServer(fatalState, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(fatalState, "rd", "onr_v1_242_fatal-attractor");
+    fatalState = apply(fatalState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    fatalState = apply(fatalState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(fatalState, action) === "onr_v1_242_fatal-attractor");
+    fatalState = apply(fatalState, "runner", (action) => action.type === "continue_run");
+    fatalState = apply(fatalState, "runner", (action) => action.type === "continue_run");
+    fatalState = apply(fatalState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(fatalState, action) === "simple_barrier_ice");
+    const gripBeforeFatal = fatalState.runner.grip.length;
+    fatalState = apply(fatalState, "runner", (action) => action.type === "continue_run");
+    expect(fatalState.runner.grip.length).toBe(gripBeforeFatal - 3);
+    expect(fatalState.eventLog.at(-1)?.publicPayload).toMatchObject({ damageResolved: true, damageType: "net", damageAmount: 3 });
+
+    let shockState = toRunnerTurn(v181CardReleaseGame("v181-shock-lock"));
+    shockState.runner.credits = 20;
+    moveRunnerCardToGrip(shockState, "onr_v1_014_codecracker");
+    shockState = apply(shockState, "runner", (action) => action.type === "install_card" && sourceDefinition(shockState, action) === "onr_v1_014_codecracker");
+    putCorpIceOnServer(shockState, "rd", "simple_code_gate_ice");
+    putCorpIceOnServer(shockState, "rd", "onr_v1_268_shock-r");
+    shockState = apply(shockState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    shockState = apply(shockState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(shockState, action) === "onr_v1_268_shock-r");
+    shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    shockState = apply(shockState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(shockState, action) === "simple_code_gate_ice");
+    const shockCodecrackerId = shockState.runner.rig.programs.find((id) => shockState.cardInstances[id]?.definitionId === "onr_v1_014_codecracker");
+    const shockRunnerActions = getLegalActions(shockState, "runner");
+    expect(shockState.run?.noBreakSubroutinesActive).toBe(true);
+    expect(shockState.run?.jackOutLockedUntilEncounterEnds).toBe(true);
+    expect(shockRunnerActions.some((action) => action.type === "jack_out")).toBe(false);
+    expect(
+      shockRunnerActions.some((action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === shockCodecrackerId)
+    ).toBe(false);
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -3556,6 +4378,46 @@ const ONR_V1_7_0_FINAL_CARD_IDS = [
   "onr_v1_180_smiths-pawnshop"
 ] as const;
 
+const ONR_V1_7_1_FINAL_CARD_IDS = [
+  "onr_v1_114_temple-microcode-outlet",
+  "onr_v1_106_private-ldl-access",
+  "onr_v1_118_weather-to-finance-pipe",
+  "onr_v1_084_edited-shipping-manifests",
+  "onr_v1_129_hq-interface"
+] as const;
+
+const ONR_V1_7_2_FINAL_CARD_IDS = [
+  "onr_v1_283_audit-of-call-records",
+  "onr_v1_284_chance-observation",
+  "onr_v1_286_corporate-detective-agency",
+  "onr_v1_158_danshis-second-id",
+  "onr_v1_179_silicon-saloon-franchise"
+] as const;
+
+const ONR_V1_8_0_FINAL_CARD_IDS = [
+  "onr_v1_083_desperate-competitor",
+  "onr_v1_090_hot-tip-for-wns",
+  "onr_v1_156_corporate-ally",
+  "onr_v1_159_databroker",
+  "onr_v1_201_executive-extraction",
+  "onr_v1_214_project-babylon"
+] as const;
+
+const ONR_V1_8_1_FINAL_CARD_IDS = [
+  "onr_v1_012_clown",
+  "onr_v1_046_pattels-virus",
+  "onr_v1_049_pox",
+  "onr_v1_094_inside-job",
+  "onr_v1_173_restrictive-net-zoning",
+  "onr_v1_193_corporate-coup",
+  "onr_v1_209_political-coup",
+  "onr_v1_222_ball-and-chain",
+  "onr_v1_225_canis-major",
+  "onr_v1_226_canis-minor",
+  "onr_v1_242_fatal-attractor",
+  "onr_v1_268_shock-r"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -3842,6 +4704,141 @@ const ONR_V1_7_0_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_7_1_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v171_smoke_094",
+  name: "O:NR V1.7.1 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_114_temple-microcode-outlet", quantity: 2 },
+    { id: "onr_v1_106_private-ldl-access", quantity: 2 },
+    { id: "onr_v1_118_weather-to-finance-pipe", quantity: 2 },
+    { id: "onr_v1_084_edited-shipping-manifests", quantity: 2 },
+    { id: "onr_v1_129_hq-interface", quantity: 2 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_036_jackhammer", quantity: 2 },
+    { id: "simple_economy_event", quantity: 4 }
+  ]
+};
+
+const ONR_V1_7_1_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v171_smoke_094",
+  name: "O:NR V1.7.1 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_233_d-arc-knight", quantity: 1 },
+    { id: "onr_v1_232_crystal-wall", quantity: 2 },
+    { id: "onr_v1_295_night-shift", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "simple_economy_asset", quantity: 2 }
+  ]
+};
+
+const ONR_V1_7_2_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v172_smoke_094",
+  name: "O:NR V1.7.2 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_158_danshis-second-id", quantity: 2 },
+    { id: "onr_v1_179_silicon-saloon-franchise", quantity: 2 },
+    { id: "onr_v1_163_floating-runner-bbs", quantity: 2 },
+    { id: "onr_v1_129_hq-interface", quantity: 2 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "simple_economy_event", quantity: 4 }
+  ]
+};
+
+const ONR_V1_7_2_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v172_smoke_094",
+  name: "O:NR V1.7.2 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_283_audit-of-call-records", quantity: 2 },
+    { id: "onr_v1_284_chance-observation", quantity: 2 },
+    { id: "onr_v1_286_corporate-detective-agency", quantity: 2 },
+    { id: "onr_v1_232_crystal-wall", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 },
+    { id: "simple_economy_asset", quantity: 2 }
+  ]
+};
+
+const ONR_V1_8_0_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v180_smoke_094",
+  name: "O:NR V1.8.0 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_083_desperate-competitor", quantity: 2 },
+    { id: "onr_v1_090_hot-tip-for-wns", quantity: 2 },
+    { id: "onr_v1_156_corporate-ally", quantity: 1 },
+    { id: "onr_v1_159_databroker", quantity: 1 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_036_jackhammer", quantity: 2 },
+    { id: "simple_economy_event", quantity: 4 }
+  ]
+};
+
+const ONR_V1_8_0_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v180_smoke_094",
+  name: "O:NR V1.8.0 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_201_executive-extraction", quantity: 2 },
+    { id: "onr_v1_214_project-babylon", quantity: 2 },
+    { id: "simple_agenda", quantity: 2 },
+    { id: "onr_v1_232_crystal-wall", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
+const ONR_V1_8_1_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v181_smoke_094",
+  name: "O:NR V1.8.1 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_012_clown", quantity: 2 },
+    { id: "onr_v1_046_pattels-virus", quantity: 2 },
+    { id: "onr_v1_049_pox", quantity: 2 },
+    { id: "onr_v1_094_inside-job", quantity: 2 },
+    { id: "onr_v1_173_restrictive-net-zoning", quantity: 2 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "simple_economy_event", quantity: 4 }
+  ]
+};
+
+const ONR_V1_8_1_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v181_smoke_094",
+  name: "O:NR V1.8.1 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_193_corporate-coup", quantity: 2 },
+    { id: "onr_v1_209_political-coup", quantity: 2 },
+    { id: "onr_v1_222_ball-and-chain", quantity: 2 },
+    { id: "onr_v1_225_canis-major", quantity: 2 },
+    { id: "onr_v1_226_canis-minor", quantity: 2 },
+    { id: "onr_v1_242_fatal-attractor", quantity: 2 },
+    { id: "onr_v1_268_shock-r", quantity: 2 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -4064,6 +5061,46 @@ function v170CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_7_0_RUNNER_DECK,
     corpDeck: ONR_V1_7_0_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v171CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_7_1_RUNNER_DECK,
+    corpDeck: ONR_V1_7_1_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v172CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_7_2_RUNNER_DECK,
+    corpDeck: ONR_V1_7_2_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v180CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_8_0_RUNNER_DECK,
+    corpDeck: ONR_V1_8_0_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v181CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_8_1_RUNNER_DECK,
+    corpDeck: ONR_V1_8_1_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.8.1",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.8.1",
+  "generatedFor": "V1.8.1 Mechanikpaket H final gate",
+  "generatedAt": "2026-05-09",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.8.0.json",
+  "gateAssertions": {
+    "v180GatePassed": true,
+    "v181CoreSubsetImplemented": true,
+    "v181CounterSystemAdded": true,
+    "v181VirusAndPurgeAdded": true,
+    "v181RunFollowupFlagsAdded": true,
+    "v181ServerInstallTaxAdded": true,
+    "v181CoupCounterActionsAdded": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.counter.virus_and_server_counter_lifecycle",
+      "label": "Virus-Counter auf Karten und servergebundene Counter-Lifecycle",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.8.1",
+      "currentScopeNote": "V1.8.1 ergänzt Pattel- und Pox-Erfolgsrun-Trigger, servergebundene Counterpersistenz und Purge-Reset beider Counterquellen.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.run.followup_flags_and_next_encounter_penalties",
+      "label": "Run-Folgeflags und Next-Encounter-Penalties",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.8.1",
+      "currentScopeNote": "V1.8.1 ergänzt Ball/Canis/Fatal/Shock als deterministische Run-State-Folgepfade inkl. Jack-out-Lock-Fenster.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.run.bypass_and_encounter_strength_modifiers",
+      "label": "Run-Bypass und encountergebundene Stärke-Modifikatoren",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.8.1",
+      "currentScopeNote": "Inside Job bypassed deterministisch das erste ICE; Clown und Pattel sind in der Encounter-Stärke-Berechnung integriert.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.install_cost.server_tax_stack",
+      "label": "Servergebundene ICE-Installkosten-Taxpfade",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.8.1",
+      "currentScopeNote": "Restrictive Net Zoning und Pox-Tax werden zentral additiv und LegalAction-deterministisch ausgewertet.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.agenda.counter_action_only_coup",
+      "label": "Scored-Agenda-Counteraktionen für Corporate/Political Coup",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.8.1",
+      "currentScopeNote": "Beim Scoren werden feste Power-Counter gesetzt; Entnahme läuft nur über LegalActions mit Vollrevalidierung in applyAction.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.card_release.v1_8_1_core_subset",
+      "label": "V1.8.1 Card Core Subset",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.8.1",
+      "currentScopeNote": "12 Karten sind als freigabefähiger Kernkorb umgesetzt; Cockroach, Incubator und Grubb bleiben deferred.",
+      "coverage": ["manifest", "scenario", "unit", "visibility", "replay", "state_hash"]
+    }
+  ]
+}

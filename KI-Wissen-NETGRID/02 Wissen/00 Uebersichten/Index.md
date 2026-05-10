@@ -13,6 +13,7 @@
 - Formaler Abschluss V1.1.3: `docs/derived/V1_1_3_FINAL_REVIEW.md` bestätigt V1.1.3 als abgeschlossenes Planungs-/Normalisierungsrelease ohne Codeimplementierung.
 - S01: Sonderphase für Spielende, Ergebnisfenster, Spielziel, private Matchserie und Audio; Repository-Artefakte unter `docs/derived/S01_*.md`.
 - [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]: Workflow für wiki-first Arbeit und Rückführung von Erkenntnissen.
+- Releaseabschluss-Regel: Bei jedem umgesetzten Release wird die im Webclient sichtbare Versionsnummer am Ende auf den Zielstand angehoben und im Final Review nachgewiesen.
 
 ## Kernwissen
 
@@ -65,6 +66,10 @@
 - `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`: gemeinsames Umsetzungshandoff für V1.4.2 Belief State, V1.4.3 Simulation/Selfplay, V1.5.0 Private Replay und V1.6.0 Tutorial.
 - `docs/derived/V1_6_1_TO_V1_7_0_DETAILED_PLAN.md`: konsolidierte Detailplanung für die nächsten vier Mechanik-Releases V1.6.1, V1.6.2, V1.6.3 und V1.7.0 mit Release-Reihenfolge, Abhängigkeitsmatrix, Gate-Kriterien, Risiken und Ready-for-Implementation-Checklisten.
 - `docs/derived/V1_7_1_TO_V1_8_1_DETAILED_PLAN.md`: konsolidierte Detailplanung für die nächsten vier Mechanik-Releases V1.7.1, V1.7.2, V1.8.0 und V1.8.1 mit Abhängigkeitsprüfung, Deferred-Schnittregeln, Gate-Kriterien und Umsetzbarkeitsbewertung.
+- `docs/derived/V1_7_1_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_7_1_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis für V1.7.1 Mechanikpaket E inklusive Search-/Access-Replacement-/HQ-Multiaccess-Kernrelease sowie Artefakten `data/manifests/card-implementation-manifest-1.7.1.json`, `data/rules/mechanics-coverage-1.7.1.json` und `data/scenarios/v171-card-release-smoke.json`.
+- `docs/derived/V1_7_2_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_7_2_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis für V1.7.2 Mechanikpaket F inklusive Last-Turn-Run-Attempt-Gates, Operation-Trace-Windowing, tagged-runner Resource-Trash und Runner-Resource-Aktionen sowie Artefakten `data/manifests/card-implementation-manifest-1.7.2.json`, `data/rules/mechanics-coverage-1.7.2.json` und `data/scenarios/v172-card-release-smoke.json`.
+- `docs/derived/V1_8_0_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_8_0_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis für V1.8.0 Mechanikpaket G inklusive Agenda-Subtype-Theft-Gates, Agenda-Punkt-Kostenpfaden, Agenda-Difficulty-Modifiers und Project-Babylon-Overadvance-Bonuspunkten sowie Artefakten `data/manifests/card-implementation-manifest-1.8.0.json`, `data/rules/mechanics-coverage-1.8.0.json` und `data/scenarios/v180-card-release-smoke.json`.
+- `docs/derived/V1_8_1_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_8_1_FINAL_REVIEW.md`: Umsetzung und Gate-Ergebnis für V1.8.1 Mechanikpaket H inklusive Counter-/Virus-/Purge-Verträgen, rungebundenen Folgeflags, servergebundener Installkosten-Taxpfade und scored-agenda-basierter Counteraktionen sowie Artefakten `data/manifests/card-implementation-manifest-1.8.1.json`, `data/rules/mechanics-coverage-1.8.1.json` und `data/scenarios/v181-card-release-smoke.json`.
 - `data/rules/mechanics-coverage-1.2.2.json`: maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.2.
 
 ## Prozesse

@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.7.2",
+  "id": "v1.7.2-card-release-manifest",
+  "status": "implemented_for_v1.7.2_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.7.1.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount5": true,
+    "operationTraceWindowingDeterministic": true,
+    "lastTurnRunAttemptGateDeterministic": true,
+    "taggedRunnerResourceTrashDeterministic": true,
+    "runnerResourceActionEconomyDeterministic": true,
+    "runtimeAllowlistExtendedExactlyBy5": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_operation_trace_5_after_two_run_attempts",
+      "requiredMechanics": ["play_operation", "trace", "bid_amount", "last_turn_run_attempt_gate", "add_tag"],
+      "roleTags": ["corp", "operation", "trace", "tag", "control"]
+    },
+    {
+      "cardCode": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_operation_trace_5_after_run_attempt",
+      "requiredMechanics": ["play_operation", "trace", "bid_amount", "last_turn_run_attempt_gate", "add_tag"],
+      "roleTags": ["corp", "operation", "trace", "tag", "control"]
+    },
+    {
+      "cardCode": "onr_v1_286_corporate-detective-agency",
+      "title": "Corporate Detective Agency",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_operation_trash_two_runner_resources",
+      "requiredMechanics": ["play_operation", "runner_is_tagged", "trash_resource", "deterministic_target_selection"],
+      "roleTags": ["corp", "operation", "tag_punish", "resource_denial"]
+    },
+    {
+      "cardCode": "onr_v1_158_danshis-second-id",
+      "title": "Danshi's Second ID",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_resource_action_remove_up_to_three_tags",
+      "requiredMechanics": ["install_resource", "resource_action", "remove_tag", "self_trash"],
+      "roleTags": ["runner", "resource", "tag_control", "action_economy"]
+    },
+    {
+      "cardCode": "onr_v1_179_silicon-saloon-franchise",
+      "title": "Silicon Saloon Franchise",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_resource_action_credit_plus_draw",
+      "requiredMechanics": ["install_resource", "resource_action", "gain_credit", "draw_cards"],
+      "roleTags": ["runner", "resource", "economy", "draw"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 28,
+    "implementedCardCount": 5,
+    "deferredCardCount": 23,
+    "deferReasons": [
+      "additional dependencies in V1.8.0 agenda and scored-static families",
+      "additional dependencies in V1.8.1 counter and virus families",
+      "open mechanic hints for unresolved run-lock and persistent effect cards",
+      "already released cards from earlier gates are not re-released in V1.7.2"
+    ],
+    "openMechanicHintsStatus": "deferred_in_v1_7_2_core"
+  }
+}

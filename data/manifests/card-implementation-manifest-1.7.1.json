@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.7.1",
+  "id": "v1.7.1-card-release-manifest",
+  "status": "implemented_for_v1.7.1_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.7.0.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount5": true,
+    "hiddenZoneSearchChoiceDeterministic": true,
+    "hqToRdAccessReplacementDeterministic": true,
+    "successfulRunAccessReplacementDeterministic": true,
+    "hqInterfaceMultiaccessBonusDeterministic": true,
+    "runtimeAllowlistExtendedExactlyBy5": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_search_stack_program_to_hand",
+      "requiredMechanics": ["play_event", "hidden_zone_choice", "search_stack_program", "shuffle_stack", "choice_resolution"],
+      "roleTags": ["runner", "event", "search", "tutor", "hidden_zone"]
+    },
+    {
+      "cardCode": "onr_v1_106_private-ldl-access",
+      "title": "Private LDL Access",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_hq_run_access_rd",
+      "requiredMechanics": ["play_event", "start_run", "hq_run", "access_server_override", "breach_access"],
+      "roleTags": ["runner", "event", "run", "access", "multi_server"]
+    },
+    {
+      "cardCode": "onr_v1_118_weather-to-finance-pipe",
+      "title": "Weather-to-Finance Pipe",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_hq_run_access_replace_corp_lose_credits",
+      "requiredMechanics": ["play_event", "start_run", "hq_run", "successful_run_replacement", "corp_credit_loss"],
+      "roleTags": ["runner", "event", "run", "access_replacement", "economy_attack"]
+    },
+    {
+      "cardCode": "onr_v1_084_edited-shipping-manifests",
+      "title": "Edited Shipping Manifests",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_hq_run_access_replace_credit_tag_draw",
+      "requiredMechanics": ["play_event", "start_run", "hq_run", "successful_run_replacement", "corp_credit_loss", "runner_tag_gain", "corp_draw_cards"],
+      "roleTags": ["runner", "event", "run", "access_replacement", "tag_pressure"]
+    },
+    {
+      "cardCode": "onr_v1_129_hq-interface",
+      "title": "HQ Interface",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_hardware_hq_multiaccess_bonus",
+      "requiredMechanics": ["install_hardware", "hq_multiaccess_bonus", "breach_access_queue", "deterministic_hq_selection"],
+      "roleTags": ["runner", "hardware", "access", "hq", "multiaccess"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 48,
+    "implementedCardCount": 5,
+    "deferredCardCount": 43,
+    "deferReasons": [
+      "additional dependencies in V1.7.2 trace/tag/handsize families",
+      "additional dependencies in V1.8.0 agenda/scored-static families",
+      "additional dependencies in V1.8.1 counter/virus/purge families",
+      "additional dependencies in V1.9.0 deterministic dice families"
+    ],
+    "openMechanicHintsStatus": "deferred_in_v1_7_1_core"
+  }
+}

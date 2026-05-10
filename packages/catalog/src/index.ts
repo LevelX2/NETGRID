@@ -427,6 +427,46 @@ export const ONR_V1_7_0_RELEASE_CARD_IDS = [
   "onr_v1_180_smiths-pawnshop"
 ] as const;
 
+export const ONR_V1_7_1_RELEASE_CARD_IDS = [
+  "onr_v1_114_temple-microcode-outlet",
+  "onr_v1_106_private-ldl-access",
+  "onr_v1_118_weather-to-finance-pipe",
+  "onr_v1_084_edited-shipping-manifests",
+  "onr_v1_129_hq-interface"
+] as const;
+
+export const ONR_V1_7_2_RELEASE_CARD_IDS = [
+  "onr_v1_283_audit-of-call-records",
+  "onr_v1_284_chance-observation",
+  "onr_v1_286_corporate-detective-agency",
+  "onr_v1_158_danshis-second-id",
+  "onr_v1_179_silicon-saloon-franchise"
+] as const;
+
+export const ONR_V1_8_0_RELEASE_CARD_IDS = [
+  "onr_v1_083_desperate-competitor",
+  "onr_v1_090_hot-tip-for-wns",
+  "onr_v1_156_corporate-ally",
+  "onr_v1_159_databroker",
+  "onr_v1_201_executive-extraction",
+  "onr_v1_214_project-babylon"
+] as const;
+
+export const ONR_V1_8_1_RELEASE_CARD_IDS = [
+  "onr_v1_012_clown",
+  "onr_v1_046_pattels-virus",
+  "onr_v1_049_pox",
+  "onr_v1_094_inside-job",
+  "onr_v1_173_restrictive-net-zoning",
+  "onr_v1_193_corporate-coup",
+  "onr_v1_209_political-coup",
+  "onr_v1_222_ball-and-chain",
+  "onr_v1_225_canis-major",
+  "onr_v1_226_canis-minor",
+  "onr_v1_242_fatal-attractor",
+  "onr_v1_268_shock-r"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -435,7 +475,11 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_6_1_RELEASE_CARD_IDS,
   ...ONR_V1_6_2_RELEASE_CARD_IDS,
   ...ONR_V1_6_3_RELEASE_CARD_IDS,
-  ...ONR_V1_7_0_RELEASE_CARD_IDS
+  ...ONR_V1_7_0_RELEASE_CARD_IDS,
+  ...ONR_V1_7_1_RELEASE_CARD_IDS,
+  ...ONR_V1_7_2_RELEASE_CARD_IDS,
+  ...ONR_V1_8_0_RELEASE_CARD_IDS,
+  ...ONR_V1_8_1_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -513,6 +557,10 @@ const ONR_V1_6_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_1_RELEASE_CARD_I
 const ONR_V1_6_2_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_2_RELEASE_CARD_IDS);
 const ONR_V1_6_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_6_3_RELEASE_CARD_IDS);
 const ONR_V1_7_0_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_7_0_RELEASE_CARD_IDS);
+const ONR_V1_7_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_7_1_RELEASE_CARD_IDS);
+const ONR_V1_7_2_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_7_2_RELEASE_CARD_IDS);
+const ONR_V1_8_0_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_8_0_RELEASE_CARD_IDS);
+const ONR_V1_8_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_8_1_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -584,6 +632,42 @@ const ONR_V1_7_0_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v170-card-release-smoke.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.7.0 Mechanikpaket D", "apps/server/src/multiplayer.test.ts::V1.7.0 card release matchstart"],
   replayTests: ["packages/engine/src/index.test.ts::V1.7.0 Mechanikpaket D"]
+};
+
+const ONR_V1_7_1_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.7.1",
+  status: "human_playable_v1_7_1_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.7.1 Mechanikpaket E"],
+  scenarioTests: ["data/scenarios/v171-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.7.1 Mechanikpaket E", "apps/server/src/multiplayer.test.ts::V1.7.1 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.7.1 Mechanikpaket E"]
+};
+
+const ONR_V1_7_2_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.7.2",
+  status: "human_playable_v1_7_2_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.7.2 Mechanikpaket F"],
+  scenarioTests: ["data/scenarios/v172-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.7.2 Mechanikpaket F", "apps/server/src/multiplayer.test.ts::V1.7.2 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.7.2 Mechanikpaket F"]
+};
+
+const ONR_V1_8_0_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.8.0",
+  status: "human_playable_v1_8_0_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.8.0 Mechanikpaket G"],
+  scenarioTests: ["data/scenarios/v180-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.8.0 Mechanikpaket G", "apps/server/src/multiplayer.test.ts::V1.8.0 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.8.0 Mechanikpaket G"]
+};
+
+const ONR_V1_8_1_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.8.1",
+  status: "human_playable_v1_8_1_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.8.1 Mechanikpaket H"],
+  scenarioTests: ["data/scenarios/v181-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.8.1 Mechanikpaket H", "apps/server/src/multiplayer.test.ts::V1.8.1 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.8.1 Mechanikpaket H"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -690,6 +774,46 @@ const ONR_V1_7_0_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_069_succubus": { installCost: 3, memoryCost: 1 },
   "onr_v1_163_floating-runner-bbs": { installCost: 6 },
   "onr_v1_180_smiths-pawnshop": { installCost: 0 }
+};
+
+const ONR_V1_7_1_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_084_edited-shipping-manifests": { cost: 1, installCost: null },
+  "onr_v1_106_private-ldl-access": { cost: 0, installCost: null },
+  "onr_v1_114_temple-microcode-outlet": { cost: 1, installCost: null },
+  "onr_v1_118_weather-to-finance-pipe": { cost: 0, installCost: null },
+  "onr_v1_129_hq-interface": { installCost: 4 }
+};
+
+const ONR_V1_7_2_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_158_danshis-second-id": { installCost: 0 },
+  "onr_v1_179_silicon-saloon-franchise": { installCost: 8 },
+  "onr_v1_283_audit-of-call-records": { cost: 0, installCost: null },
+  "onr_v1_284_chance-observation": { cost: 2, installCost: null },
+  "onr_v1_286_corporate-detective-agency": { cost: 1, installCost: null }
+};
+
+const ONR_V1_8_0_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_083_desperate-competitor": { cost: 0, installCost: null },
+  "onr_v1_090_hot-tip-for-wns": { cost: 0, installCost: null },
+  "onr_v1_156_corporate-ally": { installCost: 3 },
+  "onr_v1_159_databroker": { installCost: 0 },
+  "onr_v1_201_executive-extraction": { advancementRequirement: 3, agendaPoints: 1 },
+  "onr_v1_214_project-babylon": { advancementRequirement: 3, agendaPoints: 1 }
+};
+
+const ONR_V1_8_1_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_012_clown": { installCost: 4, memoryCost: 1 },
+  "onr_v1_046_pattels-virus": { installCost: 1, memoryCost: 1 },
+  "onr_v1_049_pox": { installCost: 0, memoryCost: 1 },
+  "onr_v1_094_inside-job": { cost: 2, installCost: null },
+  "onr_v1_173_restrictive-net-zoning": { installCost: 1 },
+  "onr_v1_193_corporate-coup": { advancementRequirement: 5, agendaPoints: 2 },
+  "onr_v1_209_political-coup": { advancementRequirement: 4, agendaPoints: 2 },
+  "onr_v1_222_ball-and-chain": { rezCost: 2, strength: 5 },
+  "onr_v1_225_canis-major": { rezCost: 0, strength: 4 },
+  "onr_v1_226_canis-minor": { rezCost: 0, strength: 5 },
+  "onr_v1_242_fatal-attractor": { rezCost: 1, strength: 4 },
+  "onr_v1_268_shock-r": { rezCost: 1, strength: 3 }
 };
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
@@ -801,6 +925,54 @@ const ONR_V1_7_0_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_163_floating-runner-bbs": "Gain 1 credit at the start of each of your turns.",
   "onr_v1_180_smiths-pawnshop":
     "At the start of each of your turns, you may trash one of your other installed cards to gain 1 credit.\nOnly one unique card of a particular name can be in play at a time."
+};
+
+const ONR_V1_7_1_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_084_edited-shipping-manifests":
+    "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses 1, Runner gains 1 tag and the Corp draws 1 card.",
+  "onr_v1_106_private-ldl-access": "Make a run on HQ. If run is successful, treat it as a successful run on R&D instead of accessing HQ.",
+  "onr_v1_114_temple-microcode-outlet": "Search your stack for a program, reveal it and bring it into your hand. Shuffle your stack afterwards.",
+  "onr_v1_118_weather-to-finance-pipe": "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses 4 credits.",
+  "onr_v1_129_hq-interface": "Whenever you access cards from HQ, access one additional card from HQ."
+};
+
+const ONR_V1_7_2_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_158_danshis-second-id": "A, [T]: Remove up to three tags, at no cost.",
+  "onr_v1_179_silicon-saloon-franchise": "A: Gain 1 credit and draw one card.",
+  "onr_v1_283_audit-of-call-records": "Play only if Runner attempted two or more runs during last turn. Trace 5 - If successful, give Runner 1 tag.",
+  "onr_v1_284_chance-observation": "Play only if Runner attempted a run during last turn. Trace 5 - If successful, give Runner 1 tag.",
+  "onr_v1_286_corporate-detective-agency": "Play only if Runner is tagged. Trash up to two Resources at no cost."
+};
+
+const ONR_V1_8_0_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_083_desperate-competitor": "Play only if you liberated any Gray Ops agendas this turn. Score 1 agenda point.",
+  "onr_v1_090_hot-tip-for-wns": "Score 1 agenda point if you liberated any Black Ops agendas this turn.",
+  "onr_v1_156_corporate-ally": "Installing Corporate Ally costs 1 agenda point, in addition to the normal cost. The difficulty of all agendas is +1.",
+  "onr_v1_159_databroker": "A, [T], 1 agenda point: Gain 10 credits.",
+  "onr_v1_201_executive-extraction": "Difficulty of Gray Ops agendas is reduced by 1.",
+  "onr_v1_214_project-babylon":
+    "Score 1 additional agenda point for every two advancement counters over Project Babylon's difficulty that are on Project Babylon when you score it."
+};
+
+const ONR_V1_8_1_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_012_clown": "All ice is encountered with its strength reduced by 1.",
+  "onr_v1_046_pattels-virus":
+    "Whenever you make a successful run, put a Pattel counter on a piece of ice that had all its subroutines broken during that run. Each Pattel counter on a piece of ice reduces its strength by 1. The Corp may remove all Virus counters by forgoing its next three actions.",
+  "onr_v1_049_pox":
+    "Whenever you make a successful run, put a Pox counter in the fort that was run. Every two Pox counters in a fort require the Corp to pay 1, in addition to any other costs, to install a card inside or on that fort. The Corp may remove all Virus counters by forgoing its next three actions.",
+  "onr_v1_094_inside-job": "Make a run. You automatically pass the first piece of ice you encounter during that run.",
+  "onr_v1_173_restrictive-net-zoning":
+    "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 1, in addition to the normal cost, to install ice on that fort.",
+  "onr_v1_193_corporate-coup": "Put 5 from the bank on Corporate Coup when you score it.\n[A]: Take 1 from Corporate Coup, if it has any bits.",
+  "onr_v1_209_political-coup": "Put 6 from the bank on Political Coup when you score it.\n[A]: Take 1 from Political Coup, if it has any bits.",
+  "onr_v1_222_ball-and-chain":
+    "[Subroutine] For the remainder of the run, Runner must pay 1 when encountering a piece of ice, in addition to any other costs, or end the run.",
+  "onr_v1_225_canis-major": "[Subroutine] For the remainder of the run, all further ice is encountered at +2 strength.",
+  "onr_v1_226_canis-minor": "[Subroutine] For the remainder of the run, all further ice is encountered at +1 strength.",
+  "onr_v1_242_fatal-attractor":
+    "[Subroutine] The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner breaks all subroutines of that piece of ice.",
+  "onr_v1_268_shock-r":
+    "[Subroutine] Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -1591,6 +1763,10 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV181 = ONR_V1_8_1_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV180 = ONR_V1_8_0_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV172 = ONR_V1_7_2_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV171 = ONR_V1_7_1_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV170 = ONR_V1_7_0_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV163 = ONR_V1_6_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV162 = ONR_V1_6_2_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -1598,7 +1774,15 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV170
+  const textOverrides = isV181
+    ? ONR_V1_8_1_TEXT_OVERRIDES
+    : isV180
+    ? ONR_V1_8_0_TEXT_OVERRIDES
+    : isV172
+    ? ONR_V1_7_2_TEXT_OVERRIDES
+    : isV171
+    ? ONR_V1_7_1_TEXT_OVERRIDES
+    : isV170
     ? ONR_V1_7_0_TEXT_OVERRIDES
     : isV163
     ? ONR_V1_6_3_TEXT_OVERRIDES
@@ -1613,7 +1797,15 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV170
+  const numericOverrides = isV181
+    ? ONR_V1_8_1_NUMERIC_OVERRIDES
+    : isV180
+    ? ONR_V1_8_0_NUMERIC_OVERRIDES
+    : isV172
+    ? ONR_V1_7_2_NUMERIC_OVERRIDES
+    : isV171
+    ? ONR_V1_7_1_NUMERIC_OVERRIDES
+    : isV170
     ? ONR_V1_7_0_NUMERIC_OVERRIDES
     : isV163
     ? ONR_V1_6_3_NUMERIC_OVERRIDES
@@ -1628,7 +1820,15 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV170
+  const manifest = isV181
+    ? ONR_V1_8_1_RELEASE_MANIFEST
+    : isV180
+    ? ONR_V1_8_0_RELEASE_MANIFEST
+    : isV172
+    ? ONR_V1_7_2_RELEASE_MANIFEST
+    : isV171
+    ? ONR_V1_7_1_RELEASE_MANIFEST
+    : isV170
     ? ONR_V1_7_0_RELEASE_MANIFEST
     : isV163
     ? ONR_V1_6_3_RELEASE_MANIFEST

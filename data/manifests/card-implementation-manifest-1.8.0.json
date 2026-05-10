@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.8.0",
+  "id": "v1.8.0-card-release-manifest",
+  "status": "implemented_for_v1.8.0_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.7.2.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount6": true,
+    "agendaDifficultyDeterministic": true,
+    "runnerAgendaPointCostDeterministic": true,
+    "agendaSubtypeTheftGateDeterministic": true,
+    "projectBabylonOveradvanceDeterministic": true,
+    "runtimeAllowlistExtendedExactlyBy6": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_083_desperate-competitor",
+      "title": "Desperate Competitor",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_score_one_if_gray_ops_liberated_this_turn",
+      "requiredMechanics": ["play_event", "steal_agenda", "agenda_subtype_gate", "agenda_point_gain"],
+      "roleTags": ["runner", "event", "agenda_point", "timing_gate"]
+    },
+    {
+      "cardCode": "onr_v1_090_hot-tip-for-wns",
+      "title": "Hot Tip for WNS",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_event_score_one_if_black_ops_liberated_this_turn",
+      "requiredMechanics": ["play_event", "steal_agenda", "agenda_subtype_gate", "agenda_point_gain"],
+      "roleTags": ["runner", "event", "agenda_point", "timing_gate"]
+    },
+    {
+      "cardCode": "onr_v1_156_corporate-ally",
+      "title": "Corporate Ally",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_install_with_agenda_point_forfeit_and_global_agenda_difficulty_plus_one",
+      "requiredMechanics": ["install_resource", "unique_card", "agenda_point_cost", "forfeit_to_removed_from_game", "agenda_difficulty_modifier"],
+      "roleTags": ["runner", "resource", "cost_modifier", "global_modifier"]
+    },
+    {
+      "cardCode": "onr_v1_159_databroker",
+      "title": "Databroker",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "runner_resource_action_agenda_point_for_ten_credits_then_self_trash",
+      "requiredMechanics": ["install_resource", "resource_action", "agenda_point_cost", "forfeit_to_removed_from_game", "gain_credits", "self_trash"],
+      "roleTags": ["runner", "resource", "economy", "agenda_point_cost"]
+    },
+    {
+      "cardCode": "onr_v1_201_executive-extraction",
+      "title": "Executive Extraction",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "scored_agenda_static_gray_ops_difficulty_minus_one",
+      "requiredMechanics": ["install_remote", "advance", "score", "steal", "agenda_difficulty_modifier", "persistent_modifier"],
+      "roleTags": ["corp", "agenda", "static_modifier", "difficulty"]
+    },
+    {
+      "cardCode": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "score_bonus_points_per_two_overadvance",
+      "requiredMechanics": ["install_remote", "advance", "score", "steal", "overadvance_bonus", "agenda_counter_bonus"],
+      "roleTags": ["corp", "agenda", "overadvance", "scoring"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 13,
+    "implementedCardCount": 6,
+    "deferredCardCount": 7,
+    "deferReasons": [
+      "additional dependencies in V1.8.1 counter and virus families",
+      "counter lifecycle and trigger coupling outside the V1.8.0 core corridor",
+      "deferred cards remain blocked until V1.8.1 gate is green"
+    ],
+    "openMechanicHintsStatus": "none_for_v1_8_0_core"
+  }
+}

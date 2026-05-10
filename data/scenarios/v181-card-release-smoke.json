@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v181-card-release-smoke",
+  "title": "V1.8.1 Mechanikpaket H Kernrelease",
+  "release": "V1.8.1",
+  "status": "implemented_core_subset",
+  "extends": "data/scenarios/v180-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_012_clown",
+    "onr_v1_046_pattels-virus",
+    "onr_v1_049_pox",
+    "onr_v1_094_inside-job",
+    "onr_v1_173_restrictive-net-zoning",
+    "onr_v1_193_corporate-coup",
+    "onr_v1_209_political-coup",
+    "onr_v1_222_ball-and-chain",
+    "onr_v1_225_canis-major",
+    "onr_v1_226_canis-minor",
+    "onr_v1_242_fatal-attractor",
+    "onr_v1_268_shock-r"
+  ],
+  "deferredCards": [
+    "onr_v1_013_cockroach",
+    "onr_v1_034_incubator",
+    "onr_v1_030_grubb"
+  ],
+  "preconditions": [
+    "V1.8.0 Mechanikpaket G ist grün abgeschlossen.",
+    "V1.8.1 Preflight dokumentiert den 15-Karten-Korb als 12 freigabefähig + 3 deferred."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.8.1-Smoke-Match mit den V1.8.1 Runner- und Corp-Decks.",
+    "Prüfe Clown-Encounter-Modifier und Inside-Job-Bypass auf den ersten ICE-Encounter.",
+    "Spiele erfolgreiche Runs mit Pattel und Pox und verifiziere Karten-/Server-Counter sowie Purge-Reset.",
+    "Installiere Restrictive Net Zoning servergebunden und prüfe kombinierte ICE-Installkosten-Taxpfade mit Pox.",
+    "Score Corporate Coup und Political Coup, prüfe Startcounter und LegalAction-only Counterentnahme.",
+    "Verifiziere Ball/Canis/Fatal/Shock-Runfolgeflags inklusive Next-Encounter-Penalties und Jack-out-Lock."
+  ],
+  "expected": [
+    "Counter-/Purge-Lifecycle bleibt deterministisch, replaybar und statehash-stabil.",
+    "Runfolgeflags wirken nur in den vorgesehenen Fenstern ohne Hidden-Info-Leak.",
+    "Servergebundene Installkosten-Taxpfade bleiben für Corp-Install-LegalActions konsistent.",
+    "Keine neue AI-supported-Freigabe durch den Release.",
+    "Deferred-Karten bleiben bis dediziertem Folgegate blockiert."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.8.1 Mechanikpaket H",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic"
+  }
+}

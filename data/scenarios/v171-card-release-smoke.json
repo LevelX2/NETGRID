@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v171-card-release-smoke",
+  "title": "V1.7.1 Mechanikpaket E Kernrelease",
+  "release": "V1.7.1",
+  "status": "implemented_core_subset",
+  "extends": "data/scenarios/v170-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_114_temple-microcode-outlet",
+    "onr_v1_106_private-ldl-access",
+    "onr_v1_118_weather-to-finance-pipe",
+    "onr_v1_084_edited-shipping-manifests",
+    "onr_v1_129_hq-interface"
+  ],
+  "preconditions": [
+    "V1.7.0 Mechanikpaket D ist grün abgeschlossen.",
+    "V1.7.1 Preflight dokumentiert den 48-Karten-Korb als 5 freigabefähig + 43 deferred."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.7.1-Smoke-Match mit den V1.7.1 Runner- und Corp-Decks.",
+    "Spiele Temple Microcode Outlet und prüfe Search-Choice nur über LegalActions mit Hidden-Zone-Barrier und Shuffle.",
+    "Spiele Private LDL Access und prüfe, dass ein HQ-Run den Access deterministisch auf R&D umleitet.",
+    "Spiele Weather-to-Finance Pipe und Edited Shipping Manifests und prüfe Access-Replacement ohne Kartenzugriff.",
+    "Installiere HQ Interface und prüfe deterministischen HQ-Multiaccess-Bonus auf dem Breach-Queue-Pfad."
+  ],
+  "expected": [
+    "Search-/Run-/Access-Resolver arbeiten legal-action-only und deterministisch.",
+    "PublicEvents, PlayerViews und Hidden-Zone-Choices bleiben ohne Hidden-Info-Leaks.",
+    "Replay/StateHash bleibt stabil über Search, Access-Override und Access-Replacement-Pfade.",
+    "Keine neue AI-supported-Freigabe durch den Release."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.7.1 Mechanikpaket E",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic"
+  }
+}

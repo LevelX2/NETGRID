@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v180-card-release-smoke",
+  "title": "V1.8.0 Mechanikpaket G Kernrelease",
+  "release": "V1.8.0",
+  "status": "implemented_core_subset",
+  "extends": "data/scenarios/v172-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_083_desperate-competitor",
+    "onr_v1_090_hot-tip-for-wns",
+    "onr_v1_156_corporate-ally",
+    "onr_v1_159_databroker",
+    "onr_v1_201_executive-extraction",
+    "onr_v1_214_project-babylon"
+  ],
+  "preconditions": [
+    "V1.7.2 Mechanikpaket F ist grün abgeschlossen.",
+    "V1.8.0 Preflight dokumentiert den 13-Karten-Korb als 6 freigabefähig + 7 deferred."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.8.0-Smoke-Match mit den V1.8.0 Runner- und Corp-Decks.",
+    "Stehle Gray Ops und Black Ops Agendas im Runner-Turn und prüfe die subtype-gebundenen Event-Gates für Desperate Competitor und Hot Tip for WNS.",
+    "Installiere Corporate Ally und prüfe den Agenda-Punkt-Kostenpfad sowie Difficulty +1 auf Agenda-Legality und Score-Revalidation.",
+    "Nutze Databroker als Runner-Resource-Aktion (Klick + Agenda-Punkt + Self-Trash -> +10 Credits).",
+    "Score Executive Extraction und Project Babylon; prüfe Gray-Ops-Difficulty-Reduktion und overadvance-basierte Bonus-Agenda-Punkte."
+  ],
+  "expected": [
+    "Agenda-Difficulty ist zentral, deterministisch und in Legality + score_agenda identisch.",
+    "Agenda-Punkt-Kostenpfade forfeitieren deterministisch nach removed_from_game ohne Hidden-Info-Leak.",
+    "Project Babylon vergibt Bonuspunkte nur beim Scoren und replay-/statehash-stabil.",
+    "Keine neue AI-supported-Freigabe durch den Release."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.8.0 Mechanikpaket G",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic"
+  }
+}

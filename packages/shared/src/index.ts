@@ -93,7 +93,11 @@ export type SubroutineType =
   | "give_runner_tag"
   | "do_damage"
   | "initiate_trace"
-  | "trash_installed_program";
+  | "trash_installed_program"
+  | "set_run_encounter_tax"
+  | "set_run_future_strength_bonus"
+  | "set_next_encounter_unless_fully_break_damage"
+  | "set_next_encounter_lock";
 
 export type SubroutineDefinition = {
   id: string;
@@ -452,6 +456,7 @@ export type CardInstance = {
   strengthModifier: number;
   counters?: Partial<Record<CounterType, number>>;
   hostedOn?: CardInstanceId;
+  selectedServerId?: Exclude<ServerId, "new_remote">;
 };
 
 export type CorpServer = {
@@ -505,6 +510,11 @@ export type RunnerState = {
 export type RunState = {
   runId: string;
   attackedServerId: Exclude<ServerId, "new_remote">;
+  accessServerOverride?: Exclude<ServerId, "new_remote">;
+  successfulRunAccessReplacement?: "corp_lose_credits";
+  successfulRunCreditLoss?: number;
+  successfulRunRunnerTagGain?: number;
+  successfulRunCorpDraw?: number;
   phase: "approach_ice" | "encounter_ice" | "movement" | "access";
   position: { kind: "ice"; serverId: Exclude<ServerId, "new_remote">; iceIndex: number } | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> };
   approachedIceId?: CardInstanceId;
@@ -516,6 +526,17 @@ export type RunState = {
   pendingSuccessBonusCredits?: number;
   accessCount?: number;
   badPublicityCredits?: number;
+  bypassFirstIceRemaining?: boolean;
+  encounterTaxForFutureIce?: number;
+  futureEncounterIceStrengthBonus?: number;
+  nextEncounterNoBreakSubroutines?: boolean;
+  nextEncounterJackOutLock?: boolean;
+  noBreakSubroutinesActive?: boolean;
+  jackOutLockedUntilEncounterEnds?: boolean;
+  nextEncounterFatalDamage?: number;
+  fatalDamageActiveForEncounter?: boolean;
+  fatalDamageAmountForEncounter?: number;
+  fullyBrokenIceIds?: CardInstanceId[];
   breach?: BreachState;
 };
 
@@ -546,6 +567,9 @@ export type TraceState = {
   baseTraceStrength: number;
   status: "corp_bid" | "runner_bid";
   successEffect: TraceSuccessEffect;
+  returnPhase?: Phase;
+  returnTimingPoint?: TimingPointId;
+  returnActiveSide?: Side;
   corpBid?: number;
   traceStrength?: number;
   runnerLink?: number;
@@ -609,8 +633,13 @@ export type GameState = {
   runnerTurnFlags?: {
     stoleAgendaThisTurn: boolean;
     stoleAgendaLastTurn: boolean;
+    stoleGrayOpsAgendaThisTurn?: boolean;
+    stoleBlackOpsAgendaThisTurn?: boolean;
+    runAttemptsThisTurn?: number;
+    runAttemptsLastTurn?: number;
     damagePreventionUsage?: Record<CardInstanceId, number>;
   };
+  poxCountersByServer?: Partial<Record<Exclude<ServerId, "new_remote">, number>>;
 };
 
 export type Cost = {
@@ -1053,6 +1082,22 @@ function onrTrashInstalledProgram(id: string): SubroutineDefinition {
   return { id, type: "trash_installed_program" };
 }
 
+function onrSetRunEncounterTax(id: string, amount: number): SubroutineDefinition {
+  return { id, type: "set_run_encounter_tax", amount };
+}
+
+function onrSetRunFutureStrengthBonus(id: string, amount: number): SubroutineDefinition {
+  return { id, type: "set_run_future_strength_bonus", amount };
+}
+
+function onrSetNextEncounterFatalDamage(id: string, amount: number): SubroutineDefinition {
+  return { id, type: "set_next_encounter_unless_fully_break_damage", damageType: "net", amount };
+}
+
+function onrSetNextEncounterLock(id: string): SubroutineDefinition {
+  return { id, type: "set_next_encounter_lock" };
+}
+
 function onrMemoryChip(params: { id: string; title: string; installCost: number; memoryLimitBonus: number }): CardDefinition {
   return {
     id: params.id,
@@ -1069,6 +1114,18 @@ function onrMemoryChip(params: { id: string; title: string; installCost: number;
 }
 
 const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
+  {
+    id: "onr_v1_012_clown",
+    title: "Clown",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    memoryCost: 1,
+    rulesText: "All ice is encountered with its strength reduced by 1.",
+    mechanics: ["install_program", "memory", "counter", "encounter_ice", ONR_V1_LOCAL_PRIVATE]
+  },
   onrBreaker({
     id: "onr_v1_015_codeslinger",
     title: "Codeslinger",
@@ -1267,6 +1324,32 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceSubtype: "sentry",
     iceLabel: "sentry"
   }),
+  {
+    id: "onr_v1_046_pattels-virus",
+    title: "Pattel's Virus",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    rulesText:
+      "Whenever you make a successful run, put a Pattel counter on a piece of ice that had all its subroutines broken during that run. Each Pattel counter on a piece of ice reduces its strength by 1. The Corp may remove all Virus counters by forgoing its next three actions.",
+    mechanics: ["install_program", "memory", "counter", "virus", "purge", "run_success_trigger", "encounter_ice", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_049_pox",
+    title: "Pox",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText:
+      "Whenever you make a successful run, put a Pox counter in the fort that was run. Every two Pox counters in a fort require the Corp to pay 1, in addition to any other costs, to install a card inside or on that fort. The Corp may remove all Virus counters by forgoing its next three actions.",
+    mechanics: ["install_program", "memory", "counter", "virus", "purge", "run_success_trigger", "install_cost_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
   onrBreaker({
     id: "onr_v1_060_shaka",
     title: "Shaka",
@@ -1353,6 +1436,29 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "start_run", "breach", "multiaccess", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_083_desperate-competitor",
+    title: "Desperate Competitor",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Play only if you liberated any Gray Ops agendas this turn. Score 1 agenda point.",
+    mechanics: ["play_event", "agenda_point_gain", "agenda_subtype_condition", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_084_edited-shipping-manifests",
+    title: "Edited Shipping Manifests",
+    side: "runner",
+    type: "event",
+    subtypes: ["sabotage"],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText:
+      "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses 1, Runner gains 1 tag and the Corp draws 1 card.",
+    mechanics: ["play_event", "start_run", "breach", "access_replacement", "tag", "corp_draw", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_085_executive-wiretaps",
     title: "Executive Wiretaps",
     side: "runner",
@@ -1362,6 +1468,28 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 0,
     rulesText: "Make a run on HQ. If successful, access two additional cards from HQ.",
     mechanics: ["play_event", "start_run", "breach", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_090_hot-tip-for-wns",
+    title: "Hot Tip for WNS",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Score 1 agenda point if you liberated any Black Ops agendas this turn.",
+    mechanics: ["play_event", "agenda_point_gain", "agenda_subtype_condition", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_094_inside-job",
+    title: "Inside Job",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 2,
+    rulesText: "Make a run. You automatically pass the first piece of ice you encounter during that run.",
+    mechanics: ["play_event", "start_run", "bypass_ice", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_101_mit-west-tier",
@@ -1375,6 +1503,39 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "shuffle", "draw_cards", "removed_from_game", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_156_corporate-ally",
+    title: "Corporate Ally",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection", "unique"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    rulesText: "Installing Corporate Ally costs 1 agenda point, in addition to the normal cost. The difficulty of all agendas is +1.",
+    mechanics: ["install_resource", "unique_card", "agenda_point_cost", "agenda_difficulty_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_159_databroker",
+    title: "Databroker",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "A, [T], 1 agenda point: Gain 10 credits.",
+    mechanics: ["install_resource", "action_economy", "agenda_point_cost", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_158_danshis-second-id",
+    title: "Danshi's Second ID",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "A, [T]: Remove up to three tags, at no cost.",
+    mechanics: ["install_resource", "tag_remove", "action_economy", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_163_floating-runner-bbs",
     title: "Floating Runner BBS",
     side: "runner",
@@ -1384,6 +1545,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 6,
     rulesText: "Gain 1 credit at the start of each of your turns.",
     mechanics: ["install_resource", "start_of_turn_credit_gain", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_173_restrictive-net-zoning",
+    title: "Restrictive Net Zoning",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 1, in addition to the normal cost, to install ice on that fort.",
+    mechanics: ["install_resource", "install_cost_modifier", "counter", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_180_smiths-pawnshop",
@@ -1396,6 +1568,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "At the start of each of your turns, you may trash one of your other installed cards to gain 1 credit.\nOnly one unique card of a particular name can be in play at a time.",
     mechanics: ["install_resource", "unique_card", "start_of_turn_optional_trash_for_credit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_179_silicon-saloon-franchise",
+    title: "Silicon Saloon Franchise",
+    side: "runner",
+    type: "resource",
+    subtypes: ["position"],
+    implementationStatus: "playable_mvp",
+    installCost: 8,
+    rulesText: "A: Gain 1 credit and draw one card.",
+    mechanics: ["install_resource", "action_economy", "draw_cards", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({
     id: "onr_v1_073_wizards-book",
@@ -1421,6 +1604,39 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_hardware", "modify_memory_limit", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_106_private-ldl-access",
+    title: "Private LDL Access",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Make a run on HQ. If run is successful, treat it as a successful run on R&D instead of accessing HQ.",
+    mechanics: ["play_event", "start_run", "breach", "access_replacement", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_114_temple-microcode-outlet",
+    title: "Temple Microcode Outlet",
+    side: "runner",
+    type: "event",
+    subtypes: ["bbs"],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Search your stack for a program, reveal it and bring it into your hand. Shuffle your stack afterwards.",
+    mechanics: ["play_event", "search_stack", "shuffle", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_118_weather-to-finance-pipe",
+    title: "Weather-to-Finance Pipe",
+    side: "runner",
+    type: "event",
+    subtypes: ["sabotage"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses 4 credits.",
+    mechanics: ["play_event", "start_run", "breach", "access_replacement", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_125_dermatech-bodyplating",
     title: "Dermatech Bodyplating",
     side: "runner",
@@ -1444,6 +1660,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     memoryLimitBonus: 2
   }),
   {
+    id: "onr_v1_129_hq-interface",
+    title: "HQ Interface",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    rulesText: "Whenever you access cards from HQ, access one additional card from HQ.",
+    mechanics: ["install_hardware", "breach", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_220_tycho-extension",
     title: "Tycho Extension",
     side: "corp",
@@ -1454,6 +1681,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 4,
     rulesText: "No additional ability.",
     mechanics: ["install_remote", "advance", "score", "steal", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_193_corporate-coup",
+    title: "Corporate Coup",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 5,
+    agendaPoints: 2,
+    rulesText: "Put 5 from the bank on Corporate Coup when you score it.\n[A]: Take 1 from Corporate Coup, if it has any bits.",
+    mechanics: ["install_remote", "advance", "score", "steal", "counter", "action_economy", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_201_executive-extraction",
+    title: "Executive Extraction",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 3,
+    agendaPoints: 1,
+    rulesText: "Difficulty of Gray Ops agendas is reduced by 1.",
+    mechanics: ["install_remote", "advance", "score", "steal", "agenda_difficulty_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_203_hostile-takeover",
@@ -1468,6 +1719,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score", "steal", "on_score_gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_209_political-coup",
+    title: "Political Coup",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 2,
+    rulesText: "Put 6 from the bank on Political Coup when you score it.\n[A]: Take 1 from Political Coup, if it has any bits.",
+    mechanics: ["install_remote", "advance", "score", "steal", "counter", "action_economy", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_212_priority-requisition",
     title: "Priority Requisition",
     side: "corp",
@@ -1478,6 +1741,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 3,
     rulesText: "When scored, rez one installed piece of ice at no cost.",
     mechanics: ["install_remote", "advance", "score", "steal", "on_score_rez_ice_free", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_214_project-babylon",
+    title: "Project Babylon",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 3,
+    agendaPoints: 1,
+    rulesText: "Score 1 additional agenda point for every two advancement counters over Project Babylon's difficulty that are on Project Babylon when you score it.",
+    mechanics: ["install_remote", "advance", "score", "steal", "overadvance_bonus", "agenda_counter_bonus", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_215_security-net-optimization",
@@ -1575,6 +1850,28 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_operation", "draw_cards", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_283_audit-of-call-records",
+    title: "Audit of Call Records",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Play only if Runner attempted two or more runs during last turn. Trace 5 - If successful, give Runner 1 tag.",
+    mechanics: ["play_operation", "trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_284_chance-observation",
+    title: "Chance Observation",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 2,
+    rulesText: "Play only if Runner attempted a run during last turn. Trace 5 - If successful, give Runner 1 tag.",
+    mechanics: ["play_operation", "trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_285_closed-accounts",
     title: "Closed Accounts",
     side: "corp",
@@ -1584,6 +1881,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 1,
     rulesText: "Play only if Runner is tagged. Runner loses all credits.",
     mechanics: ["play_operation", "runner_is_tagged", "runner_lose_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_286_corporate-detective-agency",
+    title: "Corporate Detective Agency",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Play only if Runner is tagged. Trash up to two Resources at no cost.",
+    mechanics: ["play_operation", "runner_is_tagged", "trash_resource", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_287_datapool-by-zetatech",
@@ -1695,6 +2003,56 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "Play only if Runner is tagged. Do 5 meat damage.",
     mechanics: ["play_operation", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
   },
+  onrIce({
+    id: "onr_v1_222_ball-and-chain",
+    title: "Ball and Chain",
+    subtypes: ["code_gate"],
+    rezCost: 2,
+    strength: 5,
+    rulesText: "[Subroutine] For the remainder of the run, Runner must pay 1 when encountering a piece of ice, in addition to any other costs, or end the run.",
+    subroutines: [onrSetRunEncounterTax("onr_v1_222_ball_and_chain_encounter_tax", 1)],
+    mechanics: ["encounter_tax", "run_modifier"]
+  }),
+  onrIce({
+    id: "onr_v1_225_canis-major",
+    title: "Canis Major",
+    subtypes: ["sentry", "watchdog"],
+    rezCost: 0,
+    strength: 4,
+    rulesText: "[Subroutine] For the remainder of the run, all further ice is encountered at +2 strength.",
+    subroutines: [onrSetRunFutureStrengthBonus("onr_v1_225_canis_major_future_strength", 2)],
+    mechanics: ["encounter_ice_strength_bonus", "run_modifier"]
+  }),
+  onrIce({
+    id: "onr_v1_226_canis-minor",
+    title: "Canis Minor",
+    subtypes: ["sentry", "watchdog"],
+    rezCost: 0,
+    strength: 5,
+    rulesText: "[Subroutine] For the remainder of the run, all further ice is encountered at +1 strength.",
+    subroutines: [onrSetRunFutureStrengthBonus("onr_v1_226_canis_minor_future_strength", 1)],
+    mechanics: ["encounter_ice_strength_bonus", "run_modifier"]
+  }),
+  onrIce({
+    id: "onr_v1_242_fatal-attractor",
+    title: "Fatal Attractor",
+    subtypes: ["sentry", "black_ice", "ap"],
+    rezCost: 1,
+    strength: 4,
+    rulesText: "[Subroutine] The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner breaks all subroutines of that piece of ice.",
+    subroutines: [onrSetNextEncounterFatalDamage("onr_v1_242_fatal_attractor_next_encounter", 3)],
+    mechanics: ["next_encounter_penalty", "damage", "run_modifier"]
+  }),
+  onrIce({
+    id: "onr_v1_268_shock-r",
+    title: "Shock.r",
+    subtypes: ["sentry", "ap", "stun"],
+    rezCost: 1,
+    strength: 3,
+    rulesText: "[Subroutine] Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.",
+    subroutines: [onrSetNextEncounterLock("onr_v1_268_shock_r_next_encounter_lock")],
+    mechanics: ["next_encounter_penalty", "jack_out_lock", "run_modifier"]
+  }),
   onrIce({
     id: "onr_v1_229_code-corpse",
     title: "Code Corpse",
