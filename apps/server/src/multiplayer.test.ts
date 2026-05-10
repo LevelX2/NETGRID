@@ -1114,6 +1114,51 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(blocked.error)).not.toContain("Simple Agenda");
   });
 
+  it("auto-accepts undo in Human-vs-KI matches", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "undo-ai-auto-accept" });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "undo-ai-auto",
+      runnerDifficulty: "normal"
+    });
+
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "keep",
+      "undo-ai-setup"
+    );
+    const mandatory = mustAction(afterSetup, (action) => action.type === "mandatory_draw");
+    const mandatoryResult = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: mandatory.actionId,
+      clientKnownStateVersion: afterSetup.playerView.stateVersion,
+      idempotencyKey: "undo-ai-mandatory"
+    });
+    expect(mandatoryResult.ok).toBe(true);
+    if (!mandatoryResult.ok) throw new Error(mandatoryResult.error.message);
+
+    const undo = await service.requestUndo({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      targetEventId: `evt_${mandatoryResult.receipt.stateVersionAfter}`,
+      reason: "Misclick"
+    });
+    expect(undo.ok).toBe(true);
+    if (!undo.ok) throw new Error(undo.error.message);
+    expect(undo.requesterPayload.pendingUndo).toBeUndefined();
+    expect(undo.requesterPayload.playerView.stateVersion).toBe(afterSetup.playerView.stateVersion);
+
+    const stored = await service.loadForTest(created.matchId);
+    expect(stored?.pendingUndo).toBeUndefined();
+    expect(stored?.undoSnapshots.at(-1)?.status).toBe("accepted");
+  });
+
   it("handles V0.94 Damage through submit, idempotency, reconnect and undo barriers", async () => {
     const match = await joinedV094DamageMatch("mp-v094-damage");
 
@@ -2457,6 +2502,38 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(corpAiRecord?.match.deckSetup.corpSnapshotId).toBe("onr_origin_corp_ai_snapshot_v1");
     expect(corpAiCreated.playerView.deckMetadata?.opponent.deckName).toBe("Corp Origins AI - Tax & Punish");
     expect(JSON.stringify(corpAiCreated)).not.toMatch(/onr_v1_203_hostile-takeover|onr_v1_297_overtime-incentives|cardInstances|privatePayload|joinToken|tokenHash/);
+
+    const runnerVariantCreated = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "onr-origins-runner-ai-variant",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "onr_origin_runner_ai_event_pressure_snapshot_v1",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      aiDeckPolicy: "selected"
+    });
+    expect(runnerVariantCreated.playerView.deckMetadata?.opponent.deckName).toBe("Runner Origins AI - Event Pressure");
+
+    const corpVariantCreated = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "onr-origins-corp-ai-variant",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "onr_origin_corp_ai_tag_ops_snapshot_v1"
+      },
+      aiDeckPolicy: "selected"
+    });
+    expect(corpVariantCreated.playerView.deckMetadata?.opponent.deckName).toBe("Corp Origins AI - Tag Ops Control");
   });
 
   it("derives Human-vs-KI random side assignment server-side from the seed", async () => {

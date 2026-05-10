@@ -1546,8 +1546,7 @@ export class MultiplayerService {
         targetEventId: input.targetEventId,
         ...(input.reason ? { reason: input.reason.slice(0, 160) } : {})
       };
-      record.pendingUndo = undoRequest;
-      record.undoSnapshots.push({
+      const undoSnapshot: UndoSnapshot = {
         undoRequestId: undoRequest.undoRequestId,
         matchId: input.matchId,
         targetEventId: input.targetEventId,
@@ -1555,14 +1554,34 @@ export class MultiplayerService {
         requestedBy: input.side,
         status: "requested",
         hiddenInfoSafe: true
-      });
+      };
+      record.undoSnapshots.push(undoSnapshot);
+      const opponentSide = opposite(input.side);
+
+      if (this.isAiSide(record, opponentSide)) {
+        delete record.pendingUndo;
+        undoSnapshot.status = "accepted";
+        const restored = this.applyAcceptedUndo(record, undoSnapshot);
+        if (!restored) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+        record.match.matchVersion += 1;
+        record.match.updatedAt = this.now();
+        await this.storage.save(record);
+        return {
+          ok: true,
+          requesterPayload: this.payloadFor(record, input.side),
+          opponentPayload: this.payloadFor(record, opponentSide),
+          undoRequest
+        };
+      }
+
+      record.pendingUndo = undoRequest;
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
       await this.storage.save(record);
       return {
         ok: true,
         requesterPayload: this.payloadFor(record, input.side),
-        opponentPayload: this.payloadFor(record, opposite(input.side)),
+        opponentPayload: this.payloadFor(record, opponentSide),
         undoRequest
       };
     });
@@ -1683,13 +1702,8 @@ export class MultiplayerService {
       undoRecord.status = status;
       delete record.pendingUndo;
       if (status === "accepted") {
-        const snapshot = record.stateSnapshots.find((candidate) => candidate.snapshotId === undoRecord.snapshotId);
-        if (!snapshot) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
-        const targetIndex = record.eventLog.findIndex((event) => event.eventId === undoRecord.targetEventId);
-        record.gameState = clone(snapshot.gameState);
-        record.eventLog = targetIndex >= 0 ? record.eventLog.slice(0, targetIndex) : record.eventLog;
-        record.actionReceipts = record.actionReceipts.filter((receipt) => receipt.stateVersionAfter <= snapshot.stateVersion);
-        record.stateSnapshots = record.stateSnapshots.filter((candidate) => candidate.stateVersion <= snapshot.stateVersion);
+        const restored = this.applyAcceptedUndo(record, undoRecord);
+        if (!restored) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
       }
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
@@ -1700,6 +1714,17 @@ export class MultiplayerService {
         opponentPayload: this.payloadFor(record, opposite(pending.requestedBy))
       };
     });
+  }
+
+  private applyAcceptedUndo(record: StoredMatch, undoRecord: UndoSnapshot): boolean {
+    const snapshot = record.stateSnapshots.find((candidate) => candidate.snapshotId === undoRecord.snapshotId);
+    if (!snapshot) return false;
+    const targetIndex = record.eventLog.findIndex((event) => event.eventId === undoRecord.targetEventId);
+    record.gameState = clone(snapshot.gameState);
+    record.eventLog = targetIndex >= 0 ? record.eventLog.slice(0, targetIndex) : record.eventLog;
+    record.actionReceipts = record.actionReceipts.filter((receipt) => receipt.stateVersionAfter <= snapshot.stateVersion);
+    record.stateSnapshots = record.stateSnapshots.filter((candidate) => candidate.stateVersion <= snapshot.stateVersion);
+    return true;
   }
 
   private shouldUseLobbyPayload(record: StoredMatch): boolean {
@@ -1826,8 +1851,11 @@ export class MultiplayerService {
     if (!record.gameState) throw new Error("match_not_active");
     const playerView = getPlayerView(record.gameState, side);
     const opponent = record.sessions.find((session) => session.side === opposite(side));
+    const opponentIsAi = this.isAiSide(record, opposite(side));
     const pendingUndo = record.pendingUndo
-      ? { ...record.pendingUndo, needsResponse: record.pendingUndo.requestedBy !== side }
+      ? opponentIsAi
+        ? undefined
+        : { ...record.pendingUndo, needsResponse: record.pendingUndo.requestedBy !== side }
       : undefined;
     const lifecycleFinalHash = record.lifecycleResult?.finalEngineStateHash;
     const terminalWinner = record.match.status === "forfeited" ? record.lifecycleResult?.winnerSide : record.gameState.winner;
