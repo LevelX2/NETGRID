@@ -40,3 +40,7 @@ Gate: `V1_9_2_implemented: true`; `V1_9_2_verified: true`; `V1_9_2_done: true`; 
 Hinweis: `corepack pnpm build` enthält weiterhin die bekannte nicht-blockierende Turbopack-NFT-Warnung im bestehenden Next/Turbopack-Trace-Pfad.
 
 Zusatz: Der zuvor aufgetretene Timeout im bestehenden AI-Regressionstest `runs a local V1.4.3 league with holdout separation and metrics` wurde durch ein explizites Test-Timeout (`30_000 ms`) in `packages/ai/src/index.test.ts` stabilisiert. Es wurden dabei keine Engine-Regelpfade oder Release-Scope-Inhalte von V1.9.2 verändert.
+
+Zusatz 2: Ein weiterer bestehender AI-Langlauftest (`runs the V0.9 soak matrix with holdout accounting`) wurde ebenfalls mit explizitem Test-Timeout (`60_000 ms`) in `packages/ai/src/index.test.ts` stabilisiert. Auch hier wurden keine Engine-Regelpfade oder V1.9.2-Scope-Inhalte verändert.
+
+Re-Verification nach Stabilisierung (Commit `d040d95`, 2026-05-10): `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` sind erneut grün.

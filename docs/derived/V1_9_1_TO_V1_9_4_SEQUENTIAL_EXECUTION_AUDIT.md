@@ -80,6 +80,8 @@ Status: in progress (V1.9.1 und V1.9.2 abgeschlossen, Gate-Wartezustand vor V1.9
 4. V1.9.3 wurde nicht gestartet:
    - Es gibt keine neuen V1.9.3-Code- oder Releaseartefaktdateien im Worktree.
    - Der separate Blockerbericht dokumentiert den harten Stopp: `docs/derived/V1_9_3_GATE_BLOCKER_REPORT.md`.
+5. Pflichtchecks post-commit erneut verifiziert:
+   - Nach den Teststabilisierung-Commits `4634b1d` und `d040d95` wurden `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` erneut erfolgreich ausgefuehrt.
 
 ## Nächster zulässiger Schritt
 

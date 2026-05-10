@@ -30,7 +30,7 @@ Status: blocked (manuelle Freigabe ausstehend)
 
 ## Verifizierter Snapshot
 
-Stand der Verifikation: 2026-05-10 15:27:57 +02:00
+Stand der Verifikation: 2026-05-10 15:34:56 +02:00
 
 - V1.9.3-Artefakte fehlen weiterhin (erwartet bei geschlossenem Gate):
   - `data/manifests/card-implementation-manifest-1.9.3.json`
@@ -46,3 +46,6 @@ Stand der Verifikation: 2026-05-10 15:27:57 +02:00
   - `docs/derived/V1_9_4_RELEASE_ASSIGNMENT_PREFLIGHT.md`
   - `docs/derived/V1_9_4_IMPLEMENTATION_REVIEW.md`
   - `docs/derived/V1_9_4_FINAL_REVIEW.md`
+- Post-Commit-Zustand bleibt stabil:
+  - Worktree ist clean.
+  - Die Pflichtchecks `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test` und `corepack pnpm build` sind nach Teststabilisierung erneut gruen.
