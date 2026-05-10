@@ -2606,12 +2606,13 @@ select {
 .serverLead {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 8px;
   min-width: 32px;
   padding-right: 6px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
+  align-self: stretch;
 }
 
 .serverLeadTop {
@@ -2623,6 +2624,7 @@ select {
 
 .serverRunButtonCorner {
   align-self: flex-start;
+  margin-top: auto;
 }
 
 .serverBody {
@@ -5183,7 +5185,7 @@ select,
 }
 
 .server {
-  min-height: 244px;
+  min-height: 0;
 }
 
 .lane {
