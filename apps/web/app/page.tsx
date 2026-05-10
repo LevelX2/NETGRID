@@ -22,6 +22,7 @@ import {
   Layers3,
   Link2,
   ListFilter,
+  Move,
   Moon,
   PanelRightOpen,
   Play,
@@ -159,7 +160,9 @@ const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
 const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
 const APP_NAME = "NETGRID";
 const APP_STATUS_LABEL = "V1.9.0";
-const APP_ICON_SRC = "/brand/netgrid-icon-right-tile-redraw-v2.svg";
+const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
+const APP_ICON_SRC = `/brand/netgrid-icon-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
+const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
 const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [300, 500, 750, 1000, 1250, 1500] as const;
 const CARD_TOOLTIP_HOVER_OPEN_DELAY_MS = 1000;
 const CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS = 120;
@@ -1320,12 +1323,22 @@ export default function Page() {
   });
   const [recentSession, setRecentSession] = useState<RecentSessionInfo | null>(null);
   const socketRef = useRef<WebSocket | null>(null);
+  const sessionRef = useRef<SessionInfo | null>(null);
+  const lobbyRef = useRef<LobbyClientPayload | null>(null);
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
+  useEffect(() => {
+    lobbyRef.current = lobby;
+  }, [lobby]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -1831,11 +1844,11 @@ export default function Page() {
   useEffect(() => {
     if (!currentActionCue) return;
     if (audioEnabled && currentActionCue.sound) playActionCueSound(currentActionCue.sound, audioVolume, currentActionCue.soundCount);
-    if (currentActionCue.actionType === "access_card" && localAiPacingMode === "manual") return;
+    if (localAiPacingMode === "manual" && currentActionCue.source === "ai" && aiTurnPresentation?.canAdvanceAi) return;
     if (actionCueAutoDismissMs === 0) return;
     const timeout = window.setTimeout(() => setCurrentActionCue(null), actionCueAutoDismissMs);
     return () => window.clearTimeout(timeout);
-  }, [actionCueAutoDismissMs, audioEnabled, audioVolume, currentActionCue, localAiPacingMode]);
+  }, [actionCueAutoDismissMs, aiTurnPresentation?.canAdvanceAi, audioEnabled, audioVolume, currentActionCue, localAiPacingMode]);
 
   useEffect(() => {
     if (!payload || !aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online") return;
@@ -2253,7 +2266,7 @@ export default function Page() {
           side: session.side,
           actionId: action.actionId,
           clientKnownStateVersion: payload.playerView.stateVersion,
-          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${crypto.randomUUID()}`
+          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${runtimeRandomId()}`
         }
       })
     );
@@ -2270,7 +2283,7 @@ export default function Page() {
           actionId: action.actionId,
           clientKnownStateVersion: payload.playerView.stateVersion,
           selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
-          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${selectedOptionId}-${crypto.randomUUID()}`
+          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`
         }
       })
     );
@@ -2287,7 +2300,7 @@ export default function Page() {
           actionId: action.actionId,
           clientKnownStateVersion: payload.playerView.stateVersion,
           selectedChoices: { choiceId, selectedOptionIds },
-          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${crypto.randomUUID()}`
+          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`
         }
       })
     );
@@ -2497,14 +2510,14 @@ export default function Page() {
 
   const copyJoinLink = async () => {
     if (!session?.joinUrl) return;
-    await navigator.clipboard.writeText(session.joinUrl);
-    setNotice("Join-Link kopiert.");
+    const copied = await copyTextToClipboard(session.joinUrl);
+    setNotice(copied ? "Join-Link kopiert." : "Kopieren war nicht möglich. Bitte Link manuell markieren und kopieren.");
   };
 
   const copyReconnectLink = async () => {
     if (!session?.reconnectToken) return;
-    await navigator.clipboard.writeText(reconnectUrlForSession(session));
-    setNotice("Wiederverbindungslink kopiert.");
+    const copied = await copyTextToClipboard(reconnectUrlForSession(session));
+    setNotice(copied ? "Wiederverbindungslink kopiert." : "Kopieren war nicht möglich. Bitte Link manuell markieren und kopieren.");
   };
 
   const discardLocalActiveSession = () => {
@@ -2522,7 +2535,7 @@ export default function Page() {
     const now = new Date().toISOString();
     const templateIdentity = deckTemplates.find((candidate) => candidate.side === side)?.identityCardId;
     const deck: EditableDeck = {
-      deckId: `local_${side}_${crypto.randomUUID().slice(0, 8)}`,
+      deckId: `local_${side}_${runtimeRandomId().slice(0, 8)}`,
       deckVersion: "0.6.0-local",
       name: side === "runner" ? "Neues Runner-Deck" : "Neues Korp-Deck",
       side,
@@ -2571,7 +2584,7 @@ export default function Page() {
     const now = new Date().toISOString();
     const copy = {
       ...selectedLocalDeck,
-      deckId: `${selectedLocalDeck.deckId}_copy_${crypto.randomUUID().slice(0, 6)}`,
+      deckId: `${selectedLocalDeck.deckId}_copy_${runtimeRandomId().slice(0, 6)}`,
       name: `${selectedLocalDeck.name} Kopie`,
       createdAt: now,
       updatedAt: now
@@ -2644,7 +2657,7 @@ export default function Page() {
     const now = new Date().toISOString();
     const imported = {
       ...parsed.deck,
-      deckId: parsed.deck.deckId || `local_import_${crypto.randomUUID().slice(0, 8)}`,
+      deckId: parsed.deck.deckId || `local_import_${runtimeRandomId().slice(0, 8)}`,
       createdAt: parsed.deck.createdAt || now,
       updatedAt: now
     };
@@ -2772,25 +2785,30 @@ export default function Page() {
     if (message.type === "lobby_update") {
       setLobby(message.payload);
       setPayload(null);
-      if (session) rememberRecentSession(session, message.payload);
+      if (sessionRef.current) rememberRecentSession(sessionRef.current, message.payload);
       return;
     }
     if (message.type === "state_update") {
       pendingAiAdvanceKeyRef.current = null;
       setPayload((current) => {
         if (!current) {
-          const nextFromLobby = lobby
-            ? {
-                matchId: lobby.matchId,
-                matchStatus: message.payload.matchStatus,
-                matchVersion: message.payload.matchVersion,
-                side: lobby.side,
-                playerView: message.payload.playerView,
-                legalActions: [],
-                eventTail: [],
-                opponentStatus: lobby.opponentStatus
-              }
-            : null;
+          const currentLobby = lobbyRef.current;
+          const activeSession = sessionRef.current;
+          const side = currentLobby?.side ?? activeSession?.side;
+          const matchId = currentLobby?.matchId ?? activeSession?.matchId;
+          const nextFromLobby =
+            side && matchId
+              ? {
+                  matchId,
+                  matchStatus: message.payload.matchStatus,
+                  matchVersion: message.payload.matchVersion,
+                  side,
+                  playerView: message.payload.playerView,
+                  legalActions: [],
+                  eventTail: [],
+                  opponentStatus: currentLobby?.opponentStatus ?? { side: side === "runner" ? "corp" : "runner", connected: false }
+                }
+              : null;
           return nextFromLobby;
         }
         const next = {
@@ -2845,9 +2863,10 @@ export default function Page() {
             }
           : current
       );
-      if (session && shouldForgetRecoveryStatus(message.payload.matchStatus)) {
-        clearStoredSession(session);
-        removeRecentSession(session);
+      const activeSession = sessionRef.current;
+      if (activeSession && shouldForgetRecoveryStatus(message.payload.matchStatus)) {
+        clearStoredSession(activeSession);
+        removeRecentSession(activeSession);
         setRecentSession(loadRecentSession());
       }
       return;
@@ -2878,8 +2897,11 @@ export default function Page() {
       <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
-          <Brand subtitle={`${APP_STATUS_LABEL} · private Matches`} />
-          <ConnectionBadge text={statusText} state={connection} />
+          <Brand />
+          <div className="topbarMeta">
+            <span className="topbarVersion">{APP_STATUS_LABEL}</span>
+            <ConnectionBadge text={statusText} state={connection} />
+          </div>
         </header>
         <div className="setup v07Entry" data-testid="setup-screen">
           <nav className="entryTabs" aria-label="Startbereiche">
@@ -3331,8 +3353,9 @@ export default function Page() {
     <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
     <main className="app activeMatch" data-theme={colorScheme}>
       <header className="topbar">
-        <Brand subtitle={`${APP_STATUS_LABEL} · ${sideLabel(session.side)}${opponentDisplayName ? ` gegen ${opponentDisplayName}` : ""}`} />
+        <Brand />
         <div className="toolbar">
+          <span className="topbarVersion">{APP_STATUS_LABEL}</span>
           <ConnectionBadge text={statusText} state={connection} />
           {connection !== "online" ? (
             <button className="button" onClick={reconnect} disabled={!canReconnect} title="Wieder verbinden">
@@ -3389,10 +3412,16 @@ export default function Page() {
         position={cuePosition}
         cardDetailsById={catalogDetailsById}
         displayMode={cardDisplayMode}
+        aiPresentation={aiTurnPresentation}
+        pacingMode={localAiPacingMode}
         canAdvanceAi={Boolean(aiTurnPresentation?.canAdvanceAi && connection === "online")}
+        onPacingMode={updateLocalAiPacingMode}
         onPosition={setCuePosition}
         onDismiss={() => setCurrentActionCue(null)}
-        onAdvanceAi={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
+        onAdvanceAi={() => {
+          setCurrentActionCue(null);
+          advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
+        }}
       />
 
       <div className="main" data-testid="active-game">
@@ -3403,12 +3432,14 @@ export default function Page() {
             actionCapacity={actionSlotCapacities[opponentSide(activeView.side)]}
             {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})}
           />
-          <AiPacingControls
-            presentation={aiTurnPresentation}
-            mode={localAiPacingMode}
-            connection={connection}
-            onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
-          />
+          {!(currentActionCue && currentActionCue.source === "ai") ? (
+            <AiPacingControls
+              presentation={aiTurnPresentation}
+              mode={localAiPacingMode}
+              connection={connection}
+              onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
+            />
+          ) : null}
           <LegalActionsPanel
             view={activeView}
             primaryActions={legalActionSplit.primaryActions}
@@ -3734,15 +3765,15 @@ function eventActionType(event: PublicGameEvent): string {
   return payloadString(event.publicPayload, "actionType") ?? event.type;
 }
 
-function Brand({ subtitle }: { subtitle: string }) {
+function Brand() {
   return (
     <div className="brand">
       <div className="mark">
         <img className="brandLogo" src={APP_ICON_SRC} alt="" aria-hidden="true" />
       </div>
-      <div>
-        <h1>{APP_NAME}</h1>
-        <p>{subtitle}</p>
+      <div className="brandLockup">
+        <img className="brandWordmark" src={APP_WORDMARK_SRC} alt="" aria-hidden="true" />
+        <h1 className="srOnly">{APP_NAME}</h1>
       </div>
     </div>
   );
@@ -3793,12 +3824,32 @@ function StartLobbyPanel({
   const showJoinLink = Boolean(joinUrl && !terminal && (lobby.pendingDeckHandshake || lobby.matchStatus === "pending"));
   const opponentName = lobby.opponentStatus.displayName ?? (opponent?.connected ? opponent.displayName : "Wartet auf Gegenüber");
   const chatMessagesRef = useRef<HTMLDivElement | null>(null);
+  const [countdownNowMs, setCountdownNowMs] = useState(() => Date.now());
+  const countdownValue = useMemo(() => {
+    if (!countdownActive || !start?.countdownEndsAt) return null;
+    const remainingMs = new Date(start.countdownEndsAt).getTime() - countdownNowMs;
+    if (remainingMs <= 0) return null;
+    return Math.ceil(remainingMs / 1000);
+  }, [countdownActive, start?.countdownEndsAt, countdownNowMs]);
   useEffect(() => {
     const element = chatMessagesRef.current;
     if (element) element.scrollTop = element.scrollHeight;
   }, [start?.chatMessages.length]);
+  useEffect(() => {
+    if (!countdownActive || !start?.countdownEndsAt) return;
+    setCountdownNowMs(Date.now());
+    const handle = window.setInterval(() => setCountdownNowMs(Date.now()), 120);
+    return () => window.clearInterval(handle);
+  }, [countdownActive, start?.countdownEndsAt]);
   return (
     <section className="startLobbyPanel" data-testid="start-lobby">
+      {countdownValue ? (
+        <div className="lobbyCountdownOverlay" aria-live="polite" aria-atomic="true">
+          <span className="lobbyCountdownDigit" key={countdownValue}>
+            {countdownValue}
+          </span>
+        </div>
+      ) : null}
       <div className="startLobbyHeader">
         <div>
           <p className="eyebrow">{terminal ? "Terminaler Matchstatus" : "Startbereitschaftslobby"}</p>
@@ -4512,7 +4563,10 @@ function OpponentActionOverlay({
   position,
   cardDetailsById,
   displayMode,
+  aiPresentation,
+  pacingMode,
   canAdvanceAi = false,
+  onPacingMode,
   onPosition,
   onDismiss,
   onAdvanceAi
@@ -4522,7 +4576,10 @@ function OpponentActionOverlay({
   position: CuePositionPreference;
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
+  aiPresentation?: ClientPayload["aiTurnPresentation"];
+  pacingMode?: AiPacingMode;
   canAdvanceAi?: boolean;
+  onPacingMode?(value: AiPacingMode): void;
   onPosition(position: CuePositionPreference): void;
   onDismiss(): void;
   onAdvanceAi?(): void;
@@ -4532,7 +4589,7 @@ function OpponentActionOverlay({
   if (!cue) return null;
 
   const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
-  const showAdvance = cue.actionType === "access_card" && cue.source === "ai" && canAdvanceAi && onAdvanceAi;
+  const showAiControls = cue.source === "ai" && aiPresentation && pacingMode && onPacingMode;
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const overlay = overlayRef.current;
     if (!overlay) return;
@@ -4582,11 +4639,20 @@ function OpponentActionOverlay({
           <CardView card={relatedCard} displayMode={displayMode} compact preview />
         </div>
       ) : null}
-      {showAdvance ? (
-        <button className="button primary cueAdvanceButton" onClick={onAdvanceAi} type="button">
-          <Bot size={15} />
-          KI fortsetzen
-        </button>
+      {showAiControls ? (
+        <div className="cueAiControls">
+          <div className="segmented aiPacingSelector cueAiModes" role="group" aria-label="KI-Steuerung im Hinweisfenster">
+            {(["manual", "paced", "fast"] as const).map((value) => (
+              <button className={pacingMode === value ? "active" : ""} key={value} onClick={() => onPacingMode(value)} type="button" title={aiPacingModeHelp(value)}>
+                {value === "manual" ? "Einzelschritt" : value === "paced" ? "Getaktet" : "Schnell"}
+              </button>
+            ))}
+          </div>
+          <button className="aiStepButton cueAiStepButton" onClick={onAdvanceAi} disabled={!canAdvanceAi || !onAdvanceAi} type="button">
+            <Bot size={15} />
+            {pacingMode === "manual" ? "KI-Schritt" : "Jetzt ausführen"}
+          </button>
+        </div>
       ) : null}
       {queued > 0 ? <small>{queued} weitere</small> : null}
       <button
@@ -4599,7 +4665,7 @@ function OpponentActionOverlay({
         title="Hinweis verschieben"
         type="button"
       >
-        <SlidersHorizontal size={15} />
+        <Move size={15} />
       </button>
       <button className="button iconOnly" onClick={onDismiss} aria-label="Hinweis schließen" title="Hinweis schließen" type="button">
         <X size={15} />
@@ -5608,6 +5674,44 @@ function reconnectUrlForSession(session: SessionInfo): string {
   url.searchParams.set("side", session.side);
   url.searchParams.set("reconnectToken", session.reconnectToken);
   return url.toString();
+}
+
+function runtimeRandomId(): string {
+  if (typeof globalThis !== "undefined" && typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`;
+}
+
+async function copyTextToClipboard(text: string): Promise<boolean> {
+  if (!text.trim()) return false;
+  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch {
+      // Fallback below for http/LAN contexts without Clipboard API permission.
+    }
+  }
+  if (typeof document === "undefined" || !document.body) return false;
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.left = "-9999px";
+  textarea.style.opacity = "0";
+  textarea.style.pointerEvents = "none";
+  document.body.appendChild(textarea);
+  textarea.focus();
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  try {
+    return document.execCommand("copy");
+  } catch {
+    return false;
+  } finally {
+    document.body.removeChild(textarea);
+  }
 }
 
 function CatalogPanel({
