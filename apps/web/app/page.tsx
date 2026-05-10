@@ -148,6 +148,10 @@ const CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
 const LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
 const CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
 const LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
+const CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
+const LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
+const AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
+const LEGACY_AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
 const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 const LEGACY_MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 const RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
@@ -768,6 +772,14 @@ function normalizeCardTooltipMode(value: unknown): CardTooltipMode {
   return value === "simple" || value === "enhanced" || value === "image" ? value : "enhanced";
 }
 
+function normalizeCardDisplayMode(value: unknown): CardDisplayMode {
+  return value === "placeholder" || value === "text-card" || value === "compact" ? value : "placeholder";
+}
+
+function normalizeAiPacingMode(value: unknown): AiPacingMode {
+  return value === "manual" || value === "paced" || value === "fast" ? value : "paced";
+}
+
 function normalizeCardScalePercent(value: unknown, min = CARD_SCALE_PERCENT_MIN, max = CARD_SCALE_PERCENT_MAX): number {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return CARD_SCALE_DEFAULT_PERCENT;
@@ -1371,7 +1383,10 @@ export default function Page() {
   const [colorSchemeLoaded, setColorSchemeLoaded] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioVolume, setAudioVolume] = useState(0.45);
+  const [audioSettingsLoaded, setAudioSettingsLoaded] = useState(false);
   const [localAiPacingMode, setLocalAiPacingMode] = useState<AiPacingMode>("paced");
+  const [aiPacingModeLoaded, setAiPacingModeLoaded] = useState(false);
+  const [cardDisplayModeLoaded, setCardDisplayModeLoaded] = useState(false);
   const [actionCueQueue, setActionCueQueue] = useState<OpponentActionCue[]>([]);
   const [currentActionCue, setCurrentActionCue] = useState<OpponentActionCue | null>(null);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
@@ -1379,13 +1394,17 @@ export default function Page() {
   const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] = useState<CueAutoDismissMs>(2500);
+  const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
+  const [cuePositionLoaded, setCuePositionLoaded] = useState(false);
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
   const [cardTooltipMode, setCardTooltipMode] = useState<CardTooltipMode>("enhanced");
+  const [cardTooltipSettingsLoaded, setCardTooltipSettingsLoaded] = useState(false);
   const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardHandScalePercent, setCardHandScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardBoardScalePercent, setCardBoardScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardOpponentScalePercent, setCardOpponentScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardSizeSettingsLoaded, setCardSizeSettingsLoaded] = useState(false);
   const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
   const [actionSlotCapacities, setActionSlotCapacities] = useState<Record<Side, number>>({
     runner: baseActionSlotCapacity("runner"),
@@ -1547,6 +1566,28 @@ export default function Page() {
   }, [colorScheme, colorSchemeLoaded]);
 
   useEffect(() => {
+    const stored = readLocalStorageWithLegacy(CARD_DISPLAY_MODE_STORAGE_KEY, LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY);
+    if (stored !== null) setCardDisplayMode(normalizeCardDisplayMode(stored));
+    setCardDisplayModeLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!cardDisplayModeLoaded) return;
+    window.localStorage.setItem(CARD_DISPLAY_MODE_STORAGE_KEY, cardDisplayMode);
+  }, [cardDisplayModeLoaded, cardDisplayMode]);
+
+  useEffect(() => {
+    const stored = readLocalStorageWithLegacy(AI_PACING_MODE_STORAGE_KEY, LEGACY_AI_PACING_MODE_STORAGE_KEY);
+    if (stored !== null) setLocalAiPacingMode(normalizeAiPacingMode(stored));
+    setAiPacingModeLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!aiPacingModeLoaded) return;
+    window.localStorage.setItem(AI_PACING_MODE_STORAGE_KEY, localAiPacingMode);
+  }, [aiPacingModeLoaded, localAiPacingMode]);
+
+  useEffect(() => {
     let cancelled = false;
     const legacyDecks = readLegacyBrowserDecks();
     async function loadDeckLibrary() {
@@ -1590,72 +1631,84 @@ export default function Page() {
 
   useEffect(() => {
     const storedAudio = readLocalStorageWithLegacy(AUDIO_STORAGE_KEY, LEGACY_AUDIO_STORAGE_KEY);
-    if (!storedAudio) return;
-    try {
-      const parsed = JSON.parse(storedAudio) as { enabled?: boolean; volume?: number };
-      setAudioEnabled(Boolean(parsed.enabled));
-      if (typeof parsed.volume === "number") setAudioVolume(Math.min(1, Math.max(0, parsed.volume)));
-    } catch {
-      removeLocalStorageKeys(AUDIO_STORAGE_KEY, LEGACY_AUDIO_STORAGE_KEY);
+    if (storedAudio) {
+      try {
+        const parsed = JSON.parse(storedAudio) as { enabled?: boolean; volume?: number };
+        setAudioEnabled(Boolean(parsed.enabled));
+        if (typeof parsed.volume === "number") setAudioVolume(Math.min(1, Math.max(0, parsed.volume)));
+      } catch {
+        removeLocalStorageKeys(AUDIO_STORAGE_KEY, LEGACY_AUDIO_STORAGE_KEY);
+      }
     }
+    setAudioSettingsLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!audioSettingsLoaded) return;
     window.localStorage.setItem(AUDIO_STORAGE_KEY, JSON.stringify({ enabled: audioEnabled, volume: audioVolume }));
-  }, [audioEnabled, audioVolume]);
+  }, [audioSettingsLoaded, audioEnabled, audioVolume]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
-    if (!stored) return;
-    try {
-      const parsed = JSON.parse(stored) as { enabled?: boolean; autoDismissMs?: number };
-      if (typeof parsed.enabled === "boolean") setActionCuesEnabled(parsed.enabled);
-      setActionCueAutoDismissMs(normalizeCueAutoDismissMs(parsed.autoDismissMs));
-    } catch {
-      removeLocalStorageKeys(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { enabled?: boolean; autoDismissMs?: number };
+        if (typeof parsed.enabled === "boolean") setActionCuesEnabled(parsed.enabled);
+        setActionCueAutoDismissMs(normalizeCueAutoDismissMs(parsed.autoDismissMs));
+      } catch {
+        removeLocalStorageKeys(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
+      }
     }
+    setActionCueSettingsLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!actionCueSettingsLoaded) return;
     window.localStorage.setItem(ACTION_CUE_SETTINGS_STORAGE_KEY, JSON.stringify({ enabled: actionCuesEnabled, autoDismissMs: actionCueAutoDismissMs }));
-  }, [actionCuesEnabled, actionCueAutoDismissMs]);
+  }, [actionCueSettingsLoaded, actionCuesEnabled, actionCueAutoDismissMs]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
-    if (!stored) return;
-    try {
-      const parsed = JSON.parse(stored) as { hoverOpenDelayMs?: unknown; mode?: unknown };
-      setCardTooltipHoverDelayMs(normalizeCardTooltipHoverDelayMs(parsed.hoverOpenDelayMs));
-      setCardTooltipMode(normalizeCardTooltipMode(parsed.mode));
-    } catch {
-      removeLocalStorageKeys(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { hoverOpenDelayMs?: unknown; mode?: unknown };
+        setCardTooltipHoverDelayMs(normalizeCardTooltipHoverDelayMs(parsed.hoverOpenDelayMs));
+        setCardTooltipMode(normalizeCardTooltipMode(parsed.mode));
+      } catch {
+        removeLocalStorageKeys(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
+      }
     }
+    setCardTooltipSettingsLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!cardTooltipSettingsLoaded) return;
     window.localStorage.setItem(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, JSON.stringify({ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }));
-  }, [cardTooltipHoverDelayMs, cardTooltipMode]);
+  }, [cardTooltipSettingsLoaded, cardTooltipHoverDelayMs, cardTooltipMode]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
-    if (!stored) return;
-    try {
-      const parsed = JSON.parse(stored) as {
-        tooltipPercent?: unknown;
-        handPercent?: unknown;
-        boardPercent?: unknown;
-        opponentPercent?: unknown;
-      };
-      setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
-      setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent, HAND_CARD_SCALE_PERCENT_MIN, HAND_CARD_SCALE_PERCENT_MAX));
-      setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
-      setCardOpponentScalePercent(normalizeCardScalePercent(parsed.opponentPercent));
-    } catch {
-      removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as {
+          tooltipPercent?: unknown;
+          handPercent?: unknown;
+          boardPercent?: unknown;
+          opponentPercent?: unknown;
+        };
+        setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
+        setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent, HAND_CARD_SCALE_PERCENT_MIN, HAND_CARD_SCALE_PERCENT_MAX));
+        setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
+        setCardOpponentScalePercent(normalizeCardScalePercent(parsed.opponentPercent));
+      } catch {
+        removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
+      }
     }
+    setCardSizeSettingsLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!cardSizeSettingsLoaded) return;
     window.localStorage.setItem(
       CARD_SIZE_SETTINGS_STORAGE_KEY,
       JSON.stringify({
@@ -1665,15 +1718,17 @@ export default function Page() {
         opponentPercent: cardOpponentScalePercent
       })
     );
-  }, [cardTooltipScalePercent, cardHandScalePercent, cardBoardScalePercent, cardOpponentScalePercent]);
+  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardBoardScalePercent, cardOpponentScalePercent]);
 
   useEffect(() => {
     setCuePosition(parseCuePositionPreference(readLocalStorageWithLegacy(ACTION_CUE_POSITION_STORAGE_KEY, LEGACY_ACTION_CUE_POSITION_STORAGE_KEY)));
+    setCuePositionLoaded(true);
   }, []);
 
   useEffect(() => {
+    if (!cuePositionLoaded) return;
     window.localStorage.setItem(ACTION_CUE_POSITION_STORAGE_KEY, serializeCuePositionPreference(cuePosition));
-  }, [cuePosition]);
+  }, [cuePositionLoaded, cuePosition]);
 
   useEffect(() => {
     if (!matchStartSettingsLoaded) return;
