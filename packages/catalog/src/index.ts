@@ -543,12 +543,84 @@ export const DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS = [
   "onr_v1_180_smiths-pawnshop"
 ] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS = [
+  "onr_v1_012_clown",
+  "onr_v1_046_pattels-virus",
+  "onr_v1_049_pox",
+  "onr_v1_094_inside-job",
+  "onr_v1_173_restrictive-net-zoning",
+  "onr_v1_193_corporate-coup",
+  "onr_v1_209_political-coup",
+  "onr_v1_222_ball-and-chain",
+  "onr_v1_225_canis-major",
+  "onr_v1_226_canis-minor",
+  "onr_v1_242_fatal-attractor",
+  "onr_v1_268_shock-r",
+  "onr_v1_083_desperate-competitor",
+  "onr_v1_090_hot-tip-for-wns",
+  "onr_v1_156_corporate-ally",
+  "onr_v1_159_databroker",
+  "onr_v1_201_executive-extraction",
+  "onr_v1_214_project-babylon",
+  "onr_v1_283_audit-of-call-records",
+  "onr_v1_284_chance-observation",
+  "onr_v1_286_corporate-detective-agency",
+  "onr_v1_158_danshis-second-id",
+  "onr_v1_179_silicon-saloon-franchise",
+  "onr_v1_084_edited-shipping-manifests",
+  "onr_v1_106_private-ldl-access",
+  "onr_v1_114_temple-microcode-outlet",
+  "onr_v1_118_weather-to-finance-pipe",
+  "onr_v1_129_hq-interface"
+] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS = [
+  "onr_v1_081_custodial-position",
+  "onr_v1_085_executive-wiretaps",
+  "onr_v1_101_mit-west-tier",
+  "onr_v1_297_overtime-incentives",
+  "onr_v1_253_laser-wire",
+  "onr_v1_257_nerve-labyrinth",
+  "onr_v1_259_in-the-face",
+  "onr_v1_261_quandary",
+  "onr_v1_262_razor-wire",
+  "onr_v1_263_reinforced-wall",
+  "onr_v1_265_rock-is-strong",
+  "onr_v1_266_scramble",
+  "onr_v1_269_shotgun-wire",
+  "onr_v1_270_sleeper",
+  "onr_v1_278_wall-of-ice",
+  "onr_v1_279_wall-of-static",
+  "onr_v1_295_night-shift",
+  "onr_v1_220_tycho-extension",
+  "onr_v1_244_filter",
+  "onr_v1_245_fire-wall",
+  "onr_v1_252_keeper",
+  "onr_v1_256_mazer",
+  "onr_v1_281_accounts-receivable",
+  "onr_v1_282_annual-reviews",
+  "onr_v1_285_closed-accounts",
+  "onr_v1_288_day-shift",
+  "onr_v1_290_efficiency-experts",
+  "onr_v1_301_punitive-counterstrike",
+  "onr_v1_302_scorched-earth",
+  "onr_v1_307_urban-renewal",
+  "onr_v1_203_hostile-takeover",
+  "onr_v1_230_cortical-scanner",
+  "onr_v1_232_crystal-wall",
+  "onr_v1_237_data-wall",
+  "onr_v1_238_data-wall-2-0",
+  "onr_v1_239_endless-corridor"
+] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS
 ]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);

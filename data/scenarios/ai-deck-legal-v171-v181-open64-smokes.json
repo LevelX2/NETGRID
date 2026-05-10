@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "ai-runner-corp-card-approval-scenarios-v1",
+  "id": "ai-deck-legal-v171-v181-open64-smokes",
+  "batchId": "deck_legal_ai_approval_v171_to_v181_open64",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "corpAiProfileId": "corp-ai-v1.4.0-normal",
+  "status": "implemented_for_deck_legal_ai_approval_v171_to_v181_open64",
+  "assertions": {
+    "allBatchCardsHaveAiHints": true,
+    "allBatchCardsHaveScenarioRefs": true,
+    "aiSupportedOnlyAfterGate": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "runner_program_pressure_modifiers",
+      "planKinds": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "cards": [
+        "onr_v1_012_clown",
+        "onr_v1_046_pattels-virus",
+        "onr_v1_049_pox"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves V1.7.1 to V1.8.1 open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "runner_run_event_pressure",
+      "planKinds": [
+        "pressure_hq",
+        "pressure_rnd",
+        "contest_remote"
+      ],
+      "cards": [
+        "onr_v1_094_inside-job",
+        "onr_v1_084_edited-shipping-manifests",
+        "onr_v1_106_private-ldl-access",
+        "onr_v1_118_weather-to-finance-pipe",
+        "onr_v1_129_hq-interface"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves V1.7.1 to V1.8.1 open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "runner_tutor_and_setup",
+      "planKinds": [
+        "draw_for_answers",
+        "build_rig"
+      ],
+      "cards": [
+        "onr_v1_114_temple-microcode-outlet"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves V1.7.1 to V1.8.1 open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "runner_resource_econ_tag_tools",
+      "planKinds": [
+        "recover_economy",
+        "build_rig",
+        "contest_remote"
+      ],
+      "cards": [
+        "onr_v1_173_restrictive-net-zoning",
+        "onr_v1_156_corporate-ally",
+        "onr_v1_159_databroker",
+        "onr_v1_158_danshis-second-id",
+        "onr_v1_179_silicon-saloon-franchise"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves V1.7.1 to V1.8.1 open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "runner_agenda_point_conversion",
+      "planKinds": [
+        "contest_remote",
+        "pressure_rnd",
+        "pressure_hq"
+      ],
+      "cards": [
+        "onr_v1_083_desperate-competitor",
+        "onr_v1_090_hot-tip-for-wns"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves V1.7.1 to V1.8.1 open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "corp_agenda_economy_modifiers",
+      "planKinds": [
+        "score_now",
+        "score_next_turn",
+        "build_scoring_remote"
+      ],
+      "cards": [
+        "onr_v1_193_corporate-coup",
+        "onr_v1_209_political-coup",
+        "onr_v1_201_executive-extraction",
+        "onr_v1_214_project-babylon"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves V1.7.1 to V1.8.1 open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "corp_trace_tag_punish_ops",
+      "planKinds": [
+        "bait_runner",
+        "protect_hq",
+        "recover_economy"
+      ],
+      "cards": [
+        "onr_v1_283_audit-of-call-records",
+        "onr_v1_284_chance-observation",
+        "onr_v1_286_corporate-detective-agency"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves V1.7.1 to V1.8.1 open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "corp_ice_run_pressure_modifiers",
+      "planKinds": [
+        "protect_hq",
+        "protect_rnd",
+        "build_scoring_remote"
+      ],
+      "cards": [
+        "onr_v1_222_ball-and-chain",
+        "onr_v1_225_canis-major",
+        "onr_v1_226_canis-minor",
+        "onr_v1_242_fatal-attractor",
+        "onr_v1_268_shock-r"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves V1.7.1 to V1.8.1 open cards for AI with scenario coverage"
+      ]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "DecisionDebug may include uncertainty markers such as unknown_corp_cards_remain_unknown.",
+    "DecisionDebug must not include hidden Corp card titles, private decklists, cardInstances or privatePayload.",
+    "Equal side-visible projections must keep the same selected action for deterministic seeds."
+  ]
+}

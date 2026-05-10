@@ -1,0 +1,258 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-batch-manifest-v1",
+  "id": "deck-legal-ai-approval-v171-v181-open64-manifest",
+  "batchId": "deck_legal_ai_approval_v171_to_v181_open64",
+  "status": "implemented_for_ai_approval",
+  "aiHintsId": "ai-card-hints-deck-legal-v171-v181-open64",
+  "scenarioId": "ai-deck-legal-v171-v181-open64-smokes",
+  "gateAssertions": {
+    "allSliceCardsRuntimeCatalogReady": true,
+    "allSliceCardsEngineSupported": true,
+    "allSliceCardsHumanPlayable": true,
+    "allSliceCardsDeckLegal": true,
+    "allSliceCardsFormatLegal": true,
+    "allSliceCardsHaveAiHints": true,
+    "allSliceCardsHaveScenarioRefs": true,
+    "aiSupportedRequiresHumanPlayableDeckLegalFormatLegal": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenInfoSafe": true,
+    "v140CorpPlanRegressionGreen": true,
+    "v141RunnerPlanRegressionGreen": true,
+    "noBulkOnrAiApproval": true,
+    "noNewMechanics": true,
+    "noCardTextParser": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true,
+    "noOfficialAssets": true,
+    "noPublicPlatformFeatures": true
+  },
+  "cards": [
+    {
+      "cardId": "onr_v1_012_clown",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_012_clown",
+      "scenarioRefs": [
+        "runner_program_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_046_pattels-virus",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_046_pattels-virus",
+      "scenarioRefs": [
+        "runner_program_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_049_pox",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_049_pox",
+      "scenarioRefs": [
+        "runner_program_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_094_inside-job",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_094_inside-job",
+      "scenarioRefs": [
+        "runner_run_event_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_173_restrictive-net-zoning",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_173_restrictive-net-zoning",
+      "scenarioRefs": [
+        "runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_193_corporate-coup",
+      "scenarioRefs": [
+        "corp_agenda_economy_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_209_political-coup",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_209_political-coup",
+      "scenarioRefs": [
+        "corp_agenda_economy_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_222_ball-and-chain",
+      "scenarioRefs": [
+        "corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_225_canis-major",
+      "scenarioRefs": [
+        "corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_226_canis-minor",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_226_canis-minor",
+      "scenarioRefs": [
+        "corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_242_fatal-attractor",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_242_fatal-attractor",
+      "scenarioRefs": [
+        "corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_268_shock-r",
+      "scenarioRefs": [
+        "corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_083_desperate-competitor",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_083_desperate-competitor",
+      "scenarioRefs": [
+        "runner_agenda_point_conversion"
+      ]
+    },
+    {
+      "cardId": "onr_v1_090_hot-tip-for-wns",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_090_hot-tip-for-wns",
+      "scenarioRefs": [
+        "runner_agenda_point_conversion"
+      ]
+    },
+    {
+      "cardId": "onr_v1_156_corporate-ally",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_156_corporate-ally",
+      "scenarioRefs": [
+        "runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_159_databroker",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_159_databroker",
+      "scenarioRefs": [
+        "runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_201_executive-extraction",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_201_executive-extraction",
+      "scenarioRefs": [
+        "corp_agenda_economy_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_214_project-babylon",
+      "scenarioRefs": [
+        "corp_agenda_economy_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_283_audit-of-call-records",
+      "scenarioRefs": [
+        "corp_trace_tag_punish_ops"
+      ]
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_284_chance-observation",
+      "scenarioRefs": [
+        "corp_trace_tag_punish_ops"
+      ]
+    },
+    {
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_286_corporate-detective-agency",
+      "scenarioRefs": [
+        "corp_trace_tag_punish_ops"
+      ]
+    },
+    {
+      "cardId": "onr_v1_158_danshis-second-id",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_158_danshis-second-id",
+      "scenarioRefs": [
+        "runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_179_silicon-saloon-franchise",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_179_silicon-saloon-franchise",
+      "scenarioRefs": [
+        "runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_084_edited-shipping-manifests",
+      "scenarioRefs": [
+        "runner_run_event_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_106_private-ldl-access",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_106_private-ldl-access",
+      "scenarioRefs": [
+        "runner_run_event_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_114_temple-microcode-outlet",
+      "scenarioRefs": [
+        "runner_tutor_and_setup"
+      ]
+    },
+    {
+      "cardId": "onr_v1_118_weather-to-finance-pipe",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_118_weather-to-finance-pipe",
+      "scenarioRefs": [
+        "runner_run_event_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_129_hq-interface",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v171-v181-open64:onr_v1_129_hq-interface",
+      "scenarioRefs": [
+        "runner_run_event_pressure"
+      ]
+    }
+  ],
+  "deferredCards": []
+}

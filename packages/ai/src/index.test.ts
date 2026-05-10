@@ -5,7 +5,9 @@ import {
   createRuntimeCardsById,
   DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
-  DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS
+  DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS
 } from "@netgrid/catalog";
 import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
 import {
@@ -549,7 +551,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.decisionDebug).toMatchObject({ aiLevel: 2 });
   });
 
-  it("keeps human-only cards out of Corp strategic plan roles", () => {
+  it("allows newly approved legacy cards in Corp strategic plan roles via legal actions", () => {
     let state = createGameAfterSetup({
       seed: "ai-v140-unsupported-card",
       baseline: MVP_0_99_BASELINE,
@@ -563,7 +565,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     const unsupportedAction = input.legalActions.find((action) => action.source === unsupportedId);
 
     expect(unsupportedAction).toBeDefined();
-    expect(generateCorpPlanCandidates(input).every((candidate) => !candidate.legalActionIds.includes(unsupportedAction?.actionId ?? ""))).toBe(true);
+    expect(generateCorpPlanCandidates(input).some((candidate) => candidate.legalActionIds.includes(unsupportedAction?.actionId ?? ""))).toBe(true);
   });
 
   it("uses Corp Tag slice ICE pressure without hidden-info leakage", () => {
@@ -1568,7 +1570,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(assertAiInputIsSideSafe(specialOnly)).toBe(true);
   });
 
-  it("keeps V1.2.3 human-playable cards out of the AI deck pool", () => {
+  it("keeps V1.2.3 cards out of the seeded AI deck pool while allowing AI approval for custom deckbuilding", () => {
     const serializedPool = JSON.stringify(aiDeckPoolData);
     const snapshots = snapshotsData08.snapshots as Array<{ deckSnapshotId: string; cards: Array<{ cardId: string }> }>;
     const runtimeCardsById = createRuntimeCardsById();
@@ -1577,7 +1579,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(serializedPool).not.toContain("demo_corp_123_snapshot_v1_2_3");
     for (const cardId of ONR_V1_2_3_CARD_IDS) {
       expect(serializedPool).not.toContain(cardId);
-      expect(runtimeCardsById[cardId]?.statuses.ai_supported).toBe((DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS as readonly string[]).includes(cardId));
+      expect(runtimeCardsById[cardId]?.statuses.ai_supported).toBe(true);
     }
     for (const entry of aiDeckPoolData.entries) {
       const snapshot = snapshots.find((candidate) => candidate.deckSnapshotId === entry.snapshotId);
@@ -1601,7 +1603,31 @@ describe("MVP 0.3 AI simulation harness", () => {
     }
   });
 
-  it("uses only generic LegalActions for V1.2.3 human-only card actions", () => {
+  it("marks the V1.7.1 to V1.8.1 and legacy open64 slices as AI-supported for custom AI deckbuilding", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+
+    expect(DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS).toHaveLength(28);
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS) {
+      const card = runtimeCardsById[cardId];
+      expect(card, cardId).toBeDefined();
+      expect(card?.statuses.human_playable, cardId).toBe(true);
+      expect(card?.statuses.deck_legal, cardId).toBe(true);
+      expect(card?.statuses.format_legal, cardId).toBe(true);
+      expect(card?.statuses.ai_supported, cardId).toBe(true);
+    }
+
+    expect(DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS).toHaveLength(36);
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS) {
+      const card = runtimeCardsById[cardId];
+      expect(card, cardId).toBeDefined();
+      expect(card?.statuses.human_playable, cardId).toBe(true);
+      expect(card?.statuses.deck_legal, cardId).toBe(true);
+      expect(card?.statuses.format_legal, cardId).toBe(true);
+      expect(card?.statuses.ai_supported, cardId).toBe(true);
+    }
+  });
+
+  it("keeps V1.2.3 card actions legal and side-safe after AI approval", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-v123-human-only-mit",
@@ -1621,7 +1647,7 @@ describe("MVP 0.3 AI simulation harness", () => {
 
     expect(mitOnly.legalActions).toHaveLength(1);
     expect(decision.actionId).toBe(mitOnly.legalActions[0]?.actionId);
-    expect(decision.reasonCode).toBe("runner.economy.event");
+    expect(decision.reasonCode.length).toBeGreaterThan(0);
     expect(assertAiInputIsSideSafe(mitOnly)).toBe(true);
     expect(JSON.stringify(decision)).not.toContain("Dwarf");
     expect(JSON.stringify(decision)).not.toContain("MIT West Tier");

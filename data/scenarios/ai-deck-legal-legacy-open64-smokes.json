@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "ai-runner-corp-card-approval-scenarios-v1",
+  "id": "ai-deck-legal-legacy-open64-smokes",
+  "batchId": "deck_legal_ai_approval_legacy_open64",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "corpAiProfileId": "corp-ai-v1.4.0-normal",
+  "status": "implemented_for_deck_legal_ai_approval_legacy_open64",
+  "assertions": {
+    "allBatchCardsHaveAiHints": true,
+    "allBatchCardsHaveScenarioRefs": true,
+    "aiSupportedOnlyAfterGate": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "runner_v123_multiaccess_and_reset",
+      "planKinds": [
+        "pressure_rnd",
+        "pressure_hq",
+        "draw_for_answers"
+      ],
+      "cards": [
+        "onr_v1_081_custodial-position",
+        "onr_v1_085_executive-wiretaps",
+        "onr_v1_101_mit-west-tier"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves legacy open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "corp_legacy_simple_ice_defense",
+      "planKinds": [
+        "protect_hq",
+        "protect_rnd",
+        "build_scoring_remote"
+      ],
+      "cards": [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_232_crystal-wall",
+        "onr_v1_237_data-wall",
+        "onr_v1_238_data-wall-2-0",
+        "onr_v1_239_endless-corridor",
+        "onr_v1_244_filter",
+        "onr_v1_245_fire-wall",
+        "onr_v1_252_keeper",
+        "onr_v1_256_mazer",
+        "onr_v1_259_in-the-face",
+        "onr_v1_261_quandary",
+        "onr_v1_263_reinforced-wall",
+        "onr_v1_265_rock-is-strong",
+        "onr_v1_266_scramble",
+        "onr_v1_270_sleeper",
+        "onr_v1_279_wall-of-static"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves legacy open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "corp_legacy_damage_ice_pressure",
+      "planKinds": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "cards": [
+        "onr_v1_253_laser-wire",
+        "onr_v1_257_nerve-labyrinth",
+        "onr_v1_262_razor-wire",
+        "onr_v1_269_shotgun-wire",
+        "onr_v1_278_wall-of-ice"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves legacy open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "corp_legacy_economy_draw_ops",
+      "planKinds": [
+        "recover_economy"
+      ],
+      "cards": [
+        "onr_v1_281_accounts-receivable",
+        "onr_v1_282_annual-reviews",
+        "onr_v1_288_day-shift",
+        "onr_v1_290_efficiency-experts",
+        "onr_v1_295_night-shift",
+        "onr_v1_297_overtime-incentives"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves legacy open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "corp_legacy_tag_damage_ops",
+      "planKinds": [
+        "bait_runner",
+        "recover_economy"
+      ],
+      "cards": [
+        "onr_v1_285_closed-accounts",
+        "onr_v1_301_punitive-counterstrike",
+        "onr_v1_302_scorched-earth",
+        "onr_v1_307_urban-renewal"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves legacy open cards for AI with scenario coverage"
+      ]
+    },
+    {
+      "id": "corp_legacy_agenda_scoring",
+      "planKinds": [
+        "score_now",
+        "score_next_turn",
+        "build_scoring_remote"
+      ],
+      "cards": [
+        "onr_v1_203_hostile-takeover",
+        "onr_v1_220_tycho-extension"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::approves legacy open cards for AI with scenario coverage"
+      ]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "DecisionDebug may include uncertainty markers such as unknown_corp_cards_remain_unknown.",
+    "DecisionDebug must not include hidden Corp card titles, private decklists, cardInstances or privatePayload.",
+    "Equal side-visible projections must keep the same selected action for deterministic seeds."
+  ]
+}

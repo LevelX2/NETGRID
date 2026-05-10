@@ -576,17 +576,19 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(joined)).not.toContain("onr_v1_015_codeslinger");
     expect(JSON.stringify(joined)).not.toContain("cardInstances");
 
-    await expect(
-      service.createMatch({
-        hostSide: "runner",
-        mode: "human_runner_vs_corp_ai",
-        seed: "onr-local-ai-match",
-        participantADecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
-        participantBDecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
-        aiDeckPolicy: "selected",
-        settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
-      })
-    ).rejects.toThrow("ai_deck_snapshot_not_supported");
+    const aiCreated = await service.createMatch({
+      hostSide: "runner",
+      mode: "human_runner_vs_corp_ai",
+      seed: "onr-local-ai-match",
+      participantADecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
+      participantBDecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
+      aiDeckPolicy: "selected",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
+    });
+    expect(aiCreated.mode).toBe("human_runner_vs_corp_ai");
+    expect(aiCreated.playerView.deckMetadata?.own.deckName).toBe("O:NR Runner Match Smoke");
+    expect(aiCreated.playerView.deckMetadata?.opponent.deckName).toBe("O:NR Corp Match Smoke");
+    expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {
@@ -1505,22 +1507,24 @@ describe("MVP 0.2 multiplayer service", () => {
       })
     ).rejects.toThrow("deck_snapshot_invalid");
 
-    await expect(
-      service.createMatch({
-        hostSide: "corp",
-        mode: "human_corp_vs_runner_ai",
-        seed: "mp-v130-ai-blocked",
-        participantADecks: {
-          runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
-          corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
-        },
-        participantBDecks: {
-          runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
-          corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
-        },
-        aiDeckPolicy: "selected"
-      })
-    ).rejects.toThrow("ai_deck_snapshot_not_supported");
+    const aiCreated = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "mp-v130-ai-supported",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+      },
+      aiDeckPolicy: "selected"
+    });
+    expect(aiCreated.mode).toBe("human_corp_vs_runner_ai");
+    expect(aiCreated.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_v1");
+    expect(aiCreated.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.3.0");
+    expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
   it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {

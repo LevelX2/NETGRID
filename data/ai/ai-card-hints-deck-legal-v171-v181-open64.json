@@ -1,0 +1,899 @@
+{
+  "schemaVersion": "ai-card-hints-v1.3.1",
+  "hintsId": "ai-card-hints-deck-legal-v171-v181-open64",
+  "derivedFromSnapshotId": "runtime-card-snapshot-current",
+  "scope": "deck_legal_ai_approval_v171_to_v181_open64",
+  "cards": [
+    {
+      "cardId": "onr_v1_012_clown",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "ice_modifier",
+        "program",
+        "run_support"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_program",
+        "memory",
+        "persistent_modifier"
+      ],
+      "valueHints": {
+        "runPressure": 2,
+        "rigCoverage": 1
+      },
+      "riskTags": [
+        "credit_reserve"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_program_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_046_pattels-virus",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "ice_modifier",
+        "program",
+        "run_support",
+        "virus"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [
+        "corp_purge",
+        "install_program",
+        "memory",
+        "successful_run",
+        "virus_counters"
+      ],
+      "valueHints": {
+        "runPressure": 2,
+        "utility": 2
+      },
+      "riskTags": [
+        "encounter",
+        "virus_cleanup"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_program_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_049_pox",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program",
+        "run_support",
+        "server_tax",
+        "virus"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [
+        "corp_purge",
+        "install_program",
+        "memory",
+        "successful_run",
+        "virus_counters"
+      ],
+      "valueHints": {
+        "runPressure": 2,
+        "utility": 2
+      },
+      "riskTags": [
+        "encounter",
+        "virus_cleanup"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_program_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_094_inside-job",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_bypass",
+        "run_event"
+      ],
+      "planRoles": [
+        "contest_remote",
+        "pressure_hq",
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "play_event",
+        "run",
+        "successful_run"
+      ],
+      "valueHints": {
+        "runPressure": 3
+      },
+      "riskTags": [
+        "credit_reserve",
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_173_restrictive-net-zoning",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "remote_tax",
+        "resource",
+        "server_pressure"
+      ],
+      "planRoles": [
+        "contest_remote",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "choose_server",
+        "install_resource",
+        "persistent_modifier"
+      ],
+      "valueHints": {
+        "utility": 2,
+        "runPressure": 1
+      },
+      "riskTags": [
+        "board_presence"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "agenda_counters",
+        "economy_agenda",
+        "score_plan"
+      ],
+      "planRoles": [
+        "build_scoring_remote",
+        "score_next_turn",
+        "score_now"
+      ],
+      "requiredMechanics": [
+        "advance",
+        "agenda_counters",
+        "install_remote",
+        "score",
+        "take_click_ability"
+      ],
+      "valueHints": {
+        "scoring": 2,
+        "economy": 2
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_agenda_economy_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_209_political-coup",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "agenda_counters",
+        "economy_agenda",
+        "score_plan"
+      ],
+      "planRoles": [
+        "build_scoring_remote",
+        "score_next_turn",
+        "score_now"
+      ],
+      "requiredMechanics": [
+        "advance",
+        "agenda_counters",
+        "install_remote",
+        "score",
+        "take_click_ability"
+      ],
+      "valueHints": {
+        "scoring": 3,
+        "economy": 2
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_agenda_economy_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "ice",
+        "taxing_ice"
+      ],
+      "planRoles": [
+        "build_scoring_remote",
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "end_the_run",
+        "install_ice",
+        "rez_ice",
+        "run_cost_modifier"
+      ],
+      "valueHints": {
+        "defense": 3,
+        "threat": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "ice_modifier_ice",
+        "sentry_ice",
+        "taxing_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "persistent_modifier",
+        "rez_ice"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "threat": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_226_canis-minor",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "ice_modifier_ice",
+        "sentry_ice",
+        "taxing_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "encounter_ice",
+        "install_ice",
+        "persistent_modifier",
+        "rez_ice"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "threat": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_242_fatal-attractor",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ap_ice",
+        "damage_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "choice_resolution",
+        "damage",
+        "encounter_ice",
+        "install_ice",
+        "rez_ice"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "threat": 4
+      },
+      "riskTags": [
+        "damage",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ap_ice",
+        "ice",
+        "run_lock_ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [
+        "breaker_restriction",
+        "encounter_ice",
+        "install_ice",
+        "jack_out_restriction",
+        "rez_ice"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "threat": 4
+      },
+      "riskTags": [
+        "encounter",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_ice_run_pressure_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_083_desperate-competitor",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "agenda_point_event",
+        "event",
+        "steal_reward"
+      ],
+      "planRoles": [
+        "contest_remote",
+        "pressure_hq",
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [
+        "agenda_points",
+        "play_event",
+        "stolen_agenda_check"
+      ],
+      "valueHints": {
+        "scoring": 2,
+        "runPressure": 1
+      },
+      "riskTags": [
+        "conditional"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_agenda_point_conversion"
+      ]
+    },
+    {
+      "cardId": "onr_v1_090_hot-tip-for-wns",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "agenda_point_event",
+        "event",
+        "steal_reward"
+      ],
+      "planRoles": [
+        "contest_remote",
+        "pressure_hq",
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [
+        "agenda_points",
+        "play_event",
+        "stolen_agenda_check"
+      ],
+      "valueHints": {
+        "scoring": 2,
+        "runPressure": 1
+      },
+      "riskTags": [
+        "conditional"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_agenda_point_conversion"
+      ]
+    },
+    {
+      "cardId": "onr_v1_156_corporate-ally",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "agenda_modifier",
+        "connection",
+        "resource",
+        "unique"
+      ],
+      "planRoles": [
+        "build_rig",
+        "contest_remote"
+      ],
+      "requiredMechanics": [
+        "agenda_points",
+        "install_resource",
+        "persistent_modifier",
+        "unique_card"
+      ],
+      "valueHints": {
+        "utility": 2,
+        "scoring": 1
+      },
+      "riskTags": [
+        "agenda_cost",
+        "board_tradeoff"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_159_databroker",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "connection",
+        "economy",
+        "resource"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "agenda_points",
+        "credits",
+        "install_resource",
+        "trash_for_value"
+      ],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": [
+        "agenda_cost"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_201_executive-extraction",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "agenda_modifier",
+        "score_plan"
+      ],
+      "planRoles": [
+        "build_scoring_remote",
+        "score_next_turn",
+        "score_now"
+      ],
+      "requiredMechanics": [
+        "advance",
+        "install_remote",
+        "persistent_modifier",
+        "score"
+      ],
+      "valueHints": {
+        "scoring": 2,
+        "tempo": 1
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_agenda_economy_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "overadvance_agenda",
+        "score_plan"
+      ],
+      "planRoles": [
+        "build_scoring_remote",
+        "score_next_turn",
+        "score_now"
+      ],
+      "requiredMechanics": [
+        "advance",
+        "agenda_points",
+        "install_remote",
+        "score"
+      ],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_agenda_economy_modifiers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "runner_activity_punish",
+        "tag_operation",
+        "trace_operation"
+      ],
+      "planRoles": [
+        "bait_runner",
+        "protect_hq",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "last_turn_run_check",
+        "play_operation",
+        "tags",
+        "trace"
+      ],
+      "valueHints": {
+        "threat": 3
+      },
+      "riskTags": [
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_trace_tag_punish_ops"
+      ]
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "runner_activity_punish",
+        "tag_operation",
+        "trace_operation"
+      ],
+      "planRoles": [
+        "bait_runner",
+        "protect_hq",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "last_turn_run_check",
+        "play_operation",
+        "tags",
+        "trace"
+      ],
+      "valueHints": {
+        "threat": 2
+      },
+      "riskTags": [
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_trace_tag_punish_ops"
+      ]
+    },
+    {
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "resource_trash_operation",
+        "tag_punishment_operation"
+      ],
+      "planRoles": [
+        "bait_runner",
+        "protect_hq"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "tags",
+        "trash_resource"
+      ],
+      "valueHints": {
+        "threat": 3
+      },
+      "riskTags": [
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_trace_tag_punish_ops"
+      ]
+    },
+    {
+      "cardId": "onr_v1_158_danshis-second-id",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource",
+        "tag_removal",
+        "utility_resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "install_resource",
+        "remove_tags",
+        "trash_on_use"
+      ],
+      "valueHints": {
+        "survivability": 2
+      },
+      "riskTags": [
+        "board_tradeoff"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_179_silicon-saloon-franchise",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "draw",
+        "economy",
+        "position",
+        "resource"
+      ],
+      "planRoles": [
+        "draw_for_answers",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "draw",
+        "gain_credit",
+        "install_resource"
+      ],
+      "valueHints": {
+        "economy": 2,
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "board_presence"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ]
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "hq_pressure",
+        "run_event",
+        "tag_cost_event"
+      ],
+      "planRoles": [
+        "contest_remote",
+        "pressure_hq"
+      ],
+      "requiredMechanics": [
+        "add_tag",
+        "corp_draw",
+        "play_event",
+        "run",
+        "successful_run"
+      ],
+      "valueHints": {
+        "runPressure": 2,
+        "utility": 2
+      },
+      "riskTags": [
+        "tag"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_106_private-ldl-access",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "rd_pressure",
+        "run_event",
+        "server_redirect"
+      ],
+      "planRoles": [
+        "pressure_hq",
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [
+        "access_server_override",
+        "play_event",
+        "run",
+        "successful_run"
+      ],
+      "valueHints": {
+        "runPressure": 3
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "program_setup",
+        "tutor"
+      ],
+      "planRoles": [
+        "build_rig",
+        "draw_for_answers"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "reveal_card",
+        "search_stack",
+        "shuffle"
+      ],
+      "valueHints": {
+        "rigCoverage": 2,
+        "cardFlow": 2
+      },
+      "riskTags": [
+        "hidden_zone_change"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_tutor_and_setup"
+      ]
+    },
+    {
+      "cardId": "onr_v1_118_weather-to-finance-pipe",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy_denial",
+        "event",
+        "hq_pressure",
+        "run_event"
+      ],
+      "planRoles": [
+        "pressure_hq",
+        "recover_economy"
+      ],
+      "requiredMechanics": [
+        "credit_swing",
+        "play_event",
+        "run",
+        "successful_run"
+      ],
+      "valueHints": {
+        "runPressure": 2,
+        "economy": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_129_hq-interface",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "hq_pressure",
+        "multiaccess"
+      ],
+      "planRoles": [
+        "build_rig",
+        "pressure_hq"
+      ],
+      "requiredMechanics": [
+        "install_hardware",
+        "multiaccess_hq",
+        "successful_run"
+      ],
+      "valueHints": {
+        "runPressure": 3
+      },
+      "riskTags": [
+        "credit_reserve"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
+      ]
+    }
+  ]
+}
