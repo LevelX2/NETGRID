@@ -1,9 +1,9 @@
 # NETGRID Consolidated Release Roadmap
 
 Status: verbindliche konsolidierte Release-Roadmap
-Stand: 2026-05-09
+Stand: 2026-05-10
 Startpunkt: nach V1.1.2K
-Aktueller Ausführungsstand: V1.7.0 Mechanikpaket D ist abgeschlossen; nächster Umsetzungsscope ist V1.7.1 Mechanikpaket E.
+Aktueller Ausführungsstand: V1.9.0 Mechanikpaket I ist abgeschlossen; nächster verpflichtender Umsetzungsscope ist V1.9.1.
 
 ## Verbindlichkeit
 
@@ -1110,6 +1110,28 @@ Geplanter Erst-Release für noch nicht spielbare Karten (Stand 2026-05-09):
 - Ambush- und Zufallsfälle sind deterministisch, side-sicher und regressionsgeprüft.
 - Offene Sonderresolver sind entweder implementiert oder als blockiert dokumentiert.
 
+## Verbindliche Anschlusslinie V1.9.1 bis V1.9.8
+
+Planentscheid vom 2026-05-10: Die bisherige Grobplanung `docs/derived/V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md` ist als gleichberechtigter und verpflichtender Teil dieser Roadmap übernommen.
+
+Damit gilt:
+
+1. V1.9.1 bis V1.9.8 sind vor V2.0 strikt sequenziell umzusetzen.
+2. V2.x-Produktfeatures bleiben bis nach grünem Abschluss von V1.9.8 gesperrt.
+3. Jeder V1.9.x-Release folgt weiterhin der Standardstruktur aus Produkt/Feature, Mechanik/Karten/Effekte und KI-Spieler.
+4. Pro Release sind Requirements, Spezifikation, Testmatrix, Requirements-Review, Implementation-Review und Final-Review Pflicht.
+
+Verbindliche Reihenfolge der acht Releases:
+
+1. V1.9.1 Deferred-Auflösung und Restfälle deterministischer Zufall.
+2. V1.9.2 Hidden-Zone-/Access-/Run-Kernverbreiterung.
+3. V1.9.3 Trace-/Tag-/Resource-/Action-Fenster-Konsolidierung.
+4. V1.9.4 Damage-/Prevention-/Core-Erweiterungen.
+5. V1.9.5 Persistente Boardlogik und globale Modifier-Skalierung.
+6. V1.9.6 Agenda-/Counter-/Virus-Lifecycle-Schließung.
+7. V1.9.7 Upgrade-/Programm-/Hosting-/Destroy-Lifecycle-Schließung.
+8. V1.9.8 Resolver-Longtail und Vollabdeckungs-Gate.
+
 ## V2.x Geschlossene Community und öffentliche Multiplayer-Basis
 
 V2.x darf erst beginnen, wenn die Sequenz V1.6.1 bis V1.9.x grün abgeschlossen ist, private Internet-Gates stabil sind und Auth-, Datenschutz-, Moderations-, Betriebs- und Rechtsentscheidungen getroffen wurden.
@@ -1947,13 +1969,14 @@ Diese Stufe darf erst beginnen, wenn V2.x belastbar läuft und die Produktentsch
 
 ## Nächster verbindlicher Schritt
 
-Nächster Release nach abgeschlossenem V1.7.0 ist V1.7.1 Mechanikpaket E.
+Nächster Release nach abgeschlossenem V1.9.0 ist V1.9.1.
 
-Der nächste Auftrag muss strikt sequenziell auf V1.7.1 fokussieren und darf erst nach grünem V1.7.0-Final-Gate starten.
+Die nächsten vier Pflicht-Releases sind strikt sequenziell: V1.9.1, V1.9.2, V1.9.3 und V1.9.4.
 
 Pflicht für den Start:
 
 1. `AGENTS.md` und `docs/codex/CODEX_STATUS.md` lesen.
 2. Diese Roadmap als führenden Planungsstand verwenden.
-3. V1.7.1-Requirements, Spezifikation, Testmatrix und Requirements-Review vor Implementierung einfrieren.
-4. No-Scope-Grenzen aus V1.7.0 beibehalten und nur explizit freigegebene V1.7.1-Blöcke aktivieren.
+3. V1.9.1-Requirements, Spezifikation, Testmatrix und Requirements-Review vor Implementierung einfrieren.
+4. No-Scope-Grenzen aus V1.9.0 beibehalten und nur explizit freigegebene V1.9.1-Blöcke aktivieren.
+5. V2.0 darf erst nach grünem Abschluss von V1.9.8 gestartet werden.
