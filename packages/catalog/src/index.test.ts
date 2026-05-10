@@ -274,6 +274,8 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_006_black-dahlia"]?.text).toBe("2 credits: Break sentry subroutine.\n2 credits: +1 strength.");
     expect(cardsById["onr_v1_014_codecracker"]?.numeric.installCost).toBe(2);
     expect(cardsById["onr_v1_014_codecracker"]?.numeric.strength).toBe(0);
+    expect(cardsById["onr_v1_073_wizards-book"]?.numeric.installCost).toBe(5);
+    expect(cardsById["onr_v1_073_wizards-book"]?.numeric.strength).toBe(2);
     expect(cardsById["onr_v1_073_wizards-book"]?.text).toBe("0 credits: Break code gate subroutine.\n2 credits: +1 strength.");
     expect(cardsById["onr_v1_253_laser-wire"]?.text).toBe("[Subroutine] Do 1 net damage.\n[Subroutine] End the run.");
     expect(cardsById["onr_v1_278_wall-of-ice"]?.numeric.rezCost).toBe(13);
@@ -389,7 +391,11 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_021_dwarf"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_039_krash"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_066_snowball"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_066_snowball"]?.numeric.installCost).toBe(10);
+    expect(cardsById["onr_v1_066_snowball"]?.numeric.strength).toBe(0);
     expect(cardsById["onr_v1_074_worm"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_074_worm"]?.numeric.installCost).toBe(4);
+    expect(cardsById["onr_v1_074_worm"]?.numeric.strength).toBe(2);
     expect(cardsById["onr_v1_243_fetch-4-0-1"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_249_hunter"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_287_datapool-by-zetatech"]?.statuses.ai_supported).toBe(true);

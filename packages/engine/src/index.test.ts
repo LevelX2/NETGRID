@@ -1203,7 +1203,7 @@ describe("V1.1.2K Card Release", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_016_cyfermaster"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 5 });
     expect(DEMO_CARDS_BY_ID["onr_v1_040_loony-goon"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_060_shaka"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 2 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_073_wizards-book"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 5 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_073_wizards-book"]).toMatchObject({ installCost: 5, memoryCost: 1, strength: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_253_laser-wire"]).toMatchObject({ rezCost: 4, strength: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_257_nerve-labyrinth"]).toMatchObject({ rezCost: 6, strength: 4 });
     expect(DEMO_CARDS_BY_ID["onr_v1_278_wall-of-ice"]).toMatchObject({ rezCost: 13, strength: 6 });
@@ -1332,8 +1332,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
 
     expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({ installCost: 6, memoryCost: 1, strength: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 0 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_066_snowball"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 1 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_066_snowball"]).toMatchObject({ installCost: 10, memoryCost: 1, strength: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({ cost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({ cost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({ cost: 0 });
