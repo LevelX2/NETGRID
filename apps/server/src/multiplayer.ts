@@ -220,6 +220,7 @@ export type MatchRecord = {
   };
   aiControllers?: Partial<Record<Side, PlayerController>>;
   aiPacingMode?: AiPacingMode;
+  discoverableInLan?: boolean;
   series?: MatchSeriesState;
   createdAt: string;
   updatedAt: string;
@@ -387,6 +388,15 @@ export type ReplayIndexEntry = {
     runner?: string;
     corp?: string;
   };
+};
+
+export type OpenMatchListEntry = {
+  matchId: string;
+  hostDisplayName: string;
+  mode: "human_vs_human";
+  status: "pending";
+  createdAt: string;
+  ageSeconds: number;
 };
 
 export type ReplayStateHashCheck = {
@@ -674,6 +684,7 @@ export class MultiplayerService {
     runnerDifficulty?: AiDifficulty;
     corpDifficulty?: AiDifficulty;
     aiPacingMode?: AiPacingMode;
+    discoverableInLan?: boolean;
   } & MatchDeckSelectionInput): Promise<CreateMatchResult> {
     const seed = input.seed?.trim() || `match-${randomId("seed")}`;
     const matchId = randomId("match");
@@ -687,6 +698,7 @@ export class MultiplayerService {
     const aiPlayer = aiPlayerForMode(mode);
     const aiDeckPolicy = aiPlayer ? input.aiDeckPolicy ?? "selected" : undefined;
     const aiPacingMode = input.aiPacingMode ?? (aiPlayer ? "paced" : undefined);
+    const discoverableInLan = mode === "human_vs_human" ? input.discoverableInLan !== false : false;
     const now = this.now();
     const hostSessionToken = generateToken();
     const hostReconnectToken = generateToken();
@@ -743,6 +755,7 @@ export class MultiplayerService {
                 }
               }
             : {}),
+          discoverableInLan,
           createdAt: now,
           updatedAt: now
         },
@@ -849,6 +862,7 @@ export class MultiplayerService {
         },
         ...(mode === "human_vs_human" ? {} : { aiControllers: aiControllersFor(controllers) }),
         ...(aiPacingMode ? { aiPacingMode } : {}),
+        discoverableInLan,
         ...(settings.matchFormat === "two_game_side_swap"
           ? {
               series: input.series
@@ -962,6 +976,7 @@ export class MultiplayerService {
         ...(nextMode === "human_runner_vs_corp_ai" ? { corpDifficulty: aiDifficulty } : {}),
         ...(nextMode === "human_corp_vs_runner_ai" ? { runnerDifficulty: aiDifficulty } : {}),
         ...(record.match.aiPacingMode ? { aiPacingMode: record.match.aiPacingMode } : {}),
+        ...(typeof record.match.discoverableInLan === "boolean" ? { discoverableInLan: record.match.discoverableInLan } : {}),
         ...(record.match.deckSetup.aiDeckPolicy ? { aiDeckPolicy: record.match.deckSetup.aiDeckPolicy } : {}),
         settings: record.match.settings,
         participantADecks: participantDecks.player_a,
@@ -992,11 +1007,11 @@ export class MultiplayerService {
     return { matchId, status: record.match.status, availableSide: tokenRecord.allowedSide };
   }
 
-  async joinMatch(matchId: string, input: { token: string; displayName?: string } & ParticipantDeckPairInput): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
+  async joinMatch(matchId: string, input: { token?: string; displayName?: string } & ParticipantDeckPairInput): Promise<JoinMatchResult | { error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
     if (isTerminalStatus(record.match.status)) return { error: safeError("match_terminal", "Dieses private Match ist bereits abgeschlossen.") };
-    const tokenRecord = this.findToken(record, input.token, "join");
+    const tokenRecord = this.resolveJoinTokenForJoinInput(record, input.token);
     if (!tokenRecord) return { error: safeError("invalid_token", "Der Join-Link ist nicht gültig oder abgelaufen.") };
     if (record.sessions.some((session) => session.side === tokenRecord.allowedSide)) {
       return { error: safeError("side_taken", "Dieses private Match ist für diesen Link nicht mehr verfügbar.") };
@@ -1614,6 +1629,32 @@ export class MultiplayerService {
       .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   }
 
+  async listOpenMatches(): Promise<OpenMatchListEntry[]> {
+    if (!this.storage.list) return [];
+    const records = await this.storage.list();
+    const nowIso = this.now();
+    const nowMs = Date.parse(nowIso);
+    return records
+      .filter((record) => record.match.mode === "human_vs_human" && record.match.status === "pending" && record.match.discoverableInLan !== false)
+      .map((record) => {
+        const openJoinToken = this.openJoinToken(record);
+        if (!openJoinToken) return undefined;
+        const hostDisplayName = record.sessions[0]?.displayName?.trim() || "Teilnehmer A";
+        const createdMs = Date.parse(record.match.createdAt);
+        const ageSeconds = Number.isFinite(createdMs) && Number.isFinite(nowMs) ? Math.max(0, Math.floor((nowMs - createdMs) / 1000)) : 0;
+        return {
+          matchId: record.match.matchId,
+          hostDisplayName,
+          mode: "human_vs_human" as const,
+          status: "pending" as const,
+          createdAt: record.match.createdAt,
+          ageSeconds
+        };
+      })
+      .filter((entry): entry is OpenMatchListEntry => Boolean(entry))
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+  }
+
   async loadReplayView(matchId: string, perspective: ReplayPerspective): Promise<{ ok: true; replay: ReplayView } | { ok: false; error: SafeErrorPayload }> {
     const record = await this.mustLoad(matchId);
     if (!record || !record.gameState) return { ok: false, error: safeError("not_found", "Dieses Replay ist nicht verfügbar.") };
@@ -1788,6 +1829,7 @@ export class MultiplayerService {
       ...(includeOpponentDecks ? { participantBDecks: participants[opponentPlayer] } : {}),
       ...(record.match.deckSetup.aiDeckPolicy ? { aiDeckPolicy: record.match.deckSetup.aiDeckPolicy } : {}),
       ...(record.match.aiPacingMode ? { aiPacingMode: record.match.aiPacingMode } : {}),
+      ...(typeof record.match.discoverableInLan === "boolean" ? { discoverableInLan: record.match.discoverableInLan } : {}),
       ...(runnerDifficulty ? { runnerDifficulty } : {}),
       ...(corpDifficulty ? { corpDifficulty } : {})
     };
@@ -2187,6 +2229,19 @@ export class MultiplayerService {
   private findToken(record: StoredMatch, token: string, kind: TokenKind): TokenRecord | undefined {
     const hash = this.hashToken(token);
     return record.tokens.find((candidate) => candidate.kind === kind && candidate.tokenHash === hash && !candidate.revokedAt && !candidate.usedAt);
+  }
+
+  private resolveJoinTokenForJoinInput(record: StoredMatch, token: string | undefined): TokenRecord | undefined {
+    const candidate = token?.trim();
+    if (candidate) return this.findToken(record, candidate, "join");
+    if (record.match.mode !== "human_vs_human" || record.match.status !== "pending" || record.match.discoverableInLan === false) return undefined;
+    return this.openJoinToken(record);
+  }
+
+  private openJoinToken(record: StoredMatch): TokenRecord | undefined {
+    return record.tokens.find(
+      (candidate) => candidate.kind === "join" && !candidate.revokedAt && !candidate.usedAt && !record.sessions.some((session) => session.side === candidate.allowedSide)
+    );
   }
 
   private revokeAllTokens(record: StoredMatch, now: string): void {

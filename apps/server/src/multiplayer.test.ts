@@ -670,6 +670,103 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(invalidJoin.error.message).not.toContain("corp");
   });
 
+  it("V23A-T002 V23A-T003 V23A-T004 V23A-T005 lists only pending discoverable LAN matches with safe metadata", async () => {
+    let now = "2026-05-10T12:00:00.000Z";
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-open-list", now: () => now });
+    const listed = await service.createMatch({ hostSide: "runner", seed: "v23a-listed", mode: "human_vs_human", displayName: "Host A", discoverableInLan: true });
+    await service.createMatch({ hostSide: "runner", seed: "v23a-hidden", mode: "human_vs_human", displayName: "Hidden Host", discoverableInLan: false });
+    const consumed = await service.createMatch({ hostSide: "corp", seed: "v23a-consumed", mode: "human_vs_human", displayName: "Consumed Host", discoverableInLan: true });
+    await service.createMatch({ hostSide: "runner", seed: "v23a-ai", mode: "human_runner_vs_corp_ai", displayName: "AI Host", discoverableInLan: true });
+    const consumedToken = new URL(consumed.joinUrl ?? "").searchParams.get("joinToken");
+    if (!consumedToken) throw new Error("Missing consumed join token");
+    const consumedJoin = await service.joinMatch(consumed.matchId, { token: consumedToken, displayName: "Joiner" });
+    expect("error" in consumedJoin).toBe(false);
+    now = "2026-05-10T12:01:30.000Z";
+    const open = await service.listOpenMatches();
+    expect(open).toHaveLength(1);
+    expect(open[0]).toMatchObject({
+      matchId: listed.matchId,
+      hostDisplayName: "Host A",
+      mode: "human_vs_human",
+      status: "pending",
+      createdAt: "2026-05-10T12:00:00.000Z",
+      ageSeconds: 90
+    });
+    expect(Object.keys(open[0] ?? {}).sort()).toEqual(["ageSeconds", "createdAt", "hostDisplayName", "matchId", "mode", "status"]);
+    const serialized = JSON.stringify(open);
+    expect(serialized).not.toMatch(/joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances/i);
+  });
+
+  it("V23A-T008 V23A-T009 exposes GET /api/matches/open and honors discoverableInLan at create time", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-open-http" });
+    const handle = createNetgridHttpServer(service);
+    const baseUrl = await listen(handle);
+    try {
+      const visibleResponse = await fetch(`${baseUrl}/api/matches`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ hostSide: "runner", mode: "human_vs_human", seed: "v23a-http-visible" })
+      });
+      const hiddenResponse = await fetch(`${baseUrl}/api/matches`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ hostSide: "runner", mode: "human_vs_human", seed: "v23a-http-hidden", discoverableInLan: false })
+      });
+      expect(visibleResponse.status).toBe(201);
+      expect(hiddenResponse.status).toBe(201);
+      const visible = (await visibleResponse.json()) as { matchId: string };
+      const hidden = (await hiddenResponse.json()) as { matchId: string };
+      const openResponse = await fetch(`${baseUrl}/api/matches/open`);
+      expect(openResponse.status).toBe(200);
+      const openBody = (await openResponse.json()) as { matches?: Array<{ matchId: string }> };
+      const listedIds = (openBody.matches ?? []).map((entry) => entry.matchId);
+      expect(listedIds).toContain(visible.matchId);
+      expect(listedIds).not.toContain(hidden.matchId);
+      const serialized = JSON.stringify(openBody);
+      expect(serialized).not.toMatch(/joinToken|sessionToken|reconnectToken|tokenHash|deckHash|deckSnapshot|privateDeck|cardInstances/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("V23A-T011 V23A-T016 rejects stale tokenless LAN joins after status changes", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-race" });
+    const created = await service.createMatch({ hostSide: "runner", seed: "v23a-race-match", mode: "human_vs_human", discoverableInLan: true });
+    const initiallyListed = await service.listOpenMatches();
+    expect(initiallyListed.some((entry) => entry.matchId === created.matchId)).toBe(true);
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing race join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Teilnehmer B" });
+    expect("error" in joined).toBe(false);
+    const staleJoin = await service.joinMatch(created.matchId, { displayName: "Später Join" });
+    expect("error" in staleJoin).toBe(true);
+    if (!("error" in staleJoin)) throw new Error("Expected stale join rejection");
+    expect(staleJoin.error.message).not.toContain("runner");
+    expect(staleJoin.error.message).not.toContain("corp");
+    const listedAfter = await service.listOpenMatches();
+    expect(listedAfter.some((entry) => entry.matchId === created.matchId)).toBe(false);
+    const stored = await service.loadForTest(created.matchId);
+    expect(stored?.match.status).toBe("active");
+    expect(stored?.sessions).toHaveLength(2);
+  });
+
+  it("V23A-T019 keeps open-list reads responsive in small LAN setups", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v23a-performance" });
+    for (let index = 0; index < 12; index += 1) {
+      await service.createMatch({
+        hostSide: index % 2 === 0 ? "runner" : "corp",
+        seed: `v23a-perf-${index}`,
+        mode: "human_vs_human",
+        discoverableInLan: index % 3 !== 0
+      });
+    }
+    const startedAt = Date.now();
+    const open = await service.listOpenMatches();
+    const elapsedMs = Date.now() - startedAt;
+    expect(open.length).toBeGreaterThan(0);
+    expect(elapsedMs).toBeLessThan(2000);
+  });
+
   it("keeps normal Human-vs-Human matches in the start lobby until both players are ready", async () => {
     let now = "2026-05-04T20:00:00.000Z";
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "join-deck-handshake", now: () => now });

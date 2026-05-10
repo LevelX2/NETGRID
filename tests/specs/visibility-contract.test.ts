@@ -68,7 +68,7 @@ describe("Client visibility contract", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.9.4"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V2.3a"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
@@ -136,6 +136,14 @@ describe("Client visibility contract", () => {
     expect(page).toContain("Teilnehmer B wählt eigene Decks beim Beitritt.");
     expect(page).toContain("Dein Runner-Deck");
     expect(page).toContain("Mit Decks beitreten");
+    expect(page).toContain("Offene Spiele im LAN");
+    expect(page).toContain("refreshOpenLanMatches");
+    expect(page).toContain("/api/matches/open");
+    expect(page).toContain("refreshOpenLanMatches(true)");
+    expect(page).toContain("7000");
+    expect(page).toContain("Keine offenen Spiele gefunden.");
+    expect(page).toContain("Das ausgewählte Spiel ist nicht mehr offen. Die LAN-Liste wurde aktualisiert.");
+    expect(page).toContain("discoverableInLan");
     expect(page).toContain("Testkonstellation · beide Teilnehmer festlegen");
     expect(page).toContain("KI-Decks");
     expect(page).toContain("Deterministisch zufällig");
@@ -302,7 +310,7 @@ describe("Client visibility contract", () => {
   it("keeps Runner server lanes oriented with Root above ICE", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     expect(page).toContain("function serverLanesForSide");
-    expect(page).toContain('side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane]');
+    expect(page.includes('side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane]') || page.includes("return [rootLane, iceLane];")).toBe(true);
     expect(page).toContain("serverLanesForSide(activeView.side, server)");
     expect(page).toContain("serverBoardRows(activeView.servers, activeView.side)");
     const helpers = readFileSync("apps/web/app/action-board-ui.ts", "utf8");

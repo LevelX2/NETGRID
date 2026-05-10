@@ -526,6 +526,12 @@ async function routeHttp(
       return;
     }
 
+    if (request.method === "GET" && url.pathname === "/api/matches/open") {
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "matches-open")) return;
+      sendJson(response, 200, { matches: await service.listOpenMatches() });
+      return;
+    }
+
     if (request.method === "POST" && url.pathname === "/api/matches") {
       if (!checkRateLimit(response, rateLimiter, "create_match", request, deploymentConfig, "create")) return;
       const body = await readJson(request);
@@ -543,6 +549,7 @@ async function routeHttp(
       if (isDifficulty(body.runnerDifficulty)) createInput.runnerDifficulty = body.runnerDifficulty;
       if (isDifficulty(body.corpDifficulty)) createInput.corpDifficulty = body.corpDifficulty;
       if (isAiPacingMode(body.aiPacingMode)) createInput.aiPacingMode = body.aiPacingMode;
+      if (typeof body.discoverableInLan === "boolean") createInput.discoverableInLan = body.discoverableInLan;
       Object.assign(createInput, deckSelectionFromBody(body));
       if (typeof body.settings === "object" && body.settings) {
         const settings = body.settings as Record<string, unknown>;
