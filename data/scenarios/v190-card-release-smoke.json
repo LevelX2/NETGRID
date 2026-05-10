@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v190-card-release-smoke",
+  "title": "V1.9.0 Mechanikpaket I Kernrelease",
+  "release": "V1.9.0",
+  "status": "implemented_core_subset",
+  "extends": "data/scenarios/v181-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_005_bartmoss-memorial-icebreaker",
+    "onr_v1_007_blink",
+    "onr_v1_115_terrorist-reprisal",
+    "onr_v1_223_banpei",
+    "onr_v1_275_vacuum-link"
+  ],
+  "deferredCards": [
+    "onr_v1_013_cockroach",
+    "onr_v1_034_incubator",
+    "onr_v1_030_grubb"
+  ],
+  "preconditions": [
+    "V1.8.1 Mechanikpaket H ist gruen abgeschlossen.",
+    "V1.9.0 Preflight dokumentiert den 8-Karten-Korb als 5 freigabefaehig plus 3 deferred."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.9.0-Smoke-Match mit den V1.9.0 Runner- und Corp-Decks.",
+    "Pruefe den gemeinsamen deterministic die resolver ueber Blink, Bartmoss und Vacuum Link.",
+    "Verifiziere Terrorist Reprisal Last-Turn-Gate plus deterministic random HQ-discard ohne Duplikate.",
+    "Verifiziere Banpei trash-program subroutine plus unabhaengiges end-the-run Verhalten.",
+    "Verifiziere Vacuum-Link-Rewind auf rezzte ICE inklusive erstes-ICE-Edgecase und Jack-out-Fenster.",
+    "Verifiziere Ambush-on-access foundation hook im Access-Pfad ohne zusaetzlichen Kartenunlock."
+  ],
+  "expected": [
+    "Die Zufallspfade sind replaybar und statehash-stabil.",
+    "Hidden-Info-Barrieren bleiben bei HQ-discard und Access-Folgen side-sicher.",
+    "Runtime-Allowlist wurde exakt um die 5 Kernkarten erweitert.",
+    "Keine neue ai_supported-Freigabe durch den Release.",
+    "Deferred-Karten bleiben unveraendert bis zu einem Folgegate blockiert."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.9.0 Mechanikpaket I",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic",
+    "server": "apps/server/src/multiplayer.test.ts::V1.9.0 card release matchstart"
+  }
+}

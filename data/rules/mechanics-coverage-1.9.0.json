@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.9.0",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.0",
+  "generatedFor": "V1.9.0 Mechanikpaket I final gate",
+  "generatedAt": "2026-05-10",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.8.1.json",
+  "gateAssertions": {
+    "v181GatePassed": true,
+    "v190CoreSubsetImplemented": true,
+    "v190DeterministicDieKernelAdded": true,
+    "v190BanpeiConcreteResolverAdded": true,
+    "v190VacuumLinkRunRewindAdded": true,
+    "v190AmbushFoundationHookAdded": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.random.deterministic_die_kernel_v190",
+      "label": "Deterministischer Wuerfelkernel fuer V1.9.0",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.0",
+      "currentScopeNote": "Zentraler die resolver nutzt seed, randomCounter und purpose-gebundene random records mit Prefix v190.die.*.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.run.encounter_random_triggers_bartmoss_blink",
+      "label": "Encounter-gebundene Zufallstrigger fuer Bartmoss und Blink",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.0",
+      "currentScopeNote": "Bartmoss rollt nach Encounter bei Break-Nutzung; Blink rollt pro Subroutine nur einmal je Encounter.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.event.last_turn_black_ops_random_hq_discard",
+      "label": "Last-Turn-Black-Ops Gate und deterministischer HQ-Random-Discard",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.0",
+      "currentScopeNote": "Terrorist Reprisal ist nur legal nach black_ops-score im letzten Corp-Zug und discards deterministisch bis zu 5 HQ-Karten.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.ice.banpei_concrete_resolver",
+      "label": "Banpei konkreter Sonderresolver fuer Program-Entsorgung",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.0",
+      "currentScopeNote": "Banpei nutzt einen konkreten deterministic trash-program resolver; End-the-run bleibt davon unabhaengig.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.run.vacuum_link_rewind_and_ambush_foundation",
+      "label": "Vacuum-Link-Rewind und Ambush-on-Access-Foundation",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.0",
+      "currentScopeNote": "Vacuum Link rewound deterministisch auf rezzte ICE/erstes ICE mit Jack-out-Fenster; Access-Pipeline enthaelt Ambush-Foundation-Einstieg ohne Zusatz-Unlock.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    }
+  ]
+}

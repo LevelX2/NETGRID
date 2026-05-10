@@ -163,6 +163,11 @@ type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
 const STANDARD_AGENDA_POINTS_TO_WIN = 7;
 const INITIAL_HAND_SIZE = 5;
 const BASE_MAX_HAND_SIZE = 5;
+const BARTMOSS_ID = "onr_v1_005_bartmoss-memorial-icebreaker";
+const BLINK_ID = "onr_v1_007_blink";
+const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
+const BANPEI_ID = "onr_v1_223_banpei";
+const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 
 const RUNTIME_DAMAGE_PREVENTION_PROFILES: Record<string, RuntimeDamagePreventionProfile> = {
   "onr_v1_023_evil-twin": { maxPerTurn: 2, damageTypes: ["net", "core"], priority: 90 },
@@ -272,6 +277,22 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "onr_runner_event_gain_credits_9",
     resolve: (state) => {
       state.runner.credits += 9;
+    }
+  },
+  [TERRORIST_REPRISAL_ID]: {
+    name: "onr_runner_event_terrorist_reprisal_hq_random_discard",
+    canPlay: (state) => corpScoredBlackOpsAgendaLastTurn(state),
+    resolve: (state, legalAction) => {
+      if (!corpScoredBlackOpsAgendaLastTurn(state)) {
+        throw new Error("Die Korp hat im letzten Korp-Zug keine Black Ops Agenda gescored.");
+      }
+      const discardedCardIds = discardRandomCorpHqCards(state, 5, `v190.random.${TERRORIST_REPRISAL_ID}.hq_discard`);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "hq_random_discard",
+        discardedCardsCount: discardedCardIds.length
+      };
     }
   },
   "onr_v1_081_custodial-position": {
@@ -703,6 +724,10 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       runAttemptsThisTurn: 0,
       runAttemptsLastTurn: 0,
       damagePreventionUsage: {}
+    },
+    corpTurnFlags: {
+      scoredBlackOpsAgendaThisTurn: false,
+      scoredBlackOpsAgendaLastTurn: false
     }
   };
 
@@ -1814,8 +1839,10 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     }
     const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype)));
     if (!run.noBreakSubroutinesActive && breakAbility && breakerStrength >= encounteredIceStrength && availableRunnerRunCredits(state, breakerId) >= breakAbility.cost.credits) {
+      const blinkUsedSubroutines = run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
+        if (breaker.id === BLINK_ID && blinkUsedSubroutines.includes(index)) return;
         if (!run.brokenSubroutineIndexes.includes(index) && !run.resolvedSubroutineIndexes.includes(index)) {
           actions.push(
             action(
@@ -2014,12 +2041,20 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         { type: "change_breaker_strength", breakerId: String(legalAction.payload?.breakerId), amount: 1 }
       ]);
       return;
-    case "break_subroutine":
-      spendRunnerRunCredits(state, legalAction.costs[0]?.credits ?? 1, typeof legalAction.payload?.breakerId === "string" ? String(legalAction.payload.breakerId) : undefined);
-      executeEffectCommands(state, [
-        { type: "break_subroutine", subroutineIndex: Number(legalAction.payload?.subroutineIndex) }
-      ]);
+    case "break_subroutine": {
+      const breakerId = typeof legalAction.payload?.breakerId === "string" ? (String(legalAction.payload.breakerId) as CardInstanceId) : undefined;
+      spendRunnerRunCredits(state, legalAction.costs[0]?.credits ?? 1, breakerId);
+      if (breakerId) {
+        const breakerDefinition = definitionFor(state, breakerId);
+        if (breakerDefinition.id === BLINK_ID) {
+          resolveBlinkBreakSubroutineAction(state, breakerId, Number(legalAction.payload?.subroutineIndex), legalAction);
+          return;
+        }
+      }
+      executeEffectCommands(state, [{ type: "break_subroutine", subroutineIndex: Number(legalAction.payload?.subroutineIndex) }]);
+      if (breakerId) recordBartmossEncounterUsage(state, breakerId);
       return;
+    }
     case "continue_run":
       continueRun(state, legalAction);
       return;
@@ -2264,6 +2299,8 @@ function startRun(
     position: server.ice.length > 0 ? { kind: "ice", serverId: server.id, iceIndex: 0 } : { kind: "server", serverId: server.id },
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
+    bartmossUsedBreakerIdsThisEncounter: [],
+    blinkUsedSubroutinesByBreakerThisEncounter: {},
     successful: false,
     accessCount: Math.max(1, Math.floor(accessCount)),
     ...(options?.accessServerOverride ? { accessServerOverride: options.accessServerOverride } : {}),
@@ -2333,6 +2370,8 @@ function beginEncounter(state: GameState, encounteredIceId: CardInstanceId): voi
   run.encounteredIceId = encounteredIceId;
   run.brokenSubroutineIndexes = [];
   run.resolvedSubroutineIndexes = [];
+  run.bartmossUsedBreakerIdsThisEncounter = [];
+  run.blinkUsedSubroutinesByBreakerThisEncounter = {};
   if (run.nextEncounterNoBreakSubroutines) {
     run.noBreakSubroutinesActive = true;
     run.nextEncounterNoBreakSubroutines = false;
@@ -2404,8 +2443,12 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       if (state.winner) return;
     }
     if (subroutine.type === "trash_installed_program") {
-      const targetProgramId = pickRunnerProgramForUninstall(state);
-      if (targetProgramId) trashRunnerInstalledProgram(state, targetProgramId);
+      if (definition.id === BANPEI_ID) {
+        resolveBanpeiProgramTrashSubroutine(state, legalAction);
+      } else {
+        const targetProgramId = pickRunnerProgramForUninstall(state);
+        if (targetProgramId) trashRunnerInstalledProgram(state, targetProgramId);
+      }
     }
     if (subroutine.type === "set_run_encounter_tax") {
       const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
@@ -2422,6 +2465,9 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     if (subroutine.type === "set_next_encounter_lock") {
       run.nextEncounterNoBreakSubroutines = true;
       run.nextEncounterJackOutLock = true;
+    }
+    if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
+      if (resolveVacuumLinkRewindSubroutine(state, run, legalAction)) return;
     }
     if (subroutine.type === "end_the_run") ended = true;
   }
@@ -2454,6 +2500,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     finishRun(state, false);
     return;
   }
+  applyBartmossPostEncounterTrigger(state, run);
   movePastCurrentIce(state);
 }
 
@@ -2465,6 +2512,70 @@ function encounterWasFullyBrokenByRunner(run: ActiveRun, subroutines: NonNullabl
     if (!run.brokenSubroutineIndexes.includes(index)) return false;
   }
   return true;
+}
+
+function applyBartmossPostEncounterTrigger(state: GameState, run: ActiveRun): void {
+  const usedBreakerIds = run.bartmossUsedBreakerIdsThisEncounter?.slice() ?? [];
+  if (usedBreakerIds.length === 0) return;
+  const encounteredIceId = run.encounteredIceId ?? "unknown_ice";
+  for (const breakerId of usedBreakerIds) {
+    if (!state.runner.rig.programs.includes(breakerId)) continue;
+    if (definitionFor(state, breakerId).id !== BARTMOSS_ID) continue;
+    const die = rollDeterministicDie(state, `${BARTMOSS_ID}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`);
+    if (die === 1) trashRunnerInstalledProgram(state, breakerId);
+  }
+}
+
+function resolveBlinkBreakSubroutineAction(state: GameState, breakerId: CardInstanceId, subroutineIndex: number, legalAction: LegalAction): void {
+  const run = mustRun(state);
+  const encounteredIceId = run.encounteredIceId;
+  if (!encounteredIceId) throw new Error("Blink kann nur waehrend eines ICE-Encounters verwendet werden.");
+  if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0) throw new Error("Blink-Subroutinenziel ist ungueltig.");
+  const iceDefinition = definitionFor(state, encounteredIceId);
+  const subroutine = iceDefinition.subroutines?.[subroutineIndex];
+  if (!subroutine) throw new Error("Blink-Subroutine existiert nicht.");
+  if (run.brokenSubroutineIndexes.includes(subroutineIndex) || run.resolvedSubroutineIndexes.includes(subroutineIndex)) {
+    throw new Error("Diese Subroutine ist bereits aufgeloest.");
+  }
+  const blinkUsageByBreaker = (run.blinkUsedSubroutinesByBreakerThisEncounter ??= {});
+  const usedIndexes = blinkUsageByBreaker[breakerId] ?? [];
+  if (usedIndexes.includes(subroutineIndex)) throw new Error("Blink darf diese Subroutine in diesem Encounter nicht erneut anvisieren.");
+  usedIndexes.push(subroutineIndex);
+  blinkUsageByBreaker[breakerId] = usedIndexes;
+
+  const die = rollDeterministicDie(state, `${BLINK_ID}.break.${run.runId}.${encounteredIceId}.${breakerId}.${subroutineIndex}`);
+  legalAction.payload = { ...(legalAction.payload ?? {}), blinkDieRoll: die };
+  if (die >= 4) {
+    executeEffectCommands(state, [{ type: "break_subroutine", subroutineIndex }]);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      blinkBreakSuccess: true,
+      blinkDamageAmount: 0
+    };
+    return;
+  }
+
+  const damageSummary = doDamage(state, {
+    damageId: `v190.blink.${run.runId}.${encounteredIceId}.${breakerId}.${subroutineIndex}`,
+    damageType: "net",
+    amount: die,
+    source: `ability:${BLINK_ID}`
+  });
+  setDamagePayload(legalAction, damageSummary);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    blinkBreakSuccess: false,
+    blinkDamageAmount: die
+  };
+}
+
+function recordBartmossEncounterUsage(state: GameState, breakerId: CardInstanceId): void {
+  const run = state.run;
+  if (!run || run.phase !== "encounter_ice") return;
+  if (definitionFor(state, breakerId).id !== BARTMOSS_ID) return;
+  const usedBreakerIds = run.bartmossUsedBreakerIdsThisEncounter ?? [];
+  if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
+  run.bartmossUsedBreakerIdsThisEncounter = usedBreakerIds;
 }
 
 function recordRunFullyBrokenIce(run: ActiveRun, iceId: CardInstanceId): void {
@@ -2615,6 +2726,61 @@ function movePastCurrentIce(state: GameState): void {
   enterAccess(state);
 }
 
+function resolveVacuumLinkRewindSubroutine(state: GameState, run: ActiveRun, legalAction?: LegalAction): boolean {
+  if (!run.encounteredIceId) throw new Error("Vacuum-Link-Rewind benötigt einen aktiven ICE-Encounter.");
+  if (run.position.kind !== "ice") throw new Error("Vacuum-Link-Rewind erwartet eine ICE-Position.");
+  const server = mustServer(state, run.position.serverId);
+  const currentIndex =
+    server.ice[run.position.iceIndex] === run.encounteredIceId ? run.position.iceIndex : server.ice.findIndex((cardId) => cardId === run.encounteredIceId);
+  if (currentIndex < 0) throw new Error("Vacuum-Link-Rewind konnte das Encounter-ICE nicht finden.");
+
+  const die = rollDeterministicDie(state, `${VACUUM_LINK_ID}.rewind.${run.runId}.${run.encounteredIceId}`);
+  if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), vacuumLinkDieRoll: die };
+  if (die >= 4) {
+    if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), vacuumLinkRewindApplied: false };
+    return false;
+  }
+
+  let targetIndex = 0;
+  let remainingRezzedBack = die;
+  for (let index = currentIndex - 1; index >= 0; index -= 1) {
+    const cardId = server.ice[index];
+    if (!cardId || !mustInstance(state.cardInstances, cardId).rezzed) continue;
+    remainingRezzedBack -= 1;
+    if (remainingRezzedBack === 0) {
+      targetIndex = index;
+      break;
+    }
+  }
+  if (remainingRezzedBack > 0) targetIndex = 0;
+  const targetIceId = mustArrayValue(server.ice, targetIndex, "Vacuum-Link-Ziel-ICE fehlt.");
+
+  const { encounteredIceId: _encounteredIceId, accessedCardId: _accessedCardId, ...runWithoutEncounter } = run;
+  void _encounteredIceId;
+  void _accessedCardId;
+  state.run = {
+    ...runWithoutEncounter,
+    phase: "movement",
+    position: { kind: "ice", serverId: server.id, iceIndex: targetIndex },
+    approachedIceId: targetIceId,
+    brokenSubroutineIndexes: [],
+    resolvedSubroutineIndexes: []
+  };
+  state.timingPoint = "run.jack_out_window";
+  state.activeSide = "runner";
+  resetBreakerStrength(state);
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      vacuumLinkRewindApplied: true,
+      vacuumLinkRewindRezzedIceBack: die,
+      vacuumLinkTargetIceId: targetIceId,
+      vacuumLinkTargetIceIndex: targetIndex
+    };
+  }
+  return true;
+}
+
 function continueFromMovement(state: GameState): void {
   const run = mustRun(state);
   if (run.position.kind === "ice") {
@@ -2728,6 +2894,28 @@ function randomHqAccessQueue(state: GameState, runId: string, accessCount: numbe
   return selected;
 }
 
+function discardRandomCorpHqCards(state: GameState, maxCount: number, purposePrefix: string): CardInstanceId[] {
+  const available = state.corp.hq.slice();
+  const discarded: CardInstanceId[] = [];
+  const limit = Math.min(Math.max(0, Math.floor(maxCount)), available.length);
+  for (let index = 0; index < limit; index += 1) {
+    const value = nextRandom(state, `${purposePrefix}:selection:${index}`);
+    const selectedIndex = Math.floor(value * available.length);
+    const cardId = mustArrayValue(available, selectedIndex, "HQ discard selection missing.");
+    available.splice(selectedIndex, 1);
+    removeFromAllZones(state, cardId);
+    state.corp.archives.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "archives" }
+    };
+    discarded.push(cardId);
+  }
+  return discarded;
+}
+
 function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   const run = mustRun(state);
   if (run.breach) {
@@ -2756,6 +2944,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     };
     const instance = mustInstance(state.cardInstances, cardId);
     state.cardInstances[cardId] = { ...instance, faceup: true };
+    resolveAmbushOnAccessFoundation(state, cardId, legalAction);
     const definition = definitionFor(state, cardId);
     if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade") {
       completeCurrentBreachAccess(state, "accessed");
@@ -2776,10 +2965,26 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   state.run = { ...run, accessedCardId: cardId };
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
+  resolveAmbushOnAccessFoundation(state, cardId, legalAction);
   const definition = definitionFor(state, cardId);
   if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade") {
     finishRun(state, true);
   }
+}
+
+function resolveAmbushOnAccessFoundation(state: GameState, cardId: CardInstanceId, legalAction: LegalAction): void {
+  const harness = state.ambushHarness;
+  if (!harness?.enabled) return;
+  const definition = definitionFor(state, cardId);
+  const triggered = !harness.triggerDefinitionId || harness.triggerDefinitionId === definition.id;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "ambush_on_access_foundation",
+    ambushFoundationChecked: true,
+    ambushFoundationTriggered: triggered,
+    ...(triggered ? { ambushFoundationDefinitionId: definition.id } : {})
+  };
 }
 
 function stealAgenda(state: GameState, cardId: string): void {
@@ -2905,6 +3110,23 @@ function pickRunnerProgramForUninstall(state: GameState): CardInstanceId | undef
     })[0];
 }
 
+function resolveBanpeiProgramTrashSubroutine(state: GameState, legalAction?: LegalAction): void {
+  const targetProgramId = pickRunnerProgramForUninstall(state);
+  if (!targetProgramId) {
+    if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), banpeiProgramTrashed: false };
+    return;
+  }
+  trashRunnerInstalledProgram(state, targetProgramId);
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      banpeiProgramTrashed: true,
+      banpeiProgramId: targetProgramId,
+      banpeiProgramDefinitionId: definitionFor(state, targetProgramId).id
+    };
+  }
+}
+
 function trashRunnerInstalledProgram(state: GameState, cardId: CardInstanceId): void {
   if (!state.runner.rig.programs.includes(cardId)) return;
   const hostedIds = hostedCardsOn(state, cardId);
@@ -3019,6 +3241,10 @@ function endTurn(state: GameState, side: Side): void {
     flags.stoleBlackOpsAgendaThisTurn = false;
     flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
     flags.runAttemptsThisTurn = 0;
+  } else {
+    const corpFlags = ensureCorpTurnFlags(state);
+    corpFlags.scoredBlackOpsAgendaLastTurn = corpFlags.scoredBlackOpsAgendaThisTurn;
+    corpFlags.scoredBlackOpsAgendaThisTurn = false;
   }
   startDiscardPhase(state, side);
 }
@@ -3697,6 +3923,10 @@ function runnerRunAttemptsLastTurn(state: GameState): number {
   return Math.max(0, Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0));
 }
 
+function corpScoredBlackOpsAgendaLastTurn(state: GameState): boolean {
+  return ensureCorpTurnFlags(state).scoredBlackOpsAgendaLastTurn === true;
+}
+
 function runnerStoleAgendaSubtypeThisTurn(state: GameState, subtype: "gray_ops" | "black_ops"): boolean {
   if (subtype === "gray_ops") return state.runnerTurnFlags?.stoleGrayOpsAgendaThisTurn === true;
   return state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true;
@@ -3781,6 +4011,9 @@ function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction
   removeFromAllZones(state, cardId);
   state.corp.scoreArea.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "scoreArea" } };
+  if (cardHasSubtype(definition, "black_ops")) {
+    ensureCorpTurnFlags(state).scoredBlackOpsAgendaThisTurn = true;
+  }
   if (definition.id === "onr_v1_214_project-babylon") {
     const overadvance = Math.max(0, instanceBefore.advancementCounters - requiredDifficulty);
     const bonusAgendaPoints = Math.floor(overadvance / 2);
@@ -5158,6 +5391,12 @@ function nextRandom(state: GameState, purpose: string): number {
   return value;
 }
 
+function rollDeterministicDie(state: GameState, purpose: string): number {
+  const scopedPurpose = purpose.startsWith("v190.die.") ? purpose : `v190.die.${purpose}`;
+  const value = nextRandom(state, scopedPurpose);
+  return Math.floor(value * 6) + 1;
+}
+
 function deterministicNumber(input: string): number {
   let hash = 0x811c9dc5;
   for (let index = 0; index < input.length; index += 1) {
@@ -5436,6 +5675,16 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
   flags.runAttemptsThisTurn ??= 0;
   flags.runAttemptsLastTurn ??= 0;
   flags.damagePreventionUsage ??= {};
+  return flags;
+}
+
+function ensureCorpTurnFlags(state: GameState): NonNullable<GameState["corpTurnFlags"]> {
+  const flags = (state.corpTurnFlags ??= {
+    scoredBlackOpsAgendaThisTurn: false,
+    scoredBlackOpsAgendaLastTurn: false
+  });
+  flags.scoredBlackOpsAgendaThisTurn ??= false;
+  flags.scoredBlackOpsAgendaLastTurn ??= false;
   return flags;
 }
 

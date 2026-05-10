@@ -2764,6 +2764,277 @@ describe("V1.8.1 Mechanikpaket H", () => {
   });
 });
 
+describe("V1.9.0 Mechanikpaket I", () => {
+  it("adds a controlled V1.9.0 core card set for deterministic die, concrete resolver and ambush foundation scope", () => {
+    expect(ONR_V1_9_0_FINAL_CARD_IDS).toHaveLength(5);
+    for (const definitionId of ONR_V1_9_0_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" ")).toMatch(/deterministic_die_roll|deterministic_random|concrete_special_resolver|ambush/);
+    }
+    expect(ONR_V1_9_0_FINAL_CARD_IDS).not.toContain("onr_v1_013_cockroach");
+    expect(ONR_V1_9_0_FINAL_CARD_IDS).not.toContain("onr_v1_034_incubator");
+    expect(ONR_V1_9_0_FINAL_CARD_IDS).not.toContain("onr_v1_030_grubb");
+  });
+
+  it("validates V1.9.0 smoke decks and keeps previous releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_9_0_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_9_0_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v190CardReleaseGame("v190-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_268_shock-r"]).toBeDefined();
+  });
+
+  it("uses a deterministic shared die resolver namespace and replay-stable random records", () => {
+    const playBlinkOnce = (seed: string) => {
+      let state = toRunnerTurn(v190CardReleaseGame(seed));
+      state.runner.credits = 30;
+      moveRunnerCardToGrip(state, "onr_v1_007_blink");
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_007_blink");
+      putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_279_wall-of-static");
+      const blinkId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_007_blink");
+      expect(blinkId).toBeDefined();
+      state = apply(state, "runner", (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === blinkId);
+      const dieRecord = state.randomDrawRecords.find((record) => record.purpose.startsWith("v190.die.onr_v1_007_blink.break."));
+      expect(dieRecord).toBeDefined();
+      const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
+      expect(die).toBeGreaterThanOrEqual(1);
+      expect(die).toBeLessThanOrEqual(6);
+      return { state, die };
+    };
+
+    const first = playBlinkOnce("v190-die-shared");
+    const second = playBlinkOnce("v190-die-shared");
+    expect(first.die).toBe(second.die);
+    expect(first.state.randomDrawRecords).toEqual(second.state.randomDrawRecords);
+    expect(hashState(first.state)).toBe(hashState(second.state));
+  });
+
+  it("rolls Bartmoss deterministically after encounter usage and trashes exactly on die=1", () => {
+    let foundTrash = false;
+    let foundSurvive = false;
+    for (let attempt = 0; attempt < 180 && (!foundTrash || !foundSurvive); attempt += 1) {
+      let state = toRunnerTurn(v190CardReleaseGame(`v190-bartmoss-${attempt}`));
+      state.runner.credits = 40;
+      moveRunnerCardToGrip(state, "onr_v1_005_bartmoss-memorial-icebreaker");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_005_bartmoss-memorial-icebreaker"
+      );
+      putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_279_wall-of-static");
+      const bartmossId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_005_bartmoss-memorial-icebreaker");
+      expect(bartmossId).toBeDefined();
+      state = apply(state, "runner", (action) => action.type === "pump_breaker" && String(action.payload?.breakerId) === bartmossId);
+      state = apply(state, "runner", (action) => action.type === "pump_breaker" && String(action.payload?.breakerId) === bartmossId);
+      state = apply(state, "runner", (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === bartmossId);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      const dieRecord = state.randomDrawRecords.find((record) => record.purpose.startsWith("v190.die.onr_v1_005_bartmoss-memorial-icebreaker.post_encounter."));
+      expect(dieRecord).toBeDefined();
+      const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
+      const stillInstalled = bartmossId ? state.runner.rig.programs.includes(bartmossId) : false;
+      if (die === 1) {
+        expect(stillInstalled).toBe(false);
+        foundTrash = true;
+      } else {
+        expect(stillInstalled).toBe(true);
+        foundSurvive = true;
+      }
+    }
+    expect(foundTrash).toBe(true);
+    expect(foundSurvive).toBe(true);
+  });
+
+  it("resolves Blink as deterministic break-or-net-damage and enforces once-per-subroutine-per-encounter", () => {
+    let foundBreak = false;
+    let foundDamage = false;
+    for (let attempt = 0; attempt < 180 && (!foundBreak || !foundDamage); attempt += 1) {
+      let state = toRunnerTurn(v190CardReleaseGame(`v190-blink-${attempt}`));
+      state.runner.credits = 40;
+      moveRunnerCardToGrip(state, "onr_v1_007_blink");
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_007_blink");
+      putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_279_wall-of-static");
+      const blinkId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_007_blink");
+      expect(blinkId).toBeDefined();
+      const gripBefore = state.runner.grip.length;
+      state = apply(state, "runner", (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === blinkId);
+      const dieRecord = state.randomDrawRecords.find((record) => record.purpose.startsWith("v190.die.onr_v1_007_blink.break."));
+      expect(dieRecord).toBeDefined();
+      const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
+      const repeatBlinkBreakActions = getLegalActions(state, "runner").filter(
+        (action) =>
+          action.type === "break_subroutine" && String(action.payload?.breakerId) === blinkId && Number(action.payload?.subroutineIndex) === 0
+      );
+      expect(repeatBlinkBreakActions).toHaveLength(0);
+      if (die >= 4) {
+        expect(state.run?.brokenSubroutineIndexes).toContain(0);
+        expect(state.runner.grip.length).toBe(gripBefore);
+        foundBreak = true;
+      } else {
+        expect(state.run?.brokenSubroutineIndexes).not.toContain(0);
+        expect(state.runner.grip.length).toBe(gripBefore - die);
+        foundDamage = true;
+      }
+    }
+    expect(foundBreak).toBe(true);
+    expect(foundDamage).toBe(true);
+  });
+
+  it("gates Terrorist Reprisal by last-turn black_ops scoring and discards up to five HQ cards deterministically", () => {
+    let state = toRunnerTurn(v190CardReleaseGame("v190-terrorist-reprisal"));
+    state.runner.maxHandSize = 10;
+    state.runner.credits = 30;
+    state.corp.maxHandSize = 100;
+    const reprisalId = moveRunnerCardToGrip(state, "onr_v1_115_terrorist-reprisal");
+    expect(
+      getLegalActions(state, "runner").some((action) => action.type === "play_event" && String(action.payload?.cardId) === reprisalId)
+    ).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 60;
+    state.corp.clicks = 20;
+    moveCorpCardToHq(state, "onr_v1_193_corporate-coup");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_193_corporate-coup" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 5; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_193_corporate-coup");
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_193_corporate-coup");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    const hqIds = [
+      moveCorpCardToHq(state, "simple_economy_operation"),
+      moveCorpCardToHq(state, "simple_barrier_ice"),
+      moveCorpCardToHq(state, "onr_v1_275_vacuum-link"),
+      moveCorpCardToHq(state, "onr_v1_223_banpei"),
+      moveCorpCardToHq(state, "onr_v1_279_wall-of-static"),
+      moveCorpCardToHq(state, "onr_v1_203_hostile-takeover")
+    ];
+    keepOnlyCorpHqCards(state, hqIds);
+    const archivesBefore = state.corp.archives.length;
+    const hqBefore = state.corp.hq.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === reprisalId);
+    expect(state.corp.hq.length).toBe(Math.max(0, hqBefore - 5));
+    expect(state.corp.archives.length - archivesBefore).toBe(Math.min(5, hqBefore));
+    const discarded = state.corp.archives.slice(-Math.min(5, hqBefore));
+    expect(new Set(discarded).size).toBe(discarded.length);
+    const discardRecords = state.randomDrawRecords.filter((record) => record.purpose.startsWith("v190.random.onr_v1_115_terrorist-reprisal.hq_discard"));
+    expect(discardRecords).toHaveLength(Math.min(5, hqBefore));
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+  });
+
+  it("applies Banpei trash-program subroutine deterministically and keeps end-the-run independent", () => {
+    let withProgram = toRunnerTurn(v190CardReleaseGame("v190-banpei-with-program"));
+    withProgram.runner.credits = 20;
+    moveRunnerCardToGrip(withProgram, "onr_v1_014_codecracker");
+    withProgram = apply(withProgram, "runner", (action) => action.type === "install_card" && sourceDefinition(withProgram, action) === "onr_v1_014_codecracker");
+    const codecrackerId = withProgram.runner.rig.programs.find((id) => withProgram.cardInstances[id]?.definitionId === "onr_v1_014_codecracker");
+    expect(codecrackerId).toBeDefined();
+    putCorpIceOnServer(withProgram, "rd", "onr_v1_223_banpei");
+    withProgram = apply(withProgram, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    withProgram = apply(withProgram, "corp", (action) => action.type === "rez_ice" && sourceDefinition(withProgram, action) === "onr_v1_223_banpei");
+    withProgram = apply(withProgram, "runner", (action) => action.type === "continue_run");
+    expect(withProgram.runner.heap).toContain(codecrackerId);
+    expect(withProgram.run).toBeUndefined();
+
+    let withoutProgram = toRunnerTurn(v190CardReleaseGame("v190-banpei-without-program"));
+    withoutProgram.runner.credits = 20;
+    putCorpIceOnServer(withoutProgram, "rd", "onr_v1_223_banpei");
+    withoutProgram = apply(withoutProgram, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    withoutProgram = apply(withoutProgram, "corp", (action) => action.type === "rez_ice" && sourceDefinition(withoutProgram, action) === "onr_v1_223_banpei");
+    withoutProgram = apply(withoutProgram, "runner", (action) => action.type === "continue_run");
+    expect(withoutProgram.run).toBeUndefined();
+  });
+
+  it("rewinds runs with Vacuum Link on 1..3 and preserves legal jack-out window with first-ice edge handling", () => {
+    let covered = false;
+    for (let attempt = 0; attempt < 220 && !covered; attempt += 1) {
+      let state = toRunnerTurn(v190CardReleaseGame(`v190-vacuum-${attempt}`));
+      state.runner.credits = 40;
+      state.corp.credits = 20;
+      moveRunnerCardToGrip(state, "onr_v1_005_bartmoss-memorial-icebreaker");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_005_bartmoss-memorial-icebreaker"
+      );
+      const bartmossId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_005_bartmoss-memorial-icebreaker");
+      expect(bartmossId).toBeDefined();
+      putCorpIceOnServer(state, "rd", "onr_v1_275_vacuum-link");
+      putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "simple_barrier_ice");
+      state = apply(state, "runner", (action) => action.type === "pump_breaker" && String(action.payload?.breakerId) === bartmossId);
+      state = apply(state, "runner", (action) => action.type === "pump_breaker" && String(action.payload?.breakerId) === bartmossId);
+      state = apply(state, "runner", (action) => action.type === "pump_breaker" && String(action.payload?.breakerId) === bartmossId);
+      state = apply(state, "runner", (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === bartmossId);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_275_vacuum-link");
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+
+      const dieRecord = state.randomDrawRecords.find((record) => record.purpose.startsWith("v190.die.onr_v1_275_vacuum-link.rewind."));
+      expect(dieRecord).toBeDefined();
+      const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
+      if (die < 2 || die > 3) continue;
+      const run = state.run;
+      expect(run?.phase).toBe("movement");
+      expect(run?.position.kind).toBe("ice");
+      if (!run || run.position.kind !== "ice") {
+        throw new Error("expected run position to be ice after vacuum-link rewind");
+      }
+      expect(run.position.iceIndex).toBe(0);
+      const movementActions = getLegalActions(state, "runner").map((action) => action.type).sort();
+      expect(movementActions).toEqual(["continue_run", "jack_out"]);
+      covered = true;
+    }
+    expect(covered).toBe(true);
+  });
+
+  it("executes the ambush-on-access foundation hook deterministically via harness without scope expansion", () => {
+    let state = toRunnerTurn(v190CardReleaseGame("v190-ambush-foundation"));
+    state.runner.credits = 20;
+    state.ambushHarness = { enabled: true, triggerDefinitionId: "onr_v1_223_banpei" };
+    putCorpCardOnTopOfRd(state, "onr_v1_223_banpei");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "ambush_on_access_foundation"
+    });
+    const ambushPayload =
+      (state.eventLog.at(-1)?.privatePayload as { runner?: { legalAction?: { payload?: unknown } } } | undefined)?.runner?.legalAction
+        ?.payload;
+    expect(ambushPayload).toMatchObject({
+      ambushFoundationChecked: true,
+      ambushFoundationTriggered: true
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -4418,6 +4689,14 @@ const ONR_V1_8_1_FINAL_CARD_IDS = [
   "onr_v1_268_shock-r"
 ] as const;
 
+const ONR_V1_9_0_FINAL_CARD_IDS = [
+  "onr_v1_005_bartmoss-memorial-icebreaker",
+  "onr_v1_007_blink",
+  "onr_v1_115_terrorist-reprisal",
+  "onr_v1_223_banpei",
+  "onr_v1_275_vacuum-link"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -4839,6 +5118,39 @@ const ONR_V1_8_1_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_0_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v190_smoke_094",
+  name: "O:NR V1.9.0 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_005_bartmoss-memorial-icebreaker", quantity: 2 },
+    { id: "onr_v1_007_blink", quantity: 2 },
+    { id: "onr_v1_115_terrorist-reprisal", quantity: 2 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "simple_economy_event", quantity: 4 }
+  ]
+};
+
+const ONR_V1_9_0_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v190_smoke_094",
+  name: "O:NR V1.9.0 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_193_corporate-coup", quantity: 2 },
+    { id: "onr_v1_209_political-coup", quantity: 2 },
+    { id: "onr_v1_223_banpei", quantity: 2 },
+    { id: "onr_v1_275_vacuum-link", quantity: 2 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -5101,6 +5413,16 @@ function v181CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_8_1_RUNNER_DECK,
     corpDeck: ONR_V1_8_1_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v190CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_0_RUNNER_DECK,
+    corpDeck: ONR_V1_9_0_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

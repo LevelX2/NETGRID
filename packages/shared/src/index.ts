@@ -97,7 +97,8 @@ export type SubroutineType =
   | "set_run_encounter_tax"
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
-  | "set_next_encounter_lock";
+  | "set_next_encounter_lock"
+  | "rewind_run_to_rezzed_ice_by_die";
 
 export type SubroutineDefinition = {
   id: string;
@@ -537,6 +538,8 @@ export type RunState = {
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
+  bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
+  blinkUsedSubroutinesByBreakerThisEncounter?: Partial<Record<CardInstanceId, number[]>>;
   breach?: BreachState;
 };
 
@@ -638,6 +641,14 @@ export type GameState = {
     runAttemptsThisTurn?: number;
     runAttemptsLastTurn?: number;
     damagePreventionUsage?: Record<CardInstanceId, number>;
+  };
+  corpTurnFlags?: {
+    scoredBlackOpsAgendaThisTurn: boolean;
+    scoredBlackOpsAgendaLastTurn: boolean;
+  };
+  ambushHarness?: {
+    enabled: boolean;
+    triggerDefinitionId?: CardDefinitionId;
   };
   poxCountersByServer?: Partial<Record<Exclude<ServerId, "new_remote">, number>>;
 };
@@ -1098,6 +1109,10 @@ function onrSetNextEncounterLock(id: string): SubroutineDefinition {
   return { id, type: "set_next_encounter_lock" };
 }
 
+function onrRewindRunToRezzedIceByDie(id: string): SubroutineDefinition {
+  return { id, type: "rewind_run_to_rezzed_ice_by_die" };
+}
+
 function onrMemoryChip(params: { id: string; title: string; installCost: number; memoryLimitBonus: number }): CardDefinition {
   return {
     id: params.id,
@@ -1114,6 +1129,39 @@ function onrMemoryChip(params: { id: string; title: string; installCost: number;
 }
 
 const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
+  {
+    id: "onr_v1_005_bartmoss-memorial-icebreaker",
+    title: "Bartmoss Memorial Icebreaker",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker", "random"],
+    implementationStatus: "playable_mvp",
+    installCost: 5,
+    memoryCost: 1,
+    strength: 0,
+    rulesText:
+      "1 credit: Break ice subroutine.\n1 credit: +1 strength.\nAfter passing each piece of ice, roll a die if you used Bartmoss Memorial Icebreaker to break any subroutines of that ice. On a 1, trash Bartmoss Memorial Icebreaker.",
+    abilities: [
+      { id: "onr_v1_005_bartmoss_memorial_icebreaker_pump", type: "pump_strength", cost: { credits: 1 }, amount: 1, timingPoint: "run.encounter_ice" },
+      { id: "onr_v1_005_bartmoss_memorial_icebreaker_break", type: "break_subroutine", cost: { credits: 1 }, count: 1, timingPoint: "run.encounter_ice" }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "deterministic_die_roll", "post_encounter_trigger", "trash_self", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_007_blink",
+    title: "Blink",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker", "random"],
+    implementationStatus: "playable_mvp",
+    installCost: 5,
+    memoryCost: 1,
+    strength: 5,
+    rulesText:
+      "0 credits: Roll a die. On a 4, 5, or 6, break ice subroutine; otherwise, suffer that much Net damage.\nUse this ability only once on each subroutine during each encounter with a piece of ice.",
+    abilities: [{ id: "onr_v1_007_blink_break", type: "break_subroutine", cost: { credits: 0 }, count: 1, timingPoint: "run.encounter_ice" }],
+    mechanics: ["install_program", "memory", "break_subroutine", "deterministic_die_roll", "net_damage", "encounter_usage_limit", ONR_V1_LOCAL_PRIVATE]
+  },
   {
     id: "onr_v1_012_clown",
     title: "Clown",
@@ -1215,6 +1263,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 5,
     rulesText: "Gain 9 credits.",
     mechanics: ["play_event", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_115_terrorist-reprisal",
+    title: "Terrorist Reprisal",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 2,
+    rulesText: "Play only if the Corp scored any Black Ops agendas during its last turn. The Corp discards five cards at random.",
+    mechanics: ["play_event", "agenda_subtype_condition", "random_discard", "deterministic_random", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({
     id: "onr_v1_006_black-dahlia",
@@ -2014,6 +2073,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["encounter_tax", "run_modifier"]
   }),
   onrIce({
+    id: "onr_v1_223_banpei",
+    title: "Banpei",
+    subtypes: ["sentry", "killer"],
+    rezCost: 4,
+    strength: 8,
+    rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+    subroutines: [onrTrashInstalledProgram("onr_v1_223_banpei_trash_program"), onrEtr("onr_v1_223_banpei_etr")],
+    mechanics: ["trash_installed_program", "end_the_run", "concrete_special_resolver"]
+  }),
+  onrIce({
     id: "onr_v1_225_canis-major",
     title: "Canis Major",
     subtypes: ["sentry", "watchdog"],
@@ -2052,6 +2121,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "[Subroutine] Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.",
     subroutines: [onrSetNextEncounterLock("onr_v1_268_shock_r_next_encounter_lock")],
     mechanics: ["next_encounter_penalty", "jack_out_lock", "run_modifier"]
+  }),
+  onrIce({
+    id: "onr_v1_275_vacuum-link",
+    title: "Vacuum Link",
+    subtypes: ["sentry", "random"],
+    rezCost: 3,
+    strength: 5,
+    rulesText:
+      "[Subroutine] Roll a die. If you roll a 1, 2, or 3, Runner resumes the run from that many pieces of rezzed ice back, or jacks out. If there are not that many pieces of ice, Runner returns to the first piece of ice.",
+    subroutines: [onrRewindRunToRezzedIceByDie("onr_v1_275_vacuum_link_rewind")],
+    mechanics: ["deterministic_die_roll", "run_rewind", "jack_out_window"]
   }),
   onrIce({
     id: "onr_v1_229_code-corpse",

@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.0",
+  "id": "v1.9.0-card-release-manifest",
+  "status": "implemented_for_v1.9.0_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.8.1.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount5": true,
+    "deterministicDieResolverShared": true,
+    "banpeiConcreteResolverActive": true,
+    "vacuumLinkRewindDeterministic": true,
+    "terroristReprisalLastTurnGate": true,
+    "terroristReprisalRandomDiscardDeterministic": true,
+    "ambushFoundationHookPresent": true,
+    "runtimeAllowlistExtendedExactlyBy5": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "title": "Bartmoss Memorial Icebreaker",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "post_encounter_die_on_break_usage_trash_on_one",
+      "requiredMechanics": ["install_program", "memory", "pump_breaker", "break_subroutine", "deterministic_die_roll", "post_encounter_trigger"],
+      "roleTags": ["runner", "program", "random", "encounter"]
+    },
+    {
+      "cardCode": "onr_v1_007_blink",
+      "title": "Blink",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "break_subroutine_die_success_or_net_damage",
+      "requiredMechanics": ["install_program", "memory", "break_subroutine", "deterministic_die_roll", "net_damage", "encounter_usage_limit"],
+      "roleTags": ["runner", "program", "random", "damage"]
+    },
+    {
+      "cardCode": "onr_v1_115_terrorist-reprisal",
+      "title": "Terrorist Reprisal",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "last_turn_black_ops_gate_random_hq_discard_up_to_five",
+      "requiredMechanics": ["play_event", "agenda_subtype_condition", "deterministic_random", "random_discard"],
+      "roleTags": ["runner", "event", "random", "discard"]
+    },
+    {
+      "cardCode": "onr_v1_223_banpei",
+      "title": "Banpei",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "subroutine_trash_program_concrete_resolver_then_end_the_run",
+      "requiredMechanics": ["encounter_ice", "subroutine", "trash_installed_program", "end_the_run", "concrete_special_resolver"],
+      "roleTags": ["corp", "ice", "program_trash", "run_stop"]
+    },
+    {
+      "cardCode": "onr_v1_275_vacuum-link",
+      "title": "Vacuum Link",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "subroutine_die_rewind_to_rezzed_ice_or_first_ice",
+      "requiredMechanics": ["encounter_ice", "subroutine", "deterministic_die_roll", "run_rewind", "jack_out_window"],
+      "roleTags": ["corp", "ice", "random", "run_rewind"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 8,
+    "implementedCardCount": 5,
+    "deferredCardCount": 3,
+    "deferReasons": [
+      "counter lifecycle and choice resolution outside the V1.9.0 core",
+      "deferred cards remain blocked until explicit follow-up gate",
+      "no implicit unlock outside the frozen V1.9.0 core subset"
+    ],
+    "deferredCardIds": ["onr_v1_013_cockroach", "onr_v1_034_incubator", "onr_v1_030_grubb"],
+    "openMechanicHintsStatus": "deferred_unchanged_after_v1_9_0"
+  }
+}

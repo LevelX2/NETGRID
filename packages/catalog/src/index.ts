@@ -467,6 +467,14 @@ export const ONR_V1_8_1_RELEASE_CARD_IDS = [
   "onr_v1_268_shock-r"
 ] as const;
 
+export const ONR_V1_9_0_RELEASE_CARD_IDS = [
+  "onr_v1_005_bartmoss-memorial-icebreaker",
+  "onr_v1_007_blink",
+  "onr_v1_115_terrorist-reprisal",
+  "onr_v1_223_banpei",
+  "onr_v1_275_vacuum-link"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -479,7 +487,8 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_7_1_RELEASE_CARD_IDS,
   ...ONR_V1_7_2_RELEASE_CARD_IDS,
   ...ONR_V1_8_0_RELEASE_CARD_IDS,
-  ...ONR_V1_8_1_RELEASE_CARD_IDS
+  ...ONR_V1_8_1_RELEASE_CARD_IDS,
+  ...ONR_V1_9_0_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -633,6 +642,7 @@ const ONR_V1_7_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_7_1_RELEASE_CARD_I
 const ONR_V1_7_2_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_7_2_RELEASE_CARD_IDS);
 const ONR_V1_8_0_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_8_0_RELEASE_CARD_IDS);
 const ONR_V1_8_1_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_8_1_RELEASE_CARD_IDS);
+const ONR_V1_9_0_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_0_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -740,6 +750,15 @@ const ONR_V1_8_1_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v181-card-release-smoke.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.8.1 Mechanikpaket H", "apps/server/src/multiplayer.test.ts::V1.8.1 card release matchstart"],
   replayTests: ["packages/engine/src/index.test.ts::V1.8.1 Mechanikpaket H"]
+};
+
+const ONR_V1_9_0_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.0",
+  status: "human_playable_v1_9_0_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.0 Mechanikpaket I"],
+  scenarioTests: ["data/scenarios/v190-card-release-smoke.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.0 Mechanikpaket I", "apps/server/src/multiplayer.test.ts::V1.9.0 card release matchstart"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.0 Mechanikpaket I"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -886,6 +905,14 @@ const ONR_V1_8_1_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_226_canis-minor": { rezCost: 0, strength: 5 },
   "onr_v1_242_fatal-attractor": { rezCost: 1, strength: 4 },
   "onr_v1_268_shock-r": { rezCost: 1, strength: 3 }
+};
+
+const ONR_V1_9_0_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_005_bartmoss-memorial-icebreaker": { installCost: 5, memoryCost: 1, strength: 0 },
+  "onr_v1_007_blink": { installCost: 5, memoryCost: 1, strength: 5 },
+  "onr_v1_115_terrorist-reprisal": { cost: 2, installCost: null },
+  "onr_v1_223_banpei": { rezCost: 4, strength: 8 },
+  "onr_v1_275_vacuum-link": { rezCost: 3, strength: 5 }
 };
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
@@ -1045,6 +1072,18 @@ const ONR_V1_8_1_TEXT_OVERRIDES: Partial<Record<string, string>> = {
     "[Subroutine] The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner breaks all subroutines of that piece of ice.",
   "onr_v1_268_shock-r":
     "[Subroutine] Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter."
+};
+
+const ONR_V1_9_0_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_005_bartmoss-memorial-icebreaker":
+    "1 credit: Break ice subroutine.\n1 credit: +1 strength.\nAfter passing each piece of ice, roll a die if you used Bartmoss Memorial Icebreaker to break any subroutines of that ice. On a 1, trash Bartmoss Memorial Icebreaker.",
+  "onr_v1_007_blink":
+    "0 credits: Roll a die. On a 4, 5, or 6, break ice subroutine; otherwise, suffer that much Net damage.\nUse this ability only once on each subroutine during each encounter with a piece of ice.",
+  "onr_v1_115_terrorist-reprisal":
+    "Play only if the Corp scored any Black Ops agendas during its last turn. The Corp discards five cards at random.",
+  "onr_v1_223_banpei": "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+  "onr_v1_275_vacuum-link":
+    "[Subroutine] Roll a die. If you roll a 1, 2, or 3, Runner resumes the run from that many pieces of rezzed ice back, or jacks out. If there are not that many pieces of ice, Runner returns to the first piece of ice."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -1835,6 +1874,7 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV190 = ONR_V1_9_0_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV181 = ONR_V1_8_1_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV180 = ONR_V1_8_0_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV172 = ONR_V1_7_2_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -1846,7 +1886,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV181
+  const textOverrides = isV190
+    ? ONR_V1_9_0_TEXT_OVERRIDES
+    : isV181
     ? ONR_V1_8_1_TEXT_OVERRIDES
     : isV180
     ? ONR_V1_8_0_TEXT_OVERRIDES
@@ -1869,7 +1911,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV181
+  const numericOverrides = isV190
+    ? ONR_V1_9_0_NUMERIC_OVERRIDES
+    : isV181
     ? ONR_V1_8_1_NUMERIC_OVERRIDES
     : isV180
     ? ONR_V1_8_0_NUMERIC_OVERRIDES
@@ -1892,7 +1936,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV181
+  const manifest = isV190
+    ? ONR_V1_9_0_RELEASE_MANIFEST
+    : isV181
     ? ONR_V1_8_1_RELEASE_MANIFEST
     : isV180
     ? ONR_V1_8_0_RELEASE_MANIFEST

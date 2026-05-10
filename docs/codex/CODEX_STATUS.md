@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.0 Mechanikpaket I ist am 2026-05-10 nach grünem V1.8.1-Final-Gate vollständig umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau fünf Karten (`onr_v1_005_bartmoss-memorial-icebreaker`, `onr_v1_007_blink`, `onr_v1_115_terrorist-reprisal`, `onr_v1_223_banpei`, `onr_v1_275_vacuum-link`) und liefert den zentralen deterministischen Würfelresolver, den konkreten Banpei-Sonderresolver sowie den Ambush-on-Access-Foundation-Einstiegspunkt. Der Deferred-Überhang aus V1.8.1 (`onr_v1_013_cockroach`, `onr_v1_034_incubator`, `onr_v1_030_grubb`) bleibt unverändert außerhalb des Kernscopes. Gate-Ergebnis: `V1_9_0_implemented: true`; `V1_9_0_verified: true`; `V1_9_0_done: true`; `ready_for_v2_scope_planning: true`.
+
 Deck-Legal AI Approval Open64 ist am 2026-05-10 vollständig umgesetzt und lokal verifiziert. Alle 64 zuvor noch offenen, bereits `human_playable` O:NR-v1-Karten sind jetzt `ai_supported`; keine Karte außerhalb der Zielmenge wurde neu freigegeben. Umsetzung und Gate-Nachweise liegen in `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_IMPLEMENTATION_REVIEW.md` sowie in den Open64-Artefakten unter `data/ai/`, `data/manifests/` und `data/scenarios/`. Gate-Ergebnis: `deck_legal_ai_approval_open64_done: true`.
 
 V1.8.1 Mechanikpaket H ist am 2026-05-10 nach grünem V1.8.0-Final-Gate umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den privaten O:NR-v1-Runtime-Kartenpool kontrolliert um genau zwölf Karten (`onr_v1_012_clown`, `onr_v1_046_pattels-virus`, `onr_v1_049_pox`, `onr_v1_094_inside-job`, `onr_v1_173_restrictive-net-zoning`, `onr_v1_193_corporate-coup`, `onr_v1_209_political-coup`, `onr_v1_222_ball-and-chain`, `onr_v1_225_canis-major`, `onr_v1_226_canis-minor`, `onr_v1_242_fatal-attractor`, `onr_v1_268_shock-r`) und ergänzt deterministische Virus-/Purge-Verträge, rungebundene Folgeflags, servergebundene Installkosten-Taxpfade sowie scored-agenda-basierte Counteraktionen. Gate-Ergebnis: `V1_8_1_implemented: true`; `V1_8_1_verified: true`; `V1_8_1_done: true`; `ready_for_V1_9_0: true`.
@@ -219,6 +221,7 @@ Latest V1.7.1 implementation/final artifacts: `docs/derived/V1_7_1_IMPLEMENTATIO
 Latest V1.7.2 implementation/final artifacts: `docs/derived/V1_7_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_7_2_FINAL_REVIEW.md`, `docs/derived/V1_7_2_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_7_2_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_F_1_7_2_SPEC.md`, `docs/derived/V1_7_2_TEST_MATRIX.md`, `docs/derived/V1_7_2_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.7.2.json`, `data/rules/mechanics-coverage-1.7.2.json`, `data/scenarios/v172-card-release-smoke.json`.
 Latest V1.8.0 implementation/final artifacts: `docs/derived/V1_8_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_8_0_FINAL_REVIEW.md`, `docs/derived/V1_8_0_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_8_0_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_G_1_8_0_SPEC.md`, `docs/derived/V1_8_0_TEST_MATRIX.md`, `docs/derived/V1_8_0_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.8.0.json`, `data/rules/mechanics-coverage-1.8.0.json`, `data/scenarios/v180-card-release-smoke.json`.
 Latest V1.8.1 implementation/final artifacts: `docs/derived/V1_8_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_8_1_FINAL_REVIEW.md`, `docs/derived/V1_8_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_8_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_H_1_8_1_SPEC.md`, `docs/derived/V1_8_1_TEST_MATRIX.md`, `docs/derived/V1_8_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.8.1.json`, `data/rules/mechanics-coverage-1.8.1.json`, `data/scenarios/v181-card-release-smoke.json`.
+Latest V1.9.0 implementation/final artifacts: `docs/derived/V1_9_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_0_FINAL_REVIEW.md`, `docs/derived/V1_9_0_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_9_0_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_I_1_9_0_SPEC.md`, `docs/derived/V1_9_0_TEST_MATRIX.md`, `docs/derived/V1_9_0_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.0.json`, `data/rules/mechanics-coverage-1.9.0.json`, `data/scenarios/v190-card-release-smoke.json`.
 Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
 Latest King of the Road AI approval artifacts: `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_SLICE_PLAN.md`, `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json`, `data/scenarios/ai-kotr-runner-approval-smokes.json` and `data/decks/deck-snapshots-0.8.json`.
 Latest Deck-Legal AI Approval Open64 artifacts: `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_EXECUTION_PLAN.md`, `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-deck-legal-v171-v181-open64.json`, `data/ai/ai-card-hints-deck-legal-legacy-open64.json`, `data/manifests/deck-legal-ai-approval-v171-v181-open64-manifest.json`, `data/manifests/deck-legal-ai-approval-legacy-open64-manifest.json`, `data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json` and `data/scenarios/ai-deck-legal-legacy-open64-smokes.json`.
@@ -228,7 +231,7 @@ Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTI
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.9.0 Mechanikpaket I ist als nächster Umsetzungsscope ausgewählt. V1.8.1 Mechanikpaket H ist abgeschlossen und lokal verifiziert (`docs/derived/V1_8_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_8_1_FINAL_REVIEW.md`); die Folgeplanung bleibt als verbindliche Sequenz V1.9.0 vor V2.x in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` hinterlegt. Deck-Legal AI Approval Open64 ist abgeschlossen; weitere Deck-Legal-Freigaben benötigen einen neuen expliziten Gate-Beschluss.
+Current selected next scope: V1.9.0 Mechanikpaket I ist abgeschlossen und lokal verifiziert (`docs/derived/V1_9_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_0_FINAL_REVIEW.md`). Nächster Umsetzungsscope ist die V2.x-Anschlussplanung gemäß `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`; zusätzliche Kartenfreigaben oder Deferred-Auflösungen benötigen weiterhin einen expliziten Gate-Beschluss.
 
 ## Status
 
@@ -2230,14 +2233,14 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. Nächster Umsetzungsscope ist V1.9.0 (Mechanikpaket I; Anschlussrelease nach abgeschlossenem V1.8.1-Gate).
-2. Folge-Sequenz bleibt verbindlich in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` dokumentiert; V2.x startet erst nach grünem V1.9.0-Gate.
-3. V2.x-Produktfeatures (Accounts, Cloud-Decks, Datenschutz-/Social-Gates) starten erst nach grün abgeschlossenem V1.9.0-Gate.
+1. V1.9.0 (Mechanikpaket I) ist grün abgeschlossen; der nächste Umsetzungsscope ist V2.x-Planung/Umsetzung gemäß `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
+2. Die drei Deferred-Karten (`onr_v1_013_cockroach`, `onr_v1_034_incubator`, `onr_v1_030_grubb`) bleiben unverändert deferred und benötigen ein separates Folgegate.
+3. V2.x-Produktfeatures (Accounts, Cloud-Decks, Datenschutz-/Social-Gates) sind erst nach requirements-gefrorenem V2.x-Einstiegsscope umzusetzen.
 4. Tutorial-/Regelhilfe- und Replay-Flächen bleiben side-sicher und LegalAction-basiert.
 5. Deck-Legal AI Approval Open64 ist abgeschlossen; neue KI-Kartenfreigaben laufen nur über neue explizite Gate-Artefakte.
 6. No-Scope-Grenzen weiter halten: keine Public-Plattformfunktionen, keine Karten-/Mechanikfreigaben ohne Gate-Beschluss, kein LLM-Live-Regelakteur.
 
-Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe und Tutorial/Regelhilfe sind umgesetzt. Die Anschlusslinie für weitere Mechanik-/Kartenfreigaben läuft nach abgeschlossenem V1.8.1 als Sequenz V1.9.0 vor V2.x weiter; aus der Vierer-Sequenz V1.7.1 bis V1.8.1 sowie aus Deck-Legal AI Approval Open64 ist kein weiterer Implementierungsgate offen.
+Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe, Tutorial/Regelhilfe und V1.9.0 Mechanikpaket I sind umgesetzt. Die Anschlusslinie wechselt nach abgeschlossenem V1.9.0 nun in die V2.x-Gates; offene Deferred-Auflösungen bleiben explizit separat zu beschließen.
 
 Detailed planning and completion artifacts available:
 
