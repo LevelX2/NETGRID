@@ -168,6 +168,12 @@ const BLINK_ID = "onr_v1_007_blink";
 const COCKROACH_ID = "onr_v1_013_cockroach";
 const GRUBB_ID = "onr_v1_030_grubb";
 const INCUBATOR_ID = "onr_v1_034_incubator";
+const ALL_NIGHTER_ID = "onr_v1_076_all-nighter";
+const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
+const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
+const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
+const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
+const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
@@ -298,6 +304,19 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     }
   },
+  [ALL_NIGHTER_ID]: {
+    name: "onr_runner_event_all_nighter_bonus_run",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      const serverId = String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">;
+      startRun(state, serverId, undefined, 1, { grantAllNighterBonusRunOnFinish: true });
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        serverId,
+        allNighterBonusRunOnFinish: true
+      };
+    }
+  },
   "onr_v1_081_custodial-position": {
     name: "onr_runner_event_run_rd_multiaccess_3",
     requiresServer: true,
@@ -346,6 +365,19 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         ...(legalAction.payload ?? {}),
         serverId,
         bypassFirstIce: true
+      };
+    }
+  },
+  [KILROY_WAS_HERE_ID]: {
+    name: "onr_runner_event_kilroy_was_here_free_trash_rd",
+    requiresServer: true,
+    canPlayForServer: (_state, serverId) => serverId === "rd",
+    resolve: (state, legalAction) => {
+      startRun(state, "rd", undefined, 1, { freeTrashAccessZones: ["rd"] });
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        serverId: "rd",
+        freeTrashAccessZones: "rd"
       };
     }
   },
@@ -411,6 +443,19 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "onr_runner_event_mit_west_tier",
     resolve: (state, legalAction) => {
       resolveMitWestTier(state, legalAction);
+    }
+  },
+  [ROMP_THROUGH_HQ_ID]: {
+    name: "onr_runner_event_romp_through_hq_free_trash_hq",
+    requiresServer: true,
+    canPlayForServer: (_state, serverId) => serverId === "hq",
+    resolve: (state, legalAction) => {
+      startRun(state, "hq", undefined, 1, { freeTrashAccessZones: ["hq"] });
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        serverId: "hq",
+        freeTrashAccessZones: "hq"
+      };
     }
   }
 };
@@ -1382,6 +1427,20 @@ function corpMainActions(state: GameState): LegalAction[] {
   }
   for (const agendaId of state.corp.scoreArea.slice().sort()) {
     const definition = definitionFor(state, agendaId);
+    if (definition.id === AI_CHIEF_FINANCIAL_OFFICER_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: HQ/Archives in R&D mischen, 5 ziehen`,
+          agendaId,
+          [{ clicks: 1 }],
+          { cardId: agendaId, agendaAbility: "ai_chief_financial_officer", drawCardsAmount: 5 }
+        )
+      );
+      continue;
+    }
     if (definition.id !== "onr_v1_193_corporate-coup" && definition.id !== "onr_v1_209_political-coup") continue;
     if (cardCounter(state, agendaId, "power") <= 0) continue;
     const agendaAbility = definition.id === "onr_v1_193_corporate-coup" ? "corporate_coup" : "political_coup";
@@ -1404,19 +1463,25 @@ function corpMainActions(state: GameState): LegalAction[] {
 
 function runnerMainActions(state: GameState): LegalAction[] {
   const actions: LegalAction[] = [];
-  if (state.runner.clicks <= 0) {
+  const flags = ensureRunnerTurnFlags(state);
+  const hasClicks = state.runner.clicks > 0;
+  const bonusRunPending = flags.allNighterBonusRunPending === true;
+  if (!hasClicks && !bonusRunPending) {
     actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
     return actions;
   }
-  actions.push(action(state, "runner", "gain_credit", "1 Credit nehmen", "basic_action", [{ clicks: 1 }]));
-  if (state.runner.stack.length > 0) actions.push(action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [{ clicks: 1 }]));
-  if (state.runner.tags > 0 && state.runner.credits >= 2) {
-    actions.push(action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [{ clicks: 1, credits: 2 }]));
+  if (hasClicks) {
+    actions.push(action(state, "runner", "gain_credit", "1 Credit nehmen", "basic_action", [{ clicks: 1 }]));
+    if (state.runner.stack.length > 0) actions.push(action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [{ clicks: 1 }]));
+    if (state.runner.tags > 0 && state.runner.credits >= 2) {
+      actions.push(action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [{ clicks: 1, credits: 2 }]));
+    }
   }
   for (const id of state.runner.grip) {
     const definition = definitionFor(state, id);
     const uniqueBlocked = isUniqueCard(definition) && hasInstalledUniqueCardDefinition(state, "runner", definition.id);
     if (
+      hasClicks &&
       definition.type === "program" &&
       !uniqueBlocked &&
       availableRunnerProgramInstallCredits(state) >= (definition.installCost ?? 0) &&
@@ -1424,7 +1489,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
     ) {
       actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
     }
-    if (definition.type === "program" && !uniqueBlocked && availableRunnerProgramInstallCredits(state) >= (definition.installCost ?? 0)) {
+    if (hasClicks && definition.type === "program" && !uniqueBlocked && availableRunnerProgramInstallCredits(state) >= (definition.installCost ?? 0)) {
       for (const hostId of state.runner.rig.programs) {
         if (!canHostProgramOnDaemon(state, hostId, definition)) continue;
         const hostDefinition = definitionFor(state, hostId);
@@ -1442,10 +1507,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
       }
     }
-    if (definition.type === "hardware" && !uniqueBlocked && state.runner.credits >= (definition.installCost ?? 0)) {
+    if (hasClicks && definition.type === "hardware" && !uniqueBlocked && state.runner.credits >= (definition.installCost ?? 0)) {
       actions.push(action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], { cardId: id }));
     }
-    if (definition.type === "resource" && !uniqueBlocked && state.runner.credits >= (definition.installCost ?? 0)) {
+    if (hasClicks && definition.type === "resource" && !uniqueBlocked && state.runner.credits >= (definition.installCost ?? 0)) {
       if (definition.id === "onr_v1_156_corporate-ally") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (!forfeitAgendaId) continue;
@@ -1498,7 +1563,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         )
       );
     }
-    if (definition.type === "event" && state.runner.credits >= (definition.cost ?? 0)) {
+    if (hasClicks && definition.type === "event" && state.runner.credits >= (definition.cost ?? 0)) {
       const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
       if (!resolver) continue;
       if (resolver.canPlay && !resolver.canPlay(state)) continue;
@@ -1512,72 +1577,93 @@ function runnerMainActions(state: GameState): LegalAction[] {
       }
     }
   }
-  for (const resourceId of state.runner.rig.resources.slice().sort()) {
-    const definition = definitionFor(state, resourceId);
-    if (definition.id === "onr_v1_159_databroker") {
-      const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
-      if (forfeitAgendaId) {
+  if (hasClicks) {
+    for (const resourceId of state.runner.rig.resources.slice().sort()) {
+      const definition = definitionFor(state, resourceId);
+      if (definition.id === "onr_v1_159_databroker") {
+        const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
+        if (forfeitAgendaId) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "gain_credit",
+              `${definition.title}: 10 Credits (1 Agenda-Punkt, trashen)`,
+              resourceId,
+              [{ clicks: 1 }],
+              {
+                cardId: resourceId,
+                resourceAbility: "databroker",
+                forfeitAgendaCardId: forfeitAgendaId,
+                agendaPointCost: 1,
+                trashOnUse: true,
+                gainCreditsAmount: 10
+              }
+            )
+          );
+        }
+      }
+      if (definition.id === "onr_v1_158_danshis-second-id" && state.runner.tags > 0) {
+        const removeAmount = Math.min(3, state.runner.tags);
+        for (let amount = 1; amount <= removeAmount; amount += 1) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "remove_tag",
+              `${definition.title}: ${amount} Tag entfernen`,
+              resourceId,
+              [{ clicks: 1 }],
+              {
+                cardId: resourceId,
+                resourceAbility: "danshis_second_id",
+                removeTagAmount: amount,
+                trashOnUse: true
+              }
+            )
+          );
+        }
+      }
+      if (definition.id === "onr_v1_179_silicon-saloon-franchise") {
         actions.push(
           action(
             state,
             "runner",
             "gain_credit",
-            `${definition.title}: 10 Credits (1 Agenda-Punkt, trashen)`,
+            `${definition.title}: 1 Credit und 1 Karte ziehen`,
             resourceId,
             [{ clicks: 1 }],
             {
               cardId: resourceId,
-              resourceAbility: "databroker",
-              forfeitAgendaCardId: forfeitAgendaId,
-              agendaPointCost: 1,
-              trashOnUse: true,
-              gainCreditsAmount: 10
+              resourceAbility: "silicon_saloon_franchise",
+              drawCardAfter: true
             }
           )
         );
       }
     }
-    if (definition.id === "onr_v1_158_danshis-second-id" && state.runner.tags > 0) {
-      const removeAmount = Math.min(3, state.runner.tags);
-      for (let amount = 1; amount <= removeAmount; amount += 1) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "remove_tag",
-            `${definition.title}: ${amount} Tag entfernen`,
-            resourceId,
-            [{ clicks: 1 }],
-            {
-              cardId: resourceId,
-              resourceAbility: "danshis_second_id",
-              removeTagAmount: amount,
-              trashOnUse: true
-            }
-          )
-        );
-      }
+  }
+  for (const server of state.corp.servers) {
+    if (hasClicks) {
+      actions.push(action(state, "runner", "start_run", `Run auf ${server.label}`, "basic_action", [{ clicks: 1 }], { serverId: server.id }));
     }
-    if (definition.id === "onr_v1_179_silicon-saloon-franchise") {
+    if (bonusRunPending) {
       actions.push(
         action(
           state,
           "runner",
-          "gain_credit",
-          `${definition.title}: 1 Credit und 1 Karte ziehen`,
-          resourceId,
-          [{ clicks: 1 }],
+          "start_run",
+          `Bonus-Run auf ${server.label}`,
+          "basic_action",
+          [],
           {
-            cardId: resourceId,
-            resourceAbility: "silicon_saloon_franchise",
-            drawCardAfter: true
+            serverId: server.id,
+            bonusRunNoClick: true,
+            bonusRunSource: ALL_NIGHTER_ID
           }
         )
       );
     }
-  }
-  for (const server of state.corp.servers) {
-    actions.push(action(state, "runner", "start_run", `Run auf ${server.label}`, "basic_action", [{ clicks: 1 }], { serverId: server.id }));
   }
   actions.push(...specialZoneHarnessActions(state, "runner"));
   actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
@@ -1963,14 +2049,31 @@ function runnerAccessActions(state: GameState): LegalAction[] {
     return [action(state, "runner", "continue_run", "Zugriff abschließen", "game_rule")];
   }
   const definition = definitionFor(state, run.accessedCardId);
+  const freeTrashEnabled = canFreeTrashCurrentAccessCard(state, run, definition);
   if (definition.type === "agenda") return [action(state, "runner", "steal_agenda", `${definition.title} stehlen`, run.accessedCardId)];
   if (definition.type === "asset" || definition.type === "upgrade") {
     const actions: LegalAction[] = [];
-    if (state.runner.credits >= (definition.trashCost ?? 0)) {
+    if (freeTrashEnabled) {
+      actions.push(
+        action(state, "runner", "trash_accessed_card", `${definition.title} kostenlos trashen`, run.accessedCardId, [], {
+          accessTrashCostOverride: 0,
+          freeAccessTrash: true
+        })
+      );
+    } else if (state.runner.credits >= (definition.trashCost ?? 0)) {
       actions.push(action(state, "runner", "trash_accessed_card", `${definition.title} trashen`, run.accessedCardId, [{ credits: definition.trashCost ?? 0 }]));
     }
     actions.push(action(state, "runner", "decline_trash", "Nicht trashen", "game_rule"));
     return actions;
+  }
+  if (freeTrashEnabled) {
+    return [
+      action(state, "runner", "trash_accessed_card", `${definition.title} kostenlos trashen`, run.accessedCardId, [], {
+        accessTrashCostOverride: 0,
+        freeAccessTrash: true
+      }),
+      action(state, "runner", "decline_trash", run.breach ? "Weiter accessen" : "Access abschließen", "game_rule")
+    ];
   }
   return [action(state, "runner", "decline_trash", run.breach ? "Weiter accessen" : "Access abschließen", "game_rule")];
 }
@@ -1982,6 +2085,15 @@ function hasPendingAccessCandidate(state: GameState, run: ActiveRun): boolean {
   if (server.id === "hq") return state.corp.hq.length > 0;
   if (server.id === "archives") return state.corp.archives.length > 0;
   return server.root.length > 0;
+}
+
+function canFreeTrashCurrentAccessCard(state: GameState, run: ActiveRun, definition: CardDefinition): boolean {
+  if (definition.type === "agenda") return false;
+  const allowedZones = run.freeTrashAccessZones ?? [];
+  if (allowedZones.length === 0) return false;
+  const currentZone = run.breach?.queue[run.breach.currentIndex]?.zone ?? accessQueueZone(run.accessServerOverride ?? run.attackedServerId);
+  if (currentZone !== "rd" && currentZone !== "hq") return false;
+  return allowedZones.includes(currentZone);
 }
 
 function performAction(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
@@ -2044,6 +2156,15 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         };
         return;
       }
+      if (legalAction.payload?.agendaAbility === "ai_chief_financial_officer") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf die AI Chief Financial Officer Agenda-Aktion nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Die gewaehlte AI Chief Financial Officer Agenda ist nicht gescort.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== AI_CHIEF_FINANCIAL_OFFICER_ID) throw new Error("Die Agenda-Aktion passt nicht zur ausgewaehlten AI Chief Financial Officer Agenda.");
+        resolveAiChiefFinancialOfficer(state, sourceCardId, legalAction);
+        return;
+      }
       credits(state, legalAction.side, 1);
       if (legalAction.payload?.drawCardAfter === true) {
         if (legalAction.side !== "runner") throw new Error("Nur der Runner darf mit diesem Effekt ziehen.");
@@ -2087,7 +2208,11 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       scoreAgenda(state, String(legalAction.payload?.cardId), legalAction);
       return;
     case "start_run":
-      spendClick(state, "runner");
+      if (legalAction.payload?.bonusRunNoClick === true) {
+        ensureRunnerTurnFlags(state).allNighterBonusRunPending = false;
+      } else {
+        spendClick(state, "runner");
+      }
       startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">);
       return;
     case "jack_out":
@@ -2144,7 +2269,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       stealAgenda(state, mustRun(state).accessedCardId ?? "");
       return;
     case "trash_accessed_card":
-      trashAccessedCard(state, mustRun(state).accessedCardId ?? "");
+      trashAccessedCard(state, mustRun(state).accessedCardId ?? "", legalAction);
       return;
     case "trash_resource":
       trashResource(state, String(legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? ""));
@@ -2238,6 +2363,29 @@ function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
     specialZone: "removed_from_game",
     specialZoneVisibility: "public",
     specialZoneReason: "onr_v1_101_mit_west_tier"
+  };
+}
+
+function resolveAiChiefFinancialOfficer(state: GameState, agendaId: CardInstanceId, legalAction: LegalAction): void {
+  const previousHq = state.corp.hq.slice();
+  const previousArchives = state.corp.archives.slice();
+  const merge = [...state.corp.rd, ...previousHq, ...previousArchives];
+  state.corp.hq = [];
+  state.corp.archives = [];
+  state.corp.rd = shuffleStateIds(state, merge, `v192.shuffle.${AI_CHIEF_FINANCIAL_OFFICER_ID}.hq_archives_into_rd.${state.stateVersion + 1}`);
+  for (const cardId of state.corp.rd) {
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "rd" } };
+  }
+  const drawAmount = Math.max(0, Math.floor(Number(legalAction.payload?.drawCardsAmount ?? 5)));
+  const beforeDraw = state.corp.hq.length;
+  drawCorpCards(state, drawAmount);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    cardId: agendaId,
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+    shuffledCardsCount: previousHq.length + previousArchives.length,
+    drawnCardsCount: state.corp.hq.length - beforeDraw
   };
 }
 
@@ -2349,8 +2497,17 @@ function canInstallCorpRootCardInServer(state: GameState, definition: CardDefini
   });
 }
 
+function trashTopRunnersConferenceOnRunStart(state: GameState): void {
+  const toTrash = state.runner.rig.resources.filter((cardId) => definitionFor(state, cardId).id === TOP_RUNNERS_CONFERENCE_ID).sort();
+  for (const cardId of toTrash) {
+    trashRunnerInstalledCardToHeap(state, cardId);
+  }
+}
+
 type StartRunOptions = Pick<
   RunState,
+  | "freeTrashAccessZones"
+  | "grantAllNighterBonusRunOnFinish"
   | "accessServerOverride"
   | "successfulRunAccessReplacement"
   | "successfulRunCreditLoss"
@@ -2369,6 +2526,7 @@ function startRun(
   const server = mustServer(state, serverId);
   const flags = ensureRunnerTurnFlags(state);
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
+  trashTopRunnersConferenceOnRunStart(state);
   state.phase = "run";
   state.activeSide = "runner";
   state.run = {
@@ -2382,6 +2540,8 @@ function startRun(
     blinkUsedSubroutinesByBreakerThisEncounter: {},
     successful: false,
     accessCount: Math.max(1, Math.floor(accessCount)),
+    ...(options?.freeTrashAccessZones?.length ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() } : {}),
+    ...(options?.grantAllNighterBonusRunOnFinish ? { grantAllNighterBonusRunOnFinish: true } : {}),
     ...(options?.accessServerOverride ? { accessServerOverride: options.accessServerOverride } : {}),
     ...(options?.successfulRunAccessReplacement ? { successfulRunAccessReplacement: options.successfulRunAccessReplacement } : {}),
     ...(options?.successfulRunCreditLoss && options.successfulRunCreditLoss > 0 ? { successfulRunCreditLoss: options.successfulRunCreditLoss } : {}),
@@ -3025,7 +3185,8 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     state.cardInstances[cardId] = { ...instance, faceup: true };
     resolveAmbushOnAccessFoundation(state, cardId, legalAction);
     const definition = definitionFor(state, cardId);
-    if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade") {
+    const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
+    if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade" && !freeTrashAccess) {
       completeCurrentBreachAccess(state, "accessed");
     }
     return;
@@ -3046,7 +3207,8 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   state.cardInstances[cardId] = { ...instance, faceup: true };
   resolveAmbushOnAccessFoundation(state, cardId, legalAction);
   const definition = definitionFor(state, cardId);
-  if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade") {
+  const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
+  if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade" && !freeTrashAccess) {
     finishRun(state, true);
   }
 }
@@ -3083,9 +3245,12 @@ function stealAgenda(state: GameState, cardId: string): void {
   finishRun(state, true);
 }
 
-function trashAccessedCard(state: GameState, cardId: string): void {
+function trashAccessedCard(state: GameState, cardId: string, legalAction?: LegalAction): void {
   const definition = definitionFor(state, cardId);
-  spendCredits(state, "runner", definition.trashCost ?? 0);
+  const rawOverride = legalAction?.payload?.accessTrashCostOverride;
+  const overrideCost = typeof rawOverride === "number" ? Math.max(0, Math.floor(rawOverride)) : undefined;
+  const trashCost = overrideCost ?? (definition.trashCost ?? 0);
+  spendCredits(state, "runner", trashCost);
   const sourceZone = mustInstance(state.cardInstances, cardId).zone;
   if (sourceZone.side === "corp" && sourceZone.zone === "archives") {
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
@@ -3285,10 +3450,14 @@ function tokyoChibaUnsuccessfulRunBonus(state: GameState, run: GameState["run"],
 function finishRun(state: GameState, successful: boolean): void {
   const run = state.run;
   if (run && successful) applyV181SuccessfulRunCounterTriggers(state, run);
+  const allNighterBonusRunOnFinish = run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? run?.pendingSuccessBonusCredits ?? 0 : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(state, run, successful);
   state.runner.credits += bonus;
   state.corp.credits += corpBonus;
+  if (allNighterBonusRunOnFinish && !state.winner) {
+    ensureRunnerTurnFlags(state).allNighterBonusRunPending = true;
+  }
   resetBreakerStrength(state);
   delete state.run;
   state.phase = "runner_action_phase";
@@ -3387,6 +3556,7 @@ function startCorpTurn(state: GameState): void {
   state.corp.clicks = 3;
   state.runner.clicks = 0;
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
+  applyCorpStartOfTurnEffects(state);
 }
 
 function startRunnerTurn(state: GameState): void {
@@ -3404,9 +3574,19 @@ function startRunnerTurn(state: GameState): void {
   flags.runAttemptsLastTurn = 0;
   flags.damagePreventionUsage = {};
   flags.startOfTurnFloatingCreditsApplied = false;
+  flags.allNighterBonusRunPending = false;
   delete flags.incubatorPendingTransforms;
   refreshRecurringCredits(state, "runner");
   applyRunnerStartOfTurnEffects(state);
+}
+
+function applyCorpStartOfTurnEffects(state: GameState): void {
+  const polymerCount = state.corp.scoreArea.reduce((sum, cardId) => {
+    return definitionFor(state, cardId).id === POLYMER_BREAKTHROUGH_ID ? sum + 1 : sum;
+  }, 0);
+  if (polymerCount > 0) {
+    credits(state, "corp", polymerCount);
+  }
 }
 
 function applyRunnerStartOfTurnEffects(state: GameState): void {
@@ -3415,6 +3595,7 @@ function applyRunnerStartOfTurnEffects(state: GameState): void {
     for (const cardId of state.runner.rig.resources) {
       const definition = definitionFor(state, cardId);
       if (definition.id === "onr_v1_163_floating-runner-bbs") credits(state, "runner", 1);
+      if (definition.id === TOP_RUNNERS_CONFERENCE_ID) credits(state, "runner", 3);
     }
     flags.startOfTurnFloatingCreditsApplied = true;
   }
@@ -5896,7 +6077,8 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
     runAttemptsThisTurn: 0,
     runAttemptsLastTurn: 0,
     damagePreventionUsage: {},
-    startOfTurnFloatingCreditsApplied: false
+    startOfTurnFloatingCreditsApplied: false,
+    allNighterBonusRunPending: false
   });
   flags.stoleGrayOpsAgendaThisTurn ??= false;
   flags.stoleBlackOpsAgendaThisTurn ??= false;
@@ -5904,6 +6086,7 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
   flags.runAttemptsLastTurn ??= 0;
   flags.damagePreventionUsage ??= {};
   flags.startOfTurnFloatingCreditsApplied ??= false;
+  flags.allNighterBonusRunPending ??= false;
   return flags;
 }
 

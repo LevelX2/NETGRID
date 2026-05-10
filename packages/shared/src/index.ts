@@ -512,6 +512,8 @@ export type RunState = {
   runId: string;
   attackedServerId: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
+  freeTrashAccessZones?: Array<"rd" | "hq">;
+  grantAllNighterBonusRunOnFinish?: boolean;
   successfulRunAccessReplacement?: "corp_lose_credits";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
@@ -644,6 +646,7 @@ export type GameState = {
     damagePreventionUsage?: Record<CardInstanceId, number>;
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
+    allNighterBonusRunPending?: boolean;
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -1543,6 +1546,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceLabel: "wall"
   }),
   {
+    id: "onr_v1_076_all-nighter",
+    title: "All-Nighter",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Make a run; whether or not that run is successful, you may then make another run.",
+    mechanics: ["play_event", "start_run", "run_flow", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_081_custodial-position",
     title: "Custodial Position",
     side: "runner",
@@ -1610,6 +1624,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "start_run", "bypass_ice", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_096_kilroy-was-here",
+    title: "Kilroy Was Here",
+    side: "runner",
+    type: "event",
+    subtypes: ["sabotage"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Make a run on R&D; you may trash, at no cost, any cards you access that were stored in R&D, even if the cards cannot normally be trashed.",
+    mechanics: ["play_event", "start_run", "breach", "access_trash_free", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_101_mit-west-tier",
     title: "MIT West Tier",
     side: "runner",
@@ -1619,6 +1644,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 0,
     rulesText: "Shuffle your grip, heap and stack together, draw five cards, then remove MIT West Tier from the game.",
     mechanics: ["play_event", "shuffle", "draw_cards", "removed_from_game", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_107_romp-through-hq",
+    title: "Romp through HQ",
+    side: "runner",
+    type: "event",
+    subtypes: ["sabotage"],
+    implementationStatus: "playable_mvp",
+    cost: 2,
+    rulesText: "Make a run on HQ; you may trash, at no cost, any cards you access that were stored in HQ, even if the cards cannot normally be trashed.",
+    mechanics: ["play_event", "start_run", "breach", "access_trash_free", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_156_corporate-ally",
@@ -1686,6 +1722,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "At the start of each of your turns, you may trash one of your other installed cards to gain 1 credit.\nOnly one unique card of a particular name can be in play at a time.",
     mechanics: ["install_resource", "unique_card", "start_of_turn_optional_trash_for_credit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_184_top-runners-conference",
+    title: "Top Runners' Conference",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Gain 3 at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
+    mechanics: ["install_resource", "start_of_turn_credit_gain", "trash_on_run", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_179_silicon-saloon-franchise",
@@ -1813,6 +1860,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score", "steal", "counter", "action_economy", "gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_188_ai-chief-financial-officer",
+    title: "AI Chief Financial Officer",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 5,
+    agendaPoints: 2,
+    rulesText: "[A]: Shuffle cards stored in HQ and the Archives into R&D; then draw five cards.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "hidden_zone_shuffle", "draw_cards", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_201_executive-extraction",
     title: "Executive Extraction",
     side: "corp",
@@ -1847,6 +1906,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 2,
     rulesText: "Put 6 from the bank on Political Coup when you score it.\n[A]: Take 1 from Political Coup, if it has any bits.",
     mechanics: ["install_remote", "advance", "score", "steal", "counter", "action_economy", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_211_polymer-breakthrough",
+    title: "Polymer Breakthrough",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["research"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 6,
+    agendaPoints: 3,
+    rulesText: "Gain 1 at the start of each of your turns.",
+    mechanics: ["install_remote", "advance", "score", "steal", "start_of_turn_credit_gain", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_212_priority-requisition",
@@ -2241,6 +2312,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [onrTrashInstalledProgram("onr_v1_233_d_arc_knight_trash_program"), onrEtr("onr_v1_233_d_arc_knight_etr")],
     mechanics: ["uninstall_runner_program", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_235_data-naga",
+    title: "Data Naga",
+    subtypes: ["sentry", "killer"],
+    rezCost: 9,
+    strength: 5,
+    rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+    subroutines: [onrTrashInstalledProgram("onr_v1_235_data_naga_trash_program"), onrEtr("onr_v1_235_data_naga_etr")],
+    mechanics: ["trash_installed_program", "end_the_run", "concrete_special_resolver"]
   }),
   onrIce({
     id: "onr_v1_237_data-wall",

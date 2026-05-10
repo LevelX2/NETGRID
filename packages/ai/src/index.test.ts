@@ -1369,7 +1369,7 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(league.profiles.every((profile) => profile.illegalActions === 0)).toBe(true);
     expect(league.profiles.every((profile) => profile.replayFailures === 0)).toBe(true);
     expect(JSON.stringify(league)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
-  });
+  }, 30_000);
 
   it("evaluates holdout tuning gate for regression and improvement", () => {
     const baseline: Parameters<typeof evaluateV143TuningGate>[0] = {

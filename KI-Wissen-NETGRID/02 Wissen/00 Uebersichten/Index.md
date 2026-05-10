@@ -14,6 +14,10 @@
 - S01: Sonderphase für Spielende, Ergebnisfenster, Spielziel, private Matchserie und Audio; Repository-Artefakte unter `docs/derived/S01_*.md`.
 - [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]: Workflow für wiki-first Arbeit und Rückführung von Erkenntnissen.
 - Releaseabschluss-Regel: Bei jedem umgesetzten Release wird die im Webclient sichtbare Versionsnummer am Ende auf den Zielstand angehoben und im Final Review nachgewiesen.
+- V1.9.2 Mechanikpaket K ist umgesetzt und final reviewt: `docs/derived/V1_9_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`.
+- Sequenzieller Soll-Ist-Nachweis fuer V1.9.1 bis V1.9.4: `docs/derived/V1_9_1_TO_V1_9_4_SEQUENTIAL_EXECUTION_AUDIT.md`.
+- Aktiver Freigabe-Blocker vor V1.9.3: `docs/derived/V1_9_3_GATE_BLOCKER_REPORT.md`.
+- Nächstes manuelles Sequenz-Gate: V1.9.3 startet nur nach explizitem `OK V1.9.3`.
 
 ## Kernwissen
 

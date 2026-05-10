@@ -2,7 +2,8 @@
 
 ## Current phase
 
-V1.9.1 Mechanikpaket J ist am 2026-05-10 nach grünem V1.9.0-Final-Gate vollständig umgesetzt, lokal verifiziert und final reviewt. Der Release schließt den V1.9.0-Deferred-Überhang kontrolliert durch genau drei Karten (`onr_v1_013_cockroach`, `onr_v1_034_incubator`, `onr_v1_030_grubb`) und liefert deterministic Cockroach-HQ-Randomdiscard ab Counter-Schwelle, deterministic Incubator-Start-of-turn-Multiroll mit hidden-info-sicherem Choice-Transform sowie Grubb-remainder-of-run-Strength mit sauberem Run-Reset. Gate-Ergebnis: `V1_9_1_implemented: true`; `V1_9_1_verified: true`; `V1_9_1_done: true`; `ready_for_V1_9_2_manual_gate: true`.
+V1.9.2 Mechanikpaket K ist am 2026-05-10 nach grünem V1.9.1-Final-Gate vollständig umgesetzt, lokal verifiziert und final reviewt. Der Release erweitert den V1.9.2-Kernkorb kontrolliert um genau sieben Karten (`onr_v1_076_all-nighter`, `onr_v1_096_kilroy-was-here`, `onr_v1_107_romp-through-hq`, `onr_v1_184_top-runners-conference`, `onr_v1_188_ai-chief-financial-officer`, `onr_v1_211_polymer-breakthrough`, `onr_v1_235_data-naga`) und liefert deterministic Bonus-Run-/Access-/Start-of-turn-/Hidden-Zone-Shuffle-Pfade ohne Scope-Drift nach V1.9.3+ oder V2.x. Gate-Ergebnis: `V1_9_2_implemented: true`; `V1_9_2_verified: true`; `V1_9_2_done: true`; `ready_for_V1_9_3_manual_gate: true`.
+Der sequenzielle Soll-Ist-Nachweis ist in `docs/derived/V1_9_1_TO_V1_9_4_SEQUENTIAL_EXECUTION_AUDIT.md` dokumentiert; der aktive Freigabe-Blocker fuer den Start von V1.9.3 ist in `docs/derived/V1_9_3_GATE_BLOCKER_REPORT.md` festgehalten.
 
 Für die sequenzielle Anschlusslinie liegen seit 2026-05-10 die Detail- und Handoff-Artefakte `docs/derived/V1_9_1_TO_V1_9_4_DETAILED_PLAN.md` und `docs/derived/V1_9_1_TO_V1_9_4_IMPLEMENTATION_HANDOFF.md` vor. Der Umsetzungsmodus bleibt strikt sequenziell (`V1.9.1 -> V1.9.2 -> V1.9.3 -> V1.9.4`) mit explizitem manuellen Freigabe-Gate zwischen den Releases.
 
@@ -229,6 +230,9 @@ Latest V1.8.0 implementation/final artifacts: `docs/derived/V1_8_0_IMPLEMENTATIO
 Latest V1.8.1 implementation/final artifacts: `docs/derived/V1_8_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_8_1_FINAL_REVIEW.md`, `docs/derived/V1_8_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_8_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_H_1_8_1_SPEC.md`, `docs/derived/V1_8_1_TEST_MATRIX.md`, `docs/derived/V1_8_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.8.1.json`, `data/rules/mechanics-coverage-1.8.1.json`, `data/scenarios/v181-card-release-smoke.json`.
 Latest V1.9.0 implementation/final artifacts: `docs/derived/V1_9_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_0_FINAL_REVIEW.md`, `docs/derived/V1_9_0_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_9_0_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_I_1_9_0_SPEC.md`, `docs/derived/V1_9_0_TEST_MATRIX.md`, `docs/derived/V1_9_0_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.0.json`, `data/rules/mechanics-coverage-1.9.0.json`, `data/scenarios/v190-card-release-smoke.json`.
 Latest V1.9.1 implementation/final artifacts: `docs/derived/V1_9_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_1_FINAL_REVIEW.md`, `docs/derived/V1_9_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_9_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_J_1_9_1_SPEC.md`, `docs/derived/V1_9_1_TEST_MATRIX.md`, `docs/derived/V1_9_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.1.json`, `data/rules/mechanics-coverage-1.9.1.json`, `data/scenarios/v191-card-release-smoke.json`.
+Latest V1.9.2 implementation/final artifacts: `docs/derived/V1_9_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`, `docs/derived/V1_9_2_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_9_2_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_K_1_9_2_SPEC.md`, `docs/derived/V1_9_2_TEST_MATRIX.md`, `docs/derived/V1_9_2_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.2.json`, `data/rules/mechanics-coverage-1.9.2.json`, `data/scenarios/v192-card-release-smoke.json`.
+Latest V1.9.1-to-V1.9.4 sequential execution audit artifact: `docs/derived/V1_9_1_TO_V1_9_4_SEQUENTIAL_EXECUTION_AUDIT.md`.
+Latest V1.9.3 gate blocker artifact: `docs/derived/V1_9_3_GATE_BLOCKER_REPORT.md`.
 Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
 Latest King of the Road AI approval artifacts: `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_SLICE_PLAN.md`, `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json`, `data/scenarios/ai-kotr-runner-approval-smokes.json` and `data/decks/deck-snapshots-0.8.json`.
 Latest Deck-Legal AI Approval Open64 artifacts: `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_EXECUTION_PLAN.md`, `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-deck-legal-v171-v181-open64.json`, `data/ai/ai-card-hints-deck-legal-legacy-open64.json`, `data/manifests/deck-legal-ai-approval-v171-v181-open64-manifest.json`, `data/manifests/deck-legal-ai-approval-legacy-open64-manifest.json`, `data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json` and `data/scenarios/ai-deck-legal-legacy-open64-smokes.json`.
@@ -239,7 +243,7 @@ Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTI
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.9.1 Mechanikpaket J ist abgeschlossen und lokal verifiziert (`docs/derived/V1_9_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_1_FINAL_REVIEW.md`). Nächster Umsetzungsscope ist V1.9.2 ausschließlich nach expliziter manueller Freigabe (`OK V1.9.2`) gemäß sequenzieller V1.9.1->V1.9.4-Linie.
+Current selected next scope: V1.9.2 Mechanikpaket K ist abgeschlossen und lokal verifiziert (`docs/derived/V1_9_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`). Nächster Umsetzungsscope ist V1.9.3 ausschließlich nach expliziter manueller Freigabe (`OK V1.9.3`) gemäß sequenzieller V1.9.1->V1.9.4-Linie.
 
 ## Status
 
@@ -2241,14 +2245,14 @@ V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the complet
 
 Next scope decision:
 
-1. V1.9.1 (Mechanikpaket J) ist grün abgeschlossen; der V1.9.0-Deferred-Überhang ist damit umgesetzt.
-2. Nächster Umsetzungsscope ist V1.9.2 nur nach expliziter manueller Freigabe mit `OK V1.9.2`.
-3. Die aktive Linie bleibt strikt sequenziell `V1.9.2 -> V1.9.3 -> V1.9.4` mit Stop-and-Approve-Gate nach jedem Release.
+1. V1.9.2 (Mechanikpaket K) ist grün abgeschlossen; Hidden-Zone-/Access-/Run-Kernverbreiterung wurde im freigegebenen Scope umgesetzt.
+2. Nächster Umsetzungsscope ist V1.9.3 nur nach expliziter manueller Freigabe mit `OK V1.9.3`.
+3. Die aktive Linie bleibt strikt sequenziell `V1.9.3 -> V1.9.4` mit Stop-and-Approve-Gate nach jedem Release.
 4. Harte Gates bleiben unverändert: Engine-Korrektheit, Hidden-Info-Schutz, Replay/StateHash-Determinismus und LegalAction-only.
 5. V2.x-Produktfeatures (Accounts, Cloud-Decks, Datenschutz-/Social-Gates) bleiben außerhalb des aktiven V1.9.2-V1.9.4-Scope.
 6. No-Scope-Grenzen weiter halten: keine Public-Plattformfunktionen, keine Karten-/Mechanikfreigaben ohne Gate-Beschluss, kein LLM-Live-Regelakteur.
 
-Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe, Tutorial/Regelhilfe, V1.9.0 Mechanikpaket I und V1.9.1 Mechanikpaket J sind umgesetzt. Die Anschlusslinie läuft nun als manuell freigegebene Sequenz V1.9.2 bis V1.9.4 weiter.
+Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief State/Gegner-Modell, Simulation/Selfplay/Exploit-Regression, Private Replay/Analyse/Lernhilfe, Tutorial/Regelhilfe, V1.9.0 Mechanikpaket I, V1.9.1 Mechanikpaket J und V1.9.2 Mechanikpaket K sind umgesetzt. Die Anschlusslinie läuft nun als manuell freigegebene Sequenz V1.9.3 bis V1.9.4 weiter.
 
 Detailed planning and completion artifacts available:
 

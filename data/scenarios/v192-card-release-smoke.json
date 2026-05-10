@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v192-card-release-smoke",
+  "title": "V1.9.2 Mechanikpaket K Kernrelease",
+  "release": "V1.9.2",
+  "status": "implemented_core_release",
+  "extends": "data/scenarios/v191-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_076_all-nighter",
+    "onr_v1_096_kilroy-was-here",
+    "onr_v1_107_romp-through-hq",
+    "onr_v1_184_top-runners-conference",
+    "onr_v1_188_ai-chief-financial-officer",
+    "onr_v1_211_polymer-breakthrough",
+    "onr_v1_235_data-naga"
+  ],
+  "deferredCards": [],
+  "preconditions": [
+    "V1.9.1 Mechanikpaket J ist gruen abgeschlossen.",
+    "V1.9.2 Preflight friert den 7-Karten-Kernkorb inklusive Data-Naga-Entscheidung ein."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.9.2-Smoke-Match mit den V1.9.2 Runner- und Corp-Decks.",
+    "Verifiziere All-Nighter Bonus-Run als kostenfreie Folgeaktion ohne LegalAction-Bypass.",
+    "Verifiziere Kilroy/Romp Access-Queues mit kostenfreiem Trash fuer R&D/HQ ohne Hidden-Info-Leak.",
+    "Verifiziere Top Runners' Conference Start-of-turn-Credits und Auto-Trash beim Run-Start.",
+    "Verifiziere AI CFO Agenda-Aktion (HQ/Archives in R&D, dann Draw 5) mit Hidden-Zone-Barrier.",
+    "Verifiziere Polymer Breakthrough Corp-Start-of-turn-Credit.",
+    "Verifiziere Data Naga Program-Trash + End-the-run über den bestehenden legalen Subroutinepfad.",
+    "Verifiziere Replay- und StateHash-Stabilitaet fuer alle neuen Shuffle-/Access-/Run-Pfade."
+  ],
+  "expected": [
+    "Der Runtime-Allowlist-Zuwachs umfasst exakt die sieben V1.9.2-Karten.",
+    "Access-/Run-Pfade bleiben deterministic, replaybar und side-sicher.",
+    "Keine implizite AI-Freigabe fuer V1.9.2-Karten.",
+    "Keine Scope-Ausweitung auf Trace/Tag- oder Damage/Prevention-Familien."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.9.2 Mechanikpaket K",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic",
+    "server": "apps/server/src/multiplayer.test.ts::V1.9.2 card release matchstart"
+  }
+}

@@ -3319,6 +3319,156 @@ describe("V1.9.1 Mechanikpaket J", () => {
   });
 });
 
+describe("V1.9.2 Mechanikpaket K", () => {
+  it("adds the V1.9.2 core card set with hidden-zone/access/run/recurring coverage", () => {
+    expect(ONR_V1_9_2_FINAL_CARD_IDS).toHaveLength(7);
+    const expectedMechanics: Record<string, RegExp> = {
+      "onr_v1_076_all-nighter": /run_flow/,
+      "onr_v1_096_kilroy-was-here": /access_trash_free/,
+      "onr_v1_107_romp-through-hq": /access_trash_free/,
+      "onr_v1_184_top-runners-conference": /start_of_turn_credit_gain/,
+      "onr_v1_188_ai-chief-financial-officer": /hidden_zone_shuffle/,
+      "onr_v1_211_polymer-breakthrough": /start_of_turn_credit_gain/,
+      "onr_v1_235_data-naga": /trash_installed_program/
+    };
+    for (const definitionId of ONR_V1_9_2_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(expectedMechanics[definitionId]!);
+      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(/trace|tag|damage_prevention|v2|matchmaking|ranking/);
+    }
+  });
+
+  it("validates V1.9.2 smoke decks and keeps previous releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_9_2_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_9_2_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v192CardReleaseGame("v192-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_013_cockroach"]).toBeDefined();
+  });
+
+  it("grants an All-Nighter bonus run via LegalActions without spending a click on the bonus run", () => {
+    let state = toRunnerTurn(v192CardReleaseGame("v192-all-nighter"));
+    state.runner.credits = 30;
+    moveRunnerCardToGrip(state, "onr_v1_076_all-nighter");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(state, action) === "onr_v1_076_all-nighter" &&
+        action.payload?.serverId === "rd"
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    const bonusActions = getLegalActions(state, "runner").filter((action) => action.type === "start_run" && action.payload?.bonusRunNoClick === true);
+    expect(bonusActions.length).toBeGreaterThan(0);
+    state.runner.clicks = 0;
+    const clicksBefore = state.runner.clicks;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.bonusRunNoClick === true);
+    expect(state.runner.clicks).toBe(clicksBefore);
+    expect(getLegalActions(state, "runner").some((action) => action.type === "start_run" && action.payload?.bonusRunNoClick === true)).toBe(false);
+  });
+
+  it("allows Kilroy and Romp to trash accessed HQ/R&D cards at no cost", () => {
+    let state = toRunnerTurn(v192CardReleaseGame("v192-kilroy-romp"));
+    state.runner.credits = 20;
+
+    moveRunnerCardToGrip(state, "onr_v1_096_kilroy-was-here");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const creditsBeforeKilroy = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_096_kilroy-was-here"
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "trash_accessed_card");
+    expect(state.runner.credits).toBe(creditsBeforeKilroy);
+
+    moveRunnerCardToGrip(state, "onr_v1_107_romp-through-hq");
+    const hqCard = moveCorpCardToHq(state, "simple_economy_operation");
+    keepOnlyCorpHqCard(state, hqCard);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_107_romp-through-hq"
+    );
+    const creditsBeforeRompTrash = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const freeTrashAction = mustAction(state, "runner", (action) => action.type === "trash_accessed_card");
+    expect(freeTrashAction.costs).toEqual([]);
+    state = apply(state, "runner", (action) => action.actionId === freeTrashAction.actionId);
+    expect(state.runner.credits).toBe(creditsBeforeRompTrash);
+  });
+
+  it("applies Top Runners' Conference credits at start of turn and trashes it when a run starts", () => {
+    let state = toRunnerTurn(v192CardReleaseGame("v192-top-runners"));
+    state.runner.credits = 5;
+    moveRunnerCardToGrip(state, "onr_v1_184_top-runners-conference");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_184_top-runners-conference");
+    const creditsAfterInstall = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = toRunnerTurnFromCorpMain(state);
+    expect(state.runner.credits).toBe(creditsAfterInstall + 3);
+    const conferenceId = state.runner.rig.resources.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_184_top-runners-conference");
+    expect(conferenceId).toBeDefined();
+    if (!conferenceId) return;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    expect(state.runner.rig.resources.includes(conferenceId)).toBe(false);
+    expect(state.runner.heap).toContain(conferenceId);
+  });
+
+  it("handles Polymer start-of-turn credits, AI CFO hidden-zone shuffle action and Data Naga program trash", () => {
+    let state = toRunnerTurn(v192CardReleaseGame("v192-polymer-cfo-data-naga"));
+    state.runner.credits = 20;
+    state.corp.credits = 5;
+
+    const polymerAgendaId = moveCorpCardToHq(state, "onr_v1_211_polymer-breakthrough");
+    const cfoAgendaId = moveCorpCardToHq(state, "onr_v1_188_ai-chief-financial-officer");
+    removeEverywhere(state, polymerAgendaId);
+    removeEverywhere(state, cfoAgendaId);
+    state.corp.scoreArea.push(polymerAgendaId, cfoAgendaId);
+    state.cardInstances[polymerAgendaId] = { ...state.cardInstances[polymerAgendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+    state.cardInstances[cfoAgendaId] = { ...state.cardInstances[cfoAgendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+
+    const corpCreditsBeforeRunnerEndTurn = state.corp.credits;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.corp.credits).toBe(corpCreditsBeforeRunnerEndTurn + 1);
+    const corpCreditsBeforeMandatory = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    expect(state.corp.credits).toBe(corpCreditsBeforeMandatory);
+
+    moveCorpCardToHq(state, "simple_economy_operation");
+    moveCorpCardToArchives(state, "onr_v1_279_wall-of-static", false);
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "ai_chief_financial_officer");
+    expect(state.corp.archives).toHaveLength(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd"
+    });
+
+    state = toRunnerTurnFromCorpMain(state);
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
+    const dwarfId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_021_dwarf");
+    expect(dwarfId).toBeDefined();
+    if (!dwarfId) return;
+    putCorpIceOnServer(state, "rd", "onr_v1_235_data-naga");
+    state.corp.credits = 20;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_235_data-naga");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.runner.rig.programs.includes(dwarfId)).toBe(false);
+    expect(state.runner.heap).toContain(dwarfId);
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -4983,6 +5133,16 @@ const ONR_V1_9_0_FINAL_CARD_IDS = [
 
 const ONR_V1_9_1_FINAL_CARD_IDS = ["onr_v1_013_cockroach", "onr_v1_034_incubator", "onr_v1_030_grubb"] as const;
 
+const ONR_V1_9_2_FINAL_CARD_IDS = [
+  "onr_v1_076_all-nighter",
+  "onr_v1_096_kilroy-was-here",
+  "onr_v1_107_romp-through-hq",
+  "onr_v1_184_top-runners-conference",
+  "onr_v1_188_ai-chief-financial-officer",
+  "onr_v1_211_polymer-breakthrough",
+  "onr_v1_235_data-naga"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -5465,6 +5625,38 @@ const ONR_V1_9_1_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_2_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v192_smoke_094",
+  name: "O:NR V1.9.2 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_076_all-nighter", quantity: 2 },
+    { id: "onr_v1_096_kilroy-was-here", quantity: 2 },
+    { id: "onr_v1_107_romp-through-hq", quantity: 2 },
+    { id: "onr_v1_184_top-runners-conference", quantity: 2 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "simple_economy_event", quantity: 4 }
+  ]
+};
+
+const ONR_V1_9_2_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v192_smoke_094",
+  name: "O:NR V1.9.2 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_188_ai-chief-financial-officer", quantity: 2 },
+    { id: "onr_v1_211_polymer-breakthrough", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_agenda", quantity: 2 },
+    { id: "onr_v1_235_data-naga", quantity: 2 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "onr_v1_238_data-wall-2-0", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -5747,6 +5939,16 @@ function v191CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_1_RUNNER_DECK,
     corpDeck: ONR_V1_9_1_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v192CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_2_RUNNER_DECK,
+    corpDeck: ONR_V1_9_2_CORP_DECK,
     agendaPointsToWin: 7
   });
 }
