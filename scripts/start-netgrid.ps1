@@ -154,7 +154,7 @@ if (-not $webReadyLanBefore) {
     Stop-PortListeners -Ports @(3100)
   }
   Write-LauncherLog "Starting web command"
-  Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/web exec next dev --hostname 0.0.0.0 --port 3100" -LogPath $webLog -Environment $webEnvironment
+  Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/web exec next dev --webpack --hostname 0.0.0.0 --port 3100" -LogPath $webLog -Environment $webEnvironment
 }
 
 $serverReady = Wait-Endpoint -Url $serverUrl
