@@ -67,6 +67,10 @@ import {
   ONR_V1_8_0_RELEASE_CARD_IDS,
   ONR_V1_8_1_RELEASE_CARD_IDS,
   ONR_V1_9_0_RELEASE_CARD_IDS,
+  ONR_V1_9_1_RELEASE_CARD_IDS,
+  ONR_V1_9_2_RELEASE_CARD_IDS,
+  ONR_V1_9_3_RELEASE_CARD_IDS,
+  ONR_V1_9_4_RELEASE_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateAiCardHintsV2,
@@ -163,7 +167,7 @@ describe("catalog import and status logic", () => {
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 
-  it("applies the V1.0.5K, V1.0.6K, V1.1.2K, V1.2.3, V1.6.1, V1.6.2, V1.6.3, V1.7.0, V1.7.1, V1.7.2, V1.8.0, V1.8.1 and V1.9.0 release gates to private local O:NR runtime cards when present", () => {
+  it("applies the V1.0.5K, V1.0.6K, V1.1.2K, V1.2.3, V1.6.1, V1.6.2, V1.6.3, V1.7.0, V1.7.1, V1.7.2, V1.8.0, V1.8.1, V1.9.0, V1.9.1, V1.9.2, V1.9.3 and V1.9.4 release gates to private local O:NR runtime cards when present", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
 
@@ -180,7 +184,11 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_8_0_RELEASE_CARD_IDS).toHaveLength(6);
     expect(ONR_V1_8_1_RELEASE_CARD_IDS).toHaveLength(12);
     expect(ONR_V1_9_0_RELEASE_CARD_IDS).toHaveLength(5);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(117);
+    expect(ONR_V1_9_1_RELEASE_CARD_IDS).toHaveLength(3);
+    expect(ONR_V1_9_2_RELEASE_CARD_IDS).toHaveLength(7);
+    expect(ONR_V1_9_3_RELEASE_CARD_IDS).toHaveLength(4);
+    expect(ONR_V1_9_4_RELEASE_CARD_IDS).toHaveLength(2);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(133);
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
@@ -201,7 +209,15 @@ describe("catalog import and status logic", () => {
       expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
       expect(card?.statuses.format_legal).toBe(true);
-      const expectedManifest = (ONR_V1_9_0_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+      const expectedManifest = (ONR_V1_9_4_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.4"
+        : (ONR_V1_9_3_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.3"
+        : (ONR_V1_9_2_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.2"
+        : (ONR_V1_9_1_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.1"
+        : (ONR_V1_9_0_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.9.0"
         : (ONR_V1_8_1_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.8.1"
@@ -321,10 +337,49 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_115_terrorist-reprisal"]?.numeric.cost).toBe(2);
     expect(cardsById["onr_v1_223_banpei"]?.numeric.strength).toBe(8);
     expect(cardsById["onr_v1_275_vacuum-link"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.9.0");
+    expect(cardsById["onr_v1_013_cockroach"]?.numeric.installCost).toBe(0);
+    expect(cardsById["onr_v1_034_incubator"]?.numeric.memoryCost).toBe(1);
+    expect(cardsById["onr_v1_030_grubb"]?.text).toContain("remainder of this run");
+    expect(cardsById["onr_v1_013_cockroach"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.9.1");
+    expect(cardsById["onr_v1_076_all-nighter"]?.numeric.cost).toBe(0);
+    expect(cardsById["onr_v1_096_kilroy-was-here"]?.text).toContain("run on R&D");
+    expect(cardsById["onr_v1_107_romp-through-hq"]?.numeric.cost).toBe(2);
+    expect(cardsById["onr_v1_184_top-runners-conference"]?.numeric.installCost).toBe(0);
+    expect(cardsById["onr_v1_188_ai-chief-financial-officer"]?.numeric.advancementRequirement).toBe(5);
+    expect(cardsById["onr_v1_211_polymer-breakthrough"]?.numeric.agendaPoints).toBe(3);
+    expect(cardsById["onr_v1_235_data-naga"]?.numeric.strength).toBe(5);
+    expect(cardsById["onr_v1_235_data-naga"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.9.2");
+    expect(cardsById["onr_v1_207_netwatch-operations-office"]?.numeric.advancementRequirement).toBe(5);
+    expect(cardsById["onr_v1_213_private-cybernet-police"]?.numeric.agendaPoints).toBe(2);
+    expect(cardsById["onr_v1_251_jack-attack"]?.numeric.strength).toBe(3);
+    expect(cardsById["onr_v1_251_jack-attack"]?.text).toContain("Runner cannot jack out");
+    expect(cardsById["onr_v1_271_tko-2-0"]?.numeric.rezCost).toBe(7);
+    expect(cardsById["onr_v1_271_tko-2-0"]?.text).toContain("forgoes his or her next action");
+    expect(cardsById["onr_v1_251_jack-attack"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.9.3");
+    expect(cardsById["onr_v1_208_on-call-solo-team"]?.numeric.advancementRequirement).toBe(4);
+    expect(cardsById["onr_v1_217_strike-force-kali"]?.numeric.agendaPoints).toBe(3);
+    expect(cardsById["onr_v1_208_on-call-solo-team"]?.text).toContain("meat damage");
+    expect(cardsById["onr_v1_217_strike-force-kali"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.9.4");
     expect(cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(false);
-    expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(false);
-    expect(cardsById["onr_v1_030_grubb"]?.statuses.human_playable).toBe(false);
+    expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_030_grubb"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_013_cockroach"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_034_incubator"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_030_grubb"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_076_all-nighter"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_096_kilroy-was-here"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_107_romp-through-hq"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_184_top-runners-conference"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_188_ai-chief-financial-officer"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_211_polymer-breakthrough"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_235_data-naga"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_207_netwatch-operations-office"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_213_private-cybernet-police"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_251_jack-attack"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_271_tko-2-0"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_208_on-call-solo-team"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_217_strike-force-kali"]?.statuses.ai_supported).toBe(false);
     expect(cardsById["onr_v1_021_dwarf"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_039_krash"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_066_snowball"]?.statuses.ai_supported).toBe(true);

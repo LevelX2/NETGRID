@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.1",
+  "id": "v1.9.1-card-release-manifest",
+  "status": "implemented_for_v1.9.1_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.9.0.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount3": true,
+    "v190DeferredTrioImplemented": true,
+    "cockroachHqDiscardRandomizationDeterministic": true,
+    "incubatorStartOfTurnDieAndTransformChoiceImplemented": true,
+    "grubbRunRemainderStrengthImplemented": true,
+    "purgeVirusCountersCoversCockroachAndIncubator": true,
+    "runtimeAllowlistExtendedExactlyBy3": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_013_cockroach",
+      "title": "Cockroach",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "successful_hq_run_counter_then_randomize_corp_hq_discard_at_threshold",
+      "requiredMechanics": ["install_program", "memory", "virus", "successful_run_trigger", "hq_discard_randomization", "deterministic_random"],
+      "roleTags": ["runner", "program", "virus", "hq_pressure", "random_discard"]
+    },
+    {
+      "cardCode": "onr_v1_034_incubator",
+      "title": "Incubator",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "successful_run_counter_then_start_of_turn_die_and_hidden_choice_counter_transform",
+      "requiredMechanics": ["install_program", "memory", "virus", "successful_run_trigger", "start_of_turn_trigger", "deterministic_die_roll", "counter_transform_choice"],
+      "roleTags": ["runner", "program", "virus", "random", "counter_transform"]
+    },
+    {
+      "cardCode": "onr_v1_030_grubb",
+      "title": "Grubb",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "wall_breaker_with_run_remainder_strength_bonus",
+      "requiredMechanics": ["install_program", "memory", "pump_breaker", "break_subroutine", "run_remainder_strength_bonus"],
+      "roleTags": ["runner", "program", "icebreaker", "worm", "run_strength"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 3,
+    "implementedCardCount": 3,
+    "deferredCardCount": 0,
+    "deferReasons": [],
+    "deferredCardIds": [],
+    "openMechanicHintsStatus": "cleared_at_v1_9_1"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.4",
+  "id": "v1.9.4-card-release-manifest",
+  "status": "implemented_for_v1.9.4_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.9.3.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount2": true,
+    "v194PreflightDataDartsDecisionExplicit": true,
+    "taggedMeatDamageAgendaActionsImplemented": true,
+    "runtimeAllowlistExtendedExactlyBy2": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "scored_agenda_action_if_tagged_deal_1_meat_damage",
+      "requiredMechanics": ["scored_agenda_action", "tag_check", "damage_meat", "legal_action_only"],
+      "roleTags": ["corp", "agenda", "damage", "tag_gate"]
+    },
+    {
+      "cardCode": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "scored_agenda_action_if_tagged_deal_2_meat_damage",
+      "requiredMechanics": ["scored_agenda_action", "tag_check", "damage_meat", "legal_action_only"],
+      "roleTags": ["corp", "agenda", "damage", "tag_gate"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 2,
+    "implementedCardCount": 2,
+    "deferredCardCount": 1,
+    "deferReasons": ["data_darts_hidden_zone_and_next_ice_break_restriction"],
+    "deferredCardIds": ["onr_v1_240_data-darts"],
+    "openMechanicHintsStatus": "v1.9.5_or_later"
+  }
+}

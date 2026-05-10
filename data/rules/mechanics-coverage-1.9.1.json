@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.9.1",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.1",
+  "generatedFor": "V1.9.1 Mechanikpaket J final gate",
+  "generatedAt": "2026-05-10",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.9.0.json",
+  "gateAssertions": {
+    "v190GatePassed": true,
+    "v191DeferredTrioImplemented": true,
+    "v191CockroachHqDiscardRandomization": true,
+    "v191IncubatorDieAndTransformChoice": true,
+    "v191GrubbRunRemainderStrength": true,
+    "v191VirusPurgeIntegration": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.virus.cockroach_hq_random_discard_threshold",
+      "label": "Cockroach HQ-Discard-Randomisierung ab Counter-Schwelle",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.1",
+      "currentScopeNote": "Erfolgreiche HQ-Runs vergeben Virus-Counter auf Cockroach; ab >=2 werden Corp-HQ-Discards deterministisch randomisiert.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.virus.incubator_start_of_turn_die_transform",
+      "label": "Incubator Start-of-Turn-Wuerfel und Counter-Transform-Choice",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.1",
+      "currentScopeNote": "Erfolgreiche Runs vergeben Virus-Counter; pro Counter wird zu Runner-Zugstart deterministisch gewuerfelt; bei 6 folgt ein hidden-info-safe Choice-Transform.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.breaker.grubb_run_remainder_strength_bonus",
+      "label": "Grubb Run-remainder Strength-Bonus",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.1",
+      "currentScopeNote": "Grubb-Pumps addieren +1 Strength fuer den Rest des laufenden Runs und resetten mit Run-Ende.",
+      "coverage": ["unit", "scenario", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.virus.purge_integration_cockroach_incubator",
+      "label": "Purge-Integration fuer Cockroach/Incubator Virus-Counter",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.1",
+      "currentScopeNote": "Bestehende purge_virus_counters-Action entfernt Cockroach-/Incubator-Counter deterministisch und side-sicher.",
+      "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
+    }
+  ]
+}

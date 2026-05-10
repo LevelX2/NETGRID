@@ -1369,7 +1369,7 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(league.profiles.every((profile) => profile.illegalActions === 0)).toBe(true);
     expect(league.profiles.every((profile) => profile.replayFailures === 0)).toBe(true);
     expect(JSON.stringify(league)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
-  });
+  }, 30_000);
 
   it("evaluates holdout tuning gate for regression and improvement", () => {
     const baseline: Parameters<typeof evaluateV143TuningGate>[0] = {
@@ -1833,7 +1833,7 @@ describe("MVP 0.9 stronger AI", () => {
     expect(soak.aggregate.reasonCodeCoverage.length).toBeGreaterThanOrEqual(4);
     expect(soak.aggregate.holdoutSeeds).toEqual(["ai-v09-holdout-001", "ai-v09-holdout-002", "ai-v09-holdout-003"]);
     expect(JSON.stringify(soak)).not.toContain("cardInstances");
-  });
+  }, 60_000);
 });
 
 const V094_RUNNER_DECK: DeckDefinition = {

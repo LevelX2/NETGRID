@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.2",
+  "id": "v1.9.2-card-release-manifest",
+  "status": "implemented_for_v1.9.2_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.9.1.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "gateAssertions": {
+    "implementedCoreSetCount7": true,
+    "v192PreflightDataNagaDecisionExplicit": true,
+    "allNighterBonusRunNoClickImplemented": true,
+    "kilroyAndRompFreeAccessTrashImplemented": true,
+    "topRunnersConferenceStartOfTurnAndRunTrashImplemented": true,
+    "aiChiefFinancialOfficerShuffleDrawImplemented": true,
+    "polymerBreakthroughStartOfTurnCreditImplemented": true,
+    "dataNagaProgramTrashAndEtrImplemented": true,
+    "runtimeAllowlistExtendedExactlyBy7": true,
+    "noAutomaticAiSupportGrant": true,
+    "noPublicPlatformExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_076_all-nighter",
+      "title": "All-Nighter",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "run_then_optional_bonus_run_without_extra_click",
+      "requiredMechanics": ["play_event", "start_run", "run_flow", "legal_action_only"],
+      "roleTags": ["runner", "event", "run_flow"]
+    },
+    {
+      "cardCode": "onr_v1_096_kilroy-was-here",
+      "title": "Kilroy Was Here",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "rd_run_with_free_access_trash",
+      "requiredMechanics": ["play_event", "start_run", "breach", "access_trash_free"],
+      "roleTags": ["runner", "event", "rd_access", "sabotage"]
+    },
+    {
+      "cardCode": "onr_v1_107_romp-through-hq",
+      "title": "Romp through HQ",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "hq_run_with_free_access_trash",
+      "requiredMechanics": ["play_event", "start_run", "breach", "access_trash_free"],
+      "roleTags": ["runner", "event", "hq_access", "sabotage"]
+    },
+    {
+      "cardCode": "onr_v1_184_top-runners-conference",
+      "title": "Top Runners' Conference",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "start_of_turn_credit_gain_and_trash_on_run_start",
+      "requiredMechanics": ["install_resource", "start_of_turn_credit_gain", "trash_on_run"],
+      "roleTags": ["runner", "resource", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "scored_agenda_action_shuffle_hq_archives_into_rd_then_draw_5",
+      "requiredMechanics": ["scored_agenda_action", "hidden_zone_shuffle", "draw_cards", "deterministic_random"],
+      "roleTags": ["corp", "agenda", "hand_refill", "hidden_zone"]
+    },
+    {
+      "cardCode": "onr_v1_211_polymer-breakthrough",
+      "title": "Polymer Breakthrough",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "corp_start_of_turn_credit_gain_from_scored_agenda",
+      "requiredMechanics": ["start_of_turn_credit_gain", "scored_agenda_static"],
+      "roleTags": ["corp", "agenda", "economy"]
+    },
+    {
+      "cardCode": "onr_v1_235_data-naga",
+      "title": "Data Naga",
+      "releaseStatus": "human_playable",
+      "aiSupported": false,
+      "resolver": "trash_installed_program_then_end_the_run",
+      "requiredMechanics": ["trash_installed_program", "end_the_run", "encounter_ice"],
+      "roleTags": ["corp", "ice", "sentry", "program_trash"]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 7,
+    "implementedCardCount": 7,
+    "deferredCardCount": 0,
+    "deferReasons": [],
+    "deferredCardIds": [],
+    "openMechanicHintsStatus": "v193_or_later"
+  }
+}

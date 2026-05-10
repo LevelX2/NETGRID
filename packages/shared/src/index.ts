@@ -98,6 +98,8 @@ export type SubroutineType =
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
   | "set_next_encounter_lock"
+  | "set_run_jack_out_lock"
+  | "set_runner_forgo_next_action"
   | "rewind_run_to_rezzed_ice_by_die";
 
 export type SubroutineDefinition = {
@@ -512,6 +514,8 @@ export type RunState = {
   runId: string;
   attackedServerId: Exclude<ServerId, "new_remote">;
   accessServerOverride?: Exclude<ServerId, "new_remote">;
+  freeTrashAccessZones?: Array<"rd" | "hq">;
+  grantAllNighterBonusRunOnFinish?: boolean;
   successfulRunAccessReplacement?: "corp_lose_credits";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
@@ -534,12 +538,14 @@ export type RunState = {
   nextEncounterJackOutLock?: boolean;
   noBreakSubroutinesActive?: boolean;
   jackOutLockedUntilEncounterEnds?: boolean;
+  jackOutLockedForRun?: boolean;
   nextEncounterFatalDamage?: number;
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<Record<CardInstanceId, number[]>>;
+  remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   breach?: BreachState;
 };
 
@@ -641,6 +647,10 @@ export type GameState = {
     runAttemptsThisTurn?: number;
     runAttemptsLastTurn?: number;
     damagePreventionUsage?: Record<CardInstanceId, number>;
+    startOfTurnFloatingCreditsApplied?: boolean;
+    incubatorPendingTransforms?: number;
+    allNighterBonusRunPending?: boolean;
+    forgoNextActionPending?: boolean;
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -1109,6 +1119,14 @@ function onrSetNextEncounterLock(id: string): SubroutineDefinition {
   return { id, type: "set_next_encounter_lock" };
 }
 
+function onrSetRunJackOutLock(id: string): SubroutineDefinition {
+  return { id, type: "set_run_jack_out_lock" };
+}
+
+function onrSetRunnerForgoNextAction(id: string): SubroutineDefinition {
+  return { id, type: "set_runner_forgo_next_action" };
+}
+
 function onrRewindRunToRezzedIceByDie(id: string): SubroutineDefinition {
   return { id, type: "rewind_run_to_rezzed_ice_by_die" };
 }
@@ -1161,6 +1179,27 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "0 credits: Roll a die. On a 4, 5, or 6, break ice subroutine; otherwise, suffer that much Net damage.\nUse this ability only once on each subroutine during each encounter with a piece of ice.",
     abilities: [{ id: "onr_v1_007_blink_break", type: "break_subroutine", cost: { credits: 0 }, count: 1, timingPoint: "run.encounter_ice" }],
     mechanics: ["install_program", "memory", "break_subroutine", "deterministic_die_roll", "net_damage", "encounter_usage_limit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_013_cockroach",
+    title: "Cockroach",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText:
+      "Whenever you make a successful run on HQ, give the Corp a Cockroach counter. Two or more Cockroach counters cause all discards from HQ to become random. The Corp may remove all Virus counters by forgoing its next three actions.",
+    mechanics: [
+      "install_program",
+      "memory",
+      "virus",
+      "successful_run_trigger",
+      "hq_discard_randomization",
+      "deterministic_random",
+      ONR_V1_LOCAL_PRIVATE
+    ]
   },
   {
     id: "onr_v1_012_clown",
@@ -1349,6 +1388,41 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({
+    id: "onr_v1_030_grubb",
+    title: "Grubb",
+    subtypes: ["icebreaker", "worm"],
+    installCost: 0,
+    memoryCost: 1,
+    strength: 0,
+    breakCost: 1,
+    pumpCost: 2,
+    iceSubtype: "wall",
+    iceLabel: "wall",
+    extraMechanics: ["run_remainder_strength_bonus"]
+  }),
+  {
+    id: "onr_v1_034_incubator",
+    title: "Incubator",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus", "random"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText:
+      "Whenever you make a successful run, give the Corp an Incubate counter. Each Incubate counter necessitates a die roll at the start of each of your turns; on each 6, choose a Virus counter and exchange that counter for two counters of the same type. The Corp may remove all Virus counters by forgoing its next three actions.",
+    mechanics: [
+      "install_program",
+      "memory",
+      "virus",
+      "successful_run_trigger",
+      "start_of_turn_trigger",
+      "deterministic_die_roll",
+      "counter_transform_choice",
+      ONR_V1_LOCAL_PRIVATE
+    ]
+  },
+  onrBreaker({
     id: "onr_v1_036_jackhammer",
     title: "Jackhammer",
     subtypes: ["icebreaker", "noisy"],
@@ -1484,6 +1558,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceLabel: "wall"
   }),
   {
+    id: "onr_v1_076_all-nighter",
+    title: "All-Nighter",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Make a run; whether or not that run is successful, you may then make another run.",
+    mechanics: ["play_event", "start_run", "run_flow", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_081_custodial-position",
     title: "Custodial Position",
     side: "runner",
@@ -1551,6 +1636,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "start_run", "bypass_ice", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_096_kilroy-was-here",
+    title: "Kilroy Was Here",
+    side: "runner",
+    type: "event",
+    subtypes: ["sabotage"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Make a run on R&D; you may trash, at no cost, any cards you access that were stored in R&D, even if the cards cannot normally be trashed.",
+    mechanics: ["play_event", "start_run", "breach", "access_trash_free", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_101_mit-west-tier",
     title: "MIT West Tier",
     side: "runner",
@@ -1560,6 +1656,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 0,
     rulesText: "Shuffle your grip, heap and stack together, draw five cards, then remove MIT West Tier from the game.",
     mechanics: ["play_event", "shuffle", "draw_cards", "removed_from_game", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_107_romp-through-hq",
+    title: "Romp through HQ",
+    side: "runner",
+    type: "event",
+    subtypes: ["sabotage"],
+    implementationStatus: "playable_mvp",
+    cost: 2,
+    rulesText: "Make a run on HQ; you may trash, at no cost, any cards you access that were stored in HQ, even if the cards cannot normally be trashed.",
+    mechanics: ["play_event", "start_run", "breach", "access_trash_free", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_156_corporate-ally",
@@ -1627,6 +1734,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "At the start of each of your turns, you may trash one of your other installed cards to gain 1 credit.\nOnly one unique card of a particular name can be in play at a time.",
     mechanics: ["install_resource", "unique_card", "start_of_turn_optional_trash_for_credit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_184_top-runners-conference",
+    title: "Top Runners' Conference",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Gain 3 at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
+    mechanics: ["install_resource", "start_of_turn_credit_gain", "trash_on_run", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_179_silicon-saloon-franchise",
@@ -1754,6 +1872,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score", "steal", "counter", "action_economy", "gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_188_ai-chief-financial-officer",
+    title: "AI Chief Financial Officer",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 5,
+    agendaPoints: 2,
+    rulesText: "[A]: Shuffle cards stored in HQ and the Archives into R&D; then draw five cards.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "hidden_zone_shuffle", "draw_cards", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_201_executive-extraction",
     title: "Executive Extraction",
     side: "corp",
@@ -1778,6 +1908,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score", "steal", "on_score_gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_207_netwatch-operations-office",
+    title: "Netwatch Operations Office",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 5,
+    agendaPoints: 2,
+    rulesText: "[A]: Trace 7 - If trace is successful, give Runner a tag.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_208_on-call-solo-team",
+    title: "On-Call Solo Team",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 3,
+    rulesText: "[A]: Do 1 meat damage. Use this ability only if Runner is tagged.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_209_political-coup",
     title: "Political Coup",
     side: "corp",
@@ -1788,6 +1942,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 2,
     rulesText: "Put 6 from the bank on Political Coup when you score it.\n[A]: Take 1 from Political Coup, if it has any bits.",
     mechanics: ["install_remote", "advance", "score", "steal", "counter", "action_economy", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_211_polymer-breakthrough",
+    title: "Polymer Breakthrough",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["research"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 6,
+    agendaPoints: 3,
+    rulesText: "Gain 1 at the start of each of your turns.",
+    mechanics: ["install_remote", "advance", "score", "steal", "start_of_turn_credit_gain", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_212_priority-requisition",
@@ -1885,6 +2051,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "Gain 1 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort.",
     mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "region_install_rules", "run_unsuccessful_credit_bonus", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_213_private-cybernet-police",
+    title: "Private Cybernet Police",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 7,
+    agendaPoints: 2,
+    rulesText: "[A]: Trace 7 - If trace is successful, give Runner a tag.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_217_strike-force-kali",
+    title: "Strike Force Kali",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 6,
+    agendaPoints: 3,
+    rulesText: "[A]: Do 2 meat damage. Use this ability only if Runner is tagged.",
+    mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "runner_is_tagged", "damage", "flatline", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_281_accounts-receivable",
@@ -2184,6 +2374,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["uninstall_runner_program", "end_the_run"]
   }),
   onrIce({
+    id: "onr_v1_235_data-naga",
+    title: "Data Naga",
+    subtypes: ["sentry", "killer"],
+    rezCost: 9,
+    strength: 5,
+    rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
+    subroutines: [onrTrashInstalledProgram("onr_v1_235_data_naga_trash_program"), onrEtr("onr_v1_235_data_naga_etr")],
+    mechanics: ["trash_installed_program", "end_the_run", "concrete_special_resolver"]
+  }),
+  onrIce({
     id: "onr_v1_237_data-wall",
     title: "Data Wall",
     subtypes: ["wall"],
@@ -2266,6 +2466,24 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       }
     ],
     mechanics: ["trace", "link", "bid_amount", "add_tag"]
+  }),
+  onrIce({
+    id: "onr_v1_251_jack-attack",
+    title: "Jack Attack",
+    subtypes: ["sentry", "ap"],
+    rezCost: 3,
+    strength: 3,
+    rulesText: "[Subroutine] For the remainder of the run, Runner cannot jack out.\n[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
+    subroutines: [
+      onrSetRunJackOutLock("onr_v1_251_jack_attack_run_jack_out_lock"),
+      {
+        id: "onr_v1_251_jack_attack_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["run_modifier", "jack_out_lock", "trace", "link", "bid_amount", "add_tag"]
   }),
   onrIce({
     id: "onr_v1_252_keeper",
@@ -2411,6 +2629,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_270_sleeper_etr")],
     mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_271_tko-2-0",
+    title: "TKO 2.0",
+    subtypes: ["sentry", "ap", "knockout"],
+    rezCost: 7,
+    strength: 4,
+    rulesText: "[Subroutine] End the run, and Runner forgoes his or her next action.",
+    subroutines: [onrSetRunnerForgoNextAction("onr_v1_271_tko_2_0_forgo_next_action"), onrEtr("onr_v1_271_tko_2_0_etr")],
+    mechanics: ["end_the_run", "action_economy", "run_modifier"]
   }),
   onrIce({
     id: "onr_v1_273_triggerman",
