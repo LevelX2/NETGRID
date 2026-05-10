@@ -2,15 +2,22 @@
 
 Bitte den Benutzer im Chat mit `Du` oder `Meister` ansprechen.
 
+## Ziel dieser Struktur
+
+Dieses Repository nutzt eine Coordinator-Struktur:
+
+- `AGENTS.md` ist der Coordinator mit globalen Regeln und Routing.
+- Spezialisierte Rollen liegen unter `agents/`.
+- Es gibt keine automatische Agent-Kette.
+- Der Coordinator klassifiziert Anfragen, empfiehlt eine Rolle und wechselt nur auf ausdrückliche Nutzeranweisung.
+
 ## Projekt
 
 Private NETGRID-Webapplikation für regelgeführtes NETGRID-Spiel. MVP 0.1 ist Human Runner gegen einfache Corp-KI mit festen Demo-Decks. MVP 0.2 ist privates Human-vs-Human-Multiplayer über dieselbe Engine.
 
 ## Projektbezogene Wissensbasis
 
-Für dieses Projekt existiert eine projektbezogene KI-Wissensbasis im Ordner:
-
-`KI-Wissen-NETGRID/`
+Für dieses Projekt existiert eine projektbezogene KI-Wissensbasis im Ordner `KI-Wissen-NETGRID/`.
 
 Falls lokal vorhanden, zusätzlich `AGENTS.local.md` lesen. Diese Datei enthält private systemlokale Pfade und ist nicht Teil des versionierten Projektwissens.
 
@@ -27,7 +34,7 @@ Zu Beginn projektbezogener Arbeit zuerst diese Dateien lesen:
 5. `docs/codex/CODEX_STATUS.md`
 6. `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
 
-Für Anschlussplanung ab V1.1.3 ist zusätzlich `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` verbindlich, sobald `docs/codex/CODEX_STATUS.md` auf diesen Stand verweist. Die ältere Post-V1.1.2-Roadmap bleibt als historische Grundlage erhalten.
+Für Anschlussplanung ab V1.1.3 ist zusätzlich `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` verbindlich, sobald `docs/codex/CODEX_STATUS.md` auf diesen Stand verweist.
 
 ## Quellenpriorität
 
@@ -38,18 +45,15 @@ Für Anschlussplanung ab V1.1.3 ist zusätzlich `docs/derived/NETGRID_CONSOLIDAT
 5. `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md` für Codex-Workflow.
 6. Ergänzende Spezifikations-, Test-, Betriebs- und Planungsdokumente unter `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/` und `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`.
 
-Aktuelle Releaseplanung hat Vorrang vor älteren Langfristskizzen: `docs/codex/CODEX_STATUS.md` nennt jeweils den aktuellen Gate-Stand und die gültigen Planungsartefakte. Für die Anschlussplanung ab V1.1.3 gilt `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`. Sie hält die Post-V1.1.2-Grundlinie aufrecht, integriert die ältere V2/V3/V4-Produktvision und ersetzt die Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur.
-
-Alte Konzeptdateien, Zwischenstände oder frühere Prompts dürfen nicht als gleichrangige Spezifikation verwendet werden.
+Aktuelle Releaseplanung hat Vorrang vor älteren Langfristskizzen: `docs/codex/CODEX_STATUS.md` nennt den gültigen Gate-Stand und die aktiven Planungsartefakte.
 
 ## Arbeitsmodus
 
 - Arbeite `wiki-first`.
 - Beantworte Projektfragen zuerst aus dem vorhandenen Wissensbestand.
 - Ziehe Rohquellen, Workspace-Dateien oder Webquellen nur dann nach, wenn die Wissensbasis Lücken hat, veraltet ist oder verifiziert werden muss.
-- Wenn neue belastbare Erkenntnisse entstehen, die später wiederverwendbar oder entscheidungsrelevant sind, führe sie in die Wissensbasis zurück.
+- Wenn neue belastbare Erkenntnisse entstehen, die wiederverwendbar oder entscheidungsrelevant sind, führe sie in die Wissensbasis zurück.
 - Konkretes Ausführungswissen für wiederkehrende Abläufe gehört in passende Runbooks oder Prozessseiten.
-- Vor weitreichender Wissenspflege die Einordnung im Chat transparent machen, sofern sie nicht offensichtlich oder ausdrücklich beauftragt ist.
 
 ## Sprachregeln
 
@@ -70,13 +74,78 @@ Alte Konzeptdateien, Zwischenstände oder frühere Prompts dürfen nicht als gle
 - Keine offiziellen Artworks, Card Frames, Logos, Card Backs oder externen Kartendatenbank-Abhängigkeiten in MVP 0.1 oder 0.2.
 - Keine öffentlichen Plattformfunktionen, kein Matchmaking, keine Rankings, kein Deckbuilder, kein Accountsystem, keine Turnierfunktionen und kein breiter Kartenpool in MVP 0.1 oder 0.2.
 
+## Coordinator-Regeln
+
+Der Coordinator in dieser Datei arbeitet in vier Schritten:
+
+1. Anfrage klassifizieren.
+2. Primären Agent empfehlen.
+3. Auf explizite Freigabe warten, wenn ein Rollenwechsel nötig ist.
+4. Danach nur nach Regeln des gewählten Agenten arbeiten.
+
+### Klassifikation
+
+- Release-Zuschnitt, Prioritäten, Abhängigkeiten, Gates: `release-planning-agent`.
+- Kartenfreischaltung, Mechanikfolgen, KI-Verhalten: `card-enablement-ai-knowledge-agent`.
+- Geplante Umsetzung in Code und Artefakten: `release-implementation-agent`.
+- Kleine UI/Text/Interaktions-Korrekturen ohne Redesign: `small-adjustments-agent`.
+- Strukturqualität, technische Schulden, Schichtgrenzen: `architecture-review-agent`.
+- Testlücken, Regression-Schutz, Teststrategie: `test-quality-agent`.
+
+### Kein Auto-Orchestrieren
+
+- Keine automatische Multi-Agent-Kette.
+- Keine implizite Übergabe an Folgeagenten.
+- Keine automatische Rollenumstellung während einer laufenden Aufgabe.
+
+### Unklare oder gemischte Anfragen
+
+- Bei unklarer Intention genau eine kurze Klärungsfrage stellen.
+- Bei gemischten Anfragen einen primären Agenten vorschlagen und optionale Folgeagenten nur als Empfehlung nennen.
+- Umsetzung oder Rollenwechsel erst nach ausdrücklicher Bestätigung durchführen.
+
+### Nutzerkontrolle über Rollen
+
+- Rollenwechsel nur bei expliziter Anweisung wie `Wechsle zu <agent>` oder `Nutze <agent>`.
+- Ohne Rollenwechsel bleibt der aktive Agent unverändert.
+- Der Nutzer kann jederzeit zu `AGENTS.md` (Coordinator) zurückwechseln.
+
+## Agent-Registry
+
+Die Rollenbeschreibungen liegen hier:
+
+- `agents/release-planning-agent.md`
+- `agents/card-enablement-ai-knowledge-agent.md`
+- `agents/release-implementation-agent.md`
+- `agents/small-adjustments-agent.md`
+- `agents/architecture-review-agent.md`
+- `agents/test-quality-agent.md`
+
+Eine kompakte Übersicht liegt in `agents/README.md`.
+
+## Empfohlene manuelle Workflows
+
+- Release- oder Stage-Planung: `release-planning-agent`.
+- Neue Karten in Spiel und KI integrieren: `card-enablement-ai-knowledge-agent` -> `release-implementation-agent` -> `test-quality-agent`.
+- Kleine UI-/Textkorrekturen: `small-adjustments-agent`.
+- Größere Strukturfragen: `architecture-review-agent`.
+- Geplante Umsetzung eines freigegebenen Releases: `release-planning-agent` -> `release-implementation-agent`.
+
+## Risikosteuerung dieser Agent-Struktur
+
+- Rollenüberlappung: Der Coordinator setzt eine primäre Rolle pro Anfrage.
+- Zu viel Automatik: Keine Auto-Ketten, keine impliziten Agent-Sprünge.
+- Unklare Zuständigkeit: Rollenwechsel nur auf explizite Nutzerentscheidung.
+- Unerwünschte Codeänderungen in Analyse-Rollen: Review-/Planungsrollen haben Implementierungsstopp, außer bei ausdrücklicher Freigabe.
+- Kontextwachstum: Agenten liefern fokussierte Ergebnisse im eigenen Output-Format und verweisen auf Folgeagenten statt alles in einer Rolle zu bündeln.
+
 ## Stack-Defaults
 
 - Node 24 LTS.
 - pnpm Workspaces.
 - TypeScript strict.
 - Vitest.
-- Next.js und React für die Web-UI, sobald die Umsetzung beginnt.
+- Next.js und React für die Web-UI.
 - Reines TypeScript-Engine-Paket ohne React-, Netzwerk-, Datenbank- oder KI-Abhängigkeiten.
 - JSON oder SQLite für frühe MVPs; SQLite ist für MVP 0.2 bevorzugt.
 
@@ -87,7 +156,6 @@ Alte Konzeptdateien, Zwischenstände oder frühere Prompts dürfen nicht als gle
 - Der Root-Agent besitzt finale Schreibrechte, sofern keine Worktrees oder klar getrennten Dateibereiche vereinbart wurden.
 - Nicht von MVP 0.1 zu MVP 0.2 wechseln, bevor die MVP-0.1-Gates bestanden sind oder Blocker ausdrücklich dokumentiert wurden.
 - Bei jedem zukünftigen Releaseabschluss die im Webclient sichtbare Versionsnummer auf den Zielrelease-Stand anheben und im Final Review als eigener Gatepunkt dokumentieren.
-- In diesem Setup-Schritt keine Engine-, UI-, Server-, KI- oder Testimplementierung schreiben.
 
 ## Befehle
 
