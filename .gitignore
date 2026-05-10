@@ -22,16 +22,8 @@ __pycache__/
 *.sqlite-*
 data/runtime/
 data/local/
-# Keep private local ONR scans out of git, but allow self-generated card images.
-data/local-assets/*
-!data/local-assets/card-images/
-data/local-assets/card-images/*
-!data/local-assets/card-images/generated-*/
-!data/local-assets/card-images/generated-*/**
-data/local-assets/card-images/generated-*/**/*_contact_sheet.png
-data/local-assets/card-images/generated-*/**/*_sample*.png
-data/local-assets/card-images/onr-1996/
-data/local-assets/card-images/onr-1996/**
+# Keep all local asset imports/generated images out of git by default.
+data/local-assets/
 tmp*/
 *.log
 npm-debug.log*
