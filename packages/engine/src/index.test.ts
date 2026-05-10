@@ -1320,7 +1320,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       expect(definition?.mechanics.join(" ")).not.toMatch(/prevention|avoid|replacement|hosting|virus|recurring_credit|bad_publicity|format|deckbuilder|parser/);
     }
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({ installCost: 6, memoryCost: 1, strength: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_066_snowball"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 1 });
     expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 1 });
@@ -1400,7 +1400,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     const initialEncounterActions = getLegalActions(state, "runner");
     const initialPumpLabels = initialEncounterActions.filter((action) => action.type === "pump_breaker").map((action) => action.label);
     expect(initialPumpLabels).toEqual(expect.arrayContaining(["Dwarf: Stärke +1", "Krash: Stärke +1"]));
-    expect(initialEncounterActions.some((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_021_dwarf")).toBe(false);
+    expect(initialEncounterActions.some((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_021_dwarf")).toBe(true);
 
     state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
     state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
@@ -2600,21 +2600,15 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_214_project-babylon"]).toBeDefined();
   });
 
-  it("applies Clown encounter strength reduction to allow earlier breaker interactions", () => {
+  it("applies Clown encounter strength reduction to encountered ice strength", () => {
     let withoutClown = toRunnerTurn(v181CardReleaseGame("v181-clown-off"));
     withoutClown.runner.credits = 30;
     moveRunnerCardToGrip(withoutClown, "onr_v1_021_dwarf");
     withoutClown = apply(withoutClown, "runner", (action) => action.type === "install_card" && sourceDefinition(withoutClown, action) === "onr_v1_021_dwarf");
-    putCorpIceOnServer(withoutClown, "rd", "onr_v1_279_wall-of-static");
+    putCorpIceOnServer(withoutClown, "rd", "simple_barrier_ice");
     withoutClown = apply(withoutClown, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    withoutClown = apply(withoutClown, "corp", (action) => action.type === "rez_ice" && sourceDefinition(withoutClown, action) === "onr_v1_279_wall-of-static");
-    const withoutDwarfId = withoutClown.runner.rig.programs.find((id) => withoutClown.cardInstances[id]?.definitionId === "onr_v1_021_dwarf");
-    expect(withoutDwarfId).toBeDefined();
-    expect(
-      getLegalActions(withoutClown, "runner").some(
-        (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === withoutDwarfId
-      )
-    ).toBe(false);
+    withoutClown = apply(withoutClown, "corp", (action) => action.type === "rez_ice" && sourceDefinition(withoutClown, action) === "simple_barrier_ice");
+    expect(getPlayerView(withoutClown, "runner").run?.encounteredIce?.strength).toBe(3);
 
     let withClown = toRunnerTurn(v181CardReleaseGame("v181-clown-on"));
     withClown.runner.credits = 30;
@@ -2622,14 +2616,10 @@ describe("V1.8.1 Mechanikpaket H", () => {
     moveRunnerCardToGrip(withClown, "onr_v1_021_dwarf");
     withClown = apply(withClown, "runner", (action) => action.type === "install_card" && sourceDefinition(withClown, action) === "onr_v1_012_clown");
     withClown = apply(withClown, "runner", (action) => action.type === "install_card" && sourceDefinition(withClown, action) === "onr_v1_021_dwarf");
-    putCorpIceOnServer(withClown, "rd", "onr_v1_279_wall-of-static");
+    putCorpIceOnServer(withClown, "rd", "simple_barrier_ice");
     withClown = apply(withClown, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    withClown = apply(withClown, "corp", (action) => action.type === "rez_ice" && sourceDefinition(withClown, action) === "onr_v1_279_wall-of-static");
-    const withDwarfId = withClown.runner.rig.programs.find((id) => withClown.cardInstances[id]?.definitionId === "onr_v1_021_dwarf");
-    expect(withDwarfId).toBeDefined();
-    expect(
-      getLegalActions(withClown, "runner").some((action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === withDwarfId)
-    ).toBe(true);
+    withClown = apply(withClown, "corp", (action) => action.type === "rez_ice" && sourceDefinition(withClown, action) === "simple_barrier_ice");
+    expect(getPlayerView(withClown, "runner").run?.encounteredIce?.strength).toBe(2);
   });
 
   it("creates Pattel/Pox run-success counters and clears card/server virus counters with purge", () => {

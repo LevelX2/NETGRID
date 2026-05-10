@@ -915,7 +915,7 @@ const ONR_V1_1_2K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
 };
 
 const ONR_V1_2_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
-  "onr_v1_021_dwarf": { installCost: 3, memoryCost: 1, strength: 1 },
+  "onr_v1_021_dwarf": { installCost: 6, memoryCost: 1, strength: 3 },
   "onr_v1_039_krash": { installCost: 3, memoryCost: 1, strength: 0 },
   "onr_v1_066_snowball": { installCost: 3, memoryCost: 1, strength: 1 },
   "onr_v1_074_worm": { installCost: 2, memoryCost: 1, strength: 1 },

@@ -1092,7 +1092,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     state.cardInstances[iceId] = { ...state.cardInstances[iceId]!, faceup: true, rezzed: true };
     moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
-    state.runner.credits = 4;
+    state.runner.credits = 6;
     const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
     const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
     const dwarfInstall = input.legalActions.find((action) => action.type === "install_card" && sourceDefinitionFromInput(input, action) === "onr_v1_021_dwarf");
