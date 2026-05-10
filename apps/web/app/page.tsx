@@ -1169,6 +1169,17 @@ function deckBuilderMetricLine(detail: CatalogCardDetail | undefined): string {
     .join(" · ");
 }
 
+function catalogImageMetricTooltip(detail: CatalogCardDetail | null | undefined): string | undefined {
+  if (!detail) return undefined;
+  const tooltipParts = [
+    detail.numeric.installCost !== null ? `Installkosten: ${detail.numeric.installCost}` : null,
+    detail.numeric.strength !== null ? `Stärke: ${detail.numeric.strength}` : null,
+    detail.numeric.cost !== null ? `Kosten: ${detail.numeric.cost}` : null
+  ].filter((value): value is string => value !== null);
+  if (tooltipParts.length === 0) return undefined;
+  return tooltipParts.join(" · ");
+}
+
 function deckBuilderCardTooltip(card: CatalogCardSummary, detail: CatalogCardDetail | undefined): string {
   return [card.title, formatCatalogTypeLine(card), detail ? deckBuilderMetricLine(detail) : "", detail?.text ?? ""].filter(Boolean).join("\n");
 }
@@ -6373,6 +6384,7 @@ function CatalogPanel({
   onClearTypeFilters(): void;
 }) {
   const catalogImageUrl = detail ? localCardImageUrl(detail.catalogCardId) : undefined;
+  const catalogImageTooltip = catalogImageMetricTooltip(detail);
   const showCatalogHardwareOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isHardwareCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const showCatalogOperationOverlay = Boolean(catalogImageUrl) && Boolean(detail) && isOperationCardType(detail?.type) && hasGeneratedCardArt(detail?.catalogCardId);
   const catalogImagePreviewMode = showCatalogHardwareOverlay ? "hardware" : showCatalogOperationOverlay ? "operation" : "";
@@ -6511,8 +6523,8 @@ function CatalogPanel({
                 <span className={`sideBadge ${detail.side}`}>{detail.side}</span>
               </div>
               {catalogImageUrl ? (
-                <div className={`catalogImagePreview ${catalogImagePreviewMode}`}>
-                  <img src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} />
+                <div className={`catalogImagePreview ${catalogImagePreviewMode}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}>
+                  <img src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})} />
                   {showCatalogHardwareOverlay ? (
                     <HardwareImageOverlay
                       title={detail.title}
