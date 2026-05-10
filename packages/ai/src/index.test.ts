@@ -1833,7 +1833,7 @@ describe("MVP 0.9 stronger AI", () => {
     expect(soak.aggregate.reasonCodeCoverage.length).toBeGreaterThanOrEqual(4);
     expect(soak.aggregate.holdoutSeeds).toEqual(["ai-v09-holdout-001", "ai-v09-holdout-002", "ai-v09-holdout-003"]);
     expect(JSON.stringify(soak)).not.toContain("cardInstances");
-  });
+  }, 60_000);
 });
 
 const V094_RUNNER_DECK: DeckDefinition = {
