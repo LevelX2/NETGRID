@@ -893,7 +893,7 @@ const ONR_V1_0_6K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
 
 const ONR_V1_1_2K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
   "onr_v1_006_black-dahlia": { installCost: 10, memoryCost: 1, strength: 5 },
-  "onr_v1_014_codecracker": { installCost: 0, memoryCost: 1, strength: 2 },
+  "onr_v1_014_codecracker": { installCost: 2, memoryCost: 1, strength: 0 },
   "onr_v1_016_cyfermaster": { installCost: 4, memoryCost: 1, strength: 5 },
   "onr_v1_040_loony-goon": { installCost: 4, memoryCost: 1, strength: 0 },
   "onr_v1_060_shaka": { installCost: 4, memoryCost: 1, strength: 2 },

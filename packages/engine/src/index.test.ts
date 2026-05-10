@@ -703,6 +703,8 @@ describe("O:NR v1 Limited local private test access", () => {
 
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     codeGateState = apply(codeGateState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(codeGateState, action) === "onr_v1_261_quandary");
+    codeGateState = apply(codeGateState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker");
+    codeGateState = apply(codeGateState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker");
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "break_subroutine");
     expect(getLegalActions(codeGateState, "runner").find((action) => action.type === "continue_run")?.label).toBe("ICE passieren");
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "continue_run");
@@ -1197,7 +1199,7 @@ describe("V1.1.2K Card Release", () => {
     }
 
     expect(DEMO_CARDS_BY_ID["onr_v1_006_black-dahlia"]).toMatchObject({ installCost: 10, memoryCost: 1, strength: 5 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_014_codecracker"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_014_codecracker"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_016_cyfermaster"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 5 });
     expect(DEMO_CARDS_BY_ID["onr_v1_040_loony-goon"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_060_shaka"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 2 });
@@ -1243,6 +1245,8 @@ describe("V1.1.2K Card Release", () => {
 
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     codeGateState = apply(codeGateState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(codeGateState, action) === "onr_v1_261_quandary");
+    codeGateState = apply(codeGateState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker");
+    codeGateState = apply(codeGateState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker");
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker");
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "continue_run");
     codeGateState = apply(codeGateState, "runner", (action) => action.type === "access_card");
