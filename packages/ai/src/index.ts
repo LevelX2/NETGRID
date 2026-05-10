@@ -1,4 +1,4 @@
-import { applyAction, createGame, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
+import { applyAction, createGame, createGameAfterSetup, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
 import aiProfilesData from "../../../data/ai/ai-profiles-0.9.json";
 import soakSeedsData from "../../../data/ai/ai-soak-seeds-0.9.json";
 import benchmarkProfiles143Data from "../../../data/ai/ai-benchmark-profiles-1.4.3.json";
@@ -582,23 +582,7 @@ export function evaluateV143TuningGate(candidate: V143SimulationRunResult, basel
 export function runV143ExploitRegressionFixtures(config: Partial<AiSimulationConfig> = {}): V143ExploitRegressionResult[] {
   return EXPLOIT_FIXTURES_143.fixtures.map((fixture) => {
     if (fixture.fixtureId === "v143-rnd-repeat-access-freshness") {
-      const summary = simulateAiGame({
-        seed: "v143-exploit-rnd-freshness",
-        runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
-        corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
-        agendaPointsToWin: config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin,
-        maxActions: config.maxActions ?? 90,
-        runnerControllerMode: "belief_ai_v1_4_2",
-        corpControllerMode: "belief_ai_v1_4_2",
-        runnerProfileId: "runner-ai-v1.4.2-normal",
-        corpProfileId: "corp-ai-v1.4.2-normal"
-      });
-      const passed = summary.errors.length === 0 && summary.replayOk;
-      return {
-        fixtureId: fixture.fixtureId,
-        passed,
-        message: passed ? "ok" : summary.errors.join(" | ")
-      };
+      return evaluateV143RndRepeatAccessFreshnessFixture(config);
     }
 
     const summary = simulateAiGame({
@@ -619,6 +603,129 @@ export function runV143ExploitRegressionFixtures(config: Partial<AiSimulationCon
       message: passed ? "ok" : summary.errors.join(" | ")
     };
   });
+}
+
+function evaluateV143RndRepeatAccessFreshnessFixture(config: Partial<AiSimulationConfig>): V143ExploitRegressionResult {
+  const fixtureId = "v143-rnd-repeat-access-freshness";
+  let state = createGameAfterSetup({
+    seed: "v143-exploit-rnd-freshness",
+    runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
+    corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
+    agendaPointsToWin: config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin
+  });
+  const corpDraw = applyFixtureAction(state, "corp", (action) => action.type === "mandatory_draw", "corp_mandatory_draw");
+  if (!corpDraw.ok) return { fixtureId, passed: false, message: corpDraw.message };
+  state = corpDraw.state;
+  const corpEndTurn = applyFixtureAction(state, "corp", (action) => action.type === "end_turn", "corp_end_turn");
+  if (!corpEndTurn.ok) return { fixtureId, passed: false, message: corpEndTurn.message };
+  state = corpEndTurn.state;
+  if (state.pendingChoice?.source === "discard_phase" && state.pendingChoice.side === "corp") {
+    const corpDiscard = applyFixtureChoiceFirstOption(state, "corp", "corp_discard_phase");
+    if (!corpDiscard.ok) return { fixtureId, passed: false, message: corpDiscard.message };
+    state = corpDiscard.state;
+  }
+
+  const baseInput = buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.2-normal",
+    decisionId: `${fixtureId}:${state.stateVersion}:runner`
+  });
+  const rdRun = baseInput.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+  const gainCredit = baseInput.legalActions.find((action) => action.type === "gain_credit");
+  if (!rdRun || !gainCredit) {
+    return {
+      fixtureId,
+      passed: false,
+      message: "missing_required_actions:runner_needs_rd_run_and_gain_credit"
+    };
+  }
+
+  const syntheticRdAccess: PublicGameEvent = {
+    eventId: `${fixtureId}:synthetic_access`,
+    type: "access_card",
+    stateVersionBefore: baseInput.playerView.stateVersion,
+    stateVersionAfter: baseInput.playerView.stateVersion + 1,
+    stateHashAfter: "fnv1a:v143synthetic",
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      serverLabel: "R&D",
+      redactedKind: "accessed_card"
+    }
+  };
+  const staleInput: AiDecisionInput = {
+    ...baseInput,
+    legalActions: [rdRun, gainCredit],
+    eventTail: [...baseInput.eventTail, syntheticRdAccess]
+  };
+  const decision = chooseRunnerAction(staleInput);
+  const selected = staleInput.legalActions.find((action) => action.actionId === decision.actionId);
+  const staleBelief = reconstructBeliefState(staleInput);
+  const passed =
+    selected?.type === "gain_credit" &&
+    decision.reasonCode === "runner.plan.recover_economy" &&
+    staleBelief.runnerOpponentModel?.rndTopFreshness.freshness === "stale_known_same_top";
+  const selectedType = selected?.type ?? "none";
+  return {
+    fixtureId,
+    passed,
+    message: passed
+      ? "ok:selected_gain_credit_on_stale_rnd_top"
+      : `expected_gain_credit_on_stale_rnd_top:selected_${selectedType}:reason_${decision.reasonCode}`
+  };
+}
+
+function applyFixtureAction(
+  state: GameState,
+  side: Side,
+  predicate: (action: LegalAction) => boolean,
+  label: string
+): { ok: true; state: GameState } | { ok: false; message: string } {
+  const legalAction = getLegalActions(state, side).find(predicate);
+  if (!legalAction) {
+    return { ok: false, message: `missing_legal_action:${label}` };
+  }
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: legalAction.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    idempotencyKey: `${label}:${state.stateVersion}:${legalAction.actionId}`
+  });
+  if (!result.ok) {
+    return { ok: false, message: `${label}:${result.error.code}:${result.error.message}` };
+  }
+  return { ok: true, state: result.state };
+}
+
+function applyFixtureChoiceFirstOption(
+  state: GameState,
+  side: Side,
+  label: string
+): { ok: true; state: GameState } | { ok: false; message: string } {
+  const pendingChoice = state.pendingChoice;
+  if (!pendingChoice || pendingChoice.side !== side) return { ok: false, message: `missing_pending_choice:${label}` };
+  const optionId = pendingChoice.options[0]?.id;
+  if (optionId === undefined || optionId === null) return { ok: false, message: `missing_choice_option:${label}` };
+  const choiceAction = getLegalActions(state, side).find((action) => action.type === "resolve_choice");
+  if (!choiceAction) return { ok: false, message: `missing_resolve_choice_action:${label}` };
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: choiceAction.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    selectedChoices: {
+      choiceId: pendingChoice.choiceId,
+      selectedOptionIds: [String(optionId)]
+    },
+    idempotencyKey: `${label}:${state.stateVersion}:${choiceAction.actionId}`
+  });
+  if (!result.ok) {
+    return { ok: false, message: `${label}:${result.error.code}:${result.error.message}` };
+  }
+  return { ok: true, state: result.state };
 }
 
 function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationSummary["cardPoolVersion"] {

@@ -1221,6 +1221,30 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(invalidatedScore.score).toBeGreaterThan(staleScore.score);
   });
 
+  it("prefers economy over immediate repeat R&D runs when top-card freshness is stale", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-rnd-repeat-choice" }));
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    if (getLegalActions(state, "runner").some((action) => action.type === "trash_accessed_card")) {
+      state = apply(state, "runner", (action) => action.type === "decline_trash");
+    }
+    if (getLegalActions(state, "runner").some((action) => action.type === "continue_run" || action.type === "jack_out")) {
+      state = apply(state, "runner", (action) => action.type === "continue_run" || action.type === "jack_out");
+    }
+
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(rdRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!rdRun || !gainCredit) throw new Error("Missing stale R&D or gain_credit action");
+
+    const decision = chooseRunnerAction({ ...input, legalActions: [rdRun, gainCredit] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+    expect(selected?.type).toBe("gain_credit");
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
   it("provides Corp and Runner opponent models and keeps DecisionDebug side-safe", () => {
     const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-opponent-models" }));
     const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
@@ -1393,6 +1417,7 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
 
     expect(results.map((result) => result.fixtureId).sort()).toEqual(fixtures.map((fixture) => fixture.fixtureId).sort());
     expect(results.every((result) => result.passed)).toBe(true);
+    expect(results.find((result) => result.fixtureId === "v143-rnd-repeat-access-freshness")?.message).toBe("ok:selected_gain_credit_on_stale_rnd_top");
     expect(JSON.stringify(results)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
   });
 });

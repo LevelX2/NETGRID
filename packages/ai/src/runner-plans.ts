@@ -342,7 +342,12 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
   const server = target ? features.serverFeatures.get(target) : undefined;
   const history = publicServerMentions(input, target);
   const freshness = beliefState.runnerOpponentModel?.rndTopFreshness;
-  const staleRndPenalty = target === "rd" && (candidate.kind === "pressure_rnd" || candidate.kind === "safe_probe_run") && freshness?.freshness === "stale_known_same_top" ? 120 : 0;
+  const staleRndPenalty =
+    target === "rd" && (candidate.kind === "pressure_rnd" || candidate.kind === "safe_probe_run") && freshness?.freshness === "stale_known_same_top"
+      ? candidate.kind === "pressure_rnd"
+        ? 420
+        : 220
+      : 0;
   const score =
     candidate.kind === "pressure_rnd"
       ? 135 + history * 10 - staleRndPenalty
