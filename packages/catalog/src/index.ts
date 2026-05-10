@@ -892,11 +892,11 @@ const ONR_V1_0_6K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
 };
 
 const ONR_V1_1_2K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
-  "onr_v1_006_black-dahlia": { installCost: 5, memoryCost: 1, strength: 10 },
+  "onr_v1_006_black-dahlia": { installCost: 10, memoryCost: 1, strength: 5 },
   "onr_v1_014_codecracker": { installCost: 0, memoryCost: 1, strength: 2 },
-  "onr_v1_016_cyfermaster": { installCost: 5, memoryCost: 1, strength: 2 },
-  "onr_v1_040_loony-goon": { installCost: 0, memoryCost: 1, strength: 4 },
-  "onr_v1_060_shaka": { installCost: 2, memoryCost: 1, strength: 4 },
+  "onr_v1_016_cyfermaster": { installCost: 4, memoryCost: 1, strength: 5 },
+  "onr_v1_040_loony-goon": { installCost: 4, memoryCost: 1, strength: 0 },
+  "onr_v1_060_shaka": { installCost: 4, memoryCost: 1, strength: 2 },
   "onr_v1_073_wizards-book": { installCost: 2, memoryCost: 1, strength: 5 },
   "onr_v1_253_laser-wire": { rezCost: 4, strength: 2 },
   "onr_v1_257_nerve-labyrinth": { rezCost: 6, strength: 4 },
@@ -916,7 +916,7 @@ const ONR_V1_1_2K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumer
 
 const ONR_V1_2_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
   "onr_v1_021_dwarf": { installCost: 6, memoryCost: 1, strength: 3 },
-  "onr_v1_039_krash": { installCost: 3, memoryCost: 1, strength: 0 },
+  "onr_v1_039_krash": { installCost: 0, memoryCost: 1, strength: 0 },
   "onr_v1_066_snowball": { installCost: 3, memoryCost: 1, strength: 1 },
   "onr_v1_074_worm": { installCost: 2, memoryCost: 1, strength: 1 },
   "onr_v1_081_custodial-position": { cost: 0, installCost: null },

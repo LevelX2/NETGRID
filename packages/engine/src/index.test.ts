@@ -718,6 +718,9 @@ describe("O:NR v1 Limited local private test access", () => {
 
     sentryState = apply(sentryState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     sentryState = apply(sentryState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(sentryState, action) === "onr_v1_259_in-the-face");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon");
     sentryState = apply(sentryState, "runner", (action) => action.type === "break_subroutine");
     sentryState = apply(sentryState, "runner", (action) => action.type === "continue_run");
     sentryState = apply(sentryState, "runner", (action) => action.type === "access_card");
@@ -1193,11 +1196,11 @@ describe("V1.1.2K Card Release", () => {
       expect(definition?.mechanics.join(" ")).not.toMatch(/prevention|avoid|replacement|hosting|virus|recurring_credit|bad_publicity/);
     }
 
-    expect(DEMO_CARDS_BY_ID["onr_v1_006_black-dahlia"]).toMatchObject({ installCost: 5, memoryCost: 1, strength: 10 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_006_black-dahlia"]).toMatchObject({ installCost: 10, memoryCost: 1, strength: 5 });
     expect(DEMO_CARDS_BY_ID["onr_v1_014_codecracker"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 2 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_016_cyfermaster"]).toMatchObject({ installCost: 5, memoryCost: 1, strength: 2 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_040_loony-goon"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 4 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_060_shaka"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 4 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_016_cyfermaster"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 5 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_040_loony-goon"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_060_shaka"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_073_wizards-book"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 5 });
     expect(DEMO_CARDS_BY_ID["onr_v1_253_laser-wire"]).toMatchObject({ rezCost: 4, strength: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_257_nerve-labyrinth"]).toMatchObject({ rezCost: 6, strength: 4 });
@@ -1254,6 +1257,9 @@ describe("V1.1.2K Card Release", () => {
 
     sentryState = apply(sentryState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     sentryState = apply(sentryState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(sentryState, action) === "onr_v1_259_in-the-face");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon");
+    sentryState = apply(sentryState, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon");
     sentryState = apply(sentryState, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon");
     sentryState = apply(sentryState, "runner", (action) => action.type === "continue_run");
     sentryState = apply(sentryState, "runner", (action) => action.type === "access_card");
@@ -1321,7 +1327,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     }
 
     expect(DEMO_CARDS_BY_ID["onr_v1_021_dwarf"]).toMatchObject({ installCost: 6, memoryCost: 1, strength: 3 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_066_snowball"]).toMatchObject({ installCost: 3, memoryCost: 1, strength: 1 });
     expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({ installCost: 2, memoryCost: 1, strength: 1 });
     expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({ cost: 0 });
