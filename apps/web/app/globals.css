@@ -637,6 +637,74 @@ select {
   grid-template-columns: 1fr;
 }
 
+.openLanMatchesPanel {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--field-bg);
+  padding: 10px;
+}
+
+.openLanMatchesHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.openLanMatchesHeader .eyebrow {
+  margin: 0;
+}
+
+.openLanList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.openLanEntry {
+  width: 100%;
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--panel);
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.openLanEntry:hover,
+.openLanEntry:focus-visible {
+  border-color: var(--focus);
+  outline: 0;
+}
+
+.openLanEntry.selected {
+  border-color: var(--active-control-border);
+  background: var(--catalog-active-bg);
+}
+
+.openLanEntry small {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.openLanEmpty,
+.openLanTimestamp {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.openLanNotice {
+  margin: 0;
+}
+
 .joinLinkField {
   display: grid;
   gap: 6px;
@@ -2512,21 +2580,49 @@ select {
 }
 
 .serverRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 12px;
 }
 
-.serverRow.centrals {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .server {
-  min-height: 220px;
-  padding: 10px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 0;
+  padding: 8px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--section-bg);
+}
+
+.serverLayout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.serverLead {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 6px;
+  min-width: 30px;
+  padding-right: 8px;
+  border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
+}
+
+.serverLeadMeta {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.serverBody {
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .server.activeRunTarget {
@@ -2545,6 +2641,22 @@ select {
 .server h3 {
   margin: 0 0 8px;
   font-size: 15px;
+}
+
+.serverContextSideButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 900;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.serverContextSideButton.rigGroupSideLabel {
+  font-size: clamp(11px, calc(var(--cards-min-width, 116px) * 0.12), 15px);
+  border-right-color: color-mix(in srgb, var(--runner), var(--line) 54%);
 }
 
 .serverTitle {
@@ -2612,6 +2724,20 @@ select {
   margin-left: 0;
 }
 
+.serverRunButton.serverRunButtonSide {
+  height: auto;
+  min-height: 24px;
+  padding: 2px 5px;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.serverRunButton.serverRunButtonSide .costChip {
+  min-width: 19px;
+  height: 16px;
+  font-size: 10px;
+}
+
 .serverRunButton .costChip {
   min-width: 21px;
   height: 17px;
@@ -2628,6 +2754,14 @@ select {
   background: var(--zone-chip-bg);
   font-size: 12px;
   font-weight: 700;
+}
+
+.serverLead .serverCount {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  padding: 7px 3px;
+  min-height: 42px;
+  font-size: 11px;
 }
 
 .lane {
@@ -2652,18 +2786,20 @@ select {
   margin: 8px 0 4px;
 }
 
-.remoteServerLanes {
+.pairedServerLanes {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(2, max-content);
   gap: 8px;
   align-items: start;
+  width: fit-content;
+  max-width: 100%;
 }
 
-.remoteServerLane {
+.pairedServerLane {
   min-width: 0;
 }
 
-.remoteServerLane .lane {
+.pairedServerLane .lane {
   width: fit-content;
   max-width: 100%;
   min-width: calc(76px * var(--lane-card-scale, 1) + 12px);
@@ -4002,6 +4138,51 @@ select {
   margin: 0;
 }
 
+.zoneBoardSection {
+  padding-top: 10px;
+}
+
+.zoneSectionLayout {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.zoneSectionLead {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 6px;
+}
+
+.zoneSectionBody {
+  min-width: 0;
+}
+
+.zoneSectionTitle {
+  margin: 0;
+  color: color-mix(in srgb, var(--runner), white 10%);
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.zoneSectionTitle.rigGroupSideLabel {
+  font-size: clamp(12px, calc(var(--cards-min-width, 116px) * 0.13), 16px);
+  border-right-color: color-mix(in srgb, var(--runner), var(--line) 58%);
+  letter-spacing: 0.05em;
+}
+
+.zoneSectionLead .zoneLimitBadge {
+  min-height: 20px;
+  padding: 2px 6px;
+  font-size: 10px;
+}
+
+.zoneSectionLead .zoneLimitBadge strong {
+  font-size: 10px;
+}
+
 .runnerGripHeapLayout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(160px, 230px);
@@ -4811,6 +4992,35 @@ select,
 .runTimeline {
   border-color: var(--run-active-border);
   background: var(--run-active-bg);
+}
+
+.runTimelineOverlay {
+  position: fixed;
+  top: 66px;
+  left: 50%;
+  z-index: 69;
+  width: min(1080px, calc(100vw - 24px));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.runTimeline.overlay {
+  box-shadow:
+    0 14px 36px rgb(0 0 0 / 0.34),
+    0 0 0 1px color-mix(in srgb, var(--run-active-border), transparent 32%);
+  backdrop-filter: blur(7px);
+  animation: runOverlaySlideIn 180ms ease-out;
+}
+
+@keyframes runOverlaySlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .runTimelineHead {
@@ -5698,7 +5908,7 @@ select,
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .remoteServerLanes {
+  .pairedServerLanes {
     grid-template-columns: 1fr;
   }
 
@@ -5927,6 +6137,11 @@ select,
 
   .runSteps {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .runTimelineOverlay {
+    top: 58px;
+    width: min(calc(100vw - 12px), 720px);
   }
 
   .chronicleEntry {

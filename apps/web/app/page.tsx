@@ -150,6 +150,8 @@ const CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
 const LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
 const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
 const LEGACY_MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
+const RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
+const LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
 const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
@@ -165,7 +167,7 @@ const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
 const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.9.4";
+const APP_STATUS_LABEL = "V2.3a";
 const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
 const APP_ICON_SRC = `/brand/netgrid-icon-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
 const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
@@ -209,6 +211,7 @@ type DeckSideFilter = Side | "all";
 type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
 type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
 type CardTooltipMode = "simple" | "enhanced" | "image";
+type RunOverlayPositionPreference = { kind: "default" } | { kind: "custom"; xPercent: number; yPercent: number };
 
 type CardTooltipSettings = {
   hoverOpenDelayMs: CardTooltipHoverDelayMs;
@@ -424,6 +427,20 @@ type JoinMatchResponse = {
   winner?: Winner;
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
+  error?: { message: string };
+};
+
+type OpenMatchEntry = {
+  matchId: string;
+  hostDisplayName: string;
+  mode: "human_vs_human";
+  status: "pending";
+  createdAt: string;
+  ageSeconds: number;
+};
+
+type OpenMatchesResponse = {
+  matches?: OpenMatchEntry[];
   error?: { message: string };
 };
 
@@ -1105,7 +1122,7 @@ function accessServerTitleLabel(serverLabel: string): string {
 function accessServerLocationPhrase(serverLabel: string): string {
   if (serverLabel === "HQ") return "im Hauptquartier (HQ)";
   if (serverLabel === "Archive") return "im Archiv";
-  if (/^Außenserver \d+$/.test(serverLabel)) return `im ${serverLabel}`;
+  if (/^Fort \d+$/.test(serverLabel)) return `im ${serverLabel}`;
   return `in ${serverLabel}`;
 }
 
@@ -1171,14 +1188,10 @@ function deckMetadataFromEditable(deck: EditableDeck | null): DeckPublicMetadata
   };
 }
 
-function serverLanesForSide(side: Side, server: PlayerView["servers"][number]): Array<{ kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }> {
+function serverLanesForSide(_side: Side, server: PlayerView["servers"][number]): Array<{ kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }> {
   const iceLane = { kind: "ice" as const, label: "ICE" as const, cards: server.ice };
   const rootLane = { kind: "root" as const, label: "Root" as const, cards: server.root };
-  return side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane];
-}
-
-function isRemoteServerId(serverId: string): boolean {
-  return /^remote_\d+$/.test(serverId);
+  return [rootLane, iceLane];
 }
 
 function opponentSide(side: Side): Side {
@@ -1297,6 +1310,11 @@ export default function Page() {
   const [joinLinkInput, setJoinLinkInput] = useState("");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
+  const [discoverableInLan, setDiscoverableInLan] = useState(true);
+  const [openLanMatches, setOpenLanMatches] = useState<OpenMatchEntry[]>([]);
+  const [openLanLoading, setOpenLanLoading] = useState(false);
+  const [openLanError, setOpenLanError] = useState("");
+  const [openLanUpdatedAt, setOpenLanUpdatedAt] = useState<string | null>(null);
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [payload, setPayload] = useState<ClientPayload | null>(null);
   const [lobby, setLobby] = useState<LobbyClientPayload | null>(null);
@@ -1850,6 +1868,11 @@ export default function Page() {
     testSetupMode
   });
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
+  const openLanJoinableIds = new Set(openLanMatches.map((entry) => entry.matchId));
+  const joinMatchIdTrimmed = joinMatchId.trim();
+  const joinTokenTrimmed = joinToken.trim();
+  const canJoinViaOpenLan = joinMatchIdTrimmed.length > 0 && joinTokenTrimmed.length === 0 && openLanJoinableIds.has(joinMatchIdTrimmed);
+  const canSubmitJoin = joinMatchIdTrimmed.length > 0 && (joinTokenTrimmed.length > 0 || canJoinViaOpenLan);
   const visibleDeckMetadataEntries =
     gameMode === "ai_vs_ai"
       ? aiDeckPolicy === "selected"
@@ -2119,6 +2142,7 @@ export default function Page() {
         corpDifficulty,
         ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
         ...(isHumanVsHuman ? { countdownSeconds } : {}),
+        ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
           matchFormat,
           agendaPointsToWin: effectiveAgendaTarget
@@ -2286,12 +2310,51 @@ export default function Page() {
     return side === "runner" ? { runnerDeckSnapshotId: snapshotId } : { corpDeckSnapshotId: snapshotId };
   }
 
+  const refreshOpenLanMatches = async (silent = false) => {
+    if (!silent) setOpenLanLoading(true);
+    setOpenLanError("");
+    try {
+      const response = await fetchOpenLanMatches();
+      if (response.error) {
+        setOpenLanMatches([]);
+        setOpenLanError(response.error.message);
+        setOpenLanUpdatedAt(new Date().toISOString());
+        return;
+      }
+      setOpenLanMatches(response.matches ?? []);
+      setOpenLanUpdatedAt(new Date().toISOString());
+    } catch (error) {
+      setOpenLanMatches([]);
+      setOpenLanError(serverErrorNotice(error, "Offene Spiele konnten nicht geladen werden."));
+      setOpenLanUpdatedAt(new Date().toISOString());
+    } finally {
+      if (!silent) setOpenLanLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (mode !== "join" || session) return;
+    void refreshOpenLanMatches();
+    const timer = window.setInterval(() => {
+      void refreshOpenLanMatches(true);
+    }, 7000);
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [mode, session?.matchId]);
+
   const updateJoinLinkInput = (value: string) => {
     setJoinLinkInput(value);
     const parsed = parseJoinLinkInput(value);
     if (!parsed) return;
     setJoinMatchId(parsed.matchId);
     setJoinToken(parsed.joinToken);
+  };
+
+  const selectOpenLanMatch = (matchId: string) => {
+    setJoinMatchId(matchId);
+    setJoinToken("");
+    setJoinLinkInput("");
   };
 
   const joinMatch = async () => {
@@ -2312,8 +2375,8 @@ export default function Page() {
     }
     let joined: JoinMatchResponse;
     try {
-      joined = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(joinMatchId)}/join`, {
-        token: joinToken,
+      joined = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(joinMatchIdTrimmed)}/join`, {
+        token: joinTokenTrimmed,
         displayName,
         ...deckPayload
       });
@@ -2322,7 +2385,12 @@ export default function Page() {
       return;
     }
     if (joined.error) {
-      setNotice(joined.error.message);
+      if (canJoinViaOpenLan) {
+        setNotice("Das ausgewählte Spiel ist nicht mehr offen. Die LAN-Liste wurde aktualisiert.");
+        void refreshOpenLanMatches(true);
+      } else {
+        setNotice(joined.error.message);
+      }
       return;
     }
     rememberDisplayName(displayName);
@@ -3376,6 +3444,12 @@ export default function Page() {
                         </select>
                       </label>
                     ) : null}
+                    {isHumanVsHuman ? (
+                      <label className={`deckBuilderToggle ${discoverableInLan ? "checked" : ""}`}>
+                        <input checked={discoverableInLan} onChange={(event) => setDiscoverableInLan(event.target.checked)} type="checkbox" />
+                        In LAN-Liste sichtbar
+                      </label>
+                    ) : null}
                     <label>
                       Seed
                       <input value={seed} onChange={(event) => setSeed(event.target.value)} />
@@ -3453,6 +3527,41 @@ export default function Page() {
               </div>
             ) : (
               <div className="matchStartConsole joinConsole">
+                <section className="openLanMatchesPanel" aria-label="Offene Spiele im LAN" data-testid="open-lan-panel">
+                  <div className="openLanMatchesHeader">
+                    <p className="eyebrow">Offene Spiele im LAN</p>
+                    <button className="button" onClick={() => void refreshOpenLanMatches()} type="button" disabled={openLanLoading} data-testid="refresh-open-lan">
+                      <RotateCcw size={14} />
+                      Aktualisieren
+                    </button>
+                  </div>
+                  {openLanError ? (
+                    <p className="notice openLanNotice" role="status">
+                      {openLanError}
+                    </p>
+                  ) : null}
+                  {openLanMatches.length === 0 ? (
+                    <p className="openLanEmpty">{openLanLoading ? "Lade offene Spiele ..." : "Keine offenen Spiele gefunden."}</p>
+                  ) : (
+                    <ul className="openLanList" data-testid="open-lan-list">
+                      {openLanMatches.map((entry) => (
+                        <li key={entry.matchId}>
+                          <button
+                            className={`openLanEntry ${joinMatchIdTrimmed === entry.matchId && joinTokenTrimmed.length === 0 ? "selected" : ""}`}
+                            onClick={() => selectOpenLanMatch(entry.matchId)}
+                            type="button"
+                          >
+                            <strong>{shortMatchId(entry.matchId)}</strong>
+                            <small>
+                              {entry.hostDisplayName} · Mensch vs Mensch · Status: wartend · Alter: {openMatchAgeLabel(entry.ageSeconds)}
+                            </small>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {openLanUpdatedAt ? <p className="openLanTimestamp">Zuletzt aktualisiert: {formatLobbyTime(openLanUpdatedAt)}</p> : null}
+                </section>
                 <label className="joinLinkField">
                   Join-Link
                   <input value={joinLinkInput} onChange={(event) => updateJoinLinkInput(event.target.value)} data-testid="join-link-input" />
@@ -3501,7 +3610,7 @@ export default function Page() {
                     </label>
                   </div>
                 </details>
-                <button className="button primary wide" onClick={joinMatch} disabled={!joinMatchId || !joinToken} data-testid="join-match">
+                <button className="button primary wide" onClick={joinMatch} disabled={!canSubmitJoin} data-testid="join-match">
                   <Link2 size={16} />
                   Mit Decks beitreten
                 </button>
@@ -3690,6 +3799,7 @@ export default function Page() {
           advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
         }}
       />
+      {activeView?.run ? <RunTimelineOverlay view={activeView} legalActions={payload.legalActions} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} /> : null}
 
       <div className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`} data-testid="active-game">
         <aside className="column panel sidePanel">
@@ -3739,7 +3849,6 @@ export default function Page() {
             onActionContext={selectActionCard}
             onAction={submitAction}
           />
-          <RunTimeline view={activeView} legalActions={payload.legalActions} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} />
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -3756,8 +3865,6 @@ export default function Page() {
                     const cardCount = centralServerCardCount(activeView, server.id);
                     const runAction = runActionForServer(server.id);
                     const lanes = serverLanesForSide(activeView.side, server);
-                    const remoteIceLane = lanes.find((lane) => lane.kind === "ice") ?? null;
-                    const remoteRootLane = lanes.find((lane) => lane.kind === "root") ?? null;
                     const renderLaneCards = (lane: { kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }) => {
                       if (server.id === "archives" && lane.kind === "root") {
                         return (
@@ -3804,52 +3911,45 @@ export default function Page() {
                         data-testid="server"
                         data-server-id={server.id}
                       >
-                        <h3 className="serverTitle">
-                          <button className="serverContextButton" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
-                            {serverDisplayLabel(server.id)}
-                          </button>
-                          {runAction ? (
-                            <button
-                              className="serverRunButton"
-                              type="button"
-                              onClick={() => submitAction(runAction)}
-                              disabled={Boolean(payload.winner) || connection !== "online"}
-                              aria-label={`${actionButtonLabel(runAction)} starten`}
-                              title={actionButtonLabel(runAction)}
-                              data-testid="server-run-action"
-                              data-server-id={server.id}
-                            >
-                              <RunIcon size={13} />
-                              <CostChips action={runAction} />
+                        <div className="serverLayout">
+                          <div className="serverLead">
+                            <button className="serverContextButton serverContextSideButton rigGroupSideLabel" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
+                              {serverDisplayLabel(server.id)}
                             </button>
-                          ) : null}
-                          {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
-                        </h3>
-                        {isRemoteServerId(server.id) && remoteIceLane && remoteRootLane ? (
-                          <div className="remoteServerLanes">
-                            {[remoteIceLane, remoteRootLane].map((lane) => (
-                              <div className="serverLaneGroup remoteServerLane" key={lane.label}>
-                                <div className="laneLabel">
-                                  <span>{lane.label}</span>
-                                </div>
-                                <div className="lane" style={boardLaneStyle}>
-                                  {renderLaneCards(lane)}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          lanes.map((lane) => (
-                            <div className="serverLaneGroup" key={lane.label}>
-                              <div className="laneLabel">
-                                <span>{lane.label}</span>
-                              </div>
-                              <div className="lane" style={boardLaneStyle}>
-                                {renderLaneCards(lane)}
-                              </div>
+                            <div className="serverLeadMeta">
+                              {runAction ? (
+                                <button
+                                  className="serverRunButton serverRunButtonSide"
+                                  type="button"
+                                  onClick={() => submitAction(runAction)}
+                                  disabled={Boolean(payload.winner) || connection !== "online"}
+                                  aria-label={`${actionButtonLabel(runAction)} starten`}
+                                  title={actionButtonLabel(runAction)}
+                                  data-testid="server-run-action"
+                                  data-server-id={server.id}
+                                >
+                                  <RunIcon size={13} />
+                                  <CostChips action={runAction} />
+                                </button>
+                              ) : null}
+                              {cardCount !== null ? <span className="serverCount">{formatCardCount(cardCount)}</span> : null}
                             </div>
-                          ))
-                        )}
+                          </div>
+                          <div className="serverBody">
+                            <div className="pairedServerLanes">
+                              {lanes.map((lane) => (
+                                <div className="serverLaneGroup pairedServerLane" key={lane.label}>
+                                  <div className="laneLabel">
+                                    <span>{lane.label}</span>
+                                  </div>
+                                  <div className="lane" style={boardLaneStyle}>
+                                    {renderLaneCards(lane)}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
                       </article>
                     );
                   })}
@@ -3896,15 +3996,71 @@ export default function Page() {
               </div>
             </section>
           ) : null}
-          <section className="section panel boardSection">
-            <div className="sectionTitleLine boardSectionTitle">
-              <h2>{session.side === "runner" ? "Grip" : "HQ"}</h2>
-              <ZoneLimitBadge label={activeView.side === "runner" ? "Grip" : "HQ"} value={`${activeView.own.gripOrHq.length}/${activeView.own.maxHandSize}`} />
-            </div>
-            {activeView.side === "runner" ? (
-              <div className="runnerGripHeapLayout">
-                <div className="runnerGripColumn">
-                  <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "grip") ? "cueHighlightSoft" : ""}`} style={handCardsStyle}>
+          <section className="section panel boardSection zoneBoardSection">
+            <div className="zoneSectionLayout">
+              <div className="zoneSectionLead">
+                <h2 className="zoneSectionTitle rigGroupSideLabel">{session.side === "runner" ? "Grip" : "HQ"}</h2>
+                <ZoneLimitBadge label={activeView.side === "runner" ? "Grip" : "HQ"} value={`${activeView.own.gripOrHq.length}/${activeView.own.maxHandSize}`} />
+              </div>
+              <div className="zoneSectionBody">
+                {activeView.side === "runner" ? (
+                  <div className="runnerGripHeapLayout">
+                    <div className="runnerGripColumn">
+                      <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "grip") ? "cueHighlightSoft" : ""}`} style={handCardsStyle}>
+                        {activeView.own.gripOrHq.map((card) => {
+                          const displayCard = enrichCard(card);
+                          return (
+                            <CardView
+                              key={card.instanceId}
+                              card={displayCard}
+                              displayMode={cardDisplayMode}
+                              hiddenSide={activeView.side}
+                              selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                              actions={cardActionsFor(card)}
+                              actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                              onAction={submitAction}
+                              onFocus={focusCard}
+                              onActionContextSelect={selectActionCard}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className={`runnerHeapColumn ${zoneHighlighted(activeCueHighlight, activeView.side, "heap") ? "cueHighlightSoft" : ""}`}>
+                      <div className="runnerHeapHead">
+                        <strong>Heap</strong>
+                        <ZoneLimitBadge label="Heap" value={String(activeView.own.heapOrArchives.length)} />
+                      </div>
+                      {activeView.own.heapOrArchives.length > 0 ? (
+                        <div className="runnerHeapOverlapRow">
+                          {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
+                            const displayCard = enrichCard(card);
+                            return (
+                              <CardView
+                                key={card.instanceId}
+                                card={displayCard}
+                                compact
+                                displayMode={cardDisplayMode}
+                                selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                                actions={cardActionsFor(card)}
+                                actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                onAction={submitAction}
+                                onFocus={focusCard}
+                                onActionContextSelect={selectActionCard}
+                              />
+                            );
+                          })}
+                          {activeView.own.heapOrArchives.length > RUNNER_HEAP_PREVIEW_LIMIT ? (
+                            <span className="archivesOverflowBadge">+{activeView.own.heapOrArchives.length - RUNNER_HEAP_PREVIEW_LIMIT}</span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p className="archivesPileEmpty">Keine Karten im Heap.</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`} style={handCardsStyle}>
                     {activeView.own.gripOrHq.map((card) => {
                       const displayCard = enrichCard(card);
                       return (
@@ -3923,61 +4079,9 @@ export default function Page() {
                       );
                     })}
                   </div>
-                </div>
-                <div className={`runnerHeapColumn ${zoneHighlighted(activeCueHighlight, activeView.side, "heap") ? "cueHighlightSoft" : ""}`}>
-                  <div className="runnerHeapHead">
-                    <strong>Heap</strong>
-                    <ZoneLimitBadge label="Heap" value={String(activeView.own.heapOrArchives.length)} />
-                  </div>
-                  {activeView.own.heapOrArchives.length > 0 ? (
-                    <div className="runnerHeapOverlapRow">
-                      {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
-                        const displayCard = enrichCard(card);
-                        return (
-                          <CardView
-                            key={card.instanceId}
-                            card={displayCard}
-                            compact
-                            displayMode={cardDisplayMode}
-                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                            actions={cardActionsFor(card)}
-                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                            onAction={submitAction}
-                            onFocus={focusCard}
-                            onActionContextSelect={selectActionCard}
-                          />
-                        );
-                      })}
-                      {activeView.own.heapOrArchives.length > RUNNER_HEAP_PREVIEW_LIMIT ? (
-                        <span className="archivesOverflowBadge">+{activeView.own.heapOrArchives.length - RUNNER_HEAP_PREVIEW_LIMIT}</span>
-                      ) : null}
-                    </div>
-                  ) : (
-                    <p className="archivesPileEmpty">Keine Karten im Heap.</p>
-                  )}
-                </div>
+                )}
               </div>
-            ) : (
-              <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`} style={handCardsStyle}>
-                {activeView.own.gripOrHq.map((card) => {
-                  const displayCard = enrichCard(card);
-                  return (
-                    <CardView
-                      key={card.instanceId}
-                      card={displayCard}
-                      displayMode={cardDisplayMode}
-                      hiddenSide={activeView.side}
-                      selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                      actions={cardActionsFor(card)}
-                      actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                      onAction={submitAction}
-                      onFocus={focusCard}
-                      onActionContextSelect={selectActionCard}
-                    />
-                  );
-                })}
-              </div>
-            )}
+            </div>
           </section>
         </section>
 
@@ -5246,7 +5350,7 @@ function SpecialZonesStrip({
   );
 }
 
-function RunTimeline({
+function RunTimelineOverlay({
   view,
   legalActions,
   cardDetailsById,
@@ -5257,41 +5361,34 @@ function RunTimeline({
   cardDetailsById: Record<string, CatalogCardDetail>;
   highlighted?: boolean;
 }) {
-  if (!view.run) {
-    return (
-      <div className={`runTimeline ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline">
-        <div className="runTimelineHead">
-          <RunIcon size={18} />
-          <span>Kein aktiver Run</span>
-        </div>
-      </div>
-    );
-  }
+  if (!view.run) return null;
   const currentStep = currentRunTimelineStep(view, legalActions);
   const encounteredIce = view.run?.encounteredIce ? enrichVisibleCard(view.run.encounteredIce, cardDetailsById) : null;
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
   return (
-    <div className={`runTimeline active ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline">
-      <div className="runTimelineHead">
-        <RunIcon size={18} />
-        <span>{`Run auf ${serverDisplayLabel(view.run.attackedServerId)}`}</span>
-      </div>
-      <div className="runSteps">
-        {RUN_TIMELINE_STEPS.map((step) => (
-          <span className={currentStep === step.id ? "current" : ""} key={step.id}>
-            {step.label}
-          </span>
-        ))}
-      </div>
-      {jackOutAvailable ? <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p> : null}
-      {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
-      {encounteredIce ? (
-        <div className="encounterFocus">
-          <span>Begegnung</span>
-          <strong>{encounteredIce.known ? [encounteredIce.title, encounteredIce.rulesText].filter(Boolean).join(" · ") : "Verdecktes ICE"}</strong>
+    <div className="runTimelineOverlay" aria-live="polite" aria-atomic="true">
+      <div className={`runTimeline active overlay ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline" role="status">
+        <div className="runTimelineHead">
+          <RunIcon size={18} />
+          <span>{`Run auf ${serverDisplayLabel(view.run.attackedServerId)}`}</span>
         </div>
-      ) : null}
+        <div className="runSteps">
+          {RUN_TIMELINE_STEPS.map((step) => (
+            <span className={currentStep === step.id ? "current" : ""} key={step.id}>
+              {step.label}
+            </span>
+          ))}
+        </div>
+        {jackOutAvailable ? <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p> : null}
+        {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
+        {encounteredIce ? (
+          <div className="encounterFocus">
+            <span>Begegnung</span>
+            <strong>{encounteredIce.known ? [encounteredIce.title, encounteredIce.rulesText].filter(Boolean).join(" · ") : "Verdecktes ICE"}</strong>
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -7788,6 +7885,16 @@ async function bootstrap(session: SessionInfo): Promise<ClientPayload | LobbyCli
   return (await response.json()) as ClientPayload | LobbyClientPayload;
 }
 
+async function fetchOpenLanMatches(): Promise<OpenMatchesResponse> {
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_HTTP}/api/matches/open`, { cache: "no-store" });
+  } catch {
+    throw new ServerConnectionError();
+  }
+  return (await response.json()) as OpenMatchesResponse;
+}
+
 function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "player_b" {
   return lobby.sideAssignment.runnerPlayer === "player_a" && side === "runner" ? "player_a" : lobby.sideAssignment.corpPlayer === "player_a" && side === "corp" ? "player_a" : "player_b";
 }
@@ -7801,6 +7908,20 @@ function connectionQualityLabel(quality: LobbyParticipant["connectionQuality"] |
 function formatLobbyTime(value: string | undefined): string {
   if (!value) return "";
   return new Intl.DateTimeFormat("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date(value));
+}
+
+function shortMatchId(matchId: string): string {
+  const normalized = matchId.replace(/^match_/, "");
+  return normalized.length > 10 ? normalized.slice(0, 10) : normalized;
+}
+
+function openMatchAgeLabel(ageSeconds: number): string {
+  if (!Number.isFinite(ageSeconds) || ageSeconds < 0) return "gerade erstellt";
+  if (ageSeconds < 60) return `${ageSeconds}s`;
+  const minutes = Math.floor(ageSeconds / 60);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  return `${hours} h`;
 }
 
 function rememberDisplayName(name: string): void {
