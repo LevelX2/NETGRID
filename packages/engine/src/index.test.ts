@@ -173,6 +173,70 @@ describe("MVP 0.1 turns and cards", () => {
     expect(remote?.root).toEqual([]);
     expect(state.cardInstances[iceId]?.zone).toMatchObject({ side: "corp", zone: "serverIce", serverId: remote?.id });
   });
+
+  it("applies escalating base install costs for the 2nd and 3rd ICE on the same server", () => {
+    let state = createGameAfterSetup({ seed: "corp-ice-scaling-cost" });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+
+    const firstIceId = moveCorpCardToHq(state, "simple_barrier_ice");
+    const secondIceId = moveCorpCardToHq(state, "simple_sentry_ice");
+    const thirdIceEntry = Object.entries(state.cardInstances).find(
+      ([id, card]) => card.definitionId === "simple_barrier_ice" && id !== firstIceId && id !== secondIceId
+    );
+    expect(thirdIceEntry).toBeDefined();
+    if (!thirdIceEntry) throw new Error("Missing third ICE copy");
+    const thirdIceId = thirdIceEntry[0] as CardInstanceId;
+    removeEverywhere(state, thirdIceId);
+    state.corp.hq.unshift(thirdIceId);
+    state.cardInstances[thirdIceId] = { ...state.cardInstances[thirdIceId]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
+
+    const firstRdInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === firstIceId &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "ice"
+    );
+    expect(firstRdInstall.costs[0]?.credits).toBeUndefined();
+    state = apply(state, "corp", (action) => action.actionId === firstRdInstall.actionId);
+
+    const secondRdInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === secondIceId &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "ice"
+    );
+    expect(secondRdInstall.costs[0]?.credits).toBe(1);
+    expect(secondRdInstall.payload?.iceInstallBaseCost).toBe(1);
+    expect(secondRdInstall.payload?.iceInstallAdditionalCost).toBe(0);
+    expect(secondRdInstall.payload?.iceInstallTotalCost).toBe(1);
+    state = apply(state, "corp", (action) => action.actionId === secondRdInstall.actionId);
+
+    const thirdRdInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === thirdIceId &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "ice"
+    );
+    expect(thirdRdInstall.costs[0]?.credits).toBe(2);
+    expect(thirdRdInstall.payload?.iceInstallBaseCost).toBe(2);
+    expect(thirdRdInstall.payload?.iceInstallAdditionalCost).toBe(0);
+    expect(thirdRdInstall.payload?.iceInstallTotalCost).toBe(2);
+    state = apply(state, "corp", (action) => action.actionId === thirdRdInstall.actionId);
+
+    const rdServer = state.corp.servers.find((server) => server.id === "rd");
+    expect(rdServer?.ice).toHaveLength(3);
+    expect(state.corp.credits).toBe(17);
+  });
 });
 
 describe("MVP 0.1 runs, access and scoring", () => {

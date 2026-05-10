@@ -1297,8 +1297,10 @@ function corpMainActions(state: GameState): LegalAction[] {
     if (definition.type === "ice") {
       actions.push(action(state, "corp", "install_card", `ICE vor neuem Remote installieren`, id, [{ clicks: 1 }], { cardId: id, serverId: "new_remote", placement: "ice" }));
       for (const server of state.corp.servers) {
+        const baseCost = corpIceInstallBaseCost(server);
         const additionalCost = corpIceInstallAdditionalCost(state, server.id);
-        if (state.corp.credits < additionalCost) continue;
+        const installCost = baseCost + additionalCost;
+        if (state.corp.credits < installCost) continue;
         actions.push(
           action(
             state,
@@ -1306,8 +1308,15 @@ function corpMainActions(state: GameState): LegalAction[] {
             "install_card",
             `ICE vor ${server.label} installieren`,
             id,
-            [{ clicks: 1, ...(additionalCost > 0 ? { credits: additionalCost } : {}) }],
-            { cardId: id, serverId: server.id, placement: "ice", iceInstallAdditionalCost: additionalCost }
+            [{ clicks: 1, ...(installCost > 0 ? { credits: installCost } : {}) }],
+            {
+              cardId: id,
+              serverId: server.id,
+              placement: "ice",
+              iceInstallBaseCost: baseCost,
+              iceInstallAdditionalCost: additionalCost,
+              iceInstallTotalCost: installCost
+            }
           )
         );
       }
@@ -1692,6 +1701,10 @@ function runnerHasInstalledCardDefinition(state: GameState, side: Side, definiti
 
 function runnerInstalledCardCountByDefinition(state: GameState, definitionId: CardDefinitionId): number {
   return runnerInstalledCardIds(state).reduce((count, cardId) => (definitionFor(state, cardId).id === definitionId ? count + 1 : count), 0);
+}
+
+function corpIceInstallBaseCost(server: CorpServer): number {
+  return Math.max(0, server.ice.length);
 }
 
 function poxCountersForServer(state: GameState, serverId: Exclude<ServerId, "new_remote">): number {
