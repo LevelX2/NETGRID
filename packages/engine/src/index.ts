@@ -165,6 +165,9 @@ const INITIAL_HAND_SIZE = 5;
 const BASE_MAX_HAND_SIZE = 5;
 const BARTMOSS_ID = "onr_v1_005_bartmoss-memorial-icebreaker";
 const BLINK_ID = "onr_v1_007_blink";
+const COCKROACH_ID = "onr_v1_013_cockroach";
+const GRUBB_ID = "onr_v1_030_grubb";
+const INCUBATOR_ID = "onr_v1_034_incubator";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
@@ -1019,6 +1022,13 @@ export function validateGameState(state: GameState): ValidationResult {
   }
   if (state.run?.encounteredIceId && !state.cardInstances[state.run.encounteredIceId]) errors.push("Run references missing encountered ice.");
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes)) errors.push("Run resolved subroutine index list is missing.");
+  if (state.run?.remainderStrengthBonusByBreaker) {
+    for (const [breakerId, amount] of Object.entries(state.run.remainderStrengthBonusByBreaker)) {
+      if (amount === undefined || !Number.isInteger(amount) || amount < 0) {
+        errors.push(`Run remainder strength bonus for ${breakerId} must be a non-negative integer.`);
+      }
+    }
+  }
   if (state.run?.breach) {
     const effectiveAccessServerId = state.run.accessServerOverride ?? state.run.attackedServerId;
     if (state.run.phase !== "access") errors.push("Breach is only valid during access.");
@@ -1070,6 +1080,10 @@ export function validateGameState(state: GameState): ValidationResult {
     if (state.pendingChoice.minSelections < 0 || state.pendingChoice.maxSelections < state.pendingChoice.minSelections) errors.push("PendingChoice has invalid selection bounds.");
     const optionIds = new Set(state.pendingChoice.options.map((option) => option.id));
     if (optionIds.size !== state.pendingChoice.options.length) errors.push("PendingChoice option ids must be unique.");
+  }
+  if (state.runnerTurnFlags?.incubatorPendingTransforms !== undefined) {
+    const pending = state.runnerTurnFlags.incubatorPendingTransforms;
+    if (!Number.isInteger(pending) || pending < 0) errors.push("runnerTurnFlags.incubatorPendingTransforms must be a non-negative integer.");
   }
   if (state.eventModificationWindow) {
     if (!state.imminentEvent) errors.push("EventModificationWindow requires an ImminentEvent.");
@@ -1675,6 +1689,11 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
   return Math.max(0, total);
 }
 
+function runRemainderStrengthBonusForBreaker(run: GameState["run"], breakerId: CardInstanceId): number {
+  if (!run) return 0;
+  return Math.max(0, Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0));
+}
+
 function iceRezCostReductionFor(state: GameState, iceDefinition: CardDefinition): number {
   let reduction = 0;
   for (const sourceId of rezzedCorpRootCardIds(state)) {
@@ -1701,6 +1720,35 @@ function runnerHasInstalledCardDefinition(state: GameState, side: Side, definiti
 
 function runnerInstalledCardCountByDefinition(state: GameState, definitionId: CardDefinitionId): number {
   return runnerInstalledCardIds(state).reduce((count, cardId) => (definitionFor(state, cardId).id === definitionId ? count + 1 : count), 0);
+}
+
+function installedVirusCounterTotalForDefinition(state: GameState, definitionId: CardDefinitionId): number {
+  return runnerInstalledCardIds(state).reduce((sum, cardId) => {
+    if (definitionFor(state, cardId).id !== definitionId) return sum;
+    return sum + cardCounter(state, cardId, "virus");
+  }, 0);
+}
+
+function cockroachCounterTotal(state: GameState): number {
+  return installedVirusCounterTotalForDefinition(state, COCKROACH_ID);
+}
+
+function incubatorCounterTotal(state: GameState): number {
+  return installedVirusCounterTotalForDefinition(state, INCUBATOR_ID);
+}
+
+function cockroachRandomHqDiscardActive(state: GameState): boolean {
+  return cockroachCounterTotal(state) >= 2;
+}
+
+function isVisibleVirusCounterCardForRunner(state: GameState, cardId: CardInstanceId): boolean {
+  const instance = mustInstance(state.cardInstances, cardId);
+  if (instance.owner === "runner") return true;
+  if (instance.rezzed) return true;
+  if (state.corp.scoreArea.includes(cardId)) return true;
+  if (state.corp.archives.includes(cardId) && instance.faceup) return true;
+  if (state.run?.accessedCardId === cardId) return true;
+  return false;
 }
 
 function corpIceInstallBaseCost(server: CorpServer): number {
@@ -1834,7 +1882,10 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   const actions: LegalAction[] = [];
   for (const breakerId of state.runner.rig.programs) {
     const breaker = definitionFor(state, breakerId);
-    const breakerStrength = (breaker.strength ?? 0) + mustInstance(state.cardInstances, breakerId).strengthModifier;
+    const breakerStrength =
+      (breaker.strength ?? 0) +
+      mustInstance(state.cardInstances, breakerId).strengthModifier +
+      runRemainderStrengthBonusForBreaker(run, breakerId);
     const pump = breaker.abilities?.find((ability) => ability.type === "pump_strength");
     if (pump && availableRunnerRunCredits(state, breakerId) >= pump.cost.credits) {
       actions.push(
@@ -2049,10 +2100,25 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       passApproachedIce(state);
       return;
     case "pump_breaker":
-      spendRunnerRunCredits(state, legalAction.costs[0]?.credits ?? 1, typeof legalAction.payload?.breakerId === "string" ? String(legalAction.payload.breakerId) : undefined);
-      executeEffectCommands(state, [
-        { type: "change_breaker_strength", breakerId: String(legalAction.payload?.breakerId), amount: 1 }
-      ]);
+      {
+        const breakerId = typeof legalAction.payload?.breakerId === "string" ? (String(legalAction.payload.breakerId) as CardInstanceId) : undefined;
+        spendRunnerRunCredits(state, legalAction.costs[0]?.credits ?? 1, breakerId);
+        if (breakerId && definitionFor(state, breakerId).id === GRUBB_ID && state.run) {
+          const run = mustRun(state);
+          const previous = runRemainderStrengthBonusForBreaker(run, breakerId);
+          run.remainderStrengthBonusByBreaker = {
+            ...(run.remainderStrengthBonusByBreaker ?? {}),
+            [breakerId]: previous + 1
+          };
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            runRemainderStrengthBonusApplied: true,
+            runRemainderStrengthBonusAfter: previous + 1
+          };
+          return;
+        }
+        executeEffectCommands(state, [{ type: "change_breaker_strength", breakerId: String(legalAction.payload?.breakerId), amount: 1 }]);
+      }
       return;
     case "break_subroutine": {
       const breakerId = typeof legalAction.payload?.breakerId === "string" ? (String(legalAction.payload.breakerId) as CardInstanceId) : undefined;
@@ -3243,6 +3309,16 @@ function applyV181SuccessfulRunCounterTriggers(state: GameState, run: ActiveRun)
     const current = poxCountersForServer(state, serverId);
     state.poxCountersByServer = { ...(state.poxCountersByServer ?? {}), [serverId]: current + 1 };
   }
+  if (run.attackedServerId === "hq") {
+    for (const cardId of state.runner.rig.programs) {
+      if (definitionFor(state, cardId).id !== COCKROACH_ID) continue;
+      addCardCounter(state, cardId, "virus", 1);
+    }
+  }
+  for (const cardId of state.runner.rig.programs) {
+    if (definitionFor(state, cardId).id !== INCUBATOR_ID) continue;
+    addCardCounter(state, cardId, "virus", 1);
+  }
 }
 
 function endTurn(state: GameState, side: Side): void {
@@ -3327,20 +3403,94 @@ function startRunnerTurn(state: GameState): void {
   flags.runAttemptsThisTurn = 0;
   flags.runAttemptsLastTurn = 0;
   flags.damagePreventionUsage = {};
+  flags.startOfTurnFloatingCreditsApplied = false;
+  delete flags.incubatorPendingTransforms;
   refreshRecurringCredits(state, "runner");
   applyRunnerStartOfTurnEffects(state);
 }
 
 function applyRunnerStartOfTurnEffects(state: GameState): void {
-  for (const cardId of state.runner.rig.resources) {
-    const definition = definitionFor(state, cardId);
-    if (definition.id === "onr_v1_163_floating-runner-bbs") credits(state, "runner", 1);
+  const flags = ensureRunnerTurnFlags(state);
+  if (!flags.startOfTurnFloatingCreditsApplied) {
+    for (const cardId of state.runner.rig.resources) {
+      const definition = definitionFor(state, cardId);
+      if (definition.id === "onr_v1_163_floating-runner-bbs") credits(state, "runner", 1);
+    }
+    flags.startOfTurnFloatingCreditsApplied = true;
   }
+  if (state.pendingChoice) return;
+  if (queueIncubatorStartOfTurnTransforms(state)) return;
   for (const cardId of state.runner.rig.resources.slice().sort()) {
     if (state.pendingChoice) break;
     const definition = definitionFor(state, cardId);
     if (definition.id === "onr_v1_180_smiths-pawnshop") startSmithsPawnshopChoice(state, cardId);
   }
+}
+
+function queueIncubatorStartOfTurnTransforms(state: GameState): boolean {
+  const flags = ensureRunnerTurnFlags(state);
+  if (flags.incubatorPendingTransforms === undefined) {
+    const counterTotal = incubatorCounterTotal(state);
+    let pending = 0;
+    for (let index = 0; index < counterTotal; index += 1) {
+      const die = rollDeterministicDie(state, `v191.die.${INCUBATOR_ID}.start_of_turn.roll.${state.stateVersion}.${index}`);
+      if (die === 6) pending += 1;
+    }
+    flags.incubatorPendingTransforms = pending;
+  }
+  if ((flags.incubatorPendingTransforms ?? 0) <= 0) return false;
+  return startIncubatorTransformChoice(state);
+}
+
+function startIncubatorTransformChoice(state: GameState): boolean {
+  const flags = ensureRunnerTurnFlags(state);
+  const pending = Math.max(0, Math.floor(flags.incubatorPendingTransforms ?? 0));
+  if (pending <= 0) return false;
+
+  const cardTargets = Object.keys(state.cardInstances)
+    .sort()
+    .filter((cardId) => cardCounter(state, cardId, "virus") > 0)
+    .filter((cardId) => isVisibleVirusCounterCardForRunner(state, cardId))
+    .map((cardId) => {
+      const title = definitionFor(state, cardId).title;
+      const amount = cardCounter(state, cardId, "virus");
+      return {
+        id: `card_${cardId}`,
+        label: `${title} (${amount})`,
+        publicLabel: "Virus-Counter",
+        value: `card:${cardId}`
+      };
+    });
+
+  const poxTargets = state.corp.servers
+    .map((server) => ({ serverId: server.id, amount: poxCountersForServer(state, server.id) }))
+    .filter((entry) => entry.amount > 0)
+    .map((entry) => ({
+      id: `pox_${entry.serverId}`,
+      label: `Pox auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
+      publicLabel: "Virus-Counter",
+      value: `pox:${entry.serverId}`
+    }));
+
+  const options = [...cardTargets, ...poxTargets];
+  if (options.length === 0) {
+    flags.incubatorPendingTransforms = 0;
+    return false;
+  }
+
+  state.pendingChoice = {
+    choiceId: `v191_incubator_transform_${state.stateVersion + 1}_${pending}`,
+    side: "runner",
+    source: `v191.incubator_transform:${state.stateVersion + 1}`,
+    prompt: "Incubator: Wähle einen Virus-Counter für die Verdopplung.",
+    kind: "select_option",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+  return true;
 }
 
 function startSmithsPawnshopChoice(state: GameState, pawnshopId: CardInstanceId): void {
@@ -4226,6 +4376,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v191.incubator_transform")) {
+    resolveIncubatorTransformChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v170.smiths_pawnshop")) {
     resolveSmithsPawnshopChoice(state, legalAction, playerAction);
     return;
@@ -4279,28 +4433,35 @@ function resolveDiscardChoice(state: GameState, legalAction: LegalAction, player
   if (state.timingPoint !== (side === "corp" ? "corp_discard.select_cards" : "runner_discard.select_cards")) {
     throw new Error("Discard ist im aktuellen Timingpoint nicht legal.");
   }
-  const selectedIds = selectedChoiceIds(playerAction.selectedChoices);
-  const selectedCards = selectedIds.map((optionId) => {
-    const option = choice.options.find((candidate) => candidate.id === optionId);
-    if (typeof option?.value !== "string") throw new Error("Die Discard-Auswahl ist ungueltig.");
-    return option.value;
-  });
   const expectedCount = handForSide(state, side).length - maxHandSize(state, side);
-  if (expectedCount !== choice.minSelections || expectedCount !== selectedCards.length) throw new Error("Die Discard-Anzahl ist nicht mehr gueltig.");
-  const hand = handForSide(state, side);
-  for (const cardId of selectedCards) {
-    const instance = mustInstance(state.cardInstances, cardId);
-    if (instance.owner !== side || !hand.includes(cardId)) throw new Error("Eine Discard-Karte liegt nicht in der Hand.");
-  }
+  if (expectedCount !== choice.minSelections) throw new Error("Die Discard-Anzahl ist nicht mehr gueltig.");
+  const cockroachRandomized = side === "corp" && cockroachRandomHqDiscardActive(state);
+  let selectedCards: CardInstanceId[] = [];
+  if (cockroachRandomized) {
+    selectedCards = discardRandomCorpHqCards(state, expectedCount, `v191.random.${COCKROACH_ID}.hq_discard_phase`);
+  } else {
+    const selectedIds = selectedChoiceIds(playerAction.selectedChoices);
+    selectedCards = selectedIds.map((optionId) => {
+      const option = choice.options.find((candidate) => candidate.id === optionId);
+      if (typeof option?.value !== "string") throw new Error("Die Discard-Auswahl ist ungueltig.");
+      return option.value;
+    });
+    if (selectedCards.length !== expectedCount) throw new Error("Die Discard-Anzahl ist nicht mehr gueltig.");
+    const hand = handForSide(state, side);
+    for (const cardId of selectedCards) {
+      const instance = mustInstance(state.cardInstances, cardId);
+      if (instance.owner !== side || !hand.includes(cardId)) throw new Error("Eine Discard-Karte liegt nicht in der Hand.");
+    }
 
-  for (const cardId of selectedCards) {
-    removeFromAllZones(state, cardId);
-    if (side === "corp") {
-      state.corp.archives.push(cardId);
-      state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "archives" } };
-    } else {
-      state.runner.heap.push(cardId);
-      state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+    for (const cardId of selectedCards) {
+      removeFromAllZones(state, cardId);
+      if (side === "corp") {
+        state.corp.archives.push(cardId);
+        state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "archives" } };
+      } else {
+        state.runner.heap.push(cardId);
+        state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "runner", zone: "heap" } };
+      }
     }
   }
 
@@ -4310,6 +4471,7 @@ function resolveDiscardChoice(state: GameState, legalAction: LegalAction, player
     discardSide: side,
     discardCount: selectedCards.length,
     discardZone: side === "corp" ? "archives" : "heap",
+    ...(cockroachRandomized ? { randomizedByCockroach: true } : {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "discard_phase"
   };
@@ -4548,6 +4710,53 @@ function resolveSmithsPawnshopChoice(state: GameState, legalAction: LegalAction,
     legalAction.payload = { ...(legalAction.payload ?? {}), smithsPawnshopTriggered: false, smithsPawnshopCardId: pawnshopId };
   }
   delete state.pendingChoice;
+}
+
+function resolveIncubatorTransformChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v191.incubator_transform")) throw new Error("Es ist keine Incubator-Choice offen.");
+  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const selectedOption = choice.options.find((option) => option.id === selectedId);
+  if (!selectedOption || typeof selectedOption.value !== "string") throw new Error("Die Incubator-Auswahl ist ungültig.");
+
+  const value = selectedOption.value;
+  if (value.startsWith("card:")) {
+    const cardId = value.slice("card:".length);
+    if (!cardId || !state.cardInstances[cardId]) throw new Error("Der gewählte Karten-Counter ist ungültig.");
+    const available = cardCounter(state, cardId, "virus");
+    if (available <= 0) throw new Error("Der gewählte Karten-Counter ist nicht mehr verfügbar.");
+    spendCardCounter(state, cardId, "virus", 1);
+    addCardCounter(state, cardId, "virus", 2);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "incubator_transform",
+      incubatorTargetKind: "card"
+    };
+  } else if (value.startsWith("pox:")) {
+    const serverId = value.slice("pox:".length) as Exclude<ServerId, "new_remote">;
+    const available = poxCountersForServer(state, serverId);
+    if (available <= 0) throw new Error("Der gewählte Pox-Counter ist nicht mehr verfügbar.");
+    state.poxCountersByServer = { ...(state.poxCountersByServer ?? {}), [serverId]: available + 1 };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "incubator_transform",
+      incubatorTargetKind: "server"
+    };
+  } else {
+    throw new Error("Die Incubator-Auswahl hat einen ungültigen Targettyp.");
+  }
+
+  const flags = ensureRunnerTurnFlags(state);
+  const remaining = Math.max(0, Math.floor((flags.incubatorPendingTransforms ?? 0) - 1));
+  flags.incubatorPendingTransforms = remaining;
+  delete state.pendingChoice;
+  if (remaining > 0) {
+    startIncubatorTransformChoice(state);
+    return;
+  }
+  applyRunnerStartOfTurnEffects(state);
 }
 
 function selectedChoiceCardIds(choice: ChoiceRequest, playerAction: PlayerAction): CardInstanceId[] {
@@ -5114,6 +5323,7 @@ export function redactPublicEventForSide(event: PublicGameEvent, viewerSide: Sid
 function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
   const definition = definitionFor(state, id);
   const instance = mustInstance(state.cardInstances, id);
+  const runRemainderStrengthBonus = definition.type === "program" ? runRemainderStrengthBonusForBreaker(state.run, id) : 0;
   return {
     instanceId: id,
     known: true,
@@ -5131,7 +5341,11 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     rezzed: instance.rezzed,
     advancementCounters: instance.advancementCounters,
     ...(definition.advancementRequirement !== undefined ? { advancementRequirement: definition.advancementRequirement } : {}),
-    ...(definition.strength !== undefined ? { strength: definition.type === "ice" ? iceStrengthFor(state, id) : definition.strength + instance.strengthModifier } : {}),
+    ...(definition.strength !== undefined
+      ? {
+          strength: definition.type === "ice" ? iceStrengthFor(state, id) : definition.strength + instance.strengthModifier + runRemainderStrengthBonus
+        }
+      : {}),
     ...(definition.agendaPoints !== undefined ? { agendaPoints: definition.agendaPoints } : {}),
     ...(definition.trashCost !== undefined ? { trashCost: definition.trashCost } : {}),
     ...(instance.counters ? { counters: cloneCounters(instance.counters) } : {}),
@@ -5405,7 +5619,7 @@ function nextRandom(state: GameState, purpose: string): number {
 }
 
 function rollDeterministicDie(state: GameState, purpose: string): number {
-  const scopedPurpose = purpose.startsWith("v190.die.") ? purpose : `v190.die.${purpose}`;
+  const scopedPurpose = /^v\d+\.die\./.test(purpose) ? purpose : `v190.die.${purpose}`;
   const value = nextRandom(state, scopedPurpose);
   return Math.floor(value * 6) + 1;
 }
@@ -5681,13 +5895,15 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
     stoleBlackOpsAgendaThisTurn: false,
     runAttemptsThisTurn: 0,
     runAttemptsLastTurn: 0,
-    damagePreventionUsage: {}
+    damagePreventionUsage: {},
+    startOfTurnFloatingCreditsApplied: false
   });
   flags.stoleGrayOpsAgendaThisTurn ??= false;
   flags.stoleBlackOpsAgendaThisTurn ??= false;
   flags.runAttemptsThisTurn ??= 0;
   flags.runAttemptsLastTurn ??= 0;
   flags.damagePreventionUsage ??= {};
+  flags.startOfTurnFloatingCreditsApplied ??= false;
   return flags;
 }
 

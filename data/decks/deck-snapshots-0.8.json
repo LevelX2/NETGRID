@@ -790,6 +790,358 @@
         "deckHash": "fnv1a:23f11fed"
       },
       "deckHash": "fnv1a:23f11fed"
+    },
+    {
+      "deckSnapshotId": "onr_origin_runner_ai_snapshot_v1",
+      "sourceDeckId": "local_runner_onr_origin_ai_01",
+      "deckVersion": "onr-origin-ai-v1",
+      "name": "Runner Origins AI - Probe Pressure",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_015_codeslinger",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_021_dwarf",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_039_krash",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_066_snowball",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_074_worm",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_081_custodial-position",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_085_executive-wiretaps",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_101_mit-west-tier",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_145_wutech-mem-chip",
+          "quantity": 1
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 20,
+        "agendaPoints": null,
+        "influenceSpent": 0
+      },
+      "publicMetadata": {
+        "side": "runner",
+        "identityCardId": "runner_identity_001",
+        "deckName": "Runner Origins AI - Probe Pressure",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "cardPoolVersion": "private-local-onr-v1",
+        "formatProfileId": "netgrid_private_local_v1",
+        "formatProfileVersion": "1.3.0",
+        "deckHash": "fnv1a:7a0470da"
+      },
+      "deckHash": "fnv1a:7a0470da"
+    },
+    {
+      "deckSnapshotId": "onr_origin_corp_ai_snapshot_v1",
+      "sourceDeckId": "local_corp_onr_origin_ai_01",
+      "deckVersion": "onr-origin-ai-v1",
+      "name": "Corp Origins AI - Tax & Punish",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_214_project-babylon",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_220_tycho-extension",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_232_crystal-wall",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_261_quandary",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_282_annual-reviews",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_285_closed-accounts",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_297_overtime-incentives",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_301_punitive-counterstrike",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_317_data-masons",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "quantity": 1
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 23,
+        "agendaPoints": 8,
+        "influenceSpent": 0
+      },
+      "publicMetadata": {
+        "side": "corp",
+        "identityCardId": "corp_identity_001",
+        "deckName": "Corp Origins AI - Tax & Punish",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "cardPoolVersion": "private-local-onr-v1",
+        "formatProfileId": "netgrid_private_local_v1",
+        "formatProfileVersion": "1.3.0",
+        "deckHash": "fnv1a:072da05f"
+      },
+      "deckHash": "fnv1a:072da05f"
+    },
+    {
+      "deckSnapshotId": "onr_origin_runner_ai_event_pressure_snapshot_v1",
+      "sourceDeckId": "local_runner_onr_origin_ai_02",
+      "deckVersion": "onr-origin-ai-v1-variant-02",
+      "name": "Runner Origins AI - Event Pressure",
+      "side": "runner",
+      "identityCardId": "runner_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_021_dwarf",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_039_krash",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_066_snowball",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_074_worm",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_101_mit-west-tier",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_144_tycho-mem-chip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_145_wutech-mem-chip",
+          "quantity": 1
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 21,
+        "agendaPoints": null,
+        "influenceSpent": 0
+      },
+      "publicMetadata": {
+        "side": "runner",
+        "identityCardId": "runner_identity_001",
+        "deckName": "Runner Origins AI - Event Pressure",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "cardPoolVersion": "private-local-onr-v1",
+        "formatProfileId": "netgrid_private_local_v1",
+        "formatProfileVersion": "1.3.0",
+        "deckHash": "fnv1a:784e8bbe"
+      },
+      "deckHash": "fnv1a:784e8bbe"
+    },
+    {
+      "deckSnapshotId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
+      "sourceDeckId": "local_corp_onr_origin_ai_02",
+      "deckVersion": "onr-origin-ai-v1-variant-02",
+      "name": "Corp Origins AI - Tag Ops Control",
+      "side": "corp",
+      "identityCardId": "corp_identity_001",
+      "cardPoolSnapshotId": "card-snapshot-0.8",
+      "cardPoolVersion": "private-local-onr-v1",
+      "formatProfileId": "netgrid_private_local_v1",
+      "formatProfileVersion": "1.3.0",
+      "rulesBaselineId": "rules-baseline-mvp-0.94",
+      "immutable": true,
+      "cards": [
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "quantity": 3
+        },
+        {
+          "cardId": "onr_v1_220_tycho-extension",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_243_fetch-4-0-1",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_249_hunter",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_261_quandary",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_282_annual-reviews",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_285_closed-accounts",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_287_datapool-by-zetatech",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_293_netwatch-credit-voucher",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_297_overtime-incentives",
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_v1_317_data-masons",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "quantity": 1
+        }
+      ],
+      "validation": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "totalCards": 24,
+        "agendaPoints": 7,
+        "influenceSpent": 0
+      },
+      "publicMetadata": {
+        "side": "corp",
+        "identityCardId": "corp_identity_001",
+        "deckName": "Corp Origins AI - Tag Ops Control",
+        "cardPoolSnapshotId": "card-snapshot-0.8",
+        "cardPoolVersion": "private-local-onr-v1",
+        "formatProfileId": "netgrid_private_local_v1",
+        "formatProfileVersion": "1.3.0",
+        "deckHash": "fnv1a:6f425753"
+      },
+      "deckHash": "fnv1a:6f425753"
     }
   ]
 }

@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v191-card-release-smoke",
+  "title": "V1.9.1 Mechanikpaket J Kernrelease",
+  "release": "V1.9.1",
+  "status": "implemented_core_release",
+  "extends": "data/scenarios/v190-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_013_cockroach",
+    "onr_v1_034_incubator",
+    "onr_v1_030_grubb"
+  ],
+  "deferredCards": [],
+  "preconditions": [
+    "V1.9.0 Mechanikpaket I ist gruen abgeschlossen.",
+    "V1.9.1 Preflight friert den 3-Karten-Kernkorb als freigabefaehig ein."
+  ],
+  "steps": [
+    "Starte ein deterministisches V1.9.1-Smoke-Match mit den V1.9.1 Runner- und Corp-Decks.",
+    "Verifiziere Cockroach-Counteraufbau auf erfolgreichen HQ-Runs und deterministic HQ-random-discard bei Counter-Schwelle.",
+    "Verifiziere Incubator-Counteraufbau, Start-of-turn-Die-Rolls und hidden-info-safe Counter-Transform-Choice.",
+    "Verifiziere Grubb run-remainder Strength-Bonus ueber mehrere Encounter und Reset auf naechstem Run.",
+    "Verifiziere Purge-Integration fuer Cockroach-/Incubator-Virus-Counter.",
+    "Verifiziere Replay- und StateHash-Stabilitaet fuer die V1.9.1-Zufalls- und Choice-Pfade."
+  ],
+  "expected": [
+    "Der Runtime-Allowlist-Zuwachs umfasst exakt die drei V1.9.1-Karten.",
+    "Cockroach-/Incubator-Zufallspfade sind deterministic, replaybar und side-sicher.",
+    "Grubb-Staerke bleibt innerhalb eines Runs encounter-uebergreifend erhalten und resetet danach.",
+    "Purge entfernt Cockroach-/Incubator-Counter konsistent.",
+    "Keine neue ai_supported-Freigabe durch den Release."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.9.1 Mechanikpaket J",
+    "catalog": "packages/catalog/src/index.test.ts::catalog import and status logic",
+    "server": "apps/server/src/multiplayer.test.ts::V1.9.1 card release matchstart"
+  }
+}

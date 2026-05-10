@@ -540,6 +540,7 @@ export type RunState = {
   fullyBrokenIceIds?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<Record<CardInstanceId, number[]>>;
+  remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   breach?: BreachState;
 };
 
@@ -641,6 +642,8 @@ export type GameState = {
     runAttemptsThisTurn?: number;
     runAttemptsLastTurn?: number;
     damagePreventionUsage?: Record<CardInstanceId, number>;
+    startOfTurnFloatingCreditsApplied?: boolean;
+    incubatorPendingTransforms?: number;
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -1163,6 +1166,27 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_program", "memory", "break_subroutine", "deterministic_die_roll", "net_damage", "encounter_usage_limit", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_013_cockroach",
+    title: "Cockroach",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText:
+      "Whenever you make a successful run on HQ, give the Corp a Cockroach counter. Two or more Cockroach counters cause all discards from HQ to become random. The Corp may remove all Virus counters by forgoing its next three actions.",
+    mechanics: [
+      "install_program",
+      "memory",
+      "virus",
+      "successful_run_trigger",
+      "hq_discard_randomization",
+      "deterministic_random",
+      ONR_V1_LOCAL_PRIVATE
+    ]
+  },
+  {
     id: "onr_v1_012_clown",
     title: "Clown",
     side: "runner",
@@ -1347,6 +1371,41 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     memoryCost: 1,
     rulesText: "Prevents up to 2 net and/or core damage each turn.",
     mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  onrBreaker({
+    id: "onr_v1_030_grubb",
+    title: "Grubb",
+    subtypes: ["icebreaker", "worm"],
+    installCost: 0,
+    memoryCost: 1,
+    strength: 0,
+    breakCost: 1,
+    pumpCost: 2,
+    iceSubtype: "wall",
+    iceLabel: "wall",
+    extraMechanics: ["run_remainder_strength_bonus"]
+  }),
+  {
+    id: "onr_v1_034_incubator",
+    title: "Incubator",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus", "random"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText:
+      "Whenever you make a successful run, give the Corp an Incubate counter. Each Incubate counter necessitates a die roll at the start of each of your turns; on each 6, choose a Virus counter and exchange that counter for two counters of the same type. The Corp may remove all Virus counters by forgoing its next three actions.",
+    mechanics: [
+      "install_program",
+      "memory",
+      "virus",
+      "successful_run_trigger",
+      "start_of_turn_trigger",
+      "deterministic_die_roll",
+      "counter_transform_choice",
+      ONR_V1_LOCAL_PRIVATE
+    ]
   },
   onrBreaker({
     id: "onr_v1_036_jackhammer",

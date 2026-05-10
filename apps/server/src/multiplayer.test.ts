@@ -591,7 +591,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
-  it("V1.9.0 card release matchstart", async () => {
+  it("V1.9.1 card release matchstart", async () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]) return;
 
@@ -601,9 +601,12 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(cardsById["onr_v1_223_banpei"]?.statuses.human_playable).toBe(true);
     expect(cardsById["onr_v1_275_vacuum-link"]?.statuses.human_playable).toBe(true);
     expect(cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(false);
-    expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(false);
-    expect(cardsById["onr_v1_030_grubb"]?.statuses.human_playable).toBe(false);
+    expect(cardsById["onr_v1_013_cockroach"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_034_incubator"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_030_grubb"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_013_cockroach"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_034_incubator"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_030_grubb"]?.statuses.ai_supported).toBe(false);
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {

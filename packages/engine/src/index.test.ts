@@ -16,7 +16,7 @@ import {
   validateDeckDefinition,
   validateGameState
 } from "./index";
-import { MVP_0_99_BASELINE, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameState, type LegalAction, type Side } from "@netgrid/shared";
+import { MVP_0_99_BASELINE, type CardInstanceId, type ChoiceRequest, type CounterType, type DeckDefinition, type GameState, type LegalAction, type Side } from "@netgrid/shared";
 
 describe("MVP 0.1 engine foundation", () => {
   it("creates deterministic games for the same seed", () => {
@@ -3099,6 +3099,226 @@ describe("V1.9.0 Mechanikpaket I", () => {
   });
 });
 
+describe("V1.9.1 Mechanikpaket J", () => {
+  it("adds a controlled V1.9.1 core card set for cockroach random discard, incubator transform and grubb run-remainder strength", () => {
+    expect(ONR_V1_9_1_FINAL_CARD_IDS).toHaveLength(3);
+    const expectedMechanics: Record<string, RegExp> = {
+      onr_v1_013_cockroach: /hq_discard_randomization/,
+      onr_v1_034_incubator: /counter_transform_choice/,
+      onr_v1_030_grubb: /run_remainder_strength_bonus/
+    };
+    for (const definitionId of ONR_V1_9_1_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const expectedPattern = expectedMechanics[definitionId];
+      expect(expectedPattern, definitionId).toBeDefined();
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(expectedPattern!);
+      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(/v2|matchmaking|ranking|deckbuilder/);
+    }
+  });
+
+  it("validates V1.9.1 smoke decks and keeps previous releases available", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_9_1_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_9_1_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v191CardReleaseGame("v191-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(DEMO_CARDS_BY_ID["onr_v1_275_vacuum-link"]).toBeDefined();
+  });
+
+  it("randomizes Corp HQ discard deterministically with Cockroach threshold and keeps replay/statehash stable", () => {
+    const runScenario = (seed: string): GameState => {
+      let state = toRunnerTurn(v191CardReleaseGame(seed));
+      state.runner.credits = 40;
+      moveRunnerCardToGrip(state, "onr_v1_013_cockroach");
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_013_cockroach");
+
+      const keptHqId = moveCorpCardToHq(state, "simple_economy_operation");
+      keepOnlyCorpHqCard(state, keptHqId);
+      for (let index = 0; index < 2; index += 1) {
+        state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+        state = apply(state, "runner", (action) => action.type === "access_card");
+      }
+
+      const cockroachId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_013_cockroach");
+      expect(cockroachId).toBeDefined();
+      expect(cockroachId ? cardCounterAmount(state, cockroachId, "virus") : 0).toBeGreaterThanOrEqual(2);
+
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      moveCorpCardToHq(state, "onr_v1_279_wall-of-static");
+      moveCorpCardToHq(state, "onr_v1_238_data-wall-2-0");
+      state.corp.maxHandSize = Math.max(0, state.corp.hq.length - 1);
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "corp", (action) => action.type === "end_turn");
+      expect(state.pendingChoice?.source).toBe("discard_phase");
+      const selectedIds = (state.pendingChoice?.options ?? [])
+        .slice(0, state.pendingChoice?.minSelections ?? 1)
+        .map((option) => String(option.id));
+      state = applyChoices(state, "corp", selectedIds);
+
+      const randomRecords = state.randomDrawRecords.filter((record) => record.purpose.startsWith("v191.random.onr_v1_013_cockroach.hq_discard_phase"));
+      expect(randomRecords).toHaveLength(1);
+      const discardEvent = [...state.eventLog].reverse().find((event) => event.publicPayload.hiddenZoneAction === "discard_phase");
+      expect(discardEvent?.visibilityClass).toBe("hidden_info_barrier");
+      expect(discardEvent?.publicPayload).toMatchObject({ hiddenZoneAction: "discard_phase" });
+
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(replay.actualFinalStateHash).toBe(hashState(state));
+      return state;
+    };
+
+    const first = runScenario("v191-cockroach-random");
+    const second = runScenario("v191-cockroach-random");
+    expect(first.randomDrawRecords).toEqual(second.randomDrawRecords);
+    expect(hashState(first)).toBe(hashState(second));
+  });
+
+  it("runs incubator start-of-turn die rolls deterministically and resolves hidden-info-safe counter transforms", () => {
+    let foundState: GameState | undefined;
+    for (let attempt = 0; attempt < 250; attempt += 1) {
+      let state = toRunnerTurn(v191CardReleaseGame(`v191-incubator-${attempt}`));
+      state.runner.credits = 40;
+      moveRunnerCardToGrip(state, "onr_v1_034_incubator");
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_034_incubator");
+      const keptHqId = moveCorpCardToHq(state, "simple_economy_operation");
+      keepOnlyCorpHqCard(state, keptHqId);
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state = toRunnerTurnFromCorpMain(state);
+
+      if (state.pendingChoice?.source.startsWith("v191.incubator_transform")) {
+        foundState = state;
+        break;
+      }
+    }
+
+    expect(foundState).toBeDefined();
+    if (!foundState) return;
+    let state = foundState;
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const dieRecords = state.randomDrawRecords.filter((record) =>
+      record.purpose.startsWith("v191.die.onr_v1_034_incubator.start_of_turn.roll.")
+    );
+    expect(dieRecords.length).toBeGreaterThan(0);
+
+    const selectedOption = state.pendingChoice?.options.find((option) => option.id.startsWith("card_")) ?? state.pendingChoice?.options[0];
+    expect(selectedOption).toBeDefined();
+    if (!selectedOption) return;
+
+    const selectedValue = typeof selectedOption.value === "string" ? selectedOption.value : "";
+    let beforeCount = 0;
+    if (selectedValue.startsWith("card:")) {
+      const cardId = selectedValue.slice("card:".length) as CardInstanceId;
+      beforeCount = cardCounterAmount(state, cardId, "virus");
+    } else if (selectedValue.startsWith("pox:")) {
+      const serverId = selectedValue.slice("pox:".length) as keyof NonNullable<GameState["poxCountersByServer"]>;
+      beforeCount = state.poxCountersByServer?.[serverId] ?? 0;
+    }
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = applyChoice(state, "runner", String(selectedOption.id));
+
+    if (selectedValue.startsWith("card:")) {
+      const cardId = selectedValue.slice("card:".length) as CardInstanceId;
+      expect(cardCounterAmount(state, cardId, "virus")).toBe(beforeCount + 1);
+    } else if (selectedValue.startsWith("pox:")) {
+      const serverId = selectedValue.slice("pox:".length) as keyof NonNullable<GameState["poxCountersByServer"]>;
+      expect(state.poxCountersByServer?.[serverId] ?? 0).toBe(beforeCount + 1);
+    }
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneAction: "incubator_transform" });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("keeps Grubb strength bonus for the remainder of the run and resets it on the next run", () => {
+    let state = toRunnerTurn(v191CardReleaseGame("v191-grubb-run-bonus"));
+    state.runner.credits = 60;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_030_grubb");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_030_grubb");
+    const grubbId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_030_grubb");
+    expect(grubbId).toBeDefined();
+    if (!grubbId) return;
+
+    putCorpIceOnServer(state, "rd", "onr_v1_238_data-wall-2-0");
+    putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_279_wall-of-static");
+    expect(
+      getLegalActions(state, "runner").some((action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === grubbId)
+    ).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && String(action.payload?.breakerId) === grubbId);
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && String(action.payload?.breakerId) === grubbId);
+    state = apply(state, "runner", (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === grubbId);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_238_data-wall-2-0");
+    expect(
+      getLegalActions(state, "runner").some((action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === grubbId)
+    ).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === grubbId);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.run).toBeUndefined();
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    expect(
+      getLegalActions(state, "runner").some((action) => action.type === "break_subroutine" && String(action.payload?.breakerId) === grubbId)
+    ).toBe(false);
+  });
+
+  it("purges Cockroach and Incubator virus counters through the existing legal purge gate", () => {
+    let state = toRunnerTurn(v191CardReleaseGame("v191-purge-virus"));
+    state.runner.credits = 40;
+    moveRunnerCardToGrip(state, "onr_v1_013_cockroach");
+    moveRunnerCardToGrip(state, "onr_v1_034_incubator");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_013_cockroach");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_034_incubator");
+    const keptHqId = moveCorpCardToHq(state, "simple_economy_operation");
+    keepOnlyCorpHqCard(state, keptHqId);
+
+    for (let index = 0; index < 2; index += 1) {
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+      state = apply(state, "runner", (action) => action.type === "access_card");
+    }
+
+    const cockroachId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_013_cockroach");
+    const incubatorId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_034_incubator");
+    expect(cockroachId).toBeDefined();
+    expect(incubatorId).toBeDefined();
+    if (!cockroachId || !incubatorId) return;
+    expect(cardCounterAmount(state, cockroachId, "virus")).toBeGreaterThanOrEqual(2);
+    expect(cardCounterAmount(state, incubatorId, "virus")).toBeGreaterThanOrEqual(2);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    expect(getLegalActions(state, "corp").some((action) => action.type === "purge_virus_counters")).toBe(true);
+    state = apply(state, "corp", (action) => action.type === "purge_virus_counters");
+
+    expect(cardCounterAmount(state, cockroachId, "virus")).toBe(0);
+    expect(cardCounterAmount(state, incubatorId, "virus")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ purgedCounterType: "virus" });
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -4761,6 +4981,8 @@ const ONR_V1_9_0_FINAL_CARD_IDS = [
   "onr_v1_275_vacuum-link"
 ] as const;
 
+const ONR_V1_9_1_FINAL_CARD_IDS = ["onr_v1_013_cockroach", "onr_v1_034_incubator", "onr_v1_030_grubb"] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -5215,6 +5437,34 @@ const ONR_V1_9_0_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_1_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v191_smoke_094",
+  name: "O:NR V1.9.1 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_013_cockroach", quantity: 2 },
+    { id: "onr_v1_034_incubator", quantity: 2 },
+    { id: "onr_v1_030_grubb", quantity: 2 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_1_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v191_smoke_094",
+  name: "O:NR V1.9.1 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "onr_v1_279_wall-of-static", quantity: 3 },
+    { id: "onr_v1_238_data-wall-2-0", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -5491,6 +5741,16 @@ function v190CardReleaseGame(seed: string): GameState {
   });
 }
 
+function v191CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_1_RUNNER_DECK,
+    corpDeck: ONR_V1_9_1_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
 function v095ResourceGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
@@ -5616,6 +5876,10 @@ function sourceDefinition(state: GameState, action: LegalAction): string | undef
 function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
   return ids.reduce((sum, id) => sum + (DEMO_CARDS_BY_ID[state.cardInstances[id]?.definitionId ?? ""]?.agendaPoints ?? 0), 0);
+}
+
+function cardCounterAmount(state: GameState, cardId: CardInstanceId, counterType: CounterType): number {
+  return state.cardInstances[cardId]?.counters?.[counterType] ?? 0;
 }
 
 function choiceRequest(state: GameState, side: Side): ChoiceRequest {

@@ -68,7 +68,7 @@ describe("Client visibility contract", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.9.0"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.9.1"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
@@ -289,8 +289,10 @@ describe("Client visibility contract", () => {
     expect(page).toContain("visibleKnownCardIds");
     expect(page).toContain("enrichVisibleCard");
     expect(page).toContain("card.known && card.definitionId");
-    expect(page).toContain("nearestTooltipBoundary");
-    expect(page).toContain("const nextTooltipPlacement = spaceBelow < 118");
+    expect(page).toContain("const tooltipWidth = computedTooltipWidth();");
+    expect(page).toContain("const margin = 16;");
+    expect(page).toContain("Math.max(margin, Math.min(cardRect.left + 6, window.innerWidth - tooltipWidth - margin));");
+    expect(page).toContain('const nextTooltipPlacement = spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";');
     expect(page).toContain('const rulesText = card.known ? (card.rulesText ?? "") : ""');
     expect(page).toContain('title={nativeTitle}');
     expect(page).toContain("hasRulesText");
@@ -302,11 +304,12 @@ describe("Client visibility contract", () => {
     expect(page).toContain("function serverLanesForSide");
     expect(page).toContain('side === "runner" ? [rootLane, iceLane] : [iceLane, rootLane]');
     expect(page).toContain("serverLanesForSide(activeView.side, server)");
-    expect(page).toContain("serverBoardRows(activeView.servers)");
+    expect(page).toContain("serverBoardRows(activeView.servers, activeView.side)");
     const helpers = readFileSync("apps/web/app/action-board-ui.ts", "utf8");
     expect(helpers).toContain("function serverBoardRows");
-    expect(helpers).toContain('{ kind: "remotes", servers: [...remotes, ...other] }');
-    expect(helpers).toContain('{ kind: "centrals", servers: central }');
+    expect(helpers).toContain('const centralRow = { kind: "centrals" as const, servers: central };');
+    expect(helpers).toContain('const remoteRow = { kind: "remotes" as const, servers: [...remotes, ...other] };');
+    expect(helpers).toContain('return viewerSide === "corp" ? [remoteRow, centralRow] : [centralRow, remoteRow];');
   });
 
   it("returns PlayerView payloads from the web game API", () => {
