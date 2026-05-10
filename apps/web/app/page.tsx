@@ -1384,6 +1384,7 @@ export default function Page() {
       setHasStoredMatchStartSettings(false);
     }
     setMatchStartSettingsLoaded(true);
+    const storedSession = loadStoredSession();
     if (matchId && reconnectToken && (reconnectSide === "runner" || reconnectSide === "corp")) {
       setEntryTab("play");
       setMode("join");
@@ -1401,6 +1402,34 @@ export default function Page() {
       return;
     }
     if (matchId && token) {
+      if (storedSession && storedSession.matchId === matchId) {
+        setSession(storedSession);
+        void bootstrap(storedSession)
+          .then((bootstrapped) => {
+            if (bootstrapped && "playerView" in bootstrapped) {
+              setPayload(bootstrapped);
+              setLobby(null);
+              persistSession(storedSession, bootstrapped);
+              return;
+            }
+            if (bootstrapped) {
+              setLobby(bootstrapped);
+              setPayload(null);
+              persistSession(storedSession, bootstrapped);
+              return;
+            }
+            if (storedSession.reconnectToken) {
+              void reconnectSession(storedSession, "Session konnte nicht geladen werden.");
+              return;
+            }
+            setNotice("Session konnte nicht geladen werden.");
+          })
+          .catch(() => {
+            if (storedSession.reconnectToken) void reconnectSession(storedSession, "Session konnte nicht geladen werden.");
+            else setNotice("Session konnte nicht geladen werden.");
+          });
+        return;
+      }
       setEntryTab("play");
       setMode("join");
       setJoinLinkInput(window.location.href);
@@ -1410,29 +1439,28 @@ export default function Page() {
       return;
     }
     if (storedDisplayName) setDisplayName(storedDisplayName);
-    const stored = loadStoredSession();
-    if (!stored) {
+    if (!storedSession) {
       setRecentSession(loadRecentSession());
       return;
     }
-    setSession(stored);
-    void bootstrap(stored)
+    setSession(storedSession);
+    void bootstrap(storedSession)
       .then((bootstrapped) => {
         if (bootstrapped && "playerView" in bootstrapped) {
           setPayload(bootstrapped);
           setLobby(null);
-          persistSession(stored, bootstrapped);
+          persistSession(storedSession, bootstrapped);
         } else if (bootstrapped) {
           setLobby(bootstrapped);
           setPayload(null);
-          persistSession(stored, bootstrapped);
-        } else if (stored.reconnectToken) {
-          void reconnectSession(stored, "Session konnte nicht geladen werden.");
+          persistSession(storedSession, bootstrapped);
+        } else if (storedSession.reconnectToken) {
+          void reconnectSession(storedSession, "Session konnte nicht geladen werden.");
         }
         else setNotice("Session konnte nicht geladen werden.");
       })
       .catch(() => {
-        if (stored.reconnectToken) void reconnectSession(stored, "Session konnte nicht geladen werden.");
+        if (storedSession.reconnectToken) void reconnectSession(storedSession, "Session konnte nicht geladen werden.");
         else setNotice("Session konnte nicht geladen werden.");
       });
   }, []);
