@@ -492,6 +492,10 @@ type CatalogCardDetail = CatalogCardSummary & {
   aiHints?: CatalogAiHints | null;
 };
 
+type DeckBuilderCardDetail = CatalogCardDetail & {
+  definitionId?: string;
+};
+
 type CatalogAiHints = {
   roles: string[];
   planRoles: string[];
@@ -748,6 +752,7 @@ const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-generated-card-art-1";
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 const RUNNER_HEAP_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
+const SCORE_AREA_PREVIEW_LIMIT = 18;
 const HAND_CARD_BASE_MIN_WIDTH = 108;
 const OWN_RIG_CARD_BASE_MIN_WIDTH = 104;
 const OPPONENT_RIG_CARD_BASE_MIN_WIDTH = 80;
@@ -894,7 +899,7 @@ function CardImageOverlay({
       <span className="hardwareImageOverlayTop">
         <span className="hardwareImageOverlayName">{title}</span>
       </span>
-      {cost !== undefined ? <span className="hardwareImageOverlayCost">{cost}</span> : null}
+      {cost != null ? <span className="hardwareImageOverlayCost">{cost}</span> : null}
       <span className="hardwareImageOverlayFrame">
         <span className="hardwareImageOverlayKind">{kindLabel}</span>
         {overlayRules.length > 0 ? (
@@ -918,7 +923,7 @@ function HardwareImageOverlay({
 }: {
   title: string;
   rulesText?: string;
-  installCost?: number;
+  installCost?: number | null | undefined;
   className?: string;
   maxLines?: number;
 }) {
@@ -928,7 +933,7 @@ function HardwareImageOverlay({
       kindLabel="Hardware"
       maxLines={maxLines}
       {...(rulesText ? { rulesText } : {})}
-      {...(installCost !== undefined ? { cost: installCost } : {})}
+      {...(installCost != null ? { cost: installCost } : {})}
       {...(className ? { className } : {})}
     />
   );
@@ -943,7 +948,7 @@ function OperationImageOverlay({
 }: {
   title: string;
   rulesText?: string;
-  cost?: number;
+  cost?: number | null | undefined;
   className?: string;
   maxLines?: number;
 }) {
@@ -954,7 +959,7 @@ function OperationImageOverlay({
       variantClassName="operationImageOverlay"
       maxLines={maxLines}
       {...(rulesText ? { rulesText } : {})}
-      {...(cost !== undefined ? { cost } : {})}
+      {...(cost != null ? { cost } : {})}
       {...(className ? { className } : {})}
     />
   );
@@ -1385,6 +1390,11 @@ export default function Page() {
   const [deckExportText, setDeckExportText] = useState("");
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
   const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
+  const [scoreAreaOverlays, setScoreAreaOverlays] = useState<Record<Side, boolean>>({ runner: false, corp: false });
+  const [scoreAreaOverlayPositions, setScoreAreaOverlayPositions] = useState<Record<Side, RunOverlayPositionPreference>>({
+    runner: { kind: "default" },
+    corp: { kind: "default" }
+  });
   const [rightRailCollapsed, setRightRailCollapsed] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
@@ -2010,6 +2020,13 @@ export default function Page() {
   };
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
   const ownRigGroups = activeView ? groupRunnerRigCards(activeView.own.rig ?? []) : [];
+  const scoreAreaCardsBySide = (side: Side): VisibleCard[] => {
+    if (!activeView) return [];
+    return side === activeView.side ? activeView.own.scoreArea : activeView.opponent.scoreArea;
+  };
+  const toggleScoreAreaOverlay = (side: Side) => {
+    setScoreAreaOverlays((value) => ({ ...value, [side]: !value[side] }));
+  };
   const effectiveAgendaTarget = activeView?.agendaPointsToWin ?? 7;
 
   useEffect(() => {
@@ -3872,11 +3889,46 @@ export default function Page() {
         }}
       />
       {activeView?.run ? <RunTimelineOverlay view={activeView} legalActions={payload.legalActions} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} /> : null}
+      <ScoredAgendaOverlay
+        side="corp"
+        cards={scoreAreaCardsBySide("corp")}
+        open={Boolean(scoreAreaOverlays.corp)}
+        position={scoreAreaOverlayPositions.corp}
+        cardDisplayMode={cardDisplayMode}
+        enrichCard={enrichCard}
+        actionDisabled={Boolean(payload.winner) || connection !== "online"}
+        selectedContext={selectedActionContext}
+        onAction={submitAction}
+        onFocus={focusCard}
+        onActionContextSelect={selectActionCard}
+        onClose={() => setScoreAreaOverlays((value) => ({ ...value, corp: false }))}
+        onPosition={(position) => setScoreAreaOverlayPositions((value) => ({ ...value, corp: position }))}
+      />
+      <ScoredAgendaOverlay
+        side="runner"
+        cards={scoreAreaCardsBySide("runner")}
+        open={Boolean(scoreAreaOverlays.runner)}
+        position={scoreAreaOverlayPositions.runner}
+        cardDisplayMode={cardDisplayMode}
+        enrichCard={enrichCard}
+        actionDisabled={Boolean(payload.winner) || connection !== "online"}
+        selectedContext={selectedActionContext}
+        onAction={submitAction}
+        onFocus={focusCard}
+        onActionContextSelect={selectActionCard}
+        onClose={() => setScoreAreaOverlays((value) => ({ ...value, runner: false }))}
+        onPosition={(position) => setScoreAreaOverlayPositions((value) => ({ ...value, runner: position }))}
+      />
 
       <div className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`} data-testid="active-game">
         <aside className="column panel sidePanel">
           <OpponentPanel
             view={activeView}
+            scoreAreaCards={scoreAreaCardsBySide(opponentSide(activeView.side))}
+            scoreAreaOpen={scoreAreaOverlays[opponentSide(activeView.side)]}
+            agendaPointsToWin={effectiveAgendaTarget}
+            scoreAreaHighlighted={zoneHighlighted(activeCueHighlight, opponentSide(activeView.side), "scoreArea")}
+            onToggleScoreArea={() => toggleScoreAreaOverlay(opponentSide(activeView.side))}
             connected={payload.opponentStatus.connected}
             actionCapacity={actionSlotCapacities[opponentSide(activeView.side)]}
             {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})}
@@ -3905,7 +3957,15 @@ export default function Page() {
                         onClearContext={() => setSelectedActionContext(null)}
                       />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
-          <PlayerPanel view={activeView} title={`Du · ${sideLabel(activeView.side)}`} />
+          <PlayerPanel
+            view={activeView}
+            title={`Du · ${sideLabel(activeView.side)}`}
+            scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
+            scoreAreaOpen={scoreAreaOverlays[activeView.side]}
+            agendaPointsToWin={effectiveAgendaTarget}
+            scoreAreaHighlighted={zoneHighlighted(activeCueHighlight, activeView.side, "scoreArea")}
+            onToggleScoreArea={() => toggleScoreAreaOverlay(activeView.side)}
+          />
           <SpecialZonesStrip view={activeView} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} compact onFocus={focusCard} />
         </aside>
 
@@ -5522,6 +5582,131 @@ function RunTimelineOverlay({
   );
 }
 
+function ScoredAgendaOverlay({
+  side,
+  cards,
+  open,
+  position,
+  cardDisplayMode,
+  enrichCard,
+  actionDisabled,
+  selectedContext,
+  onAction,
+  onFocus,
+  onActionContextSelect,
+  onClose,
+  onPosition
+}: {
+  side: Side;
+  cards: VisibleCard[];
+  open: boolean;
+  position: RunOverlayPositionPreference;
+  cardDisplayMode: CardDisplayMode;
+  enrichCard(card: VisibleCard): DisplayVisibleCard;
+  actionDisabled: boolean;
+  selectedContext: ActionContext | null;
+  onAction(action: LegalAction): void;
+  onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onClose(): void;
+  onPosition(position: RunOverlayPositionPreference): void;
+}) {
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
+  const { handPercent } = useCardScaleSettings();
+  const handCardScale = Math.max(HAND_CARD_SCALE_PERCENT_MIN / 100, handPercent / 100);
+  const scoredAgendaCardsStyle = useMemo(
+    () => ({ "--cards-min-width": `${Math.round(HAND_CARD_BASE_MIN_WIDTH * handCardScale)}px` } as CSSProperties),
+    [handCardScale]
+  );
+  const visibleCards = cards.map((card) => enrichCard(card));
+  if (!open || visibleCards.length === 0) return null;
+  const visibleLimitCards = visibleCards.slice(0, SCORE_AREA_PREVIEW_LIMIT);
+  const title = side === "corp" ? "Entwickelt" : "Gestohlen";
+  const subtitle = `${cards.length} Agenda${cards.length === 1 ? "" : "s"}`;
+  const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const rect = overlay.getBoundingClientRect();
+    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const dragOverlay = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const overlay = overlayRef.current;
+    const offset = dragOffsetRef.current;
+    if (!overlay || !offset) return;
+    const rect = overlay.getBoundingClientRect();
+    onPosition(
+      clampRunOverlayPosition(
+        ((event.clientX - offset.x) / window.innerWidth) * 100,
+        ((event.clientY - offset.y) / window.innerHeight) * 100,
+        window.innerWidth,
+        window.innerHeight,
+        rect.width,
+        rect.height
+      )
+    );
+  };
+  const stopDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    dragOffsetRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const overlayPositionStyle: CSSProperties = position.kind === "custom"
+    ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, right: "auto", transform: "none" }
+    : {};
+
+  return (
+    <div
+      ref={overlayRef}
+      className={`scoredAgendaOverlay ${side} ${position.kind === "custom" ? "custom" : ""}`}
+      style={overlayPositionStyle}
+    >
+      <section className={`scoredAgendaPanel ${side}`}>
+        <header className={`scoredAgendaHead ${side}`}>
+          <div>
+            <strong>{title}</strong>
+            <span>{subtitle}</span>
+          </div>
+        </header>
+        <button
+          className="button iconOnly scoreAreaDragHandle"
+          type="button"
+          onPointerDown={startDrag}
+          onPointerMove={dragOverlay}
+          onPointerUp={stopDrag}
+          onPointerCancel={stopDrag}
+          aria-label={`${title}-Fenster verschieben`}
+          title={`${title}-Fenster verschieben`}
+        >
+          <Move size={14} />
+        </button>
+        <button className="button iconOnly scoreAreaFloatingClose" type="button" onClick={onClose} aria-label={`${title}-Fenster schließen`} title={`${title}-Fenster schließen`}>
+          <X size={14} />
+        </button>
+        <div className="scoredAgendaList cards" style={scoredAgendaCardsStyle}>
+          {visibleLimitCards.map((card) => (
+            <div key={card.instanceId} className="scoredAgendaEntry">
+              <CardView
+                card={card}
+                displayMode={cardDisplayMode}
+                showAdvancementCounters={false}
+                actions={[]}
+                actionDisabled={actionDisabled}
+                selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                onAction={onAction}
+                {...(onFocus ? { onFocus } : {})}
+                {...(onActionContextSelect ? { onActionContextSelect } : {})}
+              />
+              {card.rulesText ? <p className="scoredAgendaRules">{card.rulesText}</p> : null}
+            </div>
+          ))}
+          {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">+{cards.length - SCORE_AREA_PREVIEW_LIMIT} weitere</div> : null}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function serverLabelFromId(serverId: string): string {
   return serverDisplayLabel(serverId);
 }
@@ -7035,6 +7220,231 @@ function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card:
   );
 }
 
+function DeckCardTooltipTrigger({
+  card,
+  detail,
+  cardId,
+  className,
+  onSelect,
+  children
+}: {
+  card: CatalogCardSummary | null;
+  detail: DeckBuilderCardDetail | undefined;
+  cardId: string;
+  className: string;
+  onSelect(): void;
+  children: ReactNode;
+}) {
+  const { hoverOpenDelayMs, mode: tooltipMode } = useCardTooltipSettings();
+  const { tooltipPercent } = useCardScaleSettings();
+  const triggerRef = useRef<HTMLElement | null>(null);
+  const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
+  const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
+  const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
+
+  const detailLines = card && detail ? catalogDetailLines(detail) : [];
+  const rulesText = card && detail ? detail.text : "";
+  const hasRulesLines = rulesText.length > 0;
+  const tooltipText = card ? deckBuilderCardTooltip(card, detail) : cardId;
+  const tooltipImageId = detail?.definitionId ?? detail?.catalogCardId ?? card?.catalogCardId ?? cardId;
+  const overlayImageId = detail?.definitionId;
+  const tooltipImageUrl = tooltipImageId ? localCardImageUrl(tooltipImageId) : undefined;
+  const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
+  const hasTooltipTextContent = Boolean(card && (card.title || detailLines.length > 0 || hasRulesLines));
+  const tooltipEnabled = Boolean(card) && (showImageTooltip || hasTooltipTextContent);
+  const tooltipId = tooltipEnabled && card ? `deck-card-tooltip-${card.catalogCardId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const nativeTitle = tooltipEnabled ? undefined : tooltipText;
+  const tooltipStats = detail
+    ? [
+        detail.numeric.cost !== null && detail.numeric.cost !== undefined ? { icon: "¢", label: "Kosten", value: String(detail.numeric.cost) } : null,
+        detail.numeric.installCost !== null && detail.numeric.installCost !== undefined ? { icon: "↓", label: "Install", value: String(detail.numeric.installCost) } : null,
+        detail.numeric.rezCost !== null && detail.numeric.rezCost !== undefined ? { icon: "R", label: "Rez", value: String(detail.numeric.rezCost) } : null,
+        detail.numeric.trashCost !== null && detail.numeric.trashCost !== undefined ? { icon: "🗑", label: "Trash", value: String(detail.numeric.trashCost) } : null,
+        detail.numeric.strength !== null && detail.numeric.strength !== undefined ? { icon: "⚔", label: "Stärke", value: String(detail.numeric.strength) } : null,
+        detail.numeric.memoryCost !== null && detail.numeric.memoryCost !== undefined ? { icon: "MU", label: "MU", value: String(detail.numeric.memoryCost) } : null,
+        detail.numeric.advancementRequirement !== null && detail.numeric.advancementRequirement !== undefined ? { icon: "⟐", label: "Benötigt", value: String(detail.numeric.advancementRequirement) } : null
+      ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
+    : [];
+  const showHardwareOverlay = Boolean(tooltipImageUrl) && card?.type === "hardware" && Boolean(overlayImageId) && hasGeneratedCardArt(overlayImageId);
+  const showOperationOverlay = Boolean(tooltipImageUrl) && card?.type === "operation" && Boolean(overlayImageId) && hasGeneratedCardArt(overlayImageId);
+  const hasSubroutineMarkers = rulesTextLines(rulesText).some((line) => isSubroutineRuleLine(card?.type ?? "", rulesText, line));
+  const tooltipScale = Math.max(0.5, tooltipPercent / 100);
+  const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
+
+  const clearTooltipOpenTimer = () => {
+    if (tooltipOpenTimerRef.current !== null) {
+      clearTimeout(tooltipOpenTimerRef.current);
+      tooltipOpenTimerRef.current = null;
+    }
+  };
+
+  const clearTooltipCloseTimer = () => {
+    if (tooltipCloseTimerRef.current !== null) {
+      clearTimeout(tooltipCloseTimerRef.current);
+      tooltipCloseTimerRef.current = null;
+    }
+  };
+
+  const estimatedTooltipHeight = (): number => {
+    if (showImageTooltip) return 320;
+    const ruleLineCount = rulesTextLines(rulesText).length;
+    const base = tooltipMode === "enhanced" ? 132 : 78;
+    return Math.min(320, Math.round((base + ruleLineCount * 20) * tooltipScale));
+  };
+
+  const computedTooltipWidth = (): number => {
+    const viewportLimit = Math.max(160, window.innerWidth - 32);
+    const unscaled = showImageTooltip ? 220 : 300;
+    return Math.min(Math.round(unscaled * tooltipScale), viewportLimit);
+  };
+
+  const updateTooltipPlacement = () => {
+    const element = triggerRef.current;
+    if (!element) return;
+    const cardRect = element.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const spaceBelow = viewportHeight - cardRect.bottom;
+    const spaceAbove = cardRect.top;
+    const tooltipHeight = estimatedTooltipHeight();
+    const nextTooltipPlacement = spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
+    if (tooltipEnabled) {
+      const tooltipWidth = computedTooltipWidth();
+      const margin = 16;
+      const left = Math.max(margin, Math.min(cardRect.left + 6, window.innerWidth - tooltipWidth - margin));
+      setTooltipPositionStyle(
+        nextTooltipPlacement === "below"
+          ? { left: `${left}px`, top: `${cardRect.bottom + 8}px`, width: `${tooltipWidth}px` }
+          : { left: `${left}px`, top: `${cardRect.top - 8}px`, width: `${tooltipWidth}px` }
+      );
+    }
+    if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);
+  };
+
+  const scheduleTooltipOpen = () => {
+    if (!tooltipEnabled) return;
+    clearTooltipCloseTimer();
+    if (tooltipHoverVisible) return;
+    clearTooltipOpenTimer();
+    tooltipOpenTimerRef.current = setTimeout(() => {
+      tooltipOpenTimerRef.current = null;
+      setTooltipHoverVisible(true);
+    }, hoverOpenDelayMs);
+  };
+
+  const scheduleTooltipClose = () => {
+    clearTooltipOpenTimer();
+    clearTooltipCloseTimer();
+    tooltipCloseTimerRef.current = setTimeout(() => {
+      tooltipCloseTimerRef.current = null;
+      setTooltipHoverVisible(false);
+    }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
+  };
+
+  useEffect(() => {
+    if (tooltipEnabled) return;
+    clearTooltipOpenTimer();
+    clearTooltipCloseTimer();
+    setTooltipHoverVisible(false);
+    setTooltipFocusVisible(false);
+    setTooltipPositionStyle({});
+  }, [tooltipEnabled]);
+
+  useEffect(() => {
+    if (!showTooltip) return;
+    updateTooltipPlacement();
+  }, [showTooltip, tooltipMode]);
+
+  useEffect(
+    () => () => {
+      clearTooltipOpenTimer();
+      clearTooltipCloseTimer();
+    },
+    []
+  );
+
+  return (
+    <article
+      className={className}
+      onClick={onSelect}
+      ref={triggerRef}
+      title={nativeTitle}
+      aria-describedby={tooltipId}
+      onFocus={(event) => {
+        updateTooltipPlacement();
+        if (tooltipEnabled && event.currentTarget.matches(":focus-visible")) setTooltipFocusVisible(true);
+      }}
+      onBlur={() => setTooltipFocusVisible(false)}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "touch") return;
+        updateTooltipPlacement();
+        scheduleTooltipOpen();
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "touch") return;
+        scheduleTooltipClose();
+      }}
+    >
+      {children}
+      {tooltipId && card ? (
+        <span
+          className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
+          id={tooltipId}
+          role="tooltip"
+          style={tooltipPositionStyle}
+          onPointerEnter={(event) => {
+            if (event.pointerType === "touch") return;
+            clearTooltipCloseTimer();
+            clearTooltipOpenTimer();
+            if (!tooltipHoverVisible) setTooltipHoverVisible(true);
+          }}
+          onPointerLeave={(event) => {
+            if (event.pointerType === "touch") return;
+            scheduleTooltipClose();
+          }}
+        >
+          {showImageTooltip ? (
+            <>
+              {showHardwareOverlay ? <HardwareImageOverlay title={card.title} rulesText={rulesText} installCost={detail?.numeric.installCost} /> : null}
+              {showOperationOverlay ? <OperationImageOverlay title={card.title} rulesText={rulesText} cost={detail?.numeric.cost} /> : null}
+              <img className="cardTooltipImage" src={tooltipImageUrl} alt={`Kartenbild ${card.title ?? "Karte"}`} />
+            </>
+          ) : (
+            <>
+              <strong>{card.title}</strong>
+              {tooltipMode === "enhanced" ? (
+                <span className="cardTooltipStats">
+                  {tooltipStats.map((stat) => (
+                    <span key={`${card.catalogCardId}-tooltip-stat-${stat.label}`} className="cardTooltipStat" title={stat.label}>
+                      <span className="icon">{stat.icon}</span>
+                      <span>{stat.value}</span>
+                    </span>
+                  ))}
+                </span>
+              ) : null}
+              {tooltipMode === "enhanced"
+                ? detailLines.map((line) => (
+                    <span key={`${card.catalogCardId}-tooltip-detail-${line}`}>{line}</span>
+                  ))
+                : null}
+              <span className="cardTooltipText">
+                {rulesTextLines(rulesText).map((line, index) => (
+                  <span key={`${card.catalogCardId}-tooltip-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
+                    {shouldAddFallbackSubroutineMarker(card.type, rulesText, line) ? <SubroutineIcon /> : null}
+                    {renderRuleTextSegments(line, `${card.catalogCardId}-tooltip-rules-${index}`)}
+                  </span>
+                ))}
+              </span>
+            </>
+          )}
+        </span>
+      ) : null}
+    </article>
+  );
+}
+
 function DeckLibraryCard({
   card,
   detail,
@@ -7045,7 +7455,7 @@ function DeckLibraryCard({
   onSelect
 }: {
   card: CatalogCardSummary;
-  detail: CatalogCardDetail | undefined;
+  detail: DeckBuilderCardDetail | undefined;
   quantity: number;
   selected: boolean;
   onAdd(): void;
@@ -7053,9 +7463,14 @@ function DeckLibraryCard({
   onSelect(): void;
 }) {
   const metrics = deckBuilderMetricLine(detail);
-  const title = deckBuilderCardTooltip(card, detail);
   return (
-    <article className={`deckLibraryCard ${quantity > 0 ? "inDeck" : ""} ${selected ? "selected" : ""}`} onClick={onSelect} title={title}>
+    <DeckCardTooltipTrigger
+      card={card}
+      detail={detail}
+      cardId={card.catalogCardId}
+      className={`deckLibraryCard ${quantity > 0 ? "inDeck" : ""} ${selected ? "selected" : ""}`}
+      onSelect={onSelect}
+    >
       <DeckCardThumb
         cardId={card.catalogCardId}
         title={card.title}
@@ -7079,7 +7494,7 @@ function DeckLibraryCard({
           +
         </button>
       </div>
-    </article>
+    </DeckCardTooltipTrigger>
   );
 }
 
@@ -7095,17 +7510,22 @@ function DeckListCard({
 }: {
   card: CatalogCardSummary | null;
   cardId: string;
-  detail: CatalogCardDetail | undefined;
+  detail: DeckBuilderCardDetail | undefined;
   quantity: number;
   onIncrement(): void;
   onDecrement(): void;
   onRemove(): void;
   onSelect(): void;
 }) {
-  const title = card ? deckBuilderCardTooltip(card, detail) : cardId;
   const metrics = deckBuilderMetricLine(detail);
   return (
-    <article className="deckListCard" onClick={onSelect} title={title}>
+    <DeckCardTooltipTrigger
+      card={card}
+      detail={detail}
+      cardId={cardId}
+      className="deckListCard"
+      onSelect={onSelect}
+    >
       <DeckCardThumb
         cardId={card?.catalogCardId ?? cardId}
         title={card?.title ?? cardId}
@@ -7131,7 +7551,7 @@ function DeckListCard({
           <Trash2 size={13} />
         </button>
       </div>
-    </article>
+    </DeckCardTooltipTrigger>
   );
 }
 
@@ -7155,8 +7575,9 @@ function DeckCardThumb({
   preview?: boolean;
 }) {
   const imageUrl = localCardImageUrl(cardId);
-  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType);
-  const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(cardType);
+  const hasGeneratedImage = hasGeneratedCardArt(cardId);
+  const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedImage;
+  const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(cardType) && hasGeneratedImage;
   return (
     <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
       {imageUrl ? (
@@ -7272,7 +7693,27 @@ function ConnectionBadge({ text, state }: { text: string; state: "offline" | "co
   return <span className={`connection ${state}`}>{text}</span>;
 }
 
-function OpponentPanel({ view, connected, displayName, actionCapacity }: { view: PlayerView; connected: boolean; displayName?: string; actionCapacity: number }) {
+function OpponentPanel({
+  view,
+  connected,
+  displayName,
+  actionCapacity,
+  agendaPointsToWin,
+  scoreAreaCards,
+  scoreAreaOpen,
+  scoreAreaHighlighted,
+  onToggleScoreArea
+}: {
+  view: PlayerView;
+  connected: boolean;
+  displayName?: string;
+  actionCapacity: number;
+  agendaPointsToWin: number;
+  scoreAreaCards: VisibleCard[];
+  scoreAreaOpen: boolean;
+  scoreAreaHighlighted: boolean;
+  onToggleScoreArea(): void;
+}) {
   const side = opponentSide(view.side);
   const turnSide = turnSideForView(view);
   const isTurn = turnSide === side;
@@ -7282,7 +7723,23 @@ function OpponentPanel({ view, connected, displayName, actionCapacity }: { view:
       <h2><RoleIcon size={16} />{displayName ? `${displayName} · ${sideLabel(side)}` : sideLabel(side)}</h2>
       <div className="stats">
         <CreditBadge credits={view.opponent.credits} />
-        <Stat label="Agenda" value={`${view.opponent.agendaPoints} / ${view.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
+        <div className="scoreAreaStatCell">
+          <Stat label="Agenda" value={`${view.opponent.agendaPoints} / ${agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
+          {scoreAreaCards.length > 0 ? (
+            <button
+              className={`button iconOnly scoreAreaOpenButton ${scoreAreaOpen ? "is-open" : ""} ${scoreAreaHighlighted ? "cueHighlightSoft" : ""}`}
+              type="button"
+              onClick={onToggleScoreArea}
+              aria-expanded={scoreAreaOpen}
+              aria-label={`Agenda-Fenster ${scoreAreaOpen ? "schließen" : "öffnen"}`}
+              title={`Agenda-Fenster ${scoreAreaOpen ? "schließen" : "öffnen"}`}
+            >
+              <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
+                {scoreAreaOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              </span>
+            </button>
+          ) : null}
+        </div>
         {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} icon={<TagIcon size={14} />} /> : null}
         {side === "runner" ? <Stat label="Core" value={view.opponent.coreDamage ?? 0} /> : null}
       </div>
@@ -7292,7 +7749,23 @@ function OpponentPanel({ view, connected, displayName, actionCapacity }: { view:
   );
 }
 
-function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
+function PlayerPanel({
+  view,
+  title,
+  scoreAreaCards,
+  agendaPointsToWin,
+  scoreAreaOpen,
+  scoreAreaHighlighted,
+  onToggleScoreArea
+}: {
+  view: PlayerView;
+  title: string;
+  scoreAreaCards: VisibleCard[];
+  agendaPointsToWin: number;
+  scoreAreaOpen: boolean;
+  scoreAreaHighlighted: boolean;
+  onToggleScoreArea(): void;
+}) {
   const turnSide = turnSideForView(view);
   const isTurn = turnSide === view.side;
   const RoleIcon = view.side === "runner" ? RunnerRoleIcon : CorpRoleIcon;
@@ -7301,7 +7774,23 @@ function PlayerPanel({ view, title }: { view: PlayerView; title: string }) {
       <h2><RoleIcon size={16} />{title}</h2>
       <div className="stats">
         <CreditBadge credits={view.own.credits} />
-        <Stat label="Agenda" value={`${view.own.agendaPoints} / ${view.agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
+        <div className="scoreAreaStatCell">
+          <Stat label="Agenda" value={`${view.own.agendaPoints} / ${agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
+          {scoreAreaCards.length > 0 ? (
+            <button
+              className={`button iconOnly scoreAreaOpenButton ${scoreAreaOpen ? "is-open" : ""} ${scoreAreaHighlighted ? "cueHighlightSoft" : ""}`}
+              type="button"
+              onClick={onToggleScoreArea}
+              aria-expanded={scoreAreaOpen}
+              aria-label={`Agenda-Fenster ${scoreAreaOpen ? "schließen" : "öffnen"}`}
+              title={`Agenda-Fenster ${scoreAreaOpen ? "schließen" : "öffnen"}`}
+            >
+              <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
+                {scoreAreaOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              </span>
+            </button>
+          ) : null}
+        </div>
         {view.side === "runner" ? <Stat label="Tags" value={view.own.tags} icon={<TagIcon size={14} />} /> : null}
         {view.side === "runner" ? <Stat label="Core" value={view.own.coreDamage ?? 0} /> : null}
       </div>
@@ -7508,6 +7997,7 @@ function CardView({
   actions = [],
   actionDisabled = false,
   positionBadge,
+  showAdvancementCounters = true,
   onFocus,
   onActionContextSelect,
   onAction
@@ -7522,6 +8012,7 @@ function CardView({
   actions?: LegalAction[];
   actionDisabled?: boolean;
   positionBadge?: string;
+  showAdvancementCounters?: boolean;
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction?(action: LegalAction): void;
@@ -7577,10 +8068,16 @@ function CardView({
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
   const installedStateLabel = installedState === "unrezzed" ? "Ungerezzt" : installedState === "rezzed" ? "Gerezzt" : installedState === "hidden" ? "Verdeckt / ungerezzt" : null;
-  const advancementCount = preview ? 0 : Math.max(0, Math.floor(card.advancementCounters ?? 0));
+  const advancementCount = showAdvancementCounters && !preview ? Math.max(0, Math.floor(card.advancementCounters ?? 0)) : 0;
   const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
-  const cardAriaLabel = card.known ? `Karte ${card.title}${advancementLabel ? `, ${advancementLabel}` : ""}` : advancementLabel ? `Verdeckte Karte, ${advancementLabel}` : "Verdeckte Karte";
+  const cardAriaLabel = showAdvancementCounters && advancementLabel
+    ? card.known
+      ? `Karte ${card.title}, ${advancementLabel}`
+      : `Verdeckte Karte, ${advancementLabel}`
+    : card.known
+      ? `Karte ${card.title}`
+      : "Verdeckte Karte";
 
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;

@@ -2879,6 +2879,202 @@ select {
   z-index: 38;
 }
 
+.scoredAgendaOverlay {
+  position: fixed;
+  top: 72px;
+  z-index: 77;
+  pointer-events: none;
+  width: min(420px, calc(100vw - 24px));
+}
+
+.scoredAgendaOverlay.custom {
+  right: auto;
+}
+
+.scoredAgendaOverlay.corp {
+  left: 12px;
+  right: auto;
+}
+
+.scoredAgendaOverlay.runner {
+  left: auto;
+  right: 12px;
+}
+
+.scoredAgendaPanel {
+  pointer-events: auto;
+  display: grid;
+  gap: 8px;
+  width: min(420px, 100%);
+  max-width: min(420px, calc(100vw - 24px));
+  max-height: min(72vh, calc(100vh - 150px));
+  overflow: auto;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 16%);
+  border-radius: 8px;
+  position: relative;
+  background: var(--panel);
+  padding: 8px 8px 10px;
+  box-shadow: 0 18px 44px rgb(0 0 0 / 0.34);
+}
+
+.scoredAgendaPanel.corp {
+  border-color: color-mix(in srgb, var(--corp), var(--line) 50%);
+}
+
+.scoredAgendaPanel.runner {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 50%);
+}
+
+.scoredAgendaHead {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 22px;
+  padding-right: 32px;
+  padding-left: 34px;
+}
+
+.scoredAgendaHead div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.scoredAgendaHead strong {
+  color: #fefefe;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+}
+
+.scoredAgendaHead span {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.scoreAreaFloatingClose,
+.scoreAreaDragHandle {
+  position: absolute;
+  top: 2px;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  background: color-mix(in srgb, var(--panel), white 4%);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  z-index: 1;
+  line-height: 1;
+}
+
+.scoreAreaFloatingClose:hover,
+.scoreAreaDragHandle:hover {
+  color: var(--text);
+}
+
+.scoreAreaDragHandle {
+  left: 6px;
+  cursor: grab;
+  touch-action: none;
+}
+
+.scoreAreaDragHandle:active {
+  cursor: grabbing;
+}
+
+.scoreAreaFloatingClose {
+  right: 6px;
+}
+
+.scoreAreaFloatingClose:active {
+  box-shadow: none;
+}
+
+.scoredAgendaList {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--line), transparent 20%);
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.scoredAgendaEntry {
+  display: grid;
+  gap: 4px;
+}
+
+.scoredAgendaRules {
+  margin: 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.scoredAgendaOverflow {
+  color: var(--muted);
+  font-size: 11px;
+  padding-left: 2px;
+}
+
+.scoreAreaOpenButton {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  width: 20px;
+  min-width: 20px;
+  height: 18px;
+  margin: 0;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid color-mix(in srgb, var(--agenda), var(--line) 42%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 88%);
+  color: var(--text);
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  line-height: 1;
+}
+
+.scoreAreaOpenButton:hover {
+  border-color: color-mix(in srgb, var(--agenda), var(--line) 28%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 72%);
+}
+
+.scoreAreaOpenButton.is-open {
+  border-color: color-mix(in srgb, var(--agenda), #fff 20%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 68%);
+}
+
+.scoreAreaStatCell {
+  position: relative;
+}
+
+.scoreAreaStatCell .stat {
+  padding-right: 32px;
+}
+
+.scoreAreaOpenButtonIcon {
+  color: color-mix(in srgb, var(--agenda), var(--text) 18%);
+  line-height: 1;
+}
+
+.scoreAreaOpenButton.is-open .scoreAreaOpenButtonIcon {
+  color: var(--agenda);
+}
+
+.scoreAreaOpenButton svg {
+  width: 10px;
+  height: 10px;
+}
+
 .archivesOverflowBadge {
   flex: 0 0 auto;
   margin-left: 8px;
@@ -6195,6 +6391,23 @@ select,
   .runTimelineOverlay {
     top: 58px;
     max-width: calc(100vw - 12px);
+  }
+
+  .scoredAgendaOverlay {
+    top: 58px;
+    left: 8px;
+    right: 8px;
+    width: calc(100vw - 16px);
+  }
+
+  .scoredAgendaOverlay.corp,
+  .scoredAgendaOverlay.runner {
+    left: 8px;
+    right: 8px;
+  }
+
+  .scoredAgendaPanel {
+    max-height: calc(100vh - 132px);
   }
 
   .chronicleEntry {
