@@ -2414,3 +2414,23 @@ UI design exploration artifacts available:
 - `docs/ui-designsets/README.md`
 - `docs/ui-designsets/REALISM_REVIEW.md`
 - `docs/ui-designsets/05-logo-exploration/BRANDING_DECISION.md`: current provisional client name is `NETGRID`; selected clean icon references live under `docs/ui-designsets/05-logo-exploration/selected-netgrid/`.
+
+## 2026-05-11 - V1.9.5 bis V1.9.8 Kernimplementierung
+
+Status: Kernpfad V1.9.5 bis V1.9.8 grün verifiziert; vollständiger V1.9.8/V2-Unlock bleibt No-Go wegen Deferred-Longtail.
+
+Umgesetzt:
+- V1.9.5: Superior Net Barriers, ACME Savings and Loan.
+- V1.9.6: Data Raven.
+- V1.9.7: Afreet.
+- V1.9.8: Dogcatcher, Dropp, side-safe AI Known-Position-Memory.
+
+Verifikation:
+- `corepack pnpm test` grün.
+- `corepack pnpm typecheck` grün.
+
+Führende Artefakte:
+- `docs/derived/V1_9_5_TO_V1_9_8_SEQUENTIAL_IMPLEMENTATION_REVIEW.md`
+- `docs/derived/V1_9_5_TO_V1_9_8_DEFERRED_REGISTER.md`
+- `data/manifests/onr-v1-9-5-to-v1-9-8-core-implementation-manifest.json`
+- `data/scenarios/onr-v1-9-5-to-v1-9-8-core-smokes.json`

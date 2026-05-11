@@ -10,7 +10,17 @@ import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
-export type { BeliefEntry, BeliefEventClassification, BeliefEventFamily, BeliefKnowledgeKind, BeliefState, CorpOpponentModel, RndTopFreshnessMemory, RunnerOpponentModel } from "./belief-state";
+export type {
+  BeliefEntry,
+  BeliefEventClassification,
+  BeliefEventFamily,
+  BeliefKnowledgeKind,
+  BeliefState,
+  CorpOpponentModel,
+  KnownPositionMemory,
+  RndTopFreshnessMemory,
+  RunnerOpponentModel
+} from "./belief-state";
 export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,

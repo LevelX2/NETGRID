@@ -1029,10 +1029,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
   it("installs Batch A memory hardware under MU pressure", () => {
     let state = batchARunnerTurn("ai-batch-a-memory-pressure");
     state.runner.credits = 20;
-    for (const definitionId of ["onr_v1_014_codecracker", "onr_v1_021_dwarf", "onr_v1_066_snowball", "onr_v1_074_worm"] as const) {
-      moveRunnerCardToGrip(state, definitionId);
-      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === definitionId);
-    }
+    state.runner.memoryUsed = state.runner.memoryLimit;
     state.runner.clicks = 4;
     moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
     moveRunnerCardToGrip(state, "onr_v1_144_tycho-mem-chip");
@@ -1183,6 +1180,52 @@ describe("V1.4.2 belief state and opponent model", () => {
 
     const reconstructedAfterUndo = reconstructBeliefState(buildAiDecisionInput(staleState, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
     expect(reconstructedAfterUndo.runnerOpponentModel?.rndTopFreshness.freshness).toBe("stale_known_same_top");
+  });
+
+  it("tracks side-safe known position memory and invalidates R&D top after Corp draw", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v198-known-position-memory" }));
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const accessEvent: PublicGameEvent = {
+      eventId: "v198-known-rd-top",
+      type: "access_card",
+      stateVersionBefore: input.playerView.stateVersion,
+      stateVersionAfter: input.playerView.stateVersion + 1,
+      stateHashAfter: "fnv1a:v198access",
+      visibilityClass: "hidden_info_barrier",
+      publicPayload: {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "rd",
+        cardDefinitionId: "simple_agenda",
+        label: "Runner accesses R&D"
+      }
+    };
+    const accessedBelief = reconstructBeliefState({ ...input, eventTail: [...input.eventTail, accessEvent] });
+    expect(accessedBelief.knownPositionMemory?.[0]).toMatchObject({
+      zone: "rd",
+      positionKey: "top",
+      definitionId: "simple_agenda",
+      certainty: "observed"
+    });
+    expect(accessedBelief.runnerOpponentModel?.knownPositionMemory[0]).toMatchObject({
+      zone: "rd",
+      positionKey: "top",
+      definitionId: "simple_agenda"
+    });
+
+    const drawEvent: PublicGameEvent = {
+      eventId: "v198-corp-draw-invalidates-rd-top",
+      type: "mandatory_draw",
+      stateVersionBefore: input.playerView.stateVersion + 1,
+      stateVersionAfter: input.playerView.stateVersion + 2,
+      stateHashAfter: "fnv1a:v198draw",
+      visibilityClass: "private_to_side",
+      publicPayload: { actor: "corp", actionType: "mandatory_draw", label: "Korp Pflichtkarte ziehen" }
+    };
+    const invalidatedBelief = reconstructBeliefState({ ...input, eventTail: [...input.eventTail, accessEvent, drawEvent] });
+    expect(invalidatedBelief.knownPositionMemory ?? []).toEqual([]);
+    expect(invalidatedBelief.runnerOpponentModel?.knownPositionMemory ?? []).toEqual([]);
+    expect(JSON.stringify(invalidatedBelief)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
   });
 
   it("applies R&D repeat-access penalty only while top-card freshness is stale", () => {

@@ -49,6 +49,15 @@ export type RndTopFreshnessMemory = {
   invalidationReasons: string[];
 };
 
+export type KnownPositionMemory = {
+  zone: string;
+  positionKey: string;
+  definitionId: string;
+  certainty: "observed";
+  sourceEventId: string;
+  invalidatedBy: string[];
+};
+
 export type RunnerOpponentModel = {
   corpPlanEstimate: {
     scoring: number;
@@ -70,6 +79,7 @@ export type RunnerOpponentModel = {
   rndValueEstimate: number;
   corpCreditReserveInterpretation: "low" | "medium" | "high";
   rndTopFreshness: RndTopFreshnessMemory;
+  knownPositionMemory: KnownPositionMemory[];
 };
 
 export type CorpOpponentModel = {
@@ -103,6 +113,7 @@ export type BeliefState = {
   runnerOpponentModel?: RunnerOpponentModel;
   corpOpponentModel?: CorpOpponentModel;
   rndTopFreshness?: RndTopFreshnessMemory;
+  knownPositionMemory?: KnownPositionMemory[];
 };
 
 const BELIEF_VERSION_PREFIX = "belief-v1.4.2";
@@ -128,7 +139,9 @@ export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
   const uncertainty = buildUncertainty(entries, input.side);
   const assumptions = buildAssumptions(input.side, entries, classifications);
   const rndTopFreshness = input.side === "runner" ? deriveRndTopFreshness(classifications) : undefined;
-  const runnerOpponentModel = input.side === "runner" ? deriveRunnerOpponentModel(input, entries, classifications, rndTopFreshness) : undefined;
+  const knownPositionMemory = input.side === "runner" ? deriveKnownPositionMemory(history, classifications) : [];
+  const runnerOpponentModel =
+    input.side === "runner" ? deriveRunnerOpponentModel(input, entries, classifications, rndTopFreshness, knownPositionMemory) : undefined;
   const corpOpponentModel = input.side === "corp" ? deriveCorpOpponentModel(input, classifications) : undefined;
   const versionSeed = [
     input.side,
@@ -147,7 +160,8 @@ export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
     eventClassifications: classifications,
     ...(runnerOpponentModel ? { runnerOpponentModel } : {}),
     ...(corpOpponentModel ? { corpOpponentModel } : {}),
-    ...(rndTopFreshness ? { rndTopFreshness } : {})
+    ...(rndTopFreshness ? { rndTopFreshness } : {}),
+    ...(knownPositionMemory.length > 0 ? { knownPositionMemory } : {})
   };
 }
 
@@ -177,6 +191,7 @@ export function beliefDebugSummary(beliefState: BeliefState): Record<string, unk
     uncertainty: beliefState.uncertainty.slice(0, 6),
     invalidations: beliefState.invalidationLog.slice(0, 6),
     ...(beliefState.rndTopFreshness ? { rndTopFreshness: beliefState.rndTopFreshness } : {}),
+    ...(beliefState.knownPositionMemory ? { knownPositionMemory: beliefState.knownPositionMemory } : {}),
     ...(beliefState.runnerOpponentModel ? { runnerOpponentModel: beliefState.runnerOpponentModel } : {}),
     ...(beliefState.corpOpponentModel ? { corpOpponentModel: beliefState.corpOpponentModel } : {})
   };
@@ -345,11 +360,52 @@ function hypothesisEntries(input: AiDecisionInput, classifications: BeliefEventC
   return entries;
 }
 
+function deriveKnownPositionMemory(history: PublicGameEvent[], classifications: BeliefEventClassification[]): KnownPositionMemory[] {
+  const eventsById = new Map(history.map((event) => [event.eventId, event]));
+  const memory = new Map<string, KnownPositionMemory>();
+
+  for (const classification of classifications) {
+    for (const key of [...memory.keys()]) {
+      if (positionInvalidatesKey(key, classification)) memory.delete(key);
+    }
+
+    const event = eventsById.get(classification.eventId);
+    const definitionId = event ? stringValue(event.publicPayload.cardDefinitionId) : undefined;
+    if (!definitionId) continue;
+    if (!["access", "reveal", "expose", "rez"].includes(classification.family)) continue;
+
+    const zone = classification.serverId ?? "unknown";
+    if (zone === "unknown") continue;
+    const positionKey = classification.family === "access" && zone === "rd" ? "top" : classification.family === "access" ? "accessed" : "installed";
+    const key = `${zone}:${positionKey}`;
+    memory.set(key, {
+      zone,
+      positionKey,
+      definitionId,
+      certainty: "observed",
+      sourceEventId: classification.eventId,
+      invalidatedBy: []
+    });
+  }
+
+  return [...memory.values()].sort((left, right) => `${left.zone}:${left.positionKey}`.localeCompare(`${right.zone}:${right.positionKey}`));
+}
+
+function positionInvalidatesKey(key: string, event: BeliefEventClassification): boolean {
+  if (event.family === "draw" && event.actor === "corp") return key.startsWith("rd:");
+  if (event.family === "shuffle" || event.family === "arrange" || event.family === "swap") return true;
+  if (event.family === "move" || event.family === "trash" || event.family === "steal" || event.family === "discard") {
+    return event.serverId ? key.startsWith(`${event.serverId}:`) : true;
+  }
+  return false;
+}
+
 function deriveRunnerOpponentModel(
   input: AiDecisionInput,
   entries: BeliefEntry[],
   classifications: BeliefEventClassification[],
-  rndTopFreshness: RndTopFreshnessMemory | undefined
+  rndTopFreshness: RndTopFreshnessMemory | undefined,
+  knownPositionMemory: KnownPositionMemory[]
 ): RunnerOpponentModel {
   const corpEvents = classifications.filter((event) => event.actor === "corp");
   const scoringSignals = corpEvents.filter((event) => event.actionType === "advance_card" || event.actionType === "score_agenda").length;
@@ -406,7 +462,8 @@ function deriveRunnerOpponentModel(
         knownToRunner: false,
         freshness: "invalidated",
         invalidationReasons: []
-      } satisfies RndTopFreshnessMemory)
+      } satisfies RndTopFreshnessMemory),
+    knownPositionMemory
   };
 }
 

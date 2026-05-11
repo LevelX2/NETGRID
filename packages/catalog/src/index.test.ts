@@ -75,6 +75,10 @@ import {
   ONR_V1_9_2_RELEASE_CARD_IDS,
   ONR_V1_9_3_RELEASE_CARD_IDS,
   ONR_V1_9_4_RELEASE_CARD_IDS,
+  ONR_V1_9_5_RELEASE_CARD_IDS,
+  ONR_V1_9_6_RELEASE_CARD_IDS,
+  ONR_V1_9_7_RELEASE_CARD_IDS,
+  ONR_V1_9_8_RELEASE_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateAiCardHintsV2,
@@ -171,7 +175,7 @@ describe("catalog import and status logic", () => {
     expect(reviewFiles.filter((file) => existsSync(file))).toHaveLength(reviewFiles.length);
   });
 
-  it("applies the V1.0.5K, V1.0.6K, V1.1.2K, V1.2.3, V1.6.1, V1.6.2, V1.6.3, V1.7.0, V1.7.1, V1.7.2, V1.8.0, V1.8.1, V1.9.0, V1.9.1, V1.9.2, V1.9.3 and V1.9.4 release gates to private local O:NR runtime cards when present", () => {
+  it("applies the V1.0.5K through V1.9.8 release gates to private local O:NR runtime cards when present", () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_015_codeslinger"]) return;
 
@@ -192,7 +196,11 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_9_2_RELEASE_CARD_IDS).toHaveLength(7);
     expect(ONR_V1_9_3_RELEASE_CARD_IDS).toHaveLength(4);
     expect(ONR_V1_9_4_RELEASE_CARD_IDS).toHaveLength(2);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(133);
+    expect(ONR_V1_9_5_RELEASE_CARD_IDS).toHaveLength(2);
+    expect(ONR_V1_9_6_RELEASE_CARD_IDS).toHaveLength(1);
+    expect(ONR_V1_9_7_RELEASE_CARD_IDS).toHaveLength(1);
+    expect(ONR_V1_9_8_RELEASE_CARD_IDS).toHaveLength(2);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(139);
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
@@ -214,7 +222,15 @@ describe("catalog import and status logic", () => {
       expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
       expect(card?.statuses.format_legal).toBe(true);
-      const expectedManifest = (ONR_V1_9_4_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+      const expectedManifest = (ONR_V1_9_8_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.8"
+        : (ONR_V1_9_7_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.7"
+        : (ONR_V1_9_6_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.6"
+        : (ONR_V1_9_5_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.5"
+        : (ONR_V1_9_4_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.9.4"
         : (ONR_V1_9_3_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.9.3"
@@ -406,10 +422,15 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_075_zetatech-software-installer"]?.text).toBe(
       "Put 2 bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overlying Software Installer itself. If you use any of these bits, replace them at the start of your next turn."
     );
-    expect(cardsById["onr_v1_001_afreet"]?.text).toContain("Afreet can have up to 3 MU");
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(false);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.format_legal).toBe(false);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.engineCardId).toBeNull();
+    expect(cardsById["onr_v1_001_afreet"]?.text).toContain("Afreet can host up to 3 MU");
+    expect(cardsById["onr_v1_001_afreet"]?.statuses.deck_legal).toBe(true);
+    expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(true);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.format_legal).toBe(true);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.engineCardId).toBe("onr_v1_018_dogcatcher");
+    expect(cardsById["onr_v1_019_dropp"]?.statuses.deck_legal).toBe(true);
+    expect(cardsById["onr_v1_019_dropp"]?.engineCardId).toBe("onr_v1_019_dropp");
   });
 
   it("approves exactly the King of the Road Runner cards for AI after hints and scenario gates", () => {

@@ -1,0 +1,37 @@
+{
+  "manifestVersion": "onr-v1-9-5-to-v1-9-8-core-implementation-2026-05-11",
+  "status": "core_green_v2_blocked_by_deferred_longtail",
+  "generatedAt": "2026-05-11",
+  "releases": [
+    {
+      "release": "V1.9.5",
+      "gate": "go_with_deferred",
+      "cards": ["onr_v1_219_superior-net-barriers", "onr_v1_308_acme-savings-and-loan"],
+      "areas": ["engine", "catalog", "server", "web", "tests"],
+      "verification": ["corepack pnpm test", "corepack pnpm typecheck"]
+    },
+    {
+      "release": "V1.9.6",
+      "gate": "go_with_deferred",
+      "cards": ["onr_v1_236_data-raven"],
+      "areas": ["engine", "catalog", "server", "tests"],
+      "verification": ["corepack pnpm test", "corepack pnpm typecheck"]
+    },
+    {
+      "release": "V1.9.7",
+      "gate": "go_with_deferred",
+      "cards": ["onr_v1_001_afreet"],
+      "areas": ["engine", "catalog", "server", "tests"],
+      "verification": ["corepack pnpm test", "corepack pnpm typecheck"]
+    },
+    {
+      "release": "V1.9.8",
+      "gate": "core_go_v2_no_go",
+      "cards": ["onr_v1_018_dogcatcher", "onr_v1_019_dropp"],
+      "areas": ["engine", "catalog", "server", "web", "ai", "tests"],
+      "verification": ["corepack pnpm test", "corepack pnpm typecheck"]
+    }
+  ],
+  "deferredRegister": "docs/derived/V1_9_5_TO_V1_9_8_DEFERRED_REGISTER.md",
+  "review": "docs/derived/V1_9_5_TO_V1_9_8_SEQUENTIAL_IMPLEMENTATION_REVIEW.md"
+}

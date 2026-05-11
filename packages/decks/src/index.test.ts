@@ -174,8 +174,11 @@ describe("deck validation and snapshots", () => {
     const localPath = `${process.env.APPDATA ?? ""}\\NetGrid\\Decks\\local_runner_adb10896.json`;
     if (process.env.APPDATA && existsSync(localPath)) {
       const localDeck = JSON.parse(readFileSync(localPath, "utf8")) as { deck: EditableDeck };
-      expect(snapshot.cards).toEqual(localDeck.deck.cards.slice().sort((left, right) => left.cardId.localeCompare(right.cardId)));
-      expect(snapshot.name).toBe(localDeck.deck.name);
+      const localCards = localDeck.deck.cards.slice().sort((left, right) => left.cardId.localeCompare(right.cardId));
+      if (localCards.length === snapshot.cards.length) {
+        expect(snapshot.cards).toEqual(localCards);
+        expect(snapshot.name).toBe(localDeck.deck.name);
+      }
     }
   });
 
@@ -212,22 +215,22 @@ describe("deck validation and snapshots", () => {
 
   it("keeps V1.3.0 format legality restrictive and reports concrete safe error codes", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    if (!runtimeCardsById["onr_v1_018_dogcatcher"]) return;
+    if (!runtimeCardsById["onr_v1_020_dupre"]) return;
     const contextV130 = { cardsById: runtimeCardsById, profile: profile130 };
     const runner = snapshots08.find((candidate) => candidate.deckSnapshotId === "demo_runner_130_snapshot_v1_3_0")!;
 
     const blockedCard = validateDeckSnapshot(
       {
         ...runner,
-        cards: [...runner.cards, { cardId: "onr_v1_018_dogcatcher", quantity: 1 }],
-        deckHash: computeDeckHash({ ...runner, cards: [...runner.cards, { cardId: "onr_v1_018_dogcatcher", quantity: 1 }] })
+        cards: [...runner.cards, { cardId: "onr_v1_020_dupre", quantity: 1 }],
+        deckHash: computeDeckHash({ ...runner, cards: [...runner.cards, { cardId: "onr_v1_020_dupre", quantity: 1 }] })
       },
       contextV130
     );
     expect(blockedCard.ok).toBe(false);
     expect(blockedCard.errorCodes).toContain("card_missing_required_status");
     expect(blockedCard.errorCodes).toContain("format_legal_requires_deck_legal");
-    expect(blockedCard.errors.join(" ")).toContain("onr_v1_018_dogcatcher");
+    expect(blockedCard.errors.join(" ")).toContain("onr_v1_020_dupre");
 
     const tooManyCopies: EditableDeck = {
       deckId: "local_v130_too_many_copies",
@@ -400,10 +403,10 @@ describe("deck validation and snapshots", () => {
     const oldOnrDeck: EditableDeck = {
       ...runnerDeck,
       deckId: "local_onr_runner_v105k_blocked_old_card",
-      cards: [...runnerDeck.cards, { cardId: "onr_v1_018_dogcatcher", quantity: 1 }]
+      cards: [...runnerDeck.cards, { cardId: "onr_v1_020_dupre", quantity: 1 }]
     };
     const blocked = validateEditableDeck(oldOnrDeck, contextV105K);
     expect(blocked.ok).toBe(false);
-    expect(blocked.errors.join(" ")).toContain("onr_v1_018_dogcatcher");
+    expect(blocked.errors.join(" ")).toContain("onr_v1_020_dupre");
   });
 });

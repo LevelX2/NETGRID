@@ -1353,7 +1353,6 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
     expect(state.specialZones).toEqual({ setAside: [], removedFromGame: [] });
-    expect(DEMO_CARDS_BY_ID["onr_v1_018_dogcatcher"]).toBeUndefined();
   });
 
   it("installs the four unlocked breakers and resolves wall, sentry and universal break rules", () => {
@@ -3648,6 +3647,180 @@ describe("V1.9.4 Mechanikpaket M", () => {
   });
 });
 
+describe("V1.9.5 Mechanikpaket N", () => {
+  it("adds the V1.9.5 core card set with agenda strength and asset credit mechanics", () => {
+    expect(ONR_V1_9_5_FINAL_CARD_IDS).toHaveLength(2);
+    for (const definitionId of ONR_V1_9_5_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(/v2|matchmaking|ranking/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_219_superior-net-barriers"]?.mechanics.join(" ")).toMatch(/ice_strength|strength_modifier/);
+    expect(DEMO_CARDS_BY_ID["onr_v1_219_superior-net-barriers"]?.mechanics.join(" ")).toMatch(/strength/);
+    expect(DEMO_CARDS_BY_ID["onr_v1_308_acme-savings-and-loan"]?.mechanics.join(" ")).toMatch(/credit/);
+  });
+
+  it("validates V1.9.5 smoke decks", () => {
+    const runnerValidation = validateDeckDefinition(ONR_V1_9_5_RUNNER_DECK, { expectedSide: "runner" });
+    const corpValidation = validateDeckDefinition(ONR_V1_9_5_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 });
+    const state = v195CardReleaseGame("v195-validation");
+    expect(runnerValidation.ok).toBe(true);
+    expect(runnerValidation.errors).toEqual([]);
+    expect(corpValidation.ok).toBe(true);
+    expect(corpValidation.errors).toEqual([]);
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+  });
+
+  it("applies Superior Net Barriers wall strength and ACME credits deterministically", () => {
+    let state = toRunnerTurn(v195CardReleaseGame("v195-static-and-asset"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+
+    const superiorId = moveCorpCardToHq(state, "onr_v1_219_superior-net-barriers");
+    removeEverywhere(state, superiorId);
+    state.corp.scoreArea.push(superiorId);
+    state.cardInstances[superiorId] = {
+      ...state.cardInstances[superiorId]!,
+      zone: { side: "corp", zone: "scoreArea" },
+      faceup: true,
+      rezzed: true
+    };
+    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    state.cardInstances[wallId] = { ...state.cardInstances[wallId]!, faceup: true, rezzed: true };
+    const rdWall = getPlayerView(state, "corp").servers.find((server) => server.id === "rd")?.ice.find((ice) => ice.instanceId === wallId);
+    expect(rdWall?.strength).toBe((DEMO_CARDS_BY_ID["onr_v1_279_wall-of-static"]?.strength ?? 0) + 1);
+
+    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan"
+    );
+    state.corp.credits = 10;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan"
+    );
+    expect(state.corp.credits).toBe(12);
+
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 1;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.corp.credits).toBe(13);
+  });
+});
+
+describe("V1.9.6 Mechanikpaket O", () => {
+  it("adds the V1.9.6 Data Raven core card and validates smoke decks", () => {
+    expect(ONR_V1_9_6_FINAL_CARD_IDS).toHaveLength(1);
+    const definition = DEMO_CARDS_BY_ID["onr_v1_236_data-raven"];
+    expect(definition?.implementationStatus).toBe("playable_mvp");
+    expect(definition?.mechanics.join(" ")).toMatch(/trace/);
+    expect(definition?.mechanics.join(" ")).toMatch(/counter/);
+    expect(definition?.mechanics.join(" ")).not.toMatch(/v2|matchmaking|ranking/);
+    expect(validateDeckDefinition(ONR_V1_9_6_RUNNER_DECK, { expectedSide: "runner" }).ok).toBe(true);
+    expect(validateDeckDefinition(ONR_V1_9_6_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 }).ok).toBe(true);
+  });
+
+  it("adds a Data Raven counter after a successful trace and applies the next Runner-start tag", () => {
+    let state = toRunnerTurn(v196CardReleaseGame("v196-data-raven"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const dataRavenId = putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_236_data-raven"
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const corpBid = state.pendingChoice?.options.find((option) => option.id === "bid_0") ?? state.pendingChoice?.options[0];
+    expect(corpBid).toBeDefined();
+    state = applyChoice(state, "corp", String(corpBid?.id));
+    const runnerBid = state.pendingChoice?.options.find((option) => option.id === "bid_0") ?? state.pendingChoice?.options[0];
+    expect(runnerBid).toBeDefined();
+    state = applyChoice(state, "runner", String(runnerBid?.id));
+
+    expect(cardCounterAmount(state, dataRavenId, "power")).toBe(1);
+    expect(state.runner.tags).toBe(1);
+
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 1;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.runner.tags).toBe(2);
+  });
+});
+
+describe("V1.9.7 Mechanikpaket P", () => {
+  it("adds Afreet as a playable daemon host and validates smoke decks", () => {
+    expect(ONR_V1_9_7_FINAL_CARD_IDS).toHaveLength(1);
+    const definition = DEMO_CARDS_BY_ID["onr_v1_001_afreet"];
+    expect(definition?.implementationStatus).toBe("playable_mvp");
+    expect(definition?.mechanics.join(" ")).toMatch(/host/);
+    expect(definition?.mechanics.join(" ")).not.toMatch(/v2|matchmaking|ranking/);
+    expect(validateDeckDefinition(ONR_V1_9_7_RUNNER_DECK, { expectedSide: "runner" }).ok).toBe(true);
+    expect(validateDeckDefinition(ONR_V1_9_7_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 }).ok).toBe(true);
+  });
+
+  it("installs Afreet through LegalActions and consumes runner memory", () => {
+    let state = toRunnerTurn(v197CardReleaseGame("v197-afreet"));
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_001_afreet");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_001_afreet"
+    );
+    expect(state.runner.rig.programs.some((programId) => state.cardInstances[programId]?.definitionId === "onr_v1_001_afreet")).toBe(true);
+    expect(state.runner.memoryUsed).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("V1.9.8 Mechanikpaket Q", () => {
+  it("adds Dogcatcher and Dropp as playable breaker longtail cards and validates smoke decks", () => {
+    expect(ONR_V1_9_8_FINAL_CARD_IDS).toHaveLength(2);
+    for (const definitionId of ONR_V1_9_8_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/break/);
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/pump/);
+      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(/v2|matchmaking|ranking/);
+    }
+    expect(validateDeckDefinition(ONR_V1_9_8_RUNNER_DECK, { expectedSide: "runner" }).ok).toBe(true);
+    expect(validateDeckDefinition(ONR_V1_9_8_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 }).ok).toBe(true);
+  });
+
+  it("installs Dogcatcher and Dropp through LegalActions without leaking hidden Corp cards", () => {
+    let state = toRunnerTurn(v198CardReleaseGame("v198-breakers"));
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_018_dogcatcher");
+    moveRunnerCardToGrip(state, "onr_v1_019_dropp");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_018_dogcatcher"
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_019_dropp"
+    );
+    expect(state.runner.rig.programs.some((programId) => state.cardInstances[programId]?.definitionId === "onr_v1_018_dogcatcher")).toBe(true);
+    expect(state.runner.rig.programs.some((programId) => state.cardInstances[programId]?.definitionId === "onr_v1_019_dropp")).toBe(true);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Hostile Takeover");
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -5330,6 +5503,10 @@ const ONR_V1_9_3_FINAL_CARD_IDS = [
 ] as const;
 
 const ONR_V1_9_4_FINAL_CARD_IDS = ["onr_v1_208_on-call-solo-team", "onr_v1_217_strike-force-kali"] as const;
+const ONR_V1_9_5_FINAL_CARD_IDS = ["onr_v1_219_superior-net-barriers", "onr_v1_308_acme-savings-and-loan"] as const;
+const ONR_V1_9_6_FINAL_CARD_IDS = ["onr_v1_236_data-raven"] as const;
+const ONR_V1_9_7_FINAL_CARD_IDS = ["onr_v1_001_afreet"] as const;
+const ONR_V1_9_8_FINAL_CARD_IDS = ["onr_v1_018_dogcatcher", "onr_v1_019_dropp"] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
@@ -5906,6 +6083,110 @@ const ONR_V1_9_4_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_5_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v195_smoke_094",
+  name: "O:NR V1.9.5 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_5_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v195_smoke_094",
+  name: "O:NR V1.9.5 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_219_superior-net-barriers", quantity: 2 },
+    { id: "onr_v1_308_acme-savings-and-loan", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
+const ONR_V1_9_6_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v196_smoke_094",
+  name: "O:NR V1.9.6 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_6_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v196_smoke_094",
+  name: "O:NR V1.9.6 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_236_data-raven", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
+const ONR_V1_9_7_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v197_smoke_094",
+  name: "O:NR V1.9.7 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_001_afreet", quantity: 2 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_7_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v197_smoke_094",
+  name: "O:NR V1.9.7 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
+const ONR_V1_9_8_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v198_smoke_094",
+  name: "O:NR V1.9.8 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_018_dogcatcher", quantity: 2 },
+    { id: "onr_v1_019_dropp", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_8_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v198_smoke_094",
+  name: "O:NR V1.9.8 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "onr_v1_220_tycho-extension", quantity: 1 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -6218,6 +6499,46 @@ function v194CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_4_RUNNER_DECK,
     corpDeck: ONR_V1_9_4_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v195CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_5_RUNNER_DECK,
+    corpDeck: ONR_V1_9_5_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v196CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_6_RUNNER_DECK,
+    corpDeck: ONR_V1_9_6_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v197CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_7_RUNNER_DECK,
+    corpDeck: ONR_V1_9_7_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v198CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_8_RUNNER_DECK,
+    corpDeck: ONR_V1_9_8_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

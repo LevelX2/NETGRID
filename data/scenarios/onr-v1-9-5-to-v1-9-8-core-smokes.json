@@ -1,0 +1,31 @@
+{
+  "scenarioVersion": "onr-v1-9-5-to-v1-9-8-core-smokes-2026-05-11",
+  "status": "verified",
+  "scenarios": [
+    {
+      "id": "v195-static-and-asset",
+      "release": "V1.9.5",
+      "purpose": "Superior Net Barriers wall strength and ACME rez/start credits"
+    },
+    {
+      "id": "v196-data-raven",
+      "release": "V1.9.6",
+      "purpose": "Data Raven trace counter and Runner-start tag"
+    },
+    {
+      "id": "v197-afreet",
+      "release": "V1.9.7",
+      "purpose": "Afreet LegalAction install and memory use"
+    },
+    {
+      "id": "v198-breakers",
+      "release": "V1.9.8",
+      "purpose": "Dogcatcher and Dropp LegalAction installs"
+    },
+    {
+      "id": "ai-v198-known-position-memory",
+      "release": "V1.9.8",
+      "purpose": "Runner side-safe known R&D top memory and Corp draw invalidation"
+    }
+  ]
+}

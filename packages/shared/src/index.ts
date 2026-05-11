@@ -1202,6 +1202,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     ]
   },
   {
+    id: "onr_v1_001_afreet",
+    title: "Afreet",
+    side: "runner",
+    type: "program",
+    subtypes: ["daemon"],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    memoryCost: 1,
+    rulesText: "Afreet can host up to 3 MU of programs. Hosted programs use Afreet's hosting capacity instead of Runner MU.",
+    mechanics: ["install_program", "memory", "hosting", "subtype_daemon", "hosted_program_lifecycle", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_012_clown",
     title: "Clown",
     side: "runner",
@@ -1223,6 +1235,26 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     breakCost: 0,
     iceSubtype: "sentry",
     iceLabel: "sentry"
+  }),
+  onrUniversalBreaker({
+    id: "onr_v1_018_dogcatcher",
+    title: "Dogcatcher",
+    subtypes: ["icebreaker"],
+    installCost: 3,
+    memoryCost: 1,
+    strength: 1,
+    breakCost: 1,
+    pumpCost: 1
+  }),
+  onrUniversalBreaker({
+    id: "onr_v1_019_dropp",
+    title: "Dropp",
+    subtypes: ["icebreaker"],
+    installCost: 4,
+    memoryCost: 1,
+    strength: 2,
+    breakCost: 1,
+    pumpCost: 2
   }),
   onrBreaker({
     id: "onr_v1_052_raffles",
@@ -1992,6 +2024,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score", "steal", "global_ice_strength_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_219_superior-net-barriers",
+    title: "Superior Net Barriers",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["research"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 5,
+    agendaPoints: 3,
+    rulesText: "While scored, all wall ice gets +1 strength.",
+    mechanics: ["install_remote", "advance", "score", "steal", "global_ice_strength_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_308_acme-savings-and-loan",
+    title: "ACME Savings and Loan",
+    side: "corp",
+    type: "asset",
+    subtypes: ["transactions"],
+    implementationStatus: "playable_mvp",
+    rezCost: 1,
+    trashCost: 3,
+    rulesText: "When rezzed, gain 3 credits. At the start of each of your turns, gain 1 credit while ACME Savings and Loan is rezzed.",
+    mechanics: ["install_remote", "rez_card", "trash_on_access", "generic_asset_node", "persistent_modifier", "start_of_turn_credit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_317_data-masons",
     title: "Data Masons",
     side: "corp",
@@ -2382,6 +2438,20 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [onrTrashInstalledProgram("onr_v1_235_data_naga_trash_program"), onrEtr("onr_v1_235_data_naga_etr")],
     mechanics: ["trash_installed_program", "end_the_run", "concrete_special_resolver"]
+  }),
+  onrIce({
+    id: "onr_v1_236_data-raven",
+    title: "Data Raven",
+    subtypes: ["sentry", "black_ice"],
+    rezCost: 8,
+    strength: 4,
+    rulesText:
+      "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and put a Data Raven counter on Data Raven. Each Data Raven counter gives Runner a tag at the start of each Runner turn.\n[Subroutine] End the run.",
+    subroutines: [
+      { id: "onr_v1_236_data_raven_trace_counter", type: "initiate_trace", baseTraceStrength: 5, traceSuccessEffect: { type: "add_tag", amount: 1 } },
+      onrEtr("onr_v1_236_data_raven_etr")
+    ],
+    mechanics: ["trace", "link", "bid_amount", "counter", "persistent_tag_counter", "end_the_run"]
   }),
   onrIce({
     id: "onr_v1_237_data-wall",

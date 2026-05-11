@@ -177,6 +177,9 @@ const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
 const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
 const PRIVATE_CYBERNET_POLICE_ID = "onr_v1_213_private-cybernet-police";
 const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
+const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
+const DATA_RAVEN_ID = "onr_v1_236_data-raven";
+const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
 const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
@@ -662,6 +665,12 @@ const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
     name: "corp_asset_rez_gain_4",
     resolve: (state) => {
       state.corp.credits += 4;
+    }
+  },
+  [ACME_SAVINGS_AND_LOAN_ID]: {
+    name: "corp_asset_acme_rez_gain_3",
+    resolve: (state) => {
+      state.corp.credits += 3;
     }
   }
 };
@@ -1804,6 +1813,7 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   for (const agendaId of scoredCorpAgendaIds(state)) {
     const agendaDefinition = definitionFor(state, agendaId);
     if (agendaDefinition.id === "onr_v1_215_security-net-optimization") bonus += 1;
+    if (agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID && cardHasSubtype(iceDefinition, "wall")) bonus += 1;
   }
   return bonus;
 }
@@ -3676,10 +3686,20 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   if (polymerCount > 0) {
     credits(state, "corp", polymerCount);
   }
+  const acmeCount = rezzedCorpRootCardIds(state).reduce((sum, cardId) => {
+    return definitionFor(state, cardId).id === ACME_SAVINGS_AND_LOAN_ID ? sum + 1 : sum;
+  }, 0);
+  if (acmeCount > 0) {
+    credits(state, "corp", acmeCount);
+  }
 }
 
 function applyRunnerStartOfTurnEffects(state: GameState): void {
   const flags = ensureRunnerTurnFlags(state);
+  const dataRavenCounters = Object.entries(state.cardInstances).reduce((sum, [cardId, instance]) => {
+    return definitionFor(state, cardId).id === DATA_RAVEN_ID ? sum + (instance.counters?.power ?? 0) : sum;
+  }, 0);
+  if (dataRavenCounters > 0) state.runner.tags += dataRavenCounters;
   if (!flags.startOfTurnFloatingCreditsApplied) {
     for (const cardId of state.runner.rig.resources) {
       const definition = definitionFor(state, cardId);
@@ -5120,7 +5140,12 @@ function resolveTraceRunnerBid(state: GameState, legalAction: LegalAction, playe
   const runnerStrength = runnerLink + bid;
   const successful = traceStrength > runnerStrength;
   const tagsAdded = successful ? trace.successEffect.amount : 0;
+  let dataRavenCounterAdded = 0;
   if (successful) state.runner.tags += tagsAdded;
+  if (successful && trace.sourceDefinitionId === DATA_RAVEN_ID) {
+    addCardCounter(state, trace.sourceCardInstanceId, "power", 1);
+    dataRavenCounterAdded = 1;
+  }
   delete state.pendingChoice;
   delete state.trace;
   if (state.run) {
@@ -5142,7 +5167,8 @@ function resolveTraceRunnerBid(state: GameState, legalAction: LegalAction, playe
     runnerBid: bid,
     runnerStrength,
     traceSuccessful: successful,
-    tagsAdded
+    tagsAdded,
+    ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {})
   };
 }
 
