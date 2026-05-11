@@ -65,7 +65,9 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 ## Git und lokale Artefakte
 
 - `main` ist der lokale Integrationsbranch.
-- Laufende Arbeit erfolgt nach dem Initialstand auf Arbeitsbranches mit Präfix `codex/`.
+- Arbeiten auf `main` ist erlaubt, wenn die Änderung klein und nicht kollisionskritisch ist.
+- Bei erwarteter Parallelität auf derselben Datei oder potenziellen Kollisionen arbeitet der Thread mit einem separaten Branch mit Präfix `codex/` (z. B. für mehrere aktive Änderungsstränge).
+- Andere Threads dürfen bereits eigene Commit-Stände haben; wir richten den Fokus auf Konflikte gezielt im Integrationspunkt (`main`) aus.
 - Remote `origin` ist konfiguriert; Pushes, Pull Requests und Remote-Integrationen erfolgen nur auf Nutzerwunsch oder über die dafür vorgesehenen Abschluss-/GitHub-Workflows.
 - Lokale Laufzeitdaten, SQLite-Dateien, temporäre Daten, Build-Artefakte, Caches und Secrets werden nicht versioniert.
 
