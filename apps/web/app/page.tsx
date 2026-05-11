@@ -111,6 +111,7 @@ import {
   type PlayMode
 } from "./match-start";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage } from "./match-start-storage";
+import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
 import {
   catalogCardMatchesTypeFilters,
   filterCatalogCardsBySet,
@@ -1328,7 +1329,7 @@ export default function Page() {
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] = useState(false);
   const [hasStoredMatchStartSettings, setHasStoredMatchStartSettings] = useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
-  const [seed, setSeed] = useState("mvp-0.3-ai-demo");
+  const [seed, setSeed] = useState(() => createMatchSeed());
   const [joinLinkInput, setJoinLinkInput] = useState("");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
@@ -1461,7 +1462,7 @@ export default function Page() {
       if (storedMatchStartSettings.aiDeckPolicy) setAiDeckPolicy(storedMatchStartSettings.aiDeckPolicy);
       if (typeof storedMatchStartSettings.testSetupMode === "boolean") setTestSetupMode(storedMatchStartSettings.testSetupMode);
       if (storedMatchStartSettings.countdownSeconds) setCountdownSeconds(storedMatchStartSettings.countdownSeconds);
-      if (typeof storedMatchStartSettings.seed === "string") setSeed(storedMatchStartSettings.seed);
+      if (typeof storedMatchStartSettings.seed === "string") setSeed(normalizeMatchSeed(storedMatchStartSettings.seed));
       if (storedMatchStartSettings.runnerDeckSource) setRunnerDeckSource(storedMatchStartSettings.runnerDeckSource);
       if (storedMatchStartSettings.corpDeckSource) setCorpDeckSource(storedMatchStartSettings.corpDeckSource);
       if (storedMatchStartSettings.participantBRunnerDeckSource) setParticipantBRunnerDeckSource(storedMatchStartSettings.participantBRunnerDeckSource);
@@ -2197,12 +2198,14 @@ export default function Page() {
       setNotice(error instanceof Error ? error.message : "Deckauswahl ist nicht matchstartfähig.");
       return;
     }
+    const matchSeed = normalizeMatchSeed(seed);
+    setSeed(matchSeed);
     let created: CreateMatchResponse;
     try {
       created = await postJson<CreateMatchResponse>("/api/matches", {
         ...matchStart.createRequest,
         displayName,
-        seed,
+        seed: matchSeed,
         runnerDifficulty,
         corpDifficulty,
         ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
@@ -2223,6 +2226,7 @@ export default function Page() {
       return;
     }
     rememberDisplayName(displayName);
+    setSeed(createMatchSeed());
     const nextSession: SessionInfo = {
       matchId: created.matchId,
       side: created.hostSide,

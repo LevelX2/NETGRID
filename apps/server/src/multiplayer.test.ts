@@ -1824,7 +1824,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
     expect(reconnected.playerView.own.heapOrArchives.some((card) => card.definitionId === "v095_safehouse_resource")).toBe(true);
-    expect(JSON.stringify(reconnected)).not.toContain("Simple Decoder");
+    expect(JSON.stringify(reconnected)).not.toContain("Simple Barrier ICE");
 
     const undo = await match.service.requestUndo({
       matchId: match.matchId,
@@ -2297,8 +2297,11 @@ describe("MVP 0.2 multiplayer service", () => {
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "v150-mandatory");
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "install_card", "v150-install");
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "v150-end-turn");
+    await resolveCorpDiscardIfPending(match.service, match.matchId, match.corp, "v150-corp-discard");
+    await putTopCorpAgendaForMatch(match.service, match.matchId);
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-rd-run-1");
-    await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card" || action.type === "steal_agenda", "v150-rd-access");
+    await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "v150-rd-access");
+    await submit(match.service, match.matchId, match.runner, (action) => action.type === "steal_agenda", "v150-rd-steal");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "v150-rd-run-2");
 
     const index = await match.service.listReplayIndex();
@@ -2470,6 +2473,7 @@ describe("MVP 0.2 multiplayer service", () => {
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
     await putTopCorpAgendaForMatch(match.service, match.matchId);
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "end-turn");
+    await resolveCorpDiscardIfPending(match.service, match.matchId, match.corp, "corp-discard-before-run");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "access-rd");
     const steal = await submit(match.service, match.matchId, match.runner, (action) => action.type === "steal_agenda", "steal");
@@ -2713,6 +2717,7 @@ describe("MVP 0.2 multiplayer service", () => {
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "mandatory");
     await putTopCorpAgendaForMatch(match.service, match.matchId);
     await submit(match.service, match.matchId, match.corp, (action) => action.type === "end_turn", "end-turn");
+    await resolveCorpDiscardIfPending(match.service, match.matchId, match.corp, "corp-discard-before-run");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
     await submit(match.service, match.matchId, match.runner, (action) => action.type === "access_card", "access-rd");
     const steal = await submit(match.service, match.matchId, match.runner, (action) => action.type === "steal_agenda", "steal");
@@ -2877,6 +2882,7 @@ describe("MVP 0.2 multiplayer service", () => {
     await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", "mandatory");
     await putTopCorpAgendaForMatch(service, created.matchId);
     await submit(service, created.matchId, corp, (action) => action.type === "end_turn", "end-turn");
+    await resolveCorpDiscardIfPending(service, created.matchId, corp, "corp-discard-before-run");
     await submit(service, created.matchId, runner, (action) => action.type === "start_run" && action.payload?.serverId === "rd", "run-rd");
     await submit(service, created.matchId, runner, (action) => action.type === "access_card", "access-rd");
     const steal = await submit(service, created.matchId, runner, (action) => action.type === "steal_agenda", "steal");
@@ -4332,6 +4338,13 @@ async function submitFirstChoice(service: MultiplayerService, matchId: string, s
   const optionId = before.playerView.pendingChoice?.options[0]?.id;
   if (!optionId) throw new Error("Missing first choice option");
   return submitChoice(service, matchId, session, optionId, key);
+}
+
+async function resolveCorpDiscardIfPending(service: MultiplayerService, matchId: string, session: PlayerSession, key: string): Promise<void> {
+  const before = await bootstrap(service, matchId, session);
+  if (before.playerView.pendingChoice?.source !== "discard_phase") return;
+  if (before.playerView.pendingChoice.side !== "corp") return;
+  await submitFirstChoice(service, matchId, session, key);
 }
 
 function applyEngineAction(state: GameState, side: Side, predicate: (action: LegalAction) => boolean): GameState {

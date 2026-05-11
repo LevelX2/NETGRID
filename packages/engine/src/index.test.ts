@@ -28,6 +28,66 @@ describe("MVP 0.1 engine foundation", () => {
     expect(validateGameState(first).ok).toBe(true);
   });
 
+  it("shuffles sorted Corp agenda blocks without preserving the editor order bias", () => {
+    const corpMasterDeck: DeckDefinition = {
+      id: "local_corp_master_shuffle_regression",
+      name: "The Korp Master Shuffle Regression",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_v1_193_corporate-coup", quantity: 1 },
+        { id: "onr_v1_201_executive-extraction", quantity: 1 },
+        { id: "onr_v1_207_netwatch-operations-office", quantity: 1 },
+        { id: "onr_v1_208_on-call-solo-team", quantity: 1 },
+        { id: "onr_v1_209_political-coup", quantity: 1 },
+        { id: "onr_v1_211_polymer-breakthrough", quantity: 1 },
+        { id: "onr_v1_212_priority-requisition", quantity: 1 },
+        { id: "onr_v1_213_private-cybernet-police", quantity: 1 },
+        { id: "onr_v1_214_project-babylon", quantity: 1 },
+        { id: "onr_v1_215_security-net-optimization", quantity: 1 },
+        { id: "onr_v1_217_strike-force-kali", quantity: 1 },
+        { id: "onr_v1_219_superior-net-barriers", quantity: 1 },
+        { id: "onr_v1_245_fire-wall", quantity: 1 },
+        { id: "onr_v1_259_in-the-face", quantity: 1 },
+        { id: "onr_v1_263_reinforced-wall", quantity: 1 },
+        { id: "onr_v1_265_rock-is-strong", quantity: 1 },
+        { id: "onr_v1_268_shock-r", quantity: 2 },
+        { id: "onr_v1_270_sleeper", quantity: 2 },
+        { id: "onr_v1_273_triggerman", quantity: 1 },
+        { id: "onr_v1_275_vacuum-link", quantity: 1 },
+        { id: "onr_v1_278_wall-of-ice", quantity: 1 },
+        { id: "onr_v1_279_wall-of-static", quantity: 2 },
+        { id: "onr_v1_281_accounts-receivable", quantity: 2 },
+        { id: "onr_v1_282_annual-reviews", quantity: 2 },
+        { id: "onr_v1_288_day-shift", quantity: 1 },
+        { id: "onr_v1_290_efficiency-experts", quantity: 3 },
+        { id: "onr_v1_295_night-shift", quantity: 2 },
+        { id: "onr_v1_297_overtime-incentives", quantity: 2 },
+        { id: "onr_v1_308_acme-savings-and-loan", quantity: 1 },
+        { id: "onr_v1_317_data-masons", quantity: 1 },
+        { id: "onr_v1_320_encoder-inc", quantity: 1 },
+        { id: "onr_v1_341_skalderviken-sa-beta-test-site", quantity: 1 },
+        { id: "onr_v1_350_antiquated-interface-routines", quantity: 2 },
+        { id: "onr_v1_371_tokyo-chiba-infighting", quantity: 2 }
+      ]
+    };
+    const agendaCardsInDeck = corpMasterDeck.cards.reduce((sum, entry) => sum + (DEMO_CARDS_BY_ID[entry.id]?.type === "agenda" ? entry.quantity : 0), 0);
+    expect(agendaCardsInDeck).toBe(12);
+
+    let agendaCardsInOpeningHands = 0;
+    let fourPlusAgendaHands = 0;
+    for (let seedIndex = 0; seedIndex < 1000; seedIndex += 1) {
+      const state = createGameAfterSetup({ seed: `shuffle-corp-master-${seedIndex}`, corpDeck: corpMasterDeck, agendaPointsToWin: 7 });
+      const agendasInHand = state.corp.hq.filter((id) => DEMO_CARDS_BY_ID[state.cardInstances[id]!.definitionId]?.type === "agenda").length;
+      agendaCardsInOpeningHands += agendasInHand;
+      if (agendasInHand >= 4) fourPlusAgendaHands += 1;
+    }
+
+    expect(agendaCardsInOpeningHands / 1000).toBeGreaterThan(0.9);
+    expect(agendaCardsInOpeningHands / 1000).toBeLessThan(1.55);
+    expect(fourPlusAgendaHands).toBeLessThan(25);
+  });
+
   it("starts in explicit setup with side-safe private mulligan choices", () => {
     const state = createGame({ seed: "v110-explicit-setup" });
 

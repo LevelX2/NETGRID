@@ -5921,12 +5921,16 @@ function rollDeterministicDie(state: GameState, purpose: string): number {
 }
 
 function deterministicNumber(input: string): number {
-  let hash = 0x811c9dc5;
+  let hashA = 0xdeadbeef ^ input.length;
+  let hashB = 0x41c6ce57 ^ input.length;
   for (let index = 0; index < input.length; index += 1) {
-    hash ^= input.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
+    const code = input.charCodeAt(index);
+    hashA = Math.imul(hashA ^ code, 0x9e3779b1);
+    hashB = Math.imul(hashB ^ code, 0x5f356495);
   }
-  return (hash >>> 0) / 0x100000000;
+  hashA = Math.imul(hashA ^ (hashA >>> 16), 0x85ebca6b) ^ Math.imul(hashB ^ (hashB >>> 13), 0xc2b2ae35);
+  hashB = Math.imul(hashB ^ (hashB >>> 16), 0x85ebca6b) ^ Math.imul(hashA ^ (hashA >>> 13), 0xc2b2ae35);
+  return (0x100000000 * (hashB & 0x1fffff) + (hashA >>> 0)) / 0x20000000000000;
 }
 
 function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
