@@ -13,6 +13,7 @@ import deckLegalV171V181Open64AiHintsData from "../../../data/ai/ai-card-hints-d
 import deckLegalLegacyOpen64AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-legacy-open64.json";
 import deckLegalV190AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v190.json";
 import deckLegalV191V194AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
+import deckLegalV195V198AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import aiHintsReport131Data from "../../../data/ai/ai-card-hints-report-1.3.1.json";
 import cardSupportManifest131Data from "../../../data/manifests/card-support-manifest-1.3.1.json";
@@ -24,6 +25,7 @@ import deckLegalV171V181Open64ManifestData from "../../../data/manifests/deck-le
 import deckLegalLegacyOpen64ManifestData from "../../../data/manifests/deck-legal-ai-approval-legacy-open64-manifest.json";
 import deckLegalV190ManifestData from "../../../data/manifests/deck-legal-ai-approval-v190-manifest.json";
 import deckLegalV191V194ManifestData from "../../../data/manifests/deck-legal-ai-approval-v191-v194-manifest.json";
+import deckLegalV195V198ManifestData from "../../../data/manifests/deck-legal-ai-approval-v195-v198-manifest.json";
 import kingOfTheRoadScenarioData from "../../../data/scenarios/ai-kotr-runner-approval-smokes.json";
 import deckLegalBatchAScenarioData from "../../../data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json";
 import corpTagSliceScenarioData from "../../../data/scenarios/ai-corp-tag-approval-slice-smokes.json";
@@ -32,6 +34,7 @@ import deckLegalV171V181Open64ScenarioData from "../../../data/scenarios/ai-deck
 import deckLegalLegacyOpen64ScenarioData from "../../../data/scenarios/ai-deck-legal-legacy-open64-smokes.json";
 import deckLegalV190ScenarioData from "../../../data/scenarios/ai-deck-legal-v190-smokes.json";
 import deckLegalV191V194ScenarioData from "../../../data/scenarios/ai-deck-legal-v191-v194-smokes.json";
+import deckLegalV195V198ScenarioData from "../../../data/scenarios/ai-deck-legal-v195-v198-smokes.json";
 import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.3.1.json";
 import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
 import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
@@ -50,6 +53,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
   createRuntimeCardsById,
@@ -217,7 +221,8 @@ describe("catalog import and status logic", () => {
         ...DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
-        ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS
+        ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS
       ];
       expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
@@ -424,12 +429,13 @@ describe("catalog import and status logic", () => {
     );
     expect(cardsById["onr_v1_001_afreet"]?.text).toContain("Afreet can host up to 3 MU");
     expect(cardsById["onr_v1_001_afreet"]?.statuses.deck_legal).toBe(true);
-    expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(true);
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.format_legal).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_018_dogcatcher"]?.engineCardId).toBe("onr_v1_018_dogcatcher");
     expect(cardsById["onr_v1_019_dropp"]?.statuses.deck_legal).toBe(true);
+    expect(cardsById["onr_v1_019_dropp"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_019_dropp"]?.engineCardId).toBe("onr_v1_019_dropp");
   });
 
@@ -799,6 +805,49 @@ describe("catalog import and status logic", () => {
     }
 
     expect(JSON.stringify({ deckLegalV191V194AiHintsData, deckLegalV191V194ManifestData, deckLegalV191V194ScenarioData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
+    );
+  });
+
+  it("approves the V1.9.5 to V1.9.8 release slice only after catalog, hint and scenario gates", () => {
+    const cardsById = createRuntimeCardsById();
+    if (!cardsById["onr_v1_219_superior-net-barriers"]) return;
+    const approved = new Set<string>(DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS);
+    const hints = deckLegalV195V198AiHintsData.cards as Array<{
+      cardId: string;
+      roles: string[];
+      planRoles: string[];
+      requiredMechanics: string[];
+      aiSupportStatus: string;
+      scenarioRefs: string[];
+    }>;
+    const manifestCards = deckLegalV195V198ManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
+    const scenarioCards = new Set((deckLegalV195V198ScenarioData.scenarios as Array<{ cards: string[] }>).flatMap((scenario) => scenario.cards));
+
+    expect(DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS).toHaveLength(6);
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(deckLegalV195V198ScenarioData.id).toBe("ai-deck-legal-v195-v198-smokes");
+
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS) {
+      const card = cardsById[cardId];
+      const hint = hints.find((candidate) => candidate.cardId === cardId);
+      const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
+      expect(card?.statuses.human_playable, cardId).toBe(true);
+      expect(card?.statuses.deck_legal, cardId).toBe(true);
+      expect(card?.statuses.format_legal, cardId).toBe(true);
+      expect(card?.statuses.ai_supported, cardId).toBe(true);
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(hint?.roles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.requiredMechanics.length, cardId).toBeGreaterThan(0);
+      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
+      expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(scenarioCards.has(cardId), cardId).toBe(true);
+    }
+
+    expect(JSON.stringify({ deckLegalV195V198AiHintsData, deckLegalV195V198ManifestData, deckLegalV195V198ScenarioData })).not.toMatch(
       /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
     );
   });

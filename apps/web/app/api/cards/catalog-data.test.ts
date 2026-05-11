@@ -3,6 +3,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
@@ -28,7 +29,8 @@ describe("catalog API filters", () => {
       ...DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
-      ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS
+      ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS
     ].filter((cardId) => cardId.startsWith("onr_v1_"));
     expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual(
       [...new Set(expectedOnrAiApproved)].sort()
@@ -175,5 +177,25 @@ describe("catalog API filters", () => {
     expect(body.card.aiHints?.planRoles).toContain("pressure_rnd");
     expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
     expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v192_run_events_and_resource_lifecycle");
+  });
+
+  it("adds V1.9.5 bis V1.9.8 AI hints for newly approved late-core cards", () => {
+    const response = catalogDetailResponse("onr_v1_019_dropp");
+
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        aiHints: {
+          roles: string[];
+          planRoles: string[];
+          aiSupportStatus: string;
+          scenarioRefs: string[];
+        } | null;
+      };
+    };
+    expect(body.card.aiHints?.roles).toContain("program");
+    expect(body.card.aiHints?.planRoles).toContain("contest_remote");
+    expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
+    expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v195-v198-smokes.json#runner_v198_dogcatcher_and_dropp_breakers");
   });
 });

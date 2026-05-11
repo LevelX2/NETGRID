@@ -686,6 +686,15 @@ export const DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS = [
   "onr_v1_217_strike-force-kali"
 ] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS = [
+  "onr_v1_219_superior-net-barriers",
+  "onr_v1_308_acme-savings-and-loan",
+  "onr_v1_236_data-raven",
+  "onr_v1_001_afreet",
+  "onr_v1_018_dogcatcher",
+  "onr_v1_019_dropp"
+] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
@@ -695,7 +704,8 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS
 ]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);

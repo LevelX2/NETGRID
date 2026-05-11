@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "ai-runner-corp-card-approval-scenarios-v1",
+  "id": "ai-deck-legal-v195-v198-smokes",
+  "batchId": "deck_legal_ai_approval_v195_to_v198",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "corpAiProfileId": "corp-ai-v1.4.0-normal",
+  "status": "implemented_for_deck_legal_ai_approval_v195_to_v198",
+  "assertions": {
+    "allBatchCardsHaveAiHints": true,
+    "allBatchCardsHaveScenarioRefs": true,
+    "aiSupportedOnlyAfterGate": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "corp_v195_superior_net_barriers",
+      "planKinds": [
+        "score_now",
+        "score_next_turn",
+        "build_scoring_remote"
+      ],
+      "cards": [
+        "onr_v1_219_superior-net-barriers"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::marks the V1.7.1 to V1.8.1, legacy open64, V1.9.0 and V1.9.1-V1.9.4 slices as AI-supported for custom AI deckbuilding"
+      ]
+    },
+    {
+      "id": "corp_v195_acme_savings_and_loan",
+      "planKinds": [
+        "recover_economy",
+        "bait_runner"
+      ],
+      "cards": [
+        "onr_v1_308_acme-savings-and-loan"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::marks the V1.7.1 to V1.8.1, legacy open64, V1.9.0 and V1.9.1-V1.9.4 slices as AI-supported for custom AI deckbuilding"
+      ]
+    },
+    {
+      "id": "corp_v196_data_raven_tag_pressure",
+      "planKinds": [
+        "protect_hq",
+        "protect_rnd",
+        "build_scoring_remote"
+      ],
+      "cards": [
+        "onr_v1_236_data-raven"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::marks the V1.7.1 to V1.8.1, legacy open64, V1.9.0 and V1.9.1-V1.9.4 slices as AI-supported for custom AI deckbuilding"
+      ]
+    },
+    {
+      "id": "runner_v197_afreet_hosting",
+      "planKinds": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "cards": [
+        "onr_v1_001_afreet"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::marks the V1.7.1 to V1.8.1, legacy open64, V1.9.0 and V1.9.1-V1.9.4 slices as AI-supported for custom AI deckbuilding"
+      ]
+    },
+    {
+      "id": "runner_v198_dogcatcher_and_dropp_breakers",
+      "planKinds": [
+        "build_rig",
+        "contest_remote",
+        "safe_probe_run"
+      ],
+      "cards": [
+        "onr_v1_018_dogcatcher",
+        "onr_v1_019_dropp"
+      ],
+      "coveredBy": [
+        "packages/ai/src/index.test.ts::marks the V1.7.1 to V1.8.1, legacy open64, V1.9.0 and V1.9.1-V1.9.4 slices as AI-supported for custom AI deckbuilding"
+      ]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "DecisionDebug may include uncertainty markers such as unknown_corp_cards_remain_unknown.",
+    "DecisionDebug must not include hidden Corp card titles, private decklists, cardInstances or privatePayload.",
+    "Equal side-visible projections must keep the same selected action for deterministic seeds."
+  ]
+}

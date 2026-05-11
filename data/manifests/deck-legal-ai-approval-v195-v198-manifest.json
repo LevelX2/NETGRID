@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-batch-manifest-v1",
+  "id": "deck-legal-ai-approval-v195-v198-manifest",
+  "batchId": "deck_legal_ai_approval_v195_to_v198",
+  "status": "implemented_for_ai_approval",
+  "aiHintsId": "ai-card-hints-deck-legal-v195-v198",
+  "scenarioId": "ai-deck-legal-v195-v198-smokes",
+  "gateAssertions": {
+    "allSliceCardsRuntimeCatalogReady": true,
+    "allSliceCardsEngineSupported": true,
+    "allSliceCardsHumanPlayable": true,
+    "allSliceCardsDeckLegal": true,
+    "allSliceCardsFormatLegal": true,
+    "allSliceCardsHaveAiHints": true,
+    "allSliceCardsHaveScenarioRefs": true,
+    "aiSupportedRequiresHumanPlayableDeckLegalFormatLegal": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenInfoSafe": true,
+    "v140CorpPlanRegressionGreen": true,
+    "v141RunnerPlanRegressionGreen": true,
+    "noBulkOnrAiApproval": true,
+    "noNewMechanics": true,
+    "noCardTextParser": true,
+    "noBeliefState": true,
+    "noFullStateSimulation": true,
+    "noOfficialAssets": true,
+    "noPublicPlatformFeatures": true
+  },
+  "cards": [
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_219_superior-net-barriers",
+      "scenarioRefs": [
+        "corp_v195_superior_net_barriers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_308_acme-savings-and-loan",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_308_acme-savings-and-loan",
+      "scenarioRefs": [
+        "corp_v195_acme_savings_and_loan"
+      ]
+    },
+    {
+      "cardId": "onr_v1_236_data-raven",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_236_data-raven",
+      "scenarioRefs": [
+        "corp_v196_data_raven_tag_pressure"
+      ]
+    },
+    {
+      "cardId": "onr_v1_001_afreet",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_001_afreet",
+      "scenarioRefs": [
+        "runner_v197_afreet_hosting"
+      ]
+    },
+    {
+      "cardId": "onr_v1_018_dogcatcher",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_018_dogcatcher",
+      "scenarioRefs": [
+        "runner_v198_dogcatcher_and_dropp_breakers"
+      ]
+    },
+    {
+      "cardId": "onr_v1_019_dropp",
+      "status": "ai_supported",
+      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_019_dropp",
+      "scenarioRefs": [
+        "runner_v198_dogcatcher_and_dropp_breakers"
+      ]
+    }
+  ],
+  "deferredCards": []
+}

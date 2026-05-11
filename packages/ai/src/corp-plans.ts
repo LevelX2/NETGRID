@@ -8,6 +8,7 @@ import deckLegalV171V181Open64AiHintsData from "../../../data/ai/ai-card-hints-d
 import deckLegalLegacyOpen64AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-legacy-open64.json";
 import deckLegalV190AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v190.json";
 import deckLegalV191V194AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
+import deckLegalV195V198AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
 import type { AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
@@ -141,7 +142,8 @@ const AI_HINTS = new Map(
     ...(deckLegalV171V181Open64AiHintsData.cards as AiCardHint[]),
     ...(deckLegalLegacyOpen64AiHintsData.cards as AiCardHint[]),
     ...(deckLegalV190AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV191V194AiHintsData.cards as AiCardHint[])
+    ...(deckLegalV191V194AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV195V198AiHintsData.cards as AiCardHint[])
   ].map(
     (hint) => [hint.cardId, hint]
   )

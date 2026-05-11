@@ -16,6 +16,7 @@ import deckLegalV171V181Open64AiHintsData from "../../../../../data/ai/ai-card-h
 import deckLegalLegacyOpen64AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-legacy-open64.json";
 import deckLegalV190AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v190.json";
 import deckLegalV191V194AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
+import deckLegalV195V198AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
 import runtimeSupplementAiHintsData from "../../../../../data/ai/ai-card-hints-runtime-supplement.json";
 import corpTagSliceAiHintsData from "../../../../../data/ai/ai-card-hints-corp-tag-approval-slice.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
@@ -43,6 +44,7 @@ const AI_HINTS_BY_CARD_ID = new Map(
       ...(deckLegalLegacyOpen64AiHintsData.cards as CatalogAiHint[]),
       ...(deckLegalV190AiHintsData.cards as CatalogAiHint[]),
       ...(deckLegalV191V194AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV195V198AiHintsData.cards as CatalogAiHint[]),
       ...(corpTagSliceAiHintsData.cards as CatalogAiHint[])
     ]
   ).map((hint) => [hint.cardId, hint])
