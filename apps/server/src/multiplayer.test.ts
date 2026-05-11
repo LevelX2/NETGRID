@@ -455,7 +455,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(cardsById["onr_v1_079_bodyweight-synthetic-blood"]?.statuses.deck_legal).toBe(true);
     expect(cardsById["onr_v1_006_black-dahlia"]?.statuses.deck_legal).toBe(true);
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(true);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(true);
 
     const profile = (profilesData08.profiles as DeckFormatProfile[]).find((candidate) => candidate.profileId === "local-demo-v0.8");
     if (!profile) throw new Error("Missing V0.8 deck format profile");
@@ -592,7 +592,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(aiCreated)).not.toContain("cardInstances");
   });
 
-  it("V1.9.8 card release matchstart", async () => {
+  it("V1.9.9 card release matchstart", async () => {
     const cardsById = createRuntimeCardsById();
     if (!cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]) return;
 
@@ -640,12 +640,20 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(cardsById["onr_v1_001_afreet"]?.statuses.human_playable).toBe(true);
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.human_playable).toBe(true);
     expect(cardsById["onr_v1_019_dropp"]?.statuses.human_playable).toBe(true);
-    expect(cardsById["onr_v1_219_superior-net-barriers"]?.statuses.ai_supported).toBe(false);
-    expect(cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.ai_supported).toBe(false);
-    expect(cardsById["onr_v1_236_data-raven"]?.statuses.ai_supported).toBe(false);
-    expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(false);
-    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(false);
-    expect(cardsById["onr_v1_019_dropp"]?.statuses.ai_supported).toBe(false);
+    expect(cardsById["onr_v1_219_superior-net-barriers"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_308_acme-savings-and-loan"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_236_data-raven"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_019_dropp"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_349_aardvark"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_353_chimera"]?.statuses.human_playable).toBe(true);
+    expect(cardsById["onr_v1_349_aardvark"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_351_bizarre-encryption-scheme"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_352_chester-mix"]?.statuses.ai_supported).toBe(true);
+    expect(cardsById["onr_v1_353_chimera"]?.statuses.ai_supported).toBe(true);
   });
 
   it("creates private matches with hashed tokens and side-filtered bootstrap payloads", async () => {

@@ -1910,7 +1910,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
     const creditsBeforeContinue = tokyoState.corp.credits;
     tokyoState = apply(tokyoState, "runner", (action) => action.type === "continue_run");
     expect(tokyoState.run).toBeUndefined();
-    expect(tokyoState.corp.credits).toBe(creditsBeforeContinue + 1);
+    expect(tokyoState.corp.credits).toBe(creditsBeforeContinue + 2);
   });
 });
 
@@ -2822,14 +2822,15 @@ describe("V1.8.1 Mechanikpaket H", () => {
     state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_209_political-coup");
     const politicalCoupId = state.corp.scoreArea.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_209_political-coup");
     expect(politicalCoupId).toBeDefined();
-    if (politicalCoupId) expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(6);
+    if (politicalCoupId) expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(12);
 
     const creditsBefore = state.corp.credits;
     state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "corporate_coup");
     expect(state.corp.credits).toBe(creditsBefore + 1);
     if (corporateCoupId) expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(4);
     state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "political_coup");
-    if (politicalCoupId) expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(5);
+    expect(state.corp.credits).toBe(creditsBefore + 4);
+    if (politicalCoupId) expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(9);
   });
 
   it("resolves Ball/Canis run flags and enforces Fatal/Shock next-encounter penalties deterministically", () => {
@@ -3878,6 +3879,107 @@ describe("V1.9.8 Mechanikpaket Q", () => {
     expect(state.runner.rig.programs.some((programId) => state.cardInstances[programId]?.definitionId === "onr_v1_018_dogcatcher")).toBe(true);
     expect(state.runner.rig.programs.some((programId) => state.cardInstances[programId]?.definitionId === "onr_v1_019_dropp")).toBe(true);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Hostile Takeover");
+  });
+});
+
+describe("V1.9.9 Mechanikpaket R", () => {
+  it("adds the four V1.9.9 upgrade cards and validates smoke decks", () => {
+    expect(ONR_V1_9_9_FINAL_CARD_IDS).toHaveLength(4);
+    for (const definitionId of ONR_V1_9_9_FINAL_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.type, definitionId).toBe("upgrade");
+      expect(definition?.mechanics.join(" "), definitionId).not.toMatch(/v2|matchmaking|ranking/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_349_aardvark"]?.mechanics.join(" ")).toMatch(/worm/);
+    expect(DEMO_CARDS_BY_ID["onr_v1_351_bizarre-encryption-scheme"]?.mechanics.join(" ")).toMatch(/delayed_agenda_score/);
+    expect(DEMO_CARDS_BY_ID["onr_v1_352_chester-mix"]?.mechanics.join(" ")).toMatch(/ice_install_cost_mod_server/);
+    expect(DEMO_CARDS_BY_ID["onr_v1_353_chimera"]?.mechanics.join(" ")).toMatch(/daemon_trash_choice/);
+    expect(validateDeckDefinition(ONR_V1_9_9_RUNNER_DECK, { expectedSide: "runner" }).ok).toBe(true);
+    expect(validateDeckDefinition(ONR_V1_9_9_CORP_DECK, { expectedSide: "corp", minimumAgendaPoints: 7 }).ok).toBe(true);
+  });
+
+  it("lets Aardvark intercept a Worm use through a Corp choice and blocks later Worm use on that fort", () => {
+    let state = toRunnerTurn(v199CardReleaseGame("v199-aardvark"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const wormId = installRunnerProgramForTest(state, "onr_v1_074_worm");
+    const aardvarkId = putCorpRootInRemote(state, "onr_v1_349_aardvark");
+    const wallId = putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
+    state.cardInstances[wallId] = { ...state.cardInstances[wallId]!, faceup: true, rezzed: true };
+    const replayStart = structuredClone(state);
+    const replayEventOffset = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && action.payload?.breakerId === wormId);
+    expect(state.pendingChoice?.source).toContain("v199.aardvark");
+    expect(state.runner.credits).toBe(17);
+
+    state = applyChoice(state, "corp", "rez_trash_worm");
+    expect(state.cardInstances[aardvarkId]?.rezzed).toBe(true);
+    expect(state.runner.heap).toContain(wormId);
+    expect(getLegalActions(state, "runner").some((action) => action.payload?.breakerId === wormId)).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ cardDefinitionId: "onr_v1_349_aardvark", title: "Aardvark" });
+
+    const replay = replayEvents(replayStart, state.eventLog.slice(replayEventOffset));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("delays agenda scoring after Bizarre Encryption Scheme is accessed and resolves it at Runner turn start", () => {
+    let state = toRunnerTurn(v199CardReleaseGame("v199-bizarre-encryption"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpRootInRemote(state, "onr_v1_351_bizarre-encryption-scheme");
+    const agendaId = putCorpRootInRemote(state, "onr_v1_203_hostile-takeover");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+    expect(state.runner.scoreArea).not.toContain(agendaId);
+    expect(state.bizarreEncryptionDelayedAgendas).toEqual([{ agendaId, serverId: "remote_1" }]);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.runner.scoreArea).toContain(agendaId);
+    expect(state.bizarreEncryptionDelayedAgendas).toBeUndefined();
+  });
+
+  it("reduces ICE install costs on Chester Mix forts only", () => {
+    let state = createGameAfterSetup({ seed: "v199-chester", baseline: MVP_0_99_BASELINE, runnerDeck: ONR_V1_9_9_RUNNER_DECK, corpDeck: ONR_V1_9_9_CORP_DECK, agendaPointsToWin: 7 });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    const chesterId = putCorpRootInRemote(state, "onr_v1_352_chester-mix");
+    state.cardInstances[chesterId] = { ...state.cardInstances[chesterId]!, faceup: true, rezzed: true };
+    putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
+    const iceId = moveCorpCardToHq(state, "simple_code_gate_ice");
+
+    const install = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.source === iceId && action.payload?.serverId === "remote_1" && action.payload?.placement === "ice"
+    );
+    expect(install.payload?.iceInstallBaseCost).toBe(1);
+    expect(install.payload?.iceInstallReduction).toBe(1);
+    expect(install.payload?.iceInstallTotalCost).toBe(0);
+  });
+
+  it("trashes a Runner daemon when Chimera is accessed and keeps the access flow legal", () => {
+    let state = toRunnerTurn(v199CardReleaseGame("v199-chimera"));
+    state.runner.credits = 20;
+    const afreetId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
+    putCorpRootInRemote(state, "onr_v1_353_chimera");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.pendingChoice?.source).toContain("v199.chimera_daemon_trash");
+    state = applyChoice(state, "runner", `card_${afreetId}`);
+    expect(state.runner.heap).toContain(afreetId);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(getLegalActions(state, "runner").some((action) => action.type === "decline_trash")).toBe(true);
   });
 });
 
@@ -5567,6 +5669,7 @@ const ONR_V1_9_5_FINAL_CARD_IDS = ["onr_v1_219_superior-net-barriers", "onr_v1_3
 const ONR_V1_9_6_FINAL_CARD_IDS = ["onr_v1_236_data-raven"] as const;
 const ONR_V1_9_7_FINAL_CARD_IDS = ["onr_v1_001_afreet"] as const;
 const ONR_V1_9_8_FINAL_CARD_IDS = ["onr_v1_018_dogcatcher", "onr_v1_019_dropp"] as const;
+const ONR_V1_9_9_FINAL_CARD_IDS = ["onr_v1_349_aardvark", "onr_v1_351_bizarre-encryption-scheme", "onr_v1_352_chester-mix", "onr_v1_353_chimera"] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
@@ -6247,6 +6350,38 @@ const ONR_V1_9_8_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_9_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v199_smoke_094",
+  name: "O:NR V1.9.9 Runner Smoke",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_001_afreet", quantity: 2 },
+    { id: "onr_v1_014_codecracker", quantity: 2 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "onr_v1_074_worm", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_9_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v199_smoke_094",
+  name: "O:NR V1.9.9 Corp Smoke",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_349_aardvark", quantity: 2 },
+    { id: "onr_v1_351_bizarre-encryption-scheme", quantity: 2 },
+    { id: "onr_v1_352_chester-mix", quantity: 2 },
+    { id: "onr_v1_353_chimera", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "onr_v1_279_wall-of-static", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 3 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -6599,6 +6734,16 @@ function v198CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_8_RUNNER_DECK,
     corpDeck: ONR_V1_9_8_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v199CardReleaseGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_9_RUNNER_DECK,
+    corpDeck: ONR_V1_9_9_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

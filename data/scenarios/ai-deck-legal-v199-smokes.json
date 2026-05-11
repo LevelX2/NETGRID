@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "ai-runner-corp-card-approval-scenarios-v1",
+  "id": "ai-deck-legal-v199-smokes",
+  "batchId": "deck_legal_ai_approval_v199",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "corpAiProfileId": "corp-ai-v1.4.0-normal",
+  "status": "implemented_for_deck_legal_ai_approval_v199",
+  "assertions": {
+    "allBatchCardsHaveAiHints": true,
+    "allBatchCardsHaveScenarioRefs": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noFullStateSimulation": true
+  },
+  "scenarios": [
+    {
+      "id": "corp_v199_aardvark_worm_intercept",
+      "planKinds": ["build_scoring_remote", "protect_rnd", "protect_hq"],
+      "cards": ["onr_v1_349_aardvark"],
+      "coveredBy": ["packages/ai/src/index.test.ts::resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions"]
+    },
+    {
+      "id": "corp_v199_bizarre_encryption_delay",
+      "planKinds": ["build_scoring_remote", "bait_runner"],
+      "cards": ["onr_v1_351_bizarre-encryption-scheme"],
+      "coveredBy": ["packages/engine/src/index.test.ts::delays agenda scoring after Bizarre Encryption Scheme is accessed and resolves it at Runner turn start"]
+    },
+    {
+      "id": "corp_v199_chester_mix_cost_reduction",
+      "planKinds": ["build_scoring_remote", "protect_rnd", "protect_hq"],
+      "cards": ["onr_v1_352_chester-mix"],
+      "coveredBy": ["packages/engine/src/index.test.ts::reduces ICE install costs on Chester Mix forts only"]
+    },
+    {
+      "id": "runner_v199_chimera_daemon_choice",
+      "planKinds": ["safe_probe_run", "contest_remote"],
+      "cards": ["onr_v1_353_chimera"],
+      "coveredBy": ["packages/ai/src/index.test.ts::resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions"]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "AI decisions consume only PlayerView, LegalActions and side-filtered public events.",
+    "Aardvark and Chimera choices carry only visible or side-owned choice options.",
+    "BES delayed marker contains deterministic card instance references inside GameState, not public hidden card leakage."
+  ]
+}

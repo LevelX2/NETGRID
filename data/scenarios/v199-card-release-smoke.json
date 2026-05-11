@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v199-card-release-smoke",
+  "title": "V1.9.9 Upgrade-Mechanik-Sprint 349-353",
+  "release": "V1.9.9",
+  "status": "implemented_core_release",
+  "extends": "data/scenarios/v194-card-release-smoke.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "additionalCards": [
+    "onr_v1_349_aardvark",
+    "onr_v1_351_bizarre-encryption-scheme",
+    "onr_v1_352_chester-mix",
+    "onr_v1_353_chimera"
+  ],
+  "deferredCards": [],
+  "preconditions": [
+    "V1.9.9 Detailed Plan und Pre-Sprint-Checklist frieren exakt vier Upgrade-Karten ein.",
+    "Runtime-Katalog, Engine und KI-Hints enthalten keine weiteren V1.9.9-Karten."
+  ],
+  "steps": [
+    "Starte deterministische V1.9.9-Smoke-Matches mit V1.9.9 Runner- und Corp-Decks.",
+    "Verifiziere Aardvark: Worm-Nutzung öffnet Corp-Rez-Choice, trash't den Worm bei Rez und blockiert weitere Worm-LegalActions auf dem Fort.",
+    "Verifiziere Bizarre Encryption Scheme: Access markiert den Run, Agenda wird nicht sofort gestohlen und bei Runner-Turn-Start deterministisch gescored, falls noch im Fort.",
+    "Verifiziere Chester Mix: Rezzed Chester Mix reduziert ICE-Installkosten nur auf dem eigenen Fort und nicht unter 0.",
+    "Verifiziere Chimera: Access öffnet eine Runner-Daemon-Choice und trasht genau einen installierten Daemon; ohne Daemon bleibt der Pfad No-Op.",
+    "Verifiziere Replay- und StateHash-Stabilität für Aardvark-Choice und die neuen V1.9.9-State-Marker."
+  ],
+  "expected": [
+    "Alle vier Upgrades sind human_playable und ai_supported.",
+    "Alle neuen Entscheidungen laufen über LegalActions und applyAction.",
+    "PublicEvents und AI-Inputs enthalten keine verdeckten Kartendaten.",
+    "Keine neuen Release-Blocker oder offenen Mechanikfamilien für den V1.9.9-Kernbereich."
+  ],
+  "coverageRefs": {
+    "engine": "packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R",
+    "ai": "packages/ai/src/index.test.ts::resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions",
+    "catalog": "data/ai/ai-card-hints-deck-legal-v199.json"
+  }
+}

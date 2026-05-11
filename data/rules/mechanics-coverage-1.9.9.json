@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.9.9",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.9",
+  "generatedFor": "V1.9.9 Upgrade-Mechanik-Sprint final gate",
+  "generatedAt": "2026-05-11",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.9.4.json",
+  "gateAssertions": {
+    "v199PreflightFrozen": true,
+    "aardvarkWormInterceptionImplemented": true,
+    "bizarreEncryptionDelayedScoreImplemented": true,
+    "chesterMixCostReductionImplemented": true,
+    "chimeraDaemonTrashImplemented": true,
+    "aiChoicePathsCovered": true,
+    "noLatentDataLeak": true,
+    "stateHashReplayStable": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.upgrade.aardvark_worm_intercept",
+      "label": "Aardvark Worm Interception",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.9",
+      "currentScopeNote": "Unrezzed Aardvark opens a Corp choice after Worm use on the protected fort; rezzed Aardvark blocks further Worm LegalActions on that fort.",
+      "coverage": ["unit", "scenario", "choice", "visibility", "replay", "state_hash", "ai"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.bizarre_encryption_agenda_delay",
+      "label": "Bizarre Encryption Scheme Agenda Delay",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.9",
+      "currentScopeNote": "Accessed BES marks the run; later accessed agendas on that run are returned to the fort and scored for Runner at Runner turn start if still present.",
+      "coverage": ["unit", "scenario", "visibility", "state_hash", "ai"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.chester_mix_ice_install_discount",
+      "label": "Chester Mix ICE Install Discount",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.9",
+      "currentScopeNote": "Rezzed Chester Mix reduces Corp ICE install costs on its fort by 1 with zero floor after taxes.",
+      "coverage": ["unit", "scenario", "legal_action", "ai"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.chimera_daemon_trash",
+      "label": "Chimera Daemon Trash on Access",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.9",
+      "currentScopeNote": "Accessing Chimera opens a Runner daemon-trash choice if installed daemons exist; empty daemon state is a clean no-op.",
+      "coverage": ["unit", "scenario", "choice", "visibility", "ai"]
+    }
+  ],
+  "deferred": []
+}

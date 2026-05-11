@@ -109,6 +109,52 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(input)).not.toContain("cardInstances");
   });
 
+  it("resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions", () => {
+    const corpState = createGameAfterSetup({ seed: "ai-v199-aardvark-choice" });
+    corpState.pendingChoice = {
+      choiceId: `v199_aardvark_${corpState.stateVersion}`,
+      side: "corp",
+      source: "v199.aardvark:aardvark:worm:ice:pump_breaker:none:3",
+      prompt: "Aardvark rezzen und Worm trashen?",
+      kind: "select_option",
+      options: [
+        { id: "rez_trash_worm", label: "Aardvark rezzen", publicLabel: "Aardvark wird gerezzt", value: "rez_trash_worm" },
+        { id: "decline", label: "Nicht rezzen", publicLabel: "Aardvark wird nicht gerezzt", value: "decline" }
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: corpState.stateVersion,
+      visibility: "private_to_side"
+    };
+    const corpInput = buildAiDecisionInput(corpState, "corp", { difficulty: "normal" });
+    const corpDecision = chooseCorpAction(corpInput);
+    expect(corpDecision.reasonCode).toBe("corp.choice.resolve");
+    expect(corpDecision.selectedChoices).toEqual({ choiceId: corpState.pendingChoice?.choiceId, selectedOptionIds: ["rez_trash_worm"] });
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
+
+    const runnerState = toRunnerTurn(createGameAfterSetup({ seed: "ai-v199-chimera-choice" }));
+    runnerState.pendingChoice = {
+      choiceId: `v199_chimera_${runnerState.stateVersion}`,
+      side: "runner",
+      source: "v199.chimera_daemon_trash:chimera:1",
+      prompt: "Daemon für Chimera trashen",
+      kind: "select_cards",
+      options: [
+        { id: "card_afreet", label: "Afreet", publicLabel: "Daemon", value: "afreet_id" },
+        { id: "card_succubus", label: "Succubus", publicLabel: "Daemon", value: "succubus_id" }
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: runnerState.stateVersion,
+      visibility: "public"
+    };
+    const runnerInput = buildAiDecisionInput(runnerState, "runner", { difficulty: "normal" });
+    const runnerDecision = chooseRunnerAction(runnerInput);
+    expect(runnerDecision.reasonCode).toBe("runner.choice.resolve");
+    expect(runnerDecision.selectedChoices).toEqual({ choiceId: runnerState.pendingChoice?.choiceId, selectedOptionIds: ["card_afreet"] });
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+  });
+
   it("keeps V0.94 Damage board states side-safe for AI input", () => {
     const state = applyEffectCommands(v094DamageGame("ai-v094-damage"), [{ type: "do_damage", damageType: "meat", amount: 2, source: "ai_v094_smoke" }]);
     const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });

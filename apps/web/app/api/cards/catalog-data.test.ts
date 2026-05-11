@@ -4,6 +4,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
@@ -30,7 +31,8 @@ describe("catalog API filters", () => {
       ...DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
-      ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS
+      ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS
     ].filter((cardId) => cardId.startsWith("onr_v1_"));
     expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual(
       [...new Set(expectedOnrAiApproved)].sort()
@@ -197,5 +199,25 @@ describe("catalog API filters", () => {
     expect(body.card.aiHints?.planRoles).toContain("contest_remote");
     expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
     expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v195-v198-smokes.json#runner_v198_dogcatcher_and_dropp_breakers");
+  });
+
+  it("adds V1.9.9 AI hints for newly approved upgrade cards", () => {
+    const response = catalogDetailResponse("onr_v1_349_aardvark");
+
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        aiHints: {
+          roles: string[];
+          planRoles: string[];
+          aiSupportStatus: string;
+          scenarioRefs: string[];
+        } | null;
+      };
+    };
+    expect(body.card.aiHints?.roles).toContain("upgrade");
+    expect(body.card.aiHints?.planRoles).toContain("protect_rnd");
+    expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
+    expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v199-smokes.json#corp_v199_aardvark_worm_intercept");
   });
 });
