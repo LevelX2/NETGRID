@@ -544,8 +544,10 @@ export type RunState = {
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
+  aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<Record<CardInstanceId, number[]>>;
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
+  bizarreEncryptionSchemeActive?: boolean;
   breach?: BreachState;
 };
 
@@ -638,6 +640,10 @@ export type GameState = {
   };
   run?: RunState;
   trace?: TraceState;
+  bizarreEncryptionDelayedAgendas?: Array<{
+    agendaId: CardInstanceId;
+    serverId: Exclude<ServerId, "new_remote">;
+  }>;
   identityAbilityUsage?: Partial<Record<Side, { setupAbilities: string[]; turn: number; usedThisTurn: string[] }>>;
   runnerTurnFlags?: {
     stoleAgendaThisTurn: boolean;
@@ -1972,7 +1978,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 4,
     agendaPoints: 2,
-    rulesText: "Put 6 from the bank on Political Coup when you score it.\n[A]: Take 1 from Political Coup, if it has any bits.",
+    rulesText: "Put 12 from the bank on Political Coup when you score it.\n[A]: Take 3 from Political Coup, if it has any bits.",
     mechanics: ["install_remote", "advance", "score", "steal", "counter", "action_economy", "gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -2096,6 +2102,56 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "server_ice_strength_modifier", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_349_aardvark",
+    title: "Aardvark",
+    side: "corp",
+    type: "upgrade",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 2,
+    trashCost: 1,
+    rulesText:
+      "Runner cannot use worms during runs on this fort. If Runner uses a worm during a run on this fort before Aardvark is rezzed, you may rez Aardvark to trash that worm, and any bits spent using that worm on the current piece of ice are lost to no effect. Runner may then use further icebreakers to break the ice.",
+    mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "server_icebreaker_worm_use_then_breach_failover", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_351_bizarre-encryption-scheme",
+    title: "Bizarre Encryption Scheme",
+    side: "corp",
+    type: "upgrade",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 2,
+    rulesText:
+      "Runner does not score any agenda or agendas on a run during which Bizarre Encryption Scheme is accessed; return that agenda to the fort instead. Runner scores the agenda at the start of his or her next turn, if neither you nor Runner has scored it by then. This does not affect any further runs.",
+    mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "corp_access_delay_and_return_to_server_then_start_turn_score", "delayed_agenda_score", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_352_chester-mix",
+    title: "Chester Mix",
+    side: "corp",
+    type: "upgrade",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 1,
+    rulesText: "Cost to install ice on this fort is reduced by 1.",
+    mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "ice_install_cost_mod_server", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_353_chimera",
+    title: "Chimera",
+    side: "corp",
+    type: "upgrade",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    rezCost: 0,
+    trashCost: 1,
+    rulesText: "When Runner accesses Chimera, trash a daemon.",
+    mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "accessed_card_ambush_daemon_trash", "daemon_trash_choice", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_371_tokyo-chiba-infighting",
     title: "Tokyo-Chiba Infighting",
     side: "corp",
@@ -2105,7 +2161,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 6,
     rulesText:
-      "Gain 1 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort.",
+      "Gain 2 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort.",
     mechanics: ["install_remote", "rez_upgrade", "trash_on_access", "region_install_rules", "run_unsuccessful_credit_bonus", "persistent_modifier", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -2117,7 +2173,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 7,
     agendaPoints: 2,
-    rulesText: "[A]: Trace 7 - If trace is successful, give Runner a tag.",
+    rulesText: "[A]: Trace 5 - If trace is successful, give Runner a tag.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda_action", "trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
   },
   {

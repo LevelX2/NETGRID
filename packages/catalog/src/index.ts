@@ -504,6 +504,13 @@ export const ONR_V1_9_7_RELEASE_CARD_IDS = ["onr_v1_001_afreet"] as const;
 
 export const ONR_V1_9_8_RELEASE_CARD_IDS = ["onr_v1_018_dogcatcher", "onr_v1_019_dropp"] as const;
 
+export const ONR_V1_9_9_RELEASE_CARD_IDS = [
+  "onr_v1_349_aardvark",
+  "onr_v1_351_bizarre-encryption-scheme",
+  "onr_v1_352_chester-mix",
+  "onr_v1_353_chimera"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -525,7 +532,8 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_9_5_RELEASE_CARD_IDS,
   ...ONR_V1_9_6_RELEASE_CARD_IDS,
   ...ONR_V1_9_7_RELEASE_CARD_IDS,
-  ...ONR_V1_9_8_RELEASE_CARD_IDS
+  ...ONR_V1_9_8_RELEASE_CARD_IDS,
+  ...ONR_V1_9_9_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -695,6 +703,8 @@ export const DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS = [
   "onr_v1_019_dropp"
 ] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS = [...ONR_V1_9_9_RELEASE_CARD_IDS] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
@@ -705,7 +715,8 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS
 ]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
@@ -727,6 +738,7 @@ const ONR_V1_9_5_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_5_RELEASE_CARD_I
 const ONR_V1_9_6_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_6_RELEASE_CARD_IDS);
 const ONR_V1_9_7_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_7_RELEASE_CARD_IDS);
 const ONR_V1_9_8_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_8_RELEASE_CARD_IDS);
+const ONR_V1_9_9_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_9_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -915,6 +927,15 @@ const ONR_V1_9_8_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v198-card-release-smoke.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.9.8 Mechanikpaket Q", "apps/server/src/multiplayer.test.ts::V1.9.8 card release matchstart"],
   replayTests: ["packages/engine/src/index.test.ts::V1.9.8 Mechanikpaket Q"]
+};
+
+const ONR_V1_9_9_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.9",
+  status: "human_playable_v1_9_9_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R", "packages/ai/src/index.test.ts::V1.9.9 choices"],
+  scenarioTests: ["data/scenarios/v199-card-release-smoke.json", "data/scenarios/ai-deck-legal-v199-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -1117,6 +1138,13 @@ const ONR_V1_9_8_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_019_dropp": { installCost: 4, memoryCost: 1, strength: 2 }
 };
 
+const ONR_V1_9_9_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
+  "onr_v1_349_aardvark": { rezCost: 2, trashCost: 1 },
+  "onr_v1_351_bizarre-encryption-scheme": { rezCost: 0, trashCost: 2 },
+  "onr_v1_352_chester-mix": { rezCost: 0, trashCost: 1 },
+  "onr_v1_353_chimera": { rezCost: 0, trashCost: 1 }
+};
+
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
   "onr_v1_052_raffles": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
@@ -1214,8 +1242,8 @@ const ONR_V1_6_3_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_267_sentinels-prime": "[Subroutine] Trash a program.\n[Subroutine] End the run.",
   "onr_v1_273_triggerman": "[Subroutine] Trash a program.\n[Subroutine] End the run.",
   "onr_v1_350_antiquated-interface-routines": "All ice on this fort has +1 strength.",
-  "onr_v1_371_tokyo-chiba-infighting":
-    "Gain 1 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort."
+    "onr_v1_371_tokyo-chiba-infighting":
+    "Gain 2 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort."
 };
 
 const ONR_V1_7_0_TEXT_OVERRIDES: Partial<Record<string, string>> = {
@@ -1265,7 +1293,7 @@ const ONR_V1_8_1_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_173_restrictive-net-zoning":
     "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 1, in addition to the normal cost, to install ice on that fort.",
   "onr_v1_193_corporate-coup": "Put 5 from the bank on Corporate Coup when you score it.\n[A]: Take 1 from Corporate Coup, if it has any bits.",
-  "onr_v1_209_political-coup": "Put 6 from the bank on Political Coup when you score it.\n[A]: Take 1 from Political Coup, if it has any bits.",
+  "onr_v1_209_political-coup": "Put 12 from the bank on Political Coup when you score it.\n[A]: Take 3 from Political Coup, if it has any bits.",
   "onr_v1_222_ball-and-chain":
     "[Subroutine] For the remainder of the run, Runner must pay 1 when encountering a piece of ice, in addition to any other costs, or end the run.",
   "onr_v1_225_canis-major": "[Subroutine] For the remainder of the run, all further ice is encountered at +2 strength.",
@@ -1310,7 +1338,7 @@ const ONR_V1_9_2_TEXT_OVERRIDES: Partial<Record<string, string>> = {
 
 const ONR_V1_9_3_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_207_netwatch-operations-office": "[A]: Trace 7 - If trace is successful, give Runner a tag.",
-  "onr_v1_213_private-cybernet-police": "[A]: Trace 7 - If trace is successful, give Runner a tag.",
+  "onr_v1_213_private-cybernet-police": "[A]: Trace 5 - If trace is successful, give Runner a tag.",
   "onr_v1_251_jack-attack":
     "[Subroutine] For the remainder of the run, Runner cannot jack out.\n[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
   "onr_v1_271_tko-2-0": "[Subroutine] End the run, and Runner forgoes his or her next action."
@@ -1340,6 +1368,15 @@ const ONR_V1_9_7_TEXT_OVERRIDES: Partial<Record<string, string>> = {
 const ONR_V1_9_8_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_018_dogcatcher": "1 credit: Break ice subroutine.\n1 credit: +1 strength.",
   "onr_v1_019_dropp": "1 credit: Break ice subroutine.\n2 credits: +1 strength."
+};
+
+const ONR_V1_9_9_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_349_aardvark":
+    "When Runner uses a Worm icebreaker during a run on this fort, Corp may rez Aardvark. If rezzed this way, trash that Worm. Worm icebreakers cannot be used during runs on this fort while Aardvark is rezzed.",
+  "onr_v1_351_bizarre-encryption-scheme":
+    "If Runner accesses an agenda from this fort, Runner does not score it immediately. Leave the agenda installed; Runner scores it at the start of the next Runner turn if it is still installed here.",
+  "onr_v1_352_chester-mix": "The cost to install ice on this fort is reduced by 1.",
+  "onr_v1_353_chimera": "When accessed, Runner trashes one installed daemon program."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
@@ -2130,6 +2167,7 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV199 = ONR_V1_9_9_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV198 = ONR_V1_9_8_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV197 = ONR_V1_9_7_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV196 = ONR_V1_9_6_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -2150,7 +2188,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV198
+  const textOverrides = isV199
+    ? ONR_V1_9_9_TEXT_OVERRIDES
+    : isV198
     ? ONR_V1_9_8_TEXT_OVERRIDES
     : isV197
     ? ONR_V1_9_7_TEXT_OVERRIDES
@@ -2191,7 +2231,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV198
+  const numericOverrides = isV199
+    ? ONR_V1_9_9_NUMERIC_OVERRIDES
+    : isV198
     ? ONR_V1_9_8_NUMERIC_OVERRIDES
     : isV197
     ? ONR_V1_9_7_NUMERIC_OVERRIDES
@@ -2232,7 +2274,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV198
+  const manifest = isV199
+    ? ONR_V1_9_9_RELEASE_MANIFEST
+    : isV198
     ? ONR_V1_9_8_RELEASE_MANIFEST
     : isV197
     ? ONR_V1_9_7_RELEASE_MANIFEST
