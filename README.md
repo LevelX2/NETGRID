@@ -61,4 +61,5 @@ corepack pnpm typecheck
 corepack pnpm test
 corepack pnpm build
 corepack pnpm e2e
+corepack pnpm check:ai-approval-consistency
 ```
