@@ -32,7 +32,7 @@ Plant Releases, Feature-Stages, Prioritäten, Abhängigkeiten und Scope in eine 
 
 - Ohne explizite Aufforderung keine Implementierung und keine Codeänderungen.
 - Keine automatische Weitergabe an andere Agenten.
-- Keine Scope-Erweiterung über den dokumentierten MVP-/Release-Rahmen.
+- Keine Scope-Erweiterung über den aktuell gültigen Release- und Gate-Stand.
 - Bei Konflikten gilt: `CODEX_STATUS.md` plus aktuelles Ziel-Release schlägt ältere Langfristskizzen.
 
 ## Bevorzugtes Ausgabeformat
@@ -48,6 +48,13 @@ Plant Releases, Feature-Stages, Prioritäten, Abhängigkeiten und Scope in eine 
 
 ## Projektspezifische Hinweise
 
-- Releaseplanung muss `Done bedeutet` aus `AGENTS.md` einhalten.
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` ist Regelreferenz, aber keine automatische Scope-Erweiterung.
+- Releaseplanung muss folgende Done-Gates einplanen:
+  - erforderliche abgeleitete Dokumente,
+  - Test- oder Szenarioabdeckung für jede Must-Anforderung,
+  - Unit- oder Szenarioabdeckung für jede spielbare oder releasefreigegebene Karte,
+  - Visibility-, Replay-, StateHash-, stale-action- und illegal-action-Abdeckung,
+  - Build- und Testbefehle,
+  - dokumentierte Abweichungen und offene Fragen.
 - Bei Abschluss eines Releases ist die sichtbare Webclient-Version zu aktualisieren und im Final Review als eigener Gatepunkt zu führen.
 - V2.x-Artefakte können vorbereitet werden, dürfen aber aktive V1-Gates nicht überspringen.

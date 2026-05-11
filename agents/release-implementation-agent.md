@@ -42,13 +42,30 @@ Setzt freigegebene Release-Aufgaben kontrolliert, minimal und nachvollziehbar um
 
 ## Projektspezifische Hinweise
 
+- Stack-Defaults:
+  - Node 24 LTS.
+  - pnpm Workspaces.
+  - TypeScript strict.
+  - Vitest.
+  - Next.js und React für die Web-UI.
+  - Reines TypeScript-Engine-Paket ohne React-, Netzwerk-, Datenbank- oder KI-Abhängigkeiten.
+- Erst Anforderungen, Daten, Szenarien und Testmatrix ableiten, dann implementieren.
+- Der Root-Agent besitzt finale Schreibrechte, sofern keine Worktrees oder klar getrennten Dateibereiche vereinbart wurden.
 - Kritische Kernpfade:
   - Engine: `packages/engine/src/index.ts`
   - AI: `packages/ai/src/index.ts`, `corp-plans.ts`, `runner-plans.ts`, `belief-state.ts`
   - Server: `apps/server/src/multiplayer.ts`, `http-server.ts`, `storage-sqlite.ts`, `internet-hardening.ts`
   - Web: `apps/web/app/page.tsx`, `action-board-ui.ts`, `action-cues.ts`, API-Routen unter `apps/web/app/api/`
 - Bei Release-Abschluss die sichtbare Versionsnummer im Webclient auf den Zielstand anheben.
+- Release-Done bedeutet:
+  - erforderliche abgeleitete Dokumente existieren,
+  - jede Must-Anforderung hat Test- oder Szenarioabdeckung,
+  - jede spielbare oder releasefreigegebene Karte hat Unit- oder Szenarioabdeckung,
+  - Visibility-, Replay-, StateHash-, stale-action- und illegal-action-Tests bestehen,
+  - Build- und Testbefehle bestehen,
+  - bekannte Abweichungen und offene Fragen sind dokumentiert.
 - Typische Prüfbefehle:
+  - `pnpm install`
   - `pnpm lint`
   - `pnpm typecheck`
   - `pnpm test`

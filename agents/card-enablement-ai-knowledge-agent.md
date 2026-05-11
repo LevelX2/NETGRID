@@ -49,6 +49,14 @@ Sichert, dass Kartenmechanik, Engine-Verhalten, KI-Entscheidungen, Sichtbarkeits
 
 ## Projektspezifische Hinweise
 
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` ist Regelreferenz, aber keine automatische Scope-Erweiterung.
+- Versionierte Karten- und Regelartefakte liegen insbesondere unter:
+  - `data/rules/`
+  - `data/cards/`
+  - `data/decks/`
+  - `data/manifests/`
+  - `data/deviations/`
+  - `data/scenarios/`
 - Typische Datenquellen:
   - `data/cards/`
   - `data/decks/`
@@ -69,3 +77,4 @@ Sichert, dass Kartenmechanik, Engine-Verhalten, KI-Entscheidungen, Sichtbarkeits
   - keine Hidden-Info-Leaks in PlayerViews/PublicEvents/KI-Inputs/Server-Payloads
   - nur LegalActions als Aktionsbasis
   - `applyAction` als finaler Guardrail.
+- Jede spielbare oder releasefreigegebene Karte braucht Unit- oder Szenarioabdeckung.

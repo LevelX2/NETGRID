@@ -4,9 +4,10 @@ Diese Datei ist die Kurzreferenz für die Rollen unter `agents/`.
 
 ## Grundregel
 
-- Der Coordinator in `AGENTS.md` klassifiziert Anfragen und empfiehlt einen primären Agenten.
+- Der Coordinator in `AGENTS.md` klassifiziert Anfragen und wählt einen primären Agenten.
+- Die aktive Agentenvorgabe wird kurz ausgegeben; eine separate Bestätigung ist nicht nötig.
 - Es gibt keine automatische Agent-Kette.
-- Rollenwechsel erfolgt nur auf explizite Nutzeranweisung.
+- Rollenwechsel während einer laufenden Aufgabe erfolgen nur auf ausdrücklichen Nutzerwunsch.
 
 ## Rollen
 

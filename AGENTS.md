@@ -1,65 +1,53 @@
 # AGENTS.md
 
-Bitte den Benutzer im Chat mit `Du` oder `Meister` ansprechen.
+## Projekt und Wissensbasis
 
-## Ziel dieser Struktur
+Private NETGRID-Webapplikation für regelgeführtes NETGRID-Spiel.
 
-Dieses Repository nutzt eine Coordinator-Struktur:
+Bei neuen Threads, neuen Aufgaben und Projektfragen zuerst wiki-first arbeiten. Die projektbezogene Wissensbasis liegt unter `KI-Wissen-NETGRID/`; falls lokal vorhanden, zusätzlich `AGENTS.local.md` lesen.
 
-- `AGENTS.md` ist der Coordinator mit globalen Regeln und Routing.
-- Spezialisierte Rollen liegen unter `agents/`.
-- Es gibt keine automatische Agent-Kette.
-- Der Coordinator klassifiziert Anfragen, empfiehlt eine Rolle und wechselt nur auf ausdrückliche Nutzeranweisung.
-
-## Projekt
-
-Private NETGRID-Webapplikation für regelgeführtes NETGRID-Spiel. MVP 0.1 ist Human Runner gegen einfache Corp-KI mit festen Demo-Decks. MVP 0.2 ist privates Human-vs-Human-Multiplayer über dieselbe Engine.
-
-## Projektbezogene Wissensbasis
-
-Für dieses Projekt existiert eine projektbezogene KI-Wissensbasis im Ordner `KI-Wissen-NETGRID/`.
-
-Falls lokal vorhanden, zusätzlich `AGENTS.local.md` lesen. Diese Datei enthält private systemlokale Pfade und ist nicht Teil des versionierten Projektwissens.
-
-Bei neuen Threads, neuen Aufgaben und Projektfragen ist diese Wissensbasis primär zu verwenden.
-
-## Pflicht-Einstieg für neue Threads
-
-Zu Beginn projektbezogener Arbeit zuerst diese Dateien lesen:
+Pflicht-Einstieg für projektbezogene Arbeit:
 
 1. `KI-Wissen-NETGRID/00 Projektstart.md`
 2. `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
 3. `KI-Wissen-NETGRID/02 Wissen/Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen.md`
 4. `KI-Wissen-NETGRID/00 Steuerung/Regeldatei KI-Wissenspflege.md`
-5. `docs/codex/CODEX_STATUS.md`
-6. `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
 
-Für Anschlussplanung ab V1.1.3 ist zusätzlich `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` verbindlich, sobald `docs/codex/CODEX_STATUS.md` auf diesen Stand verweist.
+Die Wissensbasis nennt den jeweils gültigen Status, die verbindliche Roadmap und die relevanten Quellen. Bei Konflikten gilt das dort als aktuell führend markierte Artefakt.
 
-## Quellenpriorität
+## Arbeitsmodus und Sprache
 
-1. `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md` für MVP 0.1.
-2. `docs/source/NETGRID_MVP_0.2_Plan.md` für MVP 0.2 nach bestandenem MVP-0.1-Gate.
-3. `docs/source/Erstes Testdeck.txt` für Demo-Karten und Demo-Decks.
-4. `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` als Regelreferenz, nicht als Scope-Erweiterung.
-5. `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md` für Codex-Workflow.
-6. Ergänzende Spezifikations-, Test-, Betriebs- und Planungsdokumente unter `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/` und `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`.
-
-Aktuelle Releaseplanung hat Vorrang vor älteren Langfristskizzen: `docs/codex/CODEX_STATUS.md` nennt den gültigen Gate-Stand und die aktiven Planungsartefakte.
-
-## Arbeitsmodus
-
-- Arbeite `wiki-first`.
-- Beantworte Projektfragen zuerst aus dem vorhandenen Wissensbestand.
-- Ziehe Rohquellen, Workspace-Dateien oder Webquellen nur dann nach, wenn die Wissensbasis Lücken hat, veraltet ist oder verifiziert werden muss.
-- Wenn neue belastbare Erkenntnisse entstehen, die wiederverwendbar oder entscheidungsrelevant sind, führe sie in die Wissensbasis zurück.
-- Konkretes Ausführungswissen für wiederkehrende Abläufe gehört in passende Runbooks oder Prozessseiten.
-
-## Sprachregeln
-
+- Beantworte Projektfragen zuerst aus Wissensbasis, Status und aktiven Planungsartefakten.
+- Ziehe Rohquellen, Workspace-Dateien oder Webquellen nur hinzu, wenn die Wissensbasis Lücken hat, veraltet ist oder verifiziert werden muss.
+- Führe neue belastbare, wiederverwendbare oder entscheidungsrelevante Erkenntnisse in Wissensbasis, Runbooks oder Prozessseiten zurück.
+- Dokumentiere relevante Prozess-, Architektur-, Gate- und Abschlussentscheidungen nach der Logregel der Wissensbasis.
 - Sichtbare UI-Texte und normale deutsche Wissensseiten verwenden echtes Deutsch mit Umlauten und `ß`.
-- Der Benutzer wird im Chat und in direkt formulierten Anwendungstexten grundsätzlich mit `Du` angesprochen.
 - Technische Dateinamen, Pfade, Code-Symbole, IDs, Markdown-Links und originale Quellzitate bleiben in ihrer technischen oder originalen Schreibweise.
+
+## Coordinator und Rollenrouting
+
+Bei jeder neuen projektbezogenen Anfrage klassifiziert der Coordinator die Anfrage, wählt genau einen primären Agenten aus und gibt die aktive Agentenvorgabe kurz aus:
+
+```text
+Aktiver Agent: <agent> (agents/<agent>.md)
+```
+
+Danach arbeitet Codex direkt nach dieser Agentendatei. Es ist keine separate Bestätigung nötig.
+
+Wenn die Intention unklar ist oder mehrere Rollen mit nicht offensichtlichen Folgen passen, stellt der Coordinator genau eine kurze Klärungsfrage. Bei gemischten Anfragen wird ein primärer Agent gewählt; optionale Folgeagenten werden nur empfohlen.
+
+Es gibt keine automatische Agent-Kette, keine implizite Übergabe an Folgeagenten und keine automatische Rollenumstellung während einer laufenden Aufgabe. Der Nutzer kann jederzeit einen anderen Agenten nennen oder zu `AGENTS.md` als Coordinator zurückwechseln.
+
+## Agentenrouting
+
+- Release-Zuschnitt, Prioritäten, Abhängigkeiten, Gates: `release-planning-agent` (`agents/release-planning-agent.md`).
+- Kartenfreischaltung, Mechanikfolgen, KI-Verhalten: `card-enablement-ai-knowledge-agent` (`agents/card-enablement-ai-knowledge-agent.md`).
+- Geplante Umsetzung in Code und Artefakten: `release-implementation-agent` (`agents/release-implementation-agent.md`).
+- Kleine UI-/Text-/Interaktions-Korrekturen ohne Redesign: `small-adjustments-agent` (`agents/small-adjustments-agent.md`).
+- Strukturqualität, technische Schulden, Schichtgrenzen: `architecture-review-agent` (`agents/architecture-review-agent.md`).
+- Testlücken, Regression-Schutz, Teststrategie: `test-quality-agent` (`agents/test-quality-agent.md`).
+
+Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 
 ## Verbindliche NETGRID-Prinzipien
 
@@ -70,113 +58,15 @@ Aktuelle Releaseplanung hat Vorrang vor älteren Langfristskizzen: `docs/codex/C
 - Keine verdeckten Kartendaten dürfen in PlayerViews, PublicEvents, KI-Inputs, WebSocket-Payloads, Reconnect-Payloads, Undo-Previews, öffentlichen Replays, Logs oder Client-Fehlern leaken.
 - Deterministisches Replay und StateHash sind Pflicht.
 - Zufall läuft über Seed, RandomCounter und RandomDrawRecords.
-- Kartenpool und offizielle Mechaniken werden nicht über den erklärten MVP-Scope hinaus erweitert.
-- Keine offiziellen Artworks, Card Frames, Logos, Card Backs oder externen Kartendatenbank-Abhängigkeiten in MVP 0.1 oder 0.2.
-- Keine öffentlichen Plattformfunktionen, kein Matchmaking, keine Rankings, kein Deckbuilder, kein Accountsystem, keine Turnierfunktionen und kein breiter Kartenpool in MVP 0.1 oder 0.2.
+- Kartenpool, Mechaniken und Produktfunktionen werden nur über den aktuell gültigen Release- und Gate-Stand erweitert.
+- Keine offiziellen Artworks, Card Frames, Logos, Card Backs oder externen Kartendatenbank-Abhängigkeiten ohne eigenes Asset-/Rechts-Gate.
+- Agentendateien dürfen diese globalen NETGRID-Prinzipien konkretisieren, aber nicht abschwächen.
 
-## Coordinator-Regeln
+## Git und lokale Artefakte
 
-Der Coordinator in dieser Datei arbeitet in vier Schritten:
-
-1. Anfrage klassifizieren.
-2. Primären Agent empfehlen.
-3. Auf explizite Freigabe warten, wenn ein Rollenwechsel nötig ist.
-4. Danach nur nach Regeln des gewählten Agenten arbeiten.
-
-### Klassifikation
-
-- Release-Zuschnitt, Prioritäten, Abhängigkeiten, Gates: `release-planning-agent`.
-- Kartenfreischaltung, Mechanikfolgen, KI-Verhalten: `card-enablement-ai-knowledge-agent`.
-- Geplante Umsetzung in Code und Artefakten: `release-implementation-agent`.
-- Kleine UI/Text/Interaktions-Korrekturen ohne Redesign: `small-adjustments-agent`.
-- Strukturqualität, technische Schulden, Schichtgrenzen: `architecture-review-agent`.
-- Testlücken, Regression-Schutz, Teststrategie: `test-quality-agent`.
-
-### Kein Auto-Orchestrieren
-
-- Keine automatische Multi-Agent-Kette.
-- Keine implizite Übergabe an Folgeagenten.
-- Keine automatische Rollenumstellung während einer laufenden Aufgabe.
-
-### Unklare oder gemischte Anfragen
-
-- Bei unklarer Intention genau eine kurze Klärungsfrage stellen.
-- Bei gemischten Anfragen einen primären Agenten vorschlagen und optionale Folgeagenten nur als Empfehlung nennen.
-- Umsetzung oder Rollenwechsel erst nach ausdrücklicher Bestätigung durchführen.
-
-### Nutzerkontrolle über Rollen
-
-- Rollenwechsel nur bei expliziter Anweisung wie `Wechsle zu <agent>` oder `Nutze <agent>`.
-- Ohne Rollenwechsel bleibt der aktive Agent unverändert.
-- Der Nutzer kann jederzeit zu `AGENTS.md` (Coordinator) zurückwechseln.
-
-## Agent-Registry
-
-Die Rollenbeschreibungen liegen hier:
-
-- `agents/release-planning-agent.md`
-- `agents/card-enablement-ai-knowledge-agent.md`
-- `agents/release-implementation-agent.md`
-- `agents/small-adjustments-agent.md`
-- `agents/architecture-review-agent.md`
-- `agents/test-quality-agent.md`
-
-Eine kompakte Übersicht liegt in `agents/README.md`.
-
-## Empfohlene manuelle Workflows
-
-- Release- oder Stage-Planung: `release-planning-agent`.
-- Neue Karten in Spiel und KI integrieren: `card-enablement-ai-knowledge-agent` -> `release-implementation-agent` -> `test-quality-agent`.
-- Kleine UI-/Textkorrekturen: `small-adjustments-agent`.
-- Größere Strukturfragen: `architecture-review-agent`.
-- Geplante Umsetzung eines freigegebenen Releases: `release-planning-agent` -> `release-implementation-agent`.
-
-## Risikosteuerung dieser Agent-Struktur
-
-- Rollenüberlappung: Der Coordinator setzt eine primäre Rolle pro Anfrage.
-- Zu viel Automatik: Keine Auto-Ketten, keine impliziten Agent-Sprünge.
-- Unklare Zuständigkeit: Rollenwechsel nur auf explizite Nutzerentscheidung.
-- Unerwünschte Codeänderungen in Analyse-Rollen: Review-/Planungsrollen haben Implementierungsstopp, außer bei ausdrücklicher Freigabe.
-- Kontextwachstum: Agenten liefern fokussierte Ergebnisse im eigenen Output-Format und verweisen auf Folgeagenten statt alles in einer Rolle zu bündeln.
-
-## Stack-Defaults
-
-- Node 24 LTS.
-- pnpm Workspaces.
-- TypeScript strict.
-- Vitest.
-- Next.js und React für die Web-UI.
-- Reines TypeScript-Engine-Paket ohne React-, Netzwerk-, Datenbank- oder KI-Abhängigkeiten.
-- JSON oder SQLite für frühe MVPs; SQLite ist für MVP 0.2 bevorzugt.
-
-## Workflow
-
-- Erst Anforderungen, Daten, Szenarien und Testmatrix ableiten, dann implementieren.
-- Subagents nur verwenden, wenn der Nutzer das ausdrücklich verlangt.
-- Der Root-Agent besitzt finale Schreibrechte, sofern keine Worktrees oder klar getrennten Dateibereiche vereinbart wurden.
-- Nicht von MVP 0.1 zu MVP 0.2 wechseln, bevor die MVP-0.1-Gates bestanden sind oder Blocker ausdrücklich dokumentiert wurden.
-- Bei jedem zukünftigen Releaseabschluss die im Webclient sichtbare Versionsnummer auf den Zielrelease-Stand anheben und im Final Review als eigener Gatepunkt dokumentieren.
-
-## Befehle
-
-Die Repository-Skripte werden im Verlauf der Implementierung konkretisiert:
-
-- `pnpm install`
-- `pnpm lint`
-- `pnpm typecheck`
-- `pnpm test`
-- `pnpm build`
-
-## Git-Modell
-
-- Dieses Repository nutzt lokales Git ohne konfigurierten Remote.
 - `main` ist der lokale Integrationsbranch.
 - Laufende Arbeit erfolgt nach dem Initialstand auf Arbeitsbranches mit Präfix `codex/`.
-- Kein Push und kein Pull Request, solange kein Remote eindeutig projektkonform konfiguriert ist.
-
-## Daten und lokale Artefakte
-
-- `data/rules`, `data/cards`, `data/decks`, `data/manifests`, `data/deviations` und `data/scenarios` sind versionierte Projektartefakte.
+- Remote `origin` ist konfiguriert; Pushes, Pull Requests und Remote-Integrationen erfolgen nur auf Nutzerwunsch oder über die dafür vorgesehenen Abschluss-/GitHub-Workflows.
 - Lokale Laufzeitdaten, SQLite-Dateien, temporäre Daten, Build-Artefakte, Caches und Secrets werden nicht versioniert.
 
 ## Abschlusskommandos
@@ -188,13 +78,3 @@ Lokaler Minimalkontrakt:
 - `Finito` oder `Ende`: lokaler Abschluss ohne automatischen Merge und ohne automatischen Push; offene Änderungen prüfen, abgeschlossene Änderungen committen und offene Punkte kompakt benennen.
 - `Finale`: zuerst lokaler Abschluss; wenn nichts Relevantes offen ist, lokal nach `main` integrieren.
 - `Endfinale`: zuerst erweiterten Verify-Lauf ausführen; nur bei Erfolg `Finale` ausführen; danach Wissenspflege-, Status- und Restpunkteprüfung nachziehen.
-
-## Done bedeutet
-
-- Erforderliche abgeleitete Dokumente existieren.
-- Jede Must-Anforderung hat Test- oder Szenarioabdeckung.
-- Jede `playable_mvp` Karte hat Unit- und Szenarioabdeckung.
-- Visibility-, Replay-, StateHash-, stale-action- und illegal-action-Tests bestehen.
-- Build- und Testbefehle bestehen.
-- Bei Releaseumsetzungen ist die im Webclient sichtbare Versionsnummer auf den abgeschlossenen Release-Stand aktualisiert.
-- Bekannte Abweichungen und offene Fragen sind dokumentiert.

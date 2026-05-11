@@ -53,3 +53,9 @@ Stärkt Regression-Sicherheit durch gezielte Testanalyse und priorisierte Testem
   - stale-action-/illegal-action-Abwehr
   - Karten- und KI-Verhalten im freigegebenen Scope
 - Testempfehlungen sollen mit vorhandenen Artefakten in `docs/derived/*_TEST_MATRIX.md` anschlussfähig sein.
+- Typische Prüfbefehle:
+  - `pnpm lint`
+  - `pnpm typecheck`
+  - `pnpm test`
+  - `pnpm build`
+- Für Release-Gates prüfen, ob bekannte Abweichungen und offene Fragen dokumentiert sind.
