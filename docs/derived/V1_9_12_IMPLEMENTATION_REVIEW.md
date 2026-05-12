@@ -19,9 +19,10 @@ Status: implementing
 ## Noch nicht abgeschlossen
 
 - Keine finale Katalog-/Manifest-/Coverage-/AI-Promotion.
+- WIP-Gate-Artefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und AI-Approval-Manifest sind angelegt, aber bewusst nicht als finale Freigabe markiert.
 - Keine Webclient-Version auf V1.9.12 angehoben.
 - Exakte per-card Textparitaet muss vor Final Gate gegen die fuehrenden lokalen Quellen/Matrix nachgezogen werden.
-- Server/Web/AI-Smokes und volle Pflichtchecks stehen noch aus.
+- Finale ausfuehrbare AI-Smokes, Web und volle Pflichtchecks stehen noch aus.
 
 ## Verifikation
 
@@ -30,6 +31,7 @@ Status: implementing
 - `v1-9-install-and-check.ps1 -Task ai`: pass, 84 Tests.
 - `v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
 - `v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- JSON-Validation der V1.9.12-WIP-Artefakte: pass.
 
 ## Gate-Status
 

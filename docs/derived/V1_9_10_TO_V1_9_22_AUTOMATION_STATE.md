@@ -87,9 +87,9 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.12
 - Phase vorher: planned
 - Phase nachher: implementing
-- Umsetzung: Detailplan, Requirements, Counter/Virus/Recurring-Spec, Testmatrix und Requirements Review erstellt. Engine-WIP ergänzt Runtime-Definitionen fuer elf V1.9.12-Zielkarten, initialisiert Virus-/Recurring-Counter auf Programmen und Resources, nutzt bestehende Purge-Revalidierung, ergänzt I-Spy-/Event-Hidden-Zone-Pfade sowie Detroit-Police-Contract- und Employee-Empowerment-Agenda-Pfade. Keine finale Catalog-/Manifest-/AI-Promotion.
-- Tests: `v1-9-install-and-check.ps1 -Task engine` pass (213 Tests), `catalog` pass (26 Tests), `ai` pass (84 Tests), `server` pass (72 Tests), `typecheck` pass.
-- Cursor: V1.9.12 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Manifest/Coverage, AI-Hints/-Smokes, Release-Smoke-Finalisierung, Catalog/Web, Server/Web, volle Pflichtchecks und Final Review offen sind.
+- Umsetzung: Detailplan, Requirements, Counter/Virus/Recurring-Spec, Testmatrix und Requirements Review erstellt. Engine-WIP ergänzt Runtime-Definitionen fuer elf V1.9.12-Zielkarten, initialisiert Virus-/Recurring-Counter auf Programmen und Resources, nutzt bestehende Purge-Revalidierung, ergänzt I-Spy-/Event-Hidden-Zone-Pfade sowie Detroit-Police-Contract- und Employee-Empowerment-Agenda-Pfade. WIP-Gate-Artefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und AI-Approval-Manifest sind angelegt, aber bewusst nicht final-promotet.
+- Tests: JSON-Validation pass; `v1-9-install-and-check.ps1 -Task engine` pass (213 Tests), `catalog` pass (26 Tests), `ai` pass (84 Tests), `server` pass (72 Tests), `typecheck` pass.
+- Cursor: V1.9.12 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil finale Catalog/Web-Promotion, Web, volle Pflichtchecks, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-12 23:15 CEST
 - Ergebnis: V1.9.11 Engine-WIP auf 16/16 Hidden-Zone-Zielkarten erweitert; Cursor bleibt auf V1.9.11 `implementing`

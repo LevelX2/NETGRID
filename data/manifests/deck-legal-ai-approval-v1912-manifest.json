@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-manifest-v1",
+  "id": "deck-legal-ai-approval-v1912",
+  "status": "wip_pending_final_ai_approval",
+  "release": "V1.9.12",
+  "cardCount": 11,
+  "cards": [
+    { "cardId": "onr_v1_009_butcher-boy", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_009_butcher-boy", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_010_cascade", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_010_cascade", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_017_deep-thought", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_017_deep-thought", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_032_i-spy", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_032_i-spy", "scenarioRefs": ["runner_v1912_hidden_zone_counter"] },
+    { "cardId": "onr_v1_064_skivviss", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_064_skivviss", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_082_deal-with-militech", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_082_deal-with-militech", "scenarioRefs": ["runner_v1912_hidden_zone_counter"] },
+    { "cardId": "onr_v1_091_hunt-club-bbs", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_091_hunt-club-bbs", "scenarioRefs": ["runner_v1912_hidden_zone_counter"] },
+    { "cardId": "onr_v1_174_rigged-investments", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_174_rigged-investments", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_176_the-shell-traders", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_176_the-shell-traders", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_198_detroit-police-contract", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_198_detroit-police-contract", "scenarioRefs": ["corp_v1912_agenda_counter_economy"] },
+    { "cardId": "onr_v1_199_employee-empowerment", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_199_employee-empowerment", "scenarioRefs": ["corp_v1912_agenda_counter_economy"] }
+  ],
+  "completionGate": {
+    "allCardsAiSupported": false,
+    "requiresAiSmokeExecution": true
+  }
+}
+
