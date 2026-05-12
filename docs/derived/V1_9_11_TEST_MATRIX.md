@@ -38,4 +38,10 @@ Die Matrix deckt die 16 V1.9.11-Karten aus dem Detailplan und die Resolverfamili
 
 ## Aktueller Lauf
 
-Noch keine Implementierung. Diese Matrix friert die erforderliche Abdeckung für den folgenden V1.9.11-Codepfad ein.
+Implementierung abgeschlossen. Alle Must Cases sind durch die genannten Testflächen oder gleichwertige Paket-/Workspace-Gates abgedeckt.
+
+- Scope/Data: `catalog` grün mit 26 Tests; V1.9.11-Manifest, Coverage, Scenario und AI-Hints sind JSON-valide und zielmengenkonsistent.
+- Engine/Replay/Visibility: `engine` grün mit 209 Tests; private Search-/Reorder-Choices, Reveal/Expose und StateHash-Replay sind abgedeckt.
+- KI: `ai` grün mit 84 Tests; mehrteilige Reorder-Choices werden legal und side-sicher beantwortet.
+- Web/Server: `web` grün mit 76 Tests, `server` grün mit 72 Tests.
+- Workspace-Gates: `typecheck`, `test`, `lint` und `build` grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

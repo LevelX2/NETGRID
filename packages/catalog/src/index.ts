@@ -512,6 +512,25 @@ export const ONR_V1_9_9_RELEASE_CARD_IDS = [
   "onr_v1_353_chimera"
 ] as const;
 
+export const ONR_V1_9_11_RELEASE_CARD_IDS = [
+  "onr_v1_042_mouse",
+  "onr_v1_058_seeya",
+  "onr_v1_059_self-modifying-code",
+  "onr_v1_087_forgotten-backup-chip",
+  "onr_v1_088_fortress-respecification",
+  "onr_v1_089_gideons-pawnshop",
+  "onr_v1_092_ice-and-datas-guide-to-the-net",
+  "onr_v1_099_mantis-fixer-at-large",
+  "onr_v1_110_sneak-preview",
+  "onr_v1_151_aujourdoui",
+  "onr_v1_169_n-e-t-o",
+  "onr_v1_175_ronin-around",
+  "onr_v1_177_the-short-circuit",
+  "onr_v1_194_corporate-downsizing",
+  "onr_v1_250_ice-pick-willie",
+  "onr_v1_272_too-many-doors"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -534,7 +553,8 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_9_6_RELEASE_CARD_IDS,
   ...ONR_V1_9_7_RELEASE_CARD_IDS,
   ...ONR_V1_9_8_RELEASE_CARD_IDS,
-  ...ONR_V1_9_9_RELEASE_CARD_IDS
+  ...ONR_V1_9_9_RELEASE_CARD_IDS,
+  ...ONR_V1_9_11_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -706,6 +726,8 @@ export const DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS = [
 
 export const DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS = [...ONR_V1_9_9_RELEASE_CARD_IDS] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS = [...ONR_V1_9_11_RELEASE_CARD_IDS] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
@@ -717,7 +739,8 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS
 ]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
@@ -740,6 +763,7 @@ const ONR_V1_9_6_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_6_RELEASE_CARD_I
 const ONR_V1_9_7_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_7_RELEASE_CARD_IDS);
 const ONR_V1_9_8_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_8_RELEASE_CARD_IDS);
 const ONR_V1_9_9_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_9_RELEASE_CARD_IDS);
+const ONR_V1_9_11_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_11_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -937,6 +961,18 @@ const ONR_V1_9_9_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v199-card-release-smoke.json", "data/scenarios/ai-deck-legal-v199-smokes.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R"],
   replayTests: ["packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R"]
+};
+
+const ONR_V1_9_11_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.11",
+  status: "human_playable_v1_9_11_hidden_zone_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1911-hidden-zone-release-smoke.json", "data/scenarios/ai-deck-legal-v1911-smokes.json"],
+  visibilityTests: [
+    "packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP",
+    "data/scenarios/v1911-hidden-zone-release-smoke.json"
+  ],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -1145,6 +1181,8 @@ const ONR_V1_9_9_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_352_chester-mix": { rezCost: 0, trashCost: 1 },
   "onr_v1_353_chimera": { rezCost: 0, trashCost: 1 }
 };
+
+const ONR_V1_9_11_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {};
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
@@ -1379,6 +1417,8 @@ const ONR_V1_9_9_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_352_chester-mix": "The cost to install ice on this fort is reduced by 1.",
   "onr_v1_353_chimera": "When accessed, Runner trashes one installed daemon program."
 };
+
+const ONR_V1_9_11_TEXT_OVERRIDES: Partial<Record<string, string>> = {};
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
   return {
@@ -2165,12 +2205,12 @@ function catalogCardFromDefinition(definition: CardDefinition): CatalogCard {
     side: definition.side,
     type: definition.type,
     subtypes: [...definition.subtypes],
-    faction: "onr-v1-limited",
+    faction: "onr1996_neutral",
     setId: "onr-v1-limited",
     setName: "O:NR v1 Limited",
     collectorNumber: collectorNumberFromOnrId(definition.id),
     text: definition.rulesText,
-    displayOnlyText: false,
+    displayOnlyText: true,
     numeric: {
       cost: definition.cost ?? null,
       installCost: definition.installCost ?? null,
@@ -2223,6 +2263,7 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV1911 = ONR_V1_9_11_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV199 = ONR_V1_9_9_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV198 = ONR_V1_9_8_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV197 = ONR_V1_9_7_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -2244,7 +2285,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV199
+  const textOverrides = isV1911
+    ? ONR_V1_9_11_TEXT_OVERRIDES
+    : isV199
     ? ONR_V1_9_9_TEXT_OVERRIDES
     : isV198
     ? ONR_V1_9_8_TEXT_OVERRIDES
@@ -2287,7 +2330,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV199
+  const numericOverrides = isV1911
+    ? ONR_V1_9_11_NUMERIC_OVERRIDES
+    : isV199
     ? ONR_V1_9_9_NUMERIC_OVERRIDES
     : isV198
     ? ONR_V1_9_8_NUMERIC_OVERRIDES
@@ -2330,7 +2375,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV199
+  const manifest = isV1911
+    ? ONR_V1_9_11_RELEASE_MANIFEST
+    : isV199
     ? ONR_V1_9_9_RELEASE_MANIFEST
     : isV198
     ? ONR_V1_9_8_RELEASE_MANIFEST

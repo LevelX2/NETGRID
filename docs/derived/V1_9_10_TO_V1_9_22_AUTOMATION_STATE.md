@@ -14,9 +14,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.11
-Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.12
+Aktueller Release: V1.9.12
+Phase: planned
+Naechster erlaubter Release nach Abschluss: V1.9.13
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -49,8 +49,8 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | Release | Zielbild | Status |
 | --- | --- | --- |
 | V1.9.10 | Status-, Manifest- und Katalog-Konsolidierung | done |
-| V1.9.11 | Hidden-Zone Search, Reveal, Reorder und Shuffle | current |
-| V1.9.12 | Counter, Virus, Purge und Recurring Pools | pending |
+| V1.9.11 | Hidden-Zone Search, Reveal, Reorder und Shuffle | done |
+| V1.9.12 | Counter, Virus, Purge und Recurring Pools | current |
 | V1.9.13 | Damage, Prevention, Avoid und Replacement Longtail | pending |
 | V1.9.14 | Trace, Link, Tags und Resource-Tag-Interaktionen | pending |
 | V1.9.15 | Run Flow, Access, Multiaccess und Ambush on Access | pending |
@@ -63,6 +63,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-12 23:45 CEST
+- Ergebnis: V1.9.11 Hidden-Zone Search/Reveal/Reorder/Shuffle final abgeschlossen; Cursor auf V1.9.12 `planned` gesetzt
+- Release: V1.9.11
+- Phase vorher: implementing
+- Phase nachher: planned fuer V1.9.12
+- Umsetzung: Die 16 V1.9.11-Zielkarten sind `human_playable`, `deck_legal` und `ai_supported`. Versionierte AI-Hints, AI-Smokes, Release-Smoke, Mechanics-Coverage und Kartenmanifest wurden ergänzt. Der Katalog-Fallback fuer Automations-Worktrees ohne lokales Overlay wurde auf display-only und neutrale Faction korrigiert, die Webclient-Version steht auf `V1.9.11`, und die V1.2.3-Phasenartefakt-Spezifikation wurde an den aktuellen reconciled Runtime-Stand angepasst.
+- Tests: JSON-Validation der neuen Artefakte pass; `v1-9-install-and-check.ps1 -Task catalog` pass (26 Tests), `engine` pass (209 Tests), `ai` pass (84 Tests), `web` pass (76 Tests), `server` pass (72 Tests), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.11: hidden zone search reveal reorder`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.11 Completion-Gate ist erfüllt; V1.9.12 ist der aktuelle Release.
 
 - Zeitpunkt: 2026-05-12 23:15 CEST
 - Ergebnis: V1.9.11 Engine-WIP auf 16/16 Hidden-Zone-Zielkarten erweitert; Cursor bleibt auf V1.9.11 `implementing`
