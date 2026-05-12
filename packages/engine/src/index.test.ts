@@ -2863,6 +2863,18 @@ describe("V1.8.1 Mechanikpaket H", () => {
     state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "political_coup");
     expect(state.corp.credits).toBe(creditsBefore + 4);
     if (politicalCoupId) expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(9);
+    const politicalCoupView = getPlayerView(state, "corp").own.scoreArea.find((card) => card.definitionId === "onr_v1_209_political-coup");
+    expect(politicalCoupView?.counters?.power).toBe(9);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      cardDefinitionId: "onr_v1_209_political-coup",
+      title: "Political Coup",
+      agendaAbility: "political_coup",
+      amount: 3,
+      gainedCredits: 3,
+      spentPowerCounters: 3,
+      remainingPowerCounters: 9
+    });
   });
 
   it("resolves Ball/Canis run flags and enforces Fatal/Shock next-encounter penalties deterministically", () => {

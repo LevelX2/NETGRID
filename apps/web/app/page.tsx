@@ -5786,6 +5786,7 @@ function ScoredAgendaOverlay({
                 card={card}
                 displayMode={cardDisplayMode}
                 showAdvancementCounters={false}
+                showScoreStateBadges
                 actions={[]}
                 actionDisabled={actionDisabled}
                 selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
@@ -5793,7 +5794,7 @@ function ScoredAgendaOverlay({
                 {...(onFocus ? { onFocus } : {})}
                 {...(onActionContextSelect ? { onActionContextSelect } : {})}
               />
-              {card.rulesText ? <p className="scoredAgendaRules">{card.rulesText}</p> : null}
+              <ScoredAgendaStateLines card={card} />
             </div>
           ))}
           {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">+{cards.length - SCORE_AREA_PREVIEW_LIMIT} weitere</div> : null}
@@ -8096,6 +8097,7 @@ function CardView({
   actionDisabled = false,
   positionBadge,
   showAdvancementCounters = true,
+  showScoreStateBadges = false,
   onFocus,
   onActionContextSelect,
   onAction
@@ -8111,6 +8113,7 @@ function CardView({
   actionDisabled?: boolean;
   positionBadge?: string;
   showAdvancementCounters?: boolean;
+  showScoreStateBadges?: boolean;
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction?(action: LegalAction): void;
@@ -8169,6 +8172,7 @@ function CardView({
   const advancementCount = showAdvancementCounters && !preview ? Math.max(0, Math.floor(card.advancementCounters ?? 0)) : 0;
   const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
+  const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
       ? `Karte ${card.title}, ${advancementLabel}`
@@ -8335,6 +8339,7 @@ function CardView({
         ) : null}
         {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
+        {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
         {tooltipId ? (
           <span
             className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
@@ -8410,6 +8415,138 @@ function CardView({
       {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} onAction={onAction!} /> : null}
     </div>
   );
+}
+
+type ScoredAgendaStateTone = "credit" | "agenda" | "action" | "effect" | "depleted";
+
+type ScoredAgendaStateLine = {
+  key: string;
+  value: string;
+  label: string;
+  tone: ScoredAgendaStateTone;
+};
+
+function ScoredAgendaStateLines({ card }: { card: DisplayVisibleCard }) {
+  const lines = scoredAgendaStateLines(card);
+  if (lines.length === 0) return null;
+  return (
+    <div className="scoredAgendaStateList" aria-label={`${card.title ?? "Karte"} Status`}>
+      {lines.map((line) => (
+        <p className="scoredAgendaStateLine" key={`${card.instanceId}-${line.key}`}>
+          <span className={`scoredAgendaStatePill ${line.tone}`}>{line.value}</span>
+          <span>{line.label}</span>
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function scoredAgendaStateLines(card: DisplayVisibleCard): ScoredAgendaStateLine[] {
+  const lines: ScoredAgendaStateLine[] = [];
+  const coupCreditAmount = coupAgendaCreditAmount(card.definitionId);
+  if (coupCreditAmount !== null) {
+    const creditsOnCard = counterAmount(card, "power");
+    lines.push({
+      key: "coup-credits",
+      value: `${creditsOnCard} ${creditLabel(creditsOnCard)}`,
+      label: creditsOnCard > 0 ? `1 Aktion: ${coupCreditAmount} ${creditLabel(coupCreditAmount)} nehmen` : "Coup-Credits erschöpft",
+      tone: creditsOnCard > 0 ? "credit" : "depleted"
+    });
+  }
+
+  const bonusAgendaPoints = counterAmount(card, "agenda");
+  if (bonusAgendaPoints > 0) {
+    const totalAgendaPoints = (card.agendaPoints ?? 0) + bonusAgendaPoints;
+    lines.push({
+      key: "agenda-bonus",
+      value: `+${bonusAgendaPoints} Agenda`,
+      label: `Gesamt ${totalAgendaPoints} ${agendaPointLabel(totalAgendaPoints)}`,
+      tone: "agenda"
+    });
+  }
+
+  const effectLine = scoredAgendaEffectLine(card.definitionId);
+  if (effectLine) lines.push(effectLine);
+  return lines;
+}
+
+function scoreCardStateBadges(card: DisplayVisibleCard): ScoredAgendaStateLine[] {
+  const badges: ScoredAgendaStateLine[] = [];
+  if (coupAgendaCreditAmount(card.definitionId) !== null) {
+    const creditsOnCard = counterAmount(card, "power");
+    badges.push({
+      key: "coup-credits-badge",
+      value: `${creditsOnCard} ${creditLabel(creditsOnCard)}`,
+      label: "Credits auf der Agenda",
+      tone: creditsOnCard > 0 ? "credit" : "depleted"
+    });
+  }
+  const bonusAgendaPoints = counterAmount(card, "agenda");
+  if (bonusAgendaPoints > 0) {
+    badges.push({
+      key: "agenda-bonus-badge",
+      value: `+${bonusAgendaPoints} Agenda`,
+      label: "Bonus-Agenda-Punkte",
+      tone: "agenda"
+    });
+  }
+  return badges;
+}
+
+function ScoreCardStateBadges({ badges }: { badges: ScoredAgendaStateLine[] }) {
+  return (
+    <span className="scoreCardStateBadges" aria-hidden="true">
+      {badges.map((badge) => (
+        <span className={`scoreCardStateBadge ${badge.tone}`} key={badge.key}>
+          {badge.value}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+function scoredAgendaEffectLine(definitionId: string | undefined): ScoredAgendaStateLine | null {
+  switch (definitionId) {
+    case "onr_v1_188_ai-chief-financial-officer":
+      return { key: "effect-ai-cfo", value: "Aktion", label: "HQ/Archiv in R&D mischen, 5 ziehen", tone: "action" };
+    case "onr_v1_201_executive-extraction":
+      return { key: "effect-executive-extraction", value: "Aktiv", label: "Gray-Ops-Agendas brauchen 1 Entwicklung weniger", tone: "effect" };
+    case "onr_v1_207_netwatch-operations-office":
+      return { key: "effect-netwatch", value: "Aktion", label: "Trace 7: bei Erfolg 1 Tag", tone: "action" };
+    case "onr_v1_208_on-call-solo-team":
+      return { key: "effect-on-call", value: "Aktion", label: "1 Meat Damage, wenn Runner getaggt ist", tone: "action" };
+    case "onr_v1_211_polymer-breakthrough":
+      return { key: "effect-polymer", value: "Aktiv", label: "+1 Credit zu Beginn jedes Korp-Zugs", tone: "effect" };
+    case "onr_v1_213_private-cybernet-police":
+      return { key: "effect-private-police", value: "Aktion", label: "Trace 5: bei Erfolg 1 Tag", tone: "action" };
+    case "onr_v1_215_security-net-optimization":
+      return { key: "effect-security-net", value: "Aktiv", label: "ICE hat +1 Stärke", tone: "effect" };
+    case "onr_v1_217_strike-force-kali":
+      return { key: "effect-kali", value: "Aktion", label: "2 Meat Damage, wenn Runner getaggt ist", tone: "action" };
+    case "onr_v1_219_superior-net-barriers":
+      return { key: "effect-superior-barriers", value: "Aktiv", label: "Wall-ICE hat +1 Stärke", tone: "effect" };
+    default:
+      return null;
+  }
+}
+
+function coupAgendaCreditAmount(definitionId: string | undefined): number | null {
+  if (definitionId === "onr_v1_193_corporate-coup") return 1;
+  if (definitionId === "onr_v1_209_political-coup") return 3;
+  return null;
+}
+
+function counterAmount(card: DisplayVisibleCard, counter: "agenda" | "power"): number {
+  const amount = card.counters?.[counter];
+  return typeof amount === "number" && Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
+
+function creditLabel(amount: number): string {
+  return amount === 1 ? "Credit" : "Credits";
+}
+
+function agendaPointLabel(amount: number): string {
+  return amount === 1 ? "Agenda-Punkt" : "Agenda-Punkte";
 }
 
 function CardActionsPopover({ actions, disabled, placement, onAction }: { actions: LegalAction[]; disabled: boolean; placement: "above" | "below"; onAction(action: LegalAction): void }) {

@@ -5909,7 +5909,15 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   }
   if (legalAction.type === "trash_resource") context.zoneLabel = "Resource";
   if (legalAction.type === "rez_ice") context.zoneLabel = legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true ? "Remote" : "ICE";
-  if (legalAction.type === "gain_credit" || legalAction.type === "draw_card" || legalAction.type === "remove_tag") {
+  if (legalAction.type === "gain_credit") {
+    const gainedCredits = Number(legalAction.payload?.gainedCredits ?? legalAction.payload?.gainCreditsAmount ?? 1);
+    context.amount = Number.isFinite(gainedCredits) ? gainedCredits : 1;
+    for (const key of ["agendaAbility", "gainCreditsAmount", "gainedCredits", "removePowerCounterAmount", "spentPowerCounters", "remainingPowerCounters"]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
+  if (legalAction.type === "draw_card" || legalAction.type === "remove_tag") {
     context.amount = legalAction.type === "remove_tag" ? Number(legalAction.payload?.removeTagAmount ?? 1) : 1;
   }
   if (legalAction.type === "resolve_choice") {
@@ -6095,10 +6103,16 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
   }
   const payloadCardId = typeof legalAction.payload?.cardId === "string" ? legalAction.payload.cardId : undefined;
   const revealsCorpInstall = legalAction.side === "corp" && legalAction.type === "install_card" && payloadCardId !== undefined && state.cardInstances[payloadCardId]?.faceup === true;
+  const revealsScoredAgendaAbility =
+    legalAction.type === "gain_credit" &&
+    typeof legalAction.payload?.agendaAbility === "string" &&
+    payloadCardId !== undefined &&
+    state.corp.scoreArea.includes(payloadCardId);
   const revealsCard =
     ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation", "pump_breaker", "break_subroutine"].includes(legalAction.type) ||
     (legalAction.side === "runner" && legalAction.type === "install_card") ||
-    revealsCorpInstall;
+    revealsCorpInstall ||
+    revealsScoredAgendaAbility;
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;
     if (typeof cardId === "string" && state.cardInstances[cardId]) {

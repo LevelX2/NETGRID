@@ -84,6 +84,29 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("R&D");
   });
 
+  it("formats Coup agenda credits as card credits with the remaining amount", () => {
+    const item = formatChronicleEvent(
+      makeEvent("gain_credit", {
+        actor: "corp",
+        label: "Political Coup: 3 Credits aus Coup-Counter",
+        cardDefinitionId: "onr_v1_209_political-coup",
+        title: "Political Coup",
+        agendaAbility: "political_coup",
+        gainedCredits: 3,
+        spentPowerCounters: 3,
+        remainingPowerCounters: 9
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Du hast 3 Credits von Political Coup genommen.");
+    expect(item.category).toBe("economy");
+    expect(item.importance).toBe("important");
+    expect(item.chips).toContain("+3 Credits");
+    expect(item.chips).toContain("3 Credits von Karte");
+    expect(item.chips).toContain("9 Credits übrig");
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {

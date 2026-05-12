@@ -61,7 +61,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   const actor = sideValue(payload.actor);
-  const amount = numberValue(payload.amount);
+  const amount = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount) ?? numberValue(payload.amount);
   const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
   const zoneLabel = stringValue(payload.zoneLabel);
   const result = stringValue(payload.result);
@@ -81,6 +81,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeEffect(cardText);
+  const agendaAbility = stringValue(payload.agendaAbility);
 
   const baseChipList = baseChips(actor, isAi);
   const cardDetailLines = context.cardDetailLines ?? [];
@@ -124,9 +125,26 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "gain_credit":
+      if (agendaAbility === "corporate_coup" || agendaAbility === "political_coup") {
+        const gainedCredits = amount ?? numberValue(payload.removePowerCounterAmount) ?? 0;
+        const spentCredits = numberValue(payload.spentPowerCounters) ?? numberValue(payload.removePowerCounterAmount) ?? gainedCredits;
+        const remainingCredits = numberValue(payload.remainingPowerCounters);
+        category = "economy";
+        importance = "important";
+        title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "der Coup-Agenda"} genommen`);
+        chips.push(`+${gainedCredits} ${creditLabel(gainedCredits)}`, `${spentCredits} ${creditLabel(spentCredits)} von Karte`, ...(remainingCredits !== undefined ? [`${remainingCredits} ${creditLabel(remainingCredits)} übrig`] : []));
+        break;
+      }
+      if (agendaAbility) {
+        category = agendaAbility.includes("trace") || agendaAbility.includes("solo") || agendaAbility.includes("kali") ? "danger" : "agenda";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine gescorte Agenda"} genutzt`);
+        chips.push("Agenda-Aktion");
+        break;
+      }
       category = "economy";
       title = phrase(subject, `${creditText(amount ?? 1)} genommen`);
-      chips.push(`+${amount ?? 1} Credit${amount === 1 || amount === undefined ? "" : "s"}`);
+      chips.push(`+${amount ?? 1} ${creditLabel(amount ?? 1)}`);
       break;
     case "draw_card":
       category = "card";
@@ -458,7 +476,11 @@ function rezSuffix(cardType: string | null | undefined, effect: EffectSummary): 
 }
 
 function creditText(amount: number): string {
-  return `${amount} Credit${amount === 1 ? "" : "s"}`;
+  return `${amount} ${creditLabel(amount)}`;
+}
+
+function creditLabel(amount: number): string {
+  return amount === 1 ? "Credit" : "Credits";
 }
 
 function cardCountText(amount: number): string {
