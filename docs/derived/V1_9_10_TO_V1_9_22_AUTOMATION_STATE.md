@@ -15,7 +15,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.10
-Phase: planned
+Phase: blocked
 Naechster erlaubter Release nach Abschluss: V1.9.11
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -57,25 +57,24 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-12 nach explizitem Nutzerstart
-- Ergebnis: Lauf vor Umsetzungsstart blockiert (kein Release-Fortschritt)
-- Release: keiner, weil der Lauf vor Lesen des Release-Cursors am Lock-Gate stoppte
-- Phase vorher: Bootstrap
+- Zeitpunkt: 2026-05-12 21:35 CEST
+- Ergebnis: V1.9.10-Konsolidierungs-WIP umgesetzt, Releaseabschluss blockiert
+- Release: V1.9.10
+- Phase vorher: planned
 - Phase nachher: blocked
-- Grund: Externer Pflicht-Lock `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock` kann im festen Automations-Worktree-Lauf nicht angelegt werden (`Access denied` auf den Lock-Pfad).
-- Umsetzung/Tests: keine, um Parallelitaetsrisiken ohne Lock zu vermeiden.
-- Nachtrag 2026-05-12: Workspace/Branch/Status sind korrekt (`C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`, `codex/v1-9-originalset-completion`, Git-Status sauber). Der verbindliche Lockpfad wurde auf den ignorierten Worktree-Pfad `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock` umgestellt. Cursor bleibt `planned`; der naechste Completion-Lauf darf V1.9.10 erneut starten.
+- Umsetzung: Manifestparitaet fuer Fetch 4.0.1, Hunter und Trojan Horse; versionierter Runtime-Statusreport 374/143/143/231; No-Promotion-AI-Hints, Mechanics-Coverage-Nullaenderung, Szenario-Smoke und Katalogtest-Erweiterung.
+- Tests: JSON-Validation fuer `data/**/*.json` pass. `corepack pnpm --filter @netgrid/catalog test -- index.test.ts` blocked, weil `node_modules` fehlt und `vitest` nicht gefunden wird. `corepack pnpm install --offline` blocked mit `EPERM` beim Entfernen eines `_tmp_*`-Files.
+- Git: WIP-Commit blockiert, weil `git add` keinen `C:/Projekte/NETGRID/.git/worktrees/NETGRID_AUTOMATION_V1_9_ORIGINALSET/index.lock` anlegen kann (`Permission denied`). Ein vorhandener `index.lock` liegt nicht vor.
+- Cursor: bleibt V1.9.10; kein Sprung auf V1.9.11.
 
 ## Letzter Commit
 
-- Kein Release- oder WIP-Commit fuer V1.9.10-Inhalt, da der Lauf vor Implementierung am externen Lock-Gate gestoppt wurde.
-- Nachtrag 2026-05-12 08:37:11 +02:00: WIP-Commit fuer die Blocker-Dokumentation erneut fehlgeschlagen, da `.git/index.lock` nicht angelegt werden kann (`Permission denied`).
-- Historie: Fruehere `.git/index.lock`-Berechtigungsprobleme sollten durch Worktree-Ausfuehrung umgangen werden, sind in diesem Lauf aber weiterhin wirksam.
-- Nachtrag 2026-05-12: Worktree-Prompt wurde geschaerft: kein Wechsel in `C:\Projekte\NETGRID`; Push aus detached Worktree per `git push origin HEAD:refs/heads/codex/v1-9-originalset-completion`.
+- Kein WIP-Commit fuer diesen Lauf, weil `git add` am Worktree-Git-Index-Lock scheitert.
+- Historie: Fruehere `.git/index.lock`-Berechtigungsprobleme sollten durch Worktree-Ausfuehrung umgangen werden.
 
 ## Letzter Push
 
-Kein neuer Push in diesem Lauf, weil der Lauf vor Implementierung/Commit am Lock-Gate gestoppt wurde.
+Kein WIP-Push in diesem Lauf, weil kein Commit erzeugt werden konnte.
 
 ## Blocker
 
@@ -94,12 +93,16 @@ Kein neuer Push in diesem Lauf, weil der Lauf vor Implementierung/Commit am Lock
 - Letzter Befund: 2026-05-12 08:35:39 +02:00, Lock-Erzeugung auf `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` fehlgeschlagen.
 - Behoben durch: verbindlicher Lockpfad ist jetzt `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`; Schreibtest auf diesem Pfad war im festen Automations-Worktree erfolgreich.
 - Blocker-ID: GIT_INDEX_LOCK_PERMISSION_DENIED_2026-05-12
-- Status: vermutlich behoben durch festen lokalen Automations-Worktree, erneut im naechsten Lauf zu verifizieren
+- Status: active
 - Betroffener Release: V1.9.10
-- Beschreibung: `git commit` kann keine `.git/index.lock` erzeugen (`Permission denied`), daher sind WIP-Commit und Abschlusscommit blockiert.
-- Removal Condition: Schreibrechte fuer Lock-Erzeugung in `C:\Projekte\NETGRID\.git` wiederherstellen; danach `git add`, `git commit` und `git push` erneut ausfuehren.
-- Letzter Befund: 2026-05-12 08:37:11 +02:00, `git commit` scheitert erneut mit `Unable to create .git/index.lock: Permission denied`.
-- Umgehung: fester lokaler Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET` auf `codex/v1-9-originalset-completion`; der Lauf darf nicht nach `C:\Projekte\NETGRID` wechseln.
+- Beschreibung: `git add` kann keinen Worktree-Index-Lock unter `C:/Projekte/NETGRID/.git/worktrees/NETGRID_AUTOMATION_V1_9_ORIGINALSET/index.lock` erzeugen (`Permission denied`), daher sind WIP-Commit und Push blockiert. Ein vorhandener `index.lock` liegt nicht vor.
+- Removal Condition: Schreibrechte fuer Lock-Erzeugung in `C:\Projekte\NETGRID\.git\worktrees\NETGRID_AUTOMATION_V1_9_ORIGINALSET` wiederherstellen; danach `git add`, `git commit` und `git push` erneut ausfuehren.
+- Letzter Befund: 2026-05-12 21:35 CEST, `git add` scheitert mit `Unable to create ... index.lock: Permission denied`.
+- Blocker-ID: PNPM_INSTALL_EPERM_NODE_MODULES_MISSING_2026-05-12
+- Status: active
+- Betroffener Release: V1.9.10
+- Beschreibung: Der feste Automations-Worktree hat kein `node_modules`. Der gezielte Katalogtest erreicht deshalb Vitest nicht. `corepack pnpm install --offline` scheitert mit `EPERM: operation not permitted, unlink ... _tmp_...`.
+- Removal Condition: Dependency-Setup im Automations-Worktree erfolgreich herstellen; danach mindestens `corepack pnpm --filter @netgrid/catalog test -- index.test.ts`, `corepack pnpm --filter @netgrid/engine test`, `corepack pnpm --filter @netgrid/ai test`, `corepack pnpm typecheck` und `corepack pnpm test` erneut ausfuehren.
 
 ## Watchdog
 

@@ -16,7 +16,10 @@ import deckLegalV191V194AiHintsData from "../../../data/ai/ai-card-hints-deck-le
 import deckLegalV195V198AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
 import deckLegalV199AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v199.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
+import v1910NoPromotionAiHintsData from "../../../data/ai/ai-card-hints-v1910-no-promotion.json";
 import aiHintsReport131Data from "../../../data/ai/ai-card-hints-report-1.3.1.json";
+import cardImplementationManifest123Data from "../../../data/manifests/card-implementation-manifest-1.2.3.json";
+import cardImplementationManifest1910Data from "../../../data/manifests/card-implementation-manifest-1.9.10.json";
 import cardSupportManifest131Data from "../../../data/manifests/card-support-manifest-1.3.1.json";
 import kingOfTheRoadManifestData from "../../../data/manifests/king-of-the-road-ai-approval-manifest.json";
 import deckLegalBatchAManifestData from "../../../data/manifests/deck-legal-ai-approval-batch-a-manifest.json";
@@ -38,9 +41,12 @@ import deckLegalV190ScenarioData from "../../../data/scenarios/ai-deck-legal-v19
 import deckLegalV191V194ScenarioData from "../../../data/scenarios/ai-deck-legal-v191-v194-smokes.json";
 import deckLegalV195V198ScenarioData from "../../../data/scenarios/ai-deck-legal-v195-v198-smokes.json";
 import deckLegalV199ScenarioData from "../../../data/scenarios/ai-deck-legal-v199-smokes.json";
+import v1910StatusScenarioData from "../../../data/scenarios/v1910-status-manifest-catalog-smoke.json";
 import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.3.1.json";
 import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
 import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
+import v1910RuntimeStatusReportData from "../../../data/reports/onr-v1-runtime-status-1.9.10.json";
+import v1910MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.10.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
 import {
   assertPipelinePayloadSafe,
@@ -446,6 +452,60 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_019_dropp"]?.statuses.deck_legal).toBe(true);
     expect(cardsById["onr_v1_019_dropp"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_019_dropp"]?.engineCardId).toBe("onr_v1_019_dropp");
+  });
+
+  it("keeps V1.9.10 status consolidation to manifest and catalog parity without promotion", () => {
+    const cardsById = createRuntimeCardsById();
+    if (!cardsById["onr_v1_243_fetch-4-0-1"]) return;
+
+    const v1910Cards = cardImplementationManifest1910Data.cards as Array<{
+      cardCode: string;
+      newlyPromotedInV1910: boolean;
+      implementationManifestRef: string;
+      aiApprovalManifestRef: string;
+    }>;
+    const v1910CardIds = v1910Cards.map((card) => card.cardCode).sort();
+    const reconciledIds = ["onr_v1_243_fetch-4-0-1", "onr_v1_249_hunter", "onr_v1_306_trojan-horse"].sort();
+
+    expect(v1910CardIds).toEqual(reconciledIds);
+    expect(v1910Cards.every((card) => card.newlyPromotedInV1910 === false)).toBe(true);
+    expect(v1910Cards.every((card) => card.implementationManifestRef === "data/manifests/card-implementation-manifest-1.2.3.json")).toBe(true);
+    expect(v1910Cards.every((card) => card.aiApprovalManifestRef === "data/manifests/deck-legal-ai-approval-corp-tag-slice-manifest.json")).toBe(true);
+
+    const v123ManifestCards = (cardImplementationManifest123Data.cards as Array<{ cardCode: string }>).map((card) => card.cardCode).sort();
+    expect(v123ManifestCards).toEqual([...ONR_V1_2_3_RELEASE_CARD_IDS].sort());
+    expect(cardImplementationManifest123Data.gateAssertions.currentRuntimePlayableCardCountIs11).toBe(true);
+    expect(cardImplementationManifest123Data.v1910Reconciliation.noNewRuntimePromotion).toBe(true);
+
+    const runtimeOnrCards = Object.values(cardsById).filter((card) => card.catalogCardId.startsWith("onr_v1_") && card.statuses.human_playable && card.statuses.deck_legal);
+    const runtimeAiSupportedOnrCards = runtimeOnrCards.filter((card) => card.statuses.ai_supported);
+    expect(runtimeOnrCards.map((card) => card.catalogCardId).sort()).toEqual([...ONR_V1_RUNTIME_RELEASE_CARD_IDS].sort());
+    expect(runtimeOnrCards).toHaveLength(143);
+    expect(runtimeAiSupportedOnrCards).toHaveLength(143);
+
+    expect(v1910RuntimeStatusReportData.counts.localOriginalsetCards).toBe(374);
+    expect(v1910RuntimeStatusReportData.counts.runtimeHumanPlayableDeckLegalCards).toBe(143);
+    expect(v1910RuntimeStatusReportData.counts.runtimeAiSupportedOnrCards).toBe(143);
+    expect(v1910RuntimeStatusReportData.counts.notHumanPlayableDeckLegalAiSupported).toBe(231);
+    expect(v1910RuntimeStatusReportData.noPromotionGate.newHumanPlayableCards).toEqual([]);
+    expect(v1910RuntimeStatusReportData.noPromotionGate.newDeckLegalCards).toEqual([]);
+    expect(v1910RuntimeStatusReportData.noPromotionGate.newAiSupportedCards).toEqual([]);
+
+    const legacyCatalogIndexPath = "data/local/card-import/onr-v1-limited/catalog-index-onr-v1-limited.local.json";
+    if (existsSync(legacyCatalogIndexPath)) {
+      const legacyCatalogIndexText = readFileSync(legacyCatalogIndexPath, "utf8");
+      expect(legacyCatalogIndexText).not.toContain("@@");
+      expect(() => JSON.parse(legacyCatalogIndexText)).not.toThrow();
+    } else {
+      expect(v1910RuntimeStatusReportData.localCatalogIndex.statusInAutomationWorktree).toBe("absent_in_automation_worktree");
+      expect(v1910RuntimeStatusReportData.localCatalogIndex.versionedFallback).toBe("data/reports/onr-v1-runtime-status-1.9.10.json");
+    }
+
+    expect((v1910StatusScenarioData.cards as string[]).sort()).toEqual(reconciledIds);
+    expect(v1910NoPromotionAiHintsData.noPromotionGate.newAiSupportedCards).toEqual([]);
+    expect((v1910NoPromotionAiHintsData.cards as Array<{ cardId: string; newlyPromotedInV1910: boolean }>).map((card) => card.cardId).sort()).toEqual(reconciledIds);
+    expect((v1910NoPromotionAiHintsData.cards as Array<{ newlyPromotedInV1910: boolean }>).every((card) => card.newlyPromotedInV1910 === false)).toBe(true);
+    expect(v1910MechanicsCoverageData.gateAssertions.noNewMechanics).toBe(true);
   });
 
   it("approves exactly the King of the Road Runner cards for AI after hints and scenario gates", () => {

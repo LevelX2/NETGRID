@@ -3,7 +3,7 @@
   "id": "v123-card-release-smoke",
   "title": "V1.2.3 local O:NR Mechanic Unlock Card Release 1",
   "release": "V1.2.3",
-  "status": "implemented",
+  "status": "implemented_v1.9.10_reconciled",
   "extends": "data/scenarios/v112k-card-release-smoke.json",
   "sourceMode": "private_local_onr_v1_text_confirmed",
   "additionalCards": [
@@ -14,13 +14,16 @@
     "onr_v1_081_custodial-position",
     "onr_v1_085_executive-wiretaps",
     "onr_v1_101_mit-west-tier",
-    "onr_v1_297_overtime-incentives"
+    "onr_v1_243_fetch-4-0-1",
+    "onr_v1_249_hunter",
+    "onr_v1_297_overtime-incentives",
+    "onr_v1_306_trojan-horse"
   ],
   "preconditions": [
     "V1.2.2 Special Zones, Ownership and Control has passed its final gate.",
     "The private local O:NR v1 overlay exists under data/local.",
-    "Only the eight listed cards are promoted for V1.2.3.",
-    "V1.2.3 cards are human_playable and deck_legal, but not ai_supported."
+    "The original V1.2.3 final gate promoted eight cards; V1.9.10 reconciles the current runtime manifest trail to eleven cards.",
+    "Fetch 4.0.1, Hunter and Trojan Horse are already covered by the Corp tag AI approval slice and are not newly promoted by V1.9.10."
   ],
   "steps": [
     "Start a deterministic game with the V1.2.3 smoke decks and MVP 0.99 baseline mechanics enabled.",

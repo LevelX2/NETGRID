@@ -33,16 +33,17 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 2. Wenn ein aktiver nicht-staler Lock existiert, stoppe ohne Aenderungen.
 3. Lege fuer den eigenen Lauf einen Lock an und entferne ihn am Ende.
 4. Stelle sicher, dass der Branch `codex/v1-9-originalset-completion` aktiv ist.
-5. Lies den aktuellen Release und die Phase aus `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md`.
-6. Arbeite ausschliesslich am aktuellen Release aus dem Cursor.
-7. Plane den aktuellen Release detailliert, falls das release-spezifische Planungsartefakt noch fehlt oder veraltet ist.
-8. Setze den aktuellen Release so weit wie moeglich um.
-9. Fuehre sinnvolle zielgerichtete Tests aus; bei Zeitmangel priorisiere Pakettests und Tests fuer geaenderte Mechanik-/AI-/Datenbereiche.
-10. Schreibe Status, offene Punkte, Testresultate und naechste Schritte in den Cursor und in passende Review-/Log-Artefakte.
-11. Wenn versionierbare Aenderungen entstanden sind, erzeuge einen lokalen WIP-Commit und pushe den Branch nach GitHub.
-12. Wenn das Completion-Gate erfuellt ist, schreibe oder aktualisiere den Final Review, erzeuge einen Abschlusscommit, pushe und setze den Cursor auf den naechsten Release.
-13. Wenn das Completion-Gate nicht erfuellt ist, bleibt der Cursor auf demselben Release.
-14. Bei hartem Blocker: dokumentiere Blocker, Removal Condition und zuletzt gesicherten Stand; pushe WIP, aber springe nicht stillschweigend zum naechsten Release.
+5. Pruefe `git status`. Wenn eigene, klar zum aktuellen V1.9-Cursor gehoerende WIP-Aenderungen aus einem vorherigen Automationslauf vorhanden sind, stoppe nicht allein wegen Dirty-Status, sondern klassifiziere sie im Laufbericht und arbeite am selben Cursor weiter. Fremde, unklare oder releasefremde Aenderungen bleiben ein harter Blocker.
+6. Lies den aktuellen Release und die Phase aus `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md`.
+7. Arbeite ausschliesslich am aktuellen Release aus dem Cursor.
+8. Plane den aktuellen Release detailliert, falls das release-spezifische Planungsartefakt noch fehlt oder veraltet ist.
+9. Setze den aktuellen Release so weit wie moeglich um.
+10. Fuehre sinnvolle zielgerichtete Tests aus; bei Zeitmangel priorisiere Pakettests und Tests fuer geaenderte Mechanik-/AI-/Datenbereiche.
+11. Schreibe Status, offene Punkte, Testresultate und naechste Schritte in den Cursor und in passende Review-/Log-Artefakte.
+12. Wenn versionierbare Aenderungen entstanden sind, erzeuge einen lokalen WIP-Commit und pushe den Branch nach GitHub.
+13. Wenn das Completion-Gate erfuellt ist, schreibe oder aktualisiere den Final Review, erzeuge einen Abschlusscommit, pushe und setze den Cursor auf den naechsten Release.
+14. Wenn das Completion-Gate nicht erfuellt ist, bleibt der Cursor auf demselben Release.
+15. Bei hartem Blocker: dokumentiere Blocker, Removal Condition und zuletzt gesicherten Stand; pushe WIP, aber springe nicht stillschweigend zum naechsten Release.
 
 ## Zeitbudget je Lauf
 
@@ -55,12 +56,19 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 
 - Arbeitsbranch: `codex/v1-9-originalset-completion`.
 - Ausfuehrung: fester lokaler Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`; nicht in `C:\Projekte\NETGRID` zurueckwechseln.
+- Fuer WIP- und Abschluss-Checkpoints nutze bevorzugt das freigegebene Skript: `C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\scripts\automation\v1-9-checkpoint.ps1 -Message "<Commit-Message>" -Push`.
 - Kein Push nach `main`.
 - Kein Force-Push.
 - Keine fremden Nutzeränderungen revertieren.
 - Keine lokalen Runtime-Daten, Caches, SQLite-Dateien, Secrets oder Build-Artefakte versionieren.
 - WIP-Commit-Muster: `WIP V1.9.xx: <kurzer Fortschrittstitel>`.
 - Abschlusscommit-Muster: `V1.9.xx: <kurzer Release-Titel>`.
+
+## Installations- und Test-Regeln
+
+- Fuer Dependency-Installation und Paketchecks nutze bevorzugt das freigegebene Skript `C:\WINDOWS\System32\WindowsPowerShell\v1.0\powershell.exe -ExecutionPolicy Bypass -File C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\scripts\automation\v1-9-install-and-check.ps1 -Task <task>`.
+- Erlaubte Tasks: `install`, `catalog`, `engine`, `ai`, `web`, `server`, `typecheck`, `test`, `lint`, `build`.
+- Wenn `node_modules` fehlt, fuehre zuerst `-Task install` aus.
 
 ## Completion-Gate je Release
 

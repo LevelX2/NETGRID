@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "ai-card-hints-v1.9.10",
+  "hintsId": "ai-card-hints-v1910-no-promotion",
+  "release": "V1.9.10",
+  "status": "no_new_ai_support",
+  "cards": [
+    {
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "aiSupportStatus": "already_ai_supported",
+      "sourceHints": "data/ai/ai-card-hints-corp-tag-approval-slice.json",
+      "newlyPromotedInV1910": false
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "aiSupportStatus": "already_ai_supported",
+      "sourceHints": "data/ai/ai-card-hints-corp-tag-approval-slice.json",
+      "newlyPromotedInV1910": false
+    },
+    {
+      "cardId": "onr_v1_306_trojan-horse",
+      "aiSupportStatus": "already_ai_supported",
+      "sourceHints": "data/ai/ai-card-hints-corp-tag-approval-slice.json",
+      "newlyPromotedInV1910": false
+    }
+  ],
+  "noPromotionGate": {
+    "newAiSupportedCards": [],
+    "decisionDebugSurfaceChanged": false,
+    "hiddenInfoSurfaceChanged": false
+  }
+}
