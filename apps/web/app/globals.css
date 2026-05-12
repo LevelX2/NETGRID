@@ -5091,6 +5091,76 @@ select,
   margin: 0;
 }
 
+.confirmationDialogOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.confirmationDialogBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.64);
+}
+
+.confirmationDialogPanel {
+  position: relative;
+  z-index: 1;
+  width: min(430px, 100%);
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--access-modal-border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--access-modal-shadow);
+  padding: 18px;
+}
+
+.confirmationDialogPanel p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.confirmationDialogHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.confirmationDialogHeader h2 {
+  margin: 0;
+}
+
+.confirmationDialogIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--panel-soft);
+}
+
+.confirmationDialogOverlay.danger .confirmationDialogIcon {
+  border-color: var(--danger-button-border);
+  color: var(--danger);
+  background: var(--danger-button-bg);
+}
+
+.confirmationDialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .segmented {
   display: inline-grid;
   grid-template-columns: repeat(3, minmax(44px, 1fr));

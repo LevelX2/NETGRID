@@ -2,6 +2,7 @@
 
 import {
   Activity,
+  AlertTriangle,
   Bot,
   Building2,
   Cable,
@@ -216,6 +217,15 @@ type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
 type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
 type CardTooltipMode = "simple" | "enhanced" | "image";
 type RunOverlayPositionPreference = { kind: "default" } | { kind: "custom"; xPercent: number; yPercent: number };
+
+type ConfirmationDialogRequest = {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  cancelLabel?: string;
+  tone?: "danger" | "neutral";
+  onConfirm(): void | Promise<void>;
+};
 
 type CardTooltipSettings = {
   hoverOpenDelayMs: CardTooltipHoverDelayMs;
@@ -1413,6 +1423,7 @@ export default function Page() {
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
   const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
+  const [confirmationDialog, setConfirmationDialog] = useState<ConfirmationDialogRequest | null>(null);
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] = useState<CueAutoDismissMs>(2500);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
@@ -2740,7 +2751,6 @@ export default function Page() {
 
   const forfeitMatch = async () => {
     if (!session || !payload || payload.matchStatus !== "active" || payload.winner) return;
-    if (!window.confirm("Möchtest Du dieses Spiel wirklich aufgeben?")) return;
     let result: LifecycleActionResponse;
     try {
       result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/forfeit`, {
@@ -2757,6 +2767,17 @@ export default function Page() {
     }
     applyRemotePayload(result.actorPayload);
     setNotice("Spiel aufgegeben. Der Engine-State bleibt der letzte echte Spielzustand.");
+  };
+
+  const requestForfeitMatch = () => {
+    if (!session || !payload || payload.matchStatus !== "active" || payload.winner) return;
+    setConfirmationDialog({
+      title: "Spiel aufgeben?",
+      message: "Diese Aufgabe beendet das Match für beide Seiten. Der Engine-State bleibt der letzte echte Spielzustand.",
+      confirmLabel: "Aufgeben",
+      tone: "danger",
+      onConfirm: forfeitMatch
+    });
   };
 
   const recreateMatch = async () => {
@@ -2894,9 +2915,16 @@ export default function Page() {
   };
 
   const discardLocalActiveSession = () => {
-    if (!window.confirm("Lokale Sitzung von diesem Gerät löschen? Das Spiel wird nicht aufgegeben. Für den Wiedereinstieg brauchst Du den Wiederverbindungslink.")) return;
-    setOptionsDialogOpen(false);
-    leaveMatch();
+    setConfirmationDialog({
+      title: "Lokale Sitzung löschen?",
+      message: "Das Spiel wird nicht aufgegeben. Für den Wiedereinstieg brauchst Du den Wiederverbindungslink.",
+      confirmLabel: "Sitzung löschen",
+      tone: "danger",
+      onConfirm: () => {
+        setOptionsDialogOpen(false);
+        leaveMatch();
+      }
+    });
   };
 
   const updateDisplayName = (value: string) => {
@@ -3839,7 +3867,7 @@ export default function Page() {
             </button>
           ) : null}
           {canForfeit ? (
-            <button className="button dangerButton" onClick={forfeitMatch} title="Spiel aufgeben">
+            <button className="button dangerButton" onClick={requestForfeitMatch} title="Spiel aufgeben">
               <Flag size={16} />
               Aufgeben
             </button>
@@ -4300,6 +4328,17 @@ export default function Page() {
           />
         </OptionsDialog>
       ) : null}
+      {confirmationDialog ? (
+        <ConfirmationDialog
+          request={confirmationDialog}
+          onCancel={() => setConfirmationDialog(null)}
+          onConfirm={() => {
+            const request = confirmationDialog;
+            setConfirmationDialog(null);
+            void request.onConfirm();
+          }}
+        />
+      ) : null}
     </main>
     </CardTooltipSettingsContext.Provider>
     </CardScaleSettingsContext.Provider>
@@ -4702,6 +4741,62 @@ function GameOverModal({
               Zurück zum Startbildschirm
             </button>
           </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ConfirmationDialog({
+  request,
+  onCancel,
+  onConfirm
+}: {
+  request: ConfirmationDialogRequest;
+  onCancel(): void;
+  onConfirm(): void;
+}) {
+  const tone = request.tone ?? "neutral";
+  const cancelButtonRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    cancelButtonRef.current?.focus();
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onCancel();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onCancel]);
+
+  return (
+    <div
+      className={`confirmationDialogOverlay ${tone}`}
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirmation-dialog-title"
+      aria-describedby="confirmation-dialog-message"
+    >
+      <div className="confirmationDialogBackdrop" aria-hidden="true" onClick={onCancel} />
+      <section className="confirmationDialogPanel">
+        <div className="confirmationDialogHeader">
+          <span className="confirmationDialogIcon" aria-hidden="true">
+            {tone === "danger" ? <AlertTriangle size={18} /> : <Shield size={18} />}
+          </span>
+          <div>
+            <p className="eyebrow">Bestätigung</p>
+            <h2 id="confirmation-dialog-title">{request.title}</h2>
+          </div>
+        </div>
+        <p id="confirmation-dialog-message">{request.message}</p>
+        <div className="confirmationDialogActions">
+          <button ref={cancelButtonRef} className="button" onClick={onCancel} type="button">
+            <X size={15} />
+            {request.cancelLabel ?? "Abbrechen"}
+          </button>
+          <button className={`button primary ${tone === "danger" ? "dangerButton" : ""}`} onClick={onConfirm} type="button">
+            {tone === "danger" ? <AlertTriangle size={15} /> : <Check size={15} />}
+            {request.confirmLabel}
+          </button>
         </div>
       </section>
     </div>
