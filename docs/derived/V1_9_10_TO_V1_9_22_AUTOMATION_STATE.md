@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.14
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.15
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -66,6 +66,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 02:06 CEST
+- Ergebnis: V1.9.14 Trace/Link/Tags/Resource-Tag-Interaktionen release-spezifisch detailgeplant; Cursor bleibt auf V1.9.14 `implementing`.
+- Release: V1.9.14
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Trace/Tag/Resource-Spezifikation, Testmatrix und Requirements Review erstellt. Der Scope umfasst genau 25 Zielkarten und die Resolverfamilien `trace_link_bid_window_resolver`, `hidden_zone_search_reveal_reorder_resolver`, `event_modification_prevention_avoid_resolver`, `tag_condition_avoid_remove_resolver`, `damage_event_prevention_resolver`, `resource_tag_interaction_resolver` und `typed_counter_virus_purge_resolver`. Keine Karte wurde promotet.
+- Tests: Dokumentations-/Cursorlauf; Code-Tests noch nicht noetig, weil keine Engine-, AI-, Runtime-, Server- oder Web-Aenderung erfolgt ist.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.14: trace tag resource planning`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.14 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Engine-/LegalAction-/AI-/Visibility-/Replay-/StateHash-Abdeckung, Datenartefakte, Webclient-Version, Pflichtchecks und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-13 02:02 CEST
 - Ergebnis: V1.9.13 Damage/Prevention/Avoid/Replacement-Longtail final abgeschlossen; Cursor auf V1.9.14 `planned` gesetzt.
