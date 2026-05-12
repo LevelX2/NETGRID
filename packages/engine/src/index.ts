@@ -187,6 +187,7 @@ const CHIMERA_ID = "onr_v1_353_chimera";
 const MOUSE_ID = "onr_v1_042_mouse";
 const SEEYA_ID = "onr_v1_058_seeya";
 const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
+const I_SPY_ID = "onr_v1_032_i-spy";
 const AUJOURD_OUI_ID = "onr_v1_151_aujourdoui";
 const NETO_ID = "onr_v1_169_n-e-t-o";
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
@@ -194,6 +195,8 @@ const THE_SHORT_CIRCUIT_ID = "onr_v1_177_the-short-circuit";
 const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
 const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
 const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
+const DETROIT_POLICE_CONTRACT_ID = "onr_v1_198_detroit-police-contract";
+const EMPLOYEE_EMPOWERMENT_ID = "onr_v1_199_employee-empowerment";
 const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
@@ -332,6 +335,22 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     resolve: (state, legalAction) => {
       revealRunnerStackTop(state, legalAction);
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1911_reveal_stack_top" };
+    }
+  },
+  "onr_v1_082_deal-with-militech": {
+    name: "onr_v1912_runner_event_search_stack_program_to_hand",
+    canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
+    resolve: (state, legalAction) => {
+      startRunnerStackSearchChoice(state, "v1912.search_stack", "v1912_search_stack");
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1912_search_stack" };
+    }
+  },
+  "onr_v1_091_hunt-club-bbs": {
+    name: "onr_v1912_runner_event_reveal_stack_top",
+    canPlay: (state) => state.runner.stack.length > 0,
+    resolve: (state, legalAction) => {
+      revealRunnerStackTop(state, legalAction);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1912_reveal_stack_top" };
     }
   },
   "onr_v1_079_bodyweight-synthetic-blood": {
@@ -1570,6 +1589,20 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
+    if (definition.id === DETROIT_POLICE_CONTRACT_ID && cardCounter(state, agendaId, "power") > 0) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 1 Credit aus Contract-Counter`,
+          agendaId,
+          [{ clicks: 1 }],
+          { cardId: agendaId, agendaAbility: "v1912_detroit_police_contract", counterType: "power", removePowerCounterAmount: 1, gainCreditsAmount: 1 }
+        )
+      );
+      continue;
+    }
     if (definition.id !== "onr_v1_193_corporate-coup" && definition.id !== "onr_v1_209_political-coup") continue;
     if (cardCounter(state, agendaId, "power") <= 0) continue;
     const agendaAbility = definition.id === "onr_v1_193_corporate-coup" ? "corporate_coup" : "political_coup";
@@ -1749,6 +1782,19 @@ function runnerMainActions(state: GameState): LegalAction[] {
             cardId,
             [{ clicks: 1 }],
             { cardId, v1911HiddenZoneAbility: "reveal_stack_top" }
+          )
+        );
+      }
+      if (definition.id === I_SPY_ID && state.runner.stack.length > 0) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "gain_credit",
+            `${definition.title}: Stack-Spitze revealn`,
+            cardId,
+            [{ clicks: 1 }],
+            { cardId, v1912CounterAbility: "reveal_stack_top", hiddenZoneAction: "v1912_reveal_stack_top" }
           )
         );
       }
@@ -2403,6 +2449,15 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         resolveV1911CorporateDownsizing(state, legalAction);
         return;
       }
+      if (legalAction.payload?.v1912CounterAbility === "reveal_stack_top") {
+        if (legalAction.side !== "runner") throw new Error("Nur der Runner darf diese V1.9.12 Counter-Faehigkeit nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.runner.rig.programs.includes(sourceCardId)) throw new Error("Die V1.9.12 Counter-Faehigkeit ist nicht installiert.");
+        if (definitionFor(state, sourceCardId).id !== I_SPY_ID) throw new Error("Die V1.9.12 Counter-Faehigkeit passt nicht zur Karte.");
+        revealRunnerStackTop(state, legalAction);
+        legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1912_reveal_stack_top" };
+        return;
+      }
       if (legalAction.payload?.resourceAbility === "databroker") {
         if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Databroker nutzen.");
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
@@ -2445,6 +2500,27 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
         const expectedGainAmount = definition.id === "onr_v1_193_corporate-coup" ? 1 : 3;
         if (!Number.isInteger(gainAmount) || gainAmount !== expectedGainAmount) throw new Error("Coup-Agenda gewaehrt in diesem Scope die falsche Anzahl Credits.");
+        credits(state, "corp", gainAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          spentPowerCounters: removeAmount,
+          gainedCredits: gainAmount,
+          remainingPowerCounters: cardCounter(state, sourceCardId, "power")
+        };
+        return;
+      }
+      if (legalAction.payload?.agendaAbility === "v1912_detroit_police_contract") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf Detroit Police Contract nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Detroit Police Contract ist nicht gescort.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== DETROIT_POLICE_CONTRACT_ID) throw new Error("Die Agenda-Aktion passt nicht zu Detroit Police Contract.");
+        const removeAmount = Number(legalAction.payload?.removePowerCounterAmount ?? 0);
+        if (!Number.isInteger(removeAmount) || removeAmount !== 1) throw new Error("Detroit Police Contract muss genau 1 Counter ausgeben.");
+        if (cardCounter(state, sourceCardId, "power") < removeAmount) throw new Error("Auf Detroit Police Contract sind nicht genug Counter.");
+        spendCardCounter(state, sourceCardId, "power", removeAmount);
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 1) throw new Error("Detroit Police Contract gewaehrt in diesem Scope genau 1 Credit.");
         credits(state, "corp", gainAmount);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -2773,6 +2849,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       if (definition.mechanics.includes("virus")) addCardCounter(state, cardId, "virus", 1);
     } else if (definition.type === "resource") {
       state.runner.rig.resources.push(cardId);
+      if ((definition.recurringCredits ?? 0) > 0) setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
     } else {
       throw new Error("Nur Programme, Hardware und Resources koennen vom Runner installiert werden.");
     }
@@ -4062,6 +4139,12 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   if (acmeCount > 0) {
     credits(state, "corp", acmeCount);
   }
+  const employeeEmpowermentCount = state.corp.scoreArea.reduce((sum, cardId) => {
+    return definitionFor(state, cardId).id === EMPLOYEE_EMPOWERMENT_ID ? sum + 1 : sum;
+  }, 0);
+  if (employeeEmpowermentCount > 0) {
+    credits(state, "corp", employeeEmpowermentCount);
+  }
 }
 
 function applyRunnerStartOfTurnEffects(state: GameState): void {
@@ -4849,14 +4932,15 @@ function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction
       };
     }
   }
-  if (definition.id === "onr_v1_193_corporate-coup" || definition.id === "onr_v1_209_political-coup") {
-    const counterAmount = definition.id === "onr_v1_193_corporate-coup" ? 5 : 12;
+  if (definition.id === "onr_v1_193_corporate-coup" || definition.id === "onr_v1_209_political-coup" || definition.id === DETROIT_POLICE_CONTRACT_ID) {
+    const counterAmount = definition.id === "onr_v1_193_corporate-coup" ? 5 : definition.id === "onr_v1_209_political-coup" ? 12 : 4;
     setCardCounter(state, cardId, "power", counterAmount);
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        coupPowerCountersAdded: counterAmount,
-        coupAgendaAbility: definition.id === "onr_v1_193_corporate-coup" ? "corporate_coup" : "political_coup"
+        powerCountersAdded: counterAmount,
+        agendaAbility:
+          definition.id === "onr_v1_193_corporate-coup" ? "corporate_coup" : definition.id === "onr_v1_209_political-coup" ? "political_coup" : "v1912_detroit_police_contract"
       };
     }
   }
@@ -5024,7 +5108,7 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveTraceRunnerBid(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v098.search_stack") || state.pendingChoice.source.startsWith("v1911.search_stack")) {
+  if (state.pendingChoice.source.startsWith("v098.search_stack") || state.pendingChoice.source.startsWith("v1911.search_stack") || state.pendingChoice.source.startsWith("v1912.search_stack")) {
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
     return;
   }

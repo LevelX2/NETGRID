@@ -4008,7 +4008,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_009_butcher-boy"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_038_joan-of-arc"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4162,6 +4162,101 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("V1.9.12 Counter/Virus/Recurring WIP", () => {
+  it("adds scoped V1.9.12 WIP definitions without pulling in V1.9.13 cards", () => {
+    expect(ONR_V1_9_12_WIP_CARD_IDS).toHaveLength(11);
+    for (const definitionId of ONR_V1_9_12_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_038_joan-of-arc"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
+    let state = toRunnerTurn(v1912CounterRecurringGame("v1912-virus-recurring"));
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_009_butcher-boy");
+    moveRunnerCardToGrip(state, "onr_v1_174_rigged-investments");
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_009_butcher-boy");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_174_rigged-investments");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
+    const butcherId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_009_butcher-boy");
+    const investmentsId = state.runner.rig.resources.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_174_rigged-investments");
+    expect(butcherId).toBeDefined();
+    expect(investmentsId).toBeDefined();
+    if (butcherId) {
+      expect(state.cardInstances[butcherId]?.counters?.virus).toBe(1);
+      expect(state.cardInstances[butcherId]?.counters?.recurring_credit).toBe(1);
+    }
+    if (investmentsId) expect(state.cardInstances[investmentsId]?.counters?.recurring_credit).toBe(2);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "purge_virus_counters");
+    if (butcherId) {
+      expect(state.cardInstances[butcherId]?.counters?.virus ?? 0).toBe(0);
+      expect(state.cardInstances[butcherId]?.counters?.recurring_credit).toBe(1);
+    }
+    if (investmentsId) {
+      expect(state.cardInstances[investmentsId]?.counters?.recurring_credit).toBe(2);
+      state.cardInstances[investmentsId] = { ...state.cardInstances[investmentsId]!, counters: { ...state.cardInstances[investmentsId]!.counters, recurring_credit: 0 } };
+    }
+
+    state.corp.maxHandSize = 100;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (investmentsId) expect(state.cardInstances[investmentsId]?.counters?.recurring_credit).toBe(2);
+  });
+
+  it("uses V1.9.12 Hidden-Zone event and installed helper paths without exposing choices to the Corp", () => {
+    let state = toRunnerTurn(v1912CounterRecurringGame("v1912-hidden-zone"));
+    state.runner.credits = 20;
+    const dealId = moveRunnerCardToGrip(state, "onr_v1_082_deal-with-militech");
+    const iSpyId = moveRunnerCardToGrip(state, "onr_v1_032_i-spy");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === iSpyId);
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === dealId);
+    expect(state.pendingChoice?.source).toContain("v1912.search_stack");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.grip).toContain(targetProgramId);
+
+    putRunnerCardOnTopOfStack(state, "simple_fracter");
+    state = apply(state, "runner", (action) => action.type === "gain_credit" && action.payload?.v1912CounterAbility === "reveal_stack_top");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ revealKind: "reveal", cardDefinitionId: "simple_fracter" });
+  });
+
+  it("scores V1.9.12 Corp agendas with typed counter and start-of-turn economy paths", () => {
+    let state = apply(v1912CounterRecurringGame("v1912-corp-agendas"), "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 80;
+    state.corp.clicks = 30;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "onr_v1_198_detroit-police-contract");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_198_detroit-police-contract" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 4; index += 1) state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_198_detroit-police-contract");
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_198_detroit-police-contract");
+    const detroitId = state.corp.scoreArea.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_198_detroit-police-contract");
+    expect(detroitId).toBeDefined();
+    if (detroitId) expect(state.cardInstances[detroitId]?.counters?.power).toBe(4);
+    const beforeCredit = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1912_detroit_police_contract");
+    expect(state.corp.credits).toBe(beforeCredit + 1);
+    if (detroitId) expect(state.cardInstances[detroitId]?.counters?.power).toBe(3);
   });
 });
 
@@ -5852,6 +5947,19 @@ const ONR_V1_9_6_FINAL_CARD_IDS = ["onr_v1_236_data-raven"] as const;
 const ONR_V1_9_7_FINAL_CARD_IDS = ["onr_v1_001_afreet"] as const;
 const ONR_V1_9_8_FINAL_CARD_IDS = ["onr_v1_018_dogcatcher", "onr_v1_019_dropp"] as const;
 const ONR_V1_9_9_FINAL_CARD_IDS = ["onr_v1_349_aardvark", "onr_v1_351_bizarre-encryption-scheme", "onr_v1_352_chester-mix", "onr_v1_353_chimera"] as const;
+const ONR_V1_9_12_WIP_CARD_IDS = [
+  "onr_v1_009_butcher-boy",
+  "onr_v1_010_cascade",
+  "onr_v1_017_deep-thought",
+  "onr_v1_032_i-spy",
+  "onr_v1_064_skivviss",
+  "onr_v1_082_deal-with-militech",
+  "onr_v1_091_hunt-club-bbs",
+  "onr_v1_174_rigged-investments",
+  "onr_v1_176_the-shell-traders",
+  "onr_v1_198_detroit-police-contract",
+  "onr_v1_199_employee-empowerment"
+] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
@@ -6606,6 +6714,43 @@ const ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_12_COUNTER_RECURRING_WIP_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1912_counter_recurring_wip",
+  name: "O:NR V1.9.12 Counter Recurring WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_009_butcher-boy", quantity: 1 },
+    { id: "onr_v1_010_cascade", quantity: 1 },
+    { id: "onr_v1_017_deep-thought", quantity: 1 },
+    { id: "onr_v1_032_i-spy", quantity: 1 },
+    { id: "onr_v1_064_skivviss", quantity: 1 },
+    { id: "onr_v1_082_deal-with-militech", quantity: 1 },
+    { id: "onr_v1_091_hunt-club-bbs", quantity: 1 },
+    { id: "onr_v1_174_rigged-investments", quantity: 1 },
+    { id: "onr_v1_176_the-shell-traders", quantity: 1 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1912_counter_recurring_wip",
+  name: "O:NR V1.9.12 Counter Recurring WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_198_detroit-police-contract", quantity: 2 },
+    { id: "onr_v1_199_employee-empowerment", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -6978,6 +7123,16 @@ function v1911HiddenZoneGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK,
     corpDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1912CounterRecurringGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_RUNNER_DECK,
+    corpDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

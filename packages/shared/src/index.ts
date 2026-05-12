@@ -1197,6 +1197,45 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_program", "memory", "break_subroutine", "deterministic_die_roll", "net_damage", "encounter_usage_limit", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_009_butcher-boy",
+    title: "Butcher Boy",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    recurringCredits: 1,
+    rulesText: "V1.9.12 WIP: installs with a Virus counter and a recurring pool for run costs. Corp may purge Virus counters.",
+    mechanics: ["install_program", "memory", "counter", "virus", "purge", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_010_cascade",
+    title: "Cascade",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    recurringCredits: 1,
+    rulesText: "V1.9.12 WIP: installs with a Virus counter and a recurring pool for run costs. Corp may purge Virus counters.",
+    mechanics: ["install_program", "memory", "counter", "virus", "purge", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_017_deep-thought",
+    title: "Deep Thought",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    recurringCredits: 1,
+    rulesText: "V1.9.12 WIP: installs with a Virus counter and a recurring pool for run costs. Corp may purge Virus counters.",
+    mechanics: ["install_program", "memory", "counter", "virus", "purge", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_013_cockroach",
     title: "Cockroach",
     side: "runner",
@@ -1470,6 +1509,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       ONR_V1_LOCAL_PRIVATE
     ]
   },
+  {
+    id: "onr_v1_032_i-spy",
+    title: "I Spy",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    rulesText: "V1.9.12 WIP: installed Counter/Hidden-Zone helper that can reveal the top card of the Runner stack through a side-safe payload.",
+    mechanics: ["install_program", "memory", "counter", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
   onrBreaker({
     id: "onr_v1_036_jackhammer",
     title: "Jackhammer",
@@ -1579,6 +1630,19 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceSubtype: "sentry",
     iceLabel: "sentry"
   }),
+  {
+    id: "onr_v1_064_skivviss",
+    title: "Skivviss",
+    side: "runner",
+    type: "program",
+    subtypes: ["virus"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    recurringCredits: 1,
+    rulesText: "V1.9.12 WIP: installs with a Virus counter and a recurring pool for run costs. Corp may purge Virus counters.",
+    mechanics: ["install_program", "memory", "counter", "virus", "purge", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
   onrBreaker({
     id: "onr_v1_066_snowball",
     title: "Snowball",
@@ -1896,6 +1960,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_resource", "install_cost_modifier", "counter", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_174_rigged-investments",
+    title: "Rigged Investments",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    recurringCredits: 2,
+    rulesText: "V1.9.12 WIP: recurring pool for run costs. Used counters refresh at the start of the Runner turn without accumulation.",
+    mechanics: ["install_resource", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_175_ronin-around",
     title: "Ronin Around",
     side: "runner",
@@ -1905,6 +1981,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     rulesText: "Installed Hidden-Zone helper: look at and reorder the top two cards of your stack.",
     mechanics: ["install_resource", "reorder_stack", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_176_the-shell-traders",
+    title: "The Shell Traders",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    recurringCredits: 1,
+    rulesText: "V1.9.12 WIP: recurring pool with visible counters for run costs. Used counters refresh at the start of the Runner turn.",
+    mechanics: ["install_resource", "counter", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_177_the-short-circuit",
@@ -1986,6 +2074,28 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "start_run", "breach", "access_replacement", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_082_deal-with-militech",
+    title: "Deal with Militech",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "V1.9.12 WIP: search the stack for a program, reveal it and add it to the grip through the side-safe Hidden-Zone choice path.",
+    mechanics: ["play_event", "search_stack", "reveal", "shuffle", "counter", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_091_hunt-club-bbs",
+    title: "Hunt Club BBS",
+    side: "runner",
+    type: "event",
+    subtypes: ["bbs"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "V1.9.12 WIP: reveal the top card of the Runner stack through the side-safe Hidden-Zone path.",
+    mechanics: ["play_event", "reveal", "counter", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_114_temple-microcode-outlet",
     title: "Temple Microcode Outlet",
     side: "runner",
@@ -2064,6 +2174,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 2,
     rulesText: "Scored agenda Hidden-Zone helper: reveal the top card of R&D.",
     mechanics: ["install_remote", "advance", "score", "steal", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_198_detroit-police-contract",
+    title: "Detroit Police Contract",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 2,
+    rulesText: "V1.9.12 WIP: put power counters on Detroit Police Contract when scored. The Corp may spend one counter as a clicked credit action.",
+    mechanics: ["install_remote", "advance", "score", "steal", "counter", "recurring_pool", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_199_employee-empowerment",
+    title: "Employee Empowerment",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 2,
+    rulesText: "V1.9.12 WIP: scored agenda start-of-turn economy effect for the Corp.",
+    mechanics: ["install_remote", "advance", "score", "steal", "recurring_start_turn", "gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_193_corporate-coup",
