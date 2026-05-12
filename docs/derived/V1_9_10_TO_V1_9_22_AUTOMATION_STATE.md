@@ -64,17 +64,17 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Phase nachher: planned fuer V1.9.11
 - Umsetzung: V1.9.10-Manifest-/Statusparitaet finalisiert; enger Runtime-Fallback im Katalog fuer Automations-Worktrees ohne ignoriertes `data/local/`-Overlay; Final Review erstellt.
 - Tests: JSON-Validation fuer `data/**/*.json` pass, 219 Dateien. `v1-9-install-and-check.ps1 -Task catalog` pass (25 Tests), `engine` pass (201 Tests), `ai` pass (83 Tests), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-- Git: WIP-Commit `0929b21` vorhanden; Abschlusscommit wird nach dieser Cursor-Aktualisierung per Checkpoint-Skript erzeugt und gepusht.
+- Git: WIP-Commit `0929b21` vorhanden; Abschlusscommit `caa74b9` wurde per Checkpoint-Skript erzeugt und nach `origin/codex/v1-9-originalset-completion` gepusht.
 - Cursor: V1.9.10 abgeschlossen; V1.9.11 ist der aktuelle Release.
 
 ## Letzter Commit
 
 - WIP-Commit: `0929b21` (`WIP V1.9.10: status manifest catalog consolidation`).
-- Abschlusscommit: wird durch den aktuellen Lauf erzeugt und im Laufbericht referenziert.
+- Abschlusscommit: `caa74b9` (`V1.9.10: status manifest catalog consolidation`).
 
 ## Letzter Push
 
-WIP-Commit ist bereits in der Branch-Historie. Abschlusspush erfolgt nach dem aktuellen Abschlusscommit.
+Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 
 ## Blocker
 
