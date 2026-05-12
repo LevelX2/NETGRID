@@ -5,7 +5,7 @@ Stand: 2026-05-12
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
 Automation-ID: `netgrid-v1-9-originalset-completion`
 Watchdog-Automation-ID: `netgrid-v1-9-originalset-watchdog`
-Ausfuehrung: stündliche aktive Codex-Cron-Automation im lokalen NETGRID-Workspace
+Ausfuehrung: stündliche aktive Codex-Cron-Automation als Worktree-Lauf fuer den NETGRID-Workspace
 Branch: `codex/v1-9-originalset-completion`
 Primaerer Agent: release-implementation-agent
 Kontrollartefakt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md`
@@ -31,11 +31,11 @@ Completion-Modus: Gate-pflichtig
 
 ## Lock
 
-Lokaler, nicht versionierter Lock:
+Lokaler, nicht versionierter Lock ausserhalb der geschuetzten Repo-`.codex`-Flaeche:
 
-`.codex/runtime/v1_9_originalset_completion.lock`
+`%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock`
 
-Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur uebernommen werden, wenn er eindeutig stale ist und der vorherige Prozess nicht mehr laeuft.
+Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur uebernommen werden, wenn er eindeutig stale ist und der vorherige Prozess nicht mehr laeuft. Der fruehere Lock-Pfad `.codex/runtime/v1_9_originalset_completion.lock` ist nicht mehr verbindlich, weil der lokale Automationsmodus diese Repo-Flaeche per ACL schuetzt.
 
 ## Release-Reihenfolge
 
@@ -57,20 +57,20 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-12 08:16:54 +02:00
+- Zeitpunkt: 2026-05-12 09:31:02 +02:00
 - Ergebnis: Lauf vor Umsetzungsstart blockiert (kein Release-Fortschritt)
 - Release: V1.9.10
 - Phase vorher: planned
 - Phase nachher: blocked
-- Grund: Lock-Datei `.codex/runtime/v1_9_originalset_completion.lock` kann wegen Dateisystem-ACL nicht angelegt werden (`Access denied` auf `.codex`).
+- Grund: Lock-Datei `.codex/runtime/v1_9_originalset_completion.lock` kann erneut wegen Dateisystem-ACL nicht angelegt werden (`Access denied` auf `.codex/runtime`).
 - Umsetzung/Tests: keine, um Parallelitaetsrisiken ohne Lock zu vermeiden.
-- Nachtrag 2026-05-12: Infrastrukturblocker lokal behoben; Cursor wieder auf `planned` gesetzt. Naechster Completion-Lauf darf V1.9.10 erneut starten.
+- Nachtrag 2026-05-12: Frueherer ACL-Fix ist in diesem Lauf nicht wirksam; die Steuerung wurde deshalb auf Worktree-Ausfuehrung und externen Lock unter `%LOCALAPPDATA%\NETGRID\automation\` umgestellt. Cursor wieder auf `planned`; naechster Completion-Lauf darf V1.9.10 erneut starten.
 
 ## Letzter Commit
 
 - Kein neuer Release-/WIP-Commit in diesem Lauf: `git commit` scheiterte mit `Unable to create .git/index.lock: Permission denied`.
-- Nachtrag 2026-05-12: Git-Schreibtest nach ACL-Korrektur erfolgreich; Setup-Fix wird separat committed.
-- Der Setup-Commit fuer diese Steuerartefakte zaehlt weiterhin nicht als Releasefortschritt.
+- Nachtrag 2026-05-12 09:33:49 +02:00: erneuter Commit-Versuch fuer den Blocker-Status fehlgeschlagen, da `.git/index.lock` nicht anlegbar ist.
+- Nachtrag 2026-05-12: Completion- und Watchdog-Automation wurden von `local` auf `worktree` umgestellt, damit Folgejobs nicht mehr am lokalen geschuetzten `.git` des Hauptworkspace haengen.
 
 ## Letzter Push
 
@@ -79,17 +79,19 @@ Setup-Branch `codex/v1-9-originalset-completion` wurde nach GitHub gepusht. In d
 ## Blocker
 
 - Blocker-ID: LOCK_PATH_PERMISSION_DENIED_2026-05-12
-- Status: behoben
+- Status: behoben durch Lock-Pfadwechsel
 - Betroffener Release: V1.9.10
 - Beschreibung: Der vorgeschriebene lokale Lock-Pfad unter `.codex/runtime/` ist nicht beschreibbar. `icacls .codex` zeigt einen expliziten DENY-Eintrag fuer den aktiven Nutzer auf Write/Delete/Create-Rechte.
 - Removal Condition: Schreibrechte auf `C:\Projekte\NETGRID\.codex` (mindestens fuer das Anlegen/Loeschen von `.codex/runtime/v1_9_originalset_completion.lock`) wiederherstellen oder den verbindlichen Lock-Pfad in den Steuerartefakten auf einen beschreibbaren lokalen Runtime-Pfad umstellen.
-- Behoben durch: expliziten Deny-ACL-Eintrag fuer `S-1-5-21-2893003870-2010802999-161870138-128397290` von `.codex` entfernt und `.codex/runtime` lokal angelegt; Lock-Schreibtest erfolgreich.
+- Letzter Befund: 2026-05-12 09:31:02 +02:00, `Set-Content` auf `.codex/runtime/v1_9_originalset_completion.lock` mit `Access denied` fehlgeschlagen.
+- Behoben durch: verbindlicher Lock-Pfad ist jetzt `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock`; Schreibtest auf diesem Pfad war erfolgreich.
 - Blocker-ID: GIT_INDEX_LOCK_PERMISSION_DENIED_2026-05-12
-- Status: behoben
+- Status: umgangen durch Worktree-Ausfuehrung
 - Betroffener Release: V1.9.10
 - Beschreibung: `git commit` kann keine `.git/index.lock` erzeugen (`Permission denied`), daher sind WIP-Commit und Abschlusscommit blockiert.
 - Removal Condition: Schreibrechte fuer Lock-Erzeugung in `C:\Projekte\NETGRID\.git` wiederherstellen; danach `git add`, `git commit` und `git push` erneut ausfuehren.
-- Behoben durch: expliziten Deny-ACL-Eintrag fuer `S-1-5-21-2893003870-2010802999-161870138-128397290` von `.git` entfernt; Git-Index-Schreibtest via Setup-Fix erfolgreich.
+- Letzter Befund: 2026-05-12 09:33:49 +02:00, `git commit` scheitert erneut mit `Unable to create .git/index.lock: Permission denied`.
+- Umgehung: Automationen laufen ab jetzt im Worktree-Modus statt im lokalen Hauptworkspace.
 
 ## Watchdog
 

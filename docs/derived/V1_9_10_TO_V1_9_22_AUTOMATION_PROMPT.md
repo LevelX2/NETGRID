@@ -28,7 +28,7 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 
 ## Laufsteuerung
 
-1. Pruefe den lokalen Lock `.codex/runtime/v1_9_originalset_completion.lock`.
+1. Pruefe den lokalen Lock `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock`.
 2. Wenn ein aktiver nicht-staler Lock existiert, stoppe ohne Aenderungen.
 3. Lege fuer den eigenen Lauf einen Lock an und entferne ihn am Ende.
 4. Stelle sicher, dass der Branch `codex/v1-9-originalset-completion` aktiv ist.
@@ -53,6 +53,7 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 ## Git-Regeln
 
 - Arbeitsbranch: `codex/v1-9-originalset-completion`.
+- Ausfuehrung: Worktree-Automation; nicht auf den geschuetzten lokalen Hauptworkspace-`.git`-Pfad verlassen.
 - Kein Push nach `main`.
 - Kein Force-Push.
 - Keine fremden Nutzeränderungen revertieren.
@@ -110,4 +111,3 @@ Der sichtbare Abschlussbericht des Automationslaufs muss enthalten:
 - Push-Ergebnis, falls gepusht
 - ob der Cursor auf den naechsten Release gesetzt wurde
 - offene Blocker oder naechster sinnvoller Schritt
-

@@ -34,7 +34,7 @@ Fuehre je Lauf diese Pruefungen aus:
 - Existiert der Cursor `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md`?
 - Ist der Branch `codex/v1-9-originalset-completion` vorhanden und kann er von `origin` aktualisiert werden?
 - Gibt es seit dem letzten Watchdog-Lauf Fortschritt durch neue Commits, Cursor-Aenderungen oder Review-/Releaseartefakte?
-- Existiert der Worker-Lock `.codex/runtime/v1_9_originalset_completion.lock`?
+- Existiert der Worker-Lock `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock`?
 - Ist ein vorhandener Worker-Lock frisch oder eindeutig stale?
 - Gibt es uncommitted Aenderungen, die wie ein abgebrochener Worker-Lauf aussehen?
 - Ist die letzte Cursor-Phase plausibel fuer den aktuellen Release?
@@ -54,7 +54,7 @@ In diesen Faellen keine Reparatur versuchen. Schreibe hoechstens einen knappen W
 
 Der Watchdog darf:
 
-- einen eindeutig stale Worker-Lock entfernen, wenn er aelter als etwa zwei Stunden ist und kein passender aktiver Prozess erkennbar ist
+- einen eindeutig stale Worker-Lock unter `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` entfernen, wenn er aelter als etwa zwei Stunden ist und kein passender aktiver Prozess erkennbar ist
 - die bestehende Completion-Automation wieder auf aktiv setzen, falls sie pausiert ist und keine andere aktive Completion-Automation existiert
 - die Completion-Automation mit dem Prompt aus `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md` neu anlegen, falls sie fehlt und keine gleichwertige aktive Automation existiert
 - bei einem abgebrochenen Worker-Lauf eindeutig versionierbare, releasebezogene Aenderungen als Watchdog-Rettungs-WIP committen und pushen
@@ -103,4 +103,3 @@ Der sichtbare Abschlussbericht des Watchdog-Laufs muss enthalten:
 - durchgefuehrte Reparatur oder Grund fuer Nicht-Eingriff
 - Commit-Hash und Push-Ergebnis, falls vorhanden
 - ob ein Nachfolgejob angelegt, reaktiviert oder bewusst nicht angelegt wurde
-
