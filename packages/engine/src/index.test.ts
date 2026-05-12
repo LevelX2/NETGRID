@@ -3983,6 +3983,85 @@ describe("V1.9.9 Mechanikpaket R", () => {
   });
 });
 
+describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
+  it("adds first scoped V1.9.11 hidden-zone event definitions without pulling in later release cards", () => {
+    const implementedWipIds = [
+      "onr_v1_087_forgotten-backup-chip",
+      "onr_v1_088_fortress-respecification",
+      "onr_v1_089_gideons-pawnshop",
+      "onr_v1_092_ice-and-datas-guide-to-the-net",
+      "onr_v1_099_mantis-fixer-at-large",
+      "onr_v1_110_sneak-preview"
+    ];
+    for (const definitionId of implementedWipIds) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics).toContain("hidden_zone_tool");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_009_butcher-boy"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-search"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_087_forgotten-backup-chip");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
+    expect(state.pendingChoice?.source).toContain("v098.search_stack");
+    expect(getPlayerView(state, "runner").pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.grip).toContain(targetProgramId);
+    expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneBarrier: true, hiddenZoneAction: "search_stack" });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("reveals only the intended public definition id for V1.9.11 reveal events", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-reveal"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    putRunnerCardOnTopOfStack(state, "simple_decoder");
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      revealKind: "reveal",
+      cardDefinitionId: "simple_decoder",
+      title: "Simple Decoder"
+    });
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Forgotten Backup Chip");
+  });
+
+  it("exposes one unrezzed server card via Fortress Respecification without opening opponent choices", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-expose"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_088_fortress-respecification");
+    putCorpRootInRemote(state, "simple_upgrade");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId && action.payload?.serverId === "remote_1"
+    );
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      revealKind: "expose",
+      cardDefinitionId: "simple_upgrade",
+      title: "Simple Upgrade",
+      serverLabel: "Remote 1"
+    });
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -6382,6 +6461,37 @@ const ONR_V1_9_9_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1911_hidden_zone_wip",
+  name: "O:NR V1.9.11 Hidden-Zone WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_087_forgotten-backup-chip", quantity: 1 },
+    { id: "onr_v1_088_fortress-respecification", quantity: 1 },
+    { id: "onr_v1_089_gideons-pawnshop", quantity: 1 },
+    { id: "onr_v1_092_ice-and-datas-guide-to-the-net", quantity: 1 },
+    { id: "onr_v1_099_mantis-fixer-at-large", quantity: 1 },
+    { id: "onr_v1_110_sneak-preview", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1911_hidden_zone_wip",
+  name: "O:NR V1.9.11 Hidden-Zone WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "simple_agenda", quantity: 3 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_upgrade", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -6744,6 +6854,16 @@ function v199CardReleaseGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_9_RUNNER_DECK,
     corpDeck: ONR_V1_9_9_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1911HiddenZoneGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK,
+    corpDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

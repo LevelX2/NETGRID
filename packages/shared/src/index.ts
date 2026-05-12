@@ -1641,6 +1641,50 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "start_run", "breach", "access_replacement", "tag", "corp_draw", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_087_forgotten-backup-chip",
+    title: "Forgotten Backup Chip",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+    mechanics: ["play_event", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_088_fortress-respecification",
+    title: "Fortress Respecification",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Expose an unrezzed installed Corp card in the chosen fort.",
+    mechanics: ["play_event", "expose", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_089_gideons-pawnshop",
+    title: "Gideon's Pawnshop",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+    mechanics: ["play_event", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_092_ice-and-datas-guide-to-the-net",
+    title: "Ice and Data's Guide to the Net",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Reveal the top card of your stack.",
+    mechanics: ["play_event", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_085_executive-wiretaps",
     title: "Executive Wiretaps",
     side: "runner",
@@ -1650,6 +1694,28 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 0,
     rulesText: "Make a run on HQ. If successful, access two additional cards from HQ.",
     mechanics: ["play_event", "start_run", "breach", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_099_mantis-fixer-at-large",
+    title: "Mantis, Fixer-at-Large",
+    side: "runner",
+    type: "event",
+    subtypes: ["connection", "unique"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+    mechanics: ["play_event", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_110_sneak-preview",
+    title: "Sneak Preview",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Reveal the top card of your stack.",
+    mechanics: ["play_event", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_090_hot-tip-for-wns",

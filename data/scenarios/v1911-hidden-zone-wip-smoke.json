@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "id": "v1911-hidden-zone-wip-smoke",
+  "title": "V1.9.11 Hidden-Zone WIP Smoke",
+  "release": "V1.9.11",
+  "status": "wip",
+  "coversCards": [
+    "onr_v1_087_forgotten-backup-chip",
+    "onr_v1_088_fortress-respecification",
+    "onr_v1_089_gideons-pawnshop",
+    "onr_v1_092_ice-and-datas-guide-to-the-net",
+    "onr_v1_099_mantis-fixer-at-large",
+    "onr_v1_110_sneak-preview"
+  ],
+  "assertions": [
+    "Runner stack search opens a side-private PendingChoice.",
+    "The Corp PlayerView does not receive Runner search options.",
+    "Resolving search moves the selected program to grip and shuffles deterministically.",
+    "Replay after search resolution reproduces the same StateHash.",
+    "Reveal and expose publish only the explicitly revealed CardDefinition."
+  ],
+  "testRefs": ["packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP"],
+  "notCompletionGate": true
+}

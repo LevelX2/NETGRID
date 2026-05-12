@@ -275,6 +275,55 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       exposeCorpCardInServer(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, legalAction);
     }
   },
+  "onr_v1_087_forgotten-backup-chip": {
+    name: "onr_v1911_runner_event_search_stack_program_to_hand",
+    canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
+    resolve: (state, legalAction) => {
+      startRunnerStackSearchChoice(state);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
+    }
+  },
+  "onr_v1_088_fortress-respecification": {
+    name: "onr_v1911_runner_event_expose_unrezzed_server_card",
+    requiresServer: true,
+    canPlayForServer: (state, serverId) => exposedCorpCardInServer(state, serverId) !== undefined,
+    resolve: (state, legalAction) => {
+      exposeCorpCardInServer(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, legalAction);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1911_expose_server_card" };
+    }
+  },
+  "onr_v1_089_gideons-pawnshop": {
+    name: "onr_v1911_runner_event_search_stack_program_to_hand",
+    canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
+    resolve: (state, legalAction) => {
+      startRunnerStackSearchChoice(state);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
+    }
+  },
+  "onr_v1_092_ice-and-datas-guide-to-the-net": {
+    name: "onr_v1911_runner_event_reveal_stack_top",
+    canPlay: (state) => state.runner.stack.length > 0,
+    resolve: (state, legalAction) => {
+      revealRunnerStackTop(state, legalAction);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1911_reveal_stack_top" };
+    }
+  },
+  "onr_v1_099_mantis-fixer-at-large": {
+    name: "onr_v1911_runner_event_search_stack_program_to_hand",
+    canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
+    resolve: (state, legalAction) => {
+      startRunnerStackSearchChoice(state);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
+    }
+  },
+  "onr_v1_110_sneak-preview": {
+    name: "onr_v1911_runner_event_reveal_stack_top",
+    canPlay: (state) => state.runner.stack.length > 0,
+    resolve: (state, legalAction) => {
+      revealRunnerStackTop(state, legalAction);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1911_reveal_stack_top" };
+    }
+  },
   "onr_v1_079_bodyweight-synthetic-blood": {
     name: "onr_runner_event_draw_5",
     resolve: (state) => {

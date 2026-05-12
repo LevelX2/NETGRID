@@ -58,6 +58,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-12 22:45 CEST
+- Ergebnis: V1.9.11 Engine-WIP fuer sechs Hidden-Zone-Eventkarten umgesetzt; Cursor bleibt auf V1.9.11 `implementing`
+- Release: V1.9.11
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Forgotten Backup Chip`, `Fortress Respecification`, `Gideon's Pawnshop`, `Ice and Data's Guide to the Net`, `Mantis, Fixer-at-Large` und `Sneak Preview` haben WIP-Kartendefinitionen und Engine-Resolver fuer Search/Reveal/Expose ueber bestehende side-sichere Hidden-Zone-Pfade. Keine V1.9.12+-Karte wurde angefasst.
+- Tests: `v1-9-install-and-check.ps1 -Task engine` pass (205 Tests), `-Task catalog` pass (25 Tests), `-Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.11: hidden zone event resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.11 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil zehn Zielkarten, AI-Hints/-Smokes, Manifest/Coverage/Szenario, Server/Web und volle Pflichtchecks offen sind.
+
 - Zeitpunkt: 2026-05-12 22:33 CEST
 - Ergebnis: V1.9.11 release-spezifisch detailgeplant; Cursor bleibt auf V1.9.11 und wechselt von `planned` auf `implementing`
 - Release: V1.9.11
