@@ -32,9 +32,9 @@ Fuehre je Lauf diese Pruefungen aus:
 
 - Existiert die beaufsichtigte Automation `netgrid-v1-9-originalset-completion` und ist sie aktiv?
 - Existiert der Cursor `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md`?
-- Ist der Branch `codex/v1-9-originalset-completion` vorhanden und kann er von `origin` aktualisiert werden?
+- Ist der Worktree auf `origin/codex/v1-9-originalset-completion` oder einer daraus abgeleiteten detached-HEAD-Position?
 - Gibt es seit dem letzten Watchdog-Lauf Fortschritt durch neue Commits, Cursor-Aenderungen oder Review-/Releaseartefakte?
-- Existiert der Worker-Lock `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock`?
+- Existiert der Worker-Lock `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`?
 - Ist ein vorhandener Worker-Lock frisch oder eindeutig stale?
 - Gibt es uncommitted Aenderungen, die wie ein abgebrochener Worker-Lauf aussehen?
 - Ist die letzte Cursor-Phase plausibel fuer den aktuellen Release?
@@ -54,7 +54,7 @@ In diesen Faellen keine Reparatur versuchen. Schreibe hoechstens einen knappen W
 
 Der Watchdog darf:
 
-- einen eindeutig stale Worker-Lock unter `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` entfernen, wenn er aelter als etwa zwei Stunden ist und kein passender aktiver Prozess erkennbar ist
+- einen eindeutig stale Worker-Lock unter `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock` entfernen, wenn er aelter als etwa zwei Stunden ist und kein passender aktiver Prozess erkennbar ist
 - die bestehende Completion-Automation wieder auf aktiv setzen, falls sie pausiert ist und keine andere aktive Completion-Automation existiert
 - die Completion-Automation mit dem Prompt aus `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md` neu anlegen, falls sie fehlt und keine gleichwertige aktive Automation existiert
 - bei einem abgebrochenen Worker-Lauf eindeutig versionierbare, releasebezogene Aenderungen als Watchdog-Rettungs-WIP committen und pushen
@@ -88,6 +88,7 @@ Wenn kein Automationswerkzeug verfuegbar ist, dokumentiere den Befund und pushe 
 ## Git-Regeln
 
 - Arbeitsbranch: `codex/v1-9-originalset-completion`.
+- Worktree-Regel: Nicht in den lokalen Hauptworkspace `C:\Projekte\NETGRID` wechseln. Im eigenen Worktree `origin/codex/v1-9-originalset-completion` laden; falls noetig detached arbeiten und per `git push origin HEAD:refs/heads/codex/v1-9-originalset-completion` pushen.
 - Watchdog-Commit-Muster: `WATCHDOG V1.9 completion: <kurzer Befund oder Fix>`.
 - Committe nur Watchdog-/Cursor-/Report-/klar gerettete WIP-Aenderungen.
 - Pushe nach `origin/codex/v1-9-originalset-completion`, wenn ein Commit erzeugt wurde.

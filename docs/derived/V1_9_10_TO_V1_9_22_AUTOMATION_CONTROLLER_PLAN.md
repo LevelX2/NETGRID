@@ -50,9 +50,9 @@ Mindestinhalt:
 
 Empfohlener unversionierter Lock:
 
-`%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock`
+`C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`
 
-Der Lock muss außerhalb versionierter Artefakte bleiben. Er verhindert, dass zwei Stundenläufe dieselbe Releasearbeit parallel anfassen. Der fruehere Pfad `.codex/runtime/v1_9_originalset_completion.lock` ist nicht mehr verbindlich, weil der lokale Automationsmodus diese Repo-Flaeche per ACL schuetzt.
+Der Lock muss außerhalb versionierter Artefakte bleiben. Er verhindert, dass zwei Stundenläufe dieselbe Releasearbeit parallel anfassen. Der fruehere Pfad `.codex/runtime/v1_9_originalset_completion.lock` ist nicht mehr verbindlich, weil der lokale Automationsmodus diese Repo-Flaeche per ACL schuetzt. Der absolute Pfad ist bewusst ausgeschrieben, damit Automationslaeufe `%LOCALAPPDATA%` nicht als Literalpfad missverstehen.
 
 ## State Machine
 
