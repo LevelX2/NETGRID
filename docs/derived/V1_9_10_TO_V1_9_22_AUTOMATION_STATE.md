@@ -3,14 +3,14 @@
 Status: active
 Stand: 2026-05-12
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
-Automation-ID: `netgrid-v1-9-originalset-completion`
-Watchdog-Automation-ID: `netgrid-v1-9-originalset-watchdog`
-Ausfuehrung: stündliche aktive Codex-Cron-Automation als Worktree-Lauf fuer den NETGRID-Workspace
+Automation-ID: `netgrid-v1-9-originalset-completion-local`
+Watchdog-Automation-ID: gelöscht / nicht aktiv
+Ausfuehrung: stündliche aktive Codex-Cron-Automation im festen lokalen Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`
 Branch: `codex/v1-9-originalset-completion`
 Primaerer Agent: release-implementation-agent
 Kontrollartefakt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md`
 Controller-Prompt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md`
-Watchdog-Prompt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_WATCHDOG_PROMPT.md`
+Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
@@ -31,11 +31,11 @@ Completion-Modus: Gate-pflichtig
 
 ## Lock
 
-Lokaler, nicht versionierter Lock ausserhalb der geschuetzten Repo-`.codex`-Flaeche:
+Lokaler, nicht versionierter Lock im ignorierten Laufzeitbereich des festen Automations-Worktrees:
 
-`C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`
+`C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`
 
-Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur uebernommen werden, wenn er eindeutig stale ist und der vorherige Prozess nicht mehr laeuft. Der fruehere Lock-Pfad `.codex/runtime/v1_9_originalset_completion.lock` ist nicht mehr verbindlich, weil der lokale Automationsmodus diese Repo-Flaeche per ACL schuetzt. Der absolute Lockpfad ist verbindlich; Automationslaeufe duerfen `%LOCALAPPDATA%` nicht als Literalpfad verwenden.
+Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur uebernommen werden, wenn er eindeutig stale ist und der vorherige Prozess nicht mehr laeuft. Die frueheren Lock-Pfade `.codex/runtime/v1_9_originalset_completion.lock`, `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` und `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock` sind nicht mehr verbindlich, weil sie in Automationslaeufen per ACL blockiert sein koennen.
 
 ## Release-Reihenfolge
 
@@ -57,15 +57,14 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-12 08:35:39 +02:00
+- Zeitpunkt: 2026-05-12 nach explizitem Nutzerstart
 - Ergebnis: Lauf vor Umsetzungsstart blockiert (kein Release-Fortschritt)
-- Release: V1.9.10
-- Phase vorher: planned
+- Release: keiner, weil der Lauf vor Lesen des Release-Cursors am Lock-Gate stoppte
+- Phase vorher: Bootstrap
 - Phase nachher: blocked
-- Grund: Externer Pflicht-Lock `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` kann in diesem Lauf nicht angelegt werden (`Access denied` auf den Lock-Pfad).
+- Grund: Externer Pflicht-Lock `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock` kann im festen Automations-Worktree-Lauf nicht angelegt werden (`Access denied` auf den Lock-Pfad).
 - Umsetzung/Tests: keine, um Parallelitaetsrisiken ohne Lock zu vermeiden.
-- Nachtrag 2026-05-12: Branch/Controller-Kontext ist korrekt (`codex/v1-9-originalset-completion`, Cursor V1.9.10), aber ohne schreibbaren externen Lock bleibt der Release gesperrt.
-- Nachtrag 2026-05-12: Der dritte Test zeigte, dass `%LOCALAPPDATA%` und die Worktree-Branchbindung missverstaendlich waren. Der verbindliche Lockpfad ist jetzt absolut `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`. Worktree-Laeufe duerfen nicht in den lokalen Hauptworkspace `C:\Projekte\NETGRID` zurueckspringen, sondern muessen im eigenen Worktree `origin/codex/v1-9-originalset-completion` laden oder detached darauf arbeiten. Cursor wieder auf `planned`; naechster Completion-Lauf darf V1.9.10 erneut starten.
+- Nachtrag 2026-05-12: Workspace/Branch/Status sind korrekt (`C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`, `codex/v1-9-originalset-completion`, Git-Status sauber). Der verbindliche Lockpfad wurde auf den ignorierten Worktree-Pfad `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock` umgestellt. Cursor bleibt `planned`; der naechste Completion-Lauf darf V1.9.10 erneut starten.
 
 ## Letzter Commit
 
@@ -81,28 +80,28 @@ Kein neuer Push in diesem Lauf, weil der Lauf vor Implementierung/Commit am Lock
 ## Blocker
 
 - Blocker-ID: LOCK_PATH_PERMISSION_DENIED_2026-05-12
-- Status: behoben durch Lock-Pfadwechsel
+- Status: behoben durch Worktree-Lockpfad
 - Betroffener Release: V1.9.10
 - Beschreibung: Der vorgeschriebene lokale Lock-Pfad unter `.codex/runtime/` ist nicht beschreibbar. `icacls .codex` zeigt einen expliziten DENY-Eintrag fuer den aktiven Nutzer auf Write/Delete/Create-Rechte.
 - Removal Condition: Schreibrechte auf `C:\Projekte\NETGRID\.codex` (mindestens fuer das Anlegen/Loeschen von `.codex/runtime/v1_9_originalset_completion.lock`) wiederherstellen oder den verbindlichen Lock-Pfad in den Steuerartefakten auf einen beschreibbaren lokalen Runtime-Pfad umstellen.
 - Letzter Befund: 2026-05-12 09:31:02 +02:00, `Set-Content` auf `.codex/runtime/v1_9_originalset_completion.lock` mit `Access denied` fehlgeschlagen.
-- Behoben durch: verbindlicher Lock-Pfad ist jetzt `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`; Schreibtest auf diesem Pfad war erfolgreich.
+- Behoben durch: verbindlicher Lock-Pfad ist jetzt `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`; Schreibtest auf diesem Pfad war erfolgreich.
 - Blocker-ID: EXTERNAL_LOCK_PERMISSION_DENIED_2026-05-12
-- Status: behoben durch absoluten Lockpfad
+- Status: behoben durch Worktree-Lockpfad
 - Betroffener Release: V1.9.10
 - Beschreibung: Im aktuellen Lauf ist auch der verbindliche externe Lock-Pfad `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` nicht schreibbar; `Set-Content` liefert `Access denied`.
 - Removal Condition: Schreibrechte auf `%LOCALAPPDATA%\NETGRID\automation\` fuer die Automation wiederherstellen oder den verbindlichen Lock-Pfad auf einen beschreibbaren, nicht versionierten Runtime-Pfad umstellen und in Controller/Prompt/State konsistent nachziehen.
 - Letzter Befund: 2026-05-12 08:35:39 +02:00, Lock-Erzeugung auf `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` fehlgeschlagen.
-- Behoben durch: verbindlicher Lockpfad ist jetzt absolut `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`; Schreibtest auf diesem Pfad war im Hauptkontext erfolgreich.
+- Behoben durch: verbindlicher Lockpfad ist jetzt `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`; Schreibtest auf diesem Pfad war im festen Automations-Worktree erfolgreich.
 - Blocker-ID: GIT_INDEX_LOCK_PERMISSION_DENIED_2026-05-12
-- Status: offen
+- Status: vermutlich behoben durch festen lokalen Automations-Worktree, erneut im naechsten Lauf zu verifizieren
 - Betroffener Release: V1.9.10
 - Beschreibung: `git commit` kann keine `.git/index.lock` erzeugen (`Permission denied`), daher sind WIP-Commit und Abschlusscommit blockiert.
 - Removal Condition: Schreibrechte fuer Lock-Erzeugung in `C:\Projekte\NETGRID\.git` wiederherstellen; danach `git add`, `git commit` und `git push` erneut ausfuehren.
 - Letzter Befund: 2026-05-12 08:37:11 +02:00, `git commit` scheitert erneut mit `Unable to create .git/index.lock: Permission denied`.
-- Umgehung: Worktree-Ausfuehrung ist weiterhin vorgesehen. Wenn der Worktree detached oder auf `main` startet, muss der Lauf im eigenen Worktree `origin/codex/v1-9-originalset-completion` laden und darf nicht nach `C:\Projekte\NETGRID` wechseln. Pushing aus detached HEAD erfolgt per `git push origin HEAD:refs/heads/codex/v1-9-originalset-completion`.
+- Umgehung: fester lokaler Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET` auf `codex/v1-9-originalset-completion`; der Lauf darf nicht nach `C:\Projekte\NETGRID` wechseln.
 
 ## Watchdog
 
-Status: aktiv vorbereitet
-Aufgabe: stündlich prüfen, ob die Completion-Automation weiterlaufen kann; stale Locks, pausierte/fehlende Automation und abgebrochene WIP-Stände nach engen Regeln beheben.
+Status: gelöscht / nicht aktiv
+Aufgabe: kein separater Watchdog aktiv; Kontrolle erfolgt aktuell durch explizite Nutzerstarts und den Completion-Controller selbst.

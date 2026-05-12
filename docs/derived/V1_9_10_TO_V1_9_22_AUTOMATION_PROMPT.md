@@ -28,8 +28,8 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 
 ## Laufsteuerung
 
-0. Worktree-Preflight vor dem Lesen der Release-Artefakte: Arbeite im aktuellen Automations-Worktree. Wechsle nicht in den lokalen Hauptworkspace `C:\Projekte\NETGRID`. Falls der Worktree nicht auf der Completion-Linie steht, fuehre im aktuellen Worktree `git fetch origin codex/v1-9-originalset-completion` aus und wechsle auf `origin/codex/v1-9-originalset-completion`. Wenn der Branch wegen eines anderen Worktrees nicht direkt ausgecheckt werden kann, arbeite detached auf `origin/codex/v1-9-originalset-completion` und pushe spaetere Commits mit `git push origin HEAD:refs/heads/codex/v1-9-originalset-completion`.
-1. Pruefe den lokalen Lock `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`.
+0. Worktree-Preflight vor dem Lesen der Release-Artefakte: Fester Automations-Workspace ist `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`. Falls dieser Worktree fehlt, lege ihn aus `C:\Projekte\NETGRID` per `git worktree add C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET codex/v1-9-originalset-completion` an. Arbeite danach ausschliesslich im festen Automations-Worktree und wechsle nicht in den lokalen Hauptworkspace `C:\Projekte\NETGRID`.
+1. Pruefe den lokalen Lock `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`.
 2. Wenn ein aktiver nicht-staler Lock existiert, stoppe ohne Aenderungen.
 3. Lege fuer den eigenen Lauf einen Lock an und entferne ihn am Ende.
 4. Stelle sicher, dass der Branch `codex/v1-9-originalset-completion` aktiv ist.
@@ -54,8 +54,7 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 ## Git-Regeln
 
 - Arbeitsbranch: `codex/v1-9-originalset-completion`.
-- Ausfuehrung: Worktree-Automation; nicht auf den geschuetzten lokalen Hauptworkspace-`.git`-Pfad verlassen und nicht in `C:\Projekte\NETGRID` zurueckwechseln.
-- Falls detached auf `origin/codex/v1-9-originalset-completion` gearbeitet wird, ist Push per `git push origin HEAD:refs/heads/codex/v1-9-originalset-completion` erlaubt.
+- Ausfuehrung: fester lokaler Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`; nicht in `C:\Projekte\NETGRID` zurueckwechseln.
 - Kein Push nach `main`.
 - Kein Force-Push.
 - Keine fremden Nutzeränderungen revertieren.

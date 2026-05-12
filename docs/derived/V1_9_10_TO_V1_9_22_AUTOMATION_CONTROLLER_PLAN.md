@@ -50,9 +50,9 @@ Mindestinhalt:
 
 Empfohlener unversionierter Lock:
 
-`C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`
+`C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`
 
-Der Lock muss außerhalb versionierter Artefakte bleiben. Er verhindert, dass zwei Stundenläufe dieselbe Releasearbeit parallel anfassen. Der fruehere Pfad `.codex/runtime/v1_9_originalset_completion.lock` ist nicht mehr verbindlich, weil der lokale Automationsmodus diese Repo-Flaeche per ACL schuetzt. Der absolute Pfad ist bewusst ausgeschrieben, damit Automationslaeufe `%LOCALAPPDATA%` nicht als Literalpfad missverstehen.
+Der Lock muss außerhalb versionierter Artefakte bleiben. Er verhindert, dass zwei Stundenläufe dieselbe Releasearbeit parallel anfassen. `.codex-runlogs/` ist im Repo ignoriert und im festen Automations-Worktree beschreibbar. Die frueheren Pfade `.codex/runtime/v1_9_originalset_completion.lock` und `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock` sind nicht mehr verbindlich, weil sie in Automationsläufen per ACL blockiert sein koennen.
 
 ## State Machine
 
@@ -221,5 +221,5 @@ Nicht empfehlenswert:
 Empfohlener nächster Schritt:
 
 1. Cursor und Controller-Prompt versionieren.
-2. Stündliche Codex-Cron-Automation auf den NETGRID-Workspace legen.
+2. Stündliche Codex-Cron-Automation auf den festen Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET` legen.
 3. Abends die WIP-/Release-Commits, Pushes, Blocker und Abschlussreviews prüfen.
