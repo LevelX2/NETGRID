@@ -77,6 +77,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
   createRuntimeCardsById,
@@ -108,6 +109,7 @@ import {
   ONR_V1_9_8_RELEASE_CARD_IDS,
   ONR_V1_9_9_RELEASE_CARD_IDS,
   ONR_V1_9_11_RELEASE_CARD_IDS,
+  ONR_V1_9_12_RELEASE_CARD_IDS,
   ONR_V1_9_12_WIP_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
@@ -232,7 +234,8 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_9_8_RELEASE_CARD_IDS).toHaveLength(2);
     expect(ONR_V1_9_9_RELEASE_CARD_IDS).toHaveLength(4);
     expect(ONR_V1_9_11_RELEASE_CARD_IDS).toHaveLength(16);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(159);
+    expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(170);
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
@@ -252,12 +255,15 @@ describe("catalog import and status logic", () => {
         ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
-        ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS
+        ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS
       ];
       expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
       expect(card?.statuses.format_legal).toBe(true);
-      const expectedManifest = (ONR_V1_9_11_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+      const expectedManifest = (ONR_V1_9_12_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.12"
+        : (ONR_V1_9_11_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.9.11"
         : (ONR_V1_9_9_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.9.9"
@@ -501,8 +507,8 @@ describe("catalog import and status logic", () => {
     const runtimeOnrCards = Object.values(cardsById).filter((card) => card.catalogCardId.startsWith("onr_v1_") && card.statuses.human_playable && card.statuses.deck_legal);
     const runtimeAiSupportedOnrCards = runtimeOnrCards.filter((card) => card.statuses.ai_supported);
     expect(runtimeOnrCards.map((card) => card.catalogCardId).sort()).toEqual([...ONR_V1_RUNTIME_RELEASE_CARD_IDS].sort());
-    expect(runtimeOnrCards).toHaveLength(159);
-    expect(runtimeAiSupportedOnrCards).toHaveLength(159);
+    expect(runtimeOnrCards).toHaveLength(170);
+    expect(runtimeAiSupportedOnrCards).toHaveLength(170);
 
     expect(v1910RuntimeStatusReportData.counts.localOriginalsetCards).toBe(374);
     expect(v1910RuntimeStatusReportData.counts.runtimeHumanPlayableDeckLegalCards).toBe(143);
@@ -587,7 +593,8 @@ describe("catalog import and status logic", () => {
         ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
-        ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS
+        ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS
       ].sort()
     );
     expect(JSON.stringify({ kingOfTheRoadAiHintsData, kingOfTheRoadManifestData, kingOfTheRoadScenarioData })).not.toMatch(
@@ -1042,9 +1049,9 @@ describe("catalog import and status logic", () => {
     );
   });
 
-  it("tracks V1.9.12 counter/recurring WIP artifacts without promoting the release", () => {
+  it("approves the V1.9.12 counter/recurring slice only after catalog, manifest, hint and scenario gates", () => {
     const cardsById = createRuntimeCardsById();
-    const wip = new Set<string>(ONR_V1_9_12_WIP_CARD_IDS);
+    const approved = new Set<string>(DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS);
     const hints = deckLegalV1912AiHintsData.cards as Array<{
       cardId: string;
       roles: string[];
@@ -1053,40 +1060,45 @@ describe("catalog import and status logic", () => {
       aiSupportStatus: string;
       scenarioRefs: string[];
     }>;
-    const manifestCards = deckLegalV1912ManifestData.cards as Array<{ cardId: string; scenarioRefs: string[] }>;
+    const manifestCards = deckLegalV1912ManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
     const implementationCards = cardImplementationManifest1912Data.cards as Array<{ cardCode: string; releaseStatus: string; aiSupported: boolean; resolverFamily: string }>;
     const scenarioCards = new Set((deckLegalV1912ScenarioData.scenarios as Array<{ coversCards: string[] }>).flatMap((scenario) => scenario.coversCards));
 
-    expect(ONR_V1_9_12_WIP_CARD_IDS).toHaveLength(11);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).not.toEqual(expect.arrayContaining([...ONR_V1_9_12_WIP_CARD_IDS]));
-    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...wip].sort());
-    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...wip].sort());
-    expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...wip].sort());
-    expect(v1912WipScenarioData.coversCards.sort()).toEqual([...wip].sort());
-    expect([...scenarioCards].sort()).toEqual([...wip].sort());
-    expect(cardImplementationManifest1912Data.gateAssertions.allCardsHumanPlayable).toBe(false);
-    expect(cardImplementationManifest1912Data.gateAssertions.allCardsDeckLegal).toBe(false);
-    expect(cardImplementationManifest1912Data.gateAssertions.allCardsAiSupported).toBe(false);
-    expect(deckLegalV1912ScenarioData.completionGate.aiSupported).toBe(false);
-    expect(v1912MechanicsCoverageData.gateAssertions.typedCounterVirusPurgeResolverWip).toBe(true);
-    expect(v1912MechanicsCoverageData.gateAssertions.recurringPoolStartTurnResolverWip).toBe(true);
+    expect(DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS).toHaveLength(11);
+    expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
+    expect(ONR_V1_9_12_WIP_CARD_IDS).toEqual(ONR_V1_9_12_RELEASE_CARD_IDS);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_12_RELEASE_CARD_IDS]));
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...approved].sort());
+    expect(v1912WipScenarioData.coversCards.sort()).toEqual([...approved].sort());
+    expect([...scenarioCards].sort()).toEqual([...approved].sort());
+    expect(cardImplementationManifest1912Data.gateAssertions.allCardsHumanPlayable).toBe(true);
+    expect(cardImplementationManifest1912Data.gateAssertions.allCardsDeckLegal).toBe(true);
+    expect(cardImplementationManifest1912Data.gateAssertions.allCardsAiSupported).toBe(true);
+    expect(deckLegalV1912ScenarioData.completionGate.aiSupported).toBe(true);
+    expect(v1912MechanicsCoverageData.gateAssertions.typedCounterVirusPurgeResolverImplemented).toBe(true);
+    expect(v1912MechanicsCoverageData.gateAssertions.recurringPoolStartTurnResolverImplemented).toBe(true);
 
-    for (const cardId of ONR_V1_9_12_WIP_CARD_IDS) {
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS) {
       const runtimeCard = cardsById[cardId];
       const hint = hints.find((candidate) => candidate.cardId === cardId);
       const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
       const implementation = implementationCards.find((candidate) => candidate.cardCode === cardId);
-      expect(runtimeCard?.statuses.human_playable ?? false, cardId).toBe(false);
-      expect(runtimeCard?.statuses.deck_legal ?? false, cardId).toBe(false);
-      expect(runtimeCard?.statuses.ai_supported ?? false, cardId).toBe(false);
-      expect(hint?.aiSupportStatus, cardId).toBe("wip_pending_smoke");
+      expect(runtimeCard?.statuses.human_playable, cardId).toBe(true);
+      expect(runtimeCard?.statuses.deck_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.format_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.ai_supported, cardId).toBe(true);
+      expect(runtimeCard?.implementationManifest?.manifestVersion, cardId).toBe("card-implementation-manifest-v1.9.12");
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
       expect(hint?.roles.length, cardId).toBeGreaterThan(0);
       expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
       expect(hint?.requiredMechanics.length, cardId).toBeGreaterThan(0);
       expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
       expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
-      expect(implementation?.releaseStatus, cardId).toBe("engine_wip");
-      expect(implementation?.aiSupported, cardId).toBe(false);
+      expect(implementation?.releaseStatus, cardId).toBe("human_playable");
+      expect(implementation?.aiSupported, cardId).toBe(true);
       expect(implementation?.resolverFamily.length, cardId).toBeGreaterThan(0);
       expect(scenarioCards.has(cardId), cardId).toBe(true);
     }

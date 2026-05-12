@@ -531,7 +531,7 @@ export const ONR_V1_9_11_RELEASE_CARD_IDS = [
   "onr_v1_272_too-many-doors"
 ] as const;
 
-export const ONR_V1_9_12_WIP_CARD_IDS = [
+export const ONR_V1_9_12_RELEASE_CARD_IDS = [
   "onr_v1_009_butcher-boy",
   "onr_v1_010_cascade",
   "onr_v1_017_deep-thought",
@@ -544,6 +544,8 @@ export const ONR_V1_9_12_WIP_CARD_IDS = [
   "onr_v1_198_detroit-police-contract",
   "onr_v1_199_employee-empowerment"
 ] as const;
+
+export const ONR_V1_9_12_WIP_CARD_IDS = ONR_V1_9_12_RELEASE_CARD_IDS;
 
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
@@ -568,7 +570,8 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_9_7_RELEASE_CARD_IDS,
   ...ONR_V1_9_8_RELEASE_CARD_IDS,
   ...ONR_V1_9_9_RELEASE_CARD_IDS,
-  ...ONR_V1_9_11_RELEASE_CARD_IDS
+  ...ONR_V1_9_11_RELEASE_CARD_IDS,
+  ...ONR_V1_9_12_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -742,6 +745,8 @@ export const DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS = [...ONR_V1_9_9_RELEASE_CARD_
 
 export const DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS = [...ONR_V1_9_11_RELEASE_CARD_IDS] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS = [...ONR_V1_9_12_RELEASE_CARD_IDS] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
@@ -754,7 +759,8 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS
 ]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
@@ -778,6 +784,7 @@ const ONR_V1_9_7_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_7_RELEASE_CARD_I
 const ONR_V1_9_8_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_8_RELEASE_CARD_IDS);
 const ONR_V1_9_9_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_9_RELEASE_CARD_IDS);
 const ONR_V1_9_11_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_11_RELEASE_CARD_IDS);
+const ONR_V1_9_12_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_12_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -987,6 +994,15 @@ const ONR_V1_9_11_RELEASE_MANIFEST: CatalogManifestReference = {
     "data/scenarios/v1911-hidden-zone-release-smoke.json"
   ],
   replayTests: ["packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP"]
+};
+
+const ONR_V1_9_12_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.12",
+  status: "human_playable_v1_9_12_counter_virus_recurring_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.12 Counter/Virus/Recurring", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1912-counter-virus-recurring-release-smoke.json", "data/scenarios/ai-deck-legal-v1912-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.12 Counter/Virus/Recurring", "data/scenarios/v1912-counter-virus-recurring-release-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.12 Counter/Virus/Recurring"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -1433,6 +1449,20 @@ const ONR_V1_9_9_TEXT_OVERRIDES: Partial<Record<string, string>> = {
 };
 
 const ONR_V1_9_11_TEXT_OVERRIDES: Partial<Record<string, string>> = {};
+
+const ONR_V1_9_12_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_009_butcher-boy": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+  "onr_v1_010_cascade": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+  "onr_v1_017_deep-thought": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+  "onr_v1_032_i-spy": "Installed helper: reveal the top card of the Runner stack through a side-safe reveal action.",
+  "onr_v1_064_skivviss": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+  "onr_v1_082_deal-with-militech": "Search the stack for a program, reveal it, add it to the grip, then shuffle the stack.",
+  "onr_v1_091_hunt-club-bbs": "Reveal the top card of the Runner stack.",
+  "onr_v1_174_rigged-investments": "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
+  "onr_v1_176_the-shell-traders": "1 recurring credit for run costs. Used counters refresh at the start of each Runner turn.",
+  "onr_v1_198_detroit-police-contract": "Put 4 power counters on Detroit Police Contract when you score it. [A]: Remove 1 power counter to gain 1 credit.",
+  "onr_v1_199_employee-empowerment": "While scored, gain 1 credit at the start of each Corp turn."
+};
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
   return {
@@ -2277,6 +2307,7 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV1912 = ONR_V1_9_12_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1911 = ONR_V1_9_11_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV199 = ONR_V1_9_9_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV198 = ONR_V1_9_8_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -2299,7 +2330,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV1911
+  const textOverrides = isV1912
+    ? ONR_V1_9_12_TEXT_OVERRIDES
+    : isV1911
     ? ONR_V1_9_11_TEXT_OVERRIDES
     : isV199
     ? ONR_V1_9_9_TEXT_OVERRIDES
@@ -2344,7 +2377,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV1911
+  const numericOverrides = isV1912
+    ? {}
+    : isV1911
     ? ONR_V1_9_11_NUMERIC_OVERRIDES
     : isV199
     ? ONR_V1_9_9_NUMERIC_OVERRIDES
@@ -2389,7 +2424,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV1911
+  const manifest = isV1912
+    ? ONR_V1_9_12_RELEASE_MANIFEST
+    : isV1911
     ? ONR_V1_9_11_RELEASE_MANIFEST
     : isV199
     ? ONR_V1_9_9_RELEASE_MANIFEST

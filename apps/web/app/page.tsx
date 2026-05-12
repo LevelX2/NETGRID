@@ -171,7 +171,7 @@ const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
 const DEFAULT_DECK_FORMAT_PROFILE_VERSION = "1.3.0";
 const APP_NAME = "NETGRID";
-const APP_STATUS_LABEL = "V1.9.11";
+const APP_STATUS_LABEL = "V1.9.12";
 const APP_BRAND_ASSET_VERSION = "2026-05-10-brand-fix-2";
 const APP_ICON_SRC = `/brand/netgrid-icon-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;
 const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASSET_VERSION}`;

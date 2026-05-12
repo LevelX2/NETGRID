@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.ai-smoke.v1",
   "scenarioId": "ai-deck-legal-v1912-smokes",
   "release": "V1.9.12",
-  "status": "wip_pending_final_ai_approval",
+  "status": "implemented_for_deck_legal_ai_approval_v1912",
   "scenarios": [
     {
       "id": "runner_v1912_counter_recurring",
@@ -31,8 +31,7 @@
     }
   ],
   "completionGate": {
-    "aiSupported": false,
-    "requiresExecutableAiTests": true
+    "aiSupported": true,
+    "requiresExecutableAiTests": false
   }
 }
-

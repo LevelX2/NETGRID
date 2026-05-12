@@ -1,15 +1,15 @@
-# V1.9.12 Implementation Review - WIP
+# V1.9.12 Implementation Review
 
-Stand: 2026-05-13 00:24 CEST
-Status: implementing
+Stand: 2026-05-13 00:58 CEST
+Status: implemented_final
 
-## Umgesetzter WIP-Scope
+## Umgesetzter Scope
 
 - V1.9.12 ist aus `planned` in `implementing` ueberfuehrt.
 - Detailplan, Requirements, Counter/Virus/Recurring-Spec, Testmatrix und Requirements Review sind versioniert.
 - Alle elf Zielkarten haben Runtime-Definitionen in `packages/shared/src/index.ts`.
-- `packages/catalog/src/index.ts` fuehrt die elf Zielkarten als explizite V1.9.12-WIP-Liste, ohne sie in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` aufzunehmen.
-- `packages/catalog/src/index.test.ts` prueft Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und WIP-Szenario auf dieselbe 11er-Zielmenge und bestaetigt, dass `human_playable`, `deck_legal` und `ai_supported` noch nicht promotet sind.
+- `packages/catalog/src/index.ts` fuehrt die elf Zielkarten jetzt in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` und `DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS`.
+- `packages/catalog/src/index.test.ts` prueft Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und Szenario auf dieselbe 11er-Zielmenge und bestaetigt `human_playable`, `deck_legal` und `ai_supported`.
 - Die Engine nutzt vorhandene Counter-, Virus-/Purge- und Recurring-Helfer fuer den ersten WIP-Schnitt:
   - Virus-Programme erhalten beim Installieren Virus-Counter.
   - Recurring-Counter werden auf Programmen und Resources initialisiert.
@@ -17,14 +17,7 @@ Status: implementing
   - I Spy, Deal with Militech und Hunt Club BBS nutzen side-sichere Hidden-Zone-Pfade.
   - Detroit Police Contract nutzt einen typisierten scored-Agenda-Counter-Pfad.
   - Employee Empowerment nutzt einen scored-Agenda-Start-of-turn-Economy-Pfad.
-
-## Noch nicht abgeschlossen
-
-- Keine finale Katalog-/Manifest-/Coverage-/AI-Promotion; die Katalogseite hat nur einen WIP-No-Promotion-Guard.
-- WIP-Gate-Artefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und AI-Approval-Manifest sind angelegt, aber bewusst nicht als finale Freigabe markiert.
-- Keine Webclient-Version auf V1.9.12 angehoben.
-- Exakte per-card Textfinalisierung muss vor Final Gate nachgezogen werden. Der fruehere harte Gate-Blocker in `docs/derived/V1_9_12_FINALIZATION_BLOCKER.md` ist durch die aktive Display-Text-Finalization-Policy aufgeloest: Die Automation darf aus lokal bestaetigten Regelkern-Aussagen finale display-only Texte ableiten.
-- Finale ausfuehrbare AI-Smokes und volle Pflichtchecks stehen noch aus.
+- Die elf sichtbaren Kartentexte sind nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZATION_POLICY.md` finalisierte display-only Texte aus lokal bestaetigten Regelkern-Aussagen; sie sind keine Parser-, Engine-, LegalAction-, KI-, Replay- oder StateHash-Autoritaet.
 
 ## Verifikation
 
@@ -37,13 +30,14 @@ Status: implementing
 - `v1-9-install-and-check.ps1 -Task test`: pass.
 - `v1-9-install-and-check.ps1 -Task lint`: pass.
 - `v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-- JSON-Validation der V1.9.12-WIP-Artefakte: pass.
+- JSON-Validation der V1.9.12-Artefakte: pass, 233 `data/**/*.json`.
+- Finale Pflichtcheck-Wiederholung: pass, siehe `docs/derived/V1_9_12_FINAL_REVIEW.md`.
 
 ## Gate-Status
 
-`V1_9_12_done: false`
+`V1_9_12_done: true`
 
-`V1_9_12_phase: implementing`
+`V1_9_12_phase: final`
 
 `hard_gate_blocker: none`
 

@@ -4165,10 +4165,10 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 });
 
-describe("V1.9.12 Counter/Virus/Recurring WIP", () => {
-  it("adds scoped V1.9.12 WIP definitions without pulling in V1.9.13 cards", () => {
-    expect(ONR_V1_9_12_WIP_CARD_IDS).toHaveLength(11);
-    for (const definitionId of ONR_V1_9_12_WIP_CARD_IDS) {
+describe("V1.9.12 Counter/Virus/Recurring", () => {
+  it("adds scoped V1.9.12 definitions without pulling in V1.9.13 cards", () => {
+    expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
+    for (const definitionId of ONR_V1_9_12_RELEASE_CARD_IDS) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
@@ -5947,7 +5947,7 @@ const ONR_V1_9_6_FINAL_CARD_IDS = ["onr_v1_236_data-raven"] as const;
 const ONR_V1_9_7_FINAL_CARD_IDS = ["onr_v1_001_afreet"] as const;
 const ONR_V1_9_8_FINAL_CARD_IDS = ["onr_v1_018_dogcatcher", "onr_v1_019_dropp"] as const;
 const ONR_V1_9_9_FINAL_CARD_IDS = ["onr_v1_349_aardvark", "onr_v1_351_bizarre-encryption-scheme", "onr_v1_352_chester-mix", "onr_v1_353_chimera"] as const;
-const ONR_V1_9_12_WIP_CARD_IDS = [
+const ONR_V1_9_12_RELEASE_CARD_IDS = [
   "onr_v1_009_butcher-boy",
   "onr_v1_010_cascade",
   "onr_v1_017_deep-thought",

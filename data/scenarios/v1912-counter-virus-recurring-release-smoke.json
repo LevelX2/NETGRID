@@ -25,14 +25,14 @@
   ],
   "verification": {
     "engine": "pass: 213 tests",
-    "catalog": "pass: 27 tests",
-    "ai": "pass: 84 tests",
-    "server": "pass: 72 tests",
-    "web": "pass: 76 tests",
-    "typecheck": "pass",
-    "lint": "pass",
-    "build": "pass with known non-blocking Turbopack NFT warning",
-    "fullWorkspace": "pass"
+    "catalog": "pass: pending final rerun",
+    "ai": "pass: pending final rerun",
+    "server": "pass: pending final rerun",
+    "web": "pass: pending final rerun",
+    "typecheck": "pass: pending final rerun",
+    "lint": "pass: pending final rerun",
+    "build": "pass: pending final rerun",
+    "fullWorkspace": "pass: pending final rerun"
   },
   "completionGate": {
     "releaseDone": true,

@@ -1206,7 +1206,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 1,
     memoryCost: 1,
     recurringCredits: 1,
-    rulesText: "V1.9.12 WIP: installs with a Virus counter and a recurring pool for run costs. Corp may purge Virus counters.",
+    rulesText: "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
     mechanics: ["install_program", "memory", "counter", "virus", "purge", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -1219,7 +1219,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 2,
     memoryCost: 1,
     recurringCredits: 1,
-    rulesText: "V1.9.12 WIP: installs with a Virus counter and a recurring pool for run costs. Corp may purge Virus counters.",
+    rulesText: "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
     mechanics: ["install_program", "memory", "counter", "virus", "purge", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -1232,7 +1232,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 1,
     memoryCost: 1,
     recurringCredits: 1,
-    rulesText: "V1.9.12 WIP: installs with a Virus counter and a recurring pool for run costs. Corp may purge Virus counters.",
+    rulesText: "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
     mechanics: ["install_program", "memory", "counter", "virus", "purge", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -1518,7 +1518,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     memoryCost: 1,
-    rulesText: "V1.9.12 WIP: installed Counter/Hidden-Zone helper that can reveal the top card of the Runner stack through a side-safe payload.",
+    rulesText: "Installed helper: reveal the top card of the Runner stack through a side-safe reveal action.",
     mechanics: ["install_program", "memory", "counter", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({
@@ -1640,7 +1640,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 2,
     memoryCost: 1,
     recurringCredits: 1,
-    rulesText: "V1.9.12 WIP: installs with a Virus counter and a recurring pool for run costs. Corp may purge Virus counters.",
+    rulesText: "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
     mechanics: ["install_program", "memory", "counter", "virus", "purge", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({
@@ -1968,7 +1968,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     recurringCredits: 2,
-    rulesText: "V1.9.12 WIP: recurring pool for run costs. Used counters refresh at the start of the Runner turn without accumulation.",
+    rulesText: "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
     mechanics: ["install_resource", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -1991,7 +1991,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     recurringCredits: 1,
-    rulesText: "V1.9.12 WIP: recurring pool with visible counters for run costs. Used counters refresh at the start of the Runner turn.",
+    rulesText: "1 recurring credit for run costs. Used counters refresh at the start of each Runner turn.",
     mechanics: ["install_resource", "counter", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -2081,7 +2081,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "V1.9.12 WIP: search the stack for a program, reveal it and add it to the grip through the side-safe Hidden-Zone choice path.",
+    rulesText: "Search the stack for a program, reveal it, add it to the grip, then shuffle the stack.",
     mechanics: ["play_event", "search_stack", "reveal", "shuffle", "counter", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -2092,7 +2092,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["bbs"],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "V1.9.12 WIP: reveal the top card of the Runner stack through the side-safe Hidden-Zone path.",
+    rulesText: "Reveal the top card of the Runner stack.",
     mechanics: ["play_event", "reveal", "counter", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -2184,7 +2184,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 4,
     agendaPoints: 2,
-    rulesText: "V1.9.12 WIP: put power counters on Detroit Police Contract when scored. The Corp may spend one counter as a clicked credit action.",
+    rulesText: "Put 4 power counters on Detroit Police Contract when you score it. [A]: Remove 1 power counter to gain 1 credit.",
     mechanics: ["install_remote", "advance", "score", "steal", "counter", "recurring_pool", "gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -2196,7 +2196,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 4,
     agendaPoints: 2,
-    rulesText: "V1.9.12 WIP: scored agenda start-of-turn economy effect for the Corp.",
+    rulesText: "While scored, gain 1 credit at the start of each Corp turn.",
     mechanics: ["install_remote", "advance", "score", "steal", "recurring_start_turn", "gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
   {

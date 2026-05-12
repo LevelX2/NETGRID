@@ -1,7 +1,7 @@
 # V1.9.12 Finalization Blocker
 
 Stand: 2026-05-13 00:27 CEST
-Status: resolved_by_policy
+Status: resolved_by_policy_and_release
 
 ## Blocker
 
@@ -9,7 +9,7 @@ V1.9.12 wurde im letzten Automationslauf noch nicht final auf `human_playable`, 
 
 Grund:
 
-- Die elf V1.9.12-Zielkarten haben in `packages/shared/src/index.ts` weiterhin sichtbare `V1.9.12 WIP:`-Regeltexte.
+- Die elf V1.9.12-Zielkarten hatten in `packages/shared/src/index.ts` sichtbare `V1.9.12 WIP:`-Regeltexte.
 - Im Automations-Worktree ist keine versionierte lokale Volltextquelle fuer diese elf Karten vorhanden; die fuehrenden Planungsartefakte enthalten abgeleitete Regelkern-Aussagen aus lokal bestaetigten Texten, aber keine finalen versionierten Anzeige-/Release-Texte.
 - Eine Final-Promotion mit WIP-Texten wuerde den Completion-Gate-Vertrag verletzen, weil Katalog und Web dann finale Spielbarkeit anzeigen, waehrend die Kartenoberflaeche selbst noch WIP markiert.
 
@@ -26,9 +26,13 @@ Der Nutzer hat bestaetigt, dass dieser Punkt durch die Automation geloest werden
 
 Die Automation darf fuer die elf V1.9.12-Zielkarten aus den lokal bestaetigten Regelkern-Aussagen finale, knappe display-only Anzeige-/Release-Texte ableiten. Fehlende versionierte lokale Volltextquellen sind damit kein harter P0-Gate-Blocker mehr.
 
+## Abschlussbefund vom 2026-05-13
+
+Der Punkt ist fuer V1.9.12 geloest. Die elf Zielkarten haben finale display-only Texte ohne WIP-Praefix, die Katalog-/AI-/Manifest-Artefakte sind finalisiert, die Webclient-Version steht auf `V1.9.12`, und `docs/derived/V1_9_12_FINAL_REVIEW.md` bestaetigt das Completion-Gate.
+
 ## Naechster Umsetzungsschritt
 
-- `V1.9.12 WIP:`-Texte entfernen oder finalisieren.
+- erledigt: `V1.9.12 WIP:`-Texte entfernen oder finalisieren.
 - Im Review dokumentieren, dass die finalen Texte aus lokal bestaetigten Regelkern-Aussagen abgeleitet und display-only sind.
 - `card-implementation-manifest-1.9.12.json`, `mechanics-coverage-1.9.12.json`, `ai-card-hints-deck-legal-v1912.json`, `ai-deck-legal-v1912-smokes.json` und `deck-legal-ai-approval-v1912-manifest.json` auf finale Gatewerte setzen.
 - V1.9.12 in `packages/catalog/src/index.ts` aus WIP in Runtime-Release-IDs promoten.

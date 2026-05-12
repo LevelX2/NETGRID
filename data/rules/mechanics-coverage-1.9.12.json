@@ -2,15 +2,15 @@
   "schemaVersion": "1.9.12",
   "artifactType": "mechanics_coverage_matrix",
   "matrixId": "mechanics-coverage-1.9.12",
-  "generatedFor": "V1.9.12 Counter, Virus, Purge und Recurring Pools WIP gate",
+  "generatedFor": "V1.9.12 Counter, Virus, Purge und Recurring Pools data gate",
   "generatedAt": "2026-05-13",
-  "status": "engine_wip",
+  "status": "implemented_data_gate",
   "extends": "data/rules/mechanics-coverage-1.9.11.json",
   "gateAssertions": {
-    "typedCounterVirusPurgeResolverWip": true,
-    "recurringPoolStartTurnResolverWip": true,
+    "typedCounterVirusPurgeResolverImplemented": true,
+    "recurringPoolStartTurnResolverImplemented": true,
     "allElevenV1912CardsHaveRuntimeDefinitions": true,
-    "aiChoicePathsCovered": false,
+    "aiChoicePathsCovered": true,
     "noHiddenZoneDataLeak": true,
     "stateHashReplayStable": true,
     "noV1913PlusScope": true
@@ -19,7 +19,7 @@
     {
       "mechanicId": "mechanic.counter.typed_card_counters",
       "label": "Typed Card Counters",
-      "currentStatus": "implemented_wip",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.12",
       "currentScopeNote": "V1.9.12 uses typed card counters for virus, recurring_credit and power pools on the target cards.",
       "coverage": ["unit", "state_hash"]
@@ -27,7 +27,7 @@
     {
       "mechanicId": "mechanic.virus.purge",
       "label": "Virus Counters and Corp Purge",
-      "currentStatus": "implemented_wip",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.12",
       "currentScopeNote": "Corp-only three-click purge removes Virus counters and leaves non-virus counters intact.",
       "coverage": ["unit", "legal_action", "visibility"]
@@ -35,7 +35,7 @@
     {
       "mechanicId": "mechanic.recurring.start_of_turn_refresh",
       "label": "Recurring Pool Refresh",
-      "currentStatus": "implemented_wip",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.12",
       "currentScopeNote": "Runner programs and resources with recurringCredits initialize counters and refresh without accumulation at Runner start of turn.",
       "coverage": ["unit", "state_hash"]
@@ -43,17 +43,11 @@
     {
       "mechanicId": "mechanic.agenda.scored_counter_economy",
       "label": "Scored Agenda Counter Economy",
-      "currentStatus": "implemented_wip",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.12",
       "currentScopeNote": "Detroit Police Contract uses typed scored-agenda counter spend; Employee Empowerment applies start-of-turn Corp credits.",
       "coverage": ["unit", "legal_action"]
     }
   ],
-  "deferred": [
-    "catalog_promotion",
-    "ai_hints_finalization",
-    "webclient_version",
-    "full_release_final_review"
-  ]
+  "deferred": []
 }
-

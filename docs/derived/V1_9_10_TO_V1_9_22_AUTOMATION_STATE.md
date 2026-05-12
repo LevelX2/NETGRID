@@ -1,7 +1,7 @@
 # V1.9.10 bis V1.9.22 Automation State
 
 Status: active
-Stand: 2026-05-12
+Stand: 2026-05-13
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
 Automation-ID: `netgrid-v1-9-originalset-completion-local`
 Watchdog-Automation-ID: gelöscht / nicht aktiv
@@ -15,9 +15,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.12
-Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.13
+Aktueller Release: V1.9.13
+Phase: planned
+Naechster erlaubter Release nach Abschluss: V1.9.14
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -53,8 +53,8 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | --- | --- | --- |
 | V1.9.10 | Status-, Manifest- und Katalog-Konsolidierung | done |
 | V1.9.11 | Hidden-Zone Search, Reveal, Reorder und Shuffle | done |
-| V1.9.12 | Counter, Virus, Purge und Recurring Pools | current |
-| V1.9.13 | Damage, Prevention, Avoid und Replacement Longtail | pending |
+| V1.9.12 | Counter, Virus, Purge und Recurring Pools | done |
+| V1.9.13 | Damage, Prevention, Avoid und Replacement Longtail | current |
 | V1.9.14 | Trace, Link, Tags und Resource-Tag-Interaktionen | pending |
 | V1.9.15 | Run Flow, Access, Multiaccess und Ambush on Access | pending |
 | V1.9.16 | Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy | pending |
@@ -66,6 +66,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 00:58 CEST
+- Ergebnis: V1.9.12 Counter/Virus/Purge/Recurring final abgeschlossen; Cursor auf V1.9.13 `planned` gesetzt.
+- Release: V1.9.12
+- Phase vorher: implementing
+- Phase nachher: planned fuer V1.9.13
+- Umsetzung: Die elf V1.9.12-Zielkarten sind mit finalen display-only Texten ohne WIP-Praefix versehen und in Runtime, Katalog, Manifest, Mechanics-Coverage, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Die Webclient-Version steht auf `V1.9.12`; `docs/derived/V1_9_12_FINAL_REVIEW.md` bestaetigt das Completion-Gate.
+- Tests: JSON-Validation pass fuer 233 `data/**/*.json`; `catalog` pass (27), `engine` pass (213), `ai` pass (84), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit und Push werden per Checkpoint dieses Laufs erzeugt.
+- Cursor: V1.9.13 ist der aktuelle Release.
 
 - Zeitpunkt: 2026-05-13 00:50 CEST
 - Ergebnis: Check-Failure-Regel gehärtet; rote Pflichtchecks sind kein Early-Stop-Grund mehr.
