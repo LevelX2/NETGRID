@@ -127,6 +127,7 @@ type RunnerFeatures = {
   blockedRunServers: Set<string>;
   visibleRunBreakCosts: Map<string, number>;
 };
+type RunnerServerFeatures = RunnerFeatures["serverFeatures"] extends Map<string, infer Server> ? Server : never;
 
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
 const AI_HINTS = new Map(
@@ -357,6 +358,26 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
   const history = publicServerMentions(input, target);
   const freshness = beliefState.runnerOpponentModel?.rndTopFreshness;
   const hqHandMemory = beliefState.runnerOpponentModel?.hqHandMemory;
+  const blocked = target && isRunPlan(candidate.kind) ? features.blockedRunServers.has(target) : false;
+  const staleArchivesPenalty = staleArchivesRepeatPenalty(input, target, server);
+  const evidence = [
+    `target:${target ?? "none"}`,
+    `ice_count:${server?.iceCount ?? 0}`,
+    `root_count:${server?.rootCount ?? 0}`,
+    `known_root_count:${server?.knownRootCount ?? 0}`,
+    `server_history:${history}`,
+    `rnd_freshness:${freshness?.freshness ?? "unknown"}`,
+    `hq_hand_known:${hqHandMemory?.allCardsKnown === true ? "all" : hqHandMemory && hqHandMemory.knownCount > 0 ? "partial" : "unknown"}`,
+    `hq_known_count:${hqHandMemory?.knownCount ?? 0}`,
+    `hq_hand_count:${hqHandMemory?.handCount ?? input.playerView.opponent.handCount}`
+  ];
+  if (blocked) {
+    return {
+      score: -160,
+      reasons: ["visible_run_path_blocked"],
+      evidence
+    };
+  }
   const staleRndPenalty =
     target === "rd" && (candidate.kind === "pressure_rnd" || candidate.kind === "safe_probe_run") && freshness?.freshness === "stale_known_same_top"
       ? candidate.kind === "pressure_rnd"
@@ -376,24 +397,74 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
       : candidate.kind === "trash_asset"
         ? 150
       : candidate.kind === "safe_probe_run"
-        ? 55 - staleRndPenalty * 0.4 - staleHqPenalty * 0.4
+        ? 55 - staleRndPenalty * 0.4 - staleHqPenalty * 0.4 - staleArchivesPenalty
         : 0;
-  const reasons = ["server_value_from_visible_projection", ...(staleRndPenalty > 0 ? ["known_rnd_top_not_fresh"] : []), ...(staleHqPenalty > 0 ? ["known_hq_hand_low_value"] : [])];
+  const reasons = [
+    "server_value_from_visible_projection",
+    ...(staleRndPenalty > 0 ? ["known_rnd_top_not_fresh"] : []),
+    ...(staleHqPenalty > 0 ? ["known_hq_hand_low_value"] : []),
+    ...(staleArchivesPenalty > 0 ? ["known_archives_access_not_fresh"] : [])
+  ];
   return {
     score,
     reasons,
-    evidence: [
-      `target:${target ?? "none"}`,
-      `ice_count:${server?.iceCount ?? 0}`,
-      `root_count:${server?.rootCount ?? 0}`,
-      `known_root_count:${server?.knownRootCount ?? 0}`,
-      `server_history:${history}`,
-      `rnd_freshness:${freshness?.freshness ?? "unknown"}`,
-      `hq_hand_known:${hqHandMemory?.allCardsKnown === true ? "all" : hqHandMemory && hqHandMemory.knownCount > 0 ? "partial" : "unknown"}`,
-      `hq_known_count:${hqHandMemory?.knownCount ?? 0}`,
-      `hq_hand_count:${hqHandMemory?.handCount ?? input.playerView.opponent.handCount}`
-    ]
+    evidence
   };
+}
+
+function staleArchivesRepeatPenalty(input: AiDecisionInput, target: string | undefined, server: RunnerServerFeatures | undefined): number {
+  if (target !== "archives" || !server) return 0;
+  const history = mergedPublicHistory(input);
+  const lastArchivesAccessIndex = findLastIndex(history, (event) => isArchivesAccessEvent(event));
+  if (lastArchivesAccessIndex < 0) return 0;
+  if (history.slice(lastArchivesAccessIndex + 1).some((event) => eventMayChangeArchives(event))) return 0;
+  const lastArchivesAccess = history[lastArchivesAccessIndex];
+  if (!lastArchivesAccess) return 0;
+  const accessedDefinitionId = stringPayloadValue(lastArchivesAccess, "cardDefinitionId");
+  if (!accessedDefinitionId) return 0;
+  const visibleArchivesDefinitions = new Set(
+    input.playerView.servers
+      .find((candidate) => candidate.id === "archives")
+      ?.root.map((card) => card.definitionId)
+      .filter((definitionId): definitionId is string => Boolean(definitionId)) ?? []
+  );
+  if (!visibleArchivesDefinitions.has(accessedDefinitionId)) return 0;
+  return isLowValueKnownHqAccessCard(accessedDefinitionId, input.playerView.own.credits) ? 280 : 180;
+}
+
+function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
+  const byId = new Map<string, PublicGameEvent>();
+  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+    byId.set(event.eventId, event);
+  }
+  return [...byId.values()].sort((left, right) => eventVersion(left) - eventVersion(right));
+}
+
+function findLastIndex<T>(values: T[], predicate: (value: T) => boolean): number {
+  for (let index = values.length - 1; index >= 0; index -= 1) {
+    if (predicate(values[index]!)) return index;
+  }
+  return -1;
+}
+
+function isArchivesAccessEvent(event: PublicGameEvent): boolean {
+  return event.publicPayload.actionType === "access_card" && serverIdFromEvent(event) === "archives";
+}
+
+function eventMayChangeArchives(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload;
+  if (payload.discardZone === "archives" || payload.hiddenZoneAction === "discard_phase") return true;
+  const actionType = typeof payload.actionType === "string" ? payload.actionType : event.type;
+  return actionType === "trash_accessed_card" || actionType === "trash_card" || actionType === "play_operation";
+}
+
+function stringPayloadValue(event: PublicGameEvent, key: string): string | undefined {
+  const value = event.publicPayload[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+function eventVersion(event: PublicGameEvent): number {
+  return typeof event.stateVersionAfter === "number" ? event.stateVersionAfter : 0;
 }
 
 function isKnownLowValueHqHand(input: AiDecisionInput, target: string | undefined, hqHandMemory: KnownHqHandMemory | undefined): boolean {
@@ -416,6 +487,7 @@ export function evaluateRemoteThreat(input: AiDecisionInput, candidate: RunnerPl
   const features = extractRunnerFeatures(input);
   const target = targetServerId(input, candidate);
   const server = target ? features.serverFeatures.get(target) : undefined;
+  const blocked = target ? features.blockedRunServers.has(target) : false;
   const remoteThreat = target?.startsWith("remote_") ? (server?.rootCount ?? 0) * 40 + (server?.advancedRootCount ?? 0) * 55 : 0;
   const remoteBeliefBoost =
     target?.startsWith("remote_")
@@ -425,6 +497,13 @@ export function evaluateRemoteThreat(input: AiDecisionInput, candidate: RunnerPl
             .reduce((sum, belief) => sum + belief.confidence * 25, 0) ?? 0)
         )
       : 0;
+  if (candidate.kind === "contest_remote" && blocked) {
+    return {
+      score: -90,
+      reasons: ["remote_threat_unreachable_by_visible_ice"],
+      evidence: [`remote_target:${target?.startsWith("remote_") ? target : "none"}`, `advanced_roots:${server?.advancedRootCount ?? 0}`, `remote_belief_boost:${remoteBeliefBoost}`]
+    };
+  }
   return {
     score: candidate.kind === "contest_remote" ? remoteThreat + 80 + remoteBeliefBoost : candidate.kind === "safe_probe_run" ? Math.min(30, remoteThreat) : 0,
     reasons: remoteThreat > 0 ? ["remote_threat_visible"] : ["remote_threat_uncertain"],

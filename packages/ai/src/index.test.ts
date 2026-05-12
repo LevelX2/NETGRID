@@ -25,6 +25,7 @@ import {
   corpPlanUsesOnlyAiSupportedCards,
   chooseRunnerPlanDecision,
   estimateRunCost,
+  evaluateRunnerPlan,
   evaluateAgendaRisk,
   evaluateEconomyReserve,
   evaluateIceRez,
@@ -502,6 +503,102 @@ describe("MVP 0.3 Runner AI", () => {
 
     expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
     expect(runCost.evidence).toContain("visible_etr_break_cost:4");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("hard Runner backs off from visibly unreachable protected remote roots", () => {
+    const requiredCorpCards = ["onr_v1_279_wall-of-static", "onr_v1_371_tokyo-chiba-infighting", "onr_v1_208_on-call-solo-team"];
+    const corpDeckCards = [
+      ...ONR_V1_1_2K_CORP_DECK.cards,
+      ...requiredCorpCards.filter((id) => !ONR_V1_1_2K_CORP_DECK.cards.some((card) => card.id === id)).map((id) => ({ id, quantity: 1 }))
+    ];
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-hard-remote-visible-block",
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          cards: corpDeckCards
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    moveRunnerCardToGrip(state, "simple_killer");
+    state.runner.credits = 3;
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_killer");
+    ensureRemoteServer(state, "remote_1");
+    const wallId = putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
+    state.cardInstances[wallId] = { ...state.cardInstances[wallId]!, faceup: true, rezzed: true };
+    const tokyoId = putCorpRootInRemote(state, "onr_v1_371_tokyo-chiba-infighting", 0);
+    state.cardInstances[tokyoId] = { ...state.cardInstances[tokyoId]!, faceup: true, rezzed: true };
+    putCorpRootInRemote(state, "onr_v1_208_on-call-solo-team", 0);
+    state.runner.credits = 0;
+    state.corp.credits = 12;
+
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "hard", profileId: "runner-ai-v0.9-hard" });
+    const remoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain) throw new Error("Missing blocked remote fixture actions");
+
+    const contestCandidate = generateRunnerPlanCandidates(input).find((candidate) => candidate.kind === "contest_remote");
+    const recoverCandidate = generateRunnerPlanCandidates(input).find((candidate) => candidate.kind === "recover_economy");
+    expect(contestCandidate).toBeDefined();
+    expect(recoverCandidate).toBeDefined();
+    if (!contestCandidate || !recoverCandidate) throw new Error("Missing blocked remote fixture candidates");
+    const runCost = estimateRunCost(input, contestCandidate);
+    const access = evaluateServerAccessValue(input, contestCandidate);
+    const remoteThreat = evaluateRemoteThreat(input, contestCandidate);
+    const contestScore = evaluateRunnerPlan(input, contestCandidate);
+    const recoverScore = evaluateRunnerPlan(input, recoverCandidate);
+    const decision = chooseRunnerAction({ ...input, legalActions: [remoteRun, gain] });
+
+    expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
+    expect(runCost.evidence).toContain("visible_etr_break_cost:unavailable");
+    expect(access.reasons).toContain("visible_run_path_blocked");
+    expect(remoteThreat.reasons).toContain("remote_threat_unreachable_by_visible_ice");
+    expect(contestScore.score).toBeLessThan(recoverScore.score);
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("does not repeat a stale legacy Archives access on the same known operation", () => {
+    const requiredCorpCards = ["onr_v1_281_accounts-receivable", "onr_v1_208_on-call-solo-team"];
+    const corpDeckCards = [
+      ...ONR_V1_1_2K_CORP_DECK.cards,
+      ...requiredCorpCards.filter((id) => !ONR_V1_1_2K_CORP_DECK.cards.some((card) => card.id === id)).map((id) => ({ id, quantity: 1 }))
+    ];
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-stale-legacy-archives",
+        corpDeck: { ...ONR_V1_1_2K_CORP_DECK, cards: corpDeckCards },
+        agendaPointsToWin: 7
+      })
+    );
+    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    const accountsId = moveCorpCardToArchives(state, "onr_v1_281_accounts-receivable", true);
+    const hiddenId = moveCorpCardToArchives(state, "onr_v1_208_on-call-solo-team", false);
+    keepOnlyCorpArchivesCards(state, [accountsId, hiddenId]);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "archives");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.run).toBeUndefined();
+
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "hard", profileId: "runner-ai-v0.9-hard" });
+    const archivesRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "archives");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(archivesRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!archivesRun || !gain) throw new Error("Missing legacy Archives fixture actions");
+
+    const safeProbeCandidate = generateRunnerPlanCandidates(input).find((candidate) => candidate.kind === "safe_probe_run");
+    expect(safeProbeCandidate).toBeDefined();
+    if (!safeProbeCandidate) throw new Error("Missing safe_probe_run candidate");
+    const safeProbeScore = evaluateServerAccessValue(input, safeProbeCandidate);
+    const decision = chooseRunnerAction({ ...input, legalActions: [archivesRun, gain] });
+
+    expect(safeProbeScore.reasons).toContain("known_archives_access_not_fresh");
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
@@ -2720,6 +2817,34 @@ function putCorpRootInRemote(state: GameState, definitionId: string, advancement
     advancementCounters
   };
   return id;
+}
+
+function moveCorpCardToArchives(state: GameState, definitionId: string, faceup: boolean): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.corp.archives.push(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "archives" },
+    faceup,
+    rezzed: faceup
+  };
+  return id;
+}
+
+function keepOnlyCorpArchivesCards(state: GameState, ids: CardInstanceId[]): void {
+  const keep = new Set(ids);
+  const movedToRd = state.corp.archives.filter((cardId) => !keep.has(cardId));
+  state.corp.archives = ids.slice();
+  for (const cardId of movedToRd) {
+    state.corp.rd.push(cardId);
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      zone: { side: "corp", zone: "rd" },
+      faceup: false,
+      rezzed: false
+    };
+  }
 }
 
 function findCard(state: GameState, definitionId: string): CardInstanceId {

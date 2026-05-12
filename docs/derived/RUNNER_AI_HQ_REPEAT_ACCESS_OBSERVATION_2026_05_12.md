@@ -54,10 +54,12 @@ Beispiel: `Simple Killer` gegen `π in the 'Face` kostet bei Stärke 1 gegen St�
 
 Bei mehreren sichtbaren gerezzten ICE werden die sichtbaren End-the-run-Brechkosten über den Pfad kumuliert. Beispiel: `Simple Killer` mit 3 Credits kann ein einzelnes Stärke-3-Sentry gerade brechen, aber nicht zwei sichtbare Stärke-3-Sentry-Stopper auf demselben HQ-Pfad; der Gesamtpfad wird deshalb blockiert bewertet.
 
+Folgekorrektur: Sichtbar blockierte Run-Pfade entwerten jetzt auch den Access- und Remote-Contest-Nutzen des Zielservers. Ein geschütztes Fort mit sichtbaren Root-Karten darf also nicht allein wegen Remote-Druck attraktiv bleiben, wenn der Runner den gerezzten End-the-run-ICE-Pfad mit aktueller Rig-/Credit-Lage nicht überwinden kann. Regression: Hard-Runner mit `Simple Killer`, 0 Credits, gerezzter `Wall of Static` auf `remote_1`, rezzter `Tokyo-Chiba Infighting` und einer verdeckten Root-Karte wählt Economy statt viermal auf das unerreichbare Fort zu laufen.
+
 ## Verifikation
 
 - HQ-Handwert-Härtung: `corepack pnpm --filter @netgrid/ai test -- src/index.test.ts`, `corepack pnpm --filter @netgrid/ai typecheck`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `git diff --check`: pass.
-- Folgehärtung sichtbare ICE-Brechkosten: `corepack pnpm --filter @netgrid/ai test -- src/index.test.ts`: pass, 87 Tests; `corepack pnpm --filter @netgrid/ai typecheck`: pass.
+- Folgehärtung sichtbare ICE-Brechkosten: `corepack pnpm --filter @netgrid/ai test -- src/index.test.ts`: pass, 88 Tests; `corepack pnpm --filter @netgrid/ai typecheck`: pass.
 
 ## Gate-Hinweis
 

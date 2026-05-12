@@ -1692,7 +1692,7 @@ describe("MVP 0.2 multiplayer service", () => {
       settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
     });
 
-    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_v1");
     expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.3.0");
     expect(JSON.stringify(created)).not.toContain("onr_v1_021_dwarf");
@@ -2602,7 +2602,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const record = await service.loadForTest(created.matchId);
 
     expect(created.hostSide).toBe("corp");
-    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(record?.match.deckSetup.aiDeckPolicy).toBe("selected");
     expect(record?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
     expect(record?.match.deckSetup.runnerSnapshotId).toBe("king_of_the_road_runner_ai_snapshot_v1");
