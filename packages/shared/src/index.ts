@@ -1496,6 +1496,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceLabel: "sentry"
   }),
   {
+    id: "onr_v1_042_mouse",
+    title: "Mouse",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    rulesText: "Installed Hidden-Zone helper: expose one unrezzed installed Corp card in a chosen fort.",
+    mechanics: ["install_program", "memory", "expose", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_046_pattels-virus",
     title: "Pattel's Virus",
     side: "runner",
@@ -1520,6 +1532,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "Whenever you make a successful run, put a Pox counter in the fort that was run. Every two Pox counters in a fort require the Corp to pay 1, in addition to any other costs, to install a card inside or on that fort. The Corp may remove all Virus counters by forgoing its next three actions.",
     mechanics: ["install_program", "memory", "counter", "virus", "purge", "run_success_trigger", "install_cost_modifier", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_058_seeya",
+    title: "SeeYa",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    memoryCost: 1,
+    rulesText: "Installed Hidden-Zone helper: expose one unrezzed installed Corp card in a chosen fort.",
+    mechanics: ["install_program", "memory", "expose", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_059_self-modifying-code",
+    title: "Self-Modifying Code",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Installed Hidden-Zone helper: search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+    mechanics: ["install_program", "memory", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({
     id: "onr_v1_060_shaka",
@@ -1773,6 +1809,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "start_run", "breach", "access_trash_free", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_151_aujourdoui",
+    title: "Aujourd'Oui",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed Hidden-Zone helper: search your stack for a program or reveal the top card of your stack.",
+    mechanics: ["install_resource", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_156_corporate-ally",
     title: "Corporate Ally",
     side: "runner",
@@ -1817,6 +1864,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_resource", "start_of_turn_credit_gain", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_169_n-e-t-o",
+    title: "N.E.T.O.",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed Hidden-Zone helper: search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+    mechanics: ["install_resource", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_173_restrictive-net-zoning",
     title: "Restrictive Net Zoning",
     side: "runner",
@@ -1826,6 +1884,28 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 1,
     rulesText: "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 1, in addition to the normal cost, to install ice on that fort.",
     mechanics: ["install_resource", "install_cost_modifier", "counter", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_175_ronin-around",
+    title: "Ronin Around",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed Hidden-Zone helper: look at and reorder the top two cards of your stack.",
+    mechanics: ["install_resource", "reorder_stack", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_177_the-short-circuit",
+    title: "The Short Circuit",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed Hidden-Zone helper: reveal the top card of your stack.",
+    mechanics: ["install_resource", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_180_smiths-pawnshop",
@@ -1962,6 +2042,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 4,
     rulesText: "No additional ability.",
     mechanics: ["install_remote", "advance", "score", "steal", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_194_corporate-downsizing",
+    title: "Corporate Downsizing",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 2,
+    rulesText: "Scored agenda Hidden-Zone helper: reveal the top card of R&D.",
+    mechanics: ["install_remote", "advance", "score", "steal", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_193_corporate-coup",

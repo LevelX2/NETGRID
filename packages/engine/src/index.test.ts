@@ -3986,12 +3986,20 @@ describe("V1.9.9 Mechanikpaket R", () => {
 describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   it("adds first scoped V1.9.11 hidden-zone event definitions without pulling in later release cards", () => {
     const implementedWipIds = [
+      "onr_v1_042_mouse",
+      "onr_v1_058_seeya",
+      "onr_v1_059_self-modifying-code",
       "onr_v1_087_forgotten-backup-chip",
       "onr_v1_088_fortress-respecification",
       "onr_v1_089_gideons-pawnshop",
       "onr_v1_092_ice-and-datas-guide-to-the-net",
       "onr_v1_099_mantis-fixer-at-large",
-      "onr_v1_110_sneak-preview"
+      "onr_v1_110_sneak-preview",
+      "onr_v1_151_aujourdoui",
+      "onr_v1_169_n-e-t-o",
+      "onr_v1_175_ronin-around",
+      "onr_v1_177_the-short-circuit",
+      "onr_v1_194_corporate-downsizing"
     ];
     for (const definitionId of implementedWipIds) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
@@ -4059,6 +4067,48 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       title: "Simple Upgrade",
       serverLabel: "Remote 1"
     });
+  });
+
+  it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-installed-helpers"));
+    state.runner.credits = 20;
+    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+
+    state = apply(state, "runner", (action) => action.type === "gain_credit" && action.payload?.v1911HiddenZoneAbility === "search_stack_program_to_grip");
+    expect(state.pendingChoice?.source).toContain("v1911.search_stack");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.grip).toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneBarrier: true, hiddenZoneAction: "search_stack" });
+
+    putRunnerCardOnTopOfStack(state, "simple_decoder");
+    putRunnerCardOnTopOfStack(state, "simple_fracter");
+    state = apply(state, "runner", (action) => action.type === "gain_credit" && action.payload?.v1911HiddenZoneAbility === "arrange_stack_top2");
+    expect(state.pendingChoice?.source).toContain("v1911.arrange_stack_top2");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  });
+
+  it("uses scored Corporate Downsizing to reveal only the R&D top definition", () => {
+    let state = apply(v1911HiddenZoneGame("v1911-corporate-downsizing"), "corp", (action) => action.type === "mandatory_draw");
+    state.corp.clicks = 3;
+    const agendaId = moveCorpCardToHq(state, "onr_v1_194_corporate-downsizing");
+    removeEverywhere(state, agendaId);
+    state.corp.scoreArea.push(agendaId);
+    state.cardInstances[agendaId] = { ...state.cardInstances[agendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1911_corporate_downsizing_reveal_rd_top");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_corp_reveal_rd_top",
+      revealKind: "reveal",
+      cardDefinitionId: "simple_economy_operation"
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("simple_economy_operation_");
   });
 });
 
@@ -6467,13 +6517,21 @@ const ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK: DeckDefinition = {
   side: "runner",
   identity: "runner_identity_001",
   cards: [
+    { id: "onr_v1_042_mouse", quantity: 1 },
+    { id: "onr_v1_058_seeya", quantity: 1 },
+    { id: "onr_v1_059_self-modifying-code", quantity: 1 },
     { id: "onr_v1_087_forgotten-backup-chip", quantity: 1 },
     { id: "onr_v1_088_fortress-respecification", quantity: 1 },
     { id: "onr_v1_089_gideons-pawnshop", quantity: 1 },
     { id: "onr_v1_092_ice-and-datas-guide-to-the-net", quantity: 1 },
     { id: "onr_v1_099_mantis-fixer-at-large", quantity: 1 },
     { id: "onr_v1_110_sneak-preview", quantity: 1 },
+    { id: "onr_v1_151_aujourdoui", quantity: 1 },
+    { id: "onr_v1_169_n-e-t-o", quantity: 1 },
+    { id: "onr_v1_175_ronin-around", quantity: 1 },
+    { id: "onr_v1_177_the-short-circuit", quantity: 1 },
     { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
     { id: "simple_economy_event", quantity: 6 }
   ]
 };
@@ -6484,6 +6542,7 @@ const ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK: DeckDefinition = {
   side: "corp",
   identity: "corp_identity_001",
   cards: [
+    { id: "onr_v1_194_corporate-downsizing", quantity: 1 },
     { id: "simple_agenda", quantity: 3 },
     { id: "onr_v1_203_hostile-takeover", quantity: 3 },
     { id: "simple_upgrade", quantity: 2 },
@@ -7143,6 +7202,14 @@ function installRunnerProgramForTest(state: GameState, definitionId: string): Ca
   removeEverywhere(state, id);
   state.runner.rig.programs.push(id);
   state.runner.memoryUsed += 1;
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "rig" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function installRunnerResourceForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.rig.resources.push(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "rig" }, faceup: true, rezzed: true };
   return id;
 }

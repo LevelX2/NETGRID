@@ -5,19 +5,29 @@
   "release": "V1.9.11",
   "status": "wip",
   "coversCards": [
+    "onr_v1_042_mouse",
+    "onr_v1_058_seeya",
+    "onr_v1_059_self-modifying-code",
     "onr_v1_087_forgotten-backup-chip",
     "onr_v1_088_fortress-respecification",
     "onr_v1_089_gideons-pawnshop",
     "onr_v1_092_ice-and-datas-guide-to-the-net",
     "onr_v1_099_mantis-fixer-at-large",
-    "onr_v1_110_sneak-preview"
+    "onr_v1_110_sneak-preview",
+    "onr_v1_151_aujourdoui",
+    "onr_v1_169_n-e-t-o",
+    "onr_v1_175_ronin-around",
+    "onr_v1_177_the-short-circuit",
+    "onr_v1_194_corporate-downsizing"
   ],
   "assertions": [
     "Runner stack search opens a side-private PendingChoice.",
     "The Corp PlayerView does not receive Runner search options.",
     "Resolving search moves the selected program to grip and shuffles deterministically.",
     "Replay after search resolution reproduces the same StateHash.",
-    "Reveal and expose publish only the explicitly revealed CardDefinition."
+    "Reveal and expose publish only the explicitly revealed CardDefinition.",
+    "Installed Runner helpers use LegalActions and V1.9.11 PendingChoice sources without exposing options to the Corp.",
+    "Scored Corporate Downsizing reveals only the public R&D top CardDefinition."
   ],
   "testRefs": ["packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP"],
   "notCompletionGate": true

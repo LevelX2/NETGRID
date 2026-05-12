@@ -58,6 +58,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-12 23:00 CEST
+- Ergebnis: V1.9.11 Engine-WIP auf 14/16 Hidden-Zone-Zielkarten erweitert; Cursor bleibt auf V1.9.11 `implementing`
+- Release: V1.9.11
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Mouse`, `SeeYa`, `Self-Modifying Code`, `Aujourd'Oui`, `N.E.T.O.`, `Ronin Around`, `The Short Circuit` und `Corporate Downsizing` haben WIP-Kartendefinitionen und eng typisierte LegalAction-Pfade für installierte Runner-Helfer bzw. scored-Agenda-Reveal erhalten. Generische `trigger_ability` bleibt gesperrt. Keine V1.9.12+-Karte wurde angefasst.
+- Tests: `v1-9-install-and-check.ps1 -Task engine` pass (207 Tests), `-Task catalog` pass (25 Tests), `-Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.11: hidden zone installed helper wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.11 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Ice Pick Willie`, `Too Many Doors`, AI-Hints/-Smokes, Manifest/Coverage, Server/Web und volle Pflichtchecks offen sind.
+
 - Zeitpunkt: 2026-05-12 22:45 CEST
 - Ergebnis: V1.9.11 Engine-WIP fuer sechs Hidden-Zone-Eventkarten umgesetzt; Cursor bleibt auf V1.9.11 `implementing`
 - Release: V1.9.11

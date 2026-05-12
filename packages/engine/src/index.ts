@@ -184,6 +184,14 @@ const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
 const CHIMERA_ID = "onr_v1_353_chimera";
+const MOUSE_ID = "onr_v1_042_mouse";
+const SEEYA_ID = "onr_v1_058_seeya";
+const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
+const AUJOURD_OUI_ID = "onr_v1_151_aujourdoui";
+const NETO_ID = "onr_v1_169_n-e-t-o";
+const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
+const THE_SHORT_CIRCUIT_ID = "onr_v1_177_the-short-circuit";
+const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
 const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
@@ -1546,6 +1554,20 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
+    if (definition.id === CORPORATE_DOWNSIZING_ID && state.corp.rd.length > 0) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: R&D-Spitze revealn`,
+          agendaId,
+          [{ clicks: 1 }],
+          { cardId: agendaId, agendaAbility: "v1911_corporate_downsizing_reveal_rd_top", hiddenZoneAction: "v1911_corp_reveal_rd_top" }
+        )
+      );
+      continue;
+    }
     if (definition.id !== "onr_v1_193_corporate-coup" && definition.id !== "onr_v1_209_political-coup") continue;
     if (cardCounter(state, agendaId, "power") <= 0) continue;
     const agendaAbility = definition.id === "onr_v1_193_corporate-coup" ? "corporate_coup" : "political_coup";
@@ -1684,6 +1706,64 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
   }
   if (hasClicks) {
+    for (const cardId of [...state.runner.rig.programs, ...state.runner.rig.resources].slice().sort()) {
+      const definition = definitionFor(state, cardId);
+      if ((definition.id === SELF_MODIFYING_CODE_ID || definition.id === AUJOURD_OUI_ID || definition.id === NETO_ID) && state.runner.stack.some((id) => definitionFor(state, id).type === "program")) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "gain_credit",
+            `${definition.title}: Stack nach Programm durchsuchen`,
+            cardId,
+            [{ clicks: 1 }],
+            { cardId, v1911HiddenZoneAbility: "search_stack_program_to_grip" }
+          )
+        );
+      }
+      if ((definition.id === MOUSE_ID || definition.id === SEEYA_ID) && state.corp.servers.some((server) => exposedCorpCardInServer(state, server.id) !== undefined)) {
+        for (const server of state.corp.servers) {
+          if (exposedCorpCardInServer(state, server.id) === undefined) continue;
+          actions.push(
+            action(
+              state,
+              "runner",
+              "gain_credit",
+              `${definition.title}: Karte in ${server.label} expose`,
+              cardId,
+              [{ clicks: 1 }],
+              { cardId, serverId: server.id, v1911HiddenZoneAbility: "expose_server_card" }
+            )
+          );
+        }
+      }
+      if ((definition.id === THE_SHORT_CIRCUIT_ID || definition.id === AUJOURD_OUI_ID) && state.runner.stack.length > 0) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "gain_credit",
+            `${definition.title}: Stack-Spitze revealn`,
+            cardId,
+            [{ clicks: 1 }],
+            { cardId, v1911HiddenZoneAbility: "reveal_stack_top" }
+          )
+        );
+      }
+      if (definition.id === RONIN_AROUND_ID && state.runner.stack.length >= 2) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "gain_credit",
+            `${definition.title}: Stack-Spitze anordnen`,
+            cardId,
+            [{ clicks: 1 }],
+            { cardId, v1911HiddenZoneAbility: "arrange_stack_top2" }
+          )
+        );
+      }
+    }
     for (const resourceId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, resourceId);
       if (definition.id === "onr_v1_159_databroker") {
@@ -2313,6 +2393,14 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       return;
     case "gain_credit":
       spendClick(state, legalAction.side);
+      if (legalAction.payload?.v1911HiddenZoneAbility) {
+        resolveV1911RunnerHiddenZoneAbility(state, legalAction);
+        return;
+      }
+      if (legalAction.payload?.agendaAbility === "v1911_corporate_downsizing_reveal_rd_top") {
+        resolveV1911CorporateDownsizing(state, legalAction);
+        return;
+      }
       if (legalAction.payload?.resourceAbility === "databroker") {
         if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Databroker nutzen.");
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
@@ -4923,11 +5011,11 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveTraceRunnerBid(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v098.search_stack")) {
+  if (state.pendingChoice.source.startsWith("v098.search_stack") || state.pendingChoice.source.startsWith("v1911.search_stack")) {
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v098.arrange_stack_top2")) {
+  if (state.pendingChoice.source.startsWith("v098.arrange_stack_top2") || state.pendingChoice.source.startsWith("v1911.arrange_stack_top2")) {
     resolveRunnerStackArrangeChoice(state, legalAction, playerAction);
     return;
   }
@@ -5114,7 +5202,7 @@ function takeSetupMulligan(state: GameState, side: Side, handSize: number): void
   recordStateRandomMarkers(state, "setup.draw.corp.mulligan_hand", hq.length);
 }
 
-function startRunnerStackSearchChoice(state: GameState): void {
+function startRunnerStackSearchChoice(state: GameState, sourcePrefix = "v098.search_stack", choiceIdPrefix = "v098_search_stack"): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const options = state.runner.stack
     .filter((cardId) => definitionFor(state, cardId).type === "program")
@@ -5124,9 +5212,9 @@ function startRunnerStackSearchChoice(state: GameState): void {
     });
   if (options.length === 0) throw new Error("Keine suchbare Programmkarte im Stack.");
   state.pendingChoice = {
-    choiceId: `v098_search_stack_${state.stateVersion + 1}`,
+    choiceId: `${choiceIdPrefix}_${state.stateVersion + 1}`,
     side: "runner",
-    source: `v098.search_stack:${state.stateVersion + 1}`,
+    source: `${sourcePrefix}:${state.stateVersion + 1}`,
     prompt: "Stack durchsuchen",
     kind: "select_cards",
     options,
@@ -5157,14 +5245,14 @@ function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalActi
   };
 }
 
-function startRunnerStackArrangeChoice(state: GameState): void {
+function startRunnerStackArrangeChoice(state: GameState, sourcePrefix = "v098.arrange_stack_top2", choiceIdPrefix = "v098_arrange_stack_top2"): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const topCards = state.runner.stack.slice(0, 2);
   if (topCards.length < 2) throw new Error("Nicht genug Karten fuer Arrange.");
   state.pendingChoice = {
-    choiceId: `v098_arrange_stack_top2_${state.stateVersion + 1}`,
+    choiceId: `${choiceIdPrefix}_${state.stateVersion + 1}`,
     side: "runner",
-    source: `v098.arrange_stack_top2:${state.stateVersion + 1}`,
+    source: `${sourcePrefix}:${state.stateVersion + 1}`,
     prompt: "Top 2 Karten anordnen",
     kind: "select_cards",
     options: topCards.map((cardId) => {
@@ -5408,6 +5496,64 @@ function revealRunnerStackTop(state: GameState, legalAction: LegalAction): void 
     publicRevealKind: "reveal",
     publicRevealDefinitionId: definition.id
   };
+}
+
+function revealCorpRdTop(state: GameState, legalAction: LegalAction): void {
+  const cardId = state.corp.rd[0];
+  if (!cardId) throw new Error("R&D ist leer.");
+  const definition = definitionFor(state, cardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_corp_reveal_rd_top",
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: definition.id
+  };
+}
+
+function resolveV1911RunnerHiddenZoneAbility(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "runner") throw new Error("Nur der Runner darf V1.9.11-Hidden-Zone-Helfer nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  const installed = runnerInstalledCardIds(state);
+  if (!installed.includes(sourceCardId)) throw new Error("Der V1.9.11-Hidden-Zone-Helfer ist nicht installiert.");
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  const ability = String(legalAction.payload?.v1911HiddenZoneAbility ?? "");
+  const allowedSearchIds = new Set([SELF_MODIFYING_CODE_ID, AUJOURD_OUI_ID, NETO_ID]);
+  const allowedExposeIds = new Set([MOUSE_ID, SEEYA_ID]);
+  const allowedRevealIds = new Set([THE_SHORT_CIRCUIT_ID, AUJOURD_OUI_ID]);
+  if (ability === "search_stack_program_to_grip") {
+    if (!allowedSearchIds.has(sourceDefinition.id)) throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
+    startRunnerStackSearchChoice(state, "v1911.search_stack", "v1911_search_stack");
+    legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
+    return;
+  }
+  if (ability === "expose_server_card") {
+    if (!allowedExposeIds.has(sourceDefinition.id)) throw new Error("Diese Karte darf keine Expose-Ability nutzen.");
+    exposeCorpCardInServer(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, legalAction);
+    legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_expose_server_card" };
+    return;
+  }
+  if (ability === "reveal_stack_top") {
+    if (!allowedRevealIds.has(sourceDefinition.id)) throw new Error("Diese Karte darf keine Stack-Reveal-Ability nutzen.");
+    revealRunnerStackTop(state, legalAction);
+    legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_reveal_stack_top" };
+    return;
+  }
+  if (ability === "arrange_stack_top2") {
+    if (sourceDefinition.id !== RONIN_AROUND_ID) throw new Error("Diese Karte darf keine Stack-Reorder-Ability nutzen.");
+    startRunnerStackArrangeChoice(state, "v1911.arrange_stack_top2", "v1911_arrange_stack_top2");
+    legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_arrange_stack" };
+    return;
+  }
+  throw new Error("Unbekannte V1.9.11-Hidden-Zone-Ability.");
+}
+
+function resolveV1911CorporateDownsizing(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "corp") throw new Error("Nur die Korp darf Corporate Downsizing nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Corporate Downsizing ist nicht gescort.");
+  if (definitionFor(state, sourceCardId).id !== CORPORATE_DOWNSIZING_ID) throw new Error("Die Agenda-Aktion passt nicht zu Corporate Downsizing.");
+  revealCorpRdTop(state, legalAction);
 }
 
 function exposedCorpCardInServer(state: GameState, serverId: Exclude<ServerId, "new_remote">): CardInstanceId | undefined {
