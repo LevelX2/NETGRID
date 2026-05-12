@@ -2882,7 +2882,7 @@ select {
 .scoredAgendaOverlay {
   position: fixed;
   top: 72px;
-  z-index: 77;
+  z-index: 180;
   pointer-events: none;
   width: min(420px, calc(100vw - 24px));
 }
