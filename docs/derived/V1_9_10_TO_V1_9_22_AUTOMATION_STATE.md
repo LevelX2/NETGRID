@@ -65,7 +65,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Phase nachher: implementing
 - Umsetzung: Detailplan, Requirements, Hidden-Zone-Spezifikation, Testmatrix und Requirements Review fuer den Hidden-Zone Search/Reveal/Reorder/Shuffle-Slice erstellt. Keine Karte wurde promotet.
 - Tests: Dokumentations-/Cursorlauf; Code-Tests noch nicht noetig, weil keine Engine-/AI-/Runtime-Aenderung erfolgt ist.
-- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen.
+- Git: WIP-Commit `f587530` (`WIP V1.9.11: hidden zone planning status alignment`) erzeugt und nach `origin/codex/v1-9-originalset-completion` gepusht.
 - Cursor: V1.9.11 bleibt aktueller Release; naechster erlaubter Release bleibt V1.9.12 erst nach Completion-Gate.
 
 - Zeitpunkt: 2026-05-12 22:15 CEST
@@ -80,11 +80,13 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Commit
 
+- WIP-Commit V1.9.11: `f587530` (`WIP V1.9.11: hidden zone planning status alignment`).
 - WIP-Commit: `0929b21` (`WIP V1.9.10: status manifest catalog consolidation`).
 - Abschlusscommit: `caa74b9` (`V1.9.10: status manifest catalog consolidation`).
 
 ## Letzter Push
 
+- Push erfolgreich: `f587530` auf `origin/codex/v1-9-originalset-completion`.
 Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 
 ## Blocker
