@@ -4008,7 +4008,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_038_joan-of-arc"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_053_ramming-piston"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4173,7 +4173,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_038_joan-of-arc"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_053_ramming-piston"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -4257,6 +4257,65 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1912_detroit_police_contract");
     expect(state.corp.credits).toBe(beforeCredit + 1);
     if (detroitId) expect(state.cardInstances[detroitId]?.counters?.power).toBe(3);
+  });
+});
+
+describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
+  it("adds scoped V1.9.13 runtime definitions without pulling in V1.9.14 cards", () => {
+    expect(ONR_V1_9_13_RELEASE_CARD_IDS).toHaveLength(17);
+    for (const definitionId of ONR_V1_9_13_RELEASE_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_053_ramming-piston"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
+    let state = toRunnerTurn(v1913DamagePreventionGame("v1913-install-prevention"));
+    state.runner.credits = 80;
+    state.runner.clicks = 30;
+
+    for (const definitionId of ONR_V1_9_13_RELEASE_CARD_IDS.filter((id) => !["onr_v1_224_bolter-cluster", "onr_v1_234_data-darts", "onr_v1_258_neural-blade"].includes(id))) {
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === definitionId);
+    }
+
+    const installedDefinitions = [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].map((id) => state.cardInstances[id]?.definitionId);
+    expect(installedDefinitions).toEqual(expect.arrayContaining(ONR_V1_9_13_RELEASE_CARD_IDS.filter((id) => !id.startsWith("onr_v1_2"))));
+  });
+
+  it("opens side-safe prevention choices for Corp ICE net damage and replays the resolved StateHash", () => {
+    let state = toRunnerTurn(v1913DamagePreventionGame("v1913-ice-prevention"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_128_green-knight-surge-buffers");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_128_green-knight-surge-buffers");
+    putCorpIceOnServer(state, "rd", "onr_v1_258_neural-blade");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_258_neural-blade");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const preventOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    expect(preventOptionId).toBeDefined();
+    state = applyChoice(state, "runner", String(preventOptionId));
+    expect(state.runner.heap.length).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      eventModificationDecision: "apply",
+      preventedAmount: 2,
+      damageAmount: 0
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
 
@@ -5960,6 +6019,25 @@ const ONR_V1_9_12_RELEASE_CARD_IDS = [
   "onr_v1_198_detroit-police-contract",
   "onr_v1_199_employee-empowerment"
 ] as const;
+const ONR_V1_9_13_RELEASE_CARD_IDS = [
+  "onr_v1_038_joan-of-arc",
+  "onr_v1_121_armored-fridge",
+  "onr_v1_127_full-body-conversion",
+  "onr_v1_128_green-knight-surge-buffers",
+  "onr_v1_130_lifesaver-nanosurgeons",
+  "onr_v1_135_nasuko-cycle",
+  "onr_v1_139_r-and-d-interface",
+  "onr_v1_143_techtronica-utility-suit",
+  "onr_v1_155_code-viral-cache",
+  "onr_v1_161_fall-guy",
+  "onr_v1_170_nomad-allies",
+  "onr_v1_185_trauma-team",
+  "onr_v1_186_umbrella-policy",
+  "onr_v1_187_wilson-weeflerunner-apprentice",
+  "onr_v1_224_bolter-cluster",
+  "onr_v1_234_data-darts",
+  "onr_v1_258_neural-blade"
+] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
@@ -6751,6 +6829,46 @@ const ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1913_damage_prevention_wip",
+  name: "O:NR V1.9.13 Damage Prevention WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_038_joan-of-arc", quantity: 1 },
+    { id: "onr_v1_121_armored-fridge", quantity: 1 },
+    { id: "onr_v1_127_full-body-conversion", quantity: 1 },
+    { id: "onr_v1_128_green-knight-surge-buffers", quantity: 1 },
+    { id: "onr_v1_130_lifesaver-nanosurgeons", quantity: 1 },
+    { id: "onr_v1_135_nasuko-cycle", quantity: 1 },
+    { id: "onr_v1_139_r-and-d-interface", quantity: 1 },
+    { id: "onr_v1_143_techtronica-utility-suit", quantity: 1 },
+    { id: "onr_v1_155_code-viral-cache", quantity: 1 },
+    { id: "onr_v1_161_fall-guy", quantity: 1 },
+    { id: "onr_v1_170_nomad-allies", quantity: 1 },
+    { id: "onr_v1_185_trauma-team", quantity: 1 },
+    { id: "onr_v1_186_umbrella-policy", quantity: 1 },
+    { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_economy_event", quantity: 8 }
+  ]
+};
+
+const ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1913_damage_prevention_wip",
+  name: "O:NR V1.9.13 Damage Prevention WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_224_bolter-cluster", quantity: 2 },
+    { id: "onr_v1_234_data-darts", quantity: 2 },
+    { id: "onr_v1_258_neural-blade", quantity: 2 },
+    { id: "onr_v1_301_punitive-counterstrike", quantity: 2 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 6 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -7133,6 +7251,16 @@ function v1912CounterRecurringGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_RUNNER_DECK,
     corpDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1913DamagePreventionGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK,
+    corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

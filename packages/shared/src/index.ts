@@ -1474,6 +1474,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "Prevents up to 2 net and/or core damage each turn.",
     mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
   },
+  {
+    id: "onr_v1_038_joan-of-arc",
+    title: "Joan of Arc",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 net or core damage.",
+    mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
+  },
   onrBreaker({
     id: "onr_v1_030_grubb",
     title: "Grubb",
@@ -1894,6 +1906,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_resource", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_155_code-viral-cache",
+    title: "Code Viral Cache",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 net damage.",
+    mechanics: ["install_resource", "damage_prevention", "damage_prevention_turn_limit", "net_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_156_corporate-ally",
     title: "Corporate Ally",
     side: "runner",
@@ -1914,6 +1937,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     rulesText: "A, [T], 1 agenda point: Gain 10 credits.",
     mechanics: ["install_resource", "action_economy", "agenda_point_cost", "gain_credits", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_161_fall-guy",
+    title: "Fall Guy",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+    mechanics: ["install_resource", "damage_prevention", "damage_prevention_turn_limit", "meat_damage", "net_damage", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_158_danshis-second-id",
@@ -1947,6 +1981,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     rulesText: "Installed Hidden-Zone helper: search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
     mechanics: ["install_resource", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_170_nomad-allies",
+    title: "Nomad Allies",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+    mechanics: ["install_resource", "damage_prevention", "damage_prevention_turn_limit", "net_damage", "meat_damage", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_173_restrictive-net-zoning",
@@ -2027,6 +2072,39 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     rulesText: "Gain 3 at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
     mechanics: ["install_resource", "start_of_turn_credit_gain", "trash_on_run", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_185_trauma-team",
+    title: "Trauma Team",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "Installed prevention tool: once each turn, prevent 2 meat damage.",
+    mechanics: ["install_resource", "damage_prevention", "damage_prevention_turn_limit", "meat_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_186_umbrella-policy",
+    title: "Umbrella Policy",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 net, meat or core damage.",
+    mechanics: ["install_resource", "damage_prevention", "damage_prevention_turn_limit", "net_damage", "meat_damage", "core_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_187_wilson-weeflerunner-apprentice",
+    title: "Wilson, Weeflerunner Apprentice",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection", "unique"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 meat damage.",
+    mechanics: ["install_resource", "unique_card", "damage_prevention", "damage_prevention_turn_limit", "meat_damage", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_179_silicon-saloon-franchise",
@@ -2127,6 +2205,83 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     rulesText: "Prevents 1 meat damage each turn.",
     mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_121_armored-fridge",
+    title: "Armored Fridge",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "Installed prevention tool: once each turn, prevent 2 meat damage.",
+    mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "meat_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_127_full-body-conversion",
+    title: "Full Body Conversion",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 meat damage.",
+    mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "meat_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_128_green-knight-surge-buffers",
+    title: "\"Green Knight\" Surge Buffers",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "Installed prevention tool: once each turn, prevent 2 net damage.",
+    mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "net_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_130_lifesaver-nanosurgeons",
+    title: "Lifesaver Nanosurgeons",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["cybernetics"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 core damage.",
+    mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_135_nasuko-cycle",
+    title: "Nasuko Cycle",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+    mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "net_damage", "meat_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_139_r-and-d-interface",
+    title: "R&D Interface",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 net damage.",
+    mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "net_damage", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_143_techtronica-utility-suit",
+    title: "Techtronica Utility Suit",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    rulesText: "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+    mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "meat_damage", "net_damage", ONR_V1_LOCAL_PRIVATE]
   },
   onrMemoryChip({
     id: "onr_v1_144_tycho-mem-chip",
@@ -2687,6 +2842,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["trash_installed_program", "end_the_run", "concrete_special_resolver"]
   }),
   onrIce({
+    id: "onr_v1_224_bolter-cluster",
+    title: "Bolter Cluster",
+    subtypes: ["sentry", "black_ice"],
+    rezCost: 5,
+    strength: 3,
+    rulesText: "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+    subroutines: [onrNetDamage("onr_v1_224_bolter_cluster_net_damage", 1), onrEtr("onr_v1_224_bolter_cluster_etr")],
+    mechanics: ["damage", "flatline", "end_the_run", "event_modification"]
+  }),
+  onrIce({
     id: "onr_v1_225_canis-major",
     title: "Canis Major",
     subtypes: ["sentry", "watchdog"],
@@ -2786,6 +2951,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [onrTrashInstalledProgram("onr_v1_233_d_arc_knight_trash_program"), onrEtr("onr_v1_233_d_arc_knight_etr")],
     mechanics: ["uninstall_runner_program", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_234_data-darts",
+    title: "Data Darts",
+    subtypes: ["sentry", "black_ice"],
+    rezCost: 4,
+    strength: 2,
+    rulesText: "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+    subroutines: [onrNetDamage("onr_v1_234_data_darts_net_damage", 1), onrEtr("onr_v1_234_data_darts_etr")],
+    mechanics: ["damage", "flatline", "end_the_run", "event_modification"]
   }),
   onrIce({
     id: "onr_v1_235_data-naga",
@@ -2977,6 +3152,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "Do 2 net damage. End the run.",
     subroutines: [onrNetDamage("onr_v1_257_nerve_labyrinth_net_damage", 2), onrEtr("onr_v1_257_nerve_labyrinth_etr")],
     mechanics: ["damage", "flatline", "end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_258_neural-blade",
+    title: "Neural Blade",
+    subtypes: ["sentry", "black_ice"],
+    rezCost: 6,
+    strength: 4,
+    rulesText: "[Subroutine] Do 2 net damage.",
+    subroutines: [onrNetDamage("onr_v1_258_neural_blade_net_damage", 2)],
+    mechanics: ["damage", "flatline", "event_modification"]
   }),
   onrIce({
     id: "onr_v1_259_in-the-face",

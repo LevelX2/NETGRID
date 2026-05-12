@@ -7,6 +7,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
@@ -36,7 +37,8 @@ describe("catalog API filters", () => {
       ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
-      ...DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS
+      ...DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS
     ].filter((cardId) => cardId.startsWith("onr_v1_"));
     expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual(
       [...new Set(expectedOnrAiApproved)].sort()

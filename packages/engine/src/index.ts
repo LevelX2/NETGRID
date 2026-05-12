@@ -205,7 +205,21 @@ const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const RUNTIME_DAMAGE_PREVENTION_PROFILES: Record<string, RuntimeDamagePreventionProfile> = {
   "onr_v1_023_evil-twin": { maxPerTurn: 2, damageTypes: ["net", "core"], priority: 90 },
   "onr_v1_028_force-shield": { maxPerTurn: 2, damageTypes: ["net", "core"], priority: 100 },
-  "onr_v1_125_dermatech-bodyplating": { maxPerTurn: 1, damageTypes: ["meat"], priority: 110 }
+  "onr_v1_038_joan-of-arc": { maxPerTurn: 1, damageTypes: ["net", "core"], priority: 120 },
+  "onr_v1_121_armored-fridge": { maxPerTurn: 2, damageTypes: ["meat"], priority: 120 },
+  "onr_v1_125_dermatech-bodyplating": { maxPerTurn: 1, damageTypes: ["meat"], priority: 110 },
+  "onr_v1_127_full-body-conversion": { maxPerTurn: 1, damageTypes: ["meat"], priority: 121 },
+  "onr_v1_128_green-knight-surge-buffers": { maxPerTurn: 2, damageTypes: ["net"], priority: 121 },
+  "onr_v1_130_lifesaver-nanosurgeons": { maxPerTurn: 1, damageTypes: ["core"], priority: 121 },
+  "onr_v1_135_nasuko-cycle": { maxPerTurn: 1, damageTypes: ["net", "meat"], priority: 122 },
+  "onr_v1_139_r-and-d-interface": { maxPerTurn: 1, damageTypes: ["net"], priority: 123 },
+  "onr_v1_143_techtronica-utility-suit": { maxPerTurn: 1, damageTypes: ["net", "meat"], priority: 124 },
+  "onr_v1_155_code-viral-cache": { maxPerTurn: 1, damageTypes: ["net"], priority: 125 },
+  "onr_v1_161_fall-guy": { maxPerTurn: 1, damageTypes: ["net", "meat"], priority: 126 },
+  "onr_v1_170_nomad-allies": { maxPerTurn: 1, damageTypes: ["net", "meat"], priority: 127 },
+  "onr_v1_185_trauma-team": { maxPerTurn: 2, damageTypes: ["meat"], priority: 128 },
+  "onr_v1_186_umbrella-policy": { maxPerTurn: 1, damageTypes: ["net", "meat", "core"], priority: 129 },
+  "onr_v1_187_wilson-weeflerunner-apprentice": { maxPerTurn: 1, damageTypes: ["meat"], priority: 130 }
 };
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
@@ -3080,12 +3094,17 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     }
     if (subroutine.type === "do_damage") {
       const damageType = subroutine.damageType ?? "net";
-      const summary = doDamage(state, {
+      const event = createDamageImminentEvent(state, {
         damageId: `${run.runId}.${run.encounteredIceId}.${index}`,
         damageType,
         amount: subroutine.amount ?? 1,
         source: `subroutine:${definition.id}:${subroutine.id}`
       });
+      if (legalAction && (openReplacementWindow(state, event, legalAction) || openEventModificationWindow(state, event, legalAction))) {
+        if (!run.resolvedSubroutineIndexes.includes(index)) run.resolvedSubroutineIndexes.push(index);
+        return;
+      }
+      const summary = resolveDamageImminentEvent(state, event);
       damageSummaries.push(summary);
       if (legalAction) {
         setDamagePayload(legalAction, aggregateDamageSummaries(damageSummaries));

@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.9.13",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.13",
+  "generatedFor": "V1.9.13 Damage, Prevention, Avoid und Replacement Longtail data gate",
+  "generatedAt": "2026-05-13",
+  "status": "implemented_data_gate",
+  "extends": "data/rules/mechanics-coverage-1.9.12.json",
+  "gateAssertions": {
+    "eventModificationPreventionAvoidResolverImplemented": true,
+    "damageEventPreventionResolverImplemented": true,
+    "coreBrainDamageModifierResolverCarriedForward": true,
+    "allSeventeenV1913CardsHaveRuntimeDefinitions": true,
+    "aiChoicePathsCovered": true,
+    "noHiddenZoneDataLeak": true,
+    "stateHashReplayStable": true,
+    "noV1914PlusScope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.event_modification.prevent_avoid_interrupt",
+      "label": "Event Modification: Prevention/Avoid",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.13",
+      "currentScopeNote": "V1.9.13 extends the existing event-modification window to the target Runtime prevention cards and Corp ICE damage subroutines.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.damage.flatline",
+      "label": "Damage und Flatline",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.13",
+      "currentScopeNote": "V1.9.13 routes target net, meat and core damage through deterministic damage resolution after optional prevention.",
+      "coverage": ["unit", "replay", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.damage.core_brain_extensions",
+      "label": "Core/Brain-Damage-Erweiterungen",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.13",
+      "currentScopeNote": "Core-damage prevention is exposed through the same side-safe prevention window used by existing core-damage cards.",
+      "coverage": ["unit", "legal_action"]
+    }
+  ],
+  "deferred": []
+}
