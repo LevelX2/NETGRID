@@ -7,6 +7,8 @@ Status: umgesetzt
 
 In einem lokalen Human-Korp-vs-Runner-KI-Spiel lief die Runner-KI wiederholt auf HQ, obwohl die Korp nur eine Karte in HQ hatte. Beim ersten Zugriff sah der Runner `Overtime Incentives`; die Karte blieb danach in HQ und war für den Runner in der beobachteten Lage nicht sinnvoll verwertbar. Trotzdem bewertete die Runner-KI weitere HQ-Runs hoch genug, um mehrfach erneut auf HQ zu laufen.
 
+Folgebeobachtung im selben Playtest-Strang: Die Runner-KI startete wiederholt HQ-Runs mit 0 Credits gegen ein sichtbares, gerezztes `π in the 'Face` auf HQ. Ein `Simple Killer` war zwar installiert, konnte aber ohne Credits weder auf Stärke 3 pumpen noch die End-the-run-Subroutine brechen.
+
 ## Einordnung
 
 Das ist keine Engine- oder Visibility-Regelverletzung. Der Zugriff auf HQ ist legal, und die Karte wurde nur nach einem tatsächlichen Zugriff sichtbar. Der Fehler liegt in der Runner-KI-Bewertung:
@@ -44,14 +46,18 @@ Der AI-Level-2-Härtungsslice liegt in `packages/ai/src/belief-state.ts` und `pa
 - Testfixture: mehrere bekannte HQ-Karten, die alle aktuell keinen Run-Ertrag haben, müssen zusammen als niedriger HQ-Wert erkannt werden.
 - Positivfixtures: Nach Korp-Draw, unbekanntem Abgang, Rückkehr nach HQ oder sonstiger HQ-Veränderung darf HQ-Druck wieder normal bewertet werden; Runner-HQ-Payoff-Karten bleiben berücksichtigbar.
 
+## Folgehärtung: sichtbare ICE-Brechkosten
+
+Die Runner-KI berücksichtigt jetzt bei sichtbarem, gerezztem End-the-run-ICE auf dem Zielserver, ob installierte passende Breaker die Subroutine mit aktueller Stärke und aktuellen Credits tatsächlich brechen können. Dafür wird side-sicher aus PlayerView-Daten eine sichtbare Mindest-Brechkostenabschätzung über den bekannten gerezzten ICE-Pfad gebildet, nicht nur über das äußerste ICE.
+
+Beispiel: `Simple Killer` gegen `π in the 'Face` kostet bei Stärke 1 gegen Stärke 3 mindestens 3 Credits: zweimal pumpen und einmal brechen. Bei 0 Credits wird ein weiterer HQ-Run als sichtbar blockiert bewertet und gegenüber Economy-Aktionen deutlich abgewertet.
+
+Bei mehreren sichtbaren gerezzten ICE werden die sichtbaren End-the-run-Brechkosten über den Pfad kumuliert. Beispiel: `Simple Killer` mit 3 Credits kann ein einzelnes Stärke-3-Sentry gerade brechen, aber nicht zwei sichtbare Stärke-3-Sentry-Stopper auf demselben HQ-Pfad; der Gesamtpfad wird deshalb blockiert bewertet.
+
 ## Verifikation
 
-- `corepack pnpm --filter @netgrid/ai test -- src/index.test.ts`: pass, 85 Tests.
-- `corepack pnpm --filter @netgrid/ai typecheck`: pass.
-- `corepack pnpm lint`: pass.
-- `corepack pnpm typecheck`: pass.
-- `corepack pnpm test`: pass.
-- `git diff --check`: pass.
+- HQ-Handwert-Härtung: `corepack pnpm --filter @netgrid/ai test -- src/index.test.ts`, `corepack pnpm --filter @netgrid/ai typecheck`, `corepack pnpm lint`, `corepack pnpm typecheck`, `corepack pnpm test`, `git diff --check`: pass.
+- Folgehärtung sichtbare ICE-Brechkosten: `corepack pnpm --filter @netgrid/ai test -- src/index.test.ts`: pass, 87 Tests; `corepack pnpm --filter @netgrid/ai typecheck`: pass.
 
 ## Gate-Hinweis
 

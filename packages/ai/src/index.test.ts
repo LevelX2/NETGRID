@@ -432,6 +432,80 @@ describe("MVP 0.3 Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
+  it("backs off from HQ when the visible sentry breaker cannot pay the rezzed ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-hq-pi-face-credit-block",
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    moveRunnerCardToGrip(state, "simple_killer");
+    state.runner.credits = 3;
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_killer");
+    const iceId = putCorpIceOnServer(state, "hq", "onr_v1_259_in-the-face");
+    state.cardInstances[iceId] = { ...state.cardInstances[iceId]!, faceup: true, rezzed: true };
+    state.runner.credits = 0;
+
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(hqRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!hqRun || !gain) throw new Error("Missing HQ blocker fixture actions");
+
+    const pressureCandidate = generateRunnerPlanCandidates(input).find((candidate) => candidate.kind === "pressure_hq");
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_hq candidate");
+    const runCost = estimateRunCost(input, pressureCandidate);
+    const decision = chooseRunnerAction({ ...input, legalActions: [hqRun, gain] });
+
+    expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
+    expect(runCost.evidence).toContain("visible_etr_break_cost:3");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("backs off when the visible multi-ICE path costs more than the Runner can pay", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-hq-multi-ice-credit-block",
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          cards: [...ONR_V1_1_2K_CORP_DECK.cards, { id: "simple_sentry_ice", quantity: 1 }]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    moveRunnerCardToGrip(state, "simple_killer");
+    state.runner.credits = 3;
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_killer");
+    const innerIceId = putCorpIceOnServer(state, "hq", "onr_v1_259_in-the-face");
+    const outerIceId = putCorpIceOnServer(state, "hq", "simple_sentry_ice");
+    state.cardInstances[innerIceId] = { ...state.cardInstances[innerIceId]!, faceup: true, rezzed: true };
+    state.cardInstances[outerIceId] = { ...state.cardInstances[outerIceId]!, faceup: true, rezzed: true };
+    state.runner.credits = 3;
+
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(hqRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!hqRun || !gain) throw new Error("Missing multi-ICE HQ fixture actions");
+
+    const pressureCandidate = generateRunnerPlanCandidates(input).find((candidate) => candidate.kind === "pressure_hq");
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_hq candidate");
+    const runCost = estimateRunCost(input, pressureCandidate);
+    const decision = chooseRunnerAction({ ...input, legalActions: [hqRun, gain] });
+
+    expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
+    expect(runCost.evidence).toContain("visible_etr_break_cost:4");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
   it("does not pump or repeat a remote run when the visible breaker cannot break the rezzed ICE", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

@@ -122,10 +122,10 @@ type RunnerFeatures = {
   memoryRemaining: number;
   handCount: number;
   rigRoles: Set<string>;
-  rigDefinitionIds: Set<string>;
   handRoles: Set<string>;
   serverFeatures: Map<string, { iceCount: number; rootCount: number; knownRootCount: number; rezzedIceCount: number; advancedRootCount: number }>;
   blockedRunServers: Set<string>;
+  visibleRunBreakCosts: Map<string, number>;
 };
 
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
@@ -333,12 +333,20 @@ export function estimateRunCost(input: AiDecisionInput, candidate: RunnerPlanCan
   const target = targetServerId(input, candidate);
   const server = target ? features.serverFeatures.get(target) : undefined;
   const blocked = target ? features.blockedRunServers.has(target) : false;
+  const visibleBreakCost = target ? features.visibleRunBreakCosts.get(target) : undefined;
   const rezzedIce = server?.rezzedIceCount ?? 0;
-  const score = candidate.kind === "recover_economy" ? (features.credits < 4 ? 120 : 40) : blocked ? -420 : Math.max(-120, 90 - rezzedIce * 55 - Math.max(0, 3 - features.credits) * 35);
+  const breakCostPressure = visibleBreakCost === undefined ? 0 : visibleBreakCost * 18 + Math.max(0, visibleBreakCost - features.credits) * 55;
+  const score = candidate.kind === "recover_economy" ? (features.credits < 4 ? 120 : 40) : blocked ? -520 : Math.max(-180, 90 - rezzedIce * 55 - Math.max(0, 3 - features.credits) * 35 - breakCostPressure);
   return {
     score,
-    reasons: blocked ? ["run_blocked_by_visible_rezzed_ice"] : ["run_cost_from_visible_ice"],
-    evidence: [`target:${target ?? "none"}`, `rezzed_ice:${rezzedIce}`, `blocked:${blocked}`, `credit_reserve:${features.credits}`]
+    reasons: blocked ? ["run_blocked_by_visible_rezzed_ice", "visible_ice_unaffordable_to_break"] : ["run_cost_from_visible_ice"],
+    evidence: [
+      `target:${target ?? "none"}`,
+      `rezzed_ice:${rezzedIce}`,
+      `blocked:${blocked}`,
+      `credit_reserve:${features.credits}`,
+      `visible_etr_break_cost:${visibleBreakCost ?? "unavailable"}`
+    ]
   };
 }
 
@@ -492,7 +500,6 @@ function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDeci
 function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
   const rigCards = input.playerView.own.rig ?? [];
   const rigRoles = new Set(rigCards.flatMap((card) => rolesForCardId(card.definitionId)));
-  const rigDefinitionIds = new Set(rigCards.map((card) => card.definitionId).filter((id): id is string => Boolean(id)));
   const handRoles = new Set(input.playerView.own.gripOrHq.flatMap((card) => rolesForCardId(card.definitionId)));
   const serverFeatures = new Map(
     input.playerView.servers.map((server) => [
@@ -506,9 +513,13 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
       }
     ])
   );
-  const blockedRunServers = new Set(
-    input.playerView.servers.filter((server) => isBlockedByKnownRezzedIce(server.ice[0], rigDefinitionIds)).map((server) => server.id)
-  );
+  const blockedRunServers = new Set<string>();
+  const visibleRunBreakCosts = new Map<string, number>();
+  for (const server of input.playerView.servers) {
+    const assessment = assessKnownRezzedIcePath(server.ice, rigCards, input.playerView.own.credits);
+    if (assessment.visibleBreakCost !== undefined) visibleRunBreakCosts.set(server.id, assessment.visibleBreakCost);
+    if (assessment.blocked) blockedRunServers.add(server.id);
+  }
   return {
     credits: input.playerView.own.credits,
     clicks: input.playerView.own.clicks,
@@ -516,10 +527,10 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
     memoryRemaining: (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0),
     handCount: input.playerView.own.gripOrHq.length,
     rigRoles,
-    rigDefinitionIds,
     handRoles,
     serverFeatures,
-    blockedRunServers
+    blockedRunServers,
+    visibleRunBreakCosts
   };
 }
 
@@ -619,26 +630,77 @@ function isLowInformationRunTarget(features: RunnerFeatures, serverId: string): 
   return server.iceCount <= 1 && server.rootCount === 0;
 }
 
-function isBlockedByKnownRezzedIce(ice: { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[] } | undefined, rigDefinitionIds: Set<string>): boolean {
-  if (!ice?.definitionId || !ice.known || ice.rezzed !== true) return false;
-  const iceDefinitionId = ice.definitionId;
-  if (!iceHasEndTheRun(iceDefinitionId)) return false;
-  return ![...rigDefinitionIds].some((breakerDefinitionId) => canBreakerDefinitionBreakIce(breakerDefinitionId, iceDefinitionId));
+function assessKnownRezzedIcePath(
+  iceCards: Array<{ definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[]; strength?: number }>,
+  rigCards: VisibleCard[],
+  runnerCredits: number
+): { blocked: boolean; visibleBreakCost?: number } {
+  let visibleBreakCost = 0;
+  const breakerStrengths = new Map(rigCards.map((card) => [card.instanceId, card.strength ?? 0]));
+  for (const ice of iceCards) {
+    if (!ice.definitionId || !ice.known || ice.rezzed !== true) continue;
+    const endTheRunCount = endTheRunSubroutineCount(ice.definitionId);
+    if (endTheRunCount === 0) continue;
+    const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(ice, rigCards, endTheRunCount, breakerStrengths);
+    if (!breakAssessment) return { blocked: true, ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}) };
+    visibleBreakCost += breakAssessment.cost;
+    breakerStrengths.set(breakAssessment.breakerInstanceId, breakAssessment.endingStrength);
+  }
+  return visibleBreakCost > 0 ? { blocked: visibleBreakCost > runnerCredits, visibleBreakCost } : { blocked: false };
 }
 
-function canBreakerDefinitionBreakIce(breakerDefinitionId: string, iceDefinitionId: string): boolean {
+function minimumCreditsToBreakEndTheRunSubroutines(
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  rigCards: VisibleCard[],
+  endTheRunCount: number,
+  breakerStrengths: Map<string, number>
+): { cost: number; breakerInstanceId: string; endingStrength: number } | undefined {
+  const costs = rigCards
+    .map((card) => creditsToBreakEndTheRunSubroutinesWithBreaker(card, ice, endTheRunCount, breakerStrengths.get(card.instanceId)))
+    .filter((cost): cost is { cost: number; breakerInstanceId: string; endingStrength: number } => cost !== undefined)
+    .sort((left, right) => left.cost - right.cost || left.breakerInstanceId.localeCompare(right.breakerInstanceId));
+  if (costs.length === 0) return undefined;
+  return costs[0];
+}
+
+function creditsToBreakEndTheRunSubroutinesWithBreaker(
+  breakerCard: VisibleCard,
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  endTheRunCount: number,
+  currentBreakerStrength = breakerCard.strength ?? 0
+): { cost: number; breakerInstanceId: string; endingStrength: number } | undefined {
+  if (!breakerCard.known || !breakerCard.definitionId || !ice.definitionId) return undefined;
+  const breakerDefinitionId = breakerCard.definitionId;
+  const iceDefinitionId = ice.definitionId;
   const breakerDefinition = DEMO_CARDS_BY_ID[breakerDefinitionId];
   const iceDefinition = DEMO_CARDS_BY_ID[iceDefinitionId];
-  if (!breakerDefinition || !iceDefinition) return false;
-  return Boolean(
-    breakerDefinition.abilities?.some(
-      (ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype))
-    )
+  if (!breakerDefinition || !iceDefinition) return undefined;
+  const breakAbility = breakerDefinition.abilities?.find(
+    (ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || (ice.subtypes ?? iceDefinition.subtypes).includes(ability.iceSubtype))
   );
+  if (!breakAbility) return undefined;
+  const breakerStrength = currentBreakerStrength;
+  const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
+  const pumpAbility = breakerDefinition.abilities?.find((ability) => ability.type === "pump_strength");
+  let pumpCost = 0;
+  let endingStrength = breakerStrength;
+  if (breakerStrength < iceStrength) {
+    if (!pumpAbility || (pumpAbility.amount ?? 0) <= 0) return undefined;
+    const requiredPumps = Math.ceil((iceStrength - breakerStrength) / Math.max(1, pumpAbility.amount ?? 1));
+    pumpCost = requiredPumps * (pumpAbility.cost.credits ?? 0);
+    endingStrength += requiredPumps * Math.max(1, pumpAbility.amount ?? 1);
+  }
+  const breakCount = Math.max(1, breakAbility.count ?? 1);
+  const breakUses = Math.ceil(endTheRunCount / breakCount);
+  return {
+    cost: pumpCost + breakUses * (breakAbility.cost.credits ?? 0),
+    breakerInstanceId: breakerCard.instanceId,
+    endingStrength
+  };
 }
 
-function iceHasEndTheRun(iceDefinitionId: string): boolean {
-  return Boolean(DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.some((subroutine) => subroutine.type === "end_the_run"));
+function endTheRunSubroutineCount(iceDefinitionId: string): number {
+  return DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.filter((subroutine) => subroutine.type === "end_the_run").length ?? 0;
 }
 
 function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudgetMs: number, timeoutUsed: boolean, beliefState: BeliefState): RunnerPlanDecision {
