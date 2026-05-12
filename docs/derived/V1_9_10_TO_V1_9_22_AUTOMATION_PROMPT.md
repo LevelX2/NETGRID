@@ -30,8 +30,8 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 
 0. Worktree-Preflight vor dem Lesen der Release-Artefakte: Fester Automations-Workspace ist `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`. Falls dieser Worktree fehlt, lege ihn aus `C:\Projekte\NETGRID` per `git worktree add C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET codex/v1-9-originalset-completion` an. Arbeite danach ausschliesslich im festen Automations-Worktree und wechsle nicht in den lokalen Hauptworkspace `C:\Projekte\NETGRID`.
 1. Pruefe den lokalen Lock `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`.
-2. Wenn ein aktiver nicht-staler Lock existiert, stoppe ohne Aenderungen.
-3. Lege fuer den eigenen Lauf einen Lock an und entferne ihn am Ende.
+2. Wenn ein aktiver nicht-staler Lock existiert, stoppe ohne Aenderungen. Ein Lock mit JSON-Status `released-delete-denied`, `released`, `stale` oder `abandoned` gilt nicht als aktiv; entferne ihn wenn moeglich, sonst ueberschreibe ihn beim Anlegen des eigenen Locks.
+3. Lege fuer den eigenen Lauf einen Lock an und entferne ihn am Ende. Wenn das Loeschen am Ende trotz freigegebenem Lauf scheitert, ueberschreibe den Lock mit JSON-Status `released-delete-denied`, `releasedUtc`, `workspace` und `branch`, damit der naechste Lauf ihn sicher als freigegeben behandeln kann.
 4. Stelle sicher, dass der Branch `codex/v1-9-originalset-completion` aktiv ist.
 5. Pruefe `git status`. Wenn eigene, klar zum aktuellen V1.9-Cursor gehoerende WIP-Aenderungen aus einem vorherigen Automationslauf vorhanden sind, stoppe nicht allein wegen Dirty-Status, sondern klassifiziere sie im Laufbericht und arbeite am selben Cursor weiter. Fremde, unklare oder releasefremde Aenderungen bleiben ein harter Blocker.
 6. Lies den aktuellen Release und die Phase aus `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md`.

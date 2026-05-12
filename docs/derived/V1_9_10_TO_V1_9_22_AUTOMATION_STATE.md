@@ -36,7 +36,7 @@ Lokaler, nicht versionierter Lock im ignorierten Laufzeitbereich des festen Auto
 
 `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`
 
-Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur uebernommen werden, wenn er eindeutig stale ist und der vorherige Prozess nicht mehr laeuft. Die frueheren Lock-Pfade `.codex/runtime/v1_9_originalset_completion.lock`, `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` und `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock` sind nicht mehr verbindlich, weil sie in Automationslaeufen per ACL blockiert sein koennen.
+Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur uebernommen werden, wenn er eindeutig stale ist und der vorherige Prozess nicht mehr laeuft. Ein JSON-Lock mit Status `released-delete-denied`, `released`, `stale` oder `abandoned` gilt als freigegeben und darf entfernt oder ueberschrieben werden. Die frueheren Lock-Pfade `.codex/runtime/v1_9_originalset_completion.lock`, `%LOCALAPPDATA%\NETGRID\automation\v1_9_originalset_completion.lock` und `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock` sind nicht mehr verbindlich, weil sie in Automationslaeufen per ACL blockiert sein koennen.
 
 ## Release-Reihenfolge
 
