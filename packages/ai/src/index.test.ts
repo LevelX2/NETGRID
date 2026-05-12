@@ -1335,6 +1335,114 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
+  it("prefers economy over repeat HQ runs when the full HQ hand is known low-value", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-hq-known-low-value-repeat",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+        corpDeck: ONR_V1_2_3_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    const overtimeId = moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    keepOnlyCorpHqCard(state, overtimeId);
+    state.runner.credits = 2;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const belief = reconstructBeliefState(input);
+    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(hqRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!hqRun || !gainCredit) throw new Error("Missing known HQ or gain_credit action");
+
+    const pressureCandidate = generateRunnerPlanCandidates(input).find((candidate) => candidate.kind === "pressure_hq");
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_hq candidate");
+    const score = evaluateServerAccessValue(input, pressureCandidate, belief);
+    const decision = chooseRunnerAction({ ...input, legalActions: [hqRun, gainCredit] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+
+    expect(belief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      handCount: 1,
+      knownDefinitions: ["onr_v1_297_overtime-incentives"],
+      knownCount: 1,
+      allCardsKnown: true
+    });
+    expect(score.reasons).toContain("known_hq_hand_low_value");
+    expect(selected?.type).toBe("gain_credit");
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("tracks known HQ hand completeness conservatively across arrivals and known departures", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-hq-known-hand-memory",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+        corpDeck: ONR_V1_2_3_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    const overtimeId = moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    const economyId = moveCorpCardToHq(state, "simple_economy_operation");
+    for (const cardId of state.corp.hq.filter((candidate) => candidate !== overtimeId && candidate !== economyId)) {
+      state.corp.rd.push(cardId);
+      state.cardInstances[cardId] = { ...state.cardInstances[cardId]!, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+    }
+    state.corp.hq = [overtimeId, economyId];
+    const baseInput = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+
+    const fullyKnownInput = {
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticHqMemoryEvent("ai-hq-known-overtime", 100, "runner", "access_card", "onr_v1_297_overtime-incentives"),
+        syntheticHqMemoryEvent("ai-hq-known-economy", 101, "runner", "access_card", "simple_economy_operation")
+      ]
+    };
+    const fullyKnownBelief = reconstructBeliefState(fullyKnownInput);
+    expect(fullyKnownBelief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      handCount: 2,
+      knownDefinitions: ["onr_v1_297_overtime-incentives", "simple_economy_operation"],
+      knownCount: 2,
+      allCardsKnown: true
+    });
+
+    const afterDraw = structuredClone(state);
+    moveCorpCardToHq(afterDraw, "onr_v1_237_data-wall");
+    const afterDrawBaseInput = buildAiDecisionInput(afterDraw, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const afterDrawBelief = reconstructBeliefState({
+      ...afterDrawBaseInput,
+      eventTail: [...fullyKnownInput.eventTail, syntheticHqMemoryEvent("ai-hq-unknown-draw", 102, "corp", "mandatory_draw")]
+    });
+    expect(afterDrawBelief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      handCount: 3,
+      knownCount: 2,
+      allCardsKnown: false
+    });
+
+    const afterPlay = structuredClone(state);
+    afterPlay.corp.hq = [economyId];
+    afterPlay.cardInstances[overtimeId] = { ...afterPlay.cardInstances[overtimeId]!, zone: { side: "corp", zone: "archives" }, faceup: true, rezzed: true };
+    afterPlay.corp.archives.push(overtimeId);
+    const afterPlayBaseInput = buildAiDecisionInput(afterPlay, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
+    const afterPlayBelief = reconstructBeliefState({
+      ...afterPlayBaseInput,
+      eventTail: [...fullyKnownInput.eventTail, syntheticHqMemoryEvent("ai-hq-overtime-played", 102, "corp", "play_operation", "onr_v1_297_overtime-incentives")]
+    });
+    expect(afterPlayBelief.runnerOpponentModel?.hqHandMemory).toMatchObject({
+      handCount: 1,
+      knownDefinitions: ["simple_economy_operation"],
+      knownCount: 1,
+      allCardsKnown: true
+    });
+  });
+
   it("provides Corp and Runner opponent models and keeps DecisionDebug side-safe", () => {
     const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v142-opponent-models" }));
     const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" });
@@ -2216,6 +2324,24 @@ function withPublicServerEventTail(input: ReturnType<typeof buildAiDecisionInput
     publicPayload: { serverId }
   }));
   return { ...input, eventTail };
+}
+
+function syntheticHqMemoryEvent(eventId: string, stateVersionBefore: number, actor: Side, actionType: string, cardDefinitionId?: string): PublicGameEvent {
+  return {
+    eventId,
+    type: actionType,
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor,
+      actionType,
+      serverId: "hq",
+      serverLabel: "HQ",
+      ...(cardDefinitionId ? { cardDefinitionId } : {})
+    }
+  };
 }
 
 function runCorpAiOnlySmoke(seed: string, maxActions: number): { actions: number; errors: string[] } {

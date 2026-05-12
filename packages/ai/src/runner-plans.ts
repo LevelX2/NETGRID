@@ -13,7 +13,7 @@ import deckLegalV199AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
 import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
-import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
+import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory } from "./belief-state";
 
 export type RunnerPlanKind =
   | "pressure_rnd"
@@ -348,25 +348,29 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
   const server = target ? features.serverFeatures.get(target) : undefined;
   const history = publicServerMentions(input, target);
   const freshness = beliefState.runnerOpponentModel?.rndTopFreshness;
+  const hqHandMemory = beliefState.runnerOpponentModel?.hqHandMemory;
   const staleRndPenalty =
     target === "rd" && (candidate.kind === "pressure_rnd" || candidate.kind === "safe_probe_run") && freshness?.freshness === "stale_known_same_top"
       ? candidate.kind === "pressure_rnd"
         ? 420
         : 220
       : 0;
+  const lowValueKnownHq = isKnownLowValueHqHand(input, target, hqHandMemory);
+  const staleHqPenalty =
+    target === "hq" && (candidate.kind === "pressure_hq" || candidate.kind === "safe_probe_run") && lowValueKnownHq ? (candidate.kind === "pressure_hq" ? 430 : 230) : 0;
   const score =
     candidate.kind === "pressure_rnd"
       ? 135 + history * 10 - staleRndPenalty
     : candidate.kind === "pressure_hq"
-        ? 110 + Math.max(0, 5 - input.playerView.opponent.handCount) * 4 + history * 8
-        : candidate.kind === "contest_remote"
+        ? 110 + Math.max(0, 5 - input.playerView.opponent.handCount) * 4 + history * 8 - staleHqPenalty
+      : candidate.kind === "contest_remote"
           ? 90 + (server?.rootCount ?? 0) * 55 + (server?.advancedRootCount ?? 0) * 35
-          : candidate.kind === "trash_asset"
-            ? 150
-            : candidate.kind === "safe_probe_run"
-              ? 55 - staleRndPenalty * 0.4
-              : 0;
-  const reasons = ["server_value_from_visible_projection", ...(staleRndPenalty > 0 ? ["known_rnd_top_not_fresh"] : [])];
+      : candidate.kind === "trash_asset"
+        ? 150
+      : candidate.kind === "safe_probe_run"
+        ? 55 - staleRndPenalty * 0.4 - staleHqPenalty * 0.4
+        : 0;
+  const reasons = ["server_value_from_visible_projection", ...(staleRndPenalty > 0 ? ["known_rnd_top_not_fresh"] : []), ...(staleHqPenalty > 0 ? ["known_hq_hand_low_value"] : [])];
   return {
     score,
     reasons,
@@ -376,9 +380,28 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
       `root_count:${server?.rootCount ?? 0}`,
       `known_root_count:${server?.knownRootCount ?? 0}`,
       `server_history:${history}`,
-      `rnd_freshness:${freshness?.freshness ?? "unknown"}`
+      `rnd_freshness:${freshness?.freshness ?? "unknown"}`,
+      `hq_hand_known:${hqHandMemory?.allCardsKnown === true ? "all" : hqHandMemory && hqHandMemory.knownCount > 0 ? "partial" : "unknown"}`,
+      `hq_known_count:${hqHandMemory?.knownCount ?? 0}`,
+      `hq_hand_count:${hqHandMemory?.handCount ?? input.playerView.opponent.handCount}`
     ]
   };
+}
+
+function isKnownLowValueHqHand(input: AiDecisionInput, target: string | undefined, hqHandMemory: KnownHqHandMemory | undefined): boolean {
+  if (target !== "hq" || !hqHandMemory?.allCardsKnown || hqHandMemory.knownDefinitions.length === 0) return false;
+  return hqHandMemory.knownDefinitions.every((definitionId) => isLowValueKnownHqAccessCard(definitionId, input.playerView.own.credits));
+}
+
+function isLowValueKnownHqAccessCard(definitionId: string, runnerCredits: number): boolean {
+  const runtimeDefinition = RUNTIME_CARDS[definitionId];
+  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
+  const type = runtimeDefinition?.type ?? demoDefinition?.type;
+  if (!type) return false;
+  if (type === "agenda") return false;
+  const trashCost = runtimeDefinition?.numeric.trashCost ?? demoDefinition?.trashCost ?? 0;
+  if ((type === "asset" || type === "upgrade") && runnerCredits >= trashCost) return false;
+  return true;
 }
 
 export function evaluateRemoteThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanEvaluatorResult {

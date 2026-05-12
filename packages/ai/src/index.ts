@@ -17,6 +17,7 @@ export type {
   BeliefKnowledgeKind,
   BeliefState,
   CorpOpponentModel,
+  KnownHqHandMemory,
   KnownPositionMemory,
   RndTopFreshnessMemory,
   RunnerOpponentModel
