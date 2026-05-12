@@ -51,7 +51,7 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 - Arbeite nicht als Dauerprozess.
 - Ziel-Laufzeit bei offenem Release ist 45 bis 50 Minuten.
 - Stoppe nicht freiwillig vor 40 Minuten Gesamtlaufzeit, solange kein harter Blocker, kein aktiver fremder Lock, keine unklaren/fremden Worktree-Aenderungen und keine ausdruecklich dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
-- Unter 40 Minuten Gesamtlaufzeit gibt es nur diese erlaubten Stop-Gruende: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen, oder keine sinnvolle naechste Aktion mit konkreter Begruendung und Dateiverweisen. "Completion-Gate erreicht", "WIP gesichert", "Tests gruen", "Kontext komprimiert", "kleiner Fortschritt erledigt", "fehlende Volltextquelle bei vorhandenen Regelkern-Aussagen" oder "naechster Schritt waere groesser" sind keine Stop-Gruende.
+- Unter 40 Minuten Gesamtlaufzeit gibt es nur diese erlaubten Stop-Gruende: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen, oder keine sinnvolle naechste Aktion mit konkreter Begruendung und Dateiverweisen. "Completion-Gate erreicht", "WIP gesichert", "Tests gruen", "rote Pflichtchecks ohne abgeschlossene harte Blockeranalyse", "Kontext komprimiert", "kleiner Fortschritt erledigt", "fehlende Volltextquelle bei vorhandenen Regelkern-Aussagen" oder "naechster Schritt waere groesser" sind keine Stop-Gruende.
 - Wenn ein Lauf unter 40 Minuten stoppt, muss der Abschlussbericht explizit `Early-Stop-Reason:` mit einer der erlaubten Stop-Gruppen enthalten. Fehlt ein erlaubter Grund, war der Lauf nicht regelkonform.
 - Wenn der Kontext komprimiert wird, gilt das nicht als Stoppgrund. Setze am Cursor fort, pruefe den aktuellen Stand und arbeite weiter, bis ein erlaubter Blocker, die Gesamtcompletion V1.9.10 bis V1.9.22 oder die Zeitgrenze erreicht ist.
 - Halte nach etwa 45 bis 50 Minuten an, selbst wenn der aktuelle Release noch nicht fertig ist.
@@ -60,6 +60,7 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 - Stoppe nicht schon nach einem erfolgreichen WIP-Checkpoint, solange kein harter Blocker vorliegt und noch deutlich Restzeit vorhanden ist. Ein WIP-Commit ist ein Sicherungspunkt, kein automatisches Laufende.
 - Wenn der aktuelle Release noch nicht abgeschlossen ist und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, arbeite am selben Release weiter, bis entweder ein echter Blocker entsteht oder mindestens 40 Minuten erreicht sind. Zwischen 40 und 50 Minuten darf nur nach sauberem Status/WIP-Checkpoint gestoppt werden.
 - Wenn alle urspruenglich geplanten Teilaufgaben eines WIP-Schnitts erledigt sind, waehle unter 40 Minuten automatisch die naechste offene Gate-Arbeit aus `Implementation Review`, `Test Matrix`, `Manifest`, `Coverage`, `AI-Hints`, `AI-Smokes`, `Server/Web`, `Full Checks` oder `Final Review` und arbeite daran weiter.
+- Rote Pflichtchecks vor Releaseabschluss sind Debug-Arbeit und kein Early-Stop-Grund. Unter 40 Minuten musst du die Fehlerursache eingrenzen, passende Code-/Daten-/Test-/Doku-Fixes versuchen, die betroffenen Checks erneut laufen lassen und den Stand per WIP-Checkpoint sichern. Rote Checks verhindern nur Releaseabschluss und Cursor-Fortschritt. Sie sind erst dann ein erlaubter Stop-Grund, wenn nach konkreter Analyse ein harter technischer oder fachlicher P0-Blocker mit Removal Condition dokumentiert ist, oder wenn die 40-50-Minuten-Grenze erreicht ist und ein sauberer WIP-Checkpoint existiert.
 - Pipeline-Modus: Wenn ein Release in diesem Lauf vollstaendig abgeschlossen, gepusht und der Cursor sauber auf den naechsten Release gesetzt wurde, muss derselbe Lauf bei ausreichend Restzeit den naechsten Release beginnen. Ein Releaseabschluss ist ein Pipeline-Uebergang, kein Laufende.
 - Ausreichend Restzeit bedeutet: Der Lauf ist nach eigener Einschaetzung noch klar unter etwa 40 Minuten Gesamtlaufzeit, der Lock gehoert weiterhin diesem Lauf, der Worktree ist sauber, der Push des vorherigen Release war erfolgreich und der Cursor zeigt exakt auf den naechsten Release.
 - Im Pipeline-Modus wird immer nur der unmittelbar naechste Release begonnen; Releases duerfen nie uebersprungen werden. Erlaubt sind Detailplanung, Requirements/Testmatrix, erste eng begrenzte Umsetzung und ein WIP-Checkpoint. Wenn auch der naechste Release im selben Lauf vollstaendig gate-gruen wird und noch vor der 45-50-Minuten-Grenze gearbeitet werden kann, wird auch dessen Cursor auf den Folge-Release gesetzt und nach denselben Regeln weiterpipelinebar fortgesetzt. Es gibt keinen kuenstlichen Stopp nach einem erfolgreichen Releaseabschluss.
@@ -100,6 +101,12 @@ Ein Release darf nur dann als abgeschlossen markiert werden, wenn mindestens gil
 - Final Review existiert
 
 Tests duerfen im Expeditionsmodus fehlschlagen und trotzdem als WIP gesichert werden. Fehlgeschlagene Tests duerfen aber nicht als Release-Abschluss gewertet werden.
+
+## Umgang mit roten Checks
+
+Fehlgeschlagene Paket-, Workspace-, Lint-, Typecheck-, Build-, JSON-, Visibility-, Replay-, StateHash-, AI- oder Browser-Gates sind zuerst Arbeitsauftrag zur Fehleranalyse. Die Automation muss Fehlerursache, betroffene Dateien und naechsten Fixversuch bestimmen, den Fix soweit moeglich umsetzen und relevante Checks wiederholen.
+
+Ein roter Check ist kein Early-Stop-Grund unter 40 Minuten. Stop unter 40 Minuten ist nur erlaubt, wenn der rote Check nach Analyse auf einen echten harten technischen oder fachlichen P0-Blocker zurueckgeht und dieser mit Removal Condition dokumentiert wurde. Ansonsten bleibt der Cursor auf demselben Release, der WIP wird gesichert und der naechste Lauf setzt die Fehlerbehebung fort.
 
 ## Kartenaktivierung
 

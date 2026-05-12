@@ -73,9 +73,11 @@ Im Expeditionsmodus darf ein Lauf zusätzlich aus `planned`, `implementing` oder
 
 Ein WIP-Checkpoint ist kein Laufende. Wenn der aktuelle Release nach einem erfolgreichen WIP-Commit noch offen ist, kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, soll der Controller am selben Release weiterarbeiten. Kontextkomprimierung ist kein Stoppgrund. Gestoppt wird erst bei Blocker, sauberem Zeitbudget-Ende oder nahender 45-50-Minuten-Grenze. Ein erreichter Releaseabschluss ist kein Laufende, sondern der Pipeline-Uebergang auf den naechsten Release, solange ein naechster Release existiert und ausreichend Zeitbudget verbleibt.
 
-Early-Stop-Gate: Ein Stop unter 40 Minuten ist nur mit einer festen Stop-Gruppe erlaubt: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen oder "keine sinnvolle naechste Aktion" mit konkreter Begruendung und Dateiverweisen. Der Laufbericht muss in diesem Fall `Early-Stop-Reason:` enthalten. Completion-Gate erreicht, Teilfortschritt, gruene Teiltests, Kontextkomprimierung oder ein erfolgreicher WIP-Checkpoint zaehlen nicht.
+Early-Stop-Gate: Ein Stop unter 40 Minuten ist nur mit einer festen Stop-Gruppe erlaubt: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen oder "keine sinnvolle naechste Aktion" mit konkreter Begruendung und Dateiverweisen. Der Laufbericht muss in diesem Fall `Early-Stop-Reason:` enthalten. Completion-Gate erreicht, Teilfortschritt, gruene Teiltests, rote Pflichtchecks ohne abgeschlossene Blockeranalyse, Kontextkomprimierung oder ein erfolgreicher WIP-Checkpoint zaehlen nicht.
 
 Text-Finalisierungs-Gate: Fehlende versionierte lokale Volltextquellen fuer O:NR-v1-Zielkarten sind kein harter P0-Blocker, wenn die Karten bereits lokal bestaetigte Regelkern-Aussagen in den fuehrenden V1.9.10-bis-V1.9.xx-Planungsartefakten haben. Der Controller muss daraus finale, knappe display-only Anzeige-/Release-Texte ohne WIP-Praefix ableiten und die Ableitung im Review dokumentieren. Kartentext bleibt Anzeigeinformation und darf nicht als Regel-, Parser-, LegalAction-, KI- oder Replay-Autoritaet genutzt werden. Nur vollstaendig fehlende Textgrundlage, also weder Volltextquelle noch bestaetigte Regelkern-Aussage, bleibt ein fachlicher Blocker.
+
+Check-Failure-Gate: Rote Pflichtchecks vor Releaseabschluss verhindern ausschliesslich den Releaseabschluss und den Cursor-Fortschritt. Sie sind kein eigener Early-Stop-Grund. Unter 40 Minuten muss der Controller die Fehlerursache analysieren, die betroffenen Code-/Daten-/Test-/Doku-Pfade korrigieren, relevante Checks wiederholen und den Zwischenstand per WIP-Commit/Push sichern. Erst wenn die Analyse einen echten harten technischen oder fachlichen P0-Blocker ergibt, darf daraus ein Stopgrund werden; der Blocker braucht dann konkrete Ursache, betroffene Dateien/Checks und Removal Condition.
 
 ## Done-Gate je Release
 
@@ -207,6 +209,7 @@ Der spätere Automation-Prompt sollte nicht allgemein "arbeite weiter" sagen. Er
 | Release dauert länger als eine Stunde | zweiter Job greift parallel ein | Lock stoppt neuen Lauf |
 | Dirty Worktree durch Nutzeränderungen | falscher Commit | Diff-Gate und Blocker statt Commit |
 | Final Review existiert, Tests aber nicht grün | falsches Done-Signal | Done-Gate verlangt Testnachweise |
+| Rote Pflichtchecks werden als Laufende missverstanden | Fortschritt stoppt trotz reparierbarer Fehler | Check-Failure-Gate: Fehler analysieren, fixen, erneut testen; nur echte harte P0/Technikblocker stoppen unter 40 Minuten |
 | Automation pusht auf falschen Branch | Integrationsrisiko | Branch-Gate, kein Push nach `main` |
 | Späterer Release wird vorgezogen | Sequenzbruch | Cursor plus Handoff-Reihenfolge als harte Quelle |
 | Hidden-Info-Regression bleibt unentdeckt | Projektkernbruch | Visibility-/Replay-/AI-Safety-Pflichtgates |

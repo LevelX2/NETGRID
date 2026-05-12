@@ -27,7 +27,7 @@ Completion-Modus: Gate-pflichtig
 - Pro Automationslauf nur am aktuellen Release aus diesem Cursor arbeiten.
 - Ziel-Laufzeit bei offenem Release ist 45 bis 50 Minuten.
 - Nicht freiwillig vor 40 Minuten Gesamtlaufzeit stoppen, solange kein harter Blocker, kein fremder Lock, keine fremden/unklaren Worktree-Aenderungen und keine dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
-- Unter 40 Minuten sind nur harte technische/fachliche Blocker, fremder Lock, fremde/unklare Worktree-Aenderungen, vollstaendige Abarbeitung aller Releases V1.9.10 bis V1.9.22 oder eine konkret begruendete "keine sinnvolle naechste Aktion"-Lage erlaubte Stop-Gruende. Completion-Gate, WIP-Checkpoint, gruene Teiltests oder Kontextkomprimierung reichen nicht.
+- Unter 40 Minuten sind nur harte technische/fachliche Blocker, fremder Lock, fremde/unklare Worktree-Aenderungen, vollstaendige Abarbeitung aller Releases V1.9.10 bis V1.9.22 oder eine konkret begruendete "keine sinnvolle naechste Aktion"-Lage erlaubte Stop-Gruende. Completion-Gate, WIP-Checkpoint, gruene Teiltests, rote Pflichtchecks ohne abgeschlossene harte Blockeranalyse oder Kontextkomprimierung reichen nicht.
 - Jeder Stop unter 40 Minuten muss im Laufbericht `Early-Stop-Reason:` mit erlaubter Stop-Gruppe nennen.
 - Kontextkomprimierung ist kein Stoppgrund; der Lauf setzt am Cursor fort.
 - Spaetestens nach etwa 45 bis 50 Minuten Status schreiben, WIP committen und pushen, falls es versionierbare Aenderungen gibt.
@@ -37,6 +37,7 @@ Completion-Modus: Gate-pflichtig
 - WIP-Checkpoints sind Sicherungspunkte, kein automatisches Laufende. Solange kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, arbeitet der Lauf am aktuellen Release weiter.
 - Pipeline-Modus: Nach einem erfolgreichen Releaseabschluss und Cursor-Checkpoint muss derselbe Lauf bei sauberem Worktree, erfolgreichem Push, eigenem Lock und ausreichend Restzeit den unmittelbar naechsten Release beginnen. Releaseabschluss ist kein Stoppsignal. Kein rekursiver Neustart, kein zweiter paralleler Job und kein Ueberspringen von Releases.
 - Fehlende versionierte Volltextquellen im Automations-Worktree sind kein harter P0-Stopgrund, wenn lokal bestaetigte Regelkern-Aussagen fuer die Zielkarten in den fuehrenden V1.9.10-bis-V1.9.xx-Planungsartefakten vorliegen. Die Automation muss daraus finale display-only Anzeige-/Release-Texte ohne WIP-Praefix ableiten und weiterarbeiten.
+- Rote Pflichtchecks vor Releaseabschluss sind Debug-Arbeit, kein Early-Stop-Grund. Sie verhindern nur Releaseabschluss und Cursor-Fortschritt. Unter 40 Minuten muss die Automation Fehlerursache suchen, Fixes versuchen, relevante Checks erneut ausfuehren und WIP sichern; nur eine analysierte harte technische oder fachliche P0-Ursache mit Removal Condition darf stoppen.
 
 ## Lock
 
@@ -65,6 +66,14 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 00:50 CEST
+- Ergebnis: Check-Failure-Regel gehärtet; rote Pflichtchecks sind kein Early-Stop-Grund mehr.
+- Release: V1.9.12
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Automation-Prompt, Controller-Plan und State verlangen jetzt, dass rote Pflichtchecks vor Releaseabschluss als Debug-Arbeit behandelt werden. Der Job muss Fehler analysieren, beheben, erneut testen und WIP sichern. Rote Checks blockieren nur Releaseabschluss/Cursor-Fortschritt; sie erlauben Stop unter 40 Minuten nur nach dokumentierter harter technischer oder fachlicher P0-Ursache mit Removal Condition.
+- Cursor: bleibt auf V1.9.12.
 
 - Zeitpunkt: 2026-05-13 00:42 CEST
 - Ergebnis: Text-Finalisierungsregel auf Nutzerentscheidung hin aktiviert; der V1.9.12-Finalisierungblocker ist kein Stopgrund mehr, solange bestaetigte Regelkern-Aussagen vorliegen.
