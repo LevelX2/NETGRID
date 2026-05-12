@@ -28,8 +28,10 @@
     "catalog": "pass: 26 tests",
     "ai": "pass: 84 tests",
     "server": "pass: 72 tests",
-    "web": "pending",
+    "web": "pass: 76 tests",
     "typecheck": "pass",
+    "lint": "pass",
+    "build": "pass with known non-blocking Turbopack NFT warning",
     "fullWorkspace": "pending"
   },
   "completionGate": {

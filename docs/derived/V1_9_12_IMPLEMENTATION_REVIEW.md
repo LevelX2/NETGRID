@@ -30,7 +30,10 @@ Status: implementing
 - `v1-9-install-and-check.ps1 -Task catalog`: pass, 26 Tests.
 - `v1-9-install-and-check.ps1 -Task ai`: pass, 84 Tests.
 - `v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
 - `v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `v1-9-install-and-check.ps1 -Task lint`: pass.
+- `v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - JSON-Validation der V1.9.12-WIP-Artefakte: pass.
 
 ## Gate-Status
