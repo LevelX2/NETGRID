@@ -24,11 +24,16 @@ Completion-Modus: Gate-pflichtig
 ## Laufzeitgrenzen
 
 - Pro Automationslauf nur am aktuellen Release aus diesem Cursor arbeiten.
+- Ziel-Laufzeit bei offenem Release ist 45 bis 50 Minuten.
+- Bei offenem Release nicht freiwillig vor 40 Minuten Gesamtlaufzeit stoppen, solange kein harter Blocker, kein Completion-Gate und keine dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
+- Unter 40 Minuten sind nur harte technische/fachliche Blocker, Completion-Gate, fremder Lock, fremde/unklare Worktree-Aenderungen oder eine konkret begruendete "keine sinnvolle naechste Aktion"-Lage erlaubte Stop-Gruende. WIP-Checkpoint, gruene Teiltests oder Kontextkomprimierung reichen nicht.
+- Jeder Stop unter 40 Minuten muss im Laufbericht `Early-Stop-Reason:` mit erlaubter Stop-Gruppe nennen.
+- Kontextkomprimierung ist kein Stoppgrund; der Lauf setzt am Cursor fort.
 - Spaetestens nach etwa 45 bis 50 Minuten Status schreiben, WIP committen und pushen, falls es versionierbare Aenderungen gibt.
 - Wenn der Release fertig ist, Final Review schreiben, Completion-Gate pruefen, Abschlusscommit erzeugen, pushen und Cursor auf den naechsten Release setzen.
 - Wenn der Release nicht fertig ist, bleibt der Cursor auf demselben Release.
 - Wenn ein nicht aufloesbarer Blocker vorliegt, Blocker mit Removal Condition dokumentieren und den Cursor nicht stillschweigend ueberspringen.
-- WIP-Checkpoints sind Sicherungspunkte, kein automatisches Laufende. Solange kein harter Blocker vorliegt und noch deutlich Restzeit vorhanden ist, arbeitet der Lauf am aktuellen Release weiter.
+- WIP-Checkpoints sind Sicherungspunkte, kein automatisches Laufende. Solange kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, arbeitet der Lauf am aktuellen Release weiter.
 - Pipeline-Modus: Nach einem erfolgreichen Releaseabschluss und Cursor-Checkpoint darf derselbe Lauf bei sauberem Worktree, erfolgreichem Push, eigenem Lock und ausreichend Restzeit den unmittelbar naechsten Release beginnen. Kein rekursiver Neustart, kein zweiter paralleler Job und kein Ueberspringen von Releases.
 
 ## Lock

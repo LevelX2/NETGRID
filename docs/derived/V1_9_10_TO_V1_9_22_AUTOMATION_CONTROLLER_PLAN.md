@@ -71,7 +71,9 @@ Wichtig: Die Automation darf niemals einen Zustand überspringen.
 
 Im Expeditionsmodus darf ein Lauf zusätzlich aus `planned`, `implementing` oder `verifying` heraus einen WIP-Commit und WIP-Push erzeugen. Das ändert den Release nicht auf `done` und setzt den Cursor nicht weiter.
 
-Ein WIP-Checkpoint ist kein Laufende. Wenn der aktuelle Release nach einem erfolgreichen WIP-Commit noch offen ist, kein harter Blocker vorliegt und der Lauf noch deutlich unter etwa 35 Minuten Gesamtlaufzeit liegt, soll der Controller am selben Release weiterarbeiten. Gestoppt wird erst bei Blocker, Completion-Gate, sauberem Zeitbudget-Ende oder nahender 45-50-Minuten-Grenze.
+Ein WIP-Checkpoint ist kein Laufende. Wenn der aktuelle Release nach einem erfolgreichen WIP-Commit noch offen ist, kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, soll der Controller am selben Release weiterarbeiten. Kontextkomprimierung ist kein Stoppgrund. Gestoppt wird erst bei Blocker, Completion-Gate, sauberem Zeitbudget-Ende oder nahender 45-50-Minuten-Grenze.
+
+Early-Stop-Gate: Ein Stop unter 40 Minuten ist nur mit einer festen Stop-Gruppe erlaubt: harter technischer Blocker, harter fachlicher P0-Blocker, Completion-Gate erreicht und gepusht, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen oder "keine sinnvolle naechste Aktion" mit konkreter Begruendung und Dateiverweisen. Der Laufbericht muss in diesem Fall `Early-Stop-Reason:` enthalten. Teilfortschritt, gruene Teiltests, Kontextkomprimierung oder ein erfolgreicher WIP-Checkpoint zaehlen nicht.
 
 ## Done-Gate je Release
 
@@ -136,7 +138,7 @@ Der nächste Release darf erst begonnen werden, wenn:
 - der nächste Release exakt der Reihenfolge aus `docs/derived/V1_9_10_TO_V1_9_XX_IMPLEMENTATION_HANDOFF.md` entspricht
 - keine offenen Änderungen im Worktree verbleiben
 
-Pipeline-Ergaenzung: Wenn diese Bedingungen im selben Automationslauf erfuellt wurden und noch ausreichend Restzeit vorhanden ist, darf der Controller den unmittelbar naechsten Release im selben Lock-Kontext beginnen. Das ersetzt keinen neuen Automationslauf und startet keinen zweiten Job. Es bleibt bei sequenzieller Abarbeitung: maximal naechster Release, keine Release-Ueberspruenge, keine Arbeit nach der 45-50-Minuten-Grenze. Bei Unsicherheit stoppt der Lauf nach dem Cursor-Checkpoint.
+Pipeline-Ergaenzung: Wenn diese Bedingungen im selben Automationslauf erfuellt wurden und noch ausreichend Restzeit vorhanden ist, darf der Controller den unmittelbar naechsten Release im selben Lock-Kontext beginnen. Ausreichend Restzeit bedeutet im Regelfall unter 40 Minuten Gesamtlaufzeit. Das ersetzt keinen neuen Automationslauf und startet keinen zweiten Job. Es bleibt bei sequenzieller Abarbeitung: maximal naechster Release, keine Release-Ueberspruenge, keine Arbeit nach der 45-50-Minuten-Grenze. Bei Unsicherheit stoppt der Lauf nach dem Cursor-Checkpoint nur dann, wenn mindestens 40 Minuten erreicht sind oder ein echter Blocker dokumentiert ist.
 
 Die Reihenfolge ist hart:
 

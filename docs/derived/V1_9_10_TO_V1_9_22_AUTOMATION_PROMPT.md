@@ -48,13 +48,19 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 ## Zeitbudget je Lauf
 
 - Arbeite nicht als Dauerprozess.
+- Ziel-Laufzeit bei offenem Release ist 45 bis 50 Minuten.
+- Stoppe bei offenem Release nicht freiwillig vor 40 Minuten Gesamtlaufzeit, solange kein harter Blocker, kein Completion-Gate und keine ausdruecklich dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
+- Unter 40 Minuten Gesamtlaufzeit gibt es nur diese erlaubten Stop-Gruende: harter technischer Blocker, harter fachlicher P0-Blocker, Completion-Gate erreicht und gepusht, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, oder keine sinnvolle naechste Aktion mit konkreter Begruendung und Dateiverweisen. "WIP gesichert", "Tests gruen", "Kontext komprimiert", "kleiner Fortschritt erledigt" oder "naechster Schritt waere groesser" sind keine Stop-Gruende.
+- Wenn ein Lauf unter 40 Minuten stoppt, muss der Abschlussbericht explizit `Early-Stop-Reason:` mit einer der erlaubten Stop-Gruppen enthalten. Fehlt ein erlaubter Grund, war der Lauf nicht regelkonform.
+- Wenn der Kontext komprimiert wird, gilt das nicht als Stoppgrund. Setze am Cursor fort, pruefe den aktuellen Stand und arbeite weiter, bis Blocker, Completion-Gate oder Zeitgrenze erreicht ist.
 - Halte nach etwa 45 bis 50 Minuten an, selbst wenn der aktuelle Release noch nicht fertig ist.
 - Sichere dann Status, WIP-Commit und Push, sofern es versionierbare Aenderungen gibt.
 - Der naechste stündliche Lauf setzt am Cursor fort.
 - Stoppe nicht schon nach einem erfolgreichen WIP-Checkpoint, solange kein harter Blocker vorliegt und noch deutlich Restzeit vorhanden ist. Ein WIP-Commit ist ein Sicherungspunkt, kein automatisches Laufende.
-- Wenn der aktuelle Release noch nicht abgeschlossen ist und der Lauf nach eigener Einschaetzung unter etwa 35 Minuten Gesamtlaufzeit liegt, arbeite am selben Release weiter, bis entweder ein echter Blocker entsteht, das Completion-Gate erreicht ist oder die 45-50-Minuten-Grenze naht.
+- Wenn der aktuelle Release noch nicht abgeschlossen ist und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, arbeite am selben Release weiter, bis entweder ein echter Blocker entsteht, das Completion-Gate erreicht ist oder mindestens 40 Minuten erreicht sind. Zwischen 40 und 50 Minuten darf nur nach sauberem Status/WIP-Checkpoint gestoppt werden.
+- Wenn alle urspruenglich geplanten Teilaufgaben eines WIP-Schnitts erledigt sind, waehle unter 40 Minuten automatisch die naechste offene Gate-Arbeit aus `Implementation Review`, `Test Matrix`, `Manifest`, `Coverage`, `AI-Hints`, `AI-Smokes`, `Server/Web`, `Full Checks` oder `Final Review` und arbeite daran weiter.
 - Pipeline-Modus: Wenn ein Release in diesem Lauf vollstaendig abgeschlossen, gepusht und der Cursor sauber auf den naechsten Release gesetzt wurde, darf derselbe Lauf bei ausreichend Restzeit den naechsten Release beginnen.
-- Ausreichend Restzeit bedeutet: Der Lauf ist nach eigener Einschaetzung noch klar unter etwa 35 Minuten Gesamtlaufzeit, der Lock gehoert weiterhin diesem Lauf, der Worktree ist sauber, der Push des vorherigen Release war erfolgreich und der Cursor zeigt exakt auf den naechsten Release.
+- Ausreichend Restzeit bedeutet: Der Lauf ist nach eigener Einschaetzung noch klar unter etwa 40 Minuten Gesamtlaufzeit, der Lock gehoert weiterhin diesem Lauf, der Worktree ist sauber, der Push des vorherigen Release war erfolgreich und der Cursor zeigt exakt auf den naechsten Release.
 - Im Pipeline-Modus darf maximal der unmittelbar naechste Release begonnen werden. Erlaubt sind Detailplanung, Requirements/Testmatrix, erste eng begrenzte Umsetzung und ein WIP-Checkpoint. Ein zweiter Releaseabschluss im selben Lauf ist nur erlaubt, wenn alle Gates erneut vollstaendig erfuellt sind und weiterhin vor der 45-50-Minuten-Grenze gestoppt werden kann.
 - Kein rekursiver Neustart, kein zweiter paralleler Job, kein Ueberspringen von Releases.
 
