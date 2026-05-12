@@ -1,6 +1,6 @@
 # V1.9.12 Implementation Review - WIP
 
-Stand: 2026-05-13 00:08 CEST
+Stand: 2026-05-13 00:24 CEST
 Status: implementing
 
 ## Umgesetzter WIP-Scope
@@ -8,6 +8,8 @@ Status: implementing
 - V1.9.12 ist aus `planned` in `implementing` ueberfuehrt.
 - Detailplan, Requirements, Counter/Virus/Recurring-Spec, Testmatrix und Requirements Review sind versioniert.
 - Alle elf Zielkarten haben Runtime-Definitionen in `packages/shared/src/index.ts`.
+- `packages/catalog/src/index.ts` fuehrt die elf Zielkarten als explizite V1.9.12-WIP-Liste, ohne sie in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` aufzunehmen.
+- `packages/catalog/src/index.test.ts` prueft Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und WIP-Szenario auf dieselbe 11er-Zielmenge und bestaetigt, dass `human_playable`, `deck_legal` und `ai_supported` noch nicht promotet sind.
 - Die Engine nutzt vorhandene Counter-, Virus-/Purge- und Recurring-Helfer fuer den ersten WIP-Schnitt:
   - Virus-Programme erhalten beim Installieren Virus-Counter.
   - Recurring-Counter werden auf Programmen und Resources initialisiert.
@@ -18,20 +20,21 @@ Status: implementing
 
 ## Noch nicht abgeschlossen
 
-- Keine finale Katalog-/Manifest-/Coverage-/AI-Promotion.
+- Keine finale Katalog-/Manifest-/Coverage-/AI-Promotion; die Katalogseite hat nur einen WIP-No-Promotion-Guard.
 - WIP-Gate-Artefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und AI-Approval-Manifest sind angelegt, aber bewusst nicht als finale Freigabe markiert.
 - Keine Webclient-Version auf V1.9.12 angehoben.
 - Exakte per-card Textparitaet muss vor Final Gate gegen die fuehrenden lokalen Quellen/Matrix nachgezogen werden.
-- Finale ausfuehrbare AI-Smokes, Web und volle Pflichtchecks stehen noch aus.
+- Finale ausfuehrbare AI-Smokes und volle Pflichtchecks stehen noch aus.
 
 ## Verifikation
 
 - `v1-9-install-and-check.ps1 -Task engine`: pass, 213 Tests.
-- `v1-9-install-and-check.ps1 -Task catalog`: pass, 26 Tests.
+- `v1-9-install-and-check.ps1 -Task catalog`: pass, 27 Tests.
 - `v1-9-install-and-check.ps1 -Task ai`: pass, 84 Tests.
 - `v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
 - `v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
 - `v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `v1-9-install-and-check.ps1 -Task test`: pass.
 - `v1-9-install-and-check.ps1 -Task lint`: pass.
 - `v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - JSON-Validation der V1.9.12-WIP-Artefakte: pass.

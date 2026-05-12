@@ -531,6 +531,20 @@ export const ONR_V1_9_11_RELEASE_CARD_IDS = [
   "onr_v1_272_too-many-doors"
 ] as const;
 
+export const ONR_V1_9_12_WIP_CARD_IDS = [
+  "onr_v1_009_butcher-boy",
+  "onr_v1_010_cascade",
+  "onr_v1_017_deep-thought",
+  "onr_v1_032_i-spy",
+  "onr_v1_064_skivviss",
+  "onr_v1_082_deal-with-militech",
+  "onr_v1_091_hunt-club-bbs",
+  "onr_v1_174_rigged-investments",
+  "onr_v1_176_the-shell-traders",
+  "onr_v1_198_detroit-police-contract",
+  "onr_v1_199_employee-empowerment"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,

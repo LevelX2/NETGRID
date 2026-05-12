@@ -68,7 +68,7 @@ describe("Client visibility contract", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.9.9"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.9.11"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");
