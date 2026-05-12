@@ -25,8 +25,8 @@ Completion-Modus: Gate-pflichtig
 
 - Pro Automationslauf nur am aktuellen Release aus diesem Cursor arbeiten.
 - Ziel-Laufzeit bei offenem Release ist 45 bis 50 Minuten.
-- Bei offenem Release nicht freiwillig vor 40 Minuten Gesamtlaufzeit stoppen, solange kein harter Blocker, kein Completion-Gate und keine dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
-- Unter 40 Minuten sind nur harte technische/fachliche Blocker, Completion-Gate, fremder Lock, fremde/unklare Worktree-Aenderungen oder eine konkret begruendete "keine sinnvolle naechste Aktion"-Lage erlaubte Stop-Gruende. WIP-Checkpoint, gruene Teiltests oder Kontextkomprimierung reichen nicht.
+- Nicht freiwillig vor 40 Minuten Gesamtlaufzeit stoppen, solange kein harter Blocker, kein fremder Lock, keine fremden/unklaren Worktree-Aenderungen und keine dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
+- Unter 40 Minuten sind nur harte technische/fachliche Blocker, fremder Lock, fremde/unklare Worktree-Aenderungen, vollstaendige Abarbeitung aller Releases V1.9.10 bis V1.9.22 oder eine konkret begruendete "keine sinnvolle naechste Aktion"-Lage erlaubte Stop-Gruende. Completion-Gate, WIP-Checkpoint, gruene Teiltests oder Kontextkomprimierung reichen nicht.
 - Jeder Stop unter 40 Minuten muss im Laufbericht `Early-Stop-Reason:` mit erlaubter Stop-Gruppe nennen.
 - Kontextkomprimierung ist kein Stoppgrund; der Lauf setzt am Cursor fort.
 - Spaetestens nach etwa 45 bis 50 Minuten Status schreiben, WIP committen und pushen, falls es versionierbare Aenderungen gibt.
@@ -34,7 +34,7 @@ Completion-Modus: Gate-pflichtig
 - Wenn der Release nicht fertig ist, bleibt der Cursor auf demselben Release.
 - Wenn ein nicht aufloesbarer Blocker vorliegt, Blocker mit Removal Condition dokumentieren und den Cursor nicht stillschweigend ueberspringen.
 - WIP-Checkpoints sind Sicherungspunkte, kein automatisches Laufende. Solange kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, arbeitet der Lauf am aktuellen Release weiter.
-- Pipeline-Modus: Nach einem erfolgreichen Releaseabschluss und Cursor-Checkpoint darf derselbe Lauf bei sauberem Worktree, erfolgreichem Push, eigenem Lock und ausreichend Restzeit den unmittelbar naechsten Release beginnen. Kein rekursiver Neustart, kein zweiter paralleler Job und kein Ueberspringen von Releases.
+- Pipeline-Modus: Nach einem erfolgreichen Releaseabschluss und Cursor-Checkpoint muss derselbe Lauf bei sauberem Worktree, erfolgreichem Push, eigenem Lock und ausreichend Restzeit den unmittelbar naechsten Release beginnen. Releaseabschluss ist kein Stoppsignal. Kein rekursiver Neustart, kein zweiter paralleler Job und kein Ueberspringen von Releases.
 
 ## Lock
 
@@ -73,6 +73,14 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Tests: JSON-Validation der neuen Artefakte pass; `v1-9-install-and-check.ps1 -Task catalog` pass (26 Tests), `engine` pass (209 Tests), `ai` pass (84 Tests), `web` pass (76 Tests), `server` pass (72 Tests), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Git: Abschlusscommit `5c7ec1d` (`V1.9.11: hidden zone search reveal reorder`) erzeugt und nach `origin/codex/v1-9-originalset-completion` gepusht.
 - Cursor: V1.9.11 Completion-Gate ist erfüllt; V1.9.12 ist der aktuelle Release.
+
+- Zeitpunkt: 2026-05-12 23:55 CEST
+- Ergebnis: Controller-Regel gehärtet; Releaseabschluss unterhalb der Zeitgrenze ist kein erlaubter Early-Stop-Grund mehr.
+- Release: V1.9.12
+- Phase vorher: planned
+- Phase nachher: planned
+- Umsetzung: Automation-Prompt, Controller-Plan und State verlangen jetzt, dass ein erfolgreicher Releaseabschluss bei ausreichender Restzeit direkt in den unmittelbar nächsten Release gepipelined wird. Stop unter 40 Minuten ist nur noch bei hartem Blocker, fremdem Lock, fremden/unklaren Änderungen, vollständiger Gesamtcompletion oder konkret begründeter "keine sinnvolle nächste Aktion" erlaubt.
+- Cursor: bleibt auf V1.9.12.
 
 - Zeitpunkt: 2026-05-12 23:15 CEST
 - Ergebnis: V1.9.11 Engine-WIP auf 16/16 Hidden-Zone-Zielkarten erweitert; Cursor bleibt auf V1.9.11 `implementing`

@@ -71,9 +71,9 @@ Wichtig: Die Automation darf niemals einen Zustand überspringen.
 
 Im Expeditionsmodus darf ein Lauf zusätzlich aus `planned`, `implementing` oder `verifying` heraus einen WIP-Commit und WIP-Push erzeugen. Das ändert den Release nicht auf `done` und setzt den Cursor nicht weiter.
 
-Ein WIP-Checkpoint ist kein Laufende. Wenn der aktuelle Release nach einem erfolgreichen WIP-Commit noch offen ist, kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, soll der Controller am selben Release weiterarbeiten. Kontextkomprimierung ist kein Stoppgrund. Gestoppt wird erst bei Blocker, Completion-Gate, sauberem Zeitbudget-Ende oder nahender 45-50-Minuten-Grenze.
+Ein WIP-Checkpoint ist kein Laufende. Wenn der aktuelle Release nach einem erfolgreichen WIP-Commit noch offen ist, kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, soll der Controller am selben Release weiterarbeiten. Kontextkomprimierung ist kein Stoppgrund. Gestoppt wird erst bei Blocker, sauberem Zeitbudget-Ende oder nahender 45-50-Minuten-Grenze. Ein erreichter Releaseabschluss ist kein Laufende, sondern der Pipeline-Uebergang auf den naechsten Release, solange ein naechster Release existiert und ausreichend Zeitbudget verbleibt.
 
-Early-Stop-Gate: Ein Stop unter 40 Minuten ist nur mit einer festen Stop-Gruppe erlaubt: harter technischer Blocker, harter fachlicher P0-Blocker, Completion-Gate erreicht und gepusht, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen oder "keine sinnvolle naechste Aktion" mit konkreter Begruendung und Dateiverweisen. Der Laufbericht muss in diesem Fall `Early-Stop-Reason:` enthalten. Teilfortschritt, gruene Teiltests, Kontextkomprimierung oder ein erfolgreicher WIP-Checkpoint zaehlen nicht.
+Early-Stop-Gate: Ein Stop unter 40 Minuten ist nur mit einer festen Stop-Gruppe erlaubt: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen oder "keine sinnvolle naechste Aktion" mit konkreter Begruendung und Dateiverweisen. Der Laufbericht muss in diesem Fall `Early-Stop-Reason:` enthalten. Completion-Gate erreicht, Teilfortschritt, gruene Teiltests, Kontextkomprimierung oder ein erfolgreicher WIP-Checkpoint zaehlen nicht.
 
 ## Done-Gate je Release
 
@@ -138,7 +138,7 @@ Der nächste Release darf erst begonnen werden, wenn:
 - der nächste Release exakt der Reihenfolge aus `docs/derived/V1_9_10_TO_V1_9_XX_IMPLEMENTATION_HANDOFF.md` entspricht
 - keine offenen Änderungen im Worktree verbleiben
 
-Pipeline-Ergaenzung: Wenn diese Bedingungen im selben Automationslauf erfuellt wurden und noch ausreichend Restzeit vorhanden ist, darf der Controller den unmittelbar naechsten Release im selben Lock-Kontext beginnen. Ausreichend Restzeit bedeutet im Regelfall unter 40 Minuten Gesamtlaufzeit. Das ersetzt keinen neuen Automationslauf und startet keinen zweiten Job. Es bleibt bei sequenzieller Abarbeitung: maximal naechster Release, keine Release-Ueberspruenge, keine Arbeit nach der 45-50-Minuten-Grenze. Bei Unsicherheit stoppt der Lauf nach dem Cursor-Checkpoint nur dann, wenn mindestens 40 Minuten erreicht sind oder ein echter Blocker dokumentiert ist.
+Pipeline-Ergaenzung: Wenn diese Bedingungen im selben Automationslauf erfuellt wurden und noch ausreichend Restzeit vorhanden ist, muss der Controller den unmittelbar naechsten Release im selben Lock-Kontext beginnen. Ausreichend Restzeit bedeutet im Regelfall unter 40 Minuten Gesamtlaufzeit. Das ersetzt keinen neuen Automationslauf und startet keinen zweiten Job. Es bleibt bei strikt sequenzieller Abarbeitung: immer nur aktueller Cursor plus unmittelbar naechster Release, keine Release-Ueberspruenge, keine Arbeit nach der 45-50-Minuten-Grenze. Bei Unsicherheit stoppt der Lauf nach dem Cursor-Checkpoint nur dann, wenn mindestens 40 Minuten erreicht sind oder ein echter Blocker dokumentiert ist. Wenn der neu begonnene Release ebenfalls gate-gruen abgeschlossen wird und noch Zeitbudget vorhanden ist, wird nach demselben Muster weitergepipelined; Releaseabschluss allein ist niemals ein Stoppsignal.
 
 Die Reihenfolge ist hart:
 
@@ -194,7 +194,7 @@ Der spätere Automation-Prompt sollte nicht allgemein "arbeite weiter" sagen. Er
 6. Sichere Fortschritt per WIP-Commit/WIP-Push, wenn versionierbare Aenderungen entstanden sind.
 7. Wenn der Release fertig ist, prüfe Done-Gate, Diff-Gate, Commit-Gate und Push-Gate.
 8. Wenn Abschlusscommit und Push erfolgreich sind, setze den Cursor auf den nächsten Release.
-9. Beginne den nächsten Release nur mit Detailplanung/Requirements, wenn der aktuelle Release abgeschlossen ist.
+9. Beginne den nächsten Release bei ausreichender Restzeit zwingend mit Detailplanung/Requirements und arbeite ihn so weit wie moeglich ab.
 10. Bei jedem harten Fehler: stoppe, dokumentiere Blocker und pushe hoechstens den dokumentierten WIP-Stand.
 
 ## Problemstellen

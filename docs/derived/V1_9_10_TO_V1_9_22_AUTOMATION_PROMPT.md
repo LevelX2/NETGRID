@@ -8,7 +8,7 @@ Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
 
 Arbeite im NETGRID-Projekt wiki-first als sequenzieller Release-Implementation-Controller fuer die V1.9.10-bis-V1.9.22-Originalset-Completion. Ziel ist, die geplanten Release-Schritte soweit wie moeglich automatisch nacheinander zu detailplanen, umzusetzen, zu pruefen, lokal zu committen und nach GitHub zu pushen.
 
-Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unvollstaendigen Zwischenstaenden gesichert ist. Ein Release gilt aber erst dann als abgeschlossen und der Cursor darf erst dann auf den naechsten Release gesetzt werden, wenn das Completion-Gate fuer diesen Release erfuellt oder ein Blocker sauber dokumentiert ist.
+Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unvollstaendigen Zwischenstaenden gesichert ist. Ein Release gilt aber erst dann als abgeschlossen und der Cursor darf erst dann auf den naechsten Release gesetzt werden, wenn das Completion-Gate fuer diesen Release erfuellt ist. Ein Blocker wird dokumentiert, setzt den Cursor aber nicht auf den naechsten Release.
 
 ## Pflichtstart je Lauf
 
@@ -41,7 +41,7 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 10. Fuehre sinnvolle zielgerichtete Tests aus; bei Zeitmangel priorisiere Pakettests und Tests fuer geaenderte Mechanik-/AI-/Datenbereiche.
 11. Schreibe Status, offene Punkte, Testresultate und naechste Schritte in den Cursor und in passende Review-/Log-Artefakte.
 12. Wenn versionierbare Aenderungen entstanden sind, erzeuge einen lokalen WIP-Commit und pushe den Branch nach GitHub.
-13. Wenn das Completion-Gate erfuellt ist, schreibe oder aktualisiere den Final Review, erzeuge einen Abschlusscommit, pushe und setze den Cursor auf den naechsten Release.
+13. Wenn das Completion-Gate erfuellt ist, schreibe oder aktualisiere den Final Review, erzeuge einen Abschlusscommit, pushe, setze den Cursor auf den naechsten Release und wechsle bei ausreichender Restzeit direkt in den Pipeline-Modus fuer diesen naechsten Release.
 14. Wenn das Completion-Gate nicht erfuellt ist, bleibt der Cursor auf demselben Release.
 15. Bei hartem Blocker: dokumentiere Blocker, Removal Condition und zuletzt gesicherten Stand; pushe WIP, aber springe nicht stillschweigend zum naechsten Release.
 
@@ -49,19 +49,19 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 
 - Arbeite nicht als Dauerprozess.
 - Ziel-Laufzeit bei offenem Release ist 45 bis 50 Minuten.
-- Stoppe bei offenem Release nicht freiwillig vor 40 Minuten Gesamtlaufzeit, solange kein harter Blocker, kein Completion-Gate und keine ausdruecklich dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
-- Unter 40 Minuten Gesamtlaufzeit gibt es nur diese erlaubten Stop-Gruende: harter technischer Blocker, harter fachlicher P0-Blocker, Completion-Gate erreicht und gepusht, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, oder keine sinnvolle naechste Aktion mit konkreter Begruendung und Dateiverweisen. "WIP gesichert", "Tests gruen", "Kontext komprimiert", "kleiner Fortschritt erledigt" oder "naechster Schritt waere groesser" sind keine Stop-Gruende.
+- Stoppe nicht freiwillig vor 40 Minuten Gesamtlaufzeit, solange kein harter Blocker, kein aktiver fremder Lock, keine unklaren/fremden Worktree-Aenderungen und keine ausdruecklich dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
+- Unter 40 Minuten Gesamtlaufzeit gibt es nur diese erlaubten Stop-Gruende: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen, oder keine sinnvolle naechste Aktion mit konkreter Begruendung und Dateiverweisen. "Completion-Gate erreicht", "WIP gesichert", "Tests gruen", "Kontext komprimiert", "kleiner Fortschritt erledigt" oder "naechster Schritt waere groesser" sind keine Stop-Gruende.
 - Wenn ein Lauf unter 40 Minuten stoppt, muss der Abschlussbericht explizit `Early-Stop-Reason:` mit einer der erlaubten Stop-Gruppen enthalten. Fehlt ein erlaubter Grund, war der Lauf nicht regelkonform.
-- Wenn der Kontext komprimiert wird, gilt das nicht als Stoppgrund. Setze am Cursor fort, pruefe den aktuellen Stand und arbeite weiter, bis Blocker, Completion-Gate oder Zeitgrenze erreicht ist.
+- Wenn der Kontext komprimiert wird, gilt das nicht als Stoppgrund. Setze am Cursor fort, pruefe den aktuellen Stand und arbeite weiter, bis ein erlaubter Blocker, die Gesamtcompletion V1.9.10 bis V1.9.22 oder die Zeitgrenze erreicht ist.
 - Halte nach etwa 45 bis 50 Minuten an, selbst wenn der aktuelle Release noch nicht fertig ist.
 - Sichere dann Status, WIP-Commit und Push, sofern es versionierbare Aenderungen gibt.
 - Der naechste stündliche Lauf setzt am Cursor fort.
 - Stoppe nicht schon nach einem erfolgreichen WIP-Checkpoint, solange kein harter Blocker vorliegt und noch deutlich Restzeit vorhanden ist. Ein WIP-Commit ist ein Sicherungspunkt, kein automatisches Laufende.
-- Wenn der aktuelle Release noch nicht abgeschlossen ist und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, arbeite am selben Release weiter, bis entweder ein echter Blocker entsteht, das Completion-Gate erreicht ist oder mindestens 40 Minuten erreicht sind. Zwischen 40 und 50 Minuten darf nur nach sauberem Status/WIP-Checkpoint gestoppt werden.
+- Wenn der aktuelle Release noch nicht abgeschlossen ist und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, arbeite am selben Release weiter, bis entweder ein echter Blocker entsteht oder mindestens 40 Minuten erreicht sind. Zwischen 40 und 50 Minuten darf nur nach sauberem Status/WIP-Checkpoint gestoppt werden.
 - Wenn alle urspruenglich geplanten Teilaufgaben eines WIP-Schnitts erledigt sind, waehle unter 40 Minuten automatisch die naechste offene Gate-Arbeit aus `Implementation Review`, `Test Matrix`, `Manifest`, `Coverage`, `AI-Hints`, `AI-Smokes`, `Server/Web`, `Full Checks` oder `Final Review` und arbeite daran weiter.
-- Pipeline-Modus: Wenn ein Release in diesem Lauf vollstaendig abgeschlossen, gepusht und der Cursor sauber auf den naechsten Release gesetzt wurde, darf derselbe Lauf bei ausreichend Restzeit den naechsten Release beginnen.
+- Pipeline-Modus: Wenn ein Release in diesem Lauf vollstaendig abgeschlossen, gepusht und der Cursor sauber auf den naechsten Release gesetzt wurde, muss derselbe Lauf bei ausreichend Restzeit den naechsten Release beginnen. Ein Releaseabschluss ist ein Pipeline-Uebergang, kein Laufende.
 - Ausreichend Restzeit bedeutet: Der Lauf ist nach eigener Einschaetzung noch klar unter etwa 40 Minuten Gesamtlaufzeit, der Lock gehoert weiterhin diesem Lauf, der Worktree ist sauber, der Push des vorherigen Release war erfolgreich und der Cursor zeigt exakt auf den naechsten Release.
-- Im Pipeline-Modus darf maximal der unmittelbar naechste Release begonnen werden. Erlaubt sind Detailplanung, Requirements/Testmatrix, erste eng begrenzte Umsetzung und ein WIP-Checkpoint. Ein zweiter Releaseabschluss im selben Lauf ist nur erlaubt, wenn alle Gates erneut vollstaendig erfuellt sind und weiterhin vor der 45-50-Minuten-Grenze gestoppt werden kann.
+- Im Pipeline-Modus wird immer nur der unmittelbar naechste Release begonnen; Releases duerfen nie uebersprungen werden. Erlaubt sind Detailplanung, Requirements/Testmatrix, erste eng begrenzte Umsetzung und ein WIP-Checkpoint. Wenn auch der naechste Release im selben Lauf vollstaendig gate-gruen wird und noch vor der 45-50-Minuten-Grenze gearbeitet werden kann, wird auch dessen Cursor auf den Folge-Release gesetzt und nach denselben Regeln weiterpipelinebar fortgesetzt. Es gibt keinen kuenstlichen Stopp nach einem erfolgreichen Releaseabschluss.
 - Kein rekursiver Neustart, kein zweiter paralleler Job, kein Ueberspringen von Releases.
 
 ## Git-Regeln
