@@ -1,14 +1,14 @@
 # V1.9.10 Blocker Report
 
 Stand: 2026-05-12
-Status: active
+Status: resolved
 
 ## Blocker
 
 | Blocker-ID | Status | Betroffener Release | Beschreibung | Removal Condition |
 | --- | --- | --- | --- | --- |
-| `PNPM_INSTALL_EPERM_NODE_MODULES_MISSING_2026-05-12` | active | V1.9.10 | `node_modules` fehlt im festen Automations-Worktree; `corepack pnpm --filter @netgrid/catalog test -- index.test.ts` findet deshalb `vitest` nicht. `corepack pnpm install --offline` scheitert mit `EPERM` beim Entfernen eines `_tmp_*`-Files im Worktree. | Dependency-Setup im Worktree erfolgreich herstellen, danach Katalog-, Engine-, AI-, Typecheck- und Workspace-Tests erneut ausführen. |
-| `GIT_WORKTREE_INDEX_LOCK_PERMISSION_DENIED_2026-05-12` | active | V1.9.10 | `git add` kann keinen `C:/Projekte/NETGRID/.git/worktrees/NETGRID_AUTOMATION_V1_9_ORIGINALSET/index.lock` anlegen. Ein vorhandener `index.lock` liegt nicht vor. | Schreibrechte auf `C:\Projekte\NETGRID\.git\worktrees\NETGRID_AUTOMATION_V1_9_ORIGINALSET` für Index-Lock-Erzeugung wiederherstellen, dann WIP erneut adden/committen/pushen. |
+| `PNPM_INSTALL_EPERM_NODE_MODULES_MISSING_2026-05-12` | resolved | V1.9.10 | `node_modules` ist im festen Automations-Worktree vorhanden. `corepack pnpm install --no-frozen-lockfile --offline` konnte den Lockfile nach der engen Workspace-Abhängigkeit für `@netgrid/catalog` aktualisieren. | Erfüllt: Katalog-, Engine-, AI-, Typecheck-, Workspace-Test-, Lint- und Build-Gates wurden anschließend grün ausgeführt. |
+| `GIT_WORKTREE_INDEX_LOCK_PERMISSION_DENIED_2026-05-12` | resolved | V1.9.10 | Ein WIP-Commit `0929b21` existiert im Worktree; der Git-Index-Lock-Blocker ist für den aktuellen Lauf nicht mehr reproduziert. | Erfüllt: versionierbare Änderungen können wieder per Checkpoint-Skript gesichert werden. |
 
 ## Nicht blockierend
 

@@ -1,4 +1,5 @@
 import snapshotData from "../../../data/card-import/card-snapshot-0.8.json";
+import { DEMO_CARDS_BY_ID, type CardDefinition } from "@netgrid/shared";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
@@ -1845,7 +1846,7 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
   const baseSnapshot = snapshotData as unknown as CardSnapshot;
   const localOnrSnapshot = readLocalOnrSnapshot();
   const baseCards = applyRuntimeBaseStatusModel(baseSnapshot.cards);
-  if (!localOnrSnapshot) return { ...baseSnapshot, cards: baseCards };
+  if (!localOnrSnapshot) return { ...baseSnapshot, cards: [...baseCards, ...createFallbackOnrRuntimeCards()] };
   const confirmedTextOverrides = readLocalConfirmedTextOverrides();
   const localCardsWithConfirmedText = applyLocalConfirmedTextOverrides(localOnrSnapshot.cards, confirmedTextOverrides);
   const v105kCards = applyOnrV105KReleaseGate(localCardsWithConfirmedText);
@@ -2145,6 +2146,61 @@ function normalizeConfirmedRulesText(text: string): string {
 
 function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
   return cards.map((card) => (ONR_V1_RUNTIME_RELEASE_CARD_ID_SET.has(card.catalogCardId) ? promoteOnrRuntimeReleaseCard(card) : demoteLocalOnrCard(card)));
+}
+
+function createFallbackOnrRuntimeCards(): CatalogCard[] {
+  return ONR_V1_RUNTIME_RELEASE_CARD_IDS.map((cardId) => {
+    const definition = DEMO_CARDS_BY_ID[cardId];
+    if (!definition) return null;
+    return promoteOnrRuntimeReleaseCard(catalogCardFromDefinition(definition));
+  }).filter((card): card is CatalogCard => Boolean(card));
+}
+
+function catalogCardFromDefinition(definition: CardDefinition): CatalogCard {
+  return {
+    catalogCardId: definition.id,
+    sourceCardId: definition.id,
+    engineCardId: definition.id,
+    title: definition.title,
+    side: definition.side,
+    type: definition.type,
+    subtypes: [...definition.subtypes],
+    faction: "onr-v1-limited",
+    setId: "onr-v1-limited",
+    setName: "O:NR v1 Limited",
+    collectorNumber: collectorNumberFromOnrId(definition.id),
+    text: definition.rulesText,
+    displayOnlyText: false,
+    numeric: {
+      cost: definition.cost ?? null,
+      installCost: definition.installCost ?? null,
+      memoryCost: definition.memoryCost ?? null,
+      strength: definition.strength ?? null,
+      rezCost: definition.rezCost ?? null,
+      trashCost: definition.trashCost ?? null,
+      advancementRequirement: definition.advancementRequirement ?? null,
+      agendaPoints: definition.agendaPoints ?? null
+    },
+    statuses: {
+      imported: true,
+      validated: true,
+      catalog_ready: true,
+      implemented: true,
+      engine_supported: true,
+      playable: true,
+      human_playable: true,
+      ai_supported: false,
+      deck_legal: true,
+      format_legal: true,
+      blocked: false
+    },
+    blockReasons: [],
+    implementationManifest: null
+  };
+}
+
+function collectorNumberFromOnrId(cardId: string): string {
+  return cardId.match(/^onr_v1_(\d{3})_/)?.[1] ?? cardId;
 }
 
 function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {

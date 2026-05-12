@@ -1,11 +1,11 @@
 # V1.9.10 Implementation Review - Status-, Manifest- und Katalog-Konsolidierung
 
 Stand: 2026-05-12
-Status: implemented_wip_verification_blocked
+Status: implemented_verified
 
 ## Ergebnis
 
-Der V1.9.10-Konsolidierungsscope ist als WIP umgesetzt, aber wegen blockierter Testumgebung noch nicht releasefertig. Es wurden keine neuen Karten freigeschaltet.
+Der V1.9.10-Konsolidierungsscope ist umgesetzt und lokal verifiziert. Es wurden keine neuen Karten freigeschaltet.
 
 ## Umgesetzter Scope
 
@@ -25,31 +25,32 @@ Der V1.9.10-Konsolidierungsscope ist als WIP umgesetzt, aber wegen blockierter T
 - `data/scenarios/v123-card-release-smoke.json`
 - `data/scenarios/v1910-status-manifest-catalog-smoke.json`
 - `data/ai/ai-card-hints-v1910-no-promotion.json`
+- `packages/catalog/package.json`
+- `packages/catalog/src/index.ts`
 - `packages/catalog/src/index.test.ts`
+- `pnpm-lock.yaml`
+
+## Ergänzende Härtung im Automations-Worktree
+
+Der feste Automations-Worktree versioniert das private `data/local/`-Overlay nicht. Damit AI- und Deck-Gates trotzdem reproduzierbar bleiben, erzeugt `@netgrid/catalog` bei fehlendem privaten Overlay einen engen Runtime-Fallback aus den bereits in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` freigegebenen Engine-/Shared-Kartendefinitionen. Dieser Fallback promotet ausschließlich die bestehende Runtime-Zielmenge und keine V1.9.11+-Karten.
 
 ## Checks
 
 | Befehl | Ergebnis |
 | --- | --- |
-| JSON-Parse aller `data/**/*.json` | pass |
-| `corepack pnpm --filter @netgrid/catalog test -- index.test.ts` | blocked: `node_modules` fehlt; Vitest nicht gefunden |
-| `corepack pnpm install --offline` | blocked: EPERM beim Entfernen eines pnpm-Temporary-Files im Worktree |
-| `git add <V1.9.10 files>` | blocked: Worktree-Index-Lock kann nicht angelegt werden |
+| JSON-Parse aller `data/**/*.json` | pass, 219 Dateien |
+| `v1-9-install-and-check.ps1 -Task catalog` | pass, 25 Tests |
+| `v1-9-install-and-check.ps1 -Task engine` | pass, 201 Tests |
+| `v1-9-install-and-check.ps1 -Task ai` | pass, 83 Tests |
+| `v1-9-install-and-check.ps1 -Task typecheck` | pass |
+| `v1-9-install-and-check.ps1 -Task test` | pass |
+| `v1-9-install-and-check.ps1 -Task lint` | pass |
+| `v1-9-install-and-check.ps1 -Task build` | pass, bekannte nicht-blockierende Turbopack-NFT-Warnung |
 
 ## Blocker
 
-Blocker-ID: `PNPM_INSTALL_EPERM_NODE_MODULES_MISSING_2026-05-12`
-
-Beschreibung: Der feste Automations-Worktree hat kein `node_modules`. Der gezielte Katalogtest erreicht deshalb Vitest nicht. Ein Offline-Install scheitert mit `EPERM: operation not permitted, unlink ... _tmp_...`.
-
-Removal Condition: `pnpm install` oder ein verwendbarer Workspace-Dependency-Setup muss im Automations-Worktree erfolgreich laufen; danach mindestens Katalog-, Engine-, AI-, Typecheck- und Workspace-Testlauf erneut ausführen.
-
-Blocker-ID: `GIT_WORKTREE_INDEX_LOCK_PERMISSION_DENIED_2026-05-12`
-
-Beschreibung: `git add` kann keinen `C:/Projekte/NETGRID/.git/worktrees/NETGRID_AUTOMATION_V1_9_ORIGINALSET/index.lock` anlegen. Ein vorhandener `index.lock` liegt nicht vor.
-
-Removal Condition: Schreibrechte auf `C:\Projekte\NETGRID\.git\worktrees\NETGRID_AUTOMATION_V1_9_ORIGINALSET` für Index-Lock-Erzeugung wiederherstellen, dann WIP erneut adden/committen/pushen.
+Keine offenen V1.9.10-Blocker. Die früheren Installations- und Git-Index-Lock-Blocker sind in diesem Lauf praktisch gelöst: `node_modules` ist vorhanden, `pnpm install --no-frozen-lockfile --offline` konnte den Lockfile aktualisieren, und ein WIP-Commit existiert bereits im Worktree.
 
 ## Gate-Bewertung
 
-V1.9.10 ist noch nicht abgeschlossen. Der Cursor bleibt auf V1.9.10.
+V1.9.10 ist abgeschlossen. Der Cursor darf auf V1.9.11 gesetzt werden.

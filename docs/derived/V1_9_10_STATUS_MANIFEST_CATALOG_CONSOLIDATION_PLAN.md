@@ -1,6 +1,6 @@
 # V1.9.10 Status-, Manifest- und Katalog-Konsolidierungsplan
 
-Status: eingefroren für Umsetzung
+Status: umgesetzt und final reviewt
 Stand: 2026-05-12
 Primärer Agent: release-implementation-agent
 
@@ -27,11 +27,11 @@ V1.9.10 ist ein Konsolidierungsgate ohne neue Spielbarkeit. Es repariert die nac
 | Test | Zweck | Status |
 | --- | --- | --- |
 | JSON-Parse aller `data/**/*.json` | Artefaktvalidität | pass |
-| `corepack pnpm --filter @netgrid/catalog test -- index.test.ts` | Manifest-/Status-/No-Promotion-Gate | blocked: `node_modules` fehlt, `pnpm install --offline` scheitert mit EPERM |
-| `corepack pnpm --filter @netgrid/engine test` | Regression, unveränderte Engine-Fläche | pending nach Install-Blocker |
-| `corepack pnpm --filter @netgrid/ai test` | AI-No-Promotion und bestehende Hints | pending nach Install-Blocker |
-| `corepack pnpm typecheck` | Workspace-Typprüfung | pending nach Install-Blocker |
+| `v1-9-install-and-check.ps1 -Task catalog` | Manifest-/Status-/No-Promotion-Gate | pass |
+| `v1-9-install-and-check.ps1 -Task engine` | Regression, unveränderte Engine-Fläche | pass |
+| `v1-9-install-and-check.ps1 -Task ai` | AI-No-Promotion und bestehende Hints | pass |
+| `v1-9-install-and-check.ps1 -Task typecheck` | Workspace-Typprüfung | pass |
 
 ## Go/No-Go
 
-V1.9.10 darf erst abgeschlossen und der Cursor erst auf V1.9.11 gesetzt werden, wenn die blockierten pnpm/Vitest-Checks wieder ausführbar und grün sind. Bis dahin ist der aktuelle Stand WIP.
+V1.9.10 ist abgeschlossen. Die früher blockierten pnpm/Vitest-Checks sind ausführbar und grün; der Cursor darf auf V1.9.11 gesetzt werden.

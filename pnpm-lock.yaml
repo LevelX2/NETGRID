@@ -101,7 +101,11 @@ importers:
         specifier: workspace:*
         version: link:../shared
 
-  packages/catalog: {}
+  packages/catalog:
+    dependencies:
+      '@netgrid/shared':
+        specifier: workspace:*
+        version: link:../shared
 
   packages/decks:
     dependencies:
