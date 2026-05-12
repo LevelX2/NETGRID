@@ -1,4 +1,4 @@
-import type { PublicGameEvent, Side } from "@netgrid/shared";
+import type { PublicGameEvent, ResolvedGameEffect, Side } from "@netgrid/shared";
 
 export type ChronicleCategory = "turn" | "economy" | "card" | "run" | "agenda" | "danger" | "system" | "hidden";
 export type ChronicleImportance = "normal" | "important" | "critical";
@@ -24,6 +24,7 @@ export type ChronicleItem = {
   title: string;
   description?: string;
   chips: string[];
+  cardDefinitionId?: string;
   cardTitle?: string;
   cardText?: string;
   cardDetailLines: string[];
@@ -75,6 +76,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
   const cardTitle = explicitCardTitle ?? labelCardTitle;
+  const cardDefinitionId = stringValue(payload.cardDefinitionId);
   const cardText = context.cardText ?? undefined;
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
@@ -284,10 +286,103 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     title: ensurePeriod(title),
     ...(description ? { description: ensurePeriod(description) } : {}),
     chips: uniqueChips(chips.filter(Boolean)),
+    ...(cardDefinitionId && visibility !== "redacted" ? { cardDefinitionId } : {}),
     ...(cardTitle && visibility !== "redacted" ? { cardTitle } : {}),
     ...(cardText && visibility !== "redacted" ? { cardText } : {}),
     cardDetailLines: visibility === "redacted" ? [] : cardDetailLines,
     groupLabel: groupLabelFor(category, actor, label, serverLabel, turnNumber)
+  };
+}
+
+export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): ChronicleItem[] {
+  return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects).map((effect, index) => formatChronicleEffect(event, effect, index, side));
+}
+
+function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffect, index: number, side: Side): ChronicleItem {
+  const actor = sideValue(effect.side);
+  const subject = subjectFor(actor, side, false);
+  const sourceTitle = stringValue(effect.sourceTitle);
+  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  const cardTitle = stringValue(effect.cardTitle);
+  const amount = numberValue(effect.amount) ?? 0;
+  const chips = [...baseChips(actor, false)];
+  let category: ChronicleCategory = "system";
+  let importance: ChronicleImportance = "normal";
+  let visibility: ChronicleVisibility = effect.visibility === "public" ? "public" : effect.visibility === "private_to_side" ? "side" : "redacted";
+  let title = "Ein automatischer Effekt wurde aufgelöst";
+  const through = sourceTitle ? ` durch ${sourceTitle}` : "";
+
+  switch (effect.kind) {
+    case "gain_credits":
+      category = "economy";
+      title = phrase(subject, `${creditText(amount)}${through} erhalten`);
+      chips.push(`+${amount} Credit${amount === 1 ? "" : "s"}`, "Automatisch");
+      break;
+    case "draw_cards":
+      category = "card";
+      title = phrase(subject, `${cardCountText(amount)}${through} gezogen`);
+      chips.push(amount === 1 ? "Karte ziehen" : `${amount} Karten`, "Automatisch");
+      break;
+    case "rez_card":
+      category = "card";
+      importance = effect.reason === "region_install" || effect.reason === "on_score" ? "important" : "normal";
+      title = `${cardTitle ?? sourceTitle ?? "Eine Karte"} wurde${effect.reason === "region_install" ? " sofort" : ""} gerezzt`;
+      chips.push("Rez", "Automatisch");
+      break;
+    case "trash_card":
+      category = "card";
+      importance = "important";
+      title = `${cardTitle ?? "Eine Karte"} wurde${through} getrasht`;
+      chips.push("Trash", effect.reason === "region_limit" ? "Region" : "Automatisch");
+      break;
+    case "purge_counters":
+      category = "danger";
+      importance = "important";
+      title = phrase(subject, `${amount} ${counterLabel(effect.counterType)} entfernt`);
+      chips.push("Purge", counterLabel(effect.counterType));
+      break;
+    case "gain_actions":
+      category = "turn";
+      title = phrase(subject, `${amount} zusätzliche Aktion${amount === 1 ? "" : "en"}${through} erhalten`);
+      chips.push(`+${amount} Aktion${amount === 1 ? "" : "en"}`);
+      break;
+    case "add_tags":
+      category = "danger";
+      importance = "important";
+      title = phrase(subject, `${amount} Tag${amount === 1 ? "" : "s"}${through} erhalten`);
+      chips.push(`+${amount} Tag${amount === 1 ? "" : "s"}`);
+      break;
+    case "remove_tags":
+      category = "danger";
+      title = phrase(subject, `${amount} Tag${amount === 1 ? "" : "s"} entfernt`);
+      chips.push("Tag entfernt");
+      break;
+    case "bad_publicity":
+      category = "danger";
+      importance = "important";
+      title = phrase(subject, `${amount} Bad Publicity${through} erhalten`);
+      chips.push(`+${amount} Bad Publicity`);
+      break;
+    case "damage":
+      category = "danger";
+      importance = "critical";
+      title = phrase(subject, `${amount} Schaden${through} erlitten`);
+      chips.push("Schaden");
+      break;
+  }
+
+  return {
+    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    category,
+    importance,
+    visibility,
+    ...(actor ? { actor } : {}),
+    title: ensurePeriod(title),
+    chips: uniqueChips(chips.filter(Boolean)),
+    ...(sourceDefinitionId && visibility !== "redacted" ? { cardDefinitionId: sourceDefinitionId } : {}),
+    ...(sourceTitle && visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
+    cardDetailLines: [],
+    groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
   };
 }
 
@@ -480,6 +575,19 @@ function ensurePeriod(value: string): string {
 
 function uniqueChips(chips: string[]): string[] {
   return Array.from(new Set(chips));
+}
+
+function resolvedEffectsFromPayload(value: unknown): ResolvedGameEffect[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((effect): effect is ResolvedGameEffect => {
+    if (!effect || typeof effect !== "object") return false;
+    const candidate = effect as Partial<ResolvedGameEffect>;
+    return typeof candidate.effectId === "string" && typeof candidate.kind === "string" && typeof candidate.visibility === "string";
+  });
+}
+
+function counterLabel(counterType: unknown): string {
+  return counterType === "virus" ? "Virus-Counter" : "Counter";
 }
 
 function stringValue(value: unknown): string | undefined {

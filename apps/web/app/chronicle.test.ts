@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { formatChronicleEvent } from "./chronicle";
+import { formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -256,6 +256,62 @@ describe("formatChronicleEvent", () => {
     expect(runnerTurnEnd.groupLabel).toBe("Runner-Zug 6");
     expect(corpMandatoryDraw.chips).toContain("Korpzug 5");
     expect(corpMandatoryDraw.groupLabel).toBe("Korp-Zug 5");
+  });
+
+  it("formats resolved automatic effects as separate chronicle items", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        result: "ended",
+        resolvedEffects: [
+          {
+            effectId: "tokyo-bonus",
+            kind: "gain_credits",
+            visibility: "public",
+            side: "corp",
+            amount: 2,
+            sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+            sourceTitle: "Tokyo-Chiba Infighting",
+            serverLabel: "Remote 1",
+            reason: "unsuccessful_run"
+          }
+        ]
+      }),
+      "corp"
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.title).toBe("Du hast 2 Credits durch Tokyo-Chiba Infighting erhalten.");
+    expect(items[0]?.category).toBe("economy");
+    expect(items[0]?.cardDefinitionId).toBe("onr_v1_371_tokyo-chiba-infighting");
+    expect(items[0]?.cardTitle).toBe("Tokyo-Chiba Infighting");
+    expect(items[0]?.chips).toContain("+2 Credits");
+  });
+
+  it("formats auto-rezzed region effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("install_card", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "region-rez",
+            kind: "rez_card",
+            visibility: "public",
+            side: "corp",
+            cardDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+            cardTitle: "Tokyo-Chiba Infighting",
+            sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+            sourceTitle: "Tokyo-Chiba Infighting",
+            reason: "region_install"
+          }
+        ]
+      }),
+      "corp"
+    );
+
+    expect(items[0]?.title).toBe("Tokyo-Chiba Infighting wurde sofort gerezzt.");
+    expect(items[0]?.importance).toBe("important");
+    expect(items[0]?.chips).toContain("Automatisch");
   });
 });
 

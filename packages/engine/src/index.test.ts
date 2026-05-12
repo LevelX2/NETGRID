@@ -1867,6 +1867,20 @@ describe("V1.6.3 Mechanikpaket C", () => {
     tokyoState.corp.clicks = 10;
     moveCorpCardToHq(tokyoState, "onr_v1_371_tokyo-chiba-infighting");
     tokyoState = apply(tokyoState, "corp", (action) => action.type === "install_card" && sourceDefinition(tokyoState, action) === "onr_v1_371_tokyo-chiba-infighting");
+    expect(tokyoState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+      title: "Tokyo-Chiba Infighting"
+    });
+    expect(tokyoState.eventLog.at(-1)?.publicPayload.redactedKind).toBeUndefined();
+    expect(tokyoState.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "rez_card",
+        side: "corp",
+        sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+        reason: "region_install"
+      })
+    );
     const firstRegionId = tokyoState.corp.servers.find((server) => server.id === "remote_1")?.root.find((id) => tokyoState.cardInstances[id]?.definitionId === "onr_v1_371_tokyo-chiba-infighting");
     expect(firstRegionId).toBeDefined();
     if (firstRegionId) {
@@ -1899,6 +1913,15 @@ describe("V1.6.3 Mechanikpaket C", () => {
     if (firstRegionId) {
       expect(tokyoState.corp.archives).toContain(firstRegionId);
     }
+    expect(tokyoState.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "trash_card",
+        side: "corp",
+        sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+        cardDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+        reason: "region_limit"
+      })
+    );
     const regionCountInRemote = tokyoState.corp.servers
       .find((server) => server.id === "remote_1")
       ?.root.filter((id) => tokyoState.cardInstances[id]?.definitionId === "onr_v1_371_tokyo-chiba-infighting").length;
@@ -1911,6 +1934,15 @@ describe("V1.6.3 Mechanikpaket C", () => {
     tokyoState = apply(tokyoState, "runner", (action) => action.type === "continue_run");
     expect(tokyoState.run).toBeUndefined();
     expect(tokyoState.corp.credits).toBe(creditsBeforeContinue + 2);
+    expect(tokyoState.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "gain_credits",
+        side: "corp",
+        amount: 2,
+        sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+        reason: "unsuccessful_run"
+      })
+    );
   });
 });
 

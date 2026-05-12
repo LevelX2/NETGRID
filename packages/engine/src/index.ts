@@ -40,6 +40,7 @@ import {
   type PublicGameEvent,
   type ReplacementCandidate,
   type ReplacementWindow,
+  type ResolvedGameEffect,
   type ReplayResult,
   type RunState,
   type RulesBaseline,
@@ -102,6 +103,7 @@ export type {
   PublicGameEvent,
   ReplacementCandidate,
   ReplacementWindow,
+  ResolvedGameEffect,
   ReplayResult,
   RulesBaseline,
   SpecialZoneKind,
@@ -2373,7 +2375,9 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         removeFromAllZones(state, cardId);
         state.corp.archives.push(cardId);
         state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
+        const effectBefore = publicEffectDeltaSnapshot(state);
         resolveCorpOperation(state, definition, legalAction);
+        recordPublicEffectDeltas(state, effectBefore, legalAction, cardId, "card_resolver");
         if (definition.id === "v098_hq_rd_swap_operation") {
           legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "swap_hq_rd" };
         }
@@ -2402,10 +2406,10 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">);
       return;
     case "jack_out":
-      finishRun(state, false);
+      finishRun(state, false, legalAction);
       return;
     case "rez_ice":
-      rezCard(state, String(legalAction.payload?.cardId), legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true);
+      rezCard(state, String(legalAction.payload?.cardId), legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true, legalAction);
       return;
     case "decline_rez":
       passApproachedIce(state);
@@ -2491,6 +2495,16 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       spendClicks(state, "corp", 3);
       const purged = purgeVirusCounters(state);
       legalAction.payload = { ...(legalAction.payload ?? {}), purgedVirusCounters: purged, purgedCounterType: "virus" };
+      if (purged > 0) {
+        recordResolvedEffect(legalAction, {
+          kind: "purge_counters",
+          visibility: "public",
+          side: "corp",
+          amount: purged,
+          counterType: "virus",
+          reason: "purge"
+        });
+      }
       return;
     }
     case "move_to_set_aside":
@@ -2526,7 +2540,9 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "runner", zone: "heap" } };
   const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
   if (!resolver) throw new Error(`Kein Event-Resolver fuer ${definition.id}.`);
+  const effectBefore = publicEffectDeltaSnapshot(state);
   resolver.resolve(state, legalAction);
+  recordPublicEffectDeltas(state, effectBefore, legalAction, cardId, "card_resolver");
 }
 
 function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
@@ -2677,7 +2693,30 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     zone: { side: "corp", zone: "serverRoot", serverId: server.id }
   };
   if (regionInstall) {
-    trashOlderRegionUpgradesInServer(state, server, cardId);
+    recordResolvedEffect(legalAction, {
+      kind: "rez_card",
+      visibility: "public",
+      side: "corp",
+      ...sourceEffectFields(state, cardId),
+      ...cardEffectFields(state, cardId),
+      serverId: server.id,
+      serverLabel: server.label,
+      zoneLabel: "Remote",
+      reason: "region_install"
+    });
+    for (const trashedCardId of trashOlderRegionUpgradesInServer(state, server, cardId)) {
+      recordResolvedEffect(legalAction, {
+        kind: "trash_card",
+        visibility: "public",
+        side: "corp",
+        ...sourceEffectFields(state, cardId),
+        ...cardEffectFields(state, trashedCardId),
+        serverId: server.id,
+        serverLabel: server.label,
+        zoneLabel: "Archives",
+        reason: "region_limit"
+      });
+    }
   }
 }
 
@@ -2755,12 +2794,39 @@ function startRun(
   }
 }
 
-function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
+function rezCard(state: GameState, cardId: string, rootRez: boolean, legalAction?: LegalAction): void {
   const definition = definitionFor(state, cardId);
   spendCredits(state, "corp", rezCostForCard(state, cardId));
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), rezzed: true, faceup: true };
   if (rootRez && CORP_ROOT_REZ_RESOLVERS[definition.id]) {
+    const creditsBeforeResolver = state.corp.credits;
+    const hqBeforeResolver = state.corp.hq.length;
     CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
+    const gainedCredits = state.corp.credits - creditsBeforeResolver;
+    const serverLabel = publicServerLabelForCard(state, cardId);
+    if (gainedCredits > 0) {
+      recordResolvedEffect(legalAction, {
+        kind: "gain_credits",
+        visibility: "public",
+        side: "corp",
+        amount: gainedCredits,
+        ...sourceEffectFields(state, cardId),
+        ...(serverLabel ? { serverLabel } : {}),
+        reason: "on_rez"
+      });
+    }
+    const drawnCards = state.corp.hq.length - hqBeforeResolver;
+    if (drawnCards > 0) {
+      recordResolvedEffect(legalAction, {
+        kind: "draw_cards",
+        visibility: "public",
+        side: "corp",
+        amount: drawnCards,
+        ...sourceEffectFields(state, cardId),
+        ...(serverLabel ? { serverLabel } : {}),
+        reason: "on_rez"
+      });
+    }
     return;
   }
   if (rootRez) return;
@@ -2843,7 +2909,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   }
   if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
     if (run.phase === "access") {
-      finishRun(state, true);
+      finishRun(state, true, legalAction);
       return;
     }
     throw new Error("Run kann in diesem Schritt nicht fortgesetzt werden.");
@@ -2937,7 +3003,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   run.jackOutLockedUntilEncounterEnds = false;
   resetBreakerStrength(state);
   if (ended) {
-    finishRun(state, false);
+    finishRun(state, false, legalAction);
     return;
   }
   applyBartmossPostEncounterTrigger(state, run);
@@ -3706,7 +3772,7 @@ function trashCorpInstalledCardToArchives(state: GameState, cardId: CardInstance
   state.cardInstances[cardId] = { ...withoutHost, faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
 }
 
-function trashOlderRegionUpgradesInServer(state: GameState, server: CorpServer, keepCardId: CardInstanceId): void {
+function trashOlderRegionUpgradesInServer(state: GameState, server: CorpServer, keepCardId: CardInstanceId): CardInstanceId[] {
   const olderRegions = server.root
     .filter((cardId) => cardId !== keepCardId)
     .filter((cardId) => {
@@ -3715,28 +3781,40 @@ function trashOlderRegionUpgradesInServer(state: GameState, server: CorpServer, 
     })
     .sort();
   for (const cardId of olderRegions) trashCorpInstalledCardToArchives(state, cardId);
+  return olderRegions;
 }
 
-function tokyoChibaUnsuccessfulRunBonus(state: GameState, run: GameState["run"], successful: boolean): number {
-  if (!run || successful) return 0;
+function tokyoChibaUnsuccessfulRunBonus(state: GameState, run: GameState["run"], successful: boolean): { amount: number; sourceCardId?: CardInstanceId; serverId?: ServerId; serverLabel?: string } {
+  if (!run || successful) return { amount: 0 };
   const attackedServer = state.corp.servers.find((server) => server.id === run.attackedServerId);
-  if (!attackedServer) return 0;
-  return attackedServer.root.some((cardId) => {
+  if (!attackedServer) return { amount: 0 };
+  const sourceCardId = attackedServer.root.find((cardId) => {
     const instance = mustInstance(state.cardInstances, cardId);
     return instance.rezzed && definitionFor(state, cardId).id === "onr_v1_371_tokyo-chiba-infighting";
-  })
-    ? 2
-    : 0;
+  });
+  return sourceCardId ? { amount: 2, sourceCardId, serverId: attackedServer.id, serverLabel: attackedServer.label } : { amount: 0 };
 }
 
-function finishRun(state: GameState, successful: boolean): void {
+function finishRun(state: GameState, successful: boolean, legalAction?: LegalAction): void {
   const run = state.run;
   if (run && successful) applyV181SuccessfulRunCounterTriggers(state, run);
   const allNighterBonusRunOnFinish = run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? run?.pendingSuccessBonusCredits ?? 0 : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(state, run, successful);
   state.runner.credits += bonus;
-  state.corp.credits += corpBonus;
+  state.corp.credits += corpBonus.amount;
+  if (corpBonus.amount > 0 && corpBonus.sourceCardId) {
+    recordResolvedEffect(legalAction, {
+      kind: "gain_credits",
+      visibility: "public",
+      side: "corp",
+      amount: corpBonus.amount,
+      ...sourceEffectFields(state, corpBonus.sourceCardId),
+      ...(corpBonus.serverId ? { serverId: corpBonus.serverId } : {}),
+      ...(corpBonus.serverLabel ? { serverLabel: corpBonus.serverLabel } : {}),
+      reason: "unsuccessful_run"
+    });
+  }
   if (allNighterBonusRunOnFinish && !state.winner) {
     ensureRunnerTurnFlags(state).allNighterBonusRunPending = true;
   }
@@ -4712,7 +4790,17 @@ function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction
   }
   if (definition.id === "onr_v1_203_hostile-takeover") {
     state.corp.credits += 5;
-    if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), onScoreGainCredits: 5, corpCreditsAfter: state.corp.credits };
+    if (legalAction) {
+      legalAction.payload = { ...(legalAction.payload ?? {}), onScoreGainCredits: 5, corpCreditsAfter: state.corp.credits };
+      recordResolvedEffect(legalAction, {
+        kind: "gain_credits",
+        visibility: "public",
+        side: "corp",
+        amount: 5,
+        ...sourceEffectFields(state, cardId),
+        reason: "on_score"
+      });
+    }
   }
   if (definition.id === "onr_v1_212_priority-requisition") {
     const candidates = Object.entries(state.cardInstances)
@@ -4722,17 +4810,27 @@ function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction
         const leftCost = definitionFor(state, left).rezCost ?? 0;
         const rightCost = definitionFor(state, right).rezCost ?? 0;
         return rightCost - leftCost || left.localeCompare(right);
-      });
+    });
     const freeRezTarget = candidates[0];
     if (freeRezTarget) {
       state.cardInstances[freeRezTarget] = { ...mustInstance(state.cardInstances, freeRezTarget), faceup: true, rezzed: true };
       if (legalAction) {
+        const serverLabel = publicServerLabelForCard(state, freeRezTarget);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           priorityRequisitionFreeRez: true,
           priorityRequisitionTarget: freeRezTarget,
           priorityRequisitionTargetDefinitionId: definitionFor(state, freeRezTarget).id
         };
+        recordResolvedEffect(legalAction, {
+          kind: "rez_card",
+          visibility: "public",
+          side: "corp",
+          ...sourceEffectFields(state, cardId),
+          ...cardEffectFields(state, freeRezTarget),
+          ...(serverLabel ? { serverLabel } : {}),
+          reason: "on_score"
+        });
       }
     }
   }
@@ -5592,6 +5690,136 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   return parts.filter(Boolean).join(".");
 }
 
+type ResolvedGameEffectInput = Omit<ResolvedGameEffect, "effectId"> & { effectId?: string };
+
+function recordResolvedEffect(legalAction: LegalAction | undefined, effect: ResolvedGameEffectInput): void {
+  if (!legalAction) return;
+  const list = (legalAction.resolvedEffects ??= []);
+  const effectId = effect.effectId ?? `${legalAction.type}.effect.${list.length + 1}`;
+  list.push({ ...effect, effectId });
+}
+
+function publicResolvedEffectsForAction(legalAction: LegalAction): Record<string, unknown> {
+  if (!legalAction.resolvedEffects?.length) return {};
+  return { resolvedEffects: legalAction.resolvedEffects.map((effect) => ({ ...effect })) };
+}
+
+function sourceEffectFields(state: GameState, sourceCardId: CardInstanceId): Pick<ResolvedGameEffect, "sourceDefinitionId" | "sourceTitle"> {
+  const definition = definitionFor(state, sourceCardId);
+  return { sourceDefinitionId: definition.id, sourceTitle: definition.title };
+}
+
+function cardEffectFields(state: GameState, cardId: CardInstanceId): Pick<ResolvedGameEffect, "cardDefinitionId" | "cardTitle"> {
+  const definition = definitionFor(state, cardId);
+  return { cardDefinitionId: definition.id, cardTitle: definition.title };
+}
+
+type PublicEffectDeltaSnapshot = {
+  corpCredits: number;
+  runnerCredits: number;
+  corpHq: number;
+  runnerGrip: number;
+  corpClicks: number;
+  runnerClicks: number;
+  runnerTags: number;
+  corpBadPublicity: number;
+};
+
+function publicEffectDeltaSnapshot(state: GameState): PublicEffectDeltaSnapshot {
+  return {
+    corpCredits: state.corp.credits,
+    runnerCredits: state.runner.credits,
+    corpHq: state.corp.hq.length,
+    runnerGrip: state.runner.grip.length,
+    corpClicks: state.corp.clicks,
+    runnerClicks: state.runner.clicks,
+    runnerTags: state.runner.tags,
+    corpBadPublicity: state.corp.badPublicity
+  };
+}
+
+function recordPublicEffectDeltas(state: GameState, before: PublicEffectDeltaSnapshot, legalAction: LegalAction, sourceCardId: CardInstanceId, reason: string): void {
+  const source = sourceEffectFields(state, sourceCardId);
+  const deltas: Array<{ side: Side; credits: number }> = [
+    { side: "corp", credits: state.corp.credits - before.corpCredits },
+    { side: "runner", credits: state.runner.credits - before.runnerCredits }
+  ];
+  for (const delta of deltas) {
+    if (delta.credits <= 0) continue;
+    recordResolvedEffect(legalAction, {
+      kind: "gain_credits",
+      visibility: "public",
+      side: delta.side,
+      amount: delta.credits,
+      ...source,
+      reason
+    });
+  }
+
+  const drawn: Array<{ side: Side; count: number }> = [
+    { side: "corp", count: state.corp.hq.length - before.corpHq },
+    { side: "runner", count: state.runner.grip.length - before.runnerGrip }
+  ];
+  for (const draw of drawn) {
+    if (draw.count <= 0) continue;
+    recordResolvedEffect(legalAction, {
+      kind: "draw_cards",
+      visibility: "public",
+      side: draw.side,
+      amount: draw.count,
+      ...source,
+      reason
+    });
+  }
+
+  const gainedCorpClicks = state.corp.clicks - before.corpClicks;
+  if (gainedCorpClicks > 0) {
+    recordResolvedEffect(legalAction, {
+      kind: "gain_actions",
+      visibility: "public",
+      side: "corp",
+      amount: gainedCorpClicks,
+      ...source,
+      reason
+    });
+  }
+  const gainedRunnerClicks = state.runner.clicks - before.runnerClicks;
+  if (gainedRunnerClicks > 0) {
+    recordResolvedEffect(legalAction, {
+      kind: "gain_actions",
+      visibility: "public",
+      side: "runner",
+      amount: gainedRunnerClicks,
+      ...source,
+      reason
+    });
+  }
+
+  const addedTags = state.runner.tags - before.runnerTags;
+  if (addedTags > 0) {
+    recordResolvedEffect(legalAction, {
+      kind: "add_tags",
+      visibility: "public",
+      side: "runner",
+      amount: addedTags,
+      ...source,
+      reason
+    });
+  }
+
+  const addedBadPublicity = state.corp.badPublicity - before.corpBadPublicity;
+  if (addedBadPublicity > 0) {
+    recordResolvedEffect(legalAction, {
+      kind: "bad_publicity",
+      visibility: "public",
+      side: "corp",
+      amount: addedBadPublicity,
+      ...source,
+      reason
+    });
+  }
+}
+
 function buildEvent(before: number, after: number, stateHashAfter: StateHash, previousState: GameState, state: GameState, legalAction: LegalAction, playerAction: PlayerAction): GameEvent {
   const actor = legalAction.side;
   const reveal = revealForPublicEvent(state, legalAction);
@@ -5602,6 +5830,7 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, pr
     label: publicLabel(legalAction),
     ...publicActionUseContext(previousState, legalAction),
     ...publicContextForAction(state, legalAction),
+    ...publicResolvedEffectsForAction(legalAction),
     ...reveal
   };
   return {
@@ -5824,7 +6053,14 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
       context.totalAgendaPoints = agendaPointsForScoredCard(state, agendaId);
     }
   }
-  if (legalAction.side === "corp" && (legalAction.type === "install_card" || legalAction.type === "advance_card")) context.redactedKind = "installed_card";
+  const corpInstalledCardIsPublic =
+    legalAction.side === "corp" &&
+    (legalAction.type === "install_card" || legalAction.type === "advance_card") &&
+    cardId !== undefined &&
+    state.cardInstances[cardId]?.faceup === true;
+  if (legalAction.side === "corp" && (legalAction.type === "install_card" || legalAction.type === "advance_card") && !corpInstalledCardIsPublic) {
+    context.redactedKind = "installed_card";
+  }
 
   return context;
 }
@@ -5857,9 +6093,12 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
       return { cardDefinitionId: definition.id, title: definition.title };
     }
   }
+  const payloadCardId = typeof legalAction.payload?.cardId === "string" ? legalAction.payload.cardId : undefined;
+  const revealsCorpInstall = legalAction.side === "corp" && legalAction.type === "install_card" && payloadCardId !== undefined && state.cardInstances[payloadCardId]?.faceup === true;
   const revealsCard =
     ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation", "pump_breaker", "break_subroutine"].includes(legalAction.type) ||
-    (legalAction.side === "runner" && legalAction.type === "install_card");
+    (legalAction.side === "runner" && legalAction.type === "install_card") ||
+    revealsCorpInstall;
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;
     if (typeof cardId === "string" && state.cardInstances[cardId]) {
@@ -5886,21 +6125,45 @@ function toPublicEvent(event: GameEvent): PublicGameEvent {
 export function redactPublicEventForSide(event: PublicGameEvent, viewerSide: Side): PublicGameEvent {
   const actor = event.publicPayload.actor;
   const actionType = event.publicPayload.actionType;
-  if (actionType !== "access_card" || actor !== "runner" || viewerSide !== "corp") return event;
-  const serverLabel = typeof event.publicPayload.serverLabel === "string" ? event.publicPayload.serverLabel : "";
-  const serverId = typeof event.publicPayload.serverId === "string" ? event.publicPayload.serverId : "";
+  let redactedEvent = redactResolvedEffectsForSide(event, viewerSide);
+  if (actionType !== "access_card" || actor !== "runner" || viewerSide !== "corp") return redactedEvent;
+  const serverLabel = typeof redactedEvent.publicPayload.serverLabel === "string" ? redactedEvent.publicPayload.serverLabel : "";
+  const serverId = typeof redactedEvent.publicPayload.serverId === "string" ? redactedEvent.publicPayload.serverId : "";
   const rdHiddenAccess = serverId === "rd" || serverLabel === "R&D" || serverLabel === "F&E (R&D)" || serverLabel === "F&E";
-  if (!rdHiddenAccess) return event;
-  const { cardDefinitionId: _cardDefinitionId, title: _title, ...publicPayload } = event.publicPayload;
+  if (!rdHiddenAccess) return redactedEvent;
+  const { cardDefinitionId: _cardDefinitionId, title: _title, ...publicPayload } = redactedEvent.publicPayload;
   void _cardDefinitionId;
   void _title;
-  return {
-    ...event,
+  redactedEvent = {
+    ...redactedEvent,
     publicPayload: {
       ...publicPayload,
       redactedKind: "accessed_card"
     }
   };
+  return redactedEvent;
+}
+
+function redactResolvedEffectsForSide(event: PublicGameEvent, viewerSide: Side): PublicGameEvent {
+  const effects = event.publicPayload.resolvedEffects;
+  if (!Array.isArray(effects)) return event;
+  const redactedEffects = effects.filter((effect): effect is ResolvedGameEffect => {
+    if (!isResolvedGameEffect(effect)) return false;
+    if (effect.visibility === "public") return true;
+    return effect.visibility === "private_to_side" && effect.side === viewerSide;
+  });
+  const { resolvedEffects: _resolvedEffects, ...publicPayload } = event.publicPayload;
+  void _resolvedEffects;
+  return {
+    ...event,
+    publicPayload: redactedEffects.length > 0 ? { ...publicPayload, resolvedEffects: redactedEffects.map((effect) => ({ ...effect })) } : publicPayload
+  };
+}
+
+function isResolvedGameEffect(value: unknown): value is ResolvedGameEffect {
+  if (!value || typeof value !== "object") return false;
+  const effect = value as Partial<ResolvedGameEffect>;
+  return typeof effect.effectId === "string" && typeof effect.kind === "string" && typeof effect.visibility === "string";
 }
 
 function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {

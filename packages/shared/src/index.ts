@@ -112,6 +112,35 @@ export type SubroutineDefinition = {
 };
 
 export type EventVisibilityClass = "public" | "private_to_side" | "hidden_info_barrier" | "replay_only";
+
+export type ResolvedGameEffectKind =
+  | "gain_credits"
+  | "draw_cards"
+  | "rez_card"
+  | "trash_card"
+  | "purge_counters"
+  | "gain_actions"
+  | "add_tags"
+  | "remove_tags"
+  | "bad_publicity"
+  | "damage";
+
+export type ResolvedGameEffect = {
+  effectId: string;
+  kind: ResolvedGameEffectKind;
+  visibility: EventVisibilityClass;
+  side?: Side;
+  amount?: number;
+  sourceDefinitionId?: CardDefinitionId;
+  sourceTitle?: string;
+  cardDefinitionId?: CardDefinitionId;
+  cardTitle?: string;
+  serverId?: ServerId;
+  serverLabel?: string;
+  zoneLabel?: string;
+  counterType?: string;
+  reason?: string;
+};
 export type SpecialZoneKind = "set_aside" | "removed_from_game";
 export type SpecialZoneVisibility = "public" | "side_private" | "hidden" | "replay_only";
 
@@ -700,6 +729,7 @@ export type LegalAction = {
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
   payload?: Record<string, string | number | boolean>;
+  resolvedEffects?: ResolvedGameEffect[];
 };
 
 export type PlayerAction = {

@@ -52,6 +52,7 @@ import {
   CHRONICLE_CATEGORY_LABELS,
   chronicleGroupLabel,
   formatChronicleEvent,
+  formatChronicleEffectItems,
   type ChronicleCategory,
   type ChronicleContext,
   type ChronicleItem
@@ -6135,13 +6136,15 @@ function ChroniclePanel({
   const [collapsed, setCollapsed] = useState(false);
   const contextByEventId = chronicleContextByEventId(events, cardDetailsById);
   const entries = events
-    .slice()
-    .reverse()
-    .map((event) => {
-      const card = eventCardDetail(event, cardDetailsById);
-      const item = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});
-      return { card, item };
-    });
+    .flatMap((event) => {
+      const eventItem = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});
+      const items = [eventItem, ...formatChronicleEffectItems(event, side)];
+      return items.map((item) => {
+        const card = item.cardDefinitionId ? (cardDetailsById[item.cardDefinitionId] ?? null) : eventCardDetail(event, cardDetailsById);
+        return { card, item };
+      });
+    })
+    .reverse();
 
   return (
     <section className={`section chroniclePanel ${collapsed ? "collapsed" : ""}`} data-testid="chronicle">
