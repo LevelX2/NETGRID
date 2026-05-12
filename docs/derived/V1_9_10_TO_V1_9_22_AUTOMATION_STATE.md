@@ -59,6 +59,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-12 23:15 CEST
+- Ergebnis: V1.9.11 Engine-WIP auf 16/16 Hidden-Zone-Zielkarten erweitert; Cursor bleibt auf V1.9.11 `implementing`
+- Release: V1.9.11
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Ice Pick Willie` und `Too Many Doors` haben WIP-Kartendefinitionen und ICE-subroutinegebundene Korp-R&D-Reveal-/Reorder-Pfade erhalten. `Ice Pick Willie` revealt nur die R&D-Spitze öffentlich; `Too Many Doors` öffnet eine Korp-private R&D-Top-2-Reorder-Choice und replayt deterministisch. Der AI-Fallback beantwortet mehrteilige `select_cards`-Choices nun vollständig und side-sicher. Keine V1.9.12+-Karte wurde angefasst.
+- Tests: `v1-9-install-and-check.ps1 -Task engine` pass (209 Tests), `-Task ai` pass (84 Tests), `-Task catalog` pass (25 Tests), `-Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.11: hidden zone ice subroutine wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.11 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil versionierte AI-Hints/-Smoke-Daten, Manifest/Coverage, Server/Web, volle Pflichtchecks, Final Review und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-12 23:00 CEST
 - Ergebnis: V1.9.11 Engine-WIP auf 14/16 Hidden-Zone-Zielkarten erweitert; Cursor bleibt auf V1.9.11 `implementing`
 - Release: V1.9.11

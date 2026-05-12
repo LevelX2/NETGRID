@@ -192,6 +192,8 @@ const NETO_ID = "onr_v1_169_n-e-t-o";
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const THE_SHORT_CIRCUIT_ID = "onr_v1_177_the-short-circuit";
 const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
+const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
+const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
 const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
@@ -3043,6 +3045,17 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     if (subroutine.type === "set_runner_forgo_next_action") {
       applyRunnerForgoNextAction(state);
     }
+    if (subroutine.type === "reveal_corp_rd_top") {
+      if (definition.id !== ICE_PICK_WILLIE_ID) throw new Error("Die R&D-Reveal-Subroutine passt nicht zum ICE.");
+      if (!legalAction) throw new Error("Continue-Run LegalAction fehlt fuer R&D-Reveal.");
+      revealCorpRdTop(state, legalAction);
+    }
+    if (subroutine.type === "reorder_corp_rd_top2") {
+      if (definition.id !== TOO_MANY_DOORS_ID) throw new Error("Die R&D-Reorder-Subroutine passt nicht zum ICE.");
+      startCorpRdArrangeChoice(state, run.encounteredIceId, index, legalAction);
+      if (!run.resolvedSubroutineIndexes.includes(index)) run.resolvedSubroutineIndexes.push(index);
+      return;
+    }
     if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
       if (resolveVacuumLinkRewindSubroutine(state, run, legalAction)) return;
     }
@@ -5019,6 +5032,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveRunnerStackArrangeChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1911.corp_rd_arrange_top2")) {
+    resolveCorpRdArrangeChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -5280,6 +5297,63 @@ function resolveRunnerStackArrangeChoice(state: GameState, legalAction: LegalAct
   }
   delete state.pendingChoice;
   legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "arrange_stack", arrangedCount: selectedIds.length };
+}
+
+function startCorpRdArrangeChoice(state: GameState, sourceIceId: CardInstanceId, subroutineIndex: number, legalAction?: LegalAction): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const topCards = state.corp.rd.slice(0, 2);
+  if (topCards.length < 2) throw new Error("Nicht genug Karten fuer R&D-Arrange.");
+  state.pendingChoice = {
+    choiceId: `v1911_corp_rd_arrange_top2_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1911.corp_rd_arrange_top2:${sourceIceId}:${subroutineIndex}:${state.stateVersion + 1}`,
+    prompt: "R&D-Spitze anordnen",
+    kind: "select_cards",
+    options: topCards.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: topCards.length,
+    maxSelections: topCards.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+      arrangedCount: topCards.length
+    };
+  }
+}
+
+function resolveCorpRdArrangeChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1911.corp_rd_arrange_top2")) throw new Error("Es ist keine R&D-Arrange-Choice offen.");
+  const [, sourceIceId, subroutineIndexRaw] = choice.source.split(":");
+  if (!sourceIceId || definitionFor(state, sourceIceId).id !== TOO_MANY_DOORS_ID) throw new Error("Die R&D-Arrange-Choice gehoert nicht zu Too Many Doors.");
+  const subroutineIndex = Number(subroutineIndexRaw);
+  if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0) throw new Error("Die R&D-Arrange-Subroutine ist ungueltig.");
+  const run = mustRun(state);
+  if (run.encounteredIceId !== sourceIceId) throw new Error("Die R&D-Arrange-Choice gehoert nicht mehr zum aktuellen Encounter.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const topCards = state.corp.rd.slice(0, choice.options.length);
+  if (selectedIds.length !== topCards.length) throw new Error("Die R&D-Arrange-Auswahl ist unvollstaendig.");
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length || topCards.some((cardId) => !selectedSet.has(cardId))) throw new Error("Die R&D-Arrange-Auswahl enthaelt ungueltige Karten.");
+  state.corp.rd = [...selectedIds, ...state.corp.rd.slice(topCards.length)];
+  for (const cardId of selectedIds) {
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "corp", zone: "rd" } };
+  }
+  if (!run.resolvedSubroutineIndexes.includes(subroutineIndex)) run.resolvedSubroutineIndexes.push(subroutineIndex);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+    arrangedCount: selectedIds.length
+  };
 }
 
 function startRunnerHostingChoice(state: GameState, hostId: CardInstanceId, legalAction: LegalAction): void {
@@ -5988,6 +6062,8 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
+    if (typeof legalAction.payload.selectedCount === "number") context.selectedCount = legalAction.payload.selectedCount;
+    if (typeof legalAction.payload.arrangedCount === "number") context.arrangedCount = legalAction.payload.arrangedCount;
     context.redactedKind = "hidden_zone";
   }
   if (legalAction.payload?.publicRevealKind) context.revealKind = legalAction.payload.publicRevealKind;

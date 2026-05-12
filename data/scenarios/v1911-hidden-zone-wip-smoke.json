@@ -18,7 +18,9 @@
     "onr_v1_169_n-e-t-o",
     "onr_v1_175_ronin-around",
     "onr_v1_177_the-short-circuit",
-    "onr_v1_194_corporate-downsizing"
+    "onr_v1_194_corporate-downsizing",
+    "onr_v1_250_ice-pick-willie",
+    "onr_v1_272_too-many-doors"
   ],
   "assertions": [
     "Runner stack search opens a side-private PendingChoice.",
@@ -27,8 +29,14 @@
     "Replay after search resolution reproduces the same StateHash.",
     "Reveal and expose publish only the explicitly revealed CardDefinition.",
     "Installed Runner helpers use LegalActions and V1.9.11 PendingChoice sources without exposing options to the Corp.",
-    "Scored Corporate Downsizing reveals only the public R&D top CardDefinition."
+    "Scored Corporate Downsizing reveals only the public R&D top CardDefinition.",
+    "Ice Pick Willie reveals only the public R&D top CardDefinition through a subroutine-bound path.",
+    "Too Many Doors opens an R&D reorder PendingChoice only to the Corp and replays to the same StateHash.",
+    "AI answers multi-card Hidden-Zone choices with all required visible options without receiving opponent-only PendingChoice data."
   ],
-  "testRefs": ["packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP"],
+  "testRefs": [
+    "packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP",
+    "packages/ai/src/index.test.ts::answers V1.9.11 Corp R&D reorder choices with all required side-safe options"
+  ],
   "notCompletionGate": true
 }

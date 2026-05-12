@@ -3999,7 +3999,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       "onr_v1_169_n-e-t-o",
       "onr_v1_175_ronin-around",
       "onr_v1_177_the-short-circuit",
-      "onr_v1_194_corporate-downsizing"
+      "onr_v1_194_corporate-downsizing",
+      "onr_v1_250_ice-pick-willie",
+      "onr_v1_272_too-many-doors"
     ];
     for (const definitionId of implementedWipIds) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
@@ -4109,6 +4111,57 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       cardDefinitionId: "simple_economy_operation"
     });
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("simple_economy_operation_");
+  });
+
+  it("resolves Ice Pick Willie as a subroutine-bound public R&D top reveal", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-ice-pick-willie"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_250_ice-pick-willie");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_250_ice-pick-willie");
+    state = apply(state, "runner", (action) => action.type === "continue_run" && action.payload?.encounterContinue === true);
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_corp_reveal_rd_top",
+      revealKind: "reveal",
+      cardDefinitionId: "simple_economy_operation"
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("simple_economy_operation_");
+  });
+
+  it("opens Too Many Doors R&D reorder only to the Corp and resolves replay-safe", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-too-many-doors"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
+    const bottomChoiceId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const topChoiceId = putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_272_too-many-doors");
+    state = apply(state, "runner", (action) => action.type === "continue_run" && action.payload?.encounterContinue === true);
+    expect(state.pendingChoice?.source).toContain("v1911.corp_rd_arrange_top2");
+    expect(getPlayerView(state, "corp").pendingChoice?.options.some((option) => option.value === topChoiceId)).toBe(true);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+
+    state = applyChoices(state, "corp", [`card_${bottomChoiceId}`, `card_${topChoiceId}`]);
+    expect(state.corp.rd[0]).toBe(bottomChoiceId);
+    expect(state.corp.rd[1]).toBe(topChoiceId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+      arrangedCount: 2
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
 
@@ -6543,6 +6596,8 @@ const ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK: DeckDefinition = {
   identity: "corp_identity_001",
   cards: [
     { id: "onr_v1_194_corporate-downsizing", quantity: 1 },
+    { id: "onr_v1_250_ice-pick-willie", quantity: 1 },
+    { id: "onr_v1_272_too-many-doors", quantity: 1 },
     { id: "simple_agenda", quantity: 3 },
     { id: "onr_v1_203_hostile-takeover", quantity: 3 },
     { id: "simple_upgrade", quantity: 2 },

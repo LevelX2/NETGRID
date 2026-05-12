@@ -100,6 +100,8 @@ export type SubroutineType =
   | "set_next_encounter_lock"
   | "set_run_jack_out_lock"
   | "set_runner_forgo_next_action"
+  | "reveal_corp_rd_top"
+  | "reorder_corp_rd_top2"
   | "rewind_run_to_rezzed_ice_by_die";
 
 export type SubroutineDefinition = {
@@ -1131,6 +1133,14 @@ function onrSetRunJackOutLock(id: string): SubroutineDefinition {
 
 function onrSetRunnerForgoNextAction(id: string): SubroutineDefinition {
   return { id, type: "set_runner_forgo_next_action" };
+}
+
+function onrRevealCorpRdTop(id: string): SubroutineDefinition {
+  return { id, type: "reveal_corp_rd_top" };
+}
+
+function onrReorderCorpRdTop2(id: string): SubroutineDefinition {
+  return { id, type: "reorder_corp_rd_top2" };
 }
 
 function onrRewindRunToRezzedIceByDie(id: string): SubroutineDefinition {
@@ -2752,6 +2762,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["trace", "link", "bid_amount", "add_tag"]
   }),
   onrIce({
+    id: "onr_v1_250_ice-pick-willie",
+    title: "Ice Pick Willie",
+    subtypes: ["sentry"],
+    rezCost: 4,
+    strength: 3,
+    rulesText: "[Subroutine] Reveal the top card of R&D.",
+    subroutines: [onrRevealCorpRdTop("onr_v1_250_ice_pick_willie_reveal_rd_top")],
+    mechanics: ["reveal", "hidden_zone_tool"]
+  }),
+  onrIce({
     id: "onr_v1_251_jack-attack",
     title: "Jack Attack",
     subtypes: ["sentry", "ap"],
@@ -2923,6 +2943,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "[Subroutine] End the run, and Runner forgoes his or her next action.",
     subroutines: [onrSetRunnerForgoNextAction("onr_v1_271_tko_2_0_forgo_next_action"), onrEtr("onr_v1_271_tko_2_0_etr")],
     mechanics: ["end_the_run", "action_economy", "run_modifier"]
+  }),
+  onrIce({
+    id: "onr_v1_272_too-many-doors",
+    title: "Too Many Doors",
+    subtypes: ["sentry"],
+    rezCost: 4,
+    strength: 3,
+    rulesText: "[Subroutine] The Corp looks at and reorders the top two cards of R&D.",
+    subroutines: [onrReorderCorpRdTop2("onr_v1_272_too_many_doors_reorder_rd_top2")],
+    mechanics: ["reorder_rd", "hidden_zone_tool"]
   }),
   onrIce({
     id: "onr_v1_273_triggerman",
