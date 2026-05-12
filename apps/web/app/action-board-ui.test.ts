@@ -64,6 +64,19 @@ describe("V1.0.5 action board UI helpers", () => {
     );
   });
 
+  it("keeps card-sourced gain-credit actions on their specific labels", () => {
+    expect(actionButtonLabel(legalAction("corp", "gain_credit", "basic_action", "1 Credit nehmen"))).toBe("Credit nehmen");
+    expect(
+      actionButtonLabel(
+        legalAction("corp", "gain_credit", "private_police_1", "Private Cybernet Police: Trace 5 starten", {
+          cardId: "private_police_1",
+          agendaAbility: "private_cybernet_police",
+          traceStrength: 5
+        })
+      )
+    ).toBe("Private Cybernet Police: Trace 5 starten");
+  });
+
   it("shows access progress only from PlayerView breach data", () => {
     const running = view("runner", {
       run: {

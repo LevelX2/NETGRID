@@ -139,7 +139,7 @@ export function actionButtonLabel(action: LegalAction): string {
     case "mandatory_draw":
       return "Pflichtkarte ziehen";
     case "gain_credit":
-      return "Credit nehmen";
+      return action.source === "basic_action" ? "Credit nehmen" : normalizeVisibleTerms(action.label);
     case "draw_card":
       return "Karte ziehen";
     case "jack_out":
