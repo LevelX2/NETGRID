@@ -134,6 +134,8 @@ Der nächste Release darf erst begonnen werden, wenn:
 - der nächste Release exakt der Reihenfolge aus `docs/derived/V1_9_10_TO_V1_9_XX_IMPLEMENTATION_HANDOFF.md` entspricht
 - keine offenen Änderungen im Worktree verbleiben
 
+Pipeline-Ergaenzung: Wenn diese Bedingungen im selben Automationslauf erfuellt wurden und noch ausreichend Restzeit vorhanden ist, darf der Controller den unmittelbar naechsten Release im selben Lock-Kontext beginnen. Das ersetzt keinen neuen Automationslauf und startet keinen zweiten Job. Es bleibt bei sequenzieller Abarbeitung: maximal naechster Release, keine Release-Ueberspruenge, keine Arbeit nach der 45-50-Minuten-Grenze. Bei Unsicherheit stoppt der Lauf nach dem Cursor-Checkpoint.
+
 Die Reihenfolge ist hart:
 
 1. V1.9.10 Status-, Manifest- und Katalog-Konsolidierung

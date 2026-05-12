@@ -15,7 +15,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.11
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.12
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -28,6 +28,7 @@ Completion-Modus: Gate-pflichtig
 - Wenn der Release fertig ist, Final Review schreiben, Completion-Gate pruefen, Abschlusscommit erzeugen, pushen und Cursor auf den naechsten Release setzen.
 - Wenn der Release nicht fertig ist, bleibt der Cursor auf demselben Release.
 - Wenn ein nicht aufloesbarer Blocker vorliegt, Blocker mit Removal Condition dokumentieren und den Cursor nicht stillschweigend ueberspringen.
+- Pipeline-Modus: Nach einem erfolgreichen Releaseabschluss und Cursor-Checkpoint darf derselbe Lauf bei sauberem Worktree, erfolgreichem Push, eigenem Lock und ausreichend Restzeit den unmittelbar naechsten Release beginnen. Kein rekursiver Neustart, kein zweiter paralleler Job und kein Ueberspringen von Releases.
 
 ## Lock
 
@@ -56,6 +57,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-12 22:33 CEST
+- Ergebnis: V1.9.11 release-spezifisch detailgeplant; Cursor bleibt auf V1.9.11 und wechselt von `planned` auf `implementing`
+- Release: V1.9.11
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Hidden-Zone-Spezifikation, Testmatrix und Requirements Review fuer den Hidden-Zone Search/Reveal/Reorder/Shuffle-Slice erstellt. Keine Karte wurde promotet.
+- Tests: Dokumentations-/Cursorlauf; Code-Tests noch nicht noetig, weil keine Engine-/AI-/Runtime-Aenderung erfolgt ist.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen.
+- Cursor: V1.9.11 bleibt aktueller Release; naechster erlaubter Release bleibt V1.9.12 erst nach Completion-Gate.
 
 - Zeitpunkt: 2026-05-12 22:15 CEST
 - Ergebnis: V1.9.10-Konsolidierung final verifiziert; Cursor auf V1.9.11 gesetzt
