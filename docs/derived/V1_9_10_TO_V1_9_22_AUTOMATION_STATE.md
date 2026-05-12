@@ -65,7 +65,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Phase nachher: implementing
 - Umsetzung: `Mouse`, `SeeYa`, `Self-Modifying Code`, `Aujourd'Oui`, `N.E.T.O.`, `Ronin Around`, `The Short Circuit` und `Corporate Downsizing` haben WIP-Kartendefinitionen und eng typisierte LegalAction-Pfade für installierte Runner-Helfer bzw. scored-Agenda-Reveal erhalten. Generische `trigger_ability` bleibt gesperrt. Keine V1.9.12+-Karte wurde angefasst.
 - Tests: `v1-9-install-and-check.ps1 -Task engine` pass (207 Tests), `-Task catalog` pass (25 Tests), `-Task typecheck` pass.
-- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.11: hidden zone installed helper wip`); finaler Hash steht im Automationslaufbericht.
+- Git: WIP-Commit `e7b9609` (`WIP V1.9.11: hidden zone installed helper wip`) erzeugt und nach `origin/codex/v1-9-originalset-completion` gepusht.
 - Cursor: V1.9.11 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Ice Pick Willie`, `Too Many Doors`, AI-Hints/-Smokes, Manifest/Coverage, Server/Web und volle Pflichtchecks offen sind.
 
 - Zeitpunkt: 2026-05-12 22:45 CEST
@@ -100,12 +100,14 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Commit
 
+- WIP-Commit V1.9.11: `e7b9609` (`WIP V1.9.11: hidden zone installed helper wip`).
 - WIP-Commit V1.9.11: `f587530` (`WIP V1.9.11: hidden zone planning status alignment`).
 - WIP-Commit: `0929b21` (`WIP V1.9.10: status manifest catalog consolidation`).
 - Abschlusscommit: `caa74b9` (`V1.9.10: status manifest catalog consolidation`).
 
 ## Letzter Push
 
+- Push erfolgreich: `e7b9609` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `f587530` auf `origin/codex/v1-9-originalset-completion`.
 Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 
