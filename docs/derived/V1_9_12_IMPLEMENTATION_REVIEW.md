@@ -23,7 +23,7 @@ Status: implementing
 - Keine finale Katalog-/Manifest-/Coverage-/AI-Promotion; die Katalogseite hat nur einen WIP-No-Promotion-Guard.
 - WIP-Gate-Artefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und AI-Approval-Manifest sind angelegt, aber bewusst nicht als finale Freigabe markiert.
 - Keine Webclient-Version auf V1.9.12 angehoben.
-- Exakte per-card Textparitaet muss vor Final Gate gegen die fuehrenden lokalen Quellen/Matrix nachgezogen werden.
+- Exakte per-card Textparitaet muss vor Final Gate gegen die fuehrenden lokalen Quellen/Matrix nachgezogen werden. Der aktuelle harte Gate-Blocker ist in `docs/derived/V1_9_12_FINALIZATION_BLOCKER.md` dokumentiert.
 - Finale ausfuehrbare AI-Smokes und volle Pflichtchecks stehen noch aus.
 
 ## Verifikation
@@ -44,3 +44,5 @@ Status: implementing
 `V1_9_12_done: false`
 
 `V1_9_12_phase: implementing`
+
+`hard_gate_blocker: docs/derived/V1_9_12_FINALIZATION_BLOCKER.md`
