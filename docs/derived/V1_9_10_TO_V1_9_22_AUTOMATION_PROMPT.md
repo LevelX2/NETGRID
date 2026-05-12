@@ -51,6 +51,8 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 - Halte nach etwa 45 bis 50 Minuten an, selbst wenn der aktuelle Release noch nicht fertig ist.
 - Sichere dann Status, WIP-Commit und Push, sofern es versionierbare Aenderungen gibt.
 - Der naechste stündliche Lauf setzt am Cursor fort.
+- Stoppe nicht schon nach einem erfolgreichen WIP-Checkpoint, solange kein harter Blocker vorliegt und noch deutlich Restzeit vorhanden ist. Ein WIP-Commit ist ein Sicherungspunkt, kein automatisches Laufende.
+- Wenn der aktuelle Release noch nicht abgeschlossen ist und der Lauf nach eigener Einschaetzung unter etwa 35 Minuten Gesamtlaufzeit liegt, arbeite am selben Release weiter, bis entweder ein echter Blocker entsteht, das Completion-Gate erreicht ist oder die 45-50-Minuten-Grenze naht.
 - Pipeline-Modus: Wenn ein Release in diesem Lauf vollstaendig abgeschlossen, gepusht und der Cursor sauber auf den naechsten Release gesetzt wurde, darf derselbe Lauf bei ausreichend Restzeit den naechsten Release beginnen.
 - Ausreichend Restzeit bedeutet: Der Lauf ist nach eigener Einschaetzung noch klar unter etwa 35 Minuten Gesamtlaufzeit, der Lock gehoert weiterhin diesem Lauf, der Worktree ist sauber, der Push des vorherigen Release war erfolgreich und der Cursor zeigt exakt auf den naechsten Release.
 - Im Pipeline-Modus darf maximal der unmittelbar naechste Release begonnen werden. Erlaubt sind Detailplanung, Requirements/Testmatrix, erste eng begrenzte Umsetzung und ein WIP-Checkpoint. Ein zweiter Releaseabschluss im selben Lauf ist nur erlaubt, wenn alle Gates erneut vollstaendig erfuellt sind und weiterhin vor der 45-50-Minuten-Grenze gestoppt werden kann.

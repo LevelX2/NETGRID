@@ -71,6 +71,8 @@ Wichtig: Die Automation darf niemals einen Zustand überspringen.
 
 Im Expeditionsmodus darf ein Lauf zusätzlich aus `planned`, `implementing` oder `verifying` heraus einen WIP-Commit und WIP-Push erzeugen. Das ändert den Release nicht auf `done` und setzt den Cursor nicht weiter.
 
+Ein WIP-Checkpoint ist kein Laufende. Wenn der aktuelle Release nach einem erfolgreichen WIP-Commit noch offen ist, kein harter Blocker vorliegt und der Lauf noch deutlich unter etwa 35 Minuten Gesamtlaufzeit liegt, soll der Controller am selben Release weiterarbeiten. Gestoppt wird erst bei Blocker, Completion-Gate, sauberem Zeitbudget-Ende oder nahender 45-50-Minuten-Grenze.
+
 ## Done-Gate je Release
 
 Ein Release gilt erst als fertig, wenn alle folgenden Bedingungen erfüllt sind:

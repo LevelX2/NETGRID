@@ -28,6 +28,7 @@ Completion-Modus: Gate-pflichtig
 - Wenn der Release fertig ist, Final Review schreiben, Completion-Gate pruefen, Abschlusscommit erzeugen, pushen und Cursor auf den naechsten Release setzen.
 - Wenn der Release nicht fertig ist, bleibt der Cursor auf demselben Release.
 - Wenn ein nicht aufloesbarer Blocker vorliegt, Blocker mit Removal Condition dokumentieren und den Cursor nicht stillschweigend ueberspringen.
+- WIP-Checkpoints sind Sicherungspunkte, kein automatisches Laufende. Solange kein harter Blocker vorliegt und noch deutlich Restzeit vorhanden ist, arbeitet der Lauf am aktuellen Release weiter.
 - Pipeline-Modus: Nach einem erfolgreichen Releaseabschluss und Cursor-Checkpoint darf derselbe Lauf bei sauberem Worktree, erfolgreichem Push, eigenem Lock und ausreichend Restzeit den unmittelbar naechsten Release beginnen. Kein rekursiver Neustart, kein zweiter paralleler Job und kein Ueberspringen von Releases.
 
 ## Lock
