@@ -71,7 +71,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Phase nachher: planned fuer V1.9.12
 - Umsetzung: Die 16 V1.9.11-Zielkarten sind `human_playable`, `deck_legal` und `ai_supported`. Versionierte AI-Hints, AI-Smokes, Release-Smoke, Mechanics-Coverage und Kartenmanifest wurden ergänzt. Der Katalog-Fallback fuer Automations-Worktrees ohne lokales Overlay wurde auf display-only und neutrale Faction korrigiert, die Webclient-Version steht auf `V1.9.11`, und die V1.2.3-Phasenartefakt-Spezifikation wurde an den aktuellen reconciled Runtime-Stand angepasst.
 - Tests: JSON-Validation der neuen Artefakte pass; `v1-9-install-and-check.ps1 -Task catalog` pass (26 Tests), `engine` pass (209 Tests), `ai` pass (84 Tests), `web` pass (76 Tests), `server` pass (72 Tests), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.11: hidden zone search reveal reorder`); finaler Hash steht im Automationslaufbericht.
+- Git: Abschlusscommit `5c7ec1d` (`V1.9.11: hidden zone search reveal reorder`) erzeugt und nach `origin/codex/v1-9-originalset-completion` gepusht.
 - Cursor: V1.9.11 Completion-Gate ist erfüllt; V1.9.12 ist der aktuelle Release.
 
 - Zeitpunkt: 2026-05-12 23:15 CEST
@@ -126,6 +126,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Commit
 
+- Abschlusscommit V1.9.11: `5c7ec1d` (`V1.9.11: hidden zone search reveal reorder`).
 - WIP-Commit V1.9.11: `e7b9609` (`WIP V1.9.11: hidden zone installed helper wip`).
 - WIP-Commit V1.9.11: `f587530` (`WIP V1.9.11: hidden zone planning status alignment`).
 - WIP-Commit: `0929b21` (`WIP V1.9.10: status manifest catalog consolidation`).
@@ -133,6 +134,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Push
 
+- Push erfolgreich: `5c7ec1d` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `e7b9609` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `f587530` auf `origin/codex/v1-9-originalset-completion`.
 Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
