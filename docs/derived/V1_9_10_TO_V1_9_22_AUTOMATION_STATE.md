@@ -4,11 +4,13 @@ Status: active
 Stand: 2026-05-12
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
 Automation-ID: `netgrid-v1-9-originalset-completion`
+Watchdog-Automation-ID: `netgrid-v1-9-originalset-watchdog`
 Ausfuehrung: stündliche aktive Codex-Cron-Automation im lokalen NETGRID-Workspace
 Branch: `codex/v1-9-originalset-completion`
 Primaerer Agent: release-implementation-agent
 Kontrollartefakt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md`
 Controller-Prompt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md`
+Watchdog-Prompt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_WATCHDOG_PROMPT.md`
 
 ## Cursor
 
@@ -68,3 +70,8 @@ Setup-Branch `codex/v1-9-originalset-completion` wurde nach GitHub gepusht. Noch
 ## Blocker
 
 Keine bekannten Automationsblocker zum Start.
+
+## Watchdog
+
+Status: aktiv vorbereitet
+Aufgabe: stündlich prüfen, ob die Completion-Automation weiterlaufen kann; stale Locks, pausierte/fehlende Automation und abgebrochene WIP-Stände nach engen Regeln beheben.
