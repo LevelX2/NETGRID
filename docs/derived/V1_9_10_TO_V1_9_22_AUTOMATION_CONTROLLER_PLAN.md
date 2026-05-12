@@ -75,6 +75,8 @@ Ein WIP-Checkpoint ist kein Laufende. Wenn der aktuelle Release nach einem erfol
 
 Early-Stop-Gate: Ein Stop unter 40 Minuten ist nur mit einer festen Stop-Gruppe erlaubt: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen oder "keine sinnvolle naechste Aktion" mit konkreter Begruendung und Dateiverweisen. Der Laufbericht muss in diesem Fall `Early-Stop-Reason:` enthalten. Completion-Gate erreicht, Teilfortschritt, gruene Teiltests, Kontextkomprimierung oder ein erfolgreicher WIP-Checkpoint zaehlen nicht.
 
+Text-Finalisierungs-Gate: Fehlende versionierte lokale Volltextquellen fuer O:NR-v1-Zielkarten sind kein harter P0-Blocker, wenn die Karten bereits lokal bestaetigte Regelkern-Aussagen in den fuehrenden V1.9.10-bis-V1.9.xx-Planungsartefakten haben. Der Controller muss daraus finale, knappe display-only Anzeige-/Release-Texte ohne WIP-Praefix ableiten und die Ableitung im Review dokumentieren. Kartentext bleibt Anzeigeinformation und darf nicht als Regel-, Parser-, LegalAction-, KI- oder Replay-Autoritaet genutzt werden. Nur vollstaendig fehlende Textgrundlage, also weder Volltextquelle noch bestaetigte Regelkern-Aussage, bleibt ein fachlicher Blocker.
+
 ## Done-Gate je Release
 
 Ein Release gilt erst als fertig, wenn alle folgenden Bedingungen erfüllt sind:
@@ -210,6 +212,7 @@ Der spätere Automation-Prompt sollte nicht allgemein "arbeite weiter" sagen. Er
 | Hidden-Info-Regression bleibt unentdeckt | Projektkernbruch | Visibility-/Replay-/AI-Safety-Pflichtgates |
 | AI hängt in neuen Choice-Fenstern | stündlicher Job kann festlaufen | Timeout, AI-Fallback und blockierender Test |
 | Große Releases überfordern einen Lauf | halbfertiger Zustand | State bleibt `implementing`; nächster Lauf setzt denselben Release fort |
+| Keine versionierte Volltextquelle im Automations-Worktree | falscher P0-Stopp trotz vorhandener Regelkernanalyse | Display-Text-Finalization-Policy: lokal bestaetigte Regelkern-Aussagen als finale display-only Texte nutzen, WIP-Praefix entfernen, Review dokumentieren |
 
 ## Empfehlung
 

@@ -25,6 +25,7 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
    - `docs/derived/V1_9_10_TO_V1_9_XX_IMPLEMENTATION_HANDOFF.md`
    - `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md`
    - `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md`
+   - `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZATION_POLICY.md`
 
 ## Laufsteuerung
 
@@ -50,7 +51,7 @@ Wichtig: WIP-Commits und WIP-Pushes sind erlaubt, damit Fortschritt auch bei unv
 - Arbeite nicht als Dauerprozess.
 - Ziel-Laufzeit bei offenem Release ist 45 bis 50 Minuten.
 - Stoppe nicht freiwillig vor 40 Minuten Gesamtlaufzeit, solange kein harter Blocker, kein aktiver fremder Lock, keine unklaren/fremden Worktree-Aenderungen und keine ausdruecklich dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
-- Unter 40 Minuten Gesamtlaufzeit gibt es nur diese erlaubten Stop-Gruende: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen, oder keine sinnvolle naechste Aktion mit konkreter Begruendung und Dateiverweisen. "Completion-Gate erreicht", "WIP gesichert", "Tests gruen", "Kontext komprimiert", "kleiner Fortschritt erledigt" oder "naechster Schritt waere groesser" sind keine Stop-Gruende.
+- Unter 40 Minuten Gesamtlaufzeit gibt es nur diese erlaubten Stop-Gruende: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen, oder keine sinnvolle naechste Aktion mit konkreter Begruendung und Dateiverweisen. "Completion-Gate erreicht", "WIP gesichert", "Tests gruen", "Kontext komprimiert", "kleiner Fortschritt erledigt", "fehlende Volltextquelle bei vorhandenen Regelkern-Aussagen" oder "naechster Schritt waere groesser" sind keine Stop-Gruende.
 - Wenn ein Lauf unter 40 Minuten stoppt, muss der Abschlussbericht explizit `Early-Stop-Reason:` mit einer der erlaubten Stop-Gruppen enthalten. Fehlt ein erlaubter Grund, war der Lauf nicht regelkonform.
 - Wenn der Kontext komprimiert wird, gilt das nicht als Stoppgrund. Setze am Cursor fort, pruefe den aktuellen Stand und arbeite weiter, bis ein erlaubter Blocker, die Gesamtcompletion V1.9.10 bis V1.9.22 oder die Zeitgrenze erreicht ist.
 - Halte nach etwa 45 bis 50 Minuten an, selbst wenn der aktuelle Release noch nicht fertig ist.
@@ -103,6 +104,12 @@ Tests duerfen im Expeditionsmodus fehlschlagen und trotzdem als WIP gesichert we
 ## Kartenaktivierung
 
 Aktiviere Karten nur, wenn die jeweilige Mechanikfamilie im aktuellen Release tatsaechlich implementiert und side-sicher testbar ist. Setze `human_playable`, `deck_legal` und `ai_supported` nur mit passender Engine-, Daten-, KI- und Testabdeckung. Keine pauschale Freigabe des O:NR-v1-Kartenpools.
+
+## Anzeige- und Release-Texte
+
+Fehlende versionierte lokale Volltextquellen im Automations-Worktree sind kein harter P0-Stopgrund, wenn fuer die Zielkarten lokal bestaetigte Regelkern-Aussagen in den fuehrenden V1.9.10-bis-V1.9.xx-Planungsartefakten vorliegen. In diesem Fall muss die Automation die `V1.9.xx WIP:`-Texte selbst zu finalen, knappen Anzeige-/Release-Texten ohne WIP-Praefix finalisieren und im Review dokumentieren, dass diese Texte display-only sind.
+
+Kartentext bleibt Anzeige-/Kataloginformation und darf nicht als Parser-, Engine-, LegalAction-, KI-, Replay- oder StateHash-Autoritaet verwendet werden. Nur wenn weder versionierte Volltextquelle noch lokal bestaetigte Regelkern-Aussage vorliegt, ist fehlender Kartentext ein fachlicher Blocker.
 
 ## Release-Reihenfolge
 

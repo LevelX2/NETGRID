@@ -10,6 +10,7 @@ Branch: `codex/v1-9-originalset-completion`
 Primaerer Agent: release-implementation-agent
 Kontrollartefakt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md`
 Controller-Prompt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md`
+Text-Finalisierung: `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZATION_POLICY.md`
 Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
@@ -35,6 +36,7 @@ Completion-Modus: Gate-pflichtig
 - Wenn ein nicht aufloesbarer Blocker vorliegt, Blocker mit Removal Condition dokumentieren und den Cursor nicht stillschweigend ueberspringen.
 - WIP-Checkpoints sind Sicherungspunkte, kein automatisches Laufende. Solange kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, arbeitet der Lauf am aktuellen Release weiter.
 - Pipeline-Modus: Nach einem erfolgreichen Releaseabschluss und Cursor-Checkpoint muss derselbe Lauf bei sauberem Worktree, erfolgreichem Push, eigenem Lock und ausreichend Restzeit den unmittelbar naechsten Release beginnen. Releaseabschluss ist kein Stoppsignal. Kein rekursiver Neustart, kein zweiter paralleler Job und kein Ueberspringen von Releases.
+- Fehlende versionierte Volltextquellen im Automations-Worktree sind kein harter P0-Stopgrund, wenn lokal bestaetigte Regelkern-Aussagen fuer die Zielkarten in den fuehrenden V1.9.10-bis-V1.9.xx-Planungsartefakten vorliegen. Die Automation muss daraus finale display-only Anzeige-/Release-Texte ohne WIP-Praefix ableiten und weiterarbeiten.
 
 ## Lock
 
@@ -64,6 +66,14 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 00:42 CEST
+- Ergebnis: Text-Finalisierungsregel auf Nutzerentscheidung hin aktiviert; der V1.9.12-Finalisierungblocker ist kein Stopgrund mehr, solange bestaetigte Regelkern-Aussagen vorliegen.
+- Release: V1.9.12
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZATION_POLICY.md` definiert, dass die Automation fehlende versionierte Volltextquellen durch finale display-only Texte aus lokal bestaetigten Regelkern-Aussagen ersetzen darf. Der naechste Lauf soll die `V1.9.12 WIP:`-Texte finalisieren, Catalog/Web-Promotion und finale Gate-Artefakte nachziehen, V1.9.12 abschliessen und bei Restzeit direkt V1.9.13 beginnen.
+- Cursor: bleibt auf V1.9.12.
+
 - Zeitpunkt: 2026-05-12 23:45 CEST
 - Ergebnis: V1.9.11 Hidden-Zone Search/Reveal/Reorder/Shuffle final abgeschlossen; Cursor auf V1.9.12 `planned` gesetzt
 - Release: V1.9.11
@@ -89,7 +99,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Phase nachher: implementing
 - Umsetzung: Detailplan, Requirements, Counter/Virus/Recurring-Spec, Testmatrix und Requirements Review erstellt. Engine-WIP ergänzt Runtime-Definitionen fuer elf V1.9.12-Zielkarten, initialisiert Virus-/Recurring-Counter auf Programmen und Resources, nutzt bestehende Purge-Revalidierung, ergänzt I-Spy-/Event-Hidden-Zone-Pfade sowie Detroit-Police-Contract- und Employee-Empowerment-Agenda-Pfade. WIP-Gate-Artefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smoke-Plan und AI-Approval-Manifest sind angelegt. Der Katalog fuehrt die elf Karten als explizite V1.9.12-WIP-Zielmenge und testet Artefaktparitaet sowie No-Promotion gegen `human_playable`, `deck_legal` und `ai_supported`.
 - Tests: JSON-Validation pass; `v1-9-install-and-check.ps1 -Task engine` pass (213 Tests), `catalog` pass (27 Tests), `ai` pass (84 Tests), `server` pass (72 Tests), `web` pass (76 Tests), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-- Blocker: `docs/derived/V1_9_12_FINALIZATION_BLOCKER.md` dokumentiert den harten Final-Gate-Blocker: die elf Zielkarten tragen weiterhin `V1.9.12 WIP:`-Regeltexte und im Worktree liegt keine versionierte lokale Volltextquelle fuer finale Anzeige-/Release-Texte vor.
+- Blocker: Der urspruenglich dokumentierte Text-/Finalisierungsblocker in `docs/derived/V1_9_12_FINALIZATION_BLOCKER.md` ist durch Nutzerentscheidung und `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZATION_POLICY.md` als Stopgrund aufgehoben. Die elf Zielkarten tragen noch `V1.9.12 WIP:`-Regeltexte, muessen aber im naechsten Lauf aus lokal bestaetigten Regelkern-Aussagen finalisiert werden.
 - Cursor: V1.9.12 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil finale Text-/Catalog-/Web-Promotion, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-12 23:15 CEST
