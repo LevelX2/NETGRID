@@ -3481,6 +3481,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_061_shield",
+    title: "Shield",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Prevent up to 2 net damage each turn.",
+    mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "net_damage", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_289_edgerunner-inc-temps",
     title: "Edgerunner, Inc., Temps",
     side: "corp",

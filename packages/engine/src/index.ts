@@ -264,6 +264,7 @@ const V1922_ORGAN_DONOR_ID = "onr_v1_103_organ-donor";
 const V1922_SECURITY_CODE_WORM_CHIP_ID = "onr_v1_109_security-code-worm-chip";
 const V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID = "onr_v1_113_synchronized-attack-on-hq";
 const V1922_VALU_PAK_SOFTWARE_BUNDLE_ID = "onr_v1_117_valu-pak-software-bundle";
+const V1922_SHIELD_ID = "onr_v1_061_shield";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
@@ -317,7 +318,8 @@ const RUNTIME_DAMAGE_PREVENTION_PROFILES: Record<string, RuntimeDamagePrevention
   "onr_v1_170_nomad-allies": { maxPerTurn: 1, damageTypes: ["net", "meat"], priority: 127 },
   "onr_v1_185_trauma-team": { maxPerTurn: 2, damageTypes: ["meat"], priority: 128 },
   "onr_v1_186_umbrella-policy": { maxPerTurn: 1, damageTypes: ["net", "meat", "core"], priority: 129 },
-  "onr_v1_187_wilson-weeflerunner-apprentice": { maxPerTurn: 1, damageTypes: ["meat"], priority: 130 }
+  "onr_v1_187_wilson-weeflerunner-apprentice": { maxPerTurn: 1, damageTypes: ["meat"], priority: 130 },
+  [V1922_SHIELD_ID]: { maxPerTurn: 2, damageTypes: ["net"], priority: 131 }
 };
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {

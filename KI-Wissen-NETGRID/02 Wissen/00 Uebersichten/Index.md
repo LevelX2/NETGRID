@@ -48,7 +48,9 @@
 
 - V1.9.22 verbleibende Corp-Longtailkarten: `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer `Data Fort Reclamation`, `Security Purge`, `Haunting Inquisition`, `Tutor`, `Viral 15` und `Virizz` zusammen.
 
-- V1.9.22 Runner-Programm-Preflight: `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert `Newsgroup Filter` und `Shield` als kleinste Programm-Kandidaten, sobald Aktivierungstiming bzw. Prevention-Fenster bestaetigt sind.
+- V1.9.22 Runner-Programm-Preflight: `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert nach dem Shield-Schnitt `Newsgroup Filter` als kleinsten verbleibenden Programm-Kandidaten, sobald Aktivierungstiming und PublicPayload bestaetigt sind.
+
+- V1.9.22 Runner-Programm-Runtime-WIP: `Shield` hat jetzt eine enge Runtime-Definition ohne Catalog-, AI- oder Release-Promotion. Die Karte nutzt Installkosten 0, MU 1 und das bestehende Event-Modification-Prevention-Fenster fuer bis zu 2 Net Damage pro Runner-Zug; Engine, Catalog, AI, Server, Web, Typecheck, Test, Lint und Build sind fuer diesen Teilschnitt gruen. Die verbleibenden Runner-Programm- und Corp-Longtail-Gates bleiben offen.
 
 ## Kernwissen
 

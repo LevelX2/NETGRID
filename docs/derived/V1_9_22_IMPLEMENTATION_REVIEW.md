@@ -22,12 +22,13 @@ Status: runtime WIP, no release/catalog/AI promotion
 - `Off-Site Backups` hat eine Runtime-Definition und einen privaten Archives-to-HQ-Choice. Der Smoke deckt Wrong-Side-/Stale-Revalidation, verdeckte Archives-Auswahl, side-sichere PublicPayloads und Replay/StateHash ab; die gerade gespielte Operation ist nicht selbst auswählbar.
 - `Planning Consultants` hat eine Runtime-Definition und einen privaten R&D-Top-5-Reorder-Choice. Der Smoke deckt Wrong-Side-/Stale-Revalidation, Hidden-Zone-Choice, side-sichere PublicPayloads und Replay/StateHash ab.
 - `docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md` dokumentiert, dass die 14 Runner-Programm-Zielkarten ohne lokal bestätigte Kosten-/MU-/Breakerwerte nicht als `install_card`, `pump_breaker` oder `break_subroutine` promotet werden duerfen.
-- Ein Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass sie bis zur lokalen Wertbestaetigung nicht `playable_mvp` sind.
-- Ein weiterer Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions geoeffnet werden, solange lokale Kosten-/MU-/Breakerwerte fehlen.
+- `Shield` hat eine Runtime-Definition und einen engen installierten Programm-Resolver: Installkosten 0, MU 1 und bis zu 2 Net-Damage-Prevention pro Runner-Zug über das bestehende side-sichere Event-Modification-Fenster. Der Smoke deckt Install-LegalAction, Wrong-Side-Revalidation, Hidden-Info-sichere Prevention-Choice, PublicPayload und Replay/StateHash ab.
+- Ein Engine-Guard bestaetigt fuer die verbleibenden 13/14 Runner-Programm-Zielkarten, dass sie bis zur lokalen Wertbestaetigung nicht `playable_mvp` sind.
+- Ein weiterer Engine-Guard bestaetigt fuer die verbleibenden 13/14 Runner-Programm-Zielkarten, dass keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions geoeffnet werden, solange lokale Kosten-/MU-/Breakerwerte fehlen.
 - `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` bleibt als historischer Readiness-Stand erhalten; alle zehn Runner-Event-Zielkarten haben inzwischen enge Runtime-Resolver-Smokes, bleiben aber ohne Catalog-/AI-/Release-Promotion.
 - Ein Engine-Guard bestaetigt fuer die verbleibenden 6/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind. `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Zombie`, `Edgerunner, Inc., Temps`, `Off-Site Backups` und `Planning Consultants` sind die acht bewusst eng umgesetzten Ausnahmen dieses WIP-Schnitts.
 - `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` bleibt als historischer Readiness-Stand erhalten; die spaeter erstellte lokale Kartenfaktenbasis hebt den fehlenden Vollvertragsbefund fuer `Corporate War` und `Political Overthrow` auf, nicht fuer die restlichen Corp-Longtailkarten.
-- Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Runner-Event-Resolverkarten, acht Corp-Longtail-Resolverkarten, 20 geplante No-Promotion-Karten und keine Catalog- oder AI-Promotion ausweisen.
+- Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Runner-Event-Resolverkarten, eine Runner-Programm-Resolverkarte, acht Corp-Longtail-Resolverkarten, 19 geplante No-Promotion-Karten und keine Catalog- oder AI-Promotion ausweisen.
 - Ein AI-Paket-Guard bestaetigt, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate ausserhalb von `ai_supported`, `human_playable` und `deck_legal` bleiben.
 - Ein Web-Catalog-API-Guard bestaetigt, dass V1.9.22-WIP-Karten nicht im `ai_supported`-Filter erscheinen und Detailantworten fuer sichtbare WIP-Karten keine `ai_supported`-, `human_playable`- oder `deck_legal`-Promotion anzeigen.
 - Ein Webclient-Version-Guard bestaetigt, dass die sichtbare Client-Version bis zum V1.9.22-Completion-Gate auf `V1.9.21` bleibt.
@@ -46,13 +47,17 @@ Status: runtime WIP, no release/catalog/AI promotion
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: `Security Purge`, sobald der in `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentierte Installationsvertrag fuer revealed ICE lokal bestaetigt ist. `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer die sechs verbleibenden Corp-Longtailkarten zusammen. `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert `Newsgroup Filter` und `Shield` als kleinste Runner-Programm-Kandidaten, sobald Aktivierungstiming bzw. Prevention-Fenster bestaetigt sind.
+Naechster kleiner Schnitt: `Security Purge`, sobald der in `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentierte Installationsvertrag fuer revealed ICE lokal bestaetigt ist. `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer die sechs verbleibenden Corp-Longtailkarten zusammen. `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert `Newsgroup Filter` als kleinsten verbleibenden Runner-Programm-Kandidaten, sobald Aktivierungstiming und PublicPayload bestaetigt sind.
 
 ## Verifikation
 
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 295 Tests inkl. `Edgerunner, Inc., Temps` Install-only-Aktionsbundle, Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Edgerunner-Manifest-/Coverage-/Szenario-Alignment.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Edgerunner-Resolver.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 296 Tests inkl. `Shield` Install-LegalAction, Net-Damage-Prevention, Visibility und Replay/StateHash.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Shield-Manifest-/Coverage-/Szenario-Alignment.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Shield-Resolver.
+- Breiter Verify nach `Shield`: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Breiter Verify nach `Edgerunner, Inc., Temps`: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 294 Tests inkl. `Zombie` Core-Damage-ICE-Rez-/Encounter-Pfad.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Zombie-Manifest-/Coverage-/Szenario-Alignment.

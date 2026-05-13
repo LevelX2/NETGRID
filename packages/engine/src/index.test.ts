@@ -7268,7 +7268,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("keeps V1.9.22 runner programs out of playable runtime until local values are confirmed", () => {
+  it("keeps unresolved V1.9.22 runner programs out of playable runtime until local values are confirmed", () => {
     const runnerProgramIds = [
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
@@ -7280,7 +7280,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_051_rabbit",
       "onr_v1_055_reflector",
       "onr_v1_057_scatter-shot",
-      "onr_v1_061_shield",
       "onr_v1_067_speed-trap",
       "onr_v1_068_startup-immolator",
       "onr_v1_075_zetatech-software-installer"
@@ -7291,7 +7290,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
   });
 
-  it("does not expose V1.9.22 runner program install, pump or break LegalActions before local values are confirmed", () => {
+  it("does not expose unresolved V1.9.22 runner program install, pump or break LegalActions before local values are confirmed", () => {
     const runnerProgramIds = [
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
@@ -7303,7 +7302,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_051_rabbit",
       "onr_v1_055_reflector",
       "onr_v1_057_scatter-shot",
-      "onr_v1_061_shield",
       "onr_v1_067_speed-trap",
       "onr_v1_068_startup-immolator",
       "onr_v1_075_zetatech-software-installer"
@@ -7347,6 +7345,68 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(exposedActionTypes, definitionId).not.toContain("pump_breaker");
       expect(exposedActionTypes, definitionId).not.toContain("break_subroutine");
     }
+  });
+
+  it("installs Shield and uses side-safe per-turn net damage prevention", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-shield-prevention",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_shield_prevention",
+          name: "O:NR V1.9.22 Shield Prevention",
+          cards: [{ id: "onr_v1_061_shield", quantity: 1 }, ...ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_061_shield");
+
+    const installLegal = mustAction(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_061_shield");
+    const wrongSideInstall = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: installLegal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-shield-install-wrong-side"
+    });
+    expect(wrongSideInstall.ok).toBe(false);
+    if (!wrongSideInstall.ok) expect(wrongSideInstall.error.code).toBe("ERR_WRONG_SIDE");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_061_shield");
+    expect(state.runner.rig.programs.map((id) => state.cardInstances[id]?.definitionId)).toContain("onr_v1_061_shield");
+    expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === "onr_v1_061_shield")).toBe(true);
+
+    putCorpIceOnServer(state, "rd", "onr_v1_258_neural-blade");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_258_neural-blade");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const preventionOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    expect(preventionOptionId).toBeDefined();
+    state = applyChoice(state, "runner", String(preventionOptionId));
+    expect(state.runner.heap.length).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      eventModificationDecision: "apply",
+      preventedAmount: 2,
+      damageAmount: 0
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"|"grip"/);
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("uses Corporate Retreat until Corp installs or rezzes another card", () => {

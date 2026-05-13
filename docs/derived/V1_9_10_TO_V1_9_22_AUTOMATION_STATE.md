@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-14 00:27 CEST
+- Ergebnis: V1.9.22 Runner-Programm-Resolver fuer `Shield` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt `Shield` als V1.9.22-Runtime-Programm mit Installkosten 0, MU 1 und finalem display-only Text. `packages/engine/src/index.ts` nutzt das bestehende Event-Modification-Prevention-Fenster fuer bis zu 2 Net Damage pro Runner-Zug. `packages/engine/src/index.test.ts` deckt Install-LegalAction, Wrong-Side-Revalidation, Hidden-Info-sichere Prevention-Choice, PublicPayload und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (296); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: shield prevention program resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 23:59 CEST
 - Ergebnis: V1.9.22 Corp-Operation-Resolver fuer `Edgerunner, Inc., Temps` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
@@ -80,7 +90,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 - Folge-Preflight: `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentiert den naechsten Agenda-Kandidaten `Security Purge` und blockiert Code ohne erfundene Optionalitaets-/Serverziel-Semantik, bis der Installationsvertrag lokal bestaetigt ist.
 - Rest-Preflight: `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die sechs verbleibenden Corp-Longtailkarten und ihre offenen Implementierungsvertraege zusammen.
-- Runner-Programm-Preflight: `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert `Newsgroup Filter` und `Shield` als kleinste naechste Programm-Kandidaten, solange Aktivierungstiming bzw. Prevention-Fenster bestaetigt werden.
+- Runner-Programm-Preflight: `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert nach dem Shield-Schnitt `Newsgroup Filter` als kleinsten verbleibenden Programm-Kandidaten, solange Aktivierungstiming und PublicPayload bestaetigt werden.
 
 - Zeitpunkt: 2026-05-13 23:55 CEST
 - Ergebnis: V1.9.22 Corp-ICE-Resolver fuer `Zombie` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

@@ -7,18 +7,27 @@ Status: planned
 | --- | --- | --- |
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
-| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event- und 8 Corp-Longtail-Zielkarten; neu: `Edgerunner, Inc., Temps` als Install-only-Aktionsbundle |
-| Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Readiness Review und Engine-Guards halten 14/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
+| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event-, 1 Runner-Programm- und 8 Corp-Longtail-Zielkarten; neu: `Shield` als Net-Damage-Prevention-Programm |
+| Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | `Shield` ist als enger Install-/Net-Damage-Prevention-WIP umgesetzt; Readiness Review und Engine-Guards halten die verbleibenden 13/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
 | Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Zombie`, `Edgerunner, Inc., Temps`, `Off-Site Backups` und `Planning Consultants` haben enge Runtime-Resolver; Engine-Guard haelt die verbleibenden 6/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
-| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions sowie alle 10 Runner-Event-Resolver und acht Corp-Longtail-Resolver inkl. Wrong-Side-/Stale-Revalidation gruen |
-| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-PublicPayloads gruen |
-| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-Replay/StateHash-Pfade gruen |
+| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions, `Shield`, alle 10 Runner-Event-Resolver und acht Corp-Longtail-Resolver inkl. Wrong-Side-/Stale-Revalidation gruen |
+| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews, `Shield`-Prevention-Choice sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-PublicPayloads gruen |
+| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash, `Shield`-Prevention-Replay/StateHash sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-Replay/StateHash-Pfade gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; finale V1.9.22-AI-Promotion-Artefakte muessen bis zum Completion-Gate fehlen |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
 | Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokale Kartenfaktenbasis fuer 47/47 Karten angelegt; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach `Edgerunner, Inc., Temps`: engine 295, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach `Shield`: engine 296, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
+
+## Shield 2026-05-14 00:27 CEST
+
+- Zusatzschnitt: `Shield` ist als Runner-Programm-Runtime-WIP mit Installkosten 0, MU 1 und bis zu 2 Net-Damage-Prevention pro Runner-Zug umgesetzt.
+- Zusatzabdeckung: Install-LegalAction, Wrong-Side-Revalidation, side-sichere Prevention-Choice, PublicPayload und Replay/StateHash.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 296 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- Breiter Verify danach: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 
 ## Mindestchecks im ersten WIP
 

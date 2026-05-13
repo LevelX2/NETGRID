@@ -220,11 +220,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "blocked_missing_program_values_and_prevention_contract",
-      "confirmedLocalFacts": ["program_installation_mu_surface", "memory_mu_modifier_surface", "net_damage_prevention_turn_reset_partial_note"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["install_cost", "memory_cost", "preventable_damage_type", "prevention_amount", "prevention_window", "per_turn_limit", "turn_reset_timing", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm install/MU values and the exact per-turn prevention/reset contract."
+      "contractStatus": "runtime_wip_no_promotion",
+      "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "prevent_up_to_2_net_damage_each_turn", "event_modification_prevention_window"],
+      "safeCurrentCoverage": ["install_program_legal_action", "wrong_side_revalidation", "net_damage_prevention_window", "public_payload_visibility", "replay_statehash", "no_catalog_or_ai_promotion"],
+      "missingInformation": ["ai_fallback", "final_release_promotion"],
+      "removalCondition": "Keep Shield in WIP until V1.9.22 final AI, catalog and release-promotion gates are satisfied."
     },
     {
       "cardId": "onr_v1_067_speed-trap",
