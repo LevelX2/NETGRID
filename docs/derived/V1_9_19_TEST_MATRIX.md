@@ -15,7 +15,7 @@ Stand: 2026-05-13
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Folgearbeit |
 | AI | AI-Hints, AI-Smokes, legaler Fallback | Folgearbeit |
 | Server/Web | Keine Payload-Leaks; Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation 273, Engine 252, Catalog 33, AI 85, Server 72, Web 76, Typecheck, Test, Lint und Build grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation 275, Engine 252, Catalog 33, AI 85, Server 72, Web 76, Typecheck, Test, Lint und Build grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
 
 ## Mindestchecks im ersten WIP
 

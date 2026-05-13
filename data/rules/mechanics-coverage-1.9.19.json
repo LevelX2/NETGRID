@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.9.19",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.19",
+  "generatedFor": "V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance WIP gate",
+  "generatedAt": "2026-05-13",
+  "status": "wip_runtime_definition_pending_promotion",
+  "extends": "data/rules/mechanics-coverage-1.9.18.json",
+  "gateAssertions": {
+    "agendaOveradvanceScopeFrozenToTwentyCards": true,
+    "allCardsRuntimeDefinitionReady": true,
+    "scoredAgendaResolverCovered": false,
+    "agendaDifficultyOveradvanceCovered": false,
+    "counterAndForfeitCostsCovered": false,
+    "hiddenInfoSafeForCoveredSmokes": false,
+    "stateHashReplayStableForCoveredSmokes": false,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true,
+    "noV1920PlusScope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.agenda.scored_static_active",
+      "label": "Scored Agenda Static/Active",
+      "currentStatus": "planned_wip_runtime_definition",
+      "targetGate": "v1.9.19",
+      "currentScopeNote": "Zielkarten sind runtime-definiert; konkrete scored-area LegalAction-Pfade folgen.",
+      "coverage": ["runtime_definition"]
+    },
+    {
+      "mechanicId": "mechanic.agenda.difficulty_overadvance",
+      "label": "Agenda Difficulty und Overadvance",
+      "currentStatus": "planned_wip_runtime_definition",
+      "targetGate": "v1.9.19",
+      "currentScopeNote": "Score-/Steal-/Overadvance-Werte werden im nächsten Schnitt engine-seitig revalidiert.",
+      "coverage": ["runtime_definition"]
+    },
+    {
+      "mechanicId": "mechanic.agenda.costs_forfeit_counter",
+      "label": "Agenda-Kosten, Forfeit und Counter",
+      "currentStatus": "planned_wip_runtime_definition",
+      "targetGate": "v1.9.19",
+      "currentScopeNote": "Counter- und Forfeit-Oberflächen sind in den Zielkarten markiert, aber noch nicht final promotet.",
+      "coverage": ["runtime_definition"]
+    }
+  ],
+  "deferred": [
+    {
+      "item": "release_promotion",
+      "reason": "V1.9.19 bleibt bis konkreter Agenda-/Overadvance-Engineabdeckung, AI-Artefakten, Final Review und Webclient-Version im Implementing-Cursor."
+    }
+  ]
+}

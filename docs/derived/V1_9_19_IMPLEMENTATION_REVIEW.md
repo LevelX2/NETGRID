@@ -11,6 +11,7 @@ Stand: 2026-05-13
 - `packages/catalog/src/index.test.ts` schützt die WIP-Zielmenge und prüft No-Promotion gegen den Runtime-Releasepool.
 - `packages/engine/src/index.test.ts` prüft 20/20 Runtime-Definitionen, finale display-only Texte und den No-Scope-Guard gegen V1.9.20.
 - `data/scenarios/v1919-agenda-overadvance-wip-smoke.json` dokumentiert den WIP-Smoke maschinenlesbar ohne Release- oder AI-Promotion.
+- `data/manifests/card-implementation-manifest-1.9.19.json` und `data/rules/mechanics-coverage-1.9.19.json` bereiten Manifest und Mechanics-Coverage als WIP-Artefakte vor, ohne Catalog- oder AI-Promotion.
 
 ## Gate
 
@@ -33,3 +34,4 @@ Konkrete Agenda-/Overadvance-LegalAction-/applyAction-Pfade für Score-, Steal-,
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Nach Manifest-/Coverage-WIP-Artefakten erneut geprüft: JSON-Validation pass, 275 Dateien.
