@@ -1885,6 +1885,7 @@ describe("catalog import and status logic", () => {
     const corpOperationResolverCards = manifestCards.filter((card) =>
       ["v1922_corp_operation_private_archives_to_hq", "v1922_corp_operation_private_rd_top5_reorder"].includes(card.resolverFamily)
     );
+    const corpIceResolverCards = manifestCards.filter((card) => ["v1922_corp_ice_core_damage_etr"].includes(card.resolverFamily));
     const plannedCards = manifestCards.filter((card) => card.releaseStatus === "planned_no_promotion");
 
     expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
@@ -1952,8 +1953,14 @@ describe("catalog import and status logic", () => {
       expect(card.aiSupported, card.cardCode).toBe(false);
       expect(card.coveredSmokes.length, card.cardCode).toBeGreaterThan(0);
     }
+    expect(corpIceResolverCards.map((card) => card.cardCode).sort()).toEqual(["onr_v1_280_zombie"]);
+    for (const card of corpIceResolverCards) {
+      expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
+      expect(card.aiSupported, card.cardCode).toBe(false);
+      expect(card.coveredSmokes).toEqual(expect.arrayContaining(["rez_ice_legal_action", "core_damage_subroutines", "end_the_run", "replay_statehash"]));
+    }
 
-    expect(plannedCards).toHaveLength(22);
+    expect(plannedCards).toHaveLength(21);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
       expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);

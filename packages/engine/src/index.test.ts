@@ -7867,6 +7867,60 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("rezzes Zombie as core-damage ICE with replay-stable public run resolution", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-zombie",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_zombie",
+          name: "O:NR V1.9.22 Zombie Corp",
+          cards: [{ id: "onr_v1_280_zombie", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.corp.credits = 20;
+    state.runner.credits = 5;
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_280_zombie");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const rezLegal = mustAction(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_280_zombie");
+    expect(rezLegal.costs[0]?.credits).toBe(9);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: rezLegal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-zombie-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: rezLegal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-zombie-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && action.source === iceId);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toBeUndefined();
+    expect(state.runner.coreDamage).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "continue_run", result: "ended" });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
       "onr_v1_197_data-fort-reclamation",
@@ -7875,7 +7929,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_274_tutor",
       "onr_v1_276_viral-15",
       "onr_v1_277_virizz",
-      "onr_v1_280_zombie",
       "onr_v1_289_edgerunner-inc-temps"
     ] as const;
 
@@ -7887,6 +7940,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_196_corporate-war",
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
+      "onr_v1_280_zombie",
       "onr_v1_296_off-site-backups",
       "onr_v1_298_planning-consultants"
     ] as const) {

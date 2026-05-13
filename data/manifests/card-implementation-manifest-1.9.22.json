@@ -9,8 +9,8 @@
     "catalogWipGuardReady": true,
     "wipArtifactAlignmentGuardReady": true,
     "resolverContractInventoryReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_event_and_six_corp_resolver_clusters_30_of_47",
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_off_site_backups_and_planning_consultants_resolvers_plus_runner_program_no_legalaction_guard",
+    "runtimeDefinitionsReady": "runner_hardware_event_and_seven_corp_resolver_clusters_31_of_47",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_zombie_off_site_backups_and_planning_consultants_resolvers_plus_runner_program_no_legalaction_guard",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
@@ -418,10 +418,19 @@
     },
     {
       "cardCode": "onr_v1_280_zombie",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_corp_ice_core_damage_etr",
+      "coveredSmokes": [
+        "install_ice_legal_action",
+        "rez_ice_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "core_damage_subroutines",
+        "end_the_run",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
     },
     {
       "cardCode": "onr_v1_289_edgerunner-inc-temps",

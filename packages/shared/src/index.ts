@@ -4585,6 +4585,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["uninstall_runner_program", "end_the_run"]
   }),
   onrIce({
+    id: "onr_v1_280_zombie",
+    title: "Zombie",
+    subtypes: ["sentry", "black_ice", "ap", "zombie"],
+    rezCost: 9,
+    strength: 4,
+    rulesText: "[Subroutine] Do 1 core damage.\n[Subroutine] Do 1 core damage.\n[Subroutine] End the run.",
+    subroutines: [onrCoreDamage("onr_v1_280_zombie_core_damage_1", 1), onrCoreDamage("onr_v1_280_zombie_core_damage_2", 1), onrEtr("onr_v1_280_zombie_etr")],
+    mechanics: ["damage", "core_damage", "flatline", "end_the_run", "per_card_longtail"]
+  }),
+  onrIce({
     id: "onr_v1_278_wall-of-ice",
     title: "Wall of Ice",
     subtypes: ["wall"],
