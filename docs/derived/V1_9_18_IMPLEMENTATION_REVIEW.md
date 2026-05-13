@@ -22,7 +22,7 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 
 - Weitere konkrete LegalAction-/applyAction-Abdeckung für Grid-/Region-, City-Grid-, Counter-, Run-Flow-, Tag-Condition- und Stealth-Pfade.
 - Release-Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest.
-- Server-/Web-Gates, vollständige Pflichtchecks, Final Review und Webclient-Version `V1.9.18`.
+- Final Review, Release-Promotion, finale Manifest-/Coverage-/AI-Artefakte und Webclient-Version `V1.9.18`.
 
 ## Gate
 
@@ -34,4 +34,10 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 - JSON-Validation für `data/**/*.json`: pass, 266 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 248 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 32 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

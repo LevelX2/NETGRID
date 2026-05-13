@@ -33,7 +33,13 @@
   "verification": {
     "engine": "pass: 248 tests",
     "catalog": "pass: 32 tests",
-    "typecheck": "pass"
+    "ai": "pass: 85 tests",
+    "server": "pass: 72 tests",
+    "web": "pass: 76 tests",
+    "typecheck": "pass",
+    "test": "pass",
+    "lint": "pass",
+    "build": "pass with known non-blocking Turbopack NFT warning"
   },
   "completionGate": {
     "releaseDone": false,
