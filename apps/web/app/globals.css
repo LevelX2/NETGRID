@@ -3519,23 +3519,79 @@ select {
 .runPositionMarker {
   position: absolute;
   left: 50%;
-  top: -10px;
+  top: 50%;
   z-index: 64;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
-  min-height: 18px;
-  padding: 2px 7px;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
   border: 1px solid color-mix(in srgb, var(--runner), white 20%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--runner), var(--panel) 32%);
+  background: color-mix(in srgb, var(--runner), var(--panel) 48%);
   color: var(--text);
-  font-size: 10px;
-  font-weight: 800;
   line-height: 1;
-  white-space: nowrap;
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.36);
+  box-shadow:
+    0 4px 12px rgb(0 0 0 / 0.36),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  opacity: 0.88;
+  cursor: help;
+}
+
+.runPositionMarker:hover,
+.runPositionMarker:focus-visible {
+  opacity: 1;
+  outline: none;
+  border-color: color-mix(in srgb, var(--runner), white 42%);
+}
+
+.runPositionMarker::before,
+.runPositionMarker::after {
+  position: absolute;
+  left: 50%;
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.runPositionMarker::before {
+  content: "";
+  bottom: calc(100% + 3px);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid color-mix(in srgb, var(--runner), var(--line));
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.runPositionMarker::after {
+  content: attr(data-tooltip);
+  bottom: calc(100% + 8px);
+  max-width: min(220px, calc(100vw - 32px));
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line));
+  border-radius: 6px;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.runPositionMarker:hover::before,
+.runPositionMarker:hover::after,
+.runPositionMarker:focus-visible::before,
+.runPositionMarker:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 
 .card {
@@ -3640,10 +3696,13 @@ select {
 }
 
 .lane .runPositionMarker {
-  top: calc(-11px * var(--lane-card-scale, 1));
-  min-height: calc(18px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(7px * var(--lane-card-scale, 1));
-  font-size: calc(10px * var(--lane-card-scale, 1));
+  width: calc(26px * var(--lane-card-scale, 1));
+  height: calc(26px * var(--lane-card-scale, 1));
+}
+
+.lane .runPositionMarker svg {
+  width: calc(14px * var(--lane-card-scale, 1));
+  height: calc(14px * var(--lane-card-scale, 1));
 }
 
 .lane .installedStateMark {
