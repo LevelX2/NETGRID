@@ -81,6 +81,7 @@ Status: planned
 
 - Neues Artefakt: `data/reports/v1922-completion-gate-status.json`.
 - Zusatzabdeckung: Status bleibt `blocked_open`, `releaseDone` bleibt false und die Scope-Promotionflags bleiben false.
+- Zusatzabdeckung: Die letzte lokale Vertragsquellensuche ist als `no_complete_resolver_contract_found` dokumentiert und verweist auf die bestaetigten Teilquellen.
 - Zusatzabdeckung: Vier blockierende Gates (`resolver_contracts`, `ai_promotion_artifacts`, `webclient_version`, `final_review`) haben jeweils eine Removal Condition.
 - JSON-Validation fuer `data/**/*.json`: pass, 304 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 40 Tests.

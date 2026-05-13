@@ -1944,6 +1944,7 @@ describe("catalog import and status logic", () => {
         aiPromoted: boolean;
       };
       verifiedGreenChecks: string[];
+      lastLocalContractSearch: { result: string; confirmedPartialSources: string[]; removalCondition: string };
       blockingGates: Array<{ gateId: string; status: string; removalCondition: string }>;
     };
 
@@ -1956,6 +1957,16 @@ describe("catalog import and status logic", () => {
     expect(gateStatus.scope.catalogPromoted).toBe(false);
     expect(gateStatus.scope.aiPromoted).toBe(false);
     expect(gateStatus.verifiedGreenChecks.sort()).toEqual(["ai", "build", "catalog", "engine", "json", "lint", "server", "test", "typecheck", "web"]);
+    expect(gateStatus.lastLocalContractSearch.result).toBe("no_complete_resolver_contract_found");
+    expect(gateStatus.lastLocalContractSearch.confirmedPartialSources.sort()).toEqual([
+      "docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md",
+      "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md",
+      "docs/derived/V1_9_10_TO_V1_9_XX_CARD_FUNCTION_MATRIX.md",
+      "docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md",
+      "docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md",
+      "docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md"
+    ]);
+    expect(gateStatus.lastLocalContractSearch.removalCondition.trim()).not.toBe("");
     expect(gateStatus.blockingGates.map((gate) => gate.gateId).sort()).toEqual(["ai_promotion_artifacts", "final_review", "resolver_contracts", "webclient_version"]);
     for (const gate of gateStatus.blockingGates) {
       expect(gate.status, gate.gateId).toBe("blocked");

@@ -22,6 +22,19 @@
     "lint",
     "build"
   ],
+  "lastLocalContractSearch": {
+    "searchedAt": "2026-05-13T18:40:00+02:00",
+    "result": "no_complete_resolver_contract_found",
+    "confirmedPartialSources": [
+      "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md",
+      "docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md",
+      "docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md",
+      "docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md",
+      "docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md",
+      "docs/derived/V1_9_10_TO_V1_9_XX_CARD_FUNCTION_MATRIX.md"
+    ],
+    "removalCondition": "Add or identify a local source that provides a full per-card resolver contract, not only type surfaces or effect summaries."
+  },
   "blockingGates": [
     {
       "gateId": "resolver_contracts",

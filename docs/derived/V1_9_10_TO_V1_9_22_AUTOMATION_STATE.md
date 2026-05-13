@@ -74,7 +74,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `data/reports/v1922-completion-gate-status.json` dokumentiert maschinenlesbar `blocked_open`, die gruene Verify-Basis und die vier blockierenden Gates `resolver_contracts`, `ai_promotion_artifacts`, `webclient_version` und `final_review` mit Removal Conditions. `packages/catalog/src/index.test.ts` prueft Reportstatus, No-Promotion-Flags, Scope-Laenge und Gate-Liste.
+- Umsetzung: `data/reports/v1922-completion-gate-status.json` dokumentiert maschinenlesbar `blocked_open`, die gruene Verify-Basis, die lokale Vertragsquellensuche ohne vollstaendigen Resolververtrag und die vier blockierenden Gates `resolver_contracts`, `ai_promotion_artifacts`, `webclient_version` und `final_review` mit Removal Conditions. `packages/catalog/src/index.test.ts` prueft Reportstatus, No-Promotion-Flags, Scope-Laenge, Quellensuche und Gate-Liste.
 - Tests: JSON-Validation pass (304 Dateien); `catalog` pass (40).
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: completion gate status report`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
