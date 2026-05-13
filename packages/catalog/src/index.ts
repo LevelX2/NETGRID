@@ -662,6 +662,24 @@ export const ONR_V1_9_17_WIP_CARD_IDS = [
 
 export const ONR_V1_9_17_RELEASE_CARD_IDS = ONR_V1_9_17_WIP_CARD_IDS;
 
+export const ONR_V1_9_18_WIP_CARD_IDS = [
+  "onr_v1_354_crybaby",
+  "onr_v1_355_crystal-palace-station-grid",
+  "onr_v1_356_dedicated-response-team",
+  "onr_v1_357_dieter-esslin",
+  "onr_v1_358_dr-dreff",
+  "onr_v1_359_jenny-jett",
+  "onr_v1_361_namatoki-plaza",
+  "onr_v1_362_new-galveston-city-grid",
+  "onr_v1_364_omni-kismet-ph-d",
+  "onr_v1_365_paris-city-grid",
+  "onr_v1_366_red-herrings",
+  "onr_v1_369_singapore-city-grid",
+  "onr_v1_370_tesseract-fort-construction",
+  "onr_v1_372_turbeau-delacroix",
+  "onr_v1_373_twenty-four-hour-surveillance"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,

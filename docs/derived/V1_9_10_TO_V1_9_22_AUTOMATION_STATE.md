@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.18
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.19
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -68,6 +68,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 12:18 CEST
+- Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten release-spezifisch detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.18 `implementing`.
+- Release: V1.9.18
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Generic-Upgrade-/Root-/Server-Spezifikation, Testmatrix und Requirements Review erstellt. Alle 15 V1.9.18-Zielkarten haben WIP-Runtime-Definitionen mit finalen display-only Texten ohne WIP-Präfix. Der Katalog führt `ONR_V1_9_18_WIP_CARD_IDS` als No-Promotion-Guard, ohne die Karten in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` oder AI-Approval aufzunehmen. Crybaby deckt den ersten generischen Upgrade-/Root-Pfad für Corp-Install, Root-Rez, Runner-Access, Trash-on-access, Archives-Visibility und Payload-Redaction ab. WIP-Szenario: `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json`.
+- Tests: JSON-Validation pass fuer 266 `data/**/*.json`; `engine` pass (245), `catalog` pass (32), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.18: upgrade root server runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.18 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil konkrete LegalAction-/applyAction-Abdeckung für Upgrade-/Root-/Grid-/Access-/Ambush-/Trace-/Tag-/Damage-/Counter-Pfade, finale Manifest/Coverage/Scenario-/AI-Artefakte, Full Checks, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 12:12 CEST
 - Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten final abgeschlossen; Cursor auf V1.9.18 `planned` gesetzt.

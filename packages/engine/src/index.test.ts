@@ -5070,7 +5070,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_354_crybaby"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
@@ -5408,6 +5408,58 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
     }
+  });
+});
+
+describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
+  it("adds all V1.9.18 WIP runtime definitions without release-promoting the next slice", () => {
+    expect(ONR_V1_9_18_WIP_CARD_IDS).toHaveLength(15);
+    for (const definitionId of ONR_V1_9_18_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.side, definitionId).toBe("corp");
+      expect(definition?.type, definitionId).toBe("upgrade");
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_upgrade_root_server|access_ambush|trace|city_grid|run_flow|tag|counter|hidden_zone|stealth/);
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {
+    let state = v1917GenericAssetGame("v1918-generic-upgrade-install-rez-access");
+    state.corp.credits = 10;
+    state.runner.credits = 10;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const upgradeId = moveCorpCardToHq(state, "onr_v1_354_crybaby");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.payload?.cardId === upgradeId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_354_crybaby");
+
+    const remote = state.corp.servers.find((server) => server.root.includes(upgradeId));
+    expect(remote?.id).toBe("remote_1");
+    expect(state.cardInstances[upgradeId]?.rezzed).toBe(true);
+    expect(getPlayerView(state, "runner").servers.find((server) => server.id === remote?.id)?.root.find((card) => card.instanceId === upgradeId)?.definitionId).toBe(
+      "onr_v1_354_crybaby"
+    );
+
+    let accessState = toRunnerTurn(v1917GenericAssetGame("v1918-generic-upgrade-access-trash"));
+    accessState.runner.credits = 10;
+    const accessedUpgradeId = putCorpRootInRemote(accessState, "onr_v1_354_crybaby");
+    accessState.cardInstances[accessedUpgradeId] = { ...accessState.cardInstances[accessedUpgradeId]!, faceup: true, rezzed: true };
+    accessState = apply(accessState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    accessState = apply(accessState, "runner", (action) => action.type === "access_card");
+    expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "onr_v1_354_crybaby" });
+    expect(JSON.stringify(accessState.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+
+    accessState = apply(accessState, "runner", (action) => action.type === "trash_accessed_card");
+    expect(accessState.corp.archives).toContain(accessedUpgradeId);
+    expect(getPlayerView(accessState, "runner").servers.find((server) => server.id === "archives")?.root.find((card) => card.instanceId === accessedUpgradeId)?.definitionId).toBe(
+      "onr_v1_354_crybaby"
+    );
+    expect(validateGameState(accessState).ok).toBe(true);
   });
 });
 
@@ -6956,6 +7008,24 @@ const ONR_V1_9_17_WIP_CARD_IDS = [
   "onr_v1_345_trap"
 ] as const;
 
+const ONR_V1_9_18_WIP_CARD_IDS = [
+  "onr_v1_354_crybaby",
+  "onr_v1_355_crystal-palace-station-grid",
+  "onr_v1_356_dedicated-response-team",
+  "onr_v1_357_dieter-esslin",
+  "onr_v1_358_dr-dreff",
+  "onr_v1_359_jenny-jett",
+  "onr_v1_361_namatoki-plaza",
+  "onr_v1_362_new-galveston-city-grid",
+  "onr_v1_364_omni-kismet-ph-d",
+  "onr_v1_365_paris-city-grid",
+  "onr_v1_366_red-herrings",
+  "onr_v1_369_singapore-city-grid",
+  "onr_v1_370_tesseract-fort-construction",
+  "onr_v1_372_turbeau-delacroix",
+  "onr_v1_373_twenty-four-hour-surveillance"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -7945,6 +8015,21 @@ const ONR_V1_9_17_GENERIC_ASSET_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_342_solo-squad", quantity: 1 },
     { id: "onr_v1_344_spinn-public-relations", quantity: 1 },
     { id: "onr_v1_345_trap", quantity: 1 },
+    { id: "onr_v1_354_crybaby", quantity: 1 },
+    { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+    { id: "onr_v1_356_dedicated-response-team", quantity: 1 },
+    { id: "onr_v1_357_dieter-esslin", quantity: 1 },
+    { id: "onr_v1_358_dr-dreff", quantity: 1 },
+    { id: "onr_v1_359_jenny-jett", quantity: 1 },
+    { id: "onr_v1_361_namatoki-plaza", quantity: 1 },
+    { id: "onr_v1_362_new-galveston-city-grid", quantity: 1 },
+    { id: "onr_v1_364_omni-kismet-ph-d", quantity: 1 },
+    { id: "onr_v1_365_paris-city-grid", quantity: 1 },
+    { id: "onr_v1_366_red-herrings", quantity: 1 },
+    { id: "onr_v1_369_singapore-city-grid", quantity: 1 },
+    { id: "onr_v1_370_tesseract-fort-construction", quantity: 1 },
+    { id: "onr_v1_372_turbeau-delacroix", quantity: 1 },
+    { id: "onr_v1_373_twenty-four-hour-surveillance", quantity: 1 },
     { id: "simple_agenda", quantity: 3 },
     { id: "simple_economy_operation", quantity: 4 }
   ]

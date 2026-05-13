@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1918-generic-upgrade-root-server-wip-smoke",
+  "release": "V1.9.18",
+  "status": "wip_runtime_catalog_guard",
+  "coversCards": [
+    "onr_v1_354_crybaby",
+    "onr_v1_355_crystal-palace-station-grid",
+    "onr_v1_356_dedicated-response-team",
+    "onr_v1_357_dieter-esslin",
+    "onr_v1_358_dr-dreff",
+    "onr_v1_359_jenny-jett",
+    "onr_v1_361_namatoki-plaza",
+    "onr_v1_362_new-galveston-city-grid",
+    "onr_v1_364_omni-kismet-ph-d",
+    "onr_v1_365_paris-city-grid",
+    "onr_v1_366_red-herrings",
+    "onr_v1_369_singapore-city-grid",
+    "onr_v1_370_tesseract-fort-construction",
+    "onr_v1_372_turbeau-delacroix",
+    "onr_v1_373_twenty-four-hour-surveillance"
+  ],
+  "assertions": [
+    "V1.9.18 WIP runtime definitions exist for all 15 target cards with final display-only text and no WIP prefix.",
+    "Crybaby covers the first generic upgrade/root path for Corp install, root rez, Runner access, trash-on-access, Archives visibility and payload redaction.",
+    "Catalog WIP guard tracks the exact target set.",
+    "No V1.9.18 card is release-promoted or AI-approved in this WIP slice.",
+    "V1.9.19 Fait Accompli remains outside the V1.9.18 WIP runtime guard."
+  ],
+  "verification": {
+    "engine": "pass: 245 tests",
+    "catalog": "pass: 32 tests",
+    "typecheck": "pass"
+  },
+  "completionGate": {
+    "releaseDone": false,
+    "catalogPromoted": false,
+    "aiPromoted": false
+  }
+}
