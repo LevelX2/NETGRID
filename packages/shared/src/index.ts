@@ -3312,6 +3312,200 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subroutines: [onrEtr("onr_v1_279_wall_of_static_etr")],
     mechanics: ["end_the_run"]
   }),
+  {
+    id: "onr_v1_053_ramming-piston",
+    title: "Ramming Piston",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    strength: 2,
+    rulesText: "V1.9.14 WIP: Installed Trace/Link support program for trace-risk runs.",
+    mechanics: ["install_program", "memory", "trace", "link", "bid_amount", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_056_replicator",
+    title: "Replicator",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    strength: 1,
+    rulesText: "V1.9.14 WIP: Installed Trace/Link support program with legal bid-window interaction.",
+    mechanics: ["install_program", "memory", "trace", "link", "bid_amount", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_063_signpost",
+    title: "Signpost",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    rulesText: "V1.9.14 WIP: Installed trace helper with side-safe reveal overlap.",
+    mechanics: ["install_program", "memory", "trace", "link", "bid_amount", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_116_total-genetic-retrofit",
+    title: "Total Genetic Retrofit",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "V1.9.14 WIP: Event-based tag avoidance/prevention helper.",
+    mechanics: ["play_event", "tag_avoid", "event_modification", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_120_armadillo-armored-road-home",
+    title: "\"Armadillo\" Armored Road Home",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    rulesText: "V1.9.14 WIP: Installed tag and meat-damage protection hardware.",
+    mechanics: ["install_hardware", "tag_avoid", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_126_drifter-mobile-environment",
+    title: "\"Drifter\" Mobile Environment",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    rulesText: "V1.9.14 WIP: Installed tag-interaction hardware.",
+    mechanics: ["install_hardware", "tag_avoid", "remove_tag", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_132_microtech-trode-set",
+    title: "Microtech 'Trode Set",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    baseLink: 1,
+    rulesText: "V1.9.14 WIP: +1 link for Trace bidding; net-damage overlap remains side-safe.",
+    mechanics: ["install_hardware", "trace", "link", "bid_amount", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_154_broker",
+    title: "Broker",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "V1.9.14 WIP: Installed resource for tag-risk economy decisions.",
+    mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_157_crash-everett-inventive-fixer",
+    title: "Crash Everett, Inventive Fixer",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "V1.9.14 WIP: Installed resource action with side-safe draw/economy planning.",
+    mechanics: ["install_resource", "resource_action", "draw_cards", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_162_field-reporter-for-ice-and-data",
+    title: "Field Reporter for Ice and Data",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "V1.9.14 WIP: Installed information resource with tag-risk interaction.",
+    mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_164_hells-run",
+    title: "Hell's Run",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "V1.9.14 WIP: Installed resource for run-risk and tag-risk planning.",
+    mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_165_junkyard-bbs",
+    title: "Junkyard BBS",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "V1.9.14 WIP: Installed resource action with tag-risk interaction.",
+    mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_166_karl-de-veres-corporate-stooge",
+    title: "Karl de Veres, Corporate Stooge",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "V1.9.14 WIP: Installed resource for tag-risk and Corp-pressure decisions.",
+    mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_167_leland-corporate-bodyguard",
+    title: "Leland, Corporate Bodyguard",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    rulesText: "V1.9.14 WIP: Installed resource for tag and damage protection overlap.",
+    mechanics: ["install_resource", "resource_tag_interaction", "tag_avoid", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_178_short-term-contract",
+    title: "Short-Term Contract",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "V1.9.14 WIP: Installed resource economy action with tag-risk interaction.",
+    mechanics: ["install_resource", "resource_action", "gain_credit", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_181_the-springboard",
+    title: "The Springboard",
+    side: "runner",
+    type: "resource",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    baseLink: 1,
+    rulesText: "V1.9.14 WIP: Installed resource with Trace/Link and side-safe reveal overlap.",
+    mechanics: ["install_resource", "trace", "link", "bid_amount", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_183_technician-lover",
+    title: "Technician Lover",
+    side: "runner",
+    type: "resource",
+    subtypes: ["connection"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    rulesText: "V1.9.14 WIP: Installed resource action with tag-risk interaction.",
+    mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  },
   onrIce({
     id: "onr_v1_221_asp",
     title: "Asp",
@@ -3434,7 +3628,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       }
     ],
     mechanics: ["trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
-  })
+  }),
+  {
+    id: "onr_v1_299_power-grid-overload",
+    title: "Power Grid Overload",
+    side: "corp",
+    type: "operation",
+    subtypes: ["gray-ops"],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "V1.9.14 WIP: Operation with tag-conditioned pressure.",
+    mechanics: ["play_operation", "tag_condition", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  }
 ];
 
 export const DEMO_CARDS: CardDefinition[] = [

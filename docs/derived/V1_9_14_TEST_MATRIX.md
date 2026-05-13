@@ -6,7 +6,7 @@ Status: draft-implementing
 | Gate | Nachweis | Status |
 | --- | --- | --- |
 | Scope Freeze | Zielkartenliste in Plan/Requirements/Matrix | vorbereitet |
-| Runtime Definitions | Alle 25 Zielkarten in Runtime-Definitionsliste | teilweise: 7/25 Corp-Trace-ICE |
+| Runtime Definitions | Alle 25 Zielkarten in Runtime-Definitionsliste | teilweise: 25/25 WIP-Definitionen, nicht promotet |
 | LegalAction Revalidation | Trace-Bids, Tags, Resource-Aktionen, Kosten, Timing | teilweise: Asp-Trace-Smoke |
 | Visibility | Trace-/Tag-/Resource-Payloads side-sicher | offen |
 | Replay/StateHash | Trace, Tags und Resource-Aktionen nach Replay identisch | offen |

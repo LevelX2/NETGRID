@@ -82,10 +82,10 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.14
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: 25er-WIP-Zielmenge mit No-Promotion-Guard im Katalog ergaenzt. Erste Runtime-Definitionen fuer sieben Corp-Trace-ICE (`Asp`, `Cinderella`, `Fang`, `Fang 2.0`, `Homewrecker`, `Pocket Virtual Reality`, `Rex`) erstellt. Engine-Smoke fuer `Asp` bestaetigt side-sicheres Trace-Bid-Fenster und Tag-Ergebnis. Keine Karte wurde promotet.
+- Umsetzung: 25er-WIP-Zielmenge mit No-Promotion-Guard im Katalog ergaenzt. WIP-Runtime-Definitionen fuer alle 25 Zielkarten erstellt. Engine-Smoke fuer `Asp` bestaetigt side-sicheres Trace-Bid-Fenster und Tag-Ergebnis. Keine Karte wurde promotet.
 - Tests: `catalog` pass (28), `engine` pass (217), `typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.14: trace ice runtime guard`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.14 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil 18 Zielkarten, Manifest/Coverage/Szenarien/AI-Hints/AI-Smokes, Webclient-Version, volle Pflichtchecks und Final Review offen sind.
+- Cursor: V1.9.14 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Engine-/LegalAction-Abdeckung fuer die nicht per Asp-Smoke geprueften Zielkarten, Manifest/Coverage/Szenarien/AI-Hints/AI-Smokes, Webclient-Version, volle Pflichtchecks und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-13 02:02 CEST
 - Ergebnis: V1.9.13 Damage/Prevention/Avoid/Replacement-Longtail final abgeschlossen; Cursor auf V1.9.14 `planned` gesetzt.

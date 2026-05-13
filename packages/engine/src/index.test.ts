@@ -4008,7 +4008,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_053_ramming-piston"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_020_dupre"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4166,14 +4166,14 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {
-  it("adds scoped V1.9.12 definitions without pulling in V1.9.13 cards", () => {
+  it("adds scoped V1.9.12 definitions without pulling in later cursor cards", () => {
     expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
     for (const definitionId of ONR_V1_9_12_RELEASE_CARD_IDS) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_053_ramming-piston"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_020_dupre"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -4261,14 +4261,14 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
 });
 
 describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
-  it("adds scoped V1.9.13 runtime definitions without pulling in V1.9.14 cards", () => {
+  it("adds scoped V1.9.13 runtime definitions without pulling in V1.9.15 cards", () => {
     expect(ONR_V1_9_13_RELEASE_CARD_IDS).toHaveLength(17);
     for (const definitionId of ONR_V1_9_13_RELEASE_CARD_IDS) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_053_ramming-piston"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_020_dupre"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
