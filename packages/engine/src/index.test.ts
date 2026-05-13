@@ -5535,6 +5535,43 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
+
+  it("applies Red Herrings as a server-bound agenda steal tax", () => {
+    let state = toRunnerTurn(v1917GenericAssetGame("v1918-red-herrings-steal-tax"));
+    state.runner.credits = 7;
+    const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
+    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    state.cardInstances[redHerringsId] = { ...state.cardInstances[redHerringsId]!, faceup: true, rezzed: true };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    const stealAction = getLegalActions(state, "runner").find((action) => action.type === "steal_agenda");
+    expect(stealAction?.costs).toEqual([{ credits: 5 }]);
+    expect(stealAction?.payload).toMatchObject({
+      v1918UpgradeAbility: "red_herrings_steal_tax",
+      redHerringsCardId: redHerringsId,
+      stealAdditionalCost: 5
+    });
+
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+
+    expect(state.runner.credits).toBe(2);
+    expect(state.runner.scoreArea).toContain(agendaId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "steal_agenda",
+      v1918UpgradeAbility: "red_herrings_steal_tax",
+      stealAdditionalCost: 5
+    });
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {

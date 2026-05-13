@@ -25,12 +25,13 @@
     "Crybaby covers the first generic upgrade/root path for Corp install, root rez, Runner access, trash-on-access, Archives visibility and payload redaction.",
     "Dedicated Response Team and Dieter Esslin cover side-safe access ambush damage windows through legal Runner access.",
     "Turbeau Delacroix covers a side-safe access trace window with Corp and Runner trace bid choices.",
+    "Red Herrings covers a server-bound agenda steal tax on legal agenda access.",
     "Catalog WIP guard tracks the exact target set.",
     "No V1.9.18 card is release-promoted or AI-approved in this WIP slice.",
     "V1.9.19 Fait Accompli remains outside the V1.9.18 WIP runtime guard."
   ],
   "verification": {
-    "engine": "pass: 247 tests",
+    "engine": "pass: 248 tests",
     "catalog": "pass: 32 tests",
     "typecheck": "pass"
   },

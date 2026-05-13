@@ -208,6 +208,7 @@ const V1917_SETUP_ID = "onr_v1_340_setup";
 const V1917_TRAP_ID = "onr_v1_345_trap";
 const V1918_DEDICATED_RESPONSE_TEAM_ID = "onr_v1_356_dedicated-response-team";
 const V1918_DIETER_ESSLIN_ID = "onr_v1_357_dieter-esslin";
+const V1918_RED_HERRINGS_ID = "onr_v1_366_red-herrings";
 const V1918_TURBEAU_DELACROIX_ID = "onr_v1_372_turbeau-delacroix";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
@@ -2631,7 +2632,32 @@ function runnerAccessActions(state: GameState): LegalAction[] {
   }
   const definition = definitionFor(state, run.accessedCardId);
   const freeTrashEnabled = canFreeTrashCurrentAccessCard(state, run, definition);
-  if (definition.type === "agenda") return [action(state, "runner", "steal_agenda", `${definition.title} stehlen`, run.accessedCardId)];
+  if (definition.type === "agenda") {
+    const redHerringsId = redHerringsCardIdForCurrentAccess(state, run);
+    if (redHerringsId) {
+      const stealCost = 5;
+      if (state.runner.credits < stealCost) {
+        return [
+          action(state, "runner", "decline_trash", `${definition.title} nicht stehlen`, "game_rule", [], {
+            cardId: run.accessedCardId,
+            v1918UpgradeAbility: "red_herrings_steal_tax",
+            redHerringsCardId: redHerringsId,
+            stealAdditionalCost: stealCost,
+            stealBlockedByCost: true
+          })
+        ];
+      }
+      return [
+        action(state, "runner", "steal_agenda", `${definition.title} stehlen`, run.accessedCardId, [{ credits: stealCost }], {
+          cardId: run.accessedCardId,
+          v1918UpgradeAbility: "red_herrings_steal_tax",
+          redHerringsCardId: redHerringsId,
+          stealAdditionalCost: stealCost
+        })
+      ];
+    }
+    return [action(state, "runner", "steal_agenda", `${definition.title} stehlen`, run.accessedCardId)];
+  }
   if (definition.type === "asset" || definition.type === "upgrade") {
     const actions: LegalAction[] = [];
     if (freeTrashEnabled) {
@@ -2657,6 +2683,11 @@ function runnerAccessActions(state: GameState): LegalAction[] {
     ];
   }
   return [action(state, "runner", "decline_trash", run.breach ? "Weiter accessen" : "Access abschließen", "game_rule")];
+}
+
+function redHerringsCardIdForCurrentAccess(state: GameState, run: ActiveRun): CardInstanceId | undefined {
+  const serverId = run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
+  return rezzedRootCardIdOnServer(state, serverId, V1918_RED_HERRINGS_ID);
 }
 
 function hasPendingAccessCandidate(state: GameState, run: ActiveRun): boolean {
@@ -3019,6 +3050,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       accessCurrentCard(state, legalAction);
       return;
     case "steal_agenda":
+      spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 0);
       stealAgenda(state, mustRun(state).accessedCardId ?? "");
       return;
     case "trash_accessed_card":
@@ -6494,6 +6526,8 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.subroutineIndex !== undefined) parts.push(String(payload.subroutineIndex));
   if (payload?.removeTagAmount !== undefined) parts.push(String(payload.removeTagAmount));
   if (payload?.v1917AssetAbility) parts.push(String(payload.v1917AssetAbility));
+  if (payload?.v1918UpgradeAbility) parts.push(String(payload.v1918UpgradeAbility));
+  if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   return parts.filter(Boolean).join(".");
 }
@@ -6732,6 +6766,11 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   if (typeof legalAction.payload?.onScoreGainCredits === "number") context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
   if (typeof legalAction.payload?.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
   if (typeof legalAction.payload?.gainedActions === "number") context.gainedActions = legalAction.payload.gainedActions;
+  if (legalAction.payload?.v1918UpgradeAbility === "red_herrings_steal_tax") {
+    context.v1918UpgradeAbility = "red_herrings_steal_tax";
+    context.stealAdditionalCost = legalAction.payload.stealAdditionalCost;
+    if (legalAction.payload.stealBlockedByCost === true) context.stealBlockedByCost = true;
+  }
   if (state.winner && state.gameEndReason) context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
   if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {
