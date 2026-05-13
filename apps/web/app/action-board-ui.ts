@@ -421,7 +421,8 @@ export function runPositionStatusLabel(view: PlayerView): string | null {
   }
   const server = view.servers.find((candidate) => candidate.id === run.position?.serverId);
   const total = Math.max(run.position.iceIndex + 1, server?.ice.length ?? 0);
-  const iceLabel = `ICE ${run.position.iceIndex + 1} von ${total}`;
+  const approachNumber = Math.max(1, total - run.position.iceIndex);
+  const iceLabel = `ICE ${run.position.iceIndex + 1} (${approachNumber} von ${total})`;
   if (run.phase === "encounter_ice") return `Aktuell: Begegnung mit ${iceLabel}`;
   if (run.phase === "approach_ice") return `Aktuell: Annäherung an ${iceLabel}`;
   return `Aktuell: vor ${iceLabel}`;
@@ -562,8 +563,10 @@ function cardRefsForAction(action: LegalAction): string[] {
   addStringRef(refs, payload.resourceId);
   addStringRef(refs, payload.breakerId);
   if (action.abilityRef?.sourceCardInstanceId) refs.add(action.abilityRef.sourceCardInstanceId);
-  for (const requirement of action.targetRequirements) {
-    if (requirement.sourceIceRef) refs.add(requirement.sourceIceRef);
+  if (action.type !== "pump_breaker" && action.type !== "break_subroutine") {
+    for (const requirement of action.targetRequirements) {
+      if (requirement.sourceIceRef) refs.add(requirement.sourceIceRef);
+    }
   }
   return Array.from(refs);
 }

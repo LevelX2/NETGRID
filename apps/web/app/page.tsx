@@ -10,6 +10,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clipboard,
+  Crosshair,
   Flag,
   CopyPlus,
   Download,
@@ -4086,6 +4087,9 @@ export default function Page() {
                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
                             {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
                             runPositionActive={lane.kind === "ice" && activeRunIceId === card.instanceId}
+                            {...(lane.kind === "ice" && activeRunIceId === card.instanceId
+                              ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
+                              : {})}
                             onAction={submitAction}
                             onFocus={focusCard}
                             onActionContextSelect={selectActionCard}
@@ -5628,10 +5632,11 @@ function RunTimelineOverlay({
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
-  const [position, setPosition] = useState<RunOverlayPositionPreference>({ kind: "default" });
-  useEffect(() => {
-    setPosition(parseRunOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY)));
-  }, []);
+  const [position, setPosition] = useState<RunOverlayPositionPreference>(() =>
+    typeof window === "undefined"
+      ? { kind: "default" }
+      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY))
+  );
   useEffect(() => {
     window.localStorage.setItem(RUN_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(position));
   }, [position]);
@@ -5722,12 +5727,8 @@ function RunTimelineOverlay({
 
 function runBreakerActionHint(view: PlayerView, actions: LegalAction[]): string | null {
   if (view.run?.phase !== "encounter_ice") return null;
-  const activeIceId = activeRunIceInstanceId(view);
-  const breakerActions = actions.filter((action) => {
-    if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return false;
-    return !activeIceId || action.payload?.iceId === activeIceId;
-  });
-  if (breakerActions.length === 0) return "Keine Eisbrecher-Aktion gegen dieses ICE verfügbar.";
+  const breakerActions = encounterBreakerActions(view, actions);
+  if (breakerActions.length === 0) return "Kein passender Eisbrecher für dieses ICE verfügbar.";
   const labels = Array.from(new Set(breakerActions.map((action) => runAwareActionButtonLabel(view, action)))).slice(0, 2);
   return `Eisbrecher möglich: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
 }
@@ -5871,11 +5872,7 @@ function serverLabelFromId(serverId: string): string {
 
 function runHiddenContextActionHint(view: PlayerView, contextualActions: LegalAction[]): string | null {
   if (view.run?.phase !== "encounter_ice") return null;
-  const activeIceId = activeRunIceInstanceId(view);
-  const breakerActions = contextualActions.filter((action) => {
-    if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return false;
-    return !activeIceId || action.payload?.iceId === activeIceId;
-  });
+  const breakerActions = encounterBreakerActions(view, contextualActions);
   if (breakerActions.length === 0) return null;
   const runnerRig = view.side === "runner" ? (view.own.rig ?? []) : (view.opponent.rig ?? []);
   const breakerIds = new Set(
@@ -5892,6 +5889,47 @@ function runHiddenContextActionHint(view: PlayerView, contextualActions: LegalAc
   if (uniqueNames.length === 1) return `Eisbrecher verfügbar: Wähle ${uniqueNames[0]} im Rig für Aktionen gegen ${target}.`;
   if (uniqueNames.length > 1) return `Eisbrecher verfügbar: Wähle ${uniqueNames.slice(0, 2).join(" oder ")} im Rig für Aktionen gegen ${target}.`;
   return `Eisbrecher verfügbar: Wähle den passenden Eisbrecher im Rig für Aktionen gegen ${target}.`;
+}
+
+function encounterBreakerActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
+  const activeIceId = activeRunIceInstanceId(view);
+  const encounteredIce = view.run?.encounteredIce ?? null;
+  const runnerRig = view.side === "runner" ? (view.own.rig ?? []) : (view.opponent.rig ?? []);
+  const rigById = new Map(runnerRig.map((card) => [card.instanceId, card]));
+  return actions.filter((action) => {
+    if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return false;
+    if (activeIceId && action.payload?.iceId !== activeIceId) return false;
+    if (action.type === "break_subroutine") return true;
+    const breakerId = breakerIdFromAction(action);
+    if (!breakerId) return false;
+    const breaker = rigById.get(breakerId);
+    return breaker ? breakerMatchesEncounteredIce(breaker, encounteredIce) : false;
+  });
+}
+
+function breakerIdFromAction(action: LegalAction): string | null {
+  if (typeof action.payload?.breakerId === "string") return action.payload.breakerId;
+  return action.source !== "basic_action" && action.source !== "game_rule" ? action.source : null;
+}
+
+function breakerMatchesEncounteredIce(breaker: VisibleCard, encounteredIce: VisibleCard | null): boolean {
+  if (!encounteredIce?.known) return true;
+  const iceSubtypes = new Set((encounteredIce.subtypes ?? []).map(normalizeBreakerSubtype));
+  if (iceSubtypes.size === 0) return true;
+  const rulesText = normalizeBreakerRulesText(breaker.rulesText ?? "");
+  if (/\bbreak\s+(?:1\s+)?ice\s+subroutine\b/.test(rulesText)) return true;
+  if (iceSubtypes.has("sentry") && /\bbreak\s+(?:1\s+)?sentry\s+subroutine\b/.test(rulesText)) return true;
+  if (iceSubtypes.has("wall") && /\bbreak\s+(?:1\s+)?wall\s+subroutine\b/.test(rulesText)) return true;
+  if (iceSubtypes.has("code gate") && /\bbreak\s+(?:1\s+)?code gate\s+subroutine\b/.test(rulesText)) return true;
+  return false;
+}
+
+function normalizeBreakerSubtype(value: string): string {
+  return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function normalizeBreakerRulesText(value: string): string {
+  return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function LegalActionsPanel({
@@ -8376,6 +8414,7 @@ function CardView({
   actionLabelForAction = contextualCardActionLabel,
   positionBadge,
   runPositionActive = false,
+  runPositionLabel,
   showAdvancementCounters = true,
   showScoreStateBadges = false,
   choiceSelected = false,
@@ -8396,6 +8435,7 @@ function CardView({
   actionLabelForAction?: (action: LegalAction) => string;
   positionBadge?: string;
   runPositionActive?: boolean;
+  runPositionLabel?: string | undefined;
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
   choiceSelected?: boolean;
@@ -8596,7 +8636,11 @@ function CardView({
           {positionBadge}
         </span>
       ) : null}
-      {runPositionActive ? <span className="runPositionMarker">Aktuelles ICE</span> : null}
+      {runPositionActive ? (
+        <span className="runPositionMarker" tabIndex={0} aria-label={runPositionLabel ?? "Aktuelles ICE"} data-tooltip={runPositionLabel ?? "Aktuelles ICE"} title={runPositionLabel ?? "Aktuelles ICE"}>
+          <Crosshair size={14} strokeWidth={2.4} aria-hidden="true" />
+        </span>
+      ) : null}
       <button
         ref={cardRef}
         type="button"
