@@ -76,7 +76,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Phase nachher: implementing
 - Umsetzung: Alle 14 Runner-Programm-Zielkarten bleiben ohne lokal bestaetigte Kosten-/MU-/Breakerwerte nicht `playable_mvp` und oeffnen keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions. `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` dokumentiert, dass die vorhandenen lokalen Kernnotizen fuer die zehn Runner-Events noch keinen vollstaendigen `play_event`-Resolververtrag liefern; `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` dokumentiert, dass Corporate War und Political Overthrow zwar lokale Kernnotizen haben, aber noch keine vollstaendigen Zahlen-/Timing-/Kostenvertraege. Die bestehenden No-Promotion-Guards bleiben korrekt. Keine Karte wurde release- oder AI-promotet.
 - Tests: JSON-Validation pass (302 Dateien); `catalog` pass (36), `engine` pass (278), `ai` pass (85), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-- Git: WIP-Checkpoint `839c6570` (`WIP V1.9.22: program event readiness guards`) gepusht; weiterer WIP-Checkpoint fuer Corp-Readiness vorgesehen (`WIP V1.9.22: corp readiness contract review`).
+- Git: WIP-Checkpoint `839c6570` (`WIP V1.9.22: program event readiness guards`) gepusht; WIP-Checkpoint `72b93695` (`WIP V1.9.22: corp readiness contract review`) gepusht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-13 17:40 CEST
