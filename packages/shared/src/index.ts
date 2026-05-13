@@ -3319,6 +3319,116 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_077_anonymous-tip",
+    title: "Anonymous Tip",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with per-card longtail surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_080_core-command-jettison-ice",
+    title: "Core Command: Jettison Ice",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with ICE-target longtail surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "ice_target", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_086_forged-activation-orders",
+    title: "Forged Activation Orders",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with Corp-card pressure surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_093_if-you-want-it-done-right",
+    title: "If You Want It Done Right...",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with per-card longtail surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_100_misc-for-sale",
+    title: "misc.for-sale",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with per-card longtail surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_102_open-ended-mileage-program",
+    title: "Open-Ended Mileage Program",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with per-card longtail surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_103_organ-donor",
+    title: "Organ Donor",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with per-card longtail surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_109_security-code-worm-chip",
+    title: "Security Code WORM Chip",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with WORM-chip longtail surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "worm", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_113_synchronized-attack-on-hq",
+    title: "Synchronized Attack on HQ",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with HQ pressure surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "run_flow", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_117_valu-pak-software-bundle",
+    title: "Valu-Pak Software Bundle",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Runner event with program-bundle longtail surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "program", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_022_emergency-self-construct",
     title: "Emergency Self-Construct",
     side: "runner",

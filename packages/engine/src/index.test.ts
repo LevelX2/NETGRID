@@ -6288,6 +6288,29 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
+
+  it("adds V1.9.22 runner event runtime definitions without implying play_event support", () => {
+    const runnerEventIds = [
+      "onr_v1_077_anonymous-tip",
+      "onr_v1_080_core-command-jettison-ice",
+      "onr_v1_086_forged-activation-orders",
+      "onr_v1_093_if-you-want-it-done-right",
+      "onr_v1_100_misc-for-sale",
+      "onr_v1_102_open-ended-mileage-program",
+      "onr_v1_103_organ-donor",
+      "onr_v1_109_security-code-worm-chip",
+      "onr_v1_113_synchronized-attack-on-hq",
+      "onr_v1_117_valu-pak-software-bundle"
+    ] as const;
+    for (const definitionId of runnerEventIds) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.side, definitionId).toBe("runner");
+      expect(definition?.type, definitionId).toBe("event");
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.mechanics.join(" "), definitionId).toContain("per_card_longtail");
+    }
+  });
 });
 
 describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {

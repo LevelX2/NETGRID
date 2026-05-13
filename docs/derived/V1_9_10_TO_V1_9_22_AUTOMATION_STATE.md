@@ -74,8 +74,8 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: Arasaka Portable Prototype, Artemis 2020, Bodyweight Data Creche, Corolla Speed Chip, Microtech Backup Drive, Pandora's Deck, Parraline 5750, PK-6089a und ZZ22 Speed Chip haben Runtime-Definitionen mit finalen display-only Texten. Keine Karte wurde release- oder AI-promotet.
-- Tests: JSON-Validation pass (302 Dateien); `engine` pass (273), `catalog` pass (36), `typecheck` pass.
+- Umsetzung: Arasaka Portable Prototype, Artemis 2020, Bodyweight Data Creche, Corolla Speed Chip, Microtech Backup Drive, Pandora's Deck, Parraline 5750, PK-6089a und ZZ22 Speed Chip haben Runtime-Definitionen mit finalen display-only Texten. Zehn Runner-Event-Zielkarten haben ebenfalls Runtime-Definitionen, aber noch keine `play_event`-LegalAction-Promotion. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `engine` pass (274), `catalog` pass (36), `typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner hardware runtime guard`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil LegalAction-/applyAction-, Visibility-/Replay-/StateHash-, AI-, Full-Check-, Webclient- und Final-Review-Gates offen sind.
 

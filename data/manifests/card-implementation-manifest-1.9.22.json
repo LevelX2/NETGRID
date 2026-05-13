@@ -7,7 +7,7 @@
   "gateAssertions": {
     "v1922ScopeFrozenToFortySevenCards": true,
     "catalogWipGuardReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_cluster_9_of_47",
+    "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
     "engineCovered": false,
     "stateHashReplayStableForCoveredSmokes": false,
     "noOfficialAssets": true,
@@ -116,73 +116,93 @@
     },
     {
       "cardCode": "onr_v1_077_anonymous-tip",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_080_core-command-jettison-ice",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_086_forged-activation-orders",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_093_if-you-want-it-done-right",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_100_misc-for-sale",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_102_open-ended-mileage-program",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_103_organ-donor",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_109_security-code-worm-chip",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_113_synchronized-attack-on-hq",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_117_valu-pak-software-bundle",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_119_arasaka-portable-prototype",
@@ -369,7 +389,7 @@
   ],
   "deferredSummary": {
     "plannedCardCount": 47,
-    "implementedCardCount": 9,
+    "implementedCardCount": 19,
     "finalGateCardCount": 0,
     "deferredCardCount": 0,
     "deferredCardIds": [],
