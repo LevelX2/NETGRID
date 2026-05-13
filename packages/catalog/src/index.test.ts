@@ -147,6 +147,7 @@ import {
   ONR_V1_9_14_WIP_CARD_IDS,
   ONR_V1_9_15_WIP_CARD_IDS,
   ONR_V1_9_16_WIP_CARD_IDS,
+  ONR_V1_9_17_WIP_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateAiCardHintsV2,
@@ -279,6 +280,8 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_9_15_WIP_CARD_IDS).toEqual(ONR_V1_9_15_RELEASE_CARD_IDS);
     expect(ONR_V1_9_16_WIP_CARD_IDS).toHaveLength(16);
     expect(ONR_V1_9_16_WIP_CARD_IDS).toEqual(ONR_V1_9_16_RELEASE_CARD_IDS);
+    expect(ONR_V1_9_17_WIP_CARD_IDS).toHaveLength(18);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).not.toEqual(expect.arrayContaining([...ONR_V1_9_17_WIP_CARD_IDS]));
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(242);
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_15_RELEASE_CARD_IDS]));
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_16_RELEASE_CARD_IDS]));

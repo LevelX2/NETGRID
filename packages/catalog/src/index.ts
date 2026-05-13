@@ -639,6 +639,27 @@ export const ONR_V1_9_16_WIP_CARD_IDS = [
 
 export const ONR_V1_9_16_RELEASE_CARD_IDS = ONR_V1_9_16_WIP_CARD_IDS;
 
+export const ONR_V1_9_17_WIP_CARD_IDS = [
+  "onr_v1_309_bbs-whispering-campaign",
+  "onr_v1_310_blood-cat",
+  "onr_v1_311_braindance-campaign",
+  "onr_v1_314_corporate-negotiating-center",
+  "onr_v1_316_cowboy-sysop",
+  "onr_v1_318_department-of-truth-enhancement",
+  "onr_v1_319_disinfectant-inc",
+  "onr_v1_321_esa-contract",
+  "onr_v1_326_holovid-campaign",
+  "onr_v1_329_investment-firm",
+  "onr_v1_330_krumz",
+  "onr_v1_333_omniscience-foundation",
+  "onr_v1_336_rescheduler",
+  "onr_v1_337_rockerboy-promotion",
+  "onr_v1_340_setup",
+  "onr_v1_342_solo-squad",
+  "onr_v1_344_spinn-public-relations",
+  "onr_v1_345_trap"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,

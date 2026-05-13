@@ -497,7 +497,7 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     const initial = structuredClone(state);
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "gain_credit");
-    state = apply(state, "corp", (action) => action.type === "end_turn");
+    state = toRunnerTurnFromCorpMain(state);
     if (state.pendingChoice?.source === "discard_phase") state = applyChoice(state, "corp", String(state.pendingChoice.options[0]?.id));
     state = apply(state, "runner", (action) => action.type === "gain_credit");
 
@@ -5059,6 +5059,58 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
   });
 });
 
+describe("V1.9.17 Generic Asset/Node WIP", () => {
+  it("adds all V1.9.17 WIP runtime definitions without release-promoting the next slice", () => {
+    expect(ONR_V1_9_17_WIP_CARD_IDS).toHaveLength(18);
+    for (const definitionId of ONR_V1_9_17_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.side, definitionId).toBe("corp");
+      expect(definition?.type, definitionId).toBe("asset");
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_354_crybaby"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
+    let state = v1917GenericAssetGame("v1917-generic-asset-install-rez-access");
+    state.corp.credits = 10;
+    state.runner.credits = 10;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const assetId = moveCorpCardToHq(state, "onr_v1_321_esa-contract");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.payload?.cardId === assetId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_321_esa-contract");
+
+    const remote = state.corp.servers.find((server) => server.root.includes(assetId));
+    expect(remote?.id).toBe("remote_1");
+    expect(state.cardInstances[assetId]?.rezzed).toBe(true);
+    expect(getPlayerView(state, "runner").servers.find((server) => server.id === remote?.id)?.root.find((card) => card.instanceId === assetId)?.definitionId).toBe(
+      "onr_v1_321_esa-contract"
+    );
+
+    let accessState = toRunnerTurn(v1917GenericAssetGame("v1917-generic-asset-access-trash"));
+    accessState.runner.credits = 10;
+    const accessedAssetId = putCorpRootInRemote(accessState, "onr_v1_321_esa-contract");
+    accessState.cardInstances[accessedAssetId] = { ...accessState.cardInstances[accessedAssetId]!, faceup: true, rezzed: true };
+    accessState = apply(accessState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    accessState = apply(accessState, "runner", (action) => action.type === "access_card");
+    expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "onr_v1_321_esa-contract" });
+    expect(JSON.stringify(accessState.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+
+    accessState = apply(accessState, "runner", (action) => action.type === "trash_accessed_card");
+    expect(accessState.corp.archives).toContain(accessedAssetId);
+    expect(getPlayerView(accessState, "runner").servers.find((server) => server.id === "archives")?.root.find((card) => card.instanceId === accessedAssetId)?.definitionId).toBe(
+      "onr_v1_321_esa-contract"
+    );
+    expect(validateGameState(accessState).ok).toBe(true);
+  });
+});
+
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
   it("creates V0.97 games with explicit demo decks and keeps old run behavior gated", () => {
     const state = createGameAfterSetup({
@@ -6583,6 +6635,27 @@ const ONR_V1_9_16_WIP_CARD_IDS = [
   "onr_v1_246_fragmentation-storm"
 ] as const;
 
+const ONR_V1_9_17_WIP_CARD_IDS = [
+  "onr_v1_309_bbs-whispering-campaign",
+  "onr_v1_310_blood-cat",
+  "onr_v1_311_braindance-campaign",
+  "onr_v1_314_corporate-negotiating-center",
+  "onr_v1_316_cowboy-sysop",
+  "onr_v1_318_department-of-truth-enhancement",
+  "onr_v1_319_disinfectant-inc",
+  "onr_v1_321_esa-contract",
+  "onr_v1_326_holovid-campaign",
+  "onr_v1_329_investment-firm",
+  "onr_v1_330_krumz",
+  "onr_v1_333_omniscience-foundation",
+  "onr_v1_336_rescheduler",
+  "onr_v1_337_rockerboy-promotion",
+  "onr_v1_340_setup",
+  "onr_v1_342_solo-squad",
+  "onr_v1_344_spinn-public-relations",
+  "onr_v1_345_trap"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -7535,6 +7608,48 @@ const ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1917_generic_asset",
+  name: "O:NR V1.9.17 Generic Asset WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_killer", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_17_GENERIC_ASSET_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1917_generic_asset",
+  name: "O:NR V1.9.17 Generic Asset WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+    { id: "onr_v1_310_blood-cat", quantity: 1 },
+    { id: "onr_v1_311_braindance-campaign", quantity: 1 },
+    { id: "onr_v1_314_corporate-negotiating-center", quantity: 1 },
+    { id: "onr_v1_316_cowboy-sysop", quantity: 1 },
+    { id: "onr_v1_318_department-of-truth-enhancement", quantity: 1 },
+    { id: "onr_v1_319_disinfectant-inc", quantity: 1 },
+    { id: "onr_v1_321_esa-contract", quantity: 1 },
+    { id: "onr_v1_326_holovid-campaign", quantity: 1 },
+    { id: "onr_v1_329_investment-firm", quantity: 1 },
+    { id: "onr_v1_330_krumz", quantity: 1 },
+    { id: "onr_v1_333_omniscience-foundation", quantity: 1 },
+    { id: "onr_v1_336_rescheduler", quantity: 1 },
+    { id: "onr_v1_337_rockerboy-promotion", quantity: 1 },
+    { id: "onr_v1_340_setup", quantity: 1 },
+    { id: "onr_v1_342_solo-squad", quantity: 1 },
+    { id: "onr_v1_344_spinn-public-relations", quantity: 1 },
+    { id: "onr_v1_345_trap", quantity: 1 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -7957,6 +8072,16 @@ function v1916ProgramSubtypeGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK,
     corpDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1917GenericAssetGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK,
+    corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

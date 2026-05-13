@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.17
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.18
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -68,6 +68,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 10:25 CEST
+- Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten release-spezifisch detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.17 `implementing`.
+- Release: V1.9.17
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Generic-Asset/Node-Spezifikation, Testmatrix und Requirements Review erstellt. Alle 18 V1.9.17-Zielkarten haben WIP-Runtime-Definitionen mit finalen display-only Texten ohne WIP-Präfix. Der Katalog führt `ONR_V1_9_17_WIP_CARD_IDS` als No-Promotion-Guard, ohne die Karten in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` oder AI-Approval aufzunehmen. Engine-Smokes bestätigen 18/18 WIP-Definitionen, den No-Scope-Guard gegen V1.9.18 und den generischen ESA-Contract-Pfad für Corp-Install, Rez, Runner-Access, Trash-on-access, Archives-Visibility und Payload-Redaction. WIP-Szenario: `data/scenarios/v1917-generic-asset-node-wip-smoke.json`.
+- Tests: JSON-Validation pass für 259 `data/**/*.json`; `engine` pass (234), `catalog` pass (31), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint für diesen Lauf vorgesehen (`WIP V1.9.17: generic asset node runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.17 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil konkrete LegalAction-/applyAction-Abdeckung für die übrigen Asset-Ability-, Campaign/Economy-, Recurring-, Trace-, Hidden-Zone-, Access/Ambush-, Damage-, Tag-, Hosting- und installierte-Ziel-Pfade, finale Manifest/Coverage/Scenario-/AI-Artefakte, Full Checks, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 09:55 CEST
 - Ergebnis: V1.9.16 Program Subtypes/Hosting/Stealth final abgeschlossen; Cursor auf V1.9.17 `planned` gesetzt.
