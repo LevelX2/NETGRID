@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.scenario.v1",
   "scenarioId": "v1920-global-modifier-special-state-wip-smoke",
   "release": "V1.9.20",
-  "status": "wip_planning_catalog_guard",
+  "status": "wip_runtime_definitions_and_mram_engine_smoke",
   "coversCards": [
     "onr_v1_022_emergency-self-construct",
     "onr_v1_029_gremlins",
@@ -34,19 +34,23 @@
   "assertions": [
     "V1.9.20 scope is frozen to exactly 26 target cards.",
     "Catalog WIP guard tracks the exact target set.",
+    "All 26 V1.9.20 target cards have runtime definitions with final display-only text and no WIP prefix.",
+    "Militech MRAM Chip and MRAM Chip install through legal runner actions and update visible MU deterministically.",
+    "Remote Facility opens a rezzed Corp action-economy LegalAction that revalidates source, side and gained-action amount.",
     "No V1.9.20 card is release-promoted or AI-approved in this WIP slice.",
-    "V1.9.21 Quest for Cattekin remains outside the V1.9.20 WIP runtime guard.",
-    "Runtime definitions, Engine resolvers and AI promotion remain follow-up work."
+    "V1.9.21 AI Boon remains outside the V1.9.20 WIP runtime guard.",
+    "Broader handlimit, global static modifier and persistent-state resolver coverage remains follow-up work."
   ],
   "verification": {
     "catalog": "pass: 34 tests",
-    "typecheck": "pass"
+    "typecheck": "pass",
+    "engine": "pass: 261 tests"
   },
   "completionGate": {
     "releaseDone": false,
     "catalogPromoted": false,
     "aiPromoted": false,
-    "runtimeDefinitionsReady": false,
+    "runtimeDefinitionsReady": true,
     "engineCovered": false
   }
 }

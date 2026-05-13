@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 14:49 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um Runtime-Definitionen und ersten MRAM-MU-Engine-Smoke erweitert; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: 26/26 Zielkarten haben Runtime-Definitionen mit finalen display-only Texten ohne WIP-Praefix in `packages/shared/src/index.ts`; `packages/engine/src/index.test.ts` prueft die Zielmenge gegen V1.9.21-Promotion und deckt Militech MRAM Chip/MRAM Chip als legale Runner-Installationen mit sichtbarer MU-Projektion sowie Remote Facility als ersten rezzed Action-Economy-Assetpfad ab. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind entsprechend aktualisiert. Keine Runtime-/AI-/Web-Promotion.
+- Tests: `engine` pass (261 Tests). Vorheriger V1.9.20-Schnitt: JSON-Validation pass; `catalog` pass (34), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.20: runtime definitions and mram smoke`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-Abdeckung, AI-Artefakte, volle Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 14:33 CEST
 - Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um WIP-Datenartefakte erweitert; Cursor bleibt auf V1.9.20 `implementing`.
 - Release: V1.9.20

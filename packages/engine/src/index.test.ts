@@ -4008,7 +4008,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4174,7 +4174,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
@@ -4408,6 +4408,78 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
   });
 });
 
+describe("V1.9.20 Global Modifier/Special-State WIP", () => {
+  it("adds all V1.9.20 WIP runtime definitions without release-promoting V1.9.21", () => {
+    expect(ONR_V1_9_20_WIP_CARD_IDS).toHaveLength(26);
+    for (const definitionId of ONR_V1_9_20_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1920-mram-memory",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_133_militech-mram-chip");
+    moveRunnerCardToGrip(state, "onr_v1_134_mram-chip");
+
+    const beforeLimit = state.runner.memoryLimit;
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_133_militech-mram-chip");
+    expect(state.runner.memoryLimit).toBe(beforeLimit + 2);
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_134_mram-chip");
+    expect(state.runner.memoryLimit).toBe(beforeLimit + 3);
+
+    const runnerView = getPlayerView(state, "runner");
+    expect(runnerView.own.memoryLimit).toBe(beforeLimit + 3);
+    expect(runnerView.own.rig?.find((card) => card.definitionId === "onr_v1_133_militech-mram-chip")?.memoryLimitBonus).toBe(2);
+    expect(runnerView.own.rig?.find((card) => card.definitionId === "onr_v1_134_mram-chip")?.memoryLimitBonus).toBe(1);
+    expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === "onr_v1_133_militech-mram-chip")).toBe(true);
+  });
+
+  it("uses rezzed V1.9.20 action-economy assets through explicit legal actions", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-asset-actions",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw"
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 3;
+    state.corp.maxHandSize = 100;
+
+    const remoteFacilityId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
+    state.cardInstances[remoteFacilityId] = { ...state.cardInstances[remoteFacilityId]!, faceup: true, rezzed: true };
+    const clicksBefore = state.corp.clicks;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "gain_credit" && action.payload?.v1920AssetAbility === "gain_actions" && String(action.payload?.cardId) === remoteFacilityId
+    );
+
+    expect(state.corp.clicks).toBe(clicksBefore + 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1920AssetAbility: "gain_actions",
+      gainedActions: 2,
+      corpClicksAfter: clicksBefore + 1
+    });
+  });
+});
+
 describe("V1.9.12 Counter/Virus/Recurring", () => {
   it("adds scoped V1.9.12 definitions without pulling in later cursor cards", () => {
     expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
@@ -4416,7 +4488,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -4511,7 +4583,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
@@ -4832,7 +4904,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
@@ -4993,7 +5065,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
@@ -5154,7 +5226,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
@@ -5313,7 +5385,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
@@ -5665,7 +5737,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_upgrade_root_server|access_ambush|trace|city_grid|run_flow|tag|counter|hidden_zone|stealth/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {
@@ -7523,6 +7595,35 @@ const ONR_V1_9_19_WIP_CARD_IDS = [
   "onr_v1_374_washington-d-c-city-grid"
 ] as const;
 
+const ONR_V1_9_20_WIP_CARD_IDS = [
+  "onr_v1_022_emergency-self-construct",
+  "onr_v1_029_gremlins",
+  "onr_v1_133_militech-mram-chip",
+  "onr_v1_134_mram-chip",
+  "onr_v1_160_diplomatic-immunity",
+  "onr_v1_168_loan-from-chiba",
+  "onr_v1_171_preying-mantis",
+  "onr_v1_190_bioweapons-engineering",
+  "onr_v1_191_black-ice-quality-assurance",
+  "onr_v1_192_corporate-boon",
+  "onr_v1_200_encryption-breakthrough",
+  "onr_v1_204_ice-transmutation",
+  "onr_v1_205_main-office-relocation",
+  "onr_v1_218_subsidiary-branch",
+  "onr_v1_313_city-surveillance",
+  "onr_v1_322_euromarket-consortium",
+  "onr_v1_324_fortress-architects",
+  "onr_v1_325_hacker-tracker-central",
+  "onr_v1_327_i-got-a-rock",
+  "onr_v1_331_nevinyrral",
+  "onr_v1_332_newsgroup-taunting",
+  "onr_v1_334_pacifica-regional-ai",
+  "onr_v1_335_remote-facility",
+  "onr_v1_338_rustbelt-hq-branch",
+  "onr_v1_343_south-african-mining-corp",
+  "onr_v1_360_jerusalem-city-grid"
+] as const;
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -8573,6 +8674,55 @@ const ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_363_olivia-salazar", quantity: 1 },
     { id: "onr_v1_368_roving-submarine", quantity: 1 },
     { id: "onr_v1_374_washington-d-c-city-grid", quantity: 1 },
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
+const ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1920_global_modifier",
+  name: "O:NR V1.9.20 Global Modifier WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_022_emergency-self-construct", quantity: 1 },
+    { id: "onr_v1_029_gremlins", quantity: 1 },
+    { id: "onr_v1_133_militech-mram-chip", quantity: 1 },
+    { id: "onr_v1_134_mram-chip", quantity: 1 },
+    { id: "onr_v1_160_diplomatic-immunity", quantity: 1 },
+    { id: "onr_v1_168_loan-from-chiba", quantity: 1 },
+    { id: "onr_v1_171_preying-mantis", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1920_global_modifier",
+  name: "O:NR V1.9.20 Global Modifier WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_190_bioweapons-engineering", quantity: 1 },
+    { id: "onr_v1_191_black-ice-quality-assurance", quantity: 1 },
+    { id: "onr_v1_192_corporate-boon", quantity: 1 },
+    { id: "onr_v1_200_encryption-breakthrough", quantity: 1 },
+    { id: "onr_v1_204_ice-transmutation", quantity: 1 },
+    { id: "onr_v1_205_main-office-relocation", quantity: 1 },
+    { id: "onr_v1_218_subsidiary-branch", quantity: 1 },
+    { id: "onr_v1_313_city-surveillance", quantity: 1 },
+    { id: "onr_v1_322_euromarket-consortium", quantity: 1 },
+    { id: "onr_v1_324_fortress-architects", quantity: 1 },
+    { id: "onr_v1_325_hacker-tracker-central", quantity: 1 },
+    { id: "onr_v1_327_i-got-a-rock", quantity: 1 },
+    { id: "onr_v1_331_nevinyrral", quantity: 1 },
+    { id: "onr_v1_332_newsgroup-taunting", quantity: 1 },
+    { id: "onr_v1_334_pacifica-regional-ai", quantity: 1 },
+    { id: "onr_v1_335_remote-facility", quantity: 1 },
+    { id: "onr_v1_338_rustbelt-hq-branch", quantity: 1 },
+    { id: "onr_v1_343_south-african-mining-corp", quantity: 1 },
+    { id: "onr_v1_360_jerusalem-city-grid", quantity: 1 },
     { id: "simple_agenda", quantity: 2 },
     { id: "simple_economy_operation", quantity: 4 }
   ]

@@ -4,14 +4,14 @@
   "matrixId": "mechanics-coverage-1.9.20",
   "generatedFor": "V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende WIP gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_planning_catalog_guard_pending_runtime",
+  "status": "wip_runtime_definitions_and_mram_engine_smoke",
   "extends": "data/rules/mechanics-coverage-1.9.19.json",
   "gateAssertions": {
     "globalModifierScopeFrozenToTwentySixCards": true,
     "catalogWipGuardReady": true,
-    "runtimeDefinitionsReady": false,
+    "runtimeDefinitionsReady": true,
     "engineCovered": false,
-    "hiddenInfoSafeForCoveredSmokes": false,
+    "hiddenInfoSafeForCoveredSmokes": true,
     "stateHashReplayStableForCoveredSmokes": false,
     "catalogPromotionPending": true,
     "aiPromotionPending": true,
@@ -21,32 +21,43 @@
     {
       "mechanicId": "mechanic.persistent.special_state",
       "label": "Persistente Sonderzustaende",
-      "currentStatus": "planned",
+      "currentStatus": "runtime_defined",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "Quellen, Dauer/Ablaufbedingungen und side-sichere PublicEvent-Projektion sind geplant; Runtime folgt.",
-      "coverage": ["scope_guard"]
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; konkrete Engine-Pfade folgen in weiteren V1.9.20-Schnitten.",
+      "coverage": [
+        "scope_guard",
+        "runtime_definitions"
+      ]
     },
     {
       "mechanicId": "mechanic.modifier.action_handsize",
       "label": "Handlimit, MU und Action Economy",
-      "currentStatus": "planned",
+      "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "Deterministische Basiswert-Ableitung aus sichtbaren Quellen ist geplant; Engine-Abdeckung folgt.",
-      "coverage": ["scope_guard"]
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; MRAM-Hardware deckt den ersten legalen MU-Installationspfad ab, Remote Facility den ersten rezzed Action-Economy-Assetpfad.",
+      "coverage": [
+        "scope_guard",
+        "runtime_definitions",
+        "mram_memory_install_smoke",
+        "action_economy_asset_smoke"
+      ]
     },
     {
       "mechanicId": "mechanic.modifier.global_static_layer",
       "label": "Globale statische Modifier",
-      "currentStatus": "planned",
+      "currentStatus": "runtime_defined",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "Layering, Quellenbindung und Hidden-Info-sichere Projektion sind geplant; Engine-Abdeckung folgt.",
-      "coverage": ["scope_guard"]
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; konkrete Engine-Pfade folgen in weiteren V1.9.20-Schnitten.",
+      "coverage": [
+        "scope_guard",
+        "runtime_definitions"
+      ]
     }
   ],
   "deferred": [
     {
       "item": "runtime_and_engine_coverage",
-      "reason": "V1.9.20 hat bislang Planung, Catalog-WIP-Guard und Daten-WIP-Artefakte; Runtime-Definitionen und Engine-Pfade folgen."
+      "reason": "V1.9.20 hat Runtime-Definitionen, einen MRAM-MU-Engine-Smoke und einen Remote-Facility-Action-Economy-Smoke; weitere Handlimit-, globale Modifier- und persistente Sonderzustands-Pfade folgen."
     }
   ]
 }

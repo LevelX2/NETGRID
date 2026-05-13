@@ -244,6 +244,7 @@ const V1919_SCORED_REVEAL_AGENDA_IDS = new Set([V1919_ARTIFICIAL_SECURITY_DIRECT
 const V1919_SERVER_DIFFICULTY_UPGRADE_IDS = new Set([V1919_ROVING_SUBMARINE_ID, V1919_WASHINGTON_DC_CITY_GRID_ID]);
 const V1919_COUNTER_ASSET_IDS = new Set([V1919_CHICAGO_BRANCH_ID, V1919_VAPOR_OPS_ID]);
 const V1919_COUNTER_OPERATION_IDS = new Set([V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID, V1919_MANAGEMENT_SHAKE_UP_ID, V1919_TEAM_RESTRUCTURING_ID]);
+const V1920_ACTION_ASSET_IDS = new Set(["onr_v1_331_nevinyrral", "onr_v1_334_pacifica-regional-ai", "onr_v1_335_remote-facility"]);
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -1942,6 +1943,19 @@ function corpMainActions(state: GameState): LegalAction[] {
         )
       );
     }
+    if (V1920_ACTION_ASSET_IDS.has(definition.id)) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 2 Aktionen nehmen`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1920AssetAbility: "gain_actions", gainedActions: 2 }
+        )
+      );
+    }
     if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
     actions.push(
       action(
@@ -3210,6 +3224,22 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
           ...(legalAction.payload ?? {}),
           gainedCredits: gainAmount,
           corpCreditsAfter: state.corp.credits
+        };
+        return;
+      }
+      if (legalAction.payload?.v1920AssetAbility === "gain_actions") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.20-Asset-Action-Economy nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.20-Asset-Action-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1920_ACTION_ASSET_IDS.has(definition.id)) throw new Error("Die V1.9.20-Asset-Action-Faehigkeit passt nicht zur Karte.");
+        const gainedActions = Number(legalAction.payload?.gainedActions ?? 0);
+        if (!Number.isInteger(gainedActions) || gainedActions !== 2) throw new Error("V1.9.20-Action-Assets gewaehrten in diesem WIP genau 2 Aktionen.");
+        state.corp.clicks += gainedActions;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedActions,
+          corpClicksAfter: state.corp.clicks
         };
         return;
       }
@@ -7117,6 +7147,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.v1919UpgradeAbility) parts.push(String(payload.v1919UpgradeAbility));
   if (payload?.v1919RunnerProgramAbility) parts.push(String(payload.v1919RunnerProgramAbility));
   if (payload?.v1919RunnerEventAbility) parts.push(String(payload.v1919RunnerEventAbility));
+  if (payload?.v1920AssetAbility) parts.push(String(payload.v1920AssetAbility));
   if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.oliviaSalazarCardId) parts.push(String(payload.oliviaSalazarCardId));
@@ -7409,6 +7440,11 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (legalAction.payload.specialZone) context.specialZone = legalAction.payload.specialZone;
     if (legalAction.payload.specialZoneVisibility) context.specialZoneVisibility = legalAction.payload.specialZoneVisibility;
     if (legalAction.payload.specialZoneReason) context.specialZoneReason = legalAction.payload.specialZoneReason;
+  }
+  if (typeof legalAction.payload?.v1920AssetAbility === "string") {
+    context.v1920AssetAbility = legalAction.payload.v1920AssetAbility;
+    if (typeof legalAction.payload.gainedActions === "number") context.gainedActions = legalAction.payload.gainedActions;
+    if (typeof legalAction.payload.corpClicksAfter === "number") context.corpClicksAfter = legalAction.payload.corpClicksAfter;
   }
   if (typeof legalAction.payload?.v1919AgendaDifficulty === "number") context.v1919AgendaDifficulty = legalAction.payload.v1919AgendaDifficulty;
   if (typeof legalAction.payload?.v1919Overadvance === "number") context.v1919Overadvance = legalAction.payload.v1919Overadvance;
