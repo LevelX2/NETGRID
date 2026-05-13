@@ -27,6 +27,8 @@ Die V1.9.11-Läufe haben genau sechzehn Zielkarten an bestehende und eng ergänz
 
 Die Karten nutzen vorhandene und eng ergänzte LegalAction-/PendingChoice-Verträge für Stack-Search, R&D-Reveal, Expose und Reorder. Search-/Reorder-Choices bleiben nur der berechtigten Seite sichtbar; die Gegenseite sieht keine PendingChoice-Daten. Reveal/Expose publizieren nur die ausdrücklich erlaubte Kartendefinition. `Ice Pick Willie` und `Too Many Doors` sind als subroutinegebundene ICE-Pfade angebunden: `Ice Pick Willie` revealt nur die R&D-Spitze öffentlich, `Too Many Doors` öffnet eine Korp-private R&D-Top-2-Reorder-Choice und replayt deterministisch.
 
+Nachtrag 2026-05-14: `Gideon's Pawnshop` war in der Erstumsetzung fälschlich als Stack-Search/Program-Reveal/Shuffle-Adapter umgesetzt. Die bestätigte lokale Textquelle lautet: Kosten 2, `Search your trash for a card and bring it into your hand.` Die Runtime nutzt jetzt einen eigenen Trash-Recovery-Resolver: Auswahl aus Runner-Heap, die gerade gespielte Pawnshop-Karte ist kein Ziel, die gewählte Karte geht in die Grip und der Stack bleibt unverändert.
+
 ## Geänderte Hauptbereiche
 
 - `packages/shared/src/index.ts`: lokale WIP-Definitionen für alle 16 V1.9.11-Zielkarten ergänzt.

@@ -24,6 +24,14 @@
       "coverage": ["unit", "scenario", "choice", "visibility", "replay", "state_hash", "ai"]
     },
     {
+      "mechanicId": "mechanic.runner_trash.search_to_grip",
+      "label": "Runner Trash Search to Hand",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.11",
+      "currentScopeNote": "Gideon's Pawnshop searches the public Runner trash, moves one selected card to grip, excludes the resolving Pawnshop itself and does not shuffle the stack.",
+      "coverage": ["unit", "scenario", "choice", "public_event", "replay", "state_hash", "ai"]
+    },
+    {
       "mechanicId": "mechanic.hidden_zone.expose_or_reveal",
       "label": "Reveal and Expose Hidden-Zone Cards",
       "currentStatus": "implemented_limited",

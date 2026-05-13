@@ -1847,9 +1847,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
-    rulesText: "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
-    mechanics: ["play_event", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+    cost: 2,
+    rulesText: "Search your trash for a card and bring it into your hand.",
+    mechanics: ["play_event", "search_trash", "heap_to_grip", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_092_ice-and-datas-guide-to-the-net",

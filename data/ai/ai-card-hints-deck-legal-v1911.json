@@ -68,13 +68,13 @@
       "cardId": "onr_v1_089_gideons-pawnshop",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "hidden_zone_tool", "stack_search"],
+      "roles": ["event", "trash_recovery"],
       "planRoles": ["build_rig", "recover_rig"],
-      "requiredMechanics": ["play_event", "search_stack", "reveal", "shuffle", "legal_action_only"],
-      "valueHints": { "consistency": 3, "tempo": 1 },
-      "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
+      "requiredMechanics": ["play_event", "search_trash", "heap_to_grip", "legal_action_only"],
+      "valueHints": { "recursion": 3, "tempo": 1 },
+      "riskTags": ["public_trash_to_hand"],
       "aiSupportStatus": "ai_supported",
-      "scenarioRefs": ["data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_stack_search_and_reveal"]
+      "scenarioRefs": ["data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_trash_recovery"]
     },
     {
       "cardId": "onr_v1_092_ice-and-datas-guide-to-the-net",

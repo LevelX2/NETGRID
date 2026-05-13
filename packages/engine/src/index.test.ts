@@ -4135,7 +4135,11 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     for (const definitionId of implementedWipIds) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
-      expect(definition?.mechanics).toContain("hidden_zone_tool");
+      if (definitionId === "onr_v1_089_gideons-pawnshop") {
+        expect(definition?.mechanics).toContain("search_trash");
+      } else {
+        expect(definition?.mechanics).toContain("hidden_zone_tool");
+      }
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
@@ -4169,6 +4173,49 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       searchShuffleAfter: true,
       cardDefinitionId: "simple_decoder",
       title: "Simple Decoder"
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("resolves Gideon's Pawnshop from Runner trash without searching or shuffling the stack", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-gideons-pawnshop"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_089_gideons-pawnshop");
+    const targetId = moveRunnerCardToHeap(state, "simple_economy_event");
+    const stackBefore = [...state.runner.stack];
+    const randomCounterBefore = state.randomCounter;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    const pawnshopAction = getLegalActions(state, "runner").find((action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
+    expect(pawnshopAction?.costs).toEqual([{ clicks: 1, credits: 2 }]);
+    state = apply(state, "runner", (action) => action.actionId === pawnshopAction?.actionId);
+    expect(state.pendingChoice?.source).toContain("v1911.search_trash");
+    expect(state.pendingChoice?.options.map((option) => option.value)).toContain(targetId);
+    expect(state.pendingChoice?.options.map((option) => option.value)).not.toContain(eventId);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    const targetOption = runnerChoice?.options.find((option) => option.value === targetId);
+    expect(targetOption?.card).toMatchObject({ title: "Simple Economy Event", type: "event" });
+
+    state = applyChoice(state, "runner", String(targetOption?.id));
+    expect(state.runner.grip).toContain(targetId);
+    expect(state.runner.heap).toContain(eventId);
+    expect(state.runner.heap).not.toContain(targetId);
+    expect(state.runner.stack).toEqual(stackBefore);
+    expect(state.randomCounter).toBe(randomCounterBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "search_trash",
+      searchSource: "runner_heap",
+      searchDestination: "grip",
+      cardDefinitionId: "simple_economy_event",
+      title: "Simple Economy Event",
+      selectedCount: 1,
+      shuffled: false
     });
 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -10480,6 +10527,14 @@ function putRunnerCardOnTopOfStack(state: GameState, definitionId: string): Card
   removeEverywhere(state, id);
   state.runner.stack.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "stack" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function moveRunnerCardToHeap(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.heap.push(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "heap" }, faceup: true, rezzed: true };
   return id;
 }
 

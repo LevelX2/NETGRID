@@ -1196,7 +1196,7 @@ describe("catalog import and status logic", () => {
       expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
       expect(implementation?.releaseStatus, cardId).toBe("human_playable");
       expect(implementation?.aiSupported, cardId).toBe(true);
-      expect(implementation?.resolverFamily, cardId).toBe("hidden_zone_search_reveal_reorder_resolver");
+      expect(implementation?.resolverFamily, cardId).toBe(cardId === "onr_v1_089_gideons-pawnshop" ? "trash_recovery_resolver" : "hidden_zone_search_reveal_reorder_resolver");
       expect(scenarioCards.has(cardId), cardId).toBe(true);
     }
 

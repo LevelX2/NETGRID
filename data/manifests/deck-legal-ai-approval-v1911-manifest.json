@@ -27,7 +27,7 @@
     { "cardId": "onr_v1_059_self-modifying-code", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_059_self-modifying-code", "scenarioRefs": ["runner_v1911_stack_search_and_reveal"] },
     { "cardId": "onr_v1_087_forgotten-backup-chip", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_087_forgotten-backup-chip", "scenarioRefs": ["runner_v1911_stack_search_and_reveal"] },
     { "cardId": "onr_v1_088_fortress-respecification", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_088_fortress-respecification", "scenarioRefs": ["runner_v1911_expose_and_preview"] },
-    { "cardId": "onr_v1_089_gideons-pawnshop", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_089_gideons-pawnshop", "scenarioRefs": ["runner_v1911_stack_search_and_reveal"] },
+    { "cardId": "onr_v1_089_gideons-pawnshop", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_089_gideons-pawnshop", "scenarioRefs": ["runner_v1911_trash_recovery"] },
     { "cardId": "onr_v1_092_ice-and-datas-guide-to-the-net", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_092_ice-and-datas-guide-to-the-net", "scenarioRefs": ["runner_v1911_expose_and_preview"] },
     { "cardId": "onr_v1_099_mantis-fixer-at-large", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_099_mantis-fixer-at-large", "scenarioRefs": ["runner_v1911_stack_search_and_reveal"] },
     { "cardId": "onr_v1_110_sneak-preview", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_110_sneak-preview", "scenarioRefs": ["runner_v1911_expose_and_preview"] },

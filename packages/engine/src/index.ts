@@ -444,11 +444,11 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     }
   },
   "onr_v1_089_gideons-pawnshop": {
-    name: "onr_v1911_runner_event_search_stack_program_to_hand",
-    canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
+    name: "onr_v1911_runner_event_search_trash_card_to_hand",
+    canPlay: (state) => state.runner.heap.length > 0,
     resolve: (state, legalAction) => {
-      startRunnerStackSearchRevealChoice(state);
-      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
+      startRunnerHeapSearchChoice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1911_search_trash" };
     }
   },
   "onr_v1_092_ice-and-datas-guide-to-the-net": {
@@ -7065,6 +7065,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1911.search_trash")) {
+    resolveRunnerHeapSearchChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v098.arrange_stack_top2") || state.pendingChoice.source.startsWith("v1911.arrange_stack_top2")) {
     resolveRunnerStackArrangeChoice(state, legalAction, playerAction);
     return;
@@ -7310,6 +7314,29 @@ function startRunnerStackSearchRevealChoice(state: GameState, sourcePrefix = "v0
   });
 }
 
+function startRunnerHeapSearchChoice(state: GameState, sourceCardId: CardInstanceId): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const cardOptions = state.runner.heap
+    .filter((cardId) => cardId !== sourceCardId)
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (cardOptions.length === 0) throw new Error("Keine suchbare Karte im Trash.");
+  state.pendingChoice = {
+    choiceId: `v1911_search_trash_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.search_trash:${state.stateVersion + 1}`,
+    prompt: "Trash durchsuchen",
+    kind: "select_cards",
+    options: cardOptions,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+}
+
 function startSelfModifyingCodeSearchChoice(state: GameState): void {
   startRunnerStackSearchChoice(state, "v1911.search_stack_install", "v1911_self_modifying_code_install", {
     reveal: "public",
@@ -7348,6 +7375,27 @@ function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalActi
     ...(resolution.reveal === "public" && resolution.publicRevealKind ? { publicRevealKind: resolution.publicRevealKind } : {}),
     selectedCount: 1,
     shuffled: resolution.shuffleAfter
+  };
+}
+
+function resolveRunnerHeapSearchChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Trash-Search-Choice offen.");
+  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!cardId || !state.runner.heap.includes(cardId)) throw new Error("Die gewaehlte Karte liegt nicht im Trash.");
+  removeFromAllZones(state, cardId);
+  state.runner.grip.push(cardId);
+  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
+  delete state.pendingChoice;
+  const definition = definitionFor(state, cardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneAction: "search_trash",
+    searchSource: "runner_heap",
+    searchDestination: "grip",
+    publicRevealDefinitionId: definition.id,
+    selectedCount: 1,
+    shuffled: false
   };
 }
 
@@ -8380,6 +8428,10 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
       "traceSuccessful",
       "tagsAdded"
     ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+    for (const key of ["hiddenZoneAction", "searchSource", "searchDestination", "selectedCount", "shuffled"]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
     }
