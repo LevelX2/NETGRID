@@ -165,6 +165,32 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
   });
 
+  it("chooses the conservative gain-all Playful AI split through LegalActions", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v1921-playful-ai-choice" }));
+    state.pendingChoice = {
+      choiceId: `v1921_playful_ai_${state.stateVersion}`,
+      side: "runner",
+      source: "v1921.playful_ai:sourceCardId=playful:remainingDice=0:rollIndex=0:lastRoll=3",
+      prompt: "Playful AI: 3 Credits nehmen und/oder 3 Würfel beiseitelegen.",
+      kind: "select_option",
+      options: [
+        { id: "gain_0_set_aside_3", label: "0 Credits nehmen, 3 Würfel beiseitelegen", publicLabel: "Playful-AI-Aufteilung", value: 0 },
+        { id: "gain_1_set_aside_2", label: "1 Credit nehmen, 2 Würfel beiseitelegen", publicLabel: "Playful-AI-Aufteilung", value: 1 },
+        { id: "gain_2_set_aside_1", label: "2 Credits nehmen, 1 Würfel beiseitelegen", publicLabel: "Playful-AI-Aufteilung", value: 2 },
+        { id: "gain_3_set_aside_0", label: "3 Credits nehmen, 0 Würfel beiseitelegen", publicLabel: "Playful-AI-Aufteilung", value: 3 }
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion,
+      visibility: "public"
+    };
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const decision = chooseRunnerAction(input);
+    expect(decision.reasonCode).toBe("runner.choice.resolve");
+    expect(decision.selectedChoices).toEqual({ choiceId: state.pendingChoice.choiceId, selectedOptionIds: ["gain_3_set_aside_0"] });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
   it("keeps V0.94 Damage board states side-safe for AI input", () => {
     const state = applyEffectCommands(v094DamageGame("ai-v094-damage"), [{ type: "do_damage", damageType: "meat", amount: 2, source: "ai_v094_smoke" }]);
     const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });

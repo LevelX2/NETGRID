@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import {
   DEFAULT_CUE_POSITION,
   actionButtonLabel,
   actionCostChips,
   actionMatchesContext,
+  actionSlotCapacityForTurn,
   actionSlotDisplay,
   aiPacingDelayMs,
   breachProgressLabel,
@@ -186,6 +187,29 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(bonus.slots.every((slot) => slot.state === "available")).toBe(true);
   });
 
+  it("derives bonus-action slot capacity from current turn action history", () => {
+    const events = [
+      publicEvent("evt_1", "mandatory_draw", { actor: "corp", actionType: "mandatory_draw" }),
+      publicEvent("evt_2", "play_operation", {
+        actor: "corp",
+        actionType: "play_operation",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 1,
+        turnActionOrdinalEnd: 1,
+        gainedActions: 2
+      })
+    ];
+
+    expect(actionSlotCapacityForTurn("corp", 4, events)).toBe(5);
+    expect(actionSlotDisplay("corp", 4, actionSlotCapacityForTurn("corp", 4, events), true).slots.map((slot) => `${slot.state}:${slot.bonus}`)).toEqual([
+      "spent:false",
+      "available:false",
+      "available:false",
+      "available:true",
+      "available:true"
+    ]);
+  });
+
   it("formats action and credit costs as user-facing chips", () => {
     expect(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] })).toEqual([
       { kind: "action", amount: 1, label: "1 Aktion" },
@@ -278,6 +302,17 @@ function card(instanceId: string, title: string, type: NonNullable<VisibleCard["
     definitionId: instanceId,
     type,
     rezzed
+  };
+}
+
+function publicEvent(eventId: string, type: string, publicPayload: Record<string, unknown>): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore: 0,
+    stateVersionAfter: 1,
+    stateHashAfter: `${eventId}_hash`,
+    publicPayload
   };
 }
 

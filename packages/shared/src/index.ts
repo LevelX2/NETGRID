@@ -592,6 +592,7 @@ export type RunState = {
   aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<Record<CardInstanceId, number[]>>;
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
+  aiBoonStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
   bizarreEncryptionSchemeActive?: boolean;
   traceSuccessBySubroutineIndex?: Partial<Record<number, boolean>>;
   breach?: BreachState;
@@ -686,6 +687,7 @@ export type GameState = {
   };
   run?: RunState;
   trace?: TraceState;
+  runnerPersistentExtraActions?: number;
   bizarreEncryptionDelayedAgendas?: Array<{
     agendaId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;

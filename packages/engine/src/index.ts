@@ -254,7 +254,6 @@ const V1921_AI_BOON_ID = "onr_v1_002_ai-boon";
 const V1921_BOARDWALK_ID = "onr_v1_008_boardwalk";
 const V1921_PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
 const V1921_QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
-const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWALK_ID]);
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
 const AARDVARK_ID = "onr_v1_349_aardvark";
@@ -324,7 +323,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "runner_event_run_success_2",
     requiresServer: true,
     resolve: (state, legalAction) => {
-      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 2);
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 2, 1, undefined, legalAction);
     }
   },
   v08_burst_credit_event: {
@@ -345,14 +344,14 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "runner_event_run_success_3",
     requiresServer: true,
     resolve: (state, legalAction) => {
-      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 3);
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, 3, 1, undefined, legalAction);
     }
   },
   v097_deep_dive_event: {
     name: "runner_event_run_multiaccess_2",
     requiresServer: true,
     resolve: (state, legalAction) => {
-      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, undefined, 2);
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, undefined, 2, undefined, legalAction);
     }
   },
   v098_stack_search_event: {
@@ -396,16 +395,31 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     }
   },
   [V1921_PLAYFUL_AI_ID]: {
-    name: "onr_v1921_runner_event_deterministic_die_probe",
+    name: "onr_v1921_runner_event_playful_ai_dice_loop",
     resolve: (state, legalAction) => {
-      const randomPurpose = `v1921.die.${V1921_PLAYFUL_AI_ID}.event_probe`;
-      const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+      const sourceCardId = String(legalAction.payload?.cardId ?? "");
+      const { dieRoll, randomPurpose } = rollV1921Die(state, V1921_PLAYFUL_AI_ID, "play_event.roll.0");
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1921RunnerEventAbility: "deterministic_die_probe",
+        v1921RunnerEventAbility: "playful_ai_dice_loop",
         randomPurpose,
         v1921DieRoll: dieRoll,
-        randomCounterAfter: state.randomCounter
+        randomCounterAfter: state.randomCounter,
+        playfulAiRolledDice: 1
+      };
+      if (dieRoll <= 3) {
+        startPlayfulAiChoice(state, sourceCardId, 0, 0, dieRoll);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          playfulAiChoiceOpened: true,
+          playfulAiRemainingDice: 0
+        };
+        return;
+      }
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        playfulAiComplete: true,
+        playfulAiRemainingDice: 0
       };
     }
   },
@@ -1456,6 +1470,16 @@ export function validateGameState(state: GameState): ValidationResult {
       }
     }
   }
+  if (state.run?.aiBoonStrengthByBreaker) {
+    for (const [breakerId, amount] of Object.entries(state.run.aiBoonStrengthByBreaker)) {
+      if (amount === undefined || !Number.isInteger(amount) || amount < 1 || amount > 6) {
+        errors.push(`AI Boon run strength for ${breakerId} must be a die result.`);
+      }
+    }
+  }
+  if (state.runnerPersistentExtraActions !== undefined && (!Number.isInteger(state.runnerPersistentExtraActions) || state.runnerPersistentExtraActions < 0)) {
+    errors.push("Runner persistent extra actions must be a non-negative integer.");
+  }
   if (state.run?.breach) {
     const effectiveAccessServerId = state.run.accessServerOverride ?? state.run.attackedServerId;
     if (state.run.phase !== "access") errors.push("Breach is only valid during access.");
@@ -1997,23 +2021,10 @@ function corpMainActions(state: GameState): LegalAction[] {
           state,
           "corp",
           "gain_credit",
-          `${definition.title}: deterministischen Wuerfel werfen`,
+          `${definition.title}: Tags prüfen`,
           assetId,
           [{ clicks: 1 }],
-          { cardId: assetId, v1921AssetAbility: "deterministic_die_probe" }
-        )
-      );
-    }
-    if (definition.id === V1921_RIO_DE_JANEIRO_CITY_GRID_ID) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Server-Wuerfelprobe`,
-          assetId,
-          [{ clicks: 1 }],
-          { cardId: assetId, v1921UpgradeAbility: "deterministic_server_die_probe" }
+          { cardId: assetId, v1921AssetAbility: "schlaghund_tag_damage" }
         )
       );
     }
@@ -2336,32 +2347,6 @@ function runnerMainActions(state: GameState): LegalAction[] {
           )
         );
       }
-      if (V1921_RUNNER_RANDOM_PROGRAM_IDS.has(definition.id)) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: deterministischen Wuerfel werfen`,
-            cardId,
-            [{ clicks: 1 }],
-            { cardId, v1921RunnerProgramAbility: "deterministic_die_probe" }
-          )
-        );
-      }
-      if (definition.id === V1921_QUEST_FOR_CATTEKIN_ID) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: deterministischen Wuerfel werfen`,
-            cardId,
-            [{ clicks: 1 }],
-            { cardId, v1921RunnerResourceAbility: "deterministic_die_probe" }
-          )
-        );
-      }
       if (definition.id === RONIN_AROUND_ID && state.runner.stack.length >= 2) {
         actions.push(
           action(
@@ -2631,6 +2616,17 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
 function runRemainderStrengthBonusForBreaker(run: GameState["run"], breakerId: CardInstanceId): number {
   if (!run) return 0;
   return Math.max(0, Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0));
+}
+
+function runnerBreakerStrengthForRun(state: GameState, breakerId: CardInstanceId): number {
+  const definition = definitionFor(state, breakerId);
+  const instance = mustInstance(state.cardInstances, breakerId);
+  const run = state.run;
+  const aiBoonStrength = run?.aiBoonStrengthByBreaker?.[breakerId];
+  if (definition.id === V1921_AI_BOON_ID && Number.isInteger(aiBoonStrength)) {
+    return Math.max(0, Math.floor(aiBoonStrength ?? 0)) + instance.strengthModifier + runRemainderStrengthBonusForBreaker(run, breakerId);
+  }
+  return (definition.strength ?? 0) + instance.strengthModifier + runRemainderStrengthBonusForBreaker(run, breakerId);
 }
 
 function iceRezCostReductionFor(state: GameState, iceDefinition: CardDefinition): number {
@@ -2920,10 +2916,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   for (const breakerId of state.runner.rig.programs) {
     const breaker = definitionFor(state, breakerId);
     if (!runnerCanUseBreakerOnCurrentFort(state, breakerId)) continue;
-    const breakerStrength =
-      (breaker.strength ?? 0) +
-      mustInstance(state.cardInstances, breakerId).strengthModifier +
-      runRemainderStrengthBonusForBreaker(run, breakerId);
+    const breakerStrength = runnerBreakerStrengthForRun(state, breakerId);
     const pump = breaker.abilities?.find((ability) => ability.type === "pump_strength");
     if (pump && availableRunnerRunCredits(state, breakerId) >= pump.cost.credits) {
       actions.push(
@@ -3358,67 +3351,32 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         };
         return;
       }
-      if (legalAction.payload?.v1921AssetAbility === "deterministic_die_probe") {
+      if (legalAction.payload?.v1921AssetAbility === "schlaghund_tag_damage") {
         if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.21-Asset-Zufall nutzen.");
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
         if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.21-Asset-Zufallsfaehigkeit ist nicht rezzed installiert.");
         const definition = definitionFor(state, sourceCardId);
         if (definition.id !== V1921_SCHLAGHUND_ID) throw new Error("Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.");
-        const randomPurpose = `v1921.die.${definition.id}.asset_probe`;
-        const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+        const { dieRoll, randomPurpose } = rollV1921Die(state, definition.id, `asset_action.${state.stateVersion + 1}`);
+        const damageApplies = dieRoll <= state.runner.tags;
+        if (damageApplies) {
+          const summary = doDamage(state, {
+            damageId: `v1921.schlaghund.${state.stateVersion + 1}.${sourceCardId}`,
+            damageType: "meat",
+            amount: 10,
+            source: `ability:${V1921_SCHLAGHUND_ID}`
+          });
+          setDamagePayload(legalAction, summary);
+          trashCorpInstalledCardToArchives(state, sourceCardId);
+        }
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           randomPurpose,
           v1921DieRoll: dieRoll,
-          randomCounterAfter: state.randomCounter
-        };
-        return;
-      }
-      if (legalAction.payload?.v1921UpgradeAbility === "deterministic_server_die_probe") {
-        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.21-Upgrade-Zufall nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.21-Upgrade-Zufallsfaehigkeit ist nicht rezzed installiert.");
-        const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1921_RIO_DE_JANEIRO_CITY_GRID_ID) throw new Error("Die V1.9.21-Upgrade-Zufallsfaehigkeit passt nicht zur Karte.");
-        const randomPurpose = `v1921.die.${definition.id}.server_probe`;
-        const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          randomPurpose,
-          v1921DieRoll: dieRoll,
-          randomCounterAfter: state.randomCounter
-        };
-        return;
-      }
-      if (legalAction.payload?.v1921RunnerProgramAbility === "deterministic_die_probe") {
-        if (legalAction.side !== "runner") throw new Error("Nur der Runner darf V1.9.21-Programm-Zufall nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.runner.rig.programs.includes(sourceCardId)) throw new Error("Die V1.9.21-Programm-Zufallsfaehigkeit ist nicht installiert.");
-        const definition = definitionFor(state, sourceCardId);
-        if (!V1921_RUNNER_RANDOM_PROGRAM_IDS.has(definition.id)) throw new Error("Die V1.9.21-Programm-Zufallsfaehigkeit passt nicht zur Karte.");
-        const randomPurpose = `v1921.die.${definition.id}.program_probe`;
-        const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          randomPurpose,
-          v1921DieRoll: dieRoll,
-          randomCounterAfter: state.randomCounter
-        };
-        return;
-      }
-      if (legalAction.payload?.v1921RunnerResourceAbility === "deterministic_die_probe") {
-        if (legalAction.side !== "runner") throw new Error("Nur der Runner darf V1.9.21-Ressourcen-Zufall nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.runner.rig.resources.includes(sourceCardId)) throw new Error("Die V1.9.21-Ressourcen-Zufallsfaehigkeit ist nicht installiert.");
-        const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1921_QUEST_FOR_CATTEKIN_ID) throw new Error("Die V1.9.21-Ressourcen-Zufallsfaehigkeit passt nicht zur Karte.");
-        const randomPurpose = `v1921.die.${definition.id}.resource_probe`;
-        const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          randomPurpose,
-          v1921DieRoll: dieRoll,
-          randomCounterAfter: state.randomCounter
+          randomCounterAfter: state.randomCounter,
+          runnerTagsAfter: state.runner.tags,
+          schlaghundDamageDealt: damageApplies,
+          schlaghundTrashed: damageApplies
         };
         return;
       }
@@ -3607,7 +3565,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       } else {
         spendClick(state, "runner");
       }
-      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">);
+      startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, undefined, 1, undefined, legalAction);
       if (legalAction.payload?.v1918UpgradeAbility === "run_start_tax") {
         const taxCredits = legalAction.costs.reduce((sum, cost) => sum + (Number.isInteger(cost.credits) ? cost.credits ?? 0 : 0), 0);
         if (taxCredits > 0) spendRunnerRunCredits(state, taxCredits);
@@ -3757,7 +3715,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       resolvePendingChoice(state, legalAction, playerAction);
       return;
     case "end_turn":
-      endTurn(state, legalAction.side);
+      endTurn(state, legalAction.side, legalAction);
       return;
     case "trigger_ability":
       if (legalAction.payload?.resourceAbility === "broker_load_credits" || legalAction.payload?.resourceAbility === "broker_take_credits") {
@@ -4038,7 +3996,8 @@ function startRun(
   serverId: Exclude<ServerId, "new_remote">,
   pendingSuccessBonusCredits?: number,
   accessCount = 1,
-  options?: StartRunOptions
+  options?: StartRunOptions,
+  legalAction?: LegalAction
 ): void {
   const server = mustServer(state, serverId);
   const flags = ensureRunnerTurnFlags(state);
@@ -4071,12 +4030,43 @@ function startRun(
     ...(isV099OrLater(state) ? { badPublicityCredits: state.corp.badPublicity } : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {})
   };
+  applyV1921AiBoonStartOfRun(state, legalAction);
   if (server.ice.length > 0) {
     const approachedIceId = mustArrayValue(server.ice, 0, "Server has no approached ice.");
     state.run.approachedIceId = approachedIceId;
     approachOrEncounterIce(state, approachedIceId);
   } else {
     enterAccess(state);
+  }
+}
+
+function applyV1921AiBoonStartOfRun(state: GameState, legalAction?: LegalAction): void {
+  const run = state.run;
+  if (!run) return;
+  const aiBoonIds = state.runner.rig.programs
+    .filter((cardId) => definitionFor(state, cardId).id === V1921_AI_BOON_ID)
+    .sort();
+  if (aiBoonIds.length === 0) return;
+  const strengths: string[] = [];
+  let lastRoll = 0;
+  let lastPurpose = "";
+  for (const [index, cardId] of aiBoonIds.entries()) {
+    const roll = rollV1921Die(state, V1921_AI_BOON_ID, `start_of_run.${run.runId}.${index}`);
+    run.aiBoonStrengthByBreaker = { ...(run.aiBoonStrengthByBreaker ?? {}), [cardId]: roll.dieRoll };
+    strengths.push(`${cardId}:${roll.dieRoll}`);
+    lastRoll = roll.dieRoll;
+    lastPurpose = roll.randomPurpose;
+  }
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1921RunnerProgramAbility: "ai_boon_start_of_run_strength",
+      randomPurpose: lastPurpose,
+      v1921DieRoll: lastRoll,
+      randomCounterAfter: state.randomCounter,
+      aiBoonRunStrength: lastRoll,
+      aiBoonStrengthAssignments: strengths.join(",")
+    };
   }
 }
 
@@ -4317,6 +4307,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     return;
   }
   applyBartmossPostEncounterTrigger(state, run);
+  if (applyV1921RioDeJaneiroAfterPassIce(state, run, legalAction)) return;
   movePastCurrentIce(state);
 }
 
@@ -4340,6 +4331,40 @@ function applyBartmossPostEncounterTrigger(state: GameState, run: ActiveRun): vo
     const die = rollDeterministicDie(state, `${BARTMOSS_ID}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`);
     if (die === 1) trashRunnerInstalledProgram(state, breakerId);
   }
+}
+
+function applyV1921RioDeJaneiroAfterPassIce(state: GameState, run: ActiveRun, legalAction?: LegalAction): boolean {
+  const encounteredIceId = run.encounteredIceId;
+  if (!encounteredIceId || run.position.kind !== "ice") return false;
+  if (!mustInstance(state.cardInstances, encounteredIceId).rezzed) return false;
+  const serverId = run.position.serverId;
+  const server = mustServer(state, serverId);
+  const rioIds = server.root
+    .filter((cardId) => mustInstance(state.cardInstances, cardId).rezzed)
+    .filter((cardId) => definitionFor(state, cardId).id === V1921_RIO_DE_JANEIRO_CITY_GRID_ID)
+    .sort();
+  if (rioIds.length === 0) return false;
+  for (const [index, rioId] of rioIds.entries()) {
+    const roll = rollV1921Die(state, V1921_RIO_DE_JANEIRO_CITY_GRID_ID, `after_pass_ice.${run.runId}.${encounteredIceId}.${index}`);
+    const endRun = roll.dieRoll === 1;
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        cardId: rioId,
+        v1921UpgradeAbility: "rio_de_janeiro_after_pass_ice",
+        serverId,
+        randomPurpose: roll.randomPurpose,
+        v1921DieRoll: roll.dieRoll,
+        randomCounterAfter: state.randomCounter,
+        rioDeJaneiroEndRun: endRun
+      };
+    }
+    if (endRun) {
+      finishRun(state, false, legalAction);
+      return true;
+    }
+  }
+  return false;
 }
 
 function resolveBlinkBreakSubroutineAction(state: GameState, breakerId: CardInstanceId, subroutineIndex: number, legalAction: LegalAction): void {
@@ -5282,7 +5307,7 @@ function tokyoChibaUnsuccessfulRunBonus(state: GameState, run: GameState["run"],
 
 function finishRun(state: GameState, successful: boolean, legalAction?: LegalAction): void {
   const run = state.run;
-  if (run && successful) applyV181SuccessfulRunCounterTriggers(state, run);
+  if (run && successful) applyV181SuccessfulRunCounterTriggers(state, run, legalAction);
   const allNighterBonusRunOnFinish = run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? run?.pendingSuccessBonusCredits ?? 0 : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(state, run, successful);
@@ -5311,7 +5336,7 @@ function finishRun(state: GameState, successful: boolean, legalAction?: LegalAct
   cleanupEmptyRemotes(state);
 }
 
-function applyV181SuccessfulRunCounterTriggers(state: GameState, run: ActiveRun): void {
+function applyV181SuccessfulRunCounterTriggers(state: GameState, run: ActiveRun, legalAction?: LegalAction): void {
   const pattelsInstalled = runnerInstalledCardCountByDefinition(state, "onr_v1_046_pattels-virus");
   if (pattelsInstalled > 0) {
     const targetIceId = run.fullyBrokenIceIds?.[0];
@@ -5328,6 +5353,17 @@ function applyV181SuccessfulRunCounterTriggers(state: GameState, run: ActiveRun)
       if (definitionFor(state, cardId).id !== COCKROACH_ID) continue;
       addCardCounter(state, cardId, "virus", 1);
     }
+    for (const cardId of state.runner.rig.programs) {
+      if (definitionFor(state, cardId).id !== V1921_BOARDWALK_ID) continue;
+      addCardCounter(state, cardId, "virus", 1);
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          v1921RunnerProgramAbility: "boardwalk_successful_hq_counter",
+          boardwalkCounterAfter: cardCounter(state, cardId, "virus")
+        };
+      }
+    }
   }
   for (const cardId of state.runner.rig.programs) {
     if (definitionFor(state, cardId).id !== INCUBATOR_ID) continue;
@@ -5335,7 +5371,7 @@ function applyV181SuccessfulRunCounterTriggers(state: GameState, run: ActiveRun)
   }
 }
 
-function endTurn(state: GameState, side: Side): void {
+function endTurn(state: GameState, side: Side, legalAction?: LegalAction): void {
   if (side === "runner") {
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
@@ -5349,10 +5385,10 @@ function endTurn(state: GameState, side: Side): void {
     corpFlags.scoredBlackOpsAgendaLastTurn = corpFlags.scoredBlackOpsAgendaThisTurn;
     corpFlags.scoredBlackOpsAgendaThisTurn = false;
   }
-  startDiscardPhase(state, side);
+  startDiscardPhase(state, side, legalAction);
 }
 
-function startDiscardPhase(state: GameState, side: Side): void {
+function startDiscardPhase(state: GameState, side: Side, legalAction?: LegalAction): void {
   state.activeSide = side;
   if (side === "runner") {
     state.phase = "runner_discard_phase";
@@ -5366,32 +5402,32 @@ function startDiscardPhase(state: GameState, side: Side): void {
       delete state.run;
       return;
     }
-    processDiscardStep(state, "runner");
+    processDiscardStep(state, "runner", legalAction);
     return;
   }
 
   state.phase = "corp_discard_phase";
   state.timingPoint = "corp_discard.select_cards";
-  processDiscardStep(state, "corp");
+  processDiscardStep(state, "corp", legalAction);
 }
 
-function processDiscardStep(state: GameState, side: Side): void {
+function processDiscardStep(state: GameState, side: Side, legalAction?: LegalAction): void {
   const hand = handForSide(state, side);
   const requiredDiscardCount = hand.length - maxHandSize(state, side);
   if (requiredDiscardCount <= 0) {
-    completeDiscardPhase(state, side);
+    completeDiscardPhase(state, side, legalAction);
     return;
   }
   state.timingPoint = side === "corp" ? "corp_discard.select_cards" : "runner_discard.select_cards";
   state.pendingChoice = discardChoice(state, side, requiredDiscardCount, state.stateVersion + 1);
 }
 
-function completeDiscardPhase(state: GameState, side: Side): void {
+function completeDiscardPhase(state: GameState, side: Side, legalAction?: LegalAction): void {
   if (side === "runner") {
     startCorpTurn(state);
     return;
   }
-  startRunnerTurn(state);
+  startRunnerTurn(state, legalAction);
 }
 
 function applyRunnerForgoNextAction(state: GameState): void {
@@ -5412,11 +5448,11 @@ function startCorpTurn(state: GameState): void {
   applyCorpStartOfTurnEffects(state);
 }
 
-function startRunnerTurn(state: GameState): void {
+function startRunnerTurn(state: GameState, legalAction?: LegalAction): void {
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
   state.timingPoint = "runner_action.main";
-  state.runner.clicks = 4;
+  state.runner.clicks = 4 + Math.max(0, Math.floor(state.runnerPersistentExtraActions ?? 0));
   state.corp.clicks = 0;
   const flags = ensureRunnerTurnFlags(state);
   const forgoPending = flags.forgoNextActionPending === true;
@@ -5437,7 +5473,7 @@ function startRunnerTurn(state: GameState): void {
   }
   resolveBizarreEncryptionDelayedAgendas(state);
   refreshRecurringCredits(state, "runner");
-  applyRunnerStartOfTurnEffects(state);
+  applyRunnerStartOfTurnEffects(state, legalAction);
 }
 
 function resolveBizarreEncryptionDelayedAgendas(state: GameState): void {
@@ -5490,7 +5526,7 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   }
 }
 
-function applyRunnerStartOfTurnEffects(state: GameState): void {
+function applyRunnerStartOfTurnEffects(state: GameState, legalAction?: LegalAction): void {
   const flags = ensureRunnerTurnFlags(state);
   const dataRavenCounters = Object.entries(state.cardInstances).reduce((sum, [cardId, instance]) => {
     return definitionFor(state, cardId).id === DATA_RAVEN_ID ? sum + (instance.counters?.power ?? 0) : sum;
@@ -5504,12 +5540,94 @@ function applyRunnerStartOfTurnEffects(state: GameState): void {
     }
     flags.startOfTurnFloatingCreditsApplied = true;
   }
+  applyV1921BoardwalkStartOfTurn(state, legalAction);
+  applyV1921QuestForCattekinStartOfTurn(state, legalAction);
   if (state.pendingChoice) return;
   if (queueIncubatorStartOfTurnTransforms(state)) return;
   for (const cardId of state.runner.rig.resources.slice().sort()) {
     if (state.pendingChoice) break;
     const definition = definitionFor(state, cardId);
     if (definition.id === "onr_v1_180_smiths-pawnshop") startSmithsPawnshopChoice(state, cardId);
+  }
+}
+
+function applyV1921BoardwalkStartOfTurn(state: GameState, legalAction?: LegalAction): void {
+  const boardwalkIds = state.runner.rig.programs
+    .filter((cardId) => definitionFor(state, cardId).id === V1921_BOARDWALK_ID)
+    .sort();
+  if (boardwalkIds.length === 0 || state.corp.hq.length === 0) return;
+  let totalRevealCount = 0;
+  const revealedDefinitionIds: CardDefinitionId[] = [];
+  let lastRoll = 0;
+  let lastPurpose = "";
+  for (const boardwalkId of boardwalkIds) {
+    const revealCount = Math.min(Math.floor(cardCounter(state, boardwalkId, "virus") / 2), state.corp.hq.length);
+    if (revealCount <= 0) continue;
+    const available = state.corp.hq.slice();
+    for (let index = 0; index < revealCount && available.length > 0; index += 1) {
+      const randomPurpose = `v1921.die.${V1921_BOARDWALK_ID}.start_of_turn.hq_reveal.${boardwalkId}.${state.stateVersion + 1}.${index}`;
+      const value = nextRandom(state, randomPurpose);
+      const selectedIndex = Math.floor(value * available.length);
+      const cardId = mustArrayValue(available, selectedIndex, "Boardwalk-HQ-Reveal fehlt.");
+      available.splice(selectedIndex, 1);
+      revealedDefinitionIds.push(definitionFor(state, cardId).id);
+      totalRevealCount += 1;
+      lastRoll = Math.floor(value * 6) + 1;
+      lastPurpose = randomPurpose;
+    }
+  }
+  if (totalRevealCount > 0 && legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1921RunnerProgramAbility: "boardwalk_start_of_turn_hq_reveal",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1921_boardwalk_random_hq_reveal",
+      boardwalkRevealCount: totalRevealCount,
+      boardwalkRevealedDefinitionIds: revealedDefinitionIds.join(","),
+      randomPurpose: lastPurpose,
+      v1921DieRoll: lastRoll,
+      randomCounterAfter: state.randomCounter
+    };
+  }
+}
+
+function applyV1921QuestForCattekinStartOfTurn(state: GameState, legalAction?: LegalAction): void {
+  const questIds = state.runner.rig.resources
+    .filter((cardId) => definitionFor(state, cardId).id === V1921_QUEST_FOR_CATTEKIN_ID)
+    .sort();
+  if (questIds.length === 0) return;
+  for (const [index, questId] of questIds.entries()) {
+    if (!state.runner.rig.resources.includes(questId)) continue;
+    const roll = rollV1921Die(state, V1921_QUEST_FOR_CATTEKIN_ID, `start_of_turn.${state.stateVersion + 1}.${index}`);
+    let outcome = "no_effect";
+    if (roll.dieRoll === 6) {
+      trashRunnerInstalledCardToHeap(state, questId);
+      state.runnerPersistentExtraActions = Math.max(0, Math.floor(state.runnerPersistentExtraActions ?? 0)) + 1;
+      state.runner.clicks += 1;
+      outcome = "trash_gain_persistent_action";
+    } else if (roll.dieRoll === 1 || roll.dieRoll === 2) {
+      const damageType = roll.dieRoll === 1 ? "core" : "net";
+      const summary = doDamage(state, {
+        damageId: `v1921.quest_for_cattekin.${state.stateVersion + 1}.${questId}.${roll.dieRoll}`,
+        damageType,
+        amount: 1,
+        source: `ability:${V1921_QUEST_FOR_CATTEKIN_ID}:unpreventable`
+      });
+      outcome = roll.dieRoll === 1 ? "unpreventable_core_damage" : "unpreventable_net_damage";
+      if (legalAction) setDamagePayload(legalAction, summary);
+      if (state.winner) return;
+    }
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1921RunnerResourceAbility: "quest_for_cattekin_start_of_turn",
+        randomPurpose: roll.randomPurpose,
+        v1921DieRoll: roll.dieRoll,
+        randomCounterAfter: state.randomCounter,
+        questForCattekinOutcome: outcome,
+        questExtraActionsPerTurnAfter: state.runnerPersistentExtraActions ?? 0
+      };
+    }
   }
 }
 
@@ -6564,6 +6682,125 @@ function validateChoiceAction(choice: ChoiceRequest | undefined, legalAction: Le
   return undefined;
 }
 
+function playfulAiChoiceSource(sourceCardId: CardInstanceId, remainingDice: number, rollIndex: number, lastRoll: number): string {
+  return `v1921.playful_ai:sourceCardId=${sourceCardId}:remainingDice=${remainingDice}:rollIndex=${rollIndex}:lastRoll=${lastRoll}`;
+}
+
+function parsePlayfulAiChoiceSource(source: string):
+  | {
+      sourceCardId: CardInstanceId;
+      remainingDice: number;
+      rollIndex: number;
+      lastRoll: number;
+    }
+  | undefined {
+  if (!source.startsWith("v1921.playful_ai:")) return undefined;
+  const parts = Object.fromEntries(
+    source
+      .split(":")
+      .slice(1)
+      .map((part) => {
+        const [key, ...valueParts] = part.split("=");
+        return [key, valueParts.join("=")];
+      })
+  );
+  const sourceCardId = parts.sourceCardId;
+  const remainingDice = Number(parts.remainingDice);
+  const rollIndex = Number(parts.rollIndex);
+  const lastRoll = Number(parts.lastRoll);
+  if (!sourceCardId || !Number.isInteger(remainingDice) || !Number.isInteger(rollIndex) || !Number.isInteger(lastRoll)) return undefined;
+  if (remainingDice < 0 || rollIndex < 0 || lastRoll < 1 || lastRoll > 3) return undefined;
+  return { sourceCardId, remainingDice, rollIndex, lastRoll };
+}
+
+function startPlayfulAiChoice(state: GameState, sourceCardId: CardInstanceId, remainingDice: number, rollIndex: number, lastRoll: number): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (!state.runner.heap.includes(sourceCardId) || definitionFor(state, sourceCardId).id !== V1921_PLAYFUL_AI_ID) {
+    throw new Error("Playful AI ist nicht als aufgeloestes Event im Heap.");
+  }
+  const boundedRemaining = Math.max(0, Math.floor(remainingDice));
+  const boundedRoll = Math.max(1, Math.min(3, Math.floor(lastRoll)));
+  state.pendingChoice = {
+    choiceId: `v1921_playful_ai_${state.stateVersion + 1}_${rollIndex}_${boundedRemaining}_${boundedRoll}`,
+    side: "runner",
+    source: playfulAiChoiceSource(sourceCardId, boundedRemaining, rollIndex, boundedRoll),
+    prompt: `Playful AI: ${boundedRoll} Credits nehmen und/oder ${boundedRoll} Würfel beiseitelegen.`,
+    kind: "select_option",
+    options: Array.from({ length: boundedRoll + 1 }, (_, gainAmount) => {
+      const setAsideDice = boundedRoll - gainAmount;
+      return {
+        id: `gain_${gainAmount}_set_aside_${setAsideDice}`,
+        label: `${gainAmount} Credit${gainAmount === 1 ? "" : "s"} nehmen, ${setAsideDice} Würfel beiseitelegen`,
+        publicLabel: "Playful-AI-Aufteilung",
+        value: gainAmount
+      };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+}
+
+function resolvePlayfulAiChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  const parsed = choice ? parsePlayfulAiChoiceSource(choice.source) : undefined;
+  if (!choice || !parsed) throw new Error("Es ist keine Playful-AI-Choice offen.");
+  if (choice.side !== "runner") throw new Error("Playful AI gehoert dem Runner.");
+  if (!state.runner.heap.includes(parsed.sourceCardId) || definitionFor(state, parsed.sourceCardId).id !== V1921_PLAYFUL_AI_ID) {
+    throw new Error("Playful AI ist nicht mehr als aufgeloestes Event im Heap.");
+  }
+  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const option = choice.options.find((candidate) => candidate.id === selectedId);
+  const gainAmount = typeof option?.value === "number" ? option.value : Number.NaN;
+  if (!Number.isInteger(gainAmount) || gainAmount < 0 || gainAmount > parsed.lastRoll) throw new Error("Die Playful-AI-Aufteilung ist ungueltig.");
+  const setAsideDice = parsed.lastRoll - gainAmount;
+  credits(state, "runner", gainAmount);
+  delete state.pendingChoice;
+  const loopResult = continuePlayfulAiDiceLoop(state, parsed.sourceCardId, parsed.remainingDice + setAsideDice, parsed.rollIndex);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1921RunnerEventAbility: "playful_ai_dice_loop",
+    choiceVisibility: "public",
+    playfulAiGainedCredits: gainAmount,
+    playfulAiSetAsideDice: setAsideDice,
+    playfulAiRemainingDice: loopResult.remainingDice,
+    playfulAiRolledDice: loopResult.rolledDice,
+    playfulAiComplete: loopResult.complete,
+    ...(loopResult.choiceOpened ? { playfulAiChoiceOpened: true } : {}),
+    ...(loopResult.lastDieRoll !== undefined ? { v1921DieRoll: loopResult.lastDieRoll } : {}),
+    ...(loopResult.lastRandomPurpose ? { randomPurpose: loopResult.lastRandomPurpose } : {}),
+    randomCounterAfter: state.randomCounter,
+    runnerCreditsAfter: state.runner.credits
+  };
+}
+
+function continuePlayfulAiDiceLoop(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  diceToRoll: number,
+  previousRollIndex: number
+): { remainingDice: number; rolledDice: number; complete: boolean; choiceOpened: boolean; lastDieRoll?: number; lastRandomPurpose?: string } {
+  let remainingDice = Math.max(0, Math.floor(diceToRoll));
+  let rollIndex = Math.max(0, Math.floor(previousRollIndex));
+  let rolledDice = 0;
+  let lastDieRoll: number | undefined;
+  let lastRandomPurpose: string | undefined;
+  while (remainingDice > 0) {
+    remainingDice -= 1;
+    rollIndex += 1;
+    const roll = rollV1921Die(state, V1921_PLAYFUL_AI_ID, `set_aside.roll.${rollIndex}`);
+    rolledDice += 1;
+    lastDieRoll = roll.dieRoll;
+    lastRandomPurpose = roll.randomPurpose;
+    if (roll.dieRoll <= 3) {
+      startPlayfulAiChoice(state, sourceCardId, remainingDice, rollIndex, roll.dieRoll);
+      return { remainingDice, rolledDice, complete: false, choiceOpened: true, lastDieRoll, lastRandomPurpose };
+    }
+  }
+  return { remainingDice: 0, rolledDice, complete: true, choiceOpened: false, ...(lastDieRoll !== undefined ? { lastDieRoll } : {}), ...(lastRandomPurpose ? { lastRandomPurpose } : {}) };
+}
+
 function selectedChoiceIds(selectedChoices: PlayerAction["selectedChoices"]): string[] {
   const raw =
     selectedChoices?.selectedOptionIds ??
@@ -6635,6 +6872,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
   }
   if (state.pendingChoice.source.startsWith("v170.smiths_pawnshop")) {
     resolveSmithsPawnshopChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1921.playful_ai")) {
+    resolvePlayfulAiChoice(state, legalAction, playerAction);
     return;
   }
   delete state.pendingChoice;
@@ -6729,7 +6970,7 @@ function resolveDiscardChoice(state: GameState, legalAction: LegalAction, player
     hiddenZoneAction: "discard_phase"
   };
   delete state.pendingChoice;
-  completeDiscardPhase(state, side);
+  completeDiscardPhase(state, side, legalAction);
 }
 
 function resolveSetupMulliganChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
@@ -7722,9 +7963,7 @@ function buildEvent(before: number, after: number, stateHashAfter: StateHash, pr
 function publicActionUseContext(state: GameState, legalAction: LegalAction): Record<string, unknown> {
   const actionCostClicks = clickCostForAction(legalAction);
   if (actionCostClicks <= 0) return {};
-  const clicksBefore = clicksForSide(state, legalAction.side);
-  const turnCapacity = Math.max(baseClicksForSide(legalAction.side), clicksBefore);
-  const usedBefore = Math.max(0, turnCapacity - clicksBefore);
+  const usedBefore = spentActionClicksThisTurn(state, legalAction.side);
   return {
     actionCostClicks,
     turnActionOrdinalStart: usedBefore + 1,
@@ -7732,16 +7971,23 @@ function publicActionUseContext(state: GameState, legalAction: LegalAction): Rec
   };
 }
 
+function spentActionClicksThisTurn(state: GameState, side: Side): number {
+  let spent = 0;
+  for (let index = state.eventLog.length - 1; index >= 0; index -= 1) {
+    const payload = state.eventLog[index]?.publicPayload ?? {};
+    if (payload.actor !== side) continue;
+    if ((payload.actionType ?? state.eventLog[index]?.type) === "end_turn") break;
+    spent += positiveInteger(payload.actionCostClicks);
+  }
+  return spent;
+}
+
+function positiveInteger(value: unknown): number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : 0;
+}
+
 function clickCostForAction(legalAction: LegalAction): number {
   return legalAction.costs.reduce((sum, cost) => sum + (Number.isInteger(cost.clicks) && cost.clicks ? cost.clicks : 0), 0);
-}
-
-function clicksForSide(state: GameState, side: Side): number {
-  return side === "corp" ? state.corp.clicks : state.runner.clicks;
-}
-
-function baseClicksForSide(side: Side): number {
-  return side === "corp" ? 3 : 4;
 }
 
 function publicLabel(legalAction: LegalAction): string {
@@ -8024,6 +8270,36 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.randomCounterAfter === "number") context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string") context.randomPurpose = legalAction.payload.randomPurpose;
   }
+  if (
+    legalAction.payload?.v1921AssetAbility ||
+    legalAction.payload?.v1921UpgradeAbility ||
+    legalAction.payload?.v1921RunnerProgramAbility ||
+    legalAction.payload?.v1921RunnerEventAbility ||
+    legalAction.payload?.v1921RunnerResourceAbility
+  ) {
+    for (const key of [
+      "playfulAiChoiceOpened",
+      "playfulAiComplete",
+      "playfulAiGainedCredits",
+      "playfulAiSetAsideDice",
+      "playfulAiRemainingDice",
+      "playfulAiRolledDice",
+      "runnerCreditsAfter",
+      "aiBoonRunStrength",
+      "boardwalkCounterAfter",
+      "boardwalkRevealCount",
+      "boardwalkRevealedDefinitionIds",
+      "questForCattekinOutcome",
+      "questExtraActionsPerTurnAfter",
+      "schlaghundDamageDealt",
+      "schlaghundTrashed",
+      "rioDeJaneiroEndRun",
+      "serverId"
+    ]) {
+      const value = legalAction.payload[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
   if (typeof legalAction.payload?.v1919AgendaDifficulty === "number") context.v1919AgendaDifficulty = legalAction.payload.v1919AgendaDifficulty;
   if (typeof legalAction.payload?.v1919Overadvance === "number") context.v1919Overadvance = legalAction.payload.v1919Overadvance;
   if (typeof legalAction.payload?.v1919BonusAgendaPoints === "number") context.v1919BonusAgendaPoints = legalAction.payload.v1919BonusAgendaPoints;
@@ -8161,7 +8437,6 @@ function isResolvedGameEffect(value: unknown): value is ResolvedGameEffect {
 function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
   const definition = definitionFor(state, id);
   const instance = mustInstance(state.cardInstances, id);
-  const runRemainderStrengthBonus = definition.type === "program" ? runRemainderStrengthBonusForBreaker(state.run, id) : 0;
   return {
     instanceId: id,
     known: true,
@@ -8181,7 +8456,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(definition.advancementRequirement !== undefined ? { advancementRequirement: definition.advancementRequirement } : {}),
     ...(definition.strength !== undefined
       ? {
-          strength: definition.type === "ice" ? iceStrengthFor(state, id) : definition.strength + instance.strengthModifier + runRemainderStrengthBonus
+          strength: definition.type === "ice" ? iceStrengthFor(state, id) : definition.type === "program" ? runnerBreakerStrengthForRun(state, id) : definition.strength + instance.strengthModifier
         }
       : {}),
     ...(definition.agendaPoints !== undefined ? { agendaPoints: definition.agendaPoints } : {}),
@@ -8460,6 +8735,11 @@ function rollDeterministicDie(state: GameState, purpose: string): number {
   const scopedPurpose = /^v\d+\.die\./.test(purpose) ? purpose : `v190.die.${purpose}`;
   const value = nextRandom(state, scopedPurpose);
   return Math.floor(value * 6) + 1;
+}
+
+function rollV1921Die(state: GameState, definitionId: CardDefinitionId, window: string): { dieRoll: number; randomPurpose: string } {
+  const randomPurpose = `v1921.die.${definitionId}.${window}`;
+  return { dieRoll: rollDeterministicDie(state, randomPurpose), randomPurpose };
 }
 
 function deterministicNumber(input: string): number {

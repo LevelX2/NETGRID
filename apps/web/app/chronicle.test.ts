@@ -143,6 +143,40 @@ describe("formatChronicleEvent", () => {
     expect(take.chips).not.toContain("0 Credits auf Broker");
   });
 
+  it("shows Playful AI die results and follow-up choices in the chronicle", () => {
+    const played = formatChronicleEvent(
+      makeEvent("play_event", {
+        actor: "runner",
+        title: "Playful AI",
+        cardDefinitionId: "onr_v1_104_playful-ai",
+        v1921RunnerEventAbility: "playful_ai_dice_loop",
+        v1921DieRoll: 3,
+        playfulAiChoiceOpened: true
+      }),
+      "runner"
+    );
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        title: "Playful AI",
+        sourceDefinitionId: "onr_v1_104_playful-ai",
+        v1921RunnerEventAbility: "playful_ai_dice_loop",
+        v1921DieRoll: 5,
+        playfulAiGainedCredits: 2,
+        playfulAiSetAsideDice: 1,
+        playfulAiComplete: true
+      }),
+      "runner"
+    );
+
+    expect(played.title).toBe("Du hast Playful AI gespielt und eine 3 gewürfelt.");
+    expect(played.description).toBe("Der Wurf öffnet eine Entscheidung: Credits nehmen oder Würfel beiseitelegen.");
+    expect(played.chips).toEqual(expect.arrayContaining(["Playful AI", "Wurf 3", "Choice"]));
+    expect(resolved.title).toBe("Du hast Playful AI aufgelöst: 2 Credits genommen und 1 Würfel beiseitegelegt.");
+    expect(resolved.description).toBe("Die Playful-AI-Schleife ist abgeschlossen.");
+    expect(resolved.chips).toEqual(expect.arrayContaining(["Playful AI", "+2 Credits", "1 beiseite", "Wurf 5"]));
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {

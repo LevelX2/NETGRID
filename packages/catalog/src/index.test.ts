@@ -1772,7 +1772,7 @@ describe("catalog import and status logic", () => {
     expect(cardImplementationManifest1921Data.gateAssertions.allCardsDeckLegal).toBe(true);
     expect(cardImplementationManifest1921Data.gateAssertions.allCardsAiSupported).toBe(true);
     expect(deckLegalV1921ScenarioData.completionGate.aiSupported).toBe(true);
-    expect(v1921MechanicsCoverageData.gateAssertions.engineCovered).toBe("all_target_cards_initial_random_probe");
+    expect(v1921MechanicsCoverageData.gateAssertions.engineCovered).toBe("all_target_cards_completed_random_effects");
     expect(v1921MechanicsCoverageData.gateAssertions.hiddenInfoSafeForCoveredSmokes).toBe(true);
     expect(v1921MechanicsCoverageData.gateAssertions.catalogPromotionPending).toBe(false);
 

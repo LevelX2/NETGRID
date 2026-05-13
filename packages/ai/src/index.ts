@@ -1079,6 +1079,17 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
     const selected = choice.options.slice(0, count).map((option) => option.id);
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
   }
+  if (choice.source.startsWith("v1921.playful_ai")) {
+    const selected =
+      choice.options
+        .slice()
+        .sort((left, right) => {
+          const leftValue = typeof left.value === "number" ? left.value : -1;
+          const rightValue = typeof right.value === "number" ? right.value : -1;
+          return rightValue - leftValue || left.id.localeCompare(right.id);
+        })[0] ?? choice.options[0];
+    return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
   if (choice.kind !== "bid_amount") {
     const firstOption = choice.options[0];
     return firstOption ? { choiceId: choice.choiceId, selectedOptionIds: [firstOption.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };

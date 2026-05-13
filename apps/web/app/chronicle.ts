@@ -104,6 +104,20 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
+        const gainedCredits = numberValue(payload.playfulAiGainedCredits) ?? 0;
+        const setAsideDice = numberValue(payload.playfulAiSetAsideDice) ?? 0;
+        const lastRoll = numberValue(payload.v1921DieRoll);
+        const choiceOpened = payload.playfulAiChoiceOpened === true;
+        const complete = payload.playfulAiComplete === true;
+        category = gainedCredits > 0 ? "economy" : "card";
+        visibility = "public";
+        title = phrase(subject, `Playful AI aufgelöst: ${creditText(gainedCredits)} genommen${setAsideDice > 0 ? ` und ${setAsideDice} ${dieText(setAsideDice)} beiseitegelegt` : ""}`);
+        description = choiceOpened ? "Der nächste Wurf öffnet eine weitere Entscheidung." : complete ? "Die Playful-AI-Schleife ist abgeschlossen." : undefined;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Playful AI", `+${gainedCredits} ${creditLabel(gainedCredits)}`, ...(setAsideDice > 0 ? [`${setAsideDice} beiseite`] : []), ...(lastRoll !== undefined ? [`Wurf ${lastRoll}`] : []));
+        break;
+      }
       if (payload.discardResolved === true) {
         category = "hidden";
         visibility = "redacted";
@@ -227,6 +241,22 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "play_event":
     case "play_operation":
+      if (actionType === "play_event" && stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
+        const dieRoll = numberValue(payload.v1921DieRoll);
+        const choiceOpened = payload.playfulAiChoiceOpened === true;
+        const complete = payload.playfulAiComplete === true;
+        category = "card";
+        importance = choiceOpened ? "important" : "normal";
+        title = phrase(subject, `${cardTitle ?? "Playful AI"} gespielt${dieRoll !== undefined ? ` und eine ${dieRoll} gewürfelt` : ""}`);
+        description = choiceOpened
+          ? "Der Wurf öffnet eine Entscheidung: Credits nehmen oder Würfel beiseitelegen."
+          : complete
+            ? "Die Playful-AI-Schleife ist ohne weitere Entscheidung abgeschlossen."
+            : undefined;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(actionType === "play_event" ? "Event" : "Operation", "Playful AI", ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), choiceOpened ? "Choice" : "Fertig");
+        break;
+      }
       if (payload.traceStarted === true) {
         const baseTraceStrength = numberValue(payload.baseTraceStrength);
         category = "danger";
@@ -582,6 +612,10 @@ function creditText(amount: number): string {
 
 function creditLabel(amount: number): string {
   return amount === 1 ? "Credit" : "Credits";
+}
+
+function dieText(amount: number): string {
+  return amount === 1 ? "Würfel" : "Würfel";
 }
 
 function traceParticipantLabel(participant: Side, viewer: Side): string {

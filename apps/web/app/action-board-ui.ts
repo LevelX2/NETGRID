@@ -1,4 +1,4 @@
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 
 export const ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
 export const LEGACY_ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
@@ -274,6 +274,27 @@ export function actionSlotDisplay(side: Side, currentClicks: number, displayCapa
     baseCapacity,
     slots
   };
+}
+
+export function actionSlotCapacityForTurn(side: Side, currentClicks: number, events: PublicGameEvent[]): number {
+  const available = Math.max(0, Math.floor(currentClicks));
+  return Math.max(baseActionSlotCapacity(side), available + spentActionClicksThisTurn(side, events));
+}
+
+function spentActionClicksThisTurn(side: Side, events: PublicGameEvent[]): number {
+  let spent = 0;
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    const payload = event?.publicPayload ?? {};
+    if (payload.actor !== side) continue;
+    if ((payload.actionType ?? event?.type) === "end_turn") break;
+    spent += positiveInteger(payload.actionCostClicks);
+  }
+  return spent;
+}
+
+function positiveInteger(value: unknown): number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : 0;
 }
 
 export function actionCostChips(action: Pick<LegalAction, "costs">): CostChipView[] {

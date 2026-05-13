@@ -77,6 +77,7 @@ import {
   actionCostChips,
   aiPacingDelayMs,
   actionMatchesContext,
+  actionSlotCapacityForTurn,
   actionSlotDisplay,
   baseActionSlotCapacity,
   breachProgressLabel,
@@ -1252,15 +1253,16 @@ function turnSideForView(view: PlayerView): Side | null {
   return null;
 }
 
-function updateActionSlotCapacity(capacities: Record<Side, number>, side: Side, currentClicks: number, active: boolean, resetActiveSide: boolean): void {
+function updateActionSlotCapacity(capacities: Record<Side, number>, side: Side, currentClicks: number, active: boolean, resetActiveSide: boolean, events: PublicGameEvent[]): void {
   const baseCapacity = baseActionSlotCapacity(side);
   const safeClicks = Math.max(0, Math.floor(currentClicks));
+  const turnCapacity = active ? actionSlotCapacityForTurn(side, safeClicks, events) : safeClicks;
   if (active && resetActiveSide) {
-    capacities[side] = Math.max(baseCapacity, safeClicks);
+    capacities[side] = Math.max(baseCapacity, turnCapacity);
     return;
   }
   if (active) {
-    capacities[side] = Math.max(capacities[side] ?? baseCapacity, safeClicks);
+    capacities[side] = Math.max(capacities[side] ?? baseCapacity, turnCapacity);
     return;
   }
   if (safeClicks > (capacities[side] ?? baseCapacity)) capacities[side] = safeClicks;
@@ -2102,8 +2104,8 @@ export default function Page() {
 
     setActionSlotCapacities((current) => {
       const next = { ...current };
-      updateActionSlotCapacity(next, ownSide, activeView.own.clicks, activeView.activeSide === ownSide, resetActiveSide);
-      updateActionSlotCapacity(next, opponent, activeView.opponent.clicks, activeView.activeSide === opponent, resetActiveSide);
+      updateActionSlotCapacity(next, ownSide, activeView.own.clicks, activeView.activeSide === ownSide, resetActiveSide, activeView.publicEvents);
+      updateActionSlotCapacity(next, opponent, activeView.opponent.clicks, activeView.activeSide === opponent, resetActiveSide, activeView.publicEvents);
       return next.runner === current.runner && next.corp === current.corp ? current : next;
     });
   }, [activeView?.activeSide, activeView?.own.clicks, activeView?.opponent.clicks, activeView?.side, payload?.matchId, payload?.playerView.stateVersion]);
