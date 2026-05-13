@@ -29,6 +29,7 @@
     "ESA Contract exercises the generic Corp asset install, rez, public Economy-Asset gain-credit ability, Runner access, trash-on-access and Runner-visible Archives path without hidden state payloads.",
     "All eight scoped V1.9.17 economy assets expose distinct public gain-credit LegalActions; v1917AssetAbility participates in actionId generation to prevent same-card ability collisions.",
     "All five scoped V1.9.17 recurring assets exercise deterministic Corp start-of-turn recurring campaign credits without accumulation.",
+    "Hosted Corp cards cascade to Archives when a V1.9.17 host asset is trashed on access, and hostedOn is cleared replay-safely.",
     "Blood Cat exercises a public Trace 3 asset ability through the existing side-safe trace bid window.",
     "Corporate Negotiating Center reveals only the R&D top definition through a public hidden-zone payload.",
     "Rescheduler opens a Corp-private R&D top-2 reorder choice and replays to the same StateHash.",
@@ -37,7 +38,7 @@
     "V1.9.18 Crybaby remains outside the V1.9.17 WIP runtime guard."
   ],
   "verification": {
-    "engine": "pass: 241 tests",
+    "engine": "pass: 242 tests",
     "catalog": "pass: 31 tests",
     "typecheck": "pass",
     "json": "pass: 259 files",

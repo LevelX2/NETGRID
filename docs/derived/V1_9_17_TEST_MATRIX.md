@@ -15,7 +15,7 @@ Stand: 2026-05-13
 | Hidden-Zone | Redigierte Choices für Corporate Negotiating Center, Rescheduler, Setup!, TRAP! | Corporate Negotiating Center Reveal und Rescheduler Korp-private Reorder-Choice grün; Setup!/TRAP! Access-Reveal grün; weitere Spezialfälle Folgearbeit |
 | Access/Ambush | Setup! und TRAP! nur aus legalen Access-Fenstern | Setup!/TRAP! Access-Ambush-WIP grün |
 | Damage/Tags | Solo Squad, Setup!, TRAP! und Tag-Flächen side-sicher | Solo Squad Meat Damage, Setup! Net Damage und TRAP! Net Damage plus Tag grün |
-| Hosting/Recurring | Campaign-/Hosting-/Recurring-Assets ohne Akkumulation oder Host-Leak | Folgearbeit |
+| Hosting/Recurring | Campaign-/Hosting-/Recurring-Assets ohne Akkumulation oder Host-Leak | Recurring grün; Corp-gehostete Karten kaskadieren beim Host-Trash nach Archives; weitere aktive Host-Eligibility-Fälle Folgearbeit |
 | Visibility | PlayerView/PublicEvent/Reconnect/Undo ohne Hidden-Info | Folgearbeit |
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Folgearbeit |
 | AI | AI-Hints, AI-Smokes, legaler Fallback | Folgearbeit |

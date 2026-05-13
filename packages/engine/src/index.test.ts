@@ -5193,6 +5193,31 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("cascades hosted V1.9.17 Corp cards to Archives when the host is trashed on access", () => {
+    let state = toRunnerTurn(v1917GenericAssetGame("v1917-hosted-corp-asset-trash"));
+    state.runner.credits = 10;
+    const hostId = putCorpRootInRemote(state, "onr_v1_309_bbs-whispering-campaign");
+    const hostedId = putCorpRootInRemote(state, "onr_v1_318_department-of-truth-enhancement");
+    state.cardInstances[hostId] = { ...state.cardInstances[hostId]!, faceup: true, rezzed: true };
+    state.cardInstances[hostedId] = { ...state.cardInstances[hostedId]!, faceup: true, rezzed: true, hostedOn: hostId };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.run?.accessedCardId).toBe(hostId);
+    state = apply(state, "runner", (action) => action.type === "trash_accessed_card");
+
+    expect(state.corp.archives).toEqual(expect.arrayContaining([hostId, hostedId]));
+    expect(state.cardInstances[hostId]?.hostedOn).toBeUndefined();
+    expect(state.cardInstances[hostedId]?.hostedOn).toBeUndefined();
+    expect(getPlayerView(state, "runner").servers.find((server) => server.id === "archives")?.root.some((card) => card.instanceId === hostedId)).toBe(true);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("starts V1.9.17 trace asset abilities through the side-safe trace window", () => {
     const traceAssets = ["onr_v1_310_blood-cat", "onr_v1_330_krumz"] as const;
     for (const definitionId of traceAssets) {

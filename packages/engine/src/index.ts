@@ -4106,9 +4106,7 @@ function trashAccessedCard(state: GameState, cardId: string, legalAction?: Legal
     finishRun(state, true);
     return;
   }
-  removeFromAllZones(state, cardId);
-  state.corp.archives.push(cardId);
-  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, rezzed: true, zone: { side: "corp", zone: "archives" } };
+  trashCorpInstalledCardToArchives(state, cardId);
   if (state.run?.breach) {
     completeCurrentBreachAccess(state, "trashed");
     return;
@@ -4262,6 +4260,10 @@ function trashRunnerInstalledCardToHeap(state: GameState, cardId: CardInstanceId
 }
 
 function trashCorpInstalledCardToArchives(state: GameState, cardId: CardInstanceId): void {
+  for (const hostedId of hostedCardsOn(state, cardId)) {
+    const hostedInstance = mustInstance(state.cardInstances, hostedId);
+    if (hostedInstance.owner === "corp") trashCorpInstalledCardToArchives(state, hostedId);
+  }
   const instance = mustInstance(state.cardInstances, cardId);
   const { hostedOn: _hostedOn, ...withoutHost } = instance;
   void _hostedOn;
