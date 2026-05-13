@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 15:19 CEST
+- Ergebnis: V1.9.20 Action-Economy-applyAction-Revalidation ergänzt: falsche Seite und stale State werden am neuen rezzed Asset-Fenster zurückgewiesen; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.test.ts` ergänzt eine V1.9.20-spezifische Negativprüfung für Wrong-Side- und Stale-State-Rejection am Action-Economy-Assetpfad. Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen. Keine Runtime-/AI-/Web-Promotion.
+- Tests: JSON-Validation pass (285 Dateien); `engine` pass (265), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Schnitt vorgesehen (`WIP V1.9.20: action apply revalidation`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-/Visibility-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 15:17 CEST
 - Ergebnis: V1.9.20 Action-Economy-Smoke verbreitert: Remote Facility, Nevinyrral und Pacifica Regional AI werden jetzt alle als rezzed Asset-Quellen mit Revalidierung, Visibility und Replay-/StateHash-Assertion ausgeuebt; Cursor bleibt auf V1.9.20 `implementing`.
 - Release: V1.9.20

@@ -37,6 +37,7 @@
     "All 26 V1.9.20 target cards have runtime definitions with final display-only text and no WIP prefix.",
     "Militech MRAM Chip and MRAM Chip install through legal runner actions and update visible MU deterministically.",
     "Remote Facility, Nevinyrral and Pacifica Regional AI open rezzed Corp action-economy LegalActions that revalidate source, side and gained-action amount.",
+    "The covered V1.9.20 action-economy action rejects wrong-side and stale applyAction submissions.",
     "Fortress Architects reduces ICE rez costs from a visible rezzed root source through the global static modifier layer.",
     "Main-Office Relocation projects a scored-agenda Corp handlimit modifier through both PlayerViews without mutating the base hand size.",
     "Loan from Chiba keeps and refreshes public recurring-credit state across turn transitions.",
@@ -49,7 +50,7 @@
   "verification": {
     "catalog": "pass: 34 tests",
     "typecheck": "pass",
-    "engine": "pass: 264 tests; covered V1.9.20 paths include replay/statehash assertions"
+    "engine": "pass: 265 tests; covered V1.9.20 paths include replay/statehash and applyAction revalidation assertions"
   },
   "completionGate": {
     "releaseDone": false,

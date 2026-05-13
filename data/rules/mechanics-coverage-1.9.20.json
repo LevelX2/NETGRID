@@ -46,6 +46,7 @@
         "main_office_handlimit_smoke",
         "mram_memory_replay_statehash_smoke",
         "action_economy_asset_replay_statehash_smoke",
+        "action_economy_asset_apply_action_revalidation_smoke",
         "main_office_handlimit_replay_statehash_smoke",
         "action_economy_asset_visibility_smoke",
         "main_office_handlimit_visibility_smoke"

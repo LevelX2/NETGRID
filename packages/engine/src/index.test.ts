@@ -4496,6 +4496,49 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     }
   });
 
+  it("rejects wrong-side and stale V1.9.20 action-economy asset actions", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-asset-actions-revalidation",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw"
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 3;
+    state.corp.maxHandSize = 100;
+    const assetId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
+    state.cardInstances[assetId] = { ...state.cardInstances[assetId]!, faceup: true, rezzed: true };
+    const legal = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "gain_credit" && action.payload?.v1920AssetAbility === "gain_actions" && String(action.payload?.cardId) === assetId
+    );
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1920-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1920-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+  });
+
   it("applies rezzed V1.9.20 global ICE rez-cost modifiers from public root sources", () => {
     let state = apply(
       createGameAfterSetup({
