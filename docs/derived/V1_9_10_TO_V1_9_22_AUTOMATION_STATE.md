@@ -67,6 +67,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 03:05 CEST
+- Ergebnis: V1.9.15 Run/Access-WIP begonnen; Cursor bleibt auf V1.9.15 `implementing`.
+- Release: V1.9.15
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: 14er-WIP-Zielmenge mit No-Promotion-Guard im Katalog ergaenzt. WIP-Runtime-Definitionen fuer alle 14 Zielkarten erstellt. Engine-Smoke bestaetigt 14/14 WIP-Definitionen und den No-Scope-Guard gegen V1.9.16. Keine Karte wurde promotet.
+- Tests: `catalog` pass (29), `engine` pass (222), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.15: run access runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.15 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Engine-/LegalAction-Abdeckung fuer Run-Start, Access-Queue, Multiaccess und Ambush/ICE-Ueberlappungen, Manifest/Coverage, AI-Hints/-Smokes, Server/Web, volle Pflichtchecks, Final Review und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 03:03 CEST
 - Ergebnis: V1.9.15 Run Flow, Access, Multiaccess und Ambush on Access release-spezifisch detailgeplant und requirements-freigegeben; Cursor bleibt auf V1.9.15 `implementing`.
 - Release: V1.9.15

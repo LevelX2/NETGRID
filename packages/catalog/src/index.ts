@@ -599,6 +599,23 @@ export const ONR_V1_9_14_RELEASE_CARD_IDS = [
 
 export const ONR_V1_9_14_WIP_CARD_IDS = ONR_V1_9_14_RELEASE_CARD_IDS;
 
+export const ONR_V1_9_15_WIP_CARD_IDS = [
+  "onr_v1_020_dupre",
+  "onr_v1_024_expert-schedule-analyzer",
+  "onr_v1_041_microtech-ai-interface",
+  "onr_v1_043_mystery-box",
+  "onr_v1_062_shredder-uplink-protocol",
+  "onr_v1_065_smarteye",
+  "onr_v1_098_lucidrine-booster-drug",
+  "onr_v1_105_priority-wreck",
+  "onr_v1_111_social-engineering",
+  "onr_v1_112_stumble-through-wilderspace",
+  "onr_v1_142_record-reconstructor",
+  "onr_v1_227_cerberus",
+  "onr_v1_255_mastiff",
+  "onr_v1_294_new-blood"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,

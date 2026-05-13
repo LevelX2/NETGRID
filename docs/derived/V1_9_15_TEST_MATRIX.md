@@ -6,7 +6,7 @@ Status: draft-implementing
 | Gate | Nachweis | Status |
 | --- | --- | --- |
 | Scope Freeze | Zielkartenliste in Plan/Requirements/Matrix | vorbereitet |
-| Runtime Definitions | Alle 14 Zielkarten in Runtime-Definitionsliste | offen |
+| Runtime Definitions | Alle 14 Zielkarten in Runtime-Definitionsliste | teilweise: 14/14 WIP-Definitionen, nicht promotet |
 | LegalAction Revalidation | Run-Start, Access, Multiaccess, Ambush, Kosten, Timing | offen |
 | Visibility | Access-/Hidden-Zone-/Ambush-Payloads side-sicher | offen |
 | Replay/StateHash | Run- und Access-Queue nach Replay identisch | offen |
@@ -15,8 +15,8 @@ Status: draft-implementing
 | Mechanics Coverage | `data/rules/mechanics-coverage-1.9.15.json` | offen |
 | AI Hints | `data/ai/ai-card-hints-deck-legal-v1915.json` | offen |
 | AI Smokes | `data/scenarios/ai-deck-legal-v1915-smokes.json` | offen |
-| Catalog/Web | Release-IDs, manifest refs, sichtbare Webclient-Version | offen |
-| Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | offen |
+| Catalog/Web | Release-IDs, manifest refs, sichtbare Webclient-Version | teilweise: 14er-WIP-Zielmenge mit No-Promotion-Guard |
+| Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | teilweise: catalog, engine und typecheck gruen |
 
 ## Ziel-Smokes
 

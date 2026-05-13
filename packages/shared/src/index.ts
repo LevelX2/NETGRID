@@ -3639,6 +3639,182 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 1,
     rulesText: "Play only if the Runner is tagged. Trash installed Runner hardware.",
     mechanics: ["play_operation", "tag_condition", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_020_dupre",
+    title: "Dupré",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    rulesText: "V1.9.15 WIP: Installed run-flow helper with counter and run-lock interaction.",
+    mechanics: ["install_program", "memory", "run_flow", "counter", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_024_expert-schedule-analyzer",
+    title: "Expert Schedule Analyzer",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText: "V1.9.15 WIP: Installed program for access and breach planning.",
+    mechanics: ["install_program", "memory", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_041_microtech-ai-interface",
+    title: "Microtech AI Interface",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    memoryCost: 2,
+    rulesText: "V1.9.15 WIP: Installed program for access and breach planning.",
+    mechanics: ["install_program", "memory", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_043_mystery-box",
+    title: "Mystery Box",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText: "V1.9.15 WIP: Installed run helper with side-safe reveal support.",
+    mechanics: ["install_program", "memory", "run_flow", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_062_shredder-uplink-protocol",
+    title: "Shredder Uplink Protocol",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText: "V1.9.15 WIP: Installed program for run and access interaction.",
+    mechanics: ["install_program", "memory", "run_flow", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_065_smarteye",
+    title: "Smarteye",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    rulesText: "V1.9.15 WIP: Installed run helper with side-safe reveal support.",
+    mechanics: ["install_program", "memory", "run_flow", "reveal", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_098_lucidrine-booster-drug",
+    title: "Lucidrine Booster Drug",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "V1.9.15 WIP: Event-based run helper with prevention/replacement overlap.",
+    mechanics: ["play_event", "run_flow", "event_modification", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_105_priority-wreck",
+    title: "Priority Wreck",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "V1.9.15 WIP: Event for access and breach pressure.",
+    mechanics: ["play_event", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_111_social-engineering",
+    title: "Social Engineering",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "V1.9.15 WIP: Event for run and access pressure.",
+    mechanics: ["play_event", "run_flow", "access", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_112_stumble-through-wilderspace",
+    title: "Stumble through Wilderspace",
+    side: "runner",
+    type: "event",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "V1.9.15 WIP: Event for trace-aware run and access pressure.",
+    mechanics: ["play_event", "trace", "link", "run_flow", "access", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_142_record-reconstructor",
+    title: "Record Reconstructor",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    rulesText: "V1.9.15 WIP: Installed hardware for access and side-safe hidden-zone support.",
+    mechanics: ["install_hardware", "access", "multiaccess", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+  },
+  onrIce({
+    id: "onr_v1_227_cerberus",
+    title: "Cerberus",
+    subtypes: ["sentry"],
+    rezCost: 6,
+    strength: 5,
+    rulesText: "V1.9.15 WIP: Trace, damage and end-the-run pressure with hidden-zone overlap.",
+    subroutines: [
+      {
+        id: "onr_v1_227_cerberus_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 4,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      },
+      onrNetDamage("onr_v1_227_cerberus_net_damage", 1),
+      onrEtr("onr_v1_227_cerberus_etr")
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", "damage", "end_the_run", "run_flow", ONR_V1_LOCAL_PRIVATE]
+  }),
+  onrIce({
+    id: "onr_v1_255_mastiff",
+    title: "Mastiff",
+    subtypes: ["sentry"],
+    rezCost: 7,
+    strength: 5,
+    rulesText: "V1.9.15 WIP: Trace, core damage and end-the-run pressure.",
+    subroutines: [
+      {
+        id: "onr_v1_255_mastiff_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      },
+      onrCoreDamage("onr_v1_255_mastiff_core_damage", 1),
+      onrEtr("onr_v1_255_mastiff_etr")
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", "damage", "core_damage", "end_the_run", "run_flow", ONR_V1_LOCAL_PRIVATE]
+  }),
+  {
+    id: "onr_v1_294_new-blood",
+    title: "New Blood",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "V1.9.15 WIP: Operation with run-flow and recurring-pressure interaction.",
+    mechanics: ["play_operation", "run_flow", "recurring_credit", ONR_V1_LOCAL_PRIVATE]
   }
 ];
 
