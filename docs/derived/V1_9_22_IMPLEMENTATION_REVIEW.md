@@ -29,4 +29,10 @@ Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fu
 - JSON-Validation fuer `data/**/*.json`: pass, 302 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 275 Tests inkl. 9/9 Runner-Hardware-Install-Smokes und Runner-Event-No-Promotion-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 36 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 77 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

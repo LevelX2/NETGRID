@@ -13,9 +13,22 @@ Status: planned
 | Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | Folgearbeit |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer Hardware-LegalAction-/Event-No-Promotion-WIP: engine 275; JSON/catalog/typecheck-Rerun folgt |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer Hardware-LegalAction-/Event-No-Promotion-WIP: JSON 302, catalog 36, engine 275, ai 85, server 72, web 77, typecheck, test, lint, build |
 
 ## Mindestchecks im ersten WIP
 
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`
+
+## Breiter WIP-Verify 2026-05-13 17:35 CEST
+
+- JSON-Validation fuer `data/**/*.json`: pass, 302 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 36 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 275 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 77 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

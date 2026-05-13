@@ -65,7 +65,13 @@
     "json": "pass: 302 files",
     "catalog": "pass: 36 tests",
     "engine": "pass: 275 tests including all nine runner hardware install smokes and the runner-event no-promotion guard",
-    "typecheck": "pass"
+    "ai": "pass: 85 tests",
+    "server": "pass: 72 tests",
+    "web": "pass: 77 tests",
+    "typecheck": "pass",
+    "test": "pass: exit 0",
+    "lint": "pass",
+    "build": "pass with known non-blocking Turbopack NFT warning"
   },
   "completionGate": {
     "releaseDone": false,
