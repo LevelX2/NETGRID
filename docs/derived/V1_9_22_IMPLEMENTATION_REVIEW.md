@@ -18,6 +18,7 @@ Status: planning/catalog WIP
 - Ein weiterer Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions geoeffnet werden, solange lokale Kosten-/MU-/Breakerwerte fehlen.
 - `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` dokumentiert fuer die zehn Runner-Event-Zielkarten, dass die vorhandenen lokalen Kernnotizen noch keinen vollstaendigen `play_event`-Resolververtrag liefern; der bestehende No-`play_event`-Guard bleibt deshalb korrekt.
 - Ein Engine-Guard bestaetigt fuer 14/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind.
+- `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` dokumentiert fuer die 14 Corp-Longtailkarten, dass Corporate War und Political Overthrow zwar lokale Kernnotizen haben, aber noch keine vollstaendigen Zahlen-/Timing-/Kostenvertraege; alle weiteren Corp-Zielkarten haben aktuell nur Typoberflaechen.
 - Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
 
 ## Gate

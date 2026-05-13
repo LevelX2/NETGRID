@@ -9,7 +9,7 @@ Status: planned
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
 | Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware- und 10 Runner-Event-Zielkarten; Events mit No-`play_event`-Promotion-Guard, bis konkrete Resolver vorliegen |
 | Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Readiness Review und Engine-Guards halten 14/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
-| Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | Engine-Guard haelt 14/14 Corp-Longtailkarten aus `playable_mvp`, bis Resolver vorliegen |
+| Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | Engine-Guard und Corp-Readiness-Review halten 14/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
 | LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions inkl. Wrong-Side-/Stale-Revalidation gruen |
 | Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads und PlayerViews gruen |
 | Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash gruen |
@@ -33,6 +33,7 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 278 Tests.
 - Zusatzabdeckung: 14/14 V1.9.22-Runner-Programmkarten oeffnen ohne lokal bestaetigte Kosten-/MU-/Breakerwerte keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions.
 - Runner-Event-Readiness ist dokumentiert; kein `play_event`-Resolver wurde ohne vollstaendigen lokalen Vertrag erfunden.
+- Corp-Longtail-Readiness ist dokumentiert; kein Agenda-, ICE- oder Operations-Resolver wurde ohne vollstaendigen lokalen Vertrag erfunden.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 77 Tests.
