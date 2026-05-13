@@ -4748,7 +4748,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
-      expect(definition?.rulesText, definitionId).toContain("V1.9.15 WIP");
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_003_baedekers-net-map"]?.implementationStatus).not.toBe("playable_mvp");
   });

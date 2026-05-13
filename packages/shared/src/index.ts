@@ -3649,7 +3649,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     memoryCost: 1,
-    rulesText: "V1.9.15 WIP: Installed run-flow helper with counter and run-lock interaction.",
+    rulesText: "Installed run-flow helper for run-lock timing and counter interactions.",
     mechanics: ["install_program", "memory", "run_flow", "counter", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3661,7 +3661,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 3,
     memoryCost: 1,
-    rulesText: "V1.9.15 WIP: Installed program for access and breach planning.",
+    rulesText: "Installed access tool for breach planning and additional access support.",
     mechanics: ["install_program", "memory", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3673,7 +3673,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 4,
     memoryCost: 2,
-    rulesText: "V1.9.15 WIP: Installed program for access and breach planning.",
+    rulesText: "Installed access tool for breach planning and additional access support.",
     mechanics: ["install_program", "memory", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3685,7 +3685,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 3,
     memoryCost: 1,
-    rulesText: "V1.9.15 WIP: Installed run helper with side-safe reveal support.",
+    rulesText: "Installed run helper with side-safe hidden-zone reveal support.",
     mechanics: ["install_program", "memory", "run_flow", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3697,7 +3697,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 3,
     memoryCost: 1,
-    rulesText: "V1.9.15 WIP: Installed program for run and access interaction.",
+    rulesText: "Installed run and access tool for breach pressure.",
     mechanics: ["install_program", "memory", "run_flow", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3709,7 +3709,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     memoryCost: 1,
-    rulesText: "V1.9.15 WIP: Installed run helper with side-safe reveal support.",
+    rulesText: "Installed run helper with side-safe reveal support.",
     mechanics: ["install_program", "memory", "run_flow", "reveal", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3720,7 +3720,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "V1.9.15 WIP: Event-based run helper with prevention/replacement overlap.",
+    rulesText: "Make a run with replacement and avoid overlap support.",
     mechanics: ["play_event", "run_flow", "event_modification", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3731,7 +3731,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 1,
-    rulesText: "V1.9.15 WIP: Event for access and breach pressure.",
+    rulesText: "Make a run. If successful, access 1 additional card during the breach.",
     mechanics: ["play_event", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3742,7 +3742,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 1,
-    rulesText: "V1.9.15 WIP: Event for run and access pressure.",
+    rulesText: "Make a run and resolve normal access if successful.",
     mechanics: ["play_event", "run_flow", "access", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3753,7 +3753,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "V1.9.15 WIP: Event for trace-aware run and access pressure.",
+    rulesText: "Make a trace-aware run and resolve normal access if successful.",
     mechanics: ["play_event", "trace", "link", "run_flow", "access", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3764,7 +3764,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 3,
-    rulesText: "V1.9.15 WIP: Installed hardware for access and side-safe hidden-zone support.",
+    rulesText: "Installed hardware for access and side-safe hidden-zone support.",
     mechanics: ["install_hardware", "access", "multiaccess", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   onrIce({
@@ -3773,7 +3773,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 6,
     strength: 5,
-    rulesText: "V1.9.15 WIP: Trace, damage and end-the-run pressure with hidden-zone overlap.",
+    rulesText: "Trace 4. If successful, give the Runner 1 tag. Do 1 net damage. End the run.",
     subroutines: [
       {
         id: "onr_v1_227_cerberus_trace",
@@ -3792,7 +3792,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 7,
     strength: 5,
-    rulesText: "V1.9.15 WIP: Trace, core damage and end-the-run pressure.",
+    rulesText: "Trace 5. If successful, give the Runner 1 tag. Do 1 core damage. End the run.",
     subroutines: [
       {
         id: "onr_v1_255_mastiff_trace",
@@ -3813,7 +3813,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 1,
-    rulesText: "V1.9.15 WIP: Operation with run-flow and recurring-pressure interaction.",
+    rulesText: "Play only if the Runner made a run last turn. Gain 3 credits.",
     mechanics: ["play_operation", "run_flow", "recurring_credit", ONR_V1_LOCAL_PRIVATE]
   }
 ];
