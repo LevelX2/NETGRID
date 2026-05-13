@@ -20,12 +20,14 @@
     "Schlaghund has a V1.9.21 deterministic random Asset LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
     "Rio de Janeiro City Grid has a V1.9.21 deterministic random Upgrade LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
     "AI Boon and Boardwalk have V1.9.21 deterministic random installed-program LegalAction smokes with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
-    "Remaining deterministic random resolvers, AI, full release promotion and final review remain follow-up work."
+    "Playful AI has a V1.9.21 deterministic random play_event smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "Quest for Cattekin has a V1.9.21 deterministic random installed-resource LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "All six V1.9.21 target cards have at least one deterministic random probe; AI, full release promotion and final review remain follow-up work."
   ],
   "verification": {
     "json": "pass",
     "catalog": "pass: 35 tests",
-    "engine": "pass: 268 tests",
+    "engine": "pass: 271 tests",
     "typecheck": "pass"
   },
   "completionGate": {
@@ -33,6 +35,6 @@
     "catalogPromoted": false,
     "aiPromoted": false,
     "runtimeDefinitionsReady": true,
-    "engineCovered": "partial_asset_upgrade_runner_program_random_probes"
+    "engineCovered": "all_target_cards_initial_random_probe"
   }
 }

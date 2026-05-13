@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 16:03 CEST
+- Ergebnis: V1.9.21 initiale Random-Abdeckung fuer alle sechs Zielkarten umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Playful AI` hat einen `play_event`-Random-Probe inklusive Heap-Bewegung und `v1921RunnerEventAbility`; `Quest for Cattekin` hat eine installierte Runner-Resource-LegalAction mit `v1921RunnerResourceAbility`. Zusammen mit `AI Boon`, `Boardwalk`, `Schlaghund` und `Rio de Janeiro City Grid` haben jetzt 6/6 Zielkarten mindestens einen deterministischen Random-Probe mit `RandomDrawRecords`, side-sicheren PublicEvents und Replay-/StateHash-Stabilitaet. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen.
+- Tests: `engine` pass (271). JSON, catalog und typecheck werden vor dem naechsten WIP-Checkpoint erneut gezielt geprueft.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: initial random probes complete`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 15:59 CEST
 - Ergebnis: V1.9.21 Runner-Programm-Random-Resolver umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
 - Release: V1.9.21

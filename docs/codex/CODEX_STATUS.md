@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.21-Initial-Random-Abdeckung vom 2026-05-13 16:03 CEST: Alle sechs V1.9.21-Zielkarten haben jetzt mindestens einen deterministischen Random-Probe-Pfad mit `RandomDrawRecords`, side-sicheren PublicEvents und Replay-/StateHash-Stabilitaet. Neu in diesem Schnitt: `Playful AI` ueber `play_event` inklusive Heap-Bewegung und `Quest for Cattekin` als installierte Runner-Resource-LegalAction. Verifikation: `engine` 271 gruen. Cursor bleibt V1.9.21 `implementing`; naechster Schnitt sind AI-Hints/AI-Smokes, Full Checks, Final Review, Release-Promotion und Webclient-Version.
+
 V1.9.21-Runner-Programm-Random-Resolver vom 2026-05-13 15:59 CEST: `AI Boon` und `Boardwalk` decken jetzt installierte Runner-Programm-Zufallspfade ab. Beide erzeugen ueber eigene `v1921RunnerProgramAbility`-Payloads deterministische Wuerfelproben mit `RandomDrawRecords`, Wrong-Side-Rejection, side-sicheren PublicEvents und Replay-/StateHash-Stabilitaet. Verifikation: `engine` 269 gruen. Cursor bleibt V1.9.21 `implementing`; offen sind `Playful AI`, `Quest for Cattekin`, AI-Artefakte, Promotion/Final Review und Webclient-Version.
 
 V1.9.21-Rio-Random-Resolver vom 2026-05-13 15:55 CEST: Der zweite deterministische Zufallspfad ist umgesetzt. `Rio de Janeiro City Grid` erzeugt als rezzed Upgrade LegalAction eine serverbezogene deterministische Wuerfelprobe ueber `RandomDrawRecords`; der Pfad nutzt eigene `v1921UpgradeAbility`-Payloads, lehnt falsche Seite ab, bleibt im PublicEvent side-sicher und replay-/StateHash-stabil. Verifikation: `engine` 268 gruen. Cursor bleibt V1.9.21 `implementing`; naechster Schnitt sind Runner-seitige Random-Resolver und danach AI-/Promotion-Gates.

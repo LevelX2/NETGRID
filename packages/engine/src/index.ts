@@ -249,6 +249,8 @@ const V1920_FORTRESS_ARCHITECTS_ID = "onr_v1_324_fortress-architects";
 const V1920_ACTION_ASSET_IDS = new Set(["onr_v1_331_nevinyrral", "onr_v1_334_pacifica-regional-ai", "onr_v1_335_remote-facility"]);
 const V1921_AI_BOON_ID = "onr_v1_002_ai-boon";
 const V1921_BOARDWALK_ID = "onr_v1_008_boardwalk";
+const V1921_PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
+const V1921_QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWALK_ID]);
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
@@ -388,6 +390,20 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       const removedTags = state.runner.tags;
       state.runner.tags = 0;
       legalAction.payload = { ...(legalAction.payload ?? {}), removedTags };
+    }
+  },
+  [V1921_PLAYFUL_AI_ID]: {
+    name: "onr_v1921_runner_event_deterministic_die_probe",
+    resolve: (state, legalAction) => {
+      const randomPurpose = `v1921.die.${V1921_PLAYFUL_AI_ID}.event_probe`;
+      const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1921RunnerEventAbility: "deterministic_die_probe",
+        randomPurpose,
+        v1921DieRoll: dieRoll,
+        randomCounterAfter: state.randomCounter
+      };
     }
   },
   "onr_v1_087_forgotten-backup-chip": {
@@ -2321,6 +2337,19 @@ function runnerMainActions(state: GameState): LegalAction[] {
           )
         );
       }
+      if (definition.id === V1921_QUEST_FOR_CATTEKIN_ID) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "gain_credit",
+            `${definition.title}: deterministischen Wuerfel werfen`,
+            cardId,
+            [{ clicks: 1 }],
+            { cardId, v1921RunnerResourceAbility: "deterministic_die_probe" }
+          )
+        );
+      }
       if (definition.id === RONIN_AROUND_ID && state.runner.stack.length >= 2) {
         actions.push(
           action(
@@ -3329,6 +3358,22 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         const definition = definitionFor(state, sourceCardId);
         if (!V1921_RUNNER_RANDOM_PROGRAM_IDS.has(definition.id)) throw new Error("Die V1.9.21-Programm-Zufallsfaehigkeit passt nicht zur Karte.");
         const randomPurpose = `v1921.die.${definition.id}.program_probe`;
+        const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          randomPurpose,
+          v1921DieRoll: dieRoll,
+          randomCounterAfter: state.randomCounter
+        };
+        return;
+      }
+      if (legalAction.payload?.v1921RunnerResourceAbility === "deterministic_die_probe") {
+        if (legalAction.side !== "runner") throw new Error("Nur der Runner darf V1.9.21-Ressourcen-Zufall nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.runner.rig.resources.includes(sourceCardId)) throw new Error("Die V1.9.21-Ressourcen-Zufallsfaehigkeit ist nicht installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1921_QUEST_FOR_CATTEKIN_ID) throw new Error("Die V1.9.21-Ressourcen-Zufallsfaehigkeit passt nicht zur Karte.");
+        const randomPurpose = `v1921.die.${definition.id}.resource_probe`;
         const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -7250,6 +7295,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.v1921AssetAbility) parts.push(String(payload.v1921AssetAbility));
   if (payload?.v1921UpgradeAbility) parts.push(String(payload.v1921UpgradeAbility));
   if (payload?.v1921RunnerProgramAbility) parts.push(String(payload.v1921RunnerProgramAbility));
+  if (payload?.v1921RunnerResourceAbility) parts.push(String(payload.v1921RunnerResourceAbility));
   if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.oliviaSalazarCardId) parts.push(String(payload.oliviaSalazarCardId));
@@ -7562,6 +7608,18 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   }
   if (typeof legalAction.payload?.v1921RunnerProgramAbility === "string") {
     context.v1921RunnerProgramAbility = legalAction.payload.v1921RunnerProgramAbility;
+    if (typeof legalAction.payload.v1921DieRoll === "number") context.v1921DieRoll = legalAction.payload.v1921DieRoll;
+    if (typeof legalAction.payload.randomCounterAfter === "number") context.randomCounterAfter = legalAction.payload.randomCounterAfter;
+    if (typeof legalAction.payload.randomPurpose === "string") context.randomPurpose = legalAction.payload.randomPurpose;
+  }
+  if (typeof legalAction.payload?.v1921RunnerEventAbility === "string") {
+    context.v1921RunnerEventAbility = legalAction.payload.v1921RunnerEventAbility;
+    if (typeof legalAction.payload.v1921DieRoll === "number") context.v1921DieRoll = legalAction.payload.v1921DieRoll;
+    if (typeof legalAction.payload.randomCounterAfter === "number") context.randomCounterAfter = legalAction.payload.randomCounterAfter;
+    if (typeof legalAction.payload.randomPurpose === "string") context.randomPurpose = legalAction.payload.randomPurpose;
+  }
+  if (typeof legalAction.payload?.v1921RunnerResourceAbility === "string") {
+    context.v1921RunnerResourceAbility = legalAction.payload.v1921RunnerResourceAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number") context.v1921DieRoll = legalAction.payload.v1921DieRoll;
     if (typeof legalAction.payload.randomCounterAfter === "number") context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string") context.randomPurpose = legalAction.payload.randomPurpose;

@@ -4864,6 +4864,128 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       expect(replay.state.randomDrawRecords, definitionId).toEqual(state.randomDrawRecords);
     }
   });
+
+  it("records Playful AI event die probes through play_event replay", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1921-playful-ai-event-die-probe",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1921_playful_ai_random_probe",
+          name: "O:NR V1.9.21 Playful AI Random Probe Runner",
+          cards: [{ id: "onr_v1_104_playful-ai", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 3;
+
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_104_playful-ai");
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1921-playful-ai-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const randomBefore = state.randomDrawRecords.length;
+    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+
+    expect(state.runner.heap).toContain(eventId);
+    expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
+    expect(state.randomDrawRecords.at(-1)?.purpose).toBe("v1921.die.onr_v1_104_playful-ai.event_probe");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      v1921RunnerEventAbility: "deterministic_die_probe",
+      randomPurpose: "v1921.die.onr_v1_104_playful-ai.event_probe",
+      randomCounterAfter: randomBefore + 1
+    });
+    const publicRoll = Number(state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0);
+    expect(Number.isInteger(publicRoll)).toBe(true);
+    expect(publicRoll).toBeGreaterThanOrEqual(1);
+    expect(publicRoll).toBeLessThanOrEqual(6);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+  });
+
+  it("records Quest for Cattekin resource die probes through installed resource actions", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1921-quest-for-cattekin-resource-die-probe",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1921_quest_random_probe",
+          name: "O:NR V1.9.21 Quest Random Probe Runner",
+          cards: [{ id: "onr_v1_172_quest-for-cattekin", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 3;
+
+    const resourceId = installRunnerResourceForTest(state, "onr_v1_172_quest-for-cattekin");
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1921RunnerResourceAbility === "deterministic_die_probe" &&
+        String(action.payload?.cardId) === resourceId
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1921-quest-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const randomBefore = state.randomDrawRecords.length;
+    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+
+    expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
+    expect(state.randomDrawRecords.at(-1)?.purpose).toBe("v1921.die.onr_v1_172_quest-for-cattekin.resource_probe");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1921RunnerResourceAbility: "deterministic_die_probe",
+      randomPurpose: "v1921.die.onr_v1_172_quest-for-cattekin.resource_probe",
+      randomCounterAfter: randomBefore + 1
+    });
+    const publicRoll = Number(state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0);
+    expect(Number.isInteger(publicRoll)).toBe(true);
+    expect(publicRoll).toBeGreaterThanOrEqual(1);
+    expect(publicRoll).toBeLessThanOrEqual(6);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {
