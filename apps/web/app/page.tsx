@@ -6320,8 +6320,9 @@ function ChronicleCardTrigger({
     tooltipEnabled && card
       ? `chronicle-card-tooltip-${`${card.catalogCardId}-${item.id}`.replace(/[^A-Za-z0-9_-]/g, "-")}`
       : undefined;
-  const showHardwareOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isHardwareCardType(cardType);
-  const showOperationOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isOperationCardType(cardType);
+  const hasGeneratedImage = hasGeneratedCardArt(card?.catalogCardId);
+  const showHardwareOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isHardwareCardType(cardType) && hasGeneratedImage;
+  const showOperationOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isOperationCardType(cardType) && hasGeneratedImage;
   const tooltipStats = card
     ? [
         card.numeric.cost !== null ? { icon: "¢", label: "Kosten", value: String(card.numeric.cost) } : null,
