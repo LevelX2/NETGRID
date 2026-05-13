@@ -15,9 +15,9 @@ Stand: 2026-05-13
 | Counter/Run | Counter- und Run-Flow-Pfade | Crystal Palace Station Grid und Dr. Dreff Power-Counter grün; Twenty-Four-Hour Surveillance Run-Start-Tax mit Stealth-/Recurring-Zahlung grün; weitere Run-Flow-Sonderfälle Folgearbeit |
 | Visibility | PlayerView/PublicEvent/Reconnect/Undo ohne Hidden-Info | Folgearbeit |
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Folgearbeit |
-| AI | AI-Hints, AI-Smokes, legaler Fallback | Paketcheck grün; finale V1.9.18-AI-Artefakte Folgearbeit |
+| AI | AI-Hints, AI-Smokes, legaler Fallback | Draft-Hints und Draft-Smokes für 15/15 Karten angelegt; Paketcheck grün; offizielle AI-Promotion bleibt Folgearbeit |
 | Server/Web | Keine Payload-Leaks; Webclient-Version erst bei Abschluss | Paketchecks grün; Webclient-Version bleibt bis Abschluss Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation 266, Engine 251, Catalog 32, AI 85, Server 72, Web 76, Typecheck, Test, Lint und Build grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation 271, Engine 251, Catalog 32, AI 85, Server 72, Web 76, Typecheck, Test, Lint und Build grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
 
 ## Mindestchecks im WIP-Schnitt
 
@@ -28,4 +28,4 @@ Stand: 2026-05-13
 
 ## Abschlusschecks
 
-Vor Releaseabschluss müssen zusätzlich finale Manifest-/Coverage-/AI-Artefakte, Final Review, Release-Promotion und Webclient-Version `V1.9.18` vorliegen. Die technischen Full Checks sind in diesem WIP-Schnitt grün.
+Vor Releaseabschluss müssen zusätzlich das offizielle Release-Smoke-Artefakt, das offizielle AI-Approval-Manifest, Final Review, Release-Promotion und Webclient-Version `V1.9.18` vorliegen. Die Draft-Manifest-/Coverage-/AI-Artefakte sind vorbereitet; die technischen Full Checks sind in diesem WIP-Schnitt grün.

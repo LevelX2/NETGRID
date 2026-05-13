@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.9.18",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.18",
+  "generatedFor": "V1.9.18 Generische Upgrade/Root-Server-Faehigkeiten WIP gate",
+  "generatedAt": "2026-05-13",
+  "status": "wip_engine_covered_pending_promotion",
+  "extends": "data/rules/mechanics-coverage-1.9.17.json",
+  "gateAssertions": {
+    "genericUpgradeRootServerResolverCovered": true,
+    "cityGridRegionCovered": true,
+    "powerCounterUpgradeCovered": true,
+    "runStartTaxCovered": true,
+    "tagConditionCreditCovered": true,
+    "traceTagUpgradeCovered": true,
+    "hiddenZoneUpgradeBarrierCovered": true,
+    "accessAmbushUpgradeCovered": true,
+    "stateHashReplayStableForCoveredSmokes": true,
+    "aiChoicePathsCovered": false,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true,
+    "noV1919PlusScope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.upgrade.generic_root_server",
+      "label": "Generische Upgrade/Root-Server-Faehigkeiten",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.18",
+      "currentScopeNote": "Alle 15 Zielkarten sind als Runtime-Definitionen vorbereitet; konkrete LegalAction-Pfade decken Ambush, City Grid, Counter, Trace, Tag-Bedingung und Run-Start-Tax ab.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.city_grid",
+      "label": "City Grid und Region Upgrades",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.18",
+      "currentScopeNote": "Crystal Palace Station Grid, New Galveston City Grid und Paris City Grid haben side-sichere Root-Upgrade-Aktionen; Singapore City Grid bleibt bis zur Promotion als Runtime-Definition ohne Sonderpfad dokumentiert.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.counter_run_tax",
+      "label": "Power Counter und Run-Start-Tax",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.18",
+      "currentScopeNote": "Crystal Palace Station Grid und Dr. Dreff koennen Power Counter ueber Corp-LegalActions legen; Dr. Dreff, Turbeau Delacroix und Twenty-Four-Hour Surveillance besteuern Runner-Run-Starts inklusive Stealth-Recurring-Credit-Zahlung.",
+      "coverage": ["unit", "legal_action", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.trace_tag_condition",
+      "label": "Trace, Tag-Bedingung und Credit-Aktionen",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.18",
+      "currentScopeNote": "Paris City Grid startet Trace 2 und teilt mit Omni Kismet, Ph.D. einen getaggten Runner Condition-Credit-Pfad.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.upgrade.access_ambush_hidden",
+      "label": "Access-Ambush und Hidden-Zone-Upgrades",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.18",
+      "currentScopeNote": "Crybaby, Dedicated Response Team, Dieter Esslin, Red Herrings und Turbeau Delacroix nutzen bestehende Access-, Ambush- und Trace-Barrieren; New Galveston nutzt R&D-Top-Reveal ohne private Payloads.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    }
+  ],
+  "deferred": [
+    {
+      "item": "catalog_ai_promotion",
+      "reason": "V1.9.18 bleibt bis Final Review, Webclient-Version und offizieller deck-legal-ai-approval-Promotion im Implementing-Cursor."
+    }
+  ]
+}

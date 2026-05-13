@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.18",
+  "id": "v1.9.18-generic-upgrade-root-server-manifest",
+  "status": "wip_pending_catalog_promotion",
+  "extends": "data/manifests/card-implementation-manifest-1.9.17.json",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only",
+  "gateAssertions": {
+    "v1918ScopeFrozenToFifteenGenericUpgradeRootServerCards": true,
+    "allCardsRuntimeDefinitionReady": true,
+    "coreEngineSmokesCovered": true,
+    "legalActionsOnly": true,
+    "stateHashReplayStableForCoveredSmokes": true,
+    "hiddenInfoSafeForCoveredSmokes": true,
+    "noOfficialAssets": true,
+    "noV1919PlusScopeExpansion": true,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true
+  },
+  "cards": [
+    { "cardCode": "onr_v1_354_crybaby", "title": "Crybaby", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; trace_link_bid_window_resolver; access_breach_multiaccess_resolver; access_ambush_resolver; typed_counter_virus_purge_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "trash_on_access", "trace", "counter", "access_breach", "access_ambush", "legal_action_only"], "roleTags": ["corp", "upgrade", "ambush"] },
+    { "cardCode": "onr_v1_355_crystal-palace-station-grid", "title": "Crystal Palace Station Grid", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; typed_counter_virus_purge_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "city_grid", "power_counter", "legal_action_only"], "roleTags": ["corp", "upgrade", "region", "counter"] },
+    { "cardCode": "onr_v1_356_dedicated-response-team", "title": "Dedicated Response Team", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "access_ambush_resolver; damage_event_prevention_resolver; tag_condition_avoid_remove_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "access_ambush", "meat_damage", "tag", "legal_action_only"], "roleTags": ["corp", "upgrade", "ambush", "damage"] },
+    { "cardCode": "onr_v1_357_dieter-esslin", "title": "Dieter Esslin", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "access_ambush_resolver; damage_event_prevention_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "access_ambush", "net_damage", "hidden_zone_barrier", "legal_action_only"], "roleTags": ["corp", "upgrade", "ambush", "damage"] },
+    { "cardCode": "onr_v1_358_dr-dreff", "title": "Dr. Dreff", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; run_flow_lock_resolver; typed_counter_virus_purge_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "run_start_tax", "power_counter", "legal_action_only"], "roleTags": ["corp", "upgrade", "run_tax", "counter"] },
+    { "cardCode": "onr_v1_359_jenny-jett", "title": "Jenny Jett", "releaseStatus": "wip_runtime_definition", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "trash_on_access", "legal_action_only"], "roleTags": ["corp", "upgrade"] },
+    { "cardCode": "onr_v1_361_namatoki-plaza", "title": "Namatoki Plaza", "releaseStatus": "wip_runtime_definition", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "trash_on_access", "legal_action_only"], "roleTags": ["corp", "upgrade"] },
+    { "cardCode": "onr_v1_362_new-galveston-city-grid", "title": "New Galveston City Grid", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "city_grid", "reveal_rd_top", "hidden_zone_barrier", "legal_action_only"], "roleTags": ["corp", "upgrade", "region", "hidden_zone"] },
+    { "cardCode": "onr_v1_364_omni-kismet-ph-d", "title": "Omni Kismet, Ph.D.", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; tag_condition_avoid_remove_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "tag_condition", "legal_action_only"], "roleTags": ["corp", "upgrade", "tag"] },
+    { "cardCode": "onr_v1_365_paris-city-grid", "title": "Paris City Grid", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; trace_link_bid_window_resolver; tag_condition_avoid_remove_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "city_grid", "trace", "tag_condition", "legal_action_only"], "roleTags": ["corp", "upgrade", "region", "trace", "tag"] },
+    { "cardCode": "onr_v1_366_red-herrings", "title": "Red Herrings", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; access_breach_multiaccess_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "agenda_steal_tax", "access_breach", "legal_action_only"], "roleTags": ["corp", "upgrade", "access_tax"] },
+    { "cardCode": "onr_v1_369_singapore-city-grid", "title": "Singapore City Grid", "releaseStatus": "wip_runtime_definition", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "city_grid", "trash_on_access", "legal_action_only"], "roleTags": ["corp", "upgrade", "region"] },
+    { "cardCode": "onr_v1_370_tesseract-fort-construction", "title": "Tesseract Fort Construction", "releaseStatus": "wip_runtime_definition", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "trash_on_access", "legal_action_only"], "roleTags": ["corp", "upgrade"] },
+    { "cardCode": "onr_v1_372_turbeau-delacroix", "title": "Turbeau Delacroix", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; trace_link_bid_window_resolver; run_flow_lock_resolver; access_ambush_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "access_trace", "run_start_tax", "tag", "legal_action_only"], "roleTags": ["corp", "upgrade", "trace", "run_tax"] },
+    { "cardCode": "onr_v1_373_twenty-four-hour-surveillance", "title": "Twenty-Four-Hour Surveillance", "releaseStatus": "wip_engine_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; program_subtype_daemon_stealth_worm_resolver; run_flow_lock_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "run_start_tax", "stealth_recurring_credit", "legal_action_only"], "roleTags": ["corp", "upgrade", "stealth", "run_tax"] }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 15,
+    "implementedCardCount": 15,
+    "finalGateCardCount": 0,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 3
+  }
+}

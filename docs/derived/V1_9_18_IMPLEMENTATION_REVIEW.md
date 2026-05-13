@@ -19,6 +19,7 @@ Stand: 2026-05-13
 - Omni Kismet und Paris City Grid decken getaggter-Runner-Condition-LegalActions ab.
 - Twenty-Four-Hour Surveillance deckt einen servergebundenen Run-Start-Tax ab, der durch Runner-Run-/Stealth-Recurring-Credits bezahlt werden kann.
 - `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json` dokumentiert den aktuellen WIP-Smoke maschinenlesbar ohne Release- oder AI-Promotion.
+- `data/manifests/card-implementation-manifest-1.9.18.json`, `data/rules/mechanics-coverage-1.9.18.json`, `data/ai/ai-card-hints-deck-legal-v1918.json`, `data/scenarios/ai-deck-legal-v1918-smokes.json` und `data/manifests/v1918-deck-legal-ai-approval-draft-manifest.json` bereiten die Manifest-/Coverage-/AI-Artefakte vor, bleiben aber explizit WIP/Draft und promoten keine V1.9.18-Karte.
 
 ## Textentscheidung
 
@@ -27,7 +28,7 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 ## Noch offen
 
 - Weitere konkrete LegalAction-/applyAction-Abdeckung für die noch nicht finalisierten einfachen Generic-Upgrade-/Root-Karten, zusätzliche City-Grid-Sonderfälle und finale Server-/Visibility-Querschnittsnachweise.
-- Release-Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest.
+- Offizielles Release-Smoke-Artefakt und offizielles `deck-legal-ai-approval-v1918-manifest.json`; der vorhandene Draft ist bewusst nicht im automatischen AI-Approval-Dateimuster, weil die Karten noch nicht `ai_supported` sind.
 - Final Review, Release-Promotion, finale Manifest-/Coverage-/AI-Artefakte und Webclient-Version `V1.9.18`.
 
 ## Gate
@@ -37,7 +38,7 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 
 ## Verifikation
 
-- JSON-Validation für `data/**/*.json`: pass, 266 Dateien.
+- JSON-Validation für `data/**/*.json`: pass, 271 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 251 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 32 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
@@ -47,3 +48,4 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Nach WIP-Draft-Artefakten erneut geprüft: JSON-Validation pass, 271 Dateien; `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.

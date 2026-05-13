@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 13:17 CEST
+- Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten um vorbereitende Manifest-/Coverage-/AI-Draft-Artefakte erweitert; Cursor bleibt auf V1.9.18 `implementing`.
+- Release: V1.9.18
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/manifests/card-implementation-manifest-1.9.18.json`, `data/rules/mechanics-coverage-1.9.18.json`, `data/ai/ai-card-hints-deck-legal-v1918.json`, `data/scenarios/ai-deck-legal-v1918-smokes.json` und `data/manifests/v1918-deck-legal-ai-approval-draft-manifest.json` angelegt. Das Approval-Artefakt ist bewusst ein Draft außerhalb des offiziellen `deck-legal-ai-approval-*.json`-Patterns, damit keine nicht promoteten Karten als `ai_supported` behandelt werden. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass fuer 271 `data/**/*.json`; `ai` pass (85). Vorheriger technischer V1.9.18-Schnitt dieses Laufs: `engine` pass (251), `catalog` pass (32), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Artefaktschnitt vorgesehen (`WIP V1.9.18: data artifact promotion prep`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.18 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil offizielles Release-Smoke-Artefakt, offizielles AI-Approval-Manifest, Final Review, Release-Promotion und Webclient-Version `V1.9.18` offen sind.
+
 - Zeitpunkt: 2026-05-13 13:05 CEST
 - Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten um konkrete Counter-, City-Grid-Reveal-, City-Grid-Trace-, Tag-Condition- und Run-Start-/Stealth-Tax-Pfade erweitert; Cursor bleibt auf V1.9.18 `implementing`.
 - Release: V1.9.18
