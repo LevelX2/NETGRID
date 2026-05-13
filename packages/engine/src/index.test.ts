@@ -6695,9 +6695,89 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("plays Anonymous Tip as a public black-ice derez choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-anonymous-tip",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_anonymous_tip",
+          name: "O:NR V1.9.22 Anonymous Tip",
+          cards: [{ id: "onr_v1_077_anonymous-tip", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_anonymous_tip",
+          name: "O:NR V1.9.22 Anonymous Tip Corp",
+          cards: [{ id: "onr_v1_236_data-raven", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 5;
+    state.runner.clicks = 4;
+    const blackIceId = putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
+    state.cardInstances[blackIceId] = { ...state.cardInstances[blackIceId]!, faceup: true, rezzed: true };
+    moveRunnerCardToGrip(state, "onr_v1_077_anonymous-tip");
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_077_anonymous-tip");
+    expect(legal.costs[0]?.credits).toBe(3);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-anonymous-tip-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-anonymous-tip-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_077_anonymous-tip");
+    expect(state.pendingChoice?.source).toContain("v1922.anonymous_tip_derez_black_ice");
+    expect(state.pendingChoice?.visibility).toBe("public");
+    expect(state.runner.credits).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_077_anonymous-tip",
+      v1922RunnerEventAbility: "derez_black_ice"
+    });
+
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing Anonymous Tip choice");
+    const selectedOption = pendingChoice.options.find((option) => option.value === blackIceId);
+    expect(selectedOption).toBeDefined();
+    state = applyChoice(state, "runner", selectedOption?.id ?? "");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.cardInstances[blackIceId]?.rezzed).toBe(false);
+    expect(state.cardInstances[blackIceId]?.faceup).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_cards",
+      v1922RunnerEventAbility: "derez_black_ice",
+      derezzedCount: 1,
+      targetCardDefinitionId: "onr_v1_236_data-raven"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"|"rd"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("does not expose unresolved V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
     const runnerEventIds = [
-      "onr_v1_077_anonymous-tip",
       "onr_v1_080_core-command-jettison-ice",
       "onr_v1_086_forged-activation-orders",
       "onr_v1_109_security-code-worm-chip",

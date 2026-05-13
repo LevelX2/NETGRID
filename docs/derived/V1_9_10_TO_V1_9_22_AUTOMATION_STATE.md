@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 22:04 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Anonymous Tip` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` setzt die lokale Kostenbasis fuer `Anonymous Tip` auf 3 Credits; `packages/engine/src/index.ts` oeffnet eine `play_event`-LegalAction nur bei gerezzter Black ICE und resolved einen public Target-Choice durch Derezzen der ICE. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (289); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: anonymous tip resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 21:57 CEST
 - Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Open-Ended Mileage Program` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

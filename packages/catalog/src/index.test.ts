@@ -1862,6 +1862,7 @@ describe("catalog import and status logic", () => {
     const eventCards = manifestCards.filter((card) => card.resolverFamily.includes("play_event_surface"));
     const runnerEventResolverCards = manifestCards.filter((card) =>
       [
+        "v1922_runner_event_derez_black_ice",
         "v1922_runner_event_grip_trash_gain_credits",
         "v1922_runner_event_installed_trash_gain_credits",
         "v1922_runner_event_remove_tag_optional_return",
@@ -1904,7 +1905,7 @@ describe("catalog import and status logic", () => {
       );
     }
 
-    expect(eventCards).toHaveLength(6);
+    expect(eventCards).toHaveLength(5);
     for (const card of eventCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
       expect(card.aiSupported, card.cardCode).toBe(false);
@@ -1912,6 +1913,7 @@ describe("catalog import and status logic", () => {
     }
 
     expect(runnerEventResolverCards.map((card) => card.cardCode).sort()).toEqual([
+      "onr_v1_077_anonymous-tip",
       "onr_v1_093_if-you-want-it-done-right",
       "onr_v1_100_misc-for-sale",
       "onr_v1_102_open-ended-mileage-program",

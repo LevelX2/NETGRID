@@ -254,6 +254,7 @@ const V1921_QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWALK_ID]);
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
+const V1922_ANONYMOUS_TIP_ID = "onr_v1_077_anonymous-tip";
 const V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID = "onr_v1_093_if-you-want-it-done-right";
 const V1922_MISC_FOR_SALE_ID = "onr_v1_100_misc-for-sale";
 const V1922_OPEN_ENDED_MILEAGE_PROGRAM_ID = "onr_v1_102_open-ended-mileage-program";
@@ -414,6 +415,14 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         v1921DieRoll: dieRoll,
         randomCounterAfter: state.randomCounter
       };
+    }
+  },
+  [V1922_ANONYMOUS_TIP_ID]: {
+    name: "onr_v1922_runner_event_derez_black_ice",
+    canPlay: (state) => rezzedBlackIceIds(state).length > 0,
+    resolve: (state, legalAction) => {
+      startV1922AnonymousTipChoice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = { ...(legalAction.payload ?? {}), v1922RunnerEventAbility: "derez_black_ice" };
     }
   },
   [V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID]: {
@@ -2617,6 +2626,13 @@ function corpInstalledCardIds(state: GameState): CardInstanceId[] {
   const installed: CardInstanceId[] = [];
   for (const server of state.corp.servers) installed.push(...server.root, ...server.ice);
   return installed;
+}
+
+function rezzedBlackIceIds(state: GameState): CardInstanceId[] {
+  return corpInstalledCardIds(state).filter((cardId) => {
+    const instance = mustInstance(state.cardInstances, cardId);
+    return instance.zone.zone === "serverIce" && instance.rezzed && cardHasSubtype(definitionFor(state, cardId), "black_ice");
+  });
 }
 
 function hasInstalledUniqueCardDefinition(state: GameState, side: Side, definitionId: CardDefinitionId): boolean {
@@ -6595,6 +6611,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveV1922CorpArchivesToHqChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1922.anonymous_tip_derez_black_ice")) {
+    resolveV1922AnonymousTipChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest")) {
     resolveV1922RunnerStackTop5Choice(state, legalAction, playerAction);
     return;
@@ -6892,6 +6912,44 @@ function startV1922RunnerStackTop5Choice(state: GameState, sourceCardId: string)
     maxSelections: topCards.length,
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier"
+  };
+}
+
+function startV1922AnonymousTipChoice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const targets = rezzedBlackIceIds(state);
+  if (targets.length === 0) throw new Error("Keine gerezzte Black ICE als Ziel fuer Anonymous Tip.");
+  state.pendingChoice = {
+    choiceId: `v1922_anonymous_tip_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.anonymous_tip_derez_black_ice:${sourceCardId}`,
+    prompt: "Black ICE derezzen",
+    kind: "select_cards",
+    options: targets.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+      return { id: `card_${cardId}`, label: `${definition.title} (${serverLabel})`, publicLabel: definition.title, value: cardId };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+}
+
+function resolveV1922AnonymousTipChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.anonymous_tip_derez_black_ice")) throw new Error("Es ist keine V1.9.22-Anonymous-Tip-Choice offen.");
+  const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!selectedId || !rezzedBlackIceIds(state).includes(selectedId)) throw new Error("Das Anonymous-Tip-Ziel ist keine gerezzte Black ICE.");
+  const targetDefinition = definitionFor(state, selectedId);
+  state.cardInstances[selectedId] = { ...mustInstance(state.cardInstances, selectedId), faceup: false, rezzed: false };
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "derez_black_ice",
+    derezzedCount: 1,
+    targetCardDefinitionId: targetDefinition.id
   };
 }
 
@@ -8136,6 +8194,8 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.returnedToGrip === "boolean") context.returnedToGrip = legalAction.payload.returnedToGrip;
     if (typeof legalAction.payload.paidCredits === "number") context.paidCredits = legalAction.payload.paidCredits;
     if (typeof legalAction.payload.runnerCreditsAfter === "number") context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
+    if (typeof legalAction.payload.derezzedCount === "number") context.derezzedCount = legalAction.payload.derezzedCount;
+    if (typeof legalAction.payload.targetCardDefinitionId === "string") context.targetCardDefinitionId = legalAction.payload.targetCardDefinitionId;
   }
   if (typeof legalAction.payload?.v1921RunnerEventAbility === "string") {
     context.v1921RunnerEventAbility = legalAction.payload.v1921RunnerEventAbility;

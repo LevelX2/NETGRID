@@ -3325,9 +3325,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
-    rulesText: "Runner event with per-card longtail surface. Resolution remains LegalAction-gated.",
-    mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+    cost: 3,
+    rulesText: "Runner event with black ICE derez surface. Resolution remains LegalAction-gated.",
+    mechanics: ["play_event", "ice_target", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_080_core-command-jettison-ice",
