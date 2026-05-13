@@ -3164,6 +3164,10 @@ select {
 }
 
 .scoredAgendaHead strong {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
   color: #fefefe;
   font-size: 13px;
   font-weight: 800;
@@ -3175,6 +3179,21 @@ select {
   color: var(--muted);
   font-size: 11px;
   line-height: 1.2;
+}
+
+.scoredAgendaHead .scoredAgendaPointBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--agenda), var(--line) 42%);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--agenda), var(--panel) 74%);
+  color: color-mix(in srgb, var(--agenda), white 36%);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .scoreAreaFloatingClose,

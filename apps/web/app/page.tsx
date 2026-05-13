@@ -2067,6 +2067,10 @@ export default function Page() {
     if (!activeView) return [];
     return side === activeView.side ? activeView.own.scoreArea : activeView.opponent.scoreArea;
   };
+  const agendaPointsBySide = (side: Side): number => {
+    if (!activeView) return 0;
+    return side === activeView.side ? activeView.own.agendaPoints : activeView.opponent.agendaPoints;
+  };
   const toggleScoreAreaOverlay = (side: Side) => {
     setScoreAreaOverlays((value) => ({ ...value, [side]: !value[side] }));
   };
@@ -3952,6 +3956,8 @@ export default function Page() {
       <ScoredAgendaOverlay
         side="corp"
         cards={scoreAreaCardsBySide("corp")}
+        agendaPoints={agendaPointsBySide("corp")}
+        agendaPointsToWin={effectiveAgendaTarget}
         open={Boolean(scoreAreaOverlays.corp)}
         position={scoreAreaOverlayPositions.corp}
         cardDisplayMode={cardDisplayMode}
@@ -3967,6 +3973,8 @@ export default function Page() {
       <ScoredAgendaOverlay
         side="runner"
         cards={scoreAreaCardsBySide("runner")}
+        agendaPoints={agendaPointsBySide("runner")}
+        agendaPointsToWin={effectiveAgendaTarget}
         open={Boolean(scoreAreaOverlays.runner)}
         position={scoreAreaOverlayPositions.runner}
         cardDisplayMode={cardDisplayMode}
@@ -5714,6 +5722,8 @@ function RunTimelineOverlay({
 function ScoredAgendaOverlay({
   side,
   cards,
+  agendaPoints,
+  agendaPointsToWin,
   open,
   position,
   cardDisplayMode,
@@ -5728,6 +5738,8 @@ function ScoredAgendaOverlay({
 }: {
   side: Side;
   cards: VisibleCard[];
+  agendaPoints: number;
+  agendaPointsToWin: number;
   open: boolean;
   position: RunOverlayPositionPreference;
   cardDisplayMode: CardDisplayMode;
@@ -5793,7 +5805,10 @@ function ScoredAgendaOverlay({
       <section className={`scoredAgendaPanel ${side}`}>
         <header className={`scoredAgendaHead ${side}`}>
           <div>
-            <strong>{title}</strong>
+            <strong>
+              {title}
+              <span className="scoredAgendaPointBadge">{agendaPoints} / {agendaPointsToWin} Agenda-Punkte</span>
+            </strong>
             <span>{subtitle}</span>
           </div>
         </header>
