@@ -1086,7 +1086,7 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   const detail = detailsById[cardId] ?? null;
   const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
   const serverLabel = serverDisplayLabel(payloadString(event.publicPayload, "serverLabel") ?? "einen Server");
-  const actions = legalActions.filter((action) => ["steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
+  const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
   return {
     eventId: event.eventId,
     actorSide,
@@ -1137,6 +1137,7 @@ function accessTrashStatus(card: DisplayVisibleCard, actions: LegalAction[], act
   if (actorSide !== viewerSide) return observedAccessStatus(card, actorSide);
   if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
+  if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
   if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
   if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
@@ -4685,10 +4686,11 @@ function AccessRevealModal({
 }
 
 function accessDecisionLabel(action: LegalAction): string {
+  if (action.type === "access_card") return "Nächste Karte";
   if (action.type === "steal_agenda") return "Agenda stehlen";
   if (action.type === "trash_accessed_card") return "Trashen";
   if (action.type === "trash_resource") return "Resource trashen";
-  if (action.type === "decline_trash") return "Nicht trashen";
+  if (action.type === "decline_trash") return action.label;
   return action.label;
 }
 
