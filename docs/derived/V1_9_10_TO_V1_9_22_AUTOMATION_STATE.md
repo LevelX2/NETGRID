@@ -80,6 +80,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 - Folge-Preflight: `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentiert den naechsten Agenda-Kandidaten `Security Purge` und blockiert Code ohne erfundene Optionalitaets-/Serverziel-Semantik, bis der Installationsvertrag lokal bestaetigt ist.
 - Rest-Preflight: `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die sechs verbleibenden Corp-Longtailkarten und ihre offenen Implementierungsvertraege zusammen.
+- Runner-Programm-Preflight: `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert `Newsgroup Filter` und `Shield` als kleinste naechste Programm-Kandidaten, solange Aktivierungstiming bzw. Prevention-Fenster bestaetigt werden.
 
 - Zeitpunkt: 2026-05-13 23:55 CEST
 - Ergebnis: V1.9.22 Corp-ICE-Resolver fuer `Zombie` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

@@ -1,0 +1,26 @@
+# V1.9.22 Runner Program Implementation Preflight
+
+Stand: 2026-05-13
+Status: WIP-Preflight, keine Runtime-/Catalog-/AI-Promotion
+
+## Befund
+
+`data/rules/v1922-local-card-facts.json` enthaelt fuer 14 Runner-Programme lokale Kosten-/MU-/Effektkerne. Die bisherige No-LegalAction-Absicherung bleibt trotzdem korrekt, weil die meisten Programmwirkungen zusaetzliche Timing-, Payment- oder Subroutine-Kategorien brauchen.
+
+## Kleinste Kandidaten
+
+| Karte | Warum klein | Offener Vertrag |
+| --- | --- | --- |
+| `Newsgroup Filter` | Installkosten 5, MU 2, Effektkern "Gain 1 credit from installed program ability". | Aktivierungstiming, Klick-/Tap-/Once-per-turn-Kosten und PublicPayload der Programmaktion. |
+| `Shield` | Installkosten 0, MU 1, Net-Damage-Prevention bis 2 pro Zug; bestehende Damage-Prevention-Infrastruktur ist vorhanden. | Prevention-Fenster fuer installierte Programme, turnbasierter Verbrauch und Interaktion mit bestehenden Prevention-Kandidaten. |
+| `Poltergeist` / `Scatter Shot` | Installkosten 0, MU 1, je 1 recurring restricted credit. | Restricted-Credit-Pool fuer Trash-Kosten und Refresh-Timing. |
+
+## Nicht-kleine Kandidaten
+
+- Breaker (`Flak`, `Hammer`, `Japanese Water Torture`, `Reflector`) brauchen Subroutine-Kategorien, Break-/Pump-Kosten und teils Folgeeffekte.
+- Run-Reaktionskarten (`False Echo`, `Netspace Inverter`, `Speed Trap`, `Startup Immolator`) brauchen konkrete Triggerfenster und Ziel-/Reihenfolge-Vertraege.
+- `Zetatech Software Installer` hat noch `installCost: null` und bleibt dadurch fachlich blockiert.
+
+## Entscheidung
+
+Kein Runner-Programm-Code in diesem Preflight. Der naechste sichere Runner-Programm-Code-Schnitt ist `Newsgroup Filter` oder `Shield`, sobald Aktivierungstiming bzw. Prevention-Fenster lokal bestaetigt sind. Bis dahin bleiben die 14 Karten aus `playable_mvp` und ohne `install_card`, `pump_breaker` oder `break_subroutine`-LegalActions.

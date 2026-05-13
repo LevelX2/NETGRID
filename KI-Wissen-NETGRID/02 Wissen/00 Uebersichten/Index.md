@@ -48,6 +48,8 @@
 
 - V1.9.22 verbleibende Corp-Longtailkarten: `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer `Data Fort Reclamation`, `Security Purge`, `Haunting Inquisition`, `Tutor`, `Viral 15` und `Virizz` zusammen.
 
+- V1.9.22 Runner-Programm-Preflight: `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert `Newsgroup Filter` und `Shield` als kleinste Programm-Kandidaten, sobald Aktivierungstiming bzw. Prevention-Fenster bestaetigt sind.
+
 ## Kernwissen
 
 - [[Projektueberblick]]: verdichtetes Projektbild für neue Threads.
