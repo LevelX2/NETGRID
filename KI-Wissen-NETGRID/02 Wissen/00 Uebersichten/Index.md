@@ -48,11 +48,11 @@
 
 - V1.9.22 verbleibende Corp-Longtailkarten: `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer `Data Fort Reclamation`, `Security Purge`, `Haunting Inquisition`, `Tutor`, `Viral 15` und `Virizz` zusammen.
 
-- V1.9.22 Runner-Programm-Preflight: `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert nach dem Shield-Schnitt `Newsgroup Filter` als kleinsten verbleibenden Programm-Kandidaten, sobald Aktivierungstiming und PublicPayload bestaetigt sind.
+- V1.9.22 Runner-Programm-Install-only-WIP: `Newsgroup Filter` hat jetzt eine enge install-only Runtime-Definition ohne Catalog-, AI- oder Release-Promotion. Die Karte nutzt Installkosten 5 und MU 2; die Credit-Gain-Fähigkeit bleibt gesperrt, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestätigt sind. Engine, Catalog und Typecheck sind für diesen Teilschnitt grün.
 
 - V1.9.22 Runner-Programm-Runtime-WIP: `Shield` hat jetzt eine enge Runtime-Definition ohne Catalog-, AI- oder Release-Promotion. Die Karte nutzt Installkosten 0, MU 1 und das bestehende Event-Modification-Prevention-Fenster fuer bis zu 2 Net Damage pro Runner-Zug; Engine, Catalog, AI, Server, Web, Typecheck, Test, Lint und Build sind fuer diesen Teilschnitt gruen. Die verbleibenden Runner-Programm- und Corp-Longtail-Gates bleiben offen.
 
-- V1.9.22 Newsgroup-Filter-Preflight: `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` haelt den kleinsten verbleibenden Runner-Programm-Kandidaten offen; Runtime-Code bleibt gesperrt, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestaetigt sind.
+- V1.9.22 Newsgroup-Filter-Preflight: `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` haelt nach dem Install-only-Schnitt nur noch die Credit-Gain-Fähigkeit offen; Runtime-Code für `[A]: Gain 1` bleibt gesperrt, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestätigt sind.
 
 - V1.9.22 Remaining-Corp-ICE-Preflight: `docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md` haelt `Tutor` und `Virizz` als kleinste ICE-Kandidaten fest; Runtime-Code bleibt gesperrt, bis run-weite Zusatzsubroutine bzw. Break-Kostenmodifikation LegalAction-/applyAction-sicher bestaetigt sind.
 

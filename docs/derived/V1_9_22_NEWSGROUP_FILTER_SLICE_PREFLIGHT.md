@@ -1,7 +1,7 @@
 # V1.9.22 Newsgroup Filter Slice Preflight
 
 Stand: 2026-05-14
-Status: WIP-Preflight, keine Runtime-/Catalog-/AI-Promotion
+Status: install-only WIP umgesetzt, Ability bleibt gesperrt, keine Catalog-/AI-Promotion
 
 ## Lokaler Regelkern
 
@@ -23,11 +23,11 @@ Der kleinste moegliche Code-Schnitt waere eine installierbare Runner-Programm-De
 
 ## Entscheidung
 
-Kein Runtime-Code in diesem Preflight. Eine automatische `[A]: Gain 1`-Auslegung waere technisch klein, wuerde aber Timing, Kosten und Limit erfinden. `Newsgroup Filter` bleibt daher bis zur lokalen Bestaetigung aus `playable_mvp` und ohne `install_card`-/Ability-LegalAction.
+Install-only Runtime-Code ist als enger Teilschnitt umgesetzt: `Newsgroup Filter` kann fuer 5 Credits und 2 MU installiert werden, mit Wrong-Side-/Stale-Revalidation, PublicPayload/PlayerView- und Replay/StateHash-Abdeckung. Eine automatische `[A]: Gain 1`-Auslegung wird weiterhin nicht erfunden; die Credit-Gain-Faehigkeit bleibt ohne LegalAction, bis Timing, Kosten und Limit lokal bestaetigt sind.
 
 ## Removal Condition
 
-`Newsgroup Filter` kann in Code gehen, sobald lokal feststeht:
+Die verbleibende Credit-Gain-Faehigkeit kann in Code gehen, sobald lokal feststeht:
 
 1. ob und welche Aktivierungskosten die Programmfaehigkeit hat,
 2. in welchem Timingfenster sie nutzbar ist,

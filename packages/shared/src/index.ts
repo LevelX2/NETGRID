@@ -3493,6 +3493,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "net_damage", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_045_newsgroup-filter",
+    title: "Newsgroup Filter",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 5,
+    memoryCost: 2,
+    rulesText: "Install as a program. Its credit-gain ability remains gated until the activation timing is confirmed.",
+    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_289_edgerunner-inc-temps",
     title: "Edgerunner, Inc., Temps",
     side: "corp",

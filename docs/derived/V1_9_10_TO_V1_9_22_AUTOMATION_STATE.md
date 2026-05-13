@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-14 00:45 CEST
+- Ergebnis: V1.9.22 Runner-Programm-Install-only-WIP fuer `Newsgroup Filter` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt `Newsgroup Filter` als V1.9.22-Runtime-Programm mit Installkosten 5, MU 2 und finalem display-only Text. `packages/engine/src/index.test.ts` deckt Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, Ability-Gate, PublicPayload/PlayerViews und Replay/StateHash ab. Die Credit-Gain-Faehigkeit bleibt bis zur Bestaetigung von Aktivierungskosten, Timingfenster und Turn-/Use-Limit ohne LegalAction. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (297); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: newsgroup filter install-only wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-14 00:27 CEST
 - Ergebnis: V1.9.22 Runner-Programm-Resolver fuer `Shield` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

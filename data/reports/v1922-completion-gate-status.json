@@ -80,6 +80,7 @@
   "latestRuntimeResolverSlice": {
     "implementedAt": "2026-05-14T00:27:00+02:00",
     "cards": [
+      "onr_v1_045_newsgroup-filter",
       "onr_v1_061_shield",
       "onr_v1_077_anonymous-tip",
       "onr_v1_080_core-command-jettison-ice",
@@ -101,6 +102,7 @@
       "onr_v1_298_planning-consultants"
     ],
     "engineTests": [
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Newsgroup Filter as an install-only program while keeping its ability gated",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Shield and uses side-safe per-turn net damage prevention",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Anonymous Tip as a public black-ice derez choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Core Command Jettison Ice after a successful HQ run to pay rez cost and trash rezzed ICE",
@@ -140,8 +142,8 @@
       },
       {
         "cardId": "onr_v1_045_newsgroup-filter",
-        "status": "blocked_pending_activation_timing_contract",
-        "removalCondition": "Confirm installed program activation costs, timing, limit and public payload."
+        "status": "install_only_wip_ability_blocked_pending_activation_timing_contract",
+        "removalCondition": "Confirm installed program activation costs, timing, limit and public payload before adding the credit-gain LegalAction."
       },
       {
         "cardId": "onr_v1_274_tutor",
@@ -160,7 +162,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Newsgroup Filter install-only WIP, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

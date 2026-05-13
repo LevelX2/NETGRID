@@ -1874,7 +1874,9 @@ describe("catalog import and status logic", () => {
         "v1922_runner_event_program_install_action_bundle"
       ].includes(card.resolverFamily)
     );
-    const runnerProgramResolverCards = manifestCards.filter((card) => ["v1922_runner_program_net_damage_prevention"].includes(card.resolverFamily));
+    const runnerProgramResolverCards = manifestCards.filter((card) =>
+      ["v1922_runner_program_install_surface_ability_gated", "v1922_runner_program_net_damage_prevention"].includes(card.resolverFamily)
+    );
     const corpAgendaResolverCards = manifestCards.filter((card) =>
       [
         "v1922_corp_agenda_on_score_credit_threshold",
@@ -1937,11 +1939,17 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes.length, card.cardCode).toBeGreaterThan(0);
     }
 
-    expect(runnerProgramResolverCards.map((card) => card.cardCode)).toEqual(["onr_v1_061_shield"]);
+    expect(runnerProgramResolverCards.map((card) => card.cardCode).sort()).toEqual(["onr_v1_045_newsgroup-filter", "onr_v1_061_shield"]);
     for (const card of runnerProgramResolverCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
       expect(card.aiSupported, card.cardCode).toBe(false);
-      expect(card.coveredSmokes).toEqual(expect.arrayContaining(["install_program_legal_action", "net_damage_prevention_window", "public_payload_visibility", "replay_statehash"]));
+      expect(card.coveredSmokes).toEqual(expect.arrayContaining(["install_program_legal_action", "public_payload_visibility", "replay_statehash"]));
+      if (card.cardCode === "onr_v1_045_newsgroup-filter") {
+        expect(card.coveredSmokes).toContain("ability_contract_remains_gated");
+      }
+      if (card.cardCode === "onr_v1_061_shield") {
+        expect(card.coveredSmokes).toContain("net_damage_prevention_window");
+      }
     }
 
     expect(corpAgendaResolverCards.map((card) => card.cardCode).sort()).toEqual([
@@ -1972,7 +1980,7 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes).toEqual(expect.arrayContaining(["rez_ice_legal_action", "core_damage_subroutines", "end_the_run", "replay_statehash"]));
     }
 
-    expect(plannedCards).toHaveLength(19);
+    expect(plannedCards).toHaveLength(18);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
       expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);
