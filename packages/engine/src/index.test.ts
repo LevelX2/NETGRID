@@ -4433,6 +4433,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     moveRunnerCardToGrip(state, "onr_v1_133_militech-mram-chip");
     moveRunnerCardToGrip(state, "onr_v1_134_mram-chip");
 
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     const beforeLimit = state.runner.memoryLimit;
     state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_133_militech-mram-chip");
     expect(state.runner.memoryLimit).toBe(beforeLimit + 2);
@@ -4444,6 +4446,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(runnerView.own.rig?.find((card) => card.definitionId === "onr_v1_133_militech-mram-chip")?.memoryLimitBonus).toBe(2);
     expect(runnerView.own.rig?.find((card) => card.definitionId === "onr_v1_134_mram-chip")?.memoryLimitBonus).toBe(1);
     expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === "onr_v1_133_militech-mram-chip")).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("uses rezzed V1.9.20 action-economy assets through explicit legal actions", () => {
@@ -4463,6 +4468,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
 
     const remoteFacilityId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
     state.cardInstances[remoteFacilityId] = { ...state.cardInstances[remoteFacilityId]!, faceup: true, rezzed: true };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     const clicksBefore = state.corp.clicks;
     state = apply(
       state,
@@ -4477,6 +4484,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       gainedActions: 2,
       corpClicksAfter: clicksBefore + 1
     });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("applies rezzed V1.9.20 global ICE rez-cost modifiers from public root sources", () => {
@@ -4494,12 +4504,18 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.maxHandSize = 100;
     putCorpRootInRemote(state, "onr_v1_324_fortress-architects");
     putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_324_fortress-architects");
     state = apply(state, "corp", (action) => action.type === "end_turn");
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
 
     const wallRez = mustAction(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_232_crystal-wall");
     expect(wallRez.costs[0]?.credits).toBe(3);
+    state = apply(state, "corp", (action) => action.actionId === wallRez.actionId);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("projects V1.9.20 scored-agenda handlimit modifiers through PlayerViews", () => {
@@ -4518,6 +4534,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.maxHandSize = 5;
 
     moveCorpCardToHq(state, "onr_v1_205_main-office-relocation");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     state = apply(state, "corp", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_205_main-office-relocation");
     for (let index = 0; index < 3; index += 1) {
       state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_205_main-office-relocation");
@@ -4527,6 +4545,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.corp.maxHandSize).toBe(5);
     expect(getPlayerView(state, "corp").own.maxHandSize).toBe(6);
     expect(getPlayerView(state, "runner").opponent.maxHandSize).toBe(6);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("tracks V1.9.20 persistent recurring state on installed Loan from Chiba", () => {
@@ -4549,6 +4570,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(getPlayerView(state, "corp").opponent.rig?.find((card) => card.definitionId === "onr_v1_168_loan-from-chiba")?.counters?.recurring_credit).toBe(2);
 
     state.cardInstances[loanId] = { ...state.cardInstances[loanId]!, counters: { ...state.cardInstances[loanId]!.counters, recurring_credit: 0 } };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     state = apply(state, "runner", (action) => action.type === "end_turn");
     if (state.pendingChoice?.source === "discard_phase" && state.pendingChoice.side === "runner") {
       state = applyChoice(state, "runner", String(state.pendingChoice.options[0]?.id));
@@ -4559,6 +4582,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       state = applyChoice(state, "corp", String(state.pendingChoice.options[0]?.id));
     }
     expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
 

@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 15:13 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um Replay-/StateHash-Assertions fuer die bereits abgedeckten MRAM-, Action-Economy-, globalen Rez-Kosten-, Handlimit- und Recurring-State-Pfade erweitert; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.test.ts` prueft fuer die abgedeckten V1.9.20-Pfade deterministisches Replay und finalen StateHash. `data/manifests/card-implementation-manifest-1.9.20.json`, `data/rules/mechanics-coverage-1.9.20.json`, `data/scenarios/v1920-global-modifier-special-state-wip-smoke.json`, `docs/derived/V1_9_20_TEST_MATRIX.md`, `docs/derived/V1_9_20_IMPLEMENTATION_REVIEW.md` und `docs/codex/CODEX_STATUS.md` sind entsprechend aktualisiert. Keine Runtime-/AI-/Web-Promotion.
+- Tests: JSON-Validation pass (285 Dateien); `catalog` pass (34), `engine` pass (264), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Schnitt vorgesehen (`WIP V1.9.20: replay statehash smokes`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-/Visibility-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 15:07 CEST
 - Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um Runtime-Definitionen, erste Engine-Smokes, nicht-promotende AI-Draft-Artefakte und post-AI-Full-Verify erweitert; Cursor bleibt auf V1.9.20 `implementing`.
 - Release: V1.9.20

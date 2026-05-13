@@ -1,7 +1,7 @@
 {
   "schemaVersion": "card-implementation-manifest-v1.9.20",
   "id": "v1.9.20-global-modifier-special-state-manifest",
-  "status": "wip_runtime_definitions_and_mram_engine_smoke",
+  "status": "wip_runtime_definitions_and_replay_smokes",
   "extends": "data/manifests/card-implementation-manifest-1.9.19.json",
   "sourceMode": "private_local_onr_v1_function_matrix_display_only",
   "gateAssertions": {
@@ -9,6 +9,7 @@
     "catalogWipGuardReady": true,
     "runtimeDefinitionsReady": true,
     "engineCovered": false,
+    "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV1921PlusScopeExpansion": true,
     "catalogPromotionPending": true,

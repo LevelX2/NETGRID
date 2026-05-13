@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.scenario.v1",
   "scenarioId": "v1920-global-modifier-special-state-wip-smoke",
   "release": "V1.9.20",
-  "status": "wip_runtime_definitions_and_mram_engine_smoke",
+  "status": "wip_runtime_definitions_and_replay_smokes",
   "coversCards": [
     "onr_v1_022_emergency-self-construct",
     "onr_v1_029_gremlins",
@@ -40,6 +40,7 @@
     "Fortress Architects reduces ICE rez costs from a visible rezzed root source through the global static modifier layer.",
     "Main-Office Relocation projects a scored-agenda Corp handlimit modifier through both PlayerViews without mutating the base hand size.",
     "Loan from Chiba keeps and refreshes public recurring-credit state across turn transitions.",
+    "Covered MRAM, action-economy, global rez-cost, handlimit and recurring-state paths replay deterministically and reproduce final StateHash.",
     "No V1.9.20 card is release-promoted or AI-approved in this WIP slice.",
     "V1.9.21 AI Boon remains outside the V1.9.20 WIP runtime guard.",
     "AI, full release promotion and final review remain follow-up work."
@@ -47,7 +48,7 @@
   "verification": {
     "catalog": "pass: 34 tests",
     "typecheck": "pass",
-    "engine": "pass: 264 tests"
+    "engine": "pass: 264 tests; covered V1.9.20 paths include replay/statehash assertions"
   },
   "completionGate": {
     "releaseDone": false,

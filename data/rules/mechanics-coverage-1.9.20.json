@@ -4,7 +4,7 @@
   "matrixId": "mechanics-coverage-1.9.20",
   "generatedFor": "V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende WIP gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_runtime_definitions_and_mram_engine_smoke",
+  "status": "wip_runtime_definitions_and_replay_smokes",
   "extends": "data/rules/mechanics-coverage-1.9.19.json",
   "gateAssertions": {
     "globalModifierScopeFrozenToTwentySixCards": true,
@@ -12,7 +12,7 @@
     "runtimeDefinitionsReady": true,
     "engineCovered": false,
     "hiddenInfoSafeForCoveredSmokes": true,
-    "stateHashReplayStableForCoveredSmokes": false,
+    "stateHashReplayStableForCoveredSmokes": true,
     "catalogPromotionPending": true,
     "aiPromotionPending": true,
     "noV1921PlusScope": true
@@ -23,11 +23,12 @@
       "label": "Persistente Sonderzustaende",
       "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Loan from Chiba deckt den ersten installierten persistenten Recurring-Credit-Zustand mit Refresh ueber Turnwechsel ab.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Loan from Chiba deckt den ersten installierten persistenten Recurring-Credit-Zustand mit Refresh ueber Turnwechsel und replay-stabilem StateHash ab.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
-        "loan_from_chiba_recurring_state_smoke"
+        "loan_from_chiba_recurring_state_smoke",
+        "loan_from_chiba_replay_statehash_smoke"
       ]
     },
     {
@@ -35,13 +36,16 @@
       "label": "Handlimit, MU und Action Economy",
       "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; MRAM-Hardware deckt den ersten legalen MU-Installationspfad ab, Remote Facility den ersten rezzed Action-Economy-Assetpfad und Main-Office Relocation den ersten scored-Agenda-Handlimitmodifier.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; MRAM-Hardware deckt den ersten legalen MU-Installationspfad ab, Remote Facility den ersten rezzed Action-Economy-Assetpfad und Main-Office Relocation den ersten scored-Agenda-Handlimitmodifier, jeweils mit replay-stabilem StateHash.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
         "mram_memory_install_smoke",
         "action_economy_asset_smoke",
-        "main_office_handlimit_smoke"
+        "main_office_handlimit_smoke",
+        "mram_memory_replay_statehash_smoke",
+        "action_economy_asset_replay_statehash_smoke",
+        "main_office_handlimit_replay_statehash_smoke"
       ]
     },
     {
@@ -49,11 +53,12 @@
       "label": "Globale statische Modifier",
       "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Fortress Architects deckt den ersten rezzed globalen ICE-Rez-Kostenmodifier aus sichtbarer Root-Quelle ab.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Fortress Architects deckt den ersten rezzed globalen ICE-Rez-Kostenmodifier aus sichtbarer Root-Quelle mit replay-stabilem StateHash ab.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
-        "fortress_architects_ice_rez_cost_smoke"
+        "fortress_architects_ice_rez_cost_smoke",
+        "fortress_architects_replay_statehash_smoke"
       ]
     }
   ],
