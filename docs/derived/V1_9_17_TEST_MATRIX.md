@@ -9,16 +9,18 @@ Stand: 2026-05-13
 | No-Promotion | Keine V1.9.17-Karte in Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Smoke grün |
 | Displaytext | Kein `WIP` im Runtime-Text; display-only dokumentiert | Engine-WIP-Smoke grün |
 | Generic Asset/Node | Install, Rez, Trash-on-access, PublicEvents | ESA-Contract-Harness grün; weitere Karten Folgearbeit |
+| Campaign/Economy | Rezzed Economy-Asset-Ability mit LegalAction und applyAction-Revalidierung | ESA Contract gain-credit WIP grün; weitere Economy-Assets Folgearbeit |
+| Recurring | Corp-Start-of-turn-Recurring ohne Akkumulation | Holovid Campaign Start-of-turn-Credit grün; weitere Karten Folgearbeit |
+| Trace | Blood Cat und Krumz über Trace-Bid-Fenster | Blood Cat Trace-3-Fenster grün; Krumz Folgearbeit |
 | Hidden-Zone | Redigierte Choices für Corporate Negotiating Center, Rescheduler, Setup!, TRAP! | Folgearbeit |
 | Access/Ambush | Setup! und TRAP! nur aus legalen Access-Fenstern | Folgearbeit |
 | Damage/Tags | Solo Squad, Setup!, TRAP! und Tag-Flächen side-sicher | Folgearbeit |
-| Trace | Blood Cat und Krumz über Trace-Bid-Fenster | Folgearbeit |
 | Hosting/Recurring | Campaign-/Hosting-/Recurring-Assets ohne Akkumulation oder Host-Leak | Folgearbeit |
 | Visibility | PlayerView/PublicEvent/Reconnect/Undo ohne Hidden-Info | Folgearbeit |
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Folgearbeit |
 | AI | AI-Hints, AI-Smokes, legaler Fallback | Folgearbeit |
 | Server/Web | Keine Payload-Leaks; Webclient-Version erst bei Abschluss | Package-Gates grün; Webclient-Version bleibt offen |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Folgearbeit |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | WIP-Gates nach Economy-/Recurring-/Trace-Schnitt grün |
 
 ## Mindestchecks im WIP-Schnitt
 

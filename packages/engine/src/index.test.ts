@@ -5093,6 +5093,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "onr_v1_321_esa-contract"
     );
 
+    const creditsBeforeAbility = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1917AssetAbility === "gain_credits" && action.payload?.cardId === assetId);
+    expect(state.corp.credits).toBe(creditsBeforeAbility + 2);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "gain_credit", cardDefinitionId: "onr_v1_321_esa-contract", amount: 2 });
+
     let accessState = toRunnerTurn(v1917GenericAssetGame("v1917-generic-asset-access-trash"));
     accessState.runner.credits = 10;
     const accessedAssetId = putCorpRootInRemote(accessState, "onr_v1_321_esa-contract");
@@ -5108,6 +5114,50 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "onr_v1_321_esa-contract"
     );
     expect(validateGameState(accessState).ok).toBe(true);
+  });
+
+  it("applies rezzed V1.9.17 recurring campaign credits at Corp turn start", () => {
+    let state = v1917GenericAssetGame("v1917-recurring-campaign-start-turn");
+    state.corp.credits = 10;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const campaignId = moveCorpCardToHq(state, "onr_v1_326_holovid-campaign");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.payload?.cardId === campaignId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_326_holovid-campaign");
+    const creditsBeforeNextCorpTurn = state.corp.credits;
+
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.activeSide).toBe("corp");
+    expect(state.timingPoint).toBe("corp_draw.mandatory_draw");
+    expect(state.corp.credits).toBe(creditsBeforeNextCorpTurn + 1);
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
+  it("starts V1.9.17 trace asset abilities through the side-safe trace window", () => {
+    let state = v1917GenericAssetGame("v1917-trace-asset-window");
+    state.corp.credits = 10;
+    state.runner.credits = 5;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const bloodCatId = moveCorpCardToHq(state, "onr_v1_310_blood-cat");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.payload?.cardId === bloodCatId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_310_blood-cat");
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1917AssetAbility === "trace_3_tag" && action.payload?.cardId === bloodCatId);
+
+    expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 3, sourceDefinitionId: "onr_v1_310_blood-cat" });
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "gain_credit", traceStarted: true, sourceDefinitionId: "onr_v1_310_blood-cat" });
+    expect(validateGameState(state).ok).toBe(true);
   });
 });
 

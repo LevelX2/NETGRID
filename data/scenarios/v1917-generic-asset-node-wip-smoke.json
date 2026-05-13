@@ -26,11 +26,13 @@
   "assertions": [
     "V1.9.17 WIP runtime definitions exist for all 18 target cards with final display-only text and no WIP prefix.",
     "The WIP target set is not included in ONR_V1_RUNTIME_RELEASE_CARD_IDS and is not AI-promoted.",
-    "ESA Contract exercises the generic Corp asset install, rez, Runner access, trash-on-access and Runner-visible Archives path without hidden state payloads.",
+    "ESA Contract exercises the generic Corp asset install, rez, public Economy-Asset gain-credit ability, Runner access, trash-on-access and Runner-visible Archives path without hidden state payloads.",
+    "Holovid Campaign exercises deterministic Corp start-of-turn recurring campaign credits without accumulation.",
+    "Blood Cat exercises a public Trace 3 asset ability through the existing side-safe trace bid window.",
     "V1.9.18 Crybaby remains outside the V1.9.17 WIP runtime guard."
   ],
   "verification": {
-    "engine": "pass: 234 tests",
+    "engine": "pass: 236 tests",
     "catalog": "pass: 31 tests",
     "typecheck": "pass",
     "json": "pass: 259 files",

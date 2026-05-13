@@ -181,6 +181,24 @@ const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const DATA_RAVEN_ID = "onr_v1_236_data-raven";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
+const V1917_ECONOMY_ASSET_IDS = new Set([
+  "onr_v1_309_bbs-whispering-campaign",
+  "onr_v1_311_braindance-campaign",
+  "onr_v1_314_corporate-negotiating-center",
+  "onr_v1_321_esa-contract",
+  "onr_v1_326_holovid-campaign",
+  "onr_v1_329_investment-firm",
+  "onr_v1_337_rockerboy-promotion",
+  "onr_v1_344_spinn-public-relations"
+]);
+const V1917_RECURRING_ASSET_IDS = new Set([
+  "onr_v1_311_braindance-campaign",
+  "onr_v1_314_corporate-negotiating-center",
+  "onr_v1_326_holovid-campaign",
+  "onr_v1_329_investment-firm",
+  "onr_v1_344_spinn-public-relations"
+]);
+const V1917_TRACE_ASSET_IDS = new Set(["onr_v1_310_blood-cat", "onr_v1_330_krumz"]);
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -1626,6 +1644,34 @@ function corpMainActions(state: GameState): LegalAction[] {
       }
     }
   }
+  for (const assetId of rezzedCorpRootCardIds(state).sort()) {
+    const definition = definitionFor(state, assetId);
+    if (V1917_TRACE_ASSET_IDS.has(definition.id)) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: Trace 3 starten`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1917AssetAbility: "trace_3_tag", traceStrength: 3 }
+        )
+      );
+    }
+    if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
+    actions.push(
+      action(
+        state,
+        "corp",
+        "gain_credit",
+        `${definition.title}: 2 Credits`,
+        assetId,
+        [{ clicks: 1 }],
+        { cardId: assetId, v1917AssetAbility: "gain_credits", gainCreditsAmount: 2 }
+      )
+    );
+  }
   for (const agendaId of state.corp.scoreArea.slice().sort()) {
     const definition = definitionFor(state, agendaId);
     if (definition.id === NETWATCH_OPERATIONS_OFFICE_ID || definition.id === PRIVATE_CYBERNET_POLICE_ID) {
@@ -2563,6 +2609,33 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         if (definitionFor(state, sourceCardId).id !== I_SPY_ID) throw new Error("Die V1.9.12 Counter-Faehigkeit passt nicht zur Karte.");
         revealRunnerStackTop(state, legalAction);
         legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1912_reveal_stack_top" };
+        return;
+      }
+      if (legalAction.payload?.v1917AssetAbility === "gain_credits") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.17-Asset-Faehigkeiten nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.17-Asset-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) throw new Error("Die V1.9.17-Asset-Faehigkeit passt nicht zur Karte.");
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 2) throw new Error("V1.9.17-Economy-Assets gewaehrt in diesem WIP genau 2 Credits.");
+        credits(state, "corp", gainAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: gainAmount,
+          corpCreditsAfter: state.corp.credits
+        };
+        return;
+      }
+      if (legalAction.payload?.v1917AssetAbility === "trace_3_tag") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.17-Asset-Traces nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.17-Trace-Asset-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1917_TRACE_ASSET_IDS.has(definition.id)) throw new Error("Die V1.9.17-Trace-Asset-Faehigkeit passt nicht zur Karte.");
+        const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
+        if (!Number.isInteger(traceStrength) || traceStrength !== 3) throw new Error("V1.9.17-Trace-Assets starten in diesem WIP genau Trace 3.");
+        startTraceFromOperation(state, definition.id, traceStrength, legalAction);
         return;
       }
       if (legalAction.payload?.resourceAbility === "databroker") {
@@ -4304,6 +4377,12 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   if (acmeCount > 0) {
     credits(state, "corp", acmeCount);
   }
+  const v1917RecurringAssetCount = rezzedCorpRootCardIds(state).reduce((sum, cardId) => {
+    return V1917_RECURRING_ASSET_IDS.has(definitionFor(state, cardId).id) ? sum + 1 : sum;
+  }, 0);
+  if (v1917RecurringAssetCount > 0) {
+    credits(state, "corp", v1917RecurringAssetCount);
+  }
   const employeeEmpowermentCount = state.corp.scoreArea.reduce((sum, cardId) => {
     return definitionFor(state, cardId).id === EMPLOYEE_EMPOWERMENT_ID ? sum + 1 : sum;
   }, 0);
@@ -5160,7 +5239,10 @@ function action(
     timingPoint: state.timingPoint,
     costs,
     targetRequirements: metadata.targetRequirements ?? [],
-    visibility: type.startsWith("rez") || type === "score_agenda" || type === "trash_resource" || (side === "runner" && type === "install_card") ? "public" : "private_to_actor",
+    visibility:
+      type.startsWith("rez") || type === "score_agenda" || type === "trash_resource" || payload?.v1917AssetAbility || (side === "runner" && type === "install_card")
+        ? "public"
+        : "private_to_actor",
     expiresAtStateVersion: state.stateVersion,
     ...(metadata.choiceRequirements ? { choiceRequirements: metadata.choiceRequirements } : {}),
     ...(metadata.abilityRef ? { abilityRef: metadata.abilityRef } : {}),
@@ -6215,7 +6297,12 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   if (legalAction.type === "trash_resource") context.zoneLabel = "Resource";
   if (legalAction.type === "rez_ice") context.zoneLabel = legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true ? "Remote" : "ICE";
   if (legalAction.type === "gain_credit" || legalAction.type === "draw_card" || legalAction.type === "remove_tag") {
-    context.amount = legalAction.type === "remove_tag" ? Number(legalAction.payload?.removeTagAmount ?? 1) : 1;
+    context.amount =
+      legalAction.type === "remove_tag"
+        ? Number(legalAction.payload?.removeTagAmount ?? 1)
+        : Number.isInteger(legalAction.payload?.gainCreditsAmount)
+          ? Number(legalAction.payload?.gainCreditsAmount)
+          : 1;
   }
   if (legalAction.type === "resolve_choice") {
     context.choiceKind = legalAction.payload?.choiceKind;
@@ -6395,6 +6482,7 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
   }
   const revealsCard =
     ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation", "pump_breaker", "break_subroutine"].includes(legalAction.type) ||
+    (legalAction.type === "gain_credit" && (legalAction.payload?.v1917AssetAbility === "gain_credits" || legalAction.payload?.v1917AssetAbility === "trace_3_tag")) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;
