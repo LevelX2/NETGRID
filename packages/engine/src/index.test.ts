@@ -5600,6 +5600,98 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     expect(validateGameState(state).ok).toBe(true);
   });
+
+  it("covers V1.9.18 counter, tag-condition and hidden-zone upgrade actions", () => {
+    let state = v1917GenericAssetGame("v1918-counter-tag-hidden-actions");
+    state.corp.credits = 10;
+    state.runner.tags = 1;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const crystalId = putCorpRootInRemote(state, "onr_v1_355_crystal-palace-station-grid");
+    const omniId = putCorpRootInRemote(state, "onr_v1_364_omni-kismet-ph-d");
+    const galvestonId = putCorpRootInRemote(state, "onr_v1_362_new-galveston-city-grid");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    for (const upgradeId of [crystalId, omniId, galvestonId]) {
+      state.cardInstances[upgradeId] = { ...state.cardInstances[upgradeId]!, faceup: true, rezzed: true };
+    }
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1918UpgradeAbility === "add_power_counter");
+    expect(cardCounterAmount(state, crystalId, "power")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1918UpgradeAbility: "add_power_counter",
+      addedCounterAmount: 1,
+      remainingCounters: 1
+    });
+
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1918UpgradeAbility === "tag_condition_credit");
+    expect(state.corp.credits).toBe(11);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1918UpgradeAbility: "tag_condition_credit",
+      runnerTagsAfter: 1
+    });
+
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1918UpgradeAbility === "reveal_rd_top");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1918_city_grid_reveal_rd_top"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"/);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("covers V1.9.18 city-grid trace and run-start stealth tax paths", () => {
+    let traceState = v1917GenericAssetGame("v1918-paris-city-grid-trace");
+    traceState.corp.credits = 5;
+    traceState.runner.credits = 5;
+    traceState = apply(traceState, "corp", (action) => action.type === "mandatory_draw");
+    const parisId = putCorpRootInRemote(traceState, "onr_v1_365_paris-city-grid");
+    traceState.cardInstances[parisId] = { ...traceState.cardInstances[parisId]!, faceup: true, rezzed: true };
+    const traceInitial = structuredClone(traceState);
+    const traceReplayStart = traceState.eventLog.length;
+
+    traceState = apply(traceState, "corp", (action) => action.type === "gain_credit" && action.payload?.v1918UpgradeAbility === "trace_2_tag");
+    expect(traceState.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 2, sourceDefinitionId: "onr_v1_365_paris-city-grid" });
+    traceState = applyChoice(traceState, "corp", "bid_0");
+    traceState = applyChoice(traceState, "runner", "bid_0");
+    expect(traceState.runner.tags).toBe(1);
+    expect(validateGameState(traceState).ok).toBe(true);
+    const traceReplay = replayEvents(traceInitial, traceState.eventLog.slice(traceReplayStart));
+    expect(traceReplay.ok).toBe(true);
+    expect(hashState(traceReplay.state)).toBe(hashState(traceState));
+
+    let runState = toRunnerTurn(v1917GenericAssetGame("v1918-stealth-run-tax"));
+    runState.runner.credits = 0;
+    const surveillanceId = putCorpRootInRemote(runState, "onr_v1_373_twenty-four-hour-surveillance");
+    runState.cardInstances[surveillanceId] = { ...runState.cardInstances[surveillanceId]!, faceup: true, rezzed: true };
+    const stealthId = installRunnerProgramForTest(runState, "onr_v1_035_invisibility");
+    runState.cardInstances[stealthId] = { ...runState.cardInstances[stealthId]!, counters: { recurring_credit: 1 } };
+    const runInitial = structuredClone(runState);
+    const runReplayStart = runState.eventLog.length;
+
+    const runAction = getLegalActions(runState, "runner").find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1" && action.payload?.v1918UpgradeAbility === "run_start_tax"
+    );
+    expect(runAction?.costs).toEqual([{ clicks: 1, credits: 1 }]);
+    runState = apply(runState, "runner", (action) => action.actionId === runAction?.actionId);
+
+    expect(cardCounterAmount(runState, stealthId, "recurring_credit")).toBe(0);
+    expect(runState.runner.credits).toBe(0);
+    expect(runState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
+      v1918UpgradeAbility: "run_start_tax",
+      runStartTaxPaid: 1
+    });
+    expect(validateGameState(runState).ok).toBe(true);
+    const runReplay = replayEvents(runInitial, runState.eventLog.slice(runReplayStart));
+    expect(runReplay.ok).toBe(true);
+    expect(hashState(runReplay.state)).toBe(hashState(runState));
+  });
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
@@ -8126,6 +8218,7 @@ const ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK: DeckDefinition = {
     { id: "simple_decoder", quantity: 2 },
     { id: "simple_fracter", quantity: 2 },
     { id: "simple_killer", quantity: 2 },
+    { id: "onr_v1_035_invisibility", quantity: 1 },
     { id: "simple_economy_event", quantity: 6 }
   ]
 };

@@ -208,8 +208,17 @@ const V1917_SETUP_ID = "onr_v1_340_setup";
 const V1917_TRAP_ID = "onr_v1_345_trap";
 const V1918_DEDICATED_RESPONSE_TEAM_ID = "onr_v1_356_dedicated-response-team";
 const V1918_DIETER_ESSLIN_ID = "onr_v1_357_dieter-esslin";
+const V1918_CRYSTAL_PALACE_STATION_GRID_ID = "onr_v1_355_crystal-palace-station-grid";
+const V1918_DR_DREFF_ID = "onr_v1_358_dr-dreff";
+const V1918_NEW_GALVESTON_CITY_GRID_ID = "onr_v1_362_new-galveston-city-grid";
+const V1918_OMNI_KISMET_ID = "onr_v1_364_omni-kismet-ph-d";
+const V1918_PARIS_CITY_GRID_ID = "onr_v1_365_paris-city-grid";
 const V1918_RED_HERRINGS_ID = "onr_v1_366_red-herrings";
 const V1918_TURBEAU_DELACROIX_ID = "onr_v1_372_turbeau-delacroix";
+const V1918_TWENTY_FOUR_HOUR_SURVEILLANCE_ID = "onr_v1_373_twenty-four-hour-surveillance";
+const V1918_COUNTER_UPGRADE_IDS = new Set([V1918_CRYSTAL_PALACE_STATION_GRID_ID, V1918_DR_DREFF_ID]);
+const V1918_RUN_TAX_UPGRADE_IDS = new Set([V1918_DR_DREFF_ID, V1918_TURBEAU_DELACROIX_ID, V1918_TWENTY_FOUR_HOUR_SURVEILLANCE_ID]);
+const V1918_TAG_CONDITION_UPGRADE_IDS = new Set([V1918_OMNI_KISMET_ID, V1918_PARIS_CITY_GRID_ID]);
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -1741,6 +1750,58 @@ function corpMainActions(state: GameState): LegalAction[] {
         );
       }
     }
+    if (V1918_COUNTER_UPGRADE_IDS.has(definition.id)) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: Power-Counter laden`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1918UpgradeAbility: "add_power_counter", counterType: "power", addCounterAmount: 1 }
+        )
+      );
+    }
+    if (definition.id === V1918_NEW_GALVESTON_CITY_GRID_ID && state.corp.rd.length > 0) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: R&D-Spitze revealn`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1918UpgradeAbility: "reveal_rd_top", hiddenZoneAction: "v1918_city_grid_reveal_rd_top" }
+        )
+      );
+    }
+    if (definition.id === V1918_PARIS_CITY_GRID_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: Trace 2 starten`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1918UpgradeAbility: "trace_2_tag", traceStrength: 2 }
+        )
+      );
+    }
+    if (V1918_TAG_CONDITION_UPGRADE_IDS.has(definition.id) && state.runner.tags > 0) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: getaggten Runner besteuern`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1918UpgradeAbility: "tag_condition_credit", gainCreditsAmount: 1 }
+        )
+      );
+    }
     if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
     actions.push(
       action(
@@ -2113,10 +2174,24 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
   }
   for (const server of state.corp.servers) {
+    const v1918RunTax = v1918RunStartTaxForServer(state, server.id);
+    const runCosts = [{ clicks: 1, ...(v1918RunTax.amount > 0 ? { credits: v1918RunTax.amount } : {}) }];
+    const runPayload = {
+      serverId: server.id,
+      ...(v1918RunTax.amount > 0
+        ? {
+            v1918UpgradeAbility: "run_start_tax",
+            runStartTaxCredits: v1918RunTax.amount,
+            runStartTaxSourceDefinitionIds: v1918RunTax.sourceDefinitionIds.join(",")
+          }
+        : {})
+    };
     if (hasClicks) {
-      actions.push(action(state, "runner", "start_run", `Run auf ${server.label}`, "basic_action", [{ clicks: 1 }], { serverId: server.id }));
+      if (v1918RunTax.amount === 0 || availableRunnerRunStartCredits(state) >= v1918RunTax.amount) {
+        actions.push(action(state, "runner", "start_run", `Run auf ${server.label}`, "basic_action", runCosts, runPayload));
+      }
     }
-    if (bonusRunPending) {
+    if (bonusRunPending && (v1918RunTax.amount === 0 || availableRunnerRunStartCredits(state) >= v1918RunTax.amount)) {
       actions.push(
         action(
           state,
@@ -2124,9 +2199,9 @@ function runnerMainActions(state: GameState): LegalAction[] {
           "start_run",
           `Bonus-Run auf ${server.label}`,
           "basic_action",
-          [],
+          v1918RunTax.amount > 0 ? [{ credits: v1918RunTax.amount }] : [],
           {
-            serverId: server.id,
+            ...runPayload,
             bonusRunNoClick: true,
             bonusRunSource: ALL_NIGHTER_ID
           }
@@ -2624,6 +2699,22 @@ function runnerMovementActions(state: GameState): LegalAction[] {
   return [action(state, "runner", "jack_out", "Jack-out", "game_rule"), action(state, "runner", "continue_run", "Run fortsetzen", "game_rule")];
 }
 
+function v1918RunStartTaxForServer(state: GameState, serverId: Exclude<ServerId, "new_remote">): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
+  const server = mustServer(state, serverId);
+  const sourceDefinitionIds = server.root
+    .filter((cardId) => mustInstance(state.cardInstances, cardId).rezzed)
+    .map((cardId) => definitionFor(state, cardId).id)
+    .filter((definitionId) => V1918_RUN_TAX_UPGRADE_IDS.has(definitionId));
+  return {
+    amount: sourceDefinitionIds.length,
+    sourceDefinitionIds
+  };
+}
+
+function availableRunnerRunStartCredits(state: GameState): number {
+  return state.runner.credits + runnerRunRecurringCredits(state);
+}
+
 function runnerAccessActions(state: GameState): LegalAction[] {
   const run = mustRun(state);
   if (!run.accessedCardId) {
@@ -2833,6 +2924,60 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         };
         return;
       }
+      if (legalAction.payload?.v1918UpgradeAbility === "add_power_counter") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.18-Upgrade-Counter nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.18-Upgrade-Counter-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1918_COUNTER_UPGRADE_IDS.has(definition.id)) throw new Error("Die V1.9.18-Counter-Faehigkeit passt nicht zur Karte.");
+        const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
+        if (!Number.isInteger(addAmount) || addAmount !== 1) throw new Error("V1.9.18-Counter-Upgrades laden in diesem WIP genau 1 Power-Counter.");
+        addCardCounter(state, sourceCardId, "power", addAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          addedCounterAmount: addAmount,
+          remainingCounters: cardCounter(state, sourceCardId, "power")
+        };
+        return;
+      }
+      if (legalAction.payload?.v1918UpgradeAbility === "reveal_rd_top") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.18-City-Grid-Reveals nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.18-City-Grid-Faehigkeit ist nicht rezzed installiert.");
+        if (definitionFor(state, sourceCardId).id !== V1918_NEW_GALVESTON_CITY_GRID_ID) throw new Error("Die V1.9.18-City-Grid-Reveal-Faehigkeit passt nicht zur Karte.");
+        revealCorpRdTop(state, legalAction);
+        legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1918_city_grid_reveal_rd_top" };
+        return;
+      }
+      if (legalAction.payload?.v1918UpgradeAbility === "trace_2_tag") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.18-City-Grid-Traces nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.18-City-Grid-Trace-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1918_PARIS_CITY_GRID_ID) throw new Error("Die V1.9.18-City-Grid-Trace-Faehigkeit passt nicht zur Karte.");
+        const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
+        if (!Number.isInteger(traceStrength) || traceStrength !== 2) throw new Error("Paris City Grid startet in diesem WIP genau Trace 2.");
+        startTraceFromOperation(state, definition.id, traceStrength, legalAction);
+        return;
+      }
+      if (legalAction.payload?.v1918UpgradeAbility === "tag_condition_credit") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.18-Tag-Condition-Upgrades nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.18-Tag-Condition-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1918_TAG_CONDITION_UPGRADE_IDS.has(definition.id)) throw new Error("Die V1.9.18-Tag-Condition-Faehigkeit passt nicht zur Karte.");
+        if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 1) throw new Error("V1.9.18-Tag-Condition-Upgrades gewaehrten in diesem WIP genau 1 Credit.");
+        credits(state, "corp", gainAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: gainAmount,
+          corpCreditsAfter: state.corp.credits,
+          runnerTagsAfter: state.runner.tags
+        };
+        return;
+      }
       if (legalAction.payload?.resourceAbility === "databroker") {
         if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Databroker nutzen.");
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
@@ -2990,6 +3135,15 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         spendClick(state, "runner");
       }
       startRun(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">);
+      if (legalAction.payload?.v1918UpgradeAbility === "run_start_tax") {
+        const taxCredits = legalAction.costs.reduce((sum, cost) => sum + (Number.isInteger(cost.credits) ? cost.credits ?? 0 : 0), 0);
+        if (taxCredits > 0) spendRunnerRunCredits(state, taxCredits);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          runStartTaxPaid: taxCredits,
+          runnerCreditsAfter: state.runner.credits
+        };
+      }
       return;
     case "jack_out":
       finishRun(state, false);
@@ -6766,6 +6920,14 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   if (typeof legalAction.payload?.onScoreGainCredits === "number") context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
   if (typeof legalAction.payload?.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
   if (typeof legalAction.payload?.gainedActions === "number") context.gainedActions = legalAction.payload.gainedActions;
+  if (typeof legalAction.payload?.v1918UpgradeAbility === "string") {
+    context.v1918UpgradeAbility = legalAction.payload.v1918UpgradeAbility;
+    if (typeof legalAction.payload.runStartTaxPaid === "number") context.runStartTaxPaid = legalAction.payload.runStartTaxPaid;
+    if (typeof legalAction.payload.addedCounterAmount === "number") context.addedCounterAmount = legalAction.payload.addedCounterAmount;
+    if (typeof legalAction.payload.remainingCounters === "number") context.remainingCounters = legalAction.payload.remainingCounters;
+    if (typeof legalAction.payload.runnerTagsAfter === "number") context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
+    if (typeof legalAction.payload.runStartTaxSourceDefinitionIds === "string") context.runStartTaxSourceDefinitionIds = legalAction.payload.runStartTaxSourceDefinitionIds;
+  }
   if (legalAction.payload?.v1918UpgradeAbility === "red_herrings_steal_tax") {
     context.v1918UpgradeAbility = "red_herrings_steal_tax";
     context.stealAdditionalCost = legalAction.payload.stealAdditionalCost;

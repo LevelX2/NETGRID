@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 13:05 CEST
+- Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten um konkrete Counter-, City-Grid-Reveal-, City-Grid-Trace-, Tag-Condition- und Run-Start-/Stealth-Tax-Pfade erweitert; Cursor bleibt auf V1.9.18 `implementing`.
+- Release: V1.9.18
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Crystal Palace Station Grid und Dr. Dreff decken rezzed Power-Counter-LegalActions ab; New Galveston City Grid deckt side-sicheren R&D-Top-Reveal ab; Paris City Grid deckt ein Trace-2-Tag-Fenster mit Korp-/Runner-Bids ab; Omni Kismet und Paris City Grid decken getaggter-Runner-Condition-LegalActions ab; Twenty-Four-Hour Surveillance deckt einen servergebundenen Run-Start-Tax ab, der ueber Runner-Run-/Stealth-Recurring-Credits zahlbar ist. `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json`, `docs/derived/V1_9_18_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_9_18_TEST_MATRIX.md` sind entsprechend aktualisiert. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass fuer 266 `data/**/*.json`; `engine` pass (251), `catalog` pass (32), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.18: upgrade counter run tax paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.18 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil finale Manifest-/Coverage-/Scenario-/AI-Artefakte, weitere Querschnittschecks, Final Review, Release-Promotion und Webclient-Version `V1.9.18` offen sind.
+
 - Zeitpunkt: 2026-05-13 12:18 CEST
 - Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten release-spezifisch detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.18 `implementing`.
 - Release: V1.9.18

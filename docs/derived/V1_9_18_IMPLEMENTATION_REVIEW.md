@@ -13,6 +13,11 @@ Stand: 2026-05-13
 - `packages/engine/src/index.ts` und `packages/engine/src/index.test.ts` ergänzen Dedicated Response Team und Dieter Esslin als side-sichere Access-Ambush-Damage-Pfade sowie Turbeau Delacroix als Access-Trace-Fenster mit Corp-/Runner-Bid-Choices.
 - Red Herrings ist als servergebundener Agenda-Steal-Tax im legalen `steal_agenda`-Fenster abgedeckt.
 - City-Grid-/Region-Install ersetzt eine ältere Region im selben Remote und macht die alte Region in Archives sichtbar.
+- Crystal Palace Station Grid und Dr. Dreff decken explizite Power-Counter-LegalActions für rezzed servergebundene Upgrades ab.
+- New Galveston City Grid deckt einen side-sicheren R&D-Top-Reveal aus einem rezzed City-Grid-Upgrade ab.
+- Paris City Grid deckt ein City-Grid-Trace-2-Tag-Fenster mit Korp-/Runner-Bid-Choices ab.
+- Omni Kismet und Paris City Grid decken getaggter-Runner-Condition-LegalActions ab.
+- Twenty-Four-Hour Surveillance deckt einen servergebundenen Run-Start-Tax ab, der durch Runner-Run-/Stealth-Recurring-Credits bezahlt werden kann.
 - `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json` dokumentiert den aktuellen WIP-Smoke maschinenlesbar ohne Release- oder AI-Promotion.
 
 ## Textentscheidung
@@ -21,7 +26,7 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 
 ## Noch offen
 
-- Weitere konkrete LegalAction-/applyAction-Abdeckung für City-Grid-Effekte, Counter-, Run-Flow-, Tag-Condition- und Stealth-Pfade.
+- Weitere konkrete LegalAction-/applyAction-Abdeckung für die noch nicht finalisierten einfachen Generic-Upgrade-/Root-Karten, zusätzliche City-Grid-Sonderfälle und finale Server-/Visibility-Querschnittsnachweise.
 - Release-Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest.
 - Final Review, Release-Promotion, finale Manifest-/Coverage-/AI-Artefakte und Webclient-Version `V1.9.18`.
 
@@ -33,7 +38,7 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 ## Verifikation
 
 - JSON-Validation für `data/**/*.json`: pass, 266 Dateien.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 249 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 251 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 32 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.

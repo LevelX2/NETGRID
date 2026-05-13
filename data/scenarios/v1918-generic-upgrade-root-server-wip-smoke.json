@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.scenario.v1",
   "scenarioId": "v1918-generic-upgrade-root-server-wip-smoke",
   "release": "V1.9.18",
-  "status": "wip_runtime_catalog_guard_with_access_ambush_trace",
+  "status": "wip_runtime_catalog_guard_with_upgrade_counter_run_tag_stealth_paths",
   "coversCards": [
     "onr_v1_354_crybaby",
     "onr_v1_355_crystal-palace-station-grid",
@@ -27,12 +27,17 @@
     "Turbeau Delacroix covers a side-safe access trace window with Corp and Runner trace bid choices.",
     "Red Herrings covers a server-bound agenda steal tax on legal agenda access.",
     "V1.9.18 city grids cover server-bound region replacement with older region visibility in Archives.",
+    "Crystal Palace Station Grid and Dr. Dreff cover explicit Power-counter LegalActions for rezzed server upgrades.",
+    "New Galveston City Grid covers a side-safe R&D top reveal from a rezzed city-grid upgrade.",
+    "Paris City Grid covers a rezzed city-grid Trace 2 tag window with bid choices.",
+    "Omni Kismet and Paris City Grid cover tagged-runner condition LegalActions.",
+    "Twenty-Four-Hour Surveillance covers a rezzed server-bound run-start tax payable through Runner run/stealth recurring credits.",
     "Catalog WIP guard tracks the exact target set.",
     "No V1.9.18 card is release-promoted or AI-approved in this WIP slice.",
     "V1.9.19 Fait Accompli remains outside the V1.9.18 WIP runtime guard."
   ],
   "verification": {
-    "engine": "pass: 249 tests",
+    "engine": "pass: 251 tests",
     "catalog": "pass: 32 tests",
     "ai": "pass: 85 tests",
     "server": "pass: 72 tests",
