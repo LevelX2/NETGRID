@@ -15,9 +15,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.20
-Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.21
+Aktueller Release: V1.9.21
+Phase: planned
+Naechster erlaubter Release nach Abschluss: V1.9.22
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -63,11 +63,21 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.17 | Generische Asset/Node-Faehigkeiten | done |
 | V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | done |
 | V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | done |
-| V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | current |
-| V1.9.21 | Deterministischer Zufall und Wuerfelkarten | pending |
+| V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | done |
+| V1.9.21 | Deterministischer Zufall und Wuerfelkarten | current |
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 15:39 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende final abgeschlossen; Cursor auf V1.9.21 `planned` gesetzt.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: done; V1.9.21 planned
+- Umsetzung: Alle 26 V1.9.20-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. MRAM-MU, Action-Economy-Assets, Fortress-Architects-Rez-Kosten, Main-Office-Handlimit und Loan-from-Chiba-Recurring-State sind LegalAction-/applyAction-basiert, side-sicher und replay-/StateHash-stabil abgedeckt. Der Webclient zeigt `V1.9.20`.
+- Tests: JSON-Validation pass; `catalog` pass (35), `engine` pass (265), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf wird per Checkpoint erzeugt (`V1.9.20: global modifier special states`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 Completion-Gate ist erfuellt; V1.9.21 ist der aktuelle Release.
 
 - Zeitpunkt: 2026-05-13 15:22 CEST
 - Ergebnis: V1.9.20 WIP-Stand nach Replay-/Visibility-/Revalidation-Schnitten breit verifiziert; Cursor bleibt auf V1.9.20 `implementing`.

@@ -1,0 +1,775 @@
+{
+  "schemaVersion": "netgrid.ai-card-hints.v2",
+  "hintsId": "ai-card-hints-deck-legal-v1920",
+  "release": "V1.9.20",
+  "scope": "deck_legal_ai_approval_v1920",
+  "status": "ai_supported",
+  "cards": [
+    {
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "handlimit"
+      ],
+      "planRoles": [
+        "remote_upgrade_modifier"
+      ],
+      "requiredMechanics": [
+        "event_modification_prevention_avoid_resolver",
+        "persistent_special_state_resolver",
+        "core_brain_damage_modifier_resolver",
+        "action_economy_handsize_modifier_resolver",
+        "damage_event_prevention_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ]
+    },
+    {
+      "cardId": "onr_v1_029_gremlins",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "counter"
+      ],
+      "planRoles": [
+        "remote_upgrade_modifier"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "typed_counter_virus_purge_resolver",
+        "action_economy_handsize_modifier_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ]
+    },
+    {
+      "cardId": "onr_v1_133_militech-mram-chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "memory"
+      ],
+      "planRoles": [
+        "remote_upgrade_modifier"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ]
+    },
+    {
+      "cardId": "onr_v1_134_mram-chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "memory"
+      ],
+      "planRoles": [
+        "remote_upgrade_modifier"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ]
+    },
+    {
+      "cardId": "onr_v1_160_diplomatic-immunity",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "runner",
+        "resource",
+        "prevention"
+      ],
+      "planRoles": [
+        "remote_upgrade_modifier"
+      ],
+      "requiredMechanics": [
+        "event_modification_prevention_avoid_resolver",
+        "scored_agenda_static_active_resolver",
+        "agenda_difficulty_overadvance_resolver",
+        "global_static_modifier_layer_resolver",
+        "damage_event_prevention_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ]
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "runner",
+        "resource",
+        "persistent"
+      ],
+      "planRoles": [
+        "remote_upgrade_modifier"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "recurring_pool_start_turn_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ]
+    },
+    {
+      "cardId": "onr_v1_171_preying-mantis",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "runner",
+        "resource",
+        "action"
+      ],
+      "planRoles": [
+        "remote_upgrade_modifier"
+      ],
+      "requiredMechanics": [
+        "event_modification_prevention_avoid_resolver",
+        "persistent_special_state_resolver",
+        "core_brain_damage_modifier_resolver",
+        "action_economy_handsize_modifier_resolver",
+        "damage_event_prevention_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ]
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "modifier"
+      ],
+      "planRoles": [
+        "corp_score_agenda"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "hidden_zone_search_reveal_reorder_resolver",
+        "global_static_modifier_layer_resolver",
+        "damage_event_prevention_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
+      ]
+    },
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "ice"
+      ],
+      "planRoles": [
+        "corp_score_agenda"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "hidden_zone_search_reveal_reorder_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
+      ]
+    },
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "action"
+      ],
+      "planRoles": [
+        "corp_score_agenda"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "typed_counter_virus_purge_resolver",
+        "action_economy_handsize_modifier_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
+      ]
+    },
+    {
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "modifier"
+      ],
+      "planRoles": [
+        "corp_score_agenda"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "hidden_zone_search_reveal_reorder_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
+      ]
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "ice"
+      ],
+      "planRoles": [
+        "corp_score_agenda"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "hidden_zone_search_reveal_reorder_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
+      ]
+    },
+    {
+      "cardId": "onr_v1_205_main-office-relocation",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "handlimit"
+      ],
+      "planRoles": [
+        "corp_score_agenda"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
+      ]
+    },
+    {
+      "cardId": "onr_v1_218_subsidiary-branch",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "action"
+      ],
+      "planRoles": [
+        "corp_score_agenda"
+      ],
+      "requiredMechanics": [
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
+      ]
+    },
+    {
+      "cardId": "onr_v1_313_city-surveillance",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "modifier"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "event_modification_prevention_avoid_resolver",
+        "generic_asset_node_ability_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "handlimit"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_324_fortress-architects",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "modifier"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "persistent_special_state_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_325_hacker-tracker-central",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "trace"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "persistent_special_state_resolver",
+        "trace_link_bid_window_resolver",
+        "typed_counter_virus_purge_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_327_i-got-a-rock",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "damage"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "scored_agenda_static_active_resolver",
+        "agenda_difficulty_overadvance_resolver",
+        "global_static_modifier_layer_resolver",
+        "damage_event_prevention_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_331_nevinyrral",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "action"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_332_newsgroup-taunting",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "run"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "run_flow_lock_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_334_pacifica-regional-ai",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "action"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "scored_agenda_static_active_resolver",
+        "persistent_special_state_resolver",
+        "typed_counter_virus_purge_resolver",
+        "agenda_difficulty_overadvance_resolver",
+        "action_economy_handsize_modifier_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_335_remote-facility",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "action"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "handlimit"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_343_south-african-mining-corp",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "corp",
+        "asset",
+        "economy"
+      ],
+      "planRoles": [
+        "remote_asset_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_asset_node_ability_resolver",
+        "persistent_special_state_resolver",
+        "action_economy_handsize_modifier_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ]
+    },
+    {
+      "cardId": "onr_v1_360_jerusalem-city-grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "corp",
+        "upgrade",
+        "modifier"
+      ],
+      "planRoles": [
+        "remote_upgrade_modifier"
+      ],
+      "requiredMechanics": [
+        "generic_upgrade_root_server_resolver",
+        "persistent_special_state_resolver",
+        "global_static_modifier_layer_resolver"
+      ],
+      "valueHints": {
+        "modifier": 1
+      },
+      "riskTags": [
+        "modifier_layering",
+        "state_hash_replay_stable"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ]
+    }
+  ]
+}

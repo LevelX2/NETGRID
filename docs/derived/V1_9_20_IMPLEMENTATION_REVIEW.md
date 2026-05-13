@@ -1,6 +1,6 @@
 # V1.9.20 Implementation Review
 
-Status: runtime WIP
+Status: final implementation review
 Stand: 2026-05-13
 
 ## Umgesetzter Schnitt
@@ -9,7 +9,7 @@ Stand: 2026-05-13
 - Der Scope ist auf 26 Zielkarten festgelegt.
 - `packages/catalog/src/index.ts` führt `ONR_V1_9_20_WIP_CARD_IDS` als exakte 26er-Zielmenge.
 - `packages/catalog/src/index.test.ts` schützt die Zielmenge und bestätigt, dass V1.9.20 noch nicht im Runtime-Releasepool steht.
-- `data/scenarios/v1920-global-modifier-special-state-wip-smoke.json`, `data/manifests/card-implementation-manifest-1.9.20.json` und `data/rules/mechanics-coverage-1.9.20.json` dokumentieren den WIP-Scope maschinenlesbar ohne Promotion.
+- `data/scenarios/v1920-global-modifier-special-state-release-smoke.json`, `data/manifests/card-implementation-manifest-1.9.20.json` und `data/rules/mechanics-coverage-1.9.20.json` dokumentieren den finalen Scope maschinenlesbar mit Promotion.
 - 26/26 V1.9.20-Zielkarten haben Runtime-Definitionen in `packages/shared/src/index.ts` mit finalen display-only Texten ohne `WIP`-Präfix.
 - `packages/engine/src/index.test.ts` schützt die Runtime-Zielmenge mit V1.9.21-No-Promotion-Sentinel und deckt Militech MRAM Chip/MRAM Chip als ersten legalen MU-Installationspfad mit PlayerView-Projektion ab.
 - `packages/engine/src/index.ts` ergänzt einen ersten eng typisierten V1.9.20-Action-Economy-Assetpfad für rezzed Remote Facility/Nevinyrral/Pacifica Regional AI; `applyAction` revalidiert Side, rezzed Root-Quelle, Kartenfamilie und `gainedActions`, und `packages/engine/src/index.test.ts` übt alle drei Karten plus Wrong-Side-/Stale-State-Rejection aus.
@@ -18,23 +18,23 @@ Stand: 2026-05-13
 - Loan from Chiba trägt als erster persistenter Sonderzustand öffentliche Recurring-Credit-Counter, die über Turnwechsel deterministisch erneuert werden.
 - Die abgedeckten MRAM-, Action-Economy-, globalen Rez-Kosten-, Handgrößen- und Recurring-State-Pfade haben Replay-/StateHash-Assertions in `packages/engine/src/index.test.ts`.
 - Die abgedeckten Action-Economy-, globalen Rez-Kosten-, Handgrößen- und Recurring-State-Pfade prüfen zusätzlich, dass PublicEvents und Runner-Gegner-Views keine verdeckten HQ/R&D-Identitäten oder private Payload-Strukturen leaken.
-- Nicht-promotende AI-Draft-Artefakte sind vorbereitet: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json`. Alle Karten bleiben darin `hinted_only`, nicht `ai_supported`.
-- Es wurden noch keine Runtime-, AI- oder Web-Promotionen vorgenommen.
+- Finale AI-Artefakte sind vorbereitet: `data/ai/ai-card-hints-deck-legal-v1920.json`, `data/scenarios/ai-deck-legal-v1920-smokes.json` und `data/manifests/deck-legal-ai-approval-v1920-manifest.json`. Alle 26 Karten sind `ai_supported`.
+- Runtime-, Catalog-, AI- und Web-Promotion sind erfolgt. Die Webclient-Version steht auf `V1.9.20`.
 
 ## Gate
 
-`V1_9_20_done: false`
-`V1_9_20_phase: implementing`
+`V1_9_20_done: true`
+`V1_9_20_phase: done`
 
 ## Nächster Schnitt
 
-Weitere Kartenpfade, verbleibende Visibility-Lücken, finale AI-Smokes, Release-Promotion und Final Review nachziehen.
+V1.9.21 Deterministischer Zufall und Wuerfelkarten beginnen, sobald der Automation-Cursor weitergesetzt ist.
 
 ## Verifikation
 
 - JSON-Validation für `data/**/*.json`: pass, 285 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 265 Tests.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 34 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 35 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.

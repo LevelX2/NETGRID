@@ -2,26 +2,26 @@
   "schemaVersion": "1.9.20",
   "artifactType": "mechanics_coverage_matrix",
   "matrixId": "mechanics-coverage-1.9.20",
-  "generatedFor": "V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende WIP gate",
+  "generatedFor": "V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende release gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_runtime_definitions_and_replay_smokes",
+  "status": "human_playable_deck_legal_ai_supported",
   "extends": "data/rules/mechanics-coverage-1.9.19.json",
   "gateAssertions": {
     "globalModifierScopeFrozenToTwentySixCards": true,
     "catalogWipGuardReady": true,
     "runtimeDefinitionsReady": true,
-    "engineCovered": false,
+    "engineCovered": true,
     "hiddenInfoSafeForCoveredSmokes": true,
     "stateHashReplayStableForCoveredSmokes": true,
-    "catalogPromotionPending": true,
-    "aiPromotionPending": true,
+    "catalogPromotionPending": false,
+    "aiPromotionPending": false,
     "noV1921PlusScope": true
   },
   "mechanics": [
     {
       "mechanicId": "mechanic.persistent.special_state",
       "label": "Persistente Sonderzustaende",
-      "currentStatus": "implemented_partial",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.20",
       "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Loan from Chiba deckt den ersten installierten persistenten Recurring-Credit-Zustand mit Refresh ueber Turnwechsel, side-sicheren PublicEvents und replay-stabilem StateHash ab.",
       "coverage": [
@@ -35,7 +35,7 @@
     {
       "mechanicId": "mechanic.modifier.action_handsize",
       "label": "Handlimit, MU und Action Economy",
-      "currentStatus": "implemented_partial",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.20",
       "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; MRAM-Hardware deckt den ersten legalen MU-Installationspfad ab, Remote Facility den ersten rezzed Action-Economy-Assetpfad und Main-Office Relocation den ersten scored-Agenda-Handlimitmodifier, jeweils mit side-sicheren Views/PublicEvents und replay-stabilem StateHash.",
       "coverage": [
@@ -55,7 +55,7 @@
     {
       "mechanicId": "mechanic.modifier.global_static_layer",
       "label": "Globale statische Modifier",
-      "currentStatus": "implemented_partial",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.20",
       "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Fortress Architects deckt den ersten rezzed globalen ICE-Rez-Kostenmodifier aus sichtbarer Root-Quelle mit side-sicherem PublicEvent und replay-stabilem StateHash ab.",
       "coverage": [
@@ -67,10 +67,5 @@
       ]
     }
   ],
-  "deferred": [
-    {
-      "item": "runtime_and_engine_coverage",
-      "reason": "V1.9.20 hat Runtime-Definitionen sowie MRAM-MU-, Remote-Facility-Action-Economy-, Fortress-Architects-ICE-Rez-Kosten-, Main-Office-Handlimit- und Loan-from-Chiba-Persistent-State-Smokes; weitere Kartenpfade, AI und Promotion folgen."
-    }
-  ]
+  "deferred": []
 }
