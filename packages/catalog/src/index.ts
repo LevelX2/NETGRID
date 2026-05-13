@@ -682,6 +682,29 @@ export const ONR_V1_9_18_WIP_CARD_IDS = [
 
 export const ONR_V1_9_18_RELEASE_CARD_IDS = ONR_V1_9_18_WIP_CARD_IDS;
 
+export const ONR_V1_9_19_WIP_CARD_IDS = [
+  "onr_v1_025_fait-accompli",
+  "onr_v1_078_arasaka-owns-you",
+  "onr_v1_189_artificial-security-directors",
+  "onr_v1_202_genetics-visionary-acquisition",
+  "onr_v1_291_falsified-transactions-expert",
+  "onr_v1_292_management-shake-up",
+  "onr_v1_300_project-consultants",
+  "onr_v1_303_silver-lining-recovery-protocol",
+  "onr_v1_304_systematic-layoffs",
+  "onr_v1_305_team-restructuring",
+  "onr_v1_312_chicago-branch",
+  "onr_v1_315_corprunners-shattered-remains",
+  "onr_v1_323_experimental-ai",
+  "onr_v1_328_information-laundering",
+  "onr_v1_346_vacant-soulkiller",
+  "onr_v1_347_vapor-ops",
+  "onr_v1_348_virus-test-site",
+  "onr_v1_363_olivia-salazar",
+  "onr_v1_368_roving-submarine",
+  "onr_v1_374_washington-d-c-city-grid"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,

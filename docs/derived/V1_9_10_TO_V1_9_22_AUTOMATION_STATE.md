@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.19
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.20
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -68,6 +68,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 13:32 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Agenda/Overadvance-Spezifikation, Testmatrix und Requirements Review erstellt. Alle 20 V1.9.19-Zielkarten haben WIP-Runtime-Definitionen mit finalen display-only Texten ohne WIP-Präfix. Der Katalog führt `ONR_V1_9_19_WIP_CARD_IDS` als No-Promotion-Guard, ohne die Karten in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` oder AI-Approval aufzunehmen. WIP-Szenario: `data/scenarios/v1919-agenda-overadvance-wip-smoke.json`.
+- Tests: JSON-Validation pass fuer 273 `data/**/*.json`; `engine` pass (252), `catalog` pass (33), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: agenda overadvance runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil konkrete Agenda-/Overadvance-LegalAction-/applyAction-Pfade, finale Daten-/AI-Artefakte, Server/Web, volle Pflichtchecks, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 13:25 CEST
 - Ergebnis: V1.9.18 Generische Upgrade-/Root-/Grid-/Server-Fähigkeiten final abgeschlossen; Cursor auf V1.9.19 `planned` gesetzt.

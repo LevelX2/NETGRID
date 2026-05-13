@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1919-agenda-overadvance-wip-smoke",
+  "release": "V1.9.19",
+  "status": "wip_runtime_catalog_guard",
+  "coversCards": [
+    "onr_v1_025_fait-accompli",
+    "onr_v1_078_arasaka-owns-you",
+    "onr_v1_189_artificial-security-directors",
+    "onr_v1_202_genetics-visionary-acquisition",
+    "onr_v1_291_falsified-transactions-expert",
+    "onr_v1_292_management-shake-up",
+    "onr_v1_300_project-consultants",
+    "onr_v1_303_silver-lining-recovery-protocol",
+    "onr_v1_304_systematic-layoffs",
+    "onr_v1_305_team-restructuring",
+    "onr_v1_312_chicago-branch",
+    "onr_v1_315_corprunners-shattered-remains",
+    "onr_v1_323_experimental-ai",
+    "onr_v1_328_information-laundering",
+    "onr_v1_346_vacant-soulkiller",
+    "onr_v1_347_vapor-ops",
+    "onr_v1_348_virus-test-site",
+    "onr_v1_363_olivia-salazar",
+    "onr_v1_368_roving-submarine",
+    "onr_v1_374_washington-d-c-city-grid"
+  ],
+  "assertions": [
+    "V1.9.19 WIP runtime definitions exist for all 20 target cards with final display-only text and no WIP prefix.",
+    "Catalog WIP guard tracks the exact target set.",
+    "No V1.9.19 card is release-promoted or AI-approved in this WIP slice.",
+    "V1.9.20 Emergency Self-Construct remains outside the V1.9.19 WIP runtime guard."
+  ],
+  "verification": {
+    "engine": "pass: 252 tests",
+    "catalog": "pass: 33 tests",
+    "typecheck": "pass"
+  },
+  "completionGate": {
+    "releaseDone": false,
+    "catalogPromoted": false,
+    "aiPromoted": false
+  }
+}

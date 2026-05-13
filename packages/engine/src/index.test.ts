@@ -4008,7 +4008,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4165,6 +4165,19 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 });
 
+describe("V1.9.19 Agenda/Overadvance WIP", () => {
+  it("adds all V1.9.19 WIP runtime definitions without release-promoting the next slice", () => {
+    expect(ONR_V1_9_19_WIP_CARD_IDS).toHaveLength(20);
+    for (const definitionId of ONR_V1_9_19_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/);
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+});
+
 describe("V1.9.12 Counter/Virus/Recurring", () => {
   it("adds scoped V1.9.12 definitions without pulling in later cursor cards", () => {
     expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
@@ -4173,7 +4186,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -4268,7 +4281,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
@@ -4589,7 +4602,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
@@ -4750,7 +4763,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
@@ -4911,7 +4924,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
@@ -5070,7 +5083,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
@@ -5422,7 +5435,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_upgrade_root_server|access_ambush|trace|city_grid|run_flow|tag|counter|hidden_zone|stealth/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {
@@ -7255,6 +7268,29 @@ const ONR_V1_9_18_WIP_CARD_IDS = [
   "onr_v1_370_tesseract-fort-construction",
   "onr_v1_372_turbeau-delacroix",
   "onr_v1_373_twenty-four-hour-surveillance"
+] as const;
+
+const ONR_V1_9_19_WIP_CARD_IDS = [
+  "onr_v1_025_fait-accompli",
+  "onr_v1_078_arasaka-owns-you",
+  "onr_v1_189_artificial-security-directors",
+  "onr_v1_202_genetics-visionary-acquisition",
+  "onr_v1_291_falsified-transactions-expert",
+  "onr_v1_292_management-shake-up",
+  "onr_v1_300_project-consultants",
+  "onr_v1_303_silver-lining-recovery-protocol",
+  "onr_v1_304_systematic-layoffs",
+  "onr_v1_305_team-restructuring",
+  "onr_v1_312_chicago-branch",
+  "onr_v1_315_corprunners-shattered-remains",
+  "onr_v1_323_experimental-ai",
+  "onr_v1_328_information-laundering",
+  "onr_v1_346_vacant-soulkiller",
+  "onr_v1_347_vapor-ops",
+  "onr_v1_348_virus-test-site",
+  "onr_v1_363_olivia-salazar",
+  "onr_v1_368_roving-submarine",
+  "onr_v1_374_washington-d-c-city-grid"
 ] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
