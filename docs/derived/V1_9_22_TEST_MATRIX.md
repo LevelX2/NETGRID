@@ -16,6 +16,7 @@ Status: planned
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; finale V1.9.22-AI-Promotion-Artefakte muessen bis zum Completion-Gate fehlen |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
 | Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
+| Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
 | Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build |
 
@@ -75,4 +76,12 @@ Status: planned
 
 - `packages/catalog/src/index.test.ts` prueft, dass `data/ai/ai-card-hints-deck-legal-v1922.json`, `data/manifests/deck-legal-ai-approval-v1922-manifest.json` und `data/scenarios/ai-deck-legal-v1922-smokes.json` vor dem Completion-Gate nicht existieren.
 - Zusatzabdeckung: Eine versehentliche AI-Promotion kann dadurch nicht nur ueber Kartendaten, sondern auch ueber finale V1.9.22-AI-Artefaktnamen auffallen.
+
+## Completion-Gate-Statusreport 2026-05-13 18:40 CEST
+
+- Neues Artefakt: `data/reports/v1922-completion-gate-status.json`.
+- Zusatzabdeckung: Status bleibt `blocked_open`, `releaseDone` bleibt false und die Scope-Promotionflags bleiben false.
+- Zusatzabdeckung: Vier blockierende Gates (`resolver_contracts`, `ai_promotion_artifacts`, `webclient_version`, `final_review`) haben jeweils eine Removal Condition.
+- JSON-Validation fuer `data/**/*.json`: pass, 304 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 40 Tests.
 

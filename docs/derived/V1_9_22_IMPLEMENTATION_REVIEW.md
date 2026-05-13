@@ -26,6 +26,7 @@ Status: planning/catalog WIP
 - `data/rules/v1922-resolver-contract-inventory.json` dokumentiert die fehlenden Resolver-Vertragsfelder fuer Runner-Programme, Runner-Events, Runner-Hardware, Corp-Agendas, Corp-ICE und Corp-Operations maschinenlesbar. Der Catalog-Test gleicht das Inventar gegen 47/47 WIP-Karten ab und verbietet `ready_for_promotion`-Status in allen Clustern.
 - Das Resolver-Contract-Inventar fuehrt lokal bestaetigte Teilnotizen aus `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md` fuer Runner-Programme, Runner-Events, Runner-Hardware und Corp-Agendas als `partialLocalNotes`; der Catalog-Test prueft, dass diese Notizen im jeweiligen Cluster und V1.9.22-WIP-Scope bleiben und keine Promotion-Aussagen enthalten.
 - Ein Catalog-Guard bestaetigt, dass finale V1.9.22-AI-Promotion-Artefakte (`ai-card-hints-deck-legal-v1922.json`, `deck-legal-ai-approval-v1922-manifest.json`, `ai-deck-legal-v1922-smokes.json`) bis zum Completion-Gate nicht existieren.
+- `data/reports/v1922-completion-gate-status.json` dokumentiert maschinenlesbar den offenen V1.9.22-Gate-Stand, die gruene Verify-Basis und die vier blockierenden Gates `resolver_contracts`, `ai_promotion_artifacts`, `webclient_version` und `final_review` mit Removal Conditions.
 - Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
 
 ## Gate
@@ -46,6 +47,8 @@ Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fu
 - JSON-Validation fuer `data/**/*.json`: pass, 303 Dateien nach Teilnotizen-Ergaenzung.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 38 Tests inkl. `partialLocalNotes`-Scope-/No-Promotion-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 39 Tests inkl. V1.9.22-AI-Promotion-Artefakt-Abwesenheitsguard.
+- JSON-Validation fuer `data/**/*.json`: pass, 304 Dateien nach Gate-Statusreport.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 40 Tests inkl. Completion-Gate-Statusreport.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests inkl. V1.9.22-AI-No-Promotion-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 79 Tests inkl. V1.9.22-Web-Catalog-No-Promotion- und Webclient-Version-Guard.

@@ -103,6 +103,7 @@ import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.
 import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
 import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
 import v1910RuntimeStatusReportData from "../../../data/reports/onr-v1-runtime-status-1.9.10.json";
+import v1922CompletionGateStatusData from "../../../data/reports/v1922-completion-gate-status.json";
 import v1910MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.10.json";
 import v1911MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.11.json";
 import v1912MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.12.json";
@@ -1927,6 +1928,38 @@ describe("catalog import and status logic", () => {
 
     for (const artifactPath of promotionArtifacts) {
       expect(existsSync(new URL(artifactPath, import.meta.url)), artifactPath).toBe(false);
+    }
+  });
+
+  it("keeps the V1.9.22 completion gate status blocked until promotion gates are satisfied", () => {
+    const gateStatus = v1922CompletionGateStatusData as {
+      release: string;
+      status: string;
+      cursorPhase: string;
+      releaseDone: boolean;
+      scope: {
+        wipCardCount: number;
+        runtimeReleasePromoted: boolean;
+        catalogPromoted: boolean;
+        aiPromoted: boolean;
+      };
+      verifiedGreenChecks: string[];
+      blockingGates: Array<{ gateId: string; status: string; removalCondition: string }>;
+    };
+
+    expect(gateStatus.release).toBe("V1.9.22");
+    expect(gateStatus.status).toBe("blocked_open");
+    expect(gateStatus.cursorPhase).toBe("implementing");
+    expect(gateStatus.releaseDone).toBe(false);
+    expect(gateStatus.scope.wipCardCount).toBe(ONR_V1_9_22_WIP_CARD_IDS.length);
+    expect(gateStatus.scope.runtimeReleasePromoted).toBe(false);
+    expect(gateStatus.scope.catalogPromoted).toBe(false);
+    expect(gateStatus.scope.aiPromoted).toBe(false);
+    expect(gateStatus.verifiedGreenChecks.sort()).toEqual(["ai", "build", "catalog", "engine", "json", "lint", "server", "test", "typecheck", "web"]);
+    expect(gateStatus.blockingGates.map((gate) => gate.gateId).sort()).toEqual(["ai_promotion_artifacts", "final_review", "resolver_contracts", "webclient_version"]);
+    for (const gate of gateStatus.blockingGates) {
+      expect(gate.status, gate.gateId).toBe("blocked");
+      expect(gate.removalCondition.trim(), gate.gateId).not.toBe("");
     }
   });
 });

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "v1922-completion-gate-status-v1",
+  "release": "V1.9.22",
+  "status": "blocked_open",
+  "cursorPhase": "implementing",
+  "releaseDone": false,
+  "scope": {
+    "wipCardCount": 47,
+    "runtimeReleasePromoted": false,
+    "catalogPromoted": false,
+    "aiPromoted": false
+  },
+  "verifiedGreenChecks": [
+    "json",
+    "catalog",
+    "engine",
+    "ai",
+    "server",
+    "web",
+    "typecheck",
+    "test",
+    "lint",
+    "build"
+  ],
+  "blockingGates": [
+    {
+      "gateId": "resolver_contracts",
+      "status": "blocked",
+      "summary": "No complete local resolver contract is confirmed for the remaining real promotion work.",
+      "removalCondition": "Provide a locally confirmed full Event, Program or Corp resolver contract with costs, timing, targets, choices, visibility, replay/statehash and AI fallback."
+    },
+    {
+      "gateId": "ai_promotion_artifacts",
+      "status": "blocked",
+      "summary": "Final V1.9.22 AI hints, approval manifest and AI smoke artifacts are intentionally absent.",
+      "removalCondition": "Create final AI artifacts only after runtime/catalog promotion and side-safe AI behavior are covered."
+    },
+    {
+      "gateId": "webclient_version",
+      "status": "blocked",
+      "summary": "The visible web client version must stay V1.9.21 until the V1.9.22 completion gate.",
+      "removalCondition": "Update the visible client version to V1.9.22 only as part of final release promotion."
+    },
+    {
+      "gateId": "final_review",
+      "status": "blocked",
+      "summary": "V1.9.22 final review has not been written because the release is not complete.",
+      "removalCondition": "Write final review after runtime, catalog, AI, webclient and full verification gates are satisfied."
+    }
+  ]
+}
