@@ -76,12 +76,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
   const cardTitle = explicitCardTitle ?? labelCardTitle;
-  const cardDefinitionId = stringValue(payload.cardDefinitionId);
+  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  let cardDefinitionId = stringValue(payload.cardDefinitionId);
   const cardText = context.cardText ?? undefined;
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeEffect(cardText);
   const agendaAbility = stringValue(payload.agendaAbility);
+  const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
+  const searchReveal = stringValue(payload.searchReveal);
+  const searchDestination = stringValue(payload.searchDestination);
 
   const baseChipList = baseChips(actor, isAi);
   const cardDetailLines = context.cardDetailLines ?? [];
@@ -114,6 +118,54 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Setup", "Starthand");
         break;
       }
+      if (payload.traceStep === "corp_bid") {
+        const corpBid = numberValue(payload.corpBid) ?? 0;
+        const traceStrength = numberValue(payload.traceStrength);
+        const runnerLink = numberValue(payload.runnerLink);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `im Trace ${creditText(corpBid)} geboten`);
+        description = traceStrength !== undefined ? `Trace-Stärke: ${traceStrength}${runnerLink !== undefined ? `, Runner-Link: ${runnerLink}` : ""}.` : undefined;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Trace", `Korp-Gebot ${corpBid}`, ...(traceStrength !== undefined ? [`Trace ${traceStrength}`] : []), ...(runnerLink !== undefined ? [`Link ${runnerLink}`] : []));
+        break;
+      }
+      if (payload.traceStep === "runner_bid") {
+        const corpBid = numberValue(payload.corpBid) ?? 0;
+        const runnerBid = numberValue(payload.runnerBid) ?? 0;
+        const traceStrength = numberValue(payload.traceStrength);
+        const runnerStrength = numberValue(payload.runnerStrength);
+        const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
+        const successful = payload.traceSuccessful === true;
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`;
+        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}.` : undefined;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(
+          "Trace",
+          `Korp ${corpBid}`,
+          `Runner ${runnerBid}`,
+          ...(traceStrength !== undefined && runnerStrength !== undefined ? [`${traceStrength}:${runnerStrength}`] : []),
+          successful ? "Erfolg" : "Fehlschlag",
+          ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : [])
+        );
+        break;
+      }
+      if (hiddenZoneAction === "search_stack") {
+        const destinationLabel = searchDestinationLabel(searchDestination);
+        category = searchReveal === "public" ? "card" : "hidden";
+        importance = "important";
+        visibility = searchReveal === "public" ? "public" : "redacted";
+        title =
+          searchReveal === "public"
+            ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt und in ${destinationLabel} genommen`)
+            : phrase(subject, `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack in ${destinationLabel} genommen`);
+        chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", destinationLabel, ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
       category = "system";
       visibility = "system";
       title = phrase(subject, "eine Entscheidung beantwortet");
@@ -125,6 +177,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "gain_credit":
+      if (payload.traceStarted === true) {
+        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Trace", ...(baseTraceStrength !== undefined ? [`Base ${baseTraceStrength}`] : []));
+        break;
+      }
       if (agendaAbility === "corporate_coup" || agendaAbility === "political_coup") {
         const gainedCredits = amount ?? numberValue(payload.removePowerCounterAmount) ?? 0;
         const spentCredits = numberValue(payload.spentPowerCounters) ?? numberValue(payload.removePowerCounterAmount) ?? gainedCredits;
@@ -165,6 +227,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "play_event":
     case "play_operation":
+      if (payload.traceStarted === true) {
+        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Trace", ...(baseTraceStrength !== undefined ? [`Base ${baseTraceStrength}`] : []), actionType === "play_event" ? "Event" : "Operation");
+        break;
+      }
       title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${effect.suffix ? ` und ${effect.suffix}` : ""}`);
       chips.push(actionType === "play_event" ? "Event" : "Operation", ...effect.chips);
       break;
@@ -212,6 +284,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Subroutine", "Gebrochen");
       break;
     case "continue_run":
+      if (payload.traceStarted === true) {
+        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Trace", ...(baseTraceStrength !== undefined ? [`Base ${baseTraceStrength}`] : []));
+        break;
+      }
       category = "run";
       title = encounterContinue
         ? phrase(subject, result === "ended" ? "ungebrochene Subroutinen ausgelöst und der Run endete" : "ungebrochene Subroutinen ausgelöst")
@@ -483,8 +565,22 @@ function creditLabel(amount: number): string {
   return amount === 1 ? "Credit" : "Credits";
 }
 
+function traceParticipantLabel(participant: Side, viewer: Side): string {
+  if (participant === viewer) return "Du";
+  return participant === "corp" ? "Korp" : "Runner";
+}
+
+function traceStartTitle(subject: string, cardTitle: string | undefined, baseTraceStrength: number | undefined): string {
+  return phrase(subject, `${cardTitle ? `mit ${cardTitle} ` : ""}einen Trace${baseTraceStrength !== undefined ? ` ${baseTraceStrength}` : ""} ausgelöst`);
+}
+
 function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
+}
+
+function searchDestinationLabel(destination: string | undefined): string {
+  if (destination === "grip") return "den Grip";
+  return "die Hand";
 }
 
 function installLocation(serverLabel: string | undefined, zoneLabel: string | undefined, label: string | undefined): string {

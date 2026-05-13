@@ -197,6 +197,105 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("HQ");
   });
 
+  it("describes public stack-search reveals with the selected card and destination", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "search_stack",
+        searchReveal: "public",
+        searchDestination: "grip",
+        searchShuffleAfter: true,
+        selectedCount: 1,
+        cardDefinitionId: "onr_v1_036_jackhammer",
+        title: "Jackhammer"
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Jackhammer aus dem Stack vorgezeigt und in den Grip genommen.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("onr_v1_036_jackhammer");
+    expect(item.chips).toEqual(["Runner", "Stack", "Vorgezeigt", "den Grip", "Shuffle"]);
+  });
+
+  it("describes hidden stack-search moves without leaking the selected card", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "search_stack",
+        searchReveal: "hidden",
+        searchDestination: "grip",
+        selectedCount: 1,
+        cardDefinitionId: "onr_v1_036_jackhammer",
+        title: "Jackhammer"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Der Runner hat eine Karte verdeckt aus dem Stack in den Grip genommen.");
+    expect(item.category).toBe("hidden");
+    expect(item.visibility).toBe("redacted");
+    expect(item.cardDefinitionId).toBeUndefined();
+    expect(JSON.stringify(item)).not.toContain("Jackhammer");
+    expect(item.chips).toContain("Verdeckt");
+  });
+
+  it("describes Trace start, bids, and outcome with public bid amounts", () => {
+    const started = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        encounterContinue: true,
+        traceStarted: true,
+        sourceDefinitionId: "onr_v1_249_hunter",
+        baseTraceStrength: 4
+      }),
+      "runner",
+      { cardTitle: "Hunter" }
+    );
+    const corpBid = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        aiReasonCode: "corp.trace.bid",
+        traceStep: "corp_bid",
+        sourceDefinitionId: "onr_v1_249_hunter",
+        baseTraceStrength: 4,
+        corpBid: 2,
+        traceStrength: 6,
+        runnerLink: 0
+      }),
+      "runner"
+    );
+    const runnerBid = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        traceStep: "runner_bid",
+        sourceDefinitionId: "onr_v1_249_hunter",
+        baseTraceStrength: 4,
+        corpBid: 2,
+        traceStrength: 6,
+        runnerLink: 0,
+        runnerBid: 1,
+        runnerStrength: 1,
+        traceSuccessful: true,
+        tagsAdded: 1
+      }),
+      "runner"
+    );
+
+    expect(started.title).toBe("Du hast mit Hunter einen Trace 4 ausgelöst.");
+    expect(started.category).toBe("danger");
+    expect(started.cardDefinitionId).toBe("onr_v1_249_hunter");
+    expect(corpBid.title).toBe("Die Korp-KI hat im Trace 2 Credits geboten.");
+    expect(corpBid.description).toBe("Trace-Stärke: 6, Runner-Link: 0.");
+    expect(corpBid.chips).toContain("Korp-Gebot 2");
+    expect(runnerBid.title).toBe("Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich.");
+    expect(runnerBid.description).toBe("Endstand: Trace 6 gegen Runner-Stärke 1.");
+    expect(runnerBid.chips).toEqual(["Runner", "Trace", "Korp 2", "Runner 1", "6:1", "Erfolg", "+1 Tag"]);
+  });
+
   it("describes Corp advances as installations and developments without leaking hidden titles", () => {
     const hidden = formatChronicleEvent(
       makeEvent("advance_card", {

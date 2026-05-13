@@ -315,6 +315,17 @@ export type ChoiceOption = {
   value?: string | number | boolean;
 };
 
+export type StackSearchResolution = {
+  reveal: "public" | "hidden";
+  destination: "grip";
+  shuffleAfter: boolean;
+  publicRevealKind?: string;
+};
+
+export type VisibleChoiceOption = ChoiceOption & {
+  card?: VisibleCard;
+};
+
 export type ChoiceRequest = {
   choiceId: string;
   side: Side;
@@ -326,12 +337,14 @@ export type ChoiceRequest = {
   maxSelections: number;
   stateVersion: number;
   visibility: EventVisibilityClass;
+  stackSearchResolution?: StackSearchResolution;
 };
 
 export type PendingChoice = ChoiceRequest;
 
-export type VisibleChoiceRequest = Omit<ChoiceRequest, "side"> & {
+export type VisibleChoiceRequest = Omit<ChoiceRequest, "side" | "options"> & {
   side: Side;
+  options: VisibleChoiceOption[];
 };
 
 export type ChoiceRequirement = {

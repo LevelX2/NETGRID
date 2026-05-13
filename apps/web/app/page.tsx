@@ -46,6 +46,7 @@ import {
   ZoomIn
 } from "lucide-react";
 import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netgrid/shared";
 import {
@@ -534,6 +535,9 @@ type DisplayVisibleCard = VisibleCard & {
   strengthModifier?: number;
 };
 
+type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
+type VisibleChoiceOption = VisibleChoice["options"][number];
+
 type FocusedCard = {
   card: VisibleCard;
   matchId: string;
@@ -995,7 +999,7 @@ function catalogNumericLabel(key: string, label: string, value: number | null | 
 }
 
 function revealedEventCardId(event: PublicGameEvent): string | null {
-  const cardId = event.publicPayload.cardDefinitionId;
+  const cardId = event.publicPayload.cardDefinitionId ?? event.publicPayload.sourceDefinitionId;
   return typeof cardId === "string" ? cardId : null;
 }
 
@@ -1261,14 +1265,14 @@ function updateActionSlotCapacity(capacities: Record<Side, number>, side: Side, 
   if (safeClicks > (capacities[side] ?? baseCapacity)) capacities[side] = safeClicks;
 }
 
-function centralServerCardCount(view: PlayerView, serverId: PlayerView["servers"][number]["id"]): number | null {
+function centralServerCountLabel(view: PlayerView, serverId: PlayerView["servers"][number]["id"]): string | null {
   switch (serverId) {
     case "hq":
-      return view.side === "corp" ? view.own.gripOrHq.length : view.opponent.handCount;
+      return formatHandLimitCount(view.side === "corp" ? view.own.gripOrHq.length : view.opponent.handCount, view.side === "corp" ? view.own.maxHandSize : view.opponent.maxHandSize);
     case "rd":
-      return view.side === "corp" ? view.own.stackOrRdCount : view.opponent.deckCount;
+      return formatCardCount(view.side === "corp" ? view.own.stackOrRdCount : view.opponent.deckCount);
     case "archives":
-      return view.side === "corp" ? view.own.heapOrArchives.length : (view.opponent.discardCount ?? 0);
+      return formatCardCount(view.side === "corp" ? view.own.heapOrArchives.length : (view.opponent.discardCount ?? 0));
     default:
       return null;
   }
@@ -1328,6 +1332,10 @@ function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<string,
 
 function formatCardCount(count: number): string {
   return `${count} ${count === 1 ? "Karte" : "Karten"}`;
+}
+
+function formatHandLimitCount(count: number, limit: number): string {
+  return `${count} von ${limit} Karten`;
 }
 
 export default function Page() {
@@ -3983,6 +3991,7 @@ export default function Page() {
                         onAction={submitAction}
                         onChoiceOption={submitChoiceOption}
                         onChoiceOptions={submitChoiceOptions}
+                        enrichCard={enrichCard}
                         onClearContext={() => setSelectedActionContext(null)}
                       />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
@@ -4023,7 +4032,7 @@ export default function Page() {
               row.servers.length > 0 ? (
                 <div className={`serverRow ${row.kind}`} key={row.kind} data-testid={`server-row-${row.kind}`}>
                   {row.servers.map((server) => {
-                    const cardCount = centralServerCardCount(activeView, server.id);
+                    const countLabel = centralServerCountLabel(activeView, server.id);
                     const runAction = runActionForServer(server.id);
                     const lanes = serverLanesForSide(activeView.side, server);
                     const renderLaneCards = (lane: { kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }) => {
@@ -4075,10 +4084,10 @@ export default function Page() {
                         <div className="serverLayout">
                           <div className="serverLead">
                             <div className="serverLeadTop">
-                              <button className="serverContextButton serverContextSideButton rigGroupSideLabel" type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
+                              <button className={`serverContextButton serverContextSideButton rigGroupSideLabel ${zoneSideClass("corp")}`} type="button" onClick={() => setSelectedActionContext({ kind: "server", id: server.id, label: serverDisplayLabel(server.id) })}>
                                 {serverDisplayLabel(server.id)}
                               </button>
-                              {cardCount !== null ? <span className="serverCount serverCountSideLabel">{formatCardCount(cardCount)}</span> : null}
+                              {countLabel !== null ? <span className={`serverCount serverCountSideLabel ${zoneSideClass("corp")}`}>{countLabel}</span> : null}
                             </div>
                             {runAction ? (
                               <button
@@ -4122,14 +4131,16 @@ export default function Page() {
             <section className="section panel boardSection rigBoardSection">
               <div className={`rigSectionLayout ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>
                 <div className="rigSectionLead">
-                  <h2 className="rigSectionTitle rigGroupSideLabel">Rig</h2>
-                  <ZoneLimitBadge label="MU" value={`${activeView.own.memoryUsed ?? 0}/${activeView.own.memoryLimit ?? 0}`} />
+                  <div className="sideZoneLeadTop">
+                    <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
+                    <ZoneSideCount side="runner" value={`MU ${activeView.own.memoryUsed ?? 0}/${activeView.own.memoryLimit ?? 0}`} />
+                  </div>
                 </div>
                 {ownRigGroups.length > 0 ? (
                   <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
                     {ownRigGroups.map((group) => (
                       <div className="rigGroup rigGroupHorizontal" key={group.key} style={ownRigCardsStyle}>
-                        <h3 className="rigGroupSideLabel">{group.label}</h3>
+                        <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
                         <div className="cards rigGroupCards rigGroupCardsFull">
                           {group.cards.map((card) => {
                             const displayCard = enrichCard(card);
@@ -4158,70 +4169,10 @@ export default function Page() {
             </section>
           ) : null}
           <section className="section panel boardSection zoneBoardSection">
-            <div className="zoneSectionLayout">
-              <div className="zoneSectionLead">
-                <h2 className="zoneSectionTitle rigGroupSideLabel">{session.side === "runner" ? "Grip" : "HQ"}</h2>
-                <ZoneLimitBadge label={activeView.side === "runner" ? "Grip" : "HQ"} value={`${activeView.own.gripOrHq.length}/${activeView.own.maxHandSize}`} />
-              </div>
-              <div className="zoneSectionBody">
-                {activeView.side === "runner" ? (
-                  <div className="runnerGripHeapLayout">
-                    <div className="runnerGripColumn">
-                      <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "grip") ? "cueHighlightSoft" : ""}`} style={handCardsStyle}>
-                        {activeView.own.gripOrHq.map((card) => {
-                          const displayCard = enrichCard(card);
-                          return (
-                            <CardView
-                              key={card.instanceId}
-                              card={displayCard}
-                              displayMode={cardDisplayMode}
-                              hiddenSide={activeView.side}
-                              selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                              actions={cardActionsFor(card)}
-                              actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                              onAction={submitAction}
-                              onFocus={focusCard}
-                              onActionContextSelect={selectActionCard}
-                            />
-                          );
-                        })}
-                      </div>
-                    </div>
-                    <div className={`runnerHeapColumn ${zoneHighlighted(activeCueHighlight, activeView.side, "heap") ? "cueHighlightSoft" : ""}`}>
-                      <div className="runnerHeapHead">
-                        <strong>Heap</strong>
-                        <ZoneLimitBadge label="Heap" value={String(activeView.own.heapOrArchives.length)} />
-                      </div>
-                      {activeView.own.heapOrArchives.length > 0 ? (
-                        <div className="runnerHeapOverlapRow">
-                          {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
-                            const displayCard = enrichCard(card);
-                            return (
-                              <CardView
-                                key={card.instanceId}
-                                card={displayCard}
-                                compact
-                                displayMode={cardDisplayMode}
-                                selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                                actions={cardActionsFor(card)}
-                                actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                                onAction={submitAction}
-                                onFocus={focusCard}
-                                onActionContextSelect={selectActionCard}
-                              />
-                            );
-                          })}
-                          {activeView.own.heapOrArchives.length > RUNNER_HEAP_PREVIEW_LIMIT ? (
-                            <span className="archivesOverflowBadge">+{activeView.own.heapOrArchives.length - RUNNER_HEAP_PREVIEW_LIMIT}</span>
-                          ) : null}
-                        </div>
-                      ) : (
-                        <p className="archivesPileEmpty">Keine Karten im Heap.</p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <div className={`cards ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`} style={handCardsStyle}>
+            {activeView.side === "runner" ? (
+              <div className="runnerGripHeapLayout">
+                <SideZoneFrame side="runner" label="Grip" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "grip")}>
+                  <div className="cards" style={handCardsStyle}>
                     {activeView.own.gripOrHq.map((card) => {
                       const displayCard = enrichCard(card);
                       return (
@@ -4240,9 +4191,68 @@ export default function Page() {
                       );
                     })}
                   </div>
-                )}
+                </SideZoneFrame>
+                <SideZoneFrame side="runner" label="Stack" countLabel={formatCardCount(activeView.own.stackOrRdCount)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")} className="runnerStackZone">
+                  <div className="runnerStackPreview" aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
+                    {activeView.own.stackOrRdCount > 0 ? (
+                      <div className="runnerStackBack" aria-hidden="true">
+                        <span />
+                      </div>
+                    ) : (
+                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
+                    )}
+                  </div>
+                </SideZoneFrame>
+                <SideZoneFrame side="runner" label="Heap" countLabel={formatCardCount(activeView.own.heapOrArchives.length)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "heap")} className="runnerHeapZone">
+                  {activeView.own.heapOrArchives.length > 0 ? (
+                    <div className="runnerHeapOverlapRow">
+                      {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
+                        const displayCard = enrichCard(card);
+                        return (
+                          <CardView
+                            key={card.instanceId}
+                            card={displayCard}
+                            compact
+                            displayMode={cardDisplayMode}
+                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                            actions={cardActionsFor(card)}
+                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                            onAction={submitAction}
+                            onFocus={focusCard}
+                            onActionContextSelect={selectActionCard}
+                          />
+                        );
+                      })}
+                      {activeView.own.heapOrArchives.length > RUNNER_HEAP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{activeView.own.heapOrArchives.length - RUNNER_HEAP_PREVIEW_LIMIT}</span> : null}
+                    </div>
+                  ) : (
+                    <p className="archivesPileEmpty">Keine Karten im Heap.</p>
+                  )}
+                </SideZoneFrame>
               </div>
-            </div>
+            ) : (
+              <SideZoneFrame side="corp" label="HQ" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "hq")}>
+                <div className="cards" style={handCardsStyle}>
+                  {activeView.own.gripOrHq.map((card) => {
+                    const displayCard = enrichCard(card);
+                    return (
+                      <CardView
+                        key={card.instanceId}
+                        card={displayCard}
+                        displayMode={cardDisplayMode}
+                        hiddenSide={activeView.side}
+                        selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                        actions={cardActionsFor(card)}
+                        actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                        onAction={submitAction}
+                        onFocus={focusCard}
+                        onActionContextSelect={selectActionCard}
+                      />
+                    );
+                  })}
+                </div>
+              </SideZoneFrame>
+            )}
           </section>
         </section>
 
@@ -5481,7 +5491,7 @@ function RunnerRigStrip({
     <section className="runnerRigStrip" data-testid="runner-rig">
       <div className="rigSectionLayout rigSectionLayoutCompact">
         <div className="rigSectionLead rigSectionLeadCompact">
-          <h2 className="rigSectionTitle rigGroupSideLabel">Rig</h2>
+          <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
           <span className="rigSectionIcon" aria-hidden="true">
             <RunIcon size={14} />
           </span>
@@ -5490,7 +5500,7 @@ function RunnerRigStrip({
           <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
             {groups.map((group) => (
               <div className="rigGroup rigGroupHorizontal" key={group.key} style={opponentMiniCardsStyle}>
-                <h3 className="rigGroupSideLabel">{group.label}</h3>
+                <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
                 <div className="cards rigGroupCards rigGroupCardsMini">
                   {group.cards.map((card) => {
                     const displayCard = enrichVisibleCard(card, cardDetailsById);
@@ -5821,6 +5831,7 @@ function LegalActionsPanel({
   onAction,
   onChoiceOption,
   onChoiceOptions,
+  enrichCard,
   onClearContext
 }: {
   view: PlayerView;
@@ -5835,6 +5846,7 @@ function LegalActionsPanel({
   onAction(action: LegalAction): void;
   onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+  enrichCard(card: VisibleCard): DisplayVisibleCard;
   onClearContext(): void;
 }) {
   const setupChoice = view.pendingChoice?.source === "setup.mulligan" ? view.pendingChoice : undefined;
@@ -5866,6 +5878,9 @@ function LegalActionsPanel({
   const genericChoice = view.pendingChoice;
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (genericChoice && genericChoiceAction) {
+    if (genericChoice.kind === "select_cards" && genericChoice.options.some((option) => option.card)) {
+      return <CardChoicePanel choice={genericChoice} action={genericChoiceAction} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
+    }
     return (
       <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="generic-choice-panel">
         <h2>
@@ -5935,6 +5950,137 @@ function LegalActionsPanel({
       </div>
     </section>
   );
+}
+
+function CardChoicePanel({
+  choice,
+  action,
+  disabled,
+  highlighted,
+  enrichCard,
+  onChoiceOptions
+}: {
+  choice: VisibleChoice;
+  action: LegalAction;
+  disabled: boolean;
+  highlighted: boolean;
+  enrichCard(card: VisibleCard): DisplayVisibleCard;
+  onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+}) {
+  const [selected, setSelected] = useState<string[]>([]);
+  const minSelections = Math.max(0, Math.floor(choice.minSelections));
+  const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
+  const rows = cardChoiceRows(choice.options);
+  const selectedOptions = selected
+    .map((optionId) => choice.options.find((option) => option.id === optionId))
+    .filter((option): option is VisibleChoiceOption => Boolean(option));
+  const canSubmit = selected.length >= minSelections && selected.length <= maxSelections;
+  const singleSelection = maxSelections === 1;
+  const title = cardChoiceTitle(choice);
+  const prompt = choice.prompt.trim();
+
+  useEffect(() => {
+    setSelected([]);
+  }, [choice.choiceId]);
+
+  const toggleOption = (optionId: string) => {
+    setSelected((current) => {
+      if (current.includes(optionId)) return current.filter((id) => id !== optionId);
+      if (current.length >= maxSelections) return singleSelection ? [optionId] : current;
+      return [...current, optionId];
+    });
+  };
+
+  const dialog = (
+    <section className="cardChoiceOverlay" role="dialog" aria-modal="true" aria-labelledby="card-choice-title" data-testid="card-choice-panel">
+      <div className={`cardChoiceDialog ${highlighted ? "cueHighlight" : ""}`}>
+        <header className="cardChoiceHeader">
+          <div>
+            <h2 id="card-choice-title">
+              <Search size={17} />
+              {title}
+            </h2>
+            {prompt && prompt !== title ? <p className="meta">{prompt}</p> : null}
+          </div>
+          <span className="cardChoiceCounter">{choiceSelectionRangeLabel(minSelections, maxSelections)}</span>
+        </header>
+        <div className="cardChoiceRows">
+          {rows.map((row, rowIndex) => (
+            <div className="cardChoiceOverlapRow" key={`choice-row-${rowIndex}`}>
+              {row.map((option) => {
+                const active = selected.includes(option.id);
+                const card = option.card ? enrichCard(option.card) : null;
+                const cardChoiceDisplayMode: CardDisplayMode = card?.imageUrl ? "placeholder" : "text-card";
+                return (
+                  <div className={`cardChoiceOptionSlot ${active ? "selected" : ""}`} key={option.id}>
+                    {card ? (
+                      <CardView
+                        card={card}
+                        displayMode={cardChoiceDisplayMode}
+                        choiceSelected={active}
+                        onSelect={() => toggleOption(option.id)}
+                      />
+                    ) : (
+                      <button className={`button actionButton cardChoiceFallback ${active ? "primary" : ""}`} onClick={() => toggleOption(option.id)} disabled={disabled} type="button">
+                        {active ? <Check size={15} /> : <Clipboard size={15} />}
+                        <span className="actionButtonLabel">{option.label}</span>
+                      </button>
+                    )}
+                    <button className={`button cardChoiceSelectButton ${active ? "primary" : ""}`} onClick={() => toggleOption(option.id)} disabled={disabled} type="button" aria-pressed={active} data-testid="card-choice-option">
+                      {active ? <Check size={14} /> : <Search size={14} />}
+                      <span>{active ? "Gewählt" : "Wählen"}</span>
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+        <footer className="cardChoiceFooter">
+          <p className="cardChoiceQuestion">{cardChoiceQuestion(choice, selectedOptions)}</p>
+          <button className="button primary cardChoiceSubmit" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || !canSubmit} type="button" data-testid="card-choice-submit">
+            <Check size={15} />
+            {cardChoiceSubmitLabel(selected.length)}
+          </button>
+        </footer>
+      </div>
+    </section>
+  );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(dialog, document.body);
+}
+
+function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][] {
+  const rowCount = options.length > 18 ? 3 : options.length > 7 ? 2 : 1;
+  const rowSize = Math.max(1, Math.ceil(options.length / rowCount));
+  const rows: VisibleChoiceOption[][] = [];
+  for (let index = 0; index < options.length; index += rowSize) rows.push(options.slice(index, index + rowSize));
+  return rows;
+}
+
+function cardChoiceTitle(choice: VisibleChoice): string {
+  if (choice.source.includes("search_stack")) return "Stack durchsuchen";
+  if (choice.source.includes("arrange_stack")) return "Karten anordnen";
+  return "Karten wählen";
+}
+
+function choiceSelectionRangeLabel(minSelections: number, maxSelections: number): string {
+  if (minSelections === maxSelections) return `${maxSelections} ${maxSelections === 1 ? "Karte" : "Karten"}`;
+  return `${minSelections}-${maxSelections} Karten`;
+}
+
+function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoiceOption[]): string {
+  if (selectedOptions.length === 0) return "Keine Karte ausgewählt.";
+  if (choice.source.includes("search_stack")) {
+    return selectedOptions.length === 1 ? "Diese Karte für den Sucheffekt auswählen?" : `${selectedOptions.length} Karten für den Sucheffekt auswählen?`;
+  }
+  return selectedOptions.length === 1 ? "Diese Karte auswählen?" : `${selectedOptions.length} Karten auswählen?`;
+}
+
+function cardChoiceSubmitLabel(selectedCount: number): string {
+  if (selectedCount <= 1) return "Auswählen";
+  return `${selectedCount} auswählen`;
 }
 
 function DiscardChoicePanel({
@@ -8099,7 +8245,9 @@ function CardView({
   positionBadge,
   showAdvancementCounters = true,
   showScoreStateBadges = false,
+  choiceSelected = false,
   onFocus,
+  onSelect,
   onActionContextSelect,
   onAction
 }: {
@@ -8115,7 +8263,9 @@ function CardView({
   positionBadge?: string;
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
+  choiceSelected?: boolean;
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction?(action: LegalAction): void;
 }) {
@@ -8286,10 +8436,11 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
+          if (onSelect) onSelect(card, hiddenSide);
           onFocus?.(card, hiddenSide);
         }}
         onFocus={(event) => {
@@ -8309,9 +8460,10 @@ function CardView({
           scheduleTooltipClose();
         }}
         aria-label={cardAriaLabel}
+        aria-pressed={onSelect ? choiceSelected : undefined}
         aria-describedby={tooltipId}
         title={nativeTitle}
-        data-testid={card.known ? "known-card" : "hidden-card"}
+        data-testid={onSelect ? "card-choice-card" : card.known ? "known-card" : "hidden-card"}
         data-known={card.known ? "true" : "false"}
       >
         {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
@@ -8650,11 +8802,42 @@ function neededDevelopmentLabel(count: number | undefined): string | null {
   return count === undefined ? null : `Benötigt ${count} ${count === 1 ? "Entwicklung" : "Entwicklungen"}`;
 }
 
-function ZoneLimitBadge({ label, value }: { label: string; value: string }) {
+function zoneSideClass(side: Side): "runnerZoneSideLabel" | "corpZoneSideLabel" {
+  return side === "runner" ? "runnerZoneSideLabel" : "corpZoneSideLabel";
+}
+
+function SideZoneFrame({
+  side,
+  label,
+  countLabel,
+  highlighted = false,
+  className = "",
+  children
+}: {
+  side: Side;
+  label: string;
+  countLabel: string;
+  highlighted?: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
   return (
-    <span className="zoneLimitBadge" aria-label={`${label} ${value}`}>
-      <strong>{label}</strong>
-      <span>{value}</span>
+    <div className={`sideZoneFrame ${side} ${highlighted ? "cueHighlightSoft" : ""} ${className}`}>
+      <div className="sideZoneLead">
+        <div className="sideZoneLeadTop">
+          <h2 className={`sideZoneTitle rigGroupSideLabel ${zoneSideClass(side)}`}>{label}</h2>
+          <ZoneSideCount side={side} value={countLabel} />
+        </div>
+      </div>
+      <div className="sideZoneBody">{children}</div>
+    </div>
+  );
+}
+
+function ZoneSideCount({ side, value }: { side: Side; value: string }) {
+  return (
+    <span className={`sideZoneCount ${zoneSideClass(side)}`} aria-label={value}>
+      {value}
     </span>
   );
 }

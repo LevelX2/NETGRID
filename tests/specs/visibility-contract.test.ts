@@ -28,6 +28,8 @@ describe("Client visibility contract", () => {
     expect(page).toContain("function CardView");
     expect(page).toContain("function RunTimeline");
     expect(page).toContain("function LegalActionsPanel");
+    expect(page).toContain("function CardChoicePanel");
+    expect(page).toContain("card-choice-panel");
     expect(page).toContain("function DiagnosticsDrawer");
     expect(page).toContain("side-filtered");
     expect(page).toContain("localCardImageUrl");
@@ -68,7 +70,7 @@ describe("Client visibility contract", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
     const recovery = readFileSync("apps/web/app/session-recovery.ts", "utf8");
     const matchStart = readFileSync("apps/web/app/match-start.ts", "utf8");
-    expect(page).toContain('const APP_STATUS_LABEL = "V1.9.14"');
+    expect(page).toContain('const APP_STATUS_LABEL = "V1.9.21"');
     expect(matchStart).toContain("Mensch gegen Mensch · privater Link");
     expect(matchStart).toContain("Mensch gegen KI");
     expect(matchStart).toContain("KI gegen KI · Simulation");

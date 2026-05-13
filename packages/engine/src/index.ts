@@ -48,6 +48,7 @@ import {
   type SpecialZoneState,
   type SpecialZoneVisibility,
   type ModifierKind,
+  type StackSearchResolution,
   type ServerId,
   type SetupState,
   type Side,
@@ -412,7 +413,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "onr_v1911_runner_event_search_stack_program_to_hand",
     canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
     resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
+      startRunnerStackSearchRevealChoice(state);
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
     }
   },
@@ -429,7 +430,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "onr_v1911_runner_event_search_stack_program_to_hand",
     canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
     resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
+      startRunnerStackSearchRevealChoice(state);
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
     }
   },
@@ -445,7 +446,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "onr_v1911_runner_event_search_stack_program_to_hand",
     canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
     resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
+      startRunnerStackSearchRevealChoice(state);
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
     }
   },
@@ -461,7 +462,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "onr_v1912_runner_event_search_stack_program_to_hand",
     canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
     resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state, "v1912.search_stack", "v1912_search_stack");
+      startRunnerStackSearchRevealChoice(state, "v1912.search_stack", "v1912_search_stack");
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1912_search_stack" };
     }
   },
@@ -627,7 +628,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "onr_runner_event_search_stack_program_to_hand",
     canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
     resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
+      startRunnerStackSearchRevealChoice(state);
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "search_stack" };
     }
   },
@@ -1349,7 +1350,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
     servers: visibleServers,
     specialZones: visibleSpecialZones(state, side),
     ...(run ? { run } : {}),
-    ...(state.pendingChoice?.side === side ? { pendingChoice: visibleChoice(state.pendingChoice) } : {}),
+    ...(state.pendingChoice?.side === side ? { pendingChoice: visibleChoice(state, state.pendingChoice) } : {}),
     ...(state.deckMetadata
       ? {
           deckMetadata: {
@@ -6379,7 +6380,19 @@ function choiceAction(state: GameState, choice: ChoiceRequest): LegalAction {
     choice.prompt,
     "game_rule",
     [],
-    { choiceId: choice.choiceId, choiceVisibility: choice.visibility, choiceKind: choice.kind },
+    {
+      choiceId: choice.choiceId,
+      choiceVisibility: choice.visibility,
+      choiceKind: choice.kind,
+      ...(choice.stackSearchResolution
+        ? {
+            stackSearchReveal: choice.stackSearchResolution.reveal,
+            stackSearchDestination: choice.stackSearchResolution.destination,
+            stackSearchShuffleAfter: choice.stackSearchResolution.shuffleAfter,
+            ...(choice.stackSearchResolution.publicRevealKind ? { stackSearchPublicRevealKind: choice.stackSearchResolution.publicRevealKind } : {})
+          }
+        : {})
+    },
     {
       choiceRequirements: [
         {
@@ -6404,24 +6417,36 @@ function abilityMetadata(sourceCardInstanceId: CardInstanceId, abilityId: string
   };
 }
 
-function visibleChoice(choice: ChoiceRequest): NonNullable<PlayerView["pendingChoice"]> {
+function visibleChoice(state: GameState, choice: ChoiceRequest): NonNullable<PlayerView["pendingChoice"]> {
   return {
     choiceId: choice.choiceId,
     side: choice.side,
     source: choice.source,
     prompt: choice.prompt,
     kind: choice.kind,
-    options: choice.options.map((option) => ({
-      id: option.id,
-      label: option.label,
-      ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
-      ...(option.value !== undefined ? { value: option.value } : {})
-    })),
+    options: choice.options.map((option) => {
+      const card = visibleChoiceOptionCard(state, choice.side, option.value);
+      return {
+        id: option.id,
+        label: option.label,
+        ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
+        ...(option.value !== undefined ? { value: option.value } : {}),
+        ...(card ? { card } : {})
+      };
+    }),
     minSelections: choice.minSelections,
     maxSelections: choice.maxSelections,
     stateVersion: choice.stateVersion,
     visibility: choice.visibility
   };
+}
+
+function visibleChoiceOptionCard(state: GameState, side: Side, value: unknown): VisibleCard | undefined {
+  if (typeof value !== "string") return undefined;
+  const instance = state.cardInstances[value];
+  if (!instance) return undefined;
+  if (instance.owner !== side && instance.controller !== side) return undefined;
+  return visibleOwnCard(state, value);
 }
 
 function validateChoiceAction(choice: ChoiceRequest | undefined, legalAction: LegalAction, playerAction: PlayerAction): string | undefined {
@@ -6674,27 +6699,50 @@ function takeSetupMulligan(state: GameState, side: Side, handSize: number): void
   recordStateRandomMarkers(state, "setup.draw.corp.mulligan_hand", hq.length);
 }
 
-function startRunnerStackSearchChoice(state: GameState, sourcePrefix = "v098.search_stack", choiceIdPrefix = "v098_search_stack"): void {
+type RunnerStackSearchChoiceOptions = {
+  reveal?: StackSearchResolution["reveal"];
+  destination?: StackSearchResolution["destination"];
+  shuffleAfter?: boolean;
+  publicRevealKind?: string;
+};
+
+function startRunnerStackSearchChoice(state: GameState, sourcePrefix = "v098.search_stack", choiceIdPrefix = "v098_search_stack", config: RunnerStackSearchChoiceOptions = {}): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const options = state.runner.stack
+  const cardOptions = state.runner.stack
     .filter((cardId) => definitionFor(state, cardId).type === "program")
     .map((cardId) => {
       const definition = definitionFor(state, cardId);
       return { id: `card_${cardId}`, label: definition.title, value: cardId };
     });
-  if (options.length === 0) throw new Error("Keine suchbare Programmkarte im Stack.");
+  if (cardOptions.length === 0) throw new Error("Keine suchbare Programmkarte im Stack.");
+  const stackSearchResolution: StackSearchResolution = {
+    reveal: config.reveal ?? "hidden",
+    destination: config.destination ?? "grip",
+    shuffleAfter: config.shuffleAfter ?? true,
+    publicRevealKind: config.publicRevealKind ?? "search_stack_program"
+  };
   state.pendingChoice = {
     choiceId: `${choiceIdPrefix}_${state.stateVersion + 1}`,
     side: "runner",
     source: `${sourcePrefix}:${state.stateVersion + 1}`,
     prompt: "Stack durchsuchen",
     kind: "select_cards",
-    options,
+    options: cardOptions,
     minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
-    visibility: "hidden_info_barrier"
+    visibility: "hidden_info_barrier",
+    stackSearchResolution
   };
+}
+
+function startRunnerStackSearchRevealChoice(state: GameState, sourcePrefix = "v098.search_stack", choiceIdPrefix = "v098_search_stack"): void {
+  startRunnerStackSearchChoice(state, sourcePrefix, choiceIdPrefix, {
+    reveal: "public",
+    destination: "grip",
+    shuffleAfter: true,
+    publicRevealKind: "search_stack_program"
+  });
 }
 
 function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
@@ -6703,17 +6751,23 @@ function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalActi
   const cardId = selectedChoiceCardIds(choice, playerAction)[0];
   if (!cardId || !state.runner.stack.includes(cardId)) throw new Error("Die gewaehlte Karte liegt nicht im Stack.");
   if (definitionFor(state, cardId).type !== "program") throw new Error("Nur Programme sind in dieser Search-Harness legal.");
+  const resolution = choice.stackSearchResolution ?? { reveal: "public", destination: "grip", shuffleAfter: true, publicRevealKind: "search_stack_program" };
   removeFromAllZones(state, cardId);
   state.runner.grip.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
-  shuffleRunnerStack(state, `v098_search_stack:${choice.choiceId}:shuffle`);
+  if (resolution.shuffleAfter) shuffleRunnerStack(state, `v098_search_stack:${choice.choiceId}:shuffle`);
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "search_stack",
+    searchReveal: resolution.reveal,
+    searchDestination: resolution.destination,
+    searchShuffleAfter: resolution.shuffleAfter,
+    ...(resolution.reveal === "public" ? { publicRevealDefinitionId: definitionFor(state, cardId).id } : {}),
+    ...(resolution.reveal === "public" && resolution.publicRevealKind ? { publicRevealKind: resolution.publicRevealKind } : {}),
     selectedCount: 1,
-    shuffled: true
+    shuffled: resolution.shuffleAfter
   };
 }
 
@@ -7105,7 +7159,7 @@ function resolveV1911RunnerHiddenZoneAbility(state: GameState, legalAction: Lega
   const allowedRevealIds = new Set([THE_SHORT_CIRCUIT_ID, AUJOURD_OUI_ID]);
   if (ability === "search_stack_program_to_grip") {
     if (!allowedSearchIds.has(sourceDefinition.id)) throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
-    startRunnerStackSearchChoice(state, "v1911.search_stack", "v1911_search_stack");
+    startRunnerStackSearchRevealChoice(state, "v1911.search_stack", "v1911_search_stack");
     legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
     return;
   }
@@ -7187,6 +7241,7 @@ function resolveTraceCorpBid(state: GameState, legalAction: LegalAction, playerA
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
     traceStep: "corp_bid",
+    sourceDefinitionId: trace.sourceDefinitionId,
     baseTraceStrength: trace.baseTraceStrength,
     corpBid: bid,
     traceStrength,
@@ -7230,6 +7285,7 @@ function resolveTraceRunnerBid(state: GameState, legalAction: LegalAction, playe
     ...(legalAction.payload ?? {}),
     traceId: trace.traceId,
     traceStep: "runner_bid",
+    sourceDefinitionId: trace.sourceDefinitionId,
     baseTraceStrength: trace.baseTraceStrength,
     corpBid: trace.corpBid ?? 0,
     traceStrength,
@@ -7678,6 +7734,7 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     for (const key of [
       "traceId",
       "traceStep",
+      "sourceDefinitionId",
       "baseTraceStrength",
       "corpBid",
       "traceStrength",
@@ -7749,6 +7806,9 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.targetCardDefinitionId === "string") context.targetCardDefinitionId = legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.removedCounterAmount === "number") context.removedCounterAmount = legalAction.payload.removedCounterAmount;
     if (typeof legalAction.payload.remainingCounters === "number") context.remainingCounters = legalAction.payload.remainingCounters;
+    if (typeof legalAction.payload.searchReveal === "string") context.searchReveal = legalAction.payload.searchReveal;
+    if (typeof legalAction.payload.searchDestination === "string") context.searchDestination = legalAction.payload.searchDestination;
+    if (typeof legalAction.payload.searchShuffleAfter === "boolean") context.searchShuffleAfter = legalAction.payload.searchShuffleAfter;
     context.redactedKind = "hidden_zone";
   }
   if (legalAction.payload?.publicRevealKind) context.revealKind = legalAction.payload.publicRevealKind;

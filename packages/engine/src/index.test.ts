@@ -2170,9 +2170,18 @@ describe("V1.7.1 Mechanikpaket E", () => {
         sourceDefinition(state, action) === "onr_v1_114_temple-microcode-outlet"
     );
     expect(state.pendingChoice?.source.startsWith("v098.search_stack")).toBe(true);
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    const programOption = runnerChoice?.options.find((option) => option.value === selectedProgram);
+    expect(programOption?.card).toMatchObject({
+      definitionId: "onr_v1_036_jackhammer",
+      title: "Jackhammer",
+      type: "program"
+    });
+    expect(programOption?.card?.rulesText).toBeTruthy();
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Jackhammer");
 
-    const selectedOption =
-      state.pendingChoice?.options.find((option) => typeof option.value === "string" && option.value === selectedProgram)?.id ?? "";
+    const selectedOption = programOption?.id ?? "";
     expect(selectedOption).not.toBe("");
     state = applyChoice(state, "runner", selectedOption);
 
@@ -2180,7 +2189,14 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(state.runner.stack).not.toContain(selectedProgram);
     expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneAction: "search_stack" });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "search_stack",
+      searchReveal: "public",
+      searchDestination: "grip",
+      searchShuffleAfter: true,
+      cardDefinitionId: "onr_v1_036_jackhammer",
+      title: "Jackhammer"
+    });
   });
 
   it("runs Private LDL Access on HQ and accesses R&D instead", () => {
@@ -4065,15 +4081,26 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
 
     state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
     expect(state.pendingChoice?.source).toContain("v098.search_stack");
-    expect(getPlayerView(state, "runner").pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    const programOption = runnerChoice?.options.find((option) => option.value === targetProgramId);
+    expect(programOption?.label).toBe("Simple Decoder");
+    expect(programOption?.card).toMatchObject({ title: "Simple Decoder", type: "program" });
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
 
-    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    const optionId = programOption?.id;
     expect(optionId).toBeDefined();
     state = applyChoice(state, "runner", String(optionId));
     expect(state.runner.grip).toContain(targetProgramId);
     expect(state.runner.stack).not.toContain(targetProgramId);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneBarrier: true, hiddenZoneAction: "search_stack" });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "search_stack",
+      searchReveal: "public",
+      searchDestination: "grip",
+      searchShuffleAfter: true,
+      cardDefinitionId: "simple_decoder",
+      title: "Simple Decoder"
+    });
 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -4129,7 +4156,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(optionId).toBeDefined();
     state = applyChoice(state, "runner", String(optionId));
     expect(state.runner.grip).toContain(targetProgramId);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneBarrier: true, hiddenZoneAction: "search_stack" });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "search_stack",
+      searchReveal: "public",
+      searchDestination: "grip",
+      searchShuffleAfter: true
+    });
 
     putRunnerCardOnTopOfStack(state, "simple_decoder");
     putRunnerCardOnTopOfStack(state, "simple_fracter");
@@ -6926,7 +6959,11 @@ describe("MVP 0.98a Identity and modifiers", () => {
 
     expect(state.pendingChoice?.kind).toBe("select_cards");
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
-    expect(getPlayerView(state, "runner").pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    const programOption = runnerChoice?.options.find((option) => option.value === selectedProgram);
+    expect(programOption?.label).toBe("Simple Decoder");
+    expect(programOption?.card).toMatchObject({ title: "Simple Decoder", type: "program" });
+    expect(programOption?.card?.rulesText).toBeTruthy();
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Simple Decoder");
 
@@ -10238,5 +10275,3 @@ function removeEverywhere(state: GameState, id: string): void {
     state.specialZones.removedFromGame = state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
   }
 }
-
-
