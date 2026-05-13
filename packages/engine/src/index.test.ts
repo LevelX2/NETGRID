@@ -4021,7 +4021,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4187,7 +4187,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
@@ -4430,7 +4430,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
@@ -4665,7 +4665,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toContain("deterministic_random");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("records Schlaghund deterministic die probes through LegalAction and replay", () => {
@@ -5009,7 +5009,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -5104,7 +5104,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
@@ -5425,7 +5425,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
@@ -5586,7 +5586,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
@@ -5747,7 +5747,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
@@ -5906,7 +5906,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
@@ -6269,7 +6269,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toContain("per_card_longtail");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs all V1.9.22 runner hardware through LegalActions with replay, visibility and revalidation", () => {
@@ -7270,11 +7270,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("keeps unresolved V1.9.22 runner programs out of playable runtime until local values are confirmed", () => {
     const runnerProgramIds = [
-      "onr_v1_026_false-echo",
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_044_netspace-inverter",
       "onr_v1_048_poltergeist",
       "onr_v1_051_rabbit",
       "onr_v1_055_reflector",
@@ -7291,11 +7289,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("does not expose unresolved V1.9.22 runner program install, pump or break LegalActions before local values are confirmed", () => {
     const runnerProgramIds = [
-      "onr_v1_026_false-echo",
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_044_netspace-inverter",
       "onr_v1_048_poltergeist",
       "onr_v1_051_rabbit",
       "onr_v1_055_reflector",
@@ -7345,59 +7341,67 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
   });
 
-  it("installs Newsgroup Filter as an install-only program while keeping its ability gated", () => {
-    let state = toRunnerTurn(
-      createGameAfterSetup({
-        seed: "v1922-newsgroup-filter-install",
-        runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-          id: "onr_v1_runner_v1922_newsgroup_filter_install",
-          name: "O:NR V1.9.22 Newsgroup Filter Install",
-          cards: [{ id: "onr_v1_045_newsgroup-filter", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
-        },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
-        agendaPointsToWin: 7
-      })
-    );
-    state.runner.credits = 10;
-    state.runner.memoryLimit = 4;
-    moveRunnerCardToGrip(state, "onr_v1_045_newsgroup-filter");
+  it("installs V1.9.22 install-only runner programs while keeping their abilities gated", () => {
+    const installOnlyPrograms = [
+      { definitionId: "onr_v1_026_false-echo", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
+      { definitionId: "onr_v1_044_netspace-inverter", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
+      { definitionId: "onr_v1_045_newsgroup-filter", expectedCreditsAfter: 5, expectedMemoryUsed: 2 }
+    ] as const;
 
-    const legal = mustAction(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_045_newsgroup-filter");
-    const wrongSide = applyAction(state, {
-      matchId: state.matchId,
-      side: "corp",
-      actionId: legal.actionId,
-      clientKnownStateVersion: state.stateVersion,
-      idempotencyKey: "v1922-newsgroup-filter-wrong-side"
-    });
-    expect(wrongSide.ok).toBe(false);
-    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    for (const { definitionId, expectedCreditsAfter, expectedMemoryUsed } of installOnlyPrograms) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `v1922-${definitionId}-install-only`,
+          runnerDeck: {
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+            id: `onr_v1_runner_v1922_${definitionId}_install`,
+            name: `O:NR V1.9.22 ${definitionId} Install`,
+            cards: [{ id: definitionId, quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+          },
+          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          agendaPointsToWin: 7
+        })
+      );
+      state.runner.credits = 10;
+      state.runner.memoryLimit = 4;
+      moveRunnerCardToGrip(state, definitionId);
 
-    const stale = applyAction(state, {
-      matchId: state.matchId,
-      side: "runner",
-      actionId: legal.actionId,
-      clientKnownStateVersion: state.stateVersion - 1,
-      idempotencyKey: "v1922-newsgroup-filter-stale"
-    });
-    expect(stale.ok).toBe(false);
-    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+      const legal = mustAction(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === definitionId);
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `v1922-${definitionId}-wrong-side`
+      });
+      expect(wrongSide.ok, definitionId).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code, definitionId).toBe("ERR_WRONG_SIDE");
 
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_045_newsgroup-filter");
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `v1922-${definitionId}-stale`
+      });
+      expect(stale.ok, definitionId).toBe(false);
+      if (!stale.ok) expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
 
-    expect(state.runner.credits).toBe(5);
-    expect(state.runner.memoryUsed).toBe(2);
-    expect(state.runner.rig.programs.map((id) => state.cardInstances[id]?.definitionId)).toContain("onr_v1_045_newsgroup-filter");
-    expect(getLegalActions(state, "runner").some((action) => sourceDefinition(state, action) === "onr_v1_045_newsgroup-filter")).toBe(false);
-    expect(getPlayerView(state, "runner").own.rig?.some((card) => card.definitionId === "onr_v1_045_newsgroup-filter")).toBe(true);
-    expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === "onr_v1_045_newsgroup-filter")).toBe(true);
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === definitionId);
+
+      expect(state.runner.credits, definitionId).toBe(expectedCreditsAfter);
+      expect(state.runner.memoryUsed, definitionId).toBe(expectedMemoryUsed);
+      expect(state.runner.rig.programs.map((id) => state.cardInstances[id]?.definitionId), definitionId).toContain(definitionId);
+      expect(getLegalActions(state, "runner").some((action) => sourceDefinition(state, action) === definitionId), definitionId).toBe(false);
+      expect(getPlayerView(state, "runner").own.rig?.some((card) => card.definitionId === definitionId), definitionId).toBe(true);
+      expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === definitionId), definitionId).toBe(true);
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload), definitionId).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
   });
 
   it("installs Shield and uses side-safe per-turn net damage prevention", () => {
@@ -8156,7 +8160,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_upgrade_root_server|access_ambush|trace|city_grid|run_flow|tag|counter|hidden_zone|stealth/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {

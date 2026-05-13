@@ -48,7 +48,7 @@
 
 - V1.9.22 verbleibende Corp-Longtailkarten: `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer `Data Fort Reclamation`, `Security Purge`, `Haunting Inquisition`, `Tutor`, `Viral 15` und `Virizz` zusammen.
 
-- V1.9.22 Runner-Programm-Install-only-WIP: `Newsgroup Filter` hat jetzt eine enge install-only Runtime-Definition ohne Catalog-, AI- oder Release-Promotion. Die Karte nutzt Installkosten 5 und MU 2; die Credit-Gain-Fähigkeit bleibt gesperrt, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestätigt sind. Engine, Catalog und Typecheck sind für diesen Teilschnitt grün.
+- V1.9.22 Runner-Programm-Install-only-WIP: `False Echo`, `Netspace Inverter` und `Newsgroup Filter` haben jetzt enge install-only Runtime-Definitionen ohne Catalog-, AI- oder Release-Promotion. Die jeweiligen erfolgreichen-Run- bzw. Credit-Gain-Fähigkeiten bleiben gesperrt, bis Trigger-, Sequenz-, Aktivierungskosten-, Timing- und PublicPayload-Verträge lokal bestätigt sind. Engine, Catalog, AI, Server, Web, Typecheck, Test, Lint und Build sind für diesen Teilschnitt grün.
 
 - V1.9.22 Runner-Programm-Runtime-WIP: `Shield` hat jetzt eine enge Runtime-Definition ohne Catalog-, AI- oder Release-Promotion. Die Karte nutzt Installkosten 0, MU 1 und das bestehende Event-Modification-Prevention-Fenster fuer bis zu 2 Net Damage pro Runner-Zug; Engine, Catalog, AI, Server, Web, Typecheck, Test, Lint und Build sind fuer diesen Teilschnitt gruen. Die verbleibenden Runner-Programm- und Corp-Longtail-Gates bleiben offen.
 

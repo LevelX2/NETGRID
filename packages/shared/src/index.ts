@@ -3481,6 +3481,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_026_false-echo",
+    title: "False Echo",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Install as a program. Its successful-run forced-rez ability remains gated until the trigger and rez sequence contract is confirmed.",
+    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_044_netspace-inverter",
+    title: "Netspace Inverter",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Install as a program. Its successful-run server-ICE reorder ability remains gated until the trigger and public order-update contract is confirmed.",
+    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_061_shield",
     title: "Shield",
     side: "runner",

@@ -79,7 +79,9 @@
   },
   "latestRuntimeResolverSlice": {
     "implementedAt": "2026-05-14T00:27:00+02:00",
-    "cards": [
+      "cards": [
+      "onr_v1_026_false-echo",
+      "onr_v1_044_netspace-inverter",
       "onr_v1_045_newsgroup-filter",
       "onr_v1_061_shield",
       "onr_v1_077_anonymous-tip",
@@ -102,7 +104,7 @@
       "onr_v1_298_planning-consultants"
     ],
     "engineTests": [
-      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Newsgroup Filter as an install-only program while keeping its ability gated",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs V1.9.22 install-only runner programs while keeping their abilities gated",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Shield and uses side-safe per-turn net damage prevention",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Anonymous Tip as a public black-ice derez choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Core Command Jettison Ice after a successful HQ run to pay rez cost and trash rezzed ICE",
@@ -162,7 +164,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Newsgroup Filter install-only WIP, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "False Echo, Netspace Inverter and Newsgroup Filter install-only WIPs, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

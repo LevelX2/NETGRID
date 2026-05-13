@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-14 00:55 CEST
+- Ergebnis: V1.9.22 Runner-Programm-Install-only-WIP fuer `False Echo` und `Netspace Inverter` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt `False Echo` und `Netspace Inverter` als V1.9.22-Runtime-Programme mit Installkosten 0, MU 1 und finalen display-only Texten. `packages/engine/src/index.test.ts` deckt Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, Ability-Gates, PublicPayload/PlayerViews und Replay/StateHash fuer die install-only Runner-Programme ab. Die erfolgreichen-Run-Faehigkeiten bleiben bis zur Bestaetigung von Trigger-, Sequenz- und PublicPayload-Vertraegen ohne LegalAction. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (297); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner program install-only expansion wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-14 00:45 CEST
 - Ergebnis: V1.9.22 Runner-Programm-Install-only-WIP fuer `Newsgroup Filter` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
