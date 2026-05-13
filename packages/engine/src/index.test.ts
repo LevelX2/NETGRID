@@ -5572,6 +5572,34 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
+
+  it("keeps V1.9.18 city-grid region replacement server-bound and visible", () => {
+    let state = v1917GenericAssetGame("v1918-city-grid-region-install");
+    state.corp.credits = 20;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const firstGridId = moveCorpCardToHq(state, "onr_v1_355_crystal-palace-station-grid");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.payload?.cardId === firstGridId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+    );
+
+    const secondGridId = moveCorpCardToHq(state, "onr_v1_365_paris-city-grid");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.payload?.cardId === secondGridId && action.payload?.serverId === "remote_1" && action.payload?.placement === "root"
+    );
+
+    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    expect(remote?.root).toContain(secondGridId);
+    expect(remote?.root).not.toContain(firstGridId);
+    expect(state.corp.archives).toContain(firstGridId);
+    expect(getPlayerView(state, "runner").servers.find((server) => server.id === "archives")?.root.find((card) => card.instanceId === firstGridId)?.definitionId).toBe(
+      "onr_v1_355_crystal-palace-station-grid"
+    );
+    expect(validateGameState(state).ok).toBe(true);
+  });
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
