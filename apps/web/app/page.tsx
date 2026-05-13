@@ -4009,6 +4009,7 @@ export default function Page() {
                         onChoiceOption={submitChoiceOption}
                         onChoiceOptions={submitChoiceOptions}
                         enrichCard={enrichCard}
+                        connection={connection}
                         onClearContext={() => setSelectedActionContext(null)}
                       />
           <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
@@ -5908,6 +5909,7 @@ function LegalActionsPanel({
   onChoiceOption,
   onChoiceOptions,
   enrichCard,
+  connection,
   onClearContext
 }: {
   view: PlayerView;
@@ -5924,6 +5926,7 @@ function LegalActionsPanel({
   onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
+  connection: "offline" | "connecting" | "online";
   onClearContext(): void;
 }) {
   const setupChoice = view.pendingChoice?.source === "setup.mulligan" ? view.pendingChoice : undefined;
@@ -5956,6 +5959,18 @@ function LegalActionsPanel({
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (genericChoice && genericChoiceAction) {
     if (genericChoice.kind === "select_cards" && genericChoice.options.some((option) => option.card)) {
+      if (connection !== "online") {
+        return (
+          <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="card-choice-paused-panel">
+            <h2>
+              <Search size={16} />
+              {cardChoiceTitle(genericChoice)}
+            </h2>
+            <p className="meta">{genericChoice.prompt}</p>
+            <p className="meta">Die Kartenwahl wird wieder geöffnet, sobald die Verbindung steht.</p>
+          </section>
+        );
+      }
       return <CardChoicePanel choice={genericChoice} action={genericChoiceAction} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
     }
     return (
