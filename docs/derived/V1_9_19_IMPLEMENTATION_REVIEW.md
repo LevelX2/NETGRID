@@ -17,7 +17,8 @@ Stand: 2026-05-13
 - `packages/engine/src/index.ts` deckt außerdem erste Asset-Randpfade ab: Chicago Branch und Vapor Ops laden Power-Counter über rezzed Corp-LegalActions, Information Laundering gewinnt Credits über eine rezzed Corp-LegalAction, und Experimental AI triggert aus einem legalen Access-Fenster einen side-sicheren installierte-Programme-Trash-Ambush.
 - `packages/engine/src/index.ts` deckt jetzt auch erste Operation-Randpfade ab: Project Consultants legt engine-seitig einen Advancement-Counter auf eine installierte Agenda, Falsified-Transactions Expert/Management Shake-Up/Team Restructuring laden Power-Counter auf eine Agenda, Silver Lining Recovery Protocol gewinnt Credits, und Systematic Layoffs forfeitet eine gescorte Korp-Agenda als öffentliche Removed-from-game-Kosten.
 - Corprunner's Shattered Remains, Vacant Soulkiller und Virus Test Site sind jetzt ebenfalls über legale Access-Ambush-Fenster abgedeckt: Hardware-Trash, Core Damage und Net Damage bleiben side-sicher und laufen über die bestehenden Damage-/Visibility-Barrieren.
-- `packages/engine/src/index.test.ts` prüft den V1.9.19-Agenda-Core, Asset-Randpfad, Operation-Schnitt und Ambush-Damage-Schnitt mit fünf neuen Smokes: Score/Difficulty/Overadvance inklusive Replay/StateHash, gescorte R&D-Reveal-Aktion inklusive Hidden-Info-Barriere, Asset-Counter/Economy/Access-Ambush, Operation-Advance-/Counter-/Forfeit-Pfade sowie Corprunner/Vacant/Virus-Test-Site-Ambushes.
+- Fait Accompli, Arasaka Owns You und Olivia Salazar haben jetzt konkrete Runner-/Upgrade-Kostenpfade: Fait lädt als installiertes Programm Power-Counter bei vorhandener Runner-Agenda, Arasaka Owns You forfeitet eine Runner-Agenda öffentlich und entfernt alle Tags, Olivia Salazar erzwingt beim Stehlen einer Agenda in ihrem Server eine Runner-Agenda als öffentliche Removed-from-game-Kosten.
+- `packages/engine/src/index.test.ts` prüft den V1.9.19-Agenda-Core, Asset-Randpfad, Operation-Schnitt, Ambush-Damage-Schnitt und Runner-Agenda-Kosten-Schnitt mit sechs neuen Smokes: Score/Difficulty/Overadvance inklusive Replay/StateHash, gescorte R&D-Reveal-Aktion inklusive Hidden-Info-Barriere, Asset-Counter/Economy/Access-Ambush, Operation-Advance-/Counter-/Forfeit-Pfade, Corprunner/Vacant/Virus-Test-Site-Ambushes sowie Fait/Arasaka/Olivia.
 
 ## Gate
 
@@ -26,7 +27,7 @@ Stand: 2026-05-13
 
 ## Nächster Schnitt
 
-Weitere konkrete V1.9.19-Pfade: Fait Accompli, Arasaka Owns You und Olivia Salazar noch auf konkrete Engine-/Testrolle prüfen; danach finale Daten-/AI-Artefakte, offizielle AI-Approval, Release-Promotion und Webclient-Version.
+Weitere konkrete V1.9.19-Arbeit: finale Daten-/AI-Artefakte auf den nun breiteren Engine-Stand nachziehen, offizielle AI-Approval vorbereiten, Final Review, Release-Promotion und Webclient-Version.
 
 ## Verifikation
 
@@ -45,3 +46,4 @@ Weitere konkrete V1.9.19-Pfade: Fait Accompli, Arasaka Owns You und Olivia Salaz
 - Nach Asset-Randpfad-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 255 Tests.
 - Nach Operation-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 256 Tests.
 - Nach Ambush-Damage-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 257 Tests.
+- Nach Runner-Agenda-Kosten-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 258 Tests.

@@ -1,13 +1,14 @@
 {
   "schemaVersion": "card-implementation-manifest-v1.9.19",
   "id": "v1.9.19-agenda-overadvance-manifest",
-  "status": "wip_agenda_core_operation_asset_ambush_engine_covered_pending_catalog_promotion",
+  "status": "wip_agenda_core_operation_asset_ambush_runner_cost_engine_covered_pending_catalog_promotion",
   "extends": "data/manifests/card-implementation-manifest-1.9.18.json",
   "sourceMode": "private_local_onr_v1_function_matrix_display_only",
   "gateAssertions": {
     "v1919ScopeFrozenToTwentyAgendaOveradvanceCards": true,
     "allCardsRuntimeDefinitionReady": true,
     "legalActionsOnlyForCoveredAgendaCore": true,
+    "runnerAgendaCostEdgesCovered": true,
     "stateHashReplayStableForCoveredSmokes": true,
     "hiddenInfoSafeForCoveredSmokes": true,
     "noOfficialAssets": true,
@@ -16,8 +17,8 @@
     "aiPromotionPending": true
   },
   "cards": [
-    { "cardCode": "onr_v1_025_fait-accompli", "title": "Fait Accompli", "releaseStatus": "wip_runtime_definition", "aiSupported": false, "resolverFamily": "scored_agenda_static_active_resolver; typed_counter_virus_purge_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_program", "counter", "scored_agenda", "agenda_difficulty", "overadvance"], "roleTags": ["runner", "program", "agenda"] },
-    { "cardCode": "onr_v1_078_arasaka-owns-you", "title": "Arasaka Owns You", "releaseStatus": "wip_runtime_definition", "aiSupported": false, "resolverFamily": "event_modification_prevention_avoid_resolver; scored_agenda_static_active_resolver; tag_condition_avoid_remove_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["play_event", "tag", "prevention", "scored_agenda", "agenda_difficulty"], "roleTags": ["runner", "event", "prevention"] },
+    { "cardCode": "onr_v1_025_fait-accompli", "title": "Fait Accompli", "releaseStatus": "wip_engine_runner_program_counter_covered", "aiSupported": false, "resolverFamily": "scored_agenda_static_active_resolver; typed_counter_virus_purge_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_program", "counter", "scored_agenda", "agenda_difficulty", "overadvance"], "roleTags": ["runner", "program", "agenda"] },
+    { "cardCode": "onr_v1_078_arasaka-owns-you", "title": "Arasaka Owns You", "releaseStatus": "wip_engine_runner_event_forfeit_tag_covered", "aiSupported": false, "resolverFamily": "event_modification_prevention_avoid_resolver; scored_agenda_static_active_resolver; tag_condition_avoid_remove_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["play_event", "tag", "prevention", "scored_agenda", "agenda_difficulty"], "roleTags": ["runner", "event", "prevention"] },
     { "cardCode": "onr_v1_189_artificial-security-directors", "title": "Artificial Security Directors", "releaseStatus": "wip_engine_agenda_core_covered", "aiSupported": false, "resolverFamily": "scored_agenda_static_active_resolver; hidden_zone_search_reveal_reorder_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["agenda", "score", "steal", "hidden_zone", "overadvance"], "roleTags": ["corp", "agenda", "hidden_zone"] },
     { "cardCode": "onr_v1_202_genetics-visionary-acquisition", "title": "Genetics-Visionary Acquisition", "releaseStatus": "wip_engine_agenda_core_covered", "aiSupported": false, "resolverFamily": "scored_agenda_static_active_resolver; hidden_zone_search_reveal_reorder_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["agenda", "score", "steal", "hidden_zone", "overadvance"], "roleTags": ["corp", "agenda", "hidden_zone"] },
     { "cardCode": "onr_v1_291_falsified-transactions-expert", "title": "Falsified-Transactions Expert", "releaseStatus": "wip_engine_operation_counter_covered", "aiSupported": false, "resolverFamily": "scored_agenda_static_active_resolver; typed_counter_virus_purge_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["play_operation", "counter", "agenda_difficulty", "overadvance"], "roleTags": ["corp", "operation", "counter"] },
@@ -33,7 +34,7 @@
     { "cardCode": "onr_v1_346_vacant-soulkiller", "title": "Vacant Soulkiller", "releaseStatus": "wip_engine_access_damage_covered", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; access_ambush_resolver; core_brain_damage_modifier_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_asset", "rez_card", "access_ambush", "core_damage", "agenda_difficulty"], "roleTags": ["corp", "asset", "ambush", "damage"] },
     { "cardCode": "onr_v1_347_vapor-ops", "title": "Vapor Ops", "releaseStatus": "wip_engine_asset_counter_covered", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; scored_agenda_static_active_resolver; typed_counter_virus_purge_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_asset", "rez_card", "gain_credit", "counter", "overadvance"], "roleTags": ["corp", "asset", "economy"] },
     { "cardCode": "onr_v1_348_virus-test-site", "title": "Virus Test Site", "releaseStatus": "wip_engine_access_damage_covered", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; access_ambush_resolver; hidden_zone_search_reveal_reorder_resolver; damage_event_prevention_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_asset", "rez_card", "access_ambush", "net_damage", "hidden_zone"], "roleTags": ["corp", "asset", "ambush", "damage"] },
-    { "cardCode": "onr_v1_363_olivia-salazar", "title": "Olivia Salazar", "releaseStatus": "wip_runtime_definition", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; scored_agenda_static_active_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "scored_agenda", "agenda_difficulty"], "roleTags": ["corp", "upgrade", "agenda"] },
+    { "cardCode": "onr_v1_363_olivia-salazar", "title": "Olivia Salazar", "releaseStatus": "wip_engine_upgrade_steal_cost_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; scored_agenda_static_active_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "scored_agenda", "agenda_difficulty"], "roleTags": ["corp", "upgrade", "agenda"] },
     { "cardCode": "onr_v1_368_roving-submarine", "title": "Roving Submarine", "releaseStatus": "wip_engine_agenda_core_modifier_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; scored_agenda_static_active_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "advance", "agenda_difficulty", "overadvance"], "roleTags": ["corp", "upgrade", "advance"] },
     { "cardCode": "onr_v1_374_washington-d-c-city-grid", "title": "Washington, D.C., City Grid", "releaseStatus": "wip_engine_agenda_core_modifier_covered", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; scored_agenda_static_active_resolver; agenda_difficulty_overadvance_resolver", "requiredMechanics": ["install_upgrade", "rez_card", "city_grid", "agenda_difficulty", "overadvance"], "roleTags": ["corp", "upgrade", "region"] }
   ],
@@ -43,6 +44,6 @@
     "finalGateCardCount": 0,
     "deferredCardCount": 0,
     "deferredCardIds": [],
-    "openMechanicFamilies": 4
+    "openMechanicFamilies": 2
   }
 }

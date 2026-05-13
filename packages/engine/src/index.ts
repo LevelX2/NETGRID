@@ -220,6 +220,8 @@ const V1918_COUNTER_UPGRADE_IDS = new Set([V1918_CRYSTAL_PALACE_STATION_GRID_ID,
 const V1918_RUN_TAX_UPGRADE_IDS = new Set([V1918_DR_DREFF_ID, V1918_TURBEAU_DELACROIX_ID, V1918_TWENTY_FOUR_HOUR_SURVEILLANCE_ID]);
 const V1918_TAG_CONDITION_UPGRADE_IDS = new Set([V1918_OMNI_KISMET_ID, V1918_PARIS_CITY_GRID_ID]);
 const V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID = "onr_v1_189_artificial-security-directors";
+const V1919_FAIT_ACCOMPLI_ID = "onr_v1_025_fait-accompli";
+const V1919_ARASAKA_OWNS_YOU_ID = "onr_v1_078_arasaka-owns-you";
 const V1919_GENETICS_VISIONARY_ACQUISITION_ID = "onr_v1_202_genetics-visionary-acquisition";
 const V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID = "onr_v1_291_falsified-transactions-expert";
 const V1919_MANAGEMENT_SHAKE_UP_ID = "onr_v1_292_management-shake-up";
@@ -234,6 +236,7 @@ const V1919_INFORMATION_LAUNDERING_ID = "onr_v1_328_information-laundering";
 const V1919_VACANT_SOULKILLER_ID = "onr_v1_346_vacant-soulkiller";
 const V1919_VAPOR_OPS_ID = "onr_v1_347_vapor-ops";
 const V1919_VIRUS_TEST_SITE_ID = "onr_v1_348_virus-test-site";
+const V1919_OLIVIA_SALAZAR_ID = "onr_v1_363_olivia-salazar";
 const V1919_ROVING_SUBMARINE_ID = "onr_v1_368_roving-submarine";
 const V1919_WASHINGTON_DC_CITY_GRID_ID = "onr_v1_374_washington-d-c-city-grid";
 const V1919_OVERADVANCE_AGENDA_IDS = new Set([V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID, V1919_GENETICS_VISIONARY_ACQUISITION_ID]);
@@ -676,6 +679,29 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       const serverId = String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">;
       startRun(state, serverId);
       legalAction.payload = { ...(legalAction.payload ?? {}), serverId, traceAwareRun: true };
+    }
+  },
+  [V1919_ARASAKA_OWNS_YOU_ID]: {
+    name: "onr_v1919_runner_event_forfeit_agenda_remove_tags",
+    canPlay: (state) => state.runner.tags > 0 && pickRunnerAgendaForAgendaPointCost(state) !== undefined,
+    resolve: (state, legalAction) => {
+      if (state.runner.tags <= 0) throw new Error("Arasaka Owns You benoetigt einen getaggten Runner.");
+      const forfeitAgendaCardId = pickRunnerAgendaForAgendaPointCost(state);
+      if (!forfeitAgendaCardId) throw new Error("Arasaka Owns You benoetigt eine Runner-Agenda als Kosten.");
+      const removedTags = state.runner.tags;
+      forfeitRunnerAgendaForPointCost(state, forfeitAgendaCardId);
+      state.runner.tags = 0;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1919RunnerEventAbility: "forfeit_agenda_remove_tags",
+        forfeitAgendaCardId,
+        agendaPointCostPaid: 1,
+        removedTags,
+        runnerTagsAfter: state.runner.tags,
+        specialZone: "removed_from_game",
+        specialZoneVisibility: "public",
+        specialZoneReason: "v1919_arasaka_owns_you"
+      };
     }
   }
 };
@@ -2222,6 +2248,19 @@ function runnerMainActions(state: GameState): LegalAction[] {
           )
         );
       }
+      if (definition.id === V1919_FAIT_ACCOMPLI_ID && state.runner.scoreArea.length > 0) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "gain_credit",
+            `${definition.title}: Power-Counter laden`,
+            cardId,
+            [{ clicks: 1 }],
+            { cardId, v1919RunnerProgramAbility: "add_power_counter", counterType: "power", addCounterAmount: 1 }
+          )
+        );
+      }
       if (definition.id === RONIN_AROUND_ID && state.runner.stack.length >= 2) {
         actions.push(
           action(
@@ -2852,6 +2891,37 @@ function runnerAccessActions(state: GameState): LegalAction[] {
   const definition = definitionFor(state, run.accessedCardId);
   const freeTrashEnabled = canFreeTrashCurrentAccessCard(state, run, definition);
   if (definition.type === "agenda") {
+    const oliviaSalazarId = oliviaSalazarCardIdForCurrentAccess(state, run);
+    if (oliviaSalazarId) {
+      const forfeitAgendaCardId = pickRunnerAgendaForAgendaPointCost(state);
+      if (!forfeitAgendaCardId) {
+        return [
+          action(state, "runner", "decline_trash", `${definition.title} nicht stehlen`, "game_rule", [], {
+            cardId: run.accessedCardId,
+            v1919UpgradeAbility: "olivia_salazar_steal_cost",
+            oliviaSalazarCardId: oliviaSalazarId,
+            stealBlockedByAgendaPointCost: true
+          })
+        ];
+      }
+      return [
+        action(
+          state,
+          "runner",
+          "steal_agenda",
+          `${definition.title} stehlen`,
+          run.accessedCardId,
+          [],
+          {
+            cardId: run.accessedCardId,
+            v1919UpgradeAbility: "olivia_salazar_steal_cost",
+            oliviaSalazarCardId: oliviaSalazarId,
+            forfeitAgendaCardId,
+            agendaPointCost: 1
+          }
+        )
+      ];
+    }
     const redHerringsId = redHerringsCardIdForCurrentAccess(state, run);
     if (redHerringsId) {
       const stealCost = 5;
@@ -2907,6 +2977,11 @@ function runnerAccessActions(state: GameState): LegalAction[] {
 function redHerringsCardIdForCurrentAccess(state: GameState, run: ActiveRun): CardInstanceId | undefined {
   const serverId = run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
   return rezzedRootCardIdOnServer(state, serverId, V1918_RED_HERRINGS_ID);
+}
+
+function oliviaSalazarCardIdForCurrentAccess(state: GameState, run: ActiveRun): CardInstanceId | undefined {
+  const serverId = run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
+  return rezzedRootCardIdOnServer(state, serverId, V1919_OLIVIA_SALAZAR_ID);
 }
 
 function hasPendingAccessCandidate(state: GameState, run: ActiveRun): boolean {
@@ -3135,6 +3210,23 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
           ...(legalAction.payload ?? {}),
           gainedCredits: gainAmount,
           corpCreditsAfter: state.corp.credits
+        };
+        return;
+      }
+      if (legalAction.payload?.v1919RunnerProgramAbility === "add_power_counter") {
+        if (legalAction.side !== "runner") throw new Error("Nur der Runner darf V1.9.19-Programm-Counter nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.runner.rig.programs.includes(sourceCardId)) throw new Error("Die V1.9.19-Programm-Counter-Faehigkeit ist nicht installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1919_FAIT_ACCOMPLI_ID) throw new Error("Die V1.9.19-Programm-Counter-Faehigkeit passt nicht zur Karte.");
+        if (state.runner.scoreArea.length === 0) throw new Error("Fait Accompli benoetigt eine Runner-Agenda als Agenda-Bezug.");
+        const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
+        if (!Number.isInteger(addAmount) || addAmount !== 1) throw new Error("Fait Accompli laedt in diesem V1.9.19-WIP genau 1 Power-Counter.");
+        addCardCounter(state, sourceCardId, "power", addAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          addedCounterAmount: addAmount,
+          remainingCounters: cardCounter(state, sourceCardId, "power")
         };
         return;
       }
@@ -3375,6 +3467,26 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       return;
     case "steal_agenda":
       spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 0);
+      if (legalAction.payload?.v1919UpgradeAbility === "olivia_salazar_steal_cost") {
+        if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Olivia Salazar-Stehlkosten bezahlen.");
+        const run = mustRun(state);
+        const oliviaSalazarId = oliviaSalazarCardIdForCurrentAccess(state, run);
+        if (!oliviaSalazarId || oliviaSalazarId !== legalAction.payload.oliviaSalazarCardId) {
+          throw new Error("Olivia Salazar ist fuer diesen Zugriff nicht aktiv.");
+        }
+        const agendaCost = Number(legalAction.payload.agendaPointCost ?? 0);
+        if (!Number.isInteger(agendaCost) || agendaCost !== 1) throw new Error("Olivia Salazar verlangt genau 1 Agenda-Punkt.");
+        const forfeitAgendaCardId = String(legalAction.payload.forfeitAgendaCardId ?? "");
+        forfeitRunnerAgendaForPointCost(state, forfeitAgendaCardId);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          forfeitedAgendaCardId: forfeitAgendaCardId,
+          agendaPointCostPaid: agendaCost,
+          specialZone: "removed_from_game",
+          specialZoneVisibility: "public",
+          specialZoneReason: "v1919_olivia_salazar"
+        };
+      }
       stealAgenda(state, mustRun(state).accessedCardId ?? "");
       return;
     case "trash_accessed_card":
@@ -7002,8 +7114,12 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.v1918UpgradeAbility) parts.push(String(payload.v1918UpgradeAbility));
   if (payload?.v1919AssetAbility) parts.push(String(payload.v1919AssetAbility));
   if (payload?.v1919OperationAbility) parts.push(String(payload.v1919OperationAbility));
+  if (payload?.v1919UpgradeAbility) parts.push(String(payload.v1919UpgradeAbility));
+  if (payload?.v1919RunnerProgramAbility) parts.push(String(payload.v1919RunnerProgramAbility));
+  if (payload?.v1919RunnerEventAbility) parts.push(String(payload.v1919RunnerEventAbility));
   if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
+  if (payload?.oliviaSalazarCardId) parts.push(String(payload.oliviaSalazarCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   return parts.filter(Boolean).join(".");
 }
@@ -7270,6 +7386,29 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.addedAdvancementCounters === "number") context.addedAdvancementCounters = legalAction.payload.addedAdvancementCounters;
     if (typeof legalAction.payload.advancementCountersAfter === "number") context.advancementCountersAfter = legalAction.payload.advancementCountersAfter;
     if (typeof legalAction.payload.agendaPointCostPaid === "number") context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
+  }
+  if (typeof legalAction.payload?.v1919UpgradeAbility === "string") {
+    context.v1919UpgradeAbility = legalAction.payload.v1919UpgradeAbility;
+    if (typeof legalAction.payload.agendaPointCost === "number") context.agendaPointCost = legalAction.payload.agendaPointCost;
+    if (typeof legalAction.payload.agendaPointCostPaid === "number") context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
+    if (legalAction.payload.stealBlockedByAgendaPointCost === true) context.stealBlockedByAgendaPointCost = true;
+    if (legalAction.payload.specialZone) context.specialZone = legalAction.payload.specialZone;
+    if (legalAction.payload.specialZoneVisibility) context.specialZoneVisibility = legalAction.payload.specialZoneVisibility;
+    if (legalAction.payload.specialZoneReason) context.specialZoneReason = legalAction.payload.specialZoneReason;
+  }
+  if (typeof legalAction.payload?.v1919RunnerProgramAbility === "string") {
+    context.v1919RunnerProgramAbility = legalAction.payload.v1919RunnerProgramAbility;
+    if (typeof legalAction.payload.addedCounterAmount === "number") context.addedCounterAmount = legalAction.payload.addedCounterAmount;
+    if (typeof legalAction.payload.remainingCounters === "number") context.remainingCounters = legalAction.payload.remainingCounters;
+  }
+  if (typeof legalAction.payload?.v1919RunnerEventAbility === "string") {
+    context.v1919RunnerEventAbility = legalAction.payload.v1919RunnerEventAbility;
+    if (typeof legalAction.payload.agendaPointCostPaid === "number") context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
+    if (typeof legalAction.payload.removedTags === "number") context.removedTags = legalAction.payload.removedTags;
+    if (typeof legalAction.payload.runnerTagsAfter === "number") context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
+    if (legalAction.payload.specialZone) context.specialZone = legalAction.payload.specialZone;
+    if (legalAction.payload.specialZoneVisibility) context.specialZoneVisibility = legalAction.payload.specialZoneVisibility;
+    if (legalAction.payload.specialZoneReason) context.specialZoneReason = legalAction.payload.specialZoneReason;
   }
   if (typeof legalAction.payload?.v1919AgendaDifficulty === "number") context.v1919AgendaDifficulty = legalAction.payload.v1919AgendaDifficulty;
   if (typeof legalAction.payload?.v1919Overadvance === "number") context.v1919Overadvance = legalAction.payload.v1919Overadvance;

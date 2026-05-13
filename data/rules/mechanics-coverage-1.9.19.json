@@ -4,7 +4,7 @@
   "matrixId": "mechanics-coverage-1.9.19",
   "generatedFor": "V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance WIP gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_agenda_core_operation_asset_ambush_engine_covered_pending_promotion",
+  "status": "wip_agenda_core_operation_asset_ambush_runner_cost_engine_covered_pending_promotion",
   "extends": "data/rules/mechanics-coverage-1.9.18.json",
   "gateAssertions": {
     "agendaOveradvanceScopeFrozenToTwentyCards": true,
@@ -16,6 +16,7 @@
     "assetCounterEconomyCovered": true,
     "accessAmbushInstalledProgramCovered": true,
     "accessAmbushHardwareAndDamageCovered": true,
+    "runnerAgendaCostEdgesCovered": true,
     "hiddenInfoSafeForCoveredSmokes": true,
     "stateHashReplayStableForCoveredSmokes": true,
     "catalogPromotionPending": true,
@@ -28,7 +29,7 @@
       "label": "Scored Agenda Static/Active",
       "currentStatus": "implemented_limited_wip",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Artificial Security Directors und Genetics-Visionary Acquisition haben gescorte R&D-Top-Reveal-LegalActions mit Hidden-Info-Barriere; weitere scored-area Randpfade folgen.",
+      "currentScopeNote": "Artificial Security Directors und Genetics-Visionary Acquisition haben gescorte R&D-Top-Reveal-LegalActions mit Hidden-Info-Barriere; Fait Accompli, Arasaka Owns You und Olivia Salazar decken Runner-Agenda-Counter-/Kostenpfade ab.",
       "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "hidden_info_smoke"]
     },
     {
@@ -36,7 +37,7 @@
       "label": "Agenda Difficulty und Overadvance",
       "currentStatus": "implemented_limited_wip",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Score/Difficulty/Overadvance werden für Artificial Security Directors und Genetics-Visionary Acquisition engine-seitig revalidiert; Roving Submarine und Washington, D.C., City Grid liefern servergebundene Difficulty-Modifier. Steal- und Kostenpfade folgen.",
+      "currentScopeNote": "Score/Difficulty/Overadvance werden für Artificial Security Directors und Genetics-Visionary Acquisition engine-seitig revalidiert; Roving Submarine und Washington, D.C., City Grid liefern servergebundene Difficulty-Modifier. Olivia Salazar deckt den zusätzlichen Agenda-Steal-Kostenpfad ab.",
       "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "replay_statehash_smoke"]
     },
     {
@@ -44,7 +45,7 @@
       "label": "Agenda-Kosten, Forfeit und Counter",
       "currentStatus": "implemented_limited_wip",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Falsified-Transactions Expert, Management Shake-Up, Team Restructuring, Chicago Branch und Vapor Ops laden Power-Counter über explizite LegalActions; Systematic Layoffs forfeitet eine gescorte Korp-Agenda als öffentliche Removed-from-game-Kosten.",
+      "currentScopeNote": "Falsified-Transactions Expert, Management Shake-Up, Team Restructuring, Chicago Branch, Vapor Ops und Fait Accompli laden Power-Counter über explizite LegalActions; Systematic Layoffs, Arasaka Owns You und Olivia Salazar forfeiten Agenden als öffentliche Removed-from-game-Kosten.",
       "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "counter_smoke", "forfeit_cost_smoke"]
     },
     {

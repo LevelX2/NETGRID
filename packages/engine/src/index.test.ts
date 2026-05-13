@@ -4351,6 +4351,61 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       damageAmount: 2
     });
   });
+
+  it("uses V1.9.19 Runner agenda-cost paths for Fait Accompli, Arasaka Owns You and Olivia Salazar", () => {
+    let faitState = toRunnerTurn(v1919AgendaOveradvanceGame("v1919-fait-accompli"));
+    faitState.runner.credits = 20;
+    const faitId = installRunnerProgramForTest(faitState, "onr_v1_025_fait-accompli");
+    scoreRunnerAgendaForTest(faitState, "simple_agenda");
+    faitState = apply(
+      faitState,
+      "runner",
+      (action) => action.type === "gain_credit" && action.payload?.v1919RunnerProgramAbility === "add_power_counter"
+    );
+    expect(cardCounterAmount(faitState, faitId, "power")).toBe(1);
+    expect(faitState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1919RunnerProgramAbility: "add_power_counter",
+      addedCounterAmount: 1,
+      remainingCounters: 1
+    });
+
+    let arasakaState = toRunnerTurn(v1919AgendaOveradvanceGame("v1919-arasaka-owns-you"));
+    arasakaState.runner.credits = 20;
+    arasakaState.runner.tags = 2;
+    const arasakaCostAgendaId = scoreRunnerAgendaForTest(arasakaState, "simple_agenda");
+    moveRunnerCardToGrip(arasakaState, "onr_v1_078_arasaka-owns-you");
+    arasakaState = apply(arasakaState, "runner", (action) => action.type === "play_event" && sourceDefinition(arasakaState, action) === "onr_v1_078_arasaka-owns-you");
+    expect(arasakaState.runner.tags).toBe(0);
+    expect(arasakaState.runner.scoreArea).not.toContain(arasakaCostAgendaId);
+    expect(arasakaState.specialZones?.removedFromGame).toContain(arasakaCostAgendaId);
+    expect(arasakaState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      v1919RunnerEventAbility: "forfeit_agenda_remove_tags",
+      agendaPointCostPaid: 1,
+      removedTags: 2,
+      runnerTagsAfter: 0
+    });
+
+    let oliviaState = toRunnerTurn(v1919AgendaOveradvanceGame("v1919-olivia-salazar"));
+    oliviaState.runner.credits = 20;
+    const oliviaCostAgendaId = scoreRunnerAgendaForTest(oliviaState, "simple_agenda");
+    const accessedAgendaId = putCorpRootInRemote(oliviaState, "onr_v1_202_genetics-visionary-acquisition");
+    const oliviaId = putCorpRootInRemote(oliviaState, "onr_v1_363_olivia-salazar");
+    oliviaState.cardInstances[oliviaId] = { ...oliviaState.cardInstances[oliviaId]!, faceup: true, rezzed: true };
+    oliviaState = apply(oliviaState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    oliviaState = apply(oliviaState, "runner", (action) => action.type === "access_card");
+    oliviaState = apply(oliviaState, "runner", (action) => action.type === "steal_agenda" && action.payload?.v1919UpgradeAbility === "olivia_salazar_steal_cost");
+    expect(oliviaState.runner.scoreArea).not.toContain(oliviaCostAgendaId);
+    expect(oliviaState.runner.scoreArea).toContain(accessedAgendaId);
+    expect(oliviaState.specialZones?.removedFromGame).toContain(oliviaCostAgendaId);
+    expect(oliviaState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "steal_agenda",
+      v1919UpgradeAbility: "olivia_salazar_steal_cost",
+      agendaPointCostPaid: 1,
+      specialZoneReason: "v1919_olivia_salazar"
+    });
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {
@@ -9123,6 +9178,19 @@ function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInsta
   removeEverywhere(state, id);
   state.runner.grip.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function scoreRunnerAgendaForTest(state: GameState, definitionId: string): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) => card.definitionId === definitionId && !state.runner.scoreArea.includes(id) && !state.corp.scoreArea.includes(id)
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing unscored ${definitionId}`);
+  const id = entry[0];
+  removeEverywhere(state, id);
+  state.runner.scoreArea.push(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "scoreArea" }, faceup: true, rezzed: true };
   return id;
 }
 

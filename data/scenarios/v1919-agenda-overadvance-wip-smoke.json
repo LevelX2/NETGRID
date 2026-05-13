@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.scenario.v1",
   "scenarioId": "v1919-agenda-overadvance-wip-smoke",
   "release": "V1.9.19",
-  "status": "wip_agenda_core_engine_guard",
+  "status": "wip_agenda_core_runner_cost_engine_guard",
   "coversCards": [
     "onr_v1_025_fait-accompli",
     "onr_v1_078_arasaka-owns-you",
@@ -35,10 +35,11 @@
     "Scored Artificial Security Directors and Genetics-Visionary Acquisition expose only a side-safe R&D-top reveal action.",
     "Chicago Branch and Vapor Ops expose rezzed Power-Counter LegalActions, Information Laundering exposes a rezzed economy LegalAction, and Experimental AI resolves an access-window installed-program ambush.",
     "Project Consultants, Falsified-Transactions Expert, Management Shake-Up, Silver Lining Recovery Protocol, Systematic Layoffs and Team Restructuring have explicit play_operation resolver paths for advancement, counters, economy and public forfeit costs.",
-    "Corprunner's Shattered Remains, Vacant Soulkiller and Virus Test Site resolve hardware-trash, core-damage and net-damage access ambushes through legal access windows."
+    "Corprunner's Shattered Remains, Vacant Soulkiller and Virus Test Site resolve hardware-trash, core-damage and net-damage access ambushes through legal access windows.",
+    "Fait Accompli, Arasaka Owns You and Olivia Salazar resolve Runner agenda/counter/cost paths through explicit LegalActions with public cost payloads where required."
   ],
   "verification": {
-    "engine": "pass: 257 tests",
+    "engine": "pass: 258 tests",
     "catalog": "pass: 33 tests",
     "typecheck": "pass"
   },
@@ -49,6 +50,7 @@
     "agendaCoreEngineCovered": true,
     "assetCounterEconomyAmbushCovered": true,
     "operationResolverEdgesCovered": true,
-    "remainingRuntimeFamilies": ["runner_event_program_edges", "olivia_salazar_upgrade_edge", "final_data_ai_artifacts", "release_promotion"]
+    "runnerAgendaCostEdgesCovered": true,
+    "remainingRuntimeFamilies": ["final_data_ai_artifacts", "release_promotion"]
   }
 }
