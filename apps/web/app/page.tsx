@@ -153,6 +153,7 @@ const CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
 const LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
 const CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
 const LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
+const CARD_PREVIEW_COLLAPSED_STORAGE_PREFIX = "netgrid.cardPreviewCollapsed.v1";
 const AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
 const LEGACY_AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
 const MATCH_START_SETTINGS_STORAGE_KEY = "netgrid.matchStartSettings.v1";
@@ -1461,6 +1462,12 @@ export default function Page() {
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
+  const cardPreviewCollapsedStorageKey = session ? cardPreviewCollapsedStorageKeyFor(session.matchId, session.side) : null;
+
+  const updateCardPreviewCollapsed = (collapsed: boolean) => {
+    setCardPreviewCollapsed(collapsed);
+    if (cardPreviewCollapsedStorageKey) window.localStorage.setItem(cardPreviewCollapsedStorageKey, collapsed ? "true" : "false");
+  };
 
   useEffect(() => {
     sessionRef.current = session;
@@ -1616,6 +1623,20 @@ export default function Page() {
     if (!cardDisplayModeLoaded) return;
     window.localStorage.setItem(CARD_DISPLAY_MODE_STORAGE_KEY, cardDisplayMode);
   }, [cardDisplayModeLoaded, cardDisplayMode]);
+
+  useEffect(() => {
+    if (!cardPreviewCollapsedStorageKey) {
+      setCardPreviewCollapsed(false);
+      return;
+    }
+    const stored = window.localStorage.getItem(cardPreviewCollapsedStorageKey);
+    if (stored === "true" || stored === "false") {
+      setCardPreviewCollapsed(stored === "true");
+      return;
+    }
+    if (stored !== null) window.localStorage.removeItem(cardPreviewCollapsedStorageKey);
+    setCardPreviewCollapsed(false);
+  }, [cardPreviewCollapsedStorageKey]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(AI_PACING_MODE_STORAGE_KEY, LEGACY_AI_PACING_MODE_STORAGE_KEY);
@@ -4264,7 +4285,7 @@ export default function Page() {
                 displayMode={cardDisplayMode}
                 onDisplayMode={setCardDisplayMode}
                 collapsed={cardPreviewCollapsed}
-                onCollapsed={setCardPreviewCollapsed}
+                onCollapsed={updateCardPreviewCollapsed}
                 {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})}
               />
               <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocusCard={focusCard} />
@@ -8970,6 +8991,10 @@ function formatLobbyTime(value: string | undefined): string {
 function shortMatchId(matchId: string): string {
   const normalized = matchId.replace(/^match_/, "");
   return normalized.length > 10 ? normalized.slice(0, 10) : normalized;
+}
+
+function cardPreviewCollapsedStorageKeyFor(matchId: string, side: Side): string {
+  return `${CARD_PREVIEW_COLLAPSED_STORAGE_PREFIX}.${matchId}.${side}`;
 }
 
 function openMatchAgeLabel(ageSeconds: number): string {
