@@ -1917,6 +1917,18 @@ describe("catalog import and status logic", () => {
       }
     }
   });
+
+  it("keeps V1.9.22 AI promotion artifacts absent until the completion gate", () => {
+    const promotionArtifacts = [
+      "../../../data/ai/ai-card-hints-deck-legal-v1922.json",
+      "../../../data/manifests/deck-legal-ai-approval-v1922-manifest.json",
+      "../../../data/scenarios/ai-deck-legal-v1922-smokes.json"
+    ];
+
+    for (const artifactPath of promotionArtifacts) {
+      expect(existsSync(new URL(artifactPath, import.meta.url)), artifactPath).toBe(false);
+    }
+  });
 });
 
 describe("V1.3.1 Card Data Pipeline v2", () => {

@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 18:35 CEST
+- Ergebnis: V1.9.22 AI-Promotion-Artefakt-Abwesenheit als Catalog-Guard ergaenzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/catalog/src/index.test.ts` prueft jetzt, dass `data/ai/ai-card-hints-deck-legal-v1922.json`, `data/manifests/deck-legal-ai-approval-v1922-manifest.json` und `data/scenarios/ai-deck-legal-v1922-smokes.json` bis zum Completion-Gate nicht existieren. Keine Karte wurde release- oder AI-promotet.
+- Tests: `catalog` pass (39).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: ai artifact absence guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 18:30 CEST
 - Ergebnis: V1.9.22 Resolver-Teilnotizen ins Contract-Inventar uebernommen; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
