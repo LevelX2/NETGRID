@@ -19,6 +19,8 @@ Status: planning/catalog WIP
 - `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` dokumentiert fuer die zehn Runner-Event-Zielkarten, dass die vorhandenen lokalen Kernnotizen noch keinen vollstaendigen `play_event`-Resolververtrag liefern; der bestehende No-`play_event`-Guard bleibt deshalb korrekt.
 - Ein Engine-Guard bestaetigt fuer 14/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind.
 - `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` dokumentiert fuer die 14 Corp-Longtailkarten, dass Corporate War und Political Overthrow zwar lokale Kernnotizen haben, aber noch keine vollstaendigen Zahlen-/Timing-/Kostenvertraege; alle weiteren Corp-Zielkarten haben aktuell nur Typoberflaechen.
+- Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Eventkarten mit No-`play_event`-Guard und 28 geplante No-Promotion-Karten ausweisen und keine Catalog- oder AI-Promotion behaupten.
+- Ein AI-Paket-Guard bestaetigt, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate ausserhalb von `ai_supported`, `human_playable` und `deck_legal` bleiben.
 - Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
 
 ## Gate
@@ -34,8 +36,8 @@ Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fu
 
 - JSON-Validation fuer `data/**/*.json`: pass, 302 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 278 Tests inkl. 9/9 Runner-Hardware-Install-Smokes, Runner-Event-No-Promotion-Guard, Runner-Programm-No-Playable-Runtime-Guard, Runner-Programm-No-Install-/Pump-/Break-LegalAction-Guard und Corp-Longtail-No-Playable-Runtime-Guard.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 36 Tests.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 37 Tests inkl. V1.9.22-WIP-Artefakt-Alignment-Guard.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests inkl. V1.9.22-AI-No-Promotion-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 77 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.

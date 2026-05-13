@@ -42,6 +42,7 @@ import cardImplementationManifest1918Data from "../../../data/manifests/card-imp
 import cardImplementationManifest1919Data from "../../../data/manifests/card-implementation-manifest-1.9.19.json";
 import cardImplementationManifest1920Data from "../../../data/manifests/card-implementation-manifest-1.9.20.json";
 import cardImplementationManifest1921Data from "../../../data/manifests/card-implementation-manifest-1.9.21.json";
+import cardImplementationManifest1922Data from "../../../data/manifests/card-implementation-manifest-1.9.22.json";
 import cardSupportManifest131Data from "../../../data/manifests/card-support-manifest-1.3.1.json";
 import kingOfTheRoadManifestData from "../../../data/manifests/king-of-the-road-ai-approval-manifest.json";
 import deckLegalBatchAManifestData from "../../../data/manifests/deck-legal-ai-approval-batch-a-manifest.json";
@@ -97,6 +98,7 @@ import v1918ReleaseScenarioData from "../../../data/scenarios/v1918-generic-upgr
 import v1919ReleaseScenarioData from "../../../data/scenarios/v1919-agenda-overadvance-release-smoke.json";
 import v1920ReleaseScenarioData from "../../../data/scenarios/v1920-global-modifier-special-state-release-smoke.json";
 import v1921ReleaseScenarioData from "../../../data/scenarios/v1921-deterministic-random-release-smoke.json";
+import v1922WipScenarioData from "../../../data/scenarios/v1922-per-card-longtail-wip-smoke.json";
 import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.3.1.json";
 import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
 import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
@@ -113,6 +115,7 @@ import v1918MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1
 import v1919MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.19.json";
 import v1920MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.20.json";
 import v1921MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.21.json";
+import v1922MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.22.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
 import {
   assertPipelinePayloadSafe,
@@ -1801,6 +1804,63 @@ describe("catalog import and status logic", () => {
     }
 
     expect(JSON.stringify({ deckLegalV1921AiHintsData, deckLegalV1921ManifestData, deckLegalV1921ScenarioData, v1921ReleaseScenarioData, v1921MechanicsCoverageData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
+    );
+  });
+
+  it("keeps the V1.9.22 longtail WIP artifacts aligned without catalog or AI promotion", () => {
+    const cardsById = createRuntimeCardsById();
+    const manifestCards = cardImplementationManifest1922Data.cards as Array<{
+      cardCode: string;
+      releaseStatus: string;
+      aiSupported: boolean;
+      resolverFamily: string;
+      coveredSmokes: string[];
+    }>;
+    const manifestIds = manifestCards.map((card) => card.cardCode);
+    const hardwareCards = manifestCards.filter((card) => card.resolverFamily.includes("install_hardware_memory_surface"));
+    const eventCards = manifestCards.filter((card) => card.resolverFamily.includes("play_event_surface"));
+    const plannedCards = manifestCards.filter((card) => card.releaseStatus === "planned_no_promotion");
+
+    expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
+    expect(manifestIds.sort()).toEqual([...ONR_V1_9_22_WIP_CARD_IDS].sort());
+    expect(v1922WipScenarioData.coversCards.sort()).toEqual([...ONR_V1_9_22_WIP_CARD_IDS].sort());
+    expect(cardImplementationManifest1922Data.status).toBe("runtime_wip_no_promotion");
+    expect(cardImplementationManifest1922Data.gateAssertions.catalogPromotionPending).toBe(true);
+    expect(cardImplementationManifest1922Data.gateAssertions.aiPromotionPending).toBe(true);
+    expect(v1922WipScenarioData.status).toBe("runtime_wip_no_promotion");
+    expect(v1922WipScenarioData.completionGate.catalogPromoted).toBe(false);
+    expect(v1922WipScenarioData.completionGate.aiPromoted).toBe(false);
+    expect(v1922WipScenarioData.completionGate.releaseDone).toBe(false);
+    expect(v1922MechanicsCoverageData.status).toBe("runtime_wip_no_promotion");
+    expect(v1922MechanicsCoverageData.gateAssertions.catalogPromotionPending).toBe(true);
+    expect(v1922MechanicsCoverageData.gateAssertions.aiPromotionPending).toBe(true);
+
+    expect(hardwareCards).toHaveLength(9);
+    for (const card of hardwareCards) {
+      expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
+      expect(card.aiSupported, card.cardCode).toBe(false);
+      expect(card.coveredSmokes, card.cardCode).toEqual(
+        expect.arrayContaining(["install_hardware_legal_action", "wrong_side_revalidation", "stale_state_revalidation", "public_payload_visibility", "replay_statehash"])
+      );
+    }
+
+    expect(eventCards).toHaveLength(10);
+    for (const card of eventCards) {
+      expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
+      expect(card.aiSupported, card.cardCode).toBe(false);
+      expect(card.coveredSmokes, card.cardCode).toContain("no_play_event_promotion_guard");
+    }
+
+    expect(plannedCards).toHaveLength(28);
+    for (const card of manifestCards) {
+      expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
+      expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);
+      expect(cardsById[card.cardCode]?.statuses.ai_supported ?? false, card.cardCode).toBe(false);
+      expect(card.aiSupported, card.cardCode).toBe(false);
+    }
+
+    expect(JSON.stringify({ cardImplementationManifest1922Data, v1922WipScenarioData, v1922MechanicsCoverageData })).not.toMatch(
       /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
     );
   });

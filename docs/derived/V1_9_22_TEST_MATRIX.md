@@ -13,9 +13,10 @@ Status: planned
 | LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions inkl. Wrong-Side-/Stale-Revalidation gruen |
 | Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads und PlayerViews gruen |
 | Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash gruen |
-| AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | Folgearbeit |
+| AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; AI-Hints/-Smokes fuer Promotion bleiben Folgearbeit |
+| WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer Hardware-LegalAction-/Event-/Program-/Corp-No-Promotion-WIP: JSON 302, catalog 36, engine 277; breiter Verify vorher engine 275, ai 85, server 72, web 77, typecheck, test, lint, build |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer WIP-Artefakt-/AI-No-Promotion-Guard: JSON 302, catalog 37, engine 278, ai 86, server 72, web 77, typecheck, test, lint, build |
 
 ## Mindestchecks im ersten WIP
 
@@ -41,4 +42,14 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+
+## WIP-Artefakt-Alignment-Guard 2026-05-13 18:10 CEST
+
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 37 Tests.
+- Zusatzabdeckung: `data/manifests/card-implementation-manifest-1.9.22.json`, `data/scenarios/v1922-per-card-longtail-wip-smoke.json` und `data/rules/mechanics-coverage-1.9.22.json` muessen exakt die 47 Karten aus `ONR_V1_9_22_WIP_CARD_IDS` abdecken.
+- Zusatzabdeckung: neun Hardwarekarten muessen Install-Smokes, zehn Eventkarten den No-`play_event`-Guard und 28 Program-/Corp-Karten `planned_no_promotion` ausweisen.
+- Zusatzabdeckung: Catalog-/AI-Promotion bleibt in Manifest, Szenario, Coverage und Runtime-Catalog fuer alle 47 Karten false.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 278 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests inkl. Guard, dass 47/47 V1.9.22-WIP-Karten nicht `ai_supported`, `human_playable` oder `deck_legal` sind.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 

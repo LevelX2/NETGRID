@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 18:20 CEST
+- Ergebnis: V1.9.22 WIP-Artefakt-/AI-No-Promotion-Guards ergaenzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/catalog/src/index.test.ts` prueft jetzt, dass V1.9.22-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-WIP-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Eventkarten mit No-`play_event`-Guard und 28 geplante No-Promotion-Karten ausweisen und keine Catalog-/AI-Promotion behaupten. `packages/ai/src/index.test.ts` schuetzt zusaetzlich, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate nicht `ai_supported`, `human_playable` oder `deck_legal` sind. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (37), `engine` pass (278), `ai` pass (86), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: artifact ai no-promotion guards`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 18:00 CEST
 - Ergebnis: V1.9.22 Runner-Programm-No-LegalAction-Guard, Runner-Event-Readiness und Corp-Longtail-Readiness dokumentiert; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
