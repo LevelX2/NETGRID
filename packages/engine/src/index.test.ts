@@ -4210,7 +4210,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
     let state = toRunnerTurn(v1911HiddenZoneGame("v1911-installed-helpers"));
     state.runner.credits = 20;
-    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    installRunnerResourceForTest(state, "onr_v1_169_n-e-t-o");
     installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
     const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
 
@@ -4234,6 +4234,41 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     state = apply(state, "runner", (action) => action.type === "gain_credit" && action.payload?.v1911HiddenZoneAbility === "arrange_stack_top2");
     expect(state.pendingChoice?.source).toContain("v1911.arrange_stack_top2");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  });
+
+  it("uses Self-Modifying Code during an ICE encounter to trash itself and install the chosen program", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-self-modifying-code"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const smcId = installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    state.runner.memoryUsed = 2;
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    expect(getLegalActions(state, "runner").some((action) => action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program")).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program");
+    expect(state.runner.heap).toContain(smcId);
+    expect(state.pendingChoice?.source).toContain("v1911.search_stack_install");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.runner.grip).not.toContain(targetProgramId);
+    expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "search_stack",
+      searchReveal: "public",
+      searchDestination: "install_program",
+      searchShuffleAfter: true,
+      installSucceeded: true,
+      cardDefinitionId: "simple_decoder"
+    });
   });
 
   it("uses scored Corporate Downsizing to reveal only the R&D top definition", () => {

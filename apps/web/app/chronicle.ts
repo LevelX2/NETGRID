@@ -662,6 +662,7 @@ function cardCountText(amount: number): string {
 }
 
 function searchDestinationLabel(destination: string | undefined): string {
+  if (destination === "install_program") return "das Rig";
   if (destination === "grip") return "den Grip";
   return "die Hand";
 }

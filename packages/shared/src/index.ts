@@ -317,7 +317,7 @@ export type ChoiceOption = {
 
 export type StackSearchResolution = {
   reveal: "public" | "hidden";
-  destination: "grip";
+  destination: "grip" | "install_program";
   shuffleAfter: boolean;
   publicRevealKind?: string;
 };
@@ -1679,9 +1679,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 0,
-    memoryCost: 1,
-    rulesText: "Installed Hidden-Zone helper: search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+    installCost: 2,
+    memoryCost: 2,
+    rulesText:
+      "Trash: Search your stack for a program and install it, if you can. Shuffle your stack afterwards. You may use this ability during an encounter with a piece of ice.",
     mechanics: ["install_program", "memory", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({

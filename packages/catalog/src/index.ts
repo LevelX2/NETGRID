@@ -1826,7 +1826,10 @@ const ONR_V1_9_9_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_353_chimera": "When accessed, Runner trashes one installed daemon program."
 };
 
-const ONR_V1_9_11_TEXT_OVERRIDES: Partial<Record<string, string>> = {};
+const ONR_V1_9_11_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_059_self-modifying-code":
+    "Trash: Search your stack for a program and install it, if you can. Shuffle your stack afterwards. You may use this ability during an encounter with a piece of ice."
+};
 
 const ONR_V1_9_12_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_009_butcher-boy": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",

@@ -2280,7 +2280,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
   if (hasClicks) {
     for (const cardId of [...state.runner.rig.programs, ...state.runner.rig.resources].slice().sort()) {
       const definition = definitionFor(state, cardId);
-      if ((definition.id === SELF_MODIFYING_CODE_ID || definition.id === AUJOURD_OUI_ID || definition.id === NETO_ID) && state.runner.stack.some((id) => definitionFor(state, id).type === "program")) {
+      if ((definition.id === AUJOURD_OUI_ID || definition.id === NETO_ID) && state.runner.stack.some((id) => definitionFor(state, id).type === "program")) {
         actions.push(
           action(
             state,
@@ -2914,6 +2914,26 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   const iceDefinition = definitionFor(state, run.encounteredIceId);
   const encounteredIceStrength = iceStrengthFor(state, encounteredIceId);
   const actions: LegalAction[] = [];
+  for (const cardId of state.runner.rig.programs.slice().sort()) {
+    const definition = definitionFor(state, cardId);
+    if (
+      definition.id === SELF_MODIFYING_CODE_ID &&
+      state.runner.credits >= 2 &&
+      state.runner.stack.some((id) => definitionFor(state, id).type === "program")
+    ) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "trigger_ability",
+          `${definition.title}: Programm aus Stack installieren`,
+          cardId,
+          [{ credits: 2 }],
+          { cardId, v1911HiddenZoneAbility: "self_modifying_code_install_program", trashOnUse: true }
+        )
+      );
+    }
+  }
   for (const breakerId of state.runner.rig.programs) {
     const breaker = definitionFor(state, breakerId);
     if (!runnerCanUseBreakerOnCurrentFort(state, breakerId)) continue;
@@ -3733,6 +3753,10 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       endTurn(state, legalAction.side, legalAction);
       return;
     case "trigger_ability":
+      if (legalAction.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program") {
+        resolveSelfModifyingCodeInstallProgram(state, legalAction);
+        return;
+      }
       if (legalAction.payload?.resourceAbility === "broker_load_credits" || legalAction.payload?.resourceAbility === "broker_take_credits") {
         spendClick(state, "runner");
         resolveBrokerAbility(state, legalAction);
@@ -7242,6 +7266,15 @@ function startRunnerStackSearchRevealChoice(state: GameState, sourcePrefix = "v0
   });
 }
 
+function startSelfModifyingCodeSearchChoice(state: GameState): void {
+  startRunnerStackSearchChoice(state, "v1911.search_stack_install", "v1911_self_modifying_code_install", {
+    reveal: "public",
+    destination: "install_program",
+    shuffleAfter: true,
+    publicRevealKind: "search_stack_program"
+  });
+}
+
 function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
   const choice = state.pendingChoice;
   if (!choice) throw new Error("Es ist keine Search-Choice offen.");
@@ -7249,9 +7282,14 @@ function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalActi
   if (!cardId || !state.runner.stack.includes(cardId)) throw new Error("Die gewaehlte Karte liegt nicht im Stack.");
   if (definitionFor(state, cardId).type !== "program") throw new Error("Nur Programme sind in dieser Search-Harness legal.");
   const resolution = choice.stackSearchResolution ?? { reveal: "public", destination: "grip", shuffleAfter: true, publicRevealKind: "search_stack_program" };
-  removeFromAllZones(state, cardId);
-  state.runner.grip.push(cardId);
-  state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
+  let installSucceeded = false;
+  if (resolution.destination === "install_program") {
+    installSucceeded = tryInstallRunnerProgramFromStack(state, cardId);
+  } else {
+    removeFromAllZones(state, cardId);
+    state.runner.grip.push(cardId);
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
+  }
   if (resolution.shuffleAfter) shuffleRunnerStack(state, `v098_search_stack:${choice.choiceId}:shuffle`);
   delete state.pendingChoice;
   legalAction.payload = {
@@ -7261,6 +7299,7 @@ function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalActi
     searchReveal: resolution.reveal,
     searchDestination: resolution.destination,
     searchShuffleAfter: resolution.shuffleAfter,
+    ...(resolution.destination === "install_program" ? { installSucceeded } : {}),
     ...(resolution.reveal === "public" ? { publicRevealDefinitionId: definitionFor(state, cardId).id } : {}),
     ...(resolution.reveal === "public" && resolution.publicRevealKind ? { publicRevealKind: resolution.publicRevealKind } : {}),
     selectedCount: 1,
@@ -7679,6 +7718,50 @@ function resolveV1911RunnerHiddenZoneAbility(state: GameState, legalAction: Lega
     return;
   }
   throw new Error("Unbekannte V1.9.11-Hidden-Zone-Ability.");
+}
+
+function resolveSelfModifyingCodeInstallProgram(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Self-Modifying Code nutzen.");
+  if (state.timingPoint !== "run.encounter_ice" || !state.run?.encounteredIceId) {
+    throw new Error("Self-Modifying Code darf nur während eines ICE-Encounters genutzt werden.");
+  }
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.programs.includes(sourceCardId)) throw new Error("Self-Modifying Code ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== SELF_MODIFYING_CODE_ID) throw new Error("Diese Fähigkeit passt nicht zu Self-Modifying Code.");
+  if (!state.runner.stack.some((id) => definitionFor(state, id).type === "program")) throw new Error("Es liegt kein Programm im Stack.");
+
+  spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 2);
+  trashRunnerInstalledProgram(state, sourceCardId);
+  startSelfModifyingCodeSearchChoice(state);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_self_modifying_code_search_install",
+    trashedCardDefinitionId: SELF_MODIFYING_CODE_ID
+  };
+}
+
+function tryInstallRunnerProgramFromStack(state: GameState, cardId: CardInstanceId): boolean {
+  if (!state.runner.stack.includes(cardId)) return false;
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program") return false;
+  if (isUniqueCard(definition) && hasInstalledUniqueCardDefinition(state, "runner", definition.id)) return false;
+  if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0)) return false;
+  if (state.runner.memoryUsed + (definition.memoryCost ?? 0) > state.runner.memoryLimit) return false;
+
+  spendRunnerInstallCredits(state, definition.installCost ?? 0, definition.type);
+  removeFromAllZones(state, cardId);
+  state.runner.rig.programs.push(cardId);
+  state.runner.memoryUsed += definition.memoryCost ?? 0;
+  if ((definition.recurringCredits ?? 0) > 0) setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
+  if (definition.mechanics.includes("virus")) addCardCounter(state, cardId, "virus", 1);
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" }
+  };
+  return true;
 }
 
 function resolveV1911CorporateDownsizing(state: GameState, legalAction: LegalAction): void {
@@ -8318,6 +8401,7 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.searchReveal === "string") context.searchReveal = legalAction.payload.searchReveal;
     if (typeof legalAction.payload.searchDestination === "string") context.searchDestination = legalAction.payload.searchDestination;
     if (typeof legalAction.payload.searchShuffleAfter === "boolean") context.searchShuffleAfter = legalAction.payload.searchShuffleAfter;
+    if (typeof legalAction.payload.installSucceeded === "boolean") context.installSucceeded = legalAction.payload.installSucceeded;
     if (typeof legalAction.payload.archivesRevealCount === "number") context.archivesRevealCount = legalAction.payload.archivesRevealCount;
     context.redactedKind = "hidden_zone";
   }
