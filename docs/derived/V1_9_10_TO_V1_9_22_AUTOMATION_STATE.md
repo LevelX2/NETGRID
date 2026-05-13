@@ -74,10 +74,10 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.18
 - Phase vorher: planned
 - Phase nachher: implementing
-- Umsetzung: Detailplan, Requirements, Generic-Upgrade-/Root-/Server-Spezifikation, Testmatrix und Requirements Review erstellt. Alle 15 V1.9.18-Zielkarten haben WIP-Runtime-Definitionen mit finalen display-only Texten ohne WIP-Präfix. Der Katalog führt `ONR_V1_9_18_WIP_CARD_IDS` als No-Promotion-Guard, ohne die Karten in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` oder AI-Approval aufzunehmen. Crybaby deckt den ersten generischen Upgrade-/Root-Pfad für Corp-Install, Root-Rez, Runner-Access, Trash-on-access, Archives-Visibility und Payload-Redaction ab. WIP-Szenario: `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json`.
-- Tests: JSON-Validation pass fuer 266 `data/**/*.json`; `engine` pass (245), `catalog` pass (32), `typecheck` pass.
+- Umsetzung: Detailplan, Requirements, Generic-Upgrade-/Root-/Server-Spezifikation, Testmatrix und Requirements Review erstellt. Alle 15 V1.9.18-Zielkarten haben WIP-Runtime-Definitionen mit finalen display-only Texten ohne WIP-Präfix. Der Katalog führt `ONR_V1_9_18_WIP_CARD_IDS` als No-Promotion-Guard, ohne die Karten in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` oder AI-Approval aufzunehmen. Crybaby deckt den ersten generischen Upgrade-/Root-Pfad für Corp-Install, Root-Rez, Runner-Access, Trash-on-access, Archives-Visibility und Payload-Redaction ab. Dedicated Response Team und Dieter Esslin decken Access-Ambush-Damage ab; Turbeau Delacroix deckt ein Access-Trace-Fenster mit Corp-/Runner-Bids ab. WIP-Szenario: `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json`.
+- Tests: JSON-Validation pass fuer 266 `data/**/*.json`; `engine` pass (247), `catalog` pass (32), `typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.18: upgrade root server runtime guard`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.18 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil konkrete LegalAction-/applyAction-Abdeckung für Upgrade-/Root-/Grid-/Access-/Ambush-/Trace-/Tag-/Damage-/Counter-Pfade, finale Manifest/Coverage/Scenario-/AI-Artefakte, Full Checks, Final Review und Webclient-Version offen sind.
+- Cursor: V1.9.18 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere LegalAction-/applyAction-Abdeckung für Grid-/Region-, Red-Herrings-Access-, City-Grid-, Counter-, Run-Flow-, Tag-Condition- und Stealth-Pfade, finale Manifest/Coverage/Scenario-/AI-Artefakte, Full Checks, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 12:12 CEST
 - Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten final abgeschlossen; Cursor auf V1.9.18 `planned` gesetzt.

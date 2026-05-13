@@ -206,6 +206,9 @@ const V1917_DISINFECTANT_ID = "onr_v1_319_disinfectant-inc";
 const V1917_SOLO_SQUAD_ID = "onr_v1_342_solo-squad";
 const V1917_SETUP_ID = "onr_v1_340_setup";
 const V1917_TRAP_ID = "onr_v1_345_trap";
+const V1918_DEDICATED_RESPONSE_TEAM_ID = "onr_v1_356_dedicated-response-team";
+const V1918_DIETER_ESSLIN_ID = "onr_v1_357_dieter-esslin";
+const V1918_TURBEAU_DELACROIX_ID = "onr_v1_372_turbeau-delacroix";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -3995,6 +3998,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     state.cardInstances[cardId] = { ...instance, faceup: true };
     resolveAmbushOnAccessFoundation(state, cardId, legalAction);
     resolveV1917AmbushOnAccess(state, cardId, legalAction);
+    resolveV1918UpgradeOnAccess(state, cardId, legalAction);
     resolveV199UpgradeOnAccess(state, cardId, legalAction);
     const definition = definitionFor(state, cardId);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
@@ -4020,6 +4024,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   state.cardInstances[cardId] = { ...instance, faceup: true };
   resolveAmbushOnAccessFoundation(state, cardId, legalAction);
   resolveV1917AmbushOnAccess(state, cardId, legalAction);
+  resolveV1918UpgradeOnAccess(state, cardId, legalAction);
   resolveV199UpgradeOnAccess(state, cardId, legalAction);
   const definition = definitionFor(state, cardId);
   const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
@@ -4079,6 +4084,44 @@ function resolveV1917AmbushOnAccess(state: GameState, cardId: CardInstanceId, le
     hiddenZoneAction: "v1917_access_ambush",
     ambushDefinitionId: definition.id,
     ...(definition.id === V1917_TRAP_ID ? { tagsAdded: 1, runnerTagsAfter: state.runner.tags } : {})
+  };
+}
+
+function resolveV1918UpgradeOnAccess(state: GameState, cardId: CardInstanceId, legalAction: LegalAction): void {
+  const definition = definitionFor(state, cardId);
+  if (definition.id !== V1918_DEDICATED_RESPONSE_TEAM_ID && definition.id !== V1918_DIETER_ESSLIN_ID && definition.id !== V1918_TURBEAU_DELACROIX_ID) return;
+  if (legalAction.side !== "runner" || legalAction.type !== "access_card" || state.run?.accessedCardId !== cardId) {
+    throw new Error("V1.9.18-Upgrade-Ambush darf nur aus einem legalen Access-Fenster ausloesen.");
+  }
+  if (!mustInstance(state.cardInstances, cardId).rezzed) return;
+
+  if (definition.id === V1918_TURBEAU_DELACROIX_ID) {
+    legalAction.payload = { ...(legalAction.payload ?? {}), cardId };
+    startTraceFromOperation(state, definition.id, 3, legalAction);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1918_upgrade_access_trace",
+      ambushDefinitionId: definition.id
+    };
+    return;
+  }
+
+  if (definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID) state.runner.tags += 1;
+  const damageType = definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID ? "meat" : "net";
+  const summary = doDamage(state, {
+    damageId: `v1918.upgrade_access.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
+    damageType,
+    amount: 1,
+    source: definition.id
+  });
+  setDamagePayload(legalAction, summary);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1918_upgrade_access_ambush",
+    ambushDefinitionId: definition.id,
+    ...(definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID ? { tagsAdded: 1, runnerTagsAfter: state.runner.tags } : {})
   };
 }
 

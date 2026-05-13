@@ -5461,6 +5461,80 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     expect(validateGameState(accessState).ok).toBe(true);
   });
+
+  it("resolves V1.9.18 upgrade access ambush damage without public hidden-info leaks", () => {
+    const cases = [
+      { definitionId: "onr_v1_356_dedicated-response-team", damageType: "meat", expectedTagsAdded: 1 },
+      { definitionId: "onr_v1_357_dieter-esslin", damageType: "net", expectedTagsAdded: 0 }
+    ] as const;
+
+    for (const { definitionId, damageType, expectedTagsAdded } of cases) {
+      let state = toRunnerTurn(v1917GenericAssetGame(`v1918-upgrade-access-ambush-${definitionId}`));
+      state.runner.credits = 10;
+      const upgradeId = putCorpRootInRemote(state, definitionId);
+      state.cardInstances[upgradeId] = { ...state.cardInstances[upgradeId]!, faceup: true, rezzed: true };
+      const gripBefore = state.runner.grip.length;
+      const tagsBefore = state.runner.tags;
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+      state = apply(state, "runner", (action) => action.type === "access_card");
+
+      expect(state.run?.accessedCardId).toBe(upgradeId);
+      expect(state.runner.tags).toBe(tagsBefore + expectedTagsAdded);
+      expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 1));
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1918_upgrade_access_ambush",
+        ambushDefinitionId: definitionId,
+        damageResolved: true,
+        damageType,
+        damageAmount: 1
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+      expect(validateGameState(state).ok).toBe(true);
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("starts Turbeau Delacroix through the side-safe access trace window", () => {
+    let state = toRunnerTurn(v1917GenericAssetGame("v1918-turbeau-access-trace"));
+    state.corp.credits = 5;
+    state.runner.credits = 5;
+    const upgradeId = putCorpRootInRemote(state, "onr_v1_372_turbeau-delacroix");
+    state.cardInstances[upgradeId] = { ...state.cardInstances[upgradeId]!, faceup: true, rezzed: true };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 3, sourceDefinitionId: "onr_v1_372_turbeau-delacroix" });
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      traceStarted: true,
+      sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1918_upgrade_access_trace",
+      ambushDefinitionId: "onr_v1_372_turbeau-delacroix"
+    });
+
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+
+    expect(state.runner.tags).toBe(1);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.trace).toBeUndefined();
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {

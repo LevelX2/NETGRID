@@ -10,14 +10,14 @@ Stand: 2026-05-13
 | Displaytext | Kein `WIP` im Runtime-Text; display-only dokumentiert | Engine-WIP-Smoke grün |
 | Generic Upgrade/Root/Server | Install, Rez, Trash-on-access, Serverbindung | Crybaby-Harness für Install, Rez, Access, Trash und Archives-Visibility grün; weitere Karten Folgearbeit |
 | Grid/Region | City-Grid-/Region-Grenzen ohne Seiteneffekt | Folgearbeit |
-| Access/Ambush | Crybaby, Dedicated Response Team, Dieter Esslin, Red Herrings, Turbeau Delacroix | Folgearbeit |
-| Trace/Tags/Damage | Trace-, Tag- und Damage-Fenster side-sicher | Folgearbeit |
+| Access/Ambush | Crybaby, Dedicated Response Team, Dieter Esslin, Red Herrings, Turbeau Delacroix | Dedicated Response Team und Dieter Esslin Access-Ambush-Damage grün; Turbeau Access-Trace grün; Red Herrings Folgearbeit |
+| Trace/Tags/Damage | Trace-, Tag- und Damage-Fenster side-sicher | DRT Meat/Tag, Dieter Net Damage und Turbeau Trace-Bid grün; weitere Karten Folgearbeit |
 | Counter/Run | Counter- und Run-Flow-Pfade | Folgearbeit |
 | Visibility | PlayerView/PublicEvent/Reconnect/Undo ohne Hidden-Info | Folgearbeit |
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Folgearbeit |
 | AI | AI-Hints, AI-Smokes, legaler Fallback | Folgearbeit |
 | Server/Web | Keine Payload-Leaks; Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation, Engine, Catalog und Typecheck grün; Full Checks Folgearbeit |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation, Engine 247, Catalog 32 und Typecheck grün; Full Checks Folgearbeit |
 
 ## Mindestchecks im WIP-Schnitt
 

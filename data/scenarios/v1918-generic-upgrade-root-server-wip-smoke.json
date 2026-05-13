@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.scenario.v1",
   "scenarioId": "v1918-generic-upgrade-root-server-wip-smoke",
   "release": "V1.9.18",
-  "status": "wip_runtime_catalog_guard",
+  "status": "wip_runtime_catalog_guard_with_access_ambush_trace",
   "coversCards": [
     "onr_v1_354_crybaby",
     "onr_v1_355_crystal-palace-station-grid",
@@ -23,12 +23,14 @@
   "assertions": [
     "V1.9.18 WIP runtime definitions exist for all 15 target cards with final display-only text and no WIP prefix.",
     "Crybaby covers the first generic upgrade/root path for Corp install, root rez, Runner access, trash-on-access, Archives visibility and payload redaction.",
+    "Dedicated Response Team and Dieter Esslin cover side-safe access ambush damage windows through legal Runner access.",
+    "Turbeau Delacroix covers a side-safe access trace window with Corp and Runner trace bid choices.",
     "Catalog WIP guard tracks the exact target set.",
     "No V1.9.18 card is release-promoted or AI-approved in this WIP slice.",
     "V1.9.19 Fait Accompli remains outside the V1.9.18 WIP runtime guard."
   ],
   "verification": {
-    "engine": "pass: 245 tests",
+    "engine": "pass: 247 tests",
     "catalog": "pass: 32 tests",
     "typecheck": "pass"
   },
