@@ -17,6 +17,7 @@ Stand: 2026-05-13
 - Main-Office Relocation projiziert nach dem Scoren einen öffentlichen Korp-Handgrößenmodifier in beiden PlayerViews, ohne `state.corp.maxHandSize` als Basiswert zu überschreiben.
 - Loan from Chiba trägt als erster persistenter Sonderzustand öffentliche Recurring-Credit-Counter, die über Turnwechsel deterministisch erneuert werden.
 - Die abgedeckten MRAM-, Action-Economy-, globalen Rez-Kosten-, Handgrößen- und Recurring-State-Pfade haben Replay-/StateHash-Assertions in `packages/engine/src/index.test.ts`.
+- Die abgedeckten Action-Economy-, globalen Rez-Kosten-, Handgrößen- und Recurring-State-Pfade prüfen zusätzlich, dass PublicEvents und Runner-Gegner-Views keine verdeckten HQ/R&D-Identitäten oder private Payload-Strukturen leaken.
 - Nicht-promotende AI-Draft-Artefakte sind vorbereitet: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json`. Alle Karten bleiben darin `hinted_only`, nicht `ai_supported`.
 - Es wurden noch keine Runtime-, AI- oder Web-Promotionen vorgenommen.
 
@@ -27,7 +28,7 @@ Stand: 2026-05-13
 
 ## Nächster Schnitt
 
-Weitere Kartenpfade, Visibility-Lücken, finale AI-Smokes, Release-Promotion und Final Review nachziehen.
+Weitere Kartenpfade, verbleibende Visibility-Lücken, finale AI-Smokes, Release-Promotion und Final Review nachziehen.
 
 ## Verifikation
 

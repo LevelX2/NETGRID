@@ -23,12 +23,13 @@
       "label": "Persistente Sonderzustaende",
       "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Loan from Chiba deckt den ersten installierten persistenten Recurring-Credit-Zustand mit Refresh ueber Turnwechsel und replay-stabilem StateHash ab.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Loan from Chiba deckt den ersten installierten persistenten Recurring-Credit-Zustand mit Refresh ueber Turnwechsel, side-sicheren PublicEvents und replay-stabilem StateHash ab.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
         "loan_from_chiba_recurring_state_smoke",
-        "loan_from_chiba_replay_statehash_smoke"
+        "loan_from_chiba_replay_statehash_smoke",
+        "loan_from_chiba_visibility_smoke"
       ]
     },
     {
@@ -36,7 +37,7 @@
       "label": "Handlimit, MU und Action Economy",
       "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; MRAM-Hardware deckt den ersten legalen MU-Installationspfad ab, Remote Facility den ersten rezzed Action-Economy-Assetpfad und Main-Office Relocation den ersten scored-Agenda-Handlimitmodifier, jeweils mit replay-stabilem StateHash.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; MRAM-Hardware deckt den ersten legalen MU-Installationspfad ab, Remote Facility den ersten rezzed Action-Economy-Assetpfad und Main-Office Relocation den ersten scored-Agenda-Handlimitmodifier, jeweils mit side-sicheren Views/PublicEvents und replay-stabilem StateHash.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
@@ -45,7 +46,9 @@
         "main_office_handlimit_smoke",
         "mram_memory_replay_statehash_smoke",
         "action_economy_asset_replay_statehash_smoke",
-        "main_office_handlimit_replay_statehash_smoke"
+        "main_office_handlimit_replay_statehash_smoke",
+        "action_economy_asset_visibility_smoke",
+        "main_office_handlimit_visibility_smoke"
       ]
     },
     {
@@ -53,12 +56,13 @@
       "label": "Globale statische Modifier",
       "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Fortress Architects deckt den ersten rezzed globalen ICE-Rez-Kostenmodifier aus sichtbarer Root-Quelle mit replay-stabilem StateHash ab.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Fortress Architects deckt den ersten rezzed globalen ICE-Rez-Kostenmodifier aus sichtbarer Root-Quelle mit side-sicherem PublicEvent und replay-stabilem StateHash ab.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
         "fortress_architects_ice_rez_cost_smoke",
-        "fortress_architects_replay_statehash_smoke"
+        "fortress_architects_replay_statehash_smoke",
+        "fortress_architects_visibility_smoke"
       ]
     }
   ],

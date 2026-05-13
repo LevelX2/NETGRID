@@ -12,7 +12,7 @@ Stand: 2026-05-13
 | Action Economy | Click-/Action-Modifikatoren nur aus sichtbaren legalen Quellen | Remote-Facility/Nevinyrral/Pacifica-Assetpfad grün; weitere Action-Familien Folgearbeit |
 | Globale Modifier | Layering, Quellen und Revalidierung | Fortress-Architects-ICE-Rez-Kostenpfad grün; weitere Modifier Folgearbeit |
 | Persistente Sonderzustände | Quelle, Dauer, Ablauf, PublicEvent-Sicherheit | Loan-from-Chiba-Recurring-State grün; weitere Sonderzustände Folgearbeit |
-| Visibility | Keine Hidden-Info-Leaks über Modifier, Reconnect, Undo oder Replay | Folgearbeit |
+| Visibility | Keine Hidden-Info-Leaks über Modifier, Reconnect, Undo oder Replay | Abgedeckte Action-Economy-, Rez-Kosten-, Handlimit- und Recurring-State-Pfade grün; Reconnect/Undo und weitere Effektfamilien Folgearbeit |
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Abgedeckte MRAM-, Action-Economy-, Rez-Kosten-, Handlimit- und Recurring-State-Pfade grün; weitere Effektfamilien Folgearbeit |
 | AI | Hints, Smokes, legaler Fallback | Nicht-promotende Draft-Hints/-Smokes angelegt; finale `ai_supported`-Promotion Folgearbeit |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |

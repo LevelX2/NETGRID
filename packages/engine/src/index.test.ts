@@ -4484,6 +4484,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       gainedActions: 2,
       corpClicksAfter: clicksBefore + 1
     });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/);
+    expect(getPlayerView(state, "runner").opponent.handCount).toBe(state.corp.hq.length);
+    expect(JSON.stringify(getPlayerView(state, "runner").opponent)).not.toContain("Simple Economy Operation");
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -4513,6 +4516,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const wallRez = mustAction(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_232_crystal-wall");
     expect(wallRez.costs[0]?.credits).toBe(3);
     state = apply(state, "corp", (action) => action.actionId === wallRez.actionId);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -4545,6 +4550,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.corp.maxHandSize).toBe(5);
     expect(getPlayerView(state, "corp").own.maxHandSize).toBe(6);
     expect(getPlayerView(state, "runner").opponent.maxHandSize).toBe(6);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Economy Operation"/);
+    expect(getPlayerView(state, "runner").opponent.handCount).toBe(state.corp.hq.length);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -4582,6 +4589,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       state = applyChoice(state, "corp", String(state.pendingChoice.options[0]?.id));
     }
     expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Economy Operation"/);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));

@@ -41,6 +41,7 @@
     "Main-Office Relocation projects a scored-agenda Corp handlimit modifier through both PlayerViews without mutating the base hand size.",
     "Loan from Chiba keeps and refreshes public recurring-credit state across turn transitions.",
     "Covered MRAM, action-economy, global rez-cost, handlimit and recurring-state paths replay deterministically and reproduce final StateHash.",
+    "Covered action-economy, global rez-cost, handlimit and recurring-state events do not expose hidden HQ/R&D card identities or private payload structures.",
     "No V1.9.20 card is release-promoted or AI-approved in this WIP slice.",
     "V1.9.21 AI Boon remains outside the V1.9.20 WIP runtime guard.",
     "AI, full release promotion and final review remain follow-up work."

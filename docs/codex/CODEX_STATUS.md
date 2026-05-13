@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.20-Visibility-Schnitt vom 2026-05-13 15:15 CEST: Die abgedeckten Action-Economy-, globalen Rez-Kosten-, Handgrößen- und Recurring-State-Pfade prüfen jetzt zusätzlich, dass PublicEvents und Runner-Gegner-Views keine verdeckten HQ/R&D-Identitäten oder private Payload-Strukturen leaken. Mechanics-Coverage, WIP-Smoke, Testmatrix und Implementation Review sind nachgezogen. Verifikation: JSON-Validation 285 und `engine` 264 grün; keine Runtime-/AI-/Web-Promotion.
+
 V1.9.20-Replay-StateHash-Schnitt vom 2026-05-13 15:13 CEST: Die bereits implementierten MRAM-, Action-Economy-, globalen Rez-Kosten-, Handgrößen- und Recurring-State-Pfade haben jetzt direkte Replay-/StateHash-Assertions in `packages/engine/src/index.test.ts`. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix und Implementation Review markieren die Replay-Stabilität der abgedeckten Smokes. Verifikation: JSON-Validation 285, `catalog` 34, `engine` 264 und `typecheck` grün; keine Runtime-/AI-/Web-Promotion.
 
 V1.9.20-AI-Draft und Post-AI-Verify vom 2026-05-13 15:07 CEST: Nicht-promotende AI-Draft-Artefakte für den 26er-Scope sind angelegt: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json`. Status bleibt `hinted_only`/`draft_no_ai_promotion`; keine Karte wurde `ai_supported`. Verifikation nach den Draft-Artefakten: JSON-Validation 285, `catalog` 34, `engine` 264, `ai` 85, `server` 72, `web` 76, `typecheck`, `test`, `lint` und `build` grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
