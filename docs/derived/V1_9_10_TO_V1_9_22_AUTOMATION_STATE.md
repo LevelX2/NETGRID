@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.21
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.22
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -68,6 +68,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 15:42 CEST
+- Ergebnis: V1.9.21 Deterministischer Zufall und Wuerfelkarten geplant und als Catalog-WIP begonnen; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Deterministic-Random-Spezifikation, Testmatrix, Requirements Review und Implementation Review erstellt. Der Scope umfasst genau sechs Zielkarten (`AI Boon`, `Boardwalk`, `Playful AI`, `Quest for Cattekin`, `Schlaghund`, `Rio de Janeiro City Grid`). `ONR_V1_9_21_WIP_CARD_IDS` schuetzt die Zielmenge ohne Runtime-/AI-/Web-Promotion.
+- Tests: `catalog` pass (35), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: deterministic random planning guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runtime-WIP, Engine-/Visibility-/Replay-/StateHash-Abdeckung, Daten-/AI-Artefakte, Pflichtchecks, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 15:39 CEST
 - Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende final abgeschlossen; Cursor auf V1.9.21 `planned` gesetzt.

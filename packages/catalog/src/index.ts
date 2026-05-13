@@ -738,6 +738,15 @@ export const ONR_V1_9_20_WIP_CARD_IDS = [
 
 export const ONR_V1_9_20_RELEASE_CARD_IDS = ONR_V1_9_20_WIP_CARD_IDS;
 
+export const ONR_V1_9_21_WIP_CARD_IDS = [
+  "onr_v1_002_ai-boon",
+  "onr_v1_008_boardwalk",
+  "onr_v1_104_playful-ai",
+  "onr_v1_172_quest-for-cattekin",
+  "onr_v1_339_schlaghund",
+  "onr_v1_367_rio-de-janeiro-city-grid"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
