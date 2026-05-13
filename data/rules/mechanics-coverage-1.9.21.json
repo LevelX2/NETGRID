@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.9.21",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.21",
+  "generatedFor": "V1.9.21 Deterministischer Zufall und Wuerfelkarten release gate",
+  "generatedAt": "2026-05-13",
+  "status": "release",
+  "extends": "data/rules/mechanics-coverage-1.9.20.json",
+  "gateAssertions": {
+    "deterministicRandomScopeFrozenToSixCards": true,
+    "catalogWipGuardReady": true,
+    "runtimeDefinitionsReady": true,
+    "engineCovered": "all_target_cards_initial_random_probe",
+    "hiddenInfoSafeForCoveredSmokes": true,
+    "stateHashReplayStableForCoveredSmokes": true,
+    "catalogPromotionPending": false,
+    "aiPromotionPending": false,
+    "noV1922Scope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.random.deterministic_card",
+      "label": "Deterministischer Karten-Zufall",
+      "currentStatus": "implemented_release",
+      "targetGate": "v1.9.21",
+      "currentScopeNote": "Alle sechs Zielkarten haben initiale Asset-/Upgrade-/Runner-Programm-/Event-/Resource-LegalAction-Zufallsprobe-Pfade mit RandomDrawRecords, Visibility, Replay/StateHash sowie finale Catalog- und AI-Promotion.",
+      "coverage": [
+        "scope_guard",
+        "runtime_definitions",
+        "schlaghund_legal_action_random_probe",
+        "rio_city_grid_legal_action_random_probe",
+        "runner_program_legal_action_random_probe",
+        "playful_ai_event_random_probe",
+        "quest_resource_random_probe",
+        "wrong_side_and_stale_revalidation",
+        "public_payload_visibility",
+        "replay_statehash",
+        "catalog_ai_promotion"
+      ]
+    }
+  ],
+  "deferred": []
+}

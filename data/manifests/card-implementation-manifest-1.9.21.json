@@ -1,0 +1,140 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.21",
+  "id": "v1.9.21-deterministic-random-manifest",
+  "status": "release",
+  "extends": "data/manifests/card-implementation-manifest-1.9.20.json",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only",
+  "gateAssertions": {
+    "v1921ScopeFrozenToSixCards": true,
+    "catalogWipGuardReady": true,
+    "runtimeDefinitionsReady": true,
+    "engineCovered": "all_target_cards_initial_random_probe",
+    "stateHashReplayStableForCoveredSmokes": true,
+    "noOfficialAssets": true,
+    "noV1922ScopeExpansion": true,
+    "catalogPromotionPending": false,
+    "aiPromotionPending": false,
+    "allCardsHumanPlayable": true,
+    "allCardsDeckLegal": true,
+    "allCardsAiSupported": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_002_ai-boon",
+      "title": "AI Boon",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "deterministic_random_card_resolver; run_flow_lock_resolver; recurring_pool_start_turn_resolver",
+      "roleTags": [
+        "runner",
+        "program",
+        "random"
+      ],
+      "coveredSmokes": [
+        "installed_program_deterministic_die_probe",
+        "wrong_side_rejection",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "deterministic_random_card_resolver; hidden_zone_search_reveal_reorder_resolver; typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver",
+      "roleTags": [
+        "runner",
+        "program",
+        "random"
+      ],
+      "coveredSmokes": [
+        "installed_program_deterministic_die_probe",
+        "wrong_side_rejection",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_104_playful-ai",
+      "title": "Playful AI",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "generic_asset_node_ability_resolver; deterministic_random_card_resolver",
+      "roleTags": [
+        "runner",
+        "event",
+        "random"
+      ],
+      "coveredSmokes": [
+        "play_event_deterministic_die_probe",
+        "wrong_side_rejection",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_172_quest-for-cattekin",
+      "title": "Quest for Cattekin",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "event_modification_prevention_avoid_resolver; persistent_special_state_resolver; deterministic_random_card_resolver; core_brain_damage_modifier_resolver; hidden_zone_search_reveal_reorder_resolver; recurring_pool_start_turn_resolver; action_economy_handsize_modifier_resolver; damage_event_prevention_resolver",
+      "roleTags": [
+        "runner",
+        "resource",
+        "random"
+      ],
+      "coveredSmokes": [
+        "installed_resource_deterministic_die_probe",
+        "wrong_side_rejection",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_339_schlaghund",
+      "title": "Schlaghund",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "generic_asset_node_ability_resolver; deterministic_random_card_resolver; damage_event_prevention_resolver",
+      "roleTags": [
+        "corp",
+        "asset",
+        "random"
+      ],
+      "coveredSmokes": [
+        "rezzed_asset_deterministic_die_probe",
+        "wrong_side_rejection",
+        "stale_state_rejection",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_367_rio-de-janeiro-city-grid",
+      "title": "Rio de Janeiro City Grid",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "generic_upgrade_root_server_resolver; deterministic_random_card_resolver",
+      "roleTags": [
+        "corp",
+        "upgrade",
+        "random"
+      ],
+      "coveredSmokes": [
+        "rezzed_upgrade_deterministic_server_die_probe",
+        "wrong_side_rejection",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 6,
+    "implementedCardCount": 6,
+    "finalGateCardCount": 6,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 0
+  }
+}

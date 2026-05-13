@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1918-generic-upgrade-root-server-release-smoke",
+  "release": "V1.9.18",
+  "status": "release_promoted",
+  "coversCards": [
+    "onr_v1_354_crybaby",
+    "onr_v1_355_crystal-palace-station-grid",
+    "onr_v1_356_dedicated-response-team",
+    "onr_v1_357_dieter-esslin",
+    "onr_v1_358_dr-dreff",
+    "onr_v1_359_jenny-jett",
+    "onr_v1_361_namatoki-plaza",
+    "onr_v1_362_new-galveston-city-grid",
+    "onr_v1_364_omni-kismet-ph-d",
+    "onr_v1_365_paris-city-grid",
+    "onr_v1_366_red-herrings",
+    "onr_v1_369_singapore-city-grid",
+    "onr_v1_370_tesseract-fort-construction",
+    "onr_v1_372_turbeau-delacroix",
+    "onr_v1_373_twenty-four-hour-surveillance"
+  ],
+  "assertions": [
+    "V1.9.18 runtime definitions exist for all 15 target cards with final display-only text and no WIP prefix.",
+    "Crybaby covers the first generic upgrade/root path for Corp install, root rez, Runner access, trash-on-access, Archives visibility and payload redaction.",
+    "Dedicated Response Team and Dieter Esslin cover side-safe access ambush damage windows through legal Runner access.",
+    "Turbeau Delacroix covers a side-safe access trace window with Corp and Runner trace bid choices.",
+    "Red Herrings covers a server-bound agenda steal tax on legal agenda access.",
+    "V1.9.18 city grids cover server-bound region replacement with older region visibility in Archives.",
+    "Crystal Palace Station Grid and Dr. Dreff cover explicit Power-counter LegalActions for rezzed server upgrades.",
+    "New Galveston City Grid covers a side-safe R&D top reveal from a rezzed city-grid upgrade.",
+    "Paris City Grid covers a rezzed city-grid Trace 2 tag window with bid choices.",
+    "Omni Kismet and Paris City Grid cover tagged-runner condition LegalActions.",
+    "Twenty-Four-Hour Surveillance covers a rezzed server-bound run-start tax payable through Runner run/stealth recurring credits.",
+    "Catalog release guard tracks the exact target set.",
+    "All 15 V1.9.18 cards are release-promoted and AI-approved after the full gate.",
+    "V1.9.19 Fait Accompli remains outside the V1.9.18 release runtime guard."
+  ],
+  "verification": {
+    "engine": "pass: 251 tests",
+    "catalog": "pass: 32 tests",
+    "ai": "pass: 85 tests",
+    "server": "pass: 72 tests",
+    "web": "pass: 76 tests",
+    "typecheck": "pass",
+    "test": "pass",
+    "lint": "pass",
+    "build": "pass with known non-blocking Turbopack NFT warning"
+  },
+  "completionGate": {
+    "releaseDone": true,
+    "catalogPromoted": true,
+    "aiPromoted": true
+  }
+}

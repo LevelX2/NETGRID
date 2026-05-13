@@ -1,0 +1,50 @@
+# V1.9.19 Implementation Review
+
+Status: final
+Stand: 2026-05-13
+
+## Umgesetzter Schnitt
+
+- Detailplan, Requirements, Agenda/Overadvance-Spezifikation, Testmatrix und Requirements Review sind erstellt.
+- `packages/shared/src/index.ts` enthält WIP-Runtime-Definitionen für alle 20 V1.9.19-Zielkarten mit finalen display-only Texten ohne `WIP`-Präfix.
+- `packages/catalog/src/index.ts` führt `ONR_V1_9_19_WIP_CARD_IDS` als WIP-Zielmenge, ohne sie in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` oder AI-Approval aufzunehmen.
+- `packages/catalog/src/index.test.ts` schützt die WIP-Zielmenge und prüft No-Promotion gegen den Runtime-Releasepool.
+- `packages/engine/src/index.test.ts` prüft 20/20 Runtime-Definitionen, finale display-only Texte und den No-Scope-Guard gegen V1.9.20.
+- `data/scenarios/v1919-agenda-overadvance-wip-smoke.json` dokumentiert den WIP-Smoke maschinenlesbar ohne Release- oder AI-Promotion.
+- `data/manifests/card-implementation-manifest-1.9.19.json` und `data/rules/mechanics-coverage-1.9.19.json` bereiten Manifest und Mechanics-Coverage als WIP-Artefakte vor, ohne Catalog- oder AI-Promotion.
+- `data/ai/ai-card-hints-deck-legal-v1919.json` und `data/scenarios/ai-deck-legal-v1919-smokes.json` bereiten AI-Hints und AI-Smokes als `hinted_only`-Drafts vor; echte `ai_supported`-Promotion bleibt blockiert bis die Agenda-/Overadvance-Pfade final sind.
+- `packages/engine/src/index.ts` deckt jetzt den ersten konkreten Agenda-Core-Schnitt ab: Artificial Security Directors und Genetics-Visionary Acquisition berechnen beim Score engine-seitig Difficulty, Overadvance und Bonus-Agenda-Counter; Roving Submarine und Washington, D.C., City Grid wirken als servergebundene rezzed Difficulty-Modifier; Artificial Security Directors und Genetics-Visionary Acquisition erhalten eine gescorte, side-sichere R&D-Top-Reveal-LegalAction.
+- `packages/engine/src/index.ts` deckt außerdem erste Asset-Randpfade ab: Chicago Branch und Vapor Ops laden Power-Counter über rezzed Corp-LegalActions, Information Laundering gewinnt Credits über eine rezzed Corp-LegalAction, und Experimental AI triggert aus einem legalen Access-Fenster einen side-sicheren installierte-Programme-Trash-Ambush.
+- `packages/engine/src/index.ts` deckt jetzt auch erste Operation-Randpfade ab: Project Consultants legt engine-seitig einen Advancement-Counter auf eine installierte Agenda, Falsified-Transactions Expert/Management Shake-Up/Team Restructuring laden Power-Counter auf eine Agenda, Silver Lining Recovery Protocol gewinnt Credits, und Systematic Layoffs forfeitet eine gescorte Korp-Agenda als öffentliche Removed-from-game-Kosten.
+- Corprunner's Shattered Remains, Vacant Soulkiller und Virus Test Site sind jetzt ebenfalls über legale Access-Ambush-Fenster abgedeckt: Hardware-Trash, Core Damage und Net Damage bleiben side-sicher und laufen über die bestehenden Damage-/Visibility-Barrieren.
+- Fait Accompli, Arasaka Owns You und Olivia Salazar haben jetzt konkrete Runner-/Upgrade-Kostenpfade: Fait lädt als installiertes Programm Power-Counter bei vorhandener Runner-Agenda, Arasaka Owns You forfeitet eine Runner-Agenda öffentlich und entfernt alle Tags, Olivia Salazar erzwingt beim Stehlen einer Agenda in ihrem Server eine Runner-Agenda als öffentliche Removed-from-game-Kosten.
+- `packages/engine/src/index.test.ts` prüft den V1.9.19-Agenda-Core, Asset-Randpfad, Operation-Schnitt, Ambush-Damage-Schnitt und Runner-Agenda-Kosten-Schnitt mit sechs neuen Smokes: Score/Difficulty/Overadvance inklusive Replay/StateHash, gescorte R&D-Reveal-Aktion inklusive Hidden-Info-Barriere, Asset-Counter/Economy/Access-Ambush, Operation-Advance-/Counter-/Forfeit-Pfade, Corprunner/Vacant/Virus-Test-Site-Ambushes sowie Fait/Arasaka/Olivia.
+
+## Gate
+
+`V1_9_19_done: true`
+`V1_9_19_phase: done`
+
+## Nächster Schnitt
+
+V1.9.19 ist release-promotet. Der nächste erlaubte Cursor ist V1.9.20.
+
+## Verifikation
+
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 252 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 33 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- JSON-Validation für `data/**/*.json`: pass, 273 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Nach Manifest-/Coverage-/AI-Draft-Artefakten erneut geprüft: JSON-Validation pass, 277 Dateien; `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- Nach Agenda-Core-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 254 Tests.
+- Nach Asset-Randpfad-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 255 Tests.
+- Nach Operation-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 256 Tests.
+- Nach Ambush-Damage-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 257 Tests.
+- Nach Runner-Agenda-Kosten-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 258 Tests.
+- Abschlusslauf nach Release-Promotion: JSON-Validation pass; `catalog` pass, 34 Tests; `ai` pass, 85 Tests; `server` pass, 72 Tests; `web` pass, 76 Tests; `typecheck` pass; `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

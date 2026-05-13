@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "netgrid.ai-scenario-pack.v1",
+  "scenarioPackId": "ai-deck-legal-v1921-smokes",
+  "release": "V1.9.21",
+  "status": "ai_supported",
+  "scenarios": [
+    {
+      "id": "runner_v1921_random_programs",
+      "side": "runner",
+      "coversCards": [
+        "onr_v1_002_ai-boon",
+        "onr_v1_008_boardwalk"
+      ],
+      "expectedDecisionFamilies": [
+        "install_card",
+        "gain_credit",
+        "end_turn"
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "installed_program_source_revalidated",
+        "random_counter_replay_required",
+        "public_payload_only"
+      ]
+    },
+    {
+      "id": "runner_v1921_random_event_resource",
+      "side": "runner",
+      "coversCards": [
+        "onr_v1_104_playful-ai",
+        "onr_v1_172_quest-for-cattekin"
+      ],
+      "expectedDecisionFamilies": [
+        "play_event",
+        "install_card",
+        "gain_credit",
+        "end_turn"
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "event_heap_movement_public",
+        "installed_resource_source_revalidated",
+        "random_counter_replay_required"
+      ]
+    },
+    {
+      "id": "corp_v1921_random_root",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_339_schlaghund",
+        "onr_v1_367_rio-de-janeiro-city-grid"
+      ],
+      "expectedDecisionFamilies": [
+        "install_card",
+        "rez_ice",
+        "gain_credit",
+        "end_turn"
+      ],
+      "sideSafetyAssertions": [
+        "rezzed_root_source_revalidated",
+        "server_scope_public",
+        "random_counter_replay_required",
+        "public_payload_only"
+      ]
+    }
+  ],
+  "verification": {
+    "json": "pass",
+    "catalog": "pass: 36 tests",
+    "engine": "pass: 271 tests",
+    "ai": "pass: 85 tests",
+    "server": "pass: 72 tests",
+    "web": "pass: 77 tests",
+    "typecheck": "pass",
+    "test": "pass",
+    "lint": "pass",
+    "build": "pass with known non-blocking Turbopack NFT warning"
+  },
+  "completionGate": {
+    "aiSupported": true,
+    "legalActionsOnly": true,
+    "decisionDebugSideSafe": true,
+    "catalogPromotionPending": false,
+    "noV1922PlusScope": true
+  }
+}

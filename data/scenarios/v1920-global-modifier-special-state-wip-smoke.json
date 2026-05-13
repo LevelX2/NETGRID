@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1920-global-modifier-special-state-wip-smoke",
+  "release": "V1.9.20",
+  "status": "wip_runtime_definitions_and_replay_smokes",
+  "coversCards": [
+    "onr_v1_022_emergency-self-construct",
+    "onr_v1_029_gremlins",
+    "onr_v1_133_militech-mram-chip",
+    "onr_v1_134_mram-chip",
+    "onr_v1_160_diplomatic-immunity",
+    "onr_v1_168_loan-from-chiba",
+    "onr_v1_171_preying-mantis",
+    "onr_v1_190_bioweapons-engineering",
+    "onr_v1_191_black-ice-quality-assurance",
+    "onr_v1_192_corporate-boon",
+    "onr_v1_200_encryption-breakthrough",
+    "onr_v1_204_ice-transmutation",
+    "onr_v1_205_main-office-relocation",
+    "onr_v1_218_subsidiary-branch",
+    "onr_v1_313_city-surveillance",
+    "onr_v1_322_euromarket-consortium",
+    "onr_v1_324_fortress-architects",
+    "onr_v1_325_hacker-tracker-central",
+    "onr_v1_327_i-got-a-rock",
+    "onr_v1_331_nevinyrral",
+    "onr_v1_332_newsgroup-taunting",
+    "onr_v1_334_pacifica-regional-ai",
+    "onr_v1_335_remote-facility",
+    "onr_v1_338_rustbelt-hq-branch",
+    "onr_v1_343_south-african-mining-corp",
+    "onr_v1_360_jerusalem-city-grid"
+  ],
+  "assertions": [
+    "V1.9.20 scope is frozen to exactly 26 target cards.",
+    "Catalog WIP guard tracks the exact target set.",
+    "All 26 V1.9.20 target cards have runtime definitions with final display-only text and no WIP prefix.",
+    "Militech MRAM Chip and MRAM Chip install through legal runner actions and update visible MU deterministically.",
+    "Remote Facility, Nevinyrral and Pacifica Regional AI open rezzed Corp action-economy LegalActions that revalidate source, side and gained-action amount.",
+    "The covered V1.9.20 action-economy action rejects wrong-side and stale applyAction submissions.",
+    "Fortress Architects reduces ICE rez costs from a visible rezzed root source through the global static modifier layer.",
+    "Main-Office Relocation projects a scored-agenda Corp handlimit modifier through both PlayerViews without mutating the base hand size.",
+    "Loan from Chiba keeps and refreshes public recurring-credit state across turn transitions.",
+    "Covered MRAM, action-economy, global rez-cost, handlimit and recurring-state paths replay deterministically and reproduce final StateHash.",
+    "Covered action-economy, global rez-cost, handlimit and recurring-state events do not expose hidden HQ/R&D card identities or private payload structures.",
+    "No V1.9.20 card is release-promoted or AI-approved in this WIP slice.",
+    "V1.9.21 AI Boon remains outside the V1.9.20 WIP runtime guard.",
+    "AI, full release promotion and final review remain follow-up work."
+  ],
+  "verification": {
+    "catalog": "pass: 34 tests",
+    "typecheck": "pass",
+    "engine": "pass: 265 tests; covered V1.9.20 paths include replay/statehash and applyAction revalidation assertions"
+  },
+  "completionGate": {
+    "releaseDone": false,
+    "catalogPromoted": false,
+    "aiPromoted": false,
+    "runtimeDefinitionsReady": true,
+    "engineCovered": false,
+    "aiDraftArtifactsReady": true
+  }
+}

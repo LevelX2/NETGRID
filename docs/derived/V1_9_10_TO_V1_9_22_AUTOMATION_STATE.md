@@ -15,9 +15,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.17
+Aktueller Release: V1.9.22
 Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.18
+Naechster erlaubter Release nach Abschluss: complete
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -60,14 +60,355 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.14 | Trace, Link, Tags und Resource-Tag-Interaktionen | done |
 | V1.9.15 | Run Flow, Access, Multiaccess und Ambush on Access | done |
 | V1.9.16 | Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy | done |
-| V1.9.17 | Generische Asset/Node-Faehigkeiten | current |
-| V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | pending |
-| V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | pending |
-| V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | pending |
-| V1.9.21 | Deterministischer Zufall und Wuerfelkarten | pending |
-| V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
+| V1.9.17 | Generische Asset/Node-Faehigkeiten | done |
+| V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | done |
+| V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | done |
+| V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | done |
+| V1.9.21 | Deterministischer Zufall und Wuerfelkarten | done |
+| V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | current |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 16:40 CEST
+- Ergebnis: V1.9.22 erster Runtime-WIP fuer neun Runner-Hardware-Longtailkarten umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Arasaka Portable Prototype, Artemis 2020, Bodyweight Data Creche, Corolla Speed Chip, Microtech Backup Drive, Pandora's Deck, Parraline 5750, PK-6089a und ZZ22 Speed Chip haben Runtime-Definitionen mit finalen display-only Texten. Zehn Runner-Event-Zielkarten haben ebenfalls Runtime-Definitionen, aber noch keine `play_event`-LegalAction-Promotion. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `engine` pass (274), `catalog` pass (36), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner hardware runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil LegalAction-/applyAction-, Visibility-/Replay-/StateHash-, AI-, Full-Check-, Webclient- und Final-Review-Gates offen sind.
+
+- Zeitpunkt: 2026-05-13 16:36 CEST
+- Ergebnis: V1.9.22 Per-card Resolver Longtail und Originalset Completion Gate geplant und als Catalog-WIP begonnen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Per-card-Longtail-Spezifikation, Testmatrix, Requirements Review und Implementation Review erstellt. `ONR_V1_9_22_WIP_CARD_IDS` schuetzt die exakte 47er-Zielmenge ohne Runtime-, Catalog-Release- oder AI-Promotion. WIP-Manifest, Mechanics-Coverage und WIP-Smoke sind angelegt.
+- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (36), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: longtail planning guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runtime-/Engine-/LegalAction-/AI-Abdeckung, volle Pflichtchecks, Webclient-Version, Final Review und Originalset-Completion-Gate offen sind.
+
+- Zeitpunkt: 2026-05-13 16:31 CEST
+- Ergebnis: V1.9.21 Deterministischer Zufall und Wuerfelkarten final abgeschlossen; Cursor auf V1.9.22 `planned` gesetzt.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: done; V1.9.22 planned
+- Umsetzung: Alle sechs V1.9.21-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Deterministische Asset-, Upgrade-, Runner-Programm-, Event- und Resource-Zufallspfade nutzen `RandomDrawRecords`, side-sichere PublicEvents und replay-/StateHash-stabile Abdeckung. Der Webclient zeigt `V1.9.21`.
+- Tests: JSON-Validation pass (299 Dateien); `catalog` pass (36), `engine` pass (271), `ai` pass (85), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf wird per Checkpoint erzeugt (`V1.9.21: deterministic random dice cards`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 Completion-Gate ist erfuellt; V1.9.22 ist der aktuelle Release.
+
+- Zeitpunkt: 2026-05-13 16:12 CEST
+- Ergebnis: V1.9.21 Promotion-Readiness dokumentiert; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_21_PROMOTION_READINESS_REVIEW.md` benennt die noch fehlenden Promotion-Schalter: finale AI-Artefakte, Catalog-/AI-Approval-Exports, Webclient-Version, Final Review und Cursor-Fortschritt. Keine Teilpromotion wurde begonnen.
+- Tests: keine neuen Code-Checks; diese Notiz basiert auf dem direkt vorher dokumentierten breiten Verify-Lauf.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: promotion readiness review`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
+- Zeitpunkt: 2026-05-13 16:10 CEST
+- Ergebnis: V1.9.21 WIP-Stand nach Initial-Random und AI-Draft breit verifiziert; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Keine weitere Runtime-/AI-/Web-Promotion. `docs/codex/CODEX_STATUS.md`, `docs/derived/V1_9_21_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_9_21_TEST_MATRIX.md` dokumentieren den gruenen breiten Verify-Lauf.
+- Tests: JSON-Validation pass; `catalog` pass (35), `engine` pass (271), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass (Exit 0 ohne Detailausgabe), `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: broad verify random draft`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 16:06 CEST
+- Ergebnis: V1.9.21 nicht-promotende AI-Draft-Artefakte angelegt und geprueft; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/ai/ai-card-hints-deck-legal-v1921-draft.json`, `data/scenarios/ai-deck-legal-v1921-draft-smokes.json` und `data/manifests/v1921-deck-legal-ai-approval-draft-manifest.json` dokumentieren den engine-abgedeckten 6er-Scope als `hinted_only`/`draft_no_ai_promotion`. Keine Karte wurde `ai_supported`; Catalog-/AI-Promotion bleibt ausstehend.
+- Tests: JSON-Validation pass; `catalog` pass (35), `engine` pass (271), `ai` pass (85).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: ai draft artifacts`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil volle Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 16:03 CEST
+- Ergebnis: V1.9.21 initiale Random-Abdeckung fuer alle sechs Zielkarten umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Playful AI` hat einen `play_event`-Random-Probe inklusive Heap-Bewegung und `v1921RunnerEventAbility`; `Quest for Cattekin` hat eine installierte Runner-Resource-LegalAction mit `v1921RunnerResourceAbility`. Zusammen mit `AI Boon`, `Boardwalk`, `Schlaghund` und `Rio de Janeiro City Grid` haben jetzt 6/6 Zielkarten mindestens einen deterministischen Random-Probe mit `RandomDrawRecords`, side-sicheren PublicEvents und Replay-/StateHash-Stabilitaet. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen.
+- Tests: `engine` pass (271). JSON, catalog und typecheck werden vor dem naechsten WIP-Checkpoint erneut gezielt geprueft.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: initial random probes complete`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:59 CEST
+- Ergebnis: V1.9.21 Runner-Programm-Random-Resolver umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `AI Boon` und `Boardwalk` haben installierte Runner-Programm-LegalActions fuer deterministische Wuerfelproben. Der Pfad schreibt `RandomDrawRecords`, nutzt eigene `v1921RunnerProgramAbility`-Payloads, lehnt Wrong-Side ab, redigiert PublicEvents auf oeffentliche Zufallsmetadaten und ist replay-/StateHash-stabil. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen.
+- Tests: `engine` pass (269). JSON, catalog und typecheck werden vor dem naechsten WIP-Checkpoint erneut gezielt geprueft.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: runner program random resolvers`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Playful AI`, `Quest for Cattekin`, AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:55 CEST
+- Ergebnis: V1.9.21 zweiter deterministischer Random-Resolver umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Rio de Janeiro City Grid` hat eine rezzed Upgrade LegalAction fuer eine serverbezogene deterministische Wuerfelprobe. Der Pfad schreibt `RandomDrawRecords`, nutzt eigene `v1921UpgradeAbility`-Payloads, lehnt Wrong-Side ab, redigiert PublicEvents auf oeffentliche Zufallsmetadaten und ist replay-/StateHash-stabil. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen.
+- Tests: `engine` pass (268). JSON, catalog und typecheck werden vor dem naechsten WIP-Checkpoint erneut gezielt geprueft.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: rio random resolver`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-seitige Random-Resolver, AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:52 CEST
+- Ergebnis: V1.9.21 erster deterministischer Random-Resolver umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Schlaghund` hat eine rezzed Asset LegalAction fuer eine deterministische Wuerfelprobe. Der Pfad schreibt `RandomDrawRecords`, lehnt Wrong-Side und stale State ab, redigiert PublicEvents auf oeffentliche Zufallsmetadaten und ist replay-/StateHash-stabil. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen.
+- Tests: `engine` pass (267). JSON, catalog und typecheck bleiben aus dem vorherigen V1.9.21-WIP gruen; gezielte Reruns fuer diesen Schnitt folgen vor Checkpoint.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: schlaghund random resolver`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Random-Resolver, AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:46 CEST
+- Ergebnis: V1.9.21 Runtime-WIP fuer deterministische Zufalls-/Wuerfelkarten angelegt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: 6/6 Zielkarten haben Runtime-Definitionen mit finalen display-only Texten ohne `WIP`-Praefix. WIP-Manifest, Mechanics-Coverage und WIP-Smoke sind angelegt. Engine-Sentinel schuetzt die Zielmenge gegen V1.9.22-Promotion.
+- Tests: JSON-Validation pass; `catalog` pass (35), `engine` pass (266), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: runtime definitions random guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil deterministische Random-Resolver, Visibility-/Replay-/StateHash-Abdeckung, AI-Artefakte, Pflichtchecks, Final Review und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:42 CEST
+- Ergebnis: V1.9.21 Deterministischer Zufall und Wuerfelkarten geplant und als Catalog-WIP begonnen; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Deterministic-Random-Spezifikation, Testmatrix, Requirements Review und Implementation Review erstellt. Der Scope umfasst genau sechs Zielkarten (`AI Boon`, `Boardwalk`, `Playful AI`, `Quest for Cattekin`, `Schlaghund`, `Rio de Janeiro City Grid`). `ONR_V1_9_21_WIP_CARD_IDS` schuetzt die Zielmenge ohne Runtime-/AI-/Web-Promotion.
+- Tests: `catalog` pass (35), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: deterministic random planning guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runtime-WIP, Engine-/Visibility-/Replay-/StateHash-Abdeckung, Daten-/AI-Artefakte, Pflichtchecks, Final Review und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:39 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende final abgeschlossen; Cursor auf V1.9.21 `planned` gesetzt.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: done; V1.9.21 planned
+- Umsetzung: Alle 26 V1.9.20-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. MRAM-MU, Action-Economy-Assets, Fortress-Architects-Rez-Kosten, Main-Office-Handlimit und Loan-from-Chiba-Recurring-State sind LegalAction-/applyAction-basiert, side-sicher und replay-/StateHash-stabil abgedeckt. Der Webclient zeigt `V1.9.20`.
+- Tests: JSON-Validation pass; `catalog` pass (35), `engine` pass (265), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf wird per Checkpoint erzeugt (`V1.9.20: global modifier special states`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 Completion-Gate ist erfuellt; V1.9.21 ist der aktuelle Release.
+
+- Zeitpunkt: 2026-05-13 15:22 CEST
+- Ergebnis: V1.9.20 WIP-Stand nach Replay-/Visibility-/Revalidation-Schnitten breit verifiziert; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Keine weitere Runtime-/AI-/Web-Promotion. `docs/codex/CODEX_STATUS.md` dokumentiert den breiten Verify-Lauf inklusive transientem parallelem Lint-Zwischenfehler und gruenem isoliertem Lint-Rerun.
+- Tests: JSON-Validation pass (285 Dateien); `catalog` pass (34), `engine` pass (265), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, isolierter `lint`-Rerun pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung. Paralleler Zwischenlauf von `lint` scheiterte transient auf `.next/types/validator.ts`/`./routes.js`, direkt nach Build war der isolierte Rerun gruen.
+- Git: WIP-Checkpoint fuer diesen Schnitt vorgesehen (`WIP V1.9.20: broad verify after revalidation`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-/Visibility-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:19 CEST
+- Ergebnis: V1.9.20 Action-Economy-applyAction-Revalidation ergänzt: falsche Seite und stale State werden am neuen rezzed Asset-Fenster zurückgewiesen; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.test.ts` ergänzt eine V1.9.20-spezifische Negativprüfung für Wrong-Side- und Stale-State-Rejection am Action-Economy-Assetpfad. Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen. Keine Runtime-/AI-/Web-Promotion.
+- Tests: JSON-Validation pass (285 Dateien); `engine` pass (265), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Schnitt vorgesehen (`WIP V1.9.20: action apply revalidation`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-/Visibility-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:17 CEST
+- Ergebnis: V1.9.20 Action-Economy-Smoke verbreitert: Remote Facility, Nevinyrral und Pacifica Regional AI werden jetzt alle als rezzed Asset-Quellen mit Revalidierung, Visibility und Replay-/StateHash-Assertion ausgeuebt; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.test.ts` parametrisiert den V1.9.20-Action-Economy-Asset-Smoke auf alle drei abgedeckten Karten. `data/scenarios/v1920-global-modifier-special-state-wip-smoke.json`, `docs/derived/V1_9_20_IMPLEMENTATION_REVIEW.md` und `docs/codex/CODEX_STATUS.md` sind nachgezogen. Keine Runtime-/AI-/Web-Promotion.
+- Tests: `engine` pass (264 Tests).
+- Git: WIP-Checkpoint fuer diesen Schnitt vorgesehen (`WIP V1.9.20: action economy source coverage`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-/Visibility-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:15 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um Visibility-Assertions fuer abgedeckte Action-Economy-, globale Rez-Kosten-, Handlimit- und Recurring-State-Pfade erweitert; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.test.ts` prueft fuer die abgedeckten V1.9.20-Pfade, dass PublicEvents und Runner-Gegner-Views keine verdeckten HQ/R&D-Identitaeten oder private Payload-Strukturen leaken. `data/rules/mechanics-coverage-1.9.20.json`, `data/scenarios/v1920-global-modifier-special-state-wip-smoke.json`, `docs/derived/V1_9_20_TEST_MATRIX.md`, `docs/derived/V1_9_20_IMPLEMENTATION_REVIEW.md` und `docs/codex/CODEX_STATUS.md` sind entsprechend aktualisiert. Keine Runtime-/AI-/Web-Promotion.
+- Tests: JSON-Validation pass (285 Dateien); `engine` pass (264 Tests).
+- Git: WIP-Checkpoint fuer diesen Schnitt vorgesehen (`WIP V1.9.20: covered visibility smokes`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-/Visibility-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:13 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um Replay-/StateHash-Assertions fuer die bereits abgedeckten MRAM-, Action-Economy-, globalen Rez-Kosten-, Handlimit- und Recurring-State-Pfade erweitert; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.test.ts` prueft fuer die abgedeckten V1.9.20-Pfade deterministisches Replay und finalen StateHash. `data/manifests/card-implementation-manifest-1.9.20.json`, `data/rules/mechanics-coverage-1.9.20.json`, `data/scenarios/v1920-global-modifier-special-state-wip-smoke.json`, `docs/derived/V1_9_20_TEST_MATRIX.md`, `docs/derived/V1_9_20_IMPLEMENTATION_REVIEW.md` und `docs/codex/CODEX_STATUS.md` sind entsprechend aktualisiert. Keine Runtime-/AI-/Web-Promotion.
+- Tests: JSON-Validation pass (285 Dateien); `catalog` pass (34), `engine` pass (264), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Schnitt vorgesehen (`WIP V1.9.20: replay statehash smokes`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-/Visibility-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 15:07 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um Runtime-Definitionen, erste Engine-Smokes, nicht-promotende AI-Draft-Artefakte und post-AI-Full-Verify erweitert; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: 26/26 Zielkarten haben Runtime-Definitionen mit finalen display-only Texten ohne WIP-Praefix in `packages/shared/src/index.ts`; `packages/engine/src/index.test.ts` prueft die Zielmenge gegen V1.9.21-Promotion und deckt Militech MRAM Chip/MRAM Chip als legale Runner-Installationen mit sichtbarer MU-Projektion, Remote Facility als ersten rezzed Action-Economy-Assetpfad, Fortress Architects als ersten globalen ICE-Rez-Kostenmodifier, Main-Office Relocation als scored-Agenda-Handgroessenmodifier und Loan from Chiba als persistenten Recurring-Credit-Zustand ab. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind entsprechend aktualisiert. Keine Runtime-/AI-/Web-Promotion.
+- Tests: JSON-Validation pass (285 Dateien); `engine` pass (264), `catalog` pass (34), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- AI-Draft: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json` angelegt; Status `hinted_only`/`draft_no_ai_promotion`, keine `ai_supported`-Promotion.
+- Git: WIP-Checkpoints `e903c2bc`, `a4f99efd`, `d40687c3`, `05c11a3c`, `16d09eaf`, `329b479b`; alle nach `origin/codex/v1-9-originalset-completion` gepusht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 14:33 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um WIP-Datenartefakte erweitert; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/scenarios/v1920-global-modifier-special-state-wip-smoke.json`, `data/manifests/card-implementation-manifest-1.9.20.json` und `data/rules/mechanics-coverage-1.9.20.json` angelegt. Keine Runtime-/AI-/Web-Promotion.
+- Tests: JSON-Validation pass; `catalog` pass (34). Vorheriger V1.9.20-Schnitt im selben Lauf: `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.20: data artifact planning guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Runtime-WIP, Engine-Abdeckung, AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 14:31 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende mit Catalog-WIP-Guard begonnen; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `ONR_V1_9_20_WIP_CARD_IDS` mit exakt 26 Zielkarten ergänzt und per Catalog-Test gegen No-Promotion in den Runtime-Releasepool geschützt. Keine Runtime-/AI-/Web-Promotion.
+- Tests: `catalog` pass (34), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.20: catalog target guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Runtime-WIP, Engine-Abdeckung, Daten-/AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 14:30 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende geplant; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Global-Modifier-/Persistent-State-Spezifikation, Testmatrix, Requirements Review und Implementation Review erstellt. Scope ist auf 26 Zielkarten festgelegt. Keine Runtime-/Catalog-/AI-/Web-Promotion.
+- Tests: Dokumentations-/Cursorlauf; keine Code- oder JSON-Aenderung im V1.9.20-Schnitt.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.20: global modifier planning`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Runtime-WIP, Engine-Abdeckung, Daten-/AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 14:29 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance final abgeschlossen; Cursor auf V1.9.20 `planned` gesetzt.
+- Release: V1.9.19
+- Phase vorher: implementing
+- Phase nachher: done; V1.9.20 planned
+- Umsetzung: Alle 20 V1.9.19-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Agenda-Difficulty, Overadvance, scored Agenda Actions, Operation-Counter, Forfeit-Kosten, Asset-/Ambush-/Damage-Pfade, Fait Accompli, Arasaka Owns You und Olivia Salazar sind LegalAction-/applyAction-basiert abgedeckt. Der Webclient zeigt `V1.9.19`.
+- Tests: JSON-Validation pass; `engine` pass (258), `catalog` pass (34), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.19: agenda overadvance abilities`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 Completion-Gate ist erfüllt; V1.9.20 ist der aktuelle Release.
+
+- Zeitpunkt: 2026-05-13 14:18 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um Runner-Agenda-Kostenpfade erweitert; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Fait Accompli, Arasaka Owns You und Olivia Salazar haben konkrete LegalAction-/applyAction-Pfade erhalten. Fait Accompli lädt als installiertes Runner-Programm Power-Counter bei vorhandener Runner-Agenda. Arasaka Owns You forfeitet eine Runner-Agenda öffentlich und entfernt alle Tags. Olivia Salazar erzwingt beim Stehlen einer Agenda in ihrem Server eine Runner-Agenda als öffentliche Removed-from-game-Kosten. Keine Runtime-/AI-Promotion.
+- Tests: `engine` pass (258). Vorheriger Schnitt im selben Lauf: JSON-Validation pass fuer 277 `data/**/*.json`, `engine` pass (257), `catalog` pass (33), `typecheck` pass. Vorheriger Vollcheck: `ai` pass (85), `server` pass (72), `web` pass (76), `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: runner agenda cost paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil finale Daten-/AI-Artefakte, offizielles AI-Approval, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 14:11 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um weitere Access-Ambush-/Damage-Pfade erweitert; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Corprunner's Shattered Remains, Vacant Soulkiller und Virus Test Site sind jetzt über legale Access-Ambush-Fenster für Hardware-Trash, Core Damage und Net Damage abgedeckt. Damit deckt dieser Lauf Agenda-Core, Operationen und die meisten V1.9.19-Asset-/Ambush-Randpfade ab. Keine Runtime-/AI-Promotion.
+- Tests: `engine` pass (257). Vorheriger Schnitt im selben Lauf: JSON-Validation pass fuer 277 `data/**/*.json`, `engine` pass (256), `catalog` pass (33), `typecheck` pass. Vorheriger Vollcheck: `ai` pass (85), `server` pass (72), `web` pass (76), `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: access ambush damage paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Fait Accompli, Arasaka Owns You, Olivia Salazar, finale Daten-/AI-Artefakte, offizielles AI-Approval, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 14:09 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um Operation-Resolver erweitert; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Project Consultants, Falsified-Transactions Expert, Management Shake-Up, Silver Lining Recovery Protocol, Systematic Layoffs und Team Restructuring haben explizite `play_operation`-Resolver für Advancement, Power-Counter, Economy und öffentliche Forfeit-Kosten erhalten. Der vorherige Agenda-/Asset-Schnitt dieses Laufs deckt Artificial Security Directors, Genetics-Visionary Acquisition, Roving Submarine, Washington, D.C., City Grid, Chicago Branch, Vapor Ops, Information Laundering und Experimental AI ab. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass fuer 277 `data/**/*.json`; `engine` pass (256), `catalog` pass (33), `typecheck` pass. Vorheriger Vollcheck im selben Lauf: `ai` pass (85), `server` pass (72), `web` pass (76), `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: operation resolver paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Ambush-/Damage-Pfade, finale Daten-/AI-Artefakte, offizielles AI-Approval, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 14:04 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um konkrete Agenda-Core- und erste Asset-Randpfade erweitert; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Artificial Security Directors und Genetics-Visionary Acquisition decken Score-Difficulty, Overadvance, Bonus-Agenda-Counter und gescorte R&D-Top-Reveal-LegalActions ab. Roving Submarine und Washington, D.C., City Grid wirken als rezzed servergebundene Difficulty-Modifier. Chicago Branch und Vapor Ops decken rezzed Power-Counter-LegalActions ab; Information Laundering deckt eine rezzed Economy-LegalAction ab; Experimental AI deckt einen legalen Access-Ambush gegen installierte Runner-Programme ab. Manifest, Mechanics-Coverage, WIP-Szenario, Testmatrix, Implementation Review und Codex-Status sind entsprechend aktualisiert. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass fuer 277 `data/**/*.json`; `engine` pass (255), `catalog` pass (33), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: agenda asset engine paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Operationen, Forfeit-/Agenda-Punkt-Kosten, weitere Ambush-/Damage-Pfade, finale Daten-/AI-Artefakte, offizielles AI-Approval, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 13:32 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Agenda/Overadvance-Spezifikation, Testmatrix und Requirements Review erstellt. Alle 20 V1.9.19-Zielkarten haben WIP-Runtime-Definitionen mit finalen display-only Texten ohne WIP-Präfix. Der Katalog führt `ONR_V1_9_19_WIP_CARD_IDS` als No-Promotion-Guard, ohne die Karten in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` oder AI-Approval aufzunehmen. WIP-Szenario: `data/scenarios/v1919-agenda-overadvance-wip-smoke.json`; WIP-Datenartefakte: `data/manifests/card-implementation-manifest-1.9.19.json`, `data/rules/mechanics-coverage-1.9.19.json`, `data/ai/ai-card-hints-deck-legal-v1919.json`, `data/scenarios/ai-deck-legal-v1919-smokes.json`.
+- Tests: JSON-Validation pass fuer 277 `data/**/*.json`; `engine` pass (252), `catalog` pass (33), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: agenda overadvance runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil konkrete Agenda-/Overadvance-LegalAction-/applyAction-Pfade, finale Daten-/AI-Artefakte, Server/Web, volle Pflichtchecks, Final Review und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 13:25 CEST
+- Ergebnis: V1.9.18 Generische Upgrade-/Root-/Grid-/Server-Fähigkeiten final abgeschlossen; Cursor auf V1.9.19 `planned` gesetzt.
+- Release: V1.9.18
+- Phase vorher: implementing
+- Phase nachher: done; V1.9.19 planned
+- Umsetzung: Alle 15 V1.9.18-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Der Webclient zeigt `V1.9.18`; Runtime-/AI-Pool wächst auf 275 O:NR-v1-Karten.
+- Tests: JSON-Validation pass fuer 272 `data/**/*.json`; `engine` pass (251), `catalog` pass (33), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.18: generic upgrade root server abilities`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 ist aktueller Release; Completion-Gate für V1.9.18 ist erfüllt.
+
+- Zeitpunkt: 2026-05-13 13:17 CEST
+- Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten um vorbereitende Manifest-/Coverage-/AI-Draft-Artefakte erweitert; Cursor bleibt auf V1.9.18 `implementing`.
+- Release: V1.9.18
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/manifests/card-implementation-manifest-1.9.18.json`, `data/rules/mechanics-coverage-1.9.18.json`, `data/ai/ai-card-hints-deck-legal-v1918.json`, `data/scenarios/ai-deck-legal-v1918-smokes.json` und `data/manifests/v1918-deck-legal-ai-approval-draft-manifest.json` angelegt. Das Approval-Artefakt ist bewusst ein Draft außerhalb des offiziellen `deck-legal-ai-approval-*.json`-Patterns, damit keine nicht promoteten Karten als `ai_supported` behandelt werden. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass fuer 271 `data/**/*.json`; `ai` pass (85). Vorheriger technischer V1.9.18-Schnitt dieses Laufs: `engine` pass (251), `catalog` pass (32), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Artefaktschnitt vorgesehen (`WIP V1.9.18: data artifact promotion prep`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.18 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil offizielles Release-Smoke-Artefakt, offizielles AI-Approval-Manifest, Final Review, Release-Promotion und Webclient-Version `V1.9.18` offen sind.
+
+- Zeitpunkt: 2026-05-13 13:05 CEST
+- Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten um konkrete Counter-, City-Grid-Reveal-, City-Grid-Trace-, Tag-Condition- und Run-Start-/Stealth-Tax-Pfade erweitert; Cursor bleibt auf V1.9.18 `implementing`.
+- Release: V1.9.18
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Crystal Palace Station Grid und Dr. Dreff decken rezzed Power-Counter-LegalActions ab; New Galveston City Grid deckt side-sicheren R&D-Top-Reveal ab; Paris City Grid deckt ein Trace-2-Tag-Fenster mit Korp-/Runner-Bids ab; Omni Kismet und Paris City Grid decken getaggter-Runner-Condition-LegalActions ab; Twenty-Four-Hour Surveillance deckt einen servergebundenen Run-Start-Tax ab, der ueber Runner-Run-/Stealth-Recurring-Credits zahlbar ist. `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json`, `docs/derived/V1_9_18_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_9_18_TEST_MATRIX.md` sind entsprechend aktualisiert. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass fuer 266 `data/**/*.json`; `engine` pass (251), `catalog` pass (32), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.18: upgrade counter run tax paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.18 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil finale Manifest-/Coverage-/Scenario-/AI-Artefakte, weitere Querschnittschecks, Final Review, Release-Promotion und Webclient-Version `V1.9.18` offen sind.
+
+- Zeitpunkt: 2026-05-13 12:18 CEST
+- Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten release-spezifisch detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.18 `implementing`.
+- Release: V1.9.18
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Generic-Upgrade-/Root-/Server-Spezifikation, Testmatrix und Requirements Review erstellt. Alle 15 V1.9.18-Zielkarten haben WIP-Runtime-Definitionen mit finalen display-only Texten ohne WIP-Präfix. Der Katalog führt `ONR_V1_9_18_WIP_CARD_IDS` als No-Promotion-Guard, ohne die Karten in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` oder AI-Approval aufzunehmen. Crybaby deckt den ersten generischen Upgrade-/Root-Pfad für Corp-Install, Root-Rez, Runner-Access, Trash-on-access, Archives-Visibility und Payload-Redaction ab. Dedicated Response Team und Dieter Esslin decken Access-Ambush-Damage ab; Turbeau Delacroix deckt ein Access-Trace-Fenster mit Corp-/Runner-Bids ab; Red Herrings deckt den servergebundenen Agenda-Steal-Tax ab. City Grids decken Region-Replacement im selben Remote mit Archives-Visibility ab. WIP-Szenario: `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json`.
+- Tests: JSON-Validation pass fuer 266 `data/**/*.json`; `engine` pass (249), `catalog` pass (32), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.18: upgrade root server runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.18 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere LegalAction-/applyAction-Abdeckung für City-Grid-Effekte, Counter-, Run-Flow-, Tag-Condition- und Stealth-Pfade, finale Manifest/Coverage/Scenario-/AI-Artefakte, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 12:12 CEST
+- Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten final abgeschlossen; Cursor auf V1.9.18 `planned` gesetzt.
+- Release: V1.9.17
+- Phase vorher: implementing
+- Phase nachher: planned fuer V1.9.18
+- Umsetzung: Alle 18 V1.9.17-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Cowboy Sysop und Disinfectant, Inc. schließen die sichtbaren installed-card-/Virus-Counter-Zielpfade; `ONR_V1_9_17_RELEASE_CARD_IDS` und `DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS` promoten die Zielmenge; die Webclient-Version steht auf `V1.9.17`.
+- Tests: JSON-Validation pass fuer 265 `data/**/*.json`; `engine` pass (243), `catalog` pass (32), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.17: generic asset node abilities`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.17 Completion-Gate ist erfüllt; V1.9.18 ist der aktuelle Release.
+
+- Zeitpunkt: 2026-05-13 11:39 CEST
+- Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten um konkrete Economy-/Recurring-/Hosting-/Hidden-Zone-/Ambush-/Damage-Enginepfade erweitert; Cursor bleibt auf V1.9.17 `implementing`.
+- Release: V1.9.17
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Alle acht scoped Economy-Assets haben öffentliche Gain-Credit-LegalActions, alle fünf scoped Recurring-Assets refreshen gemeinsam am Corp-Turnstart, Corp-gehostete Karten kaskadieren beim Host-Trash nach Archives, und `v1917AssetAbility` ist im Action-ID-Schlüssel gegen Mehrfachfähigkeits-Kollisionen abgesichert. Corporate Negotiating Center erhält eine rezzed Corp-LegalAction für side-sicheren R&D-Top-Reveal; Rescheduler öffnet eine Korp-private R&D-Top-2-Reorder-Choice mit Replay/StateHash-Nachweis; Solo Squad nutzt eine typisierte rezzed Asset-LegalAction für 1 Meat Damage; Setup! und TRAP! lösen nur aus legalen Access-Fenstern aus, verursachen 1 Net Damage, und TRAP! setzt zusätzlich 1 Tag. Das WIP-Szenario wurde entsprechend erweitert. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass (259 Dateien), `engine` pass (242 Tests), `catalog` pass (31 Tests), `ai` pass (85 Tests), `server` pass (72 Tests nach isoliertem Re-Run; ein paralleler Zwischenlauf hatte einen Vitest-Worker-Abbruch), `web` pass (76 Tests), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint für diesen Lauf vorgesehen (`WIP V1.9.17: hidden ambush damage asset paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.17 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Virus/Counter/Prevention-, installierte-Ziele-Pfade, finale Manifest/Coverage/Scenario-/AI-Artefakte, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 10:25 CEST
 - Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten release-spezifisch detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.17 `implementing`.

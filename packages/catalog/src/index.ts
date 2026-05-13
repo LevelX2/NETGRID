@@ -660,6 +660,145 @@ export const ONR_V1_9_17_WIP_CARD_IDS = [
   "onr_v1_345_trap"
 ] as const;
 
+export const ONR_V1_9_17_RELEASE_CARD_IDS = ONR_V1_9_17_WIP_CARD_IDS;
+
+export const ONR_V1_9_18_WIP_CARD_IDS = [
+  "onr_v1_354_crybaby",
+  "onr_v1_355_crystal-palace-station-grid",
+  "onr_v1_356_dedicated-response-team",
+  "onr_v1_357_dieter-esslin",
+  "onr_v1_358_dr-dreff",
+  "onr_v1_359_jenny-jett",
+  "onr_v1_361_namatoki-plaza",
+  "onr_v1_362_new-galveston-city-grid",
+  "onr_v1_364_omni-kismet-ph-d",
+  "onr_v1_365_paris-city-grid",
+  "onr_v1_366_red-herrings",
+  "onr_v1_369_singapore-city-grid",
+  "onr_v1_370_tesseract-fort-construction",
+  "onr_v1_372_turbeau-delacroix",
+  "onr_v1_373_twenty-four-hour-surveillance"
+] as const;
+
+export const ONR_V1_9_18_RELEASE_CARD_IDS = ONR_V1_9_18_WIP_CARD_IDS;
+
+export const ONR_V1_9_19_WIP_CARD_IDS = [
+  "onr_v1_025_fait-accompli",
+  "onr_v1_078_arasaka-owns-you",
+  "onr_v1_189_artificial-security-directors",
+  "onr_v1_202_genetics-visionary-acquisition",
+  "onr_v1_291_falsified-transactions-expert",
+  "onr_v1_292_management-shake-up",
+  "onr_v1_300_project-consultants",
+  "onr_v1_303_silver-lining-recovery-protocol",
+  "onr_v1_304_systematic-layoffs",
+  "onr_v1_305_team-restructuring",
+  "onr_v1_312_chicago-branch",
+  "onr_v1_315_corprunners-shattered-remains",
+  "onr_v1_323_experimental-ai",
+  "onr_v1_328_information-laundering",
+  "onr_v1_346_vacant-soulkiller",
+  "onr_v1_347_vapor-ops",
+  "onr_v1_348_virus-test-site",
+  "onr_v1_363_olivia-salazar",
+  "onr_v1_368_roving-submarine",
+  "onr_v1_374_washington-d-c-city-grid"
+] as const;
+
+export const ONR_V1_9_19_RELEASE_CARD_IDS = ONR_V1_9_19_WIP_CARD_IDS;
+
+export const ONR_V1_9_20_WIP_CARD_IDS = [
+  "onr_v1_022_emergency-self-construct",
+  "onr_v1_029_gremlins",
+  "onr_v1_133_militech-mram-chip",
+  "onr_v1_134_mram-chip",
+  "onr_v1_160_diplomatic-immunity",
+  "onr_v1_168_loan-from-chiba",
+  "onr_v1_171_preying-mantis",
+  "onr_v1_190_bioweapons-engineering",
+  "onr_v1_191_black-ice-quality-assurance",
+  "onr_v1_192_corporate-boon",
+  "onr_v1_200_encryption-breakthrough",
+  "onr_v1_204_ice-transmutation",
+  "onr_v1_205_main-office-relocation",
+  "onr_v1_218_subsidiary-branch",
+  "onr_v1_313_city-surveillance",
+  "onr_v1_322_euromarket-consortium",
+  "onr_v1_324_fortress-architects",
+  "onr_v1_325_hacker-tracker-central",
+  "onr_v1_327_i-got-a-rock",
+  "onr_v1_331_nevinyrral",
+  "onr_v1_332_newsgroup-taunting",
+  "onr_v1_334_pacifica-regional-ai",
+  "onr_v1_335_remote-facility",
+  "onr_v1_338_rustbelt-hq-branch",
+  "onr_v1_343_south-african-mining-corp",
+  "onr_v1_360_jerusalem-city-grid"
+] as const;
+
+export const ONR_V1_9_20_RELEASE_CARD_IDS = ONR_V1_9_20_WIP_CARD_IDS;
+
+export const ONR_V1_9_21_WIP_CARD_IDS = [
+  "onr_v1_002_ai-boon",
+  "onr_v1_008_boardwalk",
+  "onr_v1_104_playful-ai",
+  "onr_v1_172_quest-for-cattekin",
+  "onr_v1_339_schlaghund",
+  "onr_v1_367_rio-de-janeiro-city-grid"
+] as const;
+
+export const ONR_V1_9_21_RELEASE_CARD_IDS = ONR_V1_9_21_WIP_CARD_IDS;
+
+export const ONR_V1_9_22_WIP_CARD_IDS = [
+  "onr_v1_026_false-echo",
+  "onr_v1_027_flak",
+  "onr_v1_031_hammer",
+  "onr_v1_037_japanese-water-torture",
+  "onr_v1_044_netspace-inverter",
+  "onr_v1_045_newsgroup-filter",
+  "onr_v1_048_poltergeist",
+  "onr_v1_051_rabbit",
+  "onr_v1_055_reflector",
+  "onr_v1_057_scatter-shot",
+  "onr_v1_061_shield",
+  "onr_v1_067_speed-trap",
+  "onr_v1_068_startup-immolator",
+  "onr_v1_075_zetatech-software-installer",
+  "onr_v1_077_anonymous-tip",
+  "onr_v1_080_core-command-jettison-ice",
+  "onr_v1_086_forged-activation-orders",
+  "onr_v1_093_if-you-want-it-done-right",
+  "onr_v1_100_misc-for-sale",
+  "onr_v1_102_open-ended-mileage-program",
+  "onr_v1_103_organ-donor",
+  "onr_v1_109_security-code-worm-chip",
+  "onr_v1_113_synchronized-attack-on-hq",
+  "onr_v1_117_valu-pak-software-bundle",
+  "onr_v1_119_arasaka-portable-prototype",
+  "onr_v1_122_artemis-2020",
+  "onr_v1_123_bodyweight-data-creche",
+  "onr_v1_124_corolla-speed-chip",
+  "onr_v1_131_microtech-backup-drive",
+  "onr_v1_136_pandoras-deck",
+  "onr_v1_137_parraline-5750",
+  "onr_v1_138_pk-6089a",
+  "onr_v1_147_zz22-speed-chip",
+  "onr_v1_195_corporate-retreat",
+  "onr_v1_196_corporate-war",
+  "onr_v1_197_data-fort-reclamation",
+  "onr_v1_206_marine-arcology",
+  "onr_v1_210_political-overthrow",
+  "onr_v1_216_security-purge",
+  "onr_v1_247_haunting-inquisition",
+  "onr_v1_274_tutor",
+  "onr_v1_276_viral-15",
+  "onr_v1_277_virizz",
+  "onr_v1_280_zombie",
+  "onr_v1_289_edgerunner-inc-temps",
+  "onr_v1_296_off-site-backups",
+  "onr_v1_298_planning-consultants"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -688,7 +827,12 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_9_13_RELEASE_CARD_IDS,
   ...ONR_V1_9_14_RELEASE_CARD_IDS,
   ...ONR_V1_9_15_RELEASE_CARD_IDS,
-  ...ONR_V1_9_16_RELEASE_CARD_IDS
+  ...ONR_V1_9_16_RELEASE_CARD_IDS,
+  ...ONR_V1_9_17_RELEASE_CARD_IDS,
+  ...ONR_V1_9_18_RELEASE_CARD_IDS,
+  ...ONR_V1_9_19_RELEASE_CARD_IDS,
+  ...ONR_V1_9_20_RELEASE_CARD_IDS,
+  ...ONR_V1_9_21_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -872,6 +1016,16 @@ export const DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS = [...ONR_V1_9_15_RELEASE_CAR
 
 export const DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS = [...ONR_V1_9_16_RELEASE_CARD_IDS] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS = [...ONR_V1_9_17_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS = [...ONR_V1_9_18_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS = [...ONR_V1_9_19_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS = [...ONR_V1_9_20_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS = [...ONR_V1_9_21_RELEASE_CARD_IDS] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
@@ -889,8 +1043,16 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS
 ]);
+const ONR_V1_9_21_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_21_RELEASE_CARD_IDS);
+const ONR_V1_9_19_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_19_RELEASE_CARD_IDS);
+const ONR_V1_9_20_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_20_RELEASE_CARD_IDS);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
 const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_IDS);
@@ -918,6 +1080,8 @@ const ONR_V1_9_13_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_13_RELEASE_CARD
 const ONR_V1_9_14_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_14_RELEASE_CARD_IDS);
 const ONR_V1_9_15_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_15_RELEASE_CARD_IDS);
 const ONR_V1_9_16_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_16_RELEASE_CARD_IDS);
+const ONR_V1_9_17_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_17_RELEASE_CARD_IDS);
+const ONR_V1_9_18_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_18_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -1172,6 +1336,51 @@ const ONR_V1_9_16_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json", "data/scenarios/ai-deck-legal-v1916-smokes.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.9.16 Program Subtype/Hosting/Stealth WIP", "data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json"],
   replayTests: ["packages/engine/src/index.test.ts::V1.9.16 Program Subtype/Hosting/Stealth WIP"]
+};
+
+const ONR_V1_9_17_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.17",
+  status: "human_playable_v1_9_17_generic_asset_node_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.17 Generic Asset/Node WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1917-generic-asset-node-release-smoke.json", "data/scenarios/ai-deck-legal-v1917-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.17 Generic Asset/Node WIP", "data/scenarios/v1917-generic-asset-node-release-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.17 Generic Asset/Node WIP"]
+};
+
+const ONR_V1_9_18_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.18",
+  status: "human_playable_v1_9_18_generic_upgrade_root_server_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.18 Generic Upgrade/Root Server WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1918-generic-upgrade-root-server-release-smoke.json", "data/scenarios/ai-deck-legal-v1918-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.18 Generic Upgrade/Root Server WIP", "data/scenarios/v1918-generic-upgrade-root-server-release-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.18 Generic Upgrade/Root Server WIP"]
+};
+
+const ONR_V1_9_19_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.19",
+  status: "human_playable_v1_9_19_agenda_overadvance_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.19 Agenda/Overadvance WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1919-agenda-overadvance-release-smoke.json", "data/scenarios/ai-deck-legal-v1919-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.19 Agenda/Overadvance WIP", "data/scenarios/v1919-agenda-overadvance-release-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.19 Agenda/Overadvance WIP"]
+};
+
+const ONR_V1_9_20_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.20",
+  status: "human_playable_v1_9_20_global_modifier_special_state_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.20 Global Modifier/Special-State WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1920-global-modifier-special-state-release-smoke.json", "data/scenarios/ai-deck-legal-v1920-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.20 Global Modifier/Special-State WIP", "data/scenarios/v1920-global-modifier-special-state-release-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.20 Global Modifier/Special-State WIP"]
+};
+
+const ONR_V1_9_21_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.21",
+  status: "human_playable_v1_9_21_deterministic_random_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.21 Deterministic Random WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1921-deterministic-random-release-smoke.json", "data/scenarios/ai-deck-legal-v1921-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.21 Deterministic Random WIP", "data/scenarios/v1921-deterministic-random-release-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.21 Deterministic Random WIP"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -2498,6 +2707,11 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV1921 = ONR_V1_9_21_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1920 = ONR_V1_9_20_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1919 = ONR_V1_9_19_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1918 = ONR_V1_9_18_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1917 = ONR_V1_9_17_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1916 = ONR_V1_9_16_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1915 = ONR_V1_9_15_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1914 = ONR_V1_9_14_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -2525,7 +2739,17 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV1916
+  const textOverrides = isV1921
+    ? {}
+    : isV1920
+    ? {}
+    : isV1919
+    ? {}
+    : isV1918
+    ? {}
+    : isV1917
+    ? {}
+    : isV1916
     ? {}
     : isV1915
     ? {}
@@ -2580,7 +2804,17 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV1916
+  const numericOverrides = isV1921
+    ? {}
+    : isV1920
+    ? {}
+    : isV1919
+    ? {}
+    : isV1918
+    ? {}
+    : isV1917
+    ? {}
+    : isV1916
     ? {}
     : isV1915
     ? {}
@@ -2635,7 +2869,17 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV1916
+  const manifest = isV1921
+    ? ONR_V1_9_21_RELEASE_MANIFEST
+    : isV1920
+    ? ONR_V1_9_20_RELEASE_MANIFEST
+    : isV1919
+    ? ONR_V1_9_19_RELEASE_MANIFEST
+    : isV1918
+    ? ONR_V1_9_18_RELEASE_MANIFEST
+    : isV1917
+    ? ONR_V1_9_17_RELEASE_MANIFEST
+    : isV1916
     ? ONR_V1_9_16_RELEASE_MANIFEST
     : isV1915
     ? ONR_V1_9_15_RELEASE_MANIFEST

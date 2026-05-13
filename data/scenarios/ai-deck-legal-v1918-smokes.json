@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "netgrid.ai-scenario-pack.v1",
+  "scenarioPackId": "ai-deck-legal-v1918-smokes",
+  "release": "V1.9.18",
+  "status": "ai_supported",
+  "scenarios": [
+    {
+      "id": "corp_v1918_upgrade_city_grid_counter",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_355_crystal-palace-station-grid",
+        "onr_v1_362_new-galveston-city-grid",
+        "onr_v1_365_paris-city-grid"
+      ],
+      "expectedDecisionFamilies": ["install_card", "rez_ice", "gain_credit", "resolve_choice"],
+      "sideSafetyAssertions": ["legal_actions_only", "city_grid_region_unique_server_scope", "hidden_zone_barrier", "state_hash_replay_stable"]
+    },
+    {
+      "id": "corp_v1918_upgrade_trace_tag_condition",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_364_omni-kismet-ph-d",
+        "onr_v1_365_paris-city-grid"
+      ],
+      "expectedDecisionFamilies": ["install_card", "rez_ice", "gain_credit", "trace_bid", "end_turn"],
+      "sideSafetyAssertions": ["trace_bid_private_to_active_side", "tag_condition_revalidated", "public_payload_only", "state_hash_replay_stable"]
+    },
+    {
+      "id": "corp_v1918_upgrade_run_tax_stealth",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_358_dr-dreff",
+        "onr_v1_372_turbeau-delacroix",
+        "onr_v1_373_twenty-four-hour-surveillance"
+      ],
+      "expectedDecisionFamilies": ["install_card", "rez_ice", "start_run", "end_turn"],
+      "sideSafetyAssertions": ["run_start_tax_revalidated", "stealth_recurring_credit_accounted", "legal_actions_only", "state_hash_replay_stable"]
+    },
+    {
+      "id": "corp_v1918_upgrade_access_ambush",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_354_crybaby",
+        "onr_v1_356_dedicated-response-team",
+        "onr_v1_357_dieter-esslin",
+        "onr_v1_366_red-herrings",
+        "onr_v1_372_turbeau-delacroix"
+      ],
+      "expectedDecisionFamilies": ["install_card", "access_card", "trash_accessed_card", "trace_bid"],
+      "sideSafetyAssertions": ["access_window_only", "damage_payload_redacted", "trace_bid_private_to_active_side", "state_hash_replay_stable"]
+    },
+    {
+      "id": "corp_v1918_upgrade_runtime_definition",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_359_jenny-jett",
+        "onr_v1_361_namatoki-plaza",
+        "onr_v1_369_singapore-city-grid",
+        "onr_v1_370_tesseract-fort-construction"
+      ],
+      "expectedDecisionFamilies": ["install_card", "rez_ice", "end_turn"],
+      "sideSafetyAssertions": ["runtime_definition_present", "trash_on_access_public_only", "no_special_rule_claim_before_promotion"]
+    }
+  ],
+  "verification": {
+    "ai": "pass: 85 tests",
+    "engine": "pass: 251 tests",
+    "server": "pass: 72 tests",
+    "web": "pass: 76 tests"
+  },
+  "completionGate": {
+    "aiSupported": true,
+    "legalActionsOnly": true,
+    "decisionDebugSideSafe": true,
+    "catalogPromotionPending": false,
+    "noV1919PlusScope": true
+  }
+}

@@ -19,6 +19,16 @@ import deckLegalV191V194AiHintsData from "../../../../../data/ai/ai-card-hints-d
 import deckLegalV195V198AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
 import deckLegalV199AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v199.json";
 import deckLegalV1911AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1911.json";
+import deckLegalV1912AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1912.json";
+import deckLegalV1913AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1913.json";
+import deckLegalV1914AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1914.json";
+import deckLegalV1915AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1915.json";
+import deckLegalV1916AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1916.json";
+import deckLegalV1917AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1917.json";
+import deckLegalV1918AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1918.json";
+import deckLegalV1919AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1919.json";
+import deckLegalV1920AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1920.json";
+import deckLegalV1921AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1921.json";
 import runtimeSupplementAiHintsData from "../../../../../data/ai/ai-card-hints-runtime-supplement.json";
 import corpTagSliceAiHintsData from "../../../../../data/ai/ai-card-hints-corp-tag-approval-slice.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
@@ -49,6 +59,16 @@ const AI_HINTS_BY_CARD_ID = new Map(
       ...(deckLegalV195V198AiHintsData.cards as CatalogAiHint[]),
       ...(deckLegalV199AiHintsData.cards as CatalogAiHint[]),
       ...(deckLegalV1911AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1912AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1913AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1914AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1915AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1916AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1917AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1918AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1919AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1920AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1921AiHintsData.cards as CatalogAiHint[]),
       ...(corpTagSliceAiHintsData.cards as CatalogAiHint[])
     ]
   ).map((hint) => [hint.cardId, hint])

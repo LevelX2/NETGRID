@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "1.9.22",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.22",
+  "generatedFor": "V1.9.22 Per-card Resolver Longtail und Originalset Completion Gate planning gate",
+  "generatedAt": "2026-05-13",
+  "status": "runtime_wip_no_promotion",
+  "extends": "data/rules/mechanics-coverage-1.9.21.json",
+  "gateAssertions": {
+    "perCardLongtailScopeFrozenToFortySevenCards": true,
+    "catalogWipGuardReady": true,
+    "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
+    "engineCovered": false,
+    "hiddenInfoSafeForCoveredSmokes": false,
+    "stateHashReplayStableForCoveredSmokes": false,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true,
+    "noV2Scope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.per_card_longtail_resolver_gate",
+      "label": "Per-card Resolver Longtail",
+      "currentStatus": "partial_runtime_wip",
+      "targetGate": "v1.9.22",
+      "currentScopeNote": "47 Karten sind im Catalog-WIP-Guard eingefroren; neun Runner-Hardware- und zehn Runner-Event-Zielkarten haben Runtime-Definitionen. Arasaka Portable Prototype hat einen LegalAction-Pfad mit Visibility und Replay/StateHash; Runner-Event-LegalActions bleiben Folgearbeit.",
+      "coverage": [
+        "scope_guard",
+        "runner_hardware_runtime_definitions",
+        "runner_hardware_install_legal_action",
+        "public_payload_visibility",
+        "replay_statehash",
+        "runner_event_runtime_definitions"
+      ]
+    }
+  ],
+  "deferred": [
+    {
+      "item": "runtime_engine_ai_completion_gate",
+      "reason": "V1.9.22 hat erste Runtime-Definitionen; konkrete LegalAction/applyAction-, Visibility-, Replay/StateHash-, AI-Artefakte und Final Review folgen."
+    }
+  ]
+}

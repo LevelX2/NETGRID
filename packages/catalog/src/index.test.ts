@@ -21,6 +21,11 @@ import deckLegalV1913AiHintsData from "../../../data/ai/ai-card-hints-deck-legal
 import deckLegalV1914AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1914.json";
 import deckLegalV1915AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1915.json";
 import deckLegalV1916AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1916.json";
+import deckLegalV1917AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1917.json";
+import deckLegalV1918AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1918.json";
+import deckLegalV1919AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1919.json";
+import deckLegalV1920AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1920.json";
+import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1921.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import v1910NoPromotionAiHintsData from "../../../data/ai/ai-card-hints-v1910-no-promotion.json";
 import aiHintsReport131Data from "../../../data/ai/ai-card-hints-report-1.3.1.json";
@@ -32,6 +37,11 @@ import cardImplementationManifest1913Data from "../../../data/manifests/card-imp
 import cardImplementationManifest1914Data from "../../../data/manifests/card-implementation-manifest-1.9.14.json";
 import cardImplementationManifest1915Data from "../../../data/manifests/card-implementation-manifest-1.9.15.json";
 import cardImplementationManifest1916Data from "../../../data/manifests/card-implementation-manifest-1.9.16.json";
+import cardImplementationManifest1917Data from "../../../data/manifests/card-implementation-manifest-1.9.17.json";
+import cardImplementationManifest1918Data from "../../../data/manifests/card-implementation-manifest-1.9.18.json";
+import cardImplementationManifest1919Data from "../../../data/manifests/card-implementation-manifest-1.9.19.json";
+import cardImplementationManifest1920Data from "../../../data/manifests/card-implementation-manifest-1.9.20.json";
+import cardImplementationManifest1921Data from "../../../data/manifests/card-implementation-manifest-1.9.21.json";
 import cardSupportManifest131Data from "../../../data/manifests/card-support-manifest-1.3.1.json";
 import kingOfTheRoadManifestData from "../../../data/manifests/king-of-the-road-ai-approval-manifest.json";
 import deckLegalBatchAManifestData from "../../../data/manifests/deck-legal-ai-approval-batch-a-manifest.json";
@@ -49,6 +59,11 @@ import deckLegalV1913ManifestData from "../../../data/manifests/deck-legal-ai-ap
 import deckLegalV1914ManifestData from "../../../data/manifests/deck-legal-ai-approval-v1914-manifest.json";
 import deckLegalV1915ManifestData from "../../../data/manifests/deck-legal-ai-approval-v1915-manifest.json";
 import deckLegalV1916ManifestData from "../../../data/manifests/deck-legal-ai-approval-v1916-manifest.json";
+import deckLegalV1917ManifestData from "../../../data/manifests/deck-legal-ai-approval-v1917-manifest.json";
+import deckLegalV1918ManifestData from "../../../data/manifests/deck-legal-ai-approval-v1918-manifest.json";
+import deckLegalV1919ManifestData from "../../../data/manifests/deck-legal-ai-approval-v1919-manifest.json";
+import deckLegalV1920ManifestData from "../../../data/manifests/deck-legal-ai-approval-v1920-manifest.json";
+import deckLegalV1921ManifestData from "../../../data/manifests/deck-legal-ai-approval-v1921-manifest.json";
 import kingOfTheRoadScenarioData from "../../../data/scenarios/ai-kotr-runner-approval-smokes.json";
 import deckLegalBatchAScenarioData from "../../../data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json";
 import corpTagSliceScenarioData from "../../../data/scenarios/ai-corp-tag-approval-slice-smokes.json";
@@ -65,6 +80,11 @@ import deckLegalV1913ScenarioData from "../../../data/scenarios/ai-deck-legal-v1
 import deckLegalV1914ScenarioData from "../../../data/scenarios/ai-deck-legal-v1914-smokes.json";
 import deckLegalV1915ScenarioData from "../../../data/scenarios/ai-deck-legal-v1915-smokes.json";
 import deckLegalV1916ScenarioData from "../../../data/scenarios/ai-deck-legal-v1916-smokes.json";
+import deckLegalV1917ScenarioData from "../../../data/scenarios/ai-deck-legal-v1917-smokes.json";
+import deckLegalV1918ScenarioData from "../../../data/scenarios/ai-deck-legal-v1918-smokes.json";
+import deckLegalV1919ScenarioData from "../../../data/scenarios/ai-deck-legal-v1919-smokes.json";
+import deckLegalV1920ScenarioData from "../../../data/scenarios/ai-deck-legal-v1920-smokes.json";
+import deckLegalV1921ScenarioData from "../../../data/scenarios/ai-deck-legal-v1921-smokes.json";
 import v1910StatusScenarioData from "../../../data/scenarios/v1910-status-manifest-catalog-smoke.json";
 import v1911ReleaseScenarioData from "../../../data/scenarios/v1911-hidden-zone-release-smoke.json";
 import v1912WipScenarioData from "../../../data/scenarios/v1912-counter-virus-recurring-wip-smoke.json";
@@ -72,6 +92,11 @@ import v1913ReleaseScenarioData from "../../../data/scenarios/v1913-damage-preve
 import v1914ReleaseScenarioData from "../../../data/scenarios/v1914-trace-tag-resource-smoke.json";
 import v1915ReleaseScenarioData from "../../../data/scenarios/v1915-run-access-multiaccess-smoke.json";
 import v1916ReleaseScenarioData from "../../../data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json";
+import v1917ReleaseScenarioData from "../../../data/scenarios/v1917-generic-asset-node-release-smoke.json";
+import v1918ReleaseScenarioData from "../../../data/scenarios/v1918-generic-upgrade-root-server-release-smoke.json";
+import v1919ReleaseScenarioData from "../../../data/scenarios/v1919-agenda-overadvance-release-smoke.json";
+import v1920ReleaseScenarioData from "../../../data/scenarios/v1920-global-modifier-special-state-release-smoke.json";
+import v1921ReleaseScenarioData from "../../../data/scenarios/v1921-deterministic-random-release-smoke.json";
 import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.3.1.json";
 import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
 import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
@@ -83,6 +108,11 @@ import v1913MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1
 import v1914MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.14.json";
 import v1915MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.15.json";
 import v1916MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.16.json";
+import v1917MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.17.json";
+import v1918MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.18.json";
+import v1919MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.19.json";
+import v1920MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.20.json";
+import v1921MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.21.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
 import {
   assertPipelinePayloadSafe,
@@ -106,6 +136,11 @@ import {
   DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
   createRuntimeCardsById,
@@ -142,12 +177,22 @@ import {
   ONR_V1_9_14_RELEASE_CARD_IDS,
   ONR_V1_9_15_RELEASE_CARD_IDS,
   ONR_V1_9_16_RELEASE_CARD_IDS,
+  ONR_V1_9_17_RELEASE_CARD_IDS,
+  ONR_V1_9_18_RELEASE_CARD_IDS,
+  ONR_V1_9_19_RELEASE_CARD_IDS,
+  ONR_V1_9_20_RELEASE_CARD_IDS,
+  ONR_V1_9_21_RELEASE_CARD_IDS,
   ONR_V1_9_12_WIP_CARD_IDS,
   ONR_V1_9_13_WIP_CARD_IDS,
   ONR_V1_9_14_WIP_CARD_IDS,
   ONR_V1_9_15_WIP_CARD_IDS,
   ONR_V1_9_16_WIP_CARD_IDS,
   ONR_V1_9_17_WIP_CARD_IDS,
+  ONR_V1_9_18_WIP_CARD_IDS,
+  ONR_V1_9_19_WIP_CARD_IDS,
+  ONR_V1_9_20_WIP_CARD_IDS,
+  ONR_V1_9_21_WIP_CARD_IDS,
+  ONR_V1_9_22_WIP_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   searchCatalog,
   validateAiCardHintsV2,
@@ -275,16 +320,37 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_9_13_RELEASE_CARD_IDS).toHaveLength(17);
     expect(ONR_V1_9_14_RELEASE_CARD_IDS).toHaveLength(25);
     expect(ONR_V1_9_15_RELEASE_CARD_IDS).toHaveLength(14);
+    expect(ONR_V1_9_16_RELEASE_CARD_IDS).toHaveLength(16);
+    expect(ONR_V1_9_17_RELEASE_CARD_IDS).toHaveLength(18);
+    expect(ONR_V1_9_18_RELEASE_CARD_IDS).toHaveLength(15);
+    expect(ONR_V1_9_19_RELEASE_CARD_IDS).toHaveLength(20);
+    expect(ONR_V1_9_20_RELEASE_CARD_IDS).toHaveLength(26);
+    expect(ONR_V1_9_21_RELEASE_CARD_IDS).toHaveLength(6);
+    expect(ONR_V1_9_21_WIP_CARD_IDS).toHaveLength(6);
+    expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
     expect(ONR_V1_9_14_WIP_CARD_IDS).toEqual(ONR_V1_9_14_RELEASE_CARD_IDS);
     expect(ONR_V1_9_15_WIP_CARD_IDS).toHaveLength(14);
     expect(ONR_V1_9_15_WIP_CARD_IDS).toEqual(ONR_V1_9_15_RELEASE_CARD_IDS);
     expect(ONR_V1_9_16_WIP_CARD_IDS).toHaveLength(16);
     expect(ONR_V1_9_16_WIP_CARD_IDS).toEqual(ONR_V1_9_16_RELEASE_CARD_IDS);
     expect(ONR_V1_9_17_WIP_CARD_IDS).toHaveLength(18);
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).not.toEqual(expect.arrayContaining([...ONR_V1_9_17_WIP_CARD_IDS]));
-    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(242);
+    expect(ONR_V1_9_17_WIP_CARD_IDS).toEqual(ONR_V1_9_17_RELEASE_CARD_IDS);
+    expect(ONR_V1_9_18_WIP_CARD_IDS).toHaveLength(15);
+    expect(ONR_V1_9_18_WIP_CARD_IDS).toEqual(ONR_V1_9_18_RELEASE_CARD_IDS);
+    expect(ONR_V1_9_19_WIP_CARD_IDS).toHaveLength(20);
+    expect(ONR_V1_9_19_WIP_CARD_IDS).toEqual(ONR_V1_9_19_RELEASE_CARD_IDS);
+    expect(ONR_V1_9_20_WIP_CARD_IDS).toHaveLength(26);
+    expect(ONR_V1_9_20_WIP_CARD_IDS).toEqual(ONR_V1_9_20_RELEASE_CARD_IDS);
+    expect(ONR_V1_9_21_WIP_CARD_IDS).toEqual(ONR_V1_9_21_RELEASE_CARD_IDS);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).not.toEqual(expect.arrayContaining([...ONR_V1_9_22_WIP_CARD_IDS]));
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(327);
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_15_RELEASE_CARD_IDS]));
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_16_RELEASE_CARD_IDS]));
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_17_RELEASE_CARD_IDS]));
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_18_RELEASE_CARD_IDS]));
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_19_RELEASE_CARD_IDS]));
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_20_RELEASE_CARD_IDS]));
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_21_RELEASE_CARD_IDS]));
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();
@@ -309,12 +375,27 @@ describe("catalog import and status logic", () => {
         ...DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
-        ...DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS
+        ...DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS
       ];
       expect(card?.statuses.ai_supported).toBe(approvedAiCards.includes(cardId));
       expect(card?.statuses.deck_legal).toBe(true);
       expect(card?.statuses.format_legal).toBe(true);
-      const expectedManifest = (ONR_V1_9_16_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+      const expectedManifest = (ONR_V1_9_21_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.21"
+        : (ONR_V1_9_20_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.20"
+        : (ONR_V1_9_19_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.19"
+        : (ONR_V1_9_18_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.18"
+        : (ONR_V1_9_17_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
+        ? "card-implementation-manifest-v1.9.17"
+        : (ONR_V1_9_16_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.9.16"
         : (ONR_V1_9_15_RELEASE_CARD_IDS as readonly string[]).includes(cardId)
         ? "card-implementation-manifest-v1.9.15"
@@ -568,8 +649,8 @@ describe("catalog import and status logic", () => {
     const runtimeOnrCards = Object.values(cardsById).filter((card) => card.catalogCardId.startsWith("onr_v1_") && card.statuses.human_playable && card.statuses.deck_legal);
     const runtimeAiSupportedOnrCards = runtimeOnrCards.filter((card) => card.statuses.ai_supported);
     expect(runtimeOnrCards.map((card) => card.catalogCardId).sort()).toEqual([...ONR_V1_RUNTIME_RELEASE_CARD_IDS].sort());
-    expect(runtimeOnrCards).toHaveLength(242);
-    expect(runtimeAiSupportedOnrCards).toHaveLength(242);
+    expect(runtimeOnrCards).toHaveLength(327);
+    expect(runtimeAiSupportedOnrCards).toHaveLength(327);
 
     expect(v1910RuntimeStatusReportData.counts.localOriginalsetCards).toBe(374);
     expect(v1910RuntimeStatusReportData.counts.runtimeHumanPlayableDeckLegalCards).toBe(143);
@@ -659,7 +740,12 @@ describe("catalog import and status logic", () => {
         ...DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS,
         ...DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
-        ...DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS
+        ...DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
+        ...DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS
       ].sort()
     );
     expect(JSON.stringify({ kingOfTheRoadAiHintsData, kingOfTheRoadManifestData, kingOfTheRoadScenarioData })).not.toMatch(
@@ -1410,6 +1496,311 @@ describe("catalog import and status logic", () => {
     }
 
     expect(JSON.stringify({ deckLegalV1916AiHintsData, deckLegalV1916ManifestData, deckLegalV1916ScenarioData, v1916ReleaseScenarioData, v1916MechanicsCoverageData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
+    );
+  });
+
+  it("approves the V1.9.17 generic asset node slice after full gates", () => {
+    const cardsById = createRuntimeCardsById();
+    const approved = new Set<string>(DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS);
+    const hints = deckLegalV1917AiHintsData.cards as Array<{
+      cardId: string;
+      roles: string[];
+      planRoles: string[];
+      requiredMechanics: string[];
+      aiSupportStatus: string;
+      scenarioRefs: string[];
+    }>;
+    const manifestCards = deckLegalV1917ManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
+    const implementationCards = cardImplementationManifest1917Data.cards as Array<{ cardCode: string; releaseStatus: string; aiSupported: boolean; resolverFamily: string }>;
+    const scenarioCards = new Set((deckLegalV1917ScenarioData.scenarios as Array<{ coversCards: string[] }>).flatMap((scenario) => scenario.coversCards));
+
+    expect(DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS).toHaveLength(18);
+    expect(ONR_V1_9_17_RELEASE_CARD_IDS).toHaveLength(18);
+    expect(ONR_V1_9_17_WIP_CARD_IDS).toEqual(ONR_V1_9_17_RELEASE_CARD_IDS);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_17_RELEASE_CARD_IDS]));
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...approved].sort());
+    expect(v1917ReleaseScenarioData.coversCards.sort()).toEqual([...approved].sort());
+    expect([...scenarioCards].sort()).toEqual([...approved].sort());
+    expect(cardImplementationManifest1917Data.gateAssertions.allCardsHumanPlayable).toBe(true);
+    expect(cardImplementationManifest1917Data.gateAssertions.allCardsDeckLegal).toBe(true);
+    expect(cardImplementationManifest1917Data.gateAssertions.allCardsAiSupported).toBe(true);
+    expect(deckLegalV1917ScenarioData.completionGate.aiSupported).toBe(true);
+    expect(v1917MechanicsCoverageData.gateAssertions.genericAssetNodeResolverCovered).toBe(true);
+    expect(v1917MechanicsCoverageData.gateAssertions.installedCardTargetingCovered).toBe(true);
+    expect(v1917MechanicsCoverageData.gateAssertions.virusCounterTargetingCovered).toBe(true);
+
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS) {
+      const runtimeCard = cardsById[cardId];
+      const hint = hints.find((candidate) => candidate.cardId === cardId);
+      const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
+      const implementation = implementationCards.find((candidate) => candidate.cardCode === cardId);
+      expect(runtimeCard?.statuses.human_playable, cardId).toBe(true);
+      expect(runtimeCard?.statuses.deck_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.format_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.ai_supported, cardId).toBe(true);
+      expect(runtimeCard?.implementationManifest?.manifestVersion, cardId).toBe("card-implementation-manifest-v1.9.17");
+      expect(runtimeCard?.text, cardId).not.toContain("WIP");
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(hint?.roles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.requiredMechanics.length, cardId).toBeGreaterThan(0);
+      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
+      expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(implementation?.releaseStatus, cardId).toBe("human_playable");
+      expect(implementation?.aiSupported, cardId).toBe(true);
+      expect(implementation?.resolverFamily.length, cardId).toBeGreaterThan(0);
+      expect(scenarioCards.has(cardId), cardId).toBe(true);
+    }
+
+    expect(JSON.stringify({ deckLegalV1917AiHintsData, deckLegalV1917ManifestData, deckLegalV1917ScenarioData, v1917ReleaseScenarioData, v1917MechanicsCoverageData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
+    );
+  });
+
+  it("approves the V1.9.18 generic upgrade root server slice after full gates", () => {
+    const cardsById = createRuntimeCardsById();
+    const approved = new Set<string>(DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS);
+    const hints = deckLegalV1918AiHintsData.cards as Array<{
+      cardId: string;
+      aiSupportStatus: string;
+      roles: string[];
+      planRoles: string[];
+      requiredMechanics: string[];
+      scenarioRefs: string[];
+    }>;
+    const manifestCards = deckLegalV1918ManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
+    const implementationCards = cardImplementationManifest1918Data.cards as Array<{ cardCode: string; releaseStatus: string; aiSupported: boolean; resolverFamily: string }>;
+    const scenarioCards = new Set((deckLegalV1918ScenarioData.scenarios as Array<{ coversCards: string[] }>).flatMap((scenario) => scenario.coversCards));
+
+    expect(DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS).toHaveLength(15);
+    expect(ONR_V1_9_18_RELEASE_CARD_IDS).toHaveLength(15);
+    expect(ONR_V1_9_18_WIP_CARD_IDS).toEqual(ONR_V1_9_18_RELEASE_CARD_IDS);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_18_RELEASE_CARD_IDS]));
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...approved].sort());
+    expect(v1918ReleaseScenarioData.coversCards.sort()).toEqual([...approved].sort());
+    expect([...scenarioCards].sort()).toEqual([...approved].sort());
+    expect(cardImplementationManifest1918Data.gateAssertions.allCardsHumanPlayable).toBe(true);
+    expect(cardImplementationManifest1918Data.gateAssertions.allCardsDeckLegal).toBe(true);
+    expect(cardImplementationManifest1918Data.gateAssertions.allCardsAiSupported).toBe(true);
+    expect(deckLegalV1918ScenarioData.completionGate.aiSupported).toBe(true);
+    expect(v1918MechanicsCoverageData.gateAssertions.genericUpgradeRootServerResolverCovered).toBe(true);
+    expect(v1918MechanicsCoverageData.gateAssertions.runStartTaxCovered).toBe(true);
+    expect(v1918MechanicsCoverageData.gateAssertions.tagConditionCreditCovered).toBe(true);
+
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS) {
+      const runtimeCard = cardsById[cardId];
+      const hint = hints.find((candidate) => candidate.cardId === cardId);
+      const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
+      const implementation = implementationCards.find((candidate) => candidate.cardCode === cardId);
+      expect(runtimeCard?.statuses.human_playable, cardId).toBe(true);
+      expect(runtimeCard?.statuses.deck_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.format_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.ai_supported, cardId).toBe(true);
+      expect(runtimeCard?.implementationManifest?.manifestVersion, cardId).toBe("card-implementation-manifest-v1.9.18");
+      expect(runtimeCard?.text, cardId).not.toContain("WIP");
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(hint?.roles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.requiredMechanics.length, cardId).toBeGreaterThan(0);
+      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
+      expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(implementation?.releaseStatus, cardId).toBe("human_playable");
+      expect(implementation?.aiSupported, cardId).toBe(true);
+      expect(implementation?.resolverFamily.length, cardId).toBeGreaterThan(0);
+      expect(scenarioCards.has(cardId), cardId).toBe(true);
+    }
+
+    expect(JSON.stringify({ deckLegalV1918AiHintsData, deckLegalV1918ManifestData, deckLegalV1918ScenarioData, v1918ReleaseScenarioData, v1918MechanicsCoverageData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
+    );
+  });
+
+  it("approves the V1.9.19 agenda overadvance slice after full gates", () => {
+    const cardsById = createRuntimeCardsById();
+    const approved = new Set<string>(DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS);
+    const hints = deckLegalV1919AiHintsData.cards as Array<{
+      cardId: string;
+      aiSupportStatus: string;
+      roles: string[];
+      planRoles: string[];
+      requiredMechanics: string[];
+      scenarioRefs: string[];
+    }>;
+    const manifestCards = deckLegalV1919ManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
+    const implementationCards = cardImplementationManifest1919Data.cards as Array<{ cardCode: string; releaseStatus: string; aiSupported: boolean; resolverFamily: string }>;
+    const scenarioCards = new Set((deckLegalV1919ScenarioData.scenarios as Array<{ coversCards: string[] }>).flatMap((scenario) => scenario.coversCards));
+
+    expect(DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS).toHaveLength(20);
+    expect(ONR_V1_9_19_RELEASE_CARD_IDS).toHaveLength(20);
+    expect(ONR_V1_9_19_WIP_CARD_IDS).toEqual(ONR_V1_9_19_RELEASE_CARD_IDS);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_19_RELEASE_CARD_IDS]));
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...approved].sort());
+    expect(v1919ReleaseScenarioData.coversCards.sort()).toEqual([...approved].sort());
+    expect([...scenarioCards].sort()).toEqual([...approved].sort());
+    expect(cardImplementationManifest1919Data.gateAssertions.allCardsHumanPlayable).toBe(true);
+    expect(cardImplementationManifest1919Data.gateAssertions.allCardsDeckLegal).toBe(true);
+    expect(cardImplementationManifest1919Data.gateAssertions.allCardsAiSupported).toBe(true);
+    expect(deckLegalV1919ScenarioData.completionGate.aiSupported).toBe(true);
+    expect(v1919MechanicsCoverageData.gateAssertions.scoredAgendaResolverCovered).toBe(true);
+    expect(v1919MechanicsCoverageData.gateAssertions.agendaDifficultyOveradvanceCovered).toBe(true);
+    expect(v1919MechanicsCoverageData.gateAssertions.runnerAgendaCostEdgesCovered).toBe(true);
+
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS) {
+      const runtimeCard = cardsById[cardId];
+      const hint = hints.find((candidate) => candidate.cardId === cardId);
+      const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
+      const implementation = implementationCards.find((candidate) => candidate.cardCode === cardId);
+      expect(runtimeCard?.statuses.human_playable, cardId).toBe(true);
+      expect(runtimeCard?.statuses.deck_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.format_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.ai_supported, cardId).toBe(true);
+      expect(runtimeCard?.implementationManifest?.manifestVersion, cardId).toBe("card-implementation-manifest-v1.9.19");
+      expect(runtimeCard?.text, cardId).not.toContain("WIP");
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(hint?.roles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.requiredMechanics.length, cardId).toBeGreaterThan(0);
+      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
+      expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(implementation?.releaseStatus, cardId).toBe("human_playable");
+      expect(implementation?.aiSupported, cardId).toBe(true);
+      expect(implementation?.resolverFamily.length, cardId).toBeGreaterThan(0);
+      expect(scenarioCards.has(cardId), cardId).toBe(true);
+    }
+
+    expect(JSON.stringify({ deckLegalV1919AiHintsData, deckLegalV1919ManifestData, deckLegalV1919ScenarioData, v1919ReleaseScenarioData, v1919MechanicsCoverageData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
+    );
+  });
+
+  it("approves the V1.9.20 global modifier and special-state slice after full gates", () => {
+    const cardsById = createRuntimeCardsById();
+    const approved = new Set<string>(DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS);
+    const hints = deckLegalV1920AiHintsData.cards as Array<{
+      cardId: string;
+      aiSupportStatus: string;
+      roles: string[];
+      planRoles: string[];
+      requiredMechanics: string[];
+      scenarioRefs: string[];
+    }>;
+    const manifestCards = deckLegalV1920ManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
+    const implementationCards = cardImplementationManifest1920Data.cards as Array<{ cardCode: string; releaseStatus: string; aiSupported: boolean; resolverFamily: string }>;
+    const scenarioCards = new Set((deckLegalV1920ScenarioData.scenarios as Array<{ coversCards: string[] }>).flatMap((scenario) => scenario.coversCards));
+
+    expect(DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS).toHaveLength(26);
+    expect(ONR_V1_9_20_RELEASE_CARD_IDS).toHaveLength(26);
+    expect(ONR_V1_9_20_WIP_CARD_IDS).toEqual(ONR_V1_9_20_RELEASE_CARD_IDS);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_20_RELEASE_CARD_IDS]));
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...approved].sort());
+    expect(v1920ReleaseScenarioData.coversCards.sort()).toEqual([...approved].sort());
+    expect([...scenarioCards].sort()).toEqual([...approved].sort());
+    expect(cardImplementationManifest1920Data.gateAssertions.allCardsHumanPlayable).toBe(true);
+    expect(cardImplementationManifest1920Data.gateAssertions.allCardsDeckLegal).toBe(true);
+    expect(cardImplementationManifest1920Data.gateAssertions.allCardsAiSupported).toBe(true);
+    expect(deckLegalV1920ScenarioData.completionGate.aiSupported).toBe(true);
+    expect(v1920MechanicsCoverageData.gateAssertions.engineCovered).toBe(true);
+    expect(v1920MechanicsCoverageData.gateAssertions.hiddenInfoSafeForCoveredSmokes).toBe(true);
+    expect(v1920MechanicsCoverageData.gateAssertions.catalogPromotionPending).toBe(false);
+
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS) {
+      const runtimeCard = cardsById[cardId];
+      const hint = hints.find((candidate) => candidate.cardId === cardId);
+      const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
+      const implementation = implementationCards.find((candidate) => candidate.cardCode === cardId);
+      expect(runtimeCard?.statuses.human_playable, cardId).toBe(true);
+      expect(runtimeCard?.statuses.deck_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.format_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.ai_supported, cardId).toBe(true);
+      expect(runtimeCard?.implementationManifest?.manifestVersion, cardId).toBe("card-implementation-manifest-v1.9.20");
+      expect(runtimeCard?.text, cardId).not.toContain("WIP");
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(hint?.roles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.requiredMechanics.length, cardId).toBeGreaterThan(0);
+      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
+      expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(implementation?.releaseStatus, cardId).toBe("human_playable");
+      expect(implementation?.aiSupported, cardId).toBe(true);
+      expect(implementation?.resolverFamily.length, cardId).toBeGreaterThan(0);
+      expect(scenarioCards.has(cardId), cardId).toBe(true);
+    }
+
+    expect(JSON.stringify({ deckLegalV1920AiHintsData, deckLegalV1920ManifestData, deckLegalV1920ScenarioData, v1920ReleaseScenarioData, v1920MechanicsCoverageData })).not.toMatch(
+      /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
+    );
+  });
+
+  it("approves the V1.9.21 deterministic random slice after full gates", () => {
+    const cardsById = createRuntimeCardsById();
+    const approved = new Set<string>(DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS);
+    const hints = deckLegalV1921AiHintsData.cards as Array<{
+      cardId: string;
+      aiSupportStatus: string;
+      roles: string[];
+      planRoles: string[];
+      requiredMechanics: string[];
+      scenarioRefs: string[];
+    }>;
+    const manifestCards = deckLegalV1921ManifestData.cards as Array<{ cardId: string; status: string; scenarioRefs: string[] }>;
+    const implementationCards = cardImplementationManifest1921Data.cards as Array<{ cardCode: string; releaseStatus: string; aiSupported: boolean; resolverFamily: string }>;
+    const scenarioCards = new Set((deckLegalV1921ScenarioData.scenarios as Array<{ coversCards: string[] }>).flatMap((scenario) => scenario.coversCards));
+
+    expect(DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS).toHaveLength(6);
+    expect(ONR_V1_9_21_RELEASE_CARD_IDS).toHaveLength(6);
+    expect(ONR_V1_9_21_WIP_CARD_IDS).toEqual(ONR_V1_9_21_RELEASE_CARD_IDS);
+    expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_21_RELEASE_CARD_IDS]));
+    expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
+    expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
+    expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...approved].sort());
+    expect(v1921ReleaseScenarioData.coversCards.sort()).toEqual([...approved].sort());
+    expect([...scenarioCards].sort()).toEqual([...approved].sort());
+    expect(cardImplementationManifest1921Data.gateAssertions.allCardsHumanPlayable).toBe(true);
+    expect(cardImplementationManifest1921Data.gateAssertions.allCardsDeckLegal).toBe(true);
+    expect(cardImplementationManifest1921Data.gateAssertions.allCardsAiSupported).toBe(true);
+    expect(deckLegalV1921ScenarioData.completionGate.aiSupported).toBe(true);
+    expect(v1921MechanicsCoverageData.gateAssertions.engineCovered).toBe("all_target_cards_initial_random_probe");
+    expect(v1921MechanicsCoverageData.gateAssertions.hiddenInfoSafeForCoveredSmokes).toBe(true);
+    expect(v1921MechanicsCoverageData.gateAssertions.catalogPromotionPending).toBe(false);
+
+    for (const cardId of DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS) {
+      const runtimeCard = cardsById[cardId];
+      const hint = hints.find((candidate) => candidate.cardId === cardId);
+      const manifest = manifestCards.find((candidate) => candidate.cardId === cardId);
+      const implementation = implementationCards.find((candidate) => candidate.cardCode === cardId);
+      expect(runtimeCard?.statuses.human_playable, cardId).toBe(true);
+      expect(runtimeCard?.statuses.deck_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.format_legal, cardId).toBe(true);
+      expect(runtimeCard?.statuses.ai_supported, cardId).toBe(true);
+      expect(runtimeCard?.implementationManifest?.manifestVersion, cardId).toBe("card-implementation-manifest-v1.9.21");
+      expect(runtimeCard?.text, cardId).not.toContain("WIP");
+      expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(hint?.requiredMechanics, cardId).toContain("deterministic_random_card_resolver");
+      expect(hint?.roles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.planRoles.length, cardId).toBeGreaterThan(0);
+      expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(manifest?.status, cardId).toBe("ai_supported");
+      expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+      expect(implementation?.releaseStatus, cardId).toBe("human_playable");
+      expect(implementation?.aiSupported, cardId).toBe(true);
+      expect(implementation?.resolverFamily, cardId).toContain("deterministic_random_card_resolver");
+      expect(scenarioCards.has(cardId), cardId).toBe(true);
+    }
+
+    expect(JSON.stringify({ deckLegalV1921AiHintsData, deckLegalV1921ManifestData, deckLegalV1921ScenarioData, v1921ReleaseScenarioData, v1921MechanicsCoverageData })).not.toMatch(
       /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
     );
   });

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-manifest-v1",
+  "id": "deck-legal-ai-approval-v1918",
+  "release": "V1.9.18",
+  "status": "ai_supported",
+  "extends": "data/manifests/deck-legal-ai-approval-v1917-manifest.json",
+  "scope": {
+    "cardCount": 15,
+    "cardIds": [
+      "onr_v1_354_crybaby",
+      "onr_v1_355_crystal-palace-station-grid",
+      "onr_v1_356_dedicated-response-team",
+      "onr_v1_357_dieter-esslin",
+      "onr_v1_358_dr-dreff",
+      "onr_v1_359_jenny-jett",
+      "onr_v1_361_namatoki-plaza",
+      "onr_v1_362_new-galveston-city-grid",
+      "onr_v1_364_omni-kismet-ph-d",
+      "onr_v1_365_paris-city-grid",
+      "onr_v1_366_red-herrings",
+      "onr_v1_369_singapore-city-grid",
+      "onr_v1_370_tesseract-fort-construction",
+      "onr_v1_372_turbeau-delacroix",
+      "onr_v1_373_twenty-four-hour-surveillance"
+    ]
+  },
+  "artifacts": {
+    "aiHints": "data/ai/ai-card-hints-deck-legal-v1918.json",
+    "aiSmokes": "data/scenarios/ai-deck-legal-v1918-smokes.json",
+    "engineSmoke": "data/scenarios/v1918-generic-upgrade-root-server-release-smoke.json",
+    "cardManifest": "data/manifests/card-implementation-manifest-1.9.18.json",
+    "mechanicsCoverage": "data/rules/mechanics-coverage-1.9.18.json"
+  },
+  "gateAssertions": {
+    "allCardsHaveDraftHintEntries": true,
+    "aiSupportedPromotion": true,
+    "runnerDecisionDebugSideSafe": true,
+    "corpDecisionDebugSideSafe": true,
+    "legalActionOnly": true,
+    "catalogPromotionPending": false,
+    "noV1919PlusScope": true
+  },
+  "cards": [
+    { "cardId": "onr_v1_354_crybaby", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_354_crybaby", "scenarioRefs": ["corp_v1918_upgrade_access_ambush"] },
+    { "cardId": "onr_v1_355_crystal-palace-station-grid", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_355_crystal-palace-station-grid", "scenarioRefs": ["corp_v1918_upgrade_city_grid_counter"] },
+    { "cardId": "onr_v1_356_dedicated-response-team", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_356_dedicated-response-team", "scenarioRefs": ["corp_v1918_upgrade_access_ambush"] },
+    { "cardId": "onr_v1_357_dieter-esslin", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_357_dieter-esslin", "scenarioRefs": ["corp_v1918_upgrade_access_ambush"] },
+    { "cardId": "onr_v1_358_dr-dreff", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_358_dr-dreff", "scenarioRefs": ["corp_v1918_upgrade_run_tax_stealth"] },
+    { "cardId": "onr_v1_359_jenny-jett", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_359_jenny-jett", "scenarioRefs": ["corp_v1918_upgrade_runtime_definition"] },
+    { "cardId": "onr_v1_361_namatoki-plaza", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_361_namatoki-plaza", "scenarioRefs": ["corp_v1918_upgrade_runtime_definition"] },
+    { "cardId": "onr_v1_362_new-galveston-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_362_new-galveston-city-grid", "scenarioRefs": ["corp_v1918_upgrade_city_grid_counter"] },
+    { "cardId": "onr_v1_364_omni-kismet-ph-d", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_364_omni-kismet-ph-d", "scenarioRefs": ["corp_v1918_upgrade_trace_tag_condition"] },
+    { "cardId": "onr_v1_365_paris-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_365_paris-city-grid", "scenarioRefs": ["corp_v1918_upgrade_city_grid_counter", "corp_v1918_upgrade_trace_tag_condition"] },
+    { "cardId": "onr_v1_366_red-herrings", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_366_red-herrings", "scenarioRefs": ["corp_v1918_upgrade_access_ambush"] },
+    { "cardId": "onr_v1_369_singapore-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_369_singapore-city-grid", "scenarioRefs": ["corp_v1918_upgrade_runtime_definition"] },
+    { "cardId": "onr_v1_370_tesseract-fort-construction", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_370_tesseract-fort-construction", "scenarioRefs": ["corp_v1918_upgrade_runtime_definition"] },
+    { "cardId": "onr_v1_372_turbeau-delacroix", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_372_turbeau-delacroix", "scenarioRefs": ["corp_v1918_upgrade_access_ambush", "corp_v1918_upgrade_run_tax_stealth"] },
+    { "cardId": "onr_v1_373_twenty-four-hour-surveillance", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1918:onr_v1_373_twenty-four-hour-surveillance", "scenarioRefs": ["corp_v1918_upgrade_run_tax_stealth"] }
+  ]
+}

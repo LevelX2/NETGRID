@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1921-deterministic-random-release-smoke",
+  "release": "V1.9.21",
+  "status": "release",
+  "coversCards": [
+    "onr_v1_002_ai-boon",
+    "onr_v1_008_boardwalk",
+    "onr_v1_104_playful-ai",
+    "onr_v1_172_quest-for-cattekin",
+    "onr_v1_339_schlaghund",
+    "onr_v1_367_rio-de-janeiro-city-grid"
+  ],
+  "assertions": [
+    "V1.9.21 scope is frozen to exactly 6 target cards.",
+    "Catalog release guard promotes the exact target set.",
+    "All 6 V1.9.21 target cards have runtime definitions with final display-only text and no WIP prefix.",
+    "All six V1.9.21 cards are release-promoted and AI-approved after the final gate.",
+    "V1.9.22 False Echo remains outside the V1.9.21 release runtime guard.",
+    "Schlaghund has a V1.9.21 deterministic random Asset LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "Rio de Janeiro City Grid has a V1.9.21 deterministic random Upgrade LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "AI Boon and Boardwalk have V1.9.21 deterministic random installed-program LegalAction smokes with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "Playful AI has a V1.9.21 deterministic random play_event smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "Quest for Cattekin has a V1.9.21 deterministic random installed-resource LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "All six V1.9.21 target cards have deterministic random probes plus final Catalog and AI promotion."
+  ],
+  "verification": {
+    "json": "pass",
+    "catalog": "pass: 36 tests",
+    "engine": "pass: 271 tests",
+    "ai": "pass: 85 tests",
+    "server": "pass: 72 tests",
+    "web": "pass: 77 tests",
+    "typecheck": "pass",
+    "test": "pass",
+    "lint": "pass",
+    "build": "pass with known non-blocking Turbopack NFT warning"
+  },
+  "completionGate": {
+    "releaseDone": true,
+    "catalogPromoted": true,
+    "aiPromoted": true,
+    "runtimeDefinitionsReady": true,
+    "engineCovered": "all_target_cards_initial_random_probe"
+  }
+}

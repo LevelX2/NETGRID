@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.9.17",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.17",
+  "generatedFor": "V1.9.17 Generische Asset/Node-Faehigkeiten release gate",
+  "generatedAt": "2026-05-13",
+  "status": "release_promoted",
+  "extends": "data/rules/mechanics-coverage-1.9.16.json",
+  "gateAssertions": {
+    "genericAssetNodeResolverCovered": true,
+    "campaignEconomyCovered": true,
+    "recurringAssetRefreshCovered": true,
+    "traceAssetWindowCovered": true,
+    "hiddenZoneAssetChoicesCovered": true,
+    "accessAmbushCovered": true,
+    "installedCardTargetingCovered": true,
+    "virusCounterTargetingCovered": true,
+    "damageAndTagPathsCovered": true,
+    "hostingLifecycleCovered": true,
+    "stateHashReplayStableForCoveredSmokes": true,
+    "aiChoicePathsCovered": true,
+    "noV1918PlusScope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.asset.generic_node",
+      "label": "Generische Asset/Node-Faehigkeiten",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.17",
+      "currentScopeNote": "Alle 18 Zielkarten installieren, rezzen und interagieren ueber LegalAction-basierte Asset-/Node-Pfade.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.asset.campaign_economy",
+      "label": "Campaign/Economy Assets",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.17",
+      "currentScopeNote": "Acht Economy-Assets bieten oeffentliche Gain-Credit-LegalActions; fuenf Recurring-Assets refreshen am Corp-Turnstart.",
+      "coverage": ["unit", "legal_action"]
+    },
+    {
+      "mechanicId": "mechanic.asset.trace_hidden_ambush",
+      "label": "Trace, Hidden-Zone und Ambush Assets",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.17",
+      "currentScopeNote": "Blood Cat/Krumz, Corporate Negotiating Center/Rescheduler und Setup!/TRAP! nutzen bestehende side-sichere Trace-, Hidden-Zone- und Access-Ambush-Barrieren.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.asset.installed_targets_and_counters",
+      "label": "Installierte Ziele und Virus-Counter",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.17",
+      "currentScopeNote": "Cowboy Sysop trasht sichtbare installierte Runner-Karten; Disinfectant, Inc. entfernt sichtbare Virus-Counter mit Ziel-Revalidierung.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.hosting.lifecycle.v1917_assets",
+      "label": "V1.9.17 Asset Hosting Lifecycle",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.17",
+      "currentScopeNote": "Gehostete Korp-Karten kaskadieren beim Host-Trash nach Archives und entfernen hostedOn deterministisch.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    }
+  ],
+  "deferred": []
+}

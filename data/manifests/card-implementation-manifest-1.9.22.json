@@ -1,0 +1,398 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.22",
+  "id": "v1.9.22-per-card-longtail-manifest",
+  "status": "runtime_wip_no_promotion",
+  "extends": "data/manifests/card-implementation-manifest-1.9.21.json",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only",
+  "gateAssertions": {
+    "v1922ScopeFrozenToFortySevenCards": true,
+    "catalogWipGuardReady": true,
+    "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
+    "engineCovered": false,
+    "stateHashReplayStableForCoveredSmokes": false,
+    "noOfficialAssets": true,
+    "noV2ScopeExpansion": true,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_026_false-echo",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_027_flak",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_031_hammer",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_037_japanese-water-torture",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_044_netspace-inverter",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_045_newsgroup-filter",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_048_poltergeist",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_051_rabbit",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_055_reflector",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_057_scatter-shot",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_061_shield",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_067_speed-trap",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_068_startup-immolator",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_075_zetatech-software-installer",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_077_anonymous-tip",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_080_core-command-jettison-ice",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_086_forged-activation-orders",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_093_if-you-want-it-done-right",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_100_misc-for-sale",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_102_open-ended-mileage-program",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_103_organ-donor",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_109_security-code-worm-chip",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_113_synchronized-attack-on-hq",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_117_valu-pak-software-bundle",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_119_arasaka-portable-prototype",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_122_artemis-2020",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_123_bodyweight-data-creche",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_124_corolla-speed-chip",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_131_microtech-backup-drive",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_136_pandoras-deck",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_137_parraline-5750",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_138_pk-6089a",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_147_zz22-speed-chip",
+      "releaseStatus": "runtime_wip_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_195_corporate-retreat",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_196_corporate-war",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_197_data-fort-reclamation",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_206_marine-arcology",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_210_political-overthrow",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_216_security-purge",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_247_haunting-inquisition",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_274_tutor",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_276_viral-15",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_277_virizz",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_280_zombie",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_289_edgerunner-inc-temps",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_296_off-site-backups",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    },
+    {
+      "cardCode": "onr_v1_298_planning-consultants",
+      "releaseStatus": "planned_no_promotion",
+      "aiSupported": false,
+      "resolverFamily": "per_card_longtail_resolver_gate",
+      "coveredSmokes": []
+    }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 47,
+    "implementedCardCount": 19,
+    "finalGateCardCount": 0,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 1
+  }
+}
