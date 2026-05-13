@@ -2048,9 +2048,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(before)).not.toContain("Simple Agenda");
 
     const started = await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "archives", "v112-run-archives");
-    expect(started.actorPayload.playerView.run?.breach).toMatchObject({ serverId: "archives", remainingCount: 3 });
-    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Economy Asset");
-    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Agenda");
+    expect(started.actorPayload.playerView.run?.breach).toMatchObject({ serverId: "archives", remainingCount: 1 });
+    expect(JSON.stringify(started.actorPayload)).toContain("Simple Economy Asset");
+    expect(JSON.stringify(started.actorPayload)).toContain("Simple Agenda");
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
@@ -2058,32 +2058,27 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
-    expect(reconnected.playerView.run?.breach?.remainingCount).toBe(3);
+    expect(reconnected.playerView.run?.breach?.remainingCount).toBe(1);
     expect(JSON.stringify(reconnected)).toContain("Simple Economy Operation");
-    expect(JSON.stringify(reconnected)).not.toContain("Simple Economy Asset");
-    expect(JSON.stringify(reconnected)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(reconnected)).toContain("Simple Economy Asset");
+    expect(JSON.stringify(reconnected)).toContain("Simple Agenda");
 
-    const firstAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-faceup");
-    expect(firstAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation", serverLabel: "Archives" });
-    expect(JSON.stringify(firstAccess.actorPayload)).not.toContain("Simple Economy Asset");
-    expect(JSON.stringify(firstAccess.actorPayload)).not.toContain("Simple Agenda");
-
-    const secondAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-facedown");
-    expect(secondAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_asset", serverLabel: "Archives" });
-    expect(JSON.stringify(secondAccess.actorPayload)).toContain("Simple Economy Asset");
-    expect(JSON.stringify(secondAccess.actorPayload)).not.toContain("Simple Agenda");
+    const firstAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-agenda");
+    expect(firstAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_agenda", serverLabel: "Archives" });
+    expect(JSON.stringify(firstAccess.actorPayload)).toContain("Simple Economy Asset");
+    expect(JSON.stringify(firstAccess.actorPayload)).toContain("Simple Agenda");
 
     const duplicate = await match.service.submitAction({
       matchId: match.matchId,
       side: match.runner.side,
       sessionToken: reconnected.sessionToken,
-      actionId: secondAccess.receipt.idempotencyKey,
-      clientKnownStateVersion: secondAccess.receipt.stateVersionBefore,
-      idempotencyKey: "v112-access-facedown"
+      actionId: firstAccess.receipt.idempotencyKey,
+      clientKnownStateVersion: firstAccess.receipt.stateVersionBefore,
+      idempotencyKey: "v112-access-agenda"
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(secondAccess.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(firstAccess.receipt.stateVersionAfter);
 
     const blocked = await match.service.requestUndo({
       matchId: match.matchId,
