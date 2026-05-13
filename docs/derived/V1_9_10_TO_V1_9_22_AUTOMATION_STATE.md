@@ -69,6 +69,17 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-14 01:10 CEST
+- Ergebnis: V1.9.22 Blocker-/State-Abgleich nach den letzten WIP-Commits; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Die fuehrenden Preflights, `data/rules/v1922-local-card-facts.json`, `data/rules/v1922-local-resolver-working-basis.json`, `data/reports/v1922-completion-gate-status.json` und `docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md` wurden gegeneinander geprueft. Ergebnis: Fuer die verbleibenden Runner-Programme, Corp-ICE und Corp-Agenden liegen lokale Fakten vor, aber kein ausreichend bestaetigter LegalAction-/applyAction-Vertrag fuer den naechsten Runtime-Schnitt. Runtime-Code bleibt deshalb gesperrt; keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: Dokumentations-/Statusschnitt; vorheriger nicht-Breaker-Programm-Breitverify bleibt gruen. Naechster sinnvoller technischer Check fuer Folgeaenderungen bleibt `catalog`, danach `engine` sobald ein Resolververtrag geschlossen ist.
+- Git: Letzte vorhandene WIP-Checkpoints sind `4020c7fc` (`WIP V1.9.22: remaining runner program preflight wip`), `7144ae0a` (`WIP V1.9.22: non-breaker runner program install-only wip`), `a28df824` (`WIP V1.9.22: runner program install-only expansion wip`), `52ec51f9` (`WIP V1.9.22: newsgroup filter install-only wip`), `4ebf13ce` (`WIP V1.9.22: remaining corp ice preflight wip`) und `ea27ec1c` (`WIP V1.9.22: newsgroup filter preflight wip`).
+- Blocker: Hard fachlicher P0 fuer weiteren Runtime-Code im aktuellen Cursor, bis mindestens ein verbleibender Kartenpfad einen engen, dokumentierten Vertrag fuer LegalActions, applyAction-Revalidierung, PublicPayload/PlayerViews und Replay/StateHash besitzt. Konkrete Removal Conditions stehen in `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md`, `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md`, `docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md` und `docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md`.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
 - Zeitpunkt: 2026-05-14 01:05 CEST
 - Ergebnis: V1.9.22 Remaining-Runner-Program-Preflight nachgezogen; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
@@ -988,6 +999,12 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Commit
 
+- WIP-Commit V1.9.22: `4020c7fc` (`WIP V1.9.22: remaining runner program preflight wip`).
+- WIP-Commit V1.9.22: `7144ae0a` (`WIP V1.9.22: non-breaker runner program install-only wip`).
+- WIP-Commit V1.9.22: `a28df824` (`WIP V1.9.22: runner program install-only expansion wip`).
+- WIP-Commit V1.9.22: `52ec51f9` (`WIP V1.9.22: newsgroup filter install-only wip`).
+- WIP-Commit V1.9.22: `4ebf13ce` (`WIP V1.9.22: remaining corp ice preflight wip`).
+- WIP-Commit V1.9.22: `ea27ec1c` (`WIP V1.9.22: newsgroup filter preflight wip`).
 - WIP-Commit V1.9.22: `65015d7a` (`WIP V1.9.22: resolver contract matrix`).
 - WIP-Commit V1.9.22: `5ec40b63` (`WIP V1.9.22: source scan timestamp correction`).
 - WIP-Commit V1.9.22: `3a0b179f` (`WIP V1.9.22: resolver source scan review`).
@@ -999,6 +1016,12 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Push
 
+- Push erfolgreich: `4020c7fc` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `7144ae0a` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `a28df824` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `52ec51f9` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `4ebf13ce` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `ea27ec1c` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `65015d7a` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `5ec40b63` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `3a0b179f` auf `origin/codex/v1-9-originalset-completion`.

@@ -52,6 +52,8 @@ Status: runtime WIP, no release/catalog/AI promotion
 
 Naechster kleiner Schnitt: `Security Purge`, sobald der in `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentierte Installationsvertrag fuer revealed ICE lokal bestaetigt ist. `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer die sechs verbleibenden Corp-Longtailkarten zusammen. Fuer `Newsgroup Filter` bleibt nur die Credit-Gain-Faehigkeit gesperrt, bis Aktivierungstiming, Kosten und Limit bestaetigt sind.
 
+Blocker-Abgleich 2026-05-14 01:10 CEST: Nach Pruefung von Automation-State, Completion-Gate-Status, lokaler Kartenfaktenbasis und vier Preflights gibt es derzeit keinen weiteren fachlich sicheren Runtime-Code-Schnitt ohne neue Vertragsentscheidung. `Security Purge`, `Data Fort Reclamation`, `Haunting Inquisition`, `Tutor`, `Viral 15`, `Virizz`, `Flak`, `Hammer`, `Japanese Water Torture`, `Reflector`, `Zetatech Software Installer` und die `Newsgroup Filter`-Ability bleiben fuer Code gesperrt, bis die jeweils dokumentierten LegalAction-/applyAction-, Visibility- und Replay-/StateHash-Vertraege geschlossen sind. Dieser Befund aendert keine Runtime-, Catalog-, AI- oder Release-Promotion.
+
 ## Verifikation
 
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 295 Tests inkl. `Edgerunner, Inc., Temps` Install-only-Aktionsbundle, Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash.

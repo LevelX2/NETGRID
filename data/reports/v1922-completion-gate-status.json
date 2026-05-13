@@ -133,7 +133,7 @@
     "decision": "runtime_wip_no_catalog_or_ai_promotion"
   },
   "latestPreflightReviews": {
-    "createdAt": "2026-05-14T00:27:00+02:00",
+    "createdAt": "2026-05-14T01:05:00+02:00",
       "docs": [
         "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
         "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
@@ -175,6 +175,36 @@
       }
     ],
     "decision": "no_runtime_catalog_or_ai_promotion"
+  },
+  "latestBlockerReview": {
+    "reviewedAt": "2026-05-14T01:10:00+02:00",
+    "status": "hard_functional_p0_for_additional_runtime_code",
+    "reviewedRefs": [
+      "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
+      "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
+      "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
+      "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
+      "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md",
+      "docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md",
+      "data/rules/v1922-local-card-facts.json",
+      "data/rules/v1922-local-resolver-working-basis.json"
+    ],
+    "summary": "Local card facts exist for all remaining targets, but no remaining target has a confirmed narrow LegalAction/applyAction contract for safe runtime code.",
+    "blockedCards": [
+      "onr_v1_027_flak",
+      "onr_v1_031_hammer",
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_045_newsgroup-filter",
+      "onr_v1_055_reflector",
+      "onr_v1_075_zetatech-software-installer",
+      "onr_v1_197_data-fort-reclamation",
+      "onr_v1_216_security-purge",
+      "onr_v1_247_haunting-inquisition",
+      "onr_v1_274_tutor",
+      "onr_v1_276_viral-15",
+      "onr_v1_277_virizz"
+    ],
+    "removalCondition": "Confirm one card's full runtime contract: LegalAction projection, applyAction revalidation, side-safe public/private payloads, and deterministic Replay/StateHash expectations."
   },
   "blockingGates": [
     {

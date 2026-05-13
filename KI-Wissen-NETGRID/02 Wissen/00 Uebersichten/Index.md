@@ -58,6 +58,8 @@
 
 - V1.9.22 Remaining-Corp-ICE-Preflight: `docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md` haelt `Tutor` und `Virizz` als kleinste ICE-Kandidaten fest; Runtime-Code bleibt gesperrt, bis run-weite Zusatzsubroutine bzw. Break-Kostenmodifikation LegalAction-/applyAction-sicher bestaetigt sind.
 
+- V1.9.22 Blocker-Abgleich vom 2026-05-14: Weitere Runtime-Schnitte sind fachlich gesperrt, bis fuer mindestens eine der offenen Karten `Security Purge`, `Data Fort Reclamation`, `Haunting Inquisition`, `Tutor`, `Viral 15`, `Virizz`, `Flak`, `Hammer`, `Japanese Water Torture`, `Reflector`, `Zetatech Software Installer` oder die `Newsgroup Filter`-Ability ein enger LegalAction-/applyAction-, Visibility- und Replay-/StateHash-Vertrag bestaetigt ist. Der Cursor bleibt auf V1.9.22; keine Runtime-, Catalog-, AI- oder Release-Promotion.
+
 ## Kernwissen
 
 - [[Projektueberblick]]: verdichtetes Projektbild für neue Threads.
