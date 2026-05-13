@@ -247,6 +247,7 @@ const V1919_COUNTER_OPERATION_IDS = new Set([V1919_FALSIFIED_TRANSACTIONS_EXPERT
 const V1920_MAIN_OFFICE_RELOCATION_ID = "onr_v1_205_main-office-relocation";
 const V1920_FORTRESS_ARCHITECTS_ID = "onr_v1_324_fortress-architects";
 const V1920_ACTION_ASSET_IDS = new Set(["onr_v1_331_nevinyrral", "onr_v1_334_pacifica-regional-ai", "onr_v1_335_remote-facility"]);
+const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -1958,6 +1959,19 @@ function corpMainActions(state: GameState): LegalAction[] {
         )
       );
     }
+    if (definition.id === V1921_SCHLAGHUND_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: deterministischen Wuerfel werfen`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1921AssetAbility: "deterministic_die_probe" }
+        )
+      );
+    }
     if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
     actions.push(
       action(
@@ -3243,6 +3257,22 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
           ...(legalAction.payload ?? {}),
           gainedActions,
           corpClicksAfter: state.corp.clicks
+        };
+        return;
+      }
+      if (legalAction.payload?.v1921AssetAbility === "deterministic_die_probe") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.21-Asset-Zufall nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.21-Asset-Zufallsfaehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1921_SCHLAGHUND_ID) throw new Error("Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.");
+        const randomPurpose = `v1921.die.${definition.id}.asset_probe`;
+        const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          randomPurpose,
+          v1921DieRoll: dieRoll,
+          randomCounterAfter: state.randomCounter
         };
         return;
       }
@@ -7155,6 +7185,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.v1919RunnerProgramAbility) parts.push(String(payload.v1919RunnerProgramAbility));
   if (payload?.v1919RunnerEventAbility) parts.push(String(payload.v1919RunnerEventAbility));
   if (payload?.v1920AssetAbility) parts.push(String(payload.v1920AssetAbility));
+  if (payload?.v1921AssetAbility) parts.push(String(payload.v1921AssetAbility));
   if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.oliviaSalazarCardId) parts.push(String(payload.oliviaSalazarCardId));
@@ -7452,6 +7483,12 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.v1920AssetAbility = legalAction.payload.v1920AssetAbility;
     if (typeof legalAction.payload.gainedActions === "number") context.gainedActions = legalAction.payload.gainedActions;
     if (typeof legalAction.payload.corpClicksAfter === "number") context.corpClicksAfter = legalAction.payload.corpClicksAfter;
+  }
+  if (typeof legalAction.payload?.v1921AssetAbility === "string") {
+    context.v1921AssetAbility = legalAction.payload.v1921AssetAbility;
+    if (typeof legalAction.payload.v1921DieRoll === "number") context.v1921DieRoll = legalAction.payload.v1921DieRoll;
+    if (typeof legalAction.payload.randomCounterAfter === "number") context.randomCounterAfter = legalAction.payload.randomCounterAfter;
+    if (typeof legalAction.payload.randomPurpose === "string") context.randomPurpose = legalAction.payload.randomPurpose;
   }
   if (typeof legalAction.payload?.v1919AgendaDifficulty === "number") context.v1919AgendaDifficulty = legalAction.payload.v1919AgendaDifficulty;
   if (typeof legalAction.payload?.v1919Overadvance === "number") context.v1919Overadvance = legalAction.payload.v1919Overadvance;

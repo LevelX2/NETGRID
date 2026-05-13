@@ -4,15 +4,15 @@
   "matrixId": "mechanics-coverage-1.9.21",
   "generatedFor": "V1.9.21 Deterministischer Zufall und Wuerfelkarten WIP gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_runtime_definitions",
+  "status": "wip_first_random_resolver",
   "extends": "data/rules/mechanics-coverage-1.9.20.json",
   "gateAssertions": {
     "deterministicRandomScopeFrozenToSixCards": true,
     "catalogWipGuardReady": true,
     "runtimeDefinitionsReady": true,
-    "engineCovered": false,
-    "hiddenInfoSafeForCoveredSmokes": false,
-    "stateHashReplayStableForCoveredSmokes": false,
+    "engineCovered": "partial_schlaghund_random_probe",
+    "hiddenInfoSafeForCoveredSmokes": true,
+    "stateHashReplayStableForCoveredSmokes": true,
     "catalogPromotionPending": true,
     "aiPromotionPending": true,
     "noV1922Scope": true
@@ -21,19 +21,23 @@
     {
       "mechanicId": "mechanic.random.deterministic_card",
       "label": "Deterministischer Karten-Zufall",
-      "currentStatus": "planned_runtime_wip",
+      "currentStatus": "partial_engine_wip",
       "targetGate": "v1.9.21",
-      "currentScopeNote": "6 Runtime-Definitionen sind vorhanden; Engine-Zufallsresolver, RandomDrawRecords, Visibility und Replay/StateHash folgen.",
+      "currentScopeNote": "6 Runtime-Definitionen sind vorhanden; Schlaghund hat den ersten rezzed Asset LegalAction-Zufallsprobe-Pfad mit RandomDrawRecords, Visibility und Replay/StateHash. Weitere Resolver folgen.",
       "coverage": [
         "scope_guard",
-        "runtime_definitions"
+        "runtime_definitions",
+        "schlaghund_legal_action_random_probe",
+        "wrong_side_and_stale_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     }
   ],
   "deferred": [
     {
-      "item": "engine_random_resolver",
-      "reason": "V1.9.21 hat Catalog- und Runtime-WIP; deterministische Random-Aufloesung, AI und Promotion folgen."
+      "item": "remaining_engine_random_resolvers",
+      "reason": "V1.9.21 hat einen ersten Schlaghund-Random-Probe; AI Boon, Boardwalk, Playful AI, Quest for Cattekin und Rio de Janeiro City Grid sowie finale AI/Promotion folgen."
     }
   ]
 }

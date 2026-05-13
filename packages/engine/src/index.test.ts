@@ -4654,6 +4654,84 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
+
+  it("records Schlaghund deterministic die probes through LegalAction and replay", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1921-schlaghund-die-probe",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1921_random_probe",
+          name: "O:NR V1.9.21 Random Probe Corp",
+          cards: [{ id: "onr_v1_339_schlaghund", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw"
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 3;
+    state.corp.maxHandSize = 100;
+
+    const assetId = putCorpRootInRemote(state, "onr_v1_339_schlaghund");
+    state.cardInstances[assetId] = { ...state.cardInstances[assetId]!, faceup: true, rezzed: true };
+    const legal = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1921AssetAbility === "deterministic_die_probe" &&
+        String(action.payload?.cardId) === assetId
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1921-schlaghund-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1921-schlaghund-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const randomBefore = state.randomDrawRecords.length;
+    state = apply(state, "corp", (action) => action.actionId === legal.actionId);
+
+    const randomRecord = state.randomDrawRecords.at(-1);
+    expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
+    expect(randomRecord?.purpose).toBe("v1921.die.onr_v1_339_schlaghund.asset_probe");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1921AssetAbility: "deterministic_die_probe",
+      randomPurpose: "v1921.die.onr_v1_339_schlaghund.asset_probe",
+      randomCounterAfter: randomBefore + 1
+    });
+    const publicRoll = Number(state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0);
+    expect(Number.isInteger(publicRoll)).toBe(true);
+    expect(publicRoll).toBeGreaterThanOrEqual(1);
+    expect(publicRoll).toBeLessThanOrEqual(6);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/
+    );
+    expect(getPlayerView(state, "runner").opponent.handCount).toBe(state.corp.hq.length);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {

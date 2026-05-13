@@ -12,6 +12,7 @@ Stand: 2026-05-13
 - 6/6 V1.9.21-Zielkarten haben Runtime-Definitionen in `packages/shared/src/index.ts` mit finalen display-only Texten ohne `WIP`-Praefix.
 - `packages/engine/src/index.test.ts` schuetzt die Runtime-Zielmenge mit V1.9.22-No-Promotion-Sentinel.
 - `data/scenarios/v1921-deterministic-random-wip-smoke.json`, `data/manifests/card-implementation-manifest-1.9.21.json` und `data/rules/mechanics-coverage-1.9.21.json` dokumentieren den WIP-Scope maschinenlesbar ohne Promotion.
+- `Schlaghund` hat den ersten V1.9.21-Engine-Resolver: eine rezzed Asset LegalAction fuer eine deterministische Wuerfelprobe, die `RandomDrawRecords` nutzt, Wrong-Side/Stale-State ablehnt, im PublicEvent nur oeffentliche Zufallsmetadaten zeigt und replay-/StateHash-stabil ist.
 
 ## Gate
 
@@ -20,11 +21,11 @@ Stand: 2026-05-13
 
 ## Naechster Schnitt
 
-Erster deterministischer Random-Resolver und Engine-Smokes fuer Seed/RandomCounter/RandomDrawRecords.
+Naechster deterministischer Random-Resolver fuer Runner- oder Upgrade-Pfade (`AI Boon`, `Boardwalk`, `Playful AI`, `Quest for Cattekin` oder `Rio de Janeiro City Grid`) plus weitere Engine-Smokes fuer Seed/RandomCounter/RandomDrawRecords.
 
 ## Verifikation
 
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 35 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - JSON-Validation fuer `data/**/*.json`: pass.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 266 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 267 Tests.

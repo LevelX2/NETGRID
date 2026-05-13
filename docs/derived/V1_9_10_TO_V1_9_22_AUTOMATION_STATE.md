@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 15:52 CEST
+- Ergebnis: V1.9.21 erster deterministischer Random-Resolver umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Schlaghund` hat eine rezzed Asset LegalAction fuer eine deterministische Wuerfelprobe. Der Pfad schreibt `RandomDrawRecords`, lehnt Wrong-Side und stale State ab, redigiert PublicEvents auf oeffentliche Zufallsmetadaten und ist replay-/StateHash-stabil. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen.
+- Tests: `engine` pass (267). JSON, catalog und typecheck bleiben aus dem vorherigen V1.9.21-WIP gruen; gezielte Reruns fuer diesen Schnitt folgen vor Checkpoint.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: schlaghund random resolver`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Random-Resolver, AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 15:46 CEST
 - Ergebnis: V1.9.21 Runtime-WIP fuer deterministische Zufalls-/Wuerfelkarten angelegt; Cursor bleibt auf V1.9.21 `implementing`.
 - Release: V1.9.21
