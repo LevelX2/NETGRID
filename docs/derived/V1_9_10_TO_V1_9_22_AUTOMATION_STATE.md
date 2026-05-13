@@ -69,17 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-13 14:49 CEST
-- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um Runtime-Definitionen und ersten MRAM-MU-Engine-Smoke erweitert; Cursor bleibt auf V1.9.20 `implementing`.
+- Zeitpunkt: 2026-05-13 15:07 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um Runtime-Definitionen, erste Engine-Smokes, nicht-promotende AI-Draft-Artefakte und post-AI-Full-Verify erweitert; Cursor bleibt auf V1.9.20 `implementing`.
 - Release: V1.9.20
 - Phase vorher: implementing
 - Phase nachher: implementing
 - Umsetzung: 26/26 Zielkarten haben Runtime-Definitionen mit finalen display-only Texten ohne WIP-Praefix in `packages/shared/src/index.ts`; `packages/engine/src/index.test.ts` prueft die Zielmenge gegen V1.9.21-Promotion und deckt Militech MRAM Chip/MRAM Chip als legale Runner-Installationen mit sichtbarer MU-Projektion, Remote Facility als ersten rezzed Action-Economy-Assetpfad, Fortress Architects als ersten globalen ICE-Rez-Kostenmodifier, Main-Office Relocation als scored-Agenda-Handgroessenmodifier und Loan from Chiba als persistenten Recurring-Credit-Zustand ab. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind entsprechend aktualisiert. Keine Runtime-/AI-/Web-Promotion.
-- Tests: `engine` pass (264 Tests). Vorheriger V1.9.20-Schnitt: JSON-Validation pass; `catalog` pass (34), `typecheck` pass.
-- Nachverify: JSON-Validation pass (282 Dateien); `catalog` pass (34), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-- AI-Draft: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json` angelegt; Status `hinted_only`/`draft_no_ai_promotion`, keine `ai_supported`-Promotion. Verifikation danach: JSON-Validation pass (285 Dateien), `ai` pass (85), `catalog` pass (34).
-- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.20: runtime definitions and mram smoke`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-Abdeckung, AI-Artefakte, volle Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+- Tests: JSON-Validation pass (285 Dateien); `engine` pass (264), `catalog` pass (34), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- AI-Draft: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json` angelegt; Status `hinted_only`/`draft_no_ai_promotion`, keine `ai_supported`-Promotion.
+- Git: WIP-Checkpoints `e903c2bc`, `a4f99efd`, `d40687c3`, `05c11a3c`, `16d09eaf`, `329b479b`; alle nach `origin/codex/v1-9-originalset-completion` gepusht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 14:33 CEST
 - Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende um WIP-Datenartefakte erweitert; Cursor bleibt auf V1.9.20 `implementing`.

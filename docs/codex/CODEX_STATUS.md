@@ -2,7 +2,7 @@
 
 ## Current phase
 
-V1.9.20-AI-Draft vom 2026-05-13 15:05 CEST: Nicht-promotende AI-Draft-Artefakte für den 26er-Scope sind angelegt: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json`. Status bleibt `hinted_only`/`draft_no_ai_promotion`; keine Karte wurde `ai_supported`. Verifikation: JSON-Validation 285, `ai` 85 und `catalog` 34 grün.
+V1.9.20-AI-Draft und Post-AI-Verify vom 2026-05-13 15:07 CEST: Nicht-promotende AI-Draft-Artefakte für den 26er-Scope sind angelegt: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json`. Status bleibt `hinted_only`/`draft_no_ai_promotion`; keine Karte wurde `ai_supported`. Verifikation nach den Draft-Artefakten: JSON-Validation 285, `catalog` 34, `engine` 264, `ai` 85, `server` 72, `web` 76, `typecheck`, `test`, `lint` und `build` grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 
 V1.9.20-WIP-Verify vom 2026-05-13 15:03 CEST: Der Runtime-/Engine-WIP-Stand wurde breit verifiziert: JSON-Validation 282, `catalog` 34, `engine` 264, `ai` 85, `server` 72, `web` 76, `typecheck`, `test`, `lint` und `build` grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung. Cursor bleibt V1.9.20 `implementing`; Completion-Gate bleibt offen für weitere Kartenpfade, AI-Artefakte, Release-Promotion, Webclient-Version und Final Review.
 
