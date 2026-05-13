@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 08:30 CEST
+- Ergebnis: V1.9.16 Program Subtypes/Hosting/Stealth WIP um konkrete Engine-/LegalAction-Smokes und WIP-Datenartefakte erweitert; Cursor bleibt auf V1.9.16 `implementing`.
+- Release: V1.9.16
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Trace wurde minimal um den Erfolgseffekt `none` und subroutinegebundene Erfolgs-Gates erweitert. `Fragmentation Storm` nutzt diesen Pfad fuer Trace 4 ohne Tag-Effekt; Programm-Trash und Net Damage laufen nur bei erfolgreichem Trace. Engine-Smokes decken installierten Link in side-sicheren Trace-Choices, Stealth-/Recurring-Refresh und Fragmentation-Storm-Erfolg/Misserfolg mit Replay/StateHash-Nachweis ab. WIP-Szenario, WIP-Manifest und WIP-Mechanics-Coverage sind angelegt.
+- Tests: JSON-Validation pass (255 Dateien); `engine` pass (231), `catalog` pass (30), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.16: trace link stealth destroy smokes`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.16 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
 - Zeitpunkt: 2026-05-13 08:07 CEST
 - Ergebnis: V1.9.15 Run/Access/Multiaccess final abgeschlossen; Cursor auf V1.9.16 `planned` gesetzt.
 - Release: V1.9.15

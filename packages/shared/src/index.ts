@@ -84,7 +84,7 @@ export type DemoDeckId =
 export type DamageType = "net" | "meat" | "core";
 export type CounterType = "advancement" | "virus" | "power" | "agenda" | "recurring_credit" | "bad_publicity" | "charge" | "mark" | "dividend" | "core_damage";
 
-export type TraceSuccessEffect = { type: "add_tag"; amount: number };
+export type TraceSuccessEffect = { type: "add_tag"; amount: number } | { type: "none" };
 
 export type SubroutineType =
   | "end_the_run"
@@ -111,6 +111,7 @@ export type SubroutineDefinition = {
   damageType?: DamageType;
   baseTraceStrength?: number;
   traceSuccessEffect?: TraceSuccessEffect;
+  requiresSuccessfulTraceSubroutineIndex?: number;
 };
 
 export type EventVisibilityClass = "public" | "private_to_side" | "hidden_info_barrier" | "replay_only";
@@ -550,6 +551,7 @@ export type RunState = {
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<Record<CardInstanceId, number[]>>;
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   bizarreEncryptionSchemeActive?: boolean;
+  traceSuccessBySubroutineIndex?: Partial<Record<number, boolean>>;
   breach?: BreachState;
 };
 
@@ -4015,10 +4017,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
         id: "onr_v1_246_fragmentation_storm_trace",
         type: "initiate_trace",
         baseTraceStrength: 4,
-        traceSuccessEffect: { type: "add_tag", amount: 1 }
+        traceSuccessEffect: { type: "none" }
       },
-      onrTrashInstalledProgram("onr_v1_246_fragmentation_storm_trash_program"),
-      onrNetDamage("onr_v1_246_fragmentation_storm_net_damage", 1)
+      {
+        ...onrTrashInstalledProgram("onr_v1_246_fragmentation_storm_trash_program"),
+        requiresSuccessfulTraceSubroutineIndex: 0
+      },
+      {
+        ...onrNetDamage("onr_v1_246_fragmentation_storm_net_damage", 1),
+        requiresSuccessfulTraceSubroutineIndex: 0
+      }
     ],
     mechanics: ["install_ice", "rez_ice", "trace", "link", "trash_installed_program", "damage", ONR_V1_LOCAL_PRIVATE]
   })

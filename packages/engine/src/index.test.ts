@@ -4913,6 +4913,102 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
   });
+
+  it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-link-trace"));
+    state.runner.credits = 12;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
+    moveRunnerCardToGrip(state, "onr_v1_148_access-through-alpha");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_148_access-through-alpha");
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 4 });
+
+    state = applyChoice(state, "corp", "bid_1");
+
+    expect(state.trace).toMatchObject({ status: "runner_bid", corpBid: 1, traceStrength: 5, runnerLink: 2 });
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "runner").pendingChoice?.kind).toBe("bid_amount");
+  });
+
+  it("refreshes V1.9.16 stealth and recurring counters without accumulation", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-stealth-recurring"));
+    state.runner.credits = 12;
+    moveRunnerCardToGrip(state, "onr_v1_035_invisibility");
+    moveRunnerCardToGrip(state, "onr_v1_140_raven-microcyb-eagle");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_035_invisibility");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_140_raven-microcyb-eagle");
+
+    const invisibilityId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_035_invisibility");
+    const eagleId = state.runner.rig.hardware.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_140_raven-microcyb-eagle");
+    expect(invisibilityId).toBeDefined();
+    expect(eagleId).toBeDefined();
+    if (!invisibilityId || !eagleId) throw new Error("Missing installed V1.9.16 recurring cards");
+    expect(state.cardInstances[invisibilityId]?.counters?.recurring_credit).toBe(1);
+    expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
+
+    state.cardInstances[invisibilityId] = { ...state.cardInstances[invisibilityId]!, counters: { ...state.cardInstances[invisibilityId]!.counters, recurring_credit: 0 } };
+    state.cardInstances[eagleId] = { ...state.cardInstances[eagleId]!, counters: { ...state.cardInstances[eagleId]!.counters, recurring_credit: 0 } };
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.maxHandSize = 100;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    expect(state.cardInstances[invisibilityId]?.counters?.recurring_credit).toBe(1);
+    expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
+  });
+
+  it("gates Fragmentation Storm program trash and net damage on trace success", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-fragmentation-storm-success"));
+    state.runner.credits = 10;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_047_pile-driver");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_047_pile-driver");
+    const pileDriverId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_047_pile-driver");
+    expect(pileDriverId).toBeDefined();
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    const gripBeforeDamage = state.runner.grip.length;
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ traceSuccessful: true, tagsAdded: 0 });
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(pileDriverId && state.runner.heap.includes(pileDriverId)).toBe(true);
+    expect(state.runner.grip.length).toBe(Math.max(0, gripBeforeDamage - 1));
+    expect(validateGameState(state).ok).toBe(true);
+    const successReplay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(successReplay.ok).toBe(true);
+    expect(successReplay.actualFinalStateHash).toBe(hashState(state));
+
+    let failed = initial;
+    failed.runner.credits = 10;
+    failed = apply(failed, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    failed = apply(failed, "corp", (action) => action.type === "rez_ice" && sourceDefinition(failed, action) === "onr_v1_246_fragmentation-storm");
+    failed = apply(failed, "runner", (action) => action.type === "continue_run");
+    failed = applyChoice(failed, "corp", "bid_0");
+    failed = applyChoice(failed, "runner", "bid_4");
+    failed = apply(failed, "runner", (action) => action.type === "continue_run");
+
+    expect(pileDriverId && failed.runner.rig.programs.includes(pileDriverId)).toBe(true);
+    expect(failed.runner.grip.length).toBe(gripBeforeDamage);
+    expect(validateGameState(failed).ok).toBe(true);
+    const failedReplay = replayEvents(initial, failed.eventLog.slice(initial.eventLog.length));
+    expect(failedReplay.ok).toBe(true);
+    expect(failedReplay.actualFinalStateHash).toBe(hashState(failed));
+  });
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
@@ -7353,6 +7449,44 @@ const ONR_V1_9_15_RUN_ACCESS_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1916_program_subtype",
+  name: "O:NR V1.9.16 Program Subtype WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_003_baedekers-net-map", quantity: 1 },
+    { id: "onr_v1_004_bakdoor", quantity: 1 },
+    { id: "onr_v1_033_imp", quantity: 1 },
+    { id: "onr_v1_035_invisibility", quantity: 1 },
+    { id: "onr_v1_047_pile-driver", quantity: 1 },
+    { id: "onr_v1_050_r-and-d-protocol-files", quantity: 1 },
+    { id: "onr_v1_071_vewy-vewy-quiet", quantity: 1 },
+    { id: "onr_v1_140_raven-microcyb-eagle", quantity: 1 },
+    { id: "onr_v1_141_raven-microcyb-owl", quantity: 1 },
+    { id: "onr_v1_148_access-through-alpha", quantity: 1 },
+    { id: "onr_v1_149_access-to-arasaka", quantity: 1 },
+    { id: "onr_v1_150_access-to-kiribati", quantity: 1 },
+    { id: "onr_v1_152_back-door-to-hilliard", quantity: 1 },
+    { id: "onr_v1_153_back-door-to-orbital-air", quantity: 1 },
+    { id: "onr_v1_182_submarine-uplink", quantity: 1 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1916_program_subtype",
+  name: "O:NR V1.9.16 Program Subtype WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_246_fragmentation-storm", quantity: 2 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 },
+    { id: "simple_economy_asset", quantity: 2 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -7765,6 +7899,16 @@ function v1915RunAccessGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK,
     corpDeck: ONR_V1_9_15_RUN_ACCESS_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1916ProgramSubtypeGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK,
+    corpDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

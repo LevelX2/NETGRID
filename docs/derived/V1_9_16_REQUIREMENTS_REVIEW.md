@@ -1,7 +1,7 @@
 # V1.9.16 Requirements Review
 
 Stand: 2026-05-13
-Status: ready_for_implementation
+Status: implementation_wip_reviewed
 
 ## Ergebnis
 
@@ -18,3 +18,10 @@ Die Anforderungen fuer V1.9.16 sind fuer einen engen Implementation-Slice ausrei
 ## Freigabe
 
 Der release-implementation-agent darf Runtime-WIP, Engine-Smokes, Datenartefakte und KI-Hints fuer V1.9.16 umsetzen. Releasepromotion bleibt bis zu gruenem Completion-Gate gesperrt.
+
+## WIP-Zwischenstand 2026-05-13 08:26 CEST
+
+- Link-/Trace-Beitraege aus installierten V1.9.16-Karten sind in einem side-sicheren Fragmentation-Storm-Smoke abgedeckt.
+- Stealth-/Recurring-Refresh ist fuer Invisibility und Raven Microcyb Eagle abgedeckt.
+- Fragmentation Storm nutzt ein Trace-Erfolgsgate ohne Tag-Effekt; Programm-Trash und Net Damage laufen nur nach erfolgreichem Trace.
+- Hosting-Lifecycle, Replay/StateHash und AI-Support bleiben vor Releasepromotion offen.

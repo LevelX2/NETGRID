@@ -51,6 +51,7 @@ import {
   type SetupState,
   type Side,
   type StateHash,
+  type TraceSuccessEffect,
   type ValidationResult,
   type VisibleCard,
   type Winner
@@ -1297,7 +1298,7 @@ export function validateGameState(state: GameState): ValidationResult {
   if (state.trace) {
     if (!state.cardInstances[state.trace.sourceCardInstanceId]) errors.push("Trace references missing source card.");
     if (!Number.isInteger(state.trace.baseTraceStrength) || state.trace.baseTraceStrength < 0) errors.push("Trace base strength is invalid.");
-    if (state.trace.successEffect.type !== "add_tag" || state.trace.successEffect.amount !== 1) errors.push("Trace success effect is outside V0.96 scope.");
+    if (!isSupportedTraceSuccessEffect(state.trace.successEffect)) errors.push("Trace success effect is outside supported scope.");
     if (!state.pendingChoice) errors.push("Trace requires an open PendingChoice.");
     if (state.trace.status === "corp_bid" && state.pendingChoice?.side !== "corp") errors.push("Corp trace bid requires Corp choice.");
     if (state.trace.status === "runner_bid") {
@@ -3128,6 +3129,7 @@ function beginEncounter(state: GameState, encounteredIceId: CardInstanceId): voi
   run.encounteredIceId = encounteredIceId;
   run.brokenSubroutineIndexes = [];
   run.resolvedSubroutineIndexes = [];
+  run.traceSuccessBySubroutineIndex = {};
   run.bartmossUsedBreakerIdsThisEncounter = [];
   run.blinkUsedSubroutinesByBreakerThisEncounter = {};
   if (run.nextEncounterNoBreakSubroutines) {
@@ -3179,6 +3181,13 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
     if (!subroutine || state.winner || run.brokenSubroutineIndexes.includes(index) || run.resolvedSubroutineIndexes.includes(index) || ended) continue;
+    if (subroutine.requiresSuccessfulTraceSubroutineIndex !== undefined) {
+      const traceIndex = subroutine.requiresSuccessfulTraceSubroutineIndex;
+      if (run.traceSuccessBySubroutineIndex?.[traceIndex] !== true) {
+        if (!run.resolvedSubroutineIndexes.includes(index)) run.resolvedSubroutineIndexes.push(index);
+        continue;
+      }
+    }
     if (subroutine.type === "corp_gain_credit") state.corp.credits += subroutine.amount ?? 1;
     if (subroutine.type === "runner_lose_credits") state.runner.credits = Math.max(0, state.runner.credits - (subroutine.amount ?? 1));
     if (subroutine.type === "give_runner_tag") state.runner.tags += subroutine.amount ?? 1;
@@ -3375,7 +3384,7 @@ function startTraceFromSubroutine(
   const baseTraceStrength = subroutine.baseTraceStrength ?? subroutine.amount ?? 0;
   if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0) throw new Error("Trace strength ist ungueltig.");
   const successEffect = subroutine.traceSuccessEffect;
-  if (!successEffect || successEffect.type !== "add_tag" || successEffect.amount !== 1) throw new Error("Dieser Trace-Effekt ist in V0.96 nicht freigegeben.");
+  if (!successEffect || !isSupportedTraceSuccessEffect(successEffect)) throw new Error("Dieser Trace-Effekt ist nicht freigegeben.");
 
   const run = mustRun(state);
   if (!run.resolvedSubroutineIndexes.includes(subroutineIndex)) run.resolvedSubroutineIndexes.push(subroutineIndex);
@@ -5935,7 +5944,7 @@ function resolveTraceRunnerBid(state: GameState, legalAction: LegalAction, playe
   const traceStrength = trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
   const runnerStrength = runnerLink + bid;
   const successful = traceStrength > runnerStrength;
-  const tagsAdded = successful ? trace.successEffect.amount : 0;
+  const tagsAdded = successful && trace.successEffect.type === "add_tag" ? trace.successEffect.amount : 0;
   let dataRavenCounterAdded = 0;
   if (successful) state.runner.tags += tagsAdded;
   if (successful && trace.sourceDefinitionId === DATA_RAVEN_ID) {
@@ -5945,6 +5954,12 @@ function resolveTraceRunnerBid(state: GameState, legalAction: LegalAction, playe
   delete state.pendingChoice;
   delete state.trace;
   if (state.run) {
+    if (trace.subroutineIndex !== undefined) {
+      state.run.traceSuccessBySubroutineIndex = {
+        ...(state.run.traceSuccessBySubroutineIndex ?? {}),
+        [trace.subroutineIndex]: successful
+      };
+    }
     state.timingPoint = "run.encounter_ice";
     state.activeSide = "runner";
   } else if (trace.returnTimingPoint && trace.returnActiveSide && trace.returnPhase) {
@@ -5966,6 +5981,11 @@ function resolveTraceRunnerBid(state: GameState, legalAction: LegalAction, playe
     tagsAdded,
     ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {})
   };
+}
+
+function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
+  if (effect.type === "none") return true;
+  return effect.type === "add_tag" && Number.isInteger(effect.amount) && effect.amount >= 0;
 }
 
 function selectedBidAmount(choice: ChoiceRequest | undefined, playerAction: PlayerAction): number {

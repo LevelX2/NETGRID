@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1916-program-subtype-hosting-stealth-smoke",
+  "release": "V1.9.16",
+  "status": "implemented_wip_engine_smoke",
+  "coversCards": [
+    "onr_v1_003_baedekers-net-map",
+    "onr_v1_004_bakdoor",
+    "onr_v1_033_imp",
+    "onr_v1_035_invisibility",
+    "onr_v1_047_pile-driver",
+    "onr_v1_050_r-and-d-protocol-files",
+    "onr_v1_071_vewy-vewy-quiet",
+    "onr_v1_140_raven-microcyb-eagle",
+    "onr_v1_141_raven-microcyb-owl",
+    "onr_v1_148_access-through-alpha",
+    "onr_v1_149_access-to-arasaka",
+    "onr_v1_150_access-to-kiribati",
+    "onr_v1_152_back-door-to-hilliard",
+    "onr_v1_153_back-door-to-orbital-air",
+    "onr_v1_182_submarine-uplink",
+    "onr_v1_246_fragmentation-storm"
+  ],
+  "assertions": [
+    "V1.9.16 WIP runtime definitions exist for all 16 target cards and remain blocked from release promotion.",
+    "Installed V1.9.16 link cards contribute only public installed-card link values to side-safe trace bid windows.",
+    "V1.9.16 stealth and recurring cards initialize recurring_credit counters and refresh deterministically without accumulation.",
+    "Fragmentation Storm starts a side-safe Trace 4 window and gates installed-program trash plus net damage on trace success.",
+    "A failed Fragmentation Storm trace skips the gated program-trash and net-damage subroutines.",
+    "Fragmentation Storm success and failure branches replay to the same final StateHash."
+  ],
+  "verification": {
+    "engine": "pass: 231 tests",
+    "catalog": "pass: 30 tests",
+    "typecheck": "pass",
+    "ai": "not_run_this_wip_slice",
+    "server": "not_run_this_wip_slice",
+    "web": "not_run_this_wip_slice",
+    "test": "not_run_this_wip_slice",
+    "lint": "not_run_this_wip_slice",
+    "build": "not_run_this_wip_slice"
+  },
+  "completionGate": {
+    "releaseDone": false,
+    "catalogPromoted": false,
+    "aiPromoted": false
+  }
+}

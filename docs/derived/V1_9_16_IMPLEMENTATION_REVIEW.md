@@ -1,6 +1,6 @@
 # V1.9.16 Implementation Review
 
-Stand: 2026-05-13 08:20 CEST
+Stand: 2026-05-13 08:26 CEST
 Status: implementing_wip
 
 ## Umgesetzter WIP-Scope
@@ -10,6 +10,9 @@ Status: implementing_wip
 - `packages/catalog/src/index.ts` fuehrt `ONR_V1_9_16_WIP_CARD_IDS` fuer genau 16 Zielkarten.
 - `packages/catalog/src/index.test.ts` prueft, dass diese 16er-WIP-Zielmenge nicht in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` vorgezogen wird.
 - `packages/engine/src/index.test.ts` prueft 16/16 WIP-Runtime-Definitionen und den No-Scope-Guard gegen V1.9.17.
+- `packages/shared/src/index.ts` und `packages/engine/src/index.ts` erweitern Trace minimal um den Erfolgseffekt `none` und subroutinegebundene Erfolgs-Gates. Das nutzt `Fragmentation Storm`, ohne bestehende Add-Tag-Traces zu veraendern.
+- `packages/engine/src/index.test.ts` deckt V1.9.16 mit LegalAction-Smokes fuer installierten Link, side-sichere Trace-Choices, Stealth-/Recurring-Refresh und Fragmentation-Storm-Erfolg/Misserfolg samt Replay/StateHash-Nachweis ab.
+- `data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json`, `data/manifests/card-implementation-manifest-1.9.16.json` und `data/rules/mechanics-coverage-1.9.16.json` dokumentieren den WIP-Gate-Stand.
 
 ## Gate-Status
 
@@ -21,8 +24,8 @@ Status: implementing_wip
 
 ## Verifikation
 
-- `v1-9-install-and-check.ps1 -Task engine`: pass, 228 Tests.
+- `v1-9-install-and-check.ps1 -Task engine`: pass, 231 Tests.
 - `v1-9-install-and-check.ps1 -Task catalog`: pass, 30 Tests.
 - `v1-9-install-and-check.ps1 -Task typecheck`: pass.
 
-Offen bleiben konkrete Engine-/LegalAction-Abdeckung fuer Hosting, Stealth/Recurring, Link/Trace und installed-card destroy, Daten-/AI-Artefakte, Webclient-Version, volle Pflichtchecks und Final Review.
+Offen bleiben Hosting-Lifecycle-Smokes, Hosted-Replay/StateHash-Nachweis, AI-Hints/-Smokes, Server/Web-Gates, volle Pflichtchecks, Webclient-Version, Final Review und Releasepromotion.
