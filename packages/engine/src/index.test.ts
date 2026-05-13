@@ -4966,6 +4966,54 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
   });
 
+  it("hosts V1.9.16 programs on Imp and cascades hosted cards on daemon trash", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-imp-hosting-lifecycle"));
+    state.runner.credits = 12;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_033_imp");
+    moveRunnerCardToGrip(state, "onr_v1_004_bakdoor");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_033_imp");
+    const impId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_033_imp");
+    expect(impId).toBeDefined();
+    if (!impId) throw new Error("Missing installed Imp host");
+
+    const hostedInstall = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_004_bakdoor" &&
+        action.payload?.hostOnCardId === impId
+    );
+    const bakdoorId = String(hostedInstall.payload?.cardId ?? "");
+    state = apply(state, "runner", (action) => action.actionId === hostedInstall.actionId);
+
+    expect(state.cardInstances[bakdoorId]?.hostedOn).toBe(impId);
+    expect(state.runner.memoryUsed).toBe(1);
+    expect(getPlayerView(state, "runner").own.rig?.some((card) => card.instanceId === bakdoorId && card.hostedOn === impId)).toBe(true);
+    expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.instanceId === bakdoorId && card.hostedOn === impId)).toBe(true);
+
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.runner.rig.programs).not.toContain(impId);
+    expect(state.runner.rig.programs).not.toContain(bakdoorId);
+    expect(state.runner.heap).toEqual(expect.arrayContaining([impId, bakdoorId]));
+    expect(state.cardInstances[bakdoorId]?.hostedOn).toBeUndefined();
+    expect(state.runner.memoryUsed).toBe(0);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("gates Fragmentation Storm program trash and net damage on trace success", () => {
     let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-fragmentation-storm-success"));
     state.runner.credits = 10;

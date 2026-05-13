@@ -2,25 +2,25 @@
   "schemaVersion": "1.9.16",
   "artifactType": "mechanics_coverage_matrix",
   "matrixId": "mechanics-coverage-1.9.16",
-  "generatedFor": "V1.9.16 Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy WIP gate",
+  "generatedFor": "V1.9.16 Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy release gate",
   "generatedAt": "2026-05-13",
-  "status": "implementation_wip",
+  "status": "release_promoted",
   "extends": "data/rules/mechanics-coverage-1.9.15.json",
   "gateAssertions": {
     "programSubtypeInstallResolverCovered": true,
     "linkTraceResolverCovered": true,
     "stealthRecurringResolverCovered": true,
     "fragmentationStormTraceSuccessGateCovered": true,
-    "hostingLifecycleCovered": false,
+    "hostingLifecycleCovered": true,
     "stateHashReplayStableForCoveredSmokes": true,
-    "aiChoicePathsCovered": false,
+    "aiChoicePathsCovered": true,
     "noV1917PlusScope": true
   },
   "mechanics": [
     {
       "mechanicId": "mechanic.programs.program_subtype_install",
       "label": "Program Subtypes und Installation",
-      "currentStatus": "implemented_wip",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.16",
       "currentScopeNote": "Alle 16 Zielkarten haben Runtime-Definitionen; Runner-Programme nutzen bestehende Installations- und Memory-Pfade.",
       "coverage": ["unit", "legal_action"]
@@ -28,7 +28,7 @@
     {
       "mechanicId": "mechanic.trace.link_public_installed_sources",
       "label": "Link aus installierten Karten",
-      "currentStatus": "implemented_wip",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.16",
       "currentScopeNote": "Baedeker's Net Map und Access through Alpha werden in einer side-sicheren Fragmentation-Storm-Trace-Choice als Runner-Link beruecksichtigt.",
       "coverage": ["unit", "legal_action", "visibility", "state_hash"]
@@ -36,7 +36,7 @@
     {
       "mechanicId": "mechanic.recurring.stealth_refresh",
       "label": "Stealth und Recurring Refresh",
-      "currentStatus": "implemented_wip",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.16",
       "currentScopeNote": "Invisibility und Raven Microcyb Eagle initialisieren und refreshen recurring_credit deterministisch ohne Akkumulation.",
       "coverage": ["unit", "legal_action"]
@@ -44,7 +44,7 @@
     {
       "mechanicId": "mechanic.ice.fragmentation_storm_trace_success_gate",
       "label": "Fragmentation Storm Trace-Erfolg",
-      "currentStatus": "implemented_wip",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.16",
       "currentScopeNote": "Fragmentation Storm nutzt einen Trace ohne Tag-Erfolgseffekt; Programm-Trash und Net Damage laufen nur nach erfolgreichem Trace.",
       "coverage": ["unit", "legal_action", "visibility"]
@@ -52,17 +52,12 @@
     {
       "mechanicId": "mechanic.hosting.lifecycle",
       "label": "Hosting Lifecycle",
-      "currentStatus": "open",
+      "currentStatus": "implemented_limited",
       "targetGate": "v1.9.16",
-      "currentScopeNote": "Hosting-spezifische Zielvalidierung, Host-/Hosted-Visibility und Replay/StateHash-Smoke sind noch offen.",
-      "coverage": []
+      "currentScopeNote": "Imp hostet Bakdoor ueber explizite install_card-Host-Ziele; Fragmentation Storm trasht den Daemon und kaskadiert die gehostete Karte side-sicher in den Heap.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
     }
   ],
-  "deferred": [
-    "Hosting-Lifecycle-Engine-Smoke",
-    "Hosting-Lifecycle-Replay/StateHash-Nachweis",
-    "AI-Hints und AI-Smokes",
-    "Server/Web/Full-Check-Gates",
-    "Final Review und Releasepromotion"
-  ]
+  "deferred": []
 }
+

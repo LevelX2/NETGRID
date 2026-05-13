@@ -15,9 +15,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.16
-Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.17
+Aktueller Release: V1.9.17
+Phase: planned
+Naechster erlaubter Release nach Abschluss: V1.9.18
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -59,8 +59,8 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.13 | Damage, Prevention, Avoid und Replacement Longtail | done |
 | V1.9.14 | Trace, Link, Tags und Resource-Tag-Interaktionen | done |
 | V1.9.15 | Run Flow, Access, Multiaccess und Ambush on Access | done |
-| V1.9.16 | Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy | current |
-| V1.9.17 | Generische Asset/Node-Faehigkeiten | pending |
+| V1.9.16 | Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy | done |
+| V1.9.17 | Generische Asset/Node-Faehigkeiten | current |
 | V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | pending |
 | V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | pending |
 | V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | pending |
@@ -68,6 +68,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 09:55 CEST
+- Ergebnis: V1.9.16 Program Subtypes/Hosting/Stealth final abgeschlossen; Cursor auf V1.9.17 `planned` gesetzt.
+- Release: V1.9.16
+- Phase vorher: implementing
+- Phase nachher: planned fuer V1.9.17
+- Umsetzung: Alle 16 V1.9.16-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Der neue Hosting-Smoke installiert `Imp`, hostet `Bakdoor` zielgebunden, prueft side-sichere Host-/Hosted-References und replayt die Fragmentation-Storm-Host-Trash-Kaskade zum finalen StateHash. Die Webclient-Version steht auf `V1.9.16`.
+- Tests: JSON-Validation pass fuer 258 `data/**/*.json`; `engine` pass (232), `catalog` pass (31), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit und Push werden per Checkpoint dieses Laufs erzeugt.
+- Cursor: V1.9.17 ist der aktuelle Release; naechster Lauf beginnt mit Detailplanung fuer Generische Asset/Node-Faehigkeiten.
 
 - Zeitpunkt: 2026-05-13 08:30 CEST
 - Ergebnis: V1.9.16 Program Subtypes/Hosting/Stealth WIP um konkrete Engine-/LegalAction-Smokes und WIP-Datenartefakte erweitert; Cursor bleibt auf V1.9.16 `implementing`.

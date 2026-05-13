@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.scenario.v1",
   "scenarioId": "v1916-program-subtype-hosting-stealth-smoke",
   "release": "V1.9.16",
-  "status": "implemented_wip_engine_smoke",
+  "status": "implemented_release_core_engine_smoke",
   "coversCards": [
     "onr_v1_003_baedekers-net-map",
     "onr_v1_004_bakdoor",
@@ -22,27 +22,29 @@
     "onr_v1_246_fragmentation-storm"
   ],
   "assertions": [
-    "V1.9.16 WIP runtime definitions exist for all 16 target cards and remain blocked from release promotion.",
+    "V1.9.16 runtime definitions exist for all 16 target cards and are release-promoted.",
     "Installed V1.9.16 link cards contribute only public installed-card link values to side-safe trace bid windows.",
     "V1.9.16 stealth and recurring cards initialize recurring_credit counters and refresh deterministically without accumulation.",
+    "Imp hosts Bakdoor through an explicit install_card host target, exposes only installed-card host references, and cascades hosted cards when the daemon is trashed.",
     "Fragmentation Storm starts a side-safe Trace 4 window and gates installed-program trash plus net damage on trace success.",
     "A failed Fragmentation Storm trace skips the gated program-trash and net-damage subroutines.",
-    "Fragmentation Storm success and failure branches replay to the same final StateHash."
+    "Fragmentation Storm success, failure and hosted-lifecycle branches replay to the same final StateHash."
   ],
   "verification": {
-    "engine": "pass: 231 tests",
-    "catalog": "pass: 30 tests",
+    "engine": "pass: 232 tests",
+    "catalog": "pass: 31 tests",
     "typecheck": "pass",
-    "ai": "pass: 84 tests",
+    "ai": "pass: 85 tests",
     "server": "pass: 72 tests",
     "web": "pass: 76 tests",
-    "test": "not_run_this_wip_slice",
-    "lint": "not_run_this_wip_slice",
-    "build": "not_run_this_wip_slice"
+    "test": "pass",
+    "lint": "pass",
+    "build": "pass"
   },
   "completionGate": {
-    "releaseDone": false,
-    "catalogPromoted": false,
-    "aiPromoted": false
+    "releaseDone": true,
+    "catalogPromoted": true,
+    "aiPromoted": true
   }
 }
+

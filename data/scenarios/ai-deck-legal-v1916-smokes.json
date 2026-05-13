@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.ai-scenario-pack.v1",
   "scenarioPackId": "ai-deck-legal-v1916-smokes",
   "release": "V1.9.16",
-  "status": "ai_support_wip",
+  "status": "ai_supported",
   "scenarios": [
     {
       "id": "runner_v1916_program_hosting_tools",
@@ -18,7 +18,7 @@
       ],
       "sideSafetyAssertions": [
         "legal_actions_only",
-        "hosting_lifecycle_pending_full_gate"
+        "hosting_lifecycle_side_safe"
       ]
     },
     {
@@ -66,15 +66,16 @@
     }
   ],
   "verification": {
-    "ai": "pass: 84 tests",
-    "engine": "pass: 231 tests",
+    "ai": "pass: 85 tests",
+    "engine": "pass: 232 tests",
     "server": "pass: 72 tests",
     "web": "pass: 76 tests"
   },
   "completionGate": {
-    "aiSupported": false,
+    "aiSupported": true,
     "legalActionsOnly": true,
-    "decisionDebugSideSafe": false,
+    "decisionDebugSideSafe": true,
     "noV1917PlusScope": true
   }
 }
+

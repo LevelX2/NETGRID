@@ -8,6 +8,12 @@ import {
   DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS
 } from "@netgrid/catalog";
@@ -1803,6 +1809,30 @@ describe("MVP 0.3 AI simulation harness", () => {
       expect(card?.statuses.deck_legal, cardId).toBe(true);
       expect(card?.statuses.format_legal, cardId).toBe(true);
       expect(card?.statuses.ai_supported, cardId).toBe(true);
+    }
+  });
+
+  it("marks the V1.9.11 to V1.9.16 completion slices as AI-supported for custom AI deckbuilding", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    const slices = [
+      { ids: DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS, count: 16 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS, count: 11 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS, count: 17 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS, count: 25 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS, count: 14 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS, count: 16 }
+    ];
+
+    for (const slice of slices) {
+      expect(slice.ids).toHaveLength(slice.count);
+      for (const cardId of slice.ids) {
+        const card = runtimeCardsById[cardId];
+        expect(card, cardId).toBeDefined();
+        expect(card?.statuses.human_playable, cardId).toBe(true);
+        expect(card?.statuses.deck_legal, cardId).toBe(true);
+        expect(card?.statuses.format_legal, cardId).toBe(true);
+        expect(card?.statuses.ai_supported, cardId).toBe(true);
+      }
     }
   });
 
