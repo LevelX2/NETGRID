@@ -5,7 +5,7 @@ Status: WIP-Preflight, Newsgroup-Filter install-only umgesetzt, keine Catalog-/A
 
 ## Befund
 
-`data/rules/v1922-local-card-facts.json` enthaelt fuer 14 Runner-Programme lokale Kosten-/MU-/Effektkerne. Seit den Shield-, Newsgroup-Filter-, False-Echo- und Netspace-Inverter-Schnitten vom 2026-05-14 bleibt die No-LegalAction-Absicherung fuer die verbleibenden 10 Programmkarten korrekt, weil die meisten Programmwirkungen zusaetzliche Timing-, Payment- oder Subroutine-Kategorien brauchen.
+`data/rules/v1922-local-card-facts.json` enthaelt fuer 14 Runner-Programme lokale Kosten-/MU-/Effektkerne. Seit den Shield- und install-only-Schnitten vom 2026-05-14 bleibt die No-LegalAction-Absicherung fuer die verbleibenden 5 Programmkarten korrekt, weil diese Breaker oder `Zetatech Software Installer` zusaetzliche Kosten-, Breaker- oder Program-Overlay-Vertraege brauchen.
 
 Die erneute historische Suche in `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`, `docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md`, `data/rules/v1922-resolver-contracts.json` und `data/rules/v1922-resolver-contract-inventory.json` bestaetigt:
 
@@ -13,6 +13,7 @@ Die erneute historische Suche in `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS
 - `Poltergeist` und `Scatter Shot` haben nur die Teilnotiz "hosted recurring credits fuer Trash-Kosten"; Pool-/Zahlungsumfang und Refresh-Timing bleiben offen.
 - `Newsgroup Filter` hat keinen zusaetzlichen historischen Aktivierungsvertrag ueber den lokalen Effektkern hinaus; daher ist nur der Installationsvertrag umgesetzt, nicht die Credit-Gain-Faehigkeit.
 - `False Echo` und `Netspace Inverter` haben install-only WIP-Vertraege; ihre erfolgreichen-Run-Faehigkeiten bleiben bis zu Trigger-, Sequenz- und PublicPayload-Bestaetigung ohne LegalAction.
+- `Poltergeist`, `Rabbit`, `Scatter Shot`, `Speed Trap` und `Startup Immolator` haben install-only WIP-Vertraege; ihre Recurring-Credit-, Trace-Modifier-, Interrupt- oder Post-Break-Faehigkeiten bleiben bis zu spezifischen Verträgen ohne LegalAction.
 
 ## Kleinste Kandidaten
 
@@ -29,4 +30,4 @@ Die erneute historische Suche in `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS
 
 ## Entscheidung
 
-Kein weiterer Runner-Programm-Code in diesem Preflight. `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` konkretisiert, dass fuer `Newsgroup Filter` nur der Installationsvertrag umgesetzt ist; Aktivierungskosten, Timing und Limit bleiben fuer die Credit-Gain-Faehigkeit blockierend. `False Echo` und `Netspace Inverter` bleiben ebenfalls ability-gated. Bis dahin bleiben die verbleibenden 10 Programmkarten aus `playable_mvp` und ohne `install_card`, `pump_breaker` oder `break_subroutine`-LegalActions.
+Kein weiterer Runner-Programm-Code in diesem Preflight. `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` konkretisiert, dass fuer `Newsgroup Filter` nur der Installationsvertrag umgesetzt ist; Aktivierungskosten, Timing und Limit bleiben fuer die Credit-Gain-Faehigkeit blockierend. Die install-only-Programme bleiben ability-gated. Bis dahin bleiben die verbleibenden 5 Programmkarten aus `playable_mvp` und ohne `install_card`, `pump_breaker` oder `break_subroutine`-LegalActions.

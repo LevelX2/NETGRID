@@ -7273,12 +7273,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_048_poltergeist",
-      "onr_v1_051_rabbit",
       "onr_v1_055_reflector",
-      "onr_v1_057_scatter-shot",
-      "onr_v1_067_speed-trap",
-      "onr_v1_068_startup-immolator",
       "onr_v1_075_zetatech-software-installer"
     ] as const;
 
@@ -7292,12 +7287,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_048_poltergeist",
-      "onr_v1_051_rabbit",
       "onr_v1_055_reflector",
-      "onr_v1_057_scatter-shot",
-      "onr_v1_067_speed-trap",
-      "onr_v1_068_startup-immolator",
       "onr_v1_075_zetatech-software-installer"
     ] as const;
 
@@ -7345,7 +7335,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const installOnlyPrograms = [
       { definitionId: "onr_v1_026_false-echo", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
       { definitionId: "onr_v1_044_netspace-inverter", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
-      { definitionId: "onr_v1_045_newsgroup-filter", expectedCreditsAfter: 5, expectedMemoryUsed: 2 }
+      { definitionId: "onr_v1_045_newsgroup-filter", expectedCreditsAfter: 5, expectedMemoryUsed: 2 },
+      { definitionId: "onr_v1_048_poltergeist", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
+      { definitionId: "onr_v1_051_rabbit", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
+      { definitionId: "onr_v1_057_scatter-shot", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
+      { definitionId: "onr_v1_067_speed-trap", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
+      { definitionId: "onr_v1_068_startup-immolator", expectedCreditsAfter: 10, expectedMemoryUsed: 1 }
     ] as const;
 
     for (const { definitionId, expectedCreditsAfter, expectedMemoryUsed } of installOnlyPrograms) {

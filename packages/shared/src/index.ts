@@ -3529,6 +3529,66 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_048_poltergeist",
+    title: "Poltergeist",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Install as a program. Its restricted recurring-credit trash-cost ability remains gated until the payment window is confirmed.",
+    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_051_rabbit",
+    title: "Rabbit",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Install as a program. Its trace-limit modifier remains gated until the source filter contract is confirmed.",
+    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_057_scatter-shot",
+    title: "Scatter Shot",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Install as a program. Its restricted recurring-credit upgrade-trash ability remains gated until the payment window is confirmed.",
+    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_067_speed-trap",
+    title: "Speed Trap",
+    side: "runner",
+    type: "program",
+    subtypes: ["detection"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Install as a program. Its rez-interrupt jack-out ability remains gated until the interrupt timing contract is confirmed.",
+    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_068_startup-immolator",
+    title: "Startup Immolator",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    memoryCost: 1,
+    rulesText: "Install as a program. Its post-break ICE-trash ability remains gated until the all-subroutines-broken contract is confirmed.",
+    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_289_edgerunner-inc-temps",
     title: "Edgerunner, Inc., Temps",
     side: "corp",
