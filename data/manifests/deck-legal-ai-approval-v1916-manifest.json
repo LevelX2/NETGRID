@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-manifest-v1",
+  "id": "deck-legal-ai-approval-v1916",
+  "release": "V1.9.16",
+  "status": "ai_support_wip",
+  "extends": "data/manifests/deck-legal-ai-approval-v1915-manifest.json",
+  "scope": {
+    "cardCount": 16,
+    "cardIds": [
+      "onr_v1_003_baedekers-net-map",
+      "onr_v1_004_bakdoor",
+      "onr_v1_033_imp",
+      "onr_v1_035_invisibility",
+      "onr_v1_047_pile-driver",
+      "onr_v1_050_r-and-d-protocol-files",
+      "onr_v1_071_vewy-vewy-quiet",
+      "onr_v1_140_raven-microcyb-eagle",
+      "onr_v1_141_raven-microcyb-owl",
+      "onr_v1_148_access-through-alpha",
+      "onr_v1_149_access-to-arasaka",
+      "onr_v1_150_access-to-kiribati",
+      "onr_v1_152_back-door-to-hilliard",
+      "onr_v1_153_back-door-to-orbital-air",
+      "onr_v1_182_submarine-uplink",
+      "onr_v1_246_fragmentation-storm"
+    ]
+  },
+  "artifacts": {
+    "aiHints": "data/ai/ai-card-hints-deck-legal-v1916.json",
+    "aiSmokes": "data/scenarios/ai-deck-legal-v1916-smokes.json",
+    "engineSmoke": "data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json",
+    "cardManifest": "data/manifests/card-implementation-manifest-1.9.16.json",
+    "mechanicsCoverage": "data/rules/mechanics-coverage-1.9.16.json"
+  },
+  "gateAssertions": {
+    "allCardsHaveAiHintEntries": true,
+    "aiSupportedPromotion": false,
+    "runnerDecisionDebugSideSafe": false,
+    "corpDecisionDebugSideSafe": false,
+    "legalActionOnly": true,
+    "noV1917PlusScope": true
+  },
+  "cards": [
+    { "cardId": "onr_v1_003_baedekers-net-map", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_004_bakdoor", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_033_imp", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_035_invisibility", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_047_pile-driver", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_050_r-and-d-protocol-files", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_071_vewy-vewy-quiet", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_140_raven-microcyb-eagle", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_141_raven-microcyb-owl", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_148_access-through-alpha", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_149_access-to-arasaka", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_150_access-to-kiribati", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_152_back-door-to-hilliard", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_153_back-door-to-orbital-air", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_182_submarine-uplink", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] },
+    { "cardId": "onr_v1_246_fragmentation-storm", "status": "pending_engine_full_gate", "scenarioRefs": ["data/scenarios/ai-deck-legal-v1916-smokes.json"] }
+  ]
+}

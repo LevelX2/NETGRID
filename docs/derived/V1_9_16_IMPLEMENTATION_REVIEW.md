@@ -13,6 +13,7 @@ Status: implementing_wip
 - `packages/shared/src/index.ts` und `packages/engine/src/index.ts` erweitern Trace minimal um den Erfolgseffekt `none` und subroutinegebundene Erfolgs-Gates. Das nutzt `Fragmentation Storm`, ohne bestehende Add-Tag-Traces zu veraendern.
 - `packages/engine/src/index.test.ts` deckt V1.9.16 mit LegalAction-Smokes fuer installierten Link, side-sichere Trace-Choices, Stealth-/Recurring-Refresh und Fragmentation-Storm-Erfolg/Misserfolg samt Replay/StateHash-Nachweis ab.
 - `data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json`, `data/manifests/card-implementation-manifest-1.9.16.json` und `data/rules/mechanics-coverage-1.9.16.json` dokumentieren den WIP-Gate-Stand.
+- `data/ai/ai-card-hints-deck-legal-v1916.json`, `data/scenarios/ai-deck-legal-v1916-smokes.json` und `data/manifests/deck-legal-ai-approval-v1916-manifest.json` legen den KI-WIP-Plan an. Alle Eintraege bleiben `pending_engine_full_gate`; es gibt keine `ai_supported`-Promotion.
 
 ## Gate-Status
 
@@ -26,6 +27,8 @@ Status: implementing_wip
 
 - `v1-9-install-and-check.ps1 -Task engine`: pass, 231 Tests.
 - `v1-9-install-and-check.ps1 -Task catalog`: pass, 30 Tests.
+- `v1-9-install-and-check.ps1 -Task ai`: pass, 84 Tests.
 - `v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- JSON-Validation: pass, 258 Dateien.
 
-Offen bleiben Hosting-Lifecycle-Smokes, Hosted-Replay/StateHash-Nachweis, AI-Hints/-Smokes, Server/Web-Gates, volle Pflichtchecks, Webclient-Version, Final Review und Releasepromotion.
+Offen bleiben Hosting-Lifecycle-Smokes, Hosted-Replay/StateHash-Nachweis, echte AI-Smoke-Verifikation, Server/Web-Gates, volle Pflichtchecks, Webclient-Version, Final Review und Releasepromotion.

@@ -13,10 +13,10 @@ Status: implementing_wip_engine_smoke
 | Scenario Pack | `data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json` | WIP angelegt |
 | Manifest | `data/manifests/card-implementation-manifest-1.9.16.json` | WIP angelegt |
 | Mechanics Coverage | `data/rules/mechanics-coverage-1.9.16.json` | WIP angelegt |
-| AI Hints | `data/ai/ai-card-hints-deck-legal-v1916.json` | offen |
-| AI Smokes | `data/scenarios/ai-deck-legal-v1916-smokes.json` | offen |
+| AI Hints | `data/ai/ai-card-hints-deck-legal-v1916.json` | WIP angelegt, nicht promotet |
+| AI Smokes | `data/scenarios/ai-deck-legal-v1916-smokes.json` | WIP angelegt, nicht promotet |
 | Catalog/Web | Release-IDs, manifest refs, sichtbare Webclient-Version | WIP: No-Promotion-Guard |
-| Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | Teilcheck: engine 231, catalog 30, typecheck pass |
+| Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | Teilcheck: engine 231, catalog 30, ai 84, typecheck pass |
 
 ## Ziel-Smokes
 
@@ -25,3 +25,4 @@ Status: implementing_wip_engine_smoke
 - Link-Karten beeinflussen Trace nur aus oeffentlichen installierten Karten. Nachweis: Engine-Smoke mit Baedeker's Net Map plus Access through Alpha.
 - Stealth-/Recurring-Karten refreshen deterministisch. Nachweis: Engine-Smoke mit Invisibility plus Raven Microcyb Eagle.
 - Fragmentation Storm nutzt bestehende Trace-, installed-card-trash- und Damage-Pfade. Nachweis: Engine-Smoke fuer Trace-Erfolg und Trace-Misserfolg; Programm-Trash und Net Damage sind erfolgsgebunden und beide Branches replayen zum finalen StateHash.
+- KI-Artefakte existieren als WIP-Plan mit `pending_engine_full_gate`, ohne `ai_supported`-Promotion; AI-Paketcheck ist grün.

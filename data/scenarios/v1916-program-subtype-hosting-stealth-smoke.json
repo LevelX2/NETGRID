@@ -33,7 +33,7 @@
     "engine": "pass: 231 tests",
     "catalog": "pass: 30 tests",
     "typecheck": "pass",
-    "ai": "not_run_this_wip_slice",
+    "ai": "pass: 84 tests",
     "server": "not_run_this_wip_slice",
     "web": "not_run_this_wip_slice",
     "test": "not_run_this_wip_slice",
