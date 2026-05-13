@@ -20,7 +20,8 @@ import {
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
-  KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS
+  KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
+  ONR_V1_9_22_WIP_CARD_IDS
 } from "@netgrid/catalog";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
 
@@ -59,6 +60,28 @@ describe("catalog API filters", () => {
     expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual(
       [...new Set(expectedOnrAiApproved)].sort()
     );
+    expect(body.cards.map((card) => card.catalogCardId)).not.toEqual(expect.arrayContaining([...ONR_V1_9_22_WIP_CARD_IDS]));
+  });
+
+  it("keeps V1.9.22 WIP card details non-promoted in the web catalog API", () => {
+    for (const cardId of ONR_V1_9_22_WIP_CARD_IDS) {
+      const response = catalogDetailResponse(cardId);
+
+      expect([200, 404], cardId).toContain(response.status);
+      if (response.status === 404) continue;
+      const body = response.body as {
+        card: {
+          catalogCardId: string;
+          statuses: { ai_supported: boolean; human_playable: boolean; deck_legal: boolean };
+          aiHints: { aiSupportStatus: string } | null;
+        };
+      };
+      expect(body.card.catalogCardId, cardId).toBe(cardId);
+      expect(body.card.statuses.ai_supported, cardId).toBe(false);
+      expect(body.card.statuses.human_playable, cardId).toBe(false);
+      expect(body.card.statuses.deck_legal, cardId).toBe(false);
+      expect(body.card.aiHints?.aiSupportStatus ?? "none", cardId).not.toBe("ai_supported");
+    }
   });
 
   it("adds curated AI hints to card detail responses when available", () => {

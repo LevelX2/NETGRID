@@ -62,7 +62,8 @@
     "Ten V1.9.22 runner event target cards have runtime definitions and an explicit no-play_event-promotion guard until concrete event resolvers exist.",
     "Fourteen V1.9.22 runner program target cards have explicit no-playable-runtime and no install/pump/break LegalAction guards until local cost/MU/breaker values are confirmed.",
     "Fourteen V1.9.22 Corp agenda, ICE and operation target cards have an explicit no-playable-runtime guard until concrete resolvers exist.",
-    "The V1.9.22 manifest, mechanics coverage and this WIP scenario stay aligned to the exact 47-card WIP set without catalog or AI promotion."
+    "The V1.9.22 manifest, mechanics coverage and this WIP scenario stay aligned to the exact 47-card WIP set without catalog or AI promotion.",
+    "The web catalog API keeps all 47 V1.9.22 WIP cards out of the ai_supported filter and does not promote visible detail responses."
   ],
   "verification": {
     "json": "pass: 302 files",
@@ -70,7 +71,7 @@
     "engine": "pass: 278 tests including all nine runner hardware install smokes, runner-event no-promotion guard, runner-program no-playable-runtime/no install-pump-break LegalAction guard and Corp-longtail no-playable-runtime guard",
     "ai": "pass: 86 tests including V1.9.22 AI no-promotion guard",
     "server": "pass: 72 tests",
-    "web": "pass: 77 tests",
+    "web": "pass: 78 tests including V1.9.22 web catalog no-promotion guard",
     "typecheck": "pass",
     "test": "pass: exit 0",
     "lint": "pass",

@@ -15,8 +15,8 @@ Status: planned
 | Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; AI-Hints/-Smokes fuer Promotion bleiben Folgearbeit |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
-| Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer WIP-Artefakt-/AI-No-Promotion-Guard: JSON 302, catalog 37, engine 278, ai 86, server 72, web 77, typecheck, test, lint, build |
+| Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer WIP-Artefakt-/AI-/Web-No-Promotion-Guard: JSON 302, catalog 37, engine 278, ai 86, server 72, web 78, typecheck, test, lint, build |
 
 ## Mindestchecks im ersten WIP
 
@@ -51,5 +51,6 @@ Status: planned
 - Zusatzabdeckung: Catalog-/AI-Promotion bleibt in Manifest, Szenario, Coverage und Runtime-Catalog fuer alle 47 Karten false.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 278 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests inkl. Guard, dass 47/47 V1.9.22-WIP-Karten nicht `ai_supported`, `human_playable` oder `deck_legal` sind.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 78 Tests inkl. Guard, dass 47/47 V1.9.22-WIP-Karten nicht im `ai_supported`-Filter erscheinen und sichtbare Detailantworten nicht promotet sind.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 
