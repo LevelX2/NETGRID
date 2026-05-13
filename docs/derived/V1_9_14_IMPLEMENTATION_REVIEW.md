@@ -10,12 +10,12 @@ Status: implementing_wip
 - `packages/catalog/src/index.ts` fuehrt `ONR_V1_9_14_WIP_CARD_IDS` fuer genau 25 Zielkarten.
 - `packages/catalog/src/index.test.ts` prueft, dass diese 25er-WIP-Zielmenge nicht in `ONR_V1_RUNTIME_RELEASE_CARD_IDS` vorgezogen wird.
 - `packages/shared/src/index.ts` enthaelt WIP-Runtime-Definitionen fuer alle 25 Zielkarten. Die Definitionen sind WIP-Texte und noch keine Release-Promotion.
-- `packages/engine/src/index.test.ts` prueft fuer `Asp`, dass ein V1.9.14-Trace-ICE ueber das bestehende side-sichere Corp-/Runner-Bid-Fenster laeuft und nach erfolgreichem Trace einen Tag vergibt.
+- `packages/engine/src/index.test.ts` prueft 25/25 WIP-Runtime-Definitionen und fuer `Asp`, dass ein V1.9.14-Trace-ICE ueber das bestehende side-sichere Corp-/Runner-Bid-Fenster laeuft und nach erfolgreichem Trace einen Tag vergibt.
 
 ## Verifikation
 
 - `v1-9-install-and-check.ps1 -Task catalog`: pass, 28 Tests.
-- `v1-9-install-and-check.ps1 -Task engine`: pass, 217 Tests.
+- `v1-9-install-and-check.ps1 -Task engine`: pass, 218 Tests.
 - `v1-9-install-and-check.ps1 -Task typecheck`: pass.
 
 ## Gate-Status
