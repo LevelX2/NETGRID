@@ -23,10 +23,13 @@
       "label": "Per-card Resolver Longtail",
       "currentStatus": "partial_runtime_wip",
       "targetGate": "v1.9.22",
-      "currentScopeNote": "47 Karten sind im Catalog-WIP-Guard eingefroren; neun Runner-Hardware-Zielkarten haben Runtime-Definitionen ohne Release- oder AI-Promotion.",
+      "currentScopeNote": "47 Karten sind im Catalog-WIP-Guard eingefroren; neun Runner-Hardware-Zielkarten haben Runtime-Definitionen, und Arasaka Portable Prototype hat einen LegalAction-Installationspfad mit Visibility und Replay/StateHash.",
       "coverage": [
         "scope_guard",
-        "runner_hardware_runtime_definitions"
+        "runner_hardware_runtime_definitions",
+        "runner_hardware_install_legal_action",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     }
   ],

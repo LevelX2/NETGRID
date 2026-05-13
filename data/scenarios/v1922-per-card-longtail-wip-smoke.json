@@ -57,12 +57,13 @@
     "Catalog WIP guard tracks the exact target set.",
     "No V1.9.22 card is release-promoted or AI-approved in this planning slice.",
     "V2.x remains blocked until the Originalset Completion Gate is final-reviewed.",
-    "Nine V1.9.22 runner hardware target cards have runtime definitions with final display-only text and no release or AI promotion."
+    "Nine V1.9.22 runner hardware target cards have runtime definitions with final display-only text and no release or AI promotion.",
+    "Arasaka Portable Prototype has a V1.9.22 runner hardware install LegalAction smoke with Visibility and Replay/StateHash coverage."
   ],
   "verification": {
     "json": "pass: 302 files",
     "catalog": "pass: 36 tests",
-    "engine": "pass: 272 tests",
+    "engine": "pass: 273 tests",
     "typecheck": "pass"
   },
   "completionGate": {
@@ -70,6 +71,7 @@
     "catalogPromoted": false,
     "aiPromoted": false,
     "runtimeDefinitionsReady": "runner_hardware_cluster_9_of_47",
-    "originalsetCompletionGateReady": false
+    "originalsetCompletionGateReady": false,
+    "engineCovered": "first_runner_hardware_install_path"
   }
 }

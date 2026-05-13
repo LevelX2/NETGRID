@@ -25,6 +25,6 @@ LegalAction-/applyAction- und Visibility-Smoke fuer die erste Runner-Hardware-Gr
 ## Verifikation
 
 - JSON-Validation fuer `data/**/*.json`: pass, 302 Dateien.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 272 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 273 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 36 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.

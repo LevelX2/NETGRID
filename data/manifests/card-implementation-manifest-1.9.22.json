@@ -190,7 +190,10 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {

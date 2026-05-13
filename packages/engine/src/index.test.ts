@@ -6258,6 +6258,36 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
+
+  it("installs the first V1.9.22 runner hardware through LegalAction with replay and visibility", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-runner-hardware-install",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_hardware_install",
+          name: "O:NR V1.9.22 Runner Hardware Install",
+          cards: [{ id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_119_arasaka-portable-prototype");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_119_arasaka-portable-prototype");
+
+    expect(state.runner.rig.hardware.map((id) => state.cardInstances[id]?.definitionId)).toContain("onr_v1_119_arasaka-portable-prototype");
+    expect(getPlayerView(state, "runner").own.rig?.some((card) => card.definitionId === "onr_v1_119_arasaka-portable-prototype")).toBe(true);
+    expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === "onr_v1_119_arasaka-portable-prototype")).toBe(true);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 });
 
 describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
