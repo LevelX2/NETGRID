@@ -5735,6 +5735,38 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     }
   });
 
+  it("uses Replicator as a paid pump and free trace-subroutine breaker only", () => {
+    expect(DEMO_CARDS_BY_ID["onr_v1_056_replicator"]).toMatchObject({ installCost: 5, memoryCost: 1, strength: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_056_replicator"]?.abilities).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: "pump_strength", cost: { credits: 1 }, amount: 1 }),
+        expect.objectContaining({ type: "break_subroutine", cost: { credits: 0 }, subroutineTypes: ["initiate_trace"] })
+      ])
+    );
+
+    let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-replicator-trace-only"));
+    state.runner.credits = 4;
+    state.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(state, "onr_v1_056_replicator");
+
+    expect(getLegalActions(state, "runner").some((action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_056_replicator")).toBe(false);
+
+    state.runner.credits = 10;
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    expect(state.runner.credits).toBe(5);
+
+    putCorpIceOnServer(state, "rd", "onr_v1_240_fang");
+    state.corp.credits = 9;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_240_fang");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+
+    const replicatorBreaks = getLegalActions(state, "runner").filter((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    expect(replicatorBreaks.map((action) => action.payload?.subroutineIndex)).toEqual([0]);
+    expect(replicatorBreaks[0]?.costs).toEqual([{ credits: 0 }]);
+  });
+
   it("installs V1.9.14 Runner cards, counts installed link, and keeps Resource trash legal-action gated", () => {
     for (const definitionId of ONR_V1_9_14_RUNNER_CARD_IDS) {
       let state = toRunnerTurn(v1914TraceTagResourceGame(`v1914-install-${definitionId}`));

@@ -1337,6 +1337,8 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_9_14_RELEASE_CARD_IDS).toHaveLength(25);
     expect(ONR_V1_9_14_WIP_CARD_IDS).toEqual(ONR_V1_9_14_RELEASE_CARD_IDS);
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_14_RELEASE_CARD_IDS]));
+    expect(cardsById["onr_v1_056_replicator"]?.numeric.installCost).toBe(5);
+    expect(cardsById["onr_v1_056_replicator"]?.numeric.strength).toBe(2);
     expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
     expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
     expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...approved].sort());
@@ -1398,6 +1400,7 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_9_15_RELEASE_CARD_IDS).toHaveLength(14);
     expect(ONR_V1_9_15_WIP_CARD_IDS).toEqual(ONR_V1_9_15_RELEASE_CARD_IDS);
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(expect.arrayContaining([...ONR_V1_9_15_RELEASE_CARD_IDS]));
+    expect(cardsById["onr_v1_024_expert-schedule-analyzer"]?.numeric.installCost).toBe(0);
     expect(hints.map((hint) => hint.cardId).sort()).toEqual([...approved].sort());
     expect(manifestCards.map((card) => card.cardId).sort()).toEqual([...approved].sort());
     expect(implementationCards.map((card) => card.cardCode).sort()).toEqual([...approved].sort());

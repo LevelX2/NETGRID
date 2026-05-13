@@ -372,6 +372,7 @@ export type AbilityDefinition = {
   cost: { credits: number };
   amount?: number;
   iceSubtype?: string;
+  subroutineTypes?: SubroutineType[];
   count?: number;
   timingPoint: TimingPointId;
   kind?: AbilityKind;
@@ -4602,11 +4603,22 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["icebreaker"],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 5,
     memoryCost: 1,
-    strength: 1,
-    rulesText: "Installed program for trace subroutine pressure and legal trace bids.",
-    mechanics: ["install_program", "memory", "trace", "link", "bid_amount", ONR_V1_LOCAL_PRIVATE]
+    strength: 2,
+    rulesText: "0 Credits: Break 1 trace subroutine. 1 Credit: +1 strength.",
+    abilities: [
+      { id: "onr_v1_056_replicator_pump", type: "pump_strength", cost: { credits: 1 }, amount: 1, timingPoint: "run.encounter_ice" },
+      {
+        id: "onr_v1_056_replicator_break_trace",
+        type: "break_subroutine",
+        cost: { credits: 0 },
+        subroutineTypes: ["initiate_trace"],
+        count: 1,
+        timingPoint: "run.encounter_ice"
+      }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "trace", "link", "bid_amount", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_063_signpost",
@@ -4929,7 +4941,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 0,
     memoryCost: 1,
     rulesText: "Installed access tool for breach planning and additional access support.",
     mechanics: ["install_program", "memory", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]

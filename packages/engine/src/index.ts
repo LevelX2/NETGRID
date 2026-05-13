@@ -2938,6 +2938,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
         if (breaker.id === BLINK_ID && blinkUsedSubroutines.includes(index)) return;
+        if (breakAbility.subroutineTypes && !breakAbility.subroutineTypes.includes(subroutine.type)) return;
         if (!run.brokenSubroutineIndexes.includes(index) && !run.resolvedSubroutineIndexes.includes(index)) {
           const subroutineLabel = subroutines.length > 1 ? `Subroutine ${index + 1} brechen` : "Subroutine brechen";
           actions.push(
