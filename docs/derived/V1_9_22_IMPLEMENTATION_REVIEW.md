@@ -28,6 +28,7 @@ Status: planning/catalog WIP
 - Ein Catalog-Guard bestaetigt, dass finale V1.9.22-AI-Promotion-Artefakte (`ai-card-hints-deck-legal-v1922.json`, `deck-legal-ai-approval-v1922-manifest.json`, `ai-deck-legal-v1922-smokes.json`) bis zum Completion-Gate nicht existieren.
 - `data/reports/v1922-completion-gate-status.json` dokumentiert maschinenlesbar den offenen V1.9.22-Gate-Stand, die gruene Verify-Basis, die lokale Quellensuche ohne vollstaendigen Resolververtrag und die vier blockierenden Gates `resolver_contracts`, `ai_promotion_artifacts`, `webclient_version` und `final_review` mit Removal Conditions.
 - `docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md` dokumentiert eine erneute lokale Quellensuche auf blockierte Runner-Event- und Corp-Longtailkarten. Der Scan bestaetigt, dass weiter nur Teilnotizen, Typoberflaechen und display-only WIP-Runtimes vorliegen; daraus folgt keine Runtime-, Catalog- oder AI-Promotion.
+- `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md` und `data/rules/v1922-resolver-contracts.json` erfassen alle 47 Zielkarten einzeln mit bestaetigter Teilbasis, fehlenden Vertragsfeldern und Removal Conditions. Ergebnis: 0/47 Karten sind fuer neue Resolverimplementierung oder Promotion vollstaendig bereit; 9/47 Hardwarekarten haben nur den engen Installations-Basisvertrag.
 - Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
 
 ## Gate
@@ -59,3 +60,5 @@ Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fu
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - JSON-Validation fuer `data/**/*.json`: pass, 304 Dateien nach Source-Scan-Report-Aktualisierung.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 40 Tests inkl. Completion-Gate-Statusreport.
+- JSON-Validation fuer `data/**/*.json`: pass, 305 Dateien nach Resolververtragsmatrix.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 41 Tests inkl. aktualisiertem Completion-Gate-Statusreport-Verweis und Per-card-Guard fuer die Resolververtragsmatrix.

@@ -118,6 +118,7 @@ import v1920MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1
 import v1921MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.21.json";
 import v1922MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.22.json";
 import v1922ResolverContractInventoryData from "../../../data/rules/v1922-resolver-contract-inventory.json";
+import v1922ResolverContractsData from "../../../data/rules/v1922-resolver-contracts.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
 import {
   assertPipelinePayloadSafe,
@@ -1919,6 +1920,52 @@ describe("catalog import and status logic", () => {
     }
   });
 
+  it("tracks per-card V1.9.22 resolver contracts without promotion-ready entries", () => {
+    const contracts = v1922ResolverContractsData as {
+      status: string;
+      gateAssertions: {
+        coversExactWipScope: boolean;
+        cardCount: number;
+        readyForPromotionCount: number;
+        readyForNewResolverImplementationCount: number;
+        hardwareInstallBaseCoveredCount: number;
+        runtimePromotionUnchanged: boolean;
+        catalogPromotionUnchanged: boolean;
+        aiPromotionUnchanged: boolean;
+      };
+      cards: Array<{
+        cardId: string;
+        cluster: string;
+        contractStatus: string;
+        confirmedLocalFacts: string[];
+        safeCurrentCoverage: string[];
+        missingInformation: string[];
+        removalCondition: string;
+      }>;
+    };
+    const cardIds = contracts.cards.map((card) => card.cardId);
+
+    expect(contracts.status).toBe("contract_matrix_no_promotion");
+    expect(contracts.gateAssertions.coversExactWipScope).toBe(true);
+    expect(contracts.gateAssertions.cardCount).toBe(ONR_V1_9_22_WIP_CARD_IDS.length);
+    expect(contracts.gateAssertions.readyForPromotionCount).toBe(0);
+    expect(contracts.gateAssertions.readyForNewResolverImplementationCount).toBe(0);
+    expect(contracts.gateAssertions.hardwareInstallBaseCoveredCount).toBe(9);
+    expect(contracts.gateAssertions.runtimePromotionUnchanged).toBe(true);
+    expect(contracts.gateAssertions.catalogPromotionUnchanged).toBe(true);
+    expect(contracts.gateAssertions.aiPromotionUnchanged).toBe(true);
+    expect([...new Set(cardIds)].sort()).toEqual([...ONR_V1_9_22_WIP_CARD_IDS].sort());
+    expect(cardIds).toHaveLength(ONR_V1_9_22_WIP_CARD_IDS.length);
+
+    for (const card of contracts.cards) {
+      expect(card.contractStatus, card.cardId).not.toMatch(/ready_for_promotion|ready_for_implementation/);
+      expect(card.confirmedLocalFacts.length, card.cardId).toBeGreaterThan(0);
+      expect(card.safeCurrentCoverage.length, card.cardId).toBeGreaterThan(0);
+      expect(card.missingInformation.length, card.cardId).toBeGreaterThan(0);
+      expect(card.removalCondition.trim(), card.cardId).not.toBe("");
+    }
+  });
+
   it("keeps V1.9.22 AI promotion artifacts absent until the completion gate", () => {
     const promotionArtifacts = [
       "../../../data/ai/ai-card-hints-deck-legal-v1922.json",
@@ -1959,13 +2006,19 @@ describe("catalog import and status logic", () => {
     expect(gateStatus.verifiedGreenChecks.sort()).toEqual(["ai", "build", "catalog", "engine", "json", "lint", "server", "test", "typecheck", "web"]);
     expect(gateStatus.lastLocalContractSearch.result).toBe("no_complete_resolver_contract_found");
     expect(gateStatus.lastLocalContractSearch.confirmedPartialSources.sort()).toEqual([
+      "data/rules/v1922-resolver-contracts.json",
       "docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md",
       "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md",
       "docs/derived/V1_9_10_TO_V1_9_XX_CARD_FUNCTION_MATRIX.md",
       "docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md",
+      "docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md",
       "docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md",
       "docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md"
     ]);
+    expect(gateStatus.latestContractMatrix.cardCount).toBe(ONR_V1_9_22_WIP_CARD_IDS.length);
+    expect(gateStatus.latestContractMatrix.readyForPromotionCount).toBe(0);
+    expect(gateStatus.latestContractMatrix.hardwareInstallBaseCoveredCount).toBe(9);
+    expect(gateStatus.latestContractMatrix.decision).toBe("no_runtime_catalog_or_ai_promotion");
     expect(gateStatus.lastLocalContractSearch.removalCondition.trim()).not.toBe("");
     expect(gateStatus.blockingGates.map((gate) => gate.gateId).sort()).toEqual(["ai_promotion_artifacts", "final_review", "resolver_contracts", "webclient_version"]);
     for (const gate of gateStatus.blockingGates) {

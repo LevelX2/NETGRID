@@ -31,7 +31,9 @@
       "docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md",
       "docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md",
       "docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md",
-      "docs/derived/V1_9_10_TO_V1_9_XX_CARD_FUNCTION_MATRIX.md"
+      "docs/derived/V1_9_10_TO_V1_9_XX_CARD_FUNCTION_MATRIX.md",
+      "docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md",
+      "data/rules/v1922-resolver-contracts.json"
     ],
     "removalCondition": "Add or identify a local source that provides a full per-card resolver contract, not only type surfaces or effect summaries."
   },
@@ -39,6 +41,15 @@
     "searchedAt": "2026-05-13T19:09:00+02:00",
     "reviewRef": "docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md",
     "result": "no_complete_resolver_contract_found",
+    "decision": "no_runtime_catalog_or_ai_promotion"
+  },
+  "latestContractMatrix": {
+    "createdAt": "2026-05-13T19:25:00+02:00",
+    "docRef": "docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md",
+    "dataRef": "data/rules/v1922-resolver-contracts.json",
+    "cardCount": 47,
+    "readyForPromotionCount": 0,
+    "hardwareInstallBaseCoveredCount": 9,
     "decision": "no_runtime_catalog_or_ai_promotion"
   },
   "blockingGates": [
