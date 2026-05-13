@@ -12,7 +12,7 @@ Stand: 2026-05-13
 - `data/scenarios/v1920-global-modifier-special-state-wip-smoke.json`, `data/manifests/card-implementation-manifest-1.9.20.json` und `data/rules/mechanics-coverage-1.9.20.json` dokumentieren den WIP-Scope maschinenlesbar ohne Promotion.
 - 26/26 V1.9.20-Zielkarten haben Runtime-Definitionen in `packages/shared/src/index.ts` mit finalen display-only Texten ohne `WIP`-Präfix.
 - `packages/engine/src/index.test.ts` schützt die Runtime-Zielmenge mit V1.9.21-No-Promotion-Sentinel und deckt Militech MRAM Chip/MRAM Chip als ersten legalen MU-Installationspfad mit PlayerView-Projektion ab.
-- `packages/engine/src/index.ts` ergänzt einen ersten eng typisierten V1.9.20-Action-Economy-Assetpfad für rezzed Remote Facility/Nevinyrral/Pacifica Regional AI; `applyAction` revalidiert Side, rezzed Root-Quelle, Kartenfamilie und `gainedActions`.
+- `packages/engine/src/index.ts` ergänzt einen ersten eng typisierten V1.9.20-Action-Economy-Assetpfad für rezzed Remote Facility/Nevinyrral/Pacifica Regional AI; `applyAction` revalidiert Side, rezzed Root-Quelle, Kartenfamilie und `gainedActions`, und `packages/engine/src/index.test.ts` übt alle drei Karten aus.
 - Fortress Architects ist als erster globaler statischer Modifier an die bestehende ICE-Rez-Kostenberechnung angebunden; der Effekt ist an eine sichtbare rezzed Root-Quelle gebunden.
 - Main-Office Relocation projiziert nach dem Scoren einen öffentlichen Korp-Handgrößenmodifier in beiden PlayerViews, ohne `state.corp.maxHandSize` als Basiswert zu überschreiben.
 - Loan from Chiba trägt als erster persistenter Sonderzustand öffentliche Recurring-Credit-Counter, die über Turnwechsel deterministisch erneuert werden.

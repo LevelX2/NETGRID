@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.20-Action-Economy-Breite vom 2026-05-13 15:17 CEST: Der vorhandene V1.9.20-Action-Economy-Smoke übt jetzt alle drei abgedeckten rezzed Asset-Quellen Remote Facility, Nevinyrral und Pacifica Regional AI aus, jeweils mit Revalidierung, Visibility- und Replay-/StateHash-Assertion. Verifikation: `engine` 264 grün; keine Promotion.
+
 V1.9.20-Visibility-Schnitt vom 2026-05-13 15:15 CEST: Die abgedeckten Action-Economy-, globalen Rez-Kosten-, Handgrößen- und Recurring-State-Pfade prüfen jetzt zusätzlich, dass PublicEvents und Runner-Gegner-Views keine verdeckten HQ/R&D-Identitäten oder private Payload-Strukturen leaken. Mechanics-Coverage, WIP-Smoke, Testmatrix und Implementation Review sind nachgezogen. Verifikation: JSON-Validation 285 und `engine` 264 grün; keine Runtime-/AI-/Web-Promotion.
 
 V1.9.20-Replay-StateHash-Schnitt vom 2026-05-13 15:13 CEST: Die bereits implementierten MRAM-, Action-Economy-, globalen Rez-Kosten-, Handgrößen- und Recurring-State-Pfade haben jetzt direkte Replay-/StateHash-Assertions in `packages/engine/src/index.test.ts`. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix und Implementation Review markieren die Replay-Stabilität der abgedeckten Smokes. Verifikation: JSON-Validation 285, `catalog` 34, `engine` 264 und `typecheck` grün; keine Runtime-/AI-/Web-Promotion.

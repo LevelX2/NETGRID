@@ -4452,44 +4452,48 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   });
 
   it("uses rezzed V1.9.20 action-economy assets through explicit legal actions", () => {
-    let state = apply(
-      createGameAfterSetup({
-        seed: "v1920-asset-actions",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
-        agendaPointsToWin: 7
-      }),
-      "corp",
-      (action) => action.type === "mandatory_draw"
-    );
-    state.corp.credits = 20;
-    state.corp.clicks = 3;
-    state.corp.maxHandSize = 100;
+    for (const definitionId of ["onr_v1_335_remote-facility", "onr_v1_331_nevinyrral", "onr_v1_334_pacifica-regional-ai"]) {
+      let state = apply(
+        createGameAfterSetup({
+          seed: `v1920-asset-actions-${definitionId}`,
+          runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          agendaPointsToWin: 7
+        }),
+        "corp",
+        (action) => action.type === "mandatory_draw"
+      );
+      state.corp.credits = 20;
+      state.corp.clicks = 3;
+      state.corp.maxHandSize = 100;
 
-    const remoteFacilityId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
-    state.cardInstances[remoteFacilityId] = { ...state.cardInstances[remoteFacilityId]!, faceup: true, rezzed: true };
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    const clicksBefore = state.corp.clicks;
-    state = apply(
-      state,
-      "corp",
-      (action) => action.type === "gain_credit" && action.payload?.v1920AssetAbility === "gain_actions" && String(action.payload?.cardId) === remoteFacilityId
-    );
+      const assetId = putCorpRootInRemote(state, definitionId);
+      state.cardInstances[assetId] = { ...state.cardInstances[assetId]!, faceup: true, rezzed: true };
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const clicksBefore = state.corp.clicks;
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "gain_credit" && action.payload?.v1920AssetAbility === "gain_actions" && String(action.payload?.cardId) === assetId
+      );
 
-    expect(state.corp.clicks).toBe(clicksBefore + 1);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
-      v1920AssetAbility: "gain_actions",
-      gainedActions: 2,
-      corpClicksAfter: clicksBefore + 1
-    });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/);
-    expect(getPlayerView(state, "runner").opponent.handCount).toBe(state.corp.hq.length);
-    expect(JSON.stringify(getPlayerView(state, "runner").opponent)).not.toContain("Simple Economy Operation");
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
+      expect(state.corp.clicks, definitionId).toBe(clicksBefore + 1);
+      expect(state.eventLog.at(-1)?.publicPayload, definitionId).toMatchObject({
+        actionType: "gain_credit",
+        v1920AssetAbility: "gain_actions",
+        gainedActions: 2,
+        corpClicksAfter: clicksBefore + 1
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload), definitionId).not.toMatch(
+        /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/
+      );
+      expect(getPlayerView(state, "runner").opponent.handCount, definitionId).toBe(state.corp.hq.length);
+      expect(JSON.stringify(getPlayerView(state, "runner").opponent), definitionId).not.toContain("Simple Economy Operation");
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
   });
 
   it("applies rezzed V1.9.20 global ICE rez-cost modifiers from public root sources", () => {
