@@ -2893,6 +2893,7 @@ select {
 .serverRunButton {
   flex: 0 0 auto;
   height: 24px;
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -2916,6 +2917,56 @@ select {
 .serverRunButton:disabled {
   cursor: not-allowed;
   opacity: 0.55;
+}
+
+.serverRunButton[data-tooltip]::before,
+.serverRunButton[data-tooltip]::after {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.serverRunButton[data-tooltip]::before {
+  content: "";
+  left: calc(100% + 2px);
+  top: 50%;
+  z-index: 12;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 6px solid color-mix(in srgb, var(--runner), var(--line));
+  transform: translateY(-50%) translateX(-3px);
+}
+
+.serverRunButton[data-tooltip]::after {
+  content: attr(data-tooltip);
+  left: calc(100% + 8px);
+  top: 50%;
+  z-index: 13;
+  max-width: min(190px, calc(100vw - 32px));
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line));
+  border-radius: 6px;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  transform: translateY(-50%) translateX(-3px);
+}
+
+.serverRunButton[data-tooltip]:hover::before,
+.serverRunButton[data-tooltip]:hover::after,
+.serverRunButton[data-tooltip]:focus-visible::before,
+.serverRunButton[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
 }
 
 .serverRunButton .costChips {
@@ -3322,51 +3373,65 @@ select {
   padding-left: 2px;
 }
 
-.button.iconOnly.scoreAreaOpenButton {
-  position: absolute;
-  right: 6px;
-  top: 6px;
-  width: 22px;
-  min-width: 22px;
-  height: 20px;
-  margin: 0;
-  padding: 0;
-  border-radius: 5px;
-  border: 1px solid color-mix(in srgb, var(--agenda), var(--line) 42%);
-  background: color-mix(in srgb, var(--agenda), var(--section-bg) 88%);
-  color: var(--text);
-  z-index: 2;
-  display: inline-grid;
-  place-items: center;
-  line-height: 1;
-}
-
-.button.iconOnly.scoreAreaOpenButton:hover {
-  border-color: color-mix(in srgb, var(--agenda), var(--line) 28%);
-  background: color-mix(in srgb, var(--agenda), var(--section-bg) 72%);
-}
-
-.button.iconOnly.scoreAreaOpenButton.is-open {
-  border-color: color-mix(in srgb, var(--agenda), #fff 20%);
-  background: color-mix(in srgb, var(--agenda), var(--section-bg) 68%);
-}
-
 .scoreAreaStatCell {
-  position: relative;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.scoreAreaStatButton {
+  width: 100%;
+  cursor: pointer;
+}
+
+.scoreAreaStatButton:hover,
+.scoreAreaStatButton:focus-visible {
+  border-color: color-mix(in srgb, var(--agenda), var(--line) 24%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 76%);
+}
+
+.scoreAreaStatButton.is-open {
+  border-color: color-mix(in srgb, var(--agenda), white 20%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 70%);
+}
+
+.scoreAreaStatFooter {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
 }
 
 .scoreAreaOpenButtonIcon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--agenda), var(--line) 42%);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 84%);
   color: color-mix(in srgb, var(--agenda), var(--text) 18%);
   line-height: 1;
 }
 
-.scoreAreaOpenButton.is-open .scoreAreaOpenButtonIcon {
+.scoreAreaStatButton.is-open .scoreAreaOpenButtonIcon {
+  border-color: color-mix(in srgb, var(--agenda), white 20%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 68%);
   color: var(--agenda);
 }
 
-.scoreAreaOpenButton svg {
+.scoreAreaOpenButtonIcon svg {
   width: 10px;
   height: 10px;
+}
+
+.sideStatusPanel .stat,
+.sideStatusPanel .stat * {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .archivesOverflowBadge {
@@ -3436,6 +3501,40 @@ select {
   font-size: 11px;
   font-weight: 900;
   line-height: 1;
+  pointer-events: none;
+}
+
+.runPositionActiveSlot {
+  z-index: 70;
+}
+
+.card.runPositionActive {
+  border-color: color-mix(in srgb, var(--runner), white 26%);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--runner), white 14%),
+    0 0 20px color-mix(in srgb, var(--runner), transparent 52%),
+    var(--card-shadow);
+}
+
+.runPositionMarker {
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  z-index: 64;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--runner), white 20%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--runner), var(--panel) 32%);
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.36);
   pointer-events: none;
 }
 
@@ -3538,6 +3637,13 @@ select {
   min-width: calc(20px * var(--lane-card-scale, 1));
   height: calc(20px * var(--lane-card-scale, 1));
   font-size: calc(11px * var(--lane-card-scale, 1));
+}
+
+.lane .runPositionMarker {
+  top: calc(-11px * var(--lane-card-scale, 1));
+  min-height: calc(18px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(7px * var(--lane-card-scale, 1));
+  font-size: calc(10px * var(--lane-card-scale, 1));
 }
 
 .lane .installedStateMark {
@@ -5867,6 +5973,19 @@ select,
   line-height: 1.35;
 }
 
+.runPositionHint {
+  margin: 0;
+  padding: 8px;
+  border: 1px solid color-mix(in srgb, var(--ice), var(--runner) 30%);
+  border-radius: 6px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--ice), var(--section-bg) 88%);
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.35;
+  text-align: center;
+}
+
 .runHint {
   margin: 0;
   padding: 8px;
@@ -5877,6 +5996,11 @@ select,
   font-size: 13px;
   line-height: 1.35;
   text-align: center;
+}
+
+.runBreakerHint {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--runner) 28%);
+  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 87%);
 }
 
 .actionGroup {
@@ -6559,6 +6683,18 @@ select,
   letter-spacing: 0.03em;
   font-size: clamp(10px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.1), 13px);
   max-block-size: 100%;
+}
+
+.rigGroupSideLabel:not(button),
+.sideZoneTitle,
+.sideZoneCount,
+.serverCount,
+.laneLabel,
+.cardTooltipStat,
+.strengthBoostBadge {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .rigGroupSideLabel.runnerZoneSideLabel,

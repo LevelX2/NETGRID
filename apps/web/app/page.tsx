@@ -80,6 +80,7 @@ import {
   actionMatchesContext,
   actionSlotCapacityForTurn,
   actionSlotDisplay,
+  activeRunIceInstanceId,
   baseActionSlotCapacity,
   breachProgressLabel,
   clampCuePosition,
@@ -91,6 +92,9 @@ import {
   hasLegalAction,
   parseCuePositionPreference,
   runTargetServerIds,
+  runAwareActionButtonLabel,
+  runCurrentIceLabel,
+  runPositionStatusLabel,
   serializeCuePositionPreference,
   showInstalledCorpState,
   serverBoardRows,
@@ -2041,6 +2045,8 @@ export default function Page() {
     return runActions.length === 1 ? runActions[0]! : null;
   };
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
+  const activeRunIceId = activeView ? activeRunIceInstanceId(activeView) : null;
+  const hiddenContextHint = activeView ? runHiddenContextActionHint(activeView, legalActionSplit.contextualActions) : null;
   const ownRigGroups = activeView ? groupRunnerRigCards(activeView.own.rig ?? []) : [];
   const scoreAreaCardsBySide = (side: Side): VisibleCard[] => {
     if (!activeView) return [];
@@ -3995,6 +4001,7 @@ export default function Page() {
             selectedContext={selectedPanelContext}
             hasHiddenContextActions={legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card"}
             cardContextActive={selectedActionContext?.kind === "card"}
+            hiddenContextHint={hiddenContextHint}
             actionCapacity={actionSlotCapacities[activeView.side]}
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
@@ -4077,6 +4084,7 @@ export default function Page() {
                             actions={cardActionsFor(card)}
                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
                             {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
+                            runPositionActive={lane.kind === "ice" && activeRunIceId === card.instanceId}
                             onAction={submitAction}
                             onFocus={focusCard}
                             onActionContextSelect={selectActionCard}
@@ -4106,7 +4114,7 @@ export default function Page() {
                                 onClick={() => submitAction(runAction)}
                                 disabled={Boolean(payload.winner) || connection !== "online"}
                                 aria-label={`${actionButtonLabel(runAction)} starten`}
-                                title={actionButtonLabel(runAction)}
+                                data-tooltip={actionButtonLabel(runAction)}
                                 data-testid="server-run-action"
                                 data-server-id={server.id}
                               >
@@ -5531,6 +5539,7 @@ function RunnerRigStrip({
                         selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                         actions={cardActionsForRig(card)}
                         actionDisabled={actionDisabled}
+                        actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
                         onFocus={onFocus}
                         onActionContextSelect={onActionContext}
                         onAction={onAction}
@@ -5661,6 +5670,8 @@ function RunTimelineOverlay({
   const encounteredIce = run.encounteredIce ? enrichVisibleCard(run.encounteredIce, cardDetailsById) : null;
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
+  const positionStatus = runPositionStatusLabel(view);
+  const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
 
   return (
@@ -5686,8 +5697,10 @@ function RunTimelineOverlay({
             </span>
           ))}
         </div>
+        {positionStatus ? <p className="runPositionHint">{positionStatus}</p> : null}
         {jackOutAvailable ? <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p> : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
+        {breakerHint ? <p className="runHint runBreakerHint">{breakerHint}</p> : null}
         {encounteredIce ? (
           <div className="encounterFocus">
             <span>Begegnung</span>
@@ -5704,6 +5717,18 @@ function RunTimelineOverlay({
       </div>
     </div>
   );
+}
+
+function runBreakerActionHint(view: PlayerView, actions: LegalAction[]): string | null {
+  if (view.run?.phase !== "encounter_ice") return null;
+  const activeIceId = activeRunIceInstanceId(view);
+  const breakerActions = actions.filter((action) => {
+    if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return false;
+    return !activeIceId || action.payload?.iceId === activeIceId;
+  });
+  if (breakerActions.length === 0) return "Keine Eisbrecher-Aktion gegen dieses ICE verfügbar.";
+  const labels = Array.from(new Set(breakerActions.map((action) => runAwareActionButtonLabel(view, action)))).slice(0, 2);
+  return `Eisbrecher möglich: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
 }
 
 function ScoredAgendaOverlay({
@@ -5843,6 +5868,31 @@ function serverLabelFromId(serverId: string): string {
   return serverDisplayLabel(serverId);
 }
 
+function runHiddenContextActionHint(view: PlayerView, contextualActions: LegalAction[]): string | null {
+  if (view.run?.phase !== "encounter_ice") return null;
+  const activeIceId = activeRunIceInstanceId(view);
+  const breakerActions = contextualActions.filter((action) => {
+    if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return false;
+    return !activeIceId || action.payload?.iceId === activeIceId;
+  });
+  if (breakerActions.length === 0) return null;
+  const runnerRig = view.side === "runner" ? (view.own.rig ?? []) : (view.opponent.rig ?? []);
+  const breakerIds = new Set(
+    breakerActions
+      .map((action) => (typeof action.payload?.breakerId === "string" ? action.payload.breakerId : action.source))
+      .filter((id): id is string => typeof id === "string" && id !== "basic_action" && id !== "game_rule")
+  );
+  const breakerNames = runnerRig
+    .filter((card) => breakerIds.has(card.instanceId))
+    .map((card) => card.title)
+    .filter((title): title is string => Boolean(title));
+  const uniqueNames = Array.from(new Set(breakerNames));
+  const target = runCurrentIceLabel(view) ?? "dieses ICE";
+  if (uniqueNames.length === 1) return `Eisbrecher verfügbar: Wähle ${uniqueNames[0]} im Rig für Aktionen gegen ${target}.`;
+  if (uniqueNames.length > 1) return `Eisbrecher verfügbar: Wähle ${uniqueNames.slice(0, 2).join(" oder ")} im Rig für Aktionen gegen ${target}.`;
+  return `Eisbrecher verfügbar: Wähle den passenden Eisbrecher im Rig für Aktionen gegen ${target}.`;
+}
+
 function LegalActionsPanel({
   view,
   primaryActions,
@@ -5850,6 +5900,7 @@ function LegalActionsPanel({
   selectedContext,
   hasHiddenContextActions,
   cardContextActive = false,
+  hiddenContextHint = null,
   actionCapacity,
   disabled,
   highlighted = false,
@@ -5865,6 +5916,7 @@ function LegalActionsPanel({
   selectedContext: ActionContext | null;
   hasHiddenContextActions: boolean;
   cardContextActive?: boolean;
+  hiddenContextHint?: string | null;
   actionCapacity: number;
   disabled: boolean;
   highlighted?: boolean;
@@ -5947,7 +5999,7 @@ function LegalActionsPanel({
         {primaryActions.map((action) => (
           <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
             <Play size={15} />
-            <span className="actionButtonLabel">{actionButtonLabel(action)}</span>
+            <span className="actionButtonLabel">{runAwareActionButtonLabel(view, action)}</span>
             <CostChips action={action} />
           </button>
         ))}
@@ -5962,14 +6014,14 @@ function LegalActionsPanel({
             {contextualActions.map((action) => (
               <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
                 <Play size={15} />
-                <span className="actionButtonLabel">{actionButtonLabel(action)}</span>
+                <span className="actionButtonLabel">{runAwareActionButtonLabel(view, action)}</span>
                 <CostChips action={action} />
               </button>
             ))}
             {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
           </div>
         ) : hasHiddenContextActions ? (
-          <p className="meta">Wähle hier eine Aktion oder wähle im Spielfeld eine eigene Spielkarte bzw. ein sichtbares Spielobjekt für weitere Optionen.</p>
+          <p className="meta">{hiddenContextHint ?? "Wähle hier eine Aktion oder wähle im Spielfeld eine eigene Spielkarte bzw. ein sichtbares Spielobjekt für weitere Optionen."}</p>
         ) : null}
         {primaryActions.length === 0 && !selectedContext && !cardContextActive ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
       </div>
@@ -8004,25 +8056,15 @@ function OpponentPanel({
       <h2><RoleIcon size={16} />{displayName ? `${displayName} · ${sideLabel(side)}` : sideLabel(side)}</h2>
       <div className="stats">
         <CreditBadge credits={view.opponent.credits} />
-        <div className="scoreAreaStatCell">
-          <Stat label="Agenda" value={`${view.opponent.agendaPoints} / ${agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
-          {scoreAreaCards.length > 0 ? (
-            <button
-              className={`button iconOnly scoreAreaOpenButton ${scoreAreaOpen ? "is-open" : ""} ${scoreAreaHighlighted ? "cueHighlightSoft" : ""}`}
-              type="button"
-              onClick={onToggleScoreArea}
-              aria-expanded={scoreAreaOpen}
-              aria-label={`Agenda-Fenster ${scoreAreaOpen ? "schließen" : "öffnen"}`}
-              title={`Agenda-Fenster ${scoreAreaOpen ? "schließen" : "öffnen"}`}
-            >
-              <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
-                {scoreAreaOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-              </span>
-            </button>
-          ) : null}
-        </div>
+        <ScoreAreaStat
+          value={`${view.opponent.agendaPoints} / ${agendaPointsToWin}`}
+          open={scoreAreaOpen}
+          highlighted={scoreAreaHighlighted}
+          interactive={scoreAreaCards.length > 0}
+          onToggle={onToggleScoreArea}
+        />
         {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} icon={<TagIcon size={14} />} /> : null}
-        {side === "runner" ? <Stat label="Core" value={view.opponent.coreDamage ?? 0} /> : null}
+        {side === "runner" ? <Stat label="Kernschaden" value={view.opponent.coreDamage ?? 0} /> : null}
       </div>
       <ActionSlotMeter side={side} currentClicks={view.opponent.clicks} displayCapacity={actionCapacity} active={isTurn} compact />
       <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {isTurn ? "Am Zug" : "Wartet"}</p>
@@ -8055,25 +8097,15 @@ function PlayerPanel({
       <h2><RoleIcon size={16} />{title}</h2>
       <div className="stats">
         <CreditBadge credits={view.own.credits} />
-        <div className="scoreAreaStatCell">
-          <Stat label="Agenda" value={`${view.own.agendaPoints} / ${agendaPointsToWin}`} icon={<AgendaIcon size={14} />} />
-          {scoreAreaCards.length > 0 ? (
-            <button
-              className={`button iconOnly scoreAreaOpenButton ${scoreAreaOpen ? "is-open" : ""} ${scoreAreaHighlighted ? "cueHighlightSoft" : ""}`}
-              type="button"
-              onClick={onToggleScoreArea}
-              aria-expanded={scoreAreaOpen}
-              aria-label={`Agenda-Fenster ${scoreAreaOpen ? "schließen" : "öffnen"}`}
-              title={`Agenda-Fenster ${scoreAreaOpen ? "schließen" : "öffnen"}`}
-            >
-              <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
-                {scoreAreaOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-              </span>
-            </button>
-          ) : null}
-        </div>
+        <ScoreAreaStat
+          value={`${view.own.agendaPoints} / ${agendaPointsToWin}`}
+          open={scoreAreaOpen}
+          highlighted={scoreAreaHighlighted}
+          interactive={scoreAreaCards.length > 0}
+          onToggle={onToggleScoreArea}
+        />
         {view.side === "runner" ? <Stat label="Tags" value={view.own.tags} icon={<TagIcon size={14} />} /> : null}
-        {view.side === "runner" ? <Stat label="Core" value={view.own.coreDamage ?? 0} /> : null}
+        {view.side === "runner" ? <Stat label="Kernschaden" value={view.own.coreDamage ?? 0} /> : null}
       </div>
       {view.deckMetadata ? (
         <div className="deckMini">
@@ -8151,6 +8183,55 @@ function Stat({ label, value, unit, icon }: { label?: string; value: number | st
       </strong>
       {label ? <span className="statLabel">{label}</span> : null}
     </div>
+  );
+}
+
+function ScoreAreaStat({
+  value,
+  open,
+  highlighted,
+  interactive,
+  onToggle
+}: {
+  value: string;
+  open: boolean;
+  highlighted: boolean;
+  interactive: boolean;
+  onToggle(): void;
+}) {
+  const toggleLabel = open ? "Agendas ausblenden" : "Agendas anzeigen";
+  const content = (
+    <>
+      <strong>
+        <span className="statIcon"><AgendaIcon size={14} /></span>
+        <span className="statValue">{value}</span>
+      </strong>
+      <span className="scoreAreaStatFooter">
+        <span className="statLabel">Agenda</span>
+        {interactive ? (
+          <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
+            {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </span>
+        ) : null}
+      </span>
+    </>
+  );
+
+  if (!interactive) {
+    return <div className="stat scoreAreaStatCell">{content}</div>;
+  }
+
+  return (
+    <button
+      className={`stat scoreAreaStatCell scoreAreaStatButton ${open ? "is-open" : ""} ${highlighted ? "cueHighlightSoft" : ""}`}
+      type="button"
+      onClick={onToggle}
+      aria-expanded={open}
+      aria-label={toggleLabel}
+      title={toggleLabel}
+    >
+      {content}
+    </button>
   );
 }
 
@@ -8277,7 +8358,9 @@ function CardView({
   selected = false,
   actions = [],
   actionDisabled = false,
+  actionLabelForAction = contextualCardActionLabel,
   positionBadge,
+  runPositionActive = false,
   showAdvancementCounters = true,
   showScoreStateBadges = false,
   choiceSelected = false,
@@ -8295,7 +8378,9 @@ function CardView({
   selected?: boolean;
   actions?: LegalAction[];
   actionDisabled?: boolean;
+  actionLabelForAction?: (action: LegalAction) => string;
   positionBadge?: string;
+  runPositionActive?: boolean;
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
   choiceSelected?: boolean;
@@ -8488,16 +8573,17 @@ function CardView({
   );
 
   return (
-    <div className={`cardSlot${showCardActions ? " actionMenuOpen" : ""}`}>
+    <div className={`cardSlot${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}`}>
       {positionBadge ? (
         <span className="cardPositionBadge" aria-label={`ICE ${positionBadge}: Installationsreihenfolge von innen nach außen`}>
           {positionBadge}
         </span>
       ) : null}
+      {runPositionActive ? <span className="runPositionMarker">Aktuelles ICE</span> : null}
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -8627,7 +8713,7 @@ function CardView({
           <Play size={10} strokeWidth={2.35} />
         </button>
       ) : null}
-      {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} style={actionMenuPositionStyle} onAction={onAction!} /> : null}
+      {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} style={actionMenuPositionStyle} actionLabelForAction={actionLabelForAction} onAction={onAction!} /> : null}
     </div>
   );
 }
@@ -8764,13 +8850,27 @@ function agendaPointLabel(amount: number): string {
   return amount === 1 ? "Agenda-Punkt" : "Agenda-Punkte";
 }
 
-function CardActionsPopover({ actions, disabled, placement, style, onAction }: { actions: LegalAction[]; disabled: boolean; placement: "above" | "below"; style?: CSSProperties; onAction(action: LegalAction): void }) {
+function CardActionsPopover({
+  actions,
+  disabled,
+  placement,
+  style,
+  actionLabelForAction,
+  onAction
+}: {
+  actions: LegalAction[];
+  disabled: boolean;
+  placement: "above" | "below";
+  style?: CSSProperties;
+  actionLabelForAction(action: LegalAction): string;
+  onAction(action: LegalAction): void;
+}) {
   return (
     <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style}>
       {actions.map((action) => (
         <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
           <Play size={14} />
-          <span className="actionButtonLabel">{contextualCardActionLabel(action)}</span>
+          <span className="actionButtonLabel">{actionLabelForAction(action)}</span>
           <CostChips action={action} />
         </button>
       ))}

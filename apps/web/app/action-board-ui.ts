@@ -397,6 +397,57 @@ export function breachProgressLabel(view: PlayerView): string | null {
   return `Zugriff ${current} von ${Math.max(current, knownTotal)}`;
 }
 
+export function activeRunIceInstanceId(view: PlayerView): string | null {
+  const run = view.run;
+  if (!run) return null;
+  if (run.encounteredIce?.instanceId) return run.encounteredIce.instanceId;
+  if (run.position?.kind !== "ice") return null;
+  const server = view.servers.find((candidate) => candidate.id === run.position?.serverId);
+  return server?.ice[run.position.iceIndex]?.instanceId ?? null;
+}
+
+export function runCurrentIceLabel(view: PlayerView): string | null {
+  const position = view.run?.position;
+  if (position?.kind !== "ice") return null;
+  return `ICE ${position.iceIndex + 1}`;
+}
+
+export function runPositionStatusLabel(view: PlayerView): string | null {
+  const run = view.run;
+  if (!run?.position) return null;
+  if (run.position.kind === "server") {
+    if (run.phase === "access") return "Aktuell: Zugriff auf den Server";
+    return "Aktuell: vor dem Zugriff auf den Server";
+  }
+  const server = view.servers.find((candidate) => candidate.id === run.position?.serverId);
+  const total = Math.max(run.position.iceIndex + 1, server?.ice.length ?? 0);
+  const iceLabel = `ICE ${run.position.iceIndex + 1} von ${total}`;
+  if (run.phase === "encounter_ice") return `Aktuell: Begegnung mit ${iceLabel}`;
+  if (run.phase === "approach_ice") return `Aktuell: Annäherung an ${iceLabel}`;
+  return `Aktuell: vor ${iceLabel}`;
+}
+
+export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction): string {
+  const base = actionButtonLabel(action);
+  if (!view.run) return base;
+  const iceLabel = runCurrentIceLabel(view);
+  if (action.type === "jack_out") {
+    return iceLabel ? `Run abbrechen an ${iceLabel}` : "Run abbrechen vor Zugriff";
+  }
+  if (action.type === "continue_run") {
+    if (action.payload?.encounterContinue === true) {
+      if (base === "ICE passieren" && iceLabel) return `${iceLabel} passieren`;
+      return iceLabel ? `${base} an ${iceLabel}` : base;
+    }
+    if (view.run.phase === "movement") return iceLabel ? `Run fortsetzen zu ${iceLabel}` : "Run fortsetzen zum Zugriff";
+    if (view.run.phase === "approach_ice" && iceLabel) return `Annäherung an ${iceLabel} fortsetzen`;
+  }
+  if ((action.type === "pump_breaker" || action.type === "break_subroutine") && iceLabel && action.payload?.iceId === activeRunIceInstanceId(view)) {
+    return `${base} gegen ${iceLabel}`;
+  }
+  return base;
+}
+
 export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {
   const groups = [
     { key: "program", label: "Programme", cards: cards.filter((card) => card.type === "program") },

@@ -1282,6 +1282,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
     ? {
         attackedServerId: state.run.attackedServerId,
         phase: state.run.phase,
+        position: state.run.position,
         ...(state.run.encounteredIceId ? { encounteredIce: visibleCorpCard(state, state.run.encounteredIceId, side, "ice") } : {}),
         ...(state.run.accessedCardId ? { accessedCard: visibleCorpCard(state, state.run.accessedCardId, side, "root") } : {}),
         ...(state.run.breach

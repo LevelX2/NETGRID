@@ -879,6 +879,7 @@ export type PlayerView = {
   run?: {
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
+    position?: RunState["position"];
     encounteredIce?: VisibleCard;
     accessedCard?: VisibleCard;
     breach?: {

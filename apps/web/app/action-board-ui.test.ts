@@ -7,6 +7,7 @@ import {
   actionMatchesContext,
   actionSlotCapacityForTurn,
   actionSlotDisplay,
+  activeRunIceInstanceId,
   aiPacingDelayMs,
   breachProgressLabel,
   clampCuePosition,
@@ -17,6 +18,9 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   parseCuePositionPreference,
+  runAwareActionButtonLabel,
+  runCurrentIceLabel,
+  runPositionStatusLabel,
   runTargetServerIds,
   serverBoardRows,
   serverDisplayLabel,
@@ -45,16 +49,24 @@ describe("V1.0.5 action board UI helpers", () => {
   });
 
   it("maps RunTimeline state, active target and server labels without raw V1.0.5 labels", () => {
+    const ice1 = card("ice_1", "Inner ICE", "ice");
+    const ice2 = card("ice_2", "Middle ICE", "ice");
+    const ice3 = card("ice_3", "Outer ICE", "ice");
     const running = view("runner", {
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
-        { id: "rd", label: "R&D", ice: [], root: [] }
+        { id: "rd", label: "R&D", ice: [ice1, ice2, ice3], root: [] }
       ],
-      run: { attackedServerId: "rd", phase: "movement", successful: false }
+      run: { attackedServerId: "rd", phase: "movement", position: { kind: "ice", serverId: "rd", iceIndex: 2 }, successful: false }
     });
 
     expect(currentRunTimelineStep(running, [legalAction("runner", "jack_out", "basic_action", "Jack out", undefined, "run.jack_out_window")])).toBe("movement");
     expect(runTargetServerIds(running)).toEqual(["rd"]);
+    expect(activeRunIceInstanceId(running)).toBe("ice_3");
+    expect(runCurrentIceLabel(running)).toBe("ICE 3");
+    expect(runPositionStatusLabel(running)).toBe("Aktuell: vor ICE 3 von 3");
+    expect(runAwareActionButtonLabel(running, legalAction("runner", "jack_out", "game_rule", "Jack-out", undefined, "run.jack_out_window"))).toBe("Run abbrechen an ICE 3");
+    expect(runAwareActionButtonLabel(running, legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.jack_out_window"))).toBe("Run fortsetzen zu ICE 3");
     expect(serverDisplayLabel("rd")).toBe("F&E (R&D)");
     expect(serverDisplayLabel("archives")).toBe("Archive");
     expect(serverDisplayLabel("remote_2")).toBe("Fort 2");
@@ -76,6 +88,26 @@ describe("V1.0.5 action board UI helpers", () => {
         })
       )
     ).toBe("Private Cybernet Police: Trace 5 starten");
+  });
+
+  it("labels encounter breaker actions against the current ICE", () => {
+    const encounteredIce = card("ice_2", "Data Wall", "ice");
+    const running = view("runner", {
+      servers: [{ id: "hq", label: "HQ", ice: [card("ice_1", "Inner ICE", "ice"), encounteredIce], root: [] }],
+      run: {
+        attackedServerId: "hq",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "hq", iceIndex: 1 },
+        encounteredIce,
+        successful: false
+      }
+    });
+    const pump = legalAction("runner", "pump_breaker", "breaker_1", "Replicator: Stärke +1", { breakerId: "breaker_1", iceId: "ice_2" }, "run.encounter_ice");
+    const passIce = legalAction("runner", "continue_run", "game_rule", "ICE passieren", { encounterContinue: true, unbrokenSubroutineCount: 0 }, "run.encounter_ice");
+
+    expect(runPositionStatusLabel(running)).toBe("Aktuell: Begegnung mit ICE 2 von 2");
+    expect(runAwareActionButtonLabel(running, pump)).toBe("Stärke +1 (Replicator) gegen ICE 2");
+    expect(runAwareActionButtonLabel(running, passIce)).toBe("ICE 2 passieren");
   });
 
   it("shows access progress only from PlayerView breach data", () => {
