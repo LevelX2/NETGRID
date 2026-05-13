@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.20",
+  "id": "v1.9.20-global-modifier-special-state-manifest",
+  "status": "wip_planning_catalog_guard_pending_runtime",
+  "extends": "data/manifests/card-implementation-manifest-1.9.19.json",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only",
+  "gateAssertions": {
+    "v1920ScopeFrozenToTwentySixCards": true,
+    "catalogWipGuardReady": true,
+    "runtimeDefinitionsReady": false,
+    "engineCovered": false,
+    "noOfficialAssets": true,
+    "noV1921PlusScopeExpansion": true,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true
+  },
+  "cards": [
+    { "cardCode": "onr_v1_022_emergency-self-construct", "title": "Emergency Self-Construct", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "event_modification_prevention_avoid_resolver; persistent_special_state_resolver; core_brain_damage_modifier_resolver; action_economy_handsize_modifier_resolver; damage_event_prevention_resolver", "roleTags": ["runner", "program", "handlimit"] },
+    { "cardCode": "onr_v1_029_gremlins", "title": "Gremlins", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; typed_counter_virus_purge_resolver; action_economy_handsize_modifier_resolver", "roleTags": ["runner", "program", "counter"] },
+    { "cardCode": "onr_v1_133_militech-mram-chip", "title": "Militech MRAM Chip", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; action_economy_handsize_modifier_resolver", "roleTags": ["runner", "hardware", "memory"] },
+    { "cardCode": "onr_v1_134_mram-chip", "title": "MRAM Chip", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; action_economy_handsize_modifier_resolver", "roleTags": ["runner", "hardware", "memory"] },
+    { "cardCode": "onr_v1_160_diplomatic-immunity", "title": "Diplomatic Immunity", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "event_modification_prevention_avoid_resolver; scored_agenda_static_active_resolver; agenda_difficulty_overadvance_resolver; global_static_modifier_layer_resolver; damage_event_prevention_resolver", "roleTags": ["runner", "resource", "prevention"] },
+    { "cardCode": "onr_v1_168_loan-from-chiba", "title": "Loan from Chiba", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; recurring_pool_start_turn_resolver", "roleTags": ["runner", "resource", "persistent"] },
+    { "cardCode": "onr_v1_171_preying-mantis", "title": "Preying Mantis", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "event_modification_prevention_avoid_resolver; persistent_special_state_resolver; core_brain_damage_modifier_resolver; action_economy_handsize_modifier_resolver; damage_event_prevention_resolver", "roleTags": ["runner", "resource", "action"] },
+    { "cardCode": "onr_v1_190_bioweapons-engineering", "title": "Bioweapons Engineering", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; hidden_zone_search_reveal_reorder_resolver; global_static_modifier_layer_resolver; damage_event_prevention_resolver", "roleTags": ["corp", "agenda", "modifier"] },
+    { "cardCode": "onr_v1_191_black-ice-quality-assurance", "title": "Black Ice Quality Assurance", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; hidden_zone_search_reveal_reorder_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "agenda", "ice"] },
+    { "cardCode": "onr_v1_192_corporate-boon", "title": "Corporate Boon", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; typed_counter_virus_purge_resolver; action_economy_handsize_modifier_resolver", "roleTags": ["corp", "agenda", "action"] },
+    { "cardCode": "onr_v1_200_encryption-breakthrough", "title": "Encryption Breakthrough", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; hidden_zone_search_reveal_reorder_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "agenda", "modifier"] },
+    { "cardCode": "onr_v1_204_ice-transmutation", "title": "Ice Transmutation", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; hidden_zone_search_reveal_reorder_resolver", "roleTags": ["corp", "agenda", "ice"] },
+    { "cardCode": "onr_v1_205_main-office-relocation", "title": "Main-Office Relocation", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; action_economy_handsize_modifier_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "agenda", "handlimit"] },
+    { "cardCode": "onr_v1_218_subsidiary-branch", "title": "Subsidiary Branch", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "persistent_special_state_resolver; action_economy_handsize_modifier_resolver", "roleTags": ["corp", "agenda", "action"] },
+    { "cardCode": "onr_v1_313_city-surveillance", "title": "City Surveillance", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "event_modification_prevention_avoid_resolver; generic_asset_node_ability_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "asset", "modifier"] },
+    { "cardCode": "onr_v1_322_euromarket-consortium", "title": "Euromarket Consortium", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; persistent_special_state_resolver; action_economy_handsize_modifier_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "asset", "handlimit"] },
+    { "cardCode": "onr_v1_324_fortress-architects", "title": "Fortress Architects", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; persistent_special_state_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "asset", "modifier"] },
+    { "cardCode": "onr_v1_325_hacker-tracker-central", "title": "Hacker Tracker Central", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; persistent_special_state_resolver; trace_link_bid_window_resolver; typed_counter_virus_purge_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "asset", "trace"] },
+    { "cardCode": "onr_v1_327_i-got-a-rock", "title": "I Got a Rock", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; scored_agenda_static_active_resolver; agenda_difficulty_overadvance_resolver; global_static_modifier_layer_resolver; damage_event_prevention_resolver", "roleTags": ["corp", "asset", "damage"] },
+    { "cardCode": "onr_v1_331_nevinyrral", "title": "Nevinyrral", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; persistent_special_state_resolver; action_economy_handsize_modifier_resolver", "roleTags": ["corp", "asset", "action"] },
+    { "cardCode": "onr_v1_332_newsgroup-taunting", "title": "Newsgroup Taunting", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; run_flow_lock_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "asset", "run"] },
+    { "cardCode": "onr_v1_334_pacifica-regional-ai", "title": "Pacifica Regional AI", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; scored_agenda_static_active_resolver; persistent_special_state_resolver; typed_counter_virus_purge_resolver; agenda_difficulty_overadvance_resolver; action_economy_handsize_modifier_resolver", "roleTags": ["corp", "asset", "action"] },
+    { "cardCode": "onr_v1_335_remote-facility", "title": "Remote Facility", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; persistent_special_state_resolver; action_economy_handsize_modifier_resolver", "roleTags": ["corp", "asset", "action"] },
+    { "cardCode": "onr_v1_338_rustbelt-hq-branch", "title": "Rustbelt HQ Branch", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; persistent_special_state_resolver; action_economy_handsize_modifier_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "asset", "handlimit"] },
+    { "cardCode": "onr_v1_343_south-african-mining-corp", "title": "South African Mining Corp", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_asset_node_ability_resolver; persistent_special_state_resolver; action_economy_handsize_modifier_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "asset", "economy"] },
+    { "cardCode": "onr_v1_360_jerusalem-city-grid", "title": "Jerusalem City Grid", "releaseStatus": "wip_planned", "aiSupported": false, "resolverFamily": "generic_upgrade_root_server_resolver; persistent_special_state_resolver; global_static_modifier_layer_resolver", "roleTags": ["corp", "upgrade", "modifier"] }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 26,
+    "implementedCardCount": 0,
+    "finalGateCardCount": 0,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 3
+  }
+}

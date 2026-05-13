@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.9.20",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.20",
+  "generatedFor": "V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende WIP gate",
+  "generatedAt": "2026-05-13",
+  "status": "wip_planning_catalog_guard_pending_runtime",
+  "extends": "data/rules/mechanics-coverage-1.9.19.json",
+  "gateAssertions": {
+    "globalModifierScopeFrozenToTwentySixCards": true,
+    "catalogWipGuardReady": true,
+    "runtimeDefinitionsReady": false,
+    "engineCovered": false,
+    "hiddenInfoSafeForCoveredSmokes": false,
+    "stateHashReplayStableForCoveredSmokes": false,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true,
+    "noV1921PlusScope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.persistent.special_state",
+      "label": "Persistente Sonderzustaende",
+      "currentStatus": "planned",
+      "targetGate": "v1.9.20",
+      "currentScopeNote": "Quellen, Dauer/Ablaufbedingungen und side-sichere PublicEvent-Projektion sind geplant; Runtime folgt.",
+      "coverage": ["scope_guard"]
+    },
+    {
+      "mechanicId": "mechanic.modifier.action_handsize",
+      "label": "Handlimit, MU und Action Economy",
+      "currentStatus": "planned",
+      "targetGate": "v1.9.20",
+      "currentScopeNote": "Deterministische Basiswert-Ableitung aus sichtbaren Quellen ist geplant; Engine-Abdeckung folgt.",
+      "coverage": ["scope_guard"]
+    },
+    {
+      "mechanicId": "mechanic.modifier.global_static_layer",
+      "label": "Globale statische Modifier",
+      "currentStatus": "planned",
+      "targetGate": "v1.9.20",
+      "currentScopeNote": "Layering, Quellenbindung und Hidden-Info-sichere Projektion sind geplant; Engine-Abdeckung folgt.",
+      "coverage": ["scope_guard"]
+    }
+  ],
+  "deferred": [
+    {
+      "item": "runtime_and_engine_coverage",
+      "reason": "V1.9.20 hat bislang Planung, Catalog-WIP-Guard und Daten-WIP-Artefakte; Runtime-Definitionen und Engine-Pfade folgen."
+    }
+  ]
+}

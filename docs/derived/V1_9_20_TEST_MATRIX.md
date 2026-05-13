@@ -16,7 +16,7 @@ Stand: 2026-05-13
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Folgearbeit |
 | AI | Hints, Smokes, legaler Fallback | Folgearbeit |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Catalog 34 und Typecheck grün; weitere Checks Folgearbeit |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation, Catalog 34 und Typecheck grün; weitere Checks Folgearbeit |
 
 ## Mindestchecks im ersten WIP
 
