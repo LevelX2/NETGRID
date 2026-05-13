@@ -21,6 +21,12 @@ Status: implementing_wip
 - `v1-9-install-and-check.ps1 -Task engine`: pass, 226 Tests.
 - `v1-9-install-and-check.ps1 -Task catalog`: pass, 29 Tests.
 - `v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `v1-9-install-and-check.ps1 -Task ai`: pass, 84 Tests.
+- `v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
+- `v1-9-install-and-check.ps1 -Task test`: pass, Workspace-Pakettests plus 49 Root-Spec-Tests.
+- `v1-9-install-and-check.ps1 -Task lint`: pass.
+- `v1-9-install-and-check.ps1 -Task build`: pass; bekannte nicht-blockierende Turbopack-NFT-Warnung bleibt.
 
 ## Gate-Status
 

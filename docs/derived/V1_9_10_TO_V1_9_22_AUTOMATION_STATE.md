@@ -73,7 +73,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Phase vorher: implementing
 - Phase nachher: implementing
 - Umsetzung: WIP-Resolver fuer `Lucidrine Booster Drug`, `Priority Wreck`, `Social Engineering`, `Stumble through Wilderspace` und `New Blood` ergaenzt. Priority Wreck deckt R&D-Multiaccess mit Hidden-Queue-Schutz und Replay/StateHash ab. Cerberus und Mastiff laufen durch das bestehende side-sichere Trace-Bid-Fenster. Ein maschinenlesbarer WIP-Smoke liegt unter `data/scenarios/v1915-run-access-multiaccess-wip-smoke.json`. WIP-Artefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smokes und AI-Approval-Manifest sind angelegt, aber ausdruecklich nicht promotet.
-- Tests: `engine` pass (226), `catalog` pass (29), `ai` pass (84), `typecheck` pass.
+- Tests: JSON-Validation der neuen WIP-JSON-Artefakte pass; `catalog` pass (29), `engine` pass (226), `ai` pass (84), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.15: run access engine smokes`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.15 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil finale Kartenpromotion, finale display-only Texte ohne WIP-Praefix, finale Manifest/Coverage/Scenario-/AI-Artefakte, Server/Web, volle Pflichtchecks, Final Review und Webclient-Version offen sind.
 

@@ -16,7 +16,7 @@ Status: draft-implementing
 | AI Hints | `data/ai/ai-card-hints-deck-legal-v1915.json` | WIP: angelegt, `pending_wip`, nicht `ai_supported` |
 | AI Smokes | `data/scenarios/ai-deck-legal-v1915-smokes.json` | WIP: angelegt, noch nicht als AI-Gate ausgeführt |
 | Catalog/Web | Release-IDs, manifest refs, sichtbare Webclient-Version | teilweise: 14er-WIP-Zielmenge mit No-Promotion-Guard |
-| Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | teilweise: engine gruen mit 226 Tests; catalog/typecheck aus Vorlauf gruen, nach neuem WIP erneut ausstehend |
+| Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | WIP-gruen: catalog 29, engine 226, ai 84, web 76, server 72, typecheck, test, lint und build gruen; Build mit bekannter Turbopack-NFT-Warnung |
 
 ## Ziel-Smokes
 
