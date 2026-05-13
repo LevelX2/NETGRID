@@ -199,6 +199,11 @@ const V1917_RECURRING_ASSET_IDS = new Set([
   "onr_v1_344_spinn-public-relations"
 ]);
 const V1917_TRACE_ASSET_IDS = new Set(["onr_v1_310_blood-cat", "onr_v1_330_krumz"]);
+const V1917_HIDDEN_REVEAL_ASSET_IDS = new Set(["onr_v1_314_corporate-negotiating-center"]);
+const V1917_HIDDEN_REORDER_ASSET_IDS = new Set(["onr_v1_336_rescheduler"]);
+const V1917_SOLO_SQUAD_ID = "onr_v1_342_solo-squad";
+const V1917_SETUP_ID = "onr_v1_340_setup";
+const V1917_TRAP_ID = "onr_v1_345_trap";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -1659,6 +1664,45 @@ function corpMainActions(state: GameState): LegalAction[] {
         )
       );
     }
+    if (V1917_HIDDEN_REVEAL_ASSET_IDS.has(definition.id) && state.corp.rd.length > 0) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: R&D-Spitze revealn`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1917AssetAbility: "reveal_rd_top" }
+        )
+      );
+    }
+    if (V1917_HIDDEN_REORDER_ASSET_IDS.has(definition.id) && state.corp.rd.length >= 2) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: R&D-Spitze anordnen`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1917AssetAbility: "reorder_rd_top2" }
+        )
+      );
+    }
+    if (definition.id === V1917_SOLO_SQUAD_ID && state.runner.grip.length > 0) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 1 Meat Damage`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1917AssetAbility: "meat_damage_1", damageType: "meat", damageAmount: 1 }
+        )
+      );
+    }
     if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
     actions.push(
       action(
@@ -2636,6 +2680,36 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
         if (!Number.isInteger(traceStrength) || traceStrength !== 3) throw new Error("V1.9.17-Trace-Assets starten in diesem WIP genau Trace 3.");
         startTraceFromOperation(state, definition.id, traceStrength, legalAction);
+        return;
+      }
+      if (legalAction.payload?.v1917AssetAbility === "reveal_rd_top") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.17-Hidden-Zone-Assets nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.17-Hidden-Zone-Asset-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1917_HIDDEN_REVEAL_ASSET_IDS.has(definition.id)) throw new Error("Die V1.9.17-Hidden-Zone-Reveal-Faehigkeit passt nicht zur Karte.");
+        revealCorpRdTop(state, legalAction);
+        legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1917_corp_reveal_rd_top" };
+        return;
+      }
+      if (legalAction.payload?.v1917AssetAbility === "reorder_rd_top2") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.17-Hidden-Zone-Assets nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.17-Hidden-Zone-Asset-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1917_HIDDEN_REORDER_ASSET_IDS.has(definition.id)) throw new Error("Die V1.9.17-Hidden-Zone-Reorder-Faehigkeit passt nicht zur Karte.");
+        startV1917CorpRdArrangeChoice(state, sourceCardId, legalAction);
+        return;
+      }
+      if (legalAction.payload?.v1917AssetAbility === "meat_damage_1") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.17-Damage-Assets nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.17-Damage-Asset-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1917_SOLO_SQUAD_ID) throw new Error("Die V1.9.17-Damage-Faehigkeit passt nicht zur Karte.");
+        const damageAmount = Number(legalAction.payload?.damageAmount ?? 0);
+        if (!Number.isInteger(damageAmount) || damageAmount !== 1) throw new Error("Solo Squad nutzt in diesem V1.9.17-WIP genau 1 Meat Damage.");
+        resolveDamageOperation(state, legalAction, "meat", damageAmount, definition.id);
         return;
       }
       if (legalAction.payload?.resourceAbility === "databroker") {
@@ -3833,6 +3907,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     const instance = mustInstance(state.cardInstances, cardId);
     state.cardInstances[cardId] = { ...instance, faceup: true };
     resolveAmbushOnAccessFoundation(state, cardId, legalAction);
+    resolveV1917AmbushOnAccess(state, cardId, legalAction);
     resolveV199UpgradeOnAccess(state, cardId, legalAction);
     const definition = definitionFor(state, cardId);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
@@ -3857,6 +3932,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
   resolveAmbushOnAccessFoundation(state, cardId, legalAction);
+  resolveV1917AmbushOnAccess(state, cardId, legalAction);
   resolveV199UpgradeOnAccess(state, cardId, legalAction);
   const definition = definitionFor(state, cardId);
   const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
@@ -3893,6 +3969,29 @@ function resolveAmbushOnAccessFoundation(state: GameState, cardId: CardInstanceI
     ambushFoundationChecked: true,
     ambushFoundationTriggered: triggered,
     ...(triggered ? { ambushFoundationDefinitionId: definition.id } : {})
+  };
+}
+
+function resolveV1917AmbushOnAccess(state: GameState, cardId: CardInstanceId, legalAction: LegalAction): void {
+  const definition = definitionFor(state, cardId);
+  if (definition.id !== V1917_SETUP_ID && definition.id !== V1917_TRAP_ID) return;
+  if (legalAction.side !== "runner" || legalAction.type !== "access_card" || state.run?.accessedCardId !== cardId) {
+    throw new Error("V1.9.17-Ambush darf nur aus einem legalen Access-Fenster ausloesen.");
+  }
+  if (definition.id === V1917_TRAP_ID) state.runner.tags += 1;
+  const summary = doDamage(state, {
+    damageId: `v1917.ambush.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
+    damageType: "net",
+    amount: 1,
+    source: definition.id
+  });
+  setDamagePayload(legalAction, summary);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1917_access_ambush",
+    ambushDefinitionId: definition.id,
+    ...(definition.id === V1917_TRAP_ID ? { tagsAdded: 1, runnerTagsAfter: state.runner.tags } : {})
   };
 }
 
@@ -5367,6 +5466,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveCorpRdArrangeChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1917.corp_rd_arrange_top2")) {
+    resolveV1917CorpRdArrangeChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -5683,6 +5786,59 @@ function resolveCorpRdArrangeChoice(state: GameState, legalAction: LegalAction, 
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+    arrangedCount: selectedIds.length
+  };
+}
+
+function startV1917CorpRdArrangeChoice(state: GameState, sourceCardId: CardInstanceId, legalAction: LegalAction): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  if (!V1917_HIDDEN_REORDER_ASSET_IDS.has(sourceDefinition.id)) throw new Error("Diese Karte darf keine V1.9.17-R&D-Reorder-Choice oeffnen.");
+  const topCards = state.corp.rd.slice(0, 2);
+  if (topCards.length < 2) throw new Error("Nicht genug Karten fuer R&D-Reorder.");
+  state.pendingChoice = {
+    choiceId: `v1917_corp_rd_arrange_top2_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1917.corp_rd_arrange_top2:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "R&D-Spitze anordnen",
+    kind: "select_cards",
+    options: topCards.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: topCards.length,
+    maxSelections: topCards.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1917_corp_reorder_rd_top2",
+    arrangedCount: topCards.length
+  };
+}
+
+function resolveV1917CorpRdArrangeChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1917.corp_rd_arrange_top2")) throw new Error("Es ist keine V1.9.17-R&D-Reorder-Choice offen.");
+  const [, sourceCardId] = choice.source.split(":");
+  if (!sourceCardId || !rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.17-R&D-Reorder-Quelle ist nicht mehr rezzed installiert.");
+  if (!V1917_HIDDEN_REORDER_ASSET_IDS.has(definitionFor(state, sourceCardId).id)) throw new Error("Die V1.9.17-R&D-Reorder-Choice gehoert nicht zur passenden Karte.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const topCards = state.corp.rd.slice(0, choice.options.length);
+  if (selectedIds.length !== topCards.length) throw new Error("Die V1.9.17-R&D-Reorder-Auswahl ist unvollstaendig.");
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length || topCards.some((cardId) => !selectedSet.has(cardId))) throw new Error("Die V1.9.17-R&D-Reorder-Auswahl enthaelt ungueltige Karten.");
+  state.corp.rd = [...selectedIds, ...state.corp.rd.slice(topCards.length)];
+  for (const cardId of selectedIds) {
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "corp", zone: "rd" } };
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1917_corp_reorder_rd_top2",
     arrangedCount: selectedIds.length
   };
 }
@@ -6205,6 +6361,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.breakerId) parts.push(String(payload.breakerId));
   if (payload?.subroutineIndex !== undefined) parts.push(String(payload.subroutineIndex));
   if (payload?.removeTagAmount !== undefined) parts.push(String(payload.removeTagAmount));
+  if (payload?.v1917AssetAbility) parts.push(String(payload.v1917AssetAbility));
   return parts.filter(Boolean).join(".");
 }
 
@@ -6416,6 +6573,8 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
     if (typeof legalAction.payload.selectedCount === "number") context.selectedCount = legalAction.payload.selectedCount;
     if (typeof legalAction.payload.arrangedCount === "number") context.arrangedCount = legalAction.payload.arrangedCount;
+    if (typeof legalAction.payload.ambushDefinitionId === "string") context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
+    if (typeof legalAction.payload.runnerTagsAfter === "number") context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
     context.redactedKind = "hidden_zone";
   }
   if (legalAction.payload?.publicRevealKind) context.revealKind = legalAction.payload.publicRevealKind;

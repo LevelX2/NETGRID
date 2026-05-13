@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 11:39 CEST
+- Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten um konkrete Economy-/Recurring-/Hidden-Zone-/Ambush-/Damage-Enginepfade erweitert; Cursor bleibt auf V1.9.17 `implementing`.
+- Release: V1.9.17
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Alle acht scoped Economy-Assets haben öffentliche Gain-Credit-LegalActions, alle fünf scoped Recurring-Assets refreshen gemeinsam am Corp-Turnstart, und `v1917AssetAbility` ist im Action-ID-Schlüssel gegen Mehrfachfähigkeits-Kollisionen abgesichert. Corporate Negotiating Center erhält eine rezzed Corp-LegalAction für side-sicheren R&D-Top-Reveal; Rescheduler öffnet eine Korp-private R&D-Top-2-Reorder-Choice mit Replay/StateHash-Nachweis; Solo Squad nutzt eine typisierte rezzed Asset-LegalAction für 1 Meat Damage; Setup! und TRAP! lösen nur aus legalen Access-Fenstern aus, verursachen 1 Net Damage, und TRAP! setzt zusätzlich 1 Tag. Das WIP-Szenario wurde entsprechend erweitert. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass (259 Dateien), `engine` pass (241 Tests), `catalog` pass (31 Tests), `ai` pass (85 Tests), `server` pass (72 Tests nach isoliertem Re-Run; ein paralleler Zwischenlauf hatte einen Vitest-Worker-Abbruch), `web` pass (76 Tests), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint für diesen Lauf vorgesehen (`WIP V1.9.17: hidden ambush damage asset paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.17 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Hosting-, Virus/Counter/Prevention-, installierte-Ziele-Pfade, finale Manifest/Coverage/Scenario-/AI-Artefakte, Final Review und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 10:25 CEST
 - Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten release-spezifisch detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.17 `implementing`.
 - Release: V1.9.17
