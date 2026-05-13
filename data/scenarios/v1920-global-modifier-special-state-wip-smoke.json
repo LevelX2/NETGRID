@@ -39,14 +39,15 @@
     "Remote Facility opens a rezzed Corp action-economy LegalAction that revalidates source, side and gained-action amount.",
     "Fortress Architects reduces ICE rez costs from a visible rezzed root source through the global static modifier layer.",
     "Main-Office Relocation projects a scored-agenda Corp handlimit modifier through both PlayerViews without mutating the base hand size.",
+    "Loan from Chiba keeps and refreshes public recurring-credit state across turn transitions.",
     "No V1.9.20 card is release-promoted or AI-approved in this WIP slice.",
     "V1.9.21 AI Boon remains outside the V1.9.20 WIP runtime guard.",
-    "Persistent-state resolver coverage remains follow-up work."
+    "AI, full release promotion and final review remain follow-up work."
   ],
   "verification": {
     "catalog": "pass: 34 tests",
     "typecheck": "pass",
-    "engine": "pass: 263 tests"
+    "engine": "pass: 264 tests"
   },
   "completionGate": {
     "releaseDone": false,

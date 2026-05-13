@@ -21,12 +21,13 @@
     {
       "mechanicId": "mechanic.persistent.special_state",
       "label": "Persistente Sonderzustaende",
-      "currentStatus": "runtime_defined",
+      "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; konkrete Engine-Pfade folgen in weiteren V1.9.20-Schnitten.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Loan from Chiba deckt den ersten installierten persistenten Recurring-Credit-Zustand mit Refresh ueber Turnwechsel ab.",
       "coverage": [
         "scope_guard",
-        "runtime_definitions"
+        "runtime_definitions",
+        "loan_from_chiba_recurring_state_smoke"
       ]
     },
     {
@@ -59,7 +60,7 @@
   "deferred": [
     {
       "item": "runtime_and_engine_coverage",
-      "reason": "V1.9.20 hat Runtime-Definitionen, MRAM-MU-, Remote-Facility-Action-Economy-, Fortress-Architects-ICE-Rez-Kosten- und Main-Office-Handlimit-Smokes; persistente Sonderzustands-Pfade folgen."
+      "reason": "V1.9.20 hat Runtime-Definitionen sowie MRAM-MU-, Remote-Facility-Action-Economy-, Fortress-Architects-ICE-Rez-Kosten-, Main-Office-Handlimit- und Loan-from-Chiba-Persistent-State-Smokes; weitere Kartenpfade, AI und Promotion folgen."
     }
   ]
 }

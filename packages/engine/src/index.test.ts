@@ -4528,6 +4528,38 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(getPlayerView(state, "corp").own.maxHandSize).toBe(6);
     expect(getPlayerView(state, "runner").opponent.maxHandSize).toBe(6);
   });
+
+  it("tracks V1.9.20 persistent recurring state on installed Loan from Chiba", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1920-loan-persistent",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba");
+    const loanId = state.runner.rig.resources.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_168_loan-from-chiba");
+    expect(loanId).toBeDefined();
+    if (!loanId) throw new Error("Missing Loan from Chiba");
+    expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
+    expect(getPlayerView(state, "corp").opponent.rig?.find((card) => card.definitionId === "onr_v1_168_loan-from-chiba")?.counters?.recurring_credit).toBe(2);
+
+    state.cardInstances[loanId] = { ...state.cardInstances[loanId]!, counters: { ...state.cardInstances[loanId]!.counters, recurring_credit: 0 } };
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    if (state.pendingChoice?.source === "discard_phase" && state.pendingChoice.side === "runner") {
+      state = applyChoice(state, "runner", String(state.pendingChoice.options[0]?.id));
+    }
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (state.pendingChoice?.source === "discard_phase" && state.pendingChoice.side === "corp") {
+      state = applyChoice(state, "corp", String(state.pendingChoice.options[0]?.id));
+    }
+    expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {

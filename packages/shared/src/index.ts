@@ -3212,6 +3212,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
     installCost: 0,
+    recurringCredits: 2,
     rulesText: "Installed resource with recurring-credit and persistent-state surfaces. Credit timing remains resolver-driven.",
     mechanics: ["install_resource", "recurring_credit", "persistent_special_state", "action_economy", ONR_V1_LOCAL_PRIVATE]
   },
