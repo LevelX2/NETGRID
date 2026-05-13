@@ -15,10 +15,10 @@ Status: planned
 | Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; finale V1.9.22-AI-Promotion-Artefakte muessen bis zum Completion-Gate fehlen |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
-| Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
+| Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build; nach Resolververtragsmatrix JSON 305 und catalog 41 gruen |
 
 ## Mindestchecks im ersten WIP
 
@@ -85,4 +85,18 @@ Status: planned
 - Zusatzabdeckung: Vier blockierende Gates (`resolver_contracts`, `ai_promotion_artifacts`, `webclient_version`, `final_review`) haben jeweils eine Removal Condition.
 - JSON-Validation fuer `data/**/*.json`: pass, 304 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 40 Tests.
+
+## Resolververtragsmatrix 2026-05-13 19:25 CEST
+
+- Neue Artefakte: `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md` und `data/rules/v1922-resolver-contracts.json`.
+- Zusatzabdeckung: 47/47 V1.9.22-WIP-Karten sind einzeln mit `confirmedLocalFacts`, `safeCurrentCoverage`, `missingInformation` und `removalCondition` erfasst.
+- Zusatzabdeckung: `readyForPromotionCount` und `readyForNewResolverImplementationCount` bleiben 0; neun Hardwarekarten sind nur als Installations-Basisvertrag abgedeckt.
+- Zusatzabdeckung: `data/reports/v1922-completion-gate-status.json` verweist per `latestContractMatrix` auf die Matrix, ohne Runtime-, Catalog- oder AI-Promotion zu behaupten.
+- JSON-Validation fuer `data/**/*.json`: pass, 305 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 41 Tests.
+
+## Statusalignment 2026-05-13 19:41 CEST
+
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 41 Tests.
+- Keine neue Karte wurde promotet; der offene V1.9.22-Blocker bleibt unverändert.
 

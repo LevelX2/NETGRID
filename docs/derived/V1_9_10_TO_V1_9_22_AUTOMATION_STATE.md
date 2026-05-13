@@ -69,6 +69,26 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 19:41 CEST
+- Ergebnis: V1.9.22 Statusalignment nach Resolververtragsmatrix; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_TEST_MATRIX.md` wurde auf den 19:25-Resolververtragsmatrix-Stand nachgezogen. Die Testmatrix dokumentiert jetzt `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md`, `data/rules/v1922-resolver-contracts.json`, den `latestContractMatrix`-Verweis im Completion-Gate-Statusreport und den weiterhin nicht-promotenden Befund 0/47 bereit fuer Resolverimplementierung oder Promotion. Keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (41).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: matrix status alignment`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil ein vollstaendiger lokaler Resolververtrag fuer mindestens einen Zielpfad fehlt.
+
+- Zeitpunkt: 2026-05-13 19:25 CEST
+- Ergebnis: V1.9.22 Resolververtragsmatrix erstellt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md` und `data/rules/v1922-resolver-contracts.json` erfassen alle 47 Zielkarten einzeln mit bestaetigter Teilbasis, sicherer aktueller Abdeckung, fehlenden Vertragsfeldern und Removal Conditions. `data/reports/v1922-completion-gate-status.json` verweist per `latestContractMatrix` darauf. Ergebnis bleibt 0/47 Karten fuer neue Resolverimplementierung oder Promotion bereit; nur 9/47 Hardwarekarten haben einen engen Installations-Basisvertrag. Keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: JSON-Validation pass (305 Dateien); `catalog` pass (41).
+- Git: WIP-Commit `65015d7a` (`WIP V1.9.22: resolver contract matrix`) wurde nach `origin/codex/v1-9-originalset-completion` gepusht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil ein vollstaendiger lokaler Resolververtrag fuer mindestens einen Zielpfad fehlt.
+
 - Zeitpunkt: 2026-05-13 19:09 CEST
 - Ergebnis: V1.9.22 Source-Scan-Revalidierung dokumentiert; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
@@ -735,6 +755,9 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Commit
 
+- WIP-Commit V1.9.22: `65015d7a` (`WIP V1.9.22: resolver contract matrix`).
+- WIP-Commit V1.9.22: `5ec40b63` (`WIP V1.9.22: source scan timestamp correction`).
+- WIP-Commit V1.9.22: `3a0b179f` (`WIP V1.9.22: resolver source scan review`).
 - Abschlusscommit V1.9.11: `5c7ec1d` (`V1.9.11: hidden zone search reveal reorder`).
 - WIP-Commit V1.9.11: `e7b9609` (`WIP V1.9.11: hidden zone installed helper wip`).
 - WIP-Commit V1.9.11: `f587530` (`WIP V1.9.11: hidden zone planning status alignment`).
@@ -743,6 +766,9 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Push
 
+- Push erfolgreich: `65015d7a` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `5ec40b63` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `3a0b179f` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `5c7ec1d` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `e7b9609` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `f587530` auf `origin/codex/v1-9-originalset-completion`.
@@ -755,7 +781,7 @@ Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 - Betroffener Release: V1.9.22
 - Beschreibung: Fuer den aktuellen V1.9.22-Per-card-Resolver-Longtail liegen lokal nur Typoberflaechen, bestaetigte Teilnotizen und No-Promotion-Readiness-Reviews vor. Die erneute lokale Quellensuche hat keinen vollstaendigen per-card Resolververtrag mit Kosten, Timing, Zielen, Choices, Visibility, Replay/StateHash und AI-Fallback ergeben. Deshalb duerfen keine weiteren Karten als `human_playable`, `deck_legal` oder `ai_supported` promotet werden.
 - Removal Condition: Eine lokale, versionierte Quelle oder ein fuehrendes Planungsartefakt muss fuer mindestens einen V1.9.22-Zielpfad einen vollstaendigen Resolververtrag liefern; danach Engine-/LegalAction-/applyAction-, Visibility-, Replay/StateHash-, Manifest/Coverage-, AI- und Web-Gates fuer genau diesen Pfad umsetzen und pruefen.
-- Letzter Befund: 2026-05-13 18:40 CEST, dokumentiert in `data/reports/v1922-completion-gate-status.json` und durch `packages/catalog/src/index.test.ts` gegen den Gate-Statusreport abgesichert.
+- Letzter Befund: 2026-05-13 19:41 CEST, dokumentiert in `data/reports/v1922-completion-gate-status.json`, `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md`, `data/rules/v1922-resolver-contracts.json` und durch `packages/catalog/src/index.test.ts` gegen Gate-Statusreport sowie Per-card-Matrix abgesichert.
 
 - Blocker-ID: LOCK_PATH_PERMISSION_DENIED_2026-05-12
 - Status: behoben durch Worktree-Lockpfad
