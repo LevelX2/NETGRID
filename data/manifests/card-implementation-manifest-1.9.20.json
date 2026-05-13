@@ -12,7 +12,8 @@
     "noOfficialAssets": true,
     "noV1921PlusScopeExpansion": true,
     "catalogPromotionPending": true,
-    "aiPromotionPending": true
+    "aiPromotionPending": true,
+    "aiDraftArtifactsReady": true
   },
   "cards": [
     {

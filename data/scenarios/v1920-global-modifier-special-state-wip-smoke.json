@@ -54,6 +54,7 @@
     "catalogPromoted": false,
     "aiPromoted": false,
     "runtimeDefinitionsReady": true,
-    "engineCovered": false
+    "engineCovered": false,
+    "aiDraftArtifactsReady": true
   }
 }

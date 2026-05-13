@@ -14,9 +14,9 @@ Stand: 2026-05-13
 | Persistente Sonderzustände | Quelle, Dauer, Ablauf, PublicEvent-Sicherheit | Loan-from-Chiba-Recurring-State grün; weitere Sonderzustände Folgearbeit |
 | Visibility | Keine Hidden-Info-Leaks über Modifier, Reconnect, Undo oder Replay | Folgearbeit |
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Folgearbeit |
-| AI | Hints, Smokes, legaler Fallback | Folgearbeit |
+| AI | Hints, Smokes, legaler Fallback | Nicht-promotende Draft-Hints/-Smokes angelegt; finale `ai_supported`-Promotion Folgearbeit |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation, Catalog 34, Engine 264, AI 85, Server 72, Web 76, Typecheck, Test, Lint und Build grün; Build nur mit bekannter NFT-Warnung |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation 285, Catalog 34, Engine 264, AI 85, Server 72, Web 76, Typecheck, Test, Lint und Build grün; Build nur mit bekannter NFT-Warnung |
 
 ## Mindestchecks im ersten WIP
 

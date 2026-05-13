@@ -16,6 +16,7 @@ Stand: 2026-05-13
 - Fortress Architects ist als erster globaler statischer Modifier an die bestehende ICE-Rez-Kostenberechnung angebunden; der Effekt ist an eine sichtbare rezzed Root-Quelle gebunden.
 - Main-Office Relocation projiziert nach dem Scoren einen öffentlichen Korp-Handgrößenmodifier in beiden PlayerViews, ohne `state.corp.maxHandSize` als Basiswert zu überschreiben.
 - Loan from Chiba trägt als erster persistenter Sonderzustand öffentliche Recurring-Credit-Counter, die über Turnwechsel deterministisch erneuert werden.
+- Nicht-promotende AI-Draft-Artefakte sind vorbereitet: `data/ai/ai-card-hints-deck-legal-v1920-draft.json`, `data/scenarios/ai-deck-legal-v1920-draft-smokes.json` und `data/manifests/v1920-deck-legal-ai-approval-draft-manifest.json`. Alle Karten bleiben darin `hinted_only`, nicht `ai_supported`.
 - Es wurden noch keine Runtime-, AI- oder Web-Promotionen vorgenommen.
 
 ## Gate
@@ -25,11 +26,11 @@ Stand: 2026-05-13
 
 ## Nächster Schnitt
 
-Weitere Kartenpfade, AI-Artefakte, Release-Promotion und Final Review nachziehen.
+Weitere Kartenpfade, finale AI-Smokes, Release-Promotion und Final Review nachziehen.
 
 ## Verifikation
 
-- JSON-Validation für `data/**/*.json`: pass, 282 Dateien.
+- JSON-Validation für `data/**/*.json`: pass, 285 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 264 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 34 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.

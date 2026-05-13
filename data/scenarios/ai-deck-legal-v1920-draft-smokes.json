@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "netgrid.ai-scenario-pack.v1",
+  "scenarioPackId": "ai-deck-legal-v1920-draft-smokes",
+  "release": "V1.9.20",
+  "status": "draft_no_ai_promotion",
+  "scenarios": [
+    {
+      "id": "runner_v1920_modifier_install",
+      "side": "runner",
+      "coversCards": [
+        "onr_v1_022_emergency-self-construct",
+        "onr_v1_029_gremlins",
+        "onr_v1_133_militech-mram-chip",
+        "onr_v1_134_mram-chip",
+        "onr_v1_160_diplomatic-immunity",
+        "onr_v1_168_loan-from-chiba",
+        "onr_v1_171_preying-mantis"
+      ],
+      "expectedDecisionFamilies": [
+        "install_card",
+        "end_turn"
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "visible_installed_modifier_sources",
+        "no_hidden_zone_payload"
+      ]
+    },
+    {
+      "id": "corp_v1920_scored_modifier_agenda",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_190_bioweapons-engineering",
+        "onr_v1_191_black-ice-quality-assurance",
+        "onr_v1_192_corporate-boon",
+        "onr_v1_200_encryption-breakthrough",
+        "onr_v1_204_ice-transmutation",
+        "onr_v1_205_main-office-relocation",
+        "onr_v1_218_subsidiary-branch"
+      ],
+      "expectedDecisionFamilies": [
+        "install_card",
+        "advance_card",
+        "score_agenda"
+      ],
+      "sideSafetyAssertions": [
+        "score_window_only",
+        "public_scored_source",
+        "state_hash_replay_required"
+      ]
+    },
+    {
+      "id": "corp_v1920_rezzed_modifier_asset",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_313_city-surveillance",
+        "onr_v1_322_euromarket-consortium",
+        "onr_v1_324_fortress-architects",
+        "onr_v1_325_hacker-tracker-central",
+        "onr_v1_327_i-got-a-rock",
+        "onr_v1_331_nevinyrral",
+        "onr_v1_332_newsgroup-taunting",
+        "onr_v1_334_pacifica-regional-ai",
+        "onr_v1_335_remote-facility",
+        "onr_v1_338_rustbelt-hq-branch",
+        "onr_v1_343_south-african-mining-corp"
+      ],
+      "expectedDecisionFamilies": [
+        "install_card",
+        "rez_ice",
+        "gain_credit"
+      ],
+      "sideSafetyAssertions": [
+        "rezzed_root_source_revalidated",
+        "public_payload_only",
+        "no_ai_supported_promotion"
+      ]
+    },
+    {
+      "id": "corp_v1920_root_modifier_upgrade",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_360_jerusalem-city-grid"
+      ],
+      "expectedDecisionFamilies": [
+        "install_card",
+        "rez_ice",
+        "start_run"
+      ],
+      "sideSafetyAssertions": [
+        "server_scope_revalidated",
+        "region_scope_public",
+        "no_ai_supported_promotion"
+      ]
+    }
+  ],
+  "verification": {
+    "ai": "pass: 85 tests",
+    "engine": "pass: 264 tests",
+    "catalog": "pass: 34 tests"
+  },
+  "completionGate": {
+    "aiSupported": false,
+    "legalActionsOnly": true,
+    "decisionDebugSideSafe": "pending_final_ai_smoke",
+    "catalogPromotionPending": true,
+    "noV1921PlusScope": true
+  }
+}
