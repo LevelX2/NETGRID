@@ -17,13 +17,14 @@
     "All 6 V1.9.21 target cards have runtime definitions with final display-only text and no WIP prefix.",
     "No V1.9.21 card is release-promoted or AI-approved in this WIP slice.",
     "V1.9.22 False Echo remains outside the V1.9.21 WIP runtime guard.",
-    "Schlaghund has the first V1.9.21 deterministic random LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "Schlaghund has a V1.9.21 deterministic random Asset LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "Rio de Janeiro City Grid has a V1.9.21 deterministic random Upgrade LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
     "Remaining deterministic random resolvers, AI, full release promotion and final review remain follow-up work."
   ],
   "verification": {
     "json": "pass",
     "catalog": "pass: 35 tests",
-    "engine": "pass: 267 tests",
+    "engine": "pass: 268 tests",
     "typecheck": "pass"
   },
   "completionGate": {
@@ -31,6 +32,6 @@
     "catalogPromoted": false,
     "aiPromoted": false,
     "runtimeDefinitionsReady": true,
-    "engineCovered": "partial_schlaghund_random_probe"
+    "engineCovered": "partial_schlaghund_and_rio_random_probes"
   }
 }

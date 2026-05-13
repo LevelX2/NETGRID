@@ -4732,6 +4732,72 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
     expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
   });
+
+  it("records Rio de Janeiro City Grid server die probes without leaking hidden zones", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1921-rio-server-die-probe",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1921_rio_random_probe",
+          name: "O:NR V1.9.21 Rio Random Probe Corp",
+          cards: [{ id: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw"
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 3;
+    state.corp.maxHandSize = 100;
+
+    const upgradeId = putCorpRootInRemote(state, "onr_v1_367_rio-de-janeiro-city-grid");
+    state.cardInstances[upgradeId] = { ...state.cardInstances[upgradeId]!, faceup: true, rezzed: true };
+    const legal = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1921UpgradeAbility === "deterministic_server_die_probe" &&
+        String(action.payload?.cardId) === upgradeId
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1921-rio-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const randomBefore = state.randomDrawRecords.length;
+    state = apply(state, "corp", (action) => action.actionId === legal.actionId);
+
+    expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
+    expect(state.randomDrawRecords.at(-1)?.purpose).toBe("v1921.die.onr_v1_367_rio-de-janeiro-city-grid.server_probe");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1921UpgradeAbility: "deterministic_server_die_probe",
+      randomPurpose: "v1921.die.onr_v1_367_rio-de-janeiro-city-grid.server_probe",
+      randomCounterAfter: randomBefore + 1
+    });
+    const publicRoll = Number(state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0);
+    expect(Number.isInteger(publicRoll)).toBe(true);
+    expect(publicRoll).toBeGreaterThanOrEqual(1);
+    expect(publicRoll).toBeLessThanOrEqual(6);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {

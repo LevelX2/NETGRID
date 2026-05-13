@@ -13,6 +13,7 @@ Stand: 2026-05-13
 - `packages/engine/src/index.test.ts` schuetzt die Runtime-Zielmenge mit V1.9.22-No-Promotion-Sentinel.
 - `data/scenarios/v1921-deterministic-random-wip-smoke.json`, `data/manifests/card-implementation-manifest-1.9.21.json` und `data/rules/mechanics-coverage-1.9.21.json` dokumentieren den WIP-Scope maschinenlesbar ohne Promotion.
 - `Schlaghund` hat den ersten V1.9.21-Engine-Resolver: eine rezzed Asset LegalAction fuer eine deterministische Wuerfelprobe, die `RandomDrawRecords` nutzt, Wrong-Side/Stale-State ablehnt, im PublicEvent nur oeffentliche Zufallsmetadaten zeigt und replay-/StateHash-stabil ist.
+- `Rio de Janeiro City Grid` deckt den Upgrade-/Server-Zufallspfad mit eigener `v1921UpgradeAbility`, PublicEvent-Metadaten und replay-/StateHash-stabilem `RandomDrawRecords`-Nachweis ab.
 
 ## Gate
 
@@ -21,11 +22,11 @@ Stand: 2026-05-13
 
 ## Naechster Schnitt
 
-Naechster deterministischer Random-Resolver fuer Runner- oder Upgrade-Pfade (`AI Boon`, `Boardwalk`, `Playful AI`, `Quest for Cattekin` oder `Rio de Janeiro City Grid`) plus weitere Engine-Smokes fuer Seed/RandomCounter/RandomDrawRecords.
+Naechster deterministischer Random-Resolver fuer Runner-Pfade (`AI Boon`, `Boardwalk`, `Playful AI` oder `Quest for Cattekin`) plus weitere Engine-Smokes fuer Seed/RandomCounter/RandomDrawRecords.
 
 ## Verifikation
 
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 35 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - JSON-Validation fuer `data/**/*.json`: pass.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 267 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 268 Tests.

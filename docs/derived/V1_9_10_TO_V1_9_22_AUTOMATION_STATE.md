@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 15:55 CEST
+- Ergebnis: V1.9.21 zweiter deterministischer Random-Resolver umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Rio de Janeiro City Grid` hat eine rezzed Upgrade LegalAction fuer eine serverbezogene deterministische Wuerfelprobe. Der Pfad schreibt `RandomDrawRecords`, nutzt eigene `v1921UpgradeAbility`-Payloads, lehnt Wrong-Side ab, redigiert PublicEvents auf oeffentliche Zufallsmetadaten und ist replay-/StateHash-stabil. Manifest, Mechanics-Coverage, WIP-Smoke, Testmatrix, Implementation Review und Codex-Status sind nachgezogen.
+- Tests: `engine` pass (268). JSON, catalog und typecheck werden vor dem naechsten WIP-Checkpoint erneut gezielt geprueft.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: rio random resolver`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-seitige Random-Resolver, AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 15:52 CEST
 - Ergebnis: V1.9.21 erster deterministischer Random-Resolver umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
 - Release: V1.9.21

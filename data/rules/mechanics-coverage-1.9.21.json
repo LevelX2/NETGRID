@@ -10,7 +10,7 @@
     "deterministicRandomScopeFrozenToSixCards": true,
     "catalogWipGuardReady": true,
     "runtimeDefinitionsReady": true,
-    "engineCovered": "partial_schlaghund_random_probe",
+    "engineCovered": "partial_schlaghund_and_rio_random_probes",
     "hiddenInfoSafeForCoveredSmokes": true,
     "stateHashReplayStableForCoveredSmokes": true,
     "catalogPromotionPending": true,
@@ -23,11 +23,12 @@
       "label": "Deterministischer Karten-Zufall",
       "currentStatus": "partial_engine_wip",
       "targetGate": "v1.9.21",
-      "currentScopeNote": "6 Runtime-Definitionen sind vorhanden; Schlaghund hat den ersten rezzed Asset LegalAction-Zufallsprobe-Pfad mit RandomDrawRecords, Visibility und Replay/StateHash. Weitere Resolver folgen.",
+      "currentScopeNote": "6 Runtime-Definitionen sind vorhanden; Schlaghund und Rio de Janeiro City Grid haben rezzed Asset-/Upgrade-LegalAction-Zufallsprobe-Pfade mit RandomDrawRecords, Visibility und Replay/StateHash. Weitere Resolver folgen.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
         "schlaghund_legal_action_random_probe",
+        "rio_city_grid_legal_action_random_probe",
         "wrong_side_and_stale_revalidation",
         "public_payload_visibility",
         "replay_statehash"
@@ -37,7 +38,7 @@
   "deferred": [
     {
       "item": "remaining_engine_random_resolvers",
-      "reason": "V1.9.21 hat einen ersten Schlaghund-Random-Probe; AI Boon, Boardwalk, Playful AI, Quest for Cattekin und Rio de Janeiro City Grid sowie finale AI/Promotion folgen."
+      "reason": "V1.9.21 hat erste Schlaghund- und Rio-Random-Probes; AI Boon, Boardwalk, Playful AI, Quest for Cattekin sowie finale AI/Promotion folgen."
     }
   ]
 }
