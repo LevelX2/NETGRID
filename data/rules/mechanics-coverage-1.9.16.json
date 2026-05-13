@@ -12,6 +12,7 @@
     "stealthRecurringResolverCovered": true,
     "fragmentationStormTraceSuccessGateCovered": true,
     "hostingLifecycleCovered": true,
+    "impHostedIcebreakerStrengthReductionCovered": true,
     "stateHashReplayStableForCoveredSmokes": true,
     "aiChoicePathsCovered": true,
     "noV1917PlusScope": true
@@ -54,7 +55,7 @@
       "label": "Hosting Lifecycle",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.16",
-      "currentScopeNote": "Imp hostet Bakdoor ueber explizite install_card-Host-Ziele; Fragmentation Storm trasht den Daemon und kaskadiert die gehostete Karte side-sicher in den Heap.",
+      "currentScopeNote": "Imp hostet Programme ueber explizite install_card-Host-Ziele, senkt die Staerke so gehosteter Icebreaker um 1 und kaskadiert gehostete Karten side-sicher in den Heap, wenn der Daemon getrasht wird.",
       "coverage": ["unit", "legal_action", "visibility", "state_hash"]
     }
   ],

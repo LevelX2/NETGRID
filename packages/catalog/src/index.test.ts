@@ -1501,6 +1501,11 @@ describe("catalog import and status logic", () => {
       expect(scenarioCards.has(cardId), cardId).toBe(true);
     }
 
+    expect(cardsById["onr_v1_033_imp"]?.numeric.installCost).toBe(0);
+    expect(cardsById["onr_v1_033_imp"]?.text).toBe(
+      "Imp can have up to 2 MU of programs installed in it. All icebreakers installed in this way have their strength reduced by 1. If IMP leaves play, trash all programs installed in it."
+    );
+
     expect(JSON.stringify({ deckLegalV1916AiHintsData, deckLegalV1916ManifestData, deckLegalV1916ScenarioData, v1916ReleaseScenarioData, v1916MechanicsCoverageData })).not.toMatch(
       /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
     );

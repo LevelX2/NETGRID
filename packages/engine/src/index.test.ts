@@ -6119,6 +6119,12 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
+    expect(DEMO_CARDS_BY_ID["onr_v1_033_imp"]).toMatchObject({
+      installCost: 0,
+      memoryCost: 1,
+      rulesText:
+        "Imp can have up to 2 MU of programs installed in it. All icebreakers installed in this way have their strength reduced by 1. If IMP leaves play, trash all programs installed in it."
+    });
     expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
@@ -6220,6 +6226,34 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("installs Imp for 0 credits and reduces hosted icebreaker strength by 1", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-imp-hosted-icebreaker-strength"));
+    state.runner.credits = 10;
+    moveRunnerCardToGrip(state, "onr_v1_033_imp");
+    moveRunnerCardToGrip(state, "onr_v1_047_pile-driver");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_033_imp");
+    const impId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_033_imp");
+    expect(impId).toBeDefined();
+    expect(state.runner.credits).toBe(10);
+    if (!impId) throw new Error("Missing installed Imp host");
+
+    const hostedInstall = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_047_pile-driver" &&
+        action.payload?.hostOnCardId === impId
+    );
+    const pileDriverId = String(hostedInstall.payload?.cardId ?? "");
+    state = apply(state, "runner", (action) => action.actionId === hostedInstall.actionId);
+
+    expect(state.cardInstances[pileDriverId]?.hostedOn).toBe(impId);
+    expect(state.runner.memoryUsed).toBe(1);
+    expect(getPlayerView(state, "runner").own.rig?.find((card) => card.instanceId === pileDriverId)?.strength).toBe(1);
   });
 
   it("gates Fragmentation Storm program trash and net damage on trace success", () => {

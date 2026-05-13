@@ -5133,9 +5133,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["daemon"],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 0,
     memoryCost: 1,
-    rulesText: "Daemon program for hosting and hosted-card lifecycle coverage.",
+    rulesText:
+      "Imp can have up to 2 MU of programs installed in it. All icebreakers installed in this way have their strength reduced by 1. If IMP leaves play, trash all programs installed in it.",
     mechanics: ["install_program", "memory", "hosting", "hosted_program_lifecycle", "subtype_daemon", ONR_V1_LOCAL_PRIVATE]
   },
   {

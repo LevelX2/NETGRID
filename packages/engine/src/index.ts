@@ -2619,15 +2619,24 @@ function runRemainderStrengthBonusForBreaker(run: GameState["run"], breakerId: C
   return Math.max(0, Math.floor(run.remainderStrengthBonusByBreaker?.[breakerId] ?? 0));
 }
 
+function impHostedIcebreakerStrengthReduction(state: GameState, breakerId: CardInstanceId): number {
+  const instance = mustInstance(state.cardInstances, breakerId);
+  if (!instance.hostedOn) return 0;
+  const definition = definitionFor(state, breakerId);
+  const hostDefinition = definitionFor(state, instance.hostedOn);
+  return hostDefinition.id === "onr_v1_033_imp" && cardHasSubtype(definition, "icebreaker") ? 1 : 0;
+}
+
 function runnerBreakerStrengthForRun(state: GameState, breakerId: CardInstanceId): number {
   const definition = definitionFor(state, breakerId);
   const instance = mustInstance(state.cardInstances, breakerId);
   const run = state.run;
   const aiBoonStrength = run?.aiBoonStrengthByBreaker?.[breakerId];
+  const impHostedReduction = impHostedIcebreakerStrengthReduction(state, breakerId);
   if (definition.id === V1921_AI_BOON_ID && Number.isInteger(aiBoonStrength)) {
-    return Math.max(0, Math.floor(aiBoonStrength ?? 0)) + instance.strengthModifier + runRemainderStrengthBonusForBreaker(run, breakerId);
+    return Math.max(0, Math.floor(aiBoonStrength ?? 0)) + instance.strengthModifier + runRemainderStrengthBonusForBreaker(run, breakerId) - impHostedReduction;
   }
-  return (definition.strength ?? 0) + instance.strengthModifier + runRemainderStrengthBonusForBreaker(run, breakerId);
+  return (definition.strength ?? 0) + instance.strengthModifier + runRemainderStrengthBonusForBreaker(run, breakerId) - impHostedReduction;
 }
 
 function iceRezCostReductionFor(state: GameState, iceDefinition: CardDefinition): number {
@@ -5353,7 +5362,13 @@ function pickRunnerProgramForUninstall(state: GameState): CardInstanceId | undef
     .sort((left, right) => {
       const leftDefinition = definitionFor(state, left);
       const rightDefinition = definitionFor(state, right);
-      const byInstallCost = (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
+      const leftHostedIds = hostedCardsOn(state, left);
+      const rightHostedIds = hostedCardsOn(state, right);
+      const leftHostedInstallCost = leftHostedIds.reduce((sum, hostedId) => sum + (definitionFor(state, hostedId).installCost ?? 0), 0);
+      const rightHostedInstallCost = rightHostedIds.reduce((sum, hostedId) => sum + (definitionFor(state, hostedId).installCost ?? 0), 0);
+      const leftInstallValue = (leftDefinition.installCost ?? 0) + leftHostedInstallCost + leftHostedIds.length;
+      const rightInstallValue = (rightDefinition.installCost ?? 0) + rightHostedInstallCost + rightHostedIds.length;
+      const byInstallCost = rightInstallValue - leftInstallValue;
       if (byInstallCost !== 0) return byInstallCost;
       const byMemoryCost = (rightDefinition.memoryCost ?? 0) - (leftDefinition.memoryCost ?? 0);
       if (byMemoryCost !== 0) return byMemoryCost;
