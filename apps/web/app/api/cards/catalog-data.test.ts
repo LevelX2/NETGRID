@@ -15,6 +15,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
@@ -52,7 +53,8 @@ describe("catalog API filters", () => {
       ...DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
-      ...DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS
+      ...DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS
     ].filter((cardId) => cardId.startsWith("onr_v1_"));
     expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual(
       [...new Set(expectedOnrAiApproved)].sort()
@@ -259,5 +261,27 @@ describe("catalog API filters", () => {
     expect(body.card.aiHints?.planRoles).toContain("protect_rnd");
     expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
     expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v1911-smokes.json#corp_v1911_rd_reveal_and_reorder");
+  });
+
+  it("adds V1.9.21 AI hints for newly approved deterministic-random cards", () => {
+    const response = catalogDetailResponse("onr_v1_002_ai-boon");
+
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        aiHints: {
+          roles: string[];
+          planRoles: string[];
+          requiredMechanics: string[];
+          aiSupportStatus: string;
+          scenarioRefs: string[];
+        } | null;
+      };
+    };
+    expect(body.card.aiHints?.roles).toContain("random");
+    expect(body.card.aiHints?.planRoles).toContain("runner_program_random_probe");
+    expect(body.card.aiHints?.requiredMechanics).toContain("deterministic_random_card_resolver");
+    expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
+    expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v1921-smokes.json#runner_v1921_random_programs");
   });
 });

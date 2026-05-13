@@ -2,9 +2,9 @@
   "schemaVersion": "1.9.21",
   "artifactType": "mechanics_coverage_matrix",
   "matrixId": "mechanics-coverage-1.9.21",
-  "generatedFor": "V1.9.21 Deterministischer Zufall und Wuerfelkarten WIP gate",
+  "generatedFor": "V1.9.21 Deterministischer Zufall und Wuerfelkarten release gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_first_random_resolver",
+  "status": "release",
   "extends": "data/rules/mechanics-coverage-1.9.20.json",
   "gateAssertions": {
     "deterministicRandomScopeFrozenToSixCards": true,
@@ -13,17 +13,17 @@
     "engineCovered": "all_target_cards_initial_random_probe",
     "hiddenInfoSafeForCoveredSmokes": true,
     "stateHashReplayStableForCoveredSmokes": true,
-    "catalogPromotionPending": true,
-    "aiPromotionPending": true,
+    "catalogPromotionPending": false,
+    "aiPromotionPending": false,
     "noV1922Scope": true
   },
   "mechanics": [
     {
       "mechanicId": "mechanic.random.deterministic_card",
       "label": "Deterministischer Karten-Zufall",
-      "currentStatus": "partial_engine_wip",
+      "currentStatus": "implemented_release",
       "targetGate": "v1.9.21",
-      "currentScopeNote": "6 Runtime-Definitionen sind vorhanden; alle sechs Zielkarten haben initiale Asset-/Upgrade-/Runner-Programm-/Event-/Resource-LegalAction-Zufallsprobe-Pfade mit RandomDrawRecords, Visibility und Replay/StateHash. Finale AI/Promotion folgt.",
+      "currentScopeNote": "Alle sechs Zielkarten haben initiale Asset-/Upgrade-/Runner-Programm-/Event-/Resource-LegalAction-Zufallsprobe-Pfade mit RandomDrawRecords, Visibility, Replay/StateHash sowie finale Catalog- und AI-Promotion.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
@@ -34,14 +34,10 @@
         "quest_resource_random_probe",
         "wrong_side_and_stale_revalidation",
         "public_payload_visibility",
-        "replay_statehash"
+        "replay_statehash",
+        "catalog_ai_promotion"
       ]
     }
   ],
-  "deferred": [
-    {
-      "item": "final_ai_promotion_gates",
-      "reason": "V1.9.21 hat fuer alle sechs Zielkarten initiale Random-Probes; AI-Hints, AI-Smokes, Full Checks, Final Review und Promotion folgen."
-    }
-  ]
+  "deferred": []
 }

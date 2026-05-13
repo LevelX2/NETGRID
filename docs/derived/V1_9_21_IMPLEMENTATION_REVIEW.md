@@ -1,6 +1,6 @@
 # V1.9.21 Implementation Review
 
-Status: runtime WIP
+Status: release complete
 Stand: 2026-05-13
 
 ## Umgesetzter Schnitt
@@ -18,25 +18,29 @@ Stand: 2026-05-13
 - `Playful AI` deckt den Runner-Event-Zufallspfad ueber `play_event`, Heap-Bewegung, `v1921RunnerEventAbility`, Wrong-Side-Revalidation, PublicEvent-Metadaten und replay-/StateHash-stabile `RandomDrawRecords` ab.
 - `Quest for Cattekin` deckt den installierten Runner-Resource-Zufallspfad mit `v1921RunnerResourceAbility`, Wrong-Side-Revalidation, PublicEvent-Metadaten und replay-/StateHash-stabilen `RandomDrawRecords` ab.
 - Nicht-promotende AI-Draft-Artefakte sind angelegt und mit dem AI-Gate geprueft: `data/ai/ai-card-hints-deck-legal-v1921-draft.json`, `data/scenarios/ai-deck-legal-v1921-draft-smokes.json` und `data/manifests/v1921-deck-legal-ai-approval-draft-manifest.json`. Status bleibt `hinted_only`/`draft_no_ai_promotion`.
+- Finale Promotion-Artefakte sind angelegt: `data/ai/ai-card-hints-deck-legal-v1921.json`, `data/scenarios/ai-deck-legal-v1921-smokes.json`, `data/manifests/deck-legal-ai-approval-v1921-manifest.json` und `data/scenarios/v1921-deterministic-random-release-smoke.json`.
+- `ONR_V1_9_21_RELEASE_CARD_IDS`, `DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS` und die Webclient-Version `V1.9.21` sind gesetzt.
+- `apps/web/app/api/cards/catalog-data.ts` liefert die V1.9.21-AI-Hints im Katalogdetail aus.
 
 ## Gate
 
-`V1_9_21_done: false`
-`V1_9_21_phase: implementing`
+`V1_9_21_done: true`
+`V1_9_21_phase: done`
 
 ## Naechster Schnitt
 
-Volle Pflichtchecks, Final Review, Catalog-/AI-Promotion und Webclient-Version.
+V1.9.21 ist abgeschlossen. Naechster erlaubter Cursor ist V1.9.22.
 
 ## Verifikation
 
-- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 35 Tests.
+- JSON-Validation fuer `data/**/*.json`: pass, 299 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 36 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - JSON-Validation fuer `data/**/*.json`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 271 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 77 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0 ohne Detailausgabe.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

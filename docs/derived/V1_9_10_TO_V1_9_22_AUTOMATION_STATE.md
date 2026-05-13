@@ -15,9 +15,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.21
-Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.22
+Aktueller Release: V1.9.22
+Phase: planned
+Naechster erlaubter Release nach Abschluss: complete
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -64,10 +64,20 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | done |
 | V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | done |
 | V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | done |
-| V1.9.21 | Deterministischer Zufall und Wuerfelkarten | current |
-| V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
+| V1.9.21 | Deterministischer Zufall und Wuerfelkarten | done |
+| V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | current |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 16:31 CEST
+- Ergebnis: V1.9.21 Deterministischer Zufall und Wuerfelkarten final abgeschlossen; Cursor auf V1.9.22 `planned` gesetzt.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: done; V1.9.22 planned
+- Umsetzung: Alle sechs V1.9.21-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Deterministische Asset-, Upgrade-, Runner-Programm-, Event- und Resource-Zufallspfade nutzen `RandomDrawRecords`, side-sichere PublicEvents und replay-/StateHash-stabile Abdeckung. Der Webclient zeigt `V1.9.21`.
+- Tests: JSON-Validation pass (299 Dateien); `catalog` pass (36), `engine` pass (271), `ai` pass (85), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf wird per Checkpoint erzeugt (`V1.9.21: deterministic random dice cards`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 Completion-Gate ist erfuellt; V1.9.22 ist der aktuelle Release.
 
 - Zeitpunkt: 2026-05-13 16:12 CEST
 - Ergebnis: V1.9.21 Promotion-Readiness dokumentiert; Cursor bleibt auf V1.9.21 `implementing`.
