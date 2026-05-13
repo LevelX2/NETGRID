@@ -21,7 +21,7 @@ Aus diesem Lockup dürfen die zugehörigen Symbole links und rechts vom Schriftz
 
 Für neue Verweise sollten die `*-clean.png`-Dateien verwendet werden.
 
-Für Client- und Desktop-Icons wird aktuell die neu gezeichnete rechte Kachel `netgrid-icon-right-tile-redraw-v2.svg` verwendet. Sie hat einen transparenten Außenbereich und wurde aus der rechten Kachel-Idee des Lockups abgeleitet.
+Für Client- und Desktop-Icons wird aktuell die Cyber-Fassung `apps/web/public/brand/netgrid-icon-cyber-v1.png` verwendet. Das Windows-Icon `apps/web/public/brand/netgrid.ico` wird daraus abgeleitet.
 
 ## Nutzungsstatus
 
