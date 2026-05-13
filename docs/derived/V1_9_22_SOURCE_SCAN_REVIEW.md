@@ -1,6 +1,6 @@
 # V1.9.22 Source Scan Review
 
-Stand: 2026-05-13 19:12 CEST
+Stand: 2026-05-13 19:09 CEST
 Status: Blocker-Revalidierung, keine Runtime- oder Release-Promotion
 
 ## Zweck

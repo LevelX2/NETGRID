@@ -36,7 +36,7 @@
     "removalCondition": "Add or identify a local source that provides a full per-card resolver contract, not only type surfaces or effect summaries."
   },
   "latestAutomationScan": {
-    "searchedAt": "2026-05-13T19:12:00+02:00",
+    "searchedAt": "2026-05-13T19:09:00+02:00",
     "reviewRef": "docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md",
     "result": "no_complete_resolver_contract_found",
     "decision": "no_runtime_catalog_or_ai_promotion"

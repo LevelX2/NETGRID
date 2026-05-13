@@ -69,7 +69,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-13 19:12 CEST
+- Zeitpunkt: 2026-05-13 19:09 CEST
 - Ergebnis: V1.9.22 Source-Scan-Revalidierung dokumentiert; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
 - Phase vorher: implementing
