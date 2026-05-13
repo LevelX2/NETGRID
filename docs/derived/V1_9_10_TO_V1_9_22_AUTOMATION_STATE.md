@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 16:10 CEST
+- Ergebnis: V1.9.21 WIP-Stand nach Initial-Random und AI-Draft breit verifiziert; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Keine weitere Runtime-/AI-/Web-Promotion. `docs/codex/CODEX_STATUS.md`, `docs/derived/V1_9_21_IMPLEMENTATION_REVIEW.md` und `docs/derived/V1_9_21_TEST_MATRIX.md` dokumentieren den gruenen breiten Verify-Lauf.
+- Tests: JSON-Validation pass; `catalog` pass (35), `engine` pass (271), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass (Exit 0 ohne Detailausgabe), `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: broad verify random draft`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 16:06 CEST
 - Ergebnis: V1.9.21 nicht-promotende AI-Draft-Artefakte angelegt und geprueft; Cursor bleibt auf V1.9.21 `implementing`.
 - Release: V1.9.21

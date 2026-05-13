@@ -14,7 +14,7 @@ Stand: 2026-05-13
 | Replay/StateHash | Zufallsauflösung replay- und StateHash-stabil | Initial gruen fuer 6/6 Zielkarten: Replay/StateHash und RandomDrawRecords stabil |
 | AI | Hints, Smokes, legaler Fallback ohne Ergebnisvorwissen | Draft-Artefakte angelegt und `ai` gruen; keine AI-Promotion |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON, catalog 35, engine 271, ai 85 und typecheck gruen; Server/Web/Test/Lint/Build Folgearbeit |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen: JSON, catalog 35, engine 271, ai 85, server 72, web 76, typecheck, test Exit 0, lint und build mit bekannter Turbopack-NFT-Warnung |
 
 ## Mindestchecks im ersten WIP
 

@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.21-Breitverify vom 2026-05-13 16:10 CEST: Der WIP-Stand nach Initial-Random-Abdeckung und AI-Draft wurde breit verifiziert. Gruen: JSON, `catalog` 35, `engine` 271, `ai` 85, `server` 72, `web` 76, `typecheck`, `test` Exit 0, `lint` und `build`. Build weiterhin nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung. Cursor bleibt V1.9.21 `implementing`; offen sind Final Review, Catalog-/AI-Promotion und Webclient-Version.
+
 V1.9.21-AI-Draft-Artefakte vom 2026-05-13 16:06 CEST: Nicht-promotende AI-Draft-Artefakte fuer den 6er-Scope sind angelegt und geprueft: `data/ai/ai-card-hints-deck-legal-v1921-draft.json`, `data/scenarios/ai-deck-legal-v1921-draft-smokes.json` und `data/manifests/v1921-deck-legal-ai-approval-draft-manifest.json`. Status bleibt `hinted_only`/`draft_no_ai_promotion`; keine Karte ist `ai_supported`. Verifikation: JSON, `catalog` 35, `engine` 271 und `ai` 85 gruen. Naechster Schnitt: Full Checks, Final Review und Promotion.
 
 V1.9.21-Initial-Random-Abdeckung vom 2026-05-13 16:03 CEST: Alle sechs V1.9.21-Zielkarten haben jetzt mindestens einen deterministischen Random-Probe-Pfad mit `RandomDrawRecords`, side-sicheren PublicEvents und Replay-/StateHash-Stabilitaet. Neu in diesem Schnitt: `Playful AI` ueber `play_event` inklusive Heap-Bewegung und `Quest for Cattekin` als installierte Runner-Resource-LegalAction. Verifikation: `engine` 271 gruen. Cursor bleibt V1.9.21 `implementing`; naechster Schnitt sind AI-Hints/AI-Smokes, Full Checks, Final Review, Release-Promotion und Webclient-Version.

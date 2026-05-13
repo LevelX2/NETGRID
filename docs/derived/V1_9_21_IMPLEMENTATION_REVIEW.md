@@ -35,3 +35,8 @@ Volle Pflichtchecks, Final Review, Catalog-/AI-Promotion und Webclient-Version.
 - JSON-Validation fuer `data/**/*.json`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 271 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0 ohne Detailausgabe.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
