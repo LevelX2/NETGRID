@@ -244,6 +244,7 @@ const V1919_SCORED_REVEAL_AGENDA_IDS = new Set([V1919_ARTIFICIAL_SECURITY_DIRECT
 const V1919_SERVER_DIFFICULTY_UPGRADE_IDS = new Set([V1919_ROVING_SUBMARINE_ID, V1919_WASHINGTON_DC_CITY_GRID_ID]);
 const V1919_COUNTER_ASSET_IDS = new Set([V1919_CHICAGO_BRANCH_ID, V1919_VAPOR_OPS_ID]);
 const V1919_COUNTER_OPERATION_IDS = new Set([V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID, V1919_MANAGEMENT_SHAKE_UP_ID, V1919_TEAM_RESTRUCTURING_ID]);
+const V1920_FORTRESS_ARCHITECTS_ID = "onr_v1_324_fortress-architects";
 const V1920_ACTION_ASSET_IDS = new Set(["onr_v1_331_nevinyrral", "onr_v1_334_pacifica-regional-ai", "onr_v1_335_remote-facility"]);
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
@@ -2526,6 +2527,7 @@ function iceRezCostReductionFor(state: GameState, iceDefinition: CardDefinition)
     if (sourceDefinition.id === "onr_v1_317_data-masons" && cardHasSubtype(iceDefinition, "wall")) reduction += 2;
     if (sourceDefinition.id === "onr_v1_320_encoder-inc" && cardHasSubtype(iceDefinition, "code_gate")) reduction += 2;
     if (sourceDefinition.id === "onr_v1_341_skalderviken-sa-beta-test-site" && cardHasSubtype(iceDefinition, "black_ice")) reduction += 2;
+    if (sourceDefinition.id === V1920_FORTRESS_ARCHITECTS_ID) reduction += 1;
   }
   return reduction;
 }

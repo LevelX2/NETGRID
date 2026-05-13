@@ -45,19 +45,20 @@
     {
       "mechanicId": "mechanic.modifier.global_static_layer",
       "label": "Globale statische Modifier",
-      "currentStatus": "runtime_defined",
+      "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; konkrete Engine-Pfade folgen in weiteren V1.9.20-Schnitten.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Fortress Architects deckt den ersten rezzed globalen ICE-Rez-Kostenmodifier aus sichtbarer Root-Quelle ab.",
       "coverage": [
         "scope_guard",
-        "runtime_definitions"
+        "runtime_definitions",
+        "fortress_architects_ice_rez_cost_smoke"
       ]
     }
   ],
   "deferred": [
     {
       "item": "runtime_and_engine_coverage",
-      "reason": "V1.9.20 hat Runtime-Definitionen, einen MRAM-MU-Engine-Smoke und einen Remote-Facility-Action-Economy-Smoke; weitere Handlimit-, globale Modifier- und persistente Sonderzustands-Pfade folgen."
+      "reason": "V1.9.20 hat Runtime-Definitionen, MRAM-MU-, Remote-Facility-Action-Economy- und Fortress-Architects-ICE-Rez-Kosten-Smokes; weitere Handlimit- und persistente Sonderzustands-Pfade folgen."
     }
   ]
 }

@@ -37,14 +37,15 @@
     "All 26 V1.9.20 target cards have runtime definitions with final display-only text and no WIP prefix.",
     "Militech MRAM Chip and MRAM Chip install through legal runner actions and update visible MU deterministically.",
     "Remote Facility opens a rezzed Corp action-economy LegalAction that revalidates source, side and gained-action amount.",
+    "Fortress Architects reduces ICE rez costs from a visible rezzed root source through the global static modifier layer.",
     "No V1.9.20 card is release-promoted or AI-approved in this WIP slice.",
     "V1.9.21 AI Boon remains outside the V1.9.20 WIP runtime guard.",
-    "Broader handlimit, global static modifier and persistent-state resolver coverage remains follow-up work."
+    "Broader handlimit and persistent-state resolver coverage remains follow-up work."
   ],
   "verification": {
     "catalog": "pass: 34 tests",
     "typecheck": "pass",
-    "engine": "pass: 261 tests"
+    "engine": "pass: 262 tests"
   },
   "completionGate": {
     "releaseDone": false,

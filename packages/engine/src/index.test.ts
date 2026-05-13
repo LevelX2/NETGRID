@@ -4478,6 +4478,29 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       corpClicksAfter: clicksBefore + 1
     });
   });
+
+  it("applies rezzed V1.9.20 global ICE rez-cost modifiers from public root sources", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-global-ice-cost",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw"
+    );
+    state.corp.credits = 20;
+    state.corp.maxHandSize = 100;
+    putCorpRootInRemote(state, "onr_v1_324_fortress-architects");
+    putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_324_fortress-architects");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+
+    const wallRez = mustAction(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_232_crystal-wall");
+    expect(wallRez.costs[0]?.credits).toBe(3);
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {
@@ -8723,6 +8746,7 @@ const ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_338_rustbelt-hq-branch", quantity: 1 },
     { id: "onr_v1_343_south-african-mining-corp", quantity: 1 },
     { id: "onr_v1_360_jerusalem-city-grid", quantity: 1 },
+    { id: "onr_v1_232_crystal-wall", quantity: 1 },
     { id: "simple_agenda", quantity: 2 },
     { id: "simple_economy_operation", quantity: 4 }
   ]

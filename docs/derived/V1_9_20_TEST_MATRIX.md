@@ -10,13 +10,13 @@ Stand: 2026-05-13
 | Displaytext | Kein `WIP` im Runtime-Text; display-only dokumentiert | 26/26 Runtime-Definitionen grün; display-only im Implementation Review dokumentiert |
 | Handlimit/MU | Deterministische Berechnung und PlayerView-Projektion | MRAM-Hardware-Smoke grün; weitere Handlimit-Pfade Folgearbeit |
 | Action Economy | Click-/Action-Modifikatoren nur aus sichtbaren legalen Quellen | Remote-Facility/Nevinyrral/Pacifica-Assetpfad grün; weitere Action-Familien Folgearbeit |
-| Globale Modifier | Layering, Quellen und Revalidierung | Folgearbeit |
+| Globale Modifier | Layering, Quellen und Revalidierung | Fortress-Architects-ICE-Rez-Kostenpfad grün; weitere Modifier Folgearbeit |
 | Persistente Sonderzustände | Quelle, Dauer, Ablauf, PublicEvent-Sicherheit | Folgearbeit |
 | Visibility | Keine Hidden-Info-Leaks über Modifier, Reconnect, Undo oder Replay | Folgearbeit |
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Folgearbeit |
 | AI | Hints, Smokes, legaler Fallback | Folgearbeit |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation, Catalog 34, Engine 261 und Typecheck grün; weitere Checks Folgearbeit |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation, Catalog 34, Engine 262 und Typecheck grün; weitere Checks Folgearbeit |
 
 ## Mindestchecks im ersten WIP
 
