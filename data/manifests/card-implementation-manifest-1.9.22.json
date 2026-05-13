@@ -344,10 +344,12 @@
     },
     {
       "cardCode": "onr_v1_195_corporate-retreat",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_scored_agenda_action_gain_6_until_install_or_rez",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Corporate Retreat until Corp installs or rezzes another card"
+      ]
     },
     {
       "cardCode": "onr_v1_196_corporate-war",
@@ -451,7 +453,7 @@
   ],
   "deferredSummary": {
     "plannedCardCount": 47,
-    "implementedCardCount": 23,
+    "implementedCardCount": 24,
     "finalGateCardCount": 0,
     "deferredCardCount": 0,
     "deferredCardIds": [],

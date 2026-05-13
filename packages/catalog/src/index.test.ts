@@ -1861,7 +1861,7 @@ describe("catalog import and status logic", () => {
     const hardwareCards = manifestCards.filter((card) => card.resolverFamily.includes("install_hardware_memory_surface"));
     const eventCards = manifestCards.filter((card) => card.resolverFamily.includes("play_event_surface"));
     const corpAgendaResolverCards = manifestCards.filter((card) =>
-      ["v1922_corp_agenda_on_score_credit_threshold", "v1922_scored_agenda_action_gain_3"].includes(card.resolverFamily)
+      ["v1922_corp_agenda_on_score_credit_threshold", "v1922_scored_agenda_action_gain_3", "v1922_scored_agenda_action_gain_6_until_install_or_rez"].includes(card.resolverFamily)
     );
     const corpOperationResolverCards = manifestCards.filter((card) =>
       ["v1922_corp_operation_private_archives_to_hq", "v1922_corp_operation_private_rd_top5_reorder"].includes(card.resolverFamily)
@@ -1898,7 +1898,7 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes, card.cardCode).toContain("no_play_event_promotion_guard");
     }
 
-    expect(corpAgendaResolverCards.map((card) => card.cardCode).sort()).toEqual(["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"]);
+    expect(corpAgendaResolverCards.map((card) => card.cardCode).sort()).toEqual(["onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"]);
     for (const card of corpAgendaResolverCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
       expect(card.aiSupported, card.cardCode).toBe(false);
@@ -1911,7 +1911,7 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes.length, card.cardCode).toBeGreaterThan(0);
     }
 
-    expect(plannedCards).toHaveLength(24);
+    expect(plannedCards).toHaveLength(23);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
       expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);

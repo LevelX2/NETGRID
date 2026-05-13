@@ -6478,6 +6478,121 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
   });
 
+  it("uses Corporate Retreat until Corp installs or rezzes another card", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_corporate_retreat",
+      name: "O:NR V1.9.22 Corporate Retreat",
+      cards: [
+        { id: "onr_v1_195_corporate-retreat", quantity: 1 },
+        { id: "simple_barrier_ice", quantity: 2 },
+        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards
+      ]
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-corporate-retreat",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 40;
+    state.corp.clicks = 40;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "onr_v1_195_corporate-retreat");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_195_corporate-retreat" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 4; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_195_corporate-retreat");
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_195_corporate-retreat");
+
+    const legal = mustAction(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1922_corporate_retreat");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-corporate-retreat-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-corporate-retreat-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeAbility = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1922_corporate_retreat");
+    expect(state.corp.credits).toBe(creditsBeforeAbility + 6);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      cardDefinitionId: "onr_v1_195_corporate-retreat",
+      agendaAbility: "v1922_corporate_retreat",
+      gainedCredits: 6
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    moveCorpCardToHq(state, "simple_barrier_ice");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_barrier_ice"
+    );
+    expect(getLegalActions(state, "corp").some((action) => action.payload?.agendaAbility === "v1922_corporate_retreat")).toBe(false);
+
+    let rezState = createGameAfterSetup({
+      seed: "v1922-corporate-retreat-rez-lock",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    rezState = apply(rezState, "corp", (action) => action.type === "mandatory_draw");
+    rezState.corp.credits = 40;
+    rezState.corp.clicks = 40;
+    rezState.corp.maxHandSize = 100;
+    moveCorpCardToHq(rezState, "onr_v1_195_corporate-retreat");
+    rezState = apply(
+      rezState,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(rezState, action) === "onr_v1_195_corporate-retreat" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 4; index += 1) {
+      rezState = apply(rezState, "corp", (action) => action.type === "advance_card" && sourceDefinition(rezState, action) === "onr_v1_195_corporate-retreat");
+    }
+    rezState = apply(rezState, "corp", (action) => action.type === "score_agenda" && sourceDefinition(rezState, action) === "onr_v1_195_corporate-retreat");
+    const rezRetreatId = rezState.corp.scoreArea.find((cardId) => rezState.cardInstances[cardId]?.definitionId === "onr_v1_195_corporate-retreat");
+    expect(rezRetreatId).toBeDefined();
+    putCorpIceOnServer(rezState, "rd", "simple_barrier_ice");
+    rezState = apply(rezState, "corp", (action) => action.type === "end_turn");
+    rezState = apply(rezState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    rezState = apply(rezState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(rezState, action) === "simple_barrier_ice");
+    if (rezRetreatId) expect(rezState.cardInstances[rezRetreatId]?.counters?.mark).toBeUndefined();
+  });
+
   it("scores Corporate War through a deterministic on-score credit threshold resolver", () => {
     const corpDeck: DeckDefinition = {
       ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
@@ -6809,7 +6924,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
-      "onr_v1_195_corporate-retreat",
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_206_marine-arcology",
       "onr_v1_216_security-purge",
@@ -6824,7 +6938,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     for (const definitionId of corpLongtailIds) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
     }
-    for (const definitionId of ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"] as const) {
+    for (const definitionId of ["onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"] as const) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(DEMO_CARDS_BY_ID[definitionId]?.rulesText, definitionId).not.toContain("WIP");
       expect(DEMO_CARDS_BY_ID[definitionId]?.mechanics.join(" "), definitionId).toContain("per_card_longtail");

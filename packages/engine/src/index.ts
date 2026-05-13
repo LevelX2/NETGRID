@@ -254,6 +254,7 @@ const V1921_QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWALK_ID]);
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
+const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
 const V1922_OFF_SITE_BACKUPS_ID = "onr_v1_296_off-site-backups";
@@ -2138,6 +2139,20 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
+    if (definition.id === V1922_CORPORATE_RETREAT_ID && isV1922CorporateRetreatAbilityAvailable(state, agendaId)) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 6 Credits`,
+          agendaId,
+          [{ clicks: 1 }],
+          { cardId: agendaId, agendaAbility: "v1922_corporate_retreat", gainCreditsAmount: 6 }
+        )
+      );
+      continue;
+    }
     if (definition.id === V1922_POLITICAL_OVERTHROW_ID) {
       actions.push(
         action(
@@ -2171,6 +2186,16 @@ function corpMainActions(state: GameState): LegalAction[] {
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
   return actions;
+}
+
+function isV1922CorporateRetreatAbilityAvailable(state: GameState, agendaId: CardInstanceId): boolean {
+  return state.corp.scoreArea.includes(agendaId) && definitionFor(state, agendaId).id === V1922_CORPORATE_RETREAT_ID && cardCounter(state, agendaId, "mark") > 0;
+}
+
+function expireV1922CorporateRetreatAbilities(state: GameState): void {
+  for (const agendaId of state.corp.scoreArea) {
+    if (definitionFor(state, agendaId).id === V1922_CORPORATE_RETREAT_ID) setCardCounter(state, agendaId, "mark", 0);
+  }
 }
 
 function runnerMainActions(state: GameState): LegalAction[] {
@@ -3503,6 +3528,23 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         };
         return;
       }
+      if (legalAction.payload?.agendaAbility === "v1922_corporate_retreat") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf Corporate Retreat nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Corporate Retreat ist nicht gescort.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1922_CORPORATE_RETREAT_ID) throw new Error("Die Agenda-Aktion passt nicht zu Corporate Retreat.");
+        if (!isV1922CorporateRetreatAbilityAvailable(state, sourceCardId)) throw new Error("Corporate Retreat ist nach Install oder Rez nicht mehr verfuegbar.");
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 6) throw new Error("Corporate Retreat gewaehrt in diesem Scope genau 6 Credits.");
+        credits(state, "corp", gainAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: gainAmount,
+          corpCreditsAfter: state.corp.credits
+        };
+        return;
+      }
       if (legalAction.payload?.agendaAbility === "v1912_detroit_police_contract") {
         if (legalAction.side !== "corp") throw new Error("Nur die Korp darf Detroit Police Contract nutzen.");
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
@@ -3634,6 +3676,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       return;
     case "rez_ice":
       rezCard(state, String(legalAction.payload?.cardId), legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true);
+      expireV1922CorporateRetreatAbilities(state);
       return;
     case "decline_rez":
       passApproachedIce(state);
@@ -3839,6 +3882,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
   }
   spendClick(state, legalAction.side);
+  if (legalAction.side === "corp") expireV1922CorporateRetreatAbilities(state);
   if (legalAction.side === "runner") {
     const hostOnCardId = typeof legalAction.payload?.hostOnCardId === "string" ? String(legalAction.payload.hostOnCardId) : undefined;
     const selectedServerId = typeof legalAction.payload?.selectedServerId === "string" ? String(legalAction.payload.selectedServerId) : undefined;
@@ -6262,6 +6306,10 @@ function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction
       };
     }
   }
+  if (definition.id === V1922_CORPORATE_RETREAT_ID) {
+    setCardCounter(state, cardId, "mark", 1);
+    if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), agendaAbility: "v1922_corporate_retreat", corporateRetreatAvailable: true };
+  }
   if (definition.id === "onr_v1_203_hostile-takeover") {
     state.corp.credits += 5;
     if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), onScoreGainCredits: 5, corpCreditsAfter: state.corp.credits };
@@ -7718,8 +7766,8 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   if (typeof legalAction.payload?.corporateWarThresholdMet === "boolean") context.corporateWarThresholdMet = legalAction.payload.corporateWarThresholdMet;
   if (legalAction.payload?.onScoreLostAllCredits === true) context.onScoreLostAllCredits = true;
   if (typeof legalAction.payload?.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
-  if (legalAction.payload?.agendaAbility === "v1922_political_overthrow") {
-    context.agendaAbility = "v1922_political_overthrow";
+  if (legalAction.payload?.agendaAbility === "v1922_political_overthrow" || legalAction.payload?.agendaAbility === "v1922_corporate_retreat") {
+    context.agendaAbility = legalAction.payload.agendaAbility;
     if (typeof legalAction.payload.gainedCredits === "number") context.gainedCredits = legalAction.payload.gainedCredits;
   }
   if (typeof legalAction.payload?.gainedActions === "number") context.gainedActions = legalAction.payload.gainedActions;
@@ -7860,7 +7908,7 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
   const revealsCard =
     ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation", "pump_breaker", "break_subroutine"].includes(legalAction.type) ||
     (legalAction.type === "gain_credit" && (legalAction.payload?.v1917AssetAbility === "gain_credits" || legalAction.payload?.v1917AssetAbility === "trace_3_tag")) ||
-    (legalAction.type === "gain_credit" && legalAction.payload?.agendaAbility === "v1922_political_overthrow") ||
+    (legalAction.type === "gain_credit" && (legalAction.payload?.agendaAbility === "v1922_political_overthrow" || legalAction.payload?.agendaAbility === "v1922_corporate_retreat")) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;

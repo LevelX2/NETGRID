@@ -3429,6 +3429,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "program", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_195_corporate-retreat",
+    title: "Corporate Retreat",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 3,
+    rulesText: "[A]: Gain 6 credits. This ability is lost after Corp installs or rezzes any card.",
+    mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "ability_loss_on_install_or_rez", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_196_corporate-war",
     title: "Corporate War",
     side: "corp",
