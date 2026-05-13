@@ -5612,9 +5612,37 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     resourceState = apply(resourceState, "runner", (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_load_credits");
     expect(cardCounterAmount(resourceState, brokerId!, "power")).toBe(3);
     expect(resourceState.runner.credits).toBe(11);
+    expect(
+      getLegalActions(resourceState, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          (action.payload?.resourceAbility === "broker_load_credits" || action.payload?.resourceAbility === "broker_take_credits") &&
+          action.payload?.cardId === brokerId
+      )
+    ).toBe(false);
+    const blockedSameTurnBrokerAction = applyAction(resourceState, {
+      matchId: resourceState.matchId,
+      side: "runner",
+      actionId: brokerLoad!.actionId,
+      clientKnownStateVersion: resourceState.stateVersion,
+      idempotencyKey: `runner-${resourceState.stateVersion}-${brokerLoad!.actionId}-blocked`
+    });
+    expect(blockedSameTurnBrokerAction.ok).toBe(false);
+
+    resourceState = apply(resourceState, "runner", (action) => action.type === "end_turn");
+    resourceState = apply(resourceState, "corp", (action) => action.type === "mandatory_draw");
+    resourceState = toRunnerTurnFromCorpMain(resourceState);
     resourceState = apply(resourceState, "runner", (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_take_credits");
     expect(cardCounterAmount(resourceState, brokerId!, "power")).toBe(0);
     expect(resourceState.runner.credits).toBe(14);
+    expect(
+      getLegalActions(resourceState, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          (action.payload?.resourceAbility === "broker_load_credits" || action.payload?.resourceAbility === "broker_take_credits") &&
+          action.payload?.cardId === brokerId
+      )
+    ).toBe(false);
     expect(resourceState.eventLog.at(-1)?.visibilityClass).toBe("public");
     expect(resourceState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",

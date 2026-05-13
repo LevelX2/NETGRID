@@ -1152,7 +1152,8 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       stoleBlackOpsAgendaThisTurn: false,
       runAttemptsThisTurn: 0,
       runAttemptsLastTurn: 0,
-      damagePreventionUsage: {}
+      damagePreventionUsage: {},
+      brokerActionCardIdsThisTurn: []
     },
     corpTurnFlags: {
       scoredBlackOpsAgendaThisTurn: false,
@@ -1510,6 +1511,14 @@ export function validateGameState(state: GameState): ValidationResult {
   if (state.runnerTurnFlags?.incubatorPendingTransforms !== undefined) {
     const pending = state.runnerTurnFlags.incubatorPendingTransforms;
     if (!Number.isInteger(pending) || pending < 0) errors.push("runnerTurnFlags.incubatorPendingTransforms must be a non-negative integer.");
+  }
+  if (state.runnerTurnFlags?.brokerActionCardIdsThisTurn !== undefined) {
+    const usedBrokerIds = state.runnerTurnFlags.brokerActionCardIdsThisTurn;
+    if (!Array.isArray(usedBrokerIds)) errors.push("runnerTurnFlags.brokerActionCardIdsThisTurn must be an array.");
+    else {
+      if (new Set(usedBrokerIds).size !== usedBrokerIds.length) errors.push("runnerTurnFlags.brokerActionCardIdsThisTurn must be unique.");
+      if (!usedBrokerIds.every((id) => typeof id === "string" && id.length > 0)) errors.push("runnerTurnFlags.brokerActionCardIdsThisTurn has invalid card ids.");
+    }
   }
   if (state.eventModificationWindow) {
     if (!state.imminentEvent) errors.push("EventModificationWindow requires an ImminentEvent.");
@@ -2369,7 +2378,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     for (const resourceId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, resourceId);
-      if (definition.id === "onr_v1_154_broker") {
+      if (definition.id === "onr_v1_154_broker" && !brokerAbilityUsedThisTurn(state, resourceId)) {
         actions.push(
           action(
             state,
@@ -3766,11 +3775,13 @@ function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void 
   if (!state.runner.rig.resources.includes(sourceCardId)) throw new Error("Broker ist nicht installiert.");
   const definition = definitionFor(state, sourceCardId);
   if (definition.id !== "onr_v1_154_broker") throw new Error("Diese Broker-Aktion passt nicht zur Karte.");
+  if (brokerAbilityUsedThisTurn(state, sourceCardId)) throw new Error("Broker darf pro Zug nur eine seiner Aktionen nutzen.");
 
   if (legalAction.payload?.resourceAbility === "broker_load_credits") {
     const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
     if (!Number.isInteger(addAmount) || addAmount !== 3) throw new Error("Broker legt genau 3 Credits aus der Bank auf die Karte.");
     addCardCounter(state, sourceCardId, "power", addAmount);
+    recordBrokerAbilityUsage(state, sourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       addedCounterAmount: addAmount,
@@ -3785,6 +3796,7 @@ function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void 
   if (!Number.isInteger(gainAmount) || gainAmount !== currentCredits) throw new Error("Broker muss alle gespeicherten Credits nehmen.");
   spendCardCounter(state, sourceCardId, "power", gainAmount);
   credits(state, "runner", gainAmount);
+  recordBrokerAbilityUsage(state, sourceCardId);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     gainedCredits: gainAmount,
@@ -5415,6 +5427,7 @@ function startRunnerTurn(state: GameState): void {
   flags.runAttemptsThisTurn = 0;
   flags.runAttemptsLastTurn = 0;
   flags.damagePreventionUsage = {};
+  flags.brokerActionCardIdsThisTurn = [];
   flags.startOfTurnFloatingCreditsApplied = false;
   flags.allNighterBonusRunPending = false;
   flags.forgoNextActionPending = false;
@@ -6138,6 +6151,16 @@ function damageTypePayload(event: ImminentEvent): DamageType {
 function damagePreventionUsedThisTurn(state: GameState, cardId: CardInstanceId): number {
   const flags = ensureRunnerTurnFlags(state);
   return flags.damagePreventionUsage?.[cardId] ?? 0;
+}
+
+function brokerAbilityUsedThisTurn(state: GameState, cardId: CardInstanceId): boolean {
+  return state.runnerTurnFlags?.brokerActionCardIdsThisTurn?.includes(cardId) === true;
+}
+
+function recordBrokerAbilityUsage(state: GameState, cardId: CardInstanceId): void {
+  const flags = ensureRunnerTurnFlags(state);
+  const usedBrokerIds = (flags.brokerActionCardIdsThisTurn ??= []);
+  if (!usedBrokerIds.includes(cardId)) usedBrokerIds.push(cardId);
 }
 
 function registerDamagePreventionUsage(state: GameState, candidate: EventModificationCandidate, preventedAmount: number): void {
@@ -8715,6 +8738,7 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
     runAttemptsThisTurn: 0,
     runAttemptsLastTurn: 0,
     damagePreventionUsage: {},
+    brokerActionCardIdsThisTurn: [],
     startOfTurnFloatingCreditsApplied: false,
     allNighterBonusRunPending: false,
     forgoNextActionPending: false
@@ -8724,6 +8748,7 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
   flags.runAttemptsThisTurn ??= 0;
   flags.runAttemptsLastTurn ??= 0;
   flags.damagePreventionUsage ??= {};
+  flags.brokerActionCardIdsThisTurn ??= [];
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.allNighterBonusRunPending ??= false;
   flags.forgoNextActionPending ??= false;
