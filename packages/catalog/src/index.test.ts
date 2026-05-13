@@ -1870,7 +1870,8 @@ describe("catalog import and status logic", () => {
         "v1922_runner_event_remove_tag_optional_return",
         "v1922_runner_event_successful_hq_run_trash_unrezzed_ice",
         "v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
-        "v1922_runner_event_stack_top5_choose_one_arrange_rest"
+        "v1922_runner_event_stack_top5_choose_one_arrange_rest",
+        "v1922_runner_event_program_install_action_bundle"
       ].includes(card.resolverFamily)
     );
     const corpAgendaResolverCards = manifestCards.filter((card) =>
@@ -1909,7 +1910,7 @@ describe("catalog import and status logic", () => {
       );
     }
 
-    expect(eventCards).toHaveLength(1);
+    expect(eventCards).toHaveLength(0);
     for (const card of eventCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
       expect(card.aiSupported, card.cardCode).toBe(false);
@@ -1925,7 +1926,8 @@ describe("catalog import and status logic", () => {
       "onr_v1_102_open-ended-mileage-program",
       "onr_v1_103_organ-donor",
       "onr_v1_109_security-code-worm-chip",
-      "onr_v1_113_synchronized-attack-on-hq"
+      "onr_v1_113_synchronized-attack-on-hq",
+      "onr_v1_117_valu-pak-software-bundle"
     ]);
     for (const card of runnerEventResolverCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");

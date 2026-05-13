@@ -7186,32 +7186,86 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("does not expose unresolved V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
-    const runnerEventIds = [
-      "onr_v1_117_valu-pak-software-bundle"
-    ] as const;
+  it("plays Valu-Pak Software Bundle as a consecutive program-install action bundle", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-valu-pak-software-bundle",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_valu_pak_software_bundle",
+          name: "O:NR V1.9.22 Valu-Pak Software Bundle",
+          cards: [
+            { id: "onr_v1_117_valu-pak-software-bundle", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards
+          ]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 2;
+    state.runner.clicks = 4;
+    moveRunnerCardToGrip(state, "onr_v1_117_valu-pak-software-bundle");
+    const programId = moveRunnerCardToGrip(state, "simple_decoder");
 
-    for (const definitionId of runnerEventIds) {
-      const state = toRunnerTurn(
-        createGameAfterSetup({
-          seed: `v1922-${definitionId}-event-no-promotion`,
-          runnerDeck: {
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-            id: `onr_v1_runner_v1922_${definitionId}_event_no_promotion`,
-            name: `O:NR V1.9.22 ${definitionId} Event No Promotion`,
-            cards: [{ id: definitionId, quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
-          },
-          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
-          agendaPointsToWin: 7
-        })
-      );
-      moveRunnerCardToGrip(state, definitionId);
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_117_valu-pak-software-bundle");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-valu-pak-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
 
-      expect(
-        getLegalActions(state, "runner").some((action) => action.type === "play_event" && sourceDefinition(state, action) === definitionId),
-        definitionId
-      ).toBe(false);
-    }
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-valu-pak-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_117_valu-pak-software-bundle");
+    expect(state.runner.clicks).toBe(8);
+    expect(state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining).toBe(5);
+    expect(state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+      v1922RunnerEventAbility: "program_install_action_bundle",
+      gainedActions: 5,
+      temporaryProgramInstallCredits: 1,
+      valuPakProgramInstallActionsRemaining: 5,
+      runnerClicksAfter: 8
+    });
+
+    const bundleActions = getLegalActions(state, "runner");
+    expect(bundleActions.some((action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_decoder")).toBe(true);
+    expect(bundleActions.some((action) => action.type === "gain_credit" || action.type === "draw_card" || action.type === "start_run" || action.type === "play_event")).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_decoder");
+    expect(state.runner.rig.programs).toContain(programId);
+    expect(state.runner.credits).toBe(0);
+    expect(state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining).toBe(4);
+    expect(state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: "simple_decoder",
+      v1922RunnerEventAbility: "program_install_action_bundle",
+      valuPakInstallActionSpent: true,
+      valuPakProgramInstallActionsRemaining: 4,
+      valuPakTemporaryProgramInstallCreditsAfter: 0
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("keeps V1.9.22 runner programs out of playable runtime until local values are confirmed", () => {

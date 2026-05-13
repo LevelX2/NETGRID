@@ -9,8 +9,8 @@
     "catalogWipGuardReady": true,
     "wipArtifactAlignmentGuardReady": true,
     "resolverContractInventoryReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_event_and_six_corp_resolver_clusters_29_of_47",
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_corporate_retreat_corporate_war_marine_arcology_political_overthrow_off_site_backups_and_planning_consultants_resolvers_plus_runner_event_no_promotion_guard_plus_runner_program_no_legalaction_guard",
+    "runtimeDefinitionsReady": "runner_hardware_event_and_six_corp_resolver_clusters_30_of_47",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_off_site_backups_and_planning_consultants_resolvers_plus_runner_program_no_legalaction_guard",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
@@ -201,10 +201,15 @@
       "cardCode": "onr_v1_117_valu-pak-software-bundle",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "resolverFamily": "v1922_runner_event_program_install_action_bundle",
       "coveredSmokes": [
-        "runtime_definition_guard",
-        "no_play_event_promotion_guard"
+        "play_event_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "program_install_action_bundle",
+        "temporary_program_install_credit",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {

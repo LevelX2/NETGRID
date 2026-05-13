@@ -263,6 +263,7 @@ const V1922_OPEN_ENDED_MILEAGE_PROGRAM_ID = "onr_v1_102_open-ended-mileage-progr
 const V1922_ORGAN_DONOR_ID = "onr_v1_103_organ-donor";
 const V1922_SECURITY_CODE_WORM_CHIP_ID = "onr_v1_109_security-code-worm-chip";
 const V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID = "onr_v1_113_synchronized-attack-on-hq";
+const V1922_VALU_PAK_SOFTWARE_BUNDLE_ID = "onr_v1_117_valu-pak-software-bundle";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
@@ -505,6 +506,26 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain"
+      };
+    }
+  },
+  [V1922_VALU_PAK_SOFTWARE_BUNDLE_ID]: {
+    name: "onr_v1922_runner_event_program_install_action_bundle",
+    canPlay: (state) => runnerInstallableProgramIdsForValuPak(state).length > 0,
+    resolve: (state, legalAction) => {
+      const installablePrograms = runnerInstallableProgramIdsForValuPak(state);
+      if (installablePrograms.length === 0) throw new Error("Valu-Pak Software Bundle findet kein installierbares Programm.");
+      const flags = ensureRunnerTurnFlags(state);
+      flags.valuPakProgramInstallActionsRemaining = 5;
+      flags.valuPakTemporaryProgramInstallCredits = 1;
+      state.runner.clicks += 5;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922RunnerEventAbility: "program_install_action_bundle",
+        gainedActions: 5,
+        temporaryProgramInstallCredits: 1,
+        valuPakProgramInstallActionsRemaining: flags.valuPakProgramInstallActionsRemaining,
+        runnerClicksAfter: state.runner.clicks
       };
     }
   },
@@ -1628,6 +1649,14 @@ export function validateGameState(state: GameState): ValidationResult {
     const pending = state.runnerTurnFlags.incubatorPendingTransforms;
     if (!Number.isInteger(pending) || pending < 0) errors.push("runnerTurnFlags.incubatorPendingTransforms must be a non-negative integer.");
   }
+  if (state.runnerTurnFlags?.valuPakProgramInstallActionsRemaining !== undefined) {
+    const remaining = state.runnerTurnFlags.valuPakProgramInstallActionsRemaining;
+    if (!Number.isInteger(remaining) || remaining < 0 || remaining > 5) errors.push("runnerTurnFlags.valuPakProgramInstallActionsRemaining must be an integer from 0 to 5.");
+  }
+  if (state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits !== undefined) {
+    const credits = state.runnerTurnFlags.valuPakTemporaryProgramInstallCredits;
+    if (!Number.isInteger(credits) || credits < 0 || credits > 1) errors.push("runnerTurnFlags.valuPakTemporaryProgramInstallCredits must be an integer from 0 to 1.");
+  }
   if (state.eventModificationWindow) {
     if (!state.imminentEvent) errors.push("EventModificationWindow requires an ImminentEvent.");
     if (state.eventModificationWindow.eventId !== state.imminentEvent?.eventId) errors.push("EventModificationWindow eventId must match ImminentEvent.");
@@ -2309,6 +2338,49 @@ function expireV1922CorporateRetreatAbilities(state: GameState): void {
   }
 }
 
+function valuPakProgramInstallActionsRemaining(state: GameState): number {
+  return Math.max(0, Math.floor(ensureRunnerTurnFlags(state).valuPakProgramInstallActionsRemaining ?? 0));
+}
+
+function valuPakTemporaryProgramInstallCredits(state: GameState): number {
+  return Math.max(0, Math.floor(ensureRunnerTurnFlags(state).valuPakTemporaryProgramInstallCredits ?? 0));
+}
+
+function runnerInstallableProgramIdsForValuPak(state: GameState): CardInstanceId[] {
+  return state.runner.grip.filter((cardId) => {
+    const definition = definitionFor(state, cardId);
+    const uniqueBlocked = isUniqueCard(definition) && hasInstalledUniqueCardDefinition(state, "runner", definition.id);
+    return (
+      definition.type === "program" &&
+      !uniqueBlocked &&
+      availableRunnerProgramInstallCredits(state) >= (definition.installCost ?? 0) &&
+      state.runner.memoryUsed + (definition.memoryCost ?? 0) <= state.runner.memoryLimit
+    );
+  });
+}
+
+function clearV1922ValuPakRunnerFlags(state: GameState): void {
+  const flags = ensureRunnerTurnFlags(state);
+  flags.valuPakProgramInstallActionsRemaining = 0;
+  flags.valuPakTemporaryProgramInstallCredits = 0;
+}
+
+function consumeV1922ValuPakInstallAction(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "runner" || legalAction.type !== "install_card" || legalAction.payload?.v1922ValuPakInstallAction !== true) return;
+  const flags = ensureRunnerTurnFlags(state);
+  const remainingBefore = valuPakProgramInstallActionsRemaining(state);
+  if (remainingBefore <= 0) throw new Error("Valu-Pak Software Bundle hat keine Installationsaktionen mehr.");
+  flags.valuPakProgramInstallActionsRemaining = Math.max(0, remainingBefore - 1);
+  if (flags.valuPakProgramInstallActionsRemaining <= 0) flags.valuPakTemporaryProgramInstallCredits = 0;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "program_install_action_bundle",
+    valuPakInstallActionSpent: true,
+    valuPakProgramInstallActionsRemaining: flags.valuPakProgramInstallActionsRemaining,
+    valuPakTemporaryProgramInstallCreditsAfter: valuPakTemporaryProgramInstallCredits(state)
+  };
+}
+
 function runnerMainActions(state: GameState): LegalAction[] {
   const actions: LegalAction[] = [];
   const flags = ensureRunnerTurnFlags(state);
@@ -2316,6 +2388,19 @@ function runnerMainActions(state: GameState): LegalAction[] {
   const bonusRunPending = flags.allNighterBonusRunPending === true;
   if (!hasClicks && !bonusRunPending) {
     actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
+    return actions;
+  }
+  if (valuPakProgramInstallActionsRemaining(state) > 0) {
+    for (const id of runnerInstallableProgramIdsForValuPak(state)) {
+      const definition = definitionFor(state, id);
+      actions.push(
+        action(state, "runner", "install_card", `${definition.title} installieren`, id, [{ clicks: 1, credits: definition.installCost ?? 0 }], {
+          cardId: id,
+          v1922ValuPakInstallAction: true
+        })
+      );
+    }
+    actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule", [], { v1922ValuPakSequenceEnd: true }));
     return actions;
   }
   if (hasClicks) {
@@ -4093,6 +4178,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         ? { selectedServerId: restrictiveTargetServerId }
         : {})
     };
+    consumeV1922ValuPakInstallAction(state, legalAction);
     if (definition.id === "v099_host_resource") startRunnerHostingChoice(state, cardId, legalAction);
     return;
   }
@@ -5494,6 +5580,7 @@ function startCorpTurn(state: GameState): void {
   state.timingPoint = "corp_draw.mandatory_draw";
   state.corp.clicks = 3;
   state.runner.clicks = 0;
+  clearV1922ValuPakRunnerFlags(state);
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
   applyCorpStartOfTurnEffects(state);
 }
@@ -5517,6 +5604,8 @@ function startRunnerTurn(state: GameState): void {
   flags.startOfTurnFloatingCreditsApplied = false;
   flags.allNighterBonusRunPending = false;
   flags.forgoNextActionPending = false;
+  flags.valuPakProgramInstallActionsRemaining = 0;
+  flags.valuPakTemporaryProgramInstallCredits = 0;
   delete flags.incubatorPendingTransforms;
   if (forgoPending && state.runner.clicks > 0) {
     state.runner.clicks -= 1;
@@ -8506,6 +8595,15 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.returnedToGrip === "boolean") context.returnedToGrip = legalAction.payload.returnedToGrip;
     if (typeof legalAction.payload.paidCredits === "number") context.paidCredits = legalAction.payload.paidCredits;
     if (typeof legalAction.payload.runnerCreditsAfter === "number") context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
+    if (typeof legalAction.payload.runnerClicksAfter === "number") context.runnerClicksAfter = legalAction.payload.runnerClicksAfter;
+    if (typeof legalAction.payload.temporaryProgramInstallCredits === "number") context.temporaryProgramInstallCredits = legalAction.payload.temporaryProgramInstallCredits;
+    if (typeof legalAction.payload.valuPakProgramInstallActionsRemaining === "number") {
+      context.valuPakProgramInstallActionsRemaining = legalAction.payload.valuPakProgramInstallActionsRemaining;
+    }
+    if (typeof legalAction.payload.valuPakTemporaryProgramInstallCreditsAfter === "number") {
+      context.valuPakTemporaryProgramInstallCreditsAfter = legalAction.payload.valuPakTemporaryProgramInstallCreditsAfter;
+    }
+    if (legalAction.payload.valuPakInstallActionSpent === true) context.valuPakInstallActionSpent = true;
     if (typeof legalAction.payload.derezzedCount === "number") context.derezzedCount = legalAction.payload.derezzedCount;
     if (typeof legalAction.payload.targetCardDefinitionId === "string") context.targetCardDefinitionId = legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.targetServerLabel === "string") context.targetServerLabel = legalAction.payload.targetServerLabel;
@@ -8814,7 +8912,7 @@ function spendCredits(state: GameState, side: Side, amount: number): void {
 }
 
 function availableRunnerProgramInstallCredits(state: GameState): number {
-  return state.runner.credits + runnerRecurringCredits(state);
+  return state.runner.credits + runnerRecurringCredits(state) + valuPakTemporaryProgramInstallCredits(state);
 }
 
 function runnerRecurringCredits(state: GameState): number {
@@ -8829,6 +8927,12 @@ function spendRunnerInstallCredits(state: GameState, amount: number, cardType: C
   }
   if (availableRunnerProgramInstallCredits(state) < amount) throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
   let remaining = amount;
+  const flags = ensureRunnerTurnFlags(state);
+  const temporary = Math.min(valuPakTemporaryProgramInstallCredits(state), remaining);
+  if (temporary > 0) {
+    flags.valuPakTemporaryProgramInstallCredits = Math.max(0, valuPakTemporaryProgramInstallCredits(state) - temporary);
+    remaining -= temporary;
+  }
   for (const cardId of state.runner.rig.hardware) {
     if (remaining <= 0) break;
     const available = cardCounter(state, cardId, "recurring_credit");
@@ -9209,7 +9313,9 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
     damagePreventionUsage: {},
     startOfTurnFloatingCreditsApplied: false,
     allNighterBonusRunPending: false,
-    forgoNextActionPending: false
+    forgoNextActionPending: false,
+    valuPakProgramInstallActionsRemaining: 0,
+    valuPakTemporaryProgramInstallCredits: 0
   });
   flags.stoleGrayOpsAgendaThisTurn ??= false;
   flags.stoleBlackOpsAgendaThisTurn ??= false;
@@ -9220,6 +9326,8 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.allNighterBonusRunPending ??= false;
   flags.forgoNextActionPending ??= false;
+  flags.valuPakProgramInstallActionsRemaining ??= 0;
+  flags.valuPakTemporaryProgramInstallCredits ??= 0;
   return flags;
 }
 

@@ -662,6 +662,8 @@ export type GameState = {
     incubatorPendingTransforms?: number;
     allNighterBonusRunPending?: boolean;
     forgoNextActionPending?: boolean;
+    valuPakProgramInstallActionsRemaining?: number;
+    valuPakTemporaryProgramInstallCredits?: number;
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;

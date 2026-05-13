@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 23:45 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Valu-Pak Software Bundle` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt Turn-Flag-Felder fuer Valu-Pak-Programminstallationsaktionen. `packages/engine/src/index.ts` oeffnet `Valu-Pak Software Bundle` nur bei installierbarem Runner-Programm, gibt fuenf direkt anschliessende programminstallationsgebundene Aktionen sowie einen temporaeren Programminstallations-Credit und sperrt waehrend der Sequenz alle Nicht-Programminstallations-Aktionen ausser Zugende. `packages/engine/src/index.test.ts` deckt Wrong-Side-/Stale-Revalidation, Sequenz-Restriktion, temporaeren Credit, PublicPayload, Visibility und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (293); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: valu pak program install bundle resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 23:20 CEST
 - Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Synchronized Attack on HQ` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
