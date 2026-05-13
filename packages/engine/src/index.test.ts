@@ -4273,6 +4273,42 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(accessState.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
     expect(accessState.run?.accessedCardId).toBe(experimentalAiId);
   });
+
+  it("uses V1.9.19 operation advance, counter and forfeit-cost paths through play-operation actions", () => {
+    let state = apply(v1919AgendaOveradvanceGame("v1919-operation-paths"), "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 80;
+    state.corp.clicks = 30;
+    state.corp.maxHandSize = 100;
+
+    const agendaId = putCorpRootInRemote(state, "onr_v1_202_genetics-visionary-acquisition");
+    moveCorpCardToHq(state, "onr_v1_300_project-consultants");
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_300_project-consultants");
+    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      v1919OperationAbility: "advance_installed_agenda",
+      addedAdvancementCounters: 1
+    });
+
+    moveCorpCardToHq(state, "onr_v1_291_falsified-transactions-expert");
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_291_falsified-transactions-expert");
+    expect(cardCounterAmount(state, agendaId, "power")).toBe(1);
+
+    const scoredAgendaId = findCard(state, "simple_agenda");
+    removeEverywhere(state, scoredAgendaId);
+    state.corp.scoreArea.push(scoredAgendaId);
+    state.cardInstances[scoredAgendaId] = { ...state.cardInstances[scoredAgendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+    moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
+    const creditsBeforeLayoffs = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs");
+    expect(state.specialZones?.removedFromGame).toContain(scoredAgendaId);
+    expect(state.corp.credits).toBe(creditsBeforeLayoffs + 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      v1919OperationAbility: "forfeit_scored_agenda",
+      agendaPointCostPaid: 2
+    });
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {

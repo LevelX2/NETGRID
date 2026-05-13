@@ -221,6 +221,12 @@ const V1918_RUN_TAX_UPGRADE_IDS = new Set([V1918_DR_DREFF_ID, V1918_TURBEAU_DELA
 const V1918_TAG_CONDITION_UPGRADE_IDS = new Set([V1918_OMNI_KISMET_ID, V1918_PARIS_CITY_GRID_ID]);
 const V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID = "onr_v1_189_artificial-security-directors";
 const V1919_GENETICS_VISIONARY_ACQUISITION_ID = "onr_v1_202_genetics-visionary-acquisition";
+const V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID = "onr_v1_291_falsified-transactions-expert";
+const V1919_MANAGEMENT_SHAKE_UP_ID = "onr_v1_292_management-shake-up";
+const V1919_PROJECT_CONSULTANTS_ID = "onr_v1_300_project-consultants";
+const V1919_SILVER_LINING_RECOVERY_PROTOCOL_ID = "onr_v1_303_silver-lining-recovery-protocol";
+const V1919_SYSTEMATIC_LAYOFFS_ID = "onr_v1_304_systematic-layoffs";
+const V1919_TEAM_RESTRUCTURING_ID = "onr_v1_305_team-restructuring";
 const V1919_CHICAGO_BRANCH_ID = "onr_v1_312_chicago-branch";
 const V1919_CORPRUNNERS_SHATTERED_REMAINS_ID = "onr_v1_315_corprunners-shattered-remains";
 const V1919_EXPERIMENTAL_AI_ID = "onr_v1_323_experimental-ai";
@@ -234,6 +240,7 @@ const V1919_OVERADVANCE_AGENDA_IDS = new Set([V1919_ARTIFICIAL_SECURITY_DIRECTOR
 const V1919_SCORED_REVEAL_AGENDA_IDS = new Set([V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID, V1919_GENETICS_VISIONARY_ACQUISITION_ID]);
 const V1919_SERVER_DIFFICULTY_UPGRADE_IDS = new Set([V1919_ROVING_SUBMARINE_ID, V1919_WASHINGTON_DC_CITY_GRID_ID]);
 const V1919_COUNTER_ASSET_IDS = new Set([V1919_CHICAGO_BRANCH_ID, V1919_VAPOR_OPS_ID]);
+const V1919_COUNTER_OPERATION_IDS = new Set([V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID, V1919_MANAGEMENT_SHAKE_UP_ID, V1919_TEAM_RESTRUCTURING_ID]);
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -893,6 +900,72 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         recurringPressureCredits: 3
       };
     }
+  },
+  [V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID]: {
+    name: "onr_v1919_corp_operation_add_power_counter",
+    canPlay: (state) => v1919CorpAgendaCounterTarget(state) !== undefined,
+    resolve: (state, legalAction) => resolveV1919CounterOperation(state, legalAction, V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID)
+  },
+  [V1919_MANAGEMENT_SHAKE_UP_ID]: {
+    name: "onr_v1919_corp_operation_add_power_counter",
+    canPlay: (state) => v1919CorpAgendaCounterTarget(state) !== undefined,
+    resolve: (state, legalAction) => resolveV1919CounterOperation(state, legalAction, V1919_MANAGEMENT_SHAKE_UP_ID)
+  },
+  [V1919_PROJECT_CONSULTANTS_ID]: {
+    name: "onr_v1919_corp_operation_advance_installed_agenda",
+    canPlay: (state) => v1919InstalledAgendaTarget(state) !== undefined,
+    resolve: (state, legalAction) => {
+      const targetAgendaId = v1919InstalledAgendaTarget(state);
+      if (!targetAgendaId) throw new Error("Project Consultants findet keine installierte Agenda.");
+      mustInstance(state.cardInstances, targetAgendaId).advancementCounters += 1;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1919OperationAbility: "advance_installed_agenda",
+        targetCardId: targetAgendaId,
+        targetCardDefinitionId: definitionFor(state, targetAgendaId).id,
+        addedAdvancementCounters: 1,
+        advancementCountersAfter: mustInstance(state.cardInstances, targetAgendaId).advancementCounters
+      };
+    }
+  },
+  [V1919_SILVER_LINING_RECOVERY_PROTOCOL_ID]: {
+    name: "onr_v1919_corp_operation_gain_credits_3",
+    resolve: (state, legalAction) => {
+      credits(state, "corp", 3);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1919OperationAbility: "gain_credits",
+        gainedCredits: 3,
+        corpCreditsAfter: state.corp.credits
+      };
+    }
+  },
+  [V1919_SYSTEMATIC_LAYOFFS_ID]: {
+    name: "onr_v1919_corp_operation_forfeit_scored_agenda",
+    canPlay: (state) => v1919CorpScoredAgendaForfeitTarget(state) !== undefined,
+    resolve: (state, legalAction) => {
+      const targetAgendaId = v1919CorpScoredAgendaForfeitTarget(state);
+      if (!targetAgendaId) throw new Error("Systematic Layoffs findet keine gescorte Korp-Agenda.");
+      const agendaPointValue = agendaPointsForScoredCard(state, targetAgendaId);
+      forfeitCorpAgendaForPointCost(state, targetAgendaId);
+      credits(state, "corp", Math.max(1, agendaPointValue));
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1919OperationAbility: "forfeit_scored_agenda",
+        forfeitedAgendaCardId: targetAgendaId,
+        agendaPointCostPaid: agendaPointValue,
+        gainedCredits: Math.max(1, agendaPointValue),
+        corpCreditsAfter: state.corp.credits,
+        specialZone: "removed_from_game",
+        specialZoneVisibility: "public",
+        specialZoneReason: "v1919_systematic_layoffs"
+      };
+    }
+  },
+  [V1919_TEAM_RESTRUCTURING_ID]: {
+    name: "onr_v1919_corp_operation_add_power_counter",
+    canPlay: (state) => v1919CorpAgendaCounterTarget(state) !== undefined,
+    resolve: (state, legalAction) => resolveV1919CounterOperation(state, legalAction, V1919_TEAM_RESTRUCTURING_ID)
   }
 };
 
@@ -5724,6 +5797,64 @@ function forfeitRunnerAgendaForPointCost(state: GameState, cardId: CardInstanceI
   };
 }
 
+function forfeitCorpAgendaForPointCost(state: GameState, cardId: CardInstanceId): void {
+  if (!cardId || !state.corp.scoreArea.includes(cardId)) throw new Error("Die Korp kann diese Agenda nicht fuer Kosten forfeiten.");
+  if (agendaPointsForScoredCard(state, cardId) < 1) throw new Error("Die gewaehlte Korp-Agenda liefert keinen Agenda-Punkt fuer Kosten.");
+  const instance = mustInstance(state.cardInstances, cardId);
+  removeFromAllZones(state, cardId);
+  const specialZones = ensureSpecialZones(state);
+  specialZones.removedFromGame.push(cardId);
+  specialZones.removedFromGame.sort();
+  state.cardInstances[cardId] = {
+    ...instance,
+    faceup: true,
+    rezzed: true,
+    zone: { side: "special", zone: "removed_from_game", visibility: "public" }
+  };
+}
+
+function v1919InstalledAgendaTarget(state: GameState): CardInstanceId | undefined {
+  return state.corp.servers
+    .flatMap((server) => server.root)
+    .filter((cardId) => definitionFor(state, cardId).type === "agenda")
+    .sort((left, right) => {
+      const leftRemaining = Math.max(0, effectiveAgendaDifficulty(state, left) - mustInstance(state.cardInstances, left).advancementCounters);
+      const rightRemaining = Math.max(0, effectiveAgendaDifficulty(state, right) - mustInstance(state.cardInstances, right).advancementCounters);
+      return rightRemaining - leftRemaining || left.localeCompare(right);
+    })[0];
+}
+
+function v1919CorpAgendaCounterTarget(state: GameState): CardInstanceId | undefined {
+  const scored = state.corp.scoreArea.slice().sort()[0];
+  if (scored) return scored;
+  return v1919InstalledAgendaTarget(state);
+}
+
+function v1919CorpScoredAgendaForfeitTarget(state: GameState): CardInstanceId | undefined {
+  return state.corp.scoreArea
+    .slice()
+    .sort((left, right) => {
+      const byPoints = agendaPointsForScoredCard(state, left) - agendaPointsForScoredCard(state, right);
+      return byPoints !== 0 ? byPoints : left.localeCompare(right);
+    })
+    .find((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
+}
+
+function resolveV1919CounterOperation(state: GameState, legalAction: LegalAction, sourceDefinitionId: CardDefinitionId): void {
+  const targetAgendaId = v1919CorpAgendaCounterTarget(state);
+  if (!targetAgendaId) throw new Error("Die V1.9.19-Counter-Operation findet kein Agenda-Ziel.");
+  if (!V1919_COUNTER_OPERATION_IDS.has(sourceDefinitionId)) throw new Error("Die V1.9.19-Counter-Operation passt nicht zur Quelle.");
+  addCardCounter(state, targetAgendaId, "power", 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1919OperationAbility: "add_power_counter",
+    targetCardId: targetAgendaId,
+    targetCardDefinitionId: definitionFor(state, targetAgendaId).id,
+    addedCounterAmount: 1,
+    remainingCounters: cardCounter(state, targetAgendaId, "power")
+  };
+}
+
 function awardRunnerEventAgendaPoint(state: GameState, legalAction: LegalAction, sourceDefinitionId: CardDefinitionId): void {
   const cardId = String(legalAction.payload?.cardId ?? "");
   if (!cardId || !state.cardInstances[cardId]) throw new Error("Die Event-Karte fuer Agenda-Punkt-Gewinn fehlt.");
@@ -6870,6 +7001,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.v1917AssetAbility) parts.push(String(payload.v1917AssetAbility));
   if (payload?.v1918UpgradeAbility) parts.push(String(payload.v1918UpgradeAbility));
   if (payload?.v1919AssetAbility) parts.push(String(payload.v1919AssetAbility));
+  if (payload?.v1919OperationAbility) parts.push(String(payload.v1919OperationAbility));
   if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
@@ -7130,6 +7262,14 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.v1919AssetAbility = legalAction.payload.v1919AssetAbility;
     if (typeof legalAction.payload.addedCounterAmount === "number") context.addedCounterAmount = legalAction.payload.addedCounterAmount;
     if (typeof legalAction.payload.remainingCounters === "number") context.remainingCounters = legalAction.payload.remainingCounters;
+  }
+  if (typeof legalAction.payload?.v1919OperationAbility === "string") {
+    context.v1919OperationAbility = legalAction.payload.v1919OperationAbility;
+    if (typeof legalAction.payload.addedCounterAmount === "number") context.addedCounterAmount = legalAction.payload.addedCounterAmount;
+    if (typeof legalAction.payload.remainingCounters === "number") context.remainingCounters = legalAction.payload.remainingCounters;
+    if (typeof legalAction.payload.addedAdvancementCounters === "number") context.addedAdvancementCounters = legalAction.payload.addedAdvancementCounters;
+    if (typeof legalAction.payload.advancementCountersAfter === "number") context.advancementCountersAfter = legalAction.payload.advancementCountersAfter;
+    if (typeof legalAction.payload.agendaPointCostPaid === "number") context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
   }
   if (typeof legalAction.payload?.v1919AgendaDifficulty === "number") context.v1919AgendaDifficulty = legalAction.payload.v1919AgendaDifficulty;
   if (typeof legalAction.payload?.v1919Overadvance === "number") context.v1919Overadvance = legalAction.payload.v1919Overadvance;

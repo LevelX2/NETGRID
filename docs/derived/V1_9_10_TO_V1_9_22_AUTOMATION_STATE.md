@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 14:09 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um Operation-Resolver erweitert; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Project Consultants, Falsified-Transactions Expert, Management Shake-Up, Silver Lining Recovery Protocol, Systematic Layoffs und Team Restructuring haben explizite `play_operation`-Resolver für Advancement, Power-Counter, Economy und öffentliche Forfeit-Kosten erhalten. Der vorherige Agenda-/Asset-Schnitt dieses Laufs deckt Artificial Security Directors, Genetics-Visionary Acquisition, Roving Submarine, Washington, D.C., City Grid, Chicago Branch, Vapor Ops, Information Laundering und Experimental AI ab. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass fuer 277 `data/**/*.json`; `engine` pass (256), `catalog` pass (33), `typecheck` pass. Vorheriger Vollcheck im selben Lauf: `ai` pass (85), `server` pass (72), `web` pass (76), `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: operation resolver paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Ambush-/Damage-Pfade, finale Daten-/AI-Artefakte, offizielles AI-Approval, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 14:04 CEST
 - Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um konkrete Agenda-Core- und erste Asset-Randpfade erweitert; Cursor bleibt auf V1.9.19 `implementing`.
 - Release: V1.9.19

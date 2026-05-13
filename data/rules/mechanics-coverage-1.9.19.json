@@ -4,14 +4,15 @@
   "matrixId": "mechanics-coverage-1.9.19",
   "generatedFor": "V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance WIP gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_agenda_core_asset_edges_engine_covered_pending_promotion",
+  "status": "wip_agenda_core_operation_asset_edges_engine_covered_pending_promotion",
   "extends": "data/rules/mechanics-coverage-1.9.18.json",
   "gateAssertions": {
     "agendaOveradvanceScopeFrozenToTwentyCards": true,
     "allCardsRuntimeDefinitionReady": true,
     "scoredAgendaResolverCovered": true,
     "agendaDifficultyOveradvanceCovered": true,
-    "counterAndForfeitCostsCovered": false,
+    "counterAndForfeitCostsCovered": true,
+    "operationEdgesCovered": true,
     "assetCounterEconomyCovered": true,
     "accessAmbushInstalledProgramCovered": true,
     "hiddenInfoSafeForCoveredSmokes": true,
@@ -42,8 +43,8 @@
       "label": "Agenda-Kosten, Forfeit und Counter",
       "currentStatus": "implemented_limited_wip",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Chicago Branch und Vapor Ops laden Power-Counter über explizite rezzed Corp-LegalActions. Forfeit- und Agenda-Punkt-Kosten bleiben Folgearbeit.",
-      "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "counter_smoke"]
+      "currentScopeNote": "Falsified-Transactions Expert, Management Shake-Up, Team Restructuring, Chicago Branch und Vapor Ops laden Power-Counter über explizite LegalActions; Systematic Layoffs forfeitet eine gescorte Korp-Agenda als öffentliche Removed-from-game-Kosten.",
+      "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "counter_smoke", "forfeit_cost_smoke"]
     },
     {
       "mechanicId": "mechanic.asset.access_ambush_installed_card",
