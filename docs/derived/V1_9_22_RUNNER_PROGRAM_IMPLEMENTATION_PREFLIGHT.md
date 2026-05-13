@@ -7,6 +7,12 @@ Status: WIP-Preflight, keine Runtime-/Catalog-/AI-Promotion
 
 `data/rules/v1922-local-card-facts.json` enthaelt fuer 14 Runner-Programme lokale Kosten-/MU-/Effektkerne. Die bisherige No-LegalAction-Absicherung bleibt trotzdem korrekt, weil die meisten Programmwirkungen zusaetzliche Timing-, Payment- oder Subroutine-Kategorien brauchen.
 
+Die erneute historische Suche in `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`, `docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md`, `data/rules/v1922-resolver-contracts.json` und `data/rules/v1922-resolver-contract-inventory.json` bestaetigt:
+
+- `Shield` wurde historisch wegen Prevention-/Turn-Reset-Logik zurueckgestellt.
+- `Poltergeist` und `Scatter Shot` haben nur die Teilnotiz "hosted recurring credits fuer Trash-Kosten"; Pool-/Zahlungsumfang und Refresh-Timing bleiben offen.
+- `Newsgroup Filter` hat keinen zusaetzlichen historischen Aktivierungsvertrag ueber den lokalen Effektkern hinaus.
+
 ## Kleinste Kandidaten
 
 | Karte | Warum klein | Offener Vertrag |
