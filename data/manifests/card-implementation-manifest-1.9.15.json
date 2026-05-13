@@ -1,16 +1,17 @@
 {
   "schemaVersion": "card-implementation-manifest-v1.9.15",
-  "id": "v1.9.15-run-access-multiaccess-wip-manifest",
-  "status": "wip_not_release_promoted",
+  "id": "v1.9.15-run-access-multiaccess-manifest",
+  "status": "release_promoted",
   "extends": "data/manifests/card-implementation-manifest-1.9.14.json",
-  "sourceMode": "private_local_onr_v1_function_matrix_display_only_wip",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only",
   "gateAssertions": {
     "v1915ScopeFrozenToFourteenRunAccessCards": true,
     "allCardsRuntimeDefinitionReady": true,
-    "coreEngineSmokesPartiallyCovered": true,
-    "allCardsHumanPlayable": false,
-    "allCardsDeckLegal": false,
-    "allCardsAiSupported": false,
+    "coreEngineSmokesCovered": true,
+    "installedAccessHelperCoverage": true,
+    "allCardsHumanPlayable": true,
+    "allCardsDeckLegal": true,
+    "allCardsAiSupported": true,
     "legalActionsOnly": true,
     "stateHashReplayStableForCoveredSmokes": true,
     "hiddenInfoSafeForCoveredSmokes": true,
@@ -19,35 +20,272 @@
     "noV2ScopeExpansion": true
   },
   "cards": [
-    { "cardCode": "onr_v1_020_dupre", "title": "Dupre", "releaseStatus": "wip_not_promoted", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; typed_counter_virus_purge_resolver", "requiredMechanics": ["install_program", "run_flow", "counter", "legal_action_only"], "roleTags": ["runner", "program", "run_flow"] },
-    { "cardCode": "onr_v1_024_expert-schedule-analyzer", "title": "Expert Schedule Analyzer", "releaseStatus": "wip_not_promoted", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver", "requiredMechanics": ["install_program", "access", "multiaccess", "legal_action_only"], "roleTags": ["runner", "program", "access"] },
-    { "cardCode": "onr_v1_041_microtech-ai-interface", "title": "Microtech AI Interface", "releaseStatus": "wip_not_promoted", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver", "requiredMechanics": ["install_program", "access", "multiaccess", "legal_action_only"], "roleTags": ["runner", "program", "access"] },
-    { "cardCode": "onr_v1_043_mystery-box", "title": "Mystery Box", "releaseStatus": "wip_not_promoted", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["install_program", "run_flow", "reveal", "legal_action_only"], "roleTags": ["runner", "program", "hidden_zone"] },
-    { "cardCode": "onr_v1_062_shredder-uplink-protocol", "title": "Shredder Uplink Protocol", "releaseStatus": "wip_not_promoted", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver", "requiredMechanics": ["install_program", "run_flow", "access", "multiaccess", "legal_action_only"], "roleTags": ["runner", "program", "access"] },
-    { "cardCode": "onr_v1_065_smarteye", "title": "Smarteye", "releaseStatus": "wip_not_promoted", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["install_program", "run_flow", "reveal", "legal_action_only"], "roleTags": ["runner", "program", "hidden_zone"] },
-    { "cardCode": "onr_v1_098_lucidrine-booster-drug", "title": "Lucidrine Booster Drug", "releaseStatus": "wip_engine_supported", "aiSupported": false, "resolverFamily": "event_modification_prevention_avoid_resolver; run_flow_lock_resolver", "requiredMechanics": ["play_event", "start_run", "legal_action_only"], "roleTags": ["runner", "event", "run_flow"] },
-    { "cardCode": "onr_v1_105_priority-wreck", "title": "Priority Wreck", "releaseStatus": "wip_engine_supported", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver", "requiredMechanics": ["play_event", "start_run", "multiaccess", "replay", "legal_action_only"], "roleTags": ["runner", "event", "multiaccess"] },
-    { "cardCode": "onr_v1_111_social-engineering", "title": "Social Engineering", "releaseStatus": "wip_engine_supported", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver", "requiredMechanics": ["play_event", "start_run", "access", "legal_action_only"], "roleTags": ["runner", "event", "access"] },
-    { "cardCode": "onr_v1_112_stumble-through-wilderspace", "title": "Stumble through Wilderspace", "releaseStatus": "wip_engine_supported", "aiSupported": false, "resolverFamily": "trace_link_bid_window_resolver; run_flow_lock_resolver; access_breach_multiaccess_resolver", "requiredMechanics": ["play_event", "start_run", "trace", "access", "legal_action_only"], "roleTags": ["runner", "event", "trace"] },
-    { "cardCode": "onr_v1_142_record-reconstructor", "title": "Record Reconstructor", "releaseStatus": "wip_not_promoted", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["install_hardware", "access", "multiaccess", "hidden_zone_tool", "legal_action_only"], "roleTags": ["runner", "hardware", "access"] },
-    { "cardCode": "onr_v1_227_cerberus", "title": "Cerberus", "releaseStatus": "wip_engine_supported", "aiSupported": false, "resolverFamily": "trace_link_bid_window_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_ice", "rez_ice", "trace", "damage", "end_the_run", "legal_action_only"], "roleTags": ["corp", "ice", "trace"] },
-    { "cardCode": "onr_v1_255_mastiff", "title": "Mastiff", "releaseStatus": "wip_engine_supported", "aiSupported": false, "resolverFamily": "trace_link_bid_window_resolver; core_brain_damage_modifier_resolver", "requiredMechanics": ["install_ice", "rez_ice", "trace", "core_damage", "end_the_run", "legal_action_only"], "roleTags": ["corp", "ice", "trace"] },
-    { "cardCode": "onr_v1_294_new-blood", "title": "New Blood", "releaseStatus": "wip_engine_supported", "aiSupported": false, "resolverFamily": "run_flow_lock_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["play_operation", "runner_run_history", "gain_credits", "legal_action_only"], "roleTags": ["corp", "operation", "run_pressure"] }
+    {
+      "cardCode": "onr_v1_020_dupre",
+      "title": "Dupre",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; typed_counter_virus_purge_resolver",
+      "requiredMechanics": [
+        "install_program",
+        "run_flow",
+        "counter",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "program",
+        "run_flow"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver",
+      "requiredMechanics": [
+        "install_program",
+        "access",
+        "multiaccess",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "program",
+        "access"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver",
+      "requiredMechanics": [
+        "install_program",
+        "access",
+        "multiaccess",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "program",
+        "access"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; hidden_zone_search_reveal_reorder_resolver",
+      "requiredMechanics": [
+        "install_program",
+        "run_flow",
+        "reveal",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "program",
+        "hidden_zone"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver",
+      "requiredMechanics": [
+        "install_program",
+        "run_flow",
+        "access",
+        "multiaccess",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "program",
+        "access"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_065_smarteye",
+      "title": "Smarteye",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; hidden_zone_search_reveal_reorder_resolver",
+      "requiredMechanics": [
+        "install_program",
+        "run_flow",
+        "reveal",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "program",
+        "hidden_zone"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_098_lucidrine-booster-drug",
+      "title": "Lucidrine Booster Drug",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "event_modification_prevention_avoid_resolver; run_flow_lock_resolver",
+      "requiredMechanics": [
+        "play_event",
+        "start_run",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "event",
+        "run_flow"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_105_priority-wreck",
+      "title": "Priority Wreck",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver",
+      "requiredMechanics": [
+        "play_event",
+        "start_run",
+        "multiaccess",
+        "replay",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "event",
+        "multiaccess"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_111_social-engineering",
+      "title": "Social Engineering",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver",
+      "requiredMechanics": [
+        "play_event",
+        "start_run",
+        "access",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "event",
+        "access"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_112_stumble-through-wilderspace",
+      "title": "Stumble through Wilderspace",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "trace_link_bid_window_resolver; run_flow_lock_resolver; access_breach_multiaccess_resolver",
+      "requiredMechanics": [
+        "play_event",
+        "start_run",
+        "trace",
+        "access",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "event",
+        "trace"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_142_record-reconstructor",
+      "title": "Record Reconstructor",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; access_breach_multiaccess_resolver; hidden_zone_search_reveal_reorder_resolver",
+      "requiredMechanics": [
+        "install_hardware",
+        "access",
+        "multiaccess",
+        "hidden_zone_tool",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "runner",
+        "hardware",
+        "access"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_227_cerberus",
+      "title": "Cerberus",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "trace_link_bid_window_resolver; damage_event_prevention_resolver",
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "trace",
+        "damage",
+        "end_the_run",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "corp",
+        "ice",
+        "trace"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_255_mastiff",
+      "title": "Mastiff",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "trace_link_bid_window_resolver; core_brain_damage_modifier_resolver",
+      "requiredMechanics": [
+        "install_ice",
+        "rez_ice",
+        "trace",
+        "core_damage",
+        "end_the_run",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "corp",
+        "ice",
+        "trace"
+      ]
+    },
+    {
+      "cardCode": "onr_v1_294_new-blood",
+      "title": "New Blood",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "run_flow_lock_resolver; recurring_pool_start_turn_resolver",
+      "requiredMechanics": [
+        "play_operation",
+        "runner_run_history",
+        "gain_credits",
+        "legal_action_only"
+      ],
+      "roleTags": [
+        "corp",
+        "operation",
+        "run_pressure"
+      ]
+    }
   ],
   "deferredSummary": {
     "plannedCardCount": 14,
-    "implementedCardCount": 7,
-    "finalGateCardCount": 0,
-    "deferredCardCount": 7,
-    "deferredCardIds": [
-      "onr_v1_020_dupre",
-      "onr_v1_024_expert-schedule-analyzer",
-      "onr_v1_041_microtech-ai-interface",
-      "onr_v1_043_mystery-box",
-      "onr_v1_062_shredder-uplink-protocol",
-      "onr_v1_065_smarteye",
-      "onr_v1_142_record-reconstructor"
-    ],
-    "openMechanicFamilies": 4
+    "implementedCardCount": 14,
+    "finalGateCardCount": 14,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 0
   }
 }

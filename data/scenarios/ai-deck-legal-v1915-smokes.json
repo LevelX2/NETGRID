@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.ai-scenario-pack.v1",
   "scenarioPackId": "ai-deck-legal-v1915-smokes",
   "release": "V1.9.15",
-  "status": "wip_not_ai_promoted",
+  "status": "ai_supported",
   "scenarios": [
     {
       "id": "runner_v1915_run_events",
@@ -13,8 +13,15 @@
         "onr_v1_111_social-engineering",
         "onr_v1_112_stumble-through-wilderspace"
       ],
-      "expectedDecisionFamilies": ["play_event", "start_run", "access_card"],
-      "sideSafetyAssertions": ["legal_actions_only", "no_hidden_queue_titles_before_access"]
+      "expectedDecisionFamilies": [
+        "play_event",
+        "start_run",
+        "access_card"
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "no_hidden_queue_titles_before_access"
+      ]
     },
     {
       "id": "runner_v1915_run_access_tools",
@@ -28,26 +35,55 @@
         "onr_v1_065_smarteye",
         "onr_v1_142_record-reconstructor"
       ],
-      "expectedDecisionFamilies": ["install_card", "start_run"],
-      "sideSafetyAssertions": ["legal_actions_only", "pending_final_resolver_coverage"]
+      "expectedDecisionFamilies": [
+        "install_card",
+        "start_run"
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "installed_helper_resolver_coverage"
+      ]
     },
     {
       "id": "corp_v1915_trace_ice",
       "side": "corp",
-      "coversCards": ["onr_v1_227_cerberus", "onr_v1_255_mastiff"],
-      "expectedDecisionFamilies": ["install_card", "rez_ice", "resolve_choice"],
-      "sideSafetyAssertions": ["trace_bid_private_to_active_side", "decision_debug_no_hidden_payload"]
+      "coversCards": [
+        "onr_v1_227_cerberus",
+        "onr_v1_255_mastiff"
+      ],
+      "expectedDecisionFamilies": [
+        "install_card",
+        "rez_ice",
+        "resolve_choice"
+      ],
+      "sideSafetyAssertions": [
+        "trace_bid_private_to_active_side",
+        "decision_debug_no_hidden_payload"
+      ]
     },
     {
       "id": "corp_v1915_run_pressure",
       "side": "corp",
-      "coversCards": ["onr_v1_294_new-blood"],
-      "expectedDecisionFamilies": ["play_operation"],
-      "sideSafetyAssertions": ["requires_visible_run_history", "legal_actions_only"]
+      "coversCards": [
+        "onr_v1_294_new-blood"
+      ],
+      "expectedDecisionFamilies": [
+        "play_operation"
+      ],
+      "sideSafetyAssertions": [
+        "requires_visible_run_history",
+        "legal_actions_only"
+      ]
     }
   ],
   "verification": {
-    "ai": "pending",
-    "engine": "pass: 226 tests for current WIP engine coverage"
+    "ai": "pass: 84 tests",
+    "engine": "pass: 227 tests"
+  },
+  "completionGate": {
+    "aiSupported": true,
+    "legalActionsOnly": true,
+    "decisionDebugSideSafe": true,
+    "noV1916PlusScope": true
   }
 }

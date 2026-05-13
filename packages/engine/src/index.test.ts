@@ -4819,6 +4819,44 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(agendaPoints(state, "runner")).toBe(2);
   });
 
+  it("applies installed V1.9.15 run and access helpers through existing breach paths", () => {
+    let state = toRunnerTurn(v1915RunAccessGame("v1915-installed-access-helpers"));
+    state.runner.credits = 20;
+    state.runner.memoryLimit = 12;
+    for (const definitionId of [
+      "onr_v1_020_dupre",
+      "onr_v1_024_expert-schedule-analyzer",
+      "onr_v1_041_microtech-ai-interface",
+      "onr_v1_043_mystery-box",
+      "onr_v1_062_shredder-uplink-protocol",
+      "onr_v1_065_smarteye",
+      "onr_v1_142_record-reconstructor"
+    ] as const) {
+      moveRunnerCardToGrip(state, definitionId);
+      state.runner.clicks = 10;
+      state.runner.credits = 20;
+      const title = DEMO_CARDS_BY_ID[definitionId]?.title;
+      state = apply(state, "runner", (action) => action.type === "install_card" && (!title || action.label.includes(title)));
+    }
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, "simple_economy_asset");
+
+    const dupreId = state.runner.rig.programs.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_020_dupre");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+
+    expect(dupreId ? state.cardInstances[dupreId]?.counters?.power : 0).toBe(1);
+    expect(state.run?.breach?.queue).toHaveLength(3);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Agenda");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1915_installed_access_reveal"
+    });
+  });
+
   it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
     for (const [definitionId, baseTraceStrength] of [
       ["onr_v1_227_cerberus", 4],

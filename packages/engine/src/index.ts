@@ -201,6 +201,13 @@ const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
+const DUPRE_ID = "onr_v1_020_dupre";
+const EXPERT_SCHEDULE_ANALYZER_ID = "onr_v1_024_expert-schedule-analyzer";
+const MICROTECH_AI_INTERFACE_ID = "onr_v1_041_microtech-ai-interface";
+const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
+const SHREDDER_UPLINK_PROTOCOL_ID = "onr_v1_062_shredder-uplink-protocol";
+const SMARTEYE_ID = "onr_v1_065_smarteye";
+const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
 
 const RUNTIME_DAMAGE_PREVENTION_PROFILES: Record<string, RuntimeDamagePreventionProfile> = {
   "onr_v1_023_evil-twin": { maxPerTurn: 2, damageTypes: ["net", "core"], priority: 90 },
@@ -3036,6 +3043,8 @@ function startRun(
   const flags = ensureRunnerTurnFlags(state);
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
   trashTopRunnersConferenceOnRunStart(state);
+  const installedAccessBonus = v1915InstalledAccessBonus(state, server.id);
+  applyV1915RunStartCounterHelpers(state);
   state.phase = "run";
   state.activeSide = "runner";
   state.run = {
@@ -3049,7 +3058,7 @@ function startRun(
     aardvarkInterceptionIceIds: [],
     blinkUsedSubroutinesByBreakerThisEncounter: {},
     successful: false,
-    accessCount: Math.max(1, Math.floor(accessCount)),
+    accessCount: Math.max(1, Math.floor(accessCount)) + installedAccessBonus,
     ...(options?.freeTrashAccessZones?.length ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() } : {}),
     ...(options?.grantAllNighterBonusRunOnFinish ? { grantAllNighterBonusRunOnFinish: true } : {}),
     ...(options?.accessServerOverride ? { accessServerOverride: options.accessServerOverride } : {}),
@@ -3631,6 +3640,31 @@ function accessQueueIds(state: GameState, server: CorpServer, run: ActiveRun, ac
   return server.root.slice();
 }
 
+function v1915InstalledAccessBonus(state: GameState, serverId: Exclude<ServerId, "new_remote">): number {
+  let bonus = 0;
+  if (serverId === "hq" && runnerHasInstalledDefinition(state, EXPERT_SCHEDULE_ANALYZER_ID)) bonus += 1;
+  if (serverId === "rd" && runnerHasInstalledDefinition(state, MICROTECH_AI_INTERFACE_ID)) bonus += 1;
+  if ((serverId === "hq" || serverId === "rd") && runnerHasInstalledDefinition(state, SHREDDER_UPLINK_PROTOCOL_ID)) bonus += 1;
+  if (serverId === "archives" && runnerHasInstalledDefinition(state, RECORD_RECONSTRUCTOR_ID)) bonus += 1;
+  return bonus;
+}
+
+function applyV1915RunStartCounterHelpers(state: GameState): void {
+  for (const cardId of state.runner.rig.programs) {
+    if (definitionFor(state, cardId).id !== DUPRE_ID) continue;
+    addCardCounter(state, cardId, "power", 1);
+  }
+}
+
+function v1915InstalledRevealHelperIds(state: GameState): CardDefinitionId[] {
+  const helperIds = [MYSTERY_BOX_ID, SMARTEYE_ID, RECORD_RECONSTRUCTOR_ID];
+  return helperIds.filter((definitionId) => runnerHasInstalledDefinition(state, definitionId));
+}
+
+function runnerHasInstalledDefinition(state: GameState, definitionId: CardDefinitionId): boolean {
+  return [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].some((cardId) => definitionFor(state, cardId).id === definitionId);
+}
+
 function runnerHqAccessBonus(state: GameState): number {
   return state.runner.rig.hardware.reduce((sum, cardId) => {
     const definition = definitionFor(state, cardId);
@@ -3704,6 +3738,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
       breachId: breach.breachId,
       accessIndex: breach.currentIndex
     };
+    markV1915InstalledRevealAccess(state, entry, legalAction);
     const updatedQueue = breach.queue.map((candidate, index) => (index === breach.currentIndex ? { ...candidate, status: "accessed" as const } : candidate));
     state.run = {
       ...run,
@@ -3735,6 +3770,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     return;
   }
   legalAction.payload = { ...(legalAction.payload ?? {}), accessedCardId: cardId, serverId: server.id };
+  markV1915InstalledRevealAccess(state, { hiddenInfo: isBreachEntryHidden(state, cardId), zone: accessQueueZone(server.id) }, legalAction);
   state.run = { ...run, accessedCardId: cardId };
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
@@ -3745,6 +3781,22 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   if (definition.type !== "agenda" && definition.type !== "asset" && definition.type !== "upgrade" && !freeTrashAccess) {
     finishRun(state, true);
   }
+}
+
+function markV1915InstalledRevealAccess(
+  state: GameState,
+  entry: { hiddenInfo: boolean; zone: ActiveBreach["queue"][number]["zone"] },
+  legalAction: LegalAction
+): void {
+  if (!entry.hiddenInfo || !["rd", "hq", "archives"].includes(entry.zone)) return;
+  const helperIds = v1915InstalledRevealHelperIds(state);
+  if (helperIds.length === 0) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1915_installed_access_reveal",
+    revealHelperCount: helperIds.length
+  };
 }
 
 function resolveAmbushOnAccessFoundation(state: GameState, cardId: CardInstanceId, legalAction: LegalAction): void {

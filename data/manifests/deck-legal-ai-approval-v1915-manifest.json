@@ -1,8 +1,8 @@
 {
   "schemaVersion": "deck-legal-ai-approval-manifest-v1",
-  "id": "deck-legal-ai-approval-v1915-wip",
+  "id": "deck-legal-ai-approval-v1915",
   "release": "V1.9.15",
-  "status": "wip_not_ai_promoted",
+  "status": "ai_supported",
   "extends": "data/manifests/deck-legal-ai-approval-v1914-manifest.json",
   "scope": {
     "cardCount": 14,
@@ -26,16 +26,116 @@
   "artifacts": {
     "aiHints": "data/ai/ai-card-hints-deck-legal-v1915.json",
     "aiSmokes": "data/scenarios/ai-deck-legal-v1915-smokes.json",
-    "engineSmoke": "data/scenarios/v1915-run-access-multiaccess-wip-smoke.json",
+    "engineSmoke": "data/scenarios/v1915-run-access-multiaccess-smoke.json",
     "cardManifest": "data/manifests/card-implementation-manifest-1.9.15.json",
     "mechanicsCoverage": "data/rules/mechanics-coverage-1.9.15.json"
   },
   "gateAssertions": {
     "allCardsHaveAiHintEntries": true,
-    "aiSupportedPromotion": false,
-    "runnerDecisionDebugSideSafe": "pending",
-    "corpDecisionDebugSideSafe": "pending",
+    "aiSupportedPromotion": true,
+    "runnerDecisionDebugSideSafe": true,
+    "corpDecisionDebugSideSafe": true,
     "legalActionOnly": true,
     "noV1916PlusScope": true
-  }
+  },
+  "cards": [
+    {
+      "cardId": "onr_v1_020_dupre",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_065_smarteye",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_098_lucidrine-booster-drug",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_105_priority-wreck",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_111_social-engineering",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_112_stumble-through-wilderspace",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_142_record-reconstructor",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_227_cerberus",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_255_mastiff",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    },
+    {
+      "cardId": "onr_v1_294_new-blood",
+      "status": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1915-smokes.json"
+      ]
+    }
+  ]
 }
