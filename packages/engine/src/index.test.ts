@@ -6259,34 +6259,69 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
-  it("installs the first V1.9.22 runner hardware through LegalAction with replay and visibility", () => {
-    let state = toRunnerTurn(
-      createGameAfterSetup({
-        seed: "v1922-runner-hardware-install",
-        runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-          id: "onr_v1_runner_v1922_hardware_install",
-          name: "O:NR V1.9.22 Runner Hardware Install",
-          cards: [{ id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
-        },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
-        agendaPointsToWin: 7
-      })
-    );
-    state.runner.credits = 20;
-    moveRunnerCardToGrip(state, "onr_v1_119_arasaka-portable-prototype");
+  it("installs all V1.9.22 runner hardware through LegalActions with replay, visibility and revalidation", () => {
+    const runnerHardwareIds = [
+      "onr_v1_119_arasaka-portable-prototype",
+      "onr_v1_122_artemis-2020",
+      "onr_v1_123_bodyweight-data-creche",
+      "onr_v1_124_corolla-speed-chip",
+      "onr_v1_131_microtech-backup-drive",
+      "onr_v1_136_pandoras-deck",
+      "onr_v1_137_parraline-5750",
+      "onr_v1_138_pk-6089a",
+      "onr_v1_147_zz22-speed-chip"
+    ] as const;
 
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_119_arasaka-portable-prototype");
+    for (const definitionId of runnerHardwareIds) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `v1922-${definitionId}-hardware-install`,
+          runnerDeck: {
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+            id: `onr_v1_runner_v1922_${definitionId}_hardware_install`,
+            name: `O:NR V1.9.22 ${definitionId} Install`,
+            cards: [{ id: definitionId, quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+          },
+          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          agendaPointsToWin: 7
+        })
+      );
+      state.runner.credits = 20;
+      moveRunnerCardToGrip(state, definitionId);
 
-    expect(state.runner.rig.hardware.map((id) => state.cardInstances[id]?.definitionId)).toContain("onr_v1_119_arasaka-portable-prototype");
-    expect(getPlayerView(state, "runner").own.rig?.some((card) => card.definitionId === "onr_v1_119_arasaka-portable-prototype")).toBe(true);
-    expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === "onr_v1_119_arasaka-portable-prototype")).toBe(true);
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
+      const legal = mustAction(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === definitionId);
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `v1922-${definitionId}-wrong-side`
+      });
+      expect(wrongSide.ok, definitionId).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code, definitionId).toBe("ERR_WRONG_SIDE");
+
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `v1922-${definitionId}-stale`
+      });
+      expect(stale.ok, definitionId).toBe(false);
+      if (!stale.ok) expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === definitionId);
+
+      expect(state.runner.rig.hardware.map((id) => state.cardInstances[id]?.definitionId), definitionId).toContain(definitionId);
+      expect(getPlayerView(state, "runner").own.rig?.some((card) => card.definitionId === definitionId), definitionId).toBe(true);
+      expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === definitionId), definitionId).toBe(true);
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload), definitionId).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
   });
 
   it("adds V1.9.22 runner event runtime definitions without implying play_event support", () => {
@@ -6309,6 +6344,43 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toContain("per_card_longtail");
+    }
+  });
+
+  it("does not expose V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
+    const runnerEventIds = [
+      "onr_v1_077_anonymous-tip",
+      "onr_v1_080_core-command-jettison-ice",
+      "onr_v1_086_forged-activation-orders",
+      "onr_v1_093_if-you-want-it-done-right",
+      "onr_v1_100_misc-for-sale",
+      "onr_v1_102_open-ended-mileage-program",
+      "onr_v1_103_organ-donor",
+      "onr_v1_109_security-code-worm-chip",
+      "onr_v1_113_synchronized-attack-on-hq",
+      "onr_v1_117_valu-pak-software-bundle"
+    ] as const;
+
+    for (const definitionId of runnerEventIds) {
+      const state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `v1922-${definitionId}-event-no-promotion`,
+          runnerDeck: {
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+            id: `onr_v1_runner_v1922_${definitionId}_event_no_promotion`,
+            name: `O:NR V1.9.22 ${definitionId} Event No Promotion`,
+            cards: [{ id: definitionId, quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+          },
+          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          agendaPointsToWin: 7
+        })
+      );
+      moveRunnerCardToGrip(state, definitionId);
+
+      expect(
+        getLegalActions(state, "runner").some((action) => action.type === "play_event" && sourceDefinition(state, action) === definitionId),
+        definitionId
+      ).toBe(false);
     }
   });
 });

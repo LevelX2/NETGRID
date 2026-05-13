@@ -8,8 +8,8 @@
     "v1922ScopeFrozenToFortySevenCards": true,
     "catalogWipGuardReady": true,
     "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
-    "engineCovered": false,
-    "stateHashReplayStableForCoveredSmokes": false,
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_no_promotion_guard",
+    "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
     "catalogPromotionPending": true,
@@ -120,7 +120,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -129,7 +130,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -138,7 +140,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -147,7 +150,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -156,7 +160,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -165,7 +170,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -174,7 +180,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -183,7 +190,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -192,7 +200,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -201,7 +210,8 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "no_play_event_promotion_guard"
       ]
     },
     {
@@ -212,6 +222,8 @@
       "coveredSmokes": [
         "runtime_definition_guard",
         "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
         "public_payload_visibility",
         "replay_statehash"
       ]
@@ -222,7 +234,12 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {
@@ -231,7 +248,12 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {
@@ -240,7 +262,12 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {
@@ -249,7 +276,12 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {
@@ -258,7 +290,12 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {
@@ -267,7 +304,12 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {
@@ -276,7 +318,12 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {
@@ -285,7 +332,12 @@
       "aiSupported": false,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {

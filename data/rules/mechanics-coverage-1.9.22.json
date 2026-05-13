@@ -10,9 +10,9 @@
     "perCardLongtailScopeFrozenToFortySevenCards": true,
     "catalogWipGuardReady": true,
     "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
-    "engineCovered": false,
-    "hiddenInfoSafeForCoveredSmokes": false,
-    "stateHashReplayStableForCoveredSmokes": false,
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_no_promotion_guard",
+    "hiddenInfoSafeForCoveredSmokes": true,
+    "stateHashReplayStableForCoveredSmokes": true,
     "catalogPromotionPending": true,
     "aiPromotionPending": true,
     "noV2Scope": true
@@ -23,14 +23,16 @@
       "label": "Per-card Resolver Longtail",
       "currentStatus": "partial_runtime_wip",
       "targetGate": "v1.9.22",
-      "currentScopeNote": "47 Karten sind im Catalog-WIP-Guard eingefroren; neun Runner-Hardware- und zehn Runner-Event-Zielkarten haben Runtime-Definitionen. Arasaka Portable Prototype hat einen LegalAction-Pfad mit Visibility und Replay/StateHash; Runner-Event-LegalActions bleiben Folgearbeit.",
+      "currentScopeNote": "47 Karten sind im Catalog-WIP-Guard eingefroren; neun Runner-Hardware- und zehn Runner-Event-Zielkarten haben Runtime-Definitionen. Alle neun Runner-Hardware-Zielkarten haben Install-LegalAction-Pfade mit Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash. Die zehn Runner-Event-Zielkarten haben einen No-Promotion-Guard gegen play_event-LegalActions, bis konkrete Event-Resolver vorliegen.",
       "coverage": [
         "scope_guard",
         "runner_hardware_runtime_definitions",
         "runner_hardware_install_legal_action",
+        "runner_hardware_wrong_side_stale_revalidation",
         "public_payload_visibility",
         "replay_statehash",
-        "runner_event_runtime_definitions"
+        "runner_event_runtime_definitions",
+        "runner_event_no_play_event_promotion_guard"
       ]
     }
   ],
