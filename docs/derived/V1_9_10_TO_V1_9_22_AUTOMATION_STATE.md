@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.20
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.21
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -68,6 +68,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 14:35 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende geplant; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Global-Modifier-/Persistent-State-Spezifikation, Testmatrix, Requirements Review und Implementation Review erstellt. Scope ist auf 26 Zielkarten festgelegt. Keine Runtime-/Catalog-/AI-/Web-Promotion.
+- Tests: Dokumentations-/Cursorlauf; keine Code- oder JSON-Aenderung im V1.9.20-Schnitt.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.20: global modifier planning`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Runtime-WIP, Engine-Abdeckung, Daten-/AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 14:29 CEST
 - Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance final abgeschlossen; Cursor auf V1.9.20 `planned` gesetzt.
