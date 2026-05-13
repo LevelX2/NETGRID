@@ -29,7 +29,13 @@ Weitere Kartenpfade, AI-Artefakte, Release-Promotion und Final Review nachziehen
 
 ## Verifikation
 
+- JSON-Validation für `data/**/*.json`: pass, 282 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 264 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 34 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
-- JSON-Validation für `data/**/*.json`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
