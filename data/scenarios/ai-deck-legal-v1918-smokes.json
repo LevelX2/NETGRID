@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.ai-scenario-pack.v1",
   "scenarioPackId": "ai-deck-legal-v1918-smokes",
   "release": "V1.9.18",
-  "status": "wip_hinted_only_pending_ai_promotion",
+  "status": "ai_supported",
   "scenarios": [
     {
       "id": "corp_v1918_upgrade_city_grid_counter",
@@ -63,16 +63,16 @@
     }
   ],
   "verification": {
-    "ai": "pass: 85 tests before draft artifact import; promotion still pending",
+    "ai": "pass: 85 tests",
     "engine": "pass: 251 tests",
     "server": "pass: 72 tests",
     "web": "pass: 76 tests"
   },
   "completionGate": {
-    "aiSupported": false,
+    "aiSupported": true,
     "legalActionsOnly": true,
     "decisionDebugSideSafe": true,
-    "catalogPromotionPending": true,
+    "catalogPromotionPending": false,
     "noV1919PlusScope": true
   }
 }

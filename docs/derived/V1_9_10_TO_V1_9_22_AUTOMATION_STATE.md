@@ -15,9 +15,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.18
-Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.19
+Aktueller Release: V1.9.19
+Phase: planned
+Naechster erlaubter Release nach Abschluss: V1.9.20
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -61,13 +61,23 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.15 | Run Flow, Access, Multiaccess und Ambush on Access | done |
 | V1.9.16 | Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy | done |
 | V1.9.17 | Generische Asset/Node-Faehigkeiten | done |
-| V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | current |
-| V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | pending |
+| V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | done |
+| V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | current |
 | V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | pending |
 | V1.9.21 | Deterministischer Zufall und Wuerfelkarten | pending |
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 13:25 CEST
+- Ergebnis: V1.9.18 Generische Upgrade-/Root-/Grid-/Server-Fähigkeiten final abgeschlossen; Cursor auf V1.9.19 `planned` gesetzt.
+- Release: V1.9.18
+- Phase vorher: implementing
+- Phase nachher: done; V1.9.19 planned
+- Umsetzung: Alle 15 V1.9.18-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Der Webclient zeigt `V1.9.18`; Runtime-/AI-Pool wächst auf 275 O:NR-v1-Karten.
+- Tests: JSON-Validation pass fuer 272 `data/**/*.json`; `engine` pass (251), `catalog` pass (33), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.18: generic upgrade root server abilities`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 ist aktueller Release; Completion-Gate für V1.9.18 ist erfüllt.
 
 - Zeitpunkt: 2026-05-13 13:17 CEST
 - Ergebnis: V1.9.18 Generische Upgrade-/Root-/Server-Fähigkeiten um vorbereitende Manifest-/Coverage-/AI-Draft-Artefakte erweitert; Cursor bleibt auf V1.9.18 `implementing`.

@@ -2,9 +2,9 @@
   "schemaVersion": "1.9.18",
   "artifactType": "mechanics_coverage_matrix",
   "matrixId": "mechanics-coverage-1.9.18",
-  "generatedFor": "V1.9.18 Generische Upgrade/Root-Server-Faehigkeiten WIP gate",
+  "generatedFor": "V1.9.18 Generische Upgrade/Root-Server-Faehigkeiten release gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_engine_covered_pending_promotion",
+  "status": "release_promoted",
   "extends": "data/rules/mechanics-coverage-1.9.17.json",
   "gateAssertions": {
     "genericUpgradeRootServerResolverCovered": true,
@@ -16,9 +16,9 @@
     "hiddenZoneUpgradeBarrierCovered": true,
     "accessAmbushUpgradeCovered": true,
     "stateHashReplayStableForCoveredSmokes": true,
-    "aiChoicePathsCovered": false,
-    "catalogPromotionPending": true,
-    "aiPromotionPending": true,
+    "aiChoicePathsCovered": true,
+    "catalogPromotionPending": false,
+    "aiPromotionPending": false,
     "noV1919PlusScope": true
   },
   "mechanics": [
@@ -63,10 +63,5 @@
       "coverage": ["unit", "legal_action", "visibility", "state_hash"]
     }
   ],
-  "deferred": [
-    {
-      "item": "catalog_ai_promotion",
-      "reason": "V1.9.18 bleibt bis Final Review, Webclient-Version und offizieller deck-legal-ai-approval-Promotion im Implementing-Cursor."
-    }
-  ]
+  "deferred": []
 }

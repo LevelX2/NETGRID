@@ -1,6 +1,6 @@
 # V1.9.18 Implementation Review
 
-Status: WIP
+Status: final
 Stand: 2026-05-13
 
 ## Umgesetzter WIP-Schnitt
@@ -19,7 +19,8 @@ Stand: 2026-05-13
 - Omni Kismet und Paris City Grid decken getaggter-Runner-Condition-LegalActions ab.
 - Twenty-Four-Hour Surveillance deckt einen servergebundenen Run-Start-Tax ab, der durch Runner-Run-/Stealth-Recurring-Credits bezahlt werden kann.
 - `data/scenarios/v1918-generic-upgrade-root-server-wip-smoke.json` dokumentiert den aktuellen WIP-Smoke maschinenlesbar ohne Release- oder AI-Promotion.
-- `data/manifests/card-implementation-manifest-1.9.18.json`, `data/rules/mechanics-coverage-1.9.18.json`, `data/ai/ai-card-hints-deck-legal-v1918.json`, `data/scenarios/ai-deck-legal-v1918-smokes.json` und `data/manifests/v1918-deck-legal-ai-approval-draft-manifest.json` bereiten die Manifest-/Coverage-/AI-Artefakte vor, bleiben aber explizit WIP/Draft und promoten keine V1.9.18-Karte.
+- `data/manifests/card-implementation-manifest-1.9.18.json`, `data/rules/mechanics-coverage-1.9.18.json`, `data/scenarios/v1918-generic-upgrade-root-server-release-smoke.json`, `data/ai/ai-card-hints-deck-legal-v1918.json`, `data/scenarios/ai-deck-legal-v1918-smokes.json` und `data/manifests/deck-legal-ai-approval-v1918-manifest.json` promoten die Zielmenge final.
+- `packages/catalog/src/index.ts`, `packages/catalog/src/index.test.ts`, `packages/ai/src/index.test.ts` und `apps/web/app/api/cards/catalog-data.test.ts` führen die 15 V1.9.18-Karten im Runtime-/AI-Releasepool; `apps/web/app/page.tsx` zeigt `V1.9.18`.
 
 ## Textentscheidung
 
@@ -27,20 +28,18 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 
 ## Noch offen
 
-- Weitere konkrete LegalAction-/applyAction-Abdeckung für die noch nicht finalisierten einfachen Generic-Upgrade-/Root-Karten, zusätzliche City-Grid-Sonderfälle und finale Server-/Visibility-Querschnittsnachweise.
-- Offizielles Release-Smoke-Artefakt und offizielles `deck-legal-ai-approval-v1918-manifest.json`; der vorhandene Draft ist bewusst nicht im automatischen AI-Approval-Dateimuster, weil die Karten noch nicht `ai_supported` sind.
-- Final Review, Release-Promotion, finale Manifest-/Coverage-/AI-Artefakte und Webclient-Version `V1.9.18`.
+- Keine V1.9.18-Completion-Gates offen. Folgearbeit beginnt mit V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance.
 
 ## Gate
 
-`V1_9_18_done: false`
-`V1_9_18_phase: implementing`
+`V1_9_18_done: true`
+`V1_9_18_phase: done`
 
 ## Verifikation
 
-- JSON-Validation für `data/**/*.json`: pass, 271 Dateien.
+- JSON-Validation für `data/**/*.json`: pass, 272 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 251 Tests.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 32 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 33 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
@@ -48,4 +47,4 @@ Die Kartentexte werden nach `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZA
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-- Nach WIP-Draft-Artefakten erneut geprüft: JSON-Validation pass, 271 Dateien; `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- Nach Release-Promotion erneut geprüft: JSON-Validation pass, 272 Dateien; `catalog` pass, 33 Tests; `web` pass, 76 Tests.

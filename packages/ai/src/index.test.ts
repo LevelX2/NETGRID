@@ -15,6 +15,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS
 } from "@netgrid/catalog";
@@ -1813,7 +1814,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     }
   });
 
-  it("marks the V1.9.11 to V1.9.17 completion slices as AI-supported for custom AI deckbuilding", () => {
+  it("marks the V1.9.11 to V1.9.18 completion slices as AI-supported for custom AI deckbuilding", () => {
     const runtimeCardsById = createRuntimeCardsById();
     const slices = [
       { ids: DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS, count: 16 },
@@ -1822,7 +1823,8 @@ describe("MVP 0.3 AI simulation harness", () => {
       { ids: DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS, count: 25 },
       { ids: DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS, count: 14 },
       { ids: DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS, count: 16 },
-      { ids: DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS, count: 18 }
+      { ids: DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS, count: 18 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS, count: 15 }
     ];
 
     for (const slice of slices) {
