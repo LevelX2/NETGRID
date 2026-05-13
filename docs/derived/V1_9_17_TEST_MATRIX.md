@@ -11,7 +11,7 @@ Stand: 2026-05-13
 | Generic Asset/Node | Install, Rez, Trash-on-access, PublicEvents | ESA-Contract-Harness grün; weitere Karten Folgearbeit |
 | Campaign/Economy | Rezzed Economy-Asset-Ability mit LegalAction und applyAction-Revalidierung | ESA Contract gain-credit WIP grün; weitere Economy-Assets Folgearbeit |
 | Recurring | Corp-Start-of-turn-Recurring ohne Akkumulation | Holovid Campaign Start-of-turn-Credit grün; weitere Karten Folgearbeit |
-| Trace | Blood Cat und Krumz über Trace-Bid-Fenster | Blood Cat Trace-3-Fenster grün; Krumz Folgearbeit |
+| Trace | Blood Cat und Krumz über Trace-Bid-Fenster | Blood Cat und Krumz Trace-3-Fenster grün |
 | Hidden-Zone | Redigierte Choices für Corporate Negotiating Center, Rescheduler, Setup!, TRAP! | Folgearbeit |
 | Access/Ambush | Setup! und TRAP! nur aus legalen Access-Fenstern | Folgearbeit |
 | Damage/Tags | Solo Squad, Setup!, TRAP! und Tag-Flächen side-sicher | Folgearbeit |

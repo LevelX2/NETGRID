@@ -12,7 +12,7 @@ Stand: 2026-05-13
 - `packages/engine/src/index.ts` bietet für rezzed V1.9.17-Economy-Assets eine typisierte, öffentliche `gain_credit`-LegalAction mit applyAction-Revalidierung auf rezzed Corp-Root, Zielkarte und festen WIP-Betrag von 2 Credits.
 - `packages/engine/src/index.ts` ergänzt einen deterministischen Start-of-turn-Credit für rezzed V1.9.17-Recurring-/Campaign-Assets.
 - `packages/engine/src/index.ts` bietet für Blood Cat und Krumz eine typisierte öffentliche Trace-3-Asset-LegalAction, die das bestehende side-sichere Trace-Bid-Fenster nutzt.
-- `packages/engine/src/index.test.ts` prüft 18/18 Runtime-Definitionen, finale display-only Texte, den No-Scope-Guard gegen V1.9.18 sowie den generischen ESA-Contract-Pfad für Corp-Install, Rez, öffentliche Economy-Asset-Fähigkeit, Runner-Access, Trash-on-access, Archives-Visibility und Payload-Redaction. Zusätzlich sind Holovid Campaign für Start-of-turn-Recurring und Blood Cat für Trace-3-Fenster abgedeckt.
+- `packages/engine/src/index.test.ts` prüft 18/18 Runtime-Definitionen, finale display-only Texte, den No-Scope-Guard gegen V1.9.18 sowie den generischen ESA-Contract-Pfad für Corp-Install, Rez, öffentliche Economy-Asset-Fähigkeit, Runner-Access, Trash-on-access, Archives-Visibility und Payload-Redaction. Zusätzlich sind Holovid Campaign für Start-of-turn-Recurring sowie Blood Cat und Krumz für Trace-3-Fenster abgedeckt.
 - `data/scenarios/v1917-generic-asset-node-wip-smoke.json` dokumentiert den aktuellen WIP-Smoke maschinenlesbar ohne Release- oder AI-Promotion.
 
 ## Textentscheidung

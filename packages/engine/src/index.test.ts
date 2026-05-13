@@ -5139,25 +5139,28 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("starts V1.9.17 trace asset abilities through the side-safe trace window", () => {
-    let state = v1917GenericAssetGame("v1917-trace-asset-window");
-    state.corp.credits = 10;
-    state.runner.credits = 5;
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const bloodCatId = moveCorpCardToHq(state, "onr_v1_310_blood-cat");
-    state = apply(
-      state,
-      "corp",
-      (action) => action.type === "install_card" && action.payload?.cardId === bloodCatId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
-    );
-    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_310_blood-cat");
-    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1917AssetAbility === "trace_3_tag" && action.payload?.cardId === bloodCatId);
+    const traceAssets = ["onr_v1_310_blood-cat", "onr_v1_330_krumz"] as const;
+    for (const definitionId of traceAssets) {
+      let state = v1917GenericAssetGame(`v1917-trace-asset-window-${definitionId}`);
+      state.corp.credits = 10;
+      state.runner.credits = 5;
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      const assetId = moveCorpCardToHq(state, definitionId);
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "install_card" && action.payload?.cardId === assetId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+      );
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === definitionId);
+      state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1917AssetAbility === "trace_3_tag" && action.payload?.cardId === assetId);
 
-    expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 3, sourceDefinitionId: "onr_v1_310_blood-cat" });
-    expect(state.pendingChoice?.side).toBe("corp");
-    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
-    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "gain_credit", traceStarted: true, sourceDefinitionId: "onr_v1_310_blood-cat" });
-    expect(validateGameState(state).ok).toBe(true);
+      expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 3, sourceDefinitionId: definitionId });
+      expect(state.pendingChoice?.side).toBe("corp");
+      expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+      expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "gain_credit", traceStarted: true, sourceDefinitionId: definitionId });
+      expect(validateGameState(state).ok).toBe(true);
+    }
   });
 });
 
