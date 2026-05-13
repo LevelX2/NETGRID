@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.scenario.v1",
   "scenarioId": "v1922-per-card-longtail-wip-smoke",
   "release": "V1.9.22",
-  "status": "planning_no_promotion",
+  "status": "runtime_wip_no_promotion",
   "coversCards": [
     "onr_v1_026_false-echo",
     "onr_v1_027_flak",
@@ -56,18 +56,20 @@
     "V1.9.22 scope is frozen to exactly 47 target cards.",
     "Catalog WIP guard tracks the exact target set.",
     "No V1.9.22 card is release-promoted or AI-approved in this planning slice.",
-    "V2.x remains blocked until the Originalset Completion Gate is final-reviewed."
+    "V2.x remains blocked until the Originalset Completion Gate is final-reviewed.",
+    "Nine V1.9.22 runner hardware target cards have runtime definitions with final display-only text and no release or AI promotion."
   ],
   "verification": {
     "json": "pass: 302 files",
     "catalog": "pass: 36 tests",
+    "engine": "pass: 272 tests",
     "typecheck": "pass"
   },
   "completionGate": {
     "releaseDone": false,
     "catalogPromoted": false,
     "aiPromoted": false,
-    "runtimeDefinitionsReady": false,
+    "runtimeDefinitionsReady": "runner_hardware_cluster_9_of_47",
     "originalsetCompletionGateReady": false
   }
 }

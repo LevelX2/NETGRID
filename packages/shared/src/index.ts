@@ -3220,6 +3220,105 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "rez_card", "trash_on_access", "generic_upgrade_root_server", "city_grid", "deterministic_random", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_119_arasaka-portable-prototype",
+    title: "Arasaka Portable Prototype",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_122_artemis-2020",
+    title: "Artemis 2020",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_123_bodyweight-data-creche",
+    title: "Bodyweight Data Creche",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_124_corolla-speed-chip",
+    title: "Corolla Speed Chip",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["chip"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware chip with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_131_microtech-backup-drive",
+    title: "Microtech Backup Drive",
+    side: "runner",
+    type: "hardware",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware with per-card longtail surface. Effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_136_pandoras-deck",
+    title: "Pandora's Deck",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_137_parraline-5750",
+    title: "Parraline 5750",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_138_pk-6089a",
+    title: "PK-6089a",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["deck"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_147_zz22-speed-chip",
+    title: "ZZ22 Speed Chip",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["chip"],
+    implementationStatus: "playable_mvp",
+    installCost: 0,
+    rulesText: "Installed hardware chip with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+    mechanics: ["install_hardware", "memory", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_022_emergency-self-construct",
     title: "Emergency Self-Construct",
     side: "runner",

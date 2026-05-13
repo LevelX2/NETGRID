@@ -7,13 +7,13 @@ Status: planned
 | --- | --- | --- |
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
-| Resolver | Jede Karte hat Adapter oder Blocker | Folgearbeit |
+| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-Zielkarten, noch ohne LegalAction-Smoke |
 | LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | Folgearbeit |
 | Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | Folgearbeit |
 | Replay/StateHash | Neue Effekte sind deterministisch replaybar | Folgearbeit |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | Folgearbeit |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer Startschnitt: JSON 302, catalog 36, typecheck |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer Runtime-WIP: JSON 302, engine 272, catalog 36, typecheck |
 
 ## Mindestchecks im ersten WIP
 

@@ -1,13 +1,13 @@
 {
   "schemaVersion": "card-implementation-manifest-v1.9.22",
   "id": "v1.9.22-per-card-longtail-manifest",
-  "status": "planning_no_promotion",
+  "status": "runtime_wip_no_promotion",
   "extends": "data/manifests/card-implementation-manifest-1.9.21.json",
   "sourceMode": "private_local_onr_v1_function_matrix_display_only",
   "gateAssertions": {
     "v1922ScopeFrozenToFortySevenCards": true,
     "catalogWipGuardReady": true,
-    "runtimeDefinitionsReady": false,
+    "runtimeDefinitionsReady": "runner_hardware_cluster_9_of_47",
     "engineCovered": false,
     "stateHashReplayStableForCoveredSmokes": false,
     "noOfficialAssets": true,
@@ -186,66 +186,84 @@
     },
     {
       "cardCode": "onr_v1_119_arasaka-portable-prototype",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_122_artemis-2020",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_123_bodyweight-data-creche",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_124_corolla-speed-chip",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_131_microtech-backup-drive",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_136_pandoras-deck",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_137_parraline-5750",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_138_pk-6089a",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_147_zz22-speed-chip",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "coveredSmokes": [
+        "runtime_definition_guard"
+      ]
     },
     {
       "cardCode": "onr_v1_195_corporate-retreat",
@@ -348,7 +366,7 @@
   ],
   "deferredSummary": {
     "plannedCardCount": 47,
-    "implementedCardCount": 0,
+    "implementedCardCount": 9,
     "finalGateCardCount": 0,
     "deferredCardCount": 0,
     "deferredCardIds": [],

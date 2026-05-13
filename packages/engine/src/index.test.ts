@@ -6234,6 +6234,32 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 });
 
+describe("V1.9.22 Per-card Longtail WIP", () => {
+  it("adds the first V1.9.22 runner hardware runtime definitions without catalog release promotion", () => {
+    const runnerHardwareIds = [
+      "onr_v1_119_arasaka-portable-prototype",
+      "onr_v1_122_artemis-2020",
+      "onr_v1_123_bodyweight-data-creche",
+      "onr_v1_124_corolla-speed-chip",
+      "onr_v1_131_microtech-backup-drive",
+      "onr_v1_136_pandoras-deck",
+      "onr_v1_137_parraline-5750",
+      "onr_v1_138_pk-6089a",
+      "onr_v1_147_zz22-speed-chip"
+    ] as const;
+    expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
+    for (const definitionId of runnerHardwareIds) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.side, definitionId).toBe("runner");
+      expect(definition?.type, definitionId).toBe("hardware");
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.mechanics.join(" "), definitionId).toContain("per_card_longtail");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+});
+
 describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   it("adds all V1.9.18 WIP runtime definitions without release-promoting the next slice", () => {
     expect(ONR_V1_9_18_WIP_CARD_IDS).toHaveLength(15);
@@ -8139,6 +8165,56 @@ const ONR_V1_9_21_WIP_CARD_IDS = [
   "onr_v1_172_quest-for-cattekin",
   "onr_v1_339_schlaghund",
   "onr_v1_367_rio-de-janeiro-city-grid"
+] as const;
+
+const ONR_V1_9_22_WIP_CARD_IDS = [
+  "onr_v1_026_false-echo",
+  "onr_v1_027_flak",
+  "onr_v1_031_hammer",
+  "onr_v1_037_japanese-water-torture",
+  "onr_v1_044_netspace-inverter",
+  "onr_v1_045_newsgroup-filter",
+  "onr_v1_048_poltergeist",
+  "onr_v1_051_rabbit",
+  "onr_v1_055_reflector",
+  "onr_v1_057_scatter-shot",
+  "onr_v1_061_shield",
+  "onr_v1_067_speed-trap",
+  "onr_v1_068_startup-immolator",
+  "onr_v1_075_zetatech-software-installer",
+  "onr_v1_077_anonymous-tip",
+  "onr_v1_080_core-command-jettison-ice",
+  "onr_v1_086_forged-activation-orders",
+  "onr_v1_093_if-you-want-it-done-right",
+  "onr_v1_100_misc-for-sale",
+  "onr_v1_102_open-ended-mileage-program",
+  "onr_v1_103_organ-donor",
+  "onr_v1_109_security-code-worm-chip",
+  "onr_v1_113_synchronized-attack-on-hq",
+  "onr_v1_117_valu-pak-software-bundle",
+  "onr_v1_119_arasaka-portable-prototype",
+  "onr_v1_122_artemis-2020",
+  "onr_v1_123_bodyweight-data-creche",
+  "onr_v1_124_corolla-speed-chip",
+  "onr_v1_131_microtech-backup-drive",
+  "onr_v1_136_pandoras-deck",
+  "onr_v1_137_parraline-5750",
+  "onr_v1_138_pk-6089a",
+  "onr_v1_147_zz22-speed-chip",
+  "onr_v1_195_corporate-retreat",
+  "onr_v1_196_corporate-war",
+  "onr_v1_197_data-fort-reclamation",
+  "onr_v1_206_marine-arcology",
+  "onr_v1_210_political-overthrow",
+  "onr_v1_216_security-purge",
+  "onr_v1_247_haunting-inquisition",
+  "onr_v1_274_tutor",
+  "onr_v1_276_viral-15",
+  "onr_v1_277_virizz",
+  "onr_v1_280_zombie",
+  "onr_v1_289_edgerunner-inc-temps",
+  "onr_v1_296_off-site-backups",
+  "onr_v1_298_planning-consultants"
 ] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {

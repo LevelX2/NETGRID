@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 16:40 CEST
+- Ergebnis: V1.9.22 erster Runtime-WIP fuer neun Runner-Hardware-Longtailkarten umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Arasaka Portable Prototype, Artemis 2020, Bodyweight Data Creche, Corolla Speed Chip, Microtech Backup Drive, Pandora's Deck, Parraline 5750, PK-6089a und ZZ22 Speed Chip haben Runtime-Definitionen mit finalen display-only Texten. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `engine` pass (272), `catalog` pass (36), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner hardware runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil LegalAction-/applyAction-, Visibility-/Replay-/StateHash-, AI-, Full-Check-, Webclient- und Final-Review-Gates offen sind.
+
 - Zeitpunkt: 2026-05-13 16:36 CEST
 - Ergebnis: V1.9.22 Per-card Resolver Longtail und Originalset Completion Gate geplant und als Catalog-WIP begonnen; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
