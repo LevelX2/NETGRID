@@ -16,7 +16,7 @@ Status: implementing_wip_engine_smoke
 | AI Hints | `data/ai/ai-card-hints-deck-legal-v1916.json` | WIP angelegt, nicht promotet |
 | AI Smokes | `data/scenarios/ai-deck-legal-v1916-smokes.json` | WIP angelegt, nicht promotet |
 | Catalog/Web | Release-IDs, manifest refs, sichtbare Webclient-Version | WIP: No-Promotion-Guard |
-| Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | Teilcheck: engine 231, catalog 30, ai 84, typecheck pass |
+| Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | Teilcheck: engine 231, catalog 30, ai 84, server 72, web 76, typecheck pass |
 
 ## Ziel-Smokes
 

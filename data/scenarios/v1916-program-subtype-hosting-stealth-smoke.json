@@ -34,8 +34,8 @@
     "catalog": "pass: 30 tests",
     "typecheck": "pass",
     "ai": "pass: 84 tests",
-    "server": "not_run_this_wip_slice",
-    "web": "not_run_this_wip_slice",
+    "server": "pass: 72 tests",
+    "web": "pass: 76 tests",
     "test": "not_run_this_wip_slice",
     "lint": "not_run_this_wip_slice",
     "build": "not_run_this_wip_slice"

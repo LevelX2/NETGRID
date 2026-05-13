@@ -67,7 +67,9 @@
   ],
   "verification": {
     "ai": "pass: 84 tests",
-    "engine": "pass: 231 tests"
+    "engine": "pass: 231 tests",
+    "server": "pass: 72 tests",
+    "web": "pass: 76 tests"
   },
   "completionGate": {
     "aiSupported": false,

@@ -28,6 +28,8 @@ Status: implementing_wip
 - `v1-9-install-and-check.ps1 -Task engine`: pass, 231 Tests.
 - `v1-9-install-and-check.ps1 -Task catalog`: pass, 30 Tests.
 - `v1-9-install-and-check.ps1 -Task ai`: pass, 84 Tests.
+- `v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `v1-9-install-and-check.ps1 -Task web`: pass, 76 Tests.
 - `v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - JSON-Validation: pass, 258 Dateien.
 
