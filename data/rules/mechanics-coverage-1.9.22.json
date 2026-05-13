@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "1.9.22",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.22",
+  "generatedFor": "V1.9.22 Per-card Resolver Longtail und Originalset Completion Gate planning gate",
+  "generatedAt": "2026-05-13",
+  "status": "planning_no_promotion",
+  "extends": "data/rules/mechanics-coverage-1.9.21.json",
+  "gateAssertions": {
+    "perCardLongtailScopeFrozenToFortySevenCards": true,
+    "catalogWipGuardReady": true,
+    "runtimeDefinitionsReady": false,
+    "engineCovered": false,
+    "hiddenInfoSafeForCoveredSmokes": false,
+    "stateHashReplayStableForCoveredSmokes": false,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true,
+    "noV2Scope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.per_card_longtail_resolver_gate",
+      "label": "Per-card Resolver Longtail",
+      "currentStatus": "planned",
+      "targetGate": "v1.9.22",
+      "currentScopeNote": "47 Karten sind im Catalog-WIP-Guard eingefroren; konkrete Runtime-, Engine-, AI- und Completion-Gate-Abdeckung folgt.",
+      "coverage": [
+        "scope_guard"
+      ]
+    }
+  ],
+  "deferred": [
+    {
+      "item": "runtime_engine_ai_completion_gate",
+      "reason": "V1.9.22 ist erst geplant; konkrete per-card Resolver, Tests, AI-Artefakte und Final Review folgen."
+    }
+  ]
+}

@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.22
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: complete
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -68,6 +68,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | current |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 16:36 CEST
+- Ergebnis: V1.9.22 Per-card Resolver Longtail und Originalset Completion Gate geplant und als Catalog-WIP begonnen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Per-card-Longtail-Spezifikation, Testmatrix, Requirements Review und Implementation Review erstellt. `ONR_V1_9_22_WIP_CARD_IDS` schuetzt die exakte 47er-Zielmenge ohne Runtime-, Catalog-Release- oder AI-Promotion. WIP-Manifest, Mechanics-Coverage und WIP-Smoke sind angelegt.
+- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (36), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: longtail planning guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runtime-/Engine-/LegalAction-/AI-Abdeckung, volle Pflichtchecks, Webclient-Version, Final Review und Originalset-Completion-Gate offen sind.
 
 - Zeitpunkt: 2026-05-13 16:31 CEST
 - Ergebnis: V1.9.21 Deterministischer Zufall und Wuerfelkarten final abgeschlossen; Cursor auf V1.9.22 `planned` gesetzt.
