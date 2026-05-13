@@ -5808,6 +5808,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     resourceState.runner.memoryLimit = 8;
     moveRunnerCardToGrip(resourceState, "onr_v1_154_broker");
     resourceState = apply(resourceState, "runner", (action) => action.type === "install_card" && sourceDefinition(resourceState, action) === "onr_v1_154_broker");
+    expect(DEMO_CARDS_BY_ID["onr_v1_154_broker"]).toMatchObject({ installCost: 3 });
     const brokerId = resourceState.runner.rig.resources.find((cardId) => resourceState.cardInstances[cardId]?.definitionId === "onr_v1_154_broker");
     expect(brokerId).toBeDefined();
     const brokerLoad = getLegalActions(resourceState, "runner").find(
@@ -5816,7 +5817,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(brokerLoad?.visibility).toBe("public");
     resourceState = apply(resourceState, "runner", (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_load_credits");
     expect(cardCounterAmount(resourceState, brokerId!, "power")).toBe(3);
-    expect(resourceState.runner.credits).toBe(11);
+    expect(resourceState.runner.credits).toBe(9);
     expect(
       getLegalActions(resourceState, "runner").some(
         (action) =>
@@ -5839,7 +5840,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     resourceState = toRunnerTurnFromCorpMain(resourceState);
     resourceState = apply(resourceState, "runner", (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_take_credits");
     expect(cardCounterAmount(resourceState, brokerId!, "power")).toBe(0);
-    expect(resourceState.runner.credits).toBe(14);
+    expect(resourceState.runner.credits).toBe(12);
     expect(
       getLegalActions(resourceState, "runner").some(
         (action) =>

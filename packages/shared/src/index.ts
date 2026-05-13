@@ -4685,7 +4685,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 3,
     rulesText: "[A]: Put 3 credits from the bank on Broker, or take all credits from Broker.",
     mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
