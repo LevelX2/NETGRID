@@ -740,6 +740,13 @@ Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 
 ## Blocker
 
+- Blocker-ID: V1922_NO_COMPLETE_LOCAL_RESOLVER_CONTRACT_2026-05-13
+- Status: active
+- Betroffener Release: V1.9.22
+- Beschreibung: Fuer den aktuellen V1.9.22-Per-card-Resolver-Longtail liegen lokal nur Typoberflaechen, bestaetigte Teilnotizen und No-Promotion-Readiness-Reviews vor. Die erneute lokale Quellensuche hat keinen vollstaendigen per-card Resolververtrag mit Kosten, Timing, Zielen, Choices, Visibility, Replay/StateHash und AI-Fallback ergeben. Deshalb duerfen keine weiteren Karten als `human_playable`, `deck_legal` oder `ai_supported` promotet werden.
+- Removal Condition: Eine lokale, versionierte Quelle oder ein fuehrendes Planungsartefakt muss fuer mindestens einen V1.9.22-Zielpfad einen vollstaendigen Resolververtrag liefern; danach Engine-/LegalAction-/applyAction-, Visibility-, Replay/StateHash-, Manifest/Coverage-, AI- und Web-Gates fuer genau diesen Pfad umsetzen und pruefen.
+- Letzter Befund: 2026-05-13 18:40 CEST, dokumentiert in `data/reports/v1922-completion-gate-status.json` und durch `packages/catalog/src/index.test.ts` gegen den Gate-Statusreport abgesichert.
+
 - Blocker-ID: LOCK_PATH_PERMISSION_DENIED_2026-05-12
 - Status: behoben durch Worktree-Lockpfad
 - Betroffener Release: V1.9.10
