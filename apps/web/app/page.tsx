@@ -8502,7 +8502,11 @@ function CardView({
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const brokerStoredCredits = preview ? 0 : brokerStoredCreditsAmount(card);
-  const brokerStoredCreditsAria = brokerStoredCredits > 0 ? `${brokerStoredCredits} ${brokerStoredCredits === 1 ? "Credit" : "Credits"} auf Broker` : null;
+  const storedCreditSource = storedCreditSourceLabel(card);
+  const brokerStoredCreditsAria =
+    brokerStoredCredits > 0 && storedCreditSource
+      ? `${brokerStoredCredits} ${brokerStoredCredits === 1 ? "Credit" : "Credits"} auf ${storedCreditSource}`
+      : null;
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
       ? `Karte ${card.title}, ${advancementLabel}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}`
@@ -8700,7 +8704,7 @@ function CardView({
         ) : null}
         {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
-        {brokerStoredCredits > 0 ? <BrokerStoredCreditsBadge amount={brokerStoredCredits} /> : null}
+        {brokerStoredCredits > 0 && storedCreditSource ? <BrokerStoredCreditsBadge amount={brokerStoredCredits} sourceLabel={storedCreditSource} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
         {tooltipId ? (
           <span
@@ -8976,9 +8980,9 @@ function StrengthBoostBadge({ amount }: { amount: number }) {
   );
 }
 
-function BrokerStoredCreditsBadge({ amount }: { amount: number }) {
+function BrokerStoredCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
   return (
-    <span className="brokerStoredCreditsBadge" aria-label={`${amount} ${amount === 1 ? "Credit" : "Credits"} auf Broker`} data-testid="broker-stored-credits-badge">
+    <span className="brokerStoredCreditsBadge" aria-label={`${amount} ${amount === 1 ? "Credit" : "Credits"} auf ${sourceLabel}`} data-testid="broker-stored-credits-badge">
       {amount} {amount === 1 ? "Credit" : "Credits"}
     </span>
   );
@@ -9026,16 +9030,23 @@ function cardDetailLines(card: VisibleCard): string[] {
 }
 
 function brokerStoredCreditsLabel(card: VisibleCard): string | null {
-  if (card.definitionId !== "onr_v1_154_broker") return null;
+  const sourceLabel = storedCreditSourceLabel(card);
+  if (!sourceLabel) return null;
   const amount = brokerStoredCreditsAmount(card);
   if (amount <= 0) return null;
-  return `Broker ${amount} ${amount === 1 ? "Credit" : "Credits"}`;
+  return `${sourceLabel} ${amount} ${amount === 1 ? "Credit" : "Credits"}`;
 }
 
 function brokerStoredCreditsAmount(card: VisibleCard): number {
-  if (card.definitionId !== "onr_v1_154_broker") return 0;
+  if (!storedCreditSourceLabel(card)) return 0;
   const amount = card.counters?.power ?? 0;
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
+
+function storedCreditSourceLabel(card: VisibleCard): string | null {
+  if (card.definitionId === "onr_v1_154_broker") return "Broker";
+  if (card.definitionId === "onr_v1_178_short-term-contract") return "Short-Term Contract";
+  return null;
 }
 
 function cardWithoutDevelopmentCounters(card: DisplayVisibleCard): DisplayVisibleCard {

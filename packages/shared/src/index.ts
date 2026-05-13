@@ -4759,9 +4759,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 0,
-    rulesText: "Installed resource economy action with tag-risk interaction.",
-    mechanics: ["install_resource", "resource_action", "gain_credit", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
+    installCost: 1,
+    rulesText: "Put 12 credits from the bank on Short-Term Contract when it is installed. When all credits have been removed through Short-Term Contract, trash Short-Term Contract.\n[A]: Take 2 credits from Short-Term Contract.",
+    mechanics: ["install_resource", "resource_action", "counter", "gain_credit", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_181_the-springboard",

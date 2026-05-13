@@ -268,6 +268,7 @@ const AUJOURD_OUI_ID = "onr_v1_151_aujourdoui";
 const NETO_ID = "onr_v1_169_n-e-t-o";
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const THE_SHORT_CIRCUIT_ID = "onr_v1_177_the-short-circuit";
+const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
 const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
 const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
@@ -2394,6 +2395,28 @@ function runnerMainActions(state: GameState): LegalAction[] {
           );
         }
       }
+      if (definition.id === SHORT_TERM_CONTRACT_ID) {
+        const storedCredits = cardCounter(state, resourceId, "power");
+        if (storedCredits >= 2) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "trigger_ability",
+              `${definition.title}: 2 Credits nehmen`,
+              resourceId,
+              [{ clicks: 1 }],
+              {
+                cardId: resourceId,
+                resourceAbility: "short_term_contract_take_credits",
+                counterType: "power",
+                removePowerCounterAmount: 2,
+                gainCreditsAmount: 2
+              }
+            )
+          );
+        }
+      }
       if (definition.id === "onr_v1_159_databroker") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
@@ -3769,6 +3792,11 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         resolveSelfModifyingCodeInstallProgram(state, legalAction);
         return;
       }
+      if (legalAction.payload?.resourceAbility === "short_term_contract_take_credits") {
+        spendClick(state, "runner");
+        resolveShortTermContractAbility(state, legalAction);
+        return;
+      }
       if (legalAction.payload?.resourceAbility === "broker_load_credits" || legalAction.payload?.resourceAbility === "broker_take_credits") {
         spendClick(state, "runner");
         resolveBrokerAbility(state, legalAction);
@@ -3776,6 +3804,41 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       }
       throw new Error("Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.");
   }
+}
+
+function resolveShortTermContractAbility(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Short-Term Contract nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.resources.includes(sourceCardId)) throw new Error("Short-Term Contract ist nicht installiert.");
+  const definition = definitionFor(state, sourceCardId);
+  if (definition.id !== SHORT_TERM_CONTRACT_ID) throw new Error("Diese Short-Term-Contract-Aktion passt nicht zur Karte.");
+  const removeAmount = Number(legalAction.payload?.removePowerCounterAmount ?? 0);
+  if (!Number.isInteger(removeAmount) || removeAmount !== 2) throw new Error("Short-Term Contract muss genau 2 gespeicherte Credits ausgeben.");
+  if (cardCounter(state, sourceCardId, "power") < removeAmount) throw new Error("Auf Short-Term Contract liegen nicht genug Credits.");
+  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+  if (!Number.isInteger(gainAmount) || gainAmount !== 2) throw new Error("Short-Term Contract gewaehrt genau 2 Credits.");
+
+  spendCardCounter(state, sourceCardId, "power", removeAmount);
+  credits(state, "runner", gainAmount);
+  const remainingCounters = cardCounter(state, sourceCardId, "power");
+  const trashAfterUse = remainingCounters === 0;
+  if (trashAfterUse) trashRunnerInstalledCardToHeap(state, sourceCardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    spentPowerCounters: removeAmount,
+    gainedCredits: gainAmount,
+    remainingCounters,
+    runnerCreditsAfter: state.runner.credits,
+    ...(trashAfterUse ? { shortTermContractTrashed: true } : {})
+  };
+  recordResolvedEffect(legalAction, {
+    kind: "gain_credits",
+    visibility: "public",
+    side: "runner",
+    amount: gainAmount,
+    ...sourceEffectFields(state, sourceCardId),
+    reason: "short_term_contract_take_credits"
+  });
 }
 
 function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void {
@@ -3957,6 +4020,15 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         : {})
     };
     if (definition.id === "v099_host_resource") startRunnerHostingChoice(state, cardId, legalAction);
+    if (definition.id === SHORT_TERM_CONTRACT_ID) {
+      setCardCounter(state, cardId, "power", 12);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        counterType: "power",
+        addedCounterAmount: 12,
+        remainingCounters: 12
+      };
+    }
     return;
   }
 
@@ -8363,7 +8435,18 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     }
   }
   if (legalAction.type === "trigger_ability") {
-    for (const key of ["resourceAbility", "counterType", "addCounterAmount", "addedCounterAmount", "gainCreditsAmount", "gainedCredits", "remainingCounters"]) {
+    for (const key of [
+      "resourceAbility",
+      "counterType",
+      "addCounterAmount",
+      "addedCounterAmount",
+      "removePowerCounterAmount",
+      "spentPowerCounters",
+      "gainCreditsAmount",
+      "gainedCredits",
+      "remainingCounters",
+      "shortTermContractTrashed"
+    ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
     }

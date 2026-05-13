@@ -316,6 +316,23 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(load)).toBe("3 Credits laden");
     expect(contextualCardActionLabel(take)).toBe("6 Credits nehmen");
   });
+
+  it("labels Short-Term Contract take-credit actions on the installed resource overlay", () => {
+    const take = legalAction("runner", "trigger_ability", "short_term_1", "Short-Term Contract: 2 Credits nehmen", {
+      cardId: "short_term_1",
+      resourceAbility: "short_term_contract_take_credits",
+      counterType: "power",
+      removePowerCounterAmount: 2,
+      gainCreditsAmount: 2
+    });
+
+    const split = splitLegalActions([take]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([take]);
+    expect(actionMatchesContext(take, { kind: "card", id: "short_term_1", label: "Short-Term Contract" })).toBe(true);
+    expect(contextualCardActionLabel(take)).toBe("2 Credits nehmen");
+  });
 });
 
 function legalAction(side: Side, type: LegalAction["type"], source: LegalAction["source"], label: string, payload?: LegalAction["payload"], timingPoint: LegalAction["timingPoint"] = "corp_action.main"): LegalAction {

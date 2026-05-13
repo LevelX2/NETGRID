@@ -5993,6 +5993,56 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(resourceState.runner.heap).toContain(brokerId);
   });
 
+  it("loads Short-Term Contract with 12 credits and spends them through runner resource actions", () => {
+    let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-short-term-contract"));
+    state.runner.credits = 20;
+    state.runner.clicks = 10;
+    moveRunnerCardToGrip(state, "onr_v1_178_short-term-contract");
+
+    expect(DEMO_CARDS_BY_ID["onr_v1_178_short-term-contract"]).toMatchObject({ installCost: 1 });
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_178_short-term-contract");
+    const contractId = state.runner.rig.resources.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_178_short-term-contract");
+    expect(contractId).toBeDefined();
+    expect(state.runner.credits).toBe(19);
+    if (contractId) {
+      expect(cardCounterAmount(state, contractId, "power")).toBe(12);
+      expect(getPlayerView(state, "runner").own.rig?.find((card) => card.instanceId === contractId)?.counters?.power).toBe(12);
+    }
+
+    const firstTake = getLegalActions(state, "runner").find(
+      (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "short_term_contract_take_credits" && action.payload?.cardId === contractId
+    );
+    expect(firstTake).toMatchObject({
+      visibility: "public",
+      costs: [{ clicks: 1 }],
+      payload: { removePowerCounterAmount: 2, gainCreditsAmount: 2 }
+    });
+
+    for (let index = 0; index < 6; index += 1) {
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "short_term_contract_take_credits" && action.payload?.cardId === contractId
+      );
+    }
+
+    expect(state.runner.credits).toBe(31);
+    if (contractId) {
+      expect(cardCounterAmount(state, contractId, "power")).toBe(0);
+      expect(state.runner.rig.resources).not.toContain(contractId);
+      expect(state.runner.heap).toContain(contractId);
+    }
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      resourceAbility: "short_term_contract_take_credits",
+      spentPowerCounters: 2,
+      gainedCredits: 2,
+      remainingCounters: 0,
+      shortTermContractTrashed: true
+    });
+  });
+
   it("gates Power Grid Overload on visible tags and installed Runner hardware", () => {
     let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-power-grid-overload"));
     state.runner.credits = 12;

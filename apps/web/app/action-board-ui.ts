@@ -203,6 +203,10 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
       const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 0);
       return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
     }
+    case "short_term_contract_take_credits": {
+      const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 2);
+      return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
+    }
     default:
       return null;
   }

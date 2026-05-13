@@ -416,6 +416,13 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "Broker"} genommen`);
         break;
       }
+      if (resourceAbility === "short_term_contract_take_credits") {
+        const gainedCredits = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount) ?? amount ?? 0;
+        const trashed = payload.shortTermContractTrashed === true ? ", Contract getrasht" : "";
+        category = "economy";
+        title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "Short-Term Contract"} genommen${trashed}`);
+        break;
+      }
       category = "card";
       title = phrase(subject, `${cardTitle ?? "eine Kartenfähigkeit"} aktiviert`);
       chips.push("Kartenaktion");

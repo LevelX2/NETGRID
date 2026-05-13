@@ -1866,7 +1866,9 @@ const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
 };
 
 const ONR_V1_9_14_TEXT_OVERRIDES: Partial<Record<string, string>> = {
-  "onr_v1_154_broker": "[A]: Put 3 credits from the bank on Broker, or take all credits from Broker."
+  "onr_v1_154_broker": "[A]: Put 3 credits from the bank on Broker, or take all credits from Broker.",
+  "onr_v1_178_short-term-contract":
+    "Put 12 credits from the bank on Short-Term Contract when it is installed. When all credits have been removed through Short-Term Contract, trash Short-Term Contract.\n[A]: Take 2 credits from Short-Term Contract."
 };
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
