@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 14:04 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um konkrete Agenda-Core- und erste Asset-Randpfade erweitert; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Artificial Security Directors und Genetics-Visionary Acquisition decken Score-Difficulty, Overadvance, Bonus-Agenda-Counter und gescorte R&D-Top-Reveal-LegalActions ab. Roving Submarine und Washington, D.C., City Grid wirken als rezzed servergebundene Difficulty-Modifier. Chicago Branch und Vapor Ops decken rezzed Power-Counter-LegalActions ab; Information Laundering deckt eine rezzed Economy-LegalAction ab; Experimental AI deckt einen legalen Access-Ambush gegen installierte Runner-Programme ab. Manifest, Mechanics-Coverage, WIP-Szenario, Testmatrix, Implementation Review und Codex-Status sind entsprechend aktualisiert. Keine Runtime-/AI-Promotion.
+- Tests: JSON-Validation pass fuer 277 `data/**/*.json`; `engine` pass (255), `catalog` pass (33), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: agenda asset engine paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Operationen, Forfeit-/Agenda-Punkt-Kosten, weitere Ambush-/Damage-Pfade, finale Daten-/AI-Artefakte, offizielles AI-Approval, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 13:32 CEST
 - Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance detailgeplant und Runtime-/Catalog-WIP begonnen; Cursor bleibt auf V1.9.19 `implementing`.
 - Release: V1.9.19

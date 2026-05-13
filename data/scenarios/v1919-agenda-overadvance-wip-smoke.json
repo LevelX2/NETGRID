@@ -2,7 +2,7 @@
   "schemaVersion": "netgrid.scenario.v1",
   "scenarioId": "v1919-agenda-overadvance-wip-smoke",
   "release": "V1.9.19",
-  "status": "wip_runtime_catalog_guard",
+  "status": "wip_agenda_core_engine_guard",
   "coversCards": [
     "onr_v1_025_fait-accompli",
     "onr_v1_078_arasaka-owns-you",
@@ -29,16 +29,23 @@
     "V1.9.19 WIP runtime definitions exist for all 20 target cards with final display-only text and no WIP prefix.",
     "Catalog WIP guard tracks the exact target set.",
     "No V1.9.19 card is release-promoted or AI-approved in this WIP slice.",
-    "V1.9.20 Emergency Self-Construct remains outside the V1.9.19 WIP runtime guard."
+    "V1.9.20 Emergency Self-Construct remains outside the V1.9.19 WIP runtime guard.",
+    "Artificial Security Directors and Genetics-Visionary Acquisition score through LegalActions with engine-side difficulty and overadvance revalidation.",
+    "Roving Submarine and Washington, D.C., City Grid contribute only rezzed server-bound agenda difficulty modifiers.",
+    "Scored Artificial Security Directors and Genetics-Visionary Acquisition expose only a side-safe R&D-top reveal action.",
+    "Chicago Branch and Vapor Ops expose rezzed Power-Counter LegalActions, Information Laundering exposes a rezzed economy LegalAction, and Experimental AI resolves an access-window installed-program ambush."
   ],
   "verification": {
-    "engine": "pass: 252 tests",
+    "engine": "pass: 255 tests",
     "catalog": "pass: 33 tests",
     "typecheck": "pass"
   },
   "completionGate": {
     "releaseDone": false,
     "catalogPromoted": false,
-    "aiPromoted": false
+    "aiPromoted": false,
+    "agendaCoreEngineCovered": true,
+    "assetCounterEconomyAmbushCovered": true,
+    "remainingRuntimeFamilies": ["operation_resolvers", "forfeit_agenda_point_costs", "additional_access_ambush_damage", "release_promotion"]
   }
 }

@@ -4,16 +4,18 @@
   "matrixId": "mechanics-coverage-1.9.19",
   "generatedFor": "V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance WIP gate",
   "generatedAt": "2026-05-13",
-  "status": "wip_runtime_definition_pending_promotion",
+  "status": "wip_agenda_core_asset_edges_engine_covered_pending_promotion",
   "extends": "data/rules/mechanics-coverage-1.9.18.json",
   "gateAssertions": {
     "agendaOveradvanceScopeFrozenToTwentyCards": true,
     "allCardsRuntimeDefinitionReady": true,
-    "scoredAgendaResolverCovered": false,
-    "agendaDifficultyOveradvanceCovered": false,
+    "scoredAgendaResolverCovered": true,
+    "agendaDifficultyOveradvanceCovered": true,
     "counterAndForfeitCostsCovered": false,
-    "hiddenInfoSafeForCoveredSmokes": false,
-    "stateHashReplayStableForCoveredSmokes": false,
+    "assetCounterEconomyCovered": true,
+    "accessAmbushInstalledProgramCovered": true,
+    "hiddenInfoSafeForCoveredSmokes": true,
+    "stateHashReplayStableForCoveredSmokes": true,
     "catalogPromotionPending": true,
     "aiPromotionPending": true,
     "noV1920PlusScope": true
@@ -22,26 +24,34 @@
     {
       "mechanicId": "mechanic.agenda.scored_static_active",
       "label": "Scored Agenda Static/Active",
-      "currentStatus": "planned_wip_runtime_definition",
+      "currentStatus": "implemented_limited_wip",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Zielkarten sind runtime-definiert; konkrete scored-area LegalAction-Pfade folgen.",
-      "coverage": ["runtime_definition"]
+      "currentScopeNote": "Artificial Security Directors und Genetics-Visionary Acquisition haben gescorte R&D-Top-Reveal-LegalActions mit Hidden-Info-Barriere; weitere scored-area Randpfade folgen.",
+      "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "hidden_info_smoke"]
     },
     {
       "mechanicId": "mechanic.agenda.difficulty_overadvance",
       "label": "Agenda Difficulty und Overadvance",
-      "currentStatus": "planned_wip_runtime_definition",
+      "currentStatus": "implemented_limited_wip",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Score-/Steal-/Overadvance-Werte werden im nächsten Schnitt engine-seitig revalidiert.",
-      "coverage": ["runtime_definition"]
+      "currentScopeNote": "Score/Difficulty/Overadvance werden für Artificial Security Directors und Genetics-Visionary Acquisition engine-seitig revalidiert; Roving Submarine und Washington, D.C., City Grid liefern servergebundene Difficulty-Modifier. Steal- und Kostenpfade folgen.",
+      "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "replay_statehash_smoke"]
     },
     {
       "mechanicId": "mechanic.agenda.costs_forfeit_counter",
       "label": "Agenda-Kosten, Forfeit und Counter",
-      "currentStatus": "planned_wip_runtime_definition",
+      "currentStatus": "implemented_limited_wip",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Counter- und Forfeit-Oberflächen sind in den Zielkarten markiert, aber noch nicht final promotet.",
-      "coverage": ["runtime_definition"]
+      "currentScopeNote": "Chicago Branch und Vapor Ops laden Power-Counter über explizite rezzed Corp-LegalActions. Forfeit- und Agenda-Punkt-Kosten bleiben Folgearbeit.",
+      "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "counter_smoke"]
+    },
+    {
+      "mechanicId": "mechanic.asset.access_ambush_installed_card",
+      "label": "V1.9.19 Asset Access Ambush",
+      "currentStatus": "implemented_limited_wip",
+      "targetGate": "v1.9.19",
+      "currentScopeNote": "Experimental AI trasht aus legalem Access-Fenster ein sichtbares installiertes Runner-Programm side-sicher; weitere Ambush-/Damage-Zielkarten folgen.",
+      "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "hidden_info_smoke"]
     }
   ],
   "deferred": [

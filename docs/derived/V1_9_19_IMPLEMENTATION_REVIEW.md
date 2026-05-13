@@ -13,6 +13,9 @@ Stand: 2026-05-13
 - `data/scenarios/v1919-agenda-overadvance-wip-smoke.json` dokumentiert den WIP-Smoke maschinenlesbar ohne Release- oder AI-Promotion.
 - `data/manifests/card-implementation-manifest-1.9.19.json` und `data/rules/mechanics-coverage-1.9.19.json` bereiten Manifest und Mechanics-Coverage als WIP-Artefakte vor, ohne Catalog- oder AI-Promotion.
 - `data/ai/ai-card-hints-deck-legal-v1919.json` und `data/scenarios/ai-deck-legal-v1919-smokes.json` bereiten AI-Hints und AI-Smokes als `hinted_only`-Drafts vor; echte `ai_supported`-Promotion bleibt blockiert bis die Agenda-/Overadvance-Pfade final sind.
+- `packages/engine/src/index.ts` deckt jetzt den ersten konkreten Agenda-Core-Schnitt ab: Artificial Security Directors und Genetics-Visionary Acquisition berechnen beim Score engine-seitig Difficulty, Overadvance und Bonus-Agenda-Counter; Roving Submarine und Washington, D.C., City Grid wirken als servergebundene rezzed Difficulty-Modifier; Artificial Security Directors und Genetics-Visionary Acquisition erhalten eine gescorte, side-sichere R&D-Top-Reveal-LegalAction.
+- `packages/engine/src/index.ts` deckt außerdem erste Asset-Randpfade ab: Chicago Branch und Vapor Ops laden Power-Counter über rezzed Corp-LegalActions, Information Laundering gewinnt Credits über eine rezzed Corp-LegalAction, und Experimental AI triggert aus einem legalen Access-Fenster einen side-sicheren installierte-Programme-Trash-Ambush.
+- `packages/engine/src/index.test.ts` prüft den V1.9.19-Agenda-Core und Asset-Randpfad mit drei neuen Smokes: Score/Difficulty/Overadvance inklusive Replay/StateHash, gescorte R&D-Reveal-Aktion inklusive Hidden-Info-Barriere sowie Asset-Counter/Economy/Access-Ambush.
 
 ## Gate
 
@@ -21,7 +24,7 @@ Stand: 2026-05-13
 
 ## Nächster Schnitt
 
-Konkrete Agenda-/Overadvance-LegalAction-/applyAction-Pfade für Score-, Steal-, Difficulty- und Overadvance-Familien.
+Weitere konkrete V1.9.19-Pfade für Operation-/Asset-/Upgrade-Randkarten: Operationen, Forfeit-/Agenda-Punkt-Kosten, weitere Access-Ambush-Damage-Pfade und finale Release-/AI-Promotion.
 
 ## Verifikation
 
@@ -36,3 +39,5 @@ Konkrete Agenda-/Overadvance-LegalAction-/applyAction-Pfade für Score-, Steal-,
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Nach Manifest-/Coverage-/AI-Draft-Artefakten erneut geprüft: JSON-Validation pass, 277 Dateien; `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
+- Nach Agenda-Core-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 254 Tests.
+- Nach Asset-Randpfad-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 255 Tests.

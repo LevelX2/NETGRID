@@ -219,6 +219,21 @@ const V1918_TWENTY_FOUR_HOUR_SURVEILLANCE_ID = "onr_v1_373_twenty-four-hour-surv
 const V1918_COUNTER_UPGRADE_IDS = new Set([V1918_CRYSTAL_PALACE_STATION_GRID_ID, V1918_DR_DREFF_ID]);
 const V1918_RUN_TAX_UPGRADE_IDS = new Set([V1918_DR_DREFF_ID, V1918_TURBEAU_DELACROIX_ID, V1918_TWENTY_FOUR_HOUR_SURVEILLANCE_ID]);
 const V1918_TAG_CONDITION_UPGRADE_IDS = new Set([V1918_OMNI_KISMET_ID, V1918_PARIS_CITY_GRID_ID]);
+const V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID = "onr_v1_189_artificial-security-directors";
+const V1919_GENETICS_VISIONARY_ACQUISITION_ID = "onr_v1_202_genetics-visionary-acquisition";
+const V1919_CHICAGO_BRANCH_ID = "onr_v1_312_chicago-branch";
+const V1919_CORPRUNNERS_SHATTERED_REMAINS_ID = "onr_v1_315_corprunners-shattered-remains";
+const V1919_EXPERIMENTAL_AI_ID = "onr_v1_323_experimental-ai";
+const V1919_INFORMATION_LAUNDERING_ID = "onr_v1_328_information-laundering";
+const V1919_VACANT_SOULKILLER_ID = "onr_v1_346_vacant-soulkiller";
+const V1919_VAPOR_OPS_ID = "onr_v1_347_vapor-ops";
+const V1919_VIRUS_TEST_SITE_ID = "onr_v1_348_virus-test-site";
+const V1919_ROVING_SUBMARINE_ID = "onr_v1_368_roving-submarine";
+const V1919_WASHINGTON_DC_CITY_GRID_ID = "onr_v1_374_washington-d-c-city-grid";
+const V1919_OVERADVANCE_AGENDA_IDS = new Set([V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID, V1919_GENETICS_VISIONARY_ACQUISITION_ID]);
+const V1919_SCORED_REVEAL_AGENDA_IDS = new Set([V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID, V1919_GENETICS_VISIONARY_ACQUISITION_ID]);
+const V1919_SERVER_DIFFICULTY_UPGRADE_IDS = new Set([V1919_ROVING_SUBMARINE_ID, V1919_WASHINGTON_DC_CITY_GRID_ID]);
+const V1919_COUNTER_ASSET_IDS = new Set([V1919_CHICAGO_BRANCH_ID, V1919_VAPOR_OPS_ID]);
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -1802,6 +1817,32 @@ function corpMainActions(state: GameState): LegalAction[] {
         )
       );
     }
+    if (V1919_COUNTER_ASSET_IDS.has(definition.id)) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: Power-Counter laden`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1919AssetAbility: "add_power_counter", counterType: "power", addCounterAmount: 1 }
+        )
+      );
+    }
+    if (definition.id === V1919_INFORMATION_LAUNDERING_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 2 Credits`,
+          assetId,
+          [{ clicks: 1 }],
+          { cardId: assetId, v1919AssetAbility: "gain_credits", gainCreditsAmount: 2 }
+        )
+      );
+    }
     if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
     actions.push(
       action(
@@ -1895,6 +1936,20 @@ function corpMainActions(state: GameState): LegalAction[] {
           agendaId,
           [{ clicks: 1 }],
           { cardId: agendaId, agendaAbility: "v1912_detroit_police_contract", counterType: "power", removePowerCounterAmount: 1, gainCreditsAmount: 1 }
+        )
+      );
+      continue;
+    }
+    if (V1919_SCORED_REVEAL_AGENDA_IDS.has(definition.id) && state.corp.rd.length > 0) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: R&D-Spitze revealn`,
+          agendaId,
+          [{ clicks: 1 }],
+          { cardId: agendaId, agendaAbility: "v1919_scored_agenda_reveal_rd_top", hiddenZoneAction: "v1919_scored_agenda_reveal_rd_top" }
         )
       );
       continue;
@@ -2978,6 +3033,38 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         };
         return;
       }
+      if (legalAction.payload?.v1919AssetAbility === "add_power_counter") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.19-Asset-Counter nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.19-Asset-Counter-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1919_COUNTER_ASSET_IDS.has(definition.id)) throw new Error("Die V1.9.19-Asset-Counter-Faehigkeit passt nicht zur Karte.");
+        const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
+        if (!Number.isInteger(addAmount) || addAmount !== 1) throw new Error("V1.9.19-Counter-Assets laden in diesem WIP genau 1 Power-Counter.");
+        addCardCounter(state, sourceCardId, "power", addAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          addedCounterAmount: addAmount,
+          remainingCounters: cardCounter(state, sourceCardId, "power")
+        };
+        return;
+      }
+      if (legalAction.payload?.v1919AssetAbility === "gain_credits") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.19-Asset-Economy nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.19-Asset-Economy-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1919_INFORMATION_LAUNDERING_ID) throw new Error("Die V1.9.19-Asset-Economy-Faehigkeit passt nicht zur Karte.");
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 2) throw new Error("Information Laundering gewaehrt in diesem V1.9.19-WIP genau 2 Credits.");
+        credits(state, "corp", gainAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: gainAmount,
+          corpCreditsAfter: state.corp.credits
+        };
+        return;
+      }
       if (legalAction.payload?.resourceAbility === "databroker") {
         if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Databroker nutzen.");
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
@@ -3048,6 +3135,16 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
           gainedCredits: gainAmount,
           remainingPowerCounters: cardCounter(state, sourceCardId, "power")
         };
+        return;
+      }
+      if (legalAction.payload?.agendaAbility === "v1919_scored_agenda_reveal_rd_top") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.19-Scored-Agenda-Faehigkeiten nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Die V1.9.19-Scored-Agenda ist nicht gescort.");
+        const definition = definitionFor(state, sourceCardId);
+        if (!V1919_SCORED_REVEAL_AGENDA_IDS.has(definition.id)) throw new Error("Die V1.9.19-Scored-Agenda-Faehigkeit passt nicht zur Karte.");
+        revealCorpRdTop(state, legalAction);
+        legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1919_scored_agenda_reveal_rd_top" };
         return;
       }
       if (legalAction.payload?.agendaAbility === "ai_chief_financial_officer") {
@@ -4185,6 +4282,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     resolveAmbushOnAccessFoundation(state, cardId, legalAction);
     resolveV1917AmbushOnAccess(state, cardId, legalAction);
     resolveV1918UpgradeOnAccess(state, cardId, legalAction);
+    resolveV1919AssetOnAccess(state, cardId, legalAction);
     resolveV199UpgradeOnAccess(state, cardId, legalAction);
     const definition = definitionFor(state, cardId);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
@@ -4211,6 +4309,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   resolveAmbushOnAccessFoundation(state, cardId, legalAction);
   resolveV1917AmbushOnAccess(state, cardId, legalAction);
   resolveV1918UpgradeOnAccess(state, cardId, legalAction);
+  resolveV1919AssetOnAccess(state, cardId, legalAction);
   resolveV199UpgradeOnAccess(state, cardId, legalAction);
   const definition = definitionFor(state, cardId);
   const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
@@ -4308,6 +4407,69 @@ function resolveV1918UpgradeOnAccess(state: GameState, cardId: CardInstanceId, l
     hiddenZoneAction: "v1918_upgrade_access_ambush",
     ambushDefinitionId: definition.id,
     ...(definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID ? { tagsAdded: 1, runnerTagsAfter: state.runner.tags } : {})
+  };
+}
+
+function resolveV1919AssetOnAccess(state: GameState, cardId: CardInstanceId, legalAction: LegalAction): void {
+  const definition = definitionFor(state, cardId);
+  if (
+    definition.id !== V1919_CORPRUNNERS_SHATTERED_REMAINS_ID &&
+    definition.id !== V1919_EXPERIMENTAL_AI_ID &&
+    definition.id !== V1919_VACANT_SOULKILLER_ID &&
+    definition.id !== V1919_VIRUS_TEST_SITE_ID
+  ) {
+    return;
+  }
+  if (legalAction.side !== "runner" || legalAction.type !== "access_card" || state.run?.accessedCardId !== cardId) {
+    throw new Error("V1.9.19-Asset-Ambush darf nur aus einem legalen Access-Fenster ausloesen.");
+  }
+
+  if (definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID || definition.id === V1919_EXPERIMENTAL_AI_ID) {
+    const candidates = definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID ? state.runner.rig.hardware : state.runner.rig.programs;
+    const targetCardId = candidates
+      .slice()
+      .sort((left, right) => {
+        const leftDefinition = definitionFor(state, left);
+        const rightDefinition = definitionFor(state, right);
+        const byInstallCost = (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
+        return byInstallCost !== 0 ? byInstallCost : left.localeCompare(right);
+      })[0];
+    if (targetCardId) {
+      const targetDefinition = definitionFor(state, targetCardId);
+      trashRunnerInstalledCardToHeap(state, targetCardId);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1919_access_ambush_trash_installed",
+        ambushDefinitionId: definition.id,
+        trashedCardDefinitionId: targetDefinition.id,
+        trashedCardType: targetDefinition.type
+      };
+      return;
+    }
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1919_access_ambush_no_target",
+      ambushDefinitionId: definition.id
+    };
+    return;
+  }
+
+  const damageType: DamageType = definition.id === V1919_VACANT_SOULKILLER_ID ? "core" : "net";
+  const damageAmount = definition.id === V1919_VACANT_SOULKILLER_ID ? 1 : 2;
+  const summary = doDamage(state, {
+    damageId: `v1919.asset_access.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
+    damageType,
+    amount: damageAmount,
+    source: definition.id
+  });
+  setDamagePayload(legalAction, summary);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1919_access_ambush_damage",
+    ambushDefinitionId: definition.id
   };
 }
 
@@ -5513,7 +5675,20 @@ function effectiveAgendaDifficulty(state: GameState, agendaId: CardInstanceId): 
   let difficulty = definition.advancementRequirement ?? 0;
   if (runnerHasInstalledCorporateAlly(state)) difficulty += 1;
   if (corpHasScoredExecutiveExtraction(state) && cardHasSubtype(definition, "gray_ops")) difficulty -= 1;
+  difficulty -= v1919ServerDifficultyReduction(state, agendaId);
   return Math.max(0, difficulty);
+}
+
+function v1919ServerDifficultyReduction(state: GameState, agendaId: CardInstanceId): number {
+  const zone = mustInstance(state.cardInstances, agendaId).zone;
+  if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId) return 0;
+  const server = mustServer(state, zone.serverId);
+  return server.root.reduce((sum, rootCardId) => {
+    if (rootCardId === agendaId) return sum;
+    const instance = mustInstance(state.cardInstances, rootCardId);
+    if (!instance.rezzed) return sum;
+    return V1919_SERVER_DIFFICULTY_UPGRADE_IDS.has(definitionFor(state, rootCardId).id) ? sum + 1 : sum;
+  }, 0);
 }
 
 function agendaPointsForScoredCard(state: GameState, cardId: CardInstanceId): number {
@@ -5590,6 +5765,19 @@ function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction
         ...(legalAction.payload ?? {}),
         projectBabylonOveradvance: overadvance,
         projectBabylonBonusAgendaPoints: bonusAgendaPoints
+      };
+    }
+  }
+  if (V1919_OVERADVANCE_AGENDA_IDS.has(definition.id)) {
+    const overadvance = Math.max(0, instanceBefore.advancementCounters - requiredDifficulty);
+    const bonusAgendaPoints = Math.floor(overadvance / 2);
+    setCardCounter(state, cardId, "agenda", bonusAgendaPoints);
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1919AgendaDifficulty: requiredDifficulty,
+        v1919Overadvance: overadvance,
+        v1919BonusAgendaPoints: bonusAgendaPoints
       };
     }
   }
@@ -6681,6 +6869,8 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.removeTagAmount !== undefined) parts.push(String(payload.removeTagAmount));
   if (payload?.v1917AssetAbility) parts.push(String(payload.v1917AssetAbility));
   if (payload?.v1918UpgradeAbility) parts.push(String(payload.v1918UpgradeAbility));
+  if (payload?.v1919AssetAbility) parts.push(String(payload.v1919AssetAbility));
+  if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   return parts.filter(Boolean).join(".");
@@ -6933,6 +7123,17 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.stealAdditionalCost = legalAction.payload.stealAdditionalCost;
     if (legalAction.payload.stealBlockedByCost === true) context.stealBlockedByCost = true;
   }
+  if (legalAction.payload?.agendaAbility === "v1919_scored_agenda_reveal_rd_top") {
+    context.agendaAbility = "v1919_scored_agenda_reveal_rd_top";
+  }
+  if (typeof legalAction.payload?.v1919AssetAbility === "string") {
+    context.v1919AssetAbility = legalAction.payload.v1919AssetAbility;
+    if (typeof legalAction.payload.addedCounterAmount === "number") context.addedCounterAmount = legalAction.payload.addedCounterAmount;
+    if (typeof legalAction.payload.remainingCounters === "number") context.remainingCounters = legalAction.payload.remainingCounters;
+  }
+  if (typeof legalAction.payload?.v1919AgendaDifficulty === "number") context.v1919AgendaDifficulty = legalAction.payload.v1919AgendaDifficulty;
+  if (typeof legalAction.payload?.v1919Overadvance === "number") context.v1919Overadvance = legalAction.payload.v1919Overadvance;
+  if (typeof legalAction.payload?.v1919BonusAgendaPoints === "number") context.v1919BonusAgendaPoints = legalAction.payload.v1919BonusAgendaPoints;
   if (state.winner && state.gameEndReason) context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
   if ((legalAction.type === "score_agenda" || legalAction.type === "steal_agenda") && agendaId) {

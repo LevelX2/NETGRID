@@ -4176,6 +4176,103 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_022_emergency-self-construct"]?.implementationStatus).not.toBe("playable_mvp");
   });
+
+  it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
+    let state = apply(v1919AgendaOveradvanceGame("v1919-overadvance-score"), "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 80;
+    state.corp.clicks = 30;
+    state.corp.maxHandSize = 100;
+
+    const agendaId = putCorpRootInRemote(state, "onr_v1_189_artificial-security-directors");
+    const rovingId = findCard(state, "onr_v1_368_roving-submarine");
+    const server = state.corp.servers.find((candidate) => candidate.id === "remote_1");
+    expect(server).toBeDefined();
+    if (!server) throw new Error("Missing remote");
+    removeEverywhere(state, rovingId);
+    server.root.push(rovingId);
+    state.cardInstances[rovingId] = { ...state.cardInstances[rovingId]!, zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" }, faceup: true, rezzed: true };
+
+    const initial = structuredClone(state);
+    for (let index = 0; index < 5; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && String(action.payload?.cardId) === agendaId);
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && String(action.payload?.cardId) === agendaId);
+
+    expect(state.corp.scoreArea).toContain(agendaId);
+    expect(cardCounterAmount(state, agendaId, "agenda")).toBe(1);
+    const scoreEvent = state.eventLog.at(-1);
+    expect(scoreEvent?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      v1919AgendaDifficulty: 3,
+      v1919Overadvance: 2,
+      v1919BonusAgendaPoints: 1,
+      totalAgendaPoints: 3
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("uses V1.9.19 scored agenda reveal actions without leaking hidden R&D to the Runner before reveal", () => {
+    let state = apply(v1919AgendaOveradvanceGame("v1919-scored-reveal"), "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 80;
+    state.corp.clicks = 30;
+    state.corp.maxHandSize = 100;
+
+    const agendaId = putCorpRootInRemote(state, "onr_v1_202_genetics-visionary-acquisition");
+    for (let index = 0; index < 4; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && String(action.payload?.cardId) === agendaId);
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && String(action.payload?.cardId) === agendaId);
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Agenda");
+
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1919_scored_agenda_reveal_rd_top");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+      revealKind: "reveal",
+      cardDefinitionId: "simple_agenda",
+      title: "Simple Agenda"
+    });
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+  });
+
+  it("uses V1.9.19 asset counter, economy and access-ambush paths through explicit actions", () => {
+    let corpState = apply(v1919AgendaOveradvanceGame("v1919-asset-actions"), "corp", (action) => action.type === "mandatory_draw");
+    corpState.corp.credits = 80;
+    corpState.corp.clicks = 30;
+    const chicagoId = putCorpRootInRemote(corpState, "onr_v1_312_chicago-branch");
+    const informationId = putCorpRootInRemote(corpState, "onr_v1_328_information-laundering");
+    corpState.cardInstances[chicagoId] = { ...corpState.cardInstances[chicagoId]!, faceup: true, rezzed: true };
+    corpState.cardInstances[informationId] = { ...corpState.cardInstances[informationId]!, faceup: true, rezzed: true };
+
+    corpState = apply(corpState, "corp", (action) => action.type === "gain_credit" && action.payload?.v1919AssetAbility === "add_power_counter");
+    expect(cardCounterAmount(corpState, chicagoId, "power")).toBe(1);
+    const beforeCredits = corpState.corp.credits;
+    corpState = apply(
+      corpState,
+      "corp",
+      (action) => action.type === "gain_credit" && action.payload?.v1919AssetAbility === "gain_credits" && String(action.payload?.cardId) === informationId
+    );
+    expect(corpState.corp.credits).toBe(beforeCredits + 2);
+
+    let accessState = toRunnerTurn(v1919AgendaOveradvanceGame("v1919-asset-ambush"));
+    accessState.runner.credits = 20;
+    const programId = installRunnerProgramForTest(accessState, "simple_decoder");
+    const experimentalAiId = putCorpRootInRemote(accessState, "onr_v1_323_experimental-ai");
+    accessState = apply(accessState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    accessState = apply(accessState, "runner", (action) => action.type === "access_card");
+    expect(accessState.runner.heap).toContain(programId);
+    expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      hiddenZoneAction: "v1919_access_ambush_trash_installed",
+      ambushDefinitionId: "onr_v1_323_experimental-ai",
+      trashedCardDefinitionId: "simple_decoder"
+    });
+    expect(accessState.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(accessState.run?.accessedCardId).toBe(experimentalAiId);
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {
@@ -8303,6 +8400,50 @@ const ONR_V1_9_17_GENERIC_ASSET_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1919_agenda_overadvance",
+  name: "O:NR V1.9.19 Agenda/Overadvance WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_025_fait-accompli", quantity: 1 },
+    { id: "onr_v1_078_arasaka-owns-you", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_killer", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1919_agenda_overadvance",
+  name: "O:NR V1.9.19 Agenda/Overadvance WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_189_artificial-security-directors", quantity: 1 },
+    { id: "onr_v1_202_genetics-visionary-acquisition", quantity: 1 },
+    { id: "onr_v1_291_falsified-transactions-expert", quantity: 1 },
+    { id: "onr_v1_292_management-shake-up", quantity: 1 },
+    { id: "onr_v1_300_project-consultants", quantity: 1 },
+    { id: "onr_v1_303_silver-lining-recovery-protocol", quantity: 1 },
+    { id: "onr_v1_304_systematic-layoffs", quantity: 1 },
+    { id: "onr_v1_305_team-restructuring", quantity: 1 },
+    { id: "onr_v1_312_chicago-branch", quantity: 1 },
+    { id: "onr_v1_315_corprunners-shattered-remains", quantity: 1 },
+    { id: "onr_v1_323_experimental-ai", quantity: 1 },
+    { id: "onr_v1_328_information-laundering", quantity: 1 },
+    { id: "onr_v1_346_vacant-soulkiller", quantity: 1 },
+    { id: "onr_v1_347_vapor-ops", quantity: 1 },
+    { id: "onr_v1_348_virus-test-site", quantity: 1 },
+    { id: "onr_v1_363_olivia-salazar", quantity: 1 },
+    { id: "onr_v1_368_roving-submarine", quantity: 1 },
+    { id: "onr_v1_374_washington-d-c-city-grid", quantity: 1 },
+    { id: "simple_agenda", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -8735,6 +8876,16 @@ function v1917GenericAssetGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK,
     corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1919AgendaOveradvanceGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
+    corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
     agendaPointsToWin: 7
   });
 }
