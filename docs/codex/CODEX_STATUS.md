@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.21-Promotion-Readiness vom 2026-05-13 16:12 CEST: `docs/derived/V1_9_21_PROMOTION_READINESS_REVIEW.md` dokumentiert den naechsten Promotion-Schnitt. Der Release ist technisch vorbereitet, aber noch nicht promotet: finale AI-Artefakte, Catalog-/AI-Exports, Webclient-Version, Final Review und Cursor-Fortschritt fehlen noch.
+
 V1.9.21-Breitverify vom 2026-05-13 16:10 CEST: Der WIP-Stand nach Initial-Random-Abdeckung und AI-Draft wurde breit verifiziert. Gruen: JSON, `catalog` 35, `engine` 271, `ai` 85, `server` 72, `web` 76, `typecheck`, `test` Exit 0, `lint` und `build`. Build weiterhin nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung. Cursor bleibt V1.9.21 `implementing`; offen sind Final Review, Catalog-/AI-Promotion und Webclient-Version.
 
 V1.9.21-AI-Draft-Artefakte vom 2026-05-13 16:06 CEST: Nicht-promotende AI-Draft-Artefakte fuer den 6er-Scope sind angelegt und geprueft: `data/ai/ai-card-hints-deck-legal-v1921-draft.json`, `data/scenarios/ai-deck-legal-v1921-draft-smokes.json` und `data/manifests/v1921-deck-legal-ai-approval-draft-manifest.json`. Status bleibt `hinted_only`/`draft_no_ai_promotion`; keine Karte ist `ai_supported`. Verifikation: JSON, `catalog` 35, `engine` 271 und `ai` 85 gruen. Naechster Schnitt: Full Checks, Final Review und Promotion.

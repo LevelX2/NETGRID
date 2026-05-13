@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 16:12 CEST
+- Ergebnis: V1.9.21 Promotion-Readiness dokumentiert; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_21_PROMOTION_READINESS_REVIEW.md` benennt die noch fehlenden Promotion-Schalter: finale AI-Artefakte, Catalog-/AI-Approval-Exports, Webclient-Version, Final Review und Cursor-Fortschritt. Keine Teilpromotion wurde begonnen.
+- Tests: keine neuen Code-Checks; diese Notiz basiert auf dem direkt vorher dokumentierten breiten Verify-Lauf.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: promotion readiness review`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
 - Zeitpunkt: 2026-05-13 16:10 CEST
 - Ergebnis: V1.9.21 WIP-Stand nach Initial-Random und AI-Draft breit verifiziert; Cursor bleibt auf V1.9.21 `implementing`.
 - Release: V1.9.21
