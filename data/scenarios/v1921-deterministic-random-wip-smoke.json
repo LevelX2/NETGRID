@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1921-deterministic-random-wip-smoke",
+  "release": "V1.9.21",
+  "status": "wip_runtime_definitions",
+  "coversCards": [
+    "onr_v1_002_ai-boon",
+    "onr_v1_008_boardwalk",
+    "onr_v1_104_playful-ai",
+    "onr_v1_172_quest-for-cattekin",
+    "onr_v1_339_schlaghund",
+    "onr_v1_367_rio-de-janeiro-city-grid"
+  ],
+  "assertions": [
+    "V1.9.21 scope is frozen to exactly 6 target cards.",
+    "Catalog WIP guard tracks the exact target set.",
+    "All 6 V1.9.21 target cards have runtime definitions with final display-only text and no WIP prefix.",
+    "No V1.9.21 card is release-promoted or AI-approved in this WIP slice.",
+    "V1.9.22 False Echo remains outside the V1.9.21 WIP runtime guard.",
+    "Engine random resolver, AI, full release promotion and final review remain follow-up work."
+  ],
+  "verification": {
+    "json": "pass",
+    "catalog": "pass: 35 tests",
+    "engine": "pass: 266 tests",
+    "typecheck": "pass"
+  },
+  "completionGate": {
+    "releaseDone": false,
+    "catalogPromoted": false,
+    "aiPromoted": false,
+    "runtimeDefinitionsReady": true,
+    "engineCovered": false
+  }
+}

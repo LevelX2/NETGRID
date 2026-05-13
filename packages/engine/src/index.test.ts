@@ -4008,7 +4008,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4174,7 +4174,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
@@ -4417,7 +4417,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
@@ -4643,6 +4643,19 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   });
 });
 
+describe("V1.9.21 Deterministic Random WIP", () => {
+  it("adds all V1.9.21 WIP runtime definitions without release-promoting V1.9.22", () => {
+    expect(ONR_V1_9_21_WIP_CARD_IDS).toHaveLength(6);
+    for (const definitionId of ONR_V1_9_21_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+      expect(definition?.mechanics.join(" "), definitionId).toContain("deterministic_random");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+});
+
 describe("V1.9.12 Counter/Virus/Recurring", () => {
   it("adds scoped V1.9.12 definitions without pulling in later cursor cards", () => {
     expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
@@ -4651,7 +4664,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -4746,7 +4759,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
@@ -5067,7 +5080,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
@@ -5228,7 +5241,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
@@ -5389,7 +5402,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
@@ -5548,7 +5561,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
@@ -5900,7 +5913,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_upgrade_root_server|access_ambush|trace|city_grid|run_flow|tag|counter|hidden_zone|stealth/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_002_ai-boon"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_026_false-echo"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {
@@ -7785,6 +7798,15 @@ const ONR_V1_9_20_WIP_CARD_IDS = [
   "onr_v1_338_rustbelt-hq-branch",
   "onr_v1_343_south-african-mining-corp",
   "onr_v1_360_jerusalem-city-grid"
+] as const;
+
+const ONR_V1_9_21_WIP_CARD_IDS = [
+  "onr_v1_002_ai-boon",
+  "onr_v1_008_boardwalk",
+  "onr_v1_104_playful-ai",
+  "onr_v1_172_quest-for-cattekin",
+  "onr_v1_339_schlaghund",
+  "onr_v1_367_rio-de-janeiro-city-grid"
 ] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
@@ -9711,4 +9733,5 @@ function removeEverywhere(state: GameState, id: string): void {
     state.specialZones.removedFromGame = state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
   }
 }
+
 

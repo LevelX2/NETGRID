@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "1.9.21",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.21",
+  "generatedFor": "V1.9.21 Deterministischer Zufall und Wuerfelkarten WIP gate",
+  "generatedAt": "2026-05-13",
+  "status": "wip_runtime_definitions",
+  "extends": "data/rules/mechanics-coverage-1.9.20.json",
+  "gateAssertions": {
+    "deterministicRandomScopeFrozenToSixCards": true,
+    "catalogWipGuardReady": true,
+    "runtimeDefinitionsReady": true,
+    "engineCovered": false,
+    "hiddenInfoSafeForCoveredSmokes": false,
+    "stateHashReplayStableForCoveredSmokes": false,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true,
+    "noV1922Scope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.random.deterministic_card",
+      "label": "Deterministischer Karten-Zufall",
+      "currentStatus": "planned_runtime_wip",
+      "targetGate": "v1.9.21",
+      "currentScopeNote": "6 Runtime-Definitionen sind vorhanden; Engine-Zufallsresolver, RandomDrawRecords, Visibility und Replay/StateHash folgen.",
+      "coverage": [
+        "scope_guard",
+        "runtime_definitions"
+      ]
+    }
+  ],
+  "deferred": [
+    {
+      "item": "engine_random_resolver",
+      "reason": "V1.9.21 hat Catalog- und Runtime-WIP; deterministische Random-Aufloesung, AI und Promotion folgen."
+    }
+  ]
+}

@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 15:46 CEST
+- Ergebnis: V1.9.21 Runtime-WIP fuer deterministische Zufalls-/Wuerfelkarten angelegt; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: 6/6 Zielkarten haben Runtime-Definitionen mit finalen display-only Texten ohne `WIP`-Praefix. WIP-Manifest, Mechanics-Coverage und WIP-Smoke sind angelegt. Engine-Sentinel schuetzt die Zielmenge gegen V1.9.22-Promotion.
+- Tests: JSON-Validation pass; `catalog` pass (35), `engine` pass (266), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: runtime definitions random guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil deterministische Random-Resolver, Visibility-/Replay-/StateHash-Abdeckung, AI-Artefakte, Pflichtchecks, Final Review und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 15:42 CEST
 - Ergebnis: V1.9.21 Deterministischer Zufall und Wuerfelkarten geplant und als Catalog-WIP begonnen; Cursor bleibt auf V1.9.21 `implementing`.
 - Release: V1.9.21
