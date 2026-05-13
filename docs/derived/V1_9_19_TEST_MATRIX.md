@@ -1,6 +1,6 @@
 # V1.9.19 Test Matrix
 
-Status: frozen for WIP
+Status: final
 Stand: 2026-05-13
 
 | Bereich | Pflichtnachweis | Aktueller Stand |
@@ -15,7 +15,7 @@ Stand: 2026-05-13
 | Replay/StateHash | Deterministische Replays je Effektfamilie | Teilabdeckung grün für Score/Difficulty/Overadvance |
 | AI | AI-Hints, AI-Smokes, legaler Fallback | Draft-Hints und Draft-Smokes für 20/20 Karten angelegt; Paketcheck grün; offizielle AI-Promotion bleibt Folgearbeit |
 | Server/Web | Keine Payload-Leaks; Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON-Validation 277, Engine 258 nach Runner-Agenda-Kosten-Schnitt, Catalog 33, AI 85, Server 72, Web 76, Typecheck, Test, Lint und Build zuletzt grün; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Abschlusslauf grün: JSON-Validation, Engine 258, Catalog 34, AI 85, Server 72, Web 76, Typecheck, Test, Lint und Build; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
 
 ## Mindestchecks im ersten WIP
 

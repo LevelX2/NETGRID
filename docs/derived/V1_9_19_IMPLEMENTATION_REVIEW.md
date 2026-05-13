@@ -1,6 +1,6 @@
 # V1.9.19 Implementation Review
 
-Status: WIP
+Status: final
 Stand: 2026-05-13
 
 ## Umgesetzter Schnitt
@@ -22,12 +22,12 @@ Stand: 2026-05-13
 
 ## Gate
 
-`V1_9_19_done: false`
-`V1_9_19_phase: implementing`
+`V1_9_19_done: true`
+`V1_9_19_phase: done`
 
 ## Nächster Schnitt
 
-Weitere konkrete V1.9.19-Arbeit: finale Daten-/AI-Artefakte auf den nun breiteren Engine-Stand nachziehen, offizielle AI-Approval vorbereiten, Final Review, Release-Promotion und Webclient-Version.
+V1.9.19 ist release-promotet. Der nächste erlaubte Cursor ist V1.9.20.
 
 ## Verifikation
 
@@ -47,3 +47,4 @@ Weitere konkrete V1.9.19-Arbeit: finale Daten-/AI-Artefakte auf den nun breitere
 - Nach Operation-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 256 Tests.
 - Nach Ambush-Damage-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 257 Tests.
 - Nach Runner-Agenda-Kosten-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 258 Tests.
+- Abschlusslauf nach Release-Promotion: JSON-Validation pass; `catalog` pass, 34 Tests; `ai` pass, 85 Tests; `server` pass, 72 Tests; `web` pass, 76 Tests; `typecheck` pass; `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

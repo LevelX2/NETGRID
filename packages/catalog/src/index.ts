@@ -705,6 +705,8 @@ export const ONR_V1_9_19_WIP_CARD_IDS = [
   "onr_v1_374_washington-d-c-city-grid"
 ] as const;
 
+export const ONR_V1_9_19_RELEASE_CARD_IDS = ONR_V1_9_19_WIP_CARD_IDS;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -735,7 +737,8 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_9_15_RELEASE_CARD_IDS,
   ...ONR_V1_9_16_RELEASE_CARD_IDS,
   ...ONR_V1_9_17_RELEASE_CARD_IDS,
-  ...ONR_V1_9_18_RELEASE_CARD_IDS
+  ...ONR_V1_9_18_RELEASE_CARD_IDS,
+  ...ONR_V1_9_19_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -923,6 +926,8 @@ export const DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS = [...ONR_V1_9_17_RELEASE_CAR
 
 export const DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS = [...ONR_V1_9_18_RELEASE_CARD_IDS] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS = [...ONR_V1_9_19_RELEASE_CARD_IDS] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
@@ -942,8 +947,10 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS
 ]);
+const ONR_V1_9_19_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_19_RELEASE_CARD_IDS);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
 const ONR_V1_2_3_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_2_3_RELEASE_CARD_IDS);
@@ -1245,6 +1252,15 @@ const ONR_V1_9_18_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v1918-generic-upgrade-root-server-release-smoke.json", "data/scenarios/ai-deck-legal-v1918-smokes.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.9.18 Generic Upgrade/Root Server WIP", "data/scenarios/v1918-generic-upgrade-root-server-release-smoke.json"],
   replayTests: ["packages/engine/src/index.test.ts::V1.9.18 Generic Upgrade/Root Server WIP"]
+};
+
+const ONR_V1_9_19_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.19",
+  status: "human_playable_v1_9_19_agenda_overadvance_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.19 Agenda/Overadvance WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1919-agenda-overadvance-release-smoke.json", "data/scenarios/ai-deck-legal-v1919-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.19 Agenda/Overadvance WIP", "data/scenarios/v1919-agenda-overadvance-release-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.19 Agenda/Overadvance WIP"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -2571,6 +2587,7 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV1919 = ONR_V1_9_19_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1918 = ONR_V1_9_18_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1917 = ONR_V1_9_17_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1916 = ONR_V1_9_16_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -2600,7 +2617,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV1918
+  const textOverrides = isV1919
+    ? {}
+    : isV1918
     ? {}
     : isV1917
     ? {}
@@ -2659,7 +2678,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV1918
+  const numericOverrides = isV1919
+    ? {}
+    : isV1918
     ? {}
     : isV1917
     ? {}
@@ -2718,7 +2739,9 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV1918
+  const manifest = isV1919
+    ? ONR_V1_9_19_RELEASE_MANIFEST
+    : isV1918
     ? ONR_V1_9_18_RELEASE_MANIFEST
     : isV1917
     ? ONR_V1_9_17_RELEASE_MANIFEST
