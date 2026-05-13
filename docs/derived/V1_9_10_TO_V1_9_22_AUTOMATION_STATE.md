@@ -78,6 +78,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Tests: `engine` pass (295); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: edgerunner temps install bundle resolver wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+- Folge-Preflight: `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentiert den naechsten Agenda-Kandidaten `Security Purge` und blockiert Code ohne erfundene Optionalitaets-/Serverziel-Semantik, bis der Installationsvertrag lokal bestaetigt ist.
 
 - Zeitpunkt: 2026-05-13 23:55 CEST
 - Ergebnis: V1.9.22 Corp-ICE-Resolver fuer `Zombie` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

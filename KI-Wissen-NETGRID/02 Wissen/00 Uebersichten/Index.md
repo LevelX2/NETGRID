@@ -44,6 +44,8 @@
 
 - V1.9.22 Corp-ICE-Runtime-WIP: `Zombie` hat einen engen ICE-Resolver ohne Catalog-, AI- oder Release-Promotion. Die Runtime-Definition nutzt Rez-Kosten 9, Stärke 4, zwei Core-Damage-Subroutinen und End-the-run; der Smoke deckt Rez-LegalAction, Wrong-Side-/Stale-Revalidation, side-sichere Run-Auflösung und Replay/StateHash ab. Completion-Gate bleibt offen.
 
+- V1.9.22 Security-Purge-Preflight: `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentiert den nächsten Agenda-Kandidaten. Code bleibt gesperrt, bis die Optionalität von "any ice", Serverzielwahl und Install-/Rez-Reihenfolge lokal bestätigt sind.
+
 ## Kernwissen
 
 - [[Projektueberblick]]: verdichtetes Projektbild für neue Threads.
