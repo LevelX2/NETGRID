@@ -108,14 +108,23 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const gainedCredits = numberValue(payload.playfulAiGainedCredits) ?? 0;
         const setAsideDice = numberValue(payload.playfulAiSetAsideDice) ?? 0;
         const lastRoll = numberValue(payload.v1921DieRoll);
+        const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
+        const queuedBeforeRolls = numberValue(payload.playfulAiDiceQueuedBeforeRolls);
+        const remainingDice = numberValue(payload.playfulAiRemainingDice) ?? numberValue(payload.playfulAiDiceQueuedAfterRolls);
         const choiceOpened = payload.playfulAiChoiceOpened === true;
         const complete = payload.playfulAiComplete === true;
         category = gainedCredits > 0 ? "economy" : "card";
         visibility = "public";
         title = phrase(subject, `Playful AI aufgelöst: ${creditText(gainedCredits)} genommen${setAsideDice > 0 ? ` und ${setAsideDice} ${dieText(setAsideDice)} beiseitegelegt` : ""}`);
-        description = choiceOpened ? "Der nächste Wurf öffnet eine weitere Entscheidung." : complete ? "Die Playful-AI-Schleife ist abgeschlossen." : undefined;
+        description = playfulAiResolveDescription(dieRolls, queuedBeforeRolls, remainingDice, choiceOpened, complete);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
-        chips.push("Playful AI", `+${gainedCredits} ${creditLabel(gainedCredits)}`, ...(setAsideDice > 0 ? [`${setAsideDice} beiseite`] : []), ...(lastRoll !== undefined ? [`Wurf ${lastRoll}`] : []));
+        chips.push(
+          "Playful AI",
+          `+${gainedCredits} ${creditLabel(gainedCredits)}`,
+          ...(setAsideDice > 0 ? [`${setAsideDice} beiseite`] : []),
+          ...playfulAiRollChips(dieRolls, lastRoll),
+          ...(choiceOpened && remainingDice !== undefined ? [`${remainingDice} offen`] : [])
+        );
         break;
       }
       if (payload.discardResolved === true) {
@@ -243,6 +252,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     case "play_operation":
       if (actionType === "play_event" && stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
         const dieRoll = numberValue(payload.v1921DieRoll);
+        const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
         const choiceOpened = payload.playfulAiChoiceOpened === true;
         const complete = payload.playfulAiComplete === true;
         category = "card";
@@ -254,7 +264,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
             ? "Die Playful-AI-Schleife ist ohne weitere Entscheidung abgeschlossen."
             : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
-        chips.push(actionType === "play_event" ? "Event" : "Operation", "Playful AI", ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), choiceOpened ? "Choice" : "Fertig");
+        chips.push(actionType === "play_event" ? "Event" : "Operation", "Playful AI", ...playfulAiRollChips(dieRolls, dieRoll), choiceOpened ? "Choice" : "Fertig");
         break;
       }
       if (payload.traceStarted === true) {
@@ -648,6 +658,42 @@ function dieText(amount: number): string {
   return amount === 1 ? "Würfel" : "Würfel";
 }
 
+function playfulAiRollChips(dieRolls: number[], fallbackRoll: number | undefined): string[] {
+  if (dieRolls.length > 1) return [`Würfe ${dieRolls.join(", ")}`];
+  const roll = dieRolls[0] ?? fallbackRoll;
+  return roll !== undefined ? [`Wurf ${roll}`] : [];
+}
+
+function playfulAiResolveDescription(
+  dieRolls: number[],
+  queuedBeforeRolls: number | undefined,
+  remainingDice: number | undefined,
+  choiceOpened: boolean,
+  complete: boolean
+): string | undefined {
+  const parts: string[] = [];
+  if (dieRolls.length > 0) {
+    const verb = dieRolls.length === 1 ? "wurde" : "wurden";
+    const diceText =
+      queuedBeforeRolls && queuedBeforeRolls > dieRolls.length
+        ? `${dieRolls.length} von ${queuedBeforeRolls} beiseitegelegten Würfeln`
+        : dieRolls.length === 1
+          ? "ein beiseitegelegter Würfel"
+          : `${dieRolls.length} beiseitegelegte Würfel`;
+    parts.push(`Danach ${verb} ${diceText} geworfen: ${dieRolls.join(", ")}.`);
+  }
+  if (choiceOpened) {
+    parts.push(
+      remainingDice && remainingDice > 0
+        ? `Der letzte Wurf öffnet eine weitere Entscheidung; ${remainingDice === 1 ? "ein Würfel bleibt" : `${remainingDice} Würfel bleiben`} danach noch offen.`
+        : "Der letzte Wurf öffnet eine weitere Entscheidung."
+    );
+  } else if (complete) {
+    parts.push("Die Playful-AI-Schleife ist abgeschlossen.");
+  }
+  return parts.join(" ") || undefined;
+}
+
 function traceParticipantLabel(participant: Side, viewer: Side): string {
   if (participant === viewer) return "Du";
   return participant === "corp" ? "Korp" : "Runner";
@@ -798,6 +844,11 @@ function stringValue(value: unknown): string | undefined {
 
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function numberArrayValue(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is number => typeof item === "number" && Number.isFinite(item));
 }
 
 function positiveIntegerValue(value: unknown): number | undefined {

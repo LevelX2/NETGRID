@@ -749,7 +749,7 @@ export type LegalAction = {
   effectRef?: string;
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
-  payload?: Record<string, string | number | boolean>;
+  payload?: Record<string, string | number | boolean | number[]>;
   resolvedEffects?: ResolvedGameEffect[];
 };
 

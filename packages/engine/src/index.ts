@@ -405,7 +405,10 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         randomPurpose,
         v1921DieRoll: dieRoll,
         randomCounterAfter: state.randomCounter,
-        playfulAiRolledDice: 1
+        playfulAiRolledDice: 1,
+        playfulAiDieRolls: [dieRoll],
+        playfulAiDiceQueuedBeforeRolls: 0,
+        playfulAiDiceQueuedAfterRolls: 0
       };
       if (dieRoll <= 3) {
         startPlayfulAiChoice(state, sourceCardId, 0, 0, dieRoll);
@@ -6918,7 +6921,11 @@ function startPlayfulAiChoice(state: GameState, sourceCardId: CardInstanceId, re
     choiceId: `v1921_playful_ai_${state.stateVersion + 1}_${rollIndex}_${boundedRemaining}_${boundedRoll}`,
     side: "runner",
     source: playfulAiChoiceSource(sourceCardId, boundedRemaining, rollIndex, boundedRoll),
-    prompt: `Playful AI: ${boundedRoll} Credits nehmen und/oder ${boundedRoll} Würfel beiseitelegen.`,
+    prompt: `Playful AI: ${boundedRoll} Credits nehmen und/oder ${boundedRoll} Würfel beiseitelegen.${
+      boundedRemaining > 0
+        ? ` Danach ${boundedRemaining === 1 ? "bleibt noch ein beiseitegelegter Würfel" : `bleiben noch ${boundedRemaining} beiseitegelegte Würfel`} offen.`
+        : ""
+    }`,
     kind: "select_option",
     options: Array.from({ length: boundedRoll + 1 }, (_, gainAmount) => {
       const setAsideDice = boundedRoll - gainAmount;
@@ -6949,9 +6956,10 @@ function resolvePlayfulAiChoice(state: GameState, legalAction: LegalAction, play
   const gainAmount = typeof option?.value === "number" ? option.value : Number.NaN;
   if (!Number.isInteger(gainAmount) || gainAmount < 0 || gainAmount > parsed.lastRoll) throw new Error("Die Playful-AI-Aufteilung ist ungueltig.");
   const setAsideDice = parsed.lastRoll - gainAmount;
+  const diceQueuedBeforeRolls = parsed.remainingDice + setAsideDice;
   credits(state, "runner", gainAmount);
   delete state.pendingChoice;
-  const loopResult = continuePlayfulAiDiceLoop(state, parsed.sourceCardId, parsed.remainingDice + setAsideDice, parsed.rollIndex);
+  const loopResult = continuePlayfulAiDiceLoop(state, parsed.sourceCardId, diceQueuedBeforeRolls, parsed.rollIndex);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1921RunnerEventAbility: "playful_ai_dice_loop",
@@ -6960,6 +6968,9 @@ function resolvePlayfulAiChoice(state: GameState, legalAction: LegalAction, play
     playfulAiSetAsideDice: setAsideDice,
     playfulAiRemainingDice: loopResult.remainingDice,
     playfulAiRolledDice: loopResult.rolledDice,
+    playfulAiDieRolls: loopResult.dieRolls,
+    playfulAiDiceQueuedBeforeRolls: diceQueuedBeforeRolls,
+    playfulAiDiceQueuedAfterRolls: loopResult.remainingDice,
     playfulAiComplete: loopResult.complete,
     ...(loopResult.choiceOpened ? { playfulAiChoiceOpened: true } : {}),
     ...(loopResult.lastDieRoll !== undefined ? { v1921DieRoll: loopResult.lastDieRoll } : {}),
@@ -6974,10 +6985,19 @@ function continuePlayfulAiDiceLoop(
   sourceCardId: CardInstanceId,
   diceToRoll: number,
   previousRollIndex: number
-): { remainingDice: number; rolledDice: number; complete: boolean; choiceOpened: boolean; lastDieRoll?: number; lastRandomPurpose?: string } {
+): {
+  remainingDice: number;
+  rolledDice: number;
+  dieRolls: number[];
+  complete: boolean;
+  choiceOpened: boolean;
+  lastDieRoll?: number;
+  lastRandomPurpose?: string;
+} {
   let remainingDice = Math.max(0, Math.floor(diceToRoll));
   let rollIndex = Math.max(0, Math.floor(previousRollIndex));
   let rolledDice = 0;
+  const dieRolls: number[] = [];
   let lastDieRoll: number | undefined;
   let lastRandomPurpose: string | undefined;
   while (remainingDice > 0) {
@@ -6985,14 +7005,23 @@ function continuePlayfulAiDiceLoop(
     rollIndex += 1;
     const roll = rollV1921Die(state, V1921_PLAYFUL_AI_ID, `set_aside.roll.${rollIndex}`);
     rolledDice += 1;
+    dieRolls.push(roll.dieRoll);
     lastDieRoll = roll.dieRoll;
     lastRandomPurpose = roll.randomPurpose;
     if (roll.dieRoll <= 3) {
       startPlayfulAiChoice(state, sourceCardId, remainingDice, rollIndex, roll.dieRoll);
-      return { remainingDice, rolledDice, complete: false, choiceOpened: true, lastDieRoll, lastRandomPurpose };
+      return { remainingDice, rolledDice, dieRolls, complete: false, choiceOpened: true, lastDieRoll, lastRandomPurpose };
     }
   }
-  return { remainingDice: 0, rolledDice, complete: true, choiceOpened: false, ...(lastDieRoll !== undefined ? { lastDieRoll } : {}), ...(lastRandomPurpose ? { lastRandomPurpose } : {}) };
+  return {
+    remainingDice: 0,
+    rolledDice,
+    dieRolls,
+    complete: true,
+    choiceOpened: false,
+    ...(lastDieRoll !== undefined ? { lastDieRoll } : {}),
+    ...(lastRandomPurpose ? { lastRandomPurpose } : {})
+  };
 }
 
 function selectedChoiceIds(selectedChoices: PlayerAction["selectedChoices"]): string[] {
@@ -8540,6 +8569,9 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
       "playfulAiSetAsideDice",
       "playfulAiRemainingDice",
       "playfulAiRolledDice",
+      "playfulAiDieRolls",
+      "playfulAiDiceQueuedBeforeRolls",
+      "playfulAiDiceQueuedAfterRolls",
       "runnerCreditsAfter",
       "aiBoonRunStrength",
       "boardwalkCounterAfter",

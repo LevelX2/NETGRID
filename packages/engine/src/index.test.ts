@@ -5126,6 +5126,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       v1921RunnerEventAbility: "playful_ai_dice_loop",
       randomPurpose: "v1921.die.onr_v1_104_playful-ai.play_event.roll.0",
       v1921DieRoll: 2,
+      playfulAiDieRolls: [2],
+      playfulAiDiceQueuedBeforeRolls: 0,
+      playfulAiDiceQueuedAfterRolls: 0,
       playfulAiChoiceOpened: true,
       randomCounterAfter: randomBefore + 1
     });
@@ -5176,6 +5179,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       playfulAiGainedCredits: 2,
       playfulAiSetAsideDice: 0,
       playfulAiRemainingDice: 0,
+      playfulAiDieRolls: [],
+      playfulAiDiceQueuedBeforeRolls: 0,
+      playfulAiDiceQueuedAfterRolls: 0,
       playfulAiComplete: true
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -5213,6 +5219,17 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state = applyChoice(state, "runner", "gain_1_set_aside_2");
     expect(state.pendingChoice?.source).toContain("remainingDice=1");
     expect(state.pendingChoice?.source).toContain("lastRoll=3");
+    expect(state.pendingChoice?.prompt).toContain("bleibt noch ein beiseitegelegter Würfel offen");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      playfulAiGainedCredits: 1,
+      playfulAiSetAsideDice: 2,
+      playfulAiRolledDice: 1,
+      playfulAiDieRolls: [3],
+      playfulAiDiceQueuedBeforeRolls: 2,
+      playfulAiDiceQueuedAfterRolls: 1,
+      playfulAiChoiceOpened: true
+    });
     expect(state.randomDrawRecords.map((record) => record.purpose)).toEqual([
       "v1921.die.onr_v1_104_playful-ai.play_event.roll.0",
       "v1921.die.onr_v1_104_playful-ai.set_aside.roll.1"
@@ -5232,6 +5249,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       playfulAiGainedCredits: 3,
       playfulAiSetAsideDice: 0,
       playfulAiRolledDice: 1,
+      playfulAiDieRolls: [5],
+      playfulAiDiceQueuedBeforeRolls: 1,
+      playfulAiDiceQueuedAfterRolls: 0,
       playfulAiComplete: true
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));

@@ -44,3 +44,7 @@ Diese Completion-Nacharbeit ergänzt den formalen V1.9.21-Abschluss, ohne das ur
 ## Restgrenze
 
 Die Completion bleibt im V1.9.21-Scope. Es wurden keine V1.9.22-Karten oder externen Assets freigeschaltet.
+
+## Nachprüfung 2026-05-14
+
+Eine Playtest-Nachprüfung zu `Playful AI` bestätigte, dass die Engine weiterhin normale W6-Würfe nutzt und den abstrakten Set-aside-Zähler korrekt weiterführt. Die öffentliche Chronik war jedoch irreführend, weil Resolve-Choice-Einträge nur den zuletzt relevanten Folgewurf und die neu beiseitegelegten Würfel zeigten. Die PublicEvent-Metadaten führen nun die pro Aktion gewürfelte Serie (`playfulAiDieRolls`) sowie den Würfelzähler vor und nach den Folgewürfen. Die Web-Chronik zeigt dadurch auch 4/5/6-Folgewürfe und offene Restwürfel nachvollziehbar an.
