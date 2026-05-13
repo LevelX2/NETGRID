@@ -255,6 +255,7 @@ const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWA
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
 const V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID = "onr_v1_093_if-you-want-it-done-right";
+const V1922_ORGAN_DONOR_ID = "onr_v1_103_organ-donor";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
@@ -419,6 +420,14 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     resolve: (state, legalAction) => {
       startV1922RunnerStackTop5Choice(state, String(legalAction.payload?.cardId ?? ""));
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest" };
+    }
+  },
+  [V1922_ORGAN_DONOR_ID]: {
+    name: "onr_v1922_runner_event_trash_grip_gain_credits",
+    canPlay: (state) => state.runner.grip.length > 1,
+    resolve: (state, legalAction) => {
+      startV1922RunnerGripTrashChoice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1922_runner_grip_trash_gain_credits" };
     }
   },
   "onr_v1_087_forgotten-backup-chip": {
@@ -6565,6 +6574,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveV1922RunnerStackTop5Choice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1922.runner_grip_trash_gain_credits")) {
+    resolveV1922RunnerGripTrashChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -6873,6 +6886,52 @@ function resolveV1922RunnerStackTop5Choice(state: GameState, legalAction: LegalA
     hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest",
     selectedCount: 1,
     arrangedCount: arrangedRest.length
+  };
+}
+
+function startV1922RunnerGripTrashChoice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = state.runner.grip.map((cardId) => {
+    const definition = definitionFor(state, cardId);
+    return { id: `card_${cardId}`, label: definition.title, value: cardId };
+  });
+  if (options.length === 0) throw new Error("Keine Karten in der Grip.");
+  state.pendingChoice = {
+    choiceId: `v1922_runner_grip_trash_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.runner_grip_trash_gain_credits:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Grip-Karten trashen",
+    kind: "select_cards",
+    options,
+    minSelections: 0,
+    maxSelections: Math.min(5, options.length),
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+}
+
+function resolveV1922RunnerGripTrashChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine V1.9.22-Grip-Trash-Choice offen.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  if (selectedIds.length > 5) throw new Error("Organ Donor darf hoechstens fuenf Karten trashen.");
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length || selectedIds.some((cardId) => !state.runner.grip.includes(cardId))) throw new Error("Die Grip-Auswahl enthaelt ungueltige Karten.");
+  for (const cardId of selectedIds) {
+    removeFromAllZones(state, cardId);
+    state.runner.heap.push(cardId);
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "runner", zone: "heap" } };
+  }
+  const gainedCredits = selectedIds.length;
+  if (gainedCredits > 0) credits(state, "runner", gainedCredits);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
+    trashedCount: selectedIds.length,
+    gainedCredits,
+    runnerCreditsAfter: state.runner.credits
   };
 }
 
@@ -7829,6 +7888,9 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
     if (typeof legalAction.payload.selectedCount === "number") context.selectedCount = legalAction.payload.selectedCount;
     if (typeof legalAction.payload.arrangedCount === "number") context.arrangedCount = legalAction.payload.arrangedCount;
+    if (typeof legalAction.payload.trashedCount === "number") context.trashedCount = legalAction.payload.trashedCount;
+    if (typeof legalAction.payload.gainedCredits === "number") context.gainedCredits = legalAction.payload.gainedCredits;
+    if (typeof legalAction.payload.runnerCreditsAfter === "number") context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     if (typeof legalAction.payload.ambushDefinitionId === "string") context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
     if (typeof legalAction.payload.runnerTagsAfter === "number") context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
     if (typeof legalAction.payload.trashedCardDefinitionId === "string") context.trashedCardDefinitionId = legalAction.payload.trashedCardDefinitionId;

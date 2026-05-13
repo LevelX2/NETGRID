@@ -6441,6 +6441,94 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("plays Organ Donor as a private grip-trash economy choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-organ-donor",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_organ_donor",
+          name: "O:NR V1.9.22 Organ Donor",
+          cards: [{ id: "onr_v1_103_organ-donor", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 2;
+    state.runner.clicks = 4;
+    moveRunnerCardToGrip(state, "onr_v1_103_organ-donor");
+    const trashCandidates = state.runner.stack.slice(0, 2);
+    expect(trashCandidates).toHaveLength(2);
+    for (const cardId of trashCandidates) {
+      removeEverywhere(state, cardId);
+      state.runner.grip.unshift(cardId);
+      state.cardInstances[cardId] = { ...state.cardInstances[cardId]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+    }
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_103_organ-donor");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-organ-donor-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-organ-donor-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeEvent = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_103_organ-donor");
+    expect(state.pendingChoice?.source).toContain("v1922.runner_grip_trash_gain_credits");
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_103_organ-donor",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_runner_grip_trash_gain_credits"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"grip"|"cardInstances"|"privatePayload"/);
+
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing Organ Donor choice");
+    const selectedOptionIds = trashCandidates.map((cardId) => {
+      const option = pendingChoice.options.find((candidate) => candidate.value === cardId);
+      expect(option).toBeDefined();
+      return option?.id ?? "";
+    });
+    state = applyChoices(state, "runner", selectedOptionIds);
+    expect(state.pendingChoice).toBeUndefined();
+    for (const cardId of trashCandidates) {
+      expect(state.runner.heap).toContain(cardId);
+      expect(state.runner.grip).not.toContain(cardId);
+    }
+    expect(state.runner.credits).toBe(creditsBeforeEvent + trashCandidates.length);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
+      trashedCount: 2,
+      gainedCredits: 2
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"grip"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("does not expose unresolved V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
     const runnerEventIds = [
       "onr_v1_077_anonymous-tip",
@@ -6448,7 +6536,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_086_forged-activation-orders",
       "onr_v1_100_misc-for-sale",
       "onr_v1_102_open-ended-mileage-program",
-      "onr_v1_103_organ-donor",
       "onr_v1_109_security-code-worm-chip",
       "onr_v1_113_synchronized-attack-on-hq",
       "onr_v1_117_valu-pak-software-bundle"

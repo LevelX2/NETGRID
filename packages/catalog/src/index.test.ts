@@ -1860,7 +1860,9 @@ describe("catalog import and status logic", () => {
     const manifestIds = manifestCards.map((card) => card.cardCode);
     const hardwareCards = manifestCards.filter((card) => card.resolverFamily.includes("install_hardware_memory_surface"));
     const eventCards = manifestCards.filter((card) => card.resolverFamily.includes("play_event_surface"));
-    const runnerEventResolverCards = manifestCards.filter((card) => ["v1922_runner_event_stack_top5_choose_one_arrange_rest"].includes(card.resolverFamily));
+    const runnerEventResolverCards = manifestCards.filter((card) =>
+      ["v1922_runner_event_grip_trash_gain_credits", "v1922_runner_event_stack_top5_choose_one_arrange_rest"].includes(card.resolverFamily)
+    );
     const corpAgendaResolverCards = manifestCards.filter((card) =>
       [
         "v1922_corp_agenda_on_score_credit_threshold",
@@ -1897,14 +1899,14 @@ describe("catalog import and status logic", () => {
       );
     }
 
-    expect(eventCards).toHaveLength(9);
+    expect(eventCards).toHaveLength(8);
     for (const card of eventCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
       expect(card.aiSupported, card.cardCode).toBe(false);
       expect(card.coveredSmokes, card.cardCode).toContain("no_play_event_promotion_guard");
     }
 
-    expect(runnerEventResolverCards.map((card) => card.cardCode)).toEqual(["onr_v1_093_if-you-want-it-done-right"]);
+    expect(runnerEventResolverCards.map((card) => card.cardCode).sort()).toEqual(["onr_v1_093_if-you-want-it-done-right", "onr_v1_103_organ-donor"]);
     for (const card of runnerEventResolverCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
       expect(card.aiSupported, card.cardCode).toBe(false);
