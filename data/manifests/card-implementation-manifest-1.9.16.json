@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.16",
+  "id": "v1.9.16-program-subtype-hosting-stealth-manifest",
+  "status": "release_promoted",
+  "extends": "data/manifests/card-implementation-manifest-1.9.15.json",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only",
+  "gateAssertions": {
+    "v1916ScopeFrozenToSixteenProgramSubtypeCards": true,
+    "allCardsRuntimeDefinitionReady": true,
+    "coreEngineSmokesCovered": true,
+    "allCardsHumanPlayable": true,
+    "allCardsDeckLegal": true,
+    "allCardsAiSupported": true,
+    "legalActionsOnly": true,
+    "stateHashReplayStableForCoveredSmokes": true,
+    "hiddenInfoSafeForCoveredSmokes": true,
+    "noOfficialAssets": true,
+    "noV1917PlusScopeExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    { "cardCode": "onr_v1_003_baedekers-net-map", "title": "Baedeker's Net Map", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_hardware", "base_link", "trace", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "hardware", "link"] },
+    { "cardCode": "onr_v1_004_bakdoor", "title": "Bakdoor", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "program_subtype_install_resolver", "requiredMechanics": ["install_program", "memory", "legal_action_only"], "roleTags": ["runner", "program"] },
+    { "cardCode": "onr_v1_033_imp", "title": "Imp", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "program_subtype_install_resolver", "requiredMechanics": ["install_program", "memory", "legal_action_only"], "roleTags": ["runner", "program"] },
+    { "cardCode": "onr_v1_035_invisibility", "title": "Invisibility", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "recurring_pool_start_turn_resolver", "requiredMechanics": ["install_program", "stealth", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "program", "stealth"] },
+    { "cardCode": "onr_v1_047_pile-driver", "title": "Pile Driver", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "program_subtype_install_resolver", "requiredMechanics": ["install_program", "memory", "legal_action_only"], "roleTags": ["runner", "program", "icebreaker"] },
+    { "cardCode": "onr_v1_050_r-and-d-protocol-files", "title": "R&D Protocol Files", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "program_subtype_install_resolver", "requiredMechanics": ["install_program", "memory", "legal_action_only"], "roleTags": ["runner", "program"] },
+    { "cardCode": "onr_v1_071_vewy-vewy-quiet", "title": "Vewy Vewy Quiet", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "program_subtype_install_resolver", "requiredMechanics": ["install_program", "stealth", "legal_action_only"], "roleTags": ["runner", "program", "stealth"] },
+    { "cardCode": "onr_v1_140_raven-microcyb-eagle", "title": "Raven Microcyb Eagle", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "recurring_pool_start_turn_resolver", "requiredMechanics": ["install_hardware", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "hardware"] },
+    { "cardCode": "onr_v1_141_raven-microcyb-owl", "title": "Raven Microcyb Owl", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "recurring_pool_start_turn_resolver", "requiredMechanics": ["install_hardware", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "hardware"] },
+    { "cardCode": "onr_v1_148_access-through-alpha", "title": "Access through Alpha", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
+    { "cardCode": "onr_v1_149_access-to-arasaka", "title": "Access to Arasaka", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
+    { "cardCode": "onr_v1_150_access-to-kiribati", "title": "Access to Kiribati", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
+    { "cardCode": "onr_v1_152_back-door-to-hilliard", "title": "Back Door to Hilliard", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
+    { "cardCode": "onr_v1_153_back-door-to-orbital-air", "title": "Back Door to Orbital Air", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
+    { "cardCode": "onr_v1_182_submarine-uplink", "title": "Submarine Uplink", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver; typed_counter_virus_purge_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "counter", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
+    { "cardCode": "onr_v1_246_fragmentation-storm", "title": "Fragmentation Storm", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver; installed_card_destroy_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_ice", "rez_ice", "trace", "trash_installed_program", "net_damage", "legal_action_only"], "roleTags": ["corp", "ice", "trace"] }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 16,
+    "implementedCardCount": 16,
+    "finalGateCardCount": 16,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 0
+  }
+}
+

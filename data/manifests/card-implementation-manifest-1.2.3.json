@@ -1,18 +1,21 @@
 {
   "schemaVersion": "card-implementation-manifest-v1.2.3",
   "id": "v1.2.3-card-release-manifest",
-  "status": "implemented_for_v1.2.3_final_gate",
+  "status": "implemented_for_v1.2.3_final_gate_v1.9.10_reconciled",
   "extends": "data/manifests/card-implementation-manifest-1.1.2k.json",
   "sourceMode": "private_local_onr_v1_text_confirmed",
   "gateAssertions": {
-    "additionalPlayableCardCountIs8": true,
+    "additionalPlayableCardCountIs8": false,
+    "currentRuntimePlayableCardCountIs11": true,
+    "v1910ManifestParityReconciled": true,
     "finalCardListAtOrBelow20": true,
     "previousReleaseCardsRemainPlayable": true,
     "allPlayableCardsHaveExplicitResolver": true,
     "allPlayableCardsHaveRequiredMechanics": true,
     "runtimeAllowlistIsExact": true,
     "deckLegalRequiresHumanPlayable": true,
-    "aiSupportedCardsCountIs0": true,
+    "aiSupportedCardsCountIs0AtOriginalFinalGate": true,
+    "currentAiSupportedCardsCountIs3AfterCorpTagApproval": true,
     "aiDeckPoolUnchanged": true,
     "nonReleaseLocalOnrCardsRemainRuntimeDeckIllegal": true,
     "noOfficialCardsOrAssets": true,
@@ -85,6 +88,24 @@
       "roleTags": ["runner", "event", "hidden_zone_shuffle", "draw", "removed_from_game"]
     },
     {
+      "cardCode": "onr_v1_243_fetch-4-0-1",
+      "title": "Fetch 4.0.1",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolver": "corp_ice_trace_tag_subroutine",
+      "requiredMechanics": ["install_ice", "rez_ice", "trace", "tag_runner", "subroutine"],
+      "roleTags": ["corp", "ice", "trace", "tag_pressure", "v1910_manifest_parity"]
+    },
+    {
+      "cardCode": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolver": "corp_ice_trace_tag_subroutine",
+      "requiredMechanics": ["install_ice", "rez_ice", "trace", "tag_runner", "subroutine"],
+      "roleTags": ["corp", "ice", "trace", "tag_pressure", "v1910_manifest_parity"]
+    },
+    {
       "cardCode": "onr_v1_297_overtime-incentives",
       "title": "Overtime Incentives",
       "releaseStatus": "human_playable",
@@ -92,6 +113,15 @@
       "resolver": "corp_operation_gain_two_actions",
       "requiredMechanics": ["play_operation", "gain_actions"],
       "roleTags": ["corp", "operation", "click_gain"]
+    },
+    {
+      "cardCode": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolver": "corp_operation_tag_after_runner_agenda_theft",
+      "requiredMechanics": ["play_operation", "last_turn_agenda_theft_gate", "tag_runner"],
+      "roleTags": ["corp", "operation", "tag_pressure", "v1910_manifest_parity"]
     }
   ],
   "coverage": {
@@ -100,12 +130,23 @@
       "packages/catalog/src/index.test.ts::catalog import and status logic",
       "packages/decks/src/index.test.ts::deck validation and snapshots"
     ],
-    "scenarioTests": ["data/scenarios/v123-card-release-smoke.json"],
+    "scenarioTests": ["data/scenarios/v123-card-release-smoke.json", "data/scenarios/ai-corp-tag-approval-slice-smokes.json"],
     "visibilityTests": [
       "packages/engine/src/index.test.ts::V1.2.3 Mechanic Unlock Card Release 1",
       "apps/server/src/multiplayer.test.ts::starts V1.2.3 decks from snapshots"
     ],
-    "aiTests": ["packages/ai/src/index.test.ts::keeps V1.2.3 human-playable cards out of the AI deck pool"],
+    "aiTests": [
+      "packages/ai/src/index.test.ts::keeps V1.2.3 human-playable cards out of the AI deck pool",
+      "packages/ai/src/index.test.ts::Corp tag slice"
+    ],
     "replayTests": ["packages/engine/src/index.test.ts::removes MIT West Tier from the game"]
+  },
+  "v1910Reconciliation": {
+    "release": "V1.9.10",
+    "reason": "Fetch 4.0.1, Hunter and Trojan Horse were already runtime-, AI- and test-covered but were missing from the card-implementation manifest trail.",
+    "noNewRuntimePromotion": true,
+    "aiApprovalManifest": "data/manifests/deck-legal-ai-approval-corp-tag-slice-manifest.json",
+    "aiHints": "data/ai/ai-card-hints-corp-tag-approval-slice.json",
+    "aiScenario": "data/scenarios/ai-corp-tag-approval-slice-smokes.json"
   }
 }

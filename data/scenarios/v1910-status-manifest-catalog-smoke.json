@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "scenario-v1",
+  "id": "v1910-status-manifest-catalog-smoke",
+  "title": "V1.9.10 Status, Manifest and Catalog Consolidation",
+  "release": "V1.9.10",
+  "status": "implemented",
+  "scope": "no_new_gameplay",
+  "cards": [
+    "onr_v1_243_fetch-4-0-1",
+    "onr_v1_249_hunter",
+    "onr_v1_306_trojan-horse"
+  ],
+  "preconditions": [
+    "V1.9.9 is complete.",
+    "Runtime catalog contains 143 human_playable and deck_legal O:NR-v1 cards.",
+    "All runtime O:NR-v1 cards are ai_supported before and after this release.",
+    "No V1.9.11+ card is promoted by V1.9.10."
+  ],
+  "steps": [
+    "Validate the V1.9.10 manifest cards against runtime status.",
+    "Validate the V1.9.10 runtime status report counts.",
+    "Validate the legacy local catalog index only if it exists in the automation worktree.",
+    "Confirm no new playable, deck_legal or ai_supported cards are listed in the V1.9.10 no-promotion gate."
+  ],
+  "expected": [
+    "Fetch 4.0.1, Hunter and Trojan Horse have manifest parity references.",
+    "Runtime count remains 143.",
+    "Open Originalset count remains 231.",
+    "No gameplay, LegalAction, Replay or StateHash behavior changes."
+  ]
+}

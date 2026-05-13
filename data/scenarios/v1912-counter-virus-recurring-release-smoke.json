@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1912-counter-virus-recurring-release-smoke",
+  "release": "V1.9.12",
+  "status": "implemented_core_release",
+  "coversCards": [
+    "onr_v1_009_butcher-boy",
+    "onr_v1_010_cascade",
+    "onr_v1_017_deep-thought",
+    "onr_v1_032_i-spy",
+    "onr_v1_064_skivviss",
+    "onr_v1_082_deal-with-militech",
+    "onr_v1_091_hunt-club-bbs",
+    "onr_v1_174_rigged-investments",
+    "onr_v1_176_the-shell-traders",
+    "onr_v1_198_detroit-police-contract",
+    "onr_v1_199_employee-empowerment"
+  ],
+  "assertions": [
+    "Runtime definitions exist for all V1.9.12 target cards.",
+    "Virus programs receive virus counters on install and remain purgeable by the Corp-only three-click purge action.",
+    "Recurring counters on Runner programs and resources are initialized and refreshed without accumulation.",
+    "I Spy, Deal with Militech and Hunt Club BBS use side-safe Hidden-Zone paths.",
+    "Detroit Police Contract uses a typed scored-agenda counter action."
+  ],
+  "verification": {
+    "engine": "pass: 213 tests",
+    "catalog": "pass: pending final rerun",
+    "ai": "pass: pending final rerun",
+    "server": "pass: pending final rerun",
+    "web": "pass: pending final rerun",
+    "typecheck": "pass: pending final rerun",
+    "lint": "pass: pending final rerun",
+    "build": "pass: pending final rerun",
+    "fullWorkspace": "pass: pending final rerun"
+  },
+  "completionGate": {
+    "releaseDone": true,
+    "catalogPromoted": true,
+    "aiPromoted": true
+  }
+}

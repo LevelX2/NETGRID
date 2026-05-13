@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "onr-v1-runtime-status-report-v1.9.10",
+  "id": "onr-v1-runtime-status-1.9.10",
+  "generatedFor": "V1.9.10 Status-, Manifest- und Katalog-Konsolidierung",
+  "generatedAt": "2026-05-12",
+  "sourceMode": "runtime_catalog_and_planning_matrix",
+  "status": "implemented_final_gate",
+  "counts": {
+    "localOriginalsetCards": 374,
+    "runtimeHumanPlayableDeckLegalCards": 143,
+    "runtimeAiSupportedOnrCards": 143,
+    "humanPlayableWithoutAiSupport": 0,
+    "notHumanPlayableDeckLegalAiSupported": 231,
+    "statusConflictCardsReconciled": 3
+  },
+  "statusConflictCards": [
+    "onr_v1_243_fetch-4-0-1",
+    "onr_v1_249_hunter",
+    "onr_v1_306_trojan-horse"
+  ],
+  "localCatalogIndex": {
+    "expectedLegacyPath": "data/local/card-import/onr-v1-limited/catalog-index-onr-v1-limited.local.json",
+    "statusInAutomationWorktree": "absent_in_automation_worktree",
+    "versionedFallback": "data/reports/onr-v1-runtime-status-1.9.10.json",
+    "validationPolicy": "If the private local legacy index exists, it must parse as JSON and contain no patch markers; otherwise this versioned runtime report is authoritative for V1.9.10."
+  },
+  "noPromotionGate": {
+    "newHumanPlayableCards": [],
+    "newDeckLegalCards": [],
+    "newAiSupportedCards": [],
+    "nextAllowedRelease": "V1.9.11"
+  }
+}

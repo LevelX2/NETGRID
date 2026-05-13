@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "netgrid.ai-smoke.v1",
+  "scenarioId": "ai-deck-legal-v1913-smokes",
+  "release": "V1.9.13",
+  "status": "implemented_for_deck_legal_ai_approval_v1913",
+  "scenarios": [
+    {
+      "id": "runner_v1913_damage_prevention",
+      "side": "runner",
+      "coversCards": [
+        "onr_v1_038_joan-of-arc",
+        "onr_v1_121_armored-fridge",
+        "onr_v1_127_full-body-conversion",
+        "onr_v1_128_green-knight-surge-buffers",
+        "onr_v1_130_lifesaver-nanosurgeons",
+        "onr_v1_135_nasuko-cycle",
+        "onr_v1_139_r-and-d-interface",
+        "onr_v1_143_techtronica-utility-suit",
+        "onr_v1_155_code-viral-cache",
+        "onr_v1_161_fall-guy",
+        "onr_v1_170_nomad-allies",
+        "onr_v1_185_trauma-team",
+        "onr_v1_186_umbrella-policy",
+        "onr_v1_187_wilson-weeflerunner-apprentice"
+      ],
+      "assertions": ["AI can install low-risk prevention cards through legal install actions.", "AI fallback can pass side-private prevention choices without seeing hidden opponent data."]
+    },
+    {
+      "id": "corp_v1913_damage_ice",
+      "side": "corp",
+      "coversCards": ["onr_v1_224_bolter-cluster", "onr_v1_234_data-darts", "onr_v1_258_neural-blade"],
+      "assertions": ["Corp can rez target damage ICE.", "Damage subroutines remain deterministic and prevention-aware."]
+    }
+  ],
+  "completionGate": {
+    "aiSupported": true,
+    "requiresExecutableAiTests": false
+  }
+}

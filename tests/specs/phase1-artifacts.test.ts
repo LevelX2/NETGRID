@@ -488,6 +488,13 @@ const V1_2_3_RELEASE_CARDS = [
   "onr_v1_297_overtime-incentives"
 ];
 
+const V1_2_3_MANIFEST_CARDS_AFTER_V1910_RECONCILIATION = [
+  ...V1_2_3_RELEASE_CARDS,
+  "onr_v1_243_fetch-4-0-1",
+  "onr_v1_249_hunter",
+  "onr_v1_306_trojan-horse"
+];
+
 const V1_3_0_REQUIRED_FILES = [
   "data/decks/deck-format-profiles-1.3.0.json",
   "data/manifests/deck-validation-manifest-1.3.0.json",
@@ -1609,18 +1616,19 @@ describe("Phase 1 derived artifacts", () => {
     };
 
     expect(manifest.schemaVersion).toBe("card-implementation-manifest-v1.2.3");
-    expect(manifest.gateAssertions?.additionalPlayableCardCountIs8).toBe(true);
-    expect(manifest.gateAssertions?.aiSupportedCardsCountIs0).toBe(true);
+    expect(manifest.gateAssertions?.currentRuntimePlayableCardCountIs11).toBe(true);
+    expect(manifest.gateAssertions?.aiSupportedCardsCountIs0AtOriginalFinalGate).toBe(true);
+    expect(manifest.gateAssertions?.currentAiSupportedCardsCountIs3AfterCorpTagApproval).toBe(true);
     expect(manifest.gateAssertions?.noCardTextParser).toBe(true);
-    expect(manifest.cards?.map((card) => card.cardCode)).toEqual(V1_2_3_RELEASE_CARDS);
+    expect(manifest.cards?.map((card) => card.cardCode).sort()).toEqual([...V1_2_3_MANIFEST_CARDS_AFTER_V1910_RECONCILIATION].sort());
     for (const card of manifest.cards ?? []) {
       expect(card.releaseStatus, card.cardCode).toBe("human_playable");
-      expect(card.aiSupported, card.cardCode).toBe(false);
+      expect(card.aiSupported, card.cardCode).toBe(["onr_v1_243_fetch-4-0-1", "onr_v1_249_hunter", "onr_v1_306_trojan-horse"].includes(card.cardCode ?? ""));
       expect(card.requiredMechanics?.length, card.cardCode).toBeGreaterThan(0);
     }
 
     expect(scenario.id).toBe("v123-card-release-smoke");
-    expect(scenario.additionalCards).toEqual(V1_2_3_RELEASE_CARDS);
+    expect(scenario.additionalCards?.sort()).toEqual([...V1_2_3_MANIFEST_CARDS_AFTER_V1910_RECONCILIATION].sort());
     expect(scenario.finalStateHash).toBe("fnv1a:f8247e94");
     expect(scenario.replay).toEqual({ ok: true, finalStateHash: "fnv1a:f8247e94" });
   });

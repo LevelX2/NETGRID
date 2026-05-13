@@ -1,0 +1,48 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1913-damage-prevention-replacement-smoke",
+  "release": "V1.9.13",
+  "status": "implemented_core_release",
+  "coversCards": [
+    "onr_v1_038_joan-of-arc",
+    "onr_v1_121_armored-fridge",
+    "onr_v1_127_full-body-conversion",
+    "onr_v1_128_green-knight-surge-buffers",
+    "onr_v1_130_lifesaver-nanosurgeons",
+    "onr_v1_135_nasuko-cycle",
+    "onr_v1_139_r-and-d-interface",
+    "onr_v1_143_techtronica-utility-suit",
+    "onr_v1_155_code-viral-cache",
+    "onr_v1_161_fall-guy",
+    "onr_v1_170_nomad-allies",
+    "onr_v1_185_trauma-team",
+    "onr_v1_186_umbrella-policy",
+    "onr_v1_187_wilson-weeflerunner-apprentice",
+    "onr_v1_224_bolter-cluster",
+    "onr_v1_234_data-darts",
+    "onr_v1_258_neural-blade"
+  ],
+  "assertions": [
+    "Runtime definitions exist for all V1.9.13 target cards.",
+    "Runner prevention cards install through normal LegalActions.",
+    "Corp ICE damage subroutines open a side-safe prevention choice when a matching Runner prevention card is installed.",
+    "Prevention choices are hidden from the Corp PlayerView and resolve through applyAction revalidation.",
+    "Replay reconstructs the resolved prevention path and StateHash."
+  ],
+  "verification": {
+    "engine": "pass: 216 tests",
+    "catalog": "pass: pending final rerun",
+    "ai": "pass: pending final rerun",
+    "server": "pass: pending final rerun",
+    "web": "pass: pending final rerun",
+    "typecheck": "pass: pending final rerun",
+    "lint": "pass: pending final rerun",
+    "build": "pass: pending final rerun",
+    "fullWorkspace": "pass: pending final rerun"
+  },
+  "completionGate": {
+    "releaseDone": true,
+    "catalogPromoted": true,
+    "aiPromoted": true
+  }
+}

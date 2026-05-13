@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.12",
+  "id": "v1.9.12-counter-virus-recurring-card-release-manifest",
+  "status": "implemented_for_v1.9.12_data_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.9.11.json",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only_finalized",
+  "gateAssertions": {
+    "v1912ScopeFrozenToElevenCounterVirusRecurringCards": true,
+    "allCardsRuntimeDefinitionReady": true,
+    "allCardsEngineSupported": true,
+    "allCardsHumanPlayable": true,
+    "allCardsDeckLegal": true,
+    "allCardsAiSupported": true,
+    "legalActionsOnly": true,
+    "applyActionRevalidatesChoicesAndTargets": true,
+    "stateHashReplayStable": true,
+    "hiddenInfoSafe": true,
+    "noOfficialAssets": true,
+    "noV1913PlusScopeExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    { "cardCode": "onr_v1_009_butcher-boy", "title": "Butcher Boy", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_program", "memory", "virus", "purge", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "program", "virus", "recurring"] },
+    { "cardCode": "onr_v1_010_cascade", "title": "Cascade", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_program", "memory", "virus", "purge", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "program", "virus", "recurring"] },
+    { "cardCode": "onr_v1_017_deep-thought", "title": "Deep Thought", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_program", "memory", "virus", "purge", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "program", "virus", "recurring"] },
+    { "cardCode": "onr_v1_032_i-spy", "title": "I Spy", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["install_program", "memory", "reveal_stack_top", "legal_action_only"], "roleTags": ["runner", "program", "counter", "hidden_zone_tool"] },
+    { "cardCode": "onr_v1_064_skivviss", "title": "Skivviss", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_program", "memory", "virus", "purge", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "program", "virus", "recurring"] },
+    { "cardCode": "onr_v1_082_deal-with-militech", "title": "Deal with Militech", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["play_event", "search_stack", "reveal", "shuffle", "legal_action_only"], "roleTags": ["runner", "event", "counter", "hidden_zone_tool"] },
+    { "cardCode": "onr_v1_091_hunt-club-bbs", "title": "Hunt Club BBS", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["play_event", "reveal_stack_top", "legal_action_only"], "roleTags": ["runner", "event", "counter", "hidden_zone_tool"] },
+    { "cardCode": "onr_v1_174_rigged-investments", "title": "Rigged Investments", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "recurring_pool_start_turn_resolver", "requiredMechanics": ["install_resource", "recurring_credit", "recurring_start_turn", "legal_action_only"], "roleTags": ["runner", "resource", "recurring"] },
+    { "cardCode": "onr_v1_176_the-shell-traders", "title": "The Shell Traders", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_resource", "counter", "recurring_credit", "recurring_start_turn", "legal_action_only"], "roleTags": ["runner", "resource", "counter", "recurring"] },
+    { "cardCode": "onr_v1_198_detroit-police-contract", "title": "Detroit Police Contract", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_remote", "advance", "score", "scored_agenda_action", "counter", "gain_credits", "legal_action_only"], "roleTags": ["corp", "agenda", "counter", "economy"] },
+    { "cardCode": "onr_v1_199_employee-empowerment", "title": "Employee Empowerment", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "recurring_pool_start_turn_resolver", "requiredMechanics": ["install_remote", "advance", "score", "start_of_turn_credit_gain", "legal_action_only"], "roleTags": ["corp", "agenda", "recurring", "economy"] }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 11,
+    "implementedCardCount": 11,
+    "finalGateCardCount": 11,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 0
+  }
+}

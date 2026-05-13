@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.10",
+  "id": "v1.9.10-status-manifest-catalog-consolidation-manifest",
+  "status": "implemented_for_v1.9.10_final_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.9.9.json",
+  "sourceMode": "private_local_onr_v1_text_confirmed",
+  "releaseScope": "status_manifest_catalog_consolidation",
+  "gateAssertions": {
+    "noNewHumanPlayableCards": true,
+    "noNewDeckLegalCards": true,
+    "noNewAiSupportedCards": true,
+    "runtimeCardCountRemains143": true,
+    "aiSupportedOnrRuntimeCardCountRemains143": true,
+    "openOriginalsetCardCountRemains231": true,
+    "fetchHunterTrojanHorseManifestParityReconciled": true,
+    "catalogIndexPatchMarkerNotVersioned": true,
+    "versionedRuntimeStatusReportExists": true,
+    "noOfficialAssets": true,
+    "noExternalCardDatabaseDependency": true,
+    "noCardTextParser": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_v1_243_fetch-4-0-1",
+      "title": "Fetch 4.0.1",
+      "releaseStatus": "manifest_parity_reconciled",
+      "currentRuntimeStatus": "human_playable_deck_legal_ai_supported",
+      "newlyPromotedInV1910": false,
+      "implementationManifestRef": "data/manifests/card-implementation-manifest-1.2.3.json",
+      "aiApprovalManifestRef": "data/manifests/deck-legal-ai-approval-corp-tag-slice-manifest.json",
+      "scenarioRefs": ["data/scenarios/ai-corp-tag-approval-slice-smokes.json"]
+    },
+    {
+      "cardCode": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "releaseStatus": "manifest_parity_reconciled",
+      "currentRuntimeStatus": "human_playable_deck_legal_ai_supported",
+      "newlyPromotedInV1910": false,
+      "implementationManifestRef": "data/manifests/card-implementation-manifest-1.2.3.json",
+      "aiApprovalManifestRef": "data/manifests/deck-legal-ai-approval-corp-tag-slice-manifest.json",
+      "scenarioRefs": ["data/scenarios/ai-corp-tag-approval-slice-smokes.json"]
+    },
+    {
+      "cardCode": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "releaseStatus": "manifest_parity_reconciled",
+      "currentRuntimeStatus": "human_playable_deck_legal_ai_supported",
+      "newlyPromotedInV1910": false,
+      "implementationManifestRef": "data/manifests/card-implementation-manifest-1.2.3.json",
+      "aiApprovalManifestRef": "data/manifests/deck-legal-ai-approval-corp-tag-slice-manifest.json",
+      "scenarioRefs": ["data/scenarios/ai-corp-tag-approval-slice-smokes.json"]
+    }
+  ]
+}

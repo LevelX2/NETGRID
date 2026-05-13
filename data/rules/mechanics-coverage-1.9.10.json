@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.9.10",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.10",
+  "generatedFor": "V1.9.10 Status-, Manifest- und Katalog-Konsolidierung final gate",
+  "generatedAt": "2026-05-12",
+  "status": "implemented_final_review",
+  "extends": "data/rules/mechanics-coverage-1.9.9.json",
+  "gateAssertions": {
+    "noNewMechanics": true,
+    "manifestParityForFetchHunterTrojanHorse": true,
+    "runtimeStatusReportValid": true,
+    "noNewCardPromotion": true,
+    "hiddenInfoSurfaceUnchanged": true,
+    "stateHashReplaySurfaceUnchanged": true
+  },
+  "mechanics": [],
+  "deferred": []
+}

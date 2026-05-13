@@ -1074,6 +1074,11 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
       .map((option) => option.id);
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
   }
+  if (choice.kind === "select_cards") {
+    const count = Math.max(choice.minSelections, Math.min(choice.maxSelections, choice.maxSelections));
+    const selected = choice.options.slice(0, count).map((option) => option.id);
+    return { choiceId: choice.choiceId, selectedOptionIds: selected };
+  }
   if (choice.kind !== "bid_amount") {
     const firstOption = choice.options[0];
     return firstOption ? { choiceId: choice.choiceId, selectedOptionIds: [firstOption.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };

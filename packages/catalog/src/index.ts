@@ -1,4 +1,5 @@
 import snapshotData from "../../../data/card-import/card-snapshot-0.8.json";
+import { DEMO_CARDS_BY_ID, type CardDefinition } from "@netgrid/shared";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
@@ -511,6 +512,154 @@ export const ONR_V1_9_9_RELEASE_CARD_IDS = [
   "onr_v1_353_chimera"
 ] as const;
 
+export const ONR_V1_9_11_RELEASE_CARD_IDS = [
+  "onr_v1_042_mouse",
+  "onr_v1_058_seeya",
+  "onr_v1_059_self-modifying-code",
+  "onr_v1_087_forgotten-backup-chip",
+  "onr_v1_088_fortress-respecification",
+  "onr_v1_089_gideons-pawnshop",
+  "onr_v1_092_ice-and-datas-guide-to-the-net",
+  "onr_v1_099_mantis-fixer-at-large",
+  "onr_v1_110_sneak-preview",
+  "onr_v1_151_aujourdoui",
+  "onr_v1_169_n-e-t-o",
+  "onr_v1_175_ronin-around",
+  "onr_v1_177_the-short-circuit",
+  "onr_v1_194_corporate-downsizing",
+  "onr_v1_250_ice-pick-willie",
+  "onr_v1_272_too-many-doors"
+] as const;
+
+export const ONR_V1_9_12_RELEASE_CARD_IDS = [
+  "onr_v1_009_butcher-boy",
+  "onr_v1_010_cascade",
+  "onr_v1_017_deep-thought",
+  "onr_v1_032_i-spy",
+  "onr_v1_064_skivviss",
+  "onr_v1_082_deal-with-militech",
+  "onr_v1_091_hunt-club-bbs",
+  "onr_v1_174_rigged-investments",
+  "onr_v1_176_the-shell-traders",
+  "onr_v1_198_detroit-police-contract",
+  "onr_v1_199_employee-empowerment"
+] as const;
+
+export const ONR_V1_9_12_WIP_CARD_IDS = ONR_V1_9_12_RELEASE_CARD_IDS;
+
+export const ONR_V1_9_13_RELEASE_CARD_IDS = [
+  "onr_v1_038_joan-of-arc",
+  "onr_v1_121_armored-fridge",
+  "onr_v1_127_full-body-conversion",
+  "onr_v1_128_green-knight-surge-buffers",
+  "onr_v1_130_lifesaver-nanosurgeons",
+  "onr_v1_135_nasuko-cycle",
+  "onr_v1_139_r-and-d-interface",
+  "onr_v1_143_techtronica-utility-suit",
+  "onr_v1_155_code-viral-cache",
+  "onr_v1_161_fall-guy",
+  "onr_v1_170_nomad-allies",
+  "onr_v1_185_trauma-team",
+  "onr_v1_186_umbrella-policy",
+  "onr_v1_187_wilson-weeflerunner-apprentice",
+  "onr_v1_224_bolter-cluster",
+  "onr_v1_234_data-darts",
+  "onr_v1_258_neural-blade"
+] as const;
+
+export const ONR_V1_9_13_WIP_CARD_IDS = ONR_V1_9_13_RELEASE_CARD_IDS;
+
+export const ONR_V1_9_14_RELEASE_CARD_IDS = [
+  "onr_v1_053_ramming-piston",
+  "onr_v1_056_replicator",
+  "onr_v1_063_signpost",
+  "onr_v1_116_total-genetic-retrofit",
+  "onr_v1_120_armadillo-armored-road-home",
+  "onr_v1_126_drifter-mobile-environment",
+  "onr_v1_132_microtech-trode-set",
+  "onr_v1_154_broker",
+  "onr_v1_157_crash-everett-inventive-fixer",
+  "onr_v1_162_field-reporter-for-ice-and-data",
+  "onr_v1_164_hells-run",
+  "onr_v1_165_junkyard-bbs",
+  "onr_v1_166_karl-de-veres-corporate-stooge",
+  "onr_v1_167_leland-corporate-bodyguard",
+  "onr_v1_178_short-term-contract",
+  "onr_v1_181_the-springboard",
+  "onr_v1_183_technician-lover",
+  "onr_v1_221_asp",
+  "onr_v1_228_cinderella",
+  "onr_v1_240_fang",
+  "onr_v1_241_fang-2-0",
+  "onr_v1_248_homewrecker",
+  "onr_v1_260_pocket-virtual-reality",
+  "onr_v1_264_rex",
+  "onr_v1_299_power-grid-overload"
+] as const;
+
+export const ONR_V1_9_14_WIP_CARD_IDS = ONR_V1_9_14_RELEASE_CARD_IDS;
+
+export const ONR_V1_9_15_RELEASE_CARD_IDS = [
+  "onr_v1_020_dupre",
+  "onr_v1_024_expert-schedule-analyzer",
+  "onr_v1_041_microtech-ai-interface",
+  "onr_v1_043_mystery-box",
+  "onr_v1_062_shredder-uplink-protocol",
+  "onr_v1_065_smarteye",
+  "onr_v1_098_lucidrine-booster-drug",
+  "onr_v1_105_priority-wreck",
+  "onr_v1_111_social-engineering",
+  "onr_v1_112_stumble-through-wilderspace",
+  "onr_v1_142_record-reconstructor",
+  "onr_v1_227_cerberus",
+  "onr_v1_255_mastiff",
+  "onr_v1_294_new-blood"
+] as const;
+
+export const ONR_V1_9_15_WIP_CARD_IDS = ONR_V1_9_15_RELEASE_CARD_IDS;
+
+export const ONR_V1_9_16_WIP_CARD_IDS = [
+  "onr_v1_003_baedekers-net-map",
+  "onr_v1_004_bakdoor",
+  "onr_v1_033_imp",
+  "onr_v1_035_invisibility",
+  "onr_v1_047_pile-driver",
+  "onr_v1_050_r-and-d-protocol-files",
+  "onr_v1_071_vewy-vewy-quiet",
+  "onr_v1_140_raven-microcyb-eagle",
+  "onr_v1_141_raven-microcyb-owl",
+  "onr_v1_148_access-through-alpha",
+  "onr_v1_149_access-to-arasaka",
+  "onr_v1_150_access-to-kiribati",
+  "onr_v1_152_back-door-to-hilliard",
+  "onr_v1_153_back-door-to-orbital-air",
+  "onr_v1_182_submarine-uplink",
+  "onr_v1_246_fragmentation-storm"
+] as const;
+
+export const ONR_V1_9_16_RELEASE_CARD_IDS = ONR_V1_9_16_WIP_CARD_IDS;
+
+export const ONR_V1_9_17_WIP_CARD_IDS = [
+  "onr_v1_309_bbs-whispering-campaign",
+  "onr_v1_310_blood-cat",
+  "onr_v1_311_braindance-campaign",
+  "onr_v1_314_corporate-negotiating-center",
+  "onr_v1_316_cowboy-sysop",
+  "onr_v1_318_department-of-truth-enhancement",
+  "onr_v1_319_disinfectant-inc",
+  "onr_v1_321_esa-contract",
+  "onr_v1_326_holovid-campaign",
+  "onr_v1_329_investment-firm",
+  "onr_v1_330_krumz",
+  "onr_v1_333_omniscience-foundation",
+  "onr_v1_336_rescheduler",
+  "onr_v1_337_rockerboy-promotion",
+  "onr_v1_340_setup",
+  "onr_v1_342_solo-squad",
+  "onr_v1_344_spinn-public-relations",
+  "onr_v1_345_trap"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -533,7 +682,13 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_9_6_RELEASE_CARD_IDS,
   ...ONR_V1_9_7_RELEASE_CARD_IDS,
   ...ONR_V1_9_8_RELEASE_CARD_IDS,
-  ...ONR_V1_9_9_RELEASE_CARD_IDS
+  ...ONR_V1_9_9_RELEASE_CARD_IDS,
+  ...ONR_V1_9_11_RELEASE_CARD_IDS,
+  ...ONR_V1_9_12_RELEASE_CARD_IDS,
+  ...ONR_V1_9_13_RELEASE_CARD_IDS,
+  ...ONR_V1_9_14_RELEASE_CARD_IDS,
+  ...ONR_V1_9_15_RELEASE_CARD_IDS,
+  ...ONR_V1_9_16_RELEASE_CARD_IDS
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -705,6 +860,18 @@ export const DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS = [
 
 export const DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS = [...ONR_V1_9_9_RELEASE_CARD_IDS] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS = [...ONR_V1_9_11_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS = [...ONR_V1_9_12_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS = [...ONR_V1_9_13_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS = [...ONR_V1_9_14_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS = [...ONR_V1_9_15_RELEASE_CARD_IDS] as const;
+
+export const DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS = [...ONR_V1_9_16_RELEASE_CARD_IDS] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_RUNTIME_RELEASE_CARD_IDS);
 const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS,
@@ -716,7 +883,13 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS,
-  ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS
+  ...DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS
 ]);
 const ONR_V1_0_6K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_0_6K_RELEASE_CARD_IDS);
 const ONR_V1_1_2K_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_1_2K_RELEASE_CARD_IDS);
@@ -739,6 +912,12 @@ const ONR_V1_9_6_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_6_RELEASE_CARD_I
 const ONR_V1_9_7_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_7_RELEASE_CARD_IDS);
 const ONR_V1_9_8_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_8_RELEASE_CARD_IDS);
 const ONR_V1_9_9_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_9_RELEASE_CARD_IDS);
+const ONR_V1_9_11_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_11_RELEASE_CARD_IDS);
+const ONR_V1_9_12_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_12_RELEASE_CARD_IDS);
+const ONR_V1_9_13_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_13_RELEASE_CARD_IDS);
+const ONR_V1_9_14_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_14_RELEASE_CARD_IDS);
+const ONR_V1_9_15_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_15_RELEASE_CARD_IDS);
+const ONR_V1_9_16_RELEASE_CARD_ID_SET = new Set<string>(ONR_V1_9_16_RELEASE_CARD_IDS);
 
 const ONR_V1_0_5K_RELEASE_MANIFEST: CatalogManifestReference = {
   manifestVersion: "card-implementation-manifest-v1.0.5k",
@@ -936,6 +1115,63 @@ const ONR_V1_9_9_RELEASE_MANIFEST: CatalogManifestReference = {
   scenarioTests: ["data/scenarios/v199-card-release-smoke.json", "data/scenarios/ai-deck-legal-v199-smokes.json"],
   visibilityTests: ["packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R"],
   replayTests: ["packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R"]
+};
+
+const ONR_V1_9_11_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.11",
+  status: "human_playable_v1_9_11_hidden_zone_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1911-hidden-zone-release-smoke.json", "data/scenarios/ai-deck-legal-v1911-smokes.json"],
+  visibilityTests: [
+    "packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP",
+    "data/scenarios/v1911-hidden-zone-release-smoke.json"
+  ],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP"]
+};
+
+const ONR_V1_9_12_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.12",
+  status: "human_playable_v1_9_12_counter_virus_recurring_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.12 Counter/Virus/Recurring", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1912-counter-virus-recurring-release-smoke.json", "data/scenarios/ai-deck-legal-v1912-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.12 Counter/Virus/Recurring", "data/scenarios/v1912-counter-virus-recurring-release-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.12 Counter/Virus/Recurring"]
+};
+
+const ONR_V1_9_13_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.13",
+  status: "human_playable_v1_9_13_damage_prevention_replacement_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.13 Damage/Prevention/Replacement Longtail", "packages/ai/src/index.test.ts::V1.2.0 Event Modification"],
+  scenarioTests: ["data/scenarios/v1913-damage-prevention-replacement-smoke.json", "data/scenarios/ai-deck-legal-v1913-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.13 Damage/Prevention/Replacement Longtail", "data/scenarios/v1913-damage-prevention-replacement-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.13 Damage/Prevention/Replacement Longtail"]
+};
+
+const ONR_V1_9_14_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.14",
+  status: "human_playable_v1_9_14_trace_tag_resource_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.14 Trace/Tag/Resource Longtail", "packages/ai/src/index.test.ts::V0.96 Trace"],
+  scenarioTests: ["data/scenarios/v1914-trace-tag-resource-smoke.json", "data/scenarios/ai-deck-legal-v1914-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.14 Trace/Tag/Resource Longtail", "data/scenarios/v1914-trace-tag-resource-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.14 Trace/Tag/Resource Longtail"]
+};
+
+const ONR_V1_9_15_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.15",
+  status: "human_playable_v1_9_15_run_access_multiaccess_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.15 Run/Access/Multiaccess WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1915-run-access-multiaccess-smoke.json", "data/scenarios/ai-deck-legal-v1915-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.15 Run/Access/Multiaccess WIP", "data/scenarios/v1915-run-access-multiaccess-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.15 Run/Access/Multiaccess WIP"]
+};
+
+const ONR_V1_9_16_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.16",
+  status: "human_playable_v1_9_16_program_hosting_stealth_core",
+  unitTests: ["packages/engine/src/index.test.ts::V1.9.16 Program Subtype/Hosting/Stealth WIP", "packages/ai/src/index.test.ts::V1.9.11 choices"],
+  scenarioTests: ["data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json", "data/scenarios/ai-deck-legal-v1916-smokes.json"],
+  visibilityTests: ["packages/engine/src/index.test.ts::V1.9.16 Program Subtype/Hosting/Stealth WIP", "data/scenarios/v1916-program-subtype-hosting-stealth-smoke.json"],
+  replayTests: ["packages/engine/src/index.test.ts::V1.9.16 Program Subtype/Hosting/Stealth WIP"]
 };
 
 const ONR_V1_0_5K_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -1144,6 +1380,8 @@ const ONR_V1_9_9_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_352_chester-mix": { rezCost: 0, trashCost: 1 },
   "onr_v1_353_chimera": { rezCost: 0, trashCost: 1 }
 };
+
+const ONR_V1_9_11_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {};
 
 const ONR_V1_0_5K_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_015_codeslinger": "0 credits: Break sentry subroutine.",
@@ -1378,6 +1616,44 @@ const ONR_V1_9_9_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_352_chester-mix": "The cost to install ice on this fort is reduced by 1.",
   "onr_v1_353_chimera": "When accessed, Runner trashes one installed daemon program."
 };
+
+const ONR_V1_9_11_TEXT_OVERRIDES: Partial<Record<string, string>> = {};
+
+const ONR_V1_9_12_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_009_butcher-boy": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+  "onr_v1_010_cascade": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+  "onr_v1_017_deep-thought": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+  "onr_v1_032_i-spy": "Installed helper: reveal the top card of the Runner stack through a side-safe reveal action.",
+  "onr_v1_064_skivviss": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+  "onr_v1_082_deal-with-militech": "Search the stack for a program, reveal it, add it to the grip, then shuffle the stack.",
+  "onr_v1_091_hunt-club-bbs": "Reveal the top card of the Runner stack.",
+  "onr_v1_174_rigged-investments": "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
+  "onr_v1_176_the-shell-traders": "1 recurring credit for run costs. Used counters refresh at the start of each Runner turn.",
+  "onr_v1_198_detroit-police-contract": "Put 4 power counters on Detroit Police Contract when you score it. [A]: Remove 1 power counter to gain 1 credit.",
+  "onr_v1_199_employee-empowerment": "While scored, gain 1 credit at the start of each Corp turn."
+};
+
+const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_038_joan-of-arc": "Installed prevention tool: once each turn, prevent 1 net or core damage.",
+  "onr_v1_121_armored-fridge": "Installed prevention tool: once each turn, prevent 2 meat damage.",
+  "onr_v1_127_full-body-conversion": "Installed prevention tool: once each turn, prevent 1 meat damage.",
+  "onr_v1_128_green-knight-surge-buffers": "Installed prevention tool: once each turn, prevent 2 net damage.",
+  "onr_v1_130_lifesaver-nanosurgeons": "Installed prevention tool: once each turn, prevent 1 core damage.",
+  "onr_v1_135_nasuko-cycle": "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+  "onr_v1_139_r-and-d-interface": "Installed prevention tool: once each turn, prevent 1 net damage.",
+  "onr_v1_143_techtronica-utility-suit": "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+  "onr_v1_155_code-viral-cache": "Installed prevention tool: once each turn, prevent 1 net damage.",
+  "onr_v1_161_fall-guy": "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+  "onr_v1_170_nomad-allies": "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+  "onr_v1_185_trauma-team": "Installed prevention tool: once each turn, prevent 2 meat damage.",
+  "onr_v1_186_umbrella-policy": "Installed prevention tool: once each turn, prevent 1 net, meat or core damage.",
+  "onr_v1_187_wilson-weeflerunner-apprentice": "Installed prevention tool: once each turn, prevent 1 meat damage.",
+  "onr_v1_224_bolter-cluster": "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+  "onr_v1_234_data-darts": "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+  "onr_v1_258_neural-blade": "[Subroutine] Do 2 net damage."
+};
+
+const ONR_V1_9_14_TEXT_OVERRIDES: Partial<Record<string, string>> = {};
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
   return {
@@ -1845,7 +2121,7 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
   const baseSnapshot = snapshotData as unknown as CardSnapshot;
   const localOnrSnapshot = readLocalOnrSnapshot();
   const baseCards = applyRuntimeBaseStatusModel(baseSnapshot.cards);
-  if (!localOnrSnapshot) return { ...baseSnapshot, cards: baseCards };
+  if (!localOnrSnapshot) return { ...baseSnapshot, cards: [...baseCards, ...createFallbackOnrRuntimeCards()] };
   const confirmedTextOverrides = readLocalConfirmedTextOverrides();
   const localCardsWithConfirmedText = applyLocalConfirmedTextOverrides(localOnrSnapshot.cards, confirmedTextOverrides);
   const v105kCards = applyOnrV105KReleaseGate(localCardsWithConfirmedText);
@@ -2147,6 +2423,61 @@ function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
   return cards.map((card) => (ONR_V1_RUNTIME_RELEASE_CARD_ID_SET.has(card.catalogCardId) ? promoteOnrRuntimeReleaseCard(card) : demoteLocalOnrCard(card)));
 }
 
+function createFallbackOnrRuntimeCards(): CatalogCard[] {
+  return ONR_V1_RUNTIME_RELEASE_CARD_IDS.map((cardId) => {
+    const definition = DEMO_CARDS_BY_ID[cardId];
+    if (!definition) return null;
+    return promoteOnrRuntimeReleaseCard(catalogCardFromDefinition(definition));
+  }).filter((card): card is CatalogCard => Boolean(card));
+}
+
+function catalogCardFromDefinition(definition: CardDefinition): CatalogCard {
+  return {
+    catalogCardId: definition.id,
+    sourceCardId: definition.id,
+    engineCardId: definition.id,
+    title: definition.title,
+    side: definition.side,
+    type: definition.type,
+    subtypes: [...definition.subtypes],
+    faction: "onr1996_neutral",
+    setId: "onr-v1-limited",
+    setName: "O:NR v1 Limited",
+    collectorNumber: collectorNumberFromOnrId(definition.id),
+    text: definition.rulesText,
+    displayOnlyText: true,
+    numeric: {
+      cost: definition.cost ?? null,
+      installCost: definition.installCost ?? null,
+      memoryCost: definition.memoryCost ?? null,
+      strength: definition.strength ?? null,
+      rezCost: definition.rezCost ?? null,
+      trashCost: definition.trashCost ?? null,
+      advancementRequirement: definition.advancementRequirement ?? null,
+      agendaPoints: definition.agendaPoints ?? null
+    },
+    statuses: {
+      imported: true,
+      validated: true,
+      catalog_ready: true,
+      implemented: true,
+      engine_supported: true,
+      playable: true,
+      human_playable: true,
+      ai_supported: false,
+      deck_legal: true,
+      format_legal: true,
+      blocked: false
+    },
+    blockReasons: [],
+    implementationManifest: null
+  };
+}
+
+function collectorNumberFromOnrId(cardId: string): string {
+  return cardId.match(/^onr_v1_(\d{3})_/)?.[1] ?? cardId;
+}
+
 function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
   return cards.map((card) => {
     const engineSupported = Boolean(card.statuses.implemented && card.statuses.playable);
@@ -2167,6 +2498,12 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV1916 = ONR_V1_9_16_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1915 = ONR_V1_9_15_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1914 = ONR_V1_9_14_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1913 = ONR_V1_9_13_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1912 = ONR_V1_9_12_RELEASE_CARD_ID_SET.has(card.catalogCardId);
+  const isV1911 = ONR_V1_9_11_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV199 = ONR_V1_9_9_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV198 = ONR_V1_9_8_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV197 = ONR_V1_9_7_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -2188,7 +2525,19 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV199
+  const textOverrides = isV1916
+    ? {}
+    : isV1915
+    ? {}
+    : isV1914
+    ? ONR_V1_9_14_TEXT_OVERRIDES
+    : isV1913
+    ? ONR_V1_9_13_TEXT_OVERRIDES
+    : isV1912
+    ? ONR_V1_9_12_TEXT_OVERRIDES
+    : isV1911
+    ? ONR_V1_9_11_TEXT_OVERRIDES
+    : isV199
     ? ONR_V1_9_9_TEXT_OVERRIDES
     : isV198
     ? ONR_V1_9_8_TEXT_OVERRIDES
@@ -2231,7 +2580,19 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_TEXT_OVERRIDES
           : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV199
+  const numericOverrides = isV1916
+    ? {}
+    : isV1915
+    ? {}
+    : isV1914
+    ? {}
+    : isV1913
+    ? {}
+    : isV1912
+    ? {}
+    : isV1911
+    ? ONR_V1_9_11_NUMERIC_OVERRIDES
+    : isV199
     ? ONR_V1_9_9_NUMERIC_OVERRIDES
     : isV198
     ? ONR_V1_9_8_NUMERIC_OVERRIDES
@@ -2274,7 +2635,19 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
         : isV106K
           ? ONR_V1_0_6K_NUMERIC_OVERRIDES
           : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV199
+  const manifest = isV1916
+    ? ONR_V1_9_16_RELEASE_MANIFEST
+    : isV1915
+    ? ONR_V1_9_15_RELEASE_MANIFEST
+    : isV1914
+    ? ONR_V1_9_14_RELEASE_MANIFEST
+    : isV1913
+    ? ONR_V1_9_13_RELEASE_MANIFEST
+    : isV1912
+    ? ONR_V1_9_12_RELEASE_MANIFEST
+    : isV1911
+    ? ONR_V1_9_11_RELEASE_MANIFEST
+    : isV199
     ? ONR_V1_9_9_RELEASE_MANIFEST
     : isV198
     ? ONR_V1_9_8_RELEASE_MANIFEST

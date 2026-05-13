@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.13",
+  "id": "v1.9.13-damage-prevention-replacement-card-release-manifest",
+  "status": "implemented_for_v1.9.13_data_gate",
+  "extends": "data/manifests/card-implementation-manifest-1.9.12.json",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only_finalized",
+  "gateAssertions": {
+    "v1913ScopeFrozenToSeventeenDamagePreventionCards": true,
+    "allCardsRuntimeDefinitionReady": true,
+    "allCardsEngineSupported": true,
+    "allCardsHumanPlayable": true,
+    "allCardsDeckLegal": true,
+    "allCardsAiSupported": true,
+    "legalActionsOnly": true,
+    "applyActionRevalidatesChoicesAndTargets": true,
+    "stateHashReplayStable": true,
+    "hiddenInfoSafe": true,
+    "noOfficialAssets": true,
+    "noV1914PlusScopeExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    { "cardCode": "onr_v1_038_joan-of-arc", "title": "Joan of Arc", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_program", "memory", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "program", "damage_prevention"] },
+    { "cardCode": "onr_v1_121_armored-fridge", "title": "Armored Fridge", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_hardware", "meat_damage", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "hardware", "damage_prevention", "meat_damage"] },
+    { "cardCode": "onr_v1_127_full-body-conversion", "title": "Full Body Conversion", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_hardware", "meat_damage", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "hardware", "damage_prevention", "meat_damage"] },
+    { "cardCode": "onr_v1_128_green-knight-surge-buffers", "title": "\"Green Knight\" Surge Buffers", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_hardware", "net_damage", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "hardware", "damage_prevention", "net_damage"] },
+    { "cardCode": "onr_v1_130_lifesaver-nanosurgeons", "title": "Lifesaver Nanosurgeons", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; core_brain_damage_modifier_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_hardware", "core_damage", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "hardware", "damage_prevention", "core_damage"] },
+    { "cardCode": "onr_v1_135_nasuko-cycle", "title": "Nasuko Cycle", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_hardware", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "hardware", "damage_prevention"] },
+    { "cardCode": "onr_v1_139_r-and-d-interface", "title": "R&D Interface", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_hardware", "net_damage", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "hardware", "damage_prevention", "net_damage"] },
+    { "cardCode": "onr_v1_143_techtronica-utility-suit", "title": "Techtronica Utility Suit", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_hardware", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "hardware", "damage_prevention"] },
+    { "cardCode": "onr_v1_155_code-viral-cache", "title": "Code Viral Cache", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_resource", "net_damage", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "resource", "damage_prevention", "net_damage"] },
+    { "cardCode": "onr_v1_161_fall-guy", "title": "Fall Guy", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_resource", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "resource", "damage_prevention"] },
+    { "cardCode": "onr_v1_170_nomad-allies", "title": "Nomad Allies", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_resource", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "resource", "damage_prevention"] },
+    { "cardCode": "onr_v1_185_trauma-team", "title": "Trauma Team", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_resource", "meat_damage", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "resource", "damage_prevention", "meat_damage"] },
+    { "cardCode": "onr_v1_186_umbrella-policy", "title": "Umbrella Policy", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; core_brain_damage_modifier_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_resource", "damage_prevention", "core_damage", "legal_action_only"], "roleTags": ["runner", "resource", "damage_prevention"] },
+    { "cardCode": "onr_v1_187_wilson-weeflerunner-apprentice", "title": "Wilson, Weeflerunner Apprentice", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "event_modification_prevention_avoid_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_resource", "meat_damage", "damage_prevention", "legal_action_only"], "roleTags": ["runner", "resource", "damage_prevention", "meat_damage"] },
+    { "cardCode": "onr_v1_224_bolter-cluster", "title": "Bolter Cluster", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "damage_event_prevention_resolver; event_modification_prevention_avoid_resolver", "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "net_damage", "damage_prevention", "legal_action_only"], "roleTags": ["corp", "ice", "damage", "net_damage"] },
+    { "cardCode": "onr_v1_234_data-darts", "title": "Data Darts", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "damage_event_prevention_resolver; event_modification_prevention_avoid_resolver", "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "net_damage", "damage_prevention", "legal_action_only"], "roleTags": ["corp", "ice", "damage", "net_damage"] },
+    { "cardCode": "onr_v1_258_neural-blade", "title": "Neural Blade", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "damage_event_prevention_resolver; event_modification_prevention_avoid_resolver", "requiredMechanics": ["install_ice", "rez_ice", "encounter_ice", "net_damage", "damage_prevention", "legal_action_only"], "roleTags": ["corp", "ice", "damage", "net_damage"] }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 17,
+    "implementedCardCount": 17,
+    "finalGateCardCount": 17,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 0
+  }
+}

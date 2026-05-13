@@ -497,7 +497,7 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     const initial = structuredClone(state);
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "gain_credit");
-    state = apply(state, "corp", (action) => action.type === "end_turn");
+    state = toRunnerTurnFromCorpMain(state);
     if (state.pendingChoice?.source === "discard_phase") state = applyChoice(state, "corp", String(state.pendingChoice.options[0]?.id));
     state = apply(state, "runner", (action) => action.type === "gain_credit");
 
@@ -4027,6 +4027,342 @@ describe("V1.9.9 Mechanikpaket R", () => {
   });
 });
 
+describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
+  it("adds first scoped V1.9.11 hidden-zone event definitions without pulling in later release cards", () => {
+    const implementedWipIds = [
+      "onr_v1_042_mouse",
+      "onr_v1_058_seeya",
+      "onr_v1_059_self-modifying-code",
+      "onr_v1_087_forgotten-backup-chip",
+      "onr_v1_088_fortress-respecification",
+      "onr_v1_089_gideons-pawnshop",
+      "onr_v1_092_ice-and-datas-guide-to-the-net",
+      "onr_v1_099_mantis-fixer-at-large",
+      "onr_v1_110_sneak-preview",
+      "onr_v1_151_aujourdoui",
+      "onr_v1_169_n-e-t-o",
+      "onr_v1_175_ronin-around",
+      "onr_v1_177_the-short-circuit",
+      "onr_v1_194_corporate-downsizing",
+      "onr_v1_250_ice-pick-willie",
+      "onr_v1_272_too-many-doors"
+    ];
+    for (const definitionId of implementedWipIds) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics).toContain("hidden_zone_tool");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-search"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_087_forgotten-backup-chip");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
+    expect(state.pendingChoice?.source).toContain("v098.search_stack");
+    expect(getPlayerView(state, "runner").pendingChoice?.options.some((option) => option.label === "Simple Decoder")).toBe(true);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.grip).toContain(targetProgramId);
+    expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneBarrier: true, hiddenZoneAction: "search_stack" });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("reveals only the intended public definition id for V1.9.11 reveal events", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-reveal"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    putRunnerCardOnTopOfStack(state, "simple_decoder");
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      revealKind: "reveal",
+      cardDefinitionId: "simple_decoder",
+      title: "Simple Decoder"
+    });
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Forgotten Backup Chip");
+  });
+
+  it("exposes one unrezzed server card via Fortress Respecification without opening opponent choices", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-expose"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_088_fortress-respecification");
+    putCorpRootInRemote(state, "simple_upgrade");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId && action.payload?.serverId === "remote_1"
+    );
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      revealKind: "expose",
+      cardDefinitionId: "simple_upgrade",
+      title: "Simple Upgrade",
+      serverLabel: "Remote 1"
+    });
+  });
+
+  it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-installed-helpers"));
+    state.runner.credits = 20;
+    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+
+    state = apply(state, "runner", (action) => action.type === "gain_credit" && action.payload?.v1911HiddenZoneAbility === "search_stack_program_to_grip");
+    expect(state.pendingChoice?.source).toContain("v1911.search_stack");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.grip).toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ hiddenZoneBarrier: true, hiddenZoneAction: "search_stack" });
+
+    putRunnerCardOnTopOfStack(state, "simple_decoder");
+    putRunnerCardOnTopOfStack(state, "simple_fracter");
+    state = apply(state, "runner", (action) => action.type === "gain_credit" && action.payload?.v1911HiddenZoneAbility === "arrange_stack_top2");
+    expect(state.pendingChoice?.source).toContain("v1911.arrange_stack_top2");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  });
+
+  it("uses scored Corporate Downsizing to reveal only the R&D top definition", () => {
+    let state = apply(v1911HiddenZoneGame("v1911-corporate-downsizing"), "corp", (action) => action.type === "mandatory_draw");
+    state.corp.clicks = 3;
+    const agendaId = moveCorpCardToHq(state, "onr_v1_194_corporate-downsizing");
+    removeEverywhere(state, agendaId);
+    state.corp.scoreArea.push(agendaId);
+    state.cardInstances[agendaId] = { ...state.cardInstances[agendaId]!, zone: { side: "corp", zone: "scoreArea" }, faceup: true, rezzed: true };
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1911_corporate_downsizing_reveal_rd_top");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_corp_reveal_rd_top",
+      revealKind: "reveal",
+      cardDefinitionId: "simple_economy_operation"
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("simple_economy_operation_");
+  });
+
+  it("resolves Ice Pick Willie as a subroutine-bound public R&D top reveal", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-ice-pick-willie"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_250_ice-pick-willie");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_250_ice-pick-willie");
+    state = apply(state, "runner", (action) => action.type === "continue_run" && action.payload?.encounterContinue === true);
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_corp_reveal_rd_top",
+      revealKind: "reveal",
+      cardDefinitionId: "simple_economy_operation"
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("simple_economy_operation_");
+  });
+
+  it("opens Too Many Doors R&D reorder only to the Corp and resolves replay-safe", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-too-many-doors"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
+    const bottomChoiceId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const topChoiceId = putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_272_too-many-doors");
+    state = apply(state, "runner", (action) => action.type === "continue_run" && action.payload?.encounterContinue === true);
+    expect(state.pendingChoice?.source).toContain("v1911.corp_rd_arrange_top2");
+    expect(getPlayerView(state, "corp").pendingChoice?.options.some((option) => option.value === topChoiceId)).toBe(true);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+
+    state = applyChoices(state, "corp", [`card_${bottomChoiceId}`, `card_${topChoiceId}`]);
+    expect(state.corp.rd[0]).toBe(bottomChoiceId);
+    expect(state.corp.rd[1]).toBe(topChoiceId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+      arrangedCount: 2
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
+describe("V1.9.12 Counter/Virus/Recurring", () => {
+  it("adds scoped V1.9.12 definitions without pulling in later cursor cards", () => {
+    expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
+    for (const definitionId of ONR_V1_9_12_RELEASE_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
+    let state = toRunnerTurn(v1912CounterRecurringGame("v1912-virus-recurring"));
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_009_butcher-boy");
+    moveRunnerCardToGrip(state, "onr_v1_174_rigged-investments");
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_009_butcher-boy");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_174_rigged-investments");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_021_dwarf");
+    const butcherId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_009_butcher-boy");
+    const investmentsId = state.runner.rig.resources.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_174_rigged-investments");
+    expect(butcherId).toBeDefined();
+    expect(investmentsId).toBeDefined();
+    if (butcherId) {
+      expect(state.cardInstances[butcherId]?.counters?.virus).toBe(1);
+      expect(state.cardInstances[butcherId]?.counters?.recurring_credit).toBe(1);
+    }
+    if (investmentsId) expect(state.cardInstances[investmentsId]?.counters?.recurring_credit).toBe(2);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "purge_virus_counters");
+    if (butcherId) {
+      expect(state.cardInstances[butcherId]?.counters?.virus ?? 0).toBe(0);
+      expect(state.cardInstances[butcherId]?.counters?.recurring_credit).toBe(1);
+    }
+    if (investmentsId) {
+      expect(state.cardInstances[investmentsId]?.counters?.recurring_credit).toBe(2);
+      state.cardInstances[investmentsId] = { ...state.cardInstances[investmentsId]!, counters: { ...state.cardInstances[investmentsId]!.counters, recurring_credit: 0 } };
+    }
+
+    state.corp.maxHandSize = 100;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (investmentsId) expect(state.cardInstances[investmentsId]?.counters?.recurring_credit).toBe(2);
+  });
+
+  it("uses V1.9.12 Hidden-Zone event and installed helper paths without exposing choices to the Corp", () => {
+    let state = toRunnerTurn(v1912CounterRecurringGame("v1912-hidden-zone"));
+    state.runner.credits = 20;
+    const dealId = moveRunnerCardToGrip(state, "onr_v1_082_deal-with-militech");
+    const iSpyId = moveRunnerCardToGrip(state, "onr_v1_032_i-spy");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === iSpyId);
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === dealId);
+    expect(state.pendingChoice?.source).toContain("v1912.search_stack");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.grip).toContain(targetProgramId);
+
+    putRunnerCardOnTopOfStack(state, "simple_fracter");
+    state = apply(state, "runner", (action) => action.type === "gain_credit" && action.payload?.v1912CounterAbility === "reveal_stack_top");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ revealKind: "reveal", cardDefinitionId: "simple_fracter" });
+  });
+
+  it("scores V1.9.12 Corp agendas with typed counter and start-of-turn economy paths", () => {
+    let state = apply(v1912CounterRecurringGame("v1912-corp-agendas"), "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 80;
+    state.corp.clicks = 30;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "onr_v1_198_detroit-police-contract");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_198_detroit-police-contract" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 4; index += 1) state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_198_detroit-police-contract");
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_198_detroit-police-contract");
+    const detroitId = state.corp.scoreArea.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_198_detroit-police-contract");
+    expect(detroitId).toBeDefined();
+    if (detroitId) expect(state.cardInstances[detroitId]?.counters?.power).toBe(4);
+    const beforeCredit = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1912_detroit_police_contract");
+    expect(state.corp.credits).toBe(beforeCredit + 1);
+    if (detroitId) expect(state.cardInstances[detroitId]?.counters?.power).toBe(3);
+  });
+});
+
+describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
+  it("adds scoped V1.9.13 runtime definitions without pulling in V1.9.15 cards", () => {
+    expect(ONR_V1_9_13_RELEASE_CARD_IDS).toHaveLength(17);
+    for (const definitionId of ONR_V1_9_13_RELEASE_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
+    let state = toRunnerTurn(v1913DamagePreventionGame("v1913-install-prevention"));
+    state.runner.credits = 80;
+    state.runner.clicks = 30;
+
+    for (const definitionId of ONR_V1_9_13_RELEASE_CARD_IDS.filter((id) => !["onr_v1_224_bolter-cluster", "onr_v1_234_data-darts", "onr_v1_258_neural-blade"].includes(id))) {
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === definitionId);
+    }
+
+    const installedDefinitions = [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].map((id) => state.cardInstances[id]?.definitionId);
+    expect(installedDefinitions).toEqual(expect.arrayContaining(ONR_V1_9_13_RELEASE_CARD_IDS.filter((id) => !id.startsWith("onr_v1_2"))));
+  });
+
+  it("opens side-safe prevention choices for Corp ICE net damage and replays the resolved StateHash", () => {
+    let state = toRunnerTurn(v1913DamagePreventionGame("v1913-ice-prevention"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_128_green-knight-surge-buffers");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_128_green-knight-surge-buffers");
+    putCorpIceOnServer(state, "rd", "onr_v1_258_neural-blade");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_258_neural-blade");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const preventOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    expect(preventOptionId).toBeDefined();
+    state = applyChoice(state, "runner", String(preventOptionId));
+    expect(state.runner.heap.length).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      eventModificationDecision: "apply",
+      preventedAmount: 2,
+      damageAmount: 0
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("MVP 0.95 Resources and tag interaction", () => {
   it("installs a local Resource through LegalActions and shows it publicly", () => {
     let state = toRunnerTurn(v095ResourceGame("v095-install-resource"));
@@ -4285,6 +4621,590 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     expect(DEMO_CARDS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain("hosting");
     expect(DEMO_CARDS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain("virus");
     expect(DEMO_CARDS_BY_ID.v096_trace_probe_ice?.mechanics).not.toContain("prevention");
+  });
+});
+
+describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
+  it("adds all V1.9.14 WIP runtime definitions without pulling in V1.9.15 cards", () => {
+    expect(ONR_V1_9_14_WIP_CARD_IDS).toHaveLength(25);
+    for (const definitionId of ONR_V1_9_14_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
+    let state = toRunnerTurn(v096TraceGame("v1914-asp-trace-wip"));
+    const aspInstanceId = "v1914_asp_instance" as CardInstanceId;
+    const rd = state.corp.servers.find((server) => server.id === "rd");
+    expect(rd).toBeDefined();
+    if (!rd) throw new Error("Missing R&D server");
+    rd.ice.unshift(aspInstanceId);
+    state.cardInstances[aspInstanceId] = {
+      instanceId: aspInstanceId,
+      definitionId: "onr_v1_221_asp",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0
+    };
+    state.corp.credits = 8;
+    state.runner.credits = 5;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_221_asp");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(DEMO_CARDS_BY_ID["onr_v1_221_asp"]?.mechanics).toEqual(expect.arrayContaining(["trace", "link", "bid_amount", "add_tag"]));
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(state.pendingChoice?.kind).toBe("bid_amount");
+    expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 4 });
+    expect(getPlayerView(state, "corp").pendingChoice?.choiceId).toBe(state.pendingChoice?.choiceId);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+
+    state = applyChoice(state, "corp", "bid_1");
+    expect(state.trace).toMatchObject({ status: "runner_bid", corpBid: 1, traceStrength: 5, runnerLink: 0 });
+
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.runner.tags).toBe(1);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.trace).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ traceSuccessful: true, tagsAdded: 1 });
+  });
+
+  it("runs each V1.9.14 Trace ICE through the side-safe bid window", () => {
+    const traceIce = [
+      ["onr_v1_221_asp", 4],
+      ["onr_v1_228_cinderella", 5],
+      ["onr_v1_240_fang", 3],
+      ["onr_v1_241_fang-2-0", 4],
+      ["onr_v1_248_homewrecker", 5],
+      ["onr_v1_260_pocket-virtual-reality", 4],
+      ["onr_v1_264_rex", 5]
+    ] as const;
+
+    for (const [definitionId, baseTraceStrength] of traceIce) {
+      let state = toRunnerTurn(v1914TraceTagResourceGame(`v1914-trace-${definitionId}`));
+      putCorpIceOnServer(state, "rd", definitionId);
+      state.corp.credits = 9;
+      state.runner.credits = 5;
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === definitionId);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+
+      expect(state.pendingChoice?.side, definitionId).toBe("corp");
+      expect(state.pendingChoice?.kind, definitionId).toBe("bid_amount");
+      expect(getPlayerView(state, "runner").pendingChoice, definitionId).toBeUndefined();
+      expect(state.trace, definitionId).toMatchObject({ status: "corp_bid", baseTraceStrength });
+    }
+  });
+
+  it("installs V1.9.14 Runner cards, counts installed link, and keeps Resource trash legal-action gated", () => {
+    for (const definitionId of ONR_V1_9_14_RUNNER_CARD_IDS) {
+      let state = toRunnerTurn(v1914TraceTagResourceGame(`v1914-install-${definitionId}`));
+      state.runner.credits = 12;
+      state.runner.memoryLimit = 8;
+      state.runner.tags = 1;
+      moveRunnerCardToGrip(state, definitionId);
+
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const actionType = definition?.type === "event" ? "play_event" : "install_card";
+      state = apply(state, "runner", (action) => action.type === actionType && sourceDefinition(state, action) === definitionId);
+
+      const installed =
+        definition?.type === "event"
+          ? state.runner.heap.some((cardId) => state.cardInstances[cardId]?.definitionId === definitionId)
+          : [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].some(
+              (cardId) => state.cardInstances[cardId]?.definitionId === definitionId
+            );
+      expect(installed, definitionId).toBe(true);
+      if (definition?.type === "event") expect(state.runner.tags, definitionId).toBe(0);
+      if (definition?.type === "program") expect(state.runner.memoryUsed, definitionId).toBeGreaterThan(0);
+    }
+
+    let linkState = toRunnerTurn(v1914TraceTagResourceGame("v1914-installed-link"));
+    linkState.runner.credits = 12;
+    linkState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(linkState, "onr_v1_132_microtech-trode-set");
+    linkState = apply(linkState, "runner", (action) => action.type === "install_card" && sourceDefinition(linkState, action) === "onr_v1_132_microtech-trode-set");
+    putCorpIceOnServer(linkState, "rd", "onr_v1_221_asp");
+    linkState.corp.credits = 9;
+    linkState = apply(linkState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    linkState = apply(linkState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(linkState, action) === "onr_v1_221_asp");
+    linkState = apply(linkState, "runner", (action) => action.type === "continue_run");
+    linkState = applyChoice(linkState, "corp", "bid_0");
+    expect(linkState.trace).toMatchObject({ status: "runner_bid", runnerLink: 1 });
+
+    let resourceState = toRunnerTurn(v1914TraceTagResourceGame("v1914-resource-trash"));
+    resourceState.runner.credits = 12;
+    resourceState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(resourceState, "onr_v1_154_broker");
+    resourceState = apply(resourceState, "runner", (action) => action.type === "install_card" && sourceDefinition(resourceState, action) === "onr_v1_154_broker");
+    const brokerId = resourceState.runner.rig.resources.find((cardId) => resourceState.cardInstances[cardId]?.definitionId === "onr_v1_154_broker");
+    expect(brokerId).toBeDefined();
+    resourceState.runner.tags = 1;
+    resourceState = apply(resourceState, "runner", (action) => action.type === "end_turn");
+    resourceState = apply(resourceState, "corp", (action) => action.type === "mandatory_draw");
+    resourceState.corp.credits = 6;
+    resourceState = apply(resourceState, "corp", (action) => action.type === "trash_resource" && action.payload?.resourceId === brokerId);
+    expect(resourceState.runner.rig.resources).not.toContain(brokerId);
+    expect(resourceState.runner.heap).toContain(brokerId);
+  });
+
+  it("gates Power Grid Overload on visible tags and installed Runner hardware", () => {
+    let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-power-grid-overload"));
+    state.runner.credits = 12;
+    state.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(state, "onr_v1_120_armadillo-armored-road-home");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_120_armadillo-armored-road-home");
+    const hardwareId = state.runner.rig.hardware.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_120_armadillo-armored-road-home");
+    expect(hardwareId).toBeDefined();
+    const operationId = moveCorpCardToHq(state, "onr_v1_299_power-grid-overload");
+
+    let untagged = apply(state, "runner", (action) => action.type === "end_turn");
+    untagged = apply(untagged, "corp", (action) => action.type === "mandatory_draw");
+    untagged.corp.credits = 6;
+    expect(getLegalActions(untagged, "corp").some((action) => action.type === "play_operation" && action.payload?.cardId === operationId)).toBe(false);
+
+    let tagged = structuredClone(state);
+    tagged.runner.tags = 1;
+    tagged = apply(tagged, "runner", (action) => action.type === "end_turn");
+    tagged = apply(tagged, "corp", (action) => action.type === "mandatory_draw");
+    tagged.corp.credits = 6;
+    tagged = apply(tagged, "corp", (action) => action.type === "play_operation" && sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload");
+    expect(tagged.runner.rig.hardware).not.toContain(hardwareId);
+    expect(tagged.runner.heap).toContain(hardwareId);
+    expect(tagged.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation" });
+  });
+});
+
+describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
+  it("adds all V1.9.15 WIP runtime definitions without pulling in V1.9.16 cards", () => {
+    expect(ONR_V1_9_15_WIP_CARD_IDS).toHaveLength(14);
+    for (const definitionId of ONR_V1_9_15_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
+    const eventExpectations = [
+      { definitionId: "onr_v1_098_lucidrine-booster-drug", serverId: "archives", accessCount: 1 },
+      { definitionId: "onr_v1_105_priority-wreck", serverId: "rd", accessCount: 2 },
+      { definitionId: "onr_v1_111_social-engineering", serverId: "hq", accessCount: 1 },
+      { definitionId: "onr_v1_112_stumble-through-wilderspace", serverId: "rd", accessCount: 1 }
+    ] as const;
+
+    for (const expectation of eventExpectations) {
+      let state = toRunnerTurn(v1915RunAccessGame(`v1915-event-${expectation.definitionId}`));
+      state.runner.credits = 8;
+      moveRunnerCardToGrip(state, expectation.definitionId);
+
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(state, action) === expectation.definitionId &&
+          action.payload?.serverId === expectation.serverId
+      );
+
+      expect(state.run?.attackedServerId, expectation.definitionId).toBe(expectation.serverId);
+      expect(state.run?.accessCount, expectation.definitionId).toBe(expectation.accessCount);
+      expect(state.eventLog.at(-1)?.publicPayload, expectation.definitionId).toMatchObject({ actionType: "play_event" });
+    }
+  });
+
+  it("breaches R&D with Priority Wreck multiaccess without leaking future queued cards", () => {
+    let state = toRunnerTurn(v1915RunAccessGame("v1915-priority-wreck-rd-multiaccess"));
+    state.runner.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_105_priority-wreck");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const initial = structuredClone(state);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_105_priority-wreck" && action.payload?.serverId === "rd"
+    );
+
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(state.run?.breach).toMatchObject({ serverId: "rd", accessMode: "multi", currentIndex: 0 });
+    expect(state.run?.breach?.queue).toHaveLength(2);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Agenda");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Economy Operation");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Agenda");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ cardDefinitionId: "simple_agenda", title: "Simple Agenda" });
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(agendaPoints(state, "runner")).toBe(2);
+  });
+
+  it("applies installed V1.9.15 run and access helpers through existing breach paths", () => {
+    let state = toRunnerTurn(v1915RunAccessGame("v1915-installed-access-helpers"));
+    state.runner.credits = 20;
+    state.runner.memoryLimit = 12;
+    for (const definitionId of [
+      "onr_v1_020_dupre",
+      "onr_v1_024_expert-schedule-analyzer",
+      "onr_v1_041_microtech-ai-interface",
+      "onr_v1_043_mystery-box",
+      "onr_v1_062_shredder-uplink-protocol",
+      "onr_v1_065_smarteye",
+      "onr_v1_142_record-reconstructor"
+    ] as const) {
+      moveRunnerCardToGrip(state, definitionId);
+      state.runner.clicks = 10;
+      state.runner.credits = 20;
+      const title = DEMO_CARDS_BY_ID[definitionId]?.title;
+      state = apply(state, "runner", (action) => action.type === "install_card" && (!title || action.label.includes(title)));
+    }
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, "simple_economy_asset");
+
+    const dupreId = state.runner.rig.programs.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_020_dupre");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+
+    expect(dupreId ? state.cardInstances[dupreId]?.counters?.power : 0).toBe(1);
+    expect(state.run?.breach?.queue).toHaveLength(3);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Agenda");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1915_installed_access_reveal"
+    });
+  });
+
+  it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
+    for (const [definitionId, baseTraceStrength] of [
+      ["onr_v1_227_cerberus", 4],
+      ["onr_v1_255_mastiff", 5]
+    ] as const) {
+      let state = toRunnerTurn(v1915RunAccessGame(`v1915-ice-${definitionId}`));
+      putCorpIceOnServer(state, "rd", definitionId);
+      state.corp.credits = 10;
+      state.runner.credits = 5;
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === definitionId);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+
+      expect(state.pendingChoice?.side, definitionId).toBe("corp");
+      expect(state.pendingChoice?.kind, definitionId).toBe("bid_amount");
+      expect(getPlayerView(state, "runner").pendingChoice, definitionId).toBeUndefined();
+      expect(state.trace, definitionId).toMatchObject({ status: "corp_bid", baseTraceStrength });
+    }
+  });
+
+  it("allows New Blood only after a visible Runner run attempt last turn", () => {
+    let noRun = toRunnerTurn(v1915RunAccessGame("v1915-new-blood-no-run"));
+    const noRunOperationId = moveCorpCardToHq(noRun, "onr_v1_294_new-blood");
+    noRun = apply(noRun, "runner", (action) => action.type === "end_turn");
+    noRun = apply(noRun, "corp", (action) => action.type === "mandatory_draw");
+    noRun.corp.credits = 6;
+    expect(getLegalActions(noRun, "corp").some((action) => action.type === "play_operation" && action.payload?.cardId === noRunOperationId)).toBe(false);
+
+    let state = toRunnerTurn(v1915RunAccessGame("v1915-new-blood-after-run"));
+    moveCorpCardToHq(state, "onr_v1_294_new-blood");
+    state.corp.servers.push({ id: "remote_1", kind: "remote", label: "Remote 1", ice: [], root: [] });
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    expect(state.run).toBeUndefined();
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 6;
+
+    const beforeCredits = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_294_new-blood");
+    expect(state.corp.credits).toBe(beforeCredits + 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation" });
+  });
+});
+
+describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
+  it("adds all V1.9.16 WIP runtime definitions without release-promoting the next slice", () => {
+    expect(ONR_V1_9_16_WIP_CARD_IDS).toHaveLength(16);
+    for (const definitionId of ONR_V1_9_16_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-link-trace"));
+    state.runner.credits = 12;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
+    moveRunnerCardToGrip(state, "onr_v1_148_access-through-alpha");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_148_access-through-alpha");
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 4 });
+
+    state = applyChoice(state, "corp", "bid_1");
+
+    expect(state.trace).toMatchObject({ status: "runner_bid", corpBid: 1, traceStrength: 5, runnerLink: 2 });
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "runner").pendingChoice?.kind).toBe("bid_amount");
+  });
+
+  it("refreshes V1.9.16 stealth and recurring counters without accumulation", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-stealth-recurring"));
+    state.runner.credits = 12;
+    moveRunnerCardToGrip(state, "onr_v1_035_invisibility");
+    moveRunnerCardToGrip(state, "onr_v1_140_raven-microcyb-eagle");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_035_invisibility");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_140_raven-microcyb-eagle");
+
+    const invisibilityId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_035_invisibility");
+    const eagleId = state.runner.rig.hardware.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_140_raven-microcyb-eagle");
+    expect(invisibilityId).toBeDefined();
+    expect(eagleId).toBeDefined();
+    if (!invisibilityId || !eagleId) throw new Error("Missing installed V1.9.16 recurring cards");
+    expect(state.cardInstances[invisibilityId]?.counters?.recurring_credit).toBe(1);
+    expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
+
+    state.cardInstances[invisibilityId] = { ...state.cardInstances[invisibilityId]!, counters: { ...state.cardInstances[invisibilityId]!.counters, recurring_credit: 0 } };
+    state.cardInstances[eagleId] = { ...state.cardInstances[eagleId]!, counters: { ...state.cardInstances[eagleId]!.counters, recurring_credit: 0 } };
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.maxHandSize = 100;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    expect(state.cardInstances[invisibilityId]?.counters?.recurring_credit).toBe(1);
+    expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
+  });
+
+  it("hosts V1.9.16 programs on Imp and cascades hosted cards on daemon trash", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-imp-hosting-lifecycle"));
+    state.runner.credits = 12;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_033_imp");
+    moveRunnerCardToGrip(state, "onr_v1_004_bakdoor");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_033_imp");
+    const impId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_033_imp");
+    expect(impId).toBeDefined();
+    if (!impId) throw new Error("Missing installed Imp host");
+
+    const hostedInstall = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_004_bakdoor" &&
+        action.payload?.hostOnCardId === impId
+    );
+    const bakdoorId = String(hostedInstall.payload?.cardId ?? "");
+    state = apply(state, "runner", (action) => action.actionId === hostedInstall.actionId);
+
+    expect(state.cardInstances[bakdoorId]?.hostedOn).toBe(impId);
+    expect(state.runner.memoryUsed).toBe(1);
+    expect(getPlayerView(state, "runner").own.rig?.some((card) => card.instanceId === bakdoorId && card.hostedOn === impId)).toBe(true);
+    expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.instanceId === bakdoorId && card.hostedOn === impId)).toBe(true);
+
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.runner.rig.programs).not.toContain(impId);
+    expect(state.runner.rig.programs).not.toContain(bakdoorId);
+    expect(state.runner.heap).toEqual(expect.arrayContaining([impId, bakdoorId]));
+    expect(state.cardInstances[bakdoorId]?.hostedOn).toBeUndefined();
+    expect(state.runner.memoryUsed).toBe(0);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("gates Fragmentation Storm program trash and net damage on trace success", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-fragmentation-storm-success"));
+    state.runner.credits = 10;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_047_pile-driver");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_047_pile-driver");
+    const pileDriverId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_047_pile-driver");
+    expect(pileDriverId).toBeDefined();
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    const gripBeforeDamage = state.runner.grip.length;
+    const initial = structuredClone(state);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ traceSuccessful: true, tagsAdded: 0 });
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(pileDriverId && state.runner.heap.includes(pileDriverId)).toBe(true);
+    expect(state.runner.grip.length).toBe(Math.max(0, gripBeforeDamage - 1));
+    expect(validateGameState(state).ok).toBe(true);
+    const successReplay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(successReplay.ok).toBe(true);
+    expect(successReplay.actualFinalStateHash).toBe(hashState(state));
+
+    let failed = initial;
+    failed.runner.credits = 10;
+    failed = apply(failed, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    failed = apply(failed, "corp", (action) => action.type === "rez_ice" && sourceDefinition(failed, action) === "onr_v1_246_fragmentation-storm");
+    failed = apply(failed, "runner", (action) => action.type === "continue_run");
+    failed = applyChoice(failed, "corp", "bid_0");
+    failed = applyChoice(failed, "runner", "bid_4");
+    failed = apply(failed, "runner", (action) => action.type === "continue_run");
+
+    expect(pileDriverId && failed.runner.rig.programs.includes(pileDriverId)).toBe(true);
+    expect(failed.runner.grip.length).toBe(gripBeforeDamage);
+    expect(validateGameState(failed).ok).toBe(true);
+    const failedReplay = replayEvents(initial, failed.eventLog.slice(initial.eventLog.length));
+    expect(failedReplay.ok).toBe(true);
+    expect(failedReplay.actualFinalStateHash).toBe(hashState(failed));
+  });
+});
+
+describe("V1.9.17 Generic Asset/Node WIP", () => {
+  it("adds all V1.9.17 WIP runtime definitions without release-promoting the next slice", () => {
+    expect(ONR_V1_9_17_WIP_CARD_IDS).toHaveLength(18);
+    for (const definitionId of ONR_V1_9_17_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.side, definitionId).toBe("corp");
+      expect(definition?.type, definitionId).toBe("asset");
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_354_crybaby"]?.implementationStatus).not.toBe("playable_mvp");
+  });
+
+  it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
+    let state = v1917GenericAssetGame("v1917-generic-asset-install-rez-access");
+    state.corp.credits = 10;
+    state.runner.credits = 10;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const assetId = moveCorpCardToHq(state, "onr_v1_321_esa-contract");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.payload?.cardId === assetId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_321_esa-contract");
+
+    const remote = state.corp.servers.find((server) => server.root.includes(assetId));
+    expect(remote?.id).toBe("remote_1");
+    expect(state.cardInstances[assetId]?.rezzed).toBe(true);
+    expect(getPlayerView(state, "runner").servers.find((server) => server.id === remote?.id)?.root.find((card) => card.instanceId === assetId)?.definitionId).toBe(
+      "onr_v1_321_esa-contract"
+    );
+
+    const creditsBeforeAbility = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1917AssetAbility === "gain_credits" && action.payload?.cardId === assetId);
+    expect(state.corp.credits).toBe(creditsBeforeAbility + 2);
+    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "gain_credit", cardDefinitionId: "onr_v1_321_esa-contract", amount: 2 });
+
+    let accessState = toRunnerTurn(v1917GenericAssetGame("v1917-generic-asset-access-trash"));
+    accessState.runner.credits = 10;
+    const accessedAssetId = putCorpRootInRemote(accessState, "onr_v1_321_esa-contract");
+    accessState.cardInstances[accessedAssetId] = { ...accessState.cardInstances[accessedAssetId]!, faceup: true, rezzed: true };
+    accessState = apply(accessState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    accessState = apply(accessState, "runner", (action) => action.type === "access_card");
+    expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "onr_v1_321_esa-contract" });
+    expect(JSON.stringify(accessState.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+
+    accessState = apply(accessState, "runner", (action) => action.type === "trash_accessed_card");
+    expect(accessState.corp.archives).toContain(accessedAssetId);
+    expect(getPlayerView(accessState, "runner").servers.find((server) => server.id === "archives")?.root.find((card) => card.instanceId === accessedAssetId)?.definitionId).toBe(
+      "onr_v1_321_esa-contract"
+    );
+    expect(validateGameState(accessState).ok).toBe(true);
+  });
+
+  it("applies rezzed V1.9.17 recurring campaign credits at Corp turn start", () => {
+    let state = v1917GenericAssetGame("v1917-recurring-campaign-start-turn");
+    state.corp.credits = 10;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const campaignId = moveCorpCardToHq(state, "onr_v1_326_holovid-campaign");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "install_card" && action.payload?.cardId === campaignId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+    );
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_326_holovid-campaign");
+    const creditsBeforeNextCorpTurn = state.corp.credits;
+
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.activeSide).toBe("corp");
+    expect(state.timingPoint).toBe("corp_draw.mandatory_draw");
+    expect(state.corp.credits).toBe(creditsBeforeNextCorpTurn + 1);
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
+  it("starts V1.9.17 trace asset abilities through the side-safe trace window", () => {
+    const traceAssets = ["onr_v1_310_blood-cat", "onr_v1_330_krumz"] as const;
+    for (const definitionId of traceAssets) {
+      let state = v1917GenericAssetGame(`v1917-trace-asset-window-${definitionId}`);
+      state.corp.credits = 10;
+      state.runner.credits = 5;
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      const assetId = moveCorpCardToHq(state, definitionId);
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "install_card" && action.payload?.cardId === assetId && action.payload?.serverId === "new_remote" && action.payload?.placement === "root"
+      );
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === definitionId);
+      state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.v1917AssetAbility === "trace_3_tag" && action.payload?.cardId === assetId);
+
+      expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 3, sourceDefinitionId: definitionId });
+      expect(state.pendingChoice?.side).toBe("corp");
+      expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+      expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "gain_credit", traceStarted: true, sourceDefinitionId: definitionId });
+      expect(validateGameState(state).ok).toBe(true);
+    }
   });
 });
 
@@ -5714,6 +6634,124 @@ const ONR_V1_9_6_FINAL_CARD_IDS = ["onr_v1_236_data-raven"] as const;
 const ONR_V1_9_7_FINAL_CARD_IDS = ["onr_v1_001_afreet"] as const;
 const ONR_V1_9_8_FINAL_CARD_IDS = ["onr_v1_018_dogcatcher", "onr_v1_019_dropp"] as const;
 const ONR_V1_9_9_FINAL_CARD_IDS = ["onr_v1_349_aardvark", "onr_v1_351_bizarre-encryption-scheme", "onr_v1_352_chester-mix", "onr_v1_353_chimera"] as const;
+const ONR_V1_9_12_RELEASE_CARD_IDS = [
+  "onr_v1_009_butcher-boy",
+  "onr_v1_010_cascade",
+  "onr_v1_017_deep-thought",
+  "onr_v1_032_i-spy",
+  "onr_v1_064_skivviss",
+  "onr_v1_082_deal-with-militech",
+  "onr_v1_091_hunt-club-bbs",
+  "onr_v1_174_rigged-investments",
+  "onr_v1_176_the-shell-traders",
+  "onr_v1_198_detroit-police-contract",
+  "onr_v1_199_employee-empowerment"
+] as const;
+const ONR_V1_9_13_RELEASE_CARD_IDS = [
+  "onr_v1_038_joan-of-arc",
+  "onr_v1_121_armored-fridge",
+  "onr_v1_127_full-body-conversion",
+  "onr_v1_128_green-knight-surge-buffers",
+  "onr_v1_130_lifesaver-nanosurgeons",
+  "onr_v1_135_nasuko-cycle",
+  "onr_v1_139_r-and-d-interface",
+  "onr_v1_143_techtronica-utility-suit",
+  "onr_v1_155_code-viral-cache",
+  "onr_v1_161_fall-guy",
+  "onr_v1_170_nomad-allies",
+  "onr_v1_185_trauma-team",
+  "onr_v1_186_umbrella-policy",
+  "onr_v1_187_wilson-weeflerunner-apprentice",
+  "onr_v1_224_bolter-cluster",
+  "onr_v1_234_data-darts",
+  "onr_v1_258_neural-blade"
+] as const;
+const ONR_V1_9_14_WIP_CARD_IDS = [
+  "onr_v1_053_ramming-piston",
+  "onr_v1_056_replicator",
+  "onr_v1_063_signpost",
+  "onr_v1_116_total-genetic-retrofit",
+  "onr_v1_120_armadillo-armored-road-home",
+  "onr_v1_126_drifter-mobile-environment",
+  "onr_v1_132_microtech-trode-set",
+  "onr_v1_154_broker",
+  "onr_v1_157_crash-everett-inventive-fixer",
+  "onr_v1_162_field-reporter-for-ice-and-data",
+  "onr_v1_164_hells-run",
+  "onr_v1_165_junkyard-bbs",
+  "onr_v1_166_karl-de-veres-corporate-stooge",
+  "onr_v1_167_leland-corporate-bodyguard",
+  "onr_v1_178_short-term-contract",
+  "onr_v1_181_the-springboard",
+  "onr_v1_183_technician-lover",
+  "onr_v1_221_asp",
+  "onr_v1_228_cinderella",
+  "onr_v1_240_fang",
+  "onr_v1_241_fang-2-0",
+  "onr_v1_248_homewrecker",
+  "onr_v1_260_pocket-virtual-reality",
+  "onr_v1_264_rex",
+  "onr_v1_299_power-grid-overload"
+] as const;
+
+const ONR_V1_9_14_RUNNER_CARD_IDS = ONR_V1_9_14_WIP_CARD_IDS.filter((cardId) => DEMO_CARDS_BY_ID[cardId]?.side === "runner");
+
+const ONR_V1_9_15_WIP_CARD_IDS = [
+  "onr_v1_020_dupre",
+  "onr_v1_024_expert-schedule-analyzer",
+  "onr_v1_041_microtech-ai-interface",
+  "onr_v1_043_mystery-box",
+  "onr_v1_062_shredder-uplink-protocol",
+  "onr_v1_065_smarteye",
+  "onr_v1_098_lucidrine-booster-drug",
+  "onr_v1_105_priority-wreck",
+  "onr_v1_111_social-engineering",
+  "onr_v1_112_stumble-through-wilderspace",
+  "onr_v1_142_record-reconstructor",
+  "onr_v1_227_cerberus",
+  "onr_v1_255_mastiff",
+  "onr_v1_294_new-blood"
+] as const;
+
+const ONR_V1_9_16_WIP_CARD_IDS = [
+  "onr_v1_003_baedekers-net-map",
+  "onr_v1_004_bakdoor",
+  "onr_v1_033_imp",
+  "onr_v1_035_invisibility",
+  "onr_v1_047_pile-driver",
+  "onr_v1_050_r-and-d-protocol-files",
+  "onr_v1_071_vewy-vewy-quiet",
+  "onr_v1_140_raven-microcyb-eagle",
+  "onr_v1_141_raven-microcyb-owl",
+  "onr_v1_148_access-through-alpha",
+  "onr_v1_149_access-to-arasaka",
+  "onr_v1_150_access-to-kiribati",
+  "onr_v1_152_back-door-to-hilliard",
+  "onr_v1_153_back-door-to-orbital-air",
+  "onr_v1_182_submarine-uplink",
+  "onr_v1_246_fragmentation-storm"
+] as const;
+
+const ONR_V1_9_17_WIP_CARD_IDS = [
+  "onr_v1_309_bbs-whispering-campaign",
+  "onr_v1_310_blood-cat",
+  "onr_v1_311_braindance-campaign",
+  "onr_v1_314_corporate-negotiating-center",
+  "onr_v1_316_cowboy-sysop",
+  "onr_v1_318_department-of-truth-enhancement",
+  "onr_v1_319_disinfectant-inc",
+  "onr_v1_321_esa-contract",
+  "onr_v1_326_holovid-campaign",
+  "onr_v1_329_investment-firm",
+  "onr_v1_330_krumz",
+  "onr_v1_333_omniscience-foundation",
+  "onr_v1_336_rescheduler",
+  "onr_v1_337_rockerboy-promotion",
+  "onr_v1_340_setup",
+  "onr_v1_342_solo-squad",
+  "onr_v1_344_spinn-public-relations",
+  "onr_v1_345_trap"
+] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
@@ -6426,6 +7464,289 @@ const ONR_V1_9_9_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1911_hidden_zone_wip",
+  name: "O:NR V1.9.11 Hidden-Zone WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_042_mouse", quantity: 1 },
+    { id: "onr_v1_058_seeya", quantity: 1 },
+    { id: "onr_v1_059_self-modifying-code", quantity: 1 },
+    { id: "onr_v1_087_forgotten-backup-chip", quantity: 1 },
+    { id: "onr_v1_088_fortress-respecification", quantity: 1 },
+    { id: "onr_v1_089_gideons-pawnshop", quantity: 1 },
+    { id: "onr_v1_092_ice-and-datas-guide-to-the-net", quantity: 1 },
+    { id: "onr_v1_099_mantis-fixer-at-large", quantity: 1 },
+    { id: "onr_v1_110_sneak-preview", quantity: 1 },
+    { id: "onr_v1_151_aujourdoui", quantity: 1 },
+    { id: "onr_v1_169_n-e-t-o", quantity: 1 },
+    { id: "onr_v1_175_ronin-around", quantity: 1 },
+    { id: "onr_v1_177_the-short-circuit", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1911_hidden_zone_wip",
+  name: "O:NR V1.9.11 Hidden-Zone WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_194_corporate-downsizing", quantity: 1 },
+    { id: "onr_v1_250_ice-pick-willie", quantity: 1 },
+    { id: "onr_v1_272_too-many-doors", quantity: 1 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_upgrade", quantity: 2 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
+const ONR_V1_9_12_COUNTER_RECURRING_WIP_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1912_counter_recurring_wip",
+  name: "O:NR V1.9.12 Counter Recurring WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_009_butcher-boy", quantity: 1 },
+    { id: "onr_v1_010_cascade", quantity: 1 },
+    { id: "onr_v1_017_deep-thought", quantity: 1 },
+    { id: "onr_v1_032_i-spy", quantity: 1 },
+    { id: "onr_v1_064_skivviss", quantity: 1 },
+    { id: "onr_v1_082_deal-with-militech", quantity: 1 },
+    { id: "onr_v1_091_hunt-club-bbs", quantity: 1 },
+    { id: "onr_v1_174_rigged-investments", quantity: 1 },
+    { id: "onr_v1_176_the-shell-traders", quantity: 1 },
+    { id: "onr_v1_021_dwarf", quantity: 2 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1912_counter_recurring_wip",
+  name: "O:NR V1.9.12 Counter Recurring WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_198_detroit-police-contract", quantity: 2 },
+    { id: "onr_v1_199_employee-empowerment", quantity: 2 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
+const ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1913_damage_prevention_wip",
+  name: "O:NR V1.9.13 Damage Prevention WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_038_joan-of-arc", quantity: 1 },
+    { id: "onr_v1_121_armored-fridge", quantity: 1 },
+    { id: "onr_v1_127_full-body-conversion", quantity: 1 },
+    { id: "onr_v1_128_green-knight-surge-buffers", quantity: 1 },
+    { id: "onr_v1_130_lifesaver-nanosurgeons", quantity: 1 },
+    { id: "onr_v1_135_nasuko-cycle", quantity: 1 },
+    { id: "onr_v1_139_r-and-d-interface", quantity: 1 },
+    { id: "onr_v1_143_techtronica-utility-suit", quantity: 1 },
+    { id: "onr_v1_155_code-viral-cache", quantity: 1 },
+    { id: "onr_v1_161_fall-guy", quantity: 1 },
+    { id: "onr_v1_170_nomad-allies", quantity: 1 },
+    { id: "onr_v1_185_trauma-team", quantity: 1 },
+    { id: "onr_v1_186_umbrella-policy", quantity: 1 },
+    { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_economy_event", quantity: 8 }
+  ]
+};
+
+const ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1913_damage_prevention_wip",
+  name: "O:NR V1.9.13 Damage Prevention WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_224_bolter-cluster", quantity: 2 },
+    { id: "onr_v1_234_data-darts", quantity: 2 },
+    { id: "onr_v1_258_neural-blade", quantity: 2 },
+    { id: "onr_v1_301_punitive-counterstrike", quantity: 2 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1914_trace_tag_resource",
+  name: "O:NR V1.9.14 Trace Tag Resource Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_053_ramming-piston", quantity: 1 },
+    { id: "onr_v1_056_replicator", quantity: 1 },
+    { id: "onr_v1_063_signpost", quantity: 1 },
+    { id: "onr_v1_116_total-genetic-retrofit", quantity: 1 },
+    { id: "onr_v1_120_armadillo-armored-road-home", quantity: 1 },
+    { id: "onr_v1_126_drifter-mobile-environment", quantity: 1 },
+    { id: "onr_v1_132_microtech-trode-set", quantity: 1 },
+    { id: "onr_v1_154_broker", quantity: 1 },
+    { id: "onr_v1_157_crash-everett-inventive-fixer", quantity: 1 },
+    { id: "onr_v1_162_field-reporter-for-ice-and-data", quantity: 1 },
+    { id: "onr_v1_164_hells-run", quantity: 1 },
+    { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+    { id: "onr_v1_166_karl-de-veres-corporate-stooge", quantity: 1 },
+    { id: "onr_v1_167_leland-corporate-bodyguard", quantity: 1 },
+    { id: "onr_v1_178_short-term-contract", quantity: 1 },
+    { id: "onr_v1_181_the-springboard", quantity: 1 },
+    { id: "onr_v1_183_technician-lover", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1914_trace_tag_resource",
+  name: "O:NR V1.9.14 Trace Tag Resource Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_221_asp", quantity: 2 },
+    { id: "onr_v1_228_cinderella", quantity: 2 },
+    { id: "onr_v1_240_fang", quantity: 2 },
+    { id: "onr_v1_241_fang-2-0", quantity: 2 },
+    { id: "onr_v1_248_homewrecker", quantity: 2 },
+    { id: "onr_v1_260_pocket-virtual-reality", quantity: 2 },
+    { id: "onr_v1_264_rex", quantity: 2 },
+    { id: "onr_v1_299_power-grid-overload", quantity: 2 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
+const ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1915_run_access",
+  name: "O:NR V1.9.15 Run Access WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_020_dupre", quantity: 1 },
+    { id: "onr_v1_024_expert-schedule-analyzer", quantity: 1 },
+    { id: "onr_v1_041_microtech-ai-interface", quantity: 1 },
+    { id: "onr_v1_043_mystery-box", quantity: 1 },
+    { id: "onr_v1_062_shredder-uplink-protocol", quantity: 1 },
+    { id: "onr_v1_065_smarteye", quantity: 1 },
+    { id: "onr_v1_098_lucidrine-booster-drug", quantity: 1 },
+    { id: "onr_v1_105_priority-wreck", quantity: 2 },
+    { id: "onr_v1_111_social-engineering", quantity: 1 },
+    { id: "onr_v1_112_stumble-through-wilderspace", quantity: 1 },
+    { id: "onr_v1_142_record-reconstructor", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_15_RUN_ACCESS_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1915_run_access",
+  name: "O:NR V1.9.15 Run Access WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_227_cerberus", quantity: 2 },
+    { id: "onr_v1_255_mastiff", quantity: 2 },
+    { id: "onr_v1_294_new-blood", quantity: 2 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 },
+    { id: "simple_economy_asset", quantity: 2 }
+  ]
+};
+
+const ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1916_program_subtype",
+  name: "O:NR V1.9.16 Program Subtype WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_003_baedekers-net-map", quantity: 1 },
+    { id: "onr_v1_004_bakdoor", quantity: 1 },
+    { id: "onr_v1_033_imp", quantity: 1 },
+    { id: "onr_v1_035_invisibility", quantity: 1 },
+    { id: "onr_v1_047_pile-driver", quantity: 1 },
+    { id: "onr_v1_050_r-and-d-protocol-files", quantity: 1 },
+    { id: "onr_v1_071_vewy-vewy-quiet", quantity: 1 },
+    { id: "onr_v1_140_raven-microcyb-eagle", quantity: 1 },
+    { id: "onr_v1_141_raven-microcyb-owl", quantity: 1 },
+    { id: "onr_v1_148_access-through-alpha", quantity: 1 },
+    { id: "onr_v1_149_access-to-arasaka", quantity: 1 },
+    { id: "onr_v1_150_access-to-kiribati", quantity: 1 },
+    { id: "onr_v1_152_back-door-to-hilliard", quantity: 1 },
+    { id: "onr_v1_153_back-door-to-orbital-air", quantity: 1 },
+    { id: "onr_v1_182_submarine-uplink", quantity: 1 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1916_program_subtype",
+  name: "O:NR V1.9.16 Program Subtype WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_246_fragmentation-storm", quantity: 2 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 },
+    { id: "simple_economy_asset", quantity: 2 }
+  ]
+};
+
+const ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1917_generic_asset",
+  name: "O:NR V1.9.17 Generic Asset WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_killer", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_17_GENERIC_ASSET_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1917_generic_asset",
+  name: "O:NR V1.9.17 Generic Asset WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+    { id: "onr_v1_310_blood-cat", quantity: 1 },
+    { id: "onr_v1_311_braindance-campaign", quantity: 1 },
+    { id: "onr_v1_314_corporate-negotiating-center", quantity: 1 },
+    { id: "onr_v1_316_cowboy-sysop", quantity: 1 },
+    { id: "onr_v1_318_department-of-truth-enhancement", quantity: 1 },
+    { id: "onr_v1_319_disinfectant-inc", quantity: 1 },
+    { id: "onr_v1_321_esa-contract", quantity: 1 },
+    { id: "onr_v1_326_holovid-campaign", quantity: 1 },
+    { id: "onr_v1_329_investment-firm", quantity: 1 },
+    { id: "onr_v1_330_krumz", quantity: 1 },
+    { id: "onr_v1_333_omniscience-foundation", quantity: 1 },
+    { id: "onr_v1_336_rescheduler", quantity: 1 },
+    { id: "onr_v1_337_rockerboy-promotion", quantity: 1 },
+    { id: "onr_v1_340_setup", quantity: 1 },
+    { id: "onr_v1_342_solo-squad", quantity: 1 },
+    { id: "onr_v1_344_spinn-public-relations", quantity: 1 },
+    { id: "onr_v1_345_trap", quantity: 1 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -6792,6 +8113,76 @@ function v199CardReleaseGame(seed: string): GameState {
   });
 }
 
+function v1911HiddenZoneGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK,
+    corpDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1912CounterRecurringGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_RUNNER_DECK,
+    corpDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1913DamagePreventionGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK,
+    corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1914TraceTagResourceGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+    corpDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1915RunAccessGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK,
+    corpDeck: ONR_V1_9_15_RUN_ACCESS_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1916ProgramSubtypeGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK,
+    corpDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1917GenericAssetGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK,
+    corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
 function v095ResourceGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
@@ -7071,6 +8462,14 @@ function installRunnerProgramForTest(state: GameState, definitionId: string): Ca
   return id;
 }
 
+function installRunnerResourceForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.rig.resources.push(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "rig" }, faceup: true, rezzed: true };
+  return id;
+}
+
 function installRunnerProgramCopyForTest(state: GameState, definitionId: string): CardInstanceId {
   const entry = Object.entries(state.cardInstances).find(
     ([id, card]) => card.definitionId === definitionId && !state.runner.rig.programs.includes(id)
@@ -7136,3 +8535,4 @@ function removeEverywhere(state: GameState, id: string): void {
     state.specialZones.removedFromGame = state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
   }
 }
+

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-manifest-v1",
+  "id": "deck-legal-ai-approval-v1912",
+  "status": "implemented_for_ai_approval",
+  "release": "V1.9.12",
+  "cardCount": 11,
+  "cards": [
+    { "cardId": "onr_v1_009_butcher-boy", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_009_butcher-boy", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_010_cascade", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_010_cascade", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_017_deep-thought", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_017_deep-thought", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_032_i-spy", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_032_i-spy", "scenarioRefs": ["runner_v1912_hidden_zone_counter"] },
+    { "cardId": "onr_v1_064_skivviss", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_064_skivviss", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_082_deal-with-militech", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_082_deal-with-militech", "scenarioRefs": ["runner_v1912_hidden_zone_counter"] },
+    { "cardId": "onr_v1_091_hunt-club-bbs", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_091_hunt-club-bbs", "scenarioRefs": ["runner_v1912_hidden_zone_counter"] },
+    { "cardId": "onr_v1_174_rigged-investments", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_174_rigged-investments", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_176_the-shell-traders", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_176_the-shell-traders", "scenarioRefs": ["runner_v1912_counter_recurring"] },
+    { "cardId": "onr_v1_198_detroit-police-contract", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_198_detroit-police-contract", "scenarioRefs": ["corp_v1912_agenda_counter_economy"] },
+    { "cardId": "onr_v1_199_employee-empowerment", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1912:onr_v1_199_employee-empowerment", "scenarioRefs": ["corp_v1912_agenda_counter_economy"] }
+  ],
+  "completionGate": {
+    "allCardsAiSupported": true,
+    "requiresAiSmokeExecution": false
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.9.11",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.11",
+  "generatedFor": "V1.9.11 Hidden-Zone Search, Reveal, Reorder und Shuffle data gate",
+  "generatedAt": "2026-05-12",
+  "status": "implemented_data_gate",
+  "extends": "data/rules/mechanics-coverage-1.9.10.json",
+  "gateAssertions": {
+    "hiddenZoneSearchRevealReorderResolverImplemented": true,
+    "allSixteenV1911CardsCovered": true,
+    "aiChoicePathsCovered": true,
+    "noHiddenZoneDataLeak": true,
+    "stateHashReplayStable": true,
+    "noV1912PlusScope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.hidden_zone.search_stack_reveal_shuffle",
+      "label": "Runner Stack Search, Reveal and Shuffle",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.11",
+      "currentScopeNote": "V1.9.11 Runner event/program/resource adapters open side-private stack-search choices, reveal the selected program and shuffle deterministically.",
+      "coverage": ["unit", "scenario", "choice", "visibility", "replay", "state_hash", "ai"]
+    },
+    {
+      "mechanicId": "mechanic.hidden_zone.expose_or_reveal",
+      "label": "Reveal and Expose Hidden-Zone Cards",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.11",
+      "currentScopeNote": "V1.9.11 reveal/expose paths publish only the intentionally revealed definition and keep the remaining hidden zone redacted.",
+      "coverage": ["unit", "scenario", "visibility", "public_event", "ai"]
+    },
+    {
+      "mechanicId": "mechanic.hidden_zone.reorder_top_cards",
+      "label": "Side-Private Hidden-Zone Reorder",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.11",
+      "currentScopeNote": "Ronin Around and Too Many Doors use side-private reorder choices for known top-card windows; the opposing side receives no card IDs, titles or order.",
+      "coverage": ["unit", "scenario", "choice", "visibility", "replay", "state_hash", "ai"]
+    },
+    {
+      "mechanicId": "mechanic.hidden_zone.corp_rd_top_reveal",
+      "label": "Corp R&D Top Reveal",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.11",
+      "currentScopeNote": "Corporate Downsizing and Ice Pick Willie reveal only the top R&D definition through scored-agenda or subroutine-bound LegalAction paths.",
+      "coverage": ["unit", "scenario", "visibility", "public_event", "ai"]
+    }
+  ],
+  "deferred": []
+}

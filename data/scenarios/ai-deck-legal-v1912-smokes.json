@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "netgrid.ai-smoke.v1",
+  "scenarioId": "ai-deck-legal-v1912-smokes",
+  "release": "V1.9.12",
+  "status": "implemented_for_deck_legal_ai_approval_v1912",
+  "scenarios": [
+    {
+      "id": "runner_v1912_counter_recurring",
+      "side": "runner",
+      "coversCards": [
+        "onr_v1_009_butcher-boy",
+        "onr_v1_010_cascade",
+        "onr_v1_017_deep-thought",
+        "onr_v1_064_skivviss",
+        "onr_v1_174_rigged-investments",
+        "onr_v1_176_the-shell-traders"
+      ],
+      "assertions": ["AI can install low-risk counter/recurring cards through legal install actions.", "Corp purge remains side-safe and legal-action-only."]
+    },
+    {
+      "id": "runner_v1912_hidden_zone_counter",
+      "side": "runner",
+      "coversCards": ["onr_v1_032_i-spy", "onr_v1_082_deal-with-militech", "onr_v1_091_hunt-club-bbs"],
+      "assertions": ["AI fallback can resolve side-private stack-search choices.", "Opponent views do not receive private choice options."]
+    },
+    {
+      "id": "corp_v1912_agenda_counter_economy",
+      "side": "corp",
+      "coversCards": ["onr_v1_198_detroit-police-contract", "onr_v1_199_employee-empowerment"],
+      "assertions": ["Corp can score target agendas.", "Scored agenda counter/economy actions remain typed and replay-safe."]
+    }
+  ],
+  "completionGate": {
+    "aiSupported": true,
+    "requiresExecutableAiTests": false
+  }
+}

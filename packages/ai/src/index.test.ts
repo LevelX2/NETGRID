@@ -8,6 +8,12 @@ import {
   DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS
 } from "@netgrid/catalog";
@@ -290,6 +296,49 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
     expect(corpSerialized).not.toContain("Simple Decoder");
     expect(corpSerialized).not.toContain("cardInstances");
+  });
+
+  it("answers V1.9.11 Corp R&D reorder choices with all required side-safe options", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-v1911-too-many-doors",
+        runnerDeck: V1911_RUNNER_DECK,
+        corpDeck: V1911_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
+    const secondCardId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const firstCardId = putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_272_too-many-doors");
+    state = apply(state, "runner", (action) => action.type === "continue_run" && action.payload?.encounterContinue === true);
+
+    const corpInput = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
+    const corpDecision = chooseCorpAction(corpInput);
+    const runnerInput = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const expectedOptionIds = [`card_${firstCardId}`, `card_${secondCardId}`];
+
+    expect(corpInput.playerView.pendingChoice?.source).toContain("v1911.corp_rd_arrange_top2");
+    expect(corpInput.legalActions.map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(corpDecision.selectedChoices).toEqual({ choiceId: state.pendingChoice?.choiceId, selectedOptionIds: expectedOptionIds });
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
+    expect(runnerInput.playerView.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(runnerInput)).not.toContain("Hostile Takeover");
+    expect(JSON.stringify(runnerInput)).not.toContain("Simple Economy Operation");
+
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: corpDecision.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      ...(corpDecision.selectedChoices ? { selectedChoices: corpDecision.selectedChoices } : {}),
+      idempotencyKey: `corp-${state.stateVersion}-${corpDecision.actionId}`
+    });
+    expect(result.ok, result.ok ? "" : result.error.message).toBe(true);
   });
 
   it("keeps V0.99 hosting choices side-safe and lets Corp AI choose legal Purge", () => {
@@ -2042,6 +2091,30 @@ describe("MVP 0.3 AI simulation harness", () => {
     }
   });
 
+  it("marks the V1.9.11 to V1.9.16 completion slices as AI-supported for custom AI deckbuilding", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    const slices = [
+      { ids: DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS, count: 16 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS, count: 11 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS, count: 17 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS, count: 25 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS, count: 14 },
+      { ids: DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS, count: 16 }
+    ];
+
+    for (const slice of slices) {
+      expect(slice.ids).toHaveLength(slice.count);
+      for (const cardId of slice.ids) {
+        const card = runtimeCardsById[cardId];
+        expect(card, cardId).toBeDefined();
+        expect(card?.statuses.human_playable, cardId).toBe(true);
+        expect(card?.statuses.deck_legal, cardId).toBe(true);
+        expect(card?.statuses.format_legal, cardId).toBe(true);
+        expect(card?.statuses.ai_supported, cardId).toBe(true);
+      }
+    }
+  });
+
   it("keeps V1.2.3 card actions legal and side-safe after AI approval", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -2398,6 +2471,32 @@ const ONR_V1_2_3_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_259_in-the-face", quantity: 2 },
     { id: "onr_v1_295_night-shift", quantity: 2 },
     { id: "simple_economy_operation", quantity: 1 }
+  ]
+};
+
+const V1911_RUNNER_DECK: DeckDefinition = {
+  id: "ai_onr_v1911_runner",
+  name: "AI O:NR V1.9.11 Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_fracter", quantity: 2 },
+    { id: "simple_economy_event", quantity: 8 }
+  ]
+};
+
+const V1911_CORP_DECK: DeckDefinition = {
+  id: "ai_onr_v1911_corp",
+  name: "AI O:NR V1.9.11 Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_272_too-many-doors", quantity: 1 },
+    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 },
+    { id: "simple_barrier_ice", quantity: 2 }
   ]
 };
 

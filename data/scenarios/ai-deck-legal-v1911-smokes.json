@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "ai-runner-corp-card-approval-scenarios-v1",
+  "id": "ai-deck-legal-v1911-smokes",
+  "batchId": "deck_legal_ai_approval_v1911",
+  "runnerAiProfileId": "runner-ai-v1.4.1-normal",
+  "corpAiProfileId": "corp-ai-v1.4.0-normal",
+  "status": "implemented_for_deck_legal_ai_approval_v1911",
+  "assertions": {
+    "allBatchCardsHaveAiHints": true,
+    "allBatchCardsHaveScenarioRefs": true,
+    "runnerAiUsesOnlyLegalActions": true,
+    "corpAiUsesOnlyLegalActions": true,
+    "decisionDebugSideSafe": true,
+    "hiddenStateInvariance": true,
+    "noFullStateSimulation": true,
+    "noV1912PlusScope": true
+  },
+  "scenarios": [
+    {
+      "id": "runner_v1911_stack_search_and_reveal",
+      "planKinds": ["build_rig", "recover_rig"],
+      "cards": [
+        "onr_v1_059_self-modifying-code",
+        "onr_v1_087_forgotten-backup-chip",
+        "onr_v1_089_gideons-pawnshop",
+        "onr_v1_099_mantis-fixer-at-large"
+      ],
+      "coveredBy": ["packages/engine/src/index.test.ts::resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash"]
+    },
+    {
+      "id": "runner_v1911_expose_and_preview",
+      "planKinds": ["safe_probe_run", "contest_remote"],
+      "cards": [
+        "onr_v1_088_fortress-respecification",
+        "onr_v1_092_ice-and-datas-guide-to-the-net",
+        "onr_v1_110_sneak-preview"
+      ],
+      "coveredBy": ["packages/engine/src/index.test.ts::reveals only the intended public definition id for V1.9.11 reveal events"]
+    },
+    {
+      "id": "runner_v1911_installed_hidden_zone_helpers",
+      "planKinds": ["build_rig", "contest_remote", "safe_probe_run"],
+      "cards": [
+        "onr_v1_042_mouse",
+        "onr_v1_058_seeya",
+        "onr_v1_151_aujourdoui",
+        "onr_v1_169_n-e-t-o",
+        "onr_v1_175_ronin-around",
+        "onr_v1_177_the-short-circuit"
+      ],
+      "coveredBy": ["packages/engine/src/index.test.ts::uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp"]
+    },
+    {
+      "id": "corp_v1911_rd_reveal_and_reorder",
+      "planKinds": ["protect_rnd", "protect_hq", "build_scoring_remote"],
+      "cards": [
+        "onr_v1_194_corporate-downsizing",
+        "onr_v1_250_ice-pick-willie",
+        "onr_v1_272_too-many-doors"
+      ],
+      "coveredBy": [
+        "packages/engine/src/index.test.ts::reveals R&D top from Corporate Downsizing without leaking additional hidden cards",
+        "packages/engine/src/index.test.ts::reveals R&D top from Ice Pick Willie through a subroutine-bound path",
+        "packages/ai/src/index.test.ts::answers V1.9.11 Corp R&D reorder choices with all required side-safe options"
+      ]
+    }
+  ],
+  "hiddenInfoChecks": [
+    "Search and reorder choices are visible only to the acting side.",
+    "Public reveal and expose events include only the intentionally revealed definition.",
+    "AI decisions consume only PlayerView, LegalActions and side-filtered choices.",
+    "R&D reorder choices do not expose card order to Runner views or public payloads."
+  ]
+}

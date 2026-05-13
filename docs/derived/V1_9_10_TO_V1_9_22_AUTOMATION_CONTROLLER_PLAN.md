@@ -50,9 +50,9 @@ Mindestinhalt:
 
 Empfohlener unversionierter Lock:
 
-`C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock`
+`C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET\.codex-runlogs\v1_9_originalset_completion.lock`
 
-Der Lock muss außerhalb versionierter Artefakte bleiben. Er verhindert, dass zwei Stundenläufe dieselbe Releasearbeit parallel anfassen. Der fruehere Pfad `.codex/runtime/v1_9_originalset_completion.lock` ist nicht mehr verbindlich, weil der lokale Automationsmodus diese Repo-Flaeche per ACL schuetzt. Der absolute Pfad ist bewusst ausgeschrieben, damit Automationslaeufe `%LOCALAPPDATA%` nicht als Literalpfad missverstehen.
+Der Lock muss außerhalb versionierter Artefakte bleiben. Er verhindert, dass zwei Stundenläufe dieselbe Releasearbeit parallel anfassen. `.codex-runlogs/` ist im Repo ignoriert und im festen Automations-Worktree beschreibbar. Die frueheren Pfade `.codex/runtime/v1_9_originalset_completion.lock` und `C:\Users\Lui\AppData\Local\NETGRID\automation\v1_9_originalset_completion.lock` sind nicht mehr verbindlich, weil sie in Automationsläufen per ACL blockiert sein koennen.
 
 ## State Machine
 
@@ -70,6 +70,16 @@ Der Lock muss außerhalb versionierter Artefakte bleiben. Er verhindert, dass zw
 Wichtig: Die Automation darf niemals einen Zustand überspringen.
 
 Im Expeditionsmodus darf ein Lauf zusätzlich aus `planned`, `implementing` oder `verifying` heraus einen WIP-Commit und WIP-Push erzeugen. Das ändert den Release nicht auf `done` und setzt den Cursor nicht weiter.
+
+Ein WIP-Checkpoint ist kein Laufende. Wenn der aktuelle Release nach einem erfolgreichen WIP-Commit noch offen ist, kein harter Blocker vorliegt und der Lauf unter 40 Minuten Gesamtlaufzeit liegt, soll der Controller am selben Release weiterarbeiten. Kontextkomprimierung ist kein Stoppgrund. Gestoppt wird erst bei Blocker, sauberem Zeitbudget-Ende oder nahender 45-50-Minuten-Grenze. Ein erreichter Releaseabschluss ist kein Laufende, sondern der Pipeline-Uebergang auf den naechsten Release, solange ein naechster Release existiert und ausreichend Zeitbudget verbleibt.
+
+Early-Stop-Gate: Ein Stop unter 40 Minuten ist nur mit einer festen Stop-Gruppe erlaubt: harter technischer Blocker, harter fachlicher P0-Blocker, aktiver fremder Lock, unklare/fremde Worktree-Aenderungen, alle Releases V1.9.10 bis V1.9.22 vollstaendig abgeschlossen oder "keine sinnvolle naechste Aktion" mit konkreter Begruendung und Dateiverweisen. Der Laufbericht muss in diesem Fall `Early-Stop-Reason:` enthalten. Completion-Gate erreicht, Teilfortschritt, gruene Teiltests, rote Pflichtchecks ohne abgeschlossene Blockeranalyse, Kontextkomprimierung oder ein erfolgreicher WIP-Checkpoint zaehlen nicht.
+
+Die Stop-Gruppe "keine sinnvolle naechste Aktion" ist eng auszulegen: Sie ist nur gueltig, wenn Automation-State, Implementation Review, Testmatrix, Manifest/Coverage, AI-Hints/Smokes, Server/Web-Gates, Final Review und Webclient-Version geprueft wurden und dort keine konkrete releasebezogene Aufgabe mehr offen ist. Sie ist ungueltig, sobald der Laufbericht oder ein fuehrendes Artefakt selbst einen naechsten Einstieg, einen Gap, ein offenes Gate, fehlende Promotion/Finalisierung, fehlende Helper, fehlende Ambush-/Access-/Run-Pfade, fehlende Daten-/AI-Artefakte, fehlende Full Checks, fehlende Webclient-Version oder fehlenden Final Review benennt. "Groesserer Promotion-Schnitt", "neuer groesserer Schnitt" oder "naechste Aufgabe ist umfangreicher" zaehlen ausdruecklich nicht als Stop-Grund; der Controller muss dann einen konkreten Teilschnitt ableiten, weiterarbeiten und spaetestens an der 45-50-Minuten-Grenze einen WIP-Checkpoint sichern.
+
+Text-Finalisierungs-Gate: Fehlende versionierte lokale Volltextquellen fuer O:NR-v1-Zielkarten sind kein harter P0-Blocker, wenn die Karten bereits lokal bestaetigte Regelkern-Aussagen in den fuehrenden V1.9.10-bis-V1.9.xx-Planungsartefakten haben. Der Controller muss daraus finale, knappe display-only Anzeige-/Release-Texte ohne WIP-Praefix ableiten und die Ableitung im Review dokumentieren. Kartentext bleibt Anzeigeinformation und darf nicht als Regel-, Parser-, LegalAction-, KI- oder Replay-Autoritaet genutzt werden. Nur vollstaendig fehlende Textgrundlage, also weder Volltextquelle noch bestaetigte Regelkern-Aussage, bleibt ein fachlicher Blocker.
+
+Check-Failure-Gate: Rote Pflichtchecks vor Releaseabschluss verhindern ausschliesslich den Releaseabschluss und den Cursor-Fortschritt. Sie sind kein eigener Early-Stop-Grund. Unter 40 Minuten muss der Controller die Fehlerursache analysieren, die betroffenen Code-/Daten-/Test-/Doku-Pfade korrigieren, relevante Checks wiederholen und den Zwischenstand per WIP-Commit/Push sichern. Erst wenn die Analyse einen echten harten technischen oder fachlichen P0-Blocker ergibt, darf daraus ein Stopgrund werden; der Blocker braucht dann konkrete Ursache, betroffene Dateien/Checks und Removal Condition.
 
 ## Done-Gate je Release
 
@@ -134,6 +144,8 @@ Der nächste Release darf erst begonnen werden, wenn:
 - der nächste Release exakt der Reihenfolge aus `docs/derived/V1_9_10_TO_V1_9_XX_IMPLEMENTATION_HANDOFF.md` entspricht
 - keine offenen Änderungen im Worktree verbleiben
 
+Pipeline-Ergaenzung: Wenn diese Bedingungen im selben Automationslauf erfuellt wurden und noch ausreichend Restzeit vorhanden ist, muss der Controller den unmittelbar naechsten Release im selben Lock-Kontext beginnen. Ausreichend Restzeit bedeutet im Regelfall unter 40 Minuten Gesamtlaufzeit. Das ersetzt keinen neuen Automationslauf und startet keinen zweiten Job. Es bleibt bei strikt sequenzieller Abarbeitung: immer nur aktueller Cursor plus unmittelbar naechster Release, keine Release-Ueberspruenge, keine Arbeit nach der 45-50-Minuten-Grenze. Bei Unsicherheit stoppt der Lauf nach dem Cursor-Checkpoint nur dann, wenn mindestens 40 Minuten erreicht sind oder ein echter Blocker dokumentiert ist. Wenn der neu begonnene Release ebenfalls gate-gruen abgeschlossen wird und noch Zeitbudget vorhanden ist, wird nach demselben Muster weitergepipelined; Releaseabschluss allein ist niemals ein Stoppsignal.
+
 Die Reihenfolge ist hart:
 
 1. V1.9.10 Status-, Manifest- und Katalog-Konsolidierung
@@ -188,7 +200,7 @@ Der spätere Automation-Prompt sollte nicht allgemein "arbeite weiter" sagen. Er
 6. Sichere Fortschritt per WIP-Commit/WIP-Push, wenn versionierbare Aenderungen entstanden sind.
 7. Wenn der Release fertig ist, prüfe Done-Gate, Diff-Gate, Commit-Gate und Push-Gate.
 8. Wenn Abschlusscommit und Push erfolgreich sind, setze den Cursor auf den nächsten Release.
-9. Beginne den nächsten Release nur mit Detailplanung/Requirements, wenn der aktuelle Release abgeschlossen ist.
+9. Beginne den nächsten Release bei ausreichender Restzeit zwingend mit Detailplanung/Requirements und arbeite ihn so weit wie moeglich ab.
 10. Bei jedem harten Fehler: stoppe, dokumentiere Blocker und pushe hoechstens den dokumentierten WIP-Stand.
 
 ## Problemstellen
@@ -199,11 +211,13 @@ Der spätere Automation-Prompt sollte nicht allgemein "arbeite weiter" sagen. Er
 | Release dauert länger als eine Stunde | zweiter Job greift parallel ein | Lock stoppt neuen Lauf |
 | Dirty Worktree durch Nutzeränderungen | falscher Commit | Diff-Gate und Blocker statt Commit |
 | Final Review existiert, Tests aber nicht grün | falsches Done-Signal | Done-Gate verlangt Testnachweise |
+| Rote Pflichtchecks werden als Laufende missverstanden | Fortschritt stoppt trotz reparierbarer Fehler | Check-Failure-Gate: Fehler analysieren, fixen, erneut testen; nur echte harte P0/Technikblocker stoppen unter 40 Minuten |
 | Automation pusht auf falschen Branch | Integrationsrisiko | Branch-Gate, kein Push nach `main` |
 | Späterer Release wird vorgezogen | Sequenzbruch | Cursor plus Handoff-Reihenfolge als harte Quelle |
 | Hidden-Info-Regression bleibt unentdeckt | Projektkernbruch | Visibility-/Replay-/AI-Safety-Pflichtgates |
 | AI hängt in neuen Choice-Fenstern | stündlicher Job kann festlaufen | Timeout, AI-Fallback und blockierender Test |
 | Große Releases überfordern einen Lauf | halbfertiger Zustand | State bleibt `implementing`; nächster Lauf setzt denselben Release fort |
+| Keine versionierte Volltextquelle im Automations-Worktree | falscher P0-Stopp trotz vorhandener Regelkernanalyse | Display-Text-Finalization-Policy: lokal bestaetigte Regelkern-Aussagen als finale display-only Texte nutzen, WIP-Praefix entfernen, Review dokumentieren |
 
 ## Empfehlung
 
@@ -221,5 +235,5 @@ Nicht empfehlenswert:
 Empfohlener nächster Schritt:
 
 1. Cursor und Controller-Prompt versionieren.
-2. Stündliche Codex-Cron-Automation auf den NETGRID-Workspace legen.
+2. Stündliche Codex-Cron-Automation auf den festen Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET` legen.
 3. Abends die WIP-/Release-Commits, Pushes, Blocker und Abschlussreviews prüfen.
