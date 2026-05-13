@@ -256,6 +256,7 @@ const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
 const V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID = "onr_v1_093_if-you-want-it-done-right";
 const V1922_MISC_FOR_SALE_ID = "onr_v1_100_misc-for-sale";
+const V1922_OPEN_ENDED_MILEAGE_PROGRAM_ID = "onr_v1_102_open-ended-mileage-program";
 const V1922_ORGAN_DONOR_ID = "onr_v1_103_organ-donor";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
@@ -437,6 +438,21 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     resolve: (state, legalAction) => {
       startV1922RunnerInstalledTrashChoice(state, String(legalAction.payload?.cardId ?? ""));
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1922_runner_installed_trash_gain_credits" };
+    }
+  },
+  [V1922_OPEN_ENDED_MILEAGE_PROGRAM_ID]: {
+    name: "onr_v1922_runner_event_remove_tag_optional_return",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state, legalAction) => {
+      const removedTags = Math.min(1, state.runner.tags);
+      state.runner.tags = Math.max(0, state.runner.tags - removedTags);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922RunnerEventAbility: "remove_tag_optional_return",
+        removedTags,
+        runnerTagsAfter: state.runner.tags
+      };
+      if (state.runner.credits > 0) startV1922OpenEndedMileageReturnChoice(state, String(legalAction.payload?.cardId ?? ""));
     }
   },
   "onr_v1_087_forgotten-backup-chip": {
@@ -6591,6 +6607,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveV1922RunnerInstalledTrashChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1922.open_ended_mileage_return")) {
+    resolveV1922OpenEndedMileageReturnChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -6990,6 +7010,52 @@ function resolveV1922RunnerInstalledTrashChoice(state: GameState, legalAction: L
     hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
     trashedCount: selectedIds.length,
     gainedCredits,
+    runnerCreditsAfter: state.runner.credits
+  };
+}
+
+function startV1922OpenEndedMileageReturnChoice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `v1922_open_ended_mileage_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.open_ended_mileage_return:${sourceCardId}`,
+    prompt: "Open-Ended Mileage Program zuruecknehmen?",
+    kind: "select_option",
+    options: [
+      { id: "leave_in_heap", label: "Im Heap lassen", publicLabel: "Nicht zurueckgenommen", value: "leave_in_heap" },
+      { id: "pay_1_return_to_grip", label: "1 Credit zahlen und zuruecknehmen", publicLabel: "Zurueckgenommen", value: "pay_1_return_to_grip" }
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+}
+
+function resolveV1922OpenEndedMileageReturnChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.open_ended_mileage_return")) throw new Error("Es ist keine V1.9.22-Open-Ended-Mileage-Choice offen.");
+  const [, sourceCardId] = choice.source.split(":");
+  if (!sourceCardId) throw new Error("Open-Ended Mileage Program hat keine Quellkarte.");
+  const selectedOptionIds = Array.isArray(playerAction.selectedChoices?.selectedOptionIds)
+    ? playerAction.selectedChoices.selectedOptionIds.map((optionId) => String(optionId))
+    : [];
+  const selectedOptionId = selectedOptionIds[0] ?? "";
+  if (selectedOptionId === "pay_1_return_to_grip") {
+    if (!state.runner.heap.includes(sourceCardId)) throw new Error("Open-Ended Mileage Program liegt nicht im Heap.");
+    spendCredits(state, "runner", 1);
+    removeFromAllZones(state, sourceCardId);
+    state.runner.grip.push(sourceCardId);
+    state.cardInstances[sourceCardId] = { ...mustInstance(state.cardInstances, sourceCardId), faceup: true, zone: { side: "runner", zone: "grip" } };
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "remove_tag_optional_return",
+    returnDecision: selectedOptionId,
+    returnedToGrip: selectedOptionId === "pay_1_return_to_grip",
+    paidCredits: selectedOptionId === "pay_1_return_to_grip" ? 1 : 0,
     runnerCreditsAfter: state.runner.credits
   };
 }
@@ -8062,6 +8128,14 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.v1921DieRoll === "number") context.v1921DieRoll = legalAction.payload.v1921DieRoll;
     if (typeof legalAction.payload.randomCounterAfter === "number") context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string") context.randomPurpose = legalAction.payload.randomPurpose;
+  }
+  if (typeof legalAction.payload?.v1922RunnerEventAbility === "string") {
+    context.v1922RunnerEventAbility = legalAction.payload.v1922RunnerEventAbility;
+    if (typeof legalAction.payload.removedTags === "number") context.removedTags = legalAction.payload.removedTags;
+    if (typeof legalAction.payload.runnerTagsAfter === "number") context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
+    if (typeof legalAction.payload.returnedToGrip === "boolean") context.returnedToGrip = legalAction.payload.returnedToGrip;
+    if (typeof legalAction.payload.paidCredits === "number") context.paidCredits = legalAction.payload.paidCredits;
+    if (typeof legalAction.payload.runnerCreditsAfter === "number") context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
   }
   if (typeof legalAction.payload?.v1921RunnerEventAbility === "string") {
     context.v1921RunnerEventAbility = legalAction.payload.v1921RunnerEventAbility;

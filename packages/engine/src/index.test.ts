@@ -6621,12 +6621,85 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("plays Open-Ended Mileage Program as tag removal with optional return", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-open-ended-mileage-program",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_open_ended_mileage_program",
+          name: "O:NR V1.9.22 Open-Ended Mileage Program",
+          cards: [{ id: "onr_v1_102_open-ended-mileage-program", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 2;
+    state.runner.clicks = 4;
+    state.runner.tags = 1;
+    const eventCardId = moveRunnerCardToGrip(state, "onr_v1_102_open-ended-mileage-program");
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_102_open-ended-mileage-program");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-open-ended-mileage-program-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-open-ended-mileage-program-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_102_open-ended-mileage-program");
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingChoice?.source).toContain("v1922.open_ended_mileage_return");
+    expect(state.pendingChoice?.visibility).toBe("public");
+    expect(state.runner.heap).toContain(eventCardId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_102_open-ended-mileage-program",
+      v1922RunnerEventAbility: "remove_tag_optional_return",
+      removedTags: 1,
+      runnerTagsAfter: 0
+    });
+
+    state = applyChoice(state, "runner", "pay_1_return_to_grip");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.grip).toContain(eventCardId);
+    expect(state.runner.heap).not.toContain(eventCardId);
+    expect(state.runner.credits).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_option",
+      v1922RunnerEventAbility: "remove_tag_optional_return",
+      returnedToGrip: true,
+      paidCredits: 1,
+      runnerCreditsAfter: 1
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("does not expose unresolved V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
     const runnerEventIds = [
       "onr_v1_077_anonymous-tip",
       "onr_v1_080_core-command-jettison-ice",
       "onr_v1_086_forged-activation-orders",
-      "onr_v1_102_open-ended-mileage-program",
       "onr_v1_109_security-code-worm-chip",
       "onr_v1_113_synchronized-attack-on-hq",
       "onr_v1_117_valu-pak-software-bundle"

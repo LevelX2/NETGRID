@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 21:57 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Open-Ended Mileage Program` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `Open-Ended Mileage Program` eine `play_event`-LegalAction nur bei getaggtem Runner, entfernt einen Tag kostenlos und startet bei Runner-Credits einen public optionalen Return-to-Grip-Choice fuer 1 Credit. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (288); `catalog` initial rot wegen fehlender Resolver-Family-Erwartung, danach pass (44); `typecheck` initial rot wegen zu breiter Choice-Auswahl-Typisierung, danach pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: open ended mileage resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 21:47 CEST
 - Ergebnis: V1.9.22 Runner-Event-Resolver fuer `misc.for-sale` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
