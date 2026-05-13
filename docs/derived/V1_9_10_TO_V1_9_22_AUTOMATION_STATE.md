@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 21:30 CEST
+- Ergebnis: V1.9.22 Marine-Arcology-Runtime-Resolver umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` ergaenzt eine Runtime-Definition fuer `onr_v1_206_marine-arcology`. `packages/engine/src/index.ts` oeffnet fuer gescortes `Marine Arcology` eine Korp-LegalAction `[A]: Gain 1` und revalidiert Seite, Score-Area, Kartendefinition und Creditbetrag in `applyAction`. `packages/engine/src/index.test.ts` deckt den Pfad mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` pass (284); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44); `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: marine arcology resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 21:15 CEST
 - Ergebnis: V1.9.22 Corp-Agenda-/Operation-Runtime-Resolver fuer `Corporate Retreat`, `Corporate War`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

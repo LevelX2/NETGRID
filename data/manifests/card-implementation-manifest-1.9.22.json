@@ -9,8 +9,8 @@
     "catalogWipGuardReady": true,
     "wipArtifactAlignmentGuardReady": true,
     "resolverContractInventoryReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47_plus_program_no_promotion_guard",
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_no_promotion_guard_plus_runner_program_no_legalaction_guard",
+    "runtimeDefinitionsReady": "runner_hardware_event_and_six_corp_resolver_clusters_25_of_47",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_marine_arcology_and_existing_corp_resolvers_plus_runner_event_no_promotion_guard_plus_runner_program_no_legalaction_guard",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
@@ -369,10 +369,12 @@
     },
     {
       "cardCode": "onr_v1_206_marine-arcology",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_scored_agenda_action_gain_1",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 1"
+      ]
     },
     {
       "cardCode": "onr_v1_210_political-overthrow",
@@ -453,7 +455,7 @@
   ],
   "deferredSummary": {
     "plannedCardCount": 47,
-    "implementedCardCount": 24,
+    "implementedCardCount": 25,
     "finalGateCardCount": 0,
     "deferredCardCount": 0,
     "deferredCardIds": [],

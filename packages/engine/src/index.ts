@@ -256,6 +256,7 @@ const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
+const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
 const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
 const V1922_OFF_SITE_BACKUPS_ID = "onr_v1_296_off-site-backups";
 const V1922_PLANNING_CONSULTANTS_ID = "onr_v1_298_planning-consultants";
@@ -2167,6 +2168,20 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
+    if (definition.id === V1922_MARINE_ARCOLOGY_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 1 Credit`,
+          agendaId,
+          [{ clicks: 1 }],
+          { cardId: agendaId, agendaAbility: "v1922_marine_arcology", gainCreditsAmount: 1 }
+        )
+      );
+      continue;
+    }
     if (definition.id !== "onr_v1_193_corporate-coup" && definition.id !== "onr_v1_209_political-coup") continue;
     if (cardCounter(state, agendaId, "power") <= 0) continue;
     const agendaAbility = definition.id === "onr_v1_193_corporate-coup" ? "corporate_coup" : "political_coup";
@@ -3520,6 +3535,22 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         if (definition.id !== V1922_POLITICAL_OVERTHROW_ID) throw new Error("Die Agenda-Aktion passt nicht zu Political Overthrow.");
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
         if (!Number.isInteger(gainAmount) || gainAmount !== 3) throw new Error("Political Overthrow gewaehrt in diesem Scope genau 3 Credits.");
+        credits(state, "corp", gainAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: gainAmount,
+          corpCreditsAfter: state.corp.credits
+        };
+        return;
+      }
+      if (legalAction.payload?.agendaAbility === "v1922_marine_arcology") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf Marine Arcology nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Marine Arcology ist nicht gescort.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1922_MARINE_ARCOLOGY_ID) throw new Error("Die Agenda-Aktion passt nicht zu Marine Arcology.");
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 1) throw new Error("Marine Arcology gewaehrt in diesem Scope genau 1 Credit.");
         credits(state, "corp", gainAmount);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -7766,7 +7797,11 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   if (typeof legalAction.payload?.corporateWarThresholdMet === "boolean") context.corporateWarThresholdMet = legalAction.payload.corporateWarThresholdMet;
   if (legalAction.payload?.onScoreLostAllCredits === true) context.onScoreLostAllCredits = true;
   if (typeof legalAction.payload?.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
-  if (legalAction.payload?.agendaAbility === "v1922_political_overthrow" || legalAction.payload?.agendaAbility === "v1922_corporate_retreat") {
+  if (
+    legalAction.payload?.agendaAbility === "v1922_political_overthrow" ||
+    legalAction.payload?.agendaAbility === "v1922_marine_arcology" ||
+    legalAction.payload?.agendaAbility === "v1922_corporate_retreat"
+  ) {
     context.agendaAbility = legalAction.payload.agendaAbility;
     if (typeof legalAction.payload.gainedCredits === "number") context.gainedCredits = legalAction.payload.gainedCredits;
   }
@@ -7908,7 +7943,10 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
   const revealsCard =
     ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation", "pump_breaker", "break_subroutine"].includes(legalAction.type) ||
     (legalAction.type === "gain_credit" && (legalAction.payload?.v1917AssetAbility === "gain_credits" || legalAction.payload?.v1917AssetAbility === "trace_3_tag")) ||
-    (legalAction.type === "gain_credit" && (legalAction.payload?.agendaAbility === "v1922_political_overthrow" || legalAction.payload?.agendaAbility === "v1922_corporate_retreat")) ||
+    (legalAction.type === "gain_credit" &&
+      (legalAction.payload?.agendaAbility === "v1922_political_overthrow" ||
+        legalAction.payload?.agendaAbility === "v1922_marine_arcology" ||
+        legalAction.payload?.agendaAbility === "v1922_corporate_retreat")) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;

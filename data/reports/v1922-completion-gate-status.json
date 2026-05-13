@@ -72,11 +72,12 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-13T21:15:00+02:00",
-    "cards": ["onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"],
+    "implementedAt": "2026-05-13T21:30:00+02:00",
+    "cards": ["onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_206_marine-arcology", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"],
     "engineTests": [
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Corporate Retreat until Corp installs or rezzes another card",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 1",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Off-Site Backups as a private Archives-to-HQ choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Planning Consultants as a private R&D top-five reorder choice"
@@ -87,7 +88,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Corporate Retreat, Corporate War, Political Overthrow, Off-Site Backups and Planning Consultants now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Off-Site Backups and Planning Consultants now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

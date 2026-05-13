@@ -6759,6 +6759,80 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("uses Marine Arcology as a side-safe scored-agenda action for Gain 1", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_marine_arcology",
+      name: "O:NR V1.9.22 Marine Arcology",
+      cards: [{ id: "onr_v1_206_marine-arcology", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-marine-arcology",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 40;
+    state.corp.clicks = 40;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "onr_v1_206_marine-arcology");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_206_marine-arcology" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 3; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_206_marine-arcology");
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_206_marine-arcology");
+
+    const legal = mustAction(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1922_marine_arcology");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-marine-arcology-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-marine-arcology-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeAbility = state.corp.credits;
+    const clicksBeforeAbility = state.corp.clicks;
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1922_marine_arcology");
+
+    expect(state.corp.credits).toBe(creditsBeforeAbility + 1);
+    expect(state.corp.clicks).toBe(clicksBeforeAbility - 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      cardDefinitionId: "onr_v1_206_marine-arcology",
+      agendaAbility: "v1922_marine_arcology",
+      gainedCredits: 1
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("plays Off-Site Backups as a private Archives-to-HQ choice", () => {
     const corpDeck: DeckDefinition = {
       ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
@@ -6925,7 +6999,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
       "onr_v1_197_data-fort-reclamation",
-      "onr_v1_206_marine-arcology",
       "onr_v1_216_security-purge",
       "onr_v1_247_haunting-inquisition",
       "onr_v1_274_tutor",
@@ -6938,7 +7011,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     for (const definitionId of corpLongtailIds) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
     }
-    for (const definitionId of ["onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"] as const) {
+    for (const definitionId of [
+      "onr_v1_195_corporate-retreat",
+      "onr_v1_196_corporate-war",
+      "onr_v1_206_marine-arcology",
+      "onr_v1_210_political-overthrow",
+      "onr_v1_296_off-site-backups",
+      "onr_v1_298_planning-consultants"
+    ] as const) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(DEMO_CARDS_BY_ID[definitionId]?.rulesText, definitionId).not.toContain("WIP");
       expect(DEMO_CARDS_BY_ID[definitionId]?.mechanics.join(" "), definitionId).toContain("per_card_longtail");

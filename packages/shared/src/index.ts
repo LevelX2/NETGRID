@@ -3453,6 +3453,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score_agenda", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_206_marine-arcology",
+    title: "Marine Arcology",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["asset"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 3,
+    agendaPoints: 2,
+    rulesText: "[A]: Gain 1 credit.",
+    mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_210_political-overthrow",
     title: "Political Overthrow",
     side: "corp",
