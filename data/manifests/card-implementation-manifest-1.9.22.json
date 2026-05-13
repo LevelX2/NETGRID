@@ -10,7 +10,7 @@
     "wipArtifactAlignmentGuardReady": true,
     "resolverContractInventoryReady": true,
     "runtimeDefinitionsReady": "runner_hardware_event_and_six_corp_resolver_clusters_25_of_47",
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_marine_arcology_and_existing_corp_resolvers_plus_runner_event_no_promotion_guard_plus_runner_program_no_legalaction_guard",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_if_you_want_it_done_right_marine_arcology_and_existing_corp_resolvers_plus_runner_event_no_promotion_guard_plus_runner_program_no_legalaction_guard",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
@@ -150,10 +150,9 @@
       "cardCode": "onr_v1_093_if-you-want-it-done-right",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "resolverFamily": "v1922_runner_event_stack_top5_choose_one_arrange_rest",
       "coveredSmokes": [
-        "runtime_definition_guard",
-        "no_play_event_promotion_guard"
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays If You Want It Done Right as a private stack top-five choice"
       ]
     },
     {

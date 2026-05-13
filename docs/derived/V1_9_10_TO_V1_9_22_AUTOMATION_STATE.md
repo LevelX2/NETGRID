@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 21:35 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `If You Want It Done Right...` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `If You Want It Done Right...` eine `play_event`-LegalAction, startet einen Runner-privaten Stack-Top-5-Choice und resolved die erste Auswahl in die Grip sowie die restlichen Topkarten in der gewaehlten Reihenfolge zurueck auf den Stack. `packages/engine/src/index.test.ts` deckt Wrong-Side-/Stale-Revalidation, Hidden-Zone-Choice, side-sichere PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` pass (285); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44); `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner event stack choice wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 21:30 CEST
 - Ergebnis: V1.9.22 Marine-Arcology-Runtime-Resolver umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

@@ -254,6 +254,7 @@ const V1921_QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWALK_ID]);
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
+const V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID = "onr_v1_093_if-you-want-it-done-right";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
@@ -410,6 +411,14 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         v1921DieRoll: dieRoll,
         randomCounterAfter: state.randomCounter
       };
+    }
+  },
+  [V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID]: {
+    name: "onr_v1922_runner_event_stack_top5_choose_one_arrange_rest",
+    canPlay: (state) => state.runner.stack.length > 0,
+    resolve: (state, legalAction) => {
+      startV1922RunnerStackTop5Choice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest" };
     }
   },
   "onr_v1_087_forgotten-backup-chip": {
@@ -6552,6 +6561,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveV1922CorpArchivesToHqChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest")) {
+    resolveV1922RunnerStackTop5Choice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -6813,6 +6826,54 @@ function resolveRunnerStackArrangeChoice(state: GameState, legalAction: LegalAct
   }
   delete state.pendingChoice;
   legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "arrange_stack", arrangedCount: selectedIds.length };
+}
+
+function startV1922RunnerStackTop5Choice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const topCards = state.runner.stack.slice(0, 5);
+  if (topCards.length === 0) throw new Error("Der Stack ist leer.");
+  state.pendingChoice = {
+    choiceId: `v1922_runner_stack_top5_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.runner_stack_top5_choose_one_arrange_rest:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Stack-Spitze wählen und anordnen",
+    kind: "select_cards",
+    options: topCards.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: topCards.length,
+    maxSelections: topCards.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+}
+
+function resolveV1922RunnerStackTop5Choice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine V1.9.22-Stack-Choice offen.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const topCards = state.runner.stack.slice(0, choice.options.length);
+  if (selectedIds.length !== topCards.length) throw new Error("Die Stack-Auswahl ist unvollstaendig.");
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length || topCards.some((cardId) => !selectedSet.has(cardId))) throw new Error("Die Stack-Auswahl enthaelt ungueltige Karten.");
+  const chosenCard = selectedIds[0];
+  if (!chosenCard) throw new Error("Es wurde keine Karte fuer die Grip gewaehlt.");
+  const arrangedRest = selectedIds.slice(1);
+  state.runner.stack = [...arrangedRest, ...state.runner.stack.slice(topCards.length)];
+  state.runner.grip.push(chosenCard);
+  state.cardInstances[chosenCard] = { ...mustInstance(state.cardInstances, chosenCard), zone: { side: "runner", zone: "grip" } };
+  for (const cardId of arrangedRest) {
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "stack" } };
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest",
+    selectedCount: 1,
+    arrangedCount: arrangedRest.length
+  };
 }
 
 function startCorpRdArrangeChoice(state: GameState, sourceIceId: CardInstanceId, subroutineIndex: number, legalAction?: LegalAction): void {

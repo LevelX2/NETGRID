@@ -7,18 +7,18 @@ Status: planned
 | --- | --- | --- |
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
-| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event- und 6 Corp-Longtail-Zielkarten; Events mit No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen |
+| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event- und 6 Corp-Longtail-Zielkarten; `If You Want It Done Right...` hat einen privaten Stack-Top-5-Resolver, die uebrigen Events behalten No-`play_event`-Promotion-Guards |
 | Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Readiness Review und Engine-Guards halten 14/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
 | Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` haben enge Runtime-Resolver; Engine-Guard haelt die verbleibenden 8/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
-| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions sowie `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` inkl. Wrong-Side-/Stale-Revalidation gruen |
-| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews sowie Corporate-Retreat-/Corporate-War-/Marine-Arcology-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-PublicPayloads gruen |
-| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash sowie Corporate-Retreat-/Corporate-War-/Marine-Arcology-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-Replay/StateHash gruen |
+| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions sowie `If You Want It Done Right...`, `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` inkl. Wrong-Side-/Stale-Revalidation gruen |
+| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews sowie If-You-Want-It-Done-Right-/Corporate-Retreat-/Corporate-War-/Marine-Arcology-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-PublicPayloads gruen |
+| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash sowie If-You-Want-It-Done-Right-/Corporate-Retreat-/Corporate-War-/Marine-Arcology-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-Replay/StateHash gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; finale V1.9.22-AI-Promotion-Artefakte muessen bis zum Completion-Gate fehlen |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
 | Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokale Kartenfaktenbasis fuer 47/47 Karten angelegt; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build; nach Runtime-Resolver-WIP engine 284 und catalog 44 gruen |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build; nach Runtime-Resolver-WIP engine 285 und catalog 44 gruen |
 
 ## Mindestchecks im ersten WIP
 
@@ -53,6 +53,8 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 283 Tests.
 - Zusatzschnitt: `Marine Arcology` scored-agenda Gain 1.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 284 Tests.
+- Zusatzschnitt: `If You Want It Done Right...` privater Stack-Top-5-Choice.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 285 Tests.
 
 ## WIP-Artefakt-Alignment-Guard 2026-05-13 18:10 CEST
 

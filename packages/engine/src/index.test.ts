@@ -6337,7 +6337,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
   });
 
-  it("adds V1.9.22 runner event runtime definitions without implying play_event support", () => {
+  it("adds V1.9.22 runner event runtime definitions without broad play_event support", () => {
     const runnerEventIds = [
       "onr_v1_077_anonymous-tip",
       "onr_v1_080_core-command-jettison-ice",
@@ -6360,12 +6360,92 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
   });
 
-  it("does not expose V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
+  it("plays If You Want It Done Right as a private stack top-five choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-if-you-want-it-done-right",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_if_you_want_it_done_right",
+          name: "O:NR V1.9.22 If You Want It Done Right",
+          cards: [{ id: "onr_v1_093_if-you-want-it-done-right", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    moveRunnerCardToGrip(state, "onr_v1_093_if-you-want-it-done-right");
+    const topFive = state.runner.stack.slice(0, 5);
+    expect(topFive).toHaveLength(5);
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_093_if-you-want-it-done-right");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-if-you-want-it-done-right-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-if-you-want-it-done-right-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_093_if-you-want-it-done-right");
+    expect(state.pendingChoice?.source).toContain("v1922.runner_stack_top5_choose_one_arrange_rest");
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(state.pendingChoice?.options).toHaveLength(5);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_093_if-you-want-it-done-right",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"grip"|"cardInstances"|"privatePayload"/);
+
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing If You Want It Done Right choice");
+    const selectedOptionIds = pendingChoice.options
+      .slice()
+      .reverse()
+      .map((option) => option.id);
+    const chosenCardId = String(pendingChoice.options.find((option) => option.id === selectedOptionIds[0])?.value);
+    const expectedStackTop = selectedOptionIds.slice(1).map((optionId) => String(pendingChoice.options.find((option) => option.id === optionId)?.value));
+    state = applyChoices(state, "runner", selectedOptionIds);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.grip).toContain(chosenCardId);
+    expect(state.runner.stack.slice(0, expectedStackTop.length)).toEqual(expectedStackTop);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest",
+      selectedCount: 1,
+      arrangedCount: 4
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"grip"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("does not expose unresolved V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
     const runnerEventIds = [
       "onr_v1_077_anonymous-tip",
       "onr_v1_080_core-command-jettison-ice",
       "onr_v1_086_forged-activation-orders",
-      "onr_v1_093_if-you-want-it-done-right",
       "onr_v1_100_misc-for-sale",
       "onr_v1_102_open-ended-mileage-program",
       "onr_v1_103_organ-donor",
