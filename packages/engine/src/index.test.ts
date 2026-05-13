@@ -4580,6 +4580,50 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
   });
 });
 
+describe("V1.9.14 Trace/Tag/Resource Longtail WIP", () => {
+  it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
+    let state = toRunnerTurn(v096TraceGame("v1914-asp-trace-wip"));
+    const aspInstanceId = "v1914_asp_instance" as CardInstanceId;
+    const rd = state.corp.servers.find((server) => server.id === "rd");
+    expect(rd).toBeDefined();
+    if (!rd) throw new Error("Missing R&D server");
+    rd.ice.unshift(aspInstanceId);
+    state.cardInstances[aspInstanceId] = {
+      instanceId: aspInstanceId,
+      definitionId: "onr_v1_221_asp",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0
+    };
+    state.corp.credits = 8;
+    state.runner.credits = 5;
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_221_asp");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(DEMO_CARDS_BY_ID["onr_v1_221_asp"]?.mechanics).toEqual(expect.arrayContaining(["trace", "link", "bid_amount", "add_tag"]));
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(state.pendingChoice?.kind).toBe("bid_amount");
+    expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 4 });
+    expect(getPlayerView(state, "corp").pendingChoice?.choiceId).toBe(state.pendingChoice?.choiceId);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+
+    state = applyChoice(state, "corp", "bid_1");
+    expect(state.trace).toMatchObject({ status: "runner_bid", corpBid: 1, traceStrength: 5, runnerLink: 0 });
+
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.runner.tags).toBe(1);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.trace).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ traceSuccessful: true, tagsAdded: 1 });
+  });
+});
+
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
   it("creates V0.97 games with explicit demo decks and keeps old run behavior gated", () => {
     const state = createGameAfterSetup({

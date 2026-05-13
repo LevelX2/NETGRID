@@ -569,6 +569,34 @@ export const ONR_V1_9_13_RELEASE_CARD_IDS = [
 
 export const ONR_V1_9_13_WIP_CARD_IDS = ONR_V1_9_13_RELEASE_CARD_IDS;
 
+export const ONR_V1_9_14_WIP_CARD_IDS = [
+  "onr_v1_053_ramming-piston",
+  "onr_v1_056_replicator",
+  "onr_v1_063_signpost",
+  "onr_v1_116_total-genetic-retrofit",
+  "onr_v1_120_armadillo-armored-road-home",
+  "onr_v1_126_drifter-mobile-environment",
+  "onr_v1_132_microtech-trode-set",
+  "onr_v1_154_broker",
+  "onr_v1_157_crash-everett-inventive-fixer",
+  "onr_v1_162_field-reporter-for-ice-and-data",
+  "onr_v1_164_hells-run",
+  "onr_v1_165_junkyard-bbs",
+  "onr_v1_166_karl-de-veres-corporate-stooge",
+  "onr_v1_167_leland-corporate-bodyguard",
+  "onr_v1_178_short-term-contract",
+  "onr_v1_181_the-springboard",
+  "onr_v1_183_technician-lover",
+  "onr_v1_221_asp",
+  "onr_v1_228_cinderella",
+  "onr_v1_240_fang",
+  "onr_v1_241_fang-2-0",
+  "onr_v1_248_homewrecker",
+  "onr_v1_260_pocket-virtual-reality",
+  "onr_v1_264_rex",
+  "onr_v1_299_power-grid-overload"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,

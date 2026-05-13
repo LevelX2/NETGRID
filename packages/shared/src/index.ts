@@ -1103,6 +1103,10 @@ function onrNetDamage(id: string, amount: number): SubroutineDefinition {
   return { id, type: "do_damage", damageType: "net", amount };
 }
 
+function onrMeatDamage(id: string, amount: number): SubroutineDefinition {
+  return { id, type: "do_damage", damageType: "meat", amount };
+}
+
 function onrCoreDamage(id: string, amount: number): SubroutineDefinition {
   return { id, type: "do_damage", damageType: "core", amount };
 }
@@ -3307,6 +3311,129 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_279_wall_of_static_etr")],
     mechanics: ["end_the_run"]
+  }),
+  onrIce({
+    id: "onr_v1_221_asp",
+    title: "Asp",
+    subtypes: ["sentry"],
+    rezCost: 4,
+    strength: 4,
+    rulesText: "V1.9.14 WIP: Trace 4. If successful, give the Runner 1 tag.",
+    subroutines: [
+      {
+        id: "onr_v1_221_asp_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 4,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
+  }),
+  onrIce({
+    id: "onr_v1_228_cinderella",
+    title: "Cinderella",
+    subtypes: ["sentry"],
+    rezCost: 6,
+    strength: 5,
+    rulesText: "V1.9.14 WIP: Trace 5. If successful, give the Runner 1 tag. Do 1 meat damage.",
+    subroutines: [
+      {
+        id: "onr_v1_228_cinderella_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      },
+      onrMeatDamage("onr_v1_228_cinderella_damage", 1)
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", "damage", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
+  }),
+  onrIce({
+    id: "onr_v1_240_fang",
+    title: "Fang",
+    subtypes: ["sentry"],
+    rezCost: 4,
+    strength: 4,
+    rulesText: "V1.9.14 WIP: Trace 3. If successful, give the Runner 1 tag. End the run.",
+    subroutines: [
+      {
+        id: "onr_v1_240_fang_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 3,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      },
+      onrEtr("onr_v1_240_fang_etr")
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", "end_the_run", ONR_V1_LOCAL_PRIVATE]
+  }),
+  onrIce({
+    id: "onr_v1_241_fang-2-0",
+    title: "Fang 2.0",
+    subtypes: ["sentry"],
+    rezCost: 5,
+    strength: 5,
+    rulesText: "V1.9.14 WIP: Trace 4. If successful, give the Runner 1 tag.",
+    subroutines: [
+      {
+        id: "onr_v1_241_fang_2_0_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 4,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
+  }),
+  onrIce({
+    id: "onr_v1_248_homewrecker",
+    title: "Homewrecker",
+    subtypes: ["sentry"],
+    rezCost: 7,
+    strength: 6,
+    rulesText: "V1.9.14 WIP: Trace 5. If successful, give the Runner 1 tag. Do 2 meat damage. End the run.",
+    subroutines: [
+      {
+        id: "onr_v1_248_homewrecker_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      },
+      onrMeatDamage("onr_v1_248_homewrecker_damage", 2),
+      onrEtr("onr_v1_248_homewrecker_etr")
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", "damage", "damage_prevention", "end_the_run", ONR_V1_LOCAL_PRIVATE]
+  }),
+  onrIce({
+    id: "onr_v1_260_pocket-virtual-reality",
+    title: "Pocket Virtual Reality",
+    subtypes: ["sentry"],
+    rezCost: 5,
+    strength: 4,
+    rulesText: "V1.9.14 WIP: Trace 4. If successful, give the Runner 1 tag.",
+    subroutines: [
+      {
+        id: "onr_v1_260_pocket_virtual_reality_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 4,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", "counter", ONR_V1_LOCAL_PRIVATE]
+  }),
+  onrIce({
+    id: "onr_v1_264_rex",
+    title: "Rex",
+    subtypes: ["sentry"],
+    rezCost: 5,
+    strength: 5,
+    rulesText: "V1.9.14 WIP: Trace 5. If successful, give the Runner 1 tag.",
+    subroutines: [
+      {
+        id: "onr_v1_264_rex_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 5,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      }
+    ],
+    mechanics: ["trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE]
   })
 ];
 
