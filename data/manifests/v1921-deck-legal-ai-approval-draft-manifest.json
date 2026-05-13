@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-manifest-v1",
+  "id": "deck-legal-ai-approval-v1921-draft",
+  "release": "V1.9.21",
+  "status": "draft_no_ai_promotion",
+  "extends": "data/manifests/deck-legal-ai-approval-v1920-manifest.json",
+  "scope": {
+    "cardCount": 6,
+    "cardIds": [
+      "onr_v1_002_ai-boon",
+      "onr_v1_008_boardwalk",
+      "onr_v1_104_playful-ai",
+      "onr_v1_172_quest-for-cattekin",
+      "onr_v1_339_schlaghund",
+      "onr_v1_367_rio-de-janeiro-city-grid"
+    ]
+  },
+  "artifacts": {
+    "aiHints": "data/ai/ai-card-hints-deck-legal-v1921-draft.json",
+    "aiSmokes": "data/scenarios/ai-deck-legal-v1921-draft-smokes.json",
+    "engineSmoke": "data/scenarios/v1921-deterministic-random-wip-smoke.json",
+    "cardManifest": "data/manifests/card-implementation-manifest-1.9.21.json",
+    "mechanicsCoverage": "data/rules/mechanics-coverage-1.9.21.json"
+  },
+  "gateAssertions": {
+    "allCardsHaveDraftHintEntries": true,
+    "aiSupportedPromotion": false,
+    "runnerDecisionDebugSideSafe": "ai_check_pass",
+    "corpDecisionDebugSideSafe": "ai_check_pass",
+    "legalActionOnly": "engine_initial_random_probe_covered",
+    "catalogPromotionPending": true,
+    "noV1922PlusScope": true
+  },
+  "cards": [
+    {
+      "cardId": "onr_v1_002_ai-boon",
+      "status": "hinted_only",
+      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_002_ai-boon",
+      "scenarioRefs": ["runner_v1921_random_programs"]
+    },
+    {
+      "cardId": "onr_v1_008_boardwalk",
+      "status": "hinted_only",
+      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_008_boardwalk",
+      "scenarioRefs": ["runner_v1921_random_programs"]
+    },
+    {
+      "cardId": "onr_v1_104_playful-ai",
+      "status": "hinted_only",
+      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_104_playful-ai",
+      "scenarioRefs": ["runner_v1921_random_event_resource"]
+    },
+    {
+      "cardId": "onr_v1_172_quest-for-cattekin",
+      "status": "hinted_only",
+      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_172_quest-for-cattekin",
+      "scenarioRefs": ["runner_v1921_random_event_resource"]
+    },
+    {
+      "cardId": "onr_v1_339_schlaghund",
+      "status": "hinted_only",
+      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_339_schlaghund",
+      "scenarioRefs": ["corp_v1921_random_root"]
+    },
+    {
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+      "status": "hinted_only",
+      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_367_rio-de-janeiro-city-grid",
+      "scenarioRefs": ["corp_v1921_random_root"]
+    }
+  ]
+}

@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 16:06 CEST
+- Ergebnis: V1.9.21 nicht-promotende AI-Draft-Artefakte angelegt und geprueft; Cursor bleibt auf V1.9.21 `implementing`.
+- Release: V1.9.21
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/ai/ai-card-hints-deck-legal-v1921-draft.json`, `data/scenarios/ai-deck-legal-v1921-draft-smokes.json` und `data/manifests/v1921-deck-legal-ai-approval-draft-manifest.json` dokumentieren den engine-abgedeckten 6er-Scope als `hinted_only`/`draft_no_ai_promotion`. Keine Karte wurde `ai_supported`; Catalog-/AI-Promotion bleibt ausstehend.
+- Tests: JSON-Validation pass; `catalog` pass (35), `engine` pass (271), `ai` pass (85).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.21: ai draft artifacts`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.21 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil volle Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 16:03 CEST
 - Ergebnis: V1.9.21 initiale Random-Abdeckung fuer alle sechs Zielkarten umgesetzt; Cursor bleibt auf V1.9.21 `implementing`.
 - Release: V1.9.21

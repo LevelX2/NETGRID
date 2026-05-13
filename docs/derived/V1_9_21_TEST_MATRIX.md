@@ -12,9 +12,9 @@ Stand: 2026-05-13
 | LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Zufallsfenster revalidiert | Initial gruen fuer 6/6 Zielkarten: Quellen und Wrong-Side sind abgedeckt, `Schlaghund` zusaetzlich stale State |
 | Visibility | Keine Hidden-Info-Leaks ueber Zufallsereignisse | Initial gruen fuer 6/6 Zielkarten: PublicEvents enthalten nur oeffentliche Zufallsmetadaten |
 | Replay/StateHash | Zufallsauflösung replay- und StateHash-stabil | Initial gruen fuer 6/6 Zielkarten: Replay/StateHash und RandomDrawRecords stabil |
-| AI | Hints, Smokes, legaler Fallback ohne Ergebnisvorwissen | Folgearbeit |
+| AI | Hints, Smokes, legaler Fallback ohne Ergebnisvorwissen | Draft-Artefakte angelegt und `ai` gruen; keine AI-Promotion |
 | Server/Web | Webclient-Version erst bei Abschluss | Folgearbeit |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON, catalog 35, engine 271 und typecheck gruen; AI/Server/Web/Test/Lint/Build Folgearbeit |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | JSON, catalog 35, engine 271, ai 85 und typecheck gruen; Server/Web/Test/Lint/Build Folgearbeit |
 
 ## Mindestchecks im ersten WIP
 

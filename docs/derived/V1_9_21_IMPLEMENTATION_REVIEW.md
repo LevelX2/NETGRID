@@ -17,6 +17,7 @@ Stand: 2026-05-13
 - `AI Boon` und `Boardwalk` decken installierte Runner-Programm-Zufallspfade mit eigener `v1921RunnerProgramAbility`, Wrong-Side-Revalidation, PublicEvent-Metadaten und replay-/StateHash-stabilen `RandomDrawRecords` ab.
 - `Playful AI` deckt den Runner-Event-Zufallspfad ueber `play_event`, Heap-Bewegung, `v1921RunnerEventAbility`, Wrong-Side-Revalidation, PublicEvent-Metadaten und replay-/StateHash-stabile `RandomDrawRecords` ab.
 - `Quest for Cattekin` deckt den installierten Runner-Resource-Zufallspfad mit `v1921RunnerResourceAbility`, Wrong-Side-Revalidation, PublicEvent-Metadaten und replay-/StateHash-stabilen `RandomDrawRecords` ab.
+- Nicht-promotende AI-Draft-Artefakte sind angelegt und mit dem AI-Gate geprueft: `data/ai/ai-card-hints-deck-legal-v1921-draft.json`, `data/scenarios/ai-deck-legal-v1921-draft-smokes.json` und `data/manifests/v1921-deck-legal-ai-approval-draft-manifest.json`. Status bleibt `hinted_only`/`draft_no_ai_promotion`.
 
 ## Gate
 
@@ -25,7 +26,7 @@ Stand: 2026-05-13
 
 ## Naechster Schnitt
 
-AI-Hints, AI-Smokes und Promotion-Vorbereitung fuer den jetzt engine-abgedeckten 6er-Scope; danach volle Pflichtchecks, Final Review, Catalog-/AI-Promotion und Webclient-Version.
+Volle Pflichtchecks, Final Review, Catalog-/AI-Promotion und Webclient-Version.
 
 ## Verifikation
 
@@ -33,3 +34,4 @@ AI-Hints, AI-Smokes und Promotion-Vorbereitung fuer den jetzt engine-abgedeckten
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - JSON-Validation fuer `data/**/*.json`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 271 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
