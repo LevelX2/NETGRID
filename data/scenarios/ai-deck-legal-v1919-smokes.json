@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "netgrid.ai-scenario-pack.v1",
+  "scenarioPackId": "ai-deck-legal-v1919-smokes",
+  "release": "V1.9.19",
+  "status": "wip_hinted_only_pending_ai_promotion",
+  "scenarios": [
+    {
+      "id": "runner_v1919_agenda_counter",
+      "side": "runner",
+      "coversCards": ["onr_v1_025_fait-accompli", "onr_v1_078_arasaka-owns-you"],
+      "expectedDecisionFamilies": ["install_card", "play_event", "resolve_choice"],
+      "sideSafetyAssertions": ["legal_actions_only", "agenda_cost_revalidated", "replacement_window_side_safe"]
+    },
+    {
+      "id": "corp_v1919_scored_agenda",
+      "side": "corp",
+      "coversCards": ["onr_v1_189_artificial-security-directors", "onr_v1_202_genetics-visionary-acquisition"],
+      "expectedDecisionFamilies": ["install_card", "advance_card", "score_agenda", "steal_agenda"],
+      "sideSafetyAssertions": ["score_window_only", "hidden_zone_barrier", "state_hash_replay_stable"]
+    },
+    {
+      "id": "corp_v1919_operation_counter",
+      "side": "corp",
+      "coversCards": ["onr_v1_291_falsified-transactions-expert", "onr_v1_292_management-shake-up", "onr_v1_300_project-consultants", "onr_v1_303_silver-lining-recovery-protocol", "onr_v1_304_systematic-layoffs", "onr_v1_305_team-restructuring"],
+      "expectedDecisionFamilies": ["play_operation", "resolve_choice", "end_turn"],
+      "sideSafetyAssertions": ["counter_targets_revalidated", "forfeit_cost_revalidated", "public_payload_only"]
+    },
+    {
+      "id": "corp_v1919_asset_agenda_support",
+      "side": "corp",
+      "coversCards": ["onr_v1_312_chicago-branch", "onr_v1_315_corprunners-shattered-remains", "onr_v1_323_experimental-ai", "onr_v1_328_information-laundering", "onr_v1_346_vacant-soulkiller", "onr_v1_347_vapor-ops", "onr_v1_348_virus-test-site"],
+      "expectedDecisionFamilies": ["install_card", "rez_ice", "access_card", "trash_accessed_card"],
+      "sideSafetyAssertions": ["access_window_only", "visible_targeting", "damage_payload_redacted", "hidden_zone_barrier"]
+    },
+    {
+      "id": "corp_v1919_upgrade_agenda_support",
+      "side": "corp",
+      "coversCards": ["onr_v1_363_olivia-salazar", "onr_v1_368_roving-submarine", "onr_v1_374_washington-d-c-city-grid"],
+      "expectedDecisionFamilies": ["install_card", "rez_ice", "advance_card", "score_agenda"],
+      "sideSafetyAssertions": ["server_scope_revalidated", "region_unique_server_scope", "agenda_cost_revalidated"]
+    }
+  ],
+  "verification": {
+    "ai": "pass: 85 tests before draft artifact import; promotion still pending",
+    "engine": "pass: 252 tests",
+    "catalog": "pass: 33 tests"
+  },
+  "completionGate": {
+    "aiSupported": false,
+    "legalActionsOnly": false,
+    "decisionDebugSideSafe": true,
+    "catalogPromotionPending": true,
+    "noV1920PlusScope": true
+  }
+}
