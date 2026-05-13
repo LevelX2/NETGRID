@@ -3453,6 +3453,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_298_planning-consultants",
+    title: "Planning Consultants",
+    side: "corp",
+    type: "operation",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Look at the top five cards of R&D and arrange them in any order.",
+    mechanics: ["play_operation", "hidden_zone_tool", "reorder", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_022_emergency-self-construct",
     title: "Emergency Self-Construct",
     side: "runner",

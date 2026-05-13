@@ -256,6 +256,7 @@ const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
+const V1922_PLANNING_CONSULTANTS_ID = "onr_v1_298_planning-consultants";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -883,6 +884,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     name: "onr_corp_operation_gain_credits_3",
     resolve: (state) => {
       state.corp.credits += 3;
+    }
+  },
+  [V1922_PLANNING_CONSULTANTS_ID]: {
+    name: "onr_v1922_corp_operation_private_rd_top5_reorder",
+    canPlay: (state) => state.corp.rd.length >= 2,
+    resolve: (state, legalAction) => {
+      const sourceCardId = String(legalAction.payload?.cardId ?? "");
+      if (!sourceCardId || definitionFor(state, sourceCardId).id !== V1922_PLANNING_CONSULTANTS_ID) throw new Error("Planning Consultants fehlt als Quelle.");
+      startV1922CorpRdTopReorderChoice(state, sourceCardId, legalAction);
     }
   },
   "onr_v1_293_netwatch-credit-voucher": {
@@ -6445,6 +6455,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveV1917CorpRdArrangeChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1922.corp_rd_arrange_top5")) {
+    resolveV1922CorpRdTopReorderChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -6814,6 +6828,57 @@ function resolveV1917CorpRdArrangeChoice(state: GameState, legalAction: LegalAct
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1917_corp_reorder_rd_top2",
+    arrangedCount: selectedIds.length
+  };
+}
+
+function startV1922CorpRdTopReorderChoice(state: GameState, sourceCardId: CardInstanceId, legalAction: LegalAction): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (definitionFor(state, sourceCardId).id !== V1922_PLANNING_CONSULTANTS_ID) throw new Error("Die R&D-Reorder-Quelle ist nicht Planning Consultants.");
+  const topCards = state.corp.rd.slice(0, 5);
+  if (topCards.length < 2) throw new Error("Nicht genug Karten fuer Planning Consultants.");
+  state.pendingChoice = {
+    choiceId: `v1922_corp_rd_arrange_top5_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1922.corp_rd_arrange_top5:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "R&D-Spitze anordnen",
+    kind: "select_cards",
+    options: topCards.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: topCards.length,
+    maxSelections: topCards.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+    arrangedCount: topCards.length
+  };
+}
+
+function resolveV1922CorpRdTopReorderChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.corp_rd_arrange_top5")) throw new Error("Es ist keine V1.9.22-R&D-Reorder-Choice offen.");
+  const [, sourceCardId] = choice.source.split(":");
+  if (!sourceCardId || definitionFor(state, sourceCardId).id !== V1922_PLANNING_CONSULTANTS_ID) throw new Error("Die V1.9.22-R&D-Reorder-Choice gehoert nicht zu Planning Consultants.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const topCards = state.corp.rd.slice(0, choice.options.length);
+  if (selectedIds.length !== topCards.length) throw new Error("Die V1.9.22-R&D-Reorder-Auswahl ist unvollstaendig.");
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length || topCards.some((cardId) => !selectedSet.has(cardId))) throw new Error("Die V1.9.22-R&D-Reorder-Auswahl enthaelt ungueltige Karten.");
+  state.corp.rd = [...selectedIds, ...state.corp.rd.slice(topCards.length)];
+  for (const cardId of selectedIds) {
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "corp", zone: "rd" } };
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_corp_rd_reorder_top5",
     arrangedCount: selectedIds.length
   };
 }

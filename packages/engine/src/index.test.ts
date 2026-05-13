@@ -6644,6 +6644,89 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("plays Planning Consultants as a private R&D top-five reorder choice", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_planning_consultants",
+      name: "O:NR V1.9.22 Planning Consultants",
+      cards: [{ id: "onr_v1_298_planning-consultants", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-planning-consultants",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    state.corp.clicks = 10;
+    state.corp.maxHandSize = 100;
+    moveCorpCardToHq(state, "onr_v1_298_planning-consultants");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, "onr_v1_232_crystal-wall");
+    putCorpCardOnTopOfRd(state, "onr_v1_205_main-office-relocation");
+    putCorpCardOnTopOfRd(state, "onr_v1_324_fortress-architects");
+
+    const legal = mustAction(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_298_planning-consultants");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-planning-consultants-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-planning-consultants-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_298_planning-consultants");
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(state.pendingChoice?.options).toHaveLength(5);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      cardDefinitionId: "onr_v1_298_planning-consultants",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+      arrangedCount: 5
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
+
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing Planning Consultants choice");
+    const selectedOptionIds = pendingChoice.options
+      .slice()
+      .reverse()
+      .map((option) => option.id);
+    const expectedTop = selectedOptionIds.map((optionId) => String(pendingChoice.options.find((option) => option.id === optionId)?.value));
+    state = applyChoices(state, "corp", selectedOptionIds);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.corp.rd.slice(0, expectedTop.length)).toEqual(expectedTop);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_rd_reorder_top5",
+      arrangedCount: 5
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
       "onr_v1_195_corporate-retreat",
@@ -6656,14 +6739,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_277_virizz",
       "onr_v1_280_zombie",
       "onr_v1_289_edgerunner-inc-temps",
-      "onr_v1_296_off-site-backups",
-      "onr_v1_298_planning-consultants"
+      "onr_v1_296_off-site-backups"
     ] as const;
 
     for (const definitionId of corpLongtailIds) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
     }
-    for (const definitionId of ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"] as const) {
+    for (const definitionId of ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow", "onr_v1_298_planning-consultants"] as const) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(DEMO_CARDS_BY_ID[definitionId]?.rulesText, definitionId).not.toContain("WIP");
       expect(DEMO_CARDS_BY_ID[definitionId]?.mechanics.join(" "), definitionId).toContain("per_card_longtail");

@@ -439,15 +439,17 @@
     },
     {
       "cardCode": "onr_v1_298_planning-consultants",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_corp_operation_private_rd_top5_reorder",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Planning Consultants as a private R&D top-five reorder choice"
+      ]
     }
   ],
   "deferredSummary": {
     "plannedCardCount": 47,
-    "implementedCardCount": 19,
+    "implementedCardCount": 22,
     "finalGateCardCount": 0,
     "deferredCardCount": 0,
     "deferredCardIds": [],

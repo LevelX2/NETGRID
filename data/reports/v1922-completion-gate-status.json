@@ -73,10 +73,11 @@
   },
   "latestRuntimeResolverSlice": {
     "implementedAt": "2026-05-13T20:42:00+02:00",
-    "cards": ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"],
+    "cards": ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow", "onr_v1_298_planning-consultants"],
     "engineTests": [
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver",
-      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3"
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Planning Consultants as a private R&D top-five reorder choice"
     ],
     "decision": "runtime_wip_no_catalog_or_ai_promotion"
   },
@@ -84,7 +85,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Corporate War and Political Overthrow now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Corporate War, Political Overthrow and Planning Consultants now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {
