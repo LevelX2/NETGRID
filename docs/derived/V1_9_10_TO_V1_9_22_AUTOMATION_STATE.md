@@ -89,6 +89,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Git: WIP-Checkpoint fuer diesen Statusschnitt vorgesehen (`WIP V1.9.22: newsgroup filter preflight wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
 
+- Zeitpunkt: 2026-05-14 00:35 CEST
+- Ergebnis: V1.9.22 Remaining-Corp-ICE-Preflight nachgezogen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md` dokumentiert die vier offenen Corp-ICE-Zielkarten. `Tutor` und `Virizz` sind als kleinste naechste ICE-Kandidaten markiert, bleiben aber fuer Runtime-Code gesperrt, bis run-weite Zusatzsubroutine bzw. Break-Kostenmodifikation als LegalAction-/applyAction-Vertrag bestaetigt sind. `data/reports/v1922-completion-gate-status.json`, `docs/codex/CODEX_STATUS.md` und die Wissensbasis wurden nachgezogen. Keine Runtime-, Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: Dokumentations-/Statusschnitt; vorherige Shield- und Newsgroup-Checks bleiben gueltig.
+- Git: WIP-Checkpoint fuer diesen Statusschnitt vorgesehen (`WIP V1.9.22: remaining corp ice preflight wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
 - Zeitpunkt: 2026-05-13 23:59 CEST
 - Ergebnis: V1.9.22 Corp-Operation-Resolver fuer `Edgerunner, Inc., Temps` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

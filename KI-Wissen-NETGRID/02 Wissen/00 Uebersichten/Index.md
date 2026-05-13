@@ -54,6 +54,8 @@
 
 - V1.9.22 Newsgroup-Filter-Preflight: `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` haelt den kleinsten verbleibenden Runner-Programm-Kandidaten offen; Runtime-Code bleibt gesperrt, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestaetigt sind.
 
+- V1.9.22 Remaining-Corp-ICE-Preflight: `docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md` haelt `Tutor` und `Virizz` als kleinste ICE-Kandidaten fest; Runtime-Code bleibt gesperrt, bis run-weite Zusatzsubroutine bzw. Break-Kostenmodifikation LegalAction-/applyAction-sicher bestaetigt sind.
+
 ## Kernwissen
 
 - [[Projektueberblick]]: verdichtetes Projektbild für neue Threads.

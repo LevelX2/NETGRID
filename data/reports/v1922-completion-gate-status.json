@@ -129,7 +129,8 @@
       "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
       "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
       "docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md",
-      "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md"
+      "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md",
+      "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md"
     ],
     "nextCodeCandidates": [
       {
@@ -141,6 +142,16 @@
         "cardId": "onr_v1_045_newsgroup-filter",
         "status": "blocked_pending_activation_timing_contract",
         "removalCondition": "Confirm installed program activation costs, timing, limit and public payload."
+      },
+      {
+        "cardId": "onr_v1_274_tutor",
+        "status": "blocked_pending_run_wide_subroutine_modifier_contract",
+        "removalCondition": "Confirm added End-the-run subroutine indexing, breakability, LegalAction projection and replay contract."
+      },
+      {
+        "cardId": "onr_v1_277_virizz",
+        "status": "blocked_pending_run_wide_break_cost_modifier_contract",
+        "removalCondition": "Confirm break_subroutine cost projection, applyAction revalidation and credit-pool interactions."
       }
     ],
     "decision": "no_runtime_catalog_or_ai_promotion"
