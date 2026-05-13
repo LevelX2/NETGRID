@@ -52,6 +52,7 @@ import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side
 import {
   CHRONICLE_CATEGORY_LABELS,
   chronicleGroupLabel,
+  chronicleTurnNumberByEventId,
   formatChronicleEvent,
   formatChronicleEffectItems,
   type ChronicleCategory,
@@ -1310,29 +1311,6 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
   );
 }
 
-function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<string, number> {
-  const numbers: Record<string, number> = {};
-  let corpTurn = 0;
-  let runnerTurn = 0;
-  for (const event of events) {
-    const actionType = eventActionType(event);
-    const actor = payloadSide(event.publicPayload, "actor");
-    if (!actor) continue;
-    if (actionType === "end_turn") {
-      if (actor === "corp") {
-        corpTurn += 1;
-        numbers[event.eventId] = corpTurn;
-      } else {
-        runnerTurn += 1;
-        numbers[event.eventId] = runnerTurn;
-      }
-      continue;
-    }
-    if (actionType === "mandatory_draw" && actor === "corp") numbers[event.eventId] = corpTurn + 1;
-  }
-  return numbers;
-}
-
 function formatCardCount(count: number): string {
   return `${count} ${count === 1 ? "Karte" : "Karten"}`;
 }
@@ -2182,7 +2160,7 @@ export default function Page() {
       return;
     }
     const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
-    const contextByEventId = chronicleContextByEventId(payload.eventTail, catalogDetailsById);
+    const contextByEventId = chronicleContextByEventId(payload.playerView.publicEvents, catalogDetailsById);
     const cues = actionCuesEnabled
       ? deriveOpponentActionCues({
           viewerSide: payload.side,
@@ -4298,7 +4276,14 @@ export default function Page() {
                 onCollapsed={updateCardPreviewCollapsed}
                 {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})}
               />
-              <ChroniclePanel events={payload.eventTail} side={payload.side} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} onFocusCard={focusCard} />
+              <ChroniclePanel
+                events={payload.eventTail}
+                turnContextEvents={payload.playerView.publicEvents}
+                side={payload.side}
+                cardDetailsById={catalogDetailsById}
+                displayMode={cardDisplayMode}
+                onFocusCard={focusCard}
+              />
               <section className="section">
                 <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
                   <PanelRightOpen size={15} />
@@ -6307,19 +6292,21 @@ function CardPreviewPanel({
 
 function ChroniclePanel({
   events,
+  turnContextEvents = events,
   side,
   cardDetailsById,
   displayMode,
   onFocusCard
 }: {
   events: PublicGameEvent[];
+  turnContextEvents?: PublicGameEvent[];
   side: Side;
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
-  const contextByEventId = chronicleContextByEventId(events, cardDetailsById);
+  const contextByEventId = chronicleContextByEventId(turnContextEvents, cardDetailsById);
   const entries = events
     .flatMap((event) => {
       const eventItem = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});

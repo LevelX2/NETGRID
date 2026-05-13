@@ -447,6 +447,36 @@ export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): 
   return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects).map((effect, index) => formatChronicleEffect(event, effect, index, side));
 }
 
+export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<string, number> {
+  const numbers: Record<string, number> = {};
+  let activeSide: Side = "corp";
+  let activeTurnNumber = 1;
+
+  for (const event of events) {
+    const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+    const actor = sideValue(event.publicPayload.actor);
+    if (!actor) continue;
+
+    if (actionType === "mandatory_draw" && actor === "corp") {
+      if (activeSide !== "corp") {
+        activeSide = "corp";
+        activeTurnNumber += 1;
+      }
+      numbers[event.eventId] = activeTurnNumber;
+      continue;
+    }
+
+    if (actionType === "end_turn") {
+      if (activeSide !== actor) activeSide = actor;
+      numbers[event.eventId] = activeTurnNumber;
+      activeSide = actor === "corp" ? "runner" : "corp";
+      activeTurnNumber += 1;
+    }
+  }
+
+  return numbers;
+}
+
 function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffect, index: number, side: Side): ChronicleItem {
   const actor = sideValue(effect.side);
   const subject = subjectFor(actor, side, false);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
+import { chronicleTurnNumberByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -427,7 +427,7 @@ describe("formatChronicleEvent", () => {
     expect(multi.actionUse).toMatchObject({ label: "1-3", title: "Aktionen 1 bis 3 in diesem Zug", clicks: 3 });
   });
 
-  it("shows side-specific turn numbers for turn entries when provided by context", () => {
+  it("shows turn numbers for turn entries when provided by context", () => {
     const runnerTurnEnd = formatChronicleEvent(
       makeEvent("end_turn", {
         actor: "runner"
@@ -448,6 +448,28 @@ describe("formatChronicleEvent", () => {
     expect(runnerTurnEnd.groupLabel).toBe("Runner-Zug 6");
     expect(corpMandatoryDraw.chips).toContain("Korpzug 5");
     expect(corpMandatoryDraw.groupLabel).toBe("Korp-Zug 5");
+  });
+
+  it("counts Korp and Runner turns as one shared sequence", () => {
+    const turnNumbers = chronicleTurnNumberByEventId([
+      makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_1" }),
+      makeEvent("gain_credit", { actor: "corp", eventId: "evt_corp_credit_1" }),
+      makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_1" }),
+      makeEvent("draw_card", { actor: "runner", eventId: "evt_runner_draw_1" }),
+      makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_1" }),
+      makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_2" }),
+      makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_2" }),
+      makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_2" })
+    ]);
+
+    expect(turnNumbers).toMatchObject({
+      evt_corp_draw_1: 1,
+      evt_corp_end_1: 1,
+      evt_runner_end_1: 2,
+      evt_corp_draw_2: 3,
+      evt_corp_end_2: 3,
+      evt_runner_end_2: 4
+    });
   });
 
   it("formats resolved automatic effects as separate chronicle items", () => {
@@ -509,8 +531,11 @@ describe("formatChronicleEvent", () => {
 
 function makeEvent(actionType: string, payload: Record<string, unknown> = {}): PublicGameEvent {
   const actor = sideValue(payload.actor) ?? (actionType === "mandatory_draw" || actionType === "play_operation" ? "corp" : "runner");
+  const eventId = typeof payload.eventId === "string" ? payload.eventId : `evt_${actionType}`;
+  const payloadWithoutEventId = { ...payload };
+  delete payloadWithoutEventId.eventId;
   return {
-    eventId: `evt_${actionType}`,
+    eventId,
     type: actionType,
     stateVersionBefore: 4,
     stateVersionAfter: 5,
@@ -519,7 +544,7 @@ function makeEvent(actionType: string, payload: Record<string, unknown> = {}): P
       actor,
       actionType,
       label: `${actor}.${actionType}`,
-      ...payload
+      ...payloadWithoutEventId
     }
   };
 }
