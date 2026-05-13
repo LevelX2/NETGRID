@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.15
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.16
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -66,6 +66,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 03:03 CEST
+- Ergebnis: V1.9.15 Run Flow, Access, Multiaccess und Ambush on Access release-spezifisch detailgeplant und requirements-freigegeben; Cursor bleibt auf V1.9.15 `implementing`.
+- Release: V1.9.15
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Run/Access/Multiaccess-Spezifikation, Testmatrix und Requirements Review erstellt. Der Scope umfasst genau 14 Zielkarten und die Resolverfamilien `run_flow_lock_resolver`, `access_breach_multiaccess_resolver`, `hidden_zone_search_reveal_reorder_resolver`, `trace_link_bid_window_resolver`, `typed_counter_virus_purge_resolver`, `recurring_pool_start_turn_resolver`, `damage_event_prevention_resolver` und `core_brain_damage_modifier_resolver`. Keine Karte wurde promotet.
+- Tests: Dokumentations-/Cursorlauf; Code-Tests noch nicht noetig, weil keine Engine-, AI-, Runtime-, Server- oder Web-Aenderung fuer V1.9.15 erfolgt ist.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.15: run access planning`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.15 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Engine-/LegalAction-/AI-/Visibility-/Replay-/StateHash-Abdeckung, Datenartefakte, Webclient-Version, Pflichtchecks und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-13 02:59 CEST
 - Ergebnis: V1.9.14 Trace/Link/Tags/Resource-Tag-Interaktionen final abgeschlossen; Cursor auf V1.9.15 `planned` gesetzt.
