@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "card-implementation-manifest-v1.9.17",
+  "id": "v1.9.17-generic-asset-node-manifest",
+  "status": "release_promoted",
+  "extends": "data/manifests/card-implementation-manifest-1.9.16.json",
+  "sourceMode": "private_local_onr_v1_function_matrix_display_only",
+  "gateAssertions": {
+    "v1917ScopeFrozenToEighteenGenericAssetNodeCards": true,
+    "allCardsRuntimeDefinitionReady": true,
+    "coreEngineSmokesCovered": true,
+    "allCardsHumanPlayable": true,
+    "allCardsDeckLegal": true,
+    "allCardsAiSupported": true,
+    "legalActionsOnly": true,
+    "stateHashReplayStableForCoveredSmokes": true,
+    "hiddenInfoSafeForCoveredSmokes": true,
+    "noOfficialAssets": true,
+    "noV1918PlusScopeExpansion": true,
+    "noV2ScopeExpansion": true
+  },
+  "cards": [
+    { "cardCode": "onr_v1_309_bbs-whispering-campaign", "title": "BBS Whispering Campaign", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; hosting_hosted_lifecycle_resolver", "requiredMechanics": ["install_asset", "rez_card", "trash_on_access", "gain_credit", "hosting", "legal_action_only"], "roleTags": ["corp", "asset", "campaign"] },
+    { "cardCode": "onr_v1_310_blood-cat", "title": "Blood Cat", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; trace_link_bid_window_resolver", "requiredMechanics": ["install_asset", "rez_card", "trace", "legal_action_only"], "roleTags": ["corp", "asset", "ai"] },
+    { "cardCode": "onr_v1_311_braindance-campaign", "title": "Braindance Campaign", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; recurring_pool_start_turn_resolver; hosting_hosted_lifecycle_resolver", "requiredMechanics": ["install_asset", "rez_card", "recurring_credit", "gain_credit", "hosting", "legal_action_only"], "roleTags": ["corp", "asset", "campaign"] },
+    { "cardCode": "onr_v1_314_corporate-negotiating-center", "title": "Corporate Negotiating Center", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; hidden_zone_search_reveal_reorder_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_asset", "rez_card", "reveal_rd_top", "recurring_credit", "legal_action_only"], "roleTags": ["corp", "asset", "hidden_zone"] },
+    { "cardCode": "onr_v1_316_cowboy-sysop", "title": "Cowboy Sysop", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; installed_card_destroy_uninstall_resolver", "requiredMechanics": ["install_asset", "rez_card", "trash_installed_runner_card", "visible_target", "legal_action_only"], "roleTags": ["corp", "asset", "sysop"] },
+    { "cardCode": "onr_v1_318_department-of-truth-enhancement", "title": "Department of Truth Enhancement", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; hosting_hosted_lifecycle_resolver", "requiredMechanics": ["install_asset", "rez_card", "trash_on_access", "hosting", "legal_action_only"], "roleTags": ["corp", "asset", "gray_ops"] },
+    { "cardCode": "onr_v1_319_disinfectant-inc", "title": "Disinfectant, Inc.", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; typed_counter_virus_purge_resolver", "requiredMechanics": ["install_asset", "rez_card", "virus_counter", "remove_counter", "visible_target", "legal_action_only"], "roleTags": ["corp", "asset", "counter"] },
+    { "cardCode": "onr_v1_321_esa-contract", "title": "ESA Contract", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver", "requiredMechanics": ["install_asset", "rez_card", "gain_credit", "trash_on_access", "legal_action_only"], "roleTags": ["corp", "asset", "transactions"] },
+    { "cardCode": "onr_v1_326_holovid-campaign", "title": "Holovid Campaign", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; recurring_pool_start_turn_resolver; hosting_hosted_lifecycle_resolver", "requiredMechanics": ["install_asset", "rez_card", "recurring_credit", "gain_credit", "hosting", "legal_action_only"], "roleTags": ["corp", "asset", "campaign"] },
+    { "cardCode": "onr_v1_329_investment-firm", "title": "Investment Firm", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; recurring_pool_start_turn_resolver", "requiredMechanics": ["install_asset", "rez_card", "recurring_credit", "gain_credit", "legal_action_only"], "roleTags": ["corp", "asset", "transactions"] },
+    { "cardCode": "onr_v1_330_krumz", "title": "Krumz", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; trace_link_bid_window_resolver; hosting_hosted_lifecycle_resolver", "requiredMechanics": ["install_asset", "rez_card", "trace", "hosting", "legal_action_only"], "roleTags": ["corp", "asset", "ai"] },
+    { "cardCode": "onr_v1_333_omniscience-foundation", "title": "Omniscience Foundation", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver", "requiredMechanics": ["install_asset", "rez_card", "trash_on_access", "legal_action_only"], "roleTags": ["corp", "asset", "gray_ops"] },
+    { "cardCode": "onr_v1_336_rescheduler", "title": "Rescheduler", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; hidden_zone_search_reveal_reorder_resolver", "requiredMechanics": ["install_asset", "rez_card", "reorder_rd_top2", "legal_action_only"], "roleTags": ["corp", "asset", "hidden_zone"] },
+    { "cardCode": "onr_v1_337_rockerboy-promotion", "title": "Rockerboy Promotion", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; hosting_hosted_lifecycle_resolver", "requiredMechanics": ["install_asset", "rez_card", "gain_credit", "hosting", "legal_action_only"], "roleTags": ["corp", "asset", "campaign"] },
+    { "cardCode": "onr_v1_340_setup", "title": "Setup!", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "access_ambush_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_asset", "access_ambush", "net_damage", "legal_action_only"], "roleTags": ["corp", "asset", "ambush"] },
+    { "cardCode": "onr_v1_342_solo-squad", "title": "Solo Squad", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_asset", "rez_card", "meat_damage", "legal_action_only"], "roleTags": ["corp", "asset", "black_ops"] },
+    { "cardCode": "onr_v1_344_spinn-public-relations", "title": "Spinn Public Relations", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "generic_asset_node_ability_resolver; recurring_pool_start_turn_resolver; hosting_hosted_lifecycle_resolver", "requiredMechanics": ["install_asset", "rez_card", "recurring_credit", "gain_credit", "hosting", "legal_action_only"], "roleTags": ["corp", "asset", "transactions"] },
+    { "cardCode": "onr_v1_345_trap", "title": "TRAP!", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "access_ambush_resolver; tag_condition_avoid_remove_resolver; damage_event_prevention_resolver", "requiredMechanics": ["install_asset", "access_ambush", "net_damage", "tag", "legal_action_only"], "roleTags": ["corp", "asset", "ambush"] }
+  ],
+  "deferredSummary": {
+    "plannedCardCount": 18,
+    "implementedCardCount": 18,
+    "finalGateCardCount": 18,
+    "deferredCardCount": 0,
+    "deferredCardIds": [],
+    "openMechanicFamilies": 0
+  }
+}

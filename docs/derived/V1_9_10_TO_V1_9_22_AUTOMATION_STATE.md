@@ -15,9 +15,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.17
-Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.18
+Aktueller Release: V1.9.18
+Phase: planned
+Naechster erlaubter Release nach Abschluss: V1.9.19
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -60,14 +60,24 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.14 | Trace, Link, Tags und Resource-Tag-Interaktionen | done |
 | V1.9.15 | Run Flow, Access, Multiaccess und Ambush on Access | done |
 | V1.9.16 | Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy | done |
-| V1.9.17 | Generische Asset/Node-Faehigkeiten | current |
-| V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | pending |
+| V1.9.17 | Generische Asset/Node-Faehigkeiten | done |
+| V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | current |
 | V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | pending |
 | V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | pending |
 | V1.9.21 | Deterministischer Zufall und Wuerfelkarten | pending |
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 12:12 CEST
+- Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten final abgeschlossen; Cursor auf V1.9.18 `planned` gesetzt.
+- Release: V1.9.17
+- Phase vorher: implementing
+- Phase nachher: planned fuer V1.9.18
+- Umsetzung: Alle 18 V1.9.17-Zielkarten sind in Runtime, Katalog, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Cowboy Sysop und Disinfectant, Inc. schließen die sichtbaren installed-card-/Virus-Counter-Zielpfade; `ONR_V1_9_17_RELEASE_CARD_IDS` und `DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS` promoten die Zielmenge; die Webclient-Version steht auf `V1.9.17`.
+- Tests: JSON-Validation pass fuer 265 `data/**/*.json`; `engine` pass (243), `catalog` pass (32), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.17: generic asset node abilities`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.17 Completion-Gate ist erfüllt; V1.9.18 ist der aktuelle Release.
 
 - Zeitpunkt: 2026-05-13 11:39 CEST
 - Ergebnis: V1.9.17 Generische Asset/Node-Fähigkeiten um konkrete Economy-/Recurring-/Hosting-/Hidden-Zone-/Ambush-/Damage-Enginepfade erweitert; Cursor bleibt auf V1.9.17 `implementing`.

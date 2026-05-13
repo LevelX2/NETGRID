@@ -201,6 +201,8 @@ const V1917_RECURRING_ASSET_IDS = new Set([
 const V1917_TRACE_ASSET_IDS = new Set(["onr_v1_310_blood-cat", "onr_v1_330_krumz"]);
 const V1917_HIDDEN_REVEAL_ASSET_IDS = new Set(["onr_v1_314_corporate-negotiating-center"]);
 const V1917_HIDDEN_REORDER_ASSET_IDS = new Set(["onr_v1_336_rescheduler"]);
+const V1917_COWBOY_SYSOP_ID = "onr_v1_316_cowboy-sysop";
+const V1917_DISINFECTANT_ID = "onr_v1_319_disinfectant-inc";
 const V1917_SOLO_SQUAD_ID = "onr_v1_342_solo-squad";
 const V1917_SETUP_ID = "onr_v1_340_setup";
 const V1917_TRAP_ID = "onr_v1_345_trap";
@@ -1703,6 +1705,38 @@ function corpMainActions(state: GameState): LegalAction[] {
         )
       );
     }
+    if (definition.id === V1917_COWBOY_SYSOP_ID) {
+      for (const targetCardId of runnerInstalledCardIds(state).sort()) {
+        const targetDefinition = definitionFor(state, targetCardId);
+        actions.push(
+          action(
+            state,
+            "corp",
+            "gain_credit",
+            `${definition.title}: ${targetDefinition.title} trashen`,
+            assetId,
+            [{ clicks: 1 }],
+            { cardId: assetId, v1917AssetAbility: "trash_installed_runner_card", targetCardId }
+          )
+        );
+      }
+    }
+    if (definition.id === V1917_DISINFECTANT_ID) {
+      for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
+        const targetDefinition = definitionFor(state, targetCardId);
+        actions.push(
+          action(
+            state,
+            "corp",
+            "gain_credit",
+            `${definition.title}: Virus-Counter von ${targetDefinition.title} entfernen`,
+            assetId,
+            [{ clicks: 1 }],
+            { cardId: assetId, v1917AssetAbility: "remove_virus_counter", targetCardId, counterType: "virus", removeCounterAmount: 1 }
+          )
+        );
+      }
+    }
     if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
     actions.push(
       action(
@@ -2174,6 +2208,19 @@ function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
     }
   }
   return ids;
+}
+
+function visibleVirusCounterTargetIds(state: GameState): CardInstanceId[] {
+  const targets = new Set<CardInstanceId>();
+  for (const cardId of runnerInstalledCardIds(state)) {
+    if (cardCounter(state, cardId, "virus") > 0) targets.add(cardId);
+  }
+  for (const cardId of corpInstalledCardIds(state)) {
+    const instance = state.cardInstances[cardId];
+    if (!instance?.rezzed) continue;
+    if (cardCounter(state, cardId, "virus") > 0) targets.add(cardId);
+  }
+  return [...targets];
 }
 
 function scoredCorpAgendaIds(state: GameState): CardInstanceId[] {
@@ -2710,6 +2757,46 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         const damageAmount = Number(legalAction.payload?.damageAmount ?? 0);
         if (!Number.isInteger(damageAmount) || damageAmount !== 1) throw new Error("Solo Squad nutzt in diesem V1.9.17-WIP genau 1 Meat Damage.");
         resolveDamageOperation(state, legalAction, "meat", damageAmount, definition.id);
+        return;
+      }
+      if (legalAction.payload?.v1917AssetAbility === "trash_installed_runner_card") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.17-installed-card-Assets nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.17-installed-card-Asset-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1917_COWBOY_SYSOP_ID) throw new Error("Die V1.9.17-installed-card-Faehigkeit passt nicht zur Karte.");
+        const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+        if (!runnerInstalledCardIds(state).includes(targetCardId)) throw new Error("Das V1.9.17-installed-card-Ziel ist nicht mehr installiert.");
+        const targetDefinitionId = definitionFor(state, targetCardId).id;
+        trashRunnerInstalledCardToHeap(state, targetCardId);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "v1917_trash_installed_runner_card",
+          trashedCardDefinitionId: targetDefinitionId
+        };
+        return;
+      }
+      if (legalAction.payload?.v1917AssetAbility === "remove_virus_counter") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf V1.9.17-Virus-Counter-Assets nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId)) throw new Error("Die V1.9.17-Virus-Counter-Asset-Faehigkeit ist nicht rezzed installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1917_DISINFECTANT_ID) throw new Error("Die V1.9.17-Virus-Counter-Faehigkeit passt nicht zur Karte.");
+        const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+        if (!visibleVirusCounterTargetIds(state).includes(targetCardId)) throw new Error("Das V1.9.17-Virus-Counter-Ziel ist nicht mehr gueltig.");
+        const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
+        if (!Number.isInteger(removeAmount) || removeAmount !== 1) throw new Error("Disinfectant, Inc. entfernt in V1.9.17 genau 1 Virus-Counter.");
+        spendCardCounter(state, targetCardId, "virus", removeAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "v1917_remove_virus_counter",
+          counterType: "virus",
+          removedCounterAmount: removeAmount,
+          remainingCounters: cardCounter(state, targetCardId, "virus"),
+          targetCardDefinitionId: definitionFor(state, targetCardId).id
+        };
         return;
       }
       if (legalAction.payload?.resourceAbility === "databroker") {
@@ -6364,6 +6451,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.subroutineIndex !== undefined) parts.push(String(payload.subroutineIndex));
   if (payload?.removeTagAmount !== undefined) parts.push(String(payload.removeTagAmount));
   if (payload?.v1917AssetAbility) parts.push(String(payload.v1917AssetAbility));
+  if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   return parts.filter(Boolean).join(".");
 }
 
@@ -6577,6 +6665,10 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.arrangedCount === "number") context.arrangedCount = legalAction.payload.arrangedCount;
     if (typeof legalAction.payload.ambushDefinitionId === "string") context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
     if (typeof legalAction.payload.runnerTagsAfter === "number") context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
+    if (typeof legalAction.payload.trashedCardDefinitionId === "string") context.trashedCardDefinitionId = legalAction.payload.trashedCardDefinitionId;
+    if (typeof legalAction.payload.targetCardDefinitionId === "string") context.targetCardDefinitionId = legalAction.payload.targetCardDefinitionId;
+    if (typeof legalAction.payload.removedCounterAmount === "number") context.removedCounterAmount = legalAction.payload.removedCounterAmount;
+    if (typeof legalAction.payload.remainingCounters === "number") context.remainingCounters = legalAction.payload.remainingCounters;
     context.redactedKind = "hidden_zone";
   }
   if (legalAction.payload?.publicRevealKind) context.revealKind = legalAction.payload.publicRevealKind;

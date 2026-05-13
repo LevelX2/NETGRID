@@ -5315,6 +5315,66 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("uses Cowboy Sysop and Disinfectant, Inc. through visible installed-card targets", () => {
+    let cowboyState = v1917GenericAssetGame("v1917-cowboy-installed-target");
+    cowboyState.corp.credits = 10;
+    cowboyState = apply(cowboyState, "corp", (action) => action.type === "mandatory_draw");
+    const runnerProgramId = installRunnerProgramForTest(cowboyState, "simple_decoder");
+    const cowboyId = moveCorpCardToHq(cowboyState, "onr_v1_316_cowboy-sysop");
+    cowboyState = apply(cowboyState, "corp", (action) => action.type === "install_card" && action.payload?.cardId === cowboyId && action.payload?.serverId === "new_remote");
+    cowboyState = apply(cowboyState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(cowboyState, action) === "onr_v1_316_cowboy-sysop");
+    const cowboyInitial = structuredClone(cowboyState);
+    const cowboyReplayStart = cowboyState.eventLog.length;
+
+    cowboyState = apply(
+      cowboyState,
+      "corp",
+      (action) => action.payload?.v1917AssetAbility === "trash_installed_runner_card" && action.payload?.targetCardId === runnerProgramId
+    );
+
+    expect(cowboyState.runner.heap).toContain(runnerProgramId);
+    expect(cowboyState.runner.rig.programs).not.toContain(runnerProgramId);
+    expect(cowboyState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1917_trash_installed_runner_card",
+      trashedCardDefinitionId: "simple_decoder"
+    });
+    expect(JSON.stringify(cowboyState.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+    const cowboyReplay = replayEvents(cowboyInitial, cowboyState.eventLog.slice(cowboyReplayStart));
+    expect(cowboyReplay.ok).toBe(true);
+    expect(hashState(cowboyReplay.state)).toBe(hashState(cowboyState));
+
+    let disinfectantState = v1917GenericAssetGame("v1917-disinfectant-virus-counter");
+    disinfectantState.corp.credits = 10;
+    disinfectantState = apply(disinfectantState, "corp", (action) => action.type === "mandatory_draw");
+    const virusTargetId = installRunnerProgramForTest(disinfectantState, "simple_decoder");
+    disinfectantState.cardInstances[virusTargetId] = { ...disinfectantState.cardInstances[virusTargetId]!, counters: { virus: 2 } };
+    const disinfectantId = moveCorpCardToHq(disinfectantState, "onr_v1_319_disinfectant-inc");
+    disinfectantState = apply(disinfectantState, "corp", (action) => action.type === "install_card" && action.payload?.cardId === disinfectantId && action.payload?.serverId === "new_remote");
+    disinfectantState = apply(disinfectantState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(disinfectantState, action) === "onr_v1_319_disinfectant-inc");
+    const disinfectantInitial = structuredClone(disinfectantState);
+    const disinfectantReplayStart = disinfectantState.eventLog.length;
+
+    disinfectantState = apply(
+      disinfectantState,
+      "corp",
+      (action) => action.payload?.v1917AssetAbility === "remove_virus_counter" && action.payload?.targetCardId === virusTargetId
+    );
+
+    expect(disinfectantState.cardInstances[virusTargetId]?.counters?.virus).toBe(1);
+    expect(disinfectantState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1917_remove_virus_counter",
+      removedCounterAmount: 1,
+      remainingCounters: 1,
+      targetCardDefinitionId: "simple_decoder"
+    });
+    expect(JSON.stringify(disinfectantState.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
+    const disinfectantReplay = replayEvents(disinfectantInitial, disinfectantState.eventLog.slice(disinfectantReplayStart));
+    expect(disinfectantReplay.ok).toBe(true);
+    expect(hashState(disinfectantReplay.state)).toBe(hashState(disinfectantState));
+  });
+
   it("triggers Setup! and TRAP! only from legal access windows without leaking hidden payloads", () => {
     const ambushes = [
       { definitionId: "onr_v1_340_setup", expectedTagsAdded: 0 },
