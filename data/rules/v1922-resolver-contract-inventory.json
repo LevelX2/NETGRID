@@ -1,0 +1,116 @@
+{
+  "schemaVersion": "v1922-resolver-contract-inventory-v1",
+  "release": "V1.9.22",
+  "status": "wip_no_promotion_contract_inventory",
+  "sourceMode": "local_function_matrix_and_readiness_reviews_only",
+  "gateAssertions": {
+    "coversExactWipScope": true,
+    "noClusterReadyForPromotion": true,
+    "noResolverInferredFromTypeSurface": true,
+    "catalogPromotionPending": true,
+    "aiPromotionPending": true
+  },
+  "clusters": [
+    {
+      "clusterId": "runner_programs",
+      "contractStatus": "missing_cost_mu_breaker_values",
+      "cardIds": [
+        "onr_v1_026_false-echo",
+        "onr_v1_027_flak",
+        "onr_v1_031_hammer",
+        "onr_v1_037_japanese-water-torture",
+        "onr_v1_044_netspace-inverter",
+        "onr_v1_045_newsgroup-filter",
+        "onr_v1_048_poltergeist",
+        "onr_v1_051_rabbit",
+        "onr_v1_055_reflector",
+        "onr_v1_057_scatter-shot",
+        "onr_v1_061_shield",
+        "onr_v1_067_speed-trap",
+        "onr_v1_068_startup-immolator",
+        "onr_v1_075_zetatech-software-installer"
+      ],
+      "confirmedFields": ["side", "type", "function_matrix_program_installation_mu_surface"],
+      "missingFields": ["install_cost", "memory_cost", "breaker_strength", "pump_cost", "break_cost", "break_subtype_contract", "per_card_timing", "ai_fallback"],
+      "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"]
+    },
+    {
+      "clusterId": "runner_events",
+      "contractStatus": "missing_full_play_event_contract",
+      "cardIds": [
+        "onr_v1_077_anonymous-tip",
+        "onr_v1_080_core-command-jettison-ice",
+        "onr_v1_086_forged-activation-orders",
+        "onr_v1_093_if-you-want-it-done-right",
+        "onr_v1_100_misc-for-sale",
+        "onr_v1_102_open-ended-mileage-program",
+        "onr_v1_103_organ-donor",
+        "onr_v1_109_security-code-worm-chip",
+        "onr_v1_113_synchronized-attack-on-hq",
+        "onr_v1_117_valu-pak-software-bundle"
+      ],
+      "confirmedFields": ["side", "type", "function_matrix_runner_event_surface", "partial_historical_core_notes"],
+      "missingFields": ["play_cost", "can_play_timing", "target_set", "choice_flow", "zone_movement", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "safeCurrentCoverage": ["runtime_display_surface", "no_play_event_promotion_guard"]
+    },
+    {
+      "clusterId": "runner_hardware",
+      "contractStatus": "install_surface_covered_per_card_effects_pending",
+      "cardIds": [
+        "onr_v1_119_arasaka-portable-prototype",
+        "onr_v1_122_artemis-2020",
+        "onr_v1_123_bodyweight-data-creche",
+        "onr_v1_124_corolla-speed-chip",
+        "onr_v1_131_microtech-backup-drive",
+        "onr_v1_136_pandoras-deck",
+        "onr_v1_137_parraline-5750",
+        "onr_v1_138_pk-6089a",
+        "onr_v1_147_zz22-speed-chip"
+      ],
+      "confirmedFields": ["side", "type", "install_hardware_legal_action", "wrong_side_stale_revalidation", "visibility", "replay_statehash"],
+      "missingFields": ["per_card_effect_contract", "catalog_promotion_contract", "ai_fallback"],
+      "safeCurrentCoverage": ["runtime_display_surface", "install_hardware_legal_action", "no_ai_promotion_guard"]
+    },
+    {
+      "clusterId": "corp_agendas",
+      "contractStatus": "missing_agenda_numbers_and_ability_contracts",
+      "cardIds": [
+        "onr_v1_195_corporate-retreat",
+        "onr_v1_196_corporate-war",
+        "onr_v1_197_data-fort-reclamation",
+        "onr_v1_206_marine-arcology",
+        "onr_v1_210_political-overthrow",
+        "onr_v1_216_security-purge"
+      ],
+      "confirmedFields": ["side", "type", "function_matrix_agenda_surface", "partial_corporate_war_and_political_overthrow_notes"],
+      "missingFields": ["advancement_requirement", "agenda_points", "on_score_condition", "scored_ability_cost", "credit_or_counter_amount", "timing", "public_event_redaction", "ai_fallback"],
+      "safeCurrentCoverage": ["no_playable_runtime_guard"]
+    },
+    {
+      "clusterId": "corp_ice",
+      "contractStatus": "missing_ice_numbers_and_subroutines",
+      "cardIds": [
+        "onr_v1_247_haunting-inquisition",
+        "onr_v1_274_tutor",
+        "onr_v1_276_viral-15",
+        "onr_v1_277_virizz",
+        "onr_v1_280_zombie"
+      ],
+      "confirmedFields": ["side", "type", "function_matrix_ice_surface"],
+      "missingFields": ["rez_cost", "strength", "subtypes", "subroutines", "encounter_timing", "effect_amounts", "public_event_redaction", "ai_fallback"],
+      "safeCurrentCoverage": ["no_playable_runtime_guard"]
+    },
+    {
+      "clusterId": "corp_operations",
+      "contractStatus": "missing_operation_play_contract",
+      "cardIds": [
+        "onr_v1_289_edgerunner-inc-temps",
+        "onr_v1_296_off-site-backups",
+        "onr_v1_298_planning-consultants"
+      ],
+      "confirmedFields": ["side", "type", "function_matrix_operation_surface"],
+      "missingFields": ["play_cost", "target_set", "timing_condition", "zone_movement", "effect_amounts", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "safeCurrentCoverage": ["no_playable_runtime_guard"]
+    }
+  ]
+}

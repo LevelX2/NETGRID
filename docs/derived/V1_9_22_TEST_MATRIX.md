@@ -15,8 +15,9 @@ Status: planned
 | Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; AI-Hints/-Smokes fuer Promotion bleiben Folgearbeit |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
+| Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen fuer WIP-Artefakt-/AI-/Web-No-Promotion-Guard: JSON 302, catalog 37, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build |
 
 ## Mindestchecks im ersten WIP
 
@@ -53,4 +54,12 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests inkl. Guard, dass 47/47 V1.9.22-WIP-Karten nicht `ai_supported`, `human_playable` oder `deck_legal` sind.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 79 Tests inkl. Guard, dass 47/47 V1.9.22-WIP-Karten nicht im `ai_supported`-Filter erscheinen, sichtbare Detailantworten nicht promotet sind und der Webclient vor Abschluss weiter `V1.9.21` zeigt.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+
+## Resolver-Contract-Inventar 2026-05-13 18:25 CEST
+
+- Neues Artefakt: `data/rules/v1922-resolver-contract-inventory.json`.
+- Zusatzabdeckung: sechs Cluster (`runner_programs`, `runner_events`, `runner_hardware`, `corp_agendas`, `corp_ice`, `corp_operations`) decken exakt 47/47 V1.9.22-WIP-Karten ab.
+- Zusatzabdeckung: kein Cluster ist `ready_for_promotion`; alle Cluster haben bestaetigte Felder, fehlende Felder und aktuelle sichere No-Promotion-/Guard-Abdeckung.
+- JSON-Validation fuer `data/**/*.json`: pass, 303 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 38 Tests.
 

@@ -23,6 +23,7 @@ Status: planning/catalog WIP
 - Ein AI-Paket-Guard bestaetigt, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate ausserhalb von `ai_supported`, `human_playable` und `deck_legal` bleiben.
 - Ein Web-Catalog-API-Guard bestaetigt, dass V1.9.22-WIP-Karten nicht im `ai_supported`-Filter erscheinen und Detailantworten fuer sichtbare WIP-Karten keine `ai_supported`-, `human_playable`- oder `deck_legal`-Promotion anzeigen.
 - Ein Webclient-Version-Guard bestaetigt, dass die sichtbare Client-Version bis zum V1.9.22-Completion-Gate auf `V1.9.21` bleibt.
+- `data/rules/v1922-resolver-contract-inventory.json` dokumentiert die fehlenden Resolver-Vertragsfelder fuer Runner-Programme, Runner-Events, Runner-Hardware, Corp-Agendas, Corp-ICE und Corp-Operations maschinenlesbar. Der Catalog-Test gleicht das Inventar gegen 47/47 WIP-Karten ab und verbietet `ready_for_promotion`-Status in allen Clustern.
 - Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
 
 ## Gate
@@ -38,7 +39,8 @@ Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fu
 
 - JSON-Validation fuer `data/**/*.json`: pass, 302 Dateien.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 278 Tests inkl. 9/9 Runner-Hardware-Install-Smokes, Runner-Event-No-Promotion-Guard, Runner-Programm-No-Playable-Runtime-Guard, Runner-Programm-No-Install-/Pump-/Break-LegalAction-Guard und Corp-Longtail-No-Playable-Runtime-Guard.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 37 Tests inkl. V1.9.22-WIP-Artefakt-Alignment-Guard.
+- JSON-Validation fuer `data/**/*.json`: pass, 303 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 38 Tests inkl. V1.9.22-WIP-Artefakt-Alignment- und Resolver-Contract-Inventar-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests inkl. V1.9.22-AI-No-Promotion-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 79 Tests inkl. V1.9.22-Web-Catalog-No-Promotion- und Webclient-Version-Guard.

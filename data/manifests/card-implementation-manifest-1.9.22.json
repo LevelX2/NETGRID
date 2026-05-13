@@ -8,6 +8,7 @@
     "v1922ScopeFrozenToFortySevenCards": true,
     "catalogWipGuardReady": true,
     "wipArtifactAlignmentGuardReady": true,
+    "resolverContractInventoryReady": true,
     "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47_plus_program_no_promotion_guard",
     "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_no_promotion_guard_plus_runner_program_no_legalaction_guard",
     "stateHashReplayStableForCoveredSmokes": true,

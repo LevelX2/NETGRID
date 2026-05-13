@@ -116,6 +116,7 @@ import v1919MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1
 import v1920MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.20.json";
 import v1921MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.21.json";
 import v1922MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.22.json";
+import v1922ResolverContractInventoryData from "../../../data/rules/v1922-resolver-contract-inventory.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
 import {
   assertPipelinePayloadSafe,
@@ -1863,6 +1864,43 @@ describe("catalog import and status logic", () => {
     expect(JSON.stringify({ cardImplementationManifest1922Data, v1922WipScenarioData, v1922MechanicsCoverageData })).not.toMatch(
       /"cardInstances"\s*:|"privatePayload"\s*:|"sessionToken"\s*:|"reconnectToken"\s*:|"joinToken"\s*:|"tokenHash"\s*:|"fullState"\s*:|[A-Za-z]:\\/
     );
+  });
+
+  it("keeps the V1.9.22 resolver contract inventory exhaustive and non-promoting", () => {
+    const inventory = v1922ResolverContractInventoryData as {
+      status: string;
+      gateAssertions: {
+        coversExactWipScope: boolean;
+        noClusterReadyForPromotion: boolean;
+        catalogPromotionPending: boolean;
+        aiPromotionPending: boolean;
+      };
+      clusters: Array<{
+        clusterId: string;
+        contractStatus: string;
+        cardIds: string[];
+        confirmedFields: string[];
+        missingFields: string[];
+        safeCurrentCoverage: string[];
+      }>;
+    };
+    const coveredCards = inventory.clusters.flatMap((cluster) => cluster.cardIds);
+
+    expect(inventory.status).toBe("wip_no_promotion_contract_inventory");
+    expect(inventory.gateAssertions.coversExactWipScope).toBe(true);
+    expect(inventory.gateAssertions.noClusterReadyForPromotion).toBe(true);
+    expect(inventory.gateAssertions.catalogPromotionPending).toBe(true);
+    expect(inventory.gateAssertions.aiPromotionPending).toBe(true);
+    expect([...new Set(coveredCards)].sort()).toEqual([...ONR_V1_9_22_WIP_CARD_IDS].sort());
+    expect(coveredCards).toHaveLength(ONR_V1_9_22_WIP_CARD_IDS.length);
+    expect(inventory.clusters.map((cluster) => cluster.clusterId).sort()).toEqual(["corp_agendas", "corp_ice", "corp_operations", "runner_events", "runner_hardware", "runner_programs"]);
+
+    for (const cluster of inventory.clusters) {
+      expect(cluster.contractStatus, cluster.clusterId).not.toBe("ready_for_promotion");
+      expect(cluster.confirmedFields.length, cluster.clusterId).toBeGreaterThan(0);
+      expect(cluster.missingFields.length, cluster.clusterId).toBeGreaterThan(0);
+      expect(cluster.safeCurrentCoverage.length, cluster.clusterId).toBeGreaterThan(0);
+    }
   });
 });
 

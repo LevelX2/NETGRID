@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 18:25 CEST
+- Ergebnis: V1.9.22 Resolver-Contract-Inventar angelegt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/rules/v1922-resolver-contract-inventory.json` dokumentiert fuer sechs Cluster die lokal bestaetigten Felder, fehlenden Vertragsfelder und aktuellen sicheren Guards. Das Inventar deckt exakt 47/47 V1.9.22-WIP-Karten ab und markiert keinen Cluster als `ready_for_promotion`.
+- Tests: JSON-Validation pass (303 Dateien); `catalog` pass (38), `engine` pass (278), `ai` pass (86), `server` pass (72), `web` pass (79), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: resolver contract inventory guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 18:20 CEST
 - Ergebnis: V1.9.22 WIP-Artefakt-/AI-/Web-No-Promotion-Guards ergaenzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
