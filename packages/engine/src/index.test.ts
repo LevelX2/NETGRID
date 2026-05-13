@@ -4501,6 +4501,33 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const wallRez = mustAction(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_232_crystal-wall");
     expect(wallRez.costs[0]?.credits).toBe(3);
   });
+
+  it("projects V1.9.20 scored-agenda handlimit modifiers through PlayerViews", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-main-office-handlimit",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw"
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    state.corp.maxHandSize = 5;
+
+    moveCorpCardToHq(state, "onr_v1_205_main-office-relocation");
+    state = apply(state, "corp", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_205_main-office-relocation");
+    for (let index = 0; index < 3; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_205_main-office-relocation");
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_205_main-office-relocation");
+
+    expect(state.corp.maxHandSize).toBe(5);
+    expect(getPlayerView(state, "corp").own.maxHandSize).toBe(6);
+    expect(getPlayerView(state, "runner").opponent.maxHandSize).toBe(6);
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {

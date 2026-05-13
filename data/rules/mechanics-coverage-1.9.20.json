@@ -34,12 +34,13 @@
       "label": "Handlimit, MU und Action Economy",
       "currentStatus": "implemented_partial",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; MRAM-Hardware deckt den ersten legalen MU-Installationspfad ab, Remote Facility den ersten rezzed Action-Economy-Assetpfad.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; MRAM-Hardware deckt den ersten legalen MU-Installationspfad ab, Remote Facility den ersten rezzed Action-Economy-Assetpfad und Main-Office Relocation den ersten scored-Agenda-Handlimitmodifier.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
         "mram_memory_install_smoke",
-        "action_economy_asset_smoke"
+        "action_economy_asset_smoke",
+        "main_office_handlimit_smoke"
       ]
     },
     {
@@ -58,7 +59,7 @@
   "deferred": [
     {
       "item": "runtime_and_engine_coverage",
-      "reason": "V1.9.20 hat Runtime-Definitionen, MRAM-MU-, Remote-Facility-Action-Economy- und Fortress-Architects-ICE-Rez-Kosten-Smokes; weitere Handlimit- und persistente Sonderzustands-Pfade folgen."
+      "reason": "V1.9.20 hat Runtime-Definitionen, MRAM-MU-, Remote-Facility-Action-Economy-, Fortress-Architects-ICE-Rez-Kosten- und Main-Office-Handlimit-Smokes; persistente Sonderzustands-Pfade folgen."
     }
   ]
 }

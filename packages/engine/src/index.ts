@@ -244,6 +244,7 @@ const V1919_SCORED_REVEAL_AGENDA_IDS = new Set([V1919_ARTIFICIAL_SECURITY_DIRECT
 const V1919_SERVER_DIFFICULTY_UPGRADE_IDS = new Set([V1919_ROVING_SUBMARINE_ID, V1919_WASHINGTON_DC_CITY_GRID_ID]);
 const V1919_COUNTER_ASSET_IDS = new Set([V1919_CHICAGO_BRANCH_ID, V1919_VAPOR_OPS_ID]);
 const V1919_COUNTER_OPERATION_IDS = new Set([V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID, V1919_MANAGEMENT_SHAKE_UP_ID, V1919_TEAM_RESTRUCTURING_ID]);
+const V1920_MAIN_OFFICE_RELOCATION_ID = "onr_v1_205_main-office-relocation";
 const V1920_FORTRESS_ARCHITECTS_ID = "onr_v1_324_fortress-architects";
 const V1920_ACTION_ASSET_IDS = new Set(["onr_v1_331_nevinyrral", "onr_v1_334_pacifica-regional-ai", "onr_v1_335_remote-facility"]);
 const AARDVARK_ID = "onr_v1_349_aardvark";
@@ -5305,8 +5306,12 @@ function handForSide(state: GameState, side: Side): CardInstanceId[] {
 }
 
 function maxHandSize(state: GameState, side: Side): number {
-  if (side === "corp") return state.corp.maxHandSize;
+  if (side === "corp") return state.corp.maxHandSize + v1920CorpMaxHandSizeModifier(state);
   return state.runner.maxHandSize - state.runner.coreDamage;
+}
+
+function v1920CorpMaxHandSizeModifier(state: GameState): number {
+  return scoredCorpAgendaIds(state).some((cardId) => definitionFor(state, cardId).id === V1920_MAIN_OFFICE_RELOCATION_ID) ? 1 : 0;
 }
 
 function drawCorpCard(state: GameState): void {
