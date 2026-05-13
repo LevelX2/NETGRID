@@ -52,6 +52,8 @@
 
 - V1.9.22 Runner-Programm-Runtime-WIP: `Shield` hat jetzt eine enge Runtime-Definition ohne Catalog-, AI- oder Release-Promotion. Die Karte nutzt Installkosten 0, MU 1 und das bestehende Event-Modification-Prevention-Fenster fuer bis zu 2 Net Damage pro Runner-Zug; Engine, Catalog, AI, Server, Web, Typecheck, Test, Lint und Build sind fuer diesen Teilschnitt gruen. Die verbleibenden Runner-Programm- und Corp-Longtail-Gates bleiben offen.
 
+- V1.9.22 Newsgroup-Filter-Preflight: `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` haelt den kleinsten verbleibenden Runner-Programm-Kandidaten offen; Runtime-Code bleibt gesperrt, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestaetigt sind.
+
 ## Kernwissen
 
 - [[Projektueberblick]]: verdichtetes Projektbild für neue Threads.

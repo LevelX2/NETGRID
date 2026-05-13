@@ -28,4 +28,4 @@ Die erneute historische Suche in `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS
 
 ## Entscheidung
 
-Kein weiterer Runner-Programm-Code in diesem Preflight. Der naechste sichere Runner-Programm-Code-Schnitt ist `Newsgroup Filter`, sobald Aktivierungstiming und PublicPayload lokal bestaetigt sind. Bis dahin bleiben die verbleibenden 13 Programmkarten aus `playable_mvp` und ohne `install_card`, `pump_breaker` oder `break_subroutine`-LegalActions.
+Kein weiterer Runner-Programm-Code in diesem Preflight. `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` konkretisiert den kleinsten verbleibenden Programm-Kandidaten und haelt Code gesperrt, bis Aktivierungskosten, Timing und Limit lokal bestaetigt sind. Bis dahin bleiben die verbleibenden 13 Programmkarten aus `playable_mvp` und ohne `install_card`, `pump_breaker` oder `break_subroutine`-LegalActions.

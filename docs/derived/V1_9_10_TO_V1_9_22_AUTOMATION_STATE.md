@@ -79,6 +79,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: shield prevention program resolver wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
+- Zeitpunkt: 2026-05-14 00:32 CEST
+- Ergebnis: V1.9.22 Newsgroup-Filter-Preflight nachgezogen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` dokumentiert den lokalen Regelkern fuer `Newsgroup Filter` und sperrt Runtime-Code, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestaetigt sind. `data/reports/v1922-completion-gate-status.json`, `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md`, `docs/codex/CODEX_STATUS.md` und die Wissensbasis wurden darauf ausgerichtet. Keine Runtime-, Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: Dokumentations-/Statusschnitt; vorheriger Shield-Verify bleibt gruen.
+- Git: WIP-Checkpoint fuer diesen Statusschnitt vorgesehen (`WIP V1.9.22: newsgroup filter preflight wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
 - Zeitpunkt: 2026-05-13 23:59 CEST
 - Ergebnis: V1.9.22 Corp-Operation-Resolver fuer `Edgerunner, Inc., Temps` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
