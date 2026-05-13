@@ -1317,9 +1317,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["daemon"],
     implementationStatus: "playable_mvp",
-    installCost: 4,
+    installCost: 2,
     memoryCost: 1,
-    rulesText: "Afreet can host up to 3 MU of programs. Hosted programs use Afreet's hosting capacity instead of Runner MU.",
+    rulesText:
+      "Afreet can have up to 3 MU of programs installed in it. All icebreakers installed in Afreet have their strength reduced by 1. If Afreet leaves play, trash all programs installed in it.",
     mechanics: ["install_program", "memory", "hosting", "subtype_daemon", "hosted_program_lifecycle", ONR_V1_LOCAL_PRIVATE]
   },
   {

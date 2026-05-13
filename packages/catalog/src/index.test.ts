@@ -614,7 +614,9 @@ describe("catalog import and status logic", () => {
         "Put 2 bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overlying Software Installer itself. If you use any of these bits, replace them at the start of your next turn."
       );
     }
-    expect(cardsById["onr_v1_001_afreet"]?.text).toContain("Afreet can host up to 3 MU");
+    expect(cardsById["onr_v1_001_afreet"]?.numeric.installCost).toBe(2);
+    expect(cardsById["onr_v1_001_afreet"]?.text).toContain("All icebreakers installed in Afreet have their strength reduced by 1.");
+    expect(cardsById["onr_v1_001_afreet"]?.text).toContain("If Afreet leaves play, trash all programs installed in it.");
     expect(cardsById["onr_v1_001_afreet"]?.statuses.deck_legal).toBe(true);
     expect(cardsById["onr_v1_001_afreet"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_018_dogcatcher"]?.statuses.deck_legal).toBe(true);

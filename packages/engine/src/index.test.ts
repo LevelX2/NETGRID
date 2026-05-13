@@ -3952,6 +3952,9 @@ describe("V1.9.7 Mechanikpaket P", () => {
     expect(ONR_V1_9_7_FINAL_CARD_IDS).toHaveLength(1);
     const definition = DEMO_CARDS_BY_ID["onr_v1_001_afreet"];
     expect(definition?.implementationStatus).toBe("playable_mvp");
+    expect(definition?.installCost).toBe(2);
+    expect(definition?.subtypes).toContain("daemon");
+    expect(definition?.rulesText).toContain("All icebreakers installed in Afreet have their strength reduced by 1.");
     expect(definition?.mechanics.join(" ")).toMatch(/host/);
     expect(definition?.mechanics.join(" ")).not.toMatch(/v2|matchmaking|ranking/);
     expect(validateDeckDefinition(ONR_V1_9_7_RUNNER_DECK, { expectedSide: "runner" }).ok).toBe(true);
@@ -3968,6 +3971,7 @@ describe("V1.9.7 Mechanikpaket P", () => {
       (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_001_afreet"
     );
     expect(state.runner.rig.programs.some((programId) => state.cardInstances[programId]?.definitionId === "onr_v1_001_afreet")).toBe(true);
+    expect(state.runner.credits).toBe(18);
     expect(state.runner.memoryUsed).toBeGreaterThanOrEqual(1);
   });
 });

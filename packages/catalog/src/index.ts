@@ -1575,7 +1575,7 @@ const ONR_V1_9_6_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
 };
 
 const ONR_V1_9_7_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
-  "onr_v1_001_afreet": { installCost: 4, memoryCost: 1 }
+  "onr_v1_001_afreet": { installCost: 2, memoryCost: 1 }
 };
 
 const ONR_V1_9_8_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
@@ -1809,7 +1809,7 @@ const ONR_V1_9_6_TEXT_OVERRIDES: Partial<Record<string, string>> = {
 
 const ONR_V1_9_7_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_001_afreet":
-    "Afreet can host up to 3 MU of programs. Hosted programs use Afreet's hosting capacity instead of Runner MU."
+    "Afreet can have up to 3 MU of programs installed in it. All icebreakers installed in Afreet have their strength reduced by 1. If Afreet leaves play, trash all programs installed in it."
 };
 
 const ONR_V1_9_8_TEXT_OVERRIDES: Partial<Record<string, string>> = {
