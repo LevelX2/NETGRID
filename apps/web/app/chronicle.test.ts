@@ -234,6 +234,35 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(item)).not.toContain("corp.economy.operation");
   });
 
+  it("merges simple play draw effects into the played card entry", () => {
+    const event = makeEvent("play_operation", {
+      actor: "corp",
+      title: "Annual Reviews",
+      cardDefinitionId: "onr_v1_282_annual-reviews",
+      aiReasonCode: "corp.draw.operation",
+      resolvedEffects: [
+        {
+          effectId: "play_operation.effect.1",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 3,
+          sourceDefinitionId: "onr_v1_282_annual-reviews",
+          sourceTitle: "Annual Reviews",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner", { cardTitle: "Annual Reviews" });
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Die Korp-KI hat Annual Reviews gespielt und 3 Karten gezogen.");
+    expect(item.chips).toContain("Operation");
+    expect(item.chips).toContain("3 Karten");
+    expect(effects).toEqual([]);
+  });
+
   it("highlights stolen agendas with visible agenda points", () => {
     const item = formatChronicleEvent(
       makeEvent("steal_agenda", {

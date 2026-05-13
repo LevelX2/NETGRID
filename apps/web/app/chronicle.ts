@@ -82,6 +82,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeEffect(cardText);
+  const mergedPlayEffect = simpleMergedPlayEffect(event);
   const agendaAbility = stringValue(payload.agendaAbility);
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
   const searchReveal = stringValue(payload.searchReveal);
@@ -277,8 +278,9 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Trace", ...(baseTraceStrength !== undefined ? [`Base ${baseTraceStrength}`] : []), actionType === "play_event" ? "Event" : "Operation");
         break;
       }
-      title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${effect.suffix ? ` und ${effect.suffix}` : ""}`);
-      chips.push(actionType === "play_event" ? "Event" : "Operation", ...effect.chips);
+      const playEffect = mergedPlayEffect ?? effect;
+      title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);
+      chips.push(actionType === "play_event" ? "Event" : "Operation", ...playEffect.chips);
       break;
     case "advance_card":
       category = "hidden";
@@ -454,7 +456,9 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
 }
 
 export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): ChronicleItem[] {
-  return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects).map((effect, index) => formatChronicleEffect(event, effect, index, side));
+  return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects)
+    .filter((effect) => !shouldMergePlayEffect(event, effect))
+    .map((effect, index) => formatChronicleEffect(event, effect, index, side));
 }
 
 export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<string, number> {
@@ -638,6 +642,35 @@ function summarizeEffect(cardText: string | undefined): EffectSummary {
   if (coreDamage) return { category: "danger", sentence: `Der Runner erleidet ${coreDamage[1]} Core Damage.`, chips: [`${coreDamage[1]} Core`] };
   if (/Run auf einen Server/i.test(cardText)) return { category: "run", suffix: "Run-Druck aufgebaut", chips: ["Run"] };
   return { chips: [] };
+}
+
+function simpleMergedPlayEffect(event: PublicGameEvent): EffectSummary | undefined {
+  const effects = resolvedEffectsFromPayload(event.publicPayload.resolvedEffects);
+  const effect = effects[0];
+  if (effects.length !== 1 || !effect || !shouldMergePlayEffect(event, effect)) return undefined;
+  const amount = numberValue(effect.amount) ?? 0;
+  if (effect.kind === "draw_cards") return { category: "card", suffix: `${cardCountText(amount)} gezogen`, chips: [amount === 1 ? "Karte ziehen" : `${amount} Karten`] };
+  return undefined;
+}
+
+function shouldMergePlayEffect(event: PublicGameEvent, effect: ResolvedGameEffect | undefined): boolean {
+  if (!effect) return false;
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  if (actionType !== "play_event" && actionType !== "play_operation") return false;
+  if (effect.kind !== "draw_cards" || effect.visibility !== "public") return false;
+  if (effect.reason !== "card_resolver") return false;
+  const actor = sideValue(payload.actor);
+  if (actor && effect.side && actor !== effect.side) return false;
+  const amount = numberValue(effect.amount);
+  if (!amount || amount <= 0) return false;
+  const playedDefinitionId = stringValue(payload.cardDefinitionId);
+  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  if (playedDefinitionId && sourceDefinitionId && playedDefinitionId !== sourceDefinitionId) return false;
+  const playedTitle = stringValue(payload.title);
+  const sourceTitle = stringValue(effect.sourceTitle);
+  if (!playedDefinitionId && !sourceDefinitionId && playedTitle && sourceTitle && playedTitle !== sourceTitle) return false;
+  return true;
 }
 
 function rezSuffix(cardType: string | null | undefined, effect: EffectSummary): string {
