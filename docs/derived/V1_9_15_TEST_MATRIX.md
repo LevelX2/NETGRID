@@ -11,10 +11,10 @@ Status: draft-implementing
 | Visibility | Access-/Hidden-Zone-/Ambush-Payloads side-sicher | teilweise: Priority-Wreck-R&D-Multiaccess leakt keine zukünftigen Queue-Karten; Trace-Bid-Choice bleibt corp-privat |
 | Replay/StateHash | Run- und Access-Queue nach Replay identisch | teilweise: Priority-Wreck-R&D-Multiaccess replayt StateHash-stabil |
 | Scenario Pack | `data/scenarios/v1915-run-access-multiaccess-smoke.json` | WIP: `data/scenarios/v1915-run-access-multiaccess-wip-smoke.json` |
-| Manifest | `data/manifests/card-implementation-manifest-1.9.15.json` | offen |
-| Mechanics Coverage | `data/rules/mechanics-coverage-1.9.15.json` | offen |
-| AI Hints | `data/ai/ai-card-hints-deck-legal-v1915.json` | offen |
-| AI Smokes | `data/scenarios/ai-deck-legal-v1915-smokes.json` | offen |
+| Manifest | `data/manifests/card-implementation-manifest-1.9.15.json` | WIP: angelegt, nicht release-promotet |
+| Mechanics Coverage | `data/rules/mechanics-coverage-1.9.15.json` | WIP: angelegt, offene Resolverfamilien markiert |
+| AI Hints | `data/ai/ai-card-hints-deck-legal-v1915.json` | WIP: angelegt, `pending_wip`, nicht `ai_supported` |
+| AI Smokes | `data/scenarios/ai-deck-legal-v1915-smokes.json` | WIP: angelegt, noch nicht als AI-Gate ausgeführt |
 | Catalog/Web | Release-IDs, manifest refs, sichtbare Webclient-Version | teilweise: 14er-WIP-Zielmenge mit No-Promotion-Guard |
 | Full Checks | catalog, engine, ai, web, server, typecheck, test, lint, build | teilweise: engine gruen mit 226 Tests; catalog/typecheck aus Vorlauf gruen, nach neuem WIP erneut ausstehend |
 

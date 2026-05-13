@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-manifest-v1",
+  "id": "deck-legal-ai-approval-v1915-wip",
+  "release": "V1.9.15",
+  "status": "wip_not_ai_promoted",
+  "extends": "data/manifests/deck-legal-ai-approval-v1914-manifest.json",
+  "scope": {
+    "cardCount": 14,
+    "cardIds": [
+      "onr_v1_020_dupre",
+      "onr_v1_024_expert-schedule-analyzer",
+      "onr_v1_041_microtech-ai-interface",
+      "onr_v1_043_mystery-box",
+      "onr_v1_062_shredder-uplink-protocol",
+      "onr_v1_065_smarteye",
+      "onr_v1_098_lucidrine-booster-drug",
+      "onr_v1_105_priority-wreck",
+      "onr_v1_111_social-engineering",
+      "onr_v1_112_stumble-through-wilderspace",
+      "onr_v1_142_record-reconstructor",
+      "onr_v1_227_cerberus",
+      "onr_v1_255_mastiff",
+      "onr_v1_294_new-blood"
+    ]
+  },
+  "artifacts": {
+    "aiHints": "data/ai/ai-card-hints-deck-legal-v1915.json",
+    "aiSmokes": "data/scenarios/ai-deck-legal-v1915-smokes.json",
+    "engineSmoke": "data/scenarios/v1915-run-access-multiaccess-wip-smoke.json",
+    "cardManifest": "data/manifests/card-implementation-manifest-1.9.15.json",
+    "mechanicsCoverage": "data/rules/mechanics-coverage-1.9.15.json"
+  },
+  "gateAssertions": {
+    "allCardsHaveAiHintEntries": true,
+    "aiSupportedPromotion": false,
+    "runnerDecisionDebugSideSafe": "pending",
+    "corpDecisionDebugSideSafe": "pending",
+    "legalActionOnly": true,
+    "noV1916PlusScope": true
+  }
+}

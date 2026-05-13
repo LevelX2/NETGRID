@@ -14,6 +14,7 @@ Status: implementing_wip
 - `packages/engine/src/index.test.ts` deckt Priority-Wreck-R&D-Multiaccess inklusive Hidden-Queue-Schutz und Replay/StateHash ab.
 - `packages/engine/src/index.test.ts` deckt Cerberus und Mastiff als V1.9.15-ICE-Ueberlappung mit dem bestehenden side-sicheren Trace-Bid-Fenster ab.
 - `data/scenarios/v1915-run-access-multiaccess-wip-smoke.json` dokumentiert den neuen WIP-Smoke maschinenlesbar.
+- WIP-Datenartefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smokes und AI-Approval-Manifest sind angelegt; sie markieren den Stand ausdruecklich als nicht release-promotet und setzen keine Karte auf `ai_supported`.
 
 ## Verifikation
 
@@ -29,4 +30,4 @@ Status: implementing_wip
 
 `hard_gate_blocker: none`
 
-Offen bleiben die vollstaendige Kartenpromotion, finale display-only Texte ohne WIP-Praefix, Manifest, Mechanics-Coverage, finale Scenario Packs, AI-Hints, AI-Smokes, Catalog/Web-Promotion, Webclient-Version, volle Pflichtchecks und Final Review.
+Offen bleiben die vollstaendige Kartenpromotion, finale display-only Texte ohne WIP-Praefix, finale Manifest-/Mechanics-Coverage-/Scenario-/AI-Artefakte, Catalog/Web-Promotion, Webclient-Version, volle Pflichtchecks und Final Review.

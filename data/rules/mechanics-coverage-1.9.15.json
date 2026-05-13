@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.9.15",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.15",
+  "generatedFor": "V1.9.15 Run Flow, Access, Multiaccess und Ambush on Access WIP data gate",
+  "generatedAt": "2026-05-13",
+  "status": "wip_not_release_promoted",
+  "extends": "data/rules/mechanics-coverage-1.9.14.json",
+  "gateAssertions": {
+    "runFlowResolverPartiallyImplemented": true,
+    "accessBreachMultiaccessResolverPartiallyImplemented": true,
+    "accessAmbushResolverNotYetFinal": true,
+    "allFourteenV1915CardsHaveRuntimeDefinitions": true,
+    "aiChoicePathsCovered": false,
+    "noHiddenZoneDataLeakForCoveredSmokes": true,
+    "stateHashReplayStableForCoveredSmokes": true,
+    "noV1916PlusScope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.runs.run_flow_locks",
+      "label": "Run Flow und Run Locks",
+      "currentStatus": "implemented_wip_limited",
+      "targetGate": "v1.9.15",
+      "currentScopeNote": "V1.9.15 currently covers explicit Runner event run-start paths and New Blood's visible run-history gate. Installed helper card run-lock behavior remains pending.",
+      "coverage": ["unit", "legal_action"]
+    },
+    {
+      "mechanicId": "mechanic.runs.access_breach_multiaccess",
+      "label": "Access, Breach und Multiaccess",
+      "currentStatus": "implemented_wip_limited",
+      "targetGate": "v1.9.15",
+      "currentScopeNote": "Priority Wreck creates a deterministic R&D two-card access queue with hidden future entries and replay/StateHash coverage.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.runs.access_ambush",
+      "label": "Ambush on Access",
+      "currentStatus": "open",
+      "targetGate": "v1.9.15",
+      "currentScopeNote": "Ambush-on-access remains pending beyond the inherited V1.9.0 foundation hook.",
+      "coverage": []
+    },
+    {
+      "mechanicId": "mechanic.ice.trace_damage_run_overlap",
+      "label": "Trace-, Damage- und Run-ICE-Ueberlappung",
+      "currentStatus": "implemented_wip_limited",
+      "targetGate": "v1.9.15",
+      "currentScopeNote": "Cerberus and Mastiff open the existing side-safe trace bid window before their damage/end-the-run overlap.",
+      "coverage": ["unit", "legal_action", "visibility"]
+    }
+  ],
+  "deferred": [
+    "final display-only texts",
+    "installed access helper concrete resolver coverage",
+    "access ambush final coverage",
+    "AI hints and AI smoke execution",
+    "catalog release promotion"
+  ]
+}

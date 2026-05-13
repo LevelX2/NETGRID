@@ -72,10 +72,10 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.15
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: WIP-Resolver fuer `Lucidrine Booster Drug`, `Priority Wreck`, `Social Engineering`, `Stumble through Wilderspace` und `New Blood` ergaenzt. Priority Wreck deckt R&D-Multiaccess mit Hidden-Queue-Schutz und Replay/StateHash ab. Cerberus und Mastiff laufen durch das bestehende side-sichere Trace-Bid-Fenster. Ein maschinenlesbarer WIP-Smoke liegt unter `data/scenarios/v1915-run-access-multiaccess-wip-smoke.json`.
+- Umsetzung: WIP-Resolver fuer `Lucidrine Booster Drug`, `Priority Wreck`, `Social Engineering`, `Stumble through Wilderspace` und `New Blood` ergaenzt. Priority Wreck deckt R&D-Multiaccess mit Hidden-Queue-Schutz und Replay/StateHash ab. Cerberus und Mastiff laufen durch das bestehende side-sichere Trace-Bid-Fenster. Ein maschinenlesbarer WIP-Smoke liegt unter `data/scenarios/v1915-run-access-multiaccess-wip-smoke.json`. WIP-Artefakte fuer Manifest, Mechanics-Coverage, AI-Hints, AI-Smokes und AI-Approval-Manifest sind angelegt, aber ausdruecklich nicht promotet.
 - Tests: `engine` pass (226), `catalog` pass (29), `ai` pass (84), `typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.15: run access engine smokes`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.15 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil finale Kartenpromotion, finale display-only Texte ohne WIP-Praefix, Manifest/Coverage, finale Scenario-/AI-Artefakte, Server/Web, volle Pflichtchecks, Final Review und Webclient-Version offen sind.
+- Cursor: V1.9.15 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil finale Kartenpromotion, finale display-only Texte ohne WIP-Praefix, finale Manifest/Coverage/Scenario-/AI-Artefakte, Server/Web, volle Pflichtchecks, Final Review und Webclient-Version offen sind.
 
 - Zeitpunkt: 2026-05-13 03:05 CEST
 - Ergebnis: V1.9.15 Run/Access-WIP begonnen; Cursor bleibt auf V1.9.15 `implementing`.
