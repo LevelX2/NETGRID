@@ -6292,6 +6292,16 @@ function ChroniclePanel({
       });
     })
     .reverse();
+  const groupedEntries: { label: string; entries: typeof entries }[] = [];
+  for (const entry of entries) {
+    const label = chronicleGroupLabel(entry.item);
+    const currentGroup = groupedEntries[groupedEntries.length - 1];
+    if (currentGroup?.label === label) {
+      currentGroup.entries.push(entry);
+    } else {
+      groupedEntries.push({ label, entries: [entry] });
+    }
+  }
 
   return (
     <section className={`section chroniclePanel ${collapsed ? "collapsed" : ""}`} data-testid="chronicle">
@@ -6313,16 +6323,14 @@ function ChroniclePanel({
       {!collapsed ? (
         <div className="chronicleList">
           {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
-          {entries.map((entry, index) => {
-            const group = chronicleGroupLabel(entry.item);
-            const previousGroup = index > 0 ? chronicleGroupLabel(entries[index - 1]!.item) : null;
-            return (
-              <Fragment key={entry.item.id}>
-                {group !== previousGroup ? <div className="chronicleGroup">{group}</div> : null}
-                <ChronicleEntry item={entry.item} card={entry.card} displayMode={displayMode} onFocusCard={onFocusCard} />
-              </Fragment>
-            );
-          })}
+          {groupedEntries.map((group) => (
+            <div className="chronicleGroupBlock" key={`${group.label}-${group.entries[0]?.item.id ?? "empty"}`}>
+              <div className="chronicleGroup">{group.label}</div>
+              {group.entries.map((entry) => (
+                <ChronicleEntry key={entry.item.id} item={entry.item} card={entry.card} displayMode={displayMode} onFocusCard={onFocusCard} />
+              ))}
+            </div>
+          ))}
         </div>
       ) : null}
     </section>

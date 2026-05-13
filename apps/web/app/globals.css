@@ -4088,6 +4088,13 @@ select {
   overflow-y: auto;
 }
 
+.chronicleGroupBlock {
+  position: relative;
+  display: grid;
+  gap: 9px;
+  overflow: visible;
+}
+
 .chronicleGroup {
   position: sticky;
   top: 0;
