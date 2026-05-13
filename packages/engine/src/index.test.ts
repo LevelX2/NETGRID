@@ -6383,6 +6383,29 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       ).toBe(false);
     }
   });
+
+  it("keeps V1.9.22 runner programs out of playable runtime until local values are confirmed", () => {
+    const runnerProgramIds = [
+      "onr_v1_026_false-echo",
+      "onr_v1_027_flak",
+      "onr_v1_031_hammer",
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_044_netspace-inverter",
+      "onr_v1_045_newsgroup-filter",
+      "onr_v1_048_poltergeist",
+      "onr_v1_051_rabbit",
+      "onr_v1_055_reflector",
+      "onr_v1_057_scatter-shot",
+      "onr_v1_061_shield",
+      "onr_v1_067_speed-trap",
+      "onr_v1_068_startup-immolator",
+      "onr_v1_075_zetatech-software-installer"
+    ] as const;
+
+    for (const definitionId of runnerProgramIds) {
+      expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
+    }
+  });
 });
 
 describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
