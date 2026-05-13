@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 21:47 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `misc.for-sale` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `misc.for-sale` eine `play_event`-LegalAction, startet einen Runner-privaten Installed-Trash-Choice fuer eigene installierte Karten und resolved die Auswahl in den Heap mit 1 Credit pro getrashter Karte. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` zuerst rot wegen Testzugriff auf eine nicht exportierte interne Hilfsfunktion, danach pass (287); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44); `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: misc for sale resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 21:40 CEST
 - Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Organ Donor` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

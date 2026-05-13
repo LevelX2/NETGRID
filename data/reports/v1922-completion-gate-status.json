@@ -72,10 +72,11 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-13T21:40:00+02:00",
-    "cards": ["onr_v1_093_if-you-want-it-done-right", "onr_v1_103_organ-donor", "onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_206_marine-arcology", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"],
+    "implementedAt": "2026-05-13T21:47:00+02:00",
+    "cards": ["onr_v1_093_if-you-want-it-done-right", "onr_v1_100_misc-for-sale", "onr_v1_103_organ-donor", "onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_206_marine-arcology", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"],
     "engineTests": [
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays If You Want It Done Right as a private stack top-five choice",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays misc.for-sale as a private installed-trash economy choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Organ Donor as a private grip-trash economy choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Corporate Retreat until Corp installs or rezzes another card",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver",
@@ -90,7 +91,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "If You Want It Done Right, Organ Donor, Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Off-Site Backups and Planning Consultants now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "If You Want It Done Right, misc.for-sale, Organ Donor, Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Off-Site Backups and Planning Consultants now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

@@ -159,10 +159,9 @@
       "cardCode": "onr_v1_100_misc-for-sale",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "resolverFamily": "v1922_runner_event_installed_trash_gain_credits",
       "coveredSmokes": [
-        "runtime_definition_guard",
-        "no_play_event_promotion_guard"
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays misc.for-sale as a private installed-trash economy choice"
       ]
     },
     {

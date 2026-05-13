@@ -6529,12 +6529,103 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("plays misc.for-sale as a private installed-trash economy choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-misc-for-sale",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_misc_for_sale",
+          name: "O:NR V1.9.22 misc.for-sale",
+          cards: [
+            { id: "onr_v1_100_misc-for-sale", quantity: 1 },
+            { id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 },
+            { id: "onr_v1_122_artemis-2020", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards
+          ]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 100;
+    state.runner.clicks = 10;
+    moveRunnerCardToGrip(state, "onr_v1_119_arasaka-portable-prototype");
+    moveRunnerCardToGrip(state, "onr_v1_122_artemis-2020");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_119_arasaka-portable-prototype");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_122_artemis-2020");
+    const installedTargets = state.runner.rig.hardware.slice(0, 2);
+    expect(installedTargets).toHaveLength(2);
+    moveRunnerCardToGrip(state, "onr_v1_100_misc-for-sale");
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_100_misc-for-sale");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-misc-for-sale-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-misc-for-sale-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeEvent = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_100_misc-for-sale");
+    expect(state.pendingChoice?.source).toContain("v1922.runner_installed_trash_gain_credits");
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_100_misc-for-sale",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_runner_installed_trash_gain_credits"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"grip"|"cardInstances"|"privatePayload"/);
+
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing misc.for-sale choice");
+    const selectedOptionIds = installedTargets.map((cardId) => {
+      const option = pendingChoice.options.find((candidate) => candidate.value === cardId);
+      expect(option).toBeDefined();
+      return option?.id ?? "";
+    });
+    state = applyChoices(state, "runner", selectedOptionIds);
+    expect(state.pendingChoice).toBeUndefined();
+    for (const cardId of installedTargets) {
+      expect(state.runner.heap).toContain(cardId);
+      expect([...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources]).not.toContain(cardId);
+    }
+    expect(state.runner.credits).toBe(creditsBeforeEvent + installedTargets.length);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
+      trashedCount: 2,
+      gainedCredits: 2
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"grip"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("does not expose unresolved V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
     const runnerEventIds = [
       "onr_v1_077_anonymous-tip",
       "onr_v1_080_core-command-jettison-ice",
       "onr_v1_086_forged-activation-orders",
-      "onr_v1_100_misc-for-sale",
       "onr_v1_102_open-ended-mileage-program",
       "onr_v1_109_security-code-worm-chip",
       "onr_v1_113_synchronized-attack-on-hq",

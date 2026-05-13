@@ -255,6 +255,7 @@ const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWA
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
 const V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID = "onr_v1_093_if-you-want-it-done-right";
+const V1922_MISC_FOR_SALE_ID = "onr_v1_100_misc-for-sale";
 const V1922_ORGAN_DONOR_ID = "onr_v1_103_organ-donor";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
@@ -428,6 +429,14 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     resolve: (state, legalAction) => {
       startV1922RunnerGripTrashChoice(state, String(legalAction.payload?.cardId ?? ""));
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1922_runner_grip_trash_gain_credits" };
+    }
+  },
+  [V1922_MISC_FOR_SALE_ID]: {
+    name: "onr_v1922_runner_event_trash_installed_gain_credits",
+    canPlay: (state) => runnerInstalledCardIds(state).length > 0,
+    resolve: (state, legalAction) => {
+      startV1922RunnerInstalledTrashChoice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1922_runner_installed_trash_gain_credits" };
     }
   },
   "onr_v1_087_forgotten-backup-chip": {
@@ -6578,6 +6587,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveV1922RunnerGripTrashChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1922.runner_installed_trash_gain_credits")) {
+    resolveV1922RunnerInstalledTrashChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -6929,6 +6942,52 @@ function resolveV1922RunnerGripTrashChoice(state: GameState, legalAction: LegalA
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
+    trashedCount: selectedIds.length,
+    gainedCredits,
+    runnerCreditsAfter: state.runner.credits
+  };
+}
+
+function startV1922RunnerInstalledTrashChoice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const installed = runnerInstalledCardIds(state);
+  if (installed.length === 0) throw new Error("Keine installierten Runner-Karten.");
+  state.pendingChoice = {
+    choiceId: `v1922_runner_installed_trash_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.runner_installed_trash_gain_credits:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Installierte Karten trashen",
+    kind: "select_cards",
+    options: installed.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: 0,
+    maxSelections: installed.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+}
+
+function resolveV1922RunnerInstalledTrashChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine V1.9.22-Installed-Trash-Choice offen.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const installed = runnerInstalledCardIds(state);
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length || selectedIds.some((cardId) => !installed.includes(cardId))) throw new Error("Die Installed-Auswahl enthaelt ungueltige Karten.");
+  for (const cardId of selectedIds) {
+    removeFromAllZones(state, cardId);
+    state.runner.heap.push(cardId);
+    state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "runner", zone: "heap" } };
+  }
+  const gainedCredits = selectedIds.length;
+  if (gainedCredits > 0) credits(state, "runner", gainedCredits);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
     trashedCount: selectedIds.length,
     gainedCredits,
     runnerCreditsAfter: state.runner.credits
