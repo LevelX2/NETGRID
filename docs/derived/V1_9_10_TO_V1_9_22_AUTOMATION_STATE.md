@@ -69,7 +69,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-13 18:14 CEST
+- Zeitpunkt: 2026-05-13 18:00 CEST
 - Ergebnis: V1.9.22 Runner-Programm-No-LegalAction-Guard, Runner-Event-Readiness und Corp-Longtail-Readiness dokumentiert; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
 - Phase vorher: implementing
@@ -720,3 +720,4 @@ Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 
 Status: gelöscht / nicht aktiv
 Aufgabe: kein separater Watchdog aktiv; Kontrolle erfolgt aktuell durch explizite Nutzerstarts und den Completion-Controller selbst.
+

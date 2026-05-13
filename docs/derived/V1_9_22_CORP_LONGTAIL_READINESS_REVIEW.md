@@ -1,6 +1,6 @@
 # V1.9.22 Corp Longtail Readiness Review
 
-Stand: 2026-05-13 18:14 CEST
+Stand: 2026-05-13 18:00 CEST
 Status: WIP-Readiness, keine Runtime- oder Release-Promotion
 
 ## Befund
@@ -57,3 +57,4 @@ Der Corp-Longtail-Schnitt kann in Code gehen, sobald fuer mindestens eine Corp-Z
 ## Gate-Auswirkung
 
 V1.9.22 bleibt `implementing`. Dieser Review ist kein neuer fachlicher P0-Blocker, sondern eine Schutzmarke gegen erfundene Corp-Agenda-, ICE- oder Operationswirkungen.
+

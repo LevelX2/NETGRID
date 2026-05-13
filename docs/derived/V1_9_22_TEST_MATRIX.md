@@ -28,7 +28,7 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 36 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 278 Tests nach Runner-Programm-No-Playable-/No-LegalAction- und Corp-Longtail-No-Playable-Runtime-Guards.
 
-## Runner-Programm-No-LegalAction-Guard 2026-05-13 18:06 CEST
+## Runner-Programm-No-LegalAction-Guard 2026-05-13 18:00 CEST
 
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 278 Tests.
 - Zusatzabdeckung: 14/14 V1.9.22-Runner-Programmkarten oeffnen ohne lokal bestaetigte Kosten-/MU-/Breakerwerte keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions.
@@ -41,3 +41,4 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+
