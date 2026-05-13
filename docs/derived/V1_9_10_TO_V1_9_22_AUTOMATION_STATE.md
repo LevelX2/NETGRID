@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 18:06 CEST
+- Ergebnis: V1.9.22 Runner-Programm-No-LegalAction-Guard und Runner-Event-Readiness dokumentiert; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Alle 14 Runner-Programm-Zielkarten bleiben ohne lokal bestaetigte Kosten-/MU-/Breakerwerte nicht `playable_mvp` und oeffnen keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions. `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` dokumentiert, dass die vorhandenen lokalen Kernnotizen fuer die zehn Runner-Events noch keinen vollstaendigen `play_event`-Resolververtrag liefern; der bestehende No-`play_event`-Guard bleibt deshalb korrekt. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (36), `engine` pass (278), `ai` pass (85), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: program event readiness guards`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 17:40 CEST
 - Ergebnis: V1.9.22 Runner-Hardware-LegalAction-Abdeckung verbreitert; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

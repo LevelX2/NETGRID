@@ -15,6 +15,8 @@ Status: planning/catalog WIP
 - Zehn Runner-Event-Zielkarten haben Runtime-Definitionen mit finalen display-only Texten und einen expliziten No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen: Anonymous Tip, Core Command: Jettison Ice, Forged Activation Orders, If You Want It Done Right..., misc.for-sale, Open-Ended Mileage Program, Organ Donor, Security Code WORM Chip, Synchronized Attack on HQ und Valu-Pak Software Bundle.
 - `docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md` dokumentiert, dass die 14 Runner-Programm-Zielkarten ohne lokal bestätigte Kosten-/MU-/Breakerwerte nicht als `install_card`, `pump_breaker` oder `break_subroutine` promotet werden duerfen.
 - Ein Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass sie bis zur lokalen Wertbestaetigung nicht `playable_mvp` sind.
+- Ein weiterer Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions geoeffnet werden, solange lokale Kosten-/MU-/Breakerwerte fehlen.
+- `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` dokumentiert fuer die zehn Runner-Event-Zielkarten, dass die vorhandenen lokalen Kernnotizen noch keinen vollstaendigen `play_event`-Resolververtrag liefern; der bestehende No-`play_event`-Guard bleibt deshalb korrekt.
 - Ein Engine-Guard bestaetigt fuer 14/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind.
 - Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
 
@@ -25,12 +27,12 @@ Status: planning/catalog WIP
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fuer den Event-Cluster, eine lokal bestaetigte Runner-Programmkarte mit Kosten-/MU-/Breakerwerten oder ein nicht-promotender Runner-Programm-No-LegalAction-Guard.
+Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fuer eine Eventkarte mit vollstaendig lokal bestaetigtem Vertrag, eine lokal bestaetigte Runner-Programmkarte mit Kosten-/MU-/Breakerwerten oder ein eng begrenzter Corp-Longtail-Resolver.
 
 ## Verifikation
 
 - JSON-Validation fuer `data/**/*.json`: pass, 302 Dateien.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 277 Tests inkl. 9/9 Runner-Hardware-Install-Smokes, Runner-Event-No-Promotion-Guard, Runner-Programm-No-Playable-Runtime-Guard und Corp-Longtail-No-Playable-Runtime-Guard.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 278 Tests inkl. 9/9 Runner-Hardware-Install-Smokes, Runner-Event-No-Promotion-Guard, Runner-Programm-No-Playable-Runtime-Guard, Runner-Programm-No-Install-/Pump-/Break-LegalAction-Guard und Corp-Longtail-No-Playable-Runtime-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 36 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 85 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.

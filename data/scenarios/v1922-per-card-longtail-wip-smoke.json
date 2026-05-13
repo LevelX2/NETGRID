@@ -60,13 +60,13 @@
     "Nine V1.9.22 runner hardware target cards have runtime definitions with final display-only text and no release or AI promotion.",
     "All nine V1.9.22 runner hardware target cards have install LegalAction smokes with wrong-side/stale revalidation, Visibility and Replay/StateHash coverage.",
     "Ten V1.9.22 runner event target cards have runtime definitions and an explicit no-play_event-promotion guard until concrete event resolvers exist.",
-    "Fourteen V1.9.22 runner program target cards have an explicit no-playable-runtime guard until local cost/MU/breaker values are confirmed.",
+    "Fourteen V1.9.22 runner program target cards have explicit no-playable-runtime and no install/pump/break LegalAction guards until local cost/MU/breaker values are confirmed.",
     "Fourteen V1.9.22 Corp agenda, ICE and operation target cards have an explicit no-playable-runtime guard until concrete resolvers exist."
   ],
   "verification": {
     "json": "pass: 302 files",
     "catalog": "pass: 36 tests",
-    "engine": "pass: 277 tests including all nine runner hardware install smokes, runner-event no-promotion guard, runner-program no-playable-runtime guard and Corp-longtail no-playable-runtime guard",
+    "engine": "pass: 278 tests including all nine runner hardware install smokes, runner-event no-promotion guard, runner-program no-playable-runtime/no install-pump-break LegalAction guard and Corp-longtail no-playable-runtime guard",
     "ai": "pass: 85 tests",
     "server": "pass: 72 tests",
     "web": "pass: 77 tests",
@@ -81,6 +81,6 @@
     "aiPromoted": false,
     "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
     "originalsetCompletionGateReady": false,
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_program_and_corp_no_promotion_guards"
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_program_legalaction_and_corp_no_promotion_guards"
   }
 }

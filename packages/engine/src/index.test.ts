@@ -6407,6 +6407,64 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
   });
 
+  it("does not expose V1.9.22 runner program install, pump or break LegalActions before local values are confirmed", () => {
+    const runnerProgramIds = [
+      "onr_v1_026_false-echo",
+      "onr_v1_027_flak",
+      "onr_v1_031_hammer",
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_044_netspace-inverter",
+      "onr_v1_045_newsgroup-filter",
+      "onr_v1_048_poltergeist",
+      "onr_v1_051_rabbit",
+      "onr_v1_055_reflector",
+      "onr_v1_057_scatter-shot",
+      "onr_v1_061_shield",
+      "onr_v1_067_speed-trap",
+      "onr_v1_068_startup-immolator",
+      "onr_v1_075_zetatech-software-installer"
+    ] as const;
+
+    for (const definitionId of runnerProgramIds) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      if (!definition) {
+        expect(definition, definitionId).toBeUndefined();
+        continue;
+      }
+
+      const state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `v1922-${definitionId}-program-no-actions`,
+          runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          agendaPointsToWin: 7
+        })
+      );
+      state.runner.credits = 20;
+      state.runner.memoryLimit = 20;
+      const cardId = `v1922_${definitionId}_program_no_actions` as CardInstanceId;
+      state.runner.grip.unshift(cardId);
+      state.cardInstances[cardId] = {
+        instanceId: cardId,
+        definitionId,
+        owner: "runner",
+        controller: "runner",
+        zone: { side: "runner", zone: "grip" },
+        faceup: true,
+        rezzed: true,
+        advancementCounters: 0,
+        strengthModifier: 0
+      };
+
+      const exposedActionTypes = getLegalActions(state, "runner")
+        .filter((action) => sourceDefinition(state, action) === definitionId)
+        .map((action) => action.type);
+      expect(exposedActionTypes, definitionId).not.toContain("install_card");
+      expect(exposedActionTypes, definitionId).not.toContain("pump_breaker");
+      expect(exposedActionTypes, definitionId).not.toContain("break_subroutine");
+    }
+  });
+
   it("keeps V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
       "onr_v1_195_corporate-retreat",

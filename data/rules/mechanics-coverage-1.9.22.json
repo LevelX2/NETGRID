@@ -10,7 +10,7 @@
     "perCardLongtailScopeFrozenToFortySevenCards": true,
     "catalogWipGuardReady": true,
     "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_program_and_corp_no_promotion_guards",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_program_legalaction_and_corp_no_promotion_guards",
     "hiddenInfoSafeForCoveredSmokes": true,
     "stateHashReplayStableForCoveredSmokes": true,
     "catalogPromotionPending": true,
@@ -23,7 +23,7 @@
       "label": "Per-card Resolver Longtail",
       "currentStatus": "partial_runtime_wip",
       "targetGate": "v1.9.22",
-      "currentScopeNote": "47 Karten sind im Catalog-WIP-Guard eingefroren; neun Runner-Hardware- und zehn Runner-Event-Zielkarten haben Runtime-Definitionen. Alle neun Runner-Hardware-Zielkarten haben Install-LegalAction-Pfade mit Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash. Die zehn Runner-Event-Zielkarten haben einen No-Promotion-Guard gegen play_event-LegalActions, bis konkrete Event-Resolver vorliegen. Die 14 Runner-Programm- und 14 Corp-Longtail-Zielkarten haben No-Playable-Runtime-Guards, bis lokale Werte bzw. konkrete Resolver bestaetigt sind.",
+      "currentScopeNote": "47 Karten sind im Catalog-WIP-Guard eingefroren; neun Runner-Hardware- und zehn Runner-Event-Zielkarten haben Runtime-Definitionen. Alle neun Runner-Hardware-Zielkarten haben Install-LegalAction-Pfade mit Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash. Die zehn Runner-Event-Zielkarten haben einen No-Promotion-Guard gegen play_event-LegalActions, bis konkrete Event-Resolver vorliegen. Die 14 Runner-Programmkarten haben zusaetzlich einen expliziten No-LegalAction-Guard gegen install_card, pump_breaker und break_subroutine, bis lokale Kosten-/MU-/Breakerwerte bestaetigt sind. Die 14 Corp-Longtail-Zielkarten haben No-Playable-Runtime-Guards, bis konkrete Resolver bestaetigt sind.",
       "coverage": [
         "scope_guard",
         "runner_hardware_runtime_definitions",
@@ -34,6 +34,7 @@
         "runner_event_runtime_definitions",
         "runner_event_no_play_event_promotion_guard",
         "runner_program_no_playable_runtime_guard",
+        "runner_program_no_install_pump_break_legalaction_guard",
         "corp_longtail_no_playable_runtime_guard"
       ]
     }
