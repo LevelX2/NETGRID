@@ -3392,6 +3392,10 @@ select {
   z-index: 80;
 }
 
+.cardSlot:has(.cardTooltip.visible) {
+  z-index: 1000;
+}
+
 .cardPositionBadge {
   position: absolute;
   left: -5px;
@@ -3953,7 +3957,7 @@ select {
   position: fixed;
   left: 16px;
   top: 16px;
-  z-index: 50;
+  z-index: 1001;
   width: min(300px, calc(100vw - 32px));
   display: grid;
   gap: 5px;
