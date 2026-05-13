@@ -6776,12 +6776,418 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("plays Forged Activation Orders as a public ICE target and Corp rez-or-trash choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-forged-activation-orders",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_forged_activation_orders",
+          name: "O:NR V1.9.22 Forged Activation Orders",
+          cards: [{ id: "onr_v1_086_forged-activation-orders", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_forged_activation_orders",
+          name: "O:NR V1.9.22 Forged Activation Orders Corp",
+          cards: [{ id: "simple_barrier_ice", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 2;
+    state.runner.clicks = 4;
+    state.corp.credits = 5;
+    const targetIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    moveRunnerCardToGrip(state, "onr_v1_086_forged-activation-orders");
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_086_forged-activation-orders");
+    expect(legal.costs[0]?.credits).toBe(1);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-forged-activation-orders-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-forged-activation-orders-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_086_forged-activation-orders");
+    expect(state.runner.credits).toBe(1);
+    expect(state.pendingChoice?.source).toContain("v1922.forged_activation_orders_target");
+    expect(state.pendingChoice?.visibility).toBe("public");
+    expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toContain("simple_barrier_ice");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_086_forged-activation-orders",
+      v1922RunnerEventAbility: "force_rez_or_trash_ice"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"|"rd"|"simple_barrier_ice"/);
+
+    const targetChoice = state.pendingChoice;
+    expect(targetChoice).toBeDefined();
+    if (!targetChoice) throw new Error("Missing Forged Activation Orders target choice");
+    const targetOption = targetChoice.options.find((option) => option.value === targetIceId);
+    expect(targetOption).toBeDefined();
+    state = applyChoice(state, "runner", targetOption?.id ?? "");
+    expect(state.pendingChoice?.source).toContain("v1922.forged_activation_orders_corp");
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(state.pendingChoice?.visibility).toBe("public");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_cards",
+      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      targetVisibility: "installed_ice_position",
+      targetServerLabel: "R&D"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"|"simple_barrier_ice"/);
+
+    const corpCreditsBefore = state.corp.credits;
+    state = applyChoice(state, "corp", "rez_ice");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.cardInstances[targetIceId]?.rezzed).toBe(true);
+    expect(state.cardInstances[targetIceId]?.faceup).toBe(true);
+    expect(state.corp.credits).toBeLessThan(corpCreditsBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_option",
+      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      corpDecision: "rez_ice",
+      targetCardDefinitionId: "simple_barrier_ice",
+      targetServerLabel: "R&D"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let trashState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-forged-activation-orders-trash",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_forged_activation_orders_trash",
+          name: "O:NR V1.9.22 Forged Activation Orders Trash",
+          cards: [{ id: "onr_v1_086_forged-activation-orders", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_forged_activation_orders_trash",
+          name: "O:NR V1.9.22 Forged Activation Orders Trash Corp",
+          cards: [{ id: "simple_barrier_ice", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    trashState.runner.credits = 2;
+    trashState.corp.credits = 0;
+    const trashTargetId = putCorpIceOnServer(trashState, "hq", "simple_barrier_ice");
+    moveRunnerCardToGrip(trashState, "onr_v1_086_forged-activation-orders");
+    trashState = apply(trashState, "runner", (action) => action.type === "play_event" && sourceDefinition(trashState, action) === "onr_v1_086_forged-activation-orders");
+    const trashTargetChoice = trashState.pendingChoice;
+    if (!trashTargetChoice) throw new Error("Missing Forged Activation Orders trash target choice");
+    const trashTargetOption = trashTargetChoice.options.find((option) => option.value === trashTargetId);
+    trashState = applyChoice(trashState, "runner", trashTargetOption?.id ?? "");
+    expect(trashState.pendingChoice?.options.map((option) => option.id)).toEqual(["trash_ice"]);
+    trashState = applyChoice(trashState, "corp", "trash_ice");
+    expect(trashState.corp.archives).toContain(trashTargetId);
+    expect(trashState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_option",
+      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      corpDecision: "trash_ice",
+      trashedCount: 1,
+      targetCardDefinitionId: "simple_barrier_ice"
+    });
+  });
+
+  it("plays Core Command Jettison Ice after a successful HQ run to pay rez cost and trash rezzed ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-core-command-jettison-ice",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_core_command_jettison_ice",
+          name: "O:NR V1.9.22 Core Command Jettison Ice",
+          cards: [{ id: "onr_v1_080_core-command-jettison-ice", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_core_command_jettison_ice",
+          name: "O:NR V1.9.22 Core Command Jettison Ice Corp",
+          cards: [{ id: "simple_barrier_ice", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    const hqCard = moveCorpCardToHq(state, "simple_economy_operation");
+    keepOnlyCorpHqCard(state, hqCard);
+    const targetIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.cardInstances[targetIceId] = { ...state.cardInstances[targetIceId]!, faceup: true, rezzed: true };
+    const eventCardId = moveRunnerCardToGrip(state, "onr_v1_080_core-command-jettison-ice");
+
+    expect(getLegalActions(state, "runner").some((action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_080_core-command-jettison-ice")).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
+    expect(state.runner.grip).toContain(eventCardId);
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_080_core-command-jettison-ice");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-core-command-jettison-ice-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-core-command-jettison-ice-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBefore = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_080_core-command-jettison-ice");
+    expect(state.pendingChoice?.source).toContain("v1922.core_command_jettison_ice");
+    expect(state.pendingChoice?.visibility).toBe("public");
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing Core Command choice");
+    const targetOption = pendingChoice.options.find((option) => option.value === targetIceId);
+    expect(targetOption).toBeDefined();
+    state = applyChoice(state, "runner", targetOption?.id ?? "");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.corp.archives).toContain(targetIceId);
+    expect(state.runner.credits).toBeLessThan(creditsBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_cards",
+      v1922RunnerEventAbility: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+      trashedCount: 1,
+      targetCardDefinitionId: "simple_barrier_ice",
+      targetServerLabel: "R&D"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("plays Security Code WORM Chip after a successful HQ run to trash unrezzed ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-security-code-worm-chip",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_security_code_worm_chip",
+          name: "O:NR V1.9.22 Security Code WORM Chip",
+          cards: [{ id: "onr_v1_109_security-code-worm-chip", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_security_code_worm_chip",
+          name: "O:NR V1.9.22 Security Code WORM Chip Corp",
+          cards: [{ id: "simple_barrier_ice", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 2;
+    state.runner.clicks = 4;
+    const hqCard = moveCorpCardToHq(state, "simple_economy_operation");
+    keepOnlyCorpHqCard(state, hqCard);
+    const targetIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const eventCardId = moveRunnerCardToGrip(state, "onr_v1_109_security-code-worm-chip");
+
+    expect(getLegalActions(state, "runner").some((action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_109_security-code-worm-chip")).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
+    expect(state.runner.grip).toContain(eventCardId);
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_109_security-code-worm-chip");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-security-code-worm-chip-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-security-code-worm-chip-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_109_security-code-worm-chip");
+    expect(state.pendingChoice?.source).toContain("v1922.security_code_worm_chip");
+    expect(state.pendingChoice?.visibility).toBe("public");
+    expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toContain("simple_barrier_ice");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_109_security-code-worm-chip",
+      v1922RunnerEventAbility: "successful_hq_run_trash_unrezzed_ice"
+    });
+
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing Security Code WORM Chip choice");
+    const targetOption = pendingChoice.options.find((option) => option.value === targetIceId);
+    expect(targetOption).toBeDefined();
+    state = applyChoice(state, "runner", targetOption?.id ?? "");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.corp.archives).toContain(targetIceId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_cards",
+      v1922RunnerEventAbility: "successful_hq_run_trash_unrezzed_ice",
+      targetVisibility: "installed_ice_position",
+      targetServerLabel: "R&D",
+      trashedCount: 1,
+      targetCardDefinitionId: "simple_barrier_ice"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("plays Synchronized Attack on HQ after a successful HQ run as a private Corp retain choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-synchronized-attack-on-hq",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_synchronized_attack_on_hq",
+          name: "O:NR V1.9.22 Synchronized Attack on HQ",
+          cards: [{ id: "onr_v1_113_synchronized-attack-on-hq", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 6;
+    state.runner.clicks = 4;
+    state.corp.credits = 4;
+    const hqCards = [
+      moveCorpCardCopyToHq(state, "simple_economy_operation"),
+      moveCorpCardCopyToHq(state, "simple_economy_operation"),
+      moveCorpCardCopyToHq(state, "simple_economy_operation")
+    ];
+    keepOnlyCorpHqCards(state, hqCards);
+    const eventCardId = moveRunnerCardToGrip(state, "onr_v1_113_synchronized-attack-on-hq");
+
+    expect(getLegalActions(state, "runner").some((action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_113_synchronized-attack-on-hq")).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
+    expect(state.runner.grip).toContain(eventCardId);
+
+    const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_113_synchronized-attack-on-hq");
+    expect(legal.costs[0]?.credits).toBe(4);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-synchronized-attack-on-hq-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-synchronized-attack-on-hq-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_113_synchronized-attack-on-hq");
+    expect(state.pendingChoice?.source).toContain("v1922.synchronized_attack_on_hq");
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_113_synchronized-attack-on-hq",
+      v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"cardInstances"|"privatePayload"|"simple_economy_operation"/);
+
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing Synchronized Attack on HQ choice");
+    const retainedIds = hqCards.slice(0, 2);
+    const selectedOptionIds = retainedIds.map((cardId) => {
+      const option = pendingChoice.options.find((candidate) => candidate.value === cardId);
+      expect(option).toBeDefined();
+      return option?.id ?? "";
+    });
+    state = applyChoices(state, "corp", selectedOptionIds);
+    expect(state.pendingChoice).toBeUndefined();
+    for (const cardId of retainedIds) expect(state.corp.hq).toContain(cardId);
+    expect(state.corp.archives).toContain(hqCards[2]);
+    expect(state.corp.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      choiceKind: "select_cards",
+      v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+      retainedCount: 2,
+      discardedCount: 1,
+      paidCredits: 4,
+      corpCreditsAfter: 0
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"cardInstances"|"privatePayload"|"simple_economy_operation"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("does not expose unresolved V1.9.22 runner event LegalActions before a concrete event resolver exists", () => {
     const runnerEventIds = [
-      "onr_v1_080_core-command-jettison-ice",
-      "onr_v1_086_forged-activation-orders",
-      "onr_v1_109_security-code-worm-chip",
-      "onr_v1_113_synchronized-attack-on-hq",
       "onr_v1_117_valu-pak-software-bundle"
     ] as const;
 
@@ -11153,6 +11559,17 @@ function drawRunnerCardsForTest(state: GameState, amount: number): void {
 
 function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceId {
   const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.corp.hq.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
+  return id;
+}
+
+function moveCorpCardCopyToHq(state: GameState, definitionId: string): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(([id, card]) => card.definitionId === definitionId && !state.corp.hq.includes(id));
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing HQ copy ${definitionId}`);
+  const id = entry[0];
   removeEverywhere(state, id);
   state.corp.hq.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };

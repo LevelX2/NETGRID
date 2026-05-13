@@ -9,8 +9,8 @@
     "catalogWipGuardReady": true,
     "wipArtifactAlignmentGuardReady": true,
     "resolverContractInventoryReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_event_and_six_corp_resolver_clusters_25_of_47",
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_if_you_want_it_done_right_marine_arcology_and_existing_corp_resolvers_plus_runner_event_no_promotion_guard_plus_runner_program_no_legalaction_guard",
+    "runtimeDefinitionsReady": "runner_hardware_event_and_six_corp_resolver_clusters_29_of_47",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_corporate_retreat_corporate_war_marine_arcology_political_overthrow_off_site_backups_and_planning_consultants_resolvers_plus_runner_event_no_promotion_guard_plus_runner_program_no_legalaction_guard",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
@@ -129,20 +129,18 @@
       "cardCode": "onr_v1_080_core-command-jettison-ice",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "resolverFamily": "v1922_runner_event_successful_hq_run_pay_rez_cost_trash_rezzed_ice",
       "coveredSmokes": [
-        "runtime_definition_guard",
-        "no_play_event_promotion_guard"
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Core Command Jettison Ice after a successful HQ run to pay rez cost and trash rezzed ICE"
       ]
     },
     {
       "cardCode": "onr_v1_086_forged-activation-orders",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "resolverFamily": "v1922_runner_event_force_rez_or_trash_ice",
       "coveredSmokes": [
-        "runtime_definition_guard",
-        "no_play_event_promotion_guard"
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Forged Activation Orders as a public ICE target and Corp rez-or-trash choice"
       ]
     },
     {
@@ -185,20 +183,18 @@
       "cardCode": "onr_v1_109_security-code-worm-chip",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "resolverFamily": "v1922_runner_event_successful_hq_run_trash_unrezzed_ice",
       "coveredSmokes": [
-        "runtime_definition_guard",
-        "no_play_event_promotion_guard"
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Security Code WORM Chip after a successful HQ run to trash unrezzed ICE"
       ]
     },
     {
       "cardCode": "onr_v1_113_synchronized-attack-on-hq",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "resolverFamily": "v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
       "coveredSmokes": [
-        "runtime_definition_guard",
-        "no_play_event_promotion_guard"
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Synchronized Attack on HQ after a successful HQ run as a private Corp retain choice"
       ]
     },
     {

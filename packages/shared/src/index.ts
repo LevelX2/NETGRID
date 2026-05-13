@@ -656,6 +656,7 @@ export type GameState = {
     stoleBlackOpsAgendaThisTurn?: boolean;
     runAttemptsThisTurn?: number;
     runAttemptsLastTurn?: number;
+    successfulHqRunThisTurn?: boolean;
     damagePreventionUsage?: Record<CardInstanceId, number>;
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
@@ -3337,7 +3338,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "Runner event with ICE-target longtail surface. Resolution remains LegalAction-gated.",
+    rulesText: "Play only after a successful HQ run this turn. Pay a rezzed ICE's rez cost to trash it.",
     mechanics: ["play_event", "ice_target", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3347,9 +3348,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
-    rulesText: "Runner event with Corp-card pressure surface. Resolution remains LegalAction-gated.",
-    mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+    cost: 1,
+    rulesText: "Choose an unrezzed piece of ICE. The Corp either pays its rez cost to rez it or trashes it.",
+    mechanics: ["play_event", "ice_target", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_093_if-you-want-it-done-right",
@@ -3403,7 +3404,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "Runner event with WORM-chip longtail surface. Resolution remains LegalAction-gated.",
+    rulesText: "Play only after a successful HQ run this turn. Choose an unrezzed piece of ICE and trash it.",
     mechanics: ["play_event", "worm", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3413,8 +3414,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
-    rulesText: "Runner event with HQ pressure surface. Resolution remains LegalAction-gated.",
+    cost: 4,
+    rulesText: "Play only after a successful HQ run this turn. The Corp discards all cards in HQ unless they pay 2 credits per kept card.",
     mechanics: ["play_event", "run_flow", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {

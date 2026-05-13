@@ -7,18 +7,18 @@ Status: planned
 | --- | --- | --- |
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
-| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event- und 6 Corp-Longtail-Zielkarten; `Anonymous Tip` hat einen public Black-ICE-Derez-Resolver, `If You Want It Done Right...` einen privaten Stack-Top-5-Resolver, `misc.for-sale` einen privaten Installed-Trash-Resolver, `Open-Ended Mileage Program` einen Tag-Removal-/Return-Resolver, `Organ Donor` einen privaten Grip-Trash-Resolver, die uebrigen Events behalten No-`play_event`-Promotion-Guards |
+| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event- und 6 Corp-Longtail-Zielkarten; `Anonymous Tip` hat einen public Black-ICE-Derez-Resolver, `Core Command: Jettison Ice` einen erfolgreicher-HQ-Run-Gate mit bezahlter gerezzte-ICE-Trash-Choice, `Forged Activation Orders` einen public ICE-Positions-Target-Choice mit anschliessender Korp-Rez-/Trash-Choice, `If You Want It Done Right...` einen privaten Stack-Top-5-Resolver, `misc.for-sale` einen privaten Installed-Trash-Resolver, `Open-Ended Mileage Program` einen Tag-Removal-/Return-Resolver, `Organ Donor` einen privaten Grip-Trash-Resolver, `Security Code WORM Chip` einen erfolgreicher-HQ-Run-Gate mit unrezzte-ICE-Trash-Choice, `Synchronized Attack on HQ` einen erfolgreicher-HQ-Run-Gate mit privater Korp-HQ-Retain-Choice, das uebrige Event behaelt einen No-`play_event`-Promotion-Guard |
 | Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Readiness Review und Engine-Guards halten 14/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
 | Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` haben enge Runtime-Resolver; Engine-Guard haelt die verbleibenden 8/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
-| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions sowie `Anonymous Tip`, `If You Want It Done Right...`, `misc.for-sale`, `Open-Ended Mileage Program`, `Organ Donor`, `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` inkl. Wrong-Side-/Stale-Revalidation gruen |
-| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews sowie Anonymous-Tip-/If-You-Want-It-Done-Right-/misc-for-sale-/Open-Ended-Mileage-Program-/Organ-Donor-/Corporate-Retreat-/Corporate-War-/Marine-Arcology-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-PublicPayloads gruen |
-| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash sowie Anonymous-Tip-/If-You-Want-It-Done-Right-/misc-for-sale-/Open-Ended-Mileage-Program-/Organ-Donor-/Corporate-Retreat-/Corporate-War-/Marine-Arcology-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-Replay/StateHash gruen |
+| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions sowie `Anonymous Tip`, `Core Command: Jettison Ice`, `Forged Activation Orders`, `If You Want It Done Right...`, `misc.for-sale`, `Open-Ended Mileage Program`, `Organ Donor`, `Security Code WORM Chip`, `Synchronized Attack on HQ`, `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` inkl. Wrong-Side-/Stale-Revalidation gruen |
+| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews sowie Anonymous-Tip-/Core-Command-Jettison-Ice-/Forged-Activation-Orders-/If-You-Want-It-Done-Right-/misc-for-sale-/Open-Ended-Mileage-Program-/Organ-Donor-/Security-Code-WORM-Chip-/Synchronized-Attack-on-HQ-/Corporate-Retreat-/Corporate-War-/Marine-Arcology-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-PublicPayloads gruen |
+| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash sowie Anonymous-Tip-/Core-Command-Jettison-Ice-/Forged-Activation-Orders-/If-You-Want-It-Done-Right-/misc-for-sale-/Open-Ended-Mileage-Program-/Organ-Donor-/Security-Code-WORM-Chip-/Synchronized-Attack-on-HQ-/Corporate-Retreat-/Corporate-War-/Marine-Arcology-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-Replay/StateHash gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; finale V1.9.22-AI-Promotion-Artefakte muessen bis zum Completion-Gate fehlen |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
 | Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokale Kartenfaktenbasis fuer 47/47 Karten angelegt; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Runtime-Resolver-WIP: engine 289, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach `Synchronized Attack on HQ`: engine 293, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
 
 ## Mindestchecks im ersten WIP
 
@@ -71,6 +71,29 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - Breiter Verify nach `Anonymous Tip`: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Zusatzschnitt: `Forged Activation Orders` public ICE-Positions-Target-Choice plus Korp-Rez-/Trash-Choice.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen Testassertion auf interne CardInstance-ID im sichtbaren Choice-Objekt; nach PlayerView-Redaktion fuer public Choice-Optionen mit `publicLabel` pass, 290 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- Zusatzschnitt: `Security Code WORM Chip` erfolgreicher-HQ-Run-Flag plus public unrezzte-ICE-Trash-Choice.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen dupliziertem Testdeck-Eintrag und danach wegen schon beendetem HQ-Run ohne `continue_run`; nach Testkorrektur pass, 291 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- Zusatzschnitt: `Core Command: Jettison Ice` erfolgreicher-HQ-Run-Flag plus bezahlte public gerezzte-ICE-Trash-Choice.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 292 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- Breiter Verify nach Runner-Event-Ice-Pressure-WIP: `ai` initial rot wegen zu breiter PlayerView-Redaktion fuer public Choice-Values; nach Begrenzung auf neue `ice_*`-Positionsoptionen pass, 86 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 79 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Zusatzschnitt: `Synchronized Attack on HQ` erfolgreicher-HQ-Run-Flag plus private Korp-HQ-Retain-Choice mit 2-Credit-Kosten pro behaltener HQ-Karte.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen Testhelper-Duplikat fuer gleiche HQ-Kartendefinition und fehlender PublicPayload-Weitergabe fuer `retainedCount`/`discardedCount`, danach pass, 293 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: initial rot wegen unveraenderter `planned_no_promotion`-Zaehllogik, danach pass, 44 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- Breiter Verify nach `Synchronized Attack on HQ`: `ai` pass (86), `server` pass (72), `web` pass (79), `test` pass (Exit 0), `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 
 ## WIP-Artefakt-Alignment-Guard 2026-05-13 18:10 CEST
 

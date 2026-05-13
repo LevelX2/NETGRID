@@ -72,14 +72,18 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-13T22:04:00+02:00",
-    "cards": ["onr_v1_077_anonymous-tip", "onr_v1_093_if-you-want-it-done-right", "onr_v1_100_misc-for-sale", "onr_v1_102_open-ended-mileage-program", "onr_v1_103_organ-donor", "onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_206_marine-arcology", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"],
+    "implementedAt": "2026-05-13T23:20:00+02:00",
+    "cards": ["onr_v1_077_anonymous-tip", "onr_v1_080_core-command-jettison-ice", "onr_v1_086_forged-activation-orders", "onr_v1_093_if-you-want-it-done-right", "onr_v1_100_misc-for-sale", "onr_v1_102_open-ended-mileage-program", "onr_v1_103_organ-donor", "onr_v1_109_security-code-worm-chip", "onr_v1_113_synchronized-attack-on-hq", "onr_v1_195_corporate-retreat", "onr_v1_196_corporate-war", "onr_v1_206_marine-arcology", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"],
     "engineTests": [
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Anonymous Tip as a public black-ice derez choice",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Core Command Jettison Ice after a successful HQ run to pay rez cost and trash rezzed ICE",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Forged Activation Orders as a public ICE target and Corp rez-or-trash choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays If You Want It Done Right as a private stack top-five choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays misc.for-sale as a private installed-trash economy choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Open-Ended Mileage Program as tag removal with optional return",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Organ Donor as a private grip-trash economy choice",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Security Code WORM Chip after a successful HQ run to trash unrezzed ICE",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Synchronized Attack on HQ after a successful HQ run as a private Corp retain choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Corporate Retreat until Corp installs or rezzes another card",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 1",
@@ -93,7 +97,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Anonymous Tip, If You Want It Done Right, misc.for-sale, Open-Ended Mileage Program, Organ Donor, Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Off-Site Backups and Planning Consultants now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Anonymous Tip, Core Command: Jettison Ice, Forged Activation Orders, If You Want It Done Right, misc.for-sale, Open-Ended Mileage Program, Organ Donor, Security Code WORM Chip, Synchronized Attack on HQ, Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Off-Site Backups and Planning Consultants now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

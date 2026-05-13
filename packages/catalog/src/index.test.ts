@@ -1863,9 +1863,13 @@ describe("catalog import and status logic", () => {
     const runnerEventResolverCards = manifestCards.filter((card) =>
       [
         "v1922_runner_event_derez_black_ice",
+        "v1922_runner_event_successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+        "v1922_runner_event_force_rez_or_trash_ice",
         "v1922_runner_event_grip_trash_gain_credits",
         "v1922_runner_event_installed_trash_gain_credits",
         "v1922_runner_event_remove_tag_optional_return",
+        "v1922_runner_event_successful_hq_run_trash_unrezzed_ice",
+        "v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
         "v1922_runner_event_stack_top5_choose_one_arrange_rest"
       ].includes(card.resolverFamily)
     );
@@ -1905,7 +1909,7 @@ describe("catalog import and status logic", () => {
       );
     }
 
-    expect(eventCards).toHaveLength(5);
+    expect(eventCards).toHaveLength(1);
     for (const card of eventCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
       expect(card.aiSupported, card.cardCode).toBe(false);
@@ -1914,10 +1918,14 @@ describe("catalog import and status logic", () => {
 
     expect(runnerEventResolverCards.map((card) => card.cardCode).sort()).toEqual([
       "onr_v1_077_anonymous-tip",
+      "onr_v1_080_core-command-jettison-ice",
+      "onr_v1_086_forged-activation-orders",
       "onr_v1_093_if-you-want-it-done-right",
       "onr_v1_100_misc-for-sale",
       "onr_v1_102_open-ended-mileage-program",
-      "onr_v1_103_organ-donor"
+      "onr_v1_103_organ-donor",
+      "onr_v1_109_security-code-worm-chip",
+      "onr_v1_113_synchronized-attack-on-hq"
     ]);
     for (const card of runnerEventResolverCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");

@@ -69,6 +69,46 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 23:20 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Synchronized Attack on HQ` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` finalisiert den display-only Text und die Kosten fuer `Synchronized Attack on HQ`. `packages/engine/src/index.ts` nutzt das erfolgreiche-HQ-Run-Turn-Flag und oeffnet eine `play_event`-LegalAction nur nach erfolgreichem HQ-Run und bei HQ-Karten; der Resolver startet eine private Korp-HQ-Retain-Choice, zahlt 2 Credits pro behaltener HQ-Karte und discarded den Rest verdeckt. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen Testhelper-Duplikat fuer gleiche HQ-Kartendefinitionen und fehlender PublicPayload-Weitergabe fuer `retainedCount`/`discardedCount`, danach pass (293); `catalog` initial rot wegen unveraenderter `planned_no_promotion`-Zaehllogik, danach pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass (Exit 0); `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner event ice pressure and hq retain resolvers wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 23:10 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Core Command: Jettison Ice` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` finalisiert den display-only Text fuer `Core Command: Jettison Ice`. `packages/engine/src/index.ts` nutzt das erfolgreiche-HQ-Run-Turn-Flag und oeffnet eine `play_event`-LegalAction nur bei bezahlbarer gerezzter ICE; der Resolver startet einen public Choice, zahlt die Rez-Kosten aus Runner-Credits und trasht die gewaehlte ICE. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (292); `catalog` pass (44); `typecheck` pass. Breiter Verify danach: `ai` initial rot wegen zu breiter PlayerView-Redaktion fuer public Choice-Values, nach Begrenzung auf neue `ice_*`-Positionsoptionen pass (86); `server` pass (72); `web` pass (79); `test`, `lint` und `build` pass, Build nur mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner event ice pressure resolvers wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 23:06 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Security Code WORM Chip` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` finalisiert den display-only Text fuer `Security Code WORM Chip`. `packages/shared/src/index.ts` und `packages/engine/src/index.ts` ergaenzen ein side-sicheres Runner-Turn-Flag fuer erfolgreiche HQ-Runs im selben Zug. `packages/engine/src/index.ts` oeffnet eine `play_event`-LegalAction nur nach erfolgreichem HQ-Run und bei unrezzter installierter ICE; der Resolver startet einen public ICE-Positions-Choice und trasht die gewaehlte ICE. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen dupliziertem Testdeck-Eintrag und danach wegen unnoetigem `continue_run` nach bereits beendetem HQ-Run, danach pass (291); `catalog` pass (44); `typecheck` pass. Breiter Verify ist noch offen.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner event ice pressure resolvers wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 23:00 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Forged Activation Orders` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` setzt die lokale Kostenbasis fuer `Forged Activation Orders` auf 1 Credit und finalisiert den display-only Text. `packages/engine/src/index.ts` oeffnet eine `play_event`-LegalAction nur bei unrezzter installierter ICE, startet einen public ICE-Positions-Target-Choice fuer den Runner und danach eine public Korp-Choice zum Rezzen gegen Rez-Kosten oder Trashen der ICE. Die PlayerView-Redaktion fuer public Choice-Optionen mit `publicLabel` unterdrueckt interne Choice-`value`s, damit CardInstance-IDs keine verdeckte Definition verraten. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen Testassertion auf interne CardInstance-ID im sichtbaren Choice-Objekt, danach pass (290); `catalog` pass (44); `typecheck` pass. Breiter Verify ist noch offen.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: forged activation orders resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 22:04 CEST
 - Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Anonymous Tip` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

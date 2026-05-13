@@ -255,10 +255,14 @@ const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWA
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
 const V1922_ANONYMOUS_TIP_ID = "onr_v1_077_anonymous-tip";
+const V1922_CORE_COMMAND_JETTISON_ICE_ID = "onr_v1_080_core-command-jettison-ice";
+const V1922_FORGED_ACTIVATION_ORDERS_ID = "onr_v1_086_forged-activation-orders";
 const V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID = "onr_v1_093_if-you-want-it-done-right";
 const V1922_MISC_FOR_SALE_ID = "onr_v1_100_misc-for-sale";
 const V1922_OPEN_ENDED_MILEAGE_PROGRAM_ID = "onr_v1_102_open-ended-mileage-program";
 const V1922_ORGAN_DONOR_ID = "onr_v1_103_organ-donor";
+const V1922_SECURITY_CODE_WORM_CHIP_ID = "onr_v1_109_security-code-worm-chip";
+const V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID = "onr_v1_113_synchronized-attack-on-hq";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
@@ -425,6 +429,23 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       legalAction.payload = { ...(legalAction.payload ?? {}), v1922RunnerEventAbility: "derez_black_ice" };
     }
   },
+  [V1922_CORE_COMMAND_JETTISON_ICE_ID]: {
+    name: "onr_v1922_runner_event_successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+    canPlay: (state) => ensureRunnerTurnFlags(state).successfulHqRunThisTurn === true && affordableRezzedInstalledIceIdsForRunner(state).length > 0,
+    resolve: (state, legalAction) => {
+      if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true) throw new Error("Core Command: Jettison Ice benoetigt einen erfolgreichen HQ-Run in diesem Zug.");
+      startV1922CoreCommandJettisonIceChoice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = { ...(legalAction.payload ?? {}), v1922RunnerEventAbility: "successful_hq_run_pay_rez_cost_trash_rezzed_ice" };
+    }
+  },
+  [V1922_FORGED_ACTIVATION_ORDERS_ID]: {
+    name: "onr_v1922_runner_event_force_rez_or_trash_ice",
+    canPlay: (state) => unrezzedInstalledIceIds(state).length > 0,
+    resolve: (state, legalAction) => {
+      startV1922ForgedActivationOrdersTargetChoice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = { ...(legalAction.payload ?? {}), v1922RunnerEventAbility: "force_rez_or_trash_ice" };
+    }
+  },
   [V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID]: {
     name: "onr_v1922_runner_event_stack_top5_choose_one_arrange_rest",
     canPlay: (state) => state.runner.stack.length > 0,
@@ -462,6 +483,29 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         runnerTagsAfter: state.runner.tags
       };
       if (state.runner.credits > 0) startV1922OpenEndedMileageReturnChoice(state, String(legalAction.payload?.cardId ?? ""));
+    }
+  },
+  [V1922_SECURITY_CODE_WORM_CHIP_ID]: {
+    name: "onr_v1922_runner_event_successful_hq_run_trash_unrezzed_ice",
+    canPlay: (state) => ensureRunnerTurnFlags(state).successfulHqRunThisTurn === true && unrezzedInstalledIceIds(state).length > 0,
+    resolve: (state, legalAction) => {
+      if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true) throw new Error("Security Code WORM Chip benoetigt einen erfolgreichen HQ-Run in diesem Zug.");
+      startV1922SecurityCodeWormChipChoice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = { ...(legalAction.payload ?? {}), v1922RunnerEventAbility: "successful_hq_run_trash_unrezzed_ice" };
+    }
+  },
+  [V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID]: {
+    name: "onr_v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
+    canPlay: (state) => ensureRunnerTurnFlags(state).successfulHqRunThisTurn === true && state.corp.hq.length > 0,
+    resolve: (state, legalAction) => {
+      if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true) throw new Error("Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.");
+      startV1922SynchronizedAttackOnHqChoice(state, String(legalAction.payload?.cardId ?? ""));
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain"
+      };
     }
   },
   "onr_v1_087_forgotten-backup-chip": {
@@ -2632,6 +2676,24 @@ function rezzedBlackIceIds(state: GameState): CardInstanceId[] {
   return corpInstalledCardIds(state).filter((cardId) => {
     const instance = mustInstance(state.cardInstances, cardId);
     return instance.zone.zone === "serverIce" && instance.rezzed && cardHasSubtype(definitionFor(state, cardId), "black_ice");
+  });
+}
+
+function rezzedInstalledIceIds(state: GameState): CardInstanceId[] {
+  return corpInstalledCardIds(state).filter((cardId) => {
+    const instance = mustInstance(state.cardInstances, cardId);
+    return instance.zone.zone === "serverIce" && instance.rezzed;
+  });
+}
+
+function affordableRezzedInstalledIceIdsForRunner(state: GameState): CardInstanceId[] {
+  return rezzedInstalledIceIds(state).filter((cardId) => state.runner.credits >= rezCostForCard(state, cardId));
+}
+
+function unrezzedInstalledIceIds(state: GameState): CardInstanceId[] {
+  return corpInstalledCardIds(state).filter((cardId) => {
+    const instance = mustInstance(state.cardInstances, cardId);
+    return instance.zone.zone === "serverIce" && !instance.rezzed;
   });
 }
 
@@ -5317,6 +5379,7 @@ function tokyoChibaUnsuccessfulRunBonus(state: GameState, run: GameState["run"],
 function finishRun(state: GameState, successful: boolean): void {
   const run = state.run;
   if (run && successful) applyV181SuccessfulRunCounterTriggers(state, run);
+  if (run && successful && run.attackedServerId === "hq") ensureRunnerTurnFlags(state).successfulHqRunThisTurn = true;
   const allNighterBonusRunOnFinish = run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? run?.pendingSuccessBonusCredits ?? 0 : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(state, run, successful);
@@ -5366,6 +5429,7 @@ function endTurn(state: GameState, side: Side): void {
     flags.stoleBlackOpsAgendaThisTurn = false;
     flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
     flags.runAttemptsThisTurn = 0;
+    flags.successfulHqRunThisTurn = false;
   } else {
     const corpFlags = ensureCorpTurnFlags(state);
     corpFlags.scoredBlackOpsAgendaLastTurn = corpFlags.scoredBlackOpsAgendaThisTurn;
@@ -5448,6 +5512,7 @@ function startRunnerTurn(state: GameState): void {
   flags.stoleBlackOpsAgendaThisTurn = false;
   flags.runAttemptsThisTurn = 0;
   flags.runAttemptsLastTurn = 0;
+  flags.successfulHqRunThisTurn = false;
   flags.damagePreventionUsage = {};
   flags.startOfTurnFloatingCreditsApplied = false;
   flags.allNighterBonusRunPending = false;
@@ -6527,7 +6592,7 @@ function visibleChoice(choice: ChoiceRequest): NonNullable<PlayerView["pendingCh
       id: option.id,
       label: option.label,
       ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
-      ...(option.value !== undefined ? { value: option.value } : {})
+      ...(option.value !== undefined && !(choice.visibility === "public" && option.publicLabel && typeof option.value === "string" && option.id.startsWith("ice_")) ? { value: option.value } : {})
     })),
     minSelections: choice.minSelections,
     maxSelections: choice.maxSelections,
@@ -6613,6 +6678,26 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
   }
   if (state.pendingChoice.source.startsWith("v1922.anonymous_tip_derez_black_ice")) {
     resolveV1922AnonymousTipChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1922.core_command_jettison_ice")) {
+    resolveV1922CoreCommandJettisonIceChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1922.forged_activation_orders_target")) {
+    resolveV1922ForgedActivationOrdersTargetChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1922.forged_activation_orders_corp")) {
+    resolveV1922ForgedActivationOrdersCorpChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1922.security_code_worm_chip")) {
+    resolveV1922SecurityCodeWormChipChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1922.synchronized_attack_on_hq")) {
+    resolveV1922SynchronizedAttackOnHqChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest")) {
@@ -6950,6 +7035,233 @@ function resolveV1922AnonymousTipChoice(state: GameState, legalAction: LegalActi
     v1922RunnerEventAbility: "derez_black_ice",
     derezzedCount: 1,
     targetCardDefinitionId: targetDefinition.id
+  };
+}
+
+function startV1922CoreCommandJettisonIceChoice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const targets = affordableRezzedInstalledIceIdsForRunner(state);
+  if (targets.length === 0) throw new Error("Keine bezahlbare gerezzte ICE als Ziel fuer Core Command: Jettison Ice.");
+  state.pendingChoice = {
+    choiceId: `v1922_core_command_jettison_ice_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.core_command_jettison_ice:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Gerezzte ICE trashen",
+    kind: "select_cards",
+    options: targets.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+      return { id: `card_${cardId}`, label: `${definition.title} (${serverLabel})`, publicLabel: `${definition.title} (${serverLabel})`, value: cardId };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+}
+
+function resolveV1922CoreCommandJettisonIceChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.core_command_jettison_ice")) throw new Error("Es ist keine V1.9.22-Core-Command-Choice offen.");
+  if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true) throw new Error("Core Command: Jettison Ice benoetigt einen erfolgreichen HQ-Run in diesem Zug.");
+  const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!selectedId || !rezzedInstalledIceIds(state).includes(selectedId)) throw new Error("Das Core-Command-Ziel ist keine gerezzte installierte ICE.");
+  const rezCost = rezCostForCard(state, selectedId);
+  if (state.runner.credits < rezCost) throw new Error("Der Runner kann die Rez-Kosten fuer Core Command nicht zahlen.");
+  const definition = definitionFor(state, selectedId);
+  const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+  spendCredits(state, "runner", rezCost);
+  trashCorpInstalledCardToArchives(state, selectedId);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+    rezCostPaid: rezCost,
+    runnerCreditsAfter: state.runner.credits,
+    trashedCount: 1,
+    targetCardDefinitionId: definition.id,
+    targetServerLabel: serverLabel
+  };
+}
+
+function startV1922ForgedActivationOrdersTargetChoice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const targets = unrezzedInstalledIceIds(state);
+  if (targets.length === 0) throw new Error("Keine unrezzte ICE als Ziel fuer Forged Activation Orders.");
+  state.pendingChoice = {
+    choiceId: `v1922_forged_activation_orders_target_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.forged_activation_orders_target:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "ICE für Rez-/Trash-Entscheidung wählen",
+    kind: "select_cards",
+    options: targets.map((cardId, index) => {
+      const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+      return { id: `ice_${index + 1}`, label: `ICE in ${serverLabel}`, publicLabel: `ICE in ${serverLabel}`, value: cardId };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+}
+
+function resolveV1922ForgedActivationOrdersTargetChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.forged_activation_orders_target")) throw new Error("Es ist keine V1.9.22-Forged-Activation-Orders-Ziel-Choice offen.");
+  const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!selectedId || !unrezzedInstalledIceIds(state).includes(selectedId)) throw new Error("Das Forged-Activation-Orders-Ziel ist keine unrezzte installierte ICE.");
+  const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+  state.pendingChoice = {
+    choiceId: `v1922_forged_activation_orders_corp_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1922.forged_activation_orders_corp:${selectedId}:${state.stateVersion + 1}`,
+    prompt: "ICE rezzen oder trashen",
+    kind: "select_option",
+    options: [
+      ...(state.corp.credits >= rezCostForCard(state, selectedId) ? [{ id: "rez_ice", label: "ICE rezzen", publicLabel: "ICE gerezzt", value: "rez_ice" }] : []),
+      { id: "trash_ice", label: "ICE trashen", publicLabel: "ICE getrasht", value: "trash_ice" }
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "force_rez_or_trash_ice",
+    targetServerLabel: serverLabel,
+    targetVisibility: "installed_ice_position"
+  };
+}
+
+function resolveV1922ForgedActivationOrdersCorpChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.forged_activation_orders_corp")) throw new Error("Es ist keine V1.9.22-Forged-Activation-Orders-Korp-Choice offen.");
+  const [, targetIceId] = choice.source.split(":");
+  if (!targetIceId || !unrezzedInstalledIceIds(state).includes(targetIceId)) throw new Error("Das Forged-Activation-Orders-Ziel ist nicht mehr unrezzte installierte ICE.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const definition = definitionFor(state, targetIceId);
+  const serverLabel = publicServerLabelForCard(state, targetIceId) ?? "Server";
+  if (selected === "rez_ice") {
+    const rezCost = rezCostForCard(state, targetIceId);
+    spendCredits(state, "corp", rezCost);
+    state.cardInstances[targetIceId] = { ...mustInstance(state.cardInstances, targetIceId), rezzed: true, faceup: true };
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      corpDecision: "rez_ice",
+      rezCostPaid: rezCost,
+      targetCardDefinitionId: definition.id,
+      targetServerLabel: serverLabel
+    };
+    return;
+  }
+  if (selected !== "trash_ice") throw new Error("Die Forged-Activation-Orders-Korp-Entscheidung ist ungueltig.");
+  trashCorpInstalledCardToArchives(state, targetIceId);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "force_rez_or_trash_ice",
+    corpDecision: "trash_ice",
+    trashedCount: 1,
+    targetCardDefinitionId: definition.id,
+    targetServerLabel: serverLabel
+  };
+}
+
+function startV1922SecurityCodeWormChipChoice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const targets = unrezzedInstalledIceIds(state);
+  if (targets.length === 0) throw new Error("Keine unrezzte ICE als Ziel fuer Security Code WORM Chip.");
+  state.pendingChoice = {
+    choiceId: `v1922_security_code_worm_chip_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.security_code_worm_chip:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Unrezzte ICE trashen",
+    kind: "select_cards",
+    options: targets.map((cardId, index) => {
+      const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+      return { id: `ice_${index + 1}`, label: `ICE in ${serverLabel}`, publicLabel: `ICE in ${serverLabel}`, value: cardId };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+}
+
+function resolveV1922SecurityCodeWormChipChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.security_code_worm_chip")) throw new Error("Es ist keine V1.9.22-Security-Code-WORM-Chip-Choice offen.");
+  if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true) throw new Error("Security Code WORM Chip benoetigt einen erfolgreichen HQ-Run in diesem Zug.");
+  const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!selectedId || !unrezzedInstalledIceIds(state).includes(selectedId)) throw new Error("Das Security-Code-WORM-Chip-Ziel ist keine unrezzte installierte ICE.");
+  const definition = definitionFor(state, selectedId);
+  const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+  trashCorpInstalledCardToArchives(state, selectedId);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "successful_hq_run_trash_unrezzed_ice",
+    targetVisibility: "installed_ice_position",
+    targetServerLabel: serverLabel,
+    trashedCount: 1,
+    targetCardDefinitionId: definition.id
+  };
+}
+
+function startV1922SynchronizedAttackOnHqChoice(state: GameState, sourceCardId: string): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (state.corp.hq.length === 0) throw new Error("HQ enthaelt keine Karten fuer Synchronized Attack on HQ.");
+  state.pendingChoice = {
+    choiceId: `v1922_synchronized_attack_on_hq_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1922.synchronized_attack_on_hq:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "HQ-Karten fuer je 2 Credits behalten",
+    kind: "select_cards",
+    options: state.corp.hq.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: 0,
+    maxSelections: Math.min(state.corp.hq.length, Math.floor(state.corp.credits / 2)),
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+}
+
+function resolveV1922SynchronizedAttackOnHqChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.synchronized_attack_on_hq")) throw new Error("Es ist keine V1.9.22-Synchronized-Attack-on-HQ-Choice offen.");
+  if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true) throw new Error("Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.");
+  const retainedIds = selectedChoiceCardIds(choice, playerAction);
+  const retainedSet = new Set(retainedIds);
+  if (retainedSet.size !== retainedIds.length || retainedIds.some((cardId) => !state.corp.hq.includes(cardId))) throw new Error("Eine gewaehlte HQ-Karte ist nicht legal.");
+  const cost = retainedIds.length * 2;
+  if (state.corp.credits < cost) throw new Error("Die Korp kann die behaltenen HQ-Karten nicht bezahlen.");
+  const discardedIds = state.corp.hq.filter((cardId) => !retainedSet.has(cardId));
+  spendCredits(state, "corp", cost);
+  for (const cardId of discardedIds) {
+    removeFromAllZones(state, cardId);
+    state.corp.archives.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "archives" }
+    };
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+    retainedCount: retainedIds.length,
+    discardedCount: discardedIds.length,
+    paidCredits: cost,
+    corpCreditsAfter: state.corp.credits
   };
 }
 
@@ -8196,6 +8508,14 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.runnerCreditsAfter === "number") context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     if (typeof legalAction.payload.derezzedCount === "number") context.derezzedCount = legalAction.payload.derezzedCount;
     if (typeof legalAction.payload.targetCardDefinitionId === "string") context.targetCardDefinitionId = legalAction.payload.targetCardDefinitionId;
+    if (typeof legalAction.payload.targetServerLabel === "string") context.targetServerLabel = legalAction.payload.targetServerLabel;
+    if (typeof legalAction.payload.targetVisibility === "string") context.targetVisibility = legalAction.payload.targetVisibility;
+    if (typeof legalAction.payload.corpDecision === "string") context.corpDecision = legalAction.payload.corpDecision;
+    if (typeof legalAction.payload.rezCostPaid === "number") context.rezCostPaid = legalAction.payload.rezCostPaid;
+    if (typeof legalAction.payload.trashedCount === "number") context.trashedCount = legalAction.payload.trashedCount;
+    if (typeof legalAction.payload.retainedCount === "number") context.retainedCount = legalAction.payload.retainedCount;
+    if (typeof legalAction.payload.discardedCount === "number") context.discardedCount = legalAction.payload.discardedCount;
+    if (typeof legalAction.payload.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
   }
   if (typeof legalAction.payload?.v1921RunnerEventAbility === "string") {
     context.v1921RunnerEventAbility = legalAction.payload.v1921RunnerEventAbility;
@@ -8895,6 +9215,7 @@ function ensureRunnerTurnFlags(state: GameState): NonNullable<GameState["runnerT
   flags.stoleBlackOpsAgendaThisTurn ??= false;
   flags.runAttemptsThisTurn ??= 0;
   flags.runAttemptsLastTurn ??= 0;
+  flags.successfulHqRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.allNighterBonusRunPending ??= false;
