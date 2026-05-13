@@ -7867,6 +7867,87 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("plays Edgerunner, Inc., Temps as a consecutive Corp install-only action bundle", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_edgerunner_temps",
+      name: "O:NR V1.9.22 Edgerunner Temps",
+      cards: [
+        { id: "onr_v1_289_edgerunner-inc-temps", quantity: 1 },
+        { id: "simple_barrier_ice", quantity: 2 },
+        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards
+      ]
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-edgerunner-temps",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    state.corp.clicks = 10;
+    state.corp.maxHandSize = 100;
+    moveCorpCardToHq(state, "onr_v1_289_edgerunner-inc-temps");
+    const iceId = moveCorpCardToHq(state, "simple_barrier_ice");
+
+    const legal = mustAction(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_289_edgerunner-inc-temps");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-edgerunner-temps-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-edgerunner-temps-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_289_edgerunner-inc-temps");
+    expect(state.corp.clicks).toBe(12);
+    expect(state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining).toBe(3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      cardDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+      v1922CorpOperationAbility: "install_action_bundle",
+      gainedActions: 3,
+      edgerunnerTempsInstallActionsRemaining: 3,
+      corpClicksAfter: 12
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
+
+    const bundleActions = getLegalActions(state, "corp");
+    expect(bundleActions.some((action) => action.type === "install_card" && action.source === iceId)).toBe(true);
+    expect(bundleActions.every((action) => action.type === "install_card" || action.type === "end_turn")).toBe(true);
+    expect(bundleActions.some((action) => action.type === "gain_credit" || action.type === "draw_card" || action.type === "play_operation" || action.type === "advance_card")).toBe(false);
+
+    state = apply(state, "corp", (action) => action.type === "install_card" && action.source === iceId && action.payload?.placement === "ice");
+    expect(state.corp.servers.some((server) => server.ice.includes(iceId))).toBe(true);
+    expect(state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      v1922CorpOperationAbility: "install_action_bundle",
+      edgerunnerTempsInstallActionSpent: true,
+      edgerunnerTempsInstallActionsRemaining: 2
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("rezzes Zombie as core-damage ICE with replay-stable public run resolution", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -7928,8 +8009,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_247_haunting-inquisition",
       "onr_v1_274_tutor",
       "onr_v1_276_viral-15",
-      "onr_v1_277_virizz",
-      "onr_v1_289_edgerunner-inc-temps"
+      "onr_v1_277_virizz"
     ] as const;
 
     for (const definitionId of corpLongtailIds) {
@@ -7941,6 +8021,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
       "onr_v1_280_zombie",
+      "onr_v1_289_edgerunner-inc-temps",
       "onr_v1_296_off-site-backups",
       "onr_v1_298_planning-consultants"
     ] as const) {

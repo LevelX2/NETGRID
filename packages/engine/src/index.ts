@@ -268,6 +268,7 @@ const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
 const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
+const V1922_EDGERUNNER_TEMPS_ID = "onr_v1_289_edgerunner-inc-temps";
 const V1922_OFF_SITE_BACKUPS_ID = "onr_v1_296_off-site-backups";
 const V1922_PLANNING_CONSULTANTS_ID = "onr_v1_298_planning-consultants";
 const AARDVARK_ID = "onr_v1_349_aardvark";
@@ -1024,6 +1025,25 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       startV1922CorpRdTopReorderChoice(state, sourceCardId, legalAction);
     }
   },
+  [V1922_EDGERUNNER_TEMPS_ID]: {
+    name: "onr_v1922_corp_operation_install_action_bundle",
+    canPlay: (state) => state.corp.hq.some((cardId) => isCorpInstallableCardType(definitionFor(state, cardId))),
+    resolve: (state, legalAction) => {
+      if (!state.corp.hq.some((cardId) => isCorpInstallableCardType(definitionFor(state, cardId)))) {
+        throw new Error("Edgerunner, Inc., Temps findet keine installierbare Korp-Karte.");
+      }
+      const flags = ensureCorpTurnFlags(state);
+      flags.edgerunnerTempsInstallActionsRemaining = 3;
+      state.corp.clicks += 3;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922CorpOperationAbility: "install_action_bundle",
+        gainedActions: 3,
+        edgerunnerTempsInstallActionsRemaining: flags.edgerunnerTempsInstallActionsRemaining,
+        corpClicksAfter: state.corp.clicks
+      };
+    }
+  },
   "onr_v1_293_netwatch-credit-voucher": {
     name: "onr_corp_operation_tag_runner_gain_1",
     canPlay: (state) => state.runner.tags > 0,
@@ -1656,6 +1676,10 @@ export function validateGameState(state: GameState): ValidationResult {
   if (state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits !== undefined) {
     const credits = state.runnerTurnFlags.valuPakTemporaryProgramInstallCredits;
     if (!Number.isInteger(credits) || credits < 0 || credits > 1) errors.push("runnerTurnFlags.valuPakTemporaryProgramInstallCredits must be an integer from 0 to 1.");
+  }
+  if (state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining !== undefined) {
+    const remaining = state.corpTurnFlags.edgerunnerTempsInstallActionsRemaining;
+    if (!Number.isInteger(remaining) || remaining < 0 || remaining > 3) errors.push("corpTurnFlags.edgerunnerTempsInstallActionsRemaining must be an integer from 0 to 3.");
   }
   if (state.eventModificationWindow) {
     if (!state.imminentEvent) errors.push("EventModificationWindow requires an ImminentEvent.");
@@ -2325,6 +2349,22 @@ function corpMainActions(state: GameState): LegalAction[] {
   }
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
+  if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
+    return actions
+      .filter((candidate) => candidate.type === "install_card" || candidate.type === "end_turn")
+      .map((candidate) =>
+        candidate.type === "install_card"
+          ? {
+              ...candidate,
+              payload: {
+                ...(candidate.payload ?? {}),
+                v1922EdgerunnerTempsInstallAction: true
+              },
+              actionId: makeActionId(candidate.type, candidate.side, { ...(candidate.payload ?? {}), v1922EdgerunnerTempsInstallAction: true }, candidate.source)
+            }
+          : candidate
+      );
+  }
   return actions;
 }
 
@@ -2336,6 +2376,32 @@ function expireV1922CorporateRetreatAbilities(state: GameState): void {
   for (const agendaId of state.corp.scoreArea) {
     if (definitionFor(state, agendaId).id === V1922_CORPORATE_RETREAT_ID) setCardCounter(state, agendaId, "mark", 0);
   }
+}
+
+function isCorpInstallableCardType(definition: CardDefinition): boolean {
+  return definition.side === "corp" && (definition.type === "ice" || definition.type === "agenda" || definition.type === "asset" || definition.type === "upgrade");
+}
+
+function edgerunnerTempsInstallActionsRemaining(state: GameState): number {
+  return Math.max(0, Math.floor(state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining ?? 0));
+}
+
+function clearV1922EdgerunnerTempsFlags(state: GameState): void {
+  ensureCorpTurnFlags(state).edgerunnerTempsInstallActionsRemaining = 0;
+}
+
+function consumeV1922EdgerunnerTempsInstallAction(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "corp" || legalAction.type !== "install_card" || legalAction.payload?.v1922EdgerunnerTempsInstallAction !== true) return;
+  const flags = ensureCorpTurnFlags(state);
+  const remainingBefore = edgerunnerTempsInstallActionsRemaining(state);
+  if (remainingBefore <= 0) throw new Error("Edgerunner, Inc., Temps hat keine Installationsaktionen mehr.");
+  flags.edgerunnerTempsInstallActionsRemaining = Math.max(0, remainingBefore - 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922CorpOperationAbility: "install_action_bundle",
+    edgerunnerTempsInstallActionSpent: true,
+    edgerunnerTempsInstallActionsRemaining: flags.edgerunnerTempsInstallActionsRemaining
+  };
 }
 
 function valuPakProgramInstallActionsRemaining(state: GameState): number {
@@ -4190,6 +4256,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     spendCredits(state, "corp", legalAction.costs[0]?.credits ?? 0);
     server.ice.unshift(cardId);
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "serverIce", serverId: server.id } };
+    consumeV1922EdgerunnerTempsInstallAction(state, legalAction);
     return;
   }
 
@@ -4211,6 +4278,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   if (regionInstall) {
     trashOlderRegionUpgradesInServer(state, server, cardId);
   }
+  consumeV1922EdgerunnerTempsInstallAction(state, legalAction);
 }
 
 function canInstallCorpRootCardInServer(state: GameState, definition: CardDefinition, server: CorpServer): boolean {
@@ -5591,6 +5659,7 @@ function startRunnerTurn(state: GameState): void {
   state.timingPoint = "runner_action.main";
   state.runner.clicks = 4;
   state.corp.clicks = 0;
+  clearV1922EdgerunnerTempsFlags(state);
   const flags = ensureRunnerTurnFlags(state);
   const forgoPending = flags.forgoNextActionPending === true;
   flags.stoleAgendaThisTurn = false;
@@ -8615,6 +8684,21 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.discardedCount === "number") context.discardedCount = legalAction.payload.discardedCount;
     if (typeof legalAction.payload.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
   }
+  if (typeof legalAction.payload?.v1922CorpOperationAbility === "string") {
+    context.v1922CorpOperationAbility = legalAction.payload.v1922CorpOperationAbility;
+    if (typeof legalAction.payload.gainedActions === "number") context.gainedActions = legalAction.payload.gainedActions;
+    if (typeof legalAction.payload.edgerunnerTempsInstallActionsRemaining === "number") {
+      context.edgerunnerTempsInstallActionsRemaining = legalAction.payload.edgerunnerTempsInstallActionsRemaining;
+    }
+    if (typeof legalAction.payload.corpClicksAfter === "number") context.corpClicksAfter = legalAction.payload.corpClicksAfter;
+  }
+  if (legalAction.payload?.v1922EdgerunnerTempsInstallAction === true) {
+    context.v1922CorpOperationAbility = "install_action_bundle";
+    if (legalAction.payload.edgerunnerTempsInstallActionSpent === true) context.edgerunnerTempsInstallActionSpent = true;
+    if (typeof legalAction.payload.edgerunnerTempsInstallActionsRemaining === "number") {
+      context.edgerunnerTempsInstallActionsRemaining = legalAction.payload.edgerunnerTempsInstallActionsRemaining;
+    }
+  }
   if (typeof legalAction.payload?.v1921RunnerEventAbility === "string") {
     context.v1921RunnerEventAbility = legalAction.payload.v1921RunnerEventAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number") context.v1921DieRoll = legalAction.payload.v1921DieRoll;
@@ -9338,6 +9422,7 @@ function ensureCorpTurnFlags(state: GameState): NonNullable<GameState["corpTurnF
   });
   flags.scoredBlackOpsAgendaThisTurn ??= false;
   flags.scoredBlackOpsAgendaLastTurn ??= false;
+  flags.edgerunnerTempsInstallActionsRemaining ??= 0;
   return flags;
 }
 

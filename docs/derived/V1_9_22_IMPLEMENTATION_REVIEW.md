@@ -18,15 +18,16 @@ Status: runtime WIP, no release/catalog/AI promotion
 - `Marine Arcology` hat eine Runtime-Definition und eine aktive scored-agenda LegalAction: `[A]: Gain 1`. Der Smoke deckt Wrong-Side-/Stale-Revalidation, Kostenabzug, side-sichere PublicPayloads und Replay/StateHash ab.
 - `Political Overthrow` hat eine Runtime-Definition und eine aktive scored-agenda LegalAction: `[A]: Gain 3`. Der Smoke deckt Wrong-Side-/Stale-Revalidation, Kostenabzug, side-sichere PublicPayloads und Replay/StateHash ab.
 - `Zombie` hat eine Runtime-ICE-Definition mit zwei Core-Damage-Subroutinen und End-the-run. Der Smoke deckt Rez-LegalAction, Wrong-Side-/Stale-Revalidation, side-sichere Run-Auflösung und Replay/StateHash ab.
+- `Edgerunner, Inc., Temps` hat eine Runtime-Definition und einen korpseitigen Install-only-Aktionsbundle-Resolver. Die Operation gibt drei direkt anschliessende Install-Aktionen, sperrt waehrend der Sequenz alle Nicht-Install-Aktionen ausser Zugende und dokumentiert Restaktionen side-sicher. Der Smoke deckt Wrong-Side-/Stale-Revalidation, Sequenz-Restriktion, PublicPayload und Replay/StateHash ab.
 - `Off-Site Backups` hat eine Runtime-Definition und einen privaten Archives-to-HQ-Choice. Der Smoke deckt Wrong-Side-/Stale-Revalidation, verdeckte Archives-Auswahl, side-sichere PublicPayloads und Replay/StateHash ab; die gerade gespielte Operation ist nicht selbst auswählbar.
 - `Planning Consultants` hat eine Runtime-Definition und einen privaten R&D-Top-5-Reorder-Choice. Der Smoke deckt Wrong-Side-/Stale-Revalidation, Hidden-Zone-Choice, side-sichere PublicPayloads und Replay/StateHash ab.
 - `docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md` dokumentiert, dass die 14 Runner-Programm-Zielkarten ohne lokal bestätigte Kosten-/MU-/Breakerwerte nicht als `install_card`, `pump_breaker` oder `break_subroutine` promotet werden duerfen.
 - Ein Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass sie bis zur lokalen Wertbestaetigung nicht `playable_mvp` sind.
 - Ein weiterer Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions geoeffnet werden, solange lokale Kosten-/MU-/Breakerwerte fehlen.
 - `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` bleibt als historischer Readiness-Stand erhalten; alle zehn Runner-Event-Zielkarten haben inzwischen enge Runtime-Resolver-Smokes, bleiben aber ohne Catalog-/AI-/Release-Promotion.
-- Ein Engine-Guard bestaetigt fuer die verbleibenden 7/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind. `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Zombie`, `Off-Site Backups` und `Planning Consultants` sind die sieben bewusst eng umgesetzten Ausnahmen dieses WIP-Schnitts.
+- Ein Engine-Guard bestaetigt fuer die verbleibenden 6/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind. `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Zombie`, `Edgerunner, Inc., Temps`, `Off-Site Backups` und `Planning Consultants` sind die acht bewusst eng umgesetzten Ausnahmen dieses WIP-Schnitts.
 - `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` bleibt als historischer Readiness-Stand erhalten; die spaeter erstellte lokale Kartenfaktenbasis hebt den fehlenden Vollvertragsbefund fuer `Corporate War` und `Political Overthrow` auf, nicht fuer die restlichen Corp-Longtailkarten.
-- Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Runner-Event-Resolverkarten, sieben Corp-Longtail-Resolverkarten, 21 geplante No-Promotion-Karten und keine Catalog- oder AI-Promotion ausweisen.
+- Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Runner-Event-Resolverkarten, acht Corp-Longtail-Resolverkarten, 20 geplante No-Promotion-Karten und keine Catalog- oder AI-Promotion ausweisen.
 - Ein AI-Paket-Guard bestaetigt, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate ausserhalb von `ai_supported`, `human_playable` und `deck_legal` bleiben.
 - Ein Web-Catalog-API-Guard bestaetigt, dass V1.9.22-WIP-Karten nicht im `ai_supported`-Filter erscheinen und Detailantworten fuer sichtbare WIP-Karten keine `ai_supported`-, `human_playable`- oder `deck_legal`-Promotion anzeigen.
 - Ein Webclient-Version-Guard bestaetigt, dass die sichtbare Client-Version bis zum V1.9.22-Completion-Gate auf `V1.9.21` bleibt.
@@ -49,6 +50,10 @@ Naechster kleiner Schnitt: ein weiterer lokal bestaetigter Corp-Agenda-/Operatio
 
 ## Verifikation
 
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 295 Tests inkl. `Edgerunner, Inc., Temps` Install-only-Aktionsbundle, Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Edgerunner-Manifest-/Coverage-/Szenario-Alignment.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Edgerunner-Resolver.
+- Breiter Verify nach `Edgerunner, Inc., Temps`: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 294 Tests inkl. `Zombie` Core-Damage-ICE-Rez-/Encounter-Pfad.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Zombie-Manifest-/Coverage-/Szenario-Alignment.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Zombie-Resolver.

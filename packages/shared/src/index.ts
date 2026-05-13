@@ -668,6 +668,7 @@ export type GameState = {
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
     scoredBlackOpsAgendaLastTurn: boolean;
+    edgerunnerTempsInstallActionsRemaining?: number;
   };
   ambushHarness?: {
     enabled: boolean;
@@ -3478,6 +3479,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     agendaPoints: 6,
     rulesText: "[A]: Gain 3 credits.",
     mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_289_edgerunner-inc-temps",
+    title: "Edgerunner, Inc., Temps",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 1,
+    rulesText: "Gain up to three consecutive install-only actions.",
+    mechanics: ["play_operation", "install_remote", "action_economy", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_296_off-site-backups",
