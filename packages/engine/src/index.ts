@@ -302,6 +302,15 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       exposeCorpCardInServer(state, String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">, legalAction);
     }
   },
+  "onr_v1_116_total-genetic-retrofit": {
+    name: "onr_v1914_runner_event_clear_visible_tag",
+    canPlay: (state) => state.runner.tags > 0,
+    resolve: (state, legalAction) => {
+      const removedTags = state.runner.tags;
+      state.runner.tags = 0;
+      legalAction.payload = { ...(legalAction.payload ?? {}), removedTags };
+    }
+  },
   "onr_v1_087_forgotten-backup-chip": {
     name: "onr_v1911_runner_event_search_stack_program_to_hand",
     canPlay: (state) => state.runner.stack.some((id) => definitionFor(state, id).type === "program"),
@@ -678,6 +687,29 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     resolve: (state) => {
       requireRunnerTagged(state);
       state.runner.tags += 2;
+    }
+  },
+  "onr_v1_299_power-grid-overload": {
+    name: "onr_corp_operation_tagged_runner_trash_hardware",
+    canPlay: (state) => state.runner.tags > 0 && state.runner.rig.hardware.length > 0,
+    resolve: (state, legalAction) => {
+      requireRunnerTagged(state);
+      const targetHardwareId = state.runner.rig.hardware
+        .slice()
+        .sort((left, right) => {
+          const leftDefinition = definitionFor(state, left);
+          const rightDefinition = definitionFor(state, right);
+          const byInstallCost = (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
+          if (byInstallCost !== 0) return byInstallCost;
+          return left.localeCompare(right);
+        })[0];
+      if (!targetHardwareId) throw new Error("Der Runner hat keine installierte Hardware.");
+      trashRunnerInstalledCardToHeap(state, targetHardwareId);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        trashedHardwareId: targetHardwareId,
+        trashedHardwareDefinitionId: definitionFor(state, targetHardwareId).id
+      };
     }
   },
   "onr_v1_288_day-shift": {
@@ -5845,7 +5877,12 @@ function calculateRunnerLink(state: GameState): number {
   const baseLink = identity.baseLink ?? 0;
   if (!Number.isInteger(baseLink) || baseLink < 0) throw new Error("Runner-Link ist ungueltig.");
   const modifier = identityModifierAmount(state, "runner", "base_link", "static");
-  const link = baseLink + modifier;
+  const installedLink = [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].reduce((sum, cardId) => {
+    const cardLink = definitionFor(state, cardId).baseLink ?? 0;
+    if (!Number.isInteger(cardLink) || cardLink < 0) throw new Error("Runner-Link ist ungueltig.");
+    return sum + cardLink;
+  }, 0);
+  const link = baseLink + modifier + installedLink;
   if (!Number.isInteger(link) || link < 0) throw new Error("Runner-Link ist ungueltig.");
   return link;
 }

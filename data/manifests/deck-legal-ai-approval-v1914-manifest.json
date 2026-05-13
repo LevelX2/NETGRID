@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "deck-legal-ai-approval-manifest-v1",
+  "id": "deck-legal-ai-approval-v1914",
+  "status": "implemented_for_ai_approval",
+  "release": "V1.9.14",
+  "cardCount": 25,
+  "cards": [
+    { "cardId": "onr_v1_053_ramming-piston", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_053_ramming-piston", "scenarioRefs": ["runner_v1914_trace_link_tools"] },
+    { "cardId": "onr_v1_056_replicator", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_056_replicator", "scenarioRefs": ["runner_v1914_trace_link_tools"] },
+    { "cardId": "onr_v1_063_signpost", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_063_signpost", "scenarioRefs": ["runner_v1914_trace_link_tools"] },
+    { "cardId": "onr_v1_116_total-genetic-retrofit", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_116_total-genetic-retrofit", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_120_armadillo-armored-road-home", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_120_armadillo-armored-road-home", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_126_drifter-mobile-environment", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_126_drifter-mobile-environment", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_132_microtech-trode-set", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_132_microtech-trode-set", "scenarioRefs": ["runner_v1914_trace_link_tools"] },
+    { "cardId": "onr_v1_154_broker", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_154_broker", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_157_crash-everett-inventive-fixer", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_157_crash-everett-inventive-fixer", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_162_field-reporter-for-ice-and-data", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_162_field-reporter-for-ice-and-data", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_164_hells-run", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_164_hells-run", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_165_junkyard-bbs", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_165_junkyard-bbs", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_166_karl-de-veres-corporate-stooge", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_166_karl-de-veres-corporate-stooge", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_167_leland-corporate-bodyguard", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_167_leland-corporate-bodyguard", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_178_short-term-contract", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_178_short-term-contract", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_181_the-springboard", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_181_the-springboard", "scenarioRefs": ["runner_v1914_trace_link_tools"] },
+    { "cardId": "onr_v1_183_technician-lover", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_183_technician-lover", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_221_asp", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_221_asp", "scenarioRefs": ["corp_v1914_trace_ice"] },
+    { "cardId": "onr_v1_228_cinderella", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_228_cinderella", "scenarioRefs": ["corp_v1914_trace_ice"] },
+    { "cardId": "onr_v1_240_fang", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_240_fang", "scenarioRefs": ["corp_v1914_trace_ice"] },
+    { "cardId": "onr_v1_241_fang-2-0", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_241_fang-2-0", "scenarioRefs": ["corp_v1914_trace_ice"] },
+    { "cardId": "onr_v1_248_homewrecker", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_248_homewrecker", "scenarioRefs": ["corp_v1914_trace_ice"] },
+    { "cardId": "onr_v1_260_pocket-virtual-reality", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_260_pocket-virtual-reality", "scenarioRefs": ["corp_v1914_trace_ice"] },
+    { "cardId": "onr_v1_264_rex", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_264_rex", "scenarioRefs": ["corp_v1914_trace_ice"] },
+    { "cardId": "onr_v1_299_power-grid-overload", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1914:onr_v1_299_power-grid-overload", "scenarioRefs": ["corp_v1914_tag_punishment"] }
+  ],
+  "completionGate": {
+    "allCardsAiSupported": true,
+    "requiresAiSmokeExecution": false
+  }
+}

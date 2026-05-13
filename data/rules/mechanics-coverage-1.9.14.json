@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.9.14",
+  "artifactType": "mechanics_coverage_matrix",
+  "matrixId": "mechanics-coverage-1.9.14",
+  "generatedFor": "V1.9.14 Trace, Link, Tags und Resource-Tag-Interaktionen data gate",
+  "generatedAt": "2026-05-13",
+  "status": "implemented_data_gate",
+  "extends": "data/rules/mechanics-coverage-1.9.13.json",
+  "gateAssertions": {
+    "traceLinkBidWindowResolverImplemented": true,
+    "resourceTagInteractionResolverImplemented": true,
+    "tagConditionAvoidRemoveResolverImplemented": true,
+    "allTwentyFiveV1914CardsHaveRuntimeDefinitions": true,
+    "aiChoicePathsCovered": true,
+    "noHiddenZoneDataLeak": true,
+    "stateHashReplayStable": true,
+    "noV1915PlusScope": true
+  },
+  "mechanics": [
+    {
+      "mechanicId": "mechanic.trace.link_bidding",
+      "label": "Trace, Link und Bidding",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.14",
+      "currentScopeNote": "V1.9.14 routes target Trace ICE through the existing side-safe Corp and Runner bid windows and includes installed link contribution.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.tags.basic",
+      "label": "Tags und Tag-Bedingungen",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.14",
+      "currentScopeNote": "V1.9.14 covers tag removal, tag-conditioned Operation play and tag-gated Corp resource trash using public Runner tag state.",
+      "coverage": ["unit", "legal_action", "visibility"]
+    },
+    {
+      "mechanicId": "mechanic.resources",
+      "label": "Runner Resources und Resource-Tag-Interaktionen",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.14",
+      "currentScopeNote": "V1.9.14 Runner resources install through normal legal actions and remain trashable only while the Runner is visibly tagged.",
+      "coverage": ["unit", "legal_action", "visibility", "replay"]
+    }
+  ],
+  "deferred": []
+}

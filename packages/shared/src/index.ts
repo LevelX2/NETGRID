@@ -3322,7 +3322,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 3,
     memoryCost: 1,
     strength: 2,
-    rulesText: "V1.9.14 WIP: Installed Trace/Link support program for trace-risk runs.",
+    rulesText: "Installed program for trace-risk runs and trace bid support.",
     mechanics: ["install_program", "memory", "trace", "link", "bid_amount", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3335,7 +3335,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 3,
     memoryCost: 1,
     strength: 1,
-    rulesText: "V1.9.14 WIP: Installed Trace/Link support program with legal bid-window interaction.",
+    rulesText: "Installed program for trace subroutine pressure and legal trace bids.",
     mechanics: ["install_program", "memory", "trace", "link", "bid_amount", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3347,7 +3347,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     memoryCost: 1,
-    rulesText: "V1.9.14 WIP: Installed trace helper with side-safe reveal overlap.",
+    rulesText: "Installed trace helper with side-safe reveal support.",
     mechanics: ["install_program", "memory", "trace", "link", "bid_amount", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3358,7 +3358,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "V1.9.14 WIP: Event-based tag avoidance/prevention helper.",
+    rulesText: "Play only while tagged. Remove all Runner tags.",
     mechanics: ["play_event", "tag_avoid", "event_modification", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3369,7 +3369,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 3,
-    rulesText: "V1.9.14 WIP: Installed tag and meat-damage protection hardware.",
+    rulesText: "Installed hardware for tag-risk and meat-damage protection.",
     mechanics: ["install_hardware", "tag_avoid", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3380,7 +3380,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 3,
-    rulesText: "V1.9.14 WIP: Installed tag-interaction hardware.",
+    rulesText: "Installed hardware for tag interaction and tag removal planning.",
     mechanics: ["install_hardware", "tag_avoid", "remove_tag", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3392,7 +3392,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     baseLink: 1,
-    rulesText: "V1.9.14 WIP: +1 link for Trace bidding; net-damage overlap remains side-safe.",
+    rulesText: "+1 link for trace bidding; damage overlap remains side-safe.",
     mechanics: ["install_hardware", "trace", "link", "bid_amount", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3403,7 +3403,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    rulesText: "V1.9.14 WIP: Installed resource for tag-risk economy decisions.",
+    rulesText: "Installed resource for tag-risk economy decisions.",
     mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3414,7 +3414,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
     installCost: 2,
-    rulesText: "V1.9.14 WIP: Installed resource action with side-safe draw/economy planning.",
+    rulesText: "Installed resource action with side-safe draw and economy planning.",
     mechanics: ["install_resource", "resource_action", "draw_cards", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3425,7 +3425,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    rulesText: "V1.9.14 WIP: Installed information resource with tag-risk interaction.",
+    rulesText: "Installed information resource with tag-risk interaction.",
     mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3436,7 +3436,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 2,
-    rulesText: "V1.9.14 WIP: Installed resource for run-risk and tag-risk planning.",
+    rulesText: "Installed resource for run-risk and tag-risk planning.",
     mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3447,7 +3447,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    rulesText: "V1.9.14 WIP: Installed resource action with tag-risk interaction.",
+    rulesText: "Installed resource action with tag-risk interaction.",
     mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3458,7 +3458,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
     installCost: 2,
-    rulesText: "V1.9.14 WIP: Installed resource for tag-risk and Corp-pressure decisions.",
+    rulesText: "Installed resource for tag-risk and Corp-pressure decisions.",
     mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3469,7 +3469,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
     installCost: 2,
-    rulesText: "V1.9.14 WIP: Installed resource for tag and damage protection overlap.",
+    rulesText: "Installed resource for tag and damage protection overlap.",
     mechanics: ["install_resource", "resource_tag_interaction", "tag_avoid", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3480,7 +3480,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 0,
-    rulesText: "V1.9.14 WIP: Installed resource economy action with tag-risk interaction.",
+    rulesText: "Installed resource economy action with tag-risk interaction.",
     mechanics: ["install_resource", "resource_action", "gain_credit", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3492,7 +3492,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     baseLink: 1,
-    rulesText: "V1.9.14 WIP: Installed resource with Trace/Link and side-safe reveal overlap.",
+    rulesText: "Installed resource with +1 link and side-safe reveal support.",
     mechanics: ["install_resource", "trace", "link", "bid_amount", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3503,7 +3503,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    rulesText: "V1.9.14 WIP: Installed resource action with tag-risk interaction.",
+    rulesText: "Installed resource action with tag-risk interaction.",
     mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   onrIce({
@@ -3512,7 +3512,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 4,
     strength: 4,
-    rulesText: "V1.9.14 WIP: Trace 4. If successful, give the Runner 1 tag.",
+    rulesText: "Trace 4. If successful, give the Runner 1 tag.",
     subroutines: [
       {
         id: "onr_v1_221_asp_trace",
@@ -3529,7 +3529,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 6,
     strength: 5,
-    rulesText: "V1.9.14 WIP: Trace 5. If successful, give the Runner 1 tag. Do 1 meat damage.",
+    rulesText: "Trace 5. If successful, give the Runner 1 tag. Do 1 meat damage.",
     subroutines: [
       {
         id: "onr_v1_228_cinderella_trace",
@@ -3547,7 +3547,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 4,
     strength: 4,
-    rulesText: "V1.9.14 WIP: Trace 3. If successful, give the Runner 1 tag. End the run.",
+    rulesText: "Trace 3. If successful, give the Runner 1 tag. End the run.",
     subroutines: [
       {
         id: "onr_v1_240_fang_trace",
@@ -3565,7 +3565,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 5,
     strength: 5,
-    rulesText: "V1.9.14 WIP: Trace 4. If successful, give the Runner 1 tag.",
+    rulesText: "Trace 4. If successful, give the Runner 1 tag.",
     subroutines: [
       {
         id: "onr_v1_241_fang_2_0_trace",
@@ -3582,7 +3582,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 7,
     strength: 6,
-    rulesText: "V1.9.14 WIP: Trace 5. If successful, give the Runner 1 tag. Do 2 meat damage. End the run.",
+    rulesText: "Trace 5. If successful, give the Runner 1 tag. Do 2 meat damage. End the run.",
     subroutines: [
       {
         id: "onr_v1_248_homewrecker_trace",
@@ -3601,7 +3601,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 5,
     strength: 4,
-    rulesText: "V1.9.14 WIP: Trace 4. If successful, give the Runner 1 tag.",
+    rulesText: "Trace 4. If successful, give the Runner 1 tag.",
     subroutines: [
       {
         id: "onr_v1_260_pocket_virtual_reality_trace",
@@ -3618,7 +3618,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 5,
     strength: 5,
-    rulesText: "V1.9.14 WIP: Trace 5. If successful, give the Runner 1 tag.",
+    rulesText: "Trace 5. If successful, give the Runner 1 tag.",
     subroutines: [
       {
         id: "onr_v1_264_rex_trace",
@@ -3637,7 +3637,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["gray-ops"],
     implementationStatus: "playable_mvp",
     cost: 1,
-    rulesText: "V1.9.14 WIP: Operation with tag-conditioned pressure.",
+    rulesText: "Play only if the Runner is tagged. Trash installed Runner hardware.",
     mechanics: ["play_operation", "tag_condition", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   }
 ];

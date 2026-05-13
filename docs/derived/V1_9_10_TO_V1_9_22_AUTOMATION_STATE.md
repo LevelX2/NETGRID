@@ -15,9 +15,9 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.14
-Phase: implementing
-Naechster erlaubter Release nach Abschluss: V1.9.15
+Aktueller Release: V1.9.15
+Phase: planned
+Naechster erlaubter Release nach Abschluss: V1.9.16
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
@@ -55,8 +55,8 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.11 | Hidden-Zone Search, Reveal, Reorder und Shuffle | done |
 | V1.9.12 | Counter, Virus, Purge und Recurring Pools | done |
 | V1.9.13 | Damage, Prevention, Avoid und Replacement Longtail | done |
-| V1.9.14 | Trace, Link, Tags und Resource-Tag-Interaktionen | current |
-| V1.9.15 | Run Flow, Access, Multiaccess und Ambush on Access | pending |
+| V1.9.14 | Trace, Link, Tags und Resource-Tag-Interaktionen | done |
+| V1.9.15 | Run Flow, Access, Multiaccess und Ambush on Access | current |
 | V1.9.16 | Program Subtypes, Hosting, Stealth, Worm und Installed-card Destroy | pending |
 | V1.9.17 | Generische Asset/Node-Faehigkeiten | pending |
 | V1.9.18 | Generische Upgrade-, Root-, Grid- und Server-Faehigkeiten | pending |
@@ -66,6 +66,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 02:59 CEST
+- Ergebnis: V1.9.14 Trace/Link/Tags/Resource-Tag-Interaktionen final abgeschlossen; Cursor auf V1.9.15 `planned` gesetzt.
+- Release: V1.9.14
+- Phase vorher: implementing
+- Phase nachher: planned fuer V1.9.15
+- Umsetzung: Die 25 V1.9.14-Zielkarten sind mit finalen display-only Texten ohne WIP-Praefix versehen und in Runtime, Katalog, Manifest, Mechanics-Coverage, AI-Hints, AI-Smokes und AI-Approval-Manifest als `human_playable`, `deck_legal` und `ai_supported` freigegeben. Trace-ICE nutzen side-sichere Bid-Fenster, installierte Link-Karten zaehlen in der Trace-Aufloesung, `Total Genetic Retrofit` entfernt Tags, Resource-Trash bleibt tag-gated und `Power Grid Overload` trasht tagbedingt installierte Runner-Hardware. Die Webclient-Version steht auf `V1.9.14`.
+- Tests: JSON-Validation pass fuer 245 `data/**/*.json`; `catalog` pass (29), `engine` pass (221), `ai` pass (84), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: Abschlusscommit und Push werden per Checkpoint dieses Laufs erzeugt.
+- Cursor: V1.9.15 ist der aktuelle Release; naechster Lauf beginnt mit Detailplanung fuer Run Flow, Access, Multiaccess und Ambush on Access.
 
 - Zeitpunkt: 2026-05-13 02:06 CEST
 - Ergebnis: V1.9.14 Trace/Link/Tags/Resource-Tag-Interaktionen release-spezifisch detailgeplant; Cursor bleibt auf V1.9.14 `implementing`.

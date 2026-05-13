@@ -4580,14 +4580,14 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
   });
 });
 
-describe("V1.9.14 Trace/Tag/Resource Longtail WIP", () => {
+describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   it("adds all V1.9.14 WIP runtime definitions without pulling in V1.9.15 cards", () => {
     expect(ONR_V1_9_14_WIP_CARD_IDS).toHaveLength(25);
     for (const definitionId of ONR_V1_9_14_WIP_CARD_IDS) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
-      expect(definition?.rulesText, definitionId).toContain("V1.9.14 WIP");
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_020_dupre"]?.implementationStatus).not.toBe("playable_mvp");
   });
@@ -4632,6 +4632,112 @@ describe("V1.9.14 Trace/Tag/Resource Longtail WIP", () => {
     expect(state.pendingChoice).toBeUndefined();
     expect(state.trace).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ traceSuccessful: true, tagsAdded: 1 });
+  });
+
+  it("runs each V1.9.14 Trace ICE through the side-safe bid window", () => {
+    const traceIce = [
+      ["onr_v1_221_asp", 4],
+      ["onr_v1_228_cinderella", 5],
+      ["onr_v1_240_fang", 3],
+      ["onr_v1_241_fang-2-0", 4],
+      ["onr_v1_248_homewrecker", 5],
+      ["onr_v1_260_pocket-virtual-reality", 4],
+      ["onr_v1_264_rex", 5]
+    ] as const;
+
+    for (const [definitionId, baseTraceStrength] of traceIce) {
+      let state = toRunnerTurn(v1914TraceTagResourceGame(`v1914-trace-${definitionId}`));
+      putCorpIceOnServer(state, "rd", definitionId);
+      state.corp.credits = 9;
+      state.runner.credits = 5;
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === definitionId);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+
+      expect(state.pendingChoice?.side, definitionId).toBe("corp");
+      expect(state.pendingChoice?.kind, definitionId).toBe("bid_amount");
+      expect(getPlayerView(state, "runner").pendingChoice, definitionId).toBeUndefined();
+      expect(state.trace, definitionId).toMatchObject({ status: "corp_bid", baseTraceStrength });
+    }
+  });
+
+  it("installs V1.9.14 Runner cards, counts installed link, and keeps Resource trash legal-action gated", () => {
+    for (const definitionId of ONR_V1_9_14_RUNNER_CARD_IDS) {
+      let state = toRunnerTurn(v1914TraceTagResourceGame(`v1914-install-${definitionId}`));
+      state.runner.credits = 12;
+      state.runner.memoryLimit = 8;
+      state.runner.tags = 1;
+      moveRunnerCardToGrip(state, definitionId);
+
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      const actionType = definition?.type === "event" ? "play_event" : "install_card";
+      state = apply(state, "runner", (action) => action.type === actionType && sourceDefinition(state, action) === definitionId);
+
+      const installed =
+        definition?.type === "event"
+          ? state.runner.heap.some((cardId) => state.cardInstances[cardId]?.definitionId === definitionId)
+          : [...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources].some(
+              (cardId) => state.cardInstances[cardId]?.definitionId === definitionId
+            );
+      expect(installed, definitionId).toBe(true);
+      if (definition?.type === "event") expect(state.runner.tags, definitionId).toBe(0);
+      if (definition?.type === "program") expect(state.runner.memoryUsed, definitionId).toBeGreaterThan(0);
+    }
+
+    let linkState = toRunnerTurn(v1914TraceTagResourceGame("v1914-installed-link"));
+    linkState.runner.credits = 12;
+    linkState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(linkState, "onr_v1_132_microtech-trode-set");
+    linkState = apply(linkState, "runner", (action) => action.type === "install_card" && sourceDefinition(linkState, action) === "onr_v1_132_microtech-trode-set");
+    putCorpIceOnServer(linkState, "rd", "onr_v1_221_asp");
+    linkState.corp.credits = 9;
+    linkState = apply(linkState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    linkState = apply(linkState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(linkState, action) === "onr_v1_221_asp");
+    linkState = apply(linkState, "runner", (action) => action.type === "continue_run");
+    linkState = applyChoice(linkState, "corp", "bid_0");
+    expect(linkState.trace).toMatchObject({ status: "runner_bid", runnerLink: 1 });
+
+    let resourceState = toRunnerTurn(v1914TraceTagResourceGame("v1914-resource-trash"));
+    resourceState.runner.credits = 12;
+    resourceState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(resourceState, "onr_v1_154_broker");
+    resourceState = apply(resourceState, "runner", (action) => action.type === "install_card" && sourceDefinition(resourceState, action) === "onr_v1_154_broker");
+    const brokerId = resourceState.runner.rig.resources.find((cardId) => resourceState.cardInstances[cardId]?.definitionId === "onr_v1_154_broker");
+    expect(brokerId).toBeDefined();
+    resourceState.runner.tags = 1;
+    resourceState = apply(resourceState, "runner", (action) => action.type === "end_turn");
+    resourceState = apply(resourceState, "corp", (action) => action.type === "mandatory_draw");
+    resourceState.corp.credits = 6;
+    resourceState = apply(resourceState, "corp", (action) => action.type === "trash_resource" && action.payload?.resourceId === brokerId);
+    expect(resourceState.runner.rig.resources).not.toContain(brokerId);
+    expect(resourceState.runner.heap).toContain(brokerId);
+  });
+
+  it("gates Power Grid Overload on visible tags and installed Runner hardware", () => {
+    let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-power-grid-overload"));
+    state.runner.credits = 12;
+    state.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(state, "onr_v1_120_armadillo-armored-road-home");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_120_armadillo-armored-road-home");
+    const hardwareId = state.runner.rig.hardware.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_120_armadillo-armored-road-home");
+    expect(hardwareId).toBeDefined();
+    const operationId = moveCorpCardToHq(state, "onr_v1_299_power-grid-overload");
+
+    let untagged = apply(state, "runner", (action) => action.type === "end_turn");
+    untagged = apply(untagged, "corp", (action) => action.type === "mandatory_draw");
+    untagged.corp.credits = 6;
+    expect(getLegalActions(untagged, "corp").some((action) => action.type === "play_operation" && action.payload?.cardId === operationId)).toBe(false);
+
+    let tagged = structuredClone(state);
+    tagged.runner.tags = 1;
+    tagged = apply(tagged, "runner", (action) => action.type === "end_turn");
+    tagged = apply(tagged, "corp", (action) => action.type === "mandatory_draw");
+    tagged.corp.credits = 6;
+    tagged = apply(tagged, "corp", (action) => action.type === "play_operation" && sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload");
+    expect(tagged.runner.rig.hardware).not.toContain(hardwareId);
+    expect(tagged.runner.heap).toContain(hardwareId);
+    expect(tagged.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation" });
   });
 });
 
@@ -6121,6 +6227,8 @@ const ONR_V1_9_14_WIP_CARD_IDS = [
   "onr_v1_299_power-grid-overload"
 ] as const;
 
+const ONR_V1_9_14_RUNNER_CARD_IDS = ONR_V1_9_14_WIP_CARD_IDS.filter((cardId) => DEMO_CARDS_BY_ID[cardId]?.side === "runner");
+
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_v105k_smoke_094",
   name: "O:NR V1.0.5K Runner Smoke",
@@ -6951,6 +7059,53 @@ const ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1914_trace_tag_resource",
+  name: "O:NR V1.9.14 Trace Tag Resource Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_053_ramming-piston", quantity: 1 },
+    { id: "onr_v1_056_replicator", quantity: 1 },
+    { id: "onr_v1_063_signpost", quantity: 1 },
+    { id: "onr_v1_116_total-genetic-retrofit", quantity: 1 },
+    { id: "onr_v1_120_armadillo-armored-road-home", quantity: 1 },
+    { id: "onr_v1_126_drifter-mobile-environment", quantity: 1 },
+    { id: "onr_v1_132_microtech-trode-set", quantity: 1 },
+    { id: "onr_v1_154_broker", quantity: 1 },
+    { id: "onr_v1_157_crash-everett-inventive-fixer", quantity: 1 },
+    { id: "onr_v1_162_field-reporter-for-ice-and-data", quantity: 1 },
+    { id: "onr_v1_164_hells-run", quantity: 1 },
+    { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+    { id: "onr_v1_166_karl-de-veres-corporate-stooge", quantity: 1 },
+    { id: "onr_v1_167_leland-corporate-bodyguard", quantity: 1 },
+    { id: "onr_v1_178_short-term-contract", quantity: 1 },
+    { id: "onr_v1_181_the-springboard", quantity: 1 },
+    { id: "onr_v1_183_technician-lover", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1914_trace_tag_resource",
+  name: "O:NR V1.9.14 Trace Tag Resource Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_221_asp", quantity: 2 },
+    { id: "onr_v1_228_cinderella", quantity: 2 },
+    { id: "onr_v1_240_fang", quantity: 2 },
+    { id: "onr_v1_241_fang-2-0", quantity: 2 },
+    { id: "onr_v1_248_homewrecker", quantity: 2 },
+    { id: "onr_v1_260_pocket-virtual-reality", quantity: 2 },
+    { id: "onr_v1_264_rex", quantity: 2 },
+    { id: "onr_v1_299_power-grid-overload", quantity: 2 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -7343,6 +7498,16 @@ function v1913DamagePreventionGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK,
     corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1914TraceTagResourceGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+    corpDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

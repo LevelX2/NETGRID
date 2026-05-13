@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1914-trace-tag-resource-smoke",
+  "release": "V1.9.14",
+  "status": "implemented_core_release",
+  "coversCards": [
+    "onr_v1_053_ramming-piston",
+    "onr_v1_056_replicator",
+    "onr_v1_063_signpost",
+    "onr_v1_116_total-genetic-retrofit",
+    "onr_v1_120_armadillo-armored-road-home",
+    "onr_v1_126_drifter-mobile-environment",
+    "onr_v1_132_microtech-trode-set",
+    "onr_v1_154_broker",
+    "onr_v1_157_crash-everett-inventive-fixer",
+    "onr_v1_162_field-reporter-for-ice-and-data",
+    "onr_v1_164_hells-run",
+    "onr_v1_165_junkyard-bbs",
+    "onr_v1_166_karl-de-veres-corporate-stooge",
+    "onr_v1_167_leland-corporate-bodyguard",
+    "onr_v1_178_short-term-contract",
+    "onr_v1_181_the-springboard",
+    "onr_v1_183_technician-lover",
+    "onr_v1_221_asp",
+    "onr_v1_228_cinderella",
+    "onr_v1_240_fang",
+    "onr_v1_241_fang-2-0",
+    "onr_v1_248_homewrecker",
+    "onr_v1_260_pocket-virtual-reality",
+    "onr_v1_264_rex",
+    "onr_v1_299_power-grid-overload"
+  ],
+  "assertions": [
+    "Runtime definitions exist for all V1.9.14 target cards.",
+    "Runner programs, hardware, resources and the tag-removal event use legal install or play actions.",
+    "All V1.9.14 Trace ICE open side-safe Corp and Runner bid windows.",
+    "Installed link cards modify Runner link during trace resolution.",
+    "Corp resource trash and Power Grid Overload require visible Runner tags and public installed targets.",
+    "Replay reconstructs trace, tag and resource outcomes with stable StateHash."
+  ],
+  "verification": {
+    "engine": "pass: 221 tests",
+    "catalog": "pass: pending final rerun",
+    "ai": "pass: pending final rerun",
+    "server": "pass: pending final rerun",
+    "web": "pass: pending final rerun",
+    "typecheck": "pass: pending final rerun",
+    "lint": "pass: pending final rerun",
+    "build": "pass: pending final rerun",
+    "fullWorkspace": "pass: pending final rerun"
+  },
+  "completionGate": {
+    "releaseDone": true,
+    "catalogPromoted": true,
+    "aiPromoted": true
+  }
+}

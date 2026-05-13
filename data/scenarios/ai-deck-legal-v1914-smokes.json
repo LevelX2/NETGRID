@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "netgrid.ai-smoke.v1",
+  "scenarioId": "ai-deck-legal-v1914-smokes",
+  "release": "V1.9.14",
+  "status": "implemented_for_deck_legal_ai_approval_v1914",
+  "scenarios": [
+    {
+      "id": "runner_v1914_trace_link_tools",
+      "side": "runner",
+      "coversCards": [
+        "onr_v1_053_ramming-piston",
+        "onr_v1_056_replicator",
+        "onr_v1_063_signpost",
+        "onr_v1_132_microtech-trode-set",
+        "onr_v1_181_the-springboard"
+      ],
+      "assertions": ["Runner AI can install trace/link support cards.", "Runner trace bids use side-safe PlayerView choice data."]
+    },
+    {
+      "id": "runner_v1914_tag_resource_tools",
+      "side": "runner",
+      "coversCards": [
+        "onr_v1_116_total-genetic-retrofit",
+        "onr_v1_120_armadillo-armored-road-home",
+        "onr_v1_126_drifter-mobile-environment",
+        "onr_v1_154_broker",
+        "onr_v1_157_crash-everett-inventive-fixer",
+        "onr_v1_162_field-reporter-for-ice-and-data",
+        "onr_v1_164_hells-run",
+        "onr_v1_165_junkyard-bbs",
+        "onr_v1_166_karl-de-veres-corporate-stooge",
+        "onr_v1_167_leland-corporate-bodyguard",
+        "onr_v1_178_short-term-contract",
+        "onr_v1_183_technician-lover"
+      ],
+      "assertions": ["Runner AI can install Resource and Hardware cards through legal actions.", "Tag clearing and tag risk are evaluated from visible tag state only."]
+    },
+    {
+      "id": "corp_v1914_trace_ice",
+      "side": "corp",
+      "coversCards": [
+        "onr_v1_221_asp",
+        "onr_v1_228_cinderella",
+        "onr_v1_240_fang",
+        "onr_v1_241_fang-2-0",
+        "onr_v1_248_homewrecker",
+        "onr_v1_260_pocket-virtual-reality",
+        "onr_v1_264_rex"
+      ],
+      "assertions": ["Corp AI can rez target Trace ICE.", "Corp trace bids use public trace strength and credits only."]
+    },
+    {
+      "id": "corp_v1914_tag_punishment",
+      "side": "corp",
+      "coversCards": ["onr_v1_299_power-grid-overload"],
+      "assertions": ["Corp AI only sees Power Grid Overload as legal while the Runner is visibly tagged and has installed hardware."]
+    }
+  ],
+  "completionGate": {
+    "aiSupported": true,
+    "requiresExecutableAiTests": false
+  }
+}
