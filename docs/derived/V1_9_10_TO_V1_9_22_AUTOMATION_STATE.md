@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 15:22 CEST
+- Ergebnis: V1.9.20 WIP-Stand nach Replay-/Visibility-/Revalidation-Schnitten breit verifiziert; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Keine weitere Runtime-/AI-/Web-Promotion. `docs/codex/CODEX_STATUS.md` dokumentiert den breiten Verify-Lauf inklusive transientem parallelem Lint-Zwischenfehler und gruenem isoliertem Lint-Rerun.
+- Tests: JSON-Validation pass (285 Dateien); `catalog` pass (34), `engine` pass (265), `ai` pass (85), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, isolierter `lint`-Rerun pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung. Paralleler Zwischenlauf von `lint` scheiterte transient auf `.next/types/validator.ts`/`./routes.js`, direkt nach Build war der isolierte Rerun gruen.
+- Git: WIP-Checkpoint fuer diesen Schnitt vorgesehen (`WIP V1.9.20: broad verify after revalidation`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil weitere Engine-/Visibility-Abdeckung, finale AI-Smokes, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 15:19 CEST
 - Ergebnis: V1.9.20 Action-Economy-applyAction-Revalidation ergänzt: falsche Seite und stale State werden am neuen rezzed Asset-Fenster zurückgewiesen; Cursor bleibt auf V1.9.20 `implementing`.
 - Release: V1.9.20

@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.20-Breitverify vom 2026-05-13 15:22 CEST: Der aktuelle WIP-Stand nach Replay/Visibility/Revalidation wurde breit verifiziert. JSON-Validation 285, `catalog` 34, `engine` 265, `ai` 85, `server` 72, `web` 76, `typecheck`, `test`, isolierter `lint`-Rerun und `build` sind grün. Ein paralleler Zwischenlauf von `lint` fiel transient auf `.next/types/validator.ts`/`./routes.js`, direkt nach erfolgreichem Build war der isolierte Lint-Rerun grün. Build weiterhin nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+
 V1.9.20-Action-Revalidation vom 2026-05-13 15:19 CEST: Der V1.9.20-Action-Economy-Smoke enthält jetzt zusätzlich eine `applyAction`-Negativprüfung für falsche Seite und stale State am neuen rezzed Asset-Fenster. Verifikation: JSON-Validation 285, `engine` 265 und `typecheck` grün; keine Promotion.
 
 V1.9.20-Action-Economy-Breite vom 2026-05-13 15:17 CEST: Der vorhandene V1.9.20-Action-Economy-Smoke übt jetzt alle drei abgedeckten rezzed Asset-Quellen Remote Facility, Nevinyrral und Pacifica Regional AI aus, jeweils mit Revalidierung, Visibility- und Replay-/StateHash-Assertion. Verifikation: `engine` 264 grün; keine Promotion.
