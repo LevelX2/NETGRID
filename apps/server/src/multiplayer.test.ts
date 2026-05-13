@@ -10,6 +10,7 @@ import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
 import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
+import type { ConnectionAuditEvent } from "./connection-audit";
 import { createConfiguredStorage, createNetgridHttpServer } from "./http-server";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
@@ -2925,13 +2926,14 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("sends side-filtered bootstrap messages over WebSocket", async () => {
+    const auditEvents: ConnectionAuditEvent[] = [];
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-test",
       publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:0"
     });
     const created = await service.createMatch({ hostSide: "runner", seed: "ws-bootstrap" });
-    const handle = createNetgridHttpServer(service);
+    const handle = createNetgridHttpServer(service, { connectionAudit: { record: (event) => auditEvents.push(event) } });
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
     if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -2966,6 +2968,19 @@ describe("MVP 0.2 multiplayer service", () => {
       const stored = await service.loadForTest(created.matchId);
       expect(stored?.sessions.find((session) => session.side === created.hostSide)?.connected).toBe(true);
       replacement.close();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(auditEvents).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ event: "ws_open" }),
+          expect.objectContaining({ event: "ws_join_ok", matchId: created.matchId, side: created.hostSide }),
+          expect.objectContaining({ event: "ws_replaced_by_reconnect", matchId: created.matchId, side: created.hostSide, code: 4000 }),
+          expect.objectContaining({ event: "ws_close", matchId: created.matchId, side: created.hostSide, ignoredAsReplaced: true })
+        ])
+      );
+      expect(JSON.stringify(auditEvents)).not.toContain(created.hostSessionToken);
+      expect(JSON.stringify(auditEvents)).not.toContain(created.hostReconnectToken);
+      expect(JSON.stringify(auditEvents)).not.toMatch(/Simple Agenda|cardInstances|privatePayload|decklist/i);
     } finally {
       socket.close();
       await handle.close();
