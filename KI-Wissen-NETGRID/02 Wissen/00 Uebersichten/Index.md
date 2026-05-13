@@ -46,6 +46,8 @@
 
 - V1.9.22 Security-Purge-Preflight: `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentiert den nächsten Agenda-Kandidaten. Code bleibt gesperrt, bis die Optionalität von "any ice", Serverzielwahl und Install-/Rez-Reihenfolge lokal bestätigt sind.
 
+- V1.9.22 verbleibende Corp-Longtailkarten: `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer `Data Fort Reclamation`, `Security Purge`, `Haunting Inquisition`, `Tutor`, `Viral 15` und `Virizz` zusammen.
+
 ## Kernwissen
 
 - [[Projektueberblick]]: verdichtetes Projektbild für neue Threads.

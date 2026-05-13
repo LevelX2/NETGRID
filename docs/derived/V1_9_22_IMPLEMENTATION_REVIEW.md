@@ -46,7 +46,7 @@ Status: runtime WIP, no release/catalog/AI promotion
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: `Security Purge`, sobald der in `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentierte Installationsvertrag fuer revealed ICE lokal bestaetigt ist. Ohne diese Klaerung bleibt die naechste sichere Alternative eine lokal bestaetigte Runner-Programmkarte mit Kosten-/MU-/Breakerwerten oder ein enger Corp-ICE-Resolver mit vollstaendiger Run-weiten Semantik.
+Naechster kleiner Schnitt: `Security Purge`, sobald der in `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentierte Installationsvertrag fuer revealed ICE lokal bestaetigt ist. `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die offenen Implementierungsvertraege fuer die sechs verbleibenden Corp-Longtailkarten zusammen. Ohne diese Klaerung bleibt die naechste sichere Alternative eine lokal bestaetigte Runner-Programmkarte mit Kosten-/MU-/Breakerwerten.
 
 ## Verifikation
 
