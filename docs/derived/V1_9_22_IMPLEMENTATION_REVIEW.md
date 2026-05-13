@@ -27,6 +27,7 @@ Status: planning/catalog WIP
 - Das Resolver-Contract-Inventar fuehrt lokal bestaetigte Teilnotizen aus `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md` fuer Runner-Programme, Runner-Events, Runner-Hardware und Corp-Agendas als `partialLocalNotes`; der Catalog-Test prueft, dass diese Notizen im jeweiligen Cluster und V1.9.22-WIP-Scope bleiben und keine Promotion-Aussagen enthalten.
 - Ein Catalog-Guard bestaetigt, dass finale V1.9.22-AI-Promotion-Artefakte (`ai-card-hints-deck-legal-v1922.json`, `deck-legal-ai-approval-v1922-manifest.json`, `ai-deck-legal-v1922-smokes.json`) bis zum Completion-Gate nicht existieren.
 - `data/reports/v1922-completion-gate-status.json` dokumentiert maschinenlesbar den offenen V1.9.22-Gate-Stand, die gruene Verify-Basis, die lokale Quellensuche ohne vollstaendigen Resolververtrag und die vier blockierenden Gates `resolver_contracts`, `ai_promotion_artifacts`, `webclient_version` und `final_review` mit Removal Conditions.
+- `docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md` dokumentiert eine erneute lokale Quellensuche auf blockierte Runner-Event- und Corp-Longtailkarten. Der Scan bestaetigt, dass weiter nur Teilnotizen, Typoberflaechen und display-only WIP-Runtimes vorliegen; daraus folgt keine Runtime-, Catalog- oder AI-Promotion.
 - Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
 
 ## Gate
@@ -56,3 +57,5 @@ Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fu
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- JSON-Validation fuer `data/**/*.json`: pass, 304 Dateien nach Source-Scan-Report-Aktualisierung.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 40 Tests inkl. Completion-Gate-Statusreport.

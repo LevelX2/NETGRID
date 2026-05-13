@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 19:12 CEST
+- Ergebnis: V1.9.22 Source-Scan-Revalidierung dokumentiert; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md` dokumentiert eine erneute lokale Quellensuche fuer blockierte Runner-Event- und Corp-Longtailkarten. `data/reports/v1922-completion-gate-status.json` verweist als `latestAutomationScan` auf diesen Review. Ergebnis bleibt `no_complete_resolver_contract_found`; keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: JSON-Validation pass (304 Dateien); `catalog` pass (40).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: resolver source scan review`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil ein vollstaendiger lokaler Resolververtrag fuer mindestens einen Zielpfad fehlt.
+
 - Zeitpunkt: 2026-05-13 18:40 CEST
 - Ergebnis: V1.9.22 Completion-Gate-Statusreport angelegt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
