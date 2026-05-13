@@ -22,6 +22,7 @@ Status: planning/catalog WIP
 - Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Eventkarten mit No-`play_event`-Guard und 28 geplante No-Promotion-Karten ausweisen und keine Catalog- oder AI-Promotion behaupten.
 - Ein AI-Paket-Guard bestaetigt, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate ausserhalb von `ai_supported`, `human_playable` und `deck_legal` bleiben.
 - Ein Web-Catalog-API-Guard bestaetigt, dass V1.9.22-WIP-Karten nicht im `ai_supported`-Filter erscheinen und Detailantworten fuer sichtbare WIP-Karten keine `ai_supported`-, `human_playable`- oder `deck_legal`-Promotion anzeigen.
+- Ein Webclient-Version-Guard bestaetigt, dass die sichtbare Client-Version bis zum V1.9.22-Completion-Gate auf `V1.9.21` bleibt.
 - Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
 
 ## Gate
@@ -40,7 +41,7 @@ Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fu
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 37 Tests inkl. V1.9.22-WIP-Artefakt-Alignment-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests inkl. V1.9.22-AI-No-Promotion-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
-- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 78 Tests inkl. V1.9.22-Web-Catalog-No-Promotion-Guard.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 79 Tests inkl. V1.9.22-Web-Catalog-No-Promotion- und Webclient-Version-Guard.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
