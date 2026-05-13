@@ -569,6 +569,46 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         freeTrashAccessZones: "hq"
       };
     }
+  },
+  "onr_v1_098_lucidrine-booster-drug": {
+    name: "onr_v1915_runner_event_run_with_replacement_overlap",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      const serverId = String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">;
+      startRun(state, serverId);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        serverId,
+        eventModificationOverlap: true
+      };
+    }
+  },
+  "onr_v1_105_priority-wreck": {
+    name: "onr_v1915_runner_event_run_multiaccess_2",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      const serverId = String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">;
+      startRun(state, serverId, undefined, 2);
+      legalAction.payload = { ...(legalAction.payload ?? {}), serverId, accessCount: 2 };
+    }
+  },
+  "onr_v1_111_social-engineering": {
+    name: "onr_v1915_runner_event_run_access_pressure",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      const serverId = String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">;
+      startRun(state, serverId);
+      legalAction.payload = { ...(legalAction.payload ?? {}), serverId, socialEngineeringRun: true };
+    }
+  },
+  "onr_v1_112_stumble-through-wilderspace": {
+    name: "onr_v1915_runner_event_trace_aware_run_access",
+    requiresServer: true,
+    resolve: (state, legalAction) => {
+      const serverId = String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">;
+      startRun(state, serverId);
+      legalAction.payload = { ...(legalAction.payload ?? {}), serverId, traceAwareRun: true };
+    }
   }
 };
 
@@ -778,6 +818,19 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     resolve: (state, legalAction) => {
       state.corp.clicks += 2;
       legalAction.payload = { ...(legalAction.payload ?? {}), gainedActions: 2, corpClicksAfter: state.corp.clicks };
+    }
+  },
+  "onr_v1_294_new-blood": {
+    name: "onr_v1915_corp_operation_run_pressure_credit",
+    canPlay: (state) => runnerRunAttemptsLastTurn(state) >= 1,
+    resolve: (state, legalAction) => {
+      if (runnerRunAttemptsLastTurn(state) < 1) throw new Error("Der Runner hat im letzten Zug keinen Run versucht.");
+      state.corp.credits += 3;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        runnerRunAttemptsLastTurn: runnerRunAttemptsLastTurn(state),
+        recurringPressureCredits: 3
+      };
     }
   }
 };

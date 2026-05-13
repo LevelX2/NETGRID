@@ -4752,6 +4752,116 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_003_baedekers-net-map"]?.implementationStatus).not.toBe("playable_mvp");
   });
+
+  it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
+    const eventExpectations = [
+      { definitionId: "onr_v1_098_lucidrine-booster-drug", serverId: "archives", accessCount: 1 },
+      { definitionId: "onr_v1_105_priority-wreck", serverId: "rd", accessCount: 2 },
+      { definitionId: "onr_v1_111_social-engineering", serverId: "hq", accessCount: 1 },
+      { definitionId: "onr_v1_112_stumble-through-wilderspace", serverId: "rd", accessCount: 1 }
+    ] as const;
+
+    for (const expectation of eventExpectations) {
+      let state = toRunnerTurn(v1915RunAccessGame(`v1915-event-${expectation.definitionId}`));
+      state.runner.credits = 8;
+      moveRunnerCardToGrip(state, expectation.definitionId);
+
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(state, action) === expectation.definitionId &&
+          action.payload?.serverId === expectation.serverId
+      );
+
+      expect(state.run?.attackedServerId, expectation.definitionId).toBe(expectation.serverId);
+      expect(state.run?.accessCount, expectation.definitionId).toBe(expectation.accessCount);
+      expect(state.eventLog.at(-1)?.publicPayload, expectation.definitionId).toMatchObject({ actionType: "play_event" });
+    }
+  });
+
+  it("breaches R&D with Priority Wreck multiaccess without leaking future queued cards", () => {
+    let state = toRunnerTurn(v1915RunAccessGame("v1915-priority-wreck-rd-multiaccess"));
+    state.runner.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_105_priority-wreck");
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const initial = structuredClone(state);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_105_priority-wreck" && action.payload?.serverId === "rd"
+    );
+
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(state.run?.breach).toMatchObject({ serverId: "rd", accessMode: "multi", currentIndex: 0 });
+    expect(state.run?.breach?.queue).toHaveLength(2);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Agenda");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Simple Economy Operation");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain("Simple Agenda");
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ cardDefinitionId: "simple_agenda", title: "Simple Agenda" });
+    state = apply(state, "runner", (action) => action.type === "steal_agenda");
+
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(agendaPoints(state, "runner")).toBe(2);
+  });
+
+  it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
+    for (const [definitionId, baseTraceStrength] of [
+      ["onr_v1_227_cerberus", 4],
+      ["onr_v1_255_mastiff", 5]
+    ] as const) {
+      let state = toRunnerTurn(v1915RunAccessGame(`v1915-ice-${definitionId}`));
+      putCorpIceOnServer(state, "rd", definitionId);
+      state.corp.credits = 10;
+      state.runner.credits = 5;
+
+      state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === definitionId);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+
+      expect(state.pendingChoice?.side, definitionId).toBe("corp");
+      expect(state.pendingChoice?.kind, definitionId).toBe("bid_amount");
+      expect(getPlayerView(state, "runner").pendingChoice, definitionId).toBeUndefined();
+      expect(state.trace, definitionId).toMatchObject({ status: "corp_bid", baseTraceStrength });
+    }
+  });
+
+  it("allows New Blood only after a visible Runner run attempt last turn", () => {
+    let noRun = toRunnerTurn(v1915RunAccessGame("v1915-new-blood-no-run"));
+    const noRunOperationId = moveCorpCardToHq(noRun, "onr_v1_294_new-blood");
+    noRun = apply(noRun, "runner", (action) => action.type === "end_turn");
+    noRun = apply(noRun, "corp", (action) => action.type === "mandatory_draw");
+    noRun.corp.credits = 6;
+    expect(getLegalActions(noRun, "corp").some((action) => action.type === "play_operation" && action.payload?.cardId === noRunOperationId)).toBe(false);
+
+    let state = toRunnerTurn(v1915RunAccessGame("v1915-new-blood-after-run"));
+    moveCorpCardToHq(state, "onr_v1_294_new-blood");
+    state.corp.servers.push({ id: "remote_1", kind: "remote", label: "Remote 1", ice: [], root: [] });
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    expect(state.run).toBeUndefined();
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 6;
+
+    const beforeCredits = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_294_new-blood");
+    expect(state.corp.credits).toBe(beforeCredits + 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation" });
+  });
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
@@ -7136,6 +7246,43 @@ const ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK: DeckDefinition = {
   ]
 };
 
+const ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK: DeckDefinition = {
+  id: "onr_v1_runner_v1915_run_access",
+  name: "O:NR V1.9.15 Run Access WIP Runner",
+  side: "runner",
+  identity: "runner_identity_001",
+  cards: [
+    { id: "onr_v1_020_dupre", quantity: 1 },
+    { id: "onr_v1_024_expert-schedule-analyzer", quantity: 1 },
+    { id: "onr_v1_041_microtech-ai-interface", quantity: 1 },
+    { id: "onr_v1_043_mystery-box", quantity: 1 },
+    { id: "onr_v1_062_shredder-uplink-protocol", quantity: 1 },
+    { id: "onr_v1_065_smarteye", quantity: 1 },
+    { id: "onr_v1_098_lucidrine-booster-drug", quantity: 1 },
+    { id: "onr_v1_105_priority-wreck", quantity: 2 },
+    { id: "onr_v1_111_social-engineering", quantity: 1 },
+    { id: "onr_v1_112_stumble-through-wilderspace", quantity: 1 },
+    { id: "onr_v1_142_record-reconstructor", quantity: 1 },
+    { id: "simple_decoder", quantity: 2 },
+    { id: "simple_economy_event", quantity: 6 }
+  ]
+};
+
+const ONR_V1_9_15_RUN_ACCESS_CORP_DECK: DeckDefinition = {
+  id: "onr_v1_corp_v1915_run_access",
+  name: "O:NR V1.9.15 Run Access WIP Corp",
+  side: "corp",
+  identity: "corp_identity_001",
+  cards: [
+    { id: "onr_v1_227_cerberus", quantity: 2 },
+    { id: "onr_v1_255_mastiff", quantity: 2 },
+    { id: "onr_v1_294_new-blood", quantity: 2 },
+    { id: "simple_agenda", quantity: 3 },
+    { id: "simple_economy_operation", quantity: 4 },
+    { id: "simple_economy_asset", quantity: 2 }
+  ]
+};
+
 const ONR_V1_RUNNER_DECK: DeckDefinition = {
   id: "onr_v1_runner_test_harness_094",
   name: "O:NR v1 Limited Runner Test Harness",
@@ -7538,6 +7685,16 @@ function v1914TraceTagResourceGame(seed: string): GameState {
     baseline: MVP_0_99_BASELINE,
     runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
     corpDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK,
+    agendaPointsToWin: 7
+  });
+}
+
+function v1915RunAccessGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK,
+    corpDeck: ONR_V1_9_15_RUN_ACCESS_CORP_DECK,
     agendaPointsToWin: 7
   });
 }

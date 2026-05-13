@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "v1915-run-access-multiaccess-wip-smoke",
+  "release": "V1.9.15",
+  "status": "implemented_wip_core_engine_smoke",
+  "coversCards": [
+    "onr_v1_098_lucidrine-booster-drug",
+    "onr_v1_105_priority-wreck",
+    "onr_v1_111_social-engineering",
+    "onr_v1_112_stumble-through-wilderspace",
+    "onr_v1_227_cerberus",
+    "onr_v1_255_mastiff",
+    "onr_v1_294_new-blood"
+  ],
+  "assertions": [
+    "V1.9.15 Runner events route through explicit play_event LegalActions and start runs against selected legal servers.",
+    "Priority Wreck creates a deterministic two-card R&D breach queue without revealing future queued cards before access.",
+    "R&D multiaccess replay reconstructs the final StateHash.",
+    "Cerberus and Mastiff reuse the side-safe trace bid window before their damage and end-the-run overlap.",
+    "New Blood is legal only after a visible Runner run attempt last turn."
+  ],
+  "verification": {
+    "engine": "pass: 226 tests",
+    "catalog": "pending",
+    "ai": "pending",
+    "server": "pending",
+    "web": "pending",
+    "typecheck": "pending",
+    "lint": "pending",
+    "build": "pending",
+    "fullWorkspace": "pending"
+  },
+  "completionGate": {
+    "releaseDone": false,
+    "catalogPromoted": false,
+    "aiPromoted": false
+  }
+}
