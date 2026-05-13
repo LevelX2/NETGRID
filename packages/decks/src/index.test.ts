@@ -215,22 +215,30 @@ describe("deck validation and snapshots", () => {
 
   it("keeps V1.3.0 format legality restrictive and reports concrete safe error codes", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    if (!runtimeCardsById["onr_v1_020_dupre"]) return;
+    const blockedRuntimeCardId = "onr_v1_026_false-echo";
+    if (!runtimeCardsById[blockedRuntimeCardId]) return;
     const contextV130 = { cardsById: runtimeCardsById, profile: profile130 };
     const runner = snapshots08.find((candidate) => candidate.deckSnapshotId === "demo_runner_130_snapshot_v1_3_0")!;
+    const runnerWithBlockedCard = {
+      ...runner,
+      cards: [...runner.cards, { cardId: blockedRuntimeCardId, quantity: 1 }],
+      publicMetadata: { ...runner.publicMetadata, deckHash: "pending" },
+      deckHash: "pending"
+    };
+    const runnerWithBlockedCardHash = computeDeckHash(runnerWithBlockedCard);
 
     const blockedCard = validateDeckSnapshot(
       {
-        ...runner,
-        cards: [...runner.cards, { cardId: "onr_v1_020_dupre", quantity: 1 }],
-        deckHash: computeDeckHash({ ...runner, cards: [...runner.cards, { cardId: "onr_v1_020_dupre", quantity: 1 }] })
+        ...runnerWithBlockedCard,
+        publicMetadata: { ...runnerWithBlockedCard.publicMetadata, deckHash: runnerWithBlockedCardHash },
+        deckHash: runnerWithBlockedCardHash
       },
       contextV130
     );
     expect(blockedCard.ok).toBe(false);
     expect(blockedCard.errorCodes).toContain("card_missing_required_status");
     expect(blockedCard.errorCodes).toContain("format_legal_requires_deck_legal");
-    expect(blockedCard.errors.join(" ")).toContain("onr_v1_020_dupre");
+    expect(blockedCard.errors.join(" ")).toContain(blockedRuntimeCardId);
 
     const tooManyCopies: EditableDeck = {
       deckId: "local_v130_too_many_copies",
@@ -403,10 +411,10 @@ describe("deck validation and snapshots", () => {
     const oldOnrDeck: EditableDeck = {
       ...runnerDeck,
       deckId: "local_onr_runner_v105k_blocked_old_card",
-      cards: [...runnerDeck.cards, { cardId: "onr_v1_020_dupre", quantity: 1 }]
+      cards: [...runnerDeck.cards, { cardId: "onr_v1_026_false-echo", quantity: 1 }]
     };
     const blocked = validateEditableDeck(oldOnrDeck, contextV105K);
     expect(blocked.ok).toBe(false);
-    expect(blocked.errors.join(" ")).toContain("onr_v1_020_dupre");
+    expect(blocked.errors.join(" ")).toContain("onr_v1_026_false-echo");
   });
 });
