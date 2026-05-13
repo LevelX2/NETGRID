@@ -4670,7 +4670,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    rulesText: "Installed resource for tag-risk economy decisions.",
+    rulesText: "[A]: Put 3 credits from the bank on Broker, or take all credits from Broker.",
     mechanics: ["install_resource", "resource_action", "resource_tag_interaction", ONR_V1_LOCAL_PRIVATE]
   },
   {

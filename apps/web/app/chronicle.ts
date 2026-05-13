@@ -360,6 +360,29 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       title = phrase(subject, `die Kontrolle von ${cardTitle ?? "einer Karte"} geändert`);
       chips.push("Kontrolle");
       break;
+    case "trigger_ability": {
+      const resourceAbility = stringValue(payload.resourceAbility);
+      if (resourceAbility === "broker_load_credits") {
+        const addedCredits = numberValue(payload.addedCounterAmount) ?? numberValue(payload.addCounterAmount) ?? 3;
+        const remainingCredits = numberValue(payload.remainingCounters);
+        category = "economy";
+        title = phrase(subject, `${creditText(addedCredits)} auf ${cardTitle ?? "Broker"} gelegt`);
+        chips.push(`${addedCredits} ${creditLabel(addedCredits)} auf Karte`, ...(remainingCredits !== undefined ? [`${remainingCredits} ${creditLabel(remainingCredits)} auf Broker`] : []));
+        break;
+      }
+      if (resourceAbility === "broker_take_credits") {
+        const gainedCredits = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount) ?? amount ?? 0;
+        const remainingCredits = numberValue(payload.remainingCounters);
+        category = "economy";
+        title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "Broker"} genommen`);
+        chips.push(`+${gainedCredits} ${creditLabel(gainedCredits)}`, ...(remainingCredits !== undefined ? [`${remainingCredits} ${creditLabel(remainingCredits)} auf Broker`] : []));
+        break;
+      }
+      category = "card";
+      title = phrase(subject, `${cardTitle ?? "eine Kartenfähigkeit"} aktiviert`);
+      chips.push("Kartenaktion");
+      break;
+    }
     case "end_turn":
       category = "turn";
       title = phrase(subject, `den Zug beendet${turnChip ? ` (${turnChip})` : ""}`);

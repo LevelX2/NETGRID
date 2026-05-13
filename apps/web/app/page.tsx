@@ -8306,6 +8306,7 @@ function CardView({
   const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const [actionMenuPlacement, setActionMenuPlacement] = useState<"above" | "below">("below");
+  const [actionMenuPositionStyle, setActionMenuPositionStyle] = useState<CSSProperties>({});
   const [suppressCardTooltip, setSuppressCardTooltip] = useState(false);
   const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
@@ -8353,12 +8354,14 @@ function CardView({
   const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
+  const brokerStoredCredits = preview ? 0 : brokerStoredCreditsAmount(card);
+  const brokerStoredCreditsAria = brokerStoredCredits > 0 ? `${brokerStoredCredits} ${brokerStoredCredits === 1 ? "Credit" : "Credits"} auf Broker` : null;
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}`
+      ? `Karte ${card.title}, ${advancementLabel}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}`
+      ? `Karte ${card.title}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}`
       : "Verdeckte Karte";
 
   const estimatedTooltipHeight = (): number => {
@@ -8410,7 +8413,21 @@ function CardView({
     const estimatedActionMenuHeight = Math.min(196, Math.max(58, actions.length * 54 + 16));
     const nextActionMenuPlacement = spaceBelow < estimatedActionMenuHeight && spaceAbove > spaceBelow ? "above" : "below";
     if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);
-    if (hasCardActions) setActionMenuPlacement(nextActionMenuPlacement);
+    if (hasCardActions) {
+      const actionMenuWidth = Math.min(212, Math.max(cardRect.width, Math.min(window.innerWidth - 32, 160)));
+      const margin = 16;
+      const left = Math.max(margin, Math.min(cardRect.left, window.innerWidth - actionMenuWidth - margin));
+      const top = nextActionMenuPlacement === "below" ? cardRect.bottom + 7 : Math.max(margin, cardRect.top - estimatedActionMenuHeight - 7);
+      setActionMenuPlacement(nextActionMenuPlacement);
+      setActionMenuPositionStyle({
+        position: "fixed",
+        left: `${left}px`,
+        top: `${top}px`,
+        bottom: "auto",
+        width: `${actionMenuWidth}px`,
+        minWidth: `${Math.min(cardRect.width, actionMenuWidth)}px`
+      });
+    }
   };
 
   const scheduleTooltipOpen = () => {
@@ -8446,6 +8463,14 @@ function CardView({
     if (!showTooltip) return;
     updateOverlayPlacement();
   }, [showTooltip, tooltipMode]);
+
+  useEffect(() => {
+    if (!showCardActions) {
+      setActionMenuPositionStyle({});
+      return;
+    }
+    updateOverlayPlacement();
+  }, [showCardActions, actions.length]);
 
   useEffect(
     () => () => {
@@ -8521,6 +8546,7 @@ function CardView({
         ) : null}
         {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
+        {brokerStoredCredits > 0 ? <BrokerStoredCreditsBadge amount={brokerStoredCredits} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
         {tooltipId ? (
           <span
@@ -8594,7 +8620,7 @@ function CardView({
           <Play size={10} strokeWidth={2.35} />
         </button>
       ) : null}
-      {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} onAction={onAction!} /> : null}
+      {showCardActions ? <CardActionsPopover actions={actions} disabled={actionDisabled} placement={actionMenuPlacement} style={actionMenuPositionStyle} onAction={onAction!} /> : null}
     </div>
   );
 }
@@ -8731,9 +8757,9 @@ function agendaPointLabel(amount: number): string {
   return amount === 1 ? "Agenda-Punkt" : "Agenda-Punkte";
 }
 
-function CardActionsPopover({ actions, disabled, placement, onAction }: { actions: LegalAction[]; disabled: boolean; placement: "above" | "below"; onAction(action: LegalAction): void }) {
+function CardActionsPopover({ actions, disabled, placement, style, onAction }: { actions: LegalAction[]; disabled: boolean; placement: "above" | "below"; style?: CSSProperties; onAction(action: LegalAction): void }) {
   return (
-    <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen">
+    <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style}>
       {actions.map((action) => (
         <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
           <Play size={14} />
@@ -8774,6 +8800,14 @@ function StrengthBoostBadge({ amount }: { amount: number }) {
   );
 }
 
+function BrokerStoredCreditsBadge({ amount }: { amount: number }) {
+  return (
+    <span className="brokerStoredCreditsBadge" aria-label={`${amount} ${amount === 1 ? "Credit" : "Credits"} auf Broker`} data-testid="broker-stored-credits-badge">
+      {amount} {amount === 1 ? "Credit" : "Credits"}
+    </span>
+  );
+}
+
 function advancementGemStyle(instanceId: string, index: number): CSSProperties {
   const seed = hashString(`${instanceId}:${index}`);
   const x = 18 + (seed % 58);
@@ -8807,11 +8841,25 @@ function cardDetailLines(card: VisibleCard): string[] {
     valueLabel("Trash", card.trashCost),
     neededDevelopmentLabel(card.advancementRequirement),
     valueLabel("Agenda", card.agendaPoints),
-    valueLabel("Stärke", card.strength)
+    valueLabel("Stärke", card.strength),
+    brokerStoredCreditsLabel(card)
   ]
     .filter(Boolean)
     .join(" · ");
   return [typeLine, numberLine].filter(Boolean);
+}
+
+function brokerStoredCreditsLabel(card: VisibleCard): string | null {
+  if (card.definitionId !== "onr_v1_154_broker") return null;
+  const amount = brokerStoredCreditsAmount(card);
+  if (amount <= 0) return null;
+  return `Broker ${amount} ${amount === 1 ? "Credit" : "Credits"}`;
+}
+
+function brokerStoredCreditsAmount(card: VisibleCard): number {
+  if (card.definitionId !== "onr_v1_154_broker") return 0;
+  const amount = card.counters?.power ?? 0;
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }
 
 function cardWithoutDevelopmentCounters(card: DisplayVisibleCard): DisplayVisibleCard {

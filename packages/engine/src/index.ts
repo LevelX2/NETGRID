@@ -2369,6 +2369,33 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     for (const resourceId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, resourceId);
+      if (definition.id === "onr_v1_154_broker") {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "trigger_ability",
+            `${definition.title}: 3 Credits auf Broker legen`,
+            resourceId,
+            [{ clicks: 1 }],
+            { cardId: resourceId, resourceAbility: "broker_load_credits", counterType: "power", addCounterAmount: 3 }
+          )
+        );
+        const brokerCredits = cardCounter(state, resourceId, "power");
+        if (brokerCredits > 0) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "trigger_ability",
+              `${definition.title}: ${brokerCredits} ${brokerCredits === 1 ? "Credit" : "Credits"} nehmen`,
+              resourceId,
+              [{ clicks: 1 }],
+              { cardId: resourceId, resourceAbility: "broker_take_credits", counterType: "power", gainCreditsAmount: brokerCredits }
+            )
+          );
+        }
+      }
       if (definition.id === "onr_v1_159_databroker") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
@@ -3724,8 +3751,54 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
       endTurn(state, legalAction.side);
       return;
     case "trigger_ability":
+      if (legalAction.payload?.resourceAbility === "broker_load_credits" || legalAction.payload?.resourceAbility === "broker_take_credits") {
+        spendClick(state, "runner");
+        resolveBrokerAbility(state, legalAction);
+        return;
+      }
       throw new Error("Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.");
   }
+}
+
+function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Broker nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.resources.includes(sourceCardId)) throw new Error("Broker ist nicht installiert.");
+  const definition = definitionFor(state, sourceCardId);
+  if (definition.id !== "onr_v1_154_broker") throw new Error("Diese Broker-Aktion passt nicht zur Karte.");
+
+  if (legalAction.payload?.resourceAbility === "broker_load_credits") {
+    const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
+    if (!Number.isInteger(addAmount) || addAmount !== 3) throw new Error("Broker legt genau 3 Credits aus der Bank auf die Karte.");
+    addCardCounter(state, sourceCardId, "power", addAmount);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      addedCounterAmount: addAmount,
+      remainingCounters: cardCounter(state, sourceCardId, "power")
+    };
+    return;
+  }
+
+  const currentCredits = cardCounter(state, sourceCardId, "power");
+  if (currentCredits <= 0) throw new Error("Auf Broker liegen keine Credits.");
+  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+  if (!Number.isInteger(gainAmount) || gainAmount !== currentCredits) throw new Error("Broker muss alle gespeicherten Credits nehmen.");
+  spendCardCounter(state, sourceCardId, "power", gainAmount);
+  credits(state, "runner", gainAmount);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    gainedCredits: gainAmount,
+    remainingCounters: cardCounter(state, sourceCardId, "power"),
+    runnerCreditsAfter: state.runner.credits
+  };
+  recordResolvedEffect(legalAction, {
+    kind: "gain_credits",
+    visibility: "public",
+    side: "runner",
+    amount: gainAmount,
+    ...sourceEffectFields(state, sourceCardId),
+    reason: "broker_take_credits"
+  });
 }
 
 function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
@@ -6361,7 +6434,12 @@ function action(
     costs,
     targetRequirements: metadata.targetRequirements ?? [],
     visibility:
-      type.startsWith("rez") || type === "score_agenda" || type === "trash_resource" || payload?.v1917AssetAbility || (side === "runner" && type === "install_card")
+      type.startsWith("rez") ||
+      type === "score_agenda" ||
+      type === "trash_resource" ||
+      payload?.resourceAbility ||
+      payload?.v1917AssetAbility ||
+      (side === "runner" && type === "install_card")
         ? "public"
         : "private_to_actor",
     expiresAtStateVersion: state.stateVersion,
@@ -7450,6 +7528,7 @@ function makeActionId(type: ActionType, side: Side, payload: LegalAction["payloa
   if (payload?.v1921UpgradeAbility) parts.push(String(payload.v1921UpgradeAbility));
   if (payload?.v1921RunnerProgramAbility) parts.push(String(payload.v1921RunnerProgramAbility));
   if (payload?.v1921RunnerResourceAbility) parts.push(String(payload.v1921RunnerResourceAbility));
+  if (payload?.resourceAbility) parts.push(String(payload.resourceAbility));
   if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.oliviaSalazarCardId) parts.push(String(payload.oliviaSalazarCardId));
@@ -7680,6 +7759,12 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     const gainedCredits = Number(legalAction.payload?.gainedCredits ?? legalAction.payload?.gainCreditsAmount ?? 1);
     context.amount = Number.isFinite(gainedCredits) ? gainedCredits : 1;
     for (const key of ["agendaAbility", "gainCreditsAmount", "gainedCredits", "removePowerCounterAmount", "spentPowerCounters", "remainingPowerCounters", "v1917AssetAbility"]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
+  if (legalAction.type === "trigger_ability") {
+    for (const key of ["resourceAbility", "counterType", "addCounterAmount", "addedCounterAmount", "gainCreditsAmount", "gainedCredits", "remainingCounters"]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
     }

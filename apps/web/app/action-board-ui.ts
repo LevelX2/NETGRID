@@ -189,9 +189,22 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "steal_agenda":
       return "Stehlen";
     case "trigger_ability":
-      return "Aktivieren";
+      return resourceAbilityContextLabel(action) ?? "Aktivieren";
     default:
       return actionButtonLabel(action);
+  }
+}
+
+function resourceAbilityContextLabel(action: LegalAction): string | null {
+  switch (action.payload?.resourceAbility) {
+    case "broker_load_credits":
+      return "3 Credits laden";
+    case "broker_take_credits": {
+      const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 0);
+      return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
+    }
+    default:
+      return null;
   }
 }
 

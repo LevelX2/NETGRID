@@ -229,6 +229,29 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionButtonLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
     expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
   });
+
+  it("keeps Broker abilities on the installed resource overlay", () => {
+    const load = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", {
+      cardId: "broker_1",
+      resourceAbility: "broker_load_credits",
+      counterType: "power",
+      addCounterAmount: 3
+    });
+    const take = legalAction("runner", "trigger_ability", "broker_1", "Broker: 6 Credits nehmen", {
+      cardId: "broker_1",
+      resourceAbility: "broker_take_credits",
+      counterType: "power",
+      gainCreditsAmount: 6
+    });
+
+    const split = splitLegalActions([load, take]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([load, take]);
+    expect(actionMatchesContext(load, { kind: "card", id: "broker_1", label: "Broker" })).toBe(true);
+    expect(contextualCardActionLabel(load)).toBe("3 Credits laden");
+    expect(contextualCardActionLabel(take)).toBe("6 Credits nehmen");
+  });
 });
 
 function legalAction(side: Side, type: LegalAction["type"], source: LegalAction["source"], label: string, payload?: LegalAction["payload"], timingPoint: LegalAction["timingPoint"] = "corp_action.main"): LegalAction {

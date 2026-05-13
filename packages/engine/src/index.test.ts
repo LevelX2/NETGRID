@@ -5605,6 +5605,23 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     resourceState = apply(resourceState, "runner", (action) => action.type === "install_card" && sourceDefinition(resourceState, action) === "onr_v1_154_broker");
     const brokerId = resourceState.runner.rig.resources.find((cardId) => resourceState.cardInstances[cardId]?.definitionId === "onr_v1_154_broker");
     expect(brokerId).toBeDefined();
+    const brokerLoad = getLegalActions(resourceState, "runner").find(
+      (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_load_credits" && action.payload?.cardId === brokerId
+    );
+    expect(brokerLoad?.visibility).toBe("public");
+    resourceState = apply(resourceState, "runner", (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_load_credits");
+    expect(cardCounterAmount(resourceState, brokerId!, "power")).toBe(3);
+    expect(resourceState.runner.credits).toBe(11);
+    resourceState = apply(resourceState, "runner", (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_take_credits");
+    expect(cardCounterAmount(resourceState, brokerId!, "power")).toBe(0);
+    expect(resourceState.runner.credits).toBe(14);
+    expect(resourceState.eventLog.at(-1)?.visibilityClass).toBe("public");
+    expect(resourceState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      resourceAbility: "broker_take_credits",
+      gainedCredits: 3,
+      remainingCounters: 0
+    });
     resourceState.runner.tags = 1;
     resourceState = apply(resourceState, "runner", (action) => action.type === "end_turn");
     resourceState = apply(resourceState, "corp", (action) => action.type === "mandatory_draw");

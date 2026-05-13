@@ -1862,7 +1862,9 @@ const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_258_neural-blade": "[Subroutine] Do 2 net damage."
 };
 
-const ONR_V1_9_14_TEXT_OVERRIDES: Partial<Record<string, string>> = {};
+const ONR_V1_9_14_TEXT_OVERRIDES: Partial<Record<string, string>> = {
+  "onr_v1_154_broker": "[A]: Put 3 credits from the bank on Broker, or take all credits from Broker."
+};
 
 export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
   return {

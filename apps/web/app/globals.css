@@ -3568,6 +3568,14 @@ select {
   font-size: calc(11px * var(--lane-card-scale, 1));
 }
 
+.lane .brokerStoredCreditsBadge {
+  top: calc(5px * var(--lane-card-scale, 1));
+  right: calc(5px * var(--lane-card-scale, 1));
+  min-height: calc(19px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+  font-size: calc(10px * var(--lane-card-scale, 1));
+}
+
 .card.selectedActionSource {
   outline: 2px solid color-mix(in srgb, var(--runner), white 18%);
   outline-offset: 2px;
@@ -3900,6 +3908,33 @@ select {
     0 4px 8px rgb(0 0 0 / 0.32),
     inset 0 1px 1px rgb(255 255 255 / 0.42),
     inset 0 -2px 3px rgb(0 0 0 / 0.22);
+  pointer-events: none;
+}
+
+.brokerStoredCreditsBadge {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 12px);
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid rgb(232 191 79 / 0.8);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.34), transparent 32%),
+    linear-gradient(135deg, rgb(118 84 22 / 0.94), rgb(43 31 12 / 0.95));
+  color: #ffe7a4;
+  box-shadow:
+    0 4px 9px rgb(0 0 0 / 0.34),
+    inset 0 1px 1px rgb(255 247 204 / 0.28);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
   pointer-events: none;
 }
 

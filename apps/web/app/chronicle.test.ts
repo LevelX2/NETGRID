@@ -107,6 +107,42 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("9 Credits übrig");
   });
 
+  it("describes Broker resource actions directly instead of using the generic legal-action fallback", () => {
+    const load = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        label: "Broker: 3 Credits auf Broker legen",
+        title: "Broker",
+        resourceAbility: "broker_load_credits",
+        addedCounterAmount: 3,
+        remainingCounters: 3
+      }),
+      "runner",
+      { cardTitle: "Broker" }
+    );
+    const take = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        label: "Broker: 3 Credits nehmen",
+        title: "Broker",
+        resourceAbility: "broker_take_credits",
+        gainedCredits: 3,
+        remainingCounters: 0
+      }),
+      "runner",
+      { cardTitle: "Broker" }
+    );
+
+    expect(load.title).toBe("Du hast 3 Credits auf Broker gelegt.");
+    expect(load.category).toBe("economy");
+    expect(load.description).toBeUndefined();
+    expect(load.chips).toContain("3 Credits auf Karte");
+    expect(load.chips).toContain("3 Credits auf Broker");
+    expect(take.title).toBe("Du hast 3 Credits von Broker genommen.");
+    expect(take.chips).toContain("+3 Credits");
+    expect(take.chips).toContain("0 Credits auf Broker");
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {
