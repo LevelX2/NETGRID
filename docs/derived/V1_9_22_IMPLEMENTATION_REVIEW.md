@@ -1,7 +1,7 @@
 # V1.9.22 Implementation Review
 
 Stand: 2026-05-13
-Status: planning/catalog WIP
+Status: runtime WIP, no release/catalog/AI promotion
 
 ## Umgesetzter Schnitt
 
@@ -13,12 +13,14 @@ Status: planning/catalog WIP
 - Neun Runner-Hardware-Zielkarten haben Runtime-Definitionen mit finalen display-only Texten, ohne Release- oder AI-Promotion: Arasaka Portable Prototype, Artemis 2020, Bodyweight Data Creche, Corolla Speed Chip, Microtech Backup Drive, Pandora's Deck, Parraline 5750, PK-6089a und ZZ22 Speed Chip.
 - Alle neun Runner-Hardware-Zielkarten haben Install-LegalAction-Smokes mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayload-/PlayerView-Assertions und Replay-/StateHash-Stabilitaet.
 - Zehn Runner-Event-Zielkarten haben Runtime-Definitionen mit finalen display-only Texten und einen expliziten No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen: Anonymous Tip, Core Command: Jettison Ice, Forged Activation Orders, If You Want It Done Right..., misc.for-sale, Open-Ended Mileage Program, Organ Donor, Security Code WORM Chip, Synchronized Attack on HQ und Valu-Pak Software Bundle.
+- `Corporate War` hat eine Runtime-Definition und einen engen On-score-Credit-Schwellenresolver: bei mindestens 12 Korp-Credits werden beim Scoren 12 Credits gewonnen, sonst verliert die Korp alle Credits. Der Smoke deckt Wrong-Side-/Stale-Revalidation, side-sichere PublicPayloads und Replay/StateHash ab.
+- `Political Overthrow` hat eine Runtime-Definition und eine aktive scored-agenda LegalAction: `[A]: Gain 3`. Der Smoke deckt Wrong-Side-/Stale-Revalidation, Kostenabzug, side-sichere PublicPayloads und Replay/StateHash ab.
 - `docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md` dokumentiert, dass die 14 Runner-Programm-Zielkarten ohne lokal bestätigte Kosten-/MU-/Breakerwerte nicht als `install_card`, `pump_breaker` oder `break_subroutine` promotet werden duerfen.
 - Ein Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass sie bis zur lokalen Wertbestaetigung nicht `playable_mvp` sind.
 - Ein weiterer Engine-Guard bestaetigt fuer 14/14 Runner-Programm-Zielkarten, dass keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions geoeffnet werden, solange lokale Kosten-/MU-/Breakerwerte fehlen.
 - `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` dokumentiert fuer die zehn Runner-Event-Zielkarten, dass die vorhandenen lokalen Kernnotizen noch keinen vollstaendigen `play_event`-Resolververtrag liefern; der bestehende No-`play_event`-Guard bleibt deshalb korrekt.
-- Ein Engine-Guard bestaetigt fuer 14/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind.
-- `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` dokumentiert fuer die 14 Corp-Longtailkarten, dass Corporate War und Political Overthrow zwar lokale Kernnotizen haben, aber noch keine vollstaendigen Zahlen-/Timing-/Kostenvertraege; alle weiteren Corp-Zielkarten haben aktuell nur Typoberflaechen.
+- Ein Engine-Guard bestaetigt fuer die verbleibenden 12/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind. `Corporate War` und `Political Overthrow` sind die zwei bewusst eng umgesetzten Ausnahmen dieses WIP-Schnitts.
+- `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` bleibt als historischer Readiness-Stand erhalten; die spaeter erstellte lokale Kartenfaktenbasis hebt den fehlenden Vollvertragsbefund fuer `Corporate War` und `Political Overthrow` auf, nicht fuer die restlichen Corp-Longtailkarten.
 - Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Eventkarten mit No-`play_event`-Guard und 28 geplante No-Promotion-Karten ausweisen und keine Catalog- oder AI-Promotion behaupten.
 - Ein AI-Paket-Guard bestaetigt, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate ausserhalb von `ai_supported`, `human_playable` und `deck_legal` bleiben.
 - Ein Web-Catalog-API-Guard bestaetigt, dass V1.9.22-WIP-Karten nicht im `ai_supported`-Filter erscheinen und Detailantworten fuer sichtbare WIP-Karten keine `ai_supported`-, `human_playable`- oder `deck_legal`-Promotion anzeigen.
@@ -28,8 +30,8 @@ Status: planning/catalog WIP
 - Ein Catalog-Guard bestaetigt, dass finale V1.9.22-AI-Promotion-Artefakte (`ai-card-hints-deck-legal-v1922.json`, `deck-legal-ai-approval-v1922-manifest.json`, `ai-deck-legal-v1922-smokes.json`) bis zum Completion-Gate nicht existieren.
 - `data/reports/v1922-completion-gate-status.json` dokumentiert maschinenlesbar den offenen V1.9.22-Gate-Stand, die gruene Verify-Basis, die lokale Quellensuche ohne vollstaendigen Resolververtrag und die vier blockierenden Gates `resolver_contracts`, `ai_promotion_artifacts`, `webclient_version` und `final_review` mit Removal Conditions.
 - `docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md` dokumentiert eine erneute lokale Quellensuche auf blockierte Runner-Event- und Corp-Longtailkarten. Der Scan bestaetigt, dass weiter nur Teilnotizen, Typoberflaechen und display-only WIP-Runtimes vorliegen; daraus folgt keine Runtime-, Catalog- oder AI-Promotion.
-- `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md` und `data/rules/v1922-resolver-contracts.json` erfassen alle 47 Zielkarten einzeln mit bestaetigter Teilbasis, fehlenden Vertragsfeldern und Removal Conditions. Ergebnis: 0/47 Karten sind fuer neue Resolverimplementierung oder Promotion vollstaendig bereit; 9/47 Hardwarekarten haben nur den engen Installations-Basisvertrag.
-- Keine V1.9.22-Karte wurde Runtime-, Catalog- oder AI-promotet.
+- `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md` und `data/rules/v1922-resolver-contracts.json` erfassen alle 47 Zielkarten einzeln mit bestaetigter Teilbasis, fehlenden Vertragsfeldern und Removal Conditions. Der historische Matrixstand 0/47 wurde durch die lokale Resolver-/Kartenfaktenbasis fuer zwei enge Implementierungskandidaten fortgeschrieben; daraus folgt noch keine Release- oder AI-Promotion.
+- Keine V1.9.22-Karte wurde Catalog- oder AI-promotet; die sichtbare Webclient-Version bleibt bis zum Completion-Gate auf `V1.9.21`.
 
 ## Gate
 
@@ -38,7 +40,7 @@ Status: planning/catalog WIP
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fuer eine Eventkarte mit vollstaendig lokal bestaetigtem Vertrag, eine lokal bestaetigte Runner-Programmkarte mit Kosten-/MU-/Breakerwerten oder ein eng begrenzter Corp-Longtail-Resolver.
+Naechster kleiner Schnitt: ein weiterer lokal bestaetigter Corp-Agenda-/Operation-Resolver, ein echter Runner-Event-Resolver/LegalAction-Smoke fuer eine Eventkarte mit vollstaendig lokal bestaetigtem Vertrag oder eine lokal bestaetigte Runner-Programmkarte mit Kosten-/MU-/Breakerwerten.
 
 ## Verifikation
 
@@ -62,3 +64,13 @@ Naechster kleiner Schnitt: ein echter Runner-Event-Resolver/LegalAction-Smoke fu
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 40 Tests inkl. Completion-Gate-Statusreport.
 - JSON-Validation fuer `data/**/*.json`: pass, 305 Dateien nach Resolververtragsmatrix.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 41 Tests inkl. aktualisiertem Completion-Gate-Statusreport-Verweis und Per-card-Guard fuer die Resolververtragsmatrix.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 280 Tests inkl. `Corporate War`-On-score-Schwellenresolver und `Political Overthrow`-scored-agenda-Gain-3-Resolver.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Runtime-Resolver-WIP.
+- JSON-Validation fuer `data/**/*.json`: pass, 308 Dateien nach Runtime-Resolver-WIP.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 79 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

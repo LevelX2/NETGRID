@@ -119,6 +119,9 @@ import v1921MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1
 import v1922MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.22.json";
 import v1922ResolverContractInventoryData from "../../../data/rules/v1922-resolver-contract-inventory.json";
 import v1922ResolverContractsData from "../../../data/rules/v1922-resolver-contracts.json";
+import v1922LocalResolverWorkingBasisData from "../../../data/rules/v1922-local-resolver-working-basis.json";
+import v1922LocalCardFactsData from "../../../data/rules/v1922-local-card-facts.json";
+import onrV1AttributeConflictDecisionsData from "../../../data/rules/onr-v1-card-attribute-conflict-decisions-2026-05-13.json";
 import catalogIndexData from "../../../data/card-import/catalog-index-0.5.json";
 import {
   assertPipelinePayloadSafe,
@@ -465,6 +468,7 @@ describe("catalog import and status logic", () => {
 
     expect(cardsById["onr_v1_230_cortical-scanner"]?.numeric.rezCost).toBe(7);
     expect(cardsById["onr_v1_237_data-wall"]?.numeric.strength).toBe(0);
+    expect(cardsById["onr_v1_238_data-wall-2-0"]?.numeric.rezCost).toBe(2);
     expect(cardsById["onr_v1_238_data-wall-2-0"]?.numeric.strength).toBe(1);
     expect(cardsById["onr_v1_239_endless-corridor"]?.numeric.strength).toBe(2);
     expect(cardsById["onr_v1_015_codeslinger"]?.text).toBe("0 credits: Break sentry subroutine.");
@@ -568,6 +572,7 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_235_data-naga"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.9.2");
     expect(cardsById["onr_v1_207_netwatch-operations-office"]?.numeric.advancementRequirement).toBe(5);
     expect(cardsById["onr_v1_213_private-cybernet-police"]?.numeric.agendaPoints).toBe(2);
+    expect(cardsById["onr_v1_213_private-cybernet-police"]?.text).toContain("Trace 5");
     expect(cardsById["onr_v1_251_jack-attack"]?.numeric.strength).toBe(3);
     expect(cardsById["onr_v1_251_jack-attack"]?.text).toContain("Runner cannot jack out");
     expect(cardsById["onr_v1_271_tko-2-0"]?.numeric.rezCost).toBe(7);
@@ -627,6 +632,38 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_019_dropp"]?.statuses.deck_legal).toBe(true);
     expect(cardsById["onr_v1_019_dropp"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_019_dropp"]?.engineCardId).toBe("onr_v1_019_dropp");
+  });
+
+  it("honors user-confirmed O:NR v1 card attribute conflict decisions", () => {
+    const decisions = onrV1AttributeConflictDecisionsData as {
+      status: string;
+      gateAssertions: {
+        hostileTakeoverGain5: boolean;
+        privateCybernetPoliceTrace5: boolean;
+        dataWall20Rez2Strength1: boolean;
+        noRuntimePromotionChanged: boolean;
+        noAiPromotionChanged: boolean;
+      };
+      decisions: Array<{ cardId: string; attribute: string; value: unknown; rejectedValues: unknown[] }>;
+    };
+    const decisionByCardId = Object.fromEntries(decisions.decisions.map((decision) => [decision.cardId, decision]));
+    const cardsById = createRuntimeCardsById();
+
+    expect(decisions.status).toBe("user_confirmed");
+    expect(decisions.gateAssertions.hostileTakeoverGain5).toBe(true);
+    expect(decisions.gateAssertions.privateCybernetPoliceTrace5).toBe(true);
+    expect(decisions.gateAssertions.dataWall20Rez2Strength1).toBe(true);
+    expect(decisions.gateAssertions.noRuntimePromotionChanged).toBe(true);
+    expect(decisions.gateAssertions.noAiPromotionChanged).toBe(true);
+    expect(decisionByCardId["onr_v1_203_hostile-takeover"]?.value).toBe(5);
+    expect(decisionByCardId["onr_v1_203_hostile-takeover"]?.rejectedValues).toContain(6);
+    expect(cardsById["onr_v1_203_hostile-takeover"]?.text).toContain("Gain 5");
+    expect(decisionByCardId["onr_v1_213_private-cybernet-police"]?.value).toBe(5);
+    expect(decisionByCardId["onr_v1_213_private-cybernet-police"]?.rejectedValues).toContain(7);
+    expect(cardsById["onr_v1_213_private-cybernet-police"]?.text).toContain("Trace 5");
+    expect(decisionByCardId["onr_v1_238_data-wall-2-0"]?.value).toEqual({ rezCost: 2, strength: 1 });
+    expect(cardsById["onr_v1_238_data-wall-2-0"]?.numeric.rezCost).toBe(2);
+    expect(cardsById["onr_v1_238_data-wall-2-0"]?.numeric.strength).toBe(1);
   });
 
   it("keeps V1.9.10 status consolidation to manifest and catalog parity without promotion", () => {
@@ -1823,6 +1860,9 @@ describe("catalog import and status logic", () => {
     const manifestIds = manifestCards.map((card) => card.cardCode);
     const hardwareCards = manifestCards.filter((card) => card.resolverFamily.includes("install_hardware_memory_surface"));
     const eventCards = manifestCards.filter((card) => card.resolverFamily.includes("play_event_surface"));
+    const corpAgendaResolverCards = manifestCards.filter((card) =>
+      ["v1922_corp_agenda_on_score_credit_threshold", "v1922_scored_agenda_action_gain_3"].includes(card.resolverFamily)
+    );
     const plannedCards = manifestCards.filter((card) => card.releaseStatus === "planned_no_promotion");
 
     expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
@@ -1855,7 +1895,14 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes, card.cardCode).toContain("no_play_event_promotion_guard");
     }
 
-    expect(plannedCards).toHaveLength(28);
+    expect(corpAgendaResolverCards.map((card) => card.cardCode).sort()).toEqual(["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"]);
+    for (const card of corpAgendaResolverCards) {
+      expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
+      expect(card.aiSupported, card.cardCode).toBe(false);
+      expect(card.coveredSmokes.length, card.cardCode).toBeGreaterThan(0);
+    }
+
+    expect(plannedCards).toHaveLength(26);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
       expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);
@@ -1966,6 +2013,139 @@ describe("catalog import and status logic", () => {
     }
   });
 
+  it("tracks the V1.9.22 local resolver working basis without promotion", () => {
+    const basis = v1922LocalResolverWorkingBasisData as {
+      status: string;
+      gateAssertions: {
+        runtimePromotionUnchanged: boolean;
+        catalogPromotionUnchanged: boolean;
+        aiPromotionUnchanged: boolean;
+        readyForNarrowResolverImplementationCount: number;
+        readyForPromotionCount: number;
+        firstImplementationCandidate: string;
+      };
+      readyCandidates: Array<{
+        cardId: string;
+        readinessStatus: string;
+        numericContract: Record<string, unknown>;
+        resolverContract: {
+          trigger: string;
+          timing: string;
+          visibility: string;
+          replayStateHash: string;
+          aiFallback: string;
+        };
+        conflictResolution?: {
+          resolvedBy: string;
+          decision: string;
+        };
+        requiredImplementationChecks: string[];
+      }>;
+      reviewedDeferredCandidates: Array<{ cardId: string; status: string; reason: string }>;
+    };
+    const readyCandidateIds = basis.readyCandidates.map((candidate) => candidate.cardId);
+    const corporateWar = basis.readyCandidates.find((candidate) => candidate.cardId === "onr_v1_196_corporate-war");
+    const politicalOverthrow = basis.readyCandidates.find((candidate) => candidate.cardId === "onr_v1_210_political-overthrow");
+
+    expect(basis.status).toBe("working_basis_no_promotion");
+    expect(basis.gateAssertions.runtimePromotionUnchanged).toBe(true);
+    expect(basis.gateAssertions.catalogPromotionUnchanged).toBe(true);
+    expect(basis.gateAssertions.aiPromotionUnchanged).toBe(true);
+    expect(basis.gateAssertions.readyForNarrowResolverImplementationCount).toBe(2);
+    expect(basis.gateAssertions.readyForPromotionCount).toBe(0);
+    expect(basis.gateAssertions.firstImplementationCandidate).toBe("onr_v1_196_corporate-war");
+    expect(readyCandidateIds.sort()).toEqual(["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"]);
+    for (const candidateId of readyCandidateIds) {
+      expect(ONR_V1_9_22_WIP_CARD_IDS).toContain(candidateId);
+    }
+
+    expect(corporateWar?.readinessStatus).toBe("ready_for_narrow_resolver_implementation_not_promotion");
+    expect(corporateWar?.numericContract.advancementRequirement).toBe(3);
+    expect(corporateWar?.numericContract.agendaPoints).toBe(3);
+    expect(corporateWar?.numericContract.creditThreshold).toBe(12);
+    expect(corporateWar?.numericContract.creditGainOnThresholdMet).toBe(12);
+    expect(corporateWar?.numericContract.creditResultOnThresholdMiss).toBe("lose_all_credits");
+
+    expect(politicalOverthrow?.readinessStatus).toBe("ready_for_narrow_resolver_implementation_not_promotion");
+    expect(politicalOverthrow?.numericContract.advancementRequirement).toBe(9);
+    expect(politicalOverthrow?.numericContract.agendaPoints).toBe(6);
+    expect(politicalOverthrow?.numericContract.actionCost).toBe(1);
+    expect(politicalOverthrow?.numericContract.creditGain).toBe(3);
+    expect(politicalOverthrow?.conflictResolution?.resolvedBy).toBe("user_chat_confirmation");
+    expect(politicalOverthrow?.conflictResolution?.decision).toBe("gain_3");
+
+    for (const candidate of basis.readyCandidates) {
+      expect(candidate.readinessStatus, candidate.cardId).toBe("ready_for_narrow_resolver_implementation_not_promotion");
+      expect(candidate.requiredImplementationChecks.length, candidate.cardId).toBeGreaterThan(0);
+      expect(candidate.resolverContract.trigger.trim(), candidate.cardId).not.toBe("");
+      expect(candidate.resolverContract.timing.trim(), candidate.cardId).not.toBe("");
+      expect(candidate.resolverContract.visibility, candidate.cardId).toContain("no_hidden_card_identity");
+      expect(candidate.resolverContract.replayStateHash, candidate.cardId).toContain("deterministic");
+      expect(candidate.resolverContract.aiFallback.trim(), candidate.cardId).not.toBe("");
+      expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).not.toContain(candidate.cardId);
+    }
+
+    expect(basis.reviewedDeferredCandidates.map((candidate) => candidate.cardId).sort()).toEqual([
+      "onr_v1_077_anonymous-tip",
+      "onr_v1_080_core-command-jettison-ice",
+      "onr_v1_086_forged-activation-orders",
+      "onr_v1_119_arasaka-portable-prototype",
+      "onr_v1_136_pandoras-deck"
+    ]);
+    for (const candidate of basis.reviewedDeferredCandidates) {
+      expect(ONR_V1_9_22_WIP_CARD_IDS).toContain(candidate.cardId);
+      expect(candidate.status.trim(), candidate.cardId).not.toBe("");
+      expect(candidate.reason.trim(), candidate.cardId).not.toBe("");
+      expect(readyCandidateIds).not.toContain(candidate.cardId);
+    }
+  });
+
+  it("tracks V1.9.22 local card facts for the full WIP scope without promotion", () => {
+    const facts = v1922LocalCardFactsData as {
+      status: string;
+      gateAssertions: {
+        coversExactV1922WipScope: boolean;
+        cardCount: number;
+        localFactsAvailableCount: number;
+        unresolvedUserAttributeConflictCount: number;
+        runtimePromotionChanged: boolean;
+        catalogPromotionChanged: boolean;
+        aiPromotionChanged: boolean;
+      };
+      cards: Array<{
+        cardId: string;
+        localFactStatus: string;
+        effectSummary: string;
+        implementationContractNeeded: string[];
+        readyForNarrowImplementation?: boolean;
+        numeric: Record<string, unknown>;
+      }>;
+    };
+    const factCardIds = facts.cards.map((card) => card.cardId);
+    const readyCandidateIds = facts.cards.filter((card) => card.readyForNarrowImplementation).map((card) => card.cardId);
+    const politicalOverthrow = facts.cards.find((card) => card.cardId === "onr_v1_210_political-overthrow");
+
+    expect(facts.status).toBe("local_facts_available_no_promotion");
+    expect(facts.gateAssertions.coversExactV1922WipScope).toBe(true);
+    expect(facts.gateAssertions.cardCount).toBe(ONR_V1_9_22_WIP_CARD_IDS.length);
+    expect(facts.gateAssertions.localFactsAvailableCount).toBe(ONR_V1_9_22_WIP_CARD_IDS.length);
+    expect(facts.gateAssertions.unresolvedUserAttributeConflictCount).toBe(0);
+    expect(facts.gateAssertions.runtimePromotionChanged).toBe(false);
+    expect(facts.gateAssertions.catalogPromotionChanged).toBe(false);
+    expect(facts.gateAssertions.aiPromotionChanged).toBe(false);
+    expect([...new Set(factCardIds)].sort()).toEqual([...ONR_V1_9_22_WIP_CARD_IDS].sort());
+    expect(readyCandidateIds.sort()).toEqual(["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"]);
+    expect(politicalOverthrow?.numeric.creditGain).toBe(3);
+    expect(politicalOverthrow?.localFactStatus).toBe("complete_user_corrected");
+
+    for (const card of facts.cards) {
+      expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardId).not.toContain(card.cardId);
+      expect(card.localFactStatus.trim(), card.cardId).toMatch(/^complete/);
+      expect(card.effectSummary.trim(), card.cardId).not.toBe("");
+      expect(card.implementationContractNeeded.length, card.cardId).toBeGreaterThan(0);
+    }
+  });
+
   it("keeps V1.9.22 AI promotion artifacts absent until the completion gate", () => {
     const promotionArtifacts = [
       "../../../data/ai/ai-card-hints-deck-legal-v1922.json",
@@ -1992,6 +2172,24 @@ describe("catalog import and status logic", () => {
       };
       verifiedGreenChecks: string[];
       lastLocalContractSearch: { result: string; confirmedPartialSources: string[]; removalCondition: string };
+      latestContractMatrix: {
+        cardCount: number;
+        readyForPromotionCount: number;
+        hardwareInstallBaseCoveredCount: number;
+        decision: string;
+      };
+      latestLocalWorkingBasis: {
+        readyForNarrowResolverImplementationCount: number;
+        readyCandidates: string[];
+        decision: string;
+      };
+      latestLocalCardFacts: {
+        cardCount: number;
+        localFactsAvailableCount: number;
+        unresolvedUserAttributeConflictCount: number;
+        readyForNarrowImplementationCount: number;
+        decision: string;
+      };
       blockingGates: Array<{ gateId: string; status: string; removalCondition: string }>;
     };
 
@@ -2019,6 +2217,14 @@ describe("catalog import and status logic", () => {
     expect(gateStatus.latestContractMatrix.readyForPromotionCount).toBe(0);
     expect(gateStatus.latestContractMatrix.hardwareInstallBaseCoveredCount).toBe(9);
     expect(gateStatus.latestContractMatrix.decision).toBe("no_runtime_catalog_or_ai_promotion");
+    expect(gateStatus.latestLocalWorkingBasis.readyForNarrowResolverImplementationCount).toBe(2);
+    expect(gateStatus.latestLocalWorkingBasis.readyCandidates.sort()).toEqual(["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"]);
+    expect(gateStatus.latestLocalWorkingBasis.decision).toBe("no_runtime_catalog_or_ai_promotion");
+    expect(gateStatus.latestLocalCardFacts.cardCount).toBe(ONR_V1_9_22_WIP_CARD_IDS.length);
+    expect(gateStatus.latestLocalCardFacts.localFactsAvailableCount).toBe(ONR_V1_9_22_WIP_CARD_IDS.length);
+    expect(gateStatus.latestLocalCardFacts.unresolvedUserAttributeConflictCount).toBe(0);
+    expect(gateStatus.latestLocalCardFacts.readyForNarrowImplementationCount).toBe(2);
+    expect(gateStatus.latestLocalCardFacts.decision).toBe("local_facts_available_no_runtime_catalog_or_ai_promotion");
     expect(gateStatus.lastLocalContractSearch.removalCondition.trim()).not.toBe("");
     expect(gateStatus.blockingGates.map((gate) => gate.gateId).sort()).toEqual(["ai_promotion_artifacts", "final_review", "resolver_contracts", "webclient_version"]);
     for (const gate of gateStatus.blockingGates) {

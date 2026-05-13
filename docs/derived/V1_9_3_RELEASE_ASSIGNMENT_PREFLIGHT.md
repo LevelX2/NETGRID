@@ -29,7 +29,7 @@ Status: abgeschlossen (Scope-Freeze-Eingang)
 | CardId | Name | Primäre Mechaniklücke | Preflight-Entscheidung |
 | --- | --- | --- | --- |
 | `onr_v1_207_netwatch-operations-office` | Netwatch Operations Office | Scored-Agenda Trace 7 -> Tag | freigabefähig in V1.9.3 |
-| `onr_v1_213_private-cybernet-police` | Private Cybernet Police | Scored-Agenda Trace 7 -> Tag | freigabefähig in V1.9.3 |
+| `onr_v1_213_private-cybernet-police` | Private Cybernet Police | Scored-Agenda Trace 5 -> Tag | freigabefähig in V1.9.3 |
 | `onr_v1_251_jack-attack` | Jack Attack | Run-weites Jack-out-Lock + Trace-Tag-Subroutine | freigabefähig in V1.9.3 |
 | `onr_v1_271_tko-2-0` | TKO 2.0 | End-the-run + Next-Action-Verzicht | freigabefähig in V1.9.3 |
 

@@ -254,6 +254,8 @@ const V1921_QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([V1921_AI_BOON_ID, V1921_BOARDWALK_ID]);
 const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
+const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
+const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -2116,6 +2118,20 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
+    if (definition.id === V1922_POLITICAL_OVERTHROW_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 3 Credits`,
+          agendaId,
+          [{ clicks: 1 }],
+          { cardId: agendaId, agendaAbility: "v1922_political_overthrow", gainCreditsAmount: 3 }
+        )
+      );
+      continue;
+    }
     if (definition.id !== "onr_v1_193_corporate-coup" && definition.id !== "onr_v1_209_political-coup") continue;
     if (cardCounter(state, agendaId, "power") <= 0) continue;
     const agendaAbility = definition.id === "onr_v1_193_corporate-coup" ? "corporate_coup" : "political_coup";
@@ -3448,6 +3464,22 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
           spentPowerCounters: removeAmount,
           gainedCredits: gainAmount,
           remainingPowerCounters: cardCounter(state, sourceCardId, "power")
+        };
+        return;
+      }
+      if (legalAction.payload?.agendaAbility === "v1922_political_overthrow") {
+        if (legalAction.side !== "corp") throw new Error("Nur die Korp darf Political Overthrow nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.corp.scoreArea.includes(sourceCardId)) throw new Error("Political Overthrow ist nicht gescort.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1922_POLITICAL_OVERTHROW_ID) throw new Error("Die Agenda-Aktion passt nicht zu Political Overthrow.");
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 3) throw new Error("Political Overthrow gewaehrt in diesem Scope genau 3 Credits.");
+        credits(state, "corp", gainAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: gainAmount,
+          corpCreditsAfter: state.corp.credits
         };
         return;
       }
@@ -6214,6 +6246,26 @@ function scoreAgenda(state: GameState, cardId: string, legalAction?: LegalAction
     state.corp.credits += 5;
     if (legalAction) legalAction.payload = { ...(legalAction.payload ?? {}), onScoreGainCredits: 5, corpCreditsAfter: state.corp.credits };
   }
+  if (definition.id === V1922_CORPORATE_WAR_ID) {
+    const corpCreditsBefore = state.corp.credits;
+    const thresholdMet = corpCreditsBefore >= 12;
+    if (thresholdMet) {
+      state.corp.credits += 12;
+    } else {
+      state.corp.credits = 0;
+    }
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922CorporateWarThreshold: 12,
+        corpCreditsBeforeCorporateWar: corpCreditsBefore,
+        corporateWarThresholdMet: thresholdMet,
+        onScoreGainCredits: thresholdMet ? 12 : 0,
+        onScoreLostAllCredits: !thresholdMet,
+        corpCreditsAfter: state.corp.credits
+      };
+    }
+  }
   if (definition.id === "onr_v1_212_priority-requisition") {
     const candidates = Object.entries(state.cardInstances)
       .filter(([, instance]) => instance.zone.side === "corp" && instance.zone.zone === "serverIce" && !instance.rezzed)
@@ -7535,7 +7587,15 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   }
   if (typeof legalAction.payload?.badPublicityAfter === "number") context.badPublicityAfter = legalAction.payload.badPublicityAfter;
   if (typeof legalAction.payload?.onScoreGainCredits === "number") context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
+  if (typeof legalAction.payload?.corpCreditsBeforeCorporateWar === "number") context.corpCreditsBeforeCorporateWar = legalAction.payload.corpCreditsBeforeCorporateWar;
+  if (typeof legalAction.payload?.v1922CorporateWarThreshold === "number") context.v1922CorporateWarThreshold = legalAction.payload.v1922CorporateWarThreshold;
+  if (typeof legalAction.payload?.corporateWarThresholdMet === "boolean") context.corporateWarThresholdMet = legalAction.payload.corporateWarThresholdMet;
+  if (legalAction.payload?.onScoreLostAllCredits === true) context.onScoreLostAllCredits = true;
   if (typeof legalAction.payload?.corpCreditsAfter === "number") context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
+  if (legalAction.payload?.agendaAbility === "v1922_political_overthrow") {
+    context.agendaAbility = "v1922_political_overthrow";
+    if (typeof legalAction.payload.gainedCredits === "number") context.gainedCredits = legalAction.payload.gainedCredits;
+  }
   if (typeof legalAction.payload?.gainedActions === "number") context.gainedActions = legalAction.payload.gainedActions;
   if (typeof legalAction.payload?.v1918UpgradeAbility === "string") {
     context.v1918UpgradeAbility = legalAction.payload.v1918UpgradeAbility;
@@ -7674,6 +7734,7 @@ function revealForPublicEvent(state: GameState, legalAction: LegalAction): Recor
   const revealsCard =
     ["access_card", "rez_ice", "score_agenda", "steal_agenda", "trash_accessed_card", "trash_resource", "play_event", "play_operation", "pump_breaker", "break_subroutine"].includes(legalAction.type) ||
     (legalAction.type === "gain_credit" && (legalAction.payload?.v1917AssetAbility === "gain_credits" || legalAction.payload?.v1917AssetAbility === "trace_3_tag")) ||
+    (legalAction.type === "gain_credit" && legalAction.payload?.agendaAbility === "v1922_political_overthrow") ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId = legalAction.type === "access_card" ? (typeof legalAction.payload?.accessedCardId === "string" ? legalAction.payload.accessedCardId : state.run?.accessedCardId) : legalAction.payload?.cardId ?? legalAction.source;

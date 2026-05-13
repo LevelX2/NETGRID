@@ -52,12 +52,40 @@
     "hardwareInstallBaseCoveredCount": 9,
     "decision": "no_runtime_catalog_or_ai_promotion"
   },
+  "latestLocalWorkingBasis": {
+    "createdAt": "2026-05-13T19:58:00+02:00",
+    "docRef": "docs/derived/V1_9_22_LOCAL_RESOLVER_WORKING_BASIS.md",
+    "dataRef": "data/rules/v1922-local-resolver-working-basis.json",
+    "readyForNarrowResolverImplementationCount": 2,
+    "readyCandidates": ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"],
+    "decision": "no_runtime_catalog_or_ai_promotion"
+  },
+  "latestLocalCardFacts": {
+    "createdAt": "2026-05-13T20:20:00+02:00",
+    "docRef": "docs/derived/V1_9_22_LOCAL_CARD_FACTS_WORKING_BASIS.md",
+    "dataRef": "data/rules/v1922-local-card-facts.json",
+    "cardCount": 47,
+    "localFactsAvailableCount": 47,
+    "unresolvedUserAttributeConflictCount": 0,
+    "readyForNarrowImplementationCount": 2,
+    "readyCandidates": ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"],
+    "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
+  },
+  "latestRuntimeResolverSlice": {
+    "implementedAt": "2026-05-13T20:42:00+02:00",
+    "cards": ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"],
+    "engineTests": [
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3"
+    ],
+    "decision": "runtime_wip_no_catalog_or_ai_promotion"
+  },
   "blockingGates": [
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "No complete local resolver contract is confirmed for the remaining real promotion work.",
-      "removalCondition": "Provide a locally confirmed full Event, Program or Corp resolver contract with costs, timing, targets, choices, visibility, replay/statehash and AI fallback."
+      "summary": "Corporate War and Political Overthrow now have narrow runtime resolver smokes, but the 47-card completion gate is still not promotion-ready.",
+      "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {
       "gateId": "ai_promotion_artifacts",

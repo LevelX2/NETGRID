@@ -21,7 +21,7 @@ V1.0.5K aktiviert 12 lokal geprüfte O:NR-v1-Karten. Die Freigabe bleibt bewusst
 | Cortical Scanner | Corp | Reines End-the-run-Code-Gate |
 | Crystal Wall | Corp | Reine End-the-run-Wall |
 | Data Wall | Corp | Reine End-the-run-Wall, korrigiert auf Rez 1 / Stärke 1 |
-| Data Wall 2.0 | Corp | Reine End-the-run-Wall, korrigiert auf Rez 2 / Stärke 3 |
+| Data Wall 2.0 | Corp | Reine End-the-run-Wall, korrigiert auf Rez 2 / Stärke 1 |
 | Endless Corridor | Corp | Reines End-the-run-Code-Gate, korrigiert auf Rez 4 / Stärke 4 |
 
 ## Zurückgestellt

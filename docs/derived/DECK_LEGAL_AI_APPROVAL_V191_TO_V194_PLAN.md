@@ -30,7 +30,7 @@ Nach dem abgeschlossenen Human-Release V1.9.1 bis V1.9.4 sollen die dort neu fre
 | V1.9.2 | `onr_v1_211_polymer-breakthrough` | Polymer Breakthrough | corp | agenda | `corp_start_of_turn_credit_gain_from_scored_agenda` |
 | V1.9.2 | `onr_v1_235_data-naga` | Data Naga | corp | ice | `trash_installed_program_then_end_the_run` |
 | V1.9.3 | `onr_v1_207_netwatch-operations-office` | Netwatch Operations Office | corp | agenda | `scored_agenda_action_trace_7_add_tag` |
-| V1.9.3 | `onr_v1_213_private-cybernet-police` | Private Cybernet Police | corp | agenda | `scored_agenda_action_trace_7_add_tag` |
+| V1.9.3 | `onr_v1_213_private-cybernet-police` | Private Cybernet Police | corp | agenda | `scored_agenda_action_trace_5_add_tag` |
 | V1.9.3 | `onr_v1_251_jack-attack` | Jack Attack | corp | ice | `run_wide_jack_out_lock_plus_trace_tag_subroutine` |
 | V1.9.3 | `onr_v1_271_tko-2-0` | TKO 2.0 | corp | ice | `end_the_run_plus_runner_forgo_next_action` |
 | V1.9.4 | `onr_v1_208_on-call-solo-team` | On-Call Solo Team | corp | agenda | `scored_agenda_action_if_tagged_deal_1_meat_damage` |

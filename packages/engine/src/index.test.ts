@@ -3609,6 +3609,19 @@ describe("V1.9.3 Mechanikpaket L", () => {
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(1);
 
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinition(state, action) === "onr_v1_213_private-cybernet-police" &&
+        action.payload?.agendaAbility === "private_cybernet_police"
+    );
+    expect(state.trace).toMatchObject({ status: "corp_bid", baseTraceStrength: 5 });
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.runner.tags).toBe(2);
+
     putCorpCardOnTopOfRd(state, "simple_economy_operation");
     putCorpIceOnServer(state, "rd", "onr_v1_251_jack-attack");
     state = toRunnerTurnFromCorpMain(state);
@@ -6465,13 +6478,177 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
   });
 
-  it("keeps V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
+  it("scores Corporate War through a deterministic on-score credit threshold resolver", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_corporate_war",
+      name: "O:NR V1.9.22 Corporate War",
+      cards: [{ id: "onr_v1_196_corporate-war", quantity: 2 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-corporate-war-threshold",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 20;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "onr_v1_196_corporate-war");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_196_corporate-war" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 3; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_196_corporate-war");
+    }
+
+    const legal = mustAction(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_196_corporate-war");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-corporate-war-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-corporate-war-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeScore = state.corp.credits;
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_196_corporate-war");
+    expect(state.corp.credits).toBe(creditsBeforeScore + 12);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      cardDefinitionId: "onr_v1_196_corporate-war",
+      corporateWarThresholdMet: true,
+      onScoreGainCredits: 12
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let missState = createGameAfterSetup({
+      seed: "v1922-corporate-war-threshold-miss",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    missState = apply(missState, "corp", (action) => action.type === "mandatory_draw");
+    missState.corp.credits = 5;
+    missState.corp.clicks = 20;
+    moveCorpCardToHq(missState, "onr_v1_196_corporate-war");
+    missState = apply(missState, "corp", (action) => action.type === "install_card" && sourceDefinition(missState, action) === "onr_v1_196_corporate-war");
+    for (let index = 0; index < 3; index += 1) {
+      missState = apply(missState, "corp", (action) => action.type === "advance_card" && sourceDefinition(missState, action) === "onr_v1_196_corporate-war");
+    }
+    expect(missState.corp.credits).toBeLessThan(12);
+    missState = apply(missState, "corp", (action) => action.type === "score_agenda" && sourceDefinition(missState, action) === "onr_v1_196_corporate-war");
+    expect(missState.corp.credits).toBe(0);
+    expect(missState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      corporateWarThresholdMet: false,
+      onScoreLostAllCredits: true
+    });
+  });
+
+  it("uses Political Overthrow as a side-safe scored-agenda action for Gain 3", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_political_overthrow",
+      name: "O:NR V1.9.22 Political Overthrow",
+      cards: [{ id: "onr_v1_210_political-overthrow", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-political-overthrow",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 40;
+    state.corp.clicks = 40;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "onr_v1_210_political-overthrow");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_210_political-overthrow" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root"
+    );
+    for (let index = 0; index < 9; index += 1) {
+      state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_210_political-overthrow");
+    }
+    state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_210_political-overthrow");
+
+    const legal = mustAction(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1922_political_overthrow");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-political-overthrow-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-political-overthrow-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeAbility = state.corp.credits;
+    const clicksBeforeAbility = state.corp.clicks;
+    state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1922_political_overthrow");
+
+    expect(state.corp.credits).toBe(creditsBeforeAbility + 3);
+    expect(state.corp.clicks).toBe(clicksBeforeAbility - 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      cardDefinitionId: "onr_v1_210_political-overthrow",
+      agendaAbility: "v1922_political_overthrow",
+      gainedCredits: 3
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
       "onr_v1_195_corporate-retreat",
-      "onr_v1_196_corporate-war",
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_206_marine-arcology",
-      "onr_v1_210_political-overthrow",
       "onr_v1_216_security-purge",
       "onr_v1_247_haunting-inquisition",
       "onr_v1_274_tutor",
@@ -6485,6 +6662,11 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
     for (const definitionId of corpLongtailIds) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
+    }
+    for (const definitionId of ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow"] as const) {
+      expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(DEMO_CARDS_BY_ID[definitionId]?.rulesText, definitionId).not.toContain("WIP");
+      expect(DEMO_CARDS_BY_ID[definitionId]?.mechanics.join(" "), definitionId).toContain("per_card_longtail");
     }
   });
 });

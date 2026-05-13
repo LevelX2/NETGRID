@@ -3429,6 +3429,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["play_event", "program", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_196_corporate-war",
+    title: "Corporate War",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 3,
+    agendaPoints: 3,
+    rulesText: "When scored, if Corp has at least 12 credits, gain 12 credits; otherwise lose all credits.",
+    mechanics: ["install_remote", "advance", "score_agenda", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_210_political-overthrow",
+    title: "Political Overthrow",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["black_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 9,
+    agendaPoints: 6,
+    rulesText: "[A]: Gain 3 credits.",
+    mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_022_emergency-self-construct",
     title: "Emergency Self-Construct",
     side: "runner",

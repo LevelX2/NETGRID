@@ -7,18 +7,18 @@ Status: planned
 | --- | --- | --- |
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
-| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware- und 10 Runner-Event-Zielkarten; Events mit No-`play_event`-Promotion-Guard, bis konkrete Resolver vorliegen |
+| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event- und 2 Corp-Agenda-Zielkarten; Events mit No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen |
 | Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Readiness Review und Engine-Guards halten 14/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
-| Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | Engine-Guard und Corp-Readiness-Review halten 14/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
-| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions inkl. Wrong-Side-/Stale-Revalidation gruen |
-| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads und PlayerViews gruen |
-| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash gruen |
+| Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate War` und `Political Overthrow` haben enge Runtime-Resolver; Engine-Guard haelt die verbleibenden 12/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
+| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions sowie `Corporate War`-Score und `Political Overthrow`-scored-agenda-Aktion inkl. Wrong-Side-/Stale-Revalidation gruen |
+| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews sowie Corporate-War-/Political-Overthrow-PublicPayloads gruen |
+| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash sowie Corporate-War-/Political-Overthrow-Replay/StateHash gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; finale V1.9.22-AI-Promotion-Artefakte muessen bis zum Completion-Gate fehlen |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
-| Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
+| Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokale Kartenfaktenbasis fuer 47/47 Karten angelegt; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build; nach Resolververtragsmatrix JSON 305 und catalog 41 gruen |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build; nach Runtime-Resolver-WIP engine 280 und catalog 44 gruen |
 
 ## Mindestchecks im ersten WIP
 
@@ -99,4 +99,41 @@ Status: planned
 
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 41 Tests.
 - Keine neue Karte wurde promotet; der offene V1.9.22-Blocker bleibt unverändert.
+
+## Lokale Resolver-Arbeitsgrundlage 2026-05-13 19:58 CEST
+
+- Neue Artefakte: `docs/derived/V1_9_22_LOCAL_RESOLVER_WORKING_BASIS.md` und `data/rules/v1922-local-resolver-working-basis.json`.
+- Zusatzabdeckung: Private lokale Kontrollquellen aus dem Hauptworkspace werden als versionierte Arbeitsgrundlage referenziert, ohne Volltexte breit zu versionieren.
+- Zusatzabdeckung: `Corporate War` und `Political Overthrow` sind als enge V1.9.22-Resolver-Implementierungskandidaten dokumentiert; `Political Overthrow` ist nach Nutzerbestaetigung auf `Gain 3` entschieden.
+- Zusatzabdeckung: `data/reports/v1922-completion-gate-status.json` verweist per `latestLocalWorkingBasis` auf die neue Arbeitsgrundlage; Runtime-, Catalog- und AI-Promotion bleiben unveraendert false.
+- Catalog-Guard: Arbeitsgrundlage prueft die zwei Kandidaten, den 0-Promotion-Status, die Political-Overthrow-Konfliktentscheidung und die fuenf bewusst vertagten Kandidaten.
+- JSON-Validation fuer `data/**/*.json`: pass, 306 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 42 Tests.
+- Blocker-Status: Der alte Befund "keine implementierbare lokale Grundlage fuer irgendeinen V1.9.22-Zielpfad" ist fuer zwei enge Pfade aufgehoben; V1.9.22 bleibt aber bis Engine-/Manifest-/Coverage-/AI-/Web-/Final-Gates offen.
+
+## Lokale Kartenfaktenbasis 2026-05-13 20:20 CEST
+
+- Neue Artefakte: `docs/derived/V1_9_22_LOCAL_CARD_FACTS_WORKING_BASIS.md` und `data/rules/v1922-local-card-facts.json`.
+- Zusatzabdeckung: 47/47 V1.9.22-WIP-Karten haben eine versionierte lokale Faktenbasis mit knapper Effektzusammenfassung, Zahlenfeldern und noch benoetigten Implementierungsvertraegen.
+- Zusatzabdeckung: 0 offene Attributkonflikte; `Political Overthrow` ist in der Faktenbasis als Nutzerkorrektur `Gain 3` festgehalten.
+- Zusatzabdeckung: `Corporate War` und `Political Overthrow` sind als enge Implementierungskandidaten markiert; keine Karte wird dadurch runtime-, catalog- oder AI-promotet.
+- Zusatzabdeckung: `data/reports/v1922-completion-gate-status.json` verweist per `latestLocalCardFacts` auf die neue Arbeitsgrundlage.
+- JSON-Validation fuer `data/**/*.json`: pass, 308 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
+
+## Corp-Agenda-Runtime-Resolver 2026-05-13 20:42 CEST
+
+- Runtime-WIP: `Corporate War` und `Political Overthrow` haben jetzt enge Engine-Resolver, ohne Catalog-, AI- oder Release-Promotion.
+- Zusatzabdeckung `Corporate War`: On-score-Schwelle 12 Credits; bei Treffer Gain 12, sonst alle Credits verlieren; Wrong-Side-/Stale-Revalidation, side-sichere PublicPayloads und Replay/StateHash.
+- Zusatzabdeckung `Political Overthrow`: scored-agenda LegalAction `[A]: Gain 3`; Kostenabzug, Wrong-Side-/Stale-Revalidation, side-sichere PublicPayloads und Replay/StateHash.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 280 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
+- JSON-Validation fuer `data/**/*.json`: pass, 308 Dateien.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 79 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 

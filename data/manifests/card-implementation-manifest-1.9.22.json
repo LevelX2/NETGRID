@@ -351,10 +351,12 @@
     },
     {
       "cardCode": "onr_v1_196_corporate-war",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_corp_agenda_on_score_credit_threshold",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver"
+      ]
     },
     {
       "cardCode": "onr_v1_197_data-fort-reclamation",
@@ -372,10 +374,12 @@
     },
     {
       "cardCode": "onr_v1_210_political-overthrow",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_scored_agenda_action_gain_3",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3"
+      ]
     },
     {
       "cardCode": "onr_v1_216_security-purge",

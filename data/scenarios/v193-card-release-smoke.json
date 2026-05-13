@@ -19,7 +19,7 @@
   ],
   "steps": [
     "Starte ein deterministisches V1.9.3-Smoke-Match mit den V1.9.3 Runner- und Corp-Decks.",
-    "Verifiziere Netwatch Operations Office und Private Cybernet Police als gescorte Trace-7-Agendaaktionen inklusive Tag-Ergebnis bei Erfolg.",
+    "Verifiziere Netwatch Operations Office als gescorte Trace-7-Agendaaktion und Private Cybernet Police als gescorte Trace-5-Agendaaktion inklusive Tag-Ergebnis bei Erfolg.",
     "Verifiziere Jack Attack mit run-weitem Jack-out-Lock und Trace-Tag-Subroutine innerhalb derselben Encounter-Kette.",
     "Verifiziere TKO 2.0: End-the-run plus deterministischer Next-Action-Verzicht des Runners.",
     "Verifiziere Replay- und StateHash-Stabilitaet fuer Trace-, Run-Lock- und Action-Economy-Pfade."

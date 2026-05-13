@@ -69,6 +69,36 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 20:42 CEST
+- Ergebnis: V1.9.22 Corp-Agenda-Runtime-Resolver fuer `Corporate War` und `Political Overthrow` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` ergaenzt Runtime-Definitionen fuer `onr_v1_196_corporate-war` und `onr_v1_210_political-overthrow`. `packages/engine/src/index.ts` resolved `Corporate War` beim Scoren ueber die 12-Credit-Schwelle mit Gain 12 oder Creditverlust und oeffnet fuer gescortes `Political Overthrow` eine Korp-LegalAction `[A]: Gain 3`. `packages/engine/src/index.test.ts` deckt beide Pfade mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: JSON-Validation pass (308 Dateien); `catalog` pass (44), `engine` pass (280), `ai` pass (86), `server` pass (72), `web` pass (79), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: corp agenda resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 20:20 CEST
+- Ergebnis: V1.9.22 lokale Kartenfaktenbasis fuer alle 47 WIP-Karten hergestellt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_LOCAL_CARD_FACTS_WORKING_BASIS.md` und `data/rules/v1922-local-card-facts.json` halten fuer 47/47 V1.9.22-WIP-Karten lokale Fakten mit Zahlenfeldern, Effektzusammenfassung und benoetigten Implementierungsvertraegen fest. Offene Attributkonflikte: 0. `Corporate War` und `Political Overthrow` bleiben als erste enge Implementierungskandidaten markiert; `Political Overthrow` ist verbindlich `Gain 3`. `data/reports/v1922-completion-gate-status.json`, `docs/derived/V1_9_22_TEST_MATRIX.md`, `docs/codex/CODEX_STATUS.md` und Wissenslog/Index wurden nachgezogen. Keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: JSON-Validation pass (308 Dateien); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44).
+- Git: Noch kein Checkpoint fuer diesen Lauf erzeugt.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil jetzt nicht mehr Kartendaten, sondern Engine-/LegalAction-/applyAction-, Manifest/Coverage-, AI-, Webclient-Version- und Final-Review-Gates fuer konkrete Umsetzungsschnitte offen sind.
+
+- Zeitpunkt: 2026-05-13 19:58 CEST
+- Ergebnis: V1.9.22 lokale Resolver-Arbeitsgrundlage hergestellt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_LOCAL_RESOLVER_WORKING_BASIS.md` und `data/rules/v1922-local-resolver-working-basis.json` stellen eine versionierte Arbeitsgrundlage aus privaten lokalen Kontrollquellen her, ohne Volltexte breit zu versionieren. `Corporate War` und `Political Overthrow` sind jetzt enge Implementierungskandidaten; `Political Overthrow` ist nach Nutzerbestaetigung verbindlich `Gain 3`. `data/reports/v1922-completion-gate-status.json`, `docs/derived/V1_9_22_TEST_MATRIX.md`, `docs/codex/CODEX_STATUS.md` und Wissenslog/Index wurden nachgezogen. Keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: JSON-Validation pass (306 Dateien); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (42).
+- Git: Noch kein Checkpoint fuer diesen Lauf erzeugt.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Engine-/LegalAction-/applyAction-, Manifest/Coverage-, AI-, Webclient-Version- und Final-Review-Gates fuer die neuen Kandidaten offen sind.
+
 - Zeitpunkt: 2026-05-13 19:41 CEST
 - Ergebnis: V1.9.22 Statusalignment nach Resolververtragsmatrix; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
@@ -777,11 +807,11 @@ Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 ## Blocker
 
 - Blocker-ID: V1922_NO_COMPLETE_LOCAL_RESOLVER_CONTRACT_2026-05-13
-- Status: active
+- Status: resolved-for-narrow-implementation, release-gates-still-open
 - Betroffener Release: V1.9.22
-- Beschreibung: Fuer den aktuellen V1.9.22-Per-card-Resolver-Longtail liegen lokal nur Typoberflaechen, bestaetigte Teilnotizen und No-Promotion-Readiness-Reviews vor. Die erneute lokale Quellensuche hat keinen vollstaendigen per-card Resolververtrag mit Kosten, Timing, Zielen, Choices, Visibility, Replay/StateHash und AI-Fallback ergeben. Deshalb duerfen keine weiteren Karten als `human_playable`, `deck_legal` oder `ai_supported` promotet werden.
-- Removal Condition: Eine lokale, versionierte Quelle oder ein fuehrendes Planungsartefakt muss fuer mindestens einen V1.9.22-Zielpfad einen vollstaendigen Resolververtrag liefern; danach Engine-/LegalAction-/applyAction-, Visibility-, Replay/StateHash-, Manifest/Coverage-, AI- und Web-Gates fuer genau diesen Pfad umsetzen und pruefen.
-- Letzter Befund: 2026-05-13 19:41 CEST, dokumentiert in `data/reports/v1922-completion-gate-status.json`, `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md`, `data/rules/v1922-resolver-contracts.json` und durch `packages/catalog/src/index.test.ts` gegen Gate-Statusreport sowie Per-card-Matrix abgesichert.
+- Beschreibung: Der alte harte Befund, dass fuer keinen V1.9.22-Zielpfad eine implementierbare lokale Grundlage vorliegt, ist fuer `Corporate War` und `Political Overthrow` aufgehoben. `Political Overthrow` wurde per Nutzerentscheidung auf `Gain 3` entschieden. Keine dieser Karten ist dadurch bereits `human_playable`, `deck_legal` oder `ai_supported`.
+- Removal Condition: Die engen Kandidaten muessen in Engine/LegalAction/applyAction, Visibility, Replay/StateHash, Manifest/Coverage, AI und Webclient-Gates umgesetzt und geprueft werden; erst danach darf eine kontrollierte Promotion erfolgen.
+- Letzter Befund: 2026-05-13 19:58 CEST, dokumentiert in `docs/derived/V1_9_22_LOCAL_RESOLVER_WORKING_BASIS.md`, `data/rules/v1922-local-resolver-working-basis.json`, `data/reports/v1922-completion-gate-status.json` und durch `packages/catalog/src/index.test.ts` gegen die lokale Arbeitsgrundlage abgesichert.
 
 - Blocker-ID: LOCK_PATH_PERMISSION_DENIED_2026-05-12
 - Status: behoben durch Worktree-Lockpfad

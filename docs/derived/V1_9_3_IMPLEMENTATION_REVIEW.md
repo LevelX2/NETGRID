@@ -16,7 +16,7 @@ V1.9.3 wurde als gate-konformer Kernrelease umgesetzt. Der im V1.9.3-Preflight e
   - `onr_v1_271_tko-2-0`
 
 - Engine-Erweiterung:
-  - Scored-Agenda-Aktionen für Netwatch Operations Office und Private Cybernet Police mit Trace 7 und Tag-Vergabe bei Erfolg.
+  - Scored-Agenda-Aktionen für Netwatch Operations Office mit Trace 7 und Private Cybernet Police mit Trace 5; beide vergeben bei Erfolg einen Tag.
   - Jack Attack Subroutine mit run-weitem Jack-out-Lock und Trace-Tag-Pfad.
   - TKO 2.0 Subroutine mit End-the-run plus deterministischem Next-Action-Verzicht des Runners.
   - Turn-Flag-Fallback für Action-Verzicht über Zuggrenzen hinweg ohne Replay-/StateHash-Drift.

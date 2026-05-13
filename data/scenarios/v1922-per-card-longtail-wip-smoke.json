@@ -61,16 +61,18 @@
     "All nine V1.9.22 runner hardware target cards have install LegalAction smokes with wrong-side/stale revalidation, Visibility and Replay/StateHash coverage.",
     "Ten V1.9.22 runner event target cards have runtime definitions and an explicit no-play_event-promotion guard until concrete event resolvers exist.",
     "Fourteen V1.9.22 runner program target cards have explicit no-playable-runtime and no install/pump/break LegalAction guards until local cost/MU/breaker values are confirmed.",
-    "Fourteen V1.9.22 Corp agenda, ICE and operation target cards have an explicit no-playable-runtime guard until concrete resolvers exist.",
+    "Corporate War has a deterministic on-score credit threshold resolver with wrong-side/stale revalidation, side-safe public payloads and Replay/StateHash coverage.",
+    "Political Overthrow has a scored-agenda Gain 3 LegalAction with wrong-side/stale revalidation, side-safe public payloads and Replay/StateHash coverage.",
+    "The remaining twelve V1.9.22 Corp agenda, ICE and operation target cards have an explicit no-playable-runtime guard until concrete resolvers exist.",
     "The V1.9.22 manifest, mechanics coverage and this WIP scenario stay aligned to the exact 47-card WIP set without catalog or AI promotion.",
     "The web catalog API keeps all 47 V1.9.22 WIP cards out of the ai_supported filter and does not promote visible detail responses.",
     "The visible web client version remains V1.9.21 until the V1.9.22 completion gate is reached.",
     "The resolver-contract inventory covers all 47 WIP cards across six clusters and marks no cluster ready for promotion."
   ],
   "verification": {
-    "json": "pass: 303 files",
-    "catalog": "pass: 38 tests including V1.9.22 WIP artifact-alignment and resolver-contract inventory guards",
-    "engine": "pass: 278 tests including all nine runner hardware install smokes, runner-event no-promotion guard, runner-program no-playable-runtime/no install-pump-break LegalAction guard and Corp-longtail no-playable-runtime guard",
+    "json": "pass: 308 files",
+    "catalog": "pass: 44 tests including V1.9.22 WIP artifact-alignment, local card facts and resolver-contract guards",
+    "engine": "pass: 280 tests including all nine runner hardware install smokes, Corporate War and Political Overthrow resolver smokes, runner-event no-promotion guard, runner-program no-playable-runtime/no install-pump-break LegalAction guard and unresolved Corp-longtail no-playable-runtime guard",
     "ai": "pass: 86 tests including V1.9.22 AI no-promotion guard",
     "server": "pass: 72 tests",
     "web": "pass: 79 tests including V1.9.22 web catalog no-promotion and version guards",
@@ -83,8 +85,8 @@
     "releaseDone": false,
     "catalogPromoted": false,
     "aiPromoted": false,
-    "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
+    "runtimeDefinitionsReady": "runner_hardware_event_and_two_corp_agenda_clusters_21_of_47",
     "originalsetCompletionGateReady": false,
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_runner_event_program_legalaction_and_corp_no_promotion_guards"
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_corporate_war_and_political_overthrow_resolvers_plus_runner_event_program_and_unresolved_corp_no_promotion_guards"
   }
 }
