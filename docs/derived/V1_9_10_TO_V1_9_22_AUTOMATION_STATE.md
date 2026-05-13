@@ -28,6 +28,8 @@ Completion-Modus: Gate-pflichtig
 - Ziel-Laufzeit bei offenem Release ist 45 bis 50 Minuten.
 - Nicht freiwillig vor 40 Minuten Gesamtlaufzeit stoppen, solange kein harter Blocker, kein fremder Lock, keine fremden/unklaren Worktree-Aenderungen und keine dokumentierte "keine sinnvolle naechste Aktion"-Lage vorliegt.
 - Unter 40 Minuten sind nur harte technische/fachliche Blocker, fremder Lock, fremde/unklare Worktree-Aenderungen, vollstaendige Abarbeitung aller Releases V1.9.10 bis V1.9.22 oder eine konkret begruendete "keine sinnvolle naechste Aktion"-Lage erlaubte Stop-Gruende. Completion-Gate, WIP-Checkpoint, gruene Teiltests, rote Pflichtchecks ohne abgeschlossene harte Blockeranalyse oder Kontextkomprimierung reichen nicht.
+- Eine "keine sinnvolle naechste Aktion"-Lage ist nur gueltig, wenn in State, Implementation Review, Testmatrix, Manifest/Coverage, AI-Hints/Smokes, Server/Web-Gates, Final Review und Webclient-Version keine konkrete releasebezogene Aufgabe mehr auffindbar ist. Sie ist ungueltig, sobald der Laufbericht oder ein fuehrendes Artefakt selbst einen naechsten Einstieg, einen Gap, ein offenes Gate, fehlende Promotion/Finalisierung, fehlende Helper, fehlende Ambush-/Access-/Run-Pfade, fehlende Daten-/AI-Artefakte, fehlende Full Checks, fehlende Webclient-Version oder fehlenden Final Review benennt.
+- "Groesserer Promotion-Schnitt", "neuer groesserer Schnitt", "naechste Aufgabe ist umfangreicher" oder "naechster Einstieg ist dokumentiert" sind keine Stop-Gruende. Unter 40 Minuten muss die Automation daraus den ersten konkreten Teilschnitt ableiten und weiterarbeiten; wenn er nicht fertig wird, wird er als WIP gesichert.
 - Jeder Stop unter 40 Minuten muss im Laufbericht `Early-Stop-Reason:` mit erlaubter Stop-Gruppe nennen.
 - Kontextkomprimierung ist kein Stoppgrund; der Lauf setzt am Cursor fort.
 - Spaetestens nach etwa 45 bis 50 Minuten Status schreiben, WIP committen und pushen, falls es versionierbare Aenderungen gibt.
@@ -66,6 +68,14 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | pending |
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-13 nach 07:28 CEST
+- Ergebnis: Controller-Regel gegen falsche "keine sinnvolle naechste Aktion"-Stops gehärtet.
+- Release: V1.9.15
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Die aktive Stop-Regel stellt klar, dass ein Lauf unter 40 Minuten nicht mit "keine sinnvolle naechste Aktion" stoppen darf, wenn der Laufbericht oder ein fuehrendes Artefakt selbst konkrete naechste Arbeit benennt. Fuer den aktuellen V1.9.15-Stand sind insbesondere installierte Access-/Run-Helfer, Access-Ambush-Gap, finale Promotion, Manifest/Coverage/AI-Artefakte, Catalog/Web-Promotion, Full Checks, Final Review und Webclient-Version konkrete Folgearbeit und keine Stopgruende.
+- Cursor: V1.9.15 bleibt aktueller Release.
 
 - Zeitpunkt: 2026-05-13 07:28 CEST
 - Ergebnis: V1.9.15 Run/Access-WIP um konkrete Engine-/LegalAction-Smokes erweitert; Cursor bleibt auf V1.9.15 `implementing`.
