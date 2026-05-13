@@ -72,6 +72,12 @@ Naechster kleiner Schnitt: ein weiterer lokal bestaetigter Corp-Agenda-/Operatio
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: erst rot wegen fehlender PublicPayload-Zaehlung fuer `Organ Donor`, danach pass, 286 Tests nach PublicContext-Erweiterung fuer `trashedCount`, `gainedCredits` und `runnerCreditsAfter`.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach `Organ Donor`-Manifest-Alignment.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach `Organ Donor`-Resolver.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task ai`: pass, 86 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task server`: pass, 72 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task web`: pass, 79 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - JSON-Validation fuer `data/**/*.json`: pass, 304 Dateien nach Source-Scan-Report-Aktualisierung.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 40 Tests inkl. Completion-Gate-Statusreport.
 - JSON-Validation fuer `data/**/*.json`: pass, 305 Dateien nach Resolververtragsmatrix.

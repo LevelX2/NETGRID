@@ -18,7 +18,7 @@ Status: planned
 | Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokale Kartenfaktenbasis fuer 47/47 Karten angelegt; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build; nach Runtime-Resolver-WIP engine 286 und catalog 44 gruen |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Runtime-Resolver-WIP: engine 286, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung |
 
 ## Mindestchecks im ersten WIP
 
@@ -57,6 +57,7 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 285 Tests.
 - Zusatzschnitt: `Organ Donor` privater Grip-Trash-Economy-Choice.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen fehlender PublicPayload-Zaehlung, danach pass, 286 Tests.
+- Breiter Verify nach `Organ Donor`: `catalog` 44, `ai` 86, `server` 72, `web` 79, `typecheck`, `test`, `lint` und `build` gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 
 ## WIP-Artefakt-Alignment-Guard 2026-05-13 18:10 CEST
 
