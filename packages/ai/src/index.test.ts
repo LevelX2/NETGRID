@@ -2860,7 +2860,7 @@ function putCorpIceOnServer(state: GameState, serverId: "hq" | "rd" | "archives"
   expect(server).toBeDefined();
   if (!server) throw new Error("Missing server");
   removeEverywhere(state, id);
-  server.ice.unshift(id);
+  server.ice.push(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
   return id;
 }

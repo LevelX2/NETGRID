@@ -8490,7 +8490,7 @@ function CardView({
   return (
     <div className={`cardSlot${showCardActions ? " actionMenuOpen" : ""}`}>
       {positionBadge ? (
-        <span className="cardPositionBadge" aria-label={`ICE ${positionBadge}: äußerstes ICE zuerst`}>
+        <span className="cardPositionBadge" aria-label={`ICE ${positionBadge}: Installationsreihenfolge von innen nach außen`}>
           {positionBadge}
         </span>
       ) : null}

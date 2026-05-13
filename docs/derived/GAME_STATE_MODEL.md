@@ -78,7 +78,7 @@ type CorpServer = {
   id: ServerId
   kind: "hq" | "rd" | "archives" | "remote"
   label: string
-  ice: CardInstanceRef[] // outermost first
+  ice: CardInstanceRef[] // innermost first / installation order
   root: CardInstanceRef[]
 }
 ```
@@ -113,7 +113,7 @@ type CardInstance = {
 | `corp:rd` | Corp | Anzahl; oberste Karte nur bei Access | Titel/Reihenfolge sichtbar | R&D-Top ist verdeckt bis Access. |
 | `corp:archives` | Corp | Offene Archives-Karten sichtbar, facedown nur beim relevanten Access | Sichtbar | MVP darf Archives einfach halten. |
 | `corp:scoreArea` | Corp | Sichtbar | Sichtbar | Gescorete Agendas öffentlich. |
-| `corp:server:*:ice` | Corp | Unrezzed nur als verdeckte Karte; rezzed sichtbar | Sichtbar | ICE-Reihenfolge outermost first. |
+| `corp:server:*:ice` | Corp | Unrezzed nur als verdeckte Karte; rezzed sichtbar | Sichtbar | ICE-Reihenfolge ist innermost first / Installationsreihenfolge; der Runner encountered von außen nach innen, also vom letzten ICE-Index rückwärts. |
 | `corp:server:*:root` | Corp | Unrezzed nur als verdeckte Karte bis Access/Rez | Sichtbar | Agendas bleiben unrezzed/facedown bis Score oder Access. |
 | `runner:grip` | Runner | Titel sichtbar | Anzahl | Corp sieht keine Grip-Titel. |
 | `runner:stack` | Runner | Anzahl; Reihenfolge engine-intern | Anzahl | Keine Stack-Titel in CorpView. |
@@ -155,4 +155,3 @@ PlayerViews enthalten keine Full-State-Struktur und keine privaten Gegnerzonen. 
 | INV-006 | PendingChoice gehört genau einer Seite und ist side-sicher serialisierbar. | REQ-012 | T-VIS-004 |
 | INV-007 | LegalActions sind für aktuelle StateVersion, TimingPoint und Seite gültig. | REQ-007 | T-ACTION-001 |
 | INV-008 | Jedes Event referenziert StateVersionBefore, StateVersionAfter und StateHashAfter. | REQ-033 | T-EVENT-001 |
-

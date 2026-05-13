@@ -3927,7 +3927,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   if (placement === "ice") {
     const server = legalAction.payload?.serverId === "new_remote" ? createRemote(state) : mustServer(state, String(legalAction.payload?.serverId));
     spendCredits(state, "corp", legalAction.costs[0]?.credits ?? 0);
-    server.ice.unshift(cardId);
+    server.ice.push(cardId);
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: false, rezzed: false, zone: { side: "corp", zone: "serverIce", serverId: server.id } };
     return;
   }
@@ -4024,7 +4024,7 @@ function startRun(
     runId: `run_${state.stateVersion + 1}`,
     attackedServerId: server.id,
     phase: "approach_ice",
-    position: server.ice.length > 0 ? { kind: "ice", serverId: server.id, iceIndex: 0 } : { kind: "server", serverId: server.id },
+    position: server.ice.length > 0 ? { kind: "ice", serverId: server.id, iceIndex: server.ice.length - 1 } : { kind: "server", serverId: server.id },
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
     bartmossUsedBreakerIdsThisEncounter: [],
@@ -4045,7 +4045,7 @@ function startRun(
   };
   applyV1921AiBoonStartOfRun(state, legalAction);
   if (server.ice.length > 0) {
-    const approachedIceId = mustArrayValue(server.ice, 0, "Server has no approached ice.");
+    const approachedIceId = mustArrayValue(server.ice, server.ice.length - 1, "Server has no approached ice.");
     state.run.approachedIceId = approachedIceId;
     approachOrEncounterIce(state, approachedIceId);
   } else {
@@ -4539,8 +4539,8 @@ function movePastCurrentIce(state: GameState): void {
   const run = mustRun(state);
   if (run.position.kind !== "ice") throw new Error("Runner ist nicht an ICE positioniert.");
   const server = mustServer(state, run.position.serverId);
-  const nextIndex = run.position.iceIndex + 1;
-  if (nextIndex < server.ice.length) {
+  const nextIndex = run.position.iceIndex - 1;
+  if (nextIndex >= 0) {
     const approachedIceId = mustArrayValue(server.ice, nextIndex, "Naechstes ICE fehlt.");
     if (isV097OrLater(state)) {
       const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
@@ -4595,9 +4595,9 @@ function resolveVacuumLinkRewindSubroutine(state: GameState, run: ActiveRun, leg
     return false;
   }
 
-  let targetIndex = 0;
+  let targetIndex = server.ice.length - 1;
   let remainingRezzedBack = die;
-  for (let index = currentIndex - 1; index >= 0; index -= 1) {
+  for (let index = currentIndex + 1; index < server.ice.length; index += 1) {
     const cardId = server.ice[index];
     if (!cardId || !mustInstance(state.cardInstances, cardId).rezzed) continue;
     remainingRezzedBack -= 1;
@@ -4606,7 +4606,7 @@ function resolveVacuumLinkRewindSubroutine(state: GameState, run: ActiveRun, leg
       break;
     }
   }
-  if (remainingRezzedBack > 0) targetIndex = 0;
+  if (remainingRezzedBack > 0) targetIndex = server.ice.length - 1;
   const targetIceId = mustArrayValue(server.ice, targetIndex, "Vacuum-Link-Ziel-ICE fehlt.");
 
   const { encounteredIceId: _encounteredIceId, accessedCardId: _accessedCardId, ...runWithoutEncounter } = run;

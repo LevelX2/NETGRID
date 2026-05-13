@@ -295,11 +295,29 @@ describe("MVP 0.1 turns and cards", () => {
 
     const rdServer = state.corp.servers.find((server) => server.id === "rd");
     expect(rdServer?.ice).toHaveLength(3);
+    expect(rdServer?.ice).toEqual([firstIceId, secondIceId, thirdIceId]);
     expect(state.corp.credits).toBe(17);
   });
 });
 
 describe("MVP 0.1 runs, access and scoring", () => {
+  it("keeps ICE in installation order while the Runner approaches from the outermost ICE inward", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ice-install-order-run-order" }));
+    const innerIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const outerIceId = putCorpIceOnServer(state, "rd", "simple_sentry_ice");
+    const server = state.corp.servers.find((candidate) => candidate.id === "rd");
+
+    expect(server?.ice).toEqual([innerIceId, outerIceId]);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    expect(state.run?.position).toEqual({ kind: "ice", serverId: "rd", iceIndex: 1 });
+    expect(state.run?.approachedIceId).toBe(outerIceId);
+
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    expect(state.run?.position).toEqual({ kind: "ice", serverId: "rd", iceIndex: 0 });
+    expect(state.run?.approachedIceId).toBe(innerIceId);
+  });
+
   it("lets the Runner steal the top R&D agenda", () => {
     let state = toRunnerTurn(createGameAfterSetup({ seed: "steal-rd" }));
     putCorpCardOnTopOfRd(state, "simple_agenda");
@@ -3231,7 +3249,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
       if (!run || run.position.kind !== "ice") {
         throw new Error("expected run position to be ice after vacuum-link rewind");
       }
-      expect(run.position.iceIndex).toBe(0);
+      expect(run.position.iceIndex).toBe(1);
       const movementActions = getLegalActions(state, "runner").map((action) => action.type).sort();
       expect(movementActions).toEqual(["continue_run", "jack_out"]);
       covered = true;
@@ -10386,7 +10404,7 @@ function putCorpIceOnServer(state: GameState, serverId: "hq" | "rd" | "archives"
   expect(server).toBeDefined();
   if (!server) throw new Error("Missing server");
   removeEverywhere(state, id);
-  server.ice.unshift(id);
+  server.ice.push(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
   return id;
 }

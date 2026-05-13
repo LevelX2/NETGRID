@@ -1354,7 +1354,7 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
   const knownServerPressure = input.playerView.servers.reduce((sum, server) => sum + server.ice.filter((card) => card.known || card.rezzed).length + server.root.filter((card) => card.known).length, 0);
   const blockedRunServers = new Set(
     input.playerView.servers
-      .filter((server) => isBlockedByKnownRezzedIce(server.ice[0], rigDefinitionIds))
+      .filter((server) => isBlockedByKnownRezzedIce(server.ice.at(-1), rigDefinitionIds))
       .map((server) => server.id)
   );
   return {

@@ -4389,7 +4389,7 @@ function putCorpIceOnServerForTest(state: GameState, serverId: "hq" | "rd" | "ar
   const server = state.corp.servers.find((candidate) => candidate.id === serverId);
   if (!server) throw new Error("Missing server");
   removeEverywhereForTest(state, id);
-  server.ice.unshift(id);
+  server.ice.push(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
   return id;
 }

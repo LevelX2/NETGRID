@@ -716,7 +716,7 @@ function assessKnownRezzedIcePath(
 ): { blocked: boolean; visibleBreakCost?: number } {
   let visibleBreakCost = 0;
   const breakerStrengths = new Map(rigCards.map((card) => [card.instanceId, card.strength ?? 0]));
-  for (const ice of iceCards) {
+  for (const ice of iceCards.slice().reverse()) {
     if (!ice.definitionId || !ice.known || ice.rezzed !== true) continue;
     const endTheRunCount = endTheRunSubroutineCount(ice.definitionId);
     if (endTheRunCount === 0) continue;
