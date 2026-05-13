@@ -8315,6 +8315,7 @@ function CardView({
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
+  const hiddenBackClass = !card.known && hiddenSide ? ` hidden${hiddenSide === "runner" ? "Runner" : "Corp"}Back` : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
@@ -8492,7 +8493,7 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
