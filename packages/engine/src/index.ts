@@ -3987,10 +3987,19 @@ function canInstallCorpRootCardInServer(state: GameState, definition: CardDefini
   });
 }
 
-function trashTopRunnersConferenceOnRunStart(state: GameState): void {
+function trashTopRunnersConferenceOnRunStart(state: GameState, legalAction?: LegalAction): void {
   const toTrash = state.runner.rig.resources.filter((cardId) => definitionFor(state, cardId).id === TOP_RUNNERS_CONFERENCE_ID).sort();
   for (const cardId of toTrash) {
     trashRunnerInstalledCardToHeap(state, cardId);
+    recordResolvedEffect(legalAction, {
+      kind: "trash_card",
+      visibility: "public",
+      side: "runner",
+      ...sourceEffectFields(state, cardId),
+      ...cardEffectFields(state, cardId),
+      zoneLabel: "Heap",
+      reason: "run_start"
+    });
   }
 }
 
@@ -4017,7 +4026,7 @@ function startRun(
   const server = mustServer(state, serverId);
   const flags = ensureRunnerTurnFlags(state);
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
-  trashTopRunnersConferenceOnRunStart(state);
+  trashTopRunnersConferenceOnRunStart(state, legalAction);
   const installedAccessBonus = v1915InstalledAccessBonus(state, server.id);
   applyV1915RunStartCounterHelpers(state);
   state.phase = "run";
@@ -5545,7 +5554,7 @@ function processDiscardStep(state: GameState, side: Side, legalAction?: LegalAct
 
 function completeDiscardPhase(state: GameState, side: Side, legalAction?: LegalAction): void {
   if (side === "runner") {
-    startCorpTurn(state);
+    startCorpTurn(state, legalAction);
     return;
   }
   startRunnerTurn(state, legalAction);
@@ -5559,14 +5568,14 @@ function applyRunnerForgoNextAction(state: GameState): void {
   ensureRunnerTurnFlags(state).forgoNextActionPending = true;
 }
 
-function startCorpTurn(state: GameState): void {
+function startCorpTurn(state: GameState, legalAction?: LegalAction): void {
   state.activeSide = "corp";
   state.phase = "corp_draw_phase";
   state.timingPoint = "corp_draw.mandatory_draw";
   state.corp.clicks = 3;
   state.runner.clicks = 0;
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
-  applyCorpStartOfTurnEffects(state);
+  applyCorpStartOfTurnEffects(state, legalAction);
 }
 
 function startRunnerTurn(state: GameState, legalAction?: LegalAction): void {
@@ -5620,30 +5629,41 @@ function resolveBizarreEncryptionDelayedAgendas(state: GameState): void {
   else delete state.bizarreEncryptionDelayedAgendas;
 }
 
-function applyCorpStartOfTurnEffects(state: GameState): void {
-  const polymerCount = state.corp.scoreArea.reduce((sum, cardId) => {
-    return definitionFor(state, cardId).id === POLYMER_BREAKTHROUGH_ID ? sum + 1 : sum;
-  }, 0);
-  if (polymerCount > 0) {
-    credits(state, "corp", polymerCount);
+function applyCorpStartOfTurnEffects(state: GameState, legalAction?: LegalAction): void {
+  const scoredStartCredits = state.corp.scoreArea
+    .filter((cardId) => {
+      const definitionId = definitionFor(state, cardId).id;
+      return definitionId === POLYMER_BREAKTHROUGH_ID || definitionId === EMPLOYEE_EMPOWERMENT_ID;
+    })
+    .sort();
+  for (const cardId of scoredStartCredits) {
+    credits(state, "corp", 1);
+    recordResolvedEffect(legalAction, {
+      kind: "gain_credits",
+      visibility: "public",
+      side: "corp",
+      amount: 1,
+      ...sourceEffectFields(state, cardId),
+      reason: "start_of_turn"
+    });
   }
-  const acmeCount = rezzedCorpRootCardIds(state).reduce((sum, cardId) => {
-    return definitionFor(state, cardId).id === ACME_SAVINGS_AND_LOAN_ID ? sum + 1 : sum;
-  }, 0);
-  if (acmeCount > 0) {
-    credits(state, "corp", acmeCount);
-  }
-  const v1917RecurringAssetCount = rezzedCorpRootCardIds(state).reduce((sum, cardId) => {
-    return V1917_RECURRING_ASSET_IDS.has(definitionFor(state, cardId).id) ? sum + 1 : sum;
-  }, 0);
-  if (v1917RecurringAssetCount > 0) {
-    credits(state, "corp", v1917RecurringAssetCount);
-  }
-  const employeeEmpowermentCount = state.corp.scoreArea.reduce((sum, cardId) => {
-    return definitionFor(state, cardId).id === EMPLOYEE_EMPOWERMENT_ID ? sum + 1 : sum;
-  }, 0);
-  if (employeeEmpowermentCount > 0) {
-    credits(state, "corp", employeeEmpowermentCount);
+
+  const rezzedStartCredits = rezzedCorpRootCardIds(state)
+    .filter((cardId) => {
+      const definitionId = definitionFor(state, cardId).id;
+      return definitionId === ACME_SAVINGS_AND_LOAN_ID || V1917_RECURRING_ASSET_IDS.has(definitionId);
+    })
+    .sort();
+  for (const cardId of rezzedStartCredits) {
+    credits(state, "corp", 1);
+    recordResolvedEffect(legalAction, {
+      kind: "gain_credits",
+      visibility: "public",
+      side: "corp",
+      amount: 1,
+      ...sourceEffectFields(state, cardId),
+      reason: "start_of_turn"
+    });
   }
 }
 
@@ -5654,10 +5674,24 @@ function applyRunnerStartOfTurnEffects(state: GameState, legalAction?: LegalActi
   }, 0);
   if (dataRavenCounters > 0) state.runner.tags += dataRavenCounters;
   if (!flags.startOfTurnFloatingCreditsApplied) {
-    for (const cardId of state.runner.rig.resources) {
+    for (const cardId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, cardId);
-      if (definition.id === "onr_v1_163_floating-runner-bbs") credits(state, "runner", 1);
-      if (definition.id === TOP_RUNNERS_CONFERENCE_ID) credits(state, "runner", 3);
+      const amount =
+        definition.id === "onr_v1_163_floating-runner-bbs"
+          ? 1
+          : definition.id === TOP_RUNNERS_CONFERENCE_ID
+            ? 3
+            : 0;
+      if (amount <= 0) continue;
+      credits(state, "runner", amount);
+      recordResolvedEffect(legalAction, {
+        kind: "gain_credits",
+        visibility: "public",
+        side: "runner",
+        amount,
+        ...sourceEffectFields(state, cardId),
+        reason: "start_of_turn"
+      });
     }
     flags.startOfTurnFloatingCreditsApplied = true;
   }

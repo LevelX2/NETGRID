@@ -489,7 +489,7 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   let importance: ChronicleImportance = "normal";
   let visibility: ChronicleVisibility = effect.visibility === "public" ? "public" : effect.visibility === "private_to_side" ? "side" : "redacted";
   let title = "Ein automatischer Effekt wurde aufgelöst";
-  const through = sourceTitle ? ` durch ${sourceTitle}` : "";
+  const through = sourceTitle && sourceTitle !== cardTitle ? ` durch ${sourceTitle}` : "";
 
   switch (effect.kind) {
     case "gain_credits":

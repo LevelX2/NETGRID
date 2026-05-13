@@ -3601,12 +3601,34 @@ describe("V1.9.2 Mechanikpaket K", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = toRunnerTurnFromCorpMain(state);
     expect(state.runner.credits).toBe(creditsAfterInstall + 3);
+    expect(
+      state.eventLog.some((event) =>
+        Array.isArray(event.publicPayload.resolvedEffects) &&
+        event.publicPayload.resolvedEffects.some(
+          (effect) =>
+            effect.kind === "gain_credits" &&
+            effect.side === "runner" &&
+            effect.amount === 3 &&
+            effect.sourceDefinitionId === "onr_v1_184_top-runners-conference" &&
+            effect.reason === "start_of_turn"
+        )
+      )
+    ).toBe(true);
     const conferenceId = state.runner.rig.resources.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_184_top-runners-conference");
     expect(conferenceId).toBeDefined();
     if (!conferenceId) return;
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     expect(state.runner.rig.resources.includes(conferenceId)).toBe(false);
     expect(state.runner.heap).toContain(conferenceId);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "trash_card",
+        side: "runner",
+        cardDefinitionId: "onr_v1_184_top-runners-conference",
+        sourceDefinitionId: "onr_v1_184_top-runners-conference",
+        reason: "run_start"
+      })
+    );
   });
 
   it("handles Polymer start-of-turn credits, AI CFO hidden-zone shuffle action and Data Naga program trash", () => {

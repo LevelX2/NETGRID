@@ -527,6 +527,31 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.importance).toBe("important");
     expect(items[0]?.chips).toContain("Automatisch");
   });
+
+  it("formats self-trash effects without repeating the source card name", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("start_run", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "top-runners-trash",
+            kind: "trash_card",
+            visibility: "public",
+            side: "runner",
+            cardDefinitionId: "onr_v1_184_top-runners-conference",
+            cardTitle: "Top Runners' Conference",
+            sourceDefinitionId: "onr_v1_184_top-runners-conference",
+            sourceTitle: "Top Runners' Conference",
+            reason: "run_start"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items[0]?.title).toBe("Top Runners' Conference wurde getrasht.");
+    expect(items[0]?.chips).toContain("Automatisch");
+  });
 });
 
 function makeEvent(actionType: string, payload: Record<string, unknown> = {}): PublicGameEvent {
