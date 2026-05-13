@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-14 01:05 CEST
+- Ergebnis: V1.9.22 Remaining-Runner-Program-Preflight nachgezogen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md` dokumentiert die fuenf verbleibenden Runner-Programm-Zielkarten. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` bleiben fuer Runtime-Code gesperrt, bis Subroutine-Taxonomie, Pump-/Break-LegalActions und applyAction-Revalidation feststehen. `Zetatech Software Installer` bleibt wegen Installkosten-, Restricted-Credit- und Overlay-Vertrag gesperrt. `data/reports/v1922-completion-gate-status.json`, `docs/codex/CODEX_STATUS.md` und die Wissensbasis wurden nachgezogen. Keine Runtime-, Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: Dokumentations-/Statusschnitt; vorheriger nicht-Breaker-Programm-Breitverify bleibt gruen.
+- Git: WIP-Checkpoint fuer diesen Statusschnitt vorgesehen (`WIP V1.9.22: remaining runner program preflight wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
 - Zeitpunkt: 2026-05-14 01:00 CEST
 - Ergebnis: V1.9.22 Runner-Programm-Install-only-WIP fuer `Poltergeist`, `Rabbit`, `Scatter Shot`, `Speed Trap` und `Startup Immolator` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

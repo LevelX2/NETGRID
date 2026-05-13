@@ -134,12 +134,13 @@
   },
   "latestPreflightReviews": {
     "createdAt": "2026-05-14T00:27:00+02:00",
-    "docs": [
-      "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
-      "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
-      "docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md",
-      "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md",
-      "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md"
+      "docs": [
+        "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
+        "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
+        "docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md",
+        "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md",
+        "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md",
+        "docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md"
     ],
     "nextCodeCandidates": [
       {
@@ -161,6 +162,16 @@
         "cardId": "onr_v1_277_virizz",
         "status": "blocked_pending_run_wide_break_cost_modifier_contract",
         "removalCondition": "Confirm break_subroutine cost projection, applyAction revalidation and credit-pool interactions."
+      },
+      {
+        "cardId": "onr_v1_027_flak",
+        "status": "blocked_pending_breaker_subroutine_taxonomy_contract",
+        "removalCondition": "Confirm AP subroutine taxonomy, pump/break LegalAction projection and applyAction revalidation."
+      },
+      {
+        "cardId": "onr_v1_075_zetatech-software-installer",
+        "status": "blocked_pending_install_cost_and_overlay_contract",
+        "removalCondition": "Confirm install cost, restricted program-install credits and overlay installation contract."
       }
     ],
     "decision": "no_runtime_catalog_or_ai_promotion"

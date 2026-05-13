@@ -50,6 +50,8 @@
 
 - V1.9.22 Runner-Programm-Install-only-WIP: Acht nicht-Breaker-Programme (`False Echo`, `Netspace Inverter`, `Newsgroup Filter`, `Poltergeist`, `Rabbit`, `Scatter Shot`, `Speed Trap`, `Startup Immolator`) haben jetzt enge install-only Runtime-Definitionen ohne Catalog-, AI- oder Release-Promotion. Die jeweiligen Fähigkeiten bleiben gesperrt, bis Trigger-, Sequenz-, Zahlungsfenster-, Aktivierungs-, Timing- und PublicPayload-Verträge lokal bestätigt sind. Engine, Catalog, AI, Server, Web, Typecheck, Test, Lint und Build sind für diesen Teilschnitt grün.
 
+- V1.9.22 Remaining-Runner-Program-Preflight: `docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md` haelt die fuenf offenen Runner-Programme fest: vier Breaker brauchen Subroutine-Taxonomie sowie Pump-/Break-LegalActions; `Zetatech Software Installer` braucht Installkosten-, Restricted-Credit- und Overlay-Vertrag.
+
 - V1.9.22 Runner-Programm-Runtime-WIP: `Shield` hat jetzt eine enge Runtime-Definition ohne Catalog-, AI- oder Release-Promotion. Die Karte nutzt Installkosten 0, MU 1 und das bestehende Event-Modification-Prevention-Fenster fuer bis zu 2 Net Damage pro Runner-Zug; Engine, Catalog, AI, Server, Web, Typecheck, Test, Lint und Build sind fuer diesen Teilschnitt gruen. Die verbleibenden Runner-Programm- und Corp-Longtail-Gates bleiben offen.
 
 - V1.9.22 Newsgroup-Filter-Preflight: `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` haelt nach dem Install-only-Schnitt nur noch die Credit-Gain-Fähigkeit offen; Runtime-Code für `[A]: Gain 1` bleibt gesperrt, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestätigt sind.
