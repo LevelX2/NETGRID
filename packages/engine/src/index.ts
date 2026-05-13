@@ -256,6 +256,7 @@ const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
 const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
+const V1922_OFF_SITE_BACKUPS_ID = "onr_v1_296_off-site-backups";
 const V1922_PLANNING_CONSULTANTS_ID = "onr_v1_298_planning-consultants";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
@@ -884,6 +885,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     name: "onr_corp_operation_gain_credits_3",
     resolve: (state) => {
       state.corp.credits += 3;
+    }
+  },
+  [V1922_OFF_SITE_BACKUPS_ID]: {
+    name: "onr_v1922_corp_operation_private_archives_to_hq",
+    canPlay: (state) => state.corp.archives.length > 0,
+    resolve: (state, legalAction) => {
+      const sourceCardId = String(legalAction.payload?.cardId ?? "");
+      if (!sourceCardId || definitionFor(state, sourceCardId).id !== V1922_OFF_SITE_BACKUPS_ID) throw new Error("Off-Site Backups fehlt als Quelle.");
+      startV1922CorpArchivesToHqChoice(state, sourceCardId, legalAction);
     }
   },
   [V1922_PLANNING_CONSULTANTS_ID]: {
@@ -6459,6 +6469,10 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveV1922CorpRdTopReorderChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1922.corp_archives_to_hq")) {
+    resolveV1922CorpArchivesToHqChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -6880,6 +6894,53 @@ function resolveV1922CorpRdTopReorderChoice(state: GameState, legalAction: Legal
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_corp_rd_reorder_top5",
     arrangedCount: selectedIds.length
+  };
+}
+
+function startV1922CorpArchivesToHqChoice(state: GameState, sourceCardId: CardInstanceId, legalAction: LegalAction): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (definitionFor(state, sourceCardId).id !== V1922_OFF_SITE_BACKUPS_ID) throw new Error("Die Archives-Quelle ist nicht Off-Site Backups.");
+  const archiveCards = state.corp.archives.filter((cardId) => cardId !== sourceCardId);
+  if (archiveCards.length === 0) throw new Error("Archives ist leer.");
+  state.pendingChoice = {
+    choiceId: `v1922_corp_archives_to_hq_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1922.corp_archives_to_hq:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Archives-Karte nach HQ nehmen",
+    kind: "select_cards",
+    options: archiveCards.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_corp_archives_to_hq",
+    eligibleCount: archiveCards.length
+  };
+}
+
+function resolveV1922CorpArchivesToHqChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.corp_archives_to_hq")) throw new Error("Es ist keine V1.9.22-Archives-Choice offen.");
+  const [, sourceCardId] = choice.source.split(":");
+  if (!sourceCardId || definitionFor(state, sourceCardId).id !== V1922_OFF_SITE_BACKUPS_ID) throw new Error("Die V1.9.22-Archives-Choice gehoert nicht zu Off-Site Backups.");
+  const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!selectedId || !state.corp.archives.includes(selectedId)) throw new Error("Die gewaehlte Archives-Karte ist ungueltig.");
+  state.corp.archives = state.corp.archives.filter((cardId) => cardId !== selectedId);
+  state.corp.hq.unshift(selectedId);
+  state.cardInstances[selectedId] = { ...mustInstance(state.cardInstances, selectedId), zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_corp_archives_to_hq",
+    movedCount: 1
   };
 }
 

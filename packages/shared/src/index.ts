@@ -3453,6 +3453,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_296_off-site-backups",
+    title: "Off-Site Backups",
+    side: "corp",
+    type: "operation",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    cost: 0,
+    rulesText: "Bring any card from Archives into HQ.",
+    mechanics: ["play_operation", "hidden_zone_tool", "archives_to_hq", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_298_planning-consultants",
     title: "Planning Consultants",
     side: "corp",

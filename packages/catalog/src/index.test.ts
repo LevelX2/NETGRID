@@ -1863,7 +1863,9 @@ describe("catalog import and status logic", () => {
     const corpAgendaResolverCards = manifestCards.filter((card) =>
       ["v1922_corp_agenda_on_score_credit_threshold", "v1922_scored_agenda_action_gain_3"].includes(card.resolverFamily)
     );
-    const corpOperationResolverCards = manifestCards.filter((card) => card.resolverFamily === "v1922_corp_operation_private_rd_top5_reorder");
+    const corpOperationResolverCards = manifestCards.filter((card) =>
+      ["v1922_corp_operation_private_archives_to_hq", "v1922_corp_operation_private_rd_top5_reorder"].includes(card.resolverFamily)
+    );
     const plannedCards = manifestCards.filter((card) => card.releaseStatus === "planned_no_promotion");
 
     expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
@@ -1902,14 +1904,14 @@ describe("catalog import and status logic", () => {
       expect(card.aiSupported, card.cardCode).toBe(false);
       expect(card.coveredSmokes.length, card.cardCode).toBeGreaterThan(0);
     }
-    expect(corpOperationResolverCards.map((card) => card.cardCode)).toEqual(["onr_v1_298_planning-consultants"]);
+    expect(corpOperationResolverCards.map((card) => card.cardCode).sort()).toEqual(["onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"]);
     for (const card of corpOperationResolverCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
       expect(card.aiSupported, card.cardCode).toBe(false);
       expect(card.coveredSmokes.length, card.cardCode).toBeGreaterThan(0);
     }
 
-    expect(plannedCards).toHaveLength(25);
+    expect(plannedCards).toHaveLength(24);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
       expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);

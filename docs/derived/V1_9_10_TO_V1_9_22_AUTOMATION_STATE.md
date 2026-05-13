@@ -69,14 +69,14 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-13 20:42 CEST
-- Ergebnis: V1.9.22 Corp-Agenda-/Operation-Runtime-Resolver fuer `Corporate War`, `Political Overthrow` und `Planning Consultants` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Zeitpunkt: 2026-05-13 21:03 CEST
+- Ergebnis: V1.9.22 Corp-Agenda-/Operation-Runtime-Resolver fuer `Corporate War`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `packages/shared/src/index.ts` ergaenzt Runtime-Definitionen fuer `onr_v1_196_corporate-war`, `onr_v1_210_political-overthrow` und `onr_v1_298_planning-consultants`. `packages/engine/src/index.ts` resolved `Corporate War` beim Scoren ueber die 12-Credit-Schwelle mit Gain 12 oder Creditverlust, oeffnet fuer gescortes `Political Overthrow` eine Korp-LegalAction `[A]: Gain 3` und spielt `Planning Consultants` als privaten R&D-Top-5-Reorder-Choice. `packages/engine/src/index.test.ts` deckt alle drei Pfade mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
-- Tests: JSON-Validation pass (308 Dateien); `catalog` pass (44), `engine` pass (281). Vor Planning-Consultants-Zusatzschnitt waren `ai` pass (86), `server` pass (72), `web` pass (79), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: corp agenda resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Umsetzung: `packages/shared/src/index.ts` ergaenzt Runtime-Definitionen fuer `onr_v1_196_corporate-war`, `onr_v1_210_political-overthrow`, `onr_v1_296_off-site-backups` und `onr_v1_298_planning-consultants`. `packages/engine/src/index.ts` resolved `Corporate War` beim Scoren ueber die 12-Credit-Schwelle mit Gain 12 oder Creditverlust, oeffnet fuer gescortes `Political Overthrow` eine Korp-LegalAction `[A]: Gain 3`, spielt `Off-Site Backups` als privaten Archives-to-HQ-Choice und spielt `Planning Consultants` als privaten R&D-Top-5-Reorder-Choice. `packages/engine/src/index.test.ts` deckt alle vier Pfade mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: JSON-Validation pass (308 Dateien); `catalog` pass (44), `engine` pass (282). Vor Off-Site-Backups-Zusatzschnitt waren `ai` pass (86), `server` pass (72), `web` pass (79), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoints `2b36c09` und `e6afd90` wurden nach `origin/codex/v1-9-originalset-completion` gepusht; Off-Site-Backups-Zusatzschnitt ist als naechster WIP-Checkpoint vorgesehen.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-13 20:20 CEST

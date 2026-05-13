@@ -6644,6 +6644,86 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("plays Off-Site Backups as a private Archives-to-HQ choice", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_off_site_backups",
+      name: "O:NR V1.9.22 Off-Site Backups",
+      cards: [{ id: "onr_v1_296_off-site-backups", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-off-site-backups",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    state.corp.clicks = 10;
+    state.corp.maxHandSize = 100;
+    moveCorpCardToHq(state, "onr_v1_296_off-site-backups");
+    const faceupArchiveId = moveCorpCardToArchives(state, "simple_economy_operation", true);
+    const facedownArchiveId = moveCorpCardToArchives(state, "simple_agenda", false);
+
+    const legal = mustAction(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_296_off-site-backups");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-off-site-backups-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-off-site-backups-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_296_off-site-backups");
+    expect(state.pendingChoice?.side).toBe("corp");
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(state.pendingChoice?.options).toHaveLength(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      cardDefinitionId: "onr_v1_296_off-site-backups",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_archives_to_hq"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"|simple_economy/);
+
+    const pendingChoice = state.pendingChoice;
+    expect(pendingChoice).toBeDefined();
+    if (!pendingChoice) throw new Error("Missing Off-Site Backups choice");
+    const selectedOption = pendingChoice.options.find((option) => option.value === facedownArchiveId);
+    expect(selectedOption).toBeDefined();
+    if (!selectedOption) throw new Error("Missing facedown archive option");
+    state = applyChoices(state, "corp", [selectedOption.id]);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.corp.hq[0]).toBe(facedownArchiveId);
+    expect(state.corp.archives).toContain(faceupArchiveId);
+    expect(state.corp.archives).not.toContain(facedownArchiveId);
+    expect(state.corp.archives).toHaveLength(2);
+    expect(state.cardInstances[facedownArchiveId]?.faceup).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_corp_archives_to_hq"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"|simple_economy/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("plays Planning Consultants as a private R&D top-five reorder choice", () => {
     const corpDeck: DeckDefinition = {
       ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
@@ -6738,14 +6818,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_276_viral-15",
       "onr_v1_277_virizz",
       "onr_v1_280_zombie",
-      "onr_v1_289_edgerunner-inc-temps",
-      "onr_v1_296_off-site-backups"
+      "onr_v1_289_edgerunner-inc-temps"
     ] as const;
 
     for (const definitionId of corpLongtailIds) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
     }
-    for (const definitionId of ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow", "onr_v1_298_planning-consultants"] as const) {
+    for (const definitionId of ["onr_v1_196_corporate-war", "onr_v1_210_political-overthrow", "onr_v1_296_off-site-backups", "onr_v1_298_planning-consultants"] as const) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(DEMO_CARDS_BY_ID[definitionId]?.rulesText, definitionId).not.toContain("WIP");
       expect(DEMO_CARDS_BY_ID[definitionId]?.mechanics.join(" "), definitionId).toContain("per_card_longtail");

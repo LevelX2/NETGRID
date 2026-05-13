@@ -7,18 +7,18 @@ Status: planned
 | --- | --- | --- |
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
-| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event- und 3 Corp-Longtail-Zielkarten; Events mit No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen |
+| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event- und 4 Corp-Longtail-Zielkarten; Events mit No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen |
 | Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Readiness Review und Engine-Guards halten 14/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
-| Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate War`, `Political Overthrow` und `Planning Consultants` haben enge Runtime-Resolver; Engine-Guard haelt die verbleibenden 11/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
-| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions sowie `Corporate War`, `Political Overthrow` und `Planning Consultants` inkl. Wrong-Side-/Stale-Revalidation gruen |
-| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews sowie Corporate-War-/Political-Overthrow-/Planning-Consultants-PublicPayloads gruen |
-| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash sowie Corporate-War-/Political-Overthrow-/Planning-Consultants-Replay/StateHash gruen |
+| Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate War`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` haben enge Runtime-Resolver; Engine-Guard haelt die verbleibenden 10/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
+| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions sowie `Corporate War`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` inkl. Wrong-Side-/Stale-Revalidation gruen |
+| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews sowie Corporate-War-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-PublicPayloads gruen |
+| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash sowie Corporate-War-/Political-Overthrow-/Off-Site-Backups-/Planning-Consultants-Replay/StateHash gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; finale V1.9.22-AI-Promotion-Artefakte muessen bis zum Completion-Gate fehlen |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
 | Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokale Kartenfaktenbasis fuer 47/47 Karten angelegt; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build; nach Runtime-Resolver-WIP engine 280 und catalog 44 gruen |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Resolver-Inventar: JSON 303, catalog 38, engine 278, ai 86, server 72, web 79, typecheck, test, lint, build; nach Runtime-Resolver-WIP engine 282 und catalog 44 gruen |
 
 ## Mindestchecks im ersten WIP
 
@@ -47,6 +47,8 @@ Status: planned
 - Zusatzschnitt: `Planning Consultants` privater R&D-Top-5-Reorder-Choice.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 281 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
+- Zusatzschnitt: `Off-Site Backups` privater Archives-to-HQ-Choice.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 282 Tests.
 
 ## WIP-Artefakt-Alignment-Guard 2026-05-13 18:10 CEST
 
