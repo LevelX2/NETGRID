@@ -6406,6 +6406,29 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
     }
   });
+
+  it("keeps V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
+    const corpLongtailIds = [
+      "onr_v1_195_corporate-retreat",
+      "onr_v1_196_corporate-war",
+      "onr_v1_197_data-fort-reclamation",
+      "onr_v1_206_marine-arcology",
+      "onr_v1_210_political-overthrow",
+      "onr_v1_216_security-purge",
+      "onr_v1_247_haunting-inquisition",
+      "onr_v1_274_tutor",
+      "onr_v1_276_viral-15",
+      "onr_v1_277_virizz",
+      "onr_v1_280_zombie",
+      "onr_v1_289_edgerunner-inc-temps",
+      "onr_v1_296_off-site-backups",
+      "onr_v1_298_planning-consultants"
+    ] as const;
+
+    for (const definitionId of corpLongtailIds) {
+      expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
+    }
+  });
 });
 
 describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {

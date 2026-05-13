@@ -69,13 +69,13 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-13 17:39 CEST
+- Zeitpunkt: 2026-05-13 17:40 CEST
 - Ergebnis: V1.9.22 Runner-Hardware-LegalAction-Abdeckung verbreitert; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: Alle neun Runner-Hardware-Zielkarten haben jetzt Install-LegalAction-Smokes mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayload-/PlayerView-Assertions und Replay-/StateHash-Stabilitaet. Die zehn Runner-Event-Zielkarten haben einen expliziten No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen. `docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md` und ein Engine-Guard dokumentieren den Schutz gegen erfundene Kosten-/MU-/Breakerwerte fuer die 14 Runner-Programm-Zielkarten. Keine Karte wurde release- oder AI-promotet.
-- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (36), `engine` pass (276 nach Program-Guard), `ai` pass (85), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Umsetzung: Alle neun Runner-Hardware-Zielkarten haben jetzt Install-LegalAction-Smokes mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayload-/PlayerView-Assertions und Replay-/StateHash-Stabilitaet. Die zehn Runner-Event-Zielkarten haben einen expliziten No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen. `docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md` und Engine-Guards dokumentieren den Schutz gegen erfundene Kosten-/MU-/Breakerwerte fuer die 14 Runner-Programm-Zielkarten sowie gegen fehlende konkrete Resolver fuer die 14 Corp-Longtailkarten. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (36), `engine` pass (277 nach No-Promotion-Guards), `ai` pass (85), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: hardware legalaction coverage`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programm-, Runner-Event-, Corp-Agenda-/ICE-/Operation-, AI-, Full-Check-, Webclient- und Final-Review-Gates offen sind.
 
