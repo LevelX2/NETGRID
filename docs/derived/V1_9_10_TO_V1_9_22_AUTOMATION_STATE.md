@@ -69,7 +69,17 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
-- Zeitpunkt: 2026-05-13 14:35 CEST
+- Zeitpunkt: 2026-05-13 14:31 CEST
+- Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende mit Catalog-WIP-Guard begonnen; Cursor bleibt auf V1.9.20 `implementing`.
+- Release: V1.9.20
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `ONR_V1_9_20_WIP_CARD_IDS` mit exakt 26 Zielkarten ergänzt und per Catalog-Test gegen No-Promotion in den Runtime-Releasepool geschützt. Keine Runtime-/AI-/Web-Promotion.
+- Tests: `catalog` pass (34), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.20: catalog target guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.20 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Runtime-WIP, Engine-Abdeckung, Daten-/AI-Artefakte, Pflichtchecks, Final Review, Release-Promotion und Webclient-Version offen sind.
+
+- Zeitpunkt: 2026-05-13 14:30 CEST
 - Ergebnis: V1.9.20 Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende geplant; Cursor bleibt auf V1.9.20 `implementing`.
 - Release: V1.9.20
 - Phase vorher: planned

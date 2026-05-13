@@ -707,6 +707,35 @@ export const ONR_V1_9_19_WIP_CARD_IDS = [
 
 export const ONR_V1_9_19_RELEASE_CARD_IDS = ONR_V1_9_19_WIP_CARD_IDS;
 
+export const ONR_V1_9_20_WIP_CARD_IDS = [
+  "onr_v1_022_emergency-self-construct",
+  "onr_v1_029_gremlins",
+  "onr_v1_133_militech-mram-chip",
+  "onr_v1_134_mram-chip",
+  "onr_v1_160_diplomatic-immunity",
+  "onr_v1_168_loan-from-chiba",
+  "onr_v1_171_preying-mantis",
+  "onr_v1_190_bioweapons-engineering",
+  "onr_v1_191_black-ice-quality-assurance",
+  "onr_v1_192_corporate-boon",
+  "onr_v1_200_encryption-breakthrough",
+  "onr_v1_204_ice-transmutation",
+  "onr_v1_205_main-office-relocation",
+  "onr_v1_218_subsidiary-branch",
+  "onr_v1_313_city-surveillance",
+  "onr_v1_322_euromarket-consortium",
+  "onr_v1_324_fortress-architects",
+  "onr_v1_325_hacker-tracker-central",
+  "onr_v1_327_i-got-a-rock",
+  "onr_v1_331_nevinyrral",
+  "onr_v1_332_newsgroup-taunting",
+  "onr_v1_334_pacifica-regional-ai",
+  "onr_v1_335_remote-facility",
+  "onr_v1_338_rustbelt-hq-branch",
+  "onr_v1_343_south-african-mining-corp",
+  "onr_v1_360_jerusalem-city-grid"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
