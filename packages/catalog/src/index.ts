@@ -618,6 +618,25 @@ export const ONR_V1_9_15_RELEASE_CARD_IDS = [
 
 export const ONR_V1_9_15_WIP_CARD_IDS = ONR_V1_9_15_RELEASE_CARD_IDS;
 
+export const ONR_V1_9_16_WIP_CARD_IDS = [
+  "onr_v1_003_baedekers-net-map",
+  "onr_v1_004_bakdoor",
+  "onr_v1_033_imp",
+  "onr_v1_035_invisibility",
+  "onr_v1_047_pile-driver",
+  "onr_v1_050_r-and-d-protocol-files",
+  "onr_v1_071_vewy-vewy-quiet",
+  "onr_v1_140_raven-microcyb-eagle",
+  "onr_v1_141_raven-microcyb-owl",
+  "onr_v1_148_access-through-alpha",
+  "onr_v1_149_access-to-arasaka",
+  "onr_v1_150_access-to-kiribati",
+  "onr_v1_152_back-door-to-hilliard",
+  "onr_v1_153_back-door-to-orbital-air",
+  "onr_v1_182_submarine-uplink",
+  "onr_v1_246_fragmentation-storm"
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,

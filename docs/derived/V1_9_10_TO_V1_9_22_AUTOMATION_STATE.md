@@ -16,7 +16,7 @@ Watchdog-Prompt: derzeit nicht aktiv
 ## Cursor
 
 Aktueller Release: V1.9.16
-Phase: planned
+Phase: implementing
 Naechster erlaubter Release nach Abschluss: V1.9.17
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
@@ -78,6 +78,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Tests: JSON-Validation pass fuer 252 `data/**/*.json`; `catalog` pass (30), `engine` pass (227), `ai` pass (84), `server` pass (72), `web` pass (76), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Git: Abschlusscommit und Push werden per Checkpoint dieses Laufs erzeugt.
 - Cursor: V1.9.16 ist der aktuelle Release.
+
+- Zeitpunkt: 2026-05-13 08:20 CEST
+- Ergebnis: V1.9.16 Program Subtypes/Hosting/Stealth release-spezifisch detailgeplant und Runtime-WIP begonnen; Cursor bleibt auf V1.9.16 `implementing`.
+- Release: V1.9.16
+- Phase vorher: planned
+- Phase nachher: implementing
+- Umsetzung: Detailplan, Requirements, Program-Subtype-/Hosting-/Stealth-Spezifikation, Testmatrix und Requirements Review erstellt. Alle 16 Zielkarten haben WIP-Runtime-Definitionen; der Katalog fuehrt die Zielmenge als No-Promotion-Guard. Keine Karte wurde promotet.
+- Tests: `engine` pass (228), `catalog` pass (30), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.16: program subtype runtime guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.16 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
 
 - Zeitpunkt: 2026-05-13 nach 07:28 CEST
 - Ergebnis: Controller-Regel gegen falsche "keine sinnvolle naechste Aktion"-Stops gehärtet.

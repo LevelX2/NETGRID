@@ -4008,7 +4008,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_003_baedekers-net-map"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4173,7 +4173,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_003_baedekers-net-map"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -4268,7 +4268,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_003_baedekers-net-map"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
@@ -4589,7 +4589,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_003_baedekers-net-map"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
@@ -4750,7 +4750,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_003_baedekers-net-map"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
@@ -4899,6 +4899,19 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_294_new-blood");
     expect(state.corp.credits).toBe(beforeCredits + 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation" });
+  });
+});
+
+describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
+  it("adds all V1.9.16 WIP runtime definitions without release-promoting the next slice", () => {
+    expect(ONR_V1_9_16_WIP_CARD_IDS).toHaveLength(16);
+    for (const definitionId of ONR_V1_9_16_WIP_CARD_IDS) {
+      const definition = DEMO_CARDS_BY_ID[definitionId];
+      expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
+      expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
+      expect(definition?.rulesText, definitionId).not.toContain("WIP");
+    }
+    expect(DEMO_CARDS_BY_ID["onr_v1_025_fait-accompli"]?.implementationStatus).not.toBe("playable_mvp");
   });
 });
 
@@ -6405,6 +6418,25 @@ const ONR_V1_9_15_WIP_CARD_IDS = [
   "onr_v1_227_cerberus",
   "onr_v1_255_mastiff",
   "onr_v1_294_new-blood"
+] as const;
+
+const ONR_V1_9_16_WIP_CARD_IDS = [
+  "onr_v1_003_baedekers-net-map",
+  "onr_v1_004_bakdoor",
+  "onr_v1_033_imp",
+  "onr_v1_035_invisibility",
+  "onr_v1_047_pile-driver",
+  "onr_v1_050_r-and-d-protocol-files",
+  "onr_v1_071_vewy-vewy-quiet",
+  "onr_v1_140_raven-microcyb-eagle",
+  "onr_v1_141_raven-microcyb-owl",
+  "onr_v1_148_access-through-alpha",
+  "onr_v1_149_access-to-arasaka",
+  "onr_v1_150_access-to-kiribati",
+  "onr_v1_152_back-door-to-hilliard",
+  "onr_v1_153_back-door-to-orbital-air",
+  "onr_v1_182_submarine-uplink",
+  "onr_v1_246_fragmentation-storm"
 ] as const;
 
 const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
@@ -8089,3 +8121,4 @@ function removeEverywhere(state: GameState, id: string): void {
     state.specialZones.removedFromGame = state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
   }
 }
+

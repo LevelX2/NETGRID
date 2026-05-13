@@ -3815,7 +3815,213 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     cost: 1,
     rulesText: "Play only if the Runner made a run last turn. Gain 3 credits.",
     mechanics: ["play_operation", "run_flow", "recurring_credit", ONR_V1_LOCAL_PRIVATE]
-  }
+  },
+  {
+    id: "onr_v1_003_baedekers-net-map",
+    title: "Baedeker's Net Map",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    baseLink: 1,
+    rulesText: "Installed program that contributes base link for trace interactions.",
+    mechanics: ["install_program", "memory", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_004_bakdoor",
+    title: "Bakdoor",
+    side: "runner",
+    type: "program",
+    subtypes: [],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    baseLink: 1,
+    rulesText: "Installed program that contributes base link for trace interactions.",
+    mechanics: ["install_program", "memory", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_033_imp",
+    title: "Imp",
+    side: "runner",
+    type: "program",
+    subtypes: ["daemon"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    memoryCost: 1,
+    rulesText: "Daemon program for hosting and hosted-card lifecycle coverage.",
+    mechanics: ["install_program", "memory", "hosting", "hosted_program_lifecycle", "subtype_daemon", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_035_invisibility",
+    title: "Invisibility",
+    side: "runner",
+    type: "program",
+    subtypes: ["stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    recurringCredits: 1,
+    rulesText: "Stealth program with recurring run credits.",
+    mechanics: ["install_program", "memory", "subtype_stealth", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_047_pile-driver",
+    title: "Pile Driver",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker", "fracter", "stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    memoryCost: 1,
+    strength: 2,
+    recurringCredits: 1,
+    rulesText: "Stealth wall breaker with recurring run credits.",
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "subtype_stealth", "recurring_credit", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_050_r-and-d-protocol-files",
+    title: "R&D-Protocol Files",
+    side: "runner",
+    type: "program",
+    subtypes: ["stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    recurringCredits: 1,
+    rulesText: "Stealth program with recurring run credits.",
+    mechanics: ["install_program", "memory", "subtype_stealth", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_071_vewy-vewy-quiet",
+    title: "Vewy Vewy Quiet",
+    side: "runner",
+    type: "program",
+    subtypes: ["stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    recurringCredits: 1,
+    rulesText: "Stealth program with recurring run credits.",
+    mechanics: ["install_program", "memory", "subtype_stealth", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_140_raven-microcyb-eagle",
+    title: "Raven Microcyb Eagle",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    recurringCredits: 1,
+    rulesText: "Hardware that supplies recurring stealth credits for runs.",
+    mechanics: ["install_hardware", "subtype_stealth", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_141_raven-microcyb-owl",
+    title: "Raven Microcyb Owl",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["stealth"],
+    implementationStatus: "playable_mvp",
+    installCost: 3,
+    recurringCredits: 1,
+    rulesText: "Hardware that supplies recurring stealth credits for runs.",
+    mechanics: ["install_hardware", "subtype_stealth", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_148_access-through-alpha",
+    title: "Access through Alpha",
+    side: "runner",
+    type: "resource",
+    subtypes: ["link"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    baseLink: 1,
+    rulesText: "Resource that contributes base link for trace interactions.",
+    mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_149_access-to-arasaka",
+    title: "Access to Arasaka",
+    side: "runner",
+    type: "resource",
+    subtypes: ["link"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    baseLink: 1,
+    rulesText: "Resource that contributes base link for trace interactions.",
+    mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_150_access-to-kiribati",
+    title: "Access to Kiribati",
+    side: "runner",
+    type: "resource",
+    subtypes: ["link"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    baseLink: 1,
+    rulesText: "Resource that contributes base link for trace interactions.",
+    mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_152_back-door-to-hilliard",
+    title: "Back Door to Hilliard",
+    side: "runner",
+    type: "resource",
+    subtypes: ["link"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    baseLink: 1,
+    rulesText: "Resource that contributes base link for trace interactions.",
+    mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_153_back-door-to-orbital-air",
+    title: "Back Door to Orbital Air",
+    side: "runner",
+    type: "resource",
+    subtypes: ["link"],
+    implementationStatus: "playable_mvp",
+    installCost: 1,
+    baseLink: 1,
+    rulesText: "Resource that contributes base link for trace interactions.",
+    mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_182_submarine-uplink",
+    title: "Submarine Uplink",
+    side: "runner",
+    type: "resource",
+    subtypes: ["link"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    baseLink: 1,
+    rulesText: "Resource with base link and counter interaction for trace support.",
+    mechanics: ["install_resource", "base_link", "trace", "link", "counter", ONR_V1_LOCAL_PRIVATE]
+  },
+  onrIce({
+    id: "onr_v1_246_fragmentation-storm",
+    title: "Fragmentation Storm",
+    subtypes: ["sentry"],
+    rezCost: 5,
+    strength: 3,
+    rulesText: "Trace 4. If successful, trash an installed Runner program. Do 1 net damage.",
+    subroutines: [
+      {
+        id: "onr_v1_246_fragmentation_storm_trace",
+        type: "initiate_trace",
+        baseTraceStrength: 4,
+        traceSuccessEffect: { type: "add_tag", amount: 1 }
+      },
+      onrTrashInstalledProgram("onr_v1_246_fragmentation_storm_trash_program"),
+      onrNetDamage("onr_v1_246_fragmentation_storm_net_damage", 1)
+    ],
+    mechanics: ["install_ice", "rez_ice", "trace", "link", "trash_installed_program", "damage", ONR_V1_LOCAL_PRIVATE]
+  })
 ];
 
 export const DEMO_CARDS: CardDefinition[] = [
