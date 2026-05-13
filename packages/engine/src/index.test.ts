@@ -4798,6 +4798,72 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
     expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
   });
+
+  it("records V1.9.21 runner program die probes through installed program actions", () => {
+    for (const definitionId of ["onr_v1_002_ai-boon", "onr_v1_008_boardwalk"]) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `v1921-${definitionId}-program-die-probe`,
+          runnerDeck: {
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+            id: `onr_v1_runner_v1921_${definitionId}_random_probe`,
+            name: "O:NR V1.9.21 Program Random Probe Runner",
+            cards: [{ id: definitionId, quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+          },
+          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          agendaPointsToWin: 7
+        })
+      );
+      state.runner.credits = 20;
+      state.runner.clicks = 3;
+      state.runner.memoryLimit = 20;
+
+      const programId = installRunnerProgramForTest(state, definitionId);
+      const legal = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1921RunnerProgramAbility === "deterministic_die_probe" &&
+          String(action.payload?.cardId) === programId
+      );
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `v1921-${definitionId}-wrong-side`
+      });
+      expect(wrongSide.ok, definitionId).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code, definitionId).toBe("ERR_WRONG_SIDE");
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const randomBefore = state.randomDrawRecords.length;
+      state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+
+      const randomPurpose = `v1921.die.${definitionId}.program_probe`;
+      expect(state.randomDrawRecords, definitionId).toHaveLength(randomBefore + 1);
+      expect(state.randomDrawRecords.at(-1)?.purpose, definitionId).toBe(randomPurpose);
+      expect(state.eventLog.at(-1)?.publicPayload, definitionId).toMatchObject({
+        actionType: "gain_credit",
+        v1921RunnerProgramAbility: "deterministic_die_probe",
+        randomPurpose,
+        randomCounterAfter: randomBefore + 1
+      });
+      const publicRoll = Number(state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0);
+      expect(Number.isInteger(publicRoll), definitionId).toBe(true);
+      expect(publicRoll, definitionId).toBeGreaterThanOrEqual(1);
+      expect(publicRoll, definitionId).toBeLessThanOrEqual(6);
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload), definitionId).not.toMatch(
+        /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(replay.actualFinalStateHash, definitionId).toBe(hashState(state));
+      expect(replay.state.randomDrawRecords, definitionId).toEqual(state.randomDrawRecords);
+    }
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {

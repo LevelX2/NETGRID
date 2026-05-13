@@ -19,6 +19,7 @@
     "V1.9.22 False Echo remains outside the V1.9.21 WIP runtime guard.",
     "Schlaghund has a V1.9.21 deterministic random Asset LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
     "Rio de Janeiro City Grid has a V1.9.21 deterministic random Upgrade LegalAction smoke with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
+    "AI Boon and Boardwalk have V1.9.21 deterministic random installed-program LegalAction smokes with RandomDrawRecords, Visibility and Replay/StateHash coverage.",
     "Remaining deterministic random resolvers, AI, full release promotion and final review remain follow-up work."
   ],
   "verification": {
@@ -32,6 +33,6 @@
     "catalogPromoted": false,
     "aiPromoted": false,
     "runtimeDefinitionsReady": true,
-    "engineCovered": "partial_schlaghund_and_rio_random_probes"
+    "engineCovered": "partial_asset_upgrade_runner_program_random_probes"
   }
 }
