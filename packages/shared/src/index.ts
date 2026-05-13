@@ -2185,17 +2185,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceSubtype: "code_gate",
     iceLabel: "code gate"
   }),
-  {
+  onrMemoryChip({
     id: "onr_v1_145_wutech-mem-chip",
     title: "WuTech Mem Chip",
-    side: "runner",
-    type: "hardware",
-    subtypes: ["chip"],
-    implementationStatus: "playable_mvp",
     installCost: 1,
-    rulesText: "+1 memory limit.",
-    mechanics: ["install_hardware", "modify_memory_limit", ONR_V1_LOCAL_PRIVATE]
-  },
+    memoryLimitBonus: 1
+  }),
   {
     id: "onr_v1_106_private-ldl-access",
     title: "Private LDL Access",
