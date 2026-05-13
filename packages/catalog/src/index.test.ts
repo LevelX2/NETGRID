@@ -1882,9 +1882,13 @@ describe("catalog import and status logic", () => {
         confirmedFields: string[];
         missingFields: string[];
         safeCurrentCoverage: string[];
+        partialLocalNotes?: Array<{ cardIds: string[]; note: string; sourceRef: string }>;
       }>;
     };
     const coveredCards = inventory.clusters.flatMap((cluster) => cluster.cardIds);
+    const partialLocalNotes = inventory.clusters.flatMap((cluster) =>
+      (cluster.partialLocalNotes ?? []).map((note) => ({ ...note, clusterId: cluster.clusterId, clusterCardIds: cluster.cardIds }))
+    );
 
     expect(inventory.status).toBe("wip_no_promotion_contract_inventory");
     expect(inventory.gateAssertions.coversExactWipScope).toBe(true);
@@ -1900,6 +1904,17 @@ describe("catalog import and status logic", () => {
       expect(cluster.confirmedFields.length, cluster.clusterId).toBeGreaterThan(0);
       expect(cluster.missingFields.length, cluster.clusterId).toBeGreaterThan(0);
       expect(cluster.safeCurrentCoverage.length, cluster.clusterId).toBeGreaterThan(0);
+    }
+
+    expect(partialLocalNotes.length).toBeGreaterThan(0);
+    for (const note of partialLocalNotes) {
+      expect(note.sourceRef).toBe("docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md");
+      expect(note.note.trim(), note.clusterId).not.toBe("");
+      expect(note.note, note.clusterId).not.toMatch(/ready_for_promotion|ai_supported|deck_legal|human_playable/i);
+      for (const cardId of note.cardIds) {
+        expect(note.clusterCardIds, `${note.clusterId}:${cardId}`).toContain(cardId);
+        expect(ONR_V1_9_22_WIP_CARD_IDS, `${note.clusterId}:${cardId}`).toContain(cardId);
+      }
     }
   });
 });

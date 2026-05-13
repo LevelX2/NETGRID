@@ -32,7 +32,59 @@
       ],
       "confirmedFields": ["side", "type", "function_matrix_program_installation_mu_surface"],
       "missingFields": ["install_cost", "memory_cost", "breaker_strength", "pump_cost", "break_cost", "break_subtype_contract", "per_card_timing", "ai_fallback"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"]
+      "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
+      "partialLocalNotes": [
+        {
+          "cardIds": ["onr_v1_027_flak"],
+          "note": "Needs additional subroutine-category targeting before promotion.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_031_hammer"],
+          "note": "Historical core note identifies stealth-resource loss as the unresolved effect surface.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_037_japanese-water-torture"],
+          "note": "Historical core note identifies future-action denial as the unresolved effect surface.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_026_false-echo"],
+          "note": "Historical core note identifies a forced Corp rez sequence after a successful run.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_044_netspace-inverter"],
+          "note": "Historical core note identifies fort ICE order reversal as the unresolved effect surface.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_048_poltergeist", "onr_v1_057_scatter-shot"],
+          "note": "Historical core note identifies hosted recurring credits for trash costs.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_055_reflector"],
+          "note": "Needs additional subroutine-category targeting before promotion.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_061_shield"],
+          "note": "Historical core note identifies prevention and turn-reset handling as unresolved.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_067_speed-trap"],
+          "note": "Historical core note identifies an interrupt window after rez of an upgrade or node.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_068_startup-immolator"],
+          "note": "Historical core note identifies tap ability, just-broken tracking and ICE trashing.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        }
+      ]
     },
     {
       "clusterId": "runner_events",
@@ -51,7 +103,44 @@
       ],
       "confirmedFields": ["side", "type", "function_matrix_runner_event_surface", "partial_historical_core_notes"],
       "missingFields": ["play_cost", "can_play_timing", "target_set", "choice_flow", "zone_movement", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "safeCurrentCoverage": ["runtime_display_surface", "no_play_event_promotion_guard"]
+      "safeCurrentCoverage": ["runtime_display_surface", "no_play_event_promotion_guard"],
+      "partialLocalNotes": [
+        {
+          "cardIds": ["onr_v1_080_core-command-jettison-ice"],
+          "note": "Historical core note identifies successful-HQ-run flagging and rezzed ICE targeting.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_086_forged-activation-orders"],
+          "note": "Historical core note identifies a Corp choice to rez or trash.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_093_if-you-want-it-done-right"],
+          "note": "Historical core note identifies stack lookup, card choice and rest ordering.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_100_misc-for-sale", "onr_v1_103_organ-donor"],
+          "note": "Historical core note identifies multi-selection from installed cards or hand.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_102_open-ended-mileage-program"],
+          "note": "Historical core note identifies tag removal plus return-to-hand option.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_109_security-code-worm-chip"],
+          "note": "Historical core note identifies successful-HQ-run flagging and unrezzed ICE targeting.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_117_valu-pak-software-bundle"],
+          "note": "Historical core note identifies a restricted extra-action sequence.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        }
+      ]
     },
     {
       "clusterId": "runner_hardware",
@@ -69,7 +158,24 @@
       ],
       "confirmedFields": ["side", "type", "install_hardware_legal_action", "wrong_side_stale_revalidation", "visibility", "replay_statehash"],
       "missingFields": ["per_card_effect_contract", "catalog_promotion_contract", "ai_fallback"],
-      "safeCurrentCoverage": ["runtime_display_surface", "install_hardware_legal_action", "no_ai_promotion_guard"]
+      "safeCurrentCoverage": ["runtime_display_surface", "install_hardware_legal_action", "no_ai_promotion_guard"],
+      "partialLocalNotes": [
+        {
+          "cardIds": [
+            "onr_v1_119_arasaka-portable-prototype",
+            "onr_v1_122_artemis-2020",
+            "onr_v1_123_bodyweight-data-creche",
+            "onr_v1_124_corolla-speed-chip",
+            "onr_v1_131_microtech-backup-drive",
+            "onr_v1_136_pandoras-deck",
+            "onr_v1_137_parraline-5750",
+            "onr_v1_138_pk-6089a",
+            "onr_v1_147_zz22-speed-chip"
+          ],
+          "note": "Historical core note keeps hardware decks and chips pending on uniqueness, hosted or recurring credits, Link system or extra-run triggers.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        }
+      ]
     },
     {
       "clusterId": "corp_agendas",
@@ -84,7 +190,19 @@
       ],
       "confirmedFields": ["side", "type", "function_matrix_agenda_surface", "partial_corporate_war_and_political_overthrow_notes"],
       "missingFields": ["advancement_requirement", "agenda_points", "on_score_condition", "scored_ability_cost", "credit_or_counter_amount", "timing", "public_event_redaction", "ai_fallback"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard"]
+      "safeCurrentCoverage": ["no_playable_runtime_guard"],
+      "partialLocalNotes": [
+        {
+          "cardIds": ["onr_v1_196_corporate-war"],
+          "note": "Historical core note identifies conditional on-score credit gain or loss.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        },
+        {
+          "cardIds": ["onr_v1_210_political-overthrow"],
+          "note": "Historical core note identifies a scored-agenda action that gains credits.",
+          "sourceRef": "docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md"
+        }
+      ]
     },
     {
       "clusterId": "corp_ice",

@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 18:30 CEST
+- Ergebnis: V1.9.22 Resolver-Teilnotizen ins Contract-Inventar uebernommen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/rules/v1922-resolver-contract-inventory.json` fuehrt jetzt lokal bestaetigte Teilnotizen aus `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md` fuer Runner-Programme, Runner-Events, Runner-Hardware und Corp-Agendas. Der Catalog-Test prueft, dass jede `partialLocalNotes`-Karte im jeweiligen Cluster und in `ONR_V1_9_22_WIP_CARD_IDS` liegt und keine `ready_for_promotion`-, `ai_supported`-, `deck_legal`- oder `human_playable`-Aussage enthaelt. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (303 Dateien); `catalog` pass (38).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: partial contract notes inventory`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-13 18:25 CEST
 - Ergebnis: V1.9.22 Resolver-Contract-Inventar angelegt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
