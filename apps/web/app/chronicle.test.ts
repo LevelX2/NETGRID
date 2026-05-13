@@ -136,11 +136,11 @@ describe("formatChronicleEvent", () => {
     expect(load.title).toBe("Du hast 3 Credits auf Broker gelegt.");
     expect(load.category).toBe("economy");
     expect(load.description).toBeUndefined();
-    expect(load.chips).toContain("3 Credits auf Karte");
-    expect(load.chips).toContain("3 Credits auf Broker");
+    expect(load.chips).not.toContain("3 Credits auf Karte");
+    expect(load.chips).not.toContain("3 Credits auf Broker");
     expect(take.title).toBe("Du hast 3 Credits von Broker genommen.");
-    expect(take.chips).toContain("+3 Credits");
-    expect(take.chips).toContain("0 Credits auf Broker");
+    expect(take.chips).not.toContain("+3 Credits");
+    expect(take.chips).not.toContain("0 Credits auf Broker");
   });
 
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
