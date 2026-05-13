@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-13 14:11 CEST
+- Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um weitere Access-Ambush-/Damage-Pfade erweitert; Cursor bleibt auf V1.9.19 `implementing`.
+- Release: V1.9.19
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Corprunner's Shattered Remains, Vacant Soulkiller und Virus Test Site sind jetzt über legale Access-Ambush-Fenster für Hardware-Trash, Core Damage und Net Damage abgedeckt. Damit deckt dieser Lauf Agenda-Core, Operationen und die meisten V1.9.19-Asset-/Ambush-Randpfade ab. Keine Runtime-/AI-Promotion.
+- Tests: `engine` pass (257). Vorheriger Schnitt im selben Lauf: JSON-Validation pass fuer 277 `data/**/*.json`, `engine` pass (256), `catalog` pass (33), `typecheck` pass. Vorheriger Vollcheck: `ai` pass (85), `server` pass (72), `web` pass (76), `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.19: access ambush damage paths`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.19 bleibt aktueller Release; Completion-Gate ist nicht erfüllt, weil Fait Accompli, Arasaka Owns You, Olivia Salazar, finale Daten-/AI-Artefakte, offizielles AI-Approval, Final Review, Release-Promotion und Webclient-Version offen sind.
+
 - Zeitpunkt: 2026-05-13 14:09 CEST
 - Ergebnis: V1.9.19 Agenda Difficulty, Scored Agenda Abilities und Overadvance um Operation-Resolver erweitert; Cursor bleibt auf V1.9.19 `implementing`.
 - Release: V1.9.19

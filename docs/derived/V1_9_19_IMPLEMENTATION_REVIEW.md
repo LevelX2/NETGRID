@@ -16,7 +16,8 @@ Stand: 2026-05-13
 - `packages/engine/src/index.ts` deckt jetzt den ersten konkreten Agenda-Core-Schnitt ab: Artificial Security Directors und Genetics-Visionary Acquisition berechnen beim Score engine-seitig Difficulty, Overadvance und Bonus-Agenda-Counter; Roving Submarine und Washington, D.C., City Grid wirken als servergebundene rezzed Difficulty-Modifier; Artificial Security Directors und Genetics-Visionary Acquisition erhalten eine gescorte, side-sichere R&D-Top-Reveal-LegalAction.
 - `packages/engine/src/index.ts` deckt außerdem erste Asset-Randpfade ab: Chicago Branch und Vapor Ops laden Power-Counter über rezzed Corp-LegalActions, Information Laundering gewinnt Credits über eine rezzed Corp-LegalAction, und Experimental AI triggert aus einem legalen Access-Fenster einen side-sicheren installierte-Programme-Trash-Ambush.
 - `packages/engine/src/index.ts` deckt jetzt auch erste Operation-Randpfade ab: Project Consultants legt engine-seitig einen Advancement-Counter auf eine installierte Agenda, Falsified-Transactions Expert/Management Shake-Up/Team Restructuring laden Power-Counter auf eine Agenda, Silver Lining Recovery Protocol gewinnt Credits, und Systematic Layoffs forfeitet eine gescorte Korp-Agenda als öffentliche Removed-from-game-Kosten.
-- `packages/engine/src/index.test.ts` prüft den V1.9.19-Agenda-Core, Asset-Randpfad und Operation-Schnitt mit vier neuen Smokes: Score/Difficulty/Overadvance inklusive Replay/StateHash, gescorte R&D-Reveal-Aktion inklusive Hidden-Info-Barriere, Asset-Counter/Economy/Access-Ambush sowie Operation-Advance-/Counter-/Forfeit-Pfade.
+- Corprunner's Shattered Remains, Vacant Soulkiller und Virus Test Site sind jetzt ebenfalls über legale Access-Ambush-Fenster abgedeckt: Hardware-Trash, Core Damage und Net Damage bleiben side-sicher und laufen über die bestehenden Damage-/Visibility-Barrieren.
+- `packages/engine/src/index.test.ts` prüft den V1.9.19-Agenda-Core, Asset-Randpfad, Operation-Schnitt und Ambush-Damage-Schnitt mit fünf neuen Smokes: Score/Difficulty/Overadvance inklusive Replay/StateHash, gescorte R&D-Reveal-Aktion inklusive Hidden-Info-Barriere, Asset-Counter/Economy/Access-Ambush, Operation-Advance-/Counter-/Forfeit-Pfade sowie Corprunner/Vacant/Virus-Test-Site-Ambushes.
 
 ## Gate
 
@@ -25,7 +26,7 @@ Stand: 2026-05-13
 
 ## Nächster Schnitt
 
-Weitere konkrete V1.9.19-Pfade für Asset-/Upgrade-Randkarten: weitere Access-Ambush-Damage-Pfade, Vacant Soulkiller/Virus Test Site/Corprunner's Shattered Remains, finale Daten-/AI-Artefakte, offizielle AI-Approval, Release-Promotion und Webclient-Version.
+Weitere konkrete V1.9.19-Pfade: Fait Accompli, Arasaka Owns You und Olivia Salazar noch auf konkrete Engine-/Testrolle prüfen; danach finale Daten-/AI-Artefakte, offizielle AI-Approval, Release-Promotion und Webclient-Version.
 
 ## Verifikation
 
@@ -43,3 +44,4 @@ Weitere konkrete V1.9.19-Pfade für Asset-/Upgrade-Randkarten: weitere Access-Am
 - Nach Agenda-Core-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 254 Tests.
 - Nach Asset-Randpfad-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 255 Tests.
 - Nach Operation-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 256 Tests.
+- Nach Ambush-Damage-Schnitt: `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 257 Tests.

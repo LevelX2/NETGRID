@@ -4309,6 +4309,48 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       agendaPointCostPaid: 2
     });
   });
+
+  it("resolves remaining V1.9.19 access ambush damage and installed-hardware paths", () => {
+    let hardwareState = toRunnerTurn(v1919AgendaOveradvanceGame("v1919-corprunner-ambush"));
+    hardwareState.runner.credits = 20;
+    const hardwareId = installRunnerHardwareForTest(hardwareState, "simple_setup_hardware");
+    putCorpRootInRemote(hardwareState, "onr_v1_315_corprunners-shattered-remains");
+    hardwareState = apply(hardwareState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    hardwareState = apply(hardwareState, "runner", (action) => action.type === "access_card");
+    expect(hardwareState.runner.heap).toContain(hardwareId);
+    expect(hardwareState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1919_access_ambush_trash_installed",
+      ambushDefinitionId: "onr_v1_315_corprunners-shattered-remains"
+    });
+
+    let coreDamageState = toRunnerTurn(v1919AgendaOveradvanceGame("v1919-vacant-soulkiller"));
+    coreDamageState.runner.credits = 20;
+    const coreBefore = coreDamageState.runner.coreDamage;
+    putCorpRootInRemote(coreDamageState, "onr_v1_346_vacant-soulkiller");
+    coreDamageState = apply(coreDamageState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    coreDamageState = apply(coreDamageState, "runner", (action) => action.type === "access_card");
+    expect(coreDamageState.runner.coreDamage).toBe(coreBefore + 1);
+    expect(coreDamageState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1919_access_ambush_damage",
+      ambushDefinitionId: "onr_v1_346_vacant-soulkiller",
+      damageType: "core",
+      damageAmount: 1
+    });
+
+    let netDamageState = toRunnerTurn(v1919AgendaOveradvanceGame("v1919-virus-test-site"));
+    netDamageState.runner.credits = 20;
+    const gripBefore = netDamageState.runner.grip.length;
+    putCorpRootInRemote(netDamageState, "onr_v1_348_virus-test-site");
+    netDamageState = apply(netDamageState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    netDamageState = apply(netDamageState, "runner", (action) => action.type === "access_card");
+    expect(netDamageState.runner.grip.length).toBe(Math.max(0, gripBefore - 2));
+    expect(netDamageState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1919_access_ambush_damage",
+      ambushDefinitionId: "onr_v1_348_virus-test-site",
+      damageType: "net",
+      damageAmount: 2
+    });
+  });
 });
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {
@@ -8444,6 +8486,7 @@ const ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK: DeckDefinition = {
   cards: [
     { id: "onr_v1_025_fait-accompli", quantity: 1 },
     { id: "onr_v1_078_arasaka-owns-you", quantity: 1 },
+    { id: "simple_setup_hardware", quantity: 1 },
     { id: "simple_decoder", quantity: 2 },
     { id: "simple_fracter", quantity: 2 },
     { id: "simple_killer", quantity: 2 },
@@ -9201,6 +9244,14 @@ function installRunnerProgramForTest(state: GameState, definitionId: string): Ca
   removeEverywhere(state, id);
   state.runner.rig.programs.push(id);
   state.runner.memoryUsed += 1;
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "rig" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function installRunnerHardwareForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.rig.hardware.push(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "rig" }, faceup: true, rezzed: true };
   return id;
 }
