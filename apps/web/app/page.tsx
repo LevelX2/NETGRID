@@ -8517,12 +8517,14 @@ function CardView({
           : { left: `${left}px`, top: `${cardRect.top - 8}px`, width: `${tooltipWidth}px` }
       );
     }
-    const estimatedActionMenuHeight = Math.min(196, Math.max(58, actions.length * 54 + 16));
+    const estimatedActionMenuHeight = Math.min(210, Math.max(64, actions.length * 62 + 16));
     const nextActionMenuPlacement = spaceBelow < estimatedActionMenuHeight && spaceAbove > spaceBelow ? "above" : "below";
     if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);
     if (hasCardActions) {
-      const actionMenuWidth = Math.min(212, Math.max(cardRect.width, Math.min(window.innerWidth - 32, 160)));
-      const margin = 16;
+      const margin = window.innerWidth < 360 ? 8 : 16;
+      const viewportWidth = Math.max(160, window.innerWidth - margin * 2);
+      const preferredWidth = Math.max(cardRect.width, Math.min(viewportWidth, 224));
+      const actionMenuWidth = Math.min(viewportWidth, Math.min(260, preferredWidth));
       const left = Math.max(margin, Math.min(cardRect.left, window.innerWidth - actionMenuWidth - margin));
       const top = nextActionMenuPlacement === "below" ? cardRect.bottom + 7 : Math.max(margin, cardRect.top - estimatedActionMenuHeight - 7);
       setActionMenuPlacement(nextActionMenuPlacement);
@@ -8882,15 +8884,23 @@ function CardActionsPopover({
 }) {
   return (
     <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style}>
-      {actions.map((action) => (
-        <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
-          <Play size={14} />
-          <span className="actionButtonLabel">{actionLabelForAction(action)}</span>
-          <CostChips action={action} />
-        </button>
-      ))}
+      {actions.map((action) => {
+        const label = compactCardActionMenuLabel(action, actionLabelForAction(action));
+        return (
+          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
+            <Play size={14} />
+            <span className="actionButtonLabel">{label}</span>
+            <CostChips action={action} />
+          </button>
+        );
+      })}
     </div>
   );
+}
+
+function compactCardActionMenuLabel(action: LegalAction, label: string): string {
+  if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return label;
+  return label.replace(/\s+\([^)]*\)$/, "");
 }
 
 function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: number }) {
