@@ -356,6 +356,12 @@ export function aiPacingDelayMs(mode: AiPacingTriggerMode, hasPendingCue: boolea
   return Math.max(autoDismissMs, minimum);
 }
 
+export function aiPacingFallbackDelayMs(mode: AiPacingTriggerMode, hasPendingAiCue: boolean): number | null {
+  if (hasPendingAiCue) return null;
+  if (mode === "manual") return 0;
+  return 1400;
+}
+
 export function serverBoardRows<T extends { id: string }>(servers: T[], viewerSide: Side): Array<{ kind: "remotes" | "centrals"; servers: T[] }> {
   const centralOrder = new Map([
     ["hq", 0],

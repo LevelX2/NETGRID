@@ -81,6 +81,7 @@ import {
   actionContextStillVisible,
   actionContextTitle,
   actionCostChips,
+  aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   actionMatchesContext,
   actionSlotCapacityForTurn,
@@ -1426,6 +1427,7 @@ export default function Page() {
   const [cardDisplayModeLoaded, setCardDisplayModeLoaded] = useState(false);
   const [actionCueQueue, setActionCueQueue] = useState<OpponentActionCue[]>([]);
   const [currentActionCue, setCurrentActionCue] = useState<OpponentActionCue | null>(null);
+  const [aiPacingFallbackVisible, setAiPacingFallbackVisible] = useState(false);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
   const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
@@ -1981,6 +1983,9 @@ export default function Page() {
   const isHumanVsHuman = playMode === "human_vs_human";
   const isHumanVsAi = playMode === "human_vs_ai";
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
+  const hasPendingAiCue = currentActionCue?.source === "ai" || actionCueQueue.some((cue) => cue.source === "ai");
+  const aiPacingFallbackDelay = aiPacingFallbackDelayMs(localAiPacingMode, hasPendingAiCue);
+  const showAiPacingFallbackControls = Boolean(aiTurnPresentation?.canAdvanceAi && !payload?.winner && aiPacingFallbackDelay !== null && (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible));
   const startSummary = matchStartSummary({
     playMode,
     matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
@@ -2257,6 +2262,20 @@ export default function Page() {
       if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
     };
   }, [actionCueAutoDismissMs, actionCueQueue.length, aiTurnPresentation?.canAdvanceAi, connection, currentActionCue, localAiPacingMode, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
+
+  useEffect(() => {
+    if (!aiTurnPresentation?.canAdvanceAi || payload?.winner || aiPacingFallbackDelay === null) {
+      setAiPacingFallbackVisible(false);
+      return;
+    }
+    if (aiPacingFallbackDelay === 0) {
+      setAiPacingFallbackVisible(true);
+      return;
+    }
+    setAiPacingFallbackVisible(false);
+    const timeout = window.setTimeout(() => setAiPacingFallbackVisible(true), aiPacingFallbackDelay);
+    return () => window.clearTimeout(timeout);
+  }, [aiPacingFallbackDelay, aiTurnPresentation?.canAdvanceAi, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
 
   const createMatch = async () => {
     setNotice("");
@@ -4055,7 +4074,7 @@ export default function Page() {
             actionCapacity={actionSlotCapacities[opponentSide(activeView.side)]}
             {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})}
           />
-          {!(currentActionCue && currentActionCue.source === "ai") ? (
+          {showAiPacingFallbackControls ? (
             <AiPacingControls
               presentation={aiTurnPresentation}
               mode={localAiPacingMode}

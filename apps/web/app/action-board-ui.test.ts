@@ -9,6 +9,7 @@ import {
   actionSlotCapacityForTurn,
   actionSlotDisplay,
   activeRunIceInstanceId,
+  aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   breachProgressLabel,
   clampCuePosition,
@@ -213,6 +214,13 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(aiPacingDelayMs("paced", false, 2500)).toBe(650);
     expect(aiPacingDelayMs("paced", true, 0)).toBe(900);
     expect(aiPacingDelayMs("fast", true, 6000)).toBe(6000);
+  });
+
+  it("debounces the AI fallback controls during automatic pacing", () => {
+    expect(aiPacingFallbackDelayMs("manual", false)).toBe(0);
+    expect(aiPacingFallbackDelayMs("paced", false)).toBe(1400);
+    expect(aiPacingFallbackDelayMs("fast", false)).toBe(1400);
+    expect(aiPacingFallbackDelayMs("paced", true)).toBeNull();
   });
 });
 
