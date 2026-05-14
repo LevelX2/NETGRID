@@ -4180,7 +4180,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("resolves Gideon's Pawnshop from Runner trash without searching or shuffling the stack", () => {
+  it("resolves Gideon's Pawnshop from Runner heap without searching or shuffling the stack", () => {
     let state = toRunnerTurn(v1911HiddenZoneGame("v1911-gideons-pawnshop"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(state, "onr_v1_089_gideons-pawnshop");
@@ -4226,7 +4226,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   it("reveals only the intended public definition id for V1.9.11 reveal events", () => {
     let state = toRunnerTurn(v1911HiddenZoneGame("v1911-reveal"));
     state.runner.credits = 20;
-    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_092_ice-and-datas-guide-to-the-net");
     putRunnerCardOnTopOfStack(state, "simple_decoder");
 
     state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
@@ -4236,6 +4236,125 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       title: "Simple Decoder"
     });
     expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Forgotten Backup Chip");
+  });
+
+  it("uses Sneak Preview to choose Stack first, install a program at no cost, shuffle and return it at end of turn", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-sneak-preview-stack"));
+    state.runner.credits = 20;
+    state.runner.maxHandSize = 99;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
+    expect(state.runner.credits).toBe(17);
+    expect(state.pendingChoice?.source).toContain("v1911.sneak_preview_source");
+    expect(state.pendingChoice?.options.map((option) => option.id)).toContain("source_stack");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    state = applyChoice(state, "runner", "source_stack");
+    expect(state.pendingChoice?.source).toContain("v1911.sneak_preview_stack_install");
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(state.sneakPreviewTemporaryInstalls).toEqual([{ cardId: targetProgramId, sourceCardDefinitionId: "onr_v1_110_sneak-preview" }]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "search_stack",
+      searchSource: "runner_stack",
+      searchDestination: "install_program",
+      searchShuffleAfter: true,
+      installSucceeded: true,
+      temporaryInstall: true,
+      temporaryReturnAtEndOfTurn: true,
+      cardDefinitionId: "simple_decoder"
+    });
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.runner.grip).toContain(targetProgramId);
+    expect(state.runner.rig.programs).not.toContain(targetProgramId);
+    expect(state.sneakPreviewTemporaryInstalls).toEqual([]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ sneakPreviewReturnedCount: 1 });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("uses Sneak Preview to choose Heap first, install for free without shuffling, and does not return if the program left play", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-sneak-preview-heap"));
+    state.runner.credits = 3;
+    state.runner.maxHandSize = 99;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    const targetProgramId = moveRunnerCardToHeap(state, "simple_decoder");
+    const stackBefore = [...state.runner.stack];
+    const randomCounterBefore = state.randomCounter;
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
+    expect(state.runner.credits).toBe(0);
+    expect(state.pendingChoice?.options.map((option) => option.id)).toContain("source_heap");
+    state = applyChoice(state, "runner", "source_heap");
+    expect(state.pendingChoice?.source).toContain("v1911.sneak_preview_heap_install");
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    expect(optionId).toBeDefined();
+
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.runner.credits).toBe(0);
+    expect(state.runner.stack).toEqual(stackBefore);
+    expect(state.randomCounter).toBe(randomCounterBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "sneak_preview_install_program",
+      searchSource: "runner_heap",
+      searchDestination: "install_program",
+      searchShuffleAfter: false,
+      installSucceeded: true,
+      temporaryInstall: true
+    });
+
+    removeEverywhere(state, targetProgramId);
+    state.runner.heap.push(targetProgramId);
+    state.runner.memoryUsed = Math.max(0, state.runner.memoryUsed - 1);
+    state.cardInstances[targetProgramId] = { ...state.cardInstances[targetProgramId]!, zone: { side: "runner", zone: "heap" }, faceup: true, rezzed: true };
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.runner.grip).not.toContain(targetProgramId);
+    expect(state.runner.heap).toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload.sneakPreviewReturnedCount).toBeUndefined();
+  });
+
+  it("lets Sneak Preview free MU before installing the chosen program", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-sneak-preview-mu"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    const installedProgramId = installRunnerProgramForTest(state, "simple_fracter");
+    state.runner.memoryLimit = 1;
+    state.runner.memoryUsed = 1;
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+
+    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
+    state = applyChoice(state, "runner", "source_stack");
+    const targetOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    state = applyChoice(state, "runner", String(targetOptionId));
+    expect(state.pendingChoice?.source).toContain("v1911.sneak_preview_free_mu");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      installPendingMemoryTrash: true,
+      temporaryInstall: true
+    });
+
+    const muOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === installedProgramId)?.id;
+    expect(muOptionId).toBeDefined();
+    state = applyChoice(state, "runner", String(muOptionId));
+    expect(state.runner.heap).toContain(installedProgramId);
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.sneakPreviewTemporaryInstalls).toEqual([{ cardId: targetProgramId, sourceCardDefinitionId: "onr_v1_110_sneak-preview" }]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "sneak_preview_install_program",
+      trashedForMemoryCount: 1,
+      installSucceeded: true
+    });
   });
 
   it("exposes one unrezzed server card via Fortress Respecification without opening opponent choices", () => {

@@ -104,13 +104,13 @@
       "cardId": "onr_v1_110_sneak-preview",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "hidden_zone_tool", "stack_reveal"],
-      "planRoles": ["safe_probe_run", "build_rig"],
-      "requiredMechanics": ["play_event", "reveal_stack_top", "legal_action_only"],
-      "valueHints": { "information": 2 },
-      "riskTags": ["public_reveal"],
+      "roles": ["event", "hidden_zone_tool", "temporary_program_install"],
+      "planRoles": ["build_rig", "recover_rig"],
+      "requiredMechanics": ["play_event", "search_stack", "search_trash", "install_program", "temporary_install", "end_turn_return", "shuffle", "legal_action_only"],
+      "valueHints": { "tempo": 3, "consistency": 2 },
+      "riskTags": ["temporary_install", "shuffle_invalidates_memory", "hidden_info_barrier"],
       "aiSupportStatus": "ai_supported",
-      "scenarioRefs": ["data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_expose_and_preview"]
+      "scenarioRefs": ["data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_sneak_preview_heap_stack_install"]
     },
     {
       "cardId": "onr_v1_151_aujourdoui",

@@ -190,6 +190,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const destinationLabel = searchDestinationLabel(searchDestination);
         const installFailed = searchDestination === "install_program" && payload.installSucceeded === false;
         const installPendingMemoryTrash = searchDestination === "install_program" && payload.installPendingMemoryTrash === true;
+        const temporaryInstall = payload.temporaryInstall === true;
         category = searchReveal === "public" ? "card" : "hidden";
         importance = "important";
         visibility = searchReveal === "public" ? "public" : "redacted";
@@ -199,9 +200,29 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
               ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt; MU muss freigemacht werden`)
               : installFailed
               ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt, aber nicht installiert`)
-              : phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt und ${searchDestination === "install_program" ? "im Rig installiert" : `in ${destinationLabel} genommen`}`)
+              : phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt und ${searchDestination === "install_program" ? `im Rig installiert${temporaryInstall ? "; Rückkehr am Zugende" : ""}` : `in ${destinationLabel} genommen`}`)
             : phrase(subject, `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack in ${destinationLabel} genommen`);
-        chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
+        chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
+      if (hiddenZoneAction === "sneak_preview_install_program") {
+        const installPendingMemoryTrash = payload.installPendingMemoryTrash === true;
+        const sourceLabel = stringValue(payload.searchSource) === "runner_heap" ? "Heap" : "Stack";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = installPendingMemoryTrash
+          ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem ${sourceLabel} gewählt; MU muss freigemacht werden`)
+          : phrase(subject, `${cardTitle ?? "ein Programm"} aus dem ${sourceLabel} kostenlos im Rig installiert; Rückkehr am Zugende`);
+        chips.push(sourceLabel, installPendingMemoryTrash ? "MU freimachen" : "Installiert", "Temporär");
+        break;
+      }
+      if (hiddenZoneAction === "sneak_preview_choose_source") {
+        const sourceLabel = stringValue(payload.searchSource) === "runner_heap" ? "Heap" : "Stack";
+        category = "hidden";
+        visibility = "redacted";
+        title = phrase(subject, `${sourceLabel} als Sneak-Preview-Quelle gewählt`);
+        chips.push("Sneak Preview", sourceLabel);
         break;
       }
       category = "system";

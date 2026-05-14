@@ -30,7 +30,7 @@
     { "cardId": "onr_v1_089_gideons-pawnshop", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_089_gideons-pawnshop", "scenarioRefs": ["runner_v1911_trash_recovery"] },
     { "cardId": "onr_v1_092_ice-and-datas-guide-to-the-net", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_092_ice-and-datas-guide-to-the-net", "scenarioRefs": ["runner_v1911_expose_and_preview"] },
     { "cardId": "onr_v1_099_mantis-fixer-at-large", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_099_mantis-fixer-at-large", "scenarioRefs": ["runner_v1911_stack_search_and_reveal"] },
-    { "cardId": "onr_v1_110_sneak-preview", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_110_sneak-preview", "scenarioRefs": ["runner_v1911_expose_and_preview"] },
+    { "cardId": "onr_v1_110_sneak-preview", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_110_sneak-preview", "scenarioRefs": ["runner_v1911_sneak_preview_heap_stack_install"] },
     { "cardId": "onr_v1_151_aujourdoui", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_151_aujourdoui", "scenarioRefs": ["runner_v1911_installed_hidden_zone_helpers"] },
     { "cardId": "onr_v1_169_n-e-t-o", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_169_n-e-t-o", "scenarioRefs": ["runner_v1911_installed_hidden_zone_helpers"] },
     { "cardId": "onr_v1_175_ronin-around", "status": "ai_supported", "hintRef": "ai-card-hints-deck-legal-v1911:onr_v1_175_ronin-around", "scenarioRefs": ["runner_v1911_installed_hidden_zone_helpers"] },

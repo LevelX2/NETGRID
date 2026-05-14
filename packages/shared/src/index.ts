@@ -322,6 +322,11 @@ export type StackSearchResolution = {
   publicRevealKind?: string;
 };
 
+export type SneakPreviewTemporaryInstall = {
+  cardId: CardInstanceId;
+  sourceCardDefinitionId: CardDefinitionId;
+};
+
 export type VisibleChoiceOption = ChoiceOption & {
   card?: VisibleCard;
 };
@@ -693,6 +698,7 @@ export type GameState = {
     agendaId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;
   }>;
+  sneakPreviewTemporaryInstalls?: SneakPreviewTemporaryInstall[];
   identityAbilityUsage?: Partial<Record<Side, { setupAbilities: string[]; turn: number; usedThisTurn: string[] }>>;
   runnerTurnFlags?: {
     stoleAgendaThisTurn: boolean;
@@ -1849,7 +1855,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 2,
-    rulesText: "Search your trash for a card and bring it into your hand.",
+    rulesText: "Search your heap for a card and bring it into your grip.",
     mechanics: ["play_event", "search_trash", "heap_to_grip", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -1892,9 +1898,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
-    rulesText: "Reveal the top card of your stack.",
-    mechanics: ["play_event", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
+    cost: 3,
+    rulesText: "Choose a program from your heap or search your stack for a program. Install that program at no cost. Shuffle your stack afterwards if you searched it. At the end of the turn, take the program into your grip.",
+    mechanics: ["play_event", "search_stack", "search_trash", "install_program", "temporary_install", "end_turn_return", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_090_hot-tip-for-wns",

@@ -263,6 +263,7 @@ const CHIMERA_ID = "onr_v1_353_chimera";
 const MOUSE_ID = "onr_v1_042_mouse";
 const SEEYA_ID = "onr_v1_058_seeya";
 const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
+const SNEAK_PREVIEW_ID = "onr_v1_110_sneak-preview";
 const I_SPY_ID = "onr_v1_032_i-spy";
 const AUJOURD_OUI_ID = "onr_v1_151_aujourdoui";
 const NETO_ID = "onr_v1_169_n-e-t-o";
@@ -469,12 +470,12 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "v1911_search_stack" };
     }
   },
-  "onr_v1_110_sneak-preview": {
-    name: "onr_v1911_runner_event_reveal_stack_top",
-    canPlay: (state) => state.runner.stack.length > 0,
+  [SNEAK_PREVIEW_ID]: {
+    name: "onr_v1911_runner_event_sneak_preview_install_program",
+    canPlay: (state) => runnerStackHasProgram(state) || runnerHeapHasProgram(state),
     resolve: (state, legalAction) => {
-      revealRunnerStackTop(state, legalAction);
-      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneAction: "v1911_reveal_stack_top" };
+      startSneakPreviewSourceChoice(state);
+      legalAction.payload = { ...(legalAction.payload ?? {}), hiddenZoneBarrier: true, hiddenZoneAction: "sneak_preview_choose_source" };
     }
   },
   "onr_v1_082_deal-with-militech": {
@@ -5991,8 +5992,38 @@ function applyV181SuccessfulRunCounterTriggers(state: GameState, run: ActiveRun,
   }
 }
 
+function returnSneakPreviewProgramsAtEndOfTurn(state: GameState, legalAction?: LegalAction): void {
+  const entries = state.sneakPreviewTemporaryInstalls ?? [];
+  if (entries.length === 0) return;
+  let returnedCount = 0;
+  for (const entry of entries) {
+    const cardId = entry.cardId;
+    const instance = state.cardInstances[cardId];
+    if (!instance || !state.runner.rig.programs.includes(cardId) || instance.hostedOn) continue;
+    for (const hostedId of hostedCardsOn(state, cardId)) trashRunnerInstalledProgram(state, hostedId);
+    const definition = definitionFor(state, cardId);
+    if (runnerProgramUsesMemory(state, cardId)) {
+      state.runner.memoryUsed = Math.max(0, state.runner.memoryUsed - (definition.memoryCost ?? 0));
+    }
+    const { hostedOn: _hostedOn, ...withoutHost } = instance;
+    void _hostedOn;
+    removeFromAllZones(state, cardId);
+    state.runner.grip.push(cardId);
+    state.cardInstances[cardId] = { ...withoutHost, faceup: true, rezzed: true, zone: { side: "runner", zone: "grip" } };
+    returnedCount += 1;
+  }
+  state.sneakPreviewTemporaryInstalls = [];
+  if (returnedCount > 0 && legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sneakPreviewReturnedCount: returnedCount
+    };
+  }
+}
+
 function endTurn(state: GameState, side: Side, legalAction?: LegalAction): void {
   if (side === "runner") {
+    returnSneakPreviewProgramsAtEndOfTurn(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
     flags.stoleAgendaThisTurn = false;
@@ -7517,8 +7548,25 @@ function resolvePendingChoice(state: GameState, legalAction: LegalAction, player
     resolveTraceRunnerBid(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v098.search_stack") || state.pendingChoice.source.startsWith("v1911.search_stack") || state.pendingChoice.source.startsWith("v1912.search_stack")) {
+  if (
+    state.pendingChoice.source.startsWith("v098.search_stack") ||
+    state.pendingChoice.source.startsWith("v1911.search_stack") ||
+    state.pendingChoice.source.startsWith("v1911.sneak_preview_stack_install") ||
+    state.pendingChoice.source.startsWith("v1912.search_stack")
+  ) {
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1911.sneak_preview_source")) {
+    resolveSneakPreviewSourceChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1911.sneak_preview_heap_install")) {
+    resolveSneakPreviewHeapInstallChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1911.sneak_preview_free_mu")) {
+    resolveSneakPreviewMemoryTrashChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1911.self_modifying_code_free_mu")) {
@@ -7743,6 +7791,35 @@ type RunnerStackSearchChoiceOptions = {
   publicRevealKind?: string;
 };
 
+function runnerStackHasProgram(state: GameState): boolean {
+  return state.runner.stack.some((id) => definitionFor(state, id).type === "program");
+}
+
+function runnerHeapHasProgram(state: GameState): boolean {
+  return state.runner.heap.some((id) => definitionFor(state, id).type === "program");
+}
+
+function startSneakPreviewSourceChoice(state: GameState): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = [
+    ...(runnerHeapHasProgram(state) ? [{ id: "source_heap", label: "Heap durchsuchen", value: "heap" }] : []),
+    ...(runnerStackHasProgram(state) ? [{ id: "source_stack", label: "Stack durchsuchen", value: "stack" }] : [])
+  ];
+  if (options.length === 0) throw new Error("Kein Programm im Heap oder Stack.");
+  state.pendingChoice = {
+    choiceId: `v1911_sneak_preview_source_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.sneak_preview_source:${state.stateVersion + 1}`,
+    prompt: "Sneak Preview: Wähle, ob du im Heap oder im Stack nach einem Programm suchst.",
+    kind: "select_option",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier"
+  };
+}
+
 function startRunnerStackSearchChoice(state: GameState, sourcePrefix = "v098.search_stack", choiceIdPrefix = "v098_search_stack", config: RunnerStackSearchChoiceOptions = {}): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const destination = config.destination ?? "grip";
@@ -7791,12 +7868,12 @@ function startRunnerHeapSearchChoice(state: GameState, sourceCardId: CardInstanc
       const definition = definitionFor(state, cardId);
       return { id: `card_${cardId}`, label: definition.title, value: cardId };
     });
-  if (cardOptions.length === 0) throw new Error("Keine suchbare Karte im Trash.");
+  if (cardOptions.length === 0) throw new Error("Keine suchbare Karte im Heap.");
   state.pendingChoice = {
     choiceId: `v1911_search_trash_${state.stateVersion + 1}`,
     side: "runner",
     source: `v1911.search_trash:${state.stateVersion + 1}`,
-    prompt: "Trash durchsuchen",
+    prompt: "Heap durchsuchen",
     kind: "select_cards",
     options: cardOptions,
     minSelections: 1,
@@ -7815,6 +7892,38 @@ function startSelfModifyingCodeSearchChoice(state: GameState): void {
   });
 }
 
+function startSneakPreviewStackSearchChoice(state: GameState): void {
+  startRunnerStackSearchChoice(state, "v1911.sneak_preview_stack_install", "v1911_sneak_preview_stack_install", {
+    reveal: "public",
+    destination: "install_program",
+    shuffleAfter: true,
+    publicRevealKind: "search_stack_program"
+  });
+}
+
+function startSneakPreviewHeapSearchChoice(state: GameState): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const cardOptions = state.runner.heap
+    .filter((cardId) => definitionFor(state, cardId).type === "program")
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (cardOptions.length === 0) throw new Error("Keine suchbare Programmkarte im Heap.");
+  state.pendingChoice = {
+    choiceId: `v1911_sneak_preview_heap_install_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.sneak_preview_heap_install:${state.stateVersion + 1}`,
+    prompt: "Sneak Preview: Programm aus dem Heap wählen",
+    kind: "select_cards",
+    options: cardOptions,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+}
+
 function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
   const choice = state.pendingChoice;
   if (!choice) throw new Error("Es ist keine Search-Choice offen.");
@@ -7827,6 +7936,8 @@ function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalActi
   if (resolution.destination === "install_program") {
     const installResult = choice.source.startsWith("v1911.search_stack_install")
       ? tryResolveSelfModifyingCodeInstallFromStack(state, cardId)
+      : choice.source.startsWith("v1911.sneak_preview_stack_install")
+        ? tryResolveSneakPreviewInstall(state, cardId, "stack")
       : tryInstallRunnerProgramFromStack(state, cardId)
         ? "installed"
         : "failed";
@@ -7843,11 +7954,13 @@ function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalActi
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "search_stack",
+    ...(choice.source.startsWith("v1911.sneak_preview_stack_install") ? { searchSource: "runner_stack" } : {}),
     searchReveal: resolution.reveal,
     searchDestination: resolution.destination,
     searchShuffleAfter: resolution.shuffleAfter,
     ...(resolution.destination === "install_program" ? { installSucceeded } : {}),
     ...(installPendingMemoryTrash ? { installPendingMemoryTrash: true } : {}),
+    ...(choice.source.startsWith("v1911.sneak_preview_stack_install") ? { temporaryInstall: true, temporaryReturnAtEndOfTurn: true } : {}),
     ...(resolution.reveal === "public" ? { publicRevealDefinitionId: definitionFor(state, cardId).id } : {}),
     ...(resolution.reveal === "public" && resolution.publicRevealKind ? { publicRevealKind: resolution.publicRevealKind } : {}),
     selectedCount: 1,
@@ -7855,11 +7968,77 @@ function resolveRunnerStackSearchChoice(state: GameState, legalAction: LegalActi
   };
 }
 
+function resolveSneakPreviewSourceChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Sneak-Preview-Quellenwahl offen.");
+  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const option = choice.options.find((candidate) => candidate.id === selectedId);
+  if (!option || (option.value !== "heap" && option.value !== "stack")) throw new Error("Diese Sneak-Preview-Quelle ist nicht legal.");
+  delete state.pendingChoice;
+  if (option.value === "heap") {
+    startSneakPreviewHeapSearchChoice(state);
+  } else {
+    startSneakPreviewStackSearchChoice(state);
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "sneak_preview_choose_source",
+    searchSource: option.value === "heap" ? "runner_heap" : "runner_stack"
+  };
+}
+
+function resolveSneakPreviewHeapInstallChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Sneak-Preview-Heap-Choice offen.");
+  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!cardId || !state.runner.heap.includes(cardId)) throw new Error("Die gewaehlte Karte liegt nicht im Heap.");
+  if (definitionFor(state, cardId).type !== "program") throw new Error("Sneak Preview kann nur Programme installieren.");
+  const installResult = tryResolveSneakPreviewInstall(state, cardId, "heap");
+  const installSucceeded = installResult === "installed";
+  const installPendingMemoryTrash = installResult === "pending_memory_trash";
+  if (!installPendingMemoryTrash) delete state.pendingChoice;
+  const definition = definitionFor(state, cardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneAction: "sneak_preview_install_program",
+    searchSource: "runner_heap",
+    searchDestination: "install_program",
+    searchReveal: "public",
+    searchShuffleAfter: false,
+    installSucceeded,
+    ...(installPendingMemoryTrash ? { installPendingMemoryTrash: true } : {}),
+    temporaryInstall: true,
+    temporaryReturnAtEndOfTurn: true,
+    publicRevealDefinitionId: definition.id,
+    publicRevealKind: "heap_program",
+    selectedCount: 1,
+    shuffled: false
+  };
+}
+
+function tryResolveSneakPreviewInstall(state: GameState, cardId: CardInstanceId, sourceZone: "stack" | "heap"): "installed" | "failed" | "pending_memory_trash" {
+  const source = sourceZone === "stack" ? state.runner.stack : state.runner.heap;
+  if (!source.includes(cardId)) return "failed";
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program") return "failed";
+  if (isUniqueCard(definition) && hasInstalledUniqueCardDefinition(state, "runner", definition.id)) return "failed";
+
+  const memoryDeficit = state.runner.memoryUsed + (definition.memoryCost ?? 0) - state.runner.memoryLimit;
+  if (memoryDeficit > 0) {
+    return startSneakPreviewMemoryTrashChoice(state, cardId, sourceZone, memoryDeficit) ? "pending_memory_trash" : "failed";
+  }
+
+  installRunnerProgramAtNoCost(state, cardId, definition);
+  markSneakPreviewTemporaryInstall(state, cardId);
+  return "installed";
+}
+
 function resolveRunnerHeapSearchChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
   const choice = state.pendingChoice;
-  if (!choice) throw new Error("Es ist keine Trash-Search-Choice offen.");
+  if (!choice) throw new Error("Es ist keine Heap-Search-Choice offen.");
   const cardId = selectedChoiceCardIds(choice, playerAction)[0];
-  if (!cardId || !state.runner.heap.includes(cardId)) throw new Error("Die gewaehlte Karte liegt nicht im Trash.");
+  if (!cardId || !state.runner.heap.includes(cardId)) throw new Error("Die gewaehlte Karte liegt nicht im Heap.");
   removeFromAllZones(state, cardId);
   state.runner.grip.push(cardId);
   state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), zone: { side: "runner", zone: "grip" } };
@@ -8339,6 +8518,10 @@ function tryResolveSelfModifyingCodeInstallFromStack(state: GameState, cardId: C
 
 function installRunnerProgramFromStack(state: GameState, cardId: CardInstanceId, definition = definitionFor(state, cardId)): void {
   spendRunnerInstallCredits(state, definition.installCost ?? 0, definition.type);
+  installRunnerProgramAtNoCost(state, cardId, definition);
+}
+
+function installRunnerProgramAtNoCost(state: GameState, cardId: CardInstanceId, definition = definitionFor(state, cardId)): void {
   removeFromAllZones(state, cardId);
   state.runner.rig.programs.push(cardId);
   state.runner.memoryUsed += definition.memoryCost ?? 0;
@@ -8350,6 +8533,14 @@ function installRunnerProgramFromStack(state: GameState, cardId: CardInstanceId,
     rezzed: true,
     zone: { side: "runner", zone: "rig" }
   };
+}
+
+function markSneakPreviewTemporaryInstall(state: GameState, cardId: CardInstanceId): void {
+  const entries = state.sneakPreviewTemporaryInstalls ?? [];
+  state.sneakPreviewTemporaryInstalls = [
+    ...entries.filter((entry) => entry.cardId !== cardId),
+    { cardId, sourceCardDefinitionId: SNEAK_PREVIEW_ID }
+  ];
 }
 
 function startSelfModifyingCodeMemoryTrashChoice(state: GameState, targetProgramId: CardInstanceId, memoryDeficit: number): boolean {
@@ -8374,6 +8565,67 @@ function startSelfModifyingCodeMemoryTrashChoice(state: GameState, targetProgram
     visibility: "public"
   };
   return true;
+}
+
+function startSneakPreviewMemoryTrashChoice(state: GameState, targetProgramId: CardInstanceId, sourceZone: "stack" | "heap", memoryDeficit: number): boolean {
+  const options = state.runner.rig.programs
+    .filter((cardId) => (definitionFor(state, cardId).memoryCost ?? 0) > 0)
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: `${definition.title} (${definition.memoryCost ?? 0} MU)`, value: cardId };
+    });
+  if (options.length === 0) return false;
+  state.pendingChoice = {
+    choiceId: `v1911_sneak_preview_free_mu_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.sneak_preview_free_mu:${targetProgramId}:${sourceZone}:${state.stateVersion + 1}`,
+    prompt: `Sneak Preview: Trash installierte Programme mit mindestens ${memoryDeficit} MU, um das Programm zu installieren.`,
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: options.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public"
+  };
+  return true;
+}
+
+function resolveSneakPreviewMemoryTrashChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Sneak-Preview-MU-Choice offen.");
+  const [, targetProgramId, sourceZone] = choice.source.split(":");
+  if (!targetProgramId || (sourceZone !== "stack" && sourceZone !== "heap")) throw new Error("Die Sneak-Preview-MU-Choice ist ungueltig.");
+  const source = sourceZone === "stack" ? state.runner.stack : state.runner.heap;
+  if (!source.includes(targetProgramId)) throw new Error("Das zu installierende Programm liegt nicht mehr in der gewaehlten Zone.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  for (const cardId of selectedIds) {
+    if (!state.runner.rig.programs.includes(cardId)) throw new Error("Nur installierte Programme können für MU getrasht werden.");
+  }
+  for (const cardId of selectedIds) trashRunnerInstalledProgram(state, cardId);
+  const targetDefinition = definitionFor(state, targetProgramId);
+  if (state.runner.memoryUsed + (targetDefinition.memoryCost ?? 0) > state.runner.memoryLimit) {
+    throw new Error("Die Auswahl schafft nicht genug freie MU für das Programm.");
+  }
+  installRunnerProgramAtNoCost(state, targetProgramId, targetDefinition);
+  markSneakPreviewTemporaryInstall(state, targetProgramId);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "sneak_preview_install_program",
+    searchSource: sourceZone === "stack" ? "runner_stack" : "runner_heap",
+    searchReveal: "public",
+    searchDestination: "install_program",
+    searchShuffleAfter: false,
+    installSucceeded: true,
+    temporaryInstall: true,
+    temporaryReturnAtEndOfTurn: true,
+    trashedForMemoryCount: selectedIds.length,
+    publicRevealDefinitionId: targetDefinition.id,
+    publicRevealKind: sourceZone === "stack" ? "search_stack_program" : "heap_program",
+    selectedCount: 1,
+    shuffled: false
+  };
 }
 
 function resolveSelfModifyingCodeMemoryTrashChoice(state: GameState, legalAction: LegalAction, playerAction: PlayerAction): void {
@@ -9020,10 +9272,26 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
     }
-    for (const key of ["hiddenZoneAction", "searchSource", "searchDestination", "selectedCount", "shuffled"]) {
+    for (const key of [
+      "hiddenZoneAction",
+      "searchSource",
+      "searchReveal",
+      "searchDestination",
+      "searchShuffleAfter",
+      "installSucceeded",
+      "installPendingMemoryTrash",
+      "temporaryInstall",
+      "temporaryReturnAtEndOfTurn",
+      "trashedForMemoryCount",
+      "selectedCount",
+      "shuffled"
+    ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
     }
+  }
+  if (legalAction.type === "end_turn" && legalAction.payload?.sneakPreviewReturnedCount !== undefined) {
+    context.sneakPreviewReturnedCount = legalAction.payload.sneakPreviewReturnedCount;
   }
   if (legalAction.type === "continue_run") {
     context.result = state.run ? "continued" : "ended";

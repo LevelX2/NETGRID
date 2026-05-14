@@ -31,6 +31,8 @@ Keine V1.9.12+-Karte wurde vorgezogen.
 
 Die Karten sind über bestehende und eng ergänzte side-sichere Engine-Pfade für Stack-Search, R&D-Reveal, Expose, R&D-Top-Reorder und Shuffle angeschlossen. UI, Server, KI und menschliche Spieler reichen weiterhin nur aus `LegalActions` abgeleitete `PlayerActions` ein; `applyAction` validiert Seite, `actionId`, `stateVersion`, Timing, Ziele und Choices erneut.
 
+Nachtrag 2026-05-14: `Sneak Preview` wurde nach Quellenprüfung aus dem falschen Stack-Reveal-Adapter herausgelöst. Die Karte nutzt jetzt eine vorgelagerte Quellenwahl (`Heap` oder `Stack`), installiert das gewählte Programm kostenlos, mischt nur nach Stack-Suche und nimmt die konkrete Programm-Instanz am Runner-Zugende nur zurück, wenn sie noch installiert ist.
+
 Ergänzte oder finalisierte Hauptartefakte:
 
 - `packages/shared/src/index.ts`

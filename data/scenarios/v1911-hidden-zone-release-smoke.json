@@ -32,7 +32,8 @@
   "steps": [
     "Start deterministic V1.9.11 smoke games with the V1.9.11 runner and corp fixtures.",
     "Verify Runner stack search: choice is side-private, selected program moves to grip and stack shuffle is deterministic.",
-    "Verify Gideon's Pawnshop: choice comes from Runner trash, selected card moves to grip, the played Pawnshop is not selectable, and the stack is not shuffled.",
+    "Verify Gideon's Pawnshop: choice comes from Runner heap, selected card moves to grip, the played Pawnshop is not selectable, and the stack is not shuffled.",
+    "Verify Sneak Preview: source is chosen before search, Heap and Stack paths install a program at no cost, only Stack path shuffles, and the temporary program returns at Runner end of turn only while still installed.",
     "Verify reveal and expose: only the intentionally revealed CardDefinition is public.",
     "Verify installed Runner helpers: LegalActions expose/search/reorder only through V1.9.11 PendingChoices.",
     "Verify Corporate Downsizing and Ice Pick Willie: R&D top reveal is public without leaking the rest of R&D.",
