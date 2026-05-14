@@ -364,6 +364,35 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("merges simple play credit effects into the played card entry", () => {
+    const event = makeEvent("play_event", {
+      actor: "runner",
+      title: "Livewire's Contacts",
+      cardDefinitionId: "onr_v1_097_livewires-contacts",
+      resolvedEffects: [
+        {
+          effectId: "play_event.effect.1",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 3,
+          sourceDefinitionId: "onr_v1_097_livewires-contacts",
+          sourceTitle: "Livewire's Contacts",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner", { cardTitle: "Livewire's Contacts" });
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Du hast Livewire's Contacts gespielt und 3 Credits erhalten.");
+    expect(item.category).toBe("economy");
+    expect(item.chips).toContain("Event");
+    expect(item.chips).toContain("+3 Credits");
+    expect(effects).toEqual([]);
+  });
+
   it("highlights stolen agendas with visible agenda points", () => {
     const item = formatChronicleEvent(
       makeEvent("steal_agenda", {

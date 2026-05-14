@@ -302,6 +302,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         break;
       }
       const playEffect = mergedPlayEffect ?? effect;
+      category = playEffect.category ?? category;
       title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);
       chips.push(actionType === "play_event" ? "Event" : "Operation", ...playEffect.chips);
       break;
@@ -722,6 +723,7 @@ function simpleMergedPlayEffect(event: PublicGameEvent): EffectSummary | undefin
   if (effects.length !== 1 || !effect || !shouldMergePlayEffect(event, effect)) return undefined;
   const amount = numberValue(effect.amount) ?? 0;
   if (effect.kind === "draw_cards") return { category: "card", suffix: `${cardCountText(amount)} gezogen`, chips: [amount === 1 ? "Karte ziehen" : `${amount} Karten`] };
+  if (effect.kind === "gain_credits") return { category: "economy", suffix: `${creditText(amount)} erhalten`, chips: [`+${amount} ${creditLabel(amount)}`] };
   return undefined;
 }
 
@@ -730,7 +732,7 @@ function shouldMergePlayEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   if (actionType !== "play_event" && actionType !== "play_operation") return false;
-  if (effect.kind !== "draw_cards" || effect.visibility !== "public") return false;
+  if (!["draw_cards", "gain_credits"].includes(effect.kind) || effect.visibility !== "public") return false;
   if (effect.reason !== "card_resolver") return false;
   const actor = sideValue(payload.actor);
   if (actor && effect.side && actor !== effect.side) return false;
