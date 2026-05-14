@@ -12,6 +12,7 @@
 - Planungs- und Umsetzungshandoff V1.1.3 bis V1.2.1: `docs/derived/V1_1_3_TO_V1_2_1_IMPLEMENTATION_HANDOFF.md` bündelt Mechanics-AI-Card Baseline, Event Modification Foundation und Replacement Effects.
 - Formaler Abschluss V1.1.3: `docs/derived/V1_1_3_FINAL_REVIEW.md` bestätigt V1.1.3 als abgeschlossenes Planungs-/Normalisierungsrelease ohne Codeimplementierung.
 - S01: Sonderphase für Spielende, Ergebnisfenster, Spielziel, private Matchserie und Audio; Repository-Artefakte unter `docs/derived/S01_*.md`.
+- `docs/derived/BACKEND_0_5_PRIVATE_STORAGE_MAINTENANCE_PLAN.md`: Vorschlag für einen unabhängigen Backend-/Ops-Zwischenrelease mit privater Storage-Wartungsansicht, Größenanalyse, Backup-pflichtigem Cleanup, Dry-Run und Vacuum für lokale SQLite-Runtime-Daten, getrennt von der V1.9.x-Karten-/Mechaniklinie.
 - [[../Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen]]: Workflow für wiki-first Arbeit und Rückführung von Erkenntnissen.
 - Releaseabschluss-Regel: Bei jedem umgesetzten Release wird die im Webclient sichtbare Versionsnummer am Ende auf den Zielstand angehoben und im Final Review nachgewiesen.
 - V1.9.2 Mechanikpaket K ist umgesetzt und final reviewt: `docs/derived/V1_9_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`.

@@ -351,6 +351,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   }
 
   private saveRecord(record: StoredMatch): void {
+    dedupeStateSnapshots(record);
     const matchId = record.match.matchId;
     const stateVersion = record.gameState?.stateVersion ?? null;
     const stateHash = record.gameState ? hashState(record.gameState) : null;
@@ -483,6 +484,17 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       throw error;
     }
   }
+}
+
+function dedupeStateSnapshots(record: StoredMatch): void {
+  const seen = new Set<string>();
+  const unique: typeof record.stateSnapshots = [];
+  for (const snapshot of record.stateSnapshots) {
+    if (seen.has(snapshot.snapshotId)) continue;
+    seen.add(snapshot.snapshotId);
+    unique.push(snapshot);
+  }
+  if (unique.length !== record.stateSnapshots.length) record.stateSnapshots = unique;
 }
 
 export function createSqliteStorageBackup(input: {

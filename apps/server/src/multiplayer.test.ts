@@ -278,6 +278,28 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     reopenedStorage.close();
   });
 
+  it("deduplicates repeated state snapshots before writing SQLite mirror tables", async () => {
+    const fixture = await storedMatchFixture("v108-duplicate-state-snapshot");
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const record = structuredClone(fixture.record) as StoredMatch;
+    const gameState = createGameAfterSetup({ matchId: record.match.matchId, seed: "v108-duplicate-state-snapshot" });
+    const snapshot = stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion, "snap_duplicate");
+    record.gameState = gameState;
+    record.stateSnapshots = [snapshot, { ...snapshot, matchVersion: snapshot.matchVersion + 1 }];
+
+    await expect(storage.save(record)).resolves.toBeUndefined();
+
+    const reopened = await storage.load(record.match.matchId);
+    expect(reopened?.stateSnapshots.map((candidate) => candidate.snapshotId)).toEqual(["snap_duplicate"]);
+    const db = new DatabaseSync(dbPath, { readOnly: true });
+    expect(db.prepare("SELECT COUNT(*) AS count FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?").get(record.match.matchId, "snap_duplicate")).toMatchObject({ count: 1 });
+    db.close();
+    storage.close();
+  });
+
   it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
     const dir = await tempStorageDir();
     const legacyPath = join(dir, "netgrid.sqlite");
