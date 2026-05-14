@@ -550,6 +550,86 @@ describe("formatChronicleEvent", () => {
     expect(runnerBid.chips).toEqual(["Runner", "Trace", "Korp 2", "Runner 1", "6:1", "Erfolg", "+1 Tag"]);
   });
 
+  it("describes complex card payloads from the Originalset spot-check clearly", () => {
+    const valuPak = formatChronicleEvent(
+      makeEvent("play_event", {
+        actor: "runner",
+        cardDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+        title: "Valu-Pak Software Bundle",
+        v1922RunnerEventAbility: "program_install_action_bundle",
+        gainedActions: 5,
+        temporaryProgramInstallCredits: 1,
+        valuPakProgramInstallActionsRemaining: 5
+      }),
+      "runner"
+    );
+    const edgerunner = formatChronicleEvent(
+      makeEvent("play_operation", {
+        actor: "corp",
+        cardDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+        title: "Edgerunner, Inc., Temps",
+        v1922CorpOperationAbility: "install_action_bundle",
+        gainedActions: 3,
+        edgerunnerTempsInstallActionsRemaining: 3
+      }),
+      "runner"
+    );
+    const securityPurge = formatChronicleEvent(
+      makeEvent("score_agenda", {
+        actor: "corp",
+        cardDefinitionId: "onr_v1_216_security-purge",
+        title: "Security Purge",
+        agendaAbility: "v1922_security_purge",
+        revealedCount: 3,
+        installedIceCount: 2,
+        trashedCount: 1
+      }),
+      "runner"
+    );
+    const shield = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_061_shield",
+        title: "Shield",
+        eventModificationDecision: "apply",
+        preventedAmount: 2,
+        damageAmount: 0
+      }),
+      "runner"
+    );
+    const boardwalk = formatChronicleEvent(
+      makeEvent("gain_credit", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_008_boardwalk",
+        title: "Boardwalk",
+        v1921RunnerProgramAbility: "deterministic_die_probe",
+        v1921DieRoll: 4
+      }),
+      "runner"
+    );
+    const flak = formatChronicleEvent(
+      makeEvent("break_subroutine", {
+        actor: "runner",
+        cardDefinitionId: "onr_v1_027_flak",
+        title: "Flak"
+      }),
+      "runner"
+    );
+
+    expect(valuPak.title).toBe("Du hast Valu-Pak Software Bundle gespielt und 5 Programminstall-Aktionen erhalten.");
+    expect(valuPak.description).toBe("1 temporärer Credit ist nur für Programminstallationen verfügbar.");
+    expect(valuPak.chips).toContain("+5 Aktionen");
+    expect(edgerunner.title).toBe("Die Korp hat Edgerunner, Inc., Temps gespielt und 3 Installaktionen erhalten.");
+    expect(edgerunner.chips).toContain("3 offen");
+    expect(securityPurge.title).toBe("Die Korp hat Security Purge gescored und 3 R&D-Karten aufgedeckt.");
+    expect(securityPurge.description).toBe("2 ICE installiert und gerezzt; 1 Nicht-ICE getrasht.");
+    expect(shield.title).toBe("Du hast 2 Schaden mit Shield verhindert.");
+    expect(shield.chips).toContain("2 verhindert");
+    expect(boardwalk.title).toBe("Du hast Boardwalk aktiviert und eine 4 gewürfelt.");
+    expect(boardwalk.chips).toContain("Wurf 4");
+    expect(flak.title).toBe("Du hast mit Flak eine Subroutine gebrochen.");
+  });
+
   it("describes Corp advances as installations and developments without leaking hidden titles", () => {
     const hidden = formatChronicleEvent(
       makeEvent("advance_card", {

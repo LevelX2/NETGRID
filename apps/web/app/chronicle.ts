@@ -186,6 +186,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         );
         break;
       }
+      if (payload.eventModificationDecision === "apply" && numberValue(payload.preventedAmount) !== undefined) {
+        const preventedAmount = numberValue(payload.preventedAmount) ?? 0;
+        const damageAmount = numberValue(payload.damageAmount);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${preventedAmount} Schaden${cardTitle ? ` mit ${cardTitle}` : ""} verhindert`);
+        description = damageAmount !== undefined ? `${damageAmount} Schaden bleibt übrig.` : undefined;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Prävention", `${preventedAmount} verhindert`, ...(damageAmount !== undefined ? [`${damageAmount} übrig`] : []));
+        break;
+      }
       if (stringValue(payload.v1922RunnerEventAbility) === "successful_hq_run_pay_rez_cost_trash_rezzed_ice") {
         const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
         const targetServerLabel = displayServerLabel(stringValue(payload.targetServerLabel));
@@ -284,6 +296,20 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Agenda-Aktion");
         break;
       }
+      if (
+        stringValue(payload.v1921RunnerProgramAbility) === "deterministic_die_probe" ||
+        stringValue(payload.v1921RunnerResourceAbility) === "deterministic_die_probe" ||
+        stringValue(payload.v1921UpgradeAbility) === "deterministic_server_die_probe" ||
+        stringValue(payload.v1921AssetAbility) === "deterministic_die_probe"
+      ) {
+        const dieRoll = numberValue(payload.v1921DieRoll);
+        category = "card";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine Kartenfähigkeit"} aktiviert${dieRoll !== undefined ? ` und eine ${dieRoll} gewürfelt` : ""}`);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Würfel", ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []));
+        break;
+      }
       category = "economy";
       title = phrase(subject, `${creditText(amount ?? 1)} genommen`);
       chips.push(`+${amount ?? 1} ${creditLabel(amount ?? 1)}`);
@@ -307,6 +333,26 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "play_event":
     case "play_operation":
+      if (actionType === "play_event" && stringValue(payload.v1922RunnerEventAbility) === "program_install_action_bundle") {
+        const gainedActions = numberValue(payload.gainedActions) ?? 0;
+        const temporaryCredits = numberValue(payload.temporaryProgramInstallCredits) ?? 0;
+        const remaining = numberValue(payload.valuPakProgramInstallActionsRemaining);
+        category = "turn";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "Valu-Pak Software Bundle"} gespielt und ${gainedActions} Programminstall-Aktionen erhalten`);
+        description = temporaryCredits > 0 ? `${temporaryCredits} temporärer Credit ist nur für Programminstallationen verfügbar.` : undefined;
+        chips.push("Event", `+${gainedActions} Aktionen`, ...(temporaryCredits > 0 ? [`+${temporaryCredits} Install-Credit`] : []), ...(remaining !== undefined ? [`${remaining} offen`] : []));
+        break;
+      }
+      if (actionType === "play_operation" && stringValue(payload.v1922CorpOperationAbility) === "install_action_bundle") {
+        const gainedActions = numberValue(payload.gainedActions) ?? 0;
+        const remaining = numberValue(payload.edgerunnerTempsInstallActionsRemaining);
+        category = "turn";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "Edgerunner, Inc., Temps"} gespielt und ${gainedActions} Installaktionen erhalten`);
+        chips.push("Operation", `+${gainedActions} Installaktionen`, ...(remaining !== undefined ? [`${remaining} offen`] : []));
+        break;
+      }
       if (actionType === "play_event" && stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
         const dieRoll = numberValue(payload.v1921DieRoll);
         const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
@@ -348,6 +394,15 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     case "score_agenda": {
       category = "agenda";
       importance = "important";
+      if (agendaAbility === "v1922_security_purge") {
+        const revealedCount = numberValue(payload.revealedCount) ?? 0;
+        const installedIceCount = numberValue(payload.installedIceCount) ?? 0;
+        const trashedCount = numberValue(payload.trashedCount) ?? 0;
+        title = phrase(subject, `${cardTitle ?? "Security Purge"} gescored und ${revealedCount} R&D-Karten aufgedeckt`);
+        description = `${installedIceCount} ICE installiert und gerezzt; ${trashedCount} Nicht-ICE getrasht.`;
+        chips.push("Score", "R&D Reveal", `${installedIceCount} ICE`, `${trashedCount} Trash`);
+        break;
+      }
       const points = agendaPointSuffix(agendaPoints);
       title = phrase(subject, `${cardTitle ?? "eine Agenda"} gescored${points}`);
       chips.push("Score", ...agendaPointChips(agendaPoints));
@@ -379,8 +434,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "break_subroutine":
       category = "run";
-      title = phrase(subject, "eine Subroutine gebrochen");
-      chips.push("Subroutine", "Gebrochen");
+      title = phrase(subject, `${cardTitle ? `mit ${cardTitle} ` : ""}eine Subroutine gebrochen`);
+      chips.push("Subroutine", "Gebrochen", ...(cardTitle ? [cardTitle] : []));
       break;
     case "continue_run":
       if (payload.traceStarted === true) {

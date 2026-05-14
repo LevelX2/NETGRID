@@ -8868,6 +8868,94 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("applies Bioweapons Engineering to meat-damage sources before resolution", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1920_bioweapons_meat_damage",
+      name: "O:NR V1.9.20 Bioweapons Meat Damage",
+      cards: [
+        { id: "onr_v1_302_scorched-earth", quantity: 1 },
+        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+      ],
+    };
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-bioweapons-meat-damage",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 20;
+    state.corp.maxHandSize = 100;
+    state.runner.tags = 1;
+    drawRunnerCardsForTest(state, 3);
+
+    moveCorpCardToHq(state, "onr_v1_190_bioweapons-engineering");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_190_bioweapons-engineering" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root",
+    );
+    for (let index = 0; index < 4; index += 1) {
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_190_bioweapons-engineering",
+      );
+    }
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_190_bioweapons-engineering",
+    );
+    expect(
+      state.corp.scoreArea.map((id) => state.cardInstances[id]?.definitionId),
+    ).toContain("onr_v1_190_bioweapons-engineering");
+
+    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_302_scorched-earth",
+    );
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      cardDefinitionId: "onr_v1_302_scorched-earth",
+      damageResolved: true,
+      damageType: "meat",
+      baseDamageAmount: 4,
+      bioweaponsEngineeringModifier: 1,
+      damageAmount: 5,
+      cardsTrashed: 5,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"hq"|"rd"|"cardInstances"|"privatePayload"|"grip"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("tracks V1.9.20 persistent recurring state on installed Loan from Chiba", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -12842,6 +12930,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "hq",
     );
+    expect(state.run?.phase).toBe("access");
+    expect(state.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
     expect(state.runner.grip).toContain(eventCardId);
@@ -13047,6 +13137,49 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("does not offer Security Code WORM Chip after a successful HQ run without unrezzed ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-security-code-worm-chip-no-target",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_security_code_worm_chip_no_target",
+          name: "O:NR V1.9.22 Security Code WORM Chip No Target",
+          cards: [
+            { id: "onr_v1_109_security-code-worm-chip", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 2;
+    state.runner.clicks = 4;
+    const hqCard = moveCorpCardToHq(state, "onr_v1_293_netwatch-credit-voucher");
+    keepOnlyCorpHqCard(state, hqCard);
+    moveRunnerCardToGrip(state, "onr_v1_109_security-code-worm-chip");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.timingPoint).toBe("runner_action.main");
+    expect(state.runnerTurnFlags?.successfulHqRunThisTurn).toBe(true);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_109_security-code-worm-chip",
+      ),
+    ).toBe(false);
   });
 
   it("plays Synchronized Attack on HQ after a successful HQ run as a private Corp retain choice", () => {

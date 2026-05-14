@@ -308,6 +308,8 @@ const V1919_COUNTER_OPERATION_IDS = new Set([
   V1919_TEAM_RESTRUCTURING_ID,
 ]);
 const V1920_MAIN_OFFICE_RELOCATION_ID = "onr_v1_205_main-office-relocation";
+const V1920_BIOWEAPONS_ENGINEERING_ID =
+  "onr_v1_190_bioweapons-engineering";
 const V1920_FORTRESS_ARCHITECTS_ID = "onr_v1_324_fortress-architects";
 const V1920_ACTION_ASSET_IDS = new Set([
   "onr_v1_331_nevinyrral",
@@ -636,10 +638,10 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   [V1922_CORE_COMMAND_JETTISON_ICE_ID]: {
     name: "onr_v1922_runner_event_successful_hq_run_pay_rez_cost_trash_rezzed_ice",
     canPlay: (state) =>
-      ensureRunnerTurnFlags(state).successfulHqRunThisTurn === true &&
+      hasSuccessfulHqRunThisTurn(state) &&
       affordableRezzedInstalledIceIdsForRunner(state).length > 0,
     resolve: (state, legalAction) => {
-      if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true)
+      if (!hasSuccessfulHqRunThisTurn(state))
         throw new Error(
           "Core Command: Jettison Ice benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
@@ -735,10 +737,10 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   [V1922_SECURITY_CODE_WORM_CHIP_ID]: {
     name: "onr_v1922_runner_event_successful_hq_run_trash_unrezzed_ice",
     canPlay: (state) =>
-      ensureRunnerTurnFlags(state).successfulHqRunThisTurn === true &&
+      hasSuccessfulHqRunThisTurn(state) &&
       unrezzedInstalledIceIds(state).length > 0,
     resolve: (state, legalAction) => {
-      if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true)
+      if (!hasSuccessfulHqRunThisTurn(state))
         throw new Error(
           "Security Code WORM Chip benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
@@ -755,10 +757,10 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   [V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID]: {
     name: "onr_v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
     canPlay: (state) =>
-      ensureRunnerTurnFlags(state).successfulHqRunThisTurn === true &&
+      hasSuccessfulHqRunThisTurn(state) &&
       state.corp.hq.length > 0,
     resolve: (state, legalAction) => {
-      if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true)
+      if (!hasSuccessfulHqRunThisTurn(state))
         throw new Error(
           "Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
@@ -1857,6 +1859,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       stoleBlackOpsAgendaThisTurn: false,
       runAttemptsThisTurn: 0,
       runAttemptsLastTurn: 0,
+      successfulHqRunThisTurn: false,
       damagePreventionUsage: {},
     },
     corpTurnFlags: {
@@ -8116,6 +8119,7 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
 
 function enterAccess(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
+  markSuccessfulRunForTurn(state, run);
   if (run.successfulRunAccessReplacement === "corp_lose_credits") {
     applySuccessfulRunAccessReplacement(state, run);
     finishRun(state, true);
@@ -8143,6 +8147,11 @@ function enterAccess(state: GameState, legalAction?: LegalAction): void {
   }
   state.timingPoint = "access.resolve_card";
   state.activeSide = "runner";
+}
+
+function markSuccessfulRunForTurn(state: GameState, run: ActiveRun): void {
+  if (run.attackedServerId === "hq")
+    ensureRunnerTurnFlags(state).successfulHqRunThisTurn = true;
 }
 
 function revealArchivesAtBreachStart(
@@ -9799,6 +9808,12 @@ function resolveDamageOperation(
   if (openEventModificationWindow(state, event, legalAction)) return;
   const summary = resolveDamageImminentEvent(state, event);
   setDamagePayload(legalAction, summary);
+  const payload = (legalAction.payload ??= {});
+  if (typeof event.payload.baseDamageAmount === "number")
+    payload.baseDamageAmount = event.payload.baseDamageAmount;
+  if (typeof event.payload.bioweaponsEngineeringModifier === "number")
+    payload.bioweaponsEngineeringModifier =
+      event.payload.bioweaponsEngineeringModifier;
 }
 
 function createDamageImminentEvent(
@@ -9810,6 +9825,11 @@ function createDamageImminentEvent(
     source: string;
   },
 ): ImminentEvent {
+  const bioweaponsModifier =
+    request.damageType === "meat" && corpHasScoredBioweaponsEngineering(state)
+      ? 1
+      : 0;
+  const amount = request.amount + bioweaponsModifier;
   return {
     eventId: `imminent_damage_${state.stateVersion + 1}_${sanitizeId(request.damageId)}`,
     eventType: "damage",
@@ -9819,7 +9839,13 @@ function createDamageImminentEvent(
     payload: {
       damageId: request.damageId,
       damageType: request.damageType,
-      amount: request.amount,
+      amount,
+      ...(bioweaponsModifier > 0
+        ? {
+            baseDamageAmount: request.amount,
+            bioweaponsEngineeringModifier: bioweaponsModifier,
+          }
+        : {}),
       source: request.source,
     },
     visibility: "hidden_info_barrier",
@@ -10389,6 +10415,13 @@ function corpHasScoredExecutiveExtraction(state: GameState): boolean {
   return scoredCorpAgendaIds(state).some(
     (cardId) =>
       definitionFor(state, cardId).id === "onr_v1_201_executive-extraction",
+  );
+}
+
+function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
+  return scoredCorpAgendaIds(state).some(
+    (cardId) =>
+      definitionFor(state, cardId).id === V1920_BIOWEAPONS_ENGINEERING_ID,
   );
 }
 
@@ -11907,7 +11940,7 @@ function resolveV1922CoreCommandJettisonIceChoice(
   const choice = state.pendingChoice;
   if (!choice || !choice.source.startsWith("v1922.core_command_jettison_ice"))
     throw new Error("Es ist keine V1.9.22-Core-Command-Choice offen.");
-  if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true)
+  if (!hasSuccessfulHqRunThisTurn(state))
     throw new Error(
       "Core Command: Jettison Ice benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
     );
@@ -12123,7 +12156,7 @@ function resolveV1922SecurityCodeWormChipChoice(
     throw new Error(
       "Es ist keine V1.9.22-Security-Code-WORM-Chip-Choice offen.",
     );
-  if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true)
+  if (!hasSuccessfulHqRunThisTurn(state))
     throw new Error(
       "Security Code WORM Chip benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
     );
@@ -12183,7 +12216,7 @@ function resolveV1922SynchronizedAttackOnHqChoice(
     throw new Error(
       "Es ist keine V1.9.22-Synchronized-Attack-on-HQ-Choice offen.",
     );
-  if (ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true)
+  if (!hasSuccessfulHqRunThisTurn(state))
     throw new Error(
       "Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
     );
@@ -13912,6 +13945,11 @@ function publicContextForAction(
     context.damageAmount = legalAction.payload.damageAmount;
     context.cardsTrashed = legalAction.payload.cardsTrashed;
     context.flatline = legalAction.payload.flatline;
+    if (typeof legalAction.payload.baseDamageAmount === "number")
+      context.baseDamageAmount = legalAction.payload.baseDamageAmount;
+    if (typeof legalAction.payload.bioweaponsEngineeringModifier === "number")
+      context.bioweaponsEngineeringModifier =
+        legalAction.payload.bioweaponsEngineeringModifier;
     if (typeof legalAction.payload.coreDamageAfter === "number")
       context.coreDamageAfter = legalAction.payload.coreDamageAfter;
     if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number")
@@ -15681,6 +15719,10 @@ function ensureRunnerTurnFlags(
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
   return flags;
+}
+
+function hasSuccessfulHqRunThisTurn(state: GameState): boolean {
+  return state.runnerTurnFlags?.successfulHqRunThisTurn === true;
 }
 
 function ensureCorpTurnFlags(
