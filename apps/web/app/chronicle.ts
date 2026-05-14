@@ -186,6 +186,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         );
         break;
       }
+      if (stringValue(payload.v1922RunnerEventAbility) === "successful_hq_run_pay_rez_cost_trash_rezzed_ice") {
+        const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+        const targetServerLabel = displayServerLabel(stringValue(payload.targetServerLabel));
+        const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${cardTitle ?? "ein gerezztes ICE"}${targetServerLabel ? ` in ${targetServerLabel}` : ""} getrasht und ${creditText(rezCostPaid)} bezahlt`);
+        cardDefinitionId = targetDefinitionId ?? cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Core Command", "Trash", `${rezCostPaid} ${creditLabel(rezCostPaid)}`, ...(targetServerLabel ? [targetServerLabel] : []));
+        break;
+      }
       if (hiddenZoneAction === "search_stack") {
         const destinationLabel = searchDestinationLabel(searchDestination);
         const installFailed = searchDestination === "install_program" && payload.installSucceeded === false;

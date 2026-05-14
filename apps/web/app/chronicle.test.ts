@@ -282,6 +282,27 @@ describe("formatChronicleEvent", () => {
     expect(resolved.chips).toEqual(expect.arrayContaining(["Playful AI", "+2 Credits", "1 beiseite", "Würfe 4, 5"]));
   });
 
+  it("names Core Command Jettison Ice targets and paid rez costs in the chronicle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        v1922RunnerEventAbility: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+        targetCardDefinitionId: "simple_barrier_ice",
+        targetServerLabel: "R&D",
+        rezCostPaid: 3,
+        trashedCount: 1
+      }),
+      "runner",
+      { cardTitle: "Simple Barrier ICE" }
+    );
+
+    expect(item.title).toBe("Du hast Simple Barrier ICE in R&D getrasht und 3 Credits bezahlt.");
+    expect(item.category).toBe("card");
+    expect(item.importance).toBe("important");
+    expect(item.cardDefinitionId).toBe("simple_barrier_ice");
+    expect(item.chips).toEqual(["Runner", "Core Command", "Trash", "3 Credits", "R&D"]);
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {

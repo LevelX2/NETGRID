@@ -1030,7 +1030,7 @@ function catalogNumericLabel(key: string, label: string, value: number | null | 
 }
 
 function revealedEventCardId(event: PublicGameEvent): string | null {
-  const cardId = event.publicPayload.cardDefinitionId ?? event.publicPayload.sourceDefinitionId;
+  const cardId = event.publicPayload.cardDefinitionId ?? event.publicPayload.sourceDefinitionId ?? event.publicPayload.targetCardDefinitionId;
   return typeof cardId === "string" ? cardId : null;
 }
 
