@@ -1039,7 +1039,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
   it("uses King of the Road economy and draw plans before low-value runs", () => {
     const economyState = kingOfTheRoadRunnerTurn("ai-kotr-economy");
     moveRunnerCardToGrip(economyState, "onr_v1_097_livewires-contacts");
-    economyState.runner.credits = 1;
+    economyState.runner.credits = 2;
     const economyInput = buildAiDecisionInput(economyState, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
     const economyEvent = economyInput.legalActions.find((action) => action.type === "play_event" && sourceDefinitionFromInput(economyInput, action) === "onr_v1_097_livewires-contacts");
 

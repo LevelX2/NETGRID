@@ -91,6 +91,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-14 15:36 CEST
+- Ergebnis: V1.9.22 Zetatech-Software-Installer-Install-only-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Zetatech Software Installer` hat eine install-only Runtime-Definition mit Installkosten 0 und MU 1 erhalten. Die Restricted-Credit- und Overlay-Faehigkeit bleibt ohne LegalAction, bis Zahlungsfenster und Overlay-Zustandswechsel technisch bestaetigt sind. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (300), `catalog` pass (44), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: zetatech install-only wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-14 15:30 CEST
 - Ergebnis: V1.9.22 Flak-/Reflector-Breaker-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

@@ -260,11 +260,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "prepared_user_confirmed_errata_reviewed_program_install_credit_no_promotion",
+      "contractStatus": "runtime_install_only_wip_no_promotion",
       "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "errata_put_2_from_bank", "recurring_2_credits_for_installing_programs", "refresh_from_bank_at_runner_turn_start", "may_install_program_over_itself"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["program_install_payment_window", "overlay_install_state_transition", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Write the restricted program-install payment window and overlay state transition contract before using the errata-reviewed recurring program-install credits."
+      "safeCurrentCoverage": ["install_program_legal_action", "wrong_side_stale_revalidation", "public_payload_visibility", "replay_statehash", "ability_contract_remains_gated"],
+      "missingInformation": ["program_install_payment_window", "overlay_install_state_transition", "ai_fallback", "final_catalog_release_promotion"],
+      "removalCondition": "Keep restricted program-install credits and overlay unavailable until their payment and state-transition contract is written."
     },
     {
       "cardId": "onr_v1_077_anonymous-tip",

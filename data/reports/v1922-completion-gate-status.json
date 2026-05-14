@@ -91,6 +91,7 @@
       "onr_v1_061_shield",
       "onr_v1_067_speed-trap",
       "onr_v1_068_startup-immolator",
+      "onr_v1_075_zetatech-software-installer",
       "onr_v1_077_anonymous-tip",
       "onr_v1_080_core-command-jettison-ice",
       "onr_v1_086_forged-activation-orders",
@@ -190,7 +191,7 @@
       },
       {
         "cardId": "onr_v1_075_zetatech-software-installer",
-        "status": "prepared_user_confirmed_pending_restricted_credit_and_overlay_contract",
+        "status": "runtime_install_only_wip_pending_restricted_credit_and_overlay_contract",
         "removalCondition": "Write restricted program-install credits and overlay installation contract."
       }
     ],
@@ -239,11 +240,10 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter, Flak and Reflector now have non-promoting runtime WIPs; Errata 1.70 and user clarifications for Hammer, Japanese Water Torture, Zetatech Software Installer and Virizz reduced several remaining factual gaps without release promotion. The user-confirmed breaker contract keeps Hammer and Japanese Water Torture ready for narrow non-promoting runtime implementation.",
+    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter, Flak, Reflector and Zetatech Software Installer now have non-promoting runtime WIPs; Errata 1.70 and user clarifications for Hammer, Japanese Water Torture and Virizz reduced several remaining factual gaps without release promotion. The user-confirmed breaker contract keeps Hammer and Japanese Water Torture ready for narrow non-promoting runtime implementation.",
     "blockedCards": [
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_075_zetatech-software-installer",
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_216_security-purge",
       "onr_v1_247_haunting-inquisition",

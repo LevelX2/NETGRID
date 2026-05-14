@@ -1956,7 +1956,8 @@ describe("catalog import and status logic", () => {
       "onr_v1_057_scatter-shot",
       "onr_v1_061_shield",
       "onr_v1_067_speed-trap",
-      "onr_v1_068_startup-immolator"
+      "onr_v1_068_startup-immolator",
+      "onr_v1_075_zetatech-software-installer"
     ]);
     for (const card of runnerProgramResolverCards) {
       expect(card.releaseStatus, card.cardCode).toBe("runtime_wip_no_promotion");
@@ -1970,7 +1971,8 @@ describe("catalog import and status logic", () => {
           "onr_v1_051_rabbit",
           "onr_v1_057_scatter-shot",
           "onr_v1_067_speed-trap",
-          "onr_v1_068_startup-immolator"
+          "onr_v1_068_startup-immolator",
+          "onr_v1_075_zetatech-software-installer"
         ].includes(card.cardCode)
       ) {
         expect(card.coveredSmokes).toContain("ability_contract_remains_gated");
@@ -2017,7 +2019,7 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes).toEqual(expect.arrayContaining(["rez_ice_legal_action", "core_damage_subroutines", "end_the_run", "replay_statehash"]));
     }
 
-    expect(plannedCards).toHaveLength(9);
+    expect(plannedCards).toHaveLength(8);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
       expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);

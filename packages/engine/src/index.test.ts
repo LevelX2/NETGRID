@@ -731,7 +731,7 @@ describe("O:NR v1 Limited local private test access", () => {
 
     const beforeContactsCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_097_livewires-contacts");
-    expect(state.runner.credits).toBe(beforeContactsCredits + 3);
+    expect(state.runner.credits).toBe(beforeContactsCredits + 1);
 
     const beforeScoreCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_108_score");
@@ -1138,7 +1138,7 @@ describe("V1.0.6K Card Release", () => {
 
     const beforeContactsCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_097_livewires-contacts");
-    expect(state.runner.credits).toBe(beforeContactsCredits + 3);
+    expect(state.runner.credits).toBe(beforeContactsCredits + 1);
 
     const beforeScoreCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_108_score");
@@ -1396,7 +1396,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({ cost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({ cost: 0 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({ cost: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_243_fetch-4-0-1"]).toMatchObject({ rezCost: 0, strength: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_249_hunter"]).toMatchObject({ rezCost: 2, strength: 5 });
     expect(DEMO_CARDS_BY_ID["onr_v1_297_overtime-incentives"]).toMatchObject({ cost: 0 });
@@ -1587,7 +1587,7 @@ describe("V1.6.1 Mechanikpaket A", () => {
       expect(definition?.mechanics.join(" ")).not.toMatch(/hosting|daemon|stealth|worm|search|arrange|shuffle|unique|counter_system|deterministischer_wuerfel/);
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_023_evil-twin"]).toMatchObject({ installCost: 6, memoryCost: 1, strength: 3 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_028_force-shield"]).toMatchObject({ installCost: 2, memoryCost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_028_force-shield"]).toMatchObject({ installCost: 0, memoryCost: 1 });
     expect(DEMO_CARDS_BY_ID["onr_v1_125_dermatech-bodyplating"]).toMatchObject({ installCost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_229_code-corpse"]).toMatchObject({ rezCost: 10, strength: 5 });
     expect(DEMO_CARDS_BY_ID["onr_v1_231_cortical-scrub"]).toMatchObject({ rezCost: 7, strength: 3 });
@@ -2092,7 +2092,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
       )?.id ?? "pass";
     smithState = applyChoice(smithState, "runner", forceShieldOption);
     expect(smithState.runner.heap.some((id) => smithState.cardInstances[id]?.definitionId === "onr_v1_028_force-shield")).toBe(true);
-    expect(smithState.runner.credits).toBe(14);
+    expect(smithState.runner.credits).toBe(16);
   });
 });
 
@@ -2416,7 +2416,7 @@ describe("V1.8.0 Mechanikpaket G", () => {
       expect(definition?.mechanics.join(" ")).not.toMatch(/counter_system|virus|purge|deterministischer_wuerfel/);
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_083_desperate-competitor"]).toMatchObject({ cost: 0 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_090_hot-tip-for-wns"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_090_hot-tip-for-wns"]).toMatchObject({ cost: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_156_corporate-ally"]).toMatchObject({ installCost: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_159_databroker"]).toMatchObject({ installCost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_201_executive-extraction"]).toMatchObject({ advancementRequirement: 3, agendaPoints: 1 });
@@ -7271,8 +7271,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   it("keeps unresolved V1.9.22 runner programs out of playable runtime until local values are confirmed", () => {
     const runnerProgramIds = [
       "onr_v1_031_hammer",
-      "onr_v1_037_japanese-water-torture",
-      "onr_v1_075_zetatech-software-installer"
+      "onr_v1_037_japanese-water-torture"
     ] as const;
 
     for (const definitionId of runnerProgramIds) {
@@ -7283,8 +7282,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   it("does not expose unresolved V1.9.22 runner program install, pump or break LegalActions before local values are confirmed", () => {
     const runnerProgramIds = [
       "onr_v1_031_hammer",
-      "onr_v1_037_japanese-water-torture",
-      "onr_v1_075_zetatech-software-installer"
+      "onr_v1_037_japanese-water-torture"
     ] as const;
 
     for (const definitionId of runnerProgramIds) {
@@ -7485,7 +7483,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       { definitionId: "onr_v1_051_rabbit", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
       { definitionId: "onr_v1_057_scatter-shot", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
       { definitionId: "onr_v1_067_speed-trap", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
-      { definitionId: "onr_v1_068_startup-immolator", expectedCreditsAfter: 10, expectedMemoryUsed: 1 }
+      { definitionId: "onr_v1_068_startup-immolator", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
+      { definitionId: "onr_v1_075_zetatech-software-installer", expectedCreditsAfter: 10, expectedMemoryUsed: 1 }
     ] as const;
 
     for (const { definitionId, expectedCreditsAfter, expectedMemoryUsed } of installOnlyPrograms) {
