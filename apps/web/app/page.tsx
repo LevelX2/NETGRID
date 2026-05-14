@@ -40,6 +40,7 @@ import {
   Sun,
   Trash2,
   Upload,
+  User,
   UserPlus,
   Volume2,
   VolumeX,
@@ -3933,10 +3934,7 @@ export default function Page() {
         position={cuePosition}
         cardDetailsById={catalogDetailsById}
         displayMode={cardDisplayMode}
-        aiPresentation={aiTurnPresentation}
-        pacingMode={localAiPacingMode}
         canAdvanceAi={Boolean(aiTurnPresentation?.canAdvanceAi && connection === "online")}
-        onPacingMode={updateLocalAiPacingMode}
         onPosition={setCuePosition}
         onDismiss={() => setCurrentActionCue(null)}
         onAdvanceAi={() => {
@@ -5354,10 +5352,7 @@ function OpponentActionOverlay({
   position,
   cardDetailsById,
   displayMode,
-  aiPresentation,
-  pacingMode,
   canAdvanceAi = false,
-  onPacingMode,
   onPosition,
   onDismiss,
   onAdvanceAi
@@ -5367,10 +5362,7 @@ function OpponentActionOverlay({
   position: CuePositionPreference;
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
-  aiPresentation?: ClientPayload["aiTurnPresentation"];
-  pacingMode?: AiPacingMode;
   canAdvanceAi?: boolean;
-  onPacingMode?(value: AiPacingMode): void;
   onPosition(position: CuePositionPreference): void;
   onDismiss(): void;
   onAdvanceAi?(): void;
@@ -5380,7 +5372,10 @@ function OpponentActionOverlay({
   if (!cue) return null;
 
   const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
-  const showAiControls = cue.source === "ai" && aiPresentation && pacingMode && onPacingMode;
+  const cueCardDisplayMode: CardDisplayMode = displayMode === "placeholder" ? displayMode : "placeholder";
+  const showHiddenCardBack = cue.visibility === "redacted" && cue.actionType === "install_card";
+  const showAiAdvanceButton = Boolean(cue.source === "ai" && canAdvanceAi && onAdvanceAi);
+  const dismissLabel = showAiAdvanceButton ? "Weiter" : "Ausblenden";
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
     const overlay = overlayRef.current;
     if (!overlay) return;
@@ -5417,52 +5412,80 @@ function OpponentActionOverlay({
       aria-live="polite"
       data-testid="opponent-cue"
     >
-      <div className="opponentCueIcon" aria-hidden="true">
-        {cue.source === "ai" ? <Bot size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
-      </div>
-      <div className="opponentCueText">
-        <span>{cue.actorLabel}</span>
-        <strong>{cue.title}</strong>
-        {cue.description ? <p>{cue.description}</p> : null}
-      </div>
-      {relatedCard ? (
-        <div className="opponentCueCard">
-          <CardView card={relatedCard} displayMode={displayMode} compact preview />
+      <div className="opponentCueHeader">
+        <div className="opponentCueIdentity">
+          <span className="opponentCueIcon" aria-hidden="true">
+            {cue.source === "ai" ? <Bot size={18} /> : cue.source === "human" ? <User size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
+          </span>
+          <span>{cue.actorLabel}</span>
         </div>
-      ) : null}
-      {showAiControls ? (
-        <div className="cueAiControls">
-          <div className="segmented aiPacingSelector cueAiModes" role="group" aria-label="KI-Steuerung im Hinweisfenster">
-            {(["manual", "paced", "fast"] as const).map((value) => (
-              <button className={pacingMode === value ? "active" : ""} key={value} onClick={() => onPacingMode(value)} type="button" title={aiPacingModeHelp(value)}>
-                {value === "manual" ? "Einzelschritt" : value === "paced" ? "Getaktet" : "Schnell"}
-              </button>
-            ))}
+        <button
+          className="button iconOnly cueDragHandle"
+          onPointerDown={startDrag}
+          onPointerMove={dragCue}
+          onPointerUp={stopDrag}
+          onPointerCancel={stopDrag}
+          aria-label="Hinweis verschieben"
+          title="Hinweis verschieben"
+          type="button"
+        >
+          <Move size={15} />
+        </button>
+      </div>
+      <div className="opponentCueBody">
+        {relatedCard || showHiddenCardBack ? (
+          <div className="opponentCueVisual">
+            <span className="opponentCueActionBadge">{cueVisualLabel(cue)}</span>
+            {relatedCard ? (
+              <div className="opponentCueCard">
+                <CardView card={relatedCard} displayMode={cueCardDisplayMode} compact preview />
+              </div>
+            ) : (
+              <div className={`opponentCueCardBack ${cue.actor === "runner" ? "runner" : "corp"}`} aria-hidden="true">
+                <span>Verdeckte Karte</span>
+              </div>
+            )}
           </div>
-          <button className="aiStepButton cueAiStepButton" onClick={onAdvanceAi} disabled={!canAdvanceAi || !onAdvanceAi} type="button">
-            <Bot size={15} />
-            {pacingMode === "manual" ? "KI-Schritt" : "Jetzt ausführen"}
-          </button>
+        ) : null}
+        <div className="opponentCueText">
+          <strong>{cue.title}</strong>
+          {cue.description ? <p>{cue.description}</p> : null}
         </div>
-      ) : null}
-      {queued > 0 ? <small>{queued} weitere</small> : null}
-      <button
-        className="button iconOnly cueDragHandle"
-        onPointerDown={startDrag}
-        onPointerMove={dragCue}
-        onPointerUp={stopDrag}
-        onPointerCancel={stopDrag}
-        aria-label="Hinweis verschieben"
-        title="Hinweis verschieben"
-        type="button"
-      >
-        <Move size={15} />
-      </button>
-      <button className="button iconOnly" onClick={onDismiss} aria-label="Hinweis schließen" title="Hinweis schließen" type="button">
-        <X size={15} />
-      </button>
+      </div>
+      <div className="opponentCueFooter">
+        {queued > 0 ? <small>{queued} weitere {queued === 1 ? "Meldung" : "Meldungen"}</small> : <span aria-hidden="true" />}
+        <button className="button cueAdvanceButton" onClick={showAiAdvanceButton && onAdvanceAi ? onAdvanceAi : onDismiss} aria-label={dismissLabel} title={dismissLabel} type="button">
+          {showAiAdvanceButton ? <Play size={14} /> : <Check size={14} />}
+          {dismissLabel}
+        </button>
+      </div>
     </aside>
   );
+}
+
+function cueVisualLabel(cue: OpponentActionCue): string {
+  switch (cue.actionType) {
+    case "install_card":
+      return cue.visibility === "redacted" ? "verdeckt installiert" : "installiert";
+    case "play_event":
+    case "play_operation":
+      return "gespielt";
+    case "access_card":
+      return "gezeigt";
+    case "rez_ice":
+      return "gerezzt";
+    case "score_agenda":
+      return "erzielt";
+    case "steal_agenda":
+      return "gestohlen";
+    case "advance_card":
+      return "entwickelt";
+    case "trash_accessed_card":
+    case "trash_resource":
+      return "getrasht";
+    default:
+      return "Karte";
+  }
 }
 
 function AiPacingControls({
