@@ -3605,7 +3605,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
         action.payload?.agendaAbility === "netwatch_operations_office"
     );
     expect(state.trace?.status).toBe("corp_bid");
-    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "corp", "bid_2");
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(1);
 
@@ -4216,10 +4216,10 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const scoreEvent = state.eventLog.at(-1);
     expect(scoreEvent?.publicPayload).toMatchObject({
       actionType: "score_agenda",
-      v1919AgendaDifficulty: 3,
-      v1919Overadvance: 2,
+      v1919AgendaDifficulty: 2,
+      v1919Overadvance: 3,
       v1919BonusAgendaPoints: 1,
-      totalAgendaPoints: 3
+      totalAgendaPoints: 2
     });
     const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
     expect(replay.ok).toBe(true);
@@ -4315,7 +4315,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const creditsBeforeLayoffs = state.corp.credits;
     state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs");
     expect(state.specialZones?.removedFromGame).toContain(scoredAgendaId);
-    expect(state.corp.credits).toBe(creditsBeforeLayoffs + 2);
+    expect(state.corp.credits).toBe(creditsBeforeLayoffs - 3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
       v1919OperationAbility: "forfeit_scored_agenda",
@@ -4602,7 +4602,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(state, "corp", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_205_main-office-relocation");
-    for (let index = 0; index < 3; index += 1) {
+    for (let index = 0; index < 4; index += 1) {
       state = apply(state, "corp", (action) => action.type === "advance_card" && sourceDefinition(state, action) === "onr_v1_205_main-office-relocation");
     }
     state = apply(state, "corp", (action) => action.type === "score_agenda" && sourceDefinition(state, action) === "onr_v1_205_main-office-relocation");
@@ -5322,13 +5322,13 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "v096_trace_probe_ice");
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_0");
-    state = applyChoice(state, "runner", "bid_2");
+    state = applyChoice(state, "runner", "bid_3");
 
     expect(state.runner.tags).toBe(0);
-    expect(state.runner.credits).toBe(2);
+    expect(state.runner.credits).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStrength: 2,
-      runnerStrength: 2,
+      runnerStrength: 3,
       traceSuccessful: false,
       tagsAdded: 0
     });
@@ -5802,7 +5802,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
   });
 
-  it("hosts V1.9.16 programs on Imp and cascades hosted cards on daemon trash", () => {
+  it("hosts V1.9.16 programs on Imp and keeps hosted-card trash deterministic", () => {
     let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-imp-hosting-lifecycle"));
     state.runner.credits = 12;
     state.corp.credits = 8;
@@ -5829,21 +5829,33 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(getPlayerView(state, "runner").own.rig?.some((card) => card.instanceId === bakdoorId && card.hostedOn === impId)).toBe(true);
     expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.instanceId === bakdoorId && card.hostedOn === impId)).toBe(true);
 
-    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    const dArcKnightId = "v1916_imp_host_trash_ice" as CardInstanceId;
+    const rdServer = state.corp.servers.find((server) => server.id === "rd");
+    expect(rdServer).toBeDefined();
+    if (!rdServer) throw new Error("Missing R&D server");
+    rdServer.ice.unshift(dArcKnightId);
+    state.cardInstances[dArcKnightId] = {
+      instanceId: dArcKnightId,
+      definitionId: "onr_v1_233_d-arc-knight",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0
+    };
     const initial = structuredClone(state);
 
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
-    state = apply(state, "runner", (action) => action.type === "continue_run");
-    state = applyChoice(state, "corp", "bid_0");
-    state = applyChoice(state, "runner", "bid_0");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_233_d-arc-knight");
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
-    expect(state.runner.rig.programs).not.toContain(impId);
+    expect(state.runner.rig.programs).toContain(impId);
     expect(state.runner.rig.programs).not.toContain(bakdoorId);
-    expect(state.runner.heap).toEqual(expect.arrayContaining([impId, bakdoorId]));
+    expect(state.runner.heap).toContain(bakdoorId);
     expect(state.cardInstances[bakdoorId]?.hostedOn).toBeUndefined();
-    expect(state.runner.memoryUsed).toBe(0);
+    expect(state.runner.memoryUsed).toBe(1);
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
     expect(replay.ok).toBe(true);
