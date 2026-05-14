@@ -127,6 +127,7 @@ export type SubroutineType =
   | "trash_installed_program"
   | "set_run_encounter_tax"
   | "set_run_break_subroutine_cost_modifier"
+  | "set_run_future_end_the_run_subroutine"
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
   | "set_next_encounter_lock"
@@ -709,6 +710,7 @@ export type RunState = {
   bypassFirstIceRemaining?: boolean;
   encounterTaxForFutureIce?: number;
   breakSubroutineAdditionalCost?: number;
+  futureEncounterEndTheRunSourceIceId?: CardInstanceId;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;
@@ -1377,6 +1379,12 @@ function onrSetRunBreakSubroutineCostModifier(
   amount: number,
 ): SubroutineDefinition {
   return { id, type: "set_run_break_subroutine_cost_modifier", amount };
+}
+
+function onrSetRunFutureEndTheRunSubroutine(
+  id: string,
+): SubroutineDefinition {
+  return { id, type: "set_run_future_end_the_run_subroutine" };
 }
 
 function onrSetRunFutureStrengthBonus(
@@ -7087,6 +7095,21 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       onrReorderCorpRdTop2("onr_v1_272_too_many_doors_reorder_rd_top2"),
     ],
     mechanics: ["reorder_rd", "hidden_zone_tool"],
+  }),
+  onrIce({
+    id: "onr_v1_274_tutor",
+    title: "Tutor",
+    subtypes: ["code_gate"],
+    rezCost: 4,
+    strength: 5,
+    rulesText:
+      "[Subroutine] For the remainder of the run, each later encountered ice gains an additional end-the-run subroutine.",
+    subroutines: [
+      onrSetRunFutureEndTheRunSubroutine(
+        "onr_v1_274_tutor_future_end_the_run",
+      ),
+    ],
+    mechanics: ["run_modifier", "end_the_run", "per_card_longtail"],
   }),
   onrIce({
     id: "onr_v1_273_triggerman",

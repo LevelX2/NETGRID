@@ -584,11 +584,11 @@
       "cluster": "corp_ice",
       "side": "corp",
       "type": "ice",
-      "contractStatus": "prepared_errata_reviewed_future_encounter_etr_modifier_no_promotion",
+      "contractStatus": "runtime_wip_no_promotion",
       "confirmedLocalFacts": ["rez_cost_4", "strength_5", "code_gate_surface", "run_wide_additional_end_the_run_subroutine_after_all_others", "does_not_modify_current_tutor_encounter_unless_same_tutor_encountered_again_later"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["run_wide_subroutine_modifier_state", "future_encounter_projection", "subroutine_indexing", "breakability_contract", "legalaction_projection", "applyaction_revalidation", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Use the errata-reviewed future-encounter modifier only after subroutine indexing and break/revalidation contracts are specified."
+      "safeCurrentCoverage": ["rez_ice_legal_action", "future_encounter_end_the_run_subroutine", "synthetic_subroutine_breakability", "wrong_side_stale_revalidation", "public_event_redaction", "replay_statehash"],
+      "missingInformation": ["final_ai_catalog_release_promotion"],
+      "removalCondition": "Keep Tutor in WIP until V1.9.22 final AI, catalog and release-promotion gates are satisfied."
     },
     {
       "cardId": "onr_v1_276_viral-15",

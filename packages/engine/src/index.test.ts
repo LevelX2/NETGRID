@@ -15005,6 +15005,136 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("rezzes Tutor and adds a breakable end-the-run subroutine to later ice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-tutor-future-etr",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_tutor_hammer",
+          name: "O:NR V1.9.22 Tutor Hammer Runner",
+          cards: [
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_tutor",
+          name: "O:NR V1.9.22 Tutor Corp",
+          cards: [
+            { id: "onr_v1_274_tutor", quantity: 1 },
+            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    const wallId = putCorpIceOnServer(state, "rd", "onr_v1_279_wall-of-static");
+    const tutorId = putCorpIceOnServer(state, "rd", "onr_v1_274_tutor");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer",
+    );
+    const hammerId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_031_hammer",
+    );
+    expect(hammerId).toBeDefined();
+    if (!hammerId) throw new Error("Missing installed Hammer");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === tutorId,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.futureEncounterEndTheRunSourceIceId).toBe(tutorId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      v1922CorpIceAbility: "tutor_future_end_the_run_subroutine",
+      sourceDefinitionId: "onr_v1_274_tutor",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"/,
+    );
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === wallId,
+    );
+    const breakActions = getLegalActions(state, "runner").filter(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer",
+    );
+    expect(breakActions.map((action) => action.payload?.subroutineIndex)).toEqual(
+      [0, 1],
+    );
+    const tutorEtr = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer" &&
+        action.payload?.subroutineIndex === 1,
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: tutorEtr.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-tutor-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: tutorEtr.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-tutor-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === tutorEtr.actionId,
+    );
+    expect(state.run?.brokenSubroutineIndexes).toContain(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_031_hammer",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("rezzes Virizz and applies a rest-of-run break-cost modifier without release promotion", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -15149,7 +15279,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_216_security-purge",
       "onr_v1_247_haunting-inquisition",
-      "onr_v1_274_tutor",
       "onr_v1_276_viral-15",
     ] as const;
 
@@ -15165,6 +15294,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
       "onr_v1_280_zombie",
+      "onr_v1_274_tutor",
       "onr_v1_277_virizz",
       "onr_v1_289_edgerunner-inc-temps",
       "onr_v1_296_off-site-backups",

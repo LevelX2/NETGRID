@@ -512,10 +512,18 @@
     },
     {
       "cardCode": "onr_v1_274_tutor",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_corp_ice_future_end_the_run_subroutine",
+      "coveredSmokes": [
+        "rez_ice_legal_action",
+        "run_wide_future_end_the_run_subroutine",
+        "synthetic_subroutine_breakability",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
     },
     {
       "cardCode": "onr_v1_276_viral-15",

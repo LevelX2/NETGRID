@@ -4954,6 +4954,10 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   if (!run.encounteredIceId) return [];
   const encounteredIceId = run.encounteredIceId;
   const iceDefinition = definitionFor(state, run.encounteredIceId);
+  const encounterSubroutines = subroutinesForCurrentEncounter(
+    state,
+    iceDefinition,
+  );
   const encounteredIceStrength = iceStrengthFor(state, encounteredIceId);
   const actions: LegalAction[] = [];
   for (const breakerId of state.runner.rig.programs) {
@@ -4999,7 +5003,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       const totalBreakCost = breakAbility.cost.credits + additionalBreakCost;
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
-      const subroutines = iceDefinition.subroutines ?? [];
+      const subroutines = encounterSubroutines;
       subroutines.forEach((subroutine, index) => {
         if (breaker.id === BLINK_ID && blinkUsedSubroutines.includes(index))
           return;
@@ -5042,7 +5046,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   }
   const nextSubroutines = encounterSubroutinesForNextContinue(
     run,
-    iceDefinition.subroutines ?? [],
+    encounterSubroutines,
   );
   const willEndRun = nextSubroutines.some(
     (subroutine) => subroutine.type === "end_the_run",
@@ -5084,6 +5088,25 @@ function breakAbilityMatchesSubroutine(
   if (tags.length === 0) return true;
   const subroutineTags = subroutine.breakTags ?? [];
   return tags.some((tag) => subroutineTags.includes(tag));
+}
+
+function subroutinesForCurrentEncounter(
+  state: GameState,
+  iceDefinition: CardDefinition,
+): NonNullable<CardDefinition["subroutines"]> {
+  const run = state.run;
+  const subroutines = [...(iceDefinition.subroutines ?? [])];
+  if (
+    run?.encounteredIceId &&
+    run.futureEncounterEndTheRunSourceIceId &&
+    run.encounteredIceId !== run.futureEncounterEndTheRunSourceIceId
+  ) {
+    subroutines.push({
+      id: "v1922_tutor_future_end_the_run",
+      type: "end_the_run",
+    });
+  }
+  return subroutines;
 }
 
 function encounterSubroutinesForNextContinue(
@@ -7117,7 +7140,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   const definition = definitionFor(state, run.encounteredIceId);
   let ended = false;
   const damageSummaries: DamageSummary[] = [];
-  const subroutines = definition.subroutines ?? [];
+  const subroutines = subroutinesForCurrentEncounter(state, definition);
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
     if (
@@ -7205,6 +7228,16 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
           ...(legalAction.payload ?? {}),
           v1922CorpIceAbility: "virizz_break_cost_modifier",
           breakSubroutineAdditionalCost: run.breakSubroutineAdditionalCost,
+          sourceDefinitionId: definition.id,
+        };
+      }
+    }
+    if (subroutine.type === "set_run_future_end_the_run_subroutine") {
+      run.futureEncounterEndTheRunSourceIceId = run.encounteredIceId;
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          v1922CorpIceAbility: "tutor_future_end_the_run_subroutine",
           sourceDefinitionId: definition.id,
         };
       }

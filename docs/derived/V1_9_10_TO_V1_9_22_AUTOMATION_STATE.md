@@ -87,9 +87,19 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - `Virizz`: Rez-Kosten 2, Staerke 4; Runtime-WIP ohne Promotion ist umgesetzt mit rest-of-run +1-Credit-Break-Kostenmodifier, LegalAction-Kostenprojektion und applyAction-Revalidierung.
 - Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
 - `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
-- Naechster sinnvoller Code-Schnitt: `Hammer`-Mehrfach-Stealth-Verteilungschoice, `Tutor` nach run-weitem Zusatz-ETR-Vertrag, `Security Purge` nach Installationsvertrag fuer revealed ICE oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
+- Naechster sinnvoller Code-Schnitt: `Hammer`-Mehrfach-Stealth-Verteilungschoice, `Security Purge` nach Installationsvertrag fuer revealed ICE oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 16:51 CEST
+- Ergebnis: V1.9.22 Tutor-Future-ETR-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Tutor` hat eine nicht-promotende Runtime-ICE-Definition mit Rez-Kosten 4, Staerke 5 und future-encounter End-the-run-Subroutine-Modifier erhalten. Nach Aufloesung der Tutor-Subroutine erhalten spaeter encountered ICE eine zusaetzliche breakbare End-the-run-Subroutine am Ende der Subroutine-Liste; der aktuelle Tutor-Encounter wird nicht rueckwirkend modifiziert. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (302); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` pass; `lint` pass; `build` pass mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: tutor future etr wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 16:40 CEST
 - Ergebnis: V1.9.22 Virizz-Break-Kostenmodifier-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

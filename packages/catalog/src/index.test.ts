@@ -3143,6 +3143,7 @@ describe("catalog import and status logic", () => {
     );
     const corpIceResolverCards = manifestCards.filter((card) =>
       [
+        "v1922_corp_ice_future_end_the_run_subroutine",
         "v1922_corp_ice_core_damage_etr",
         "v1922_corp_ice_break_cost_modifier",
       ].includes(card.resolverFamily),
@@ -3350,6 +3351,7 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes.length, card.cardCode).toBeGreaterThan(0);
     }
     expect(corpIceResolverCards.map((card) => card.cardCode).sort()).toEqual([
+      "onr_v1_274_tutor",
       "onr_v1_277_virizz",
       "onr_v1_280_zombie",
     ]);
@@ -3361,15 +3363,17 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes).toEqual(
         expect.arrayContaining([
           "rez_ice_legal_action",
-          card.cardCode === "onr_v1_277_virizz"
-            ? "run_wide_break_cost_modifier"
-            : "core_damage_subroutines",
+          card.cardCode === "onr_v1_274_tutor"
+            ? "run_wide_future_end_the_run_subroutine"
+            : card.cardCode === "onr_v1_277_virizz"
+              ? "run_wide_break_cost_modifier"
+              : "core_damage_subroutines",
           "replay_statehash",
         ]),
       );
     }
 
-    expect(plannedCards).toHaveLength(5);
+    expect(plannedCards).toHaveLength(4);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(
         card.cardCode,
