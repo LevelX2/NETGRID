@@ -11,6 +11,8 @@
   --corp: #ff816f;
   --agenda: #4aa3ff;
   --corp-status-accent: #3f9fff;
+  --runner-zone-accent: #b47cff;
+  --corp-zone-accent: #3f9fff;
   --credit: #f4c95d;
   --credit-deep: #7a4f13;
   --ice: #7db5ff;
@@ -145,6 +147,13 @@ select {
   min-width: 0;
 }
 
+.topbarStatusGroup {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .mark {
   width: 36px;
   height: 36px;
@@ -223,6 +232,18 @@ select {
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.topbarUndoToggle.active {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--runner), var(--line) 30%);
+  background: color-mix(in srgb, var(--runner), var(--panel) 72%);
+}
+
+.topbarUndoToggle.attention {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--danger), var(--line) 28%);
+  background: color-mix(in srgb, var(--danger), var(--panel) 80%);
 }
 
 .seed {
@@ -1902,12 +1923,10 @@ select {
 .opponentCueOverlay {
   position: fixed;
   z-index: 72;
-  width: min(440px, calc(100vw - 28px));
+  width: min(420px, calc(100vw - 28px));
   display: grid;
-  grid-template-columns: 38px minmax(0, 1fr) auto auto;
-  align-items: center;
   gap: 10px;
-  padding: 11px;
+  padding: 10px;
   border: 1px solid color-mix(in srgb, var(--cue), var(--line) 28%);
   border-radius: 8px;
   background: color-mix(in srgb, var(--panel), var(--cue-soft) 22%);
@@ -1952,6 +1971,24 @@ select {
   border-color: color-mix(in srgb, var(--danger), var(--cue) 30%);
 }
 
+.opponentCueHeader,
+.opponentCueFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.opponentCueIdentity {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .opponentCueIcon {
   width: 38px;
   height: 38px;
@@ -1963,13 +2000,21 @@ select {
   background: color-mix(in srgb, var(--cue), var(--accent-mix-bg) 84%);
 }
 
+.opponentCueBody {
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
 .opponentCueText {
   min-width: 0;
   display: grid;
-  gap: 2px;
+  justify-items: center;
+  gap: 4px;
+  text-align: center;
 }
 
-.opponentCueText span,
 .opponentCueOverlay small {
   color: var(--muted);
   font-size: 12px;
@@ -1994,31 +2039,101 @@ select {
   white-space: nowrap;
 }
 
+.opponentCueVisual {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+}
+
+.opponentCueActionBadge {
+  max-width: 100%;
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--cue), transparent 55%);
+  border-radius: 999px;
+  color: color-mix(in srgb, var(--cue), var(--text) 16%);
+  background: color-mix(in srgb, var(--cue), transparent 88%);
+  font-size: 11px;
+  line-height: 1.3;
+  white-space: nowrap;
+}
+
 .opponentCueCard {
-  grid-column: 2 / -1;
-  width: min(172px, 100%);
+  width: 82px;
 }
 
 .opponentCueCard .card {
-  min-height: 64px;
+  min-height: 112px;
+  box-shadow: 0 10px 22px rgb(0 0 0 / 0.26);
 }
 
-.cueAiControls {
-  grid-column: 2 / -1;
+.opponentCueCard .cardTitle {
+  font-size: 10px;
+  line-height: 1.15;
+}
+
+.opponentCueCard .cardMeta,
+.opponentCueCard .cardRulesPreview {
+  display: none;
+}
+
+.opponentCueCardBack {
+  position: relative;
+  width: 82px;
+  aspect-ratio: 5 / 7;
   display: grid;
-  gap: 8px;
+  place-items: end center;
+  padding: 8px 6px;
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--cue), var(--line) 36%);
+  border-radius: 8px;
+  background-color: #151d26;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 22px rgb(0 0 0 / 0.26);
 }
 
-.cueAiModes {
-  width: 100%;
+.opponentCueCardBack.corp {
+  background-image:
+    linear-gradient(135deg, rgb(255 255 255 / 0.08), transparent 34%),
+    url("/card-backs/netgrid-corp-back.png");
 }
 
-.cueAiModes button {
-  min-height: 32px;
+.opponentCueCardBack.runner {
+  background-image:
+    linear-gradient(135deg, rgb(255 255 255 / 0.08), transparent 34%),
+    url("/card-backs/netgrid-runner-back.png");
 }
 
-.cueAiStepButton {
-  width: 100%;
+.opponentCueCardBack::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: 1;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.opponentCueCardBack span {
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  padding: 3px 5px;
+  border-radius: 4px;
+  color: #eef6ff;
+  background: rgb(0 0 0 / 0.48);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.cueAdvanceButton {
+  min-height: 34px;
+  padding: 0 11px;
+  font-size: 12px;
 }
 
 .cueDragHandle {
@@ -2083,7 +2198,7 @@ select {
   --side-status-gradient-fade: 83%;
   position: relative;
   display: grid;
-  gap: 9px;
+  gap: 7px;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--side-status-accent), transparent var(--side-status-gradient-fade)), transparent 72%),
     color-mix(in srgb, var(--side-status-accent), var(--panel) var(--side-status-bg-panel-mix));
@@ -2119,40 +2234,55 @@ select {
 }
 
 .sideStatusPanel .stat {
+  justify-items: center;
+  min-height: 40px;
   border-color: color-mix(in srgb, var(--side-status-accent), var(--line) 54%);
   background: color-mix(in srgb, var(--side-status-accent), var(--section-bg) 88%);
+  text-align: center;
+}
+
+.sideStatusPanel .stats {
+  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
 }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(62px, 1fr));
+  gap: 6px;
 }
 
 .stat {
   min-width: 0;
+  position: relative;
   display: grid;
-  align-content: start;
-  gap: 7px;
-  padding: 8px;
+  align-content: center;
+  gap: 4px;
+  padding: 5px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--section-bg);
+  overflow: visible;
 }
 
 .stat strong {
   min-width: 0;
-  min-height: 22px;
+  min-height: 20px;
   display: flex;
+  justify-content: flex-start;
   align-items: center;
-  gap: 7px;
-  font-size: 18px;
+  gap: 5px;
+  font-size: 17px;
   line-height: 1;
+}
+
+.sideStatusPanel .stat strong {
+  justify-content: center;
 }
 
 .statValue {
   display: block;
   min-width: 0;
+  white-space: nowrap;
   overflow-wrap: anywhere;
 }
 
@@ -2197,11 +2327,236 @@ select {
   gap: 0.5rem;
 }
 
+.cardChoiceOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 240;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgb(5 7 10 / 0.66);
+}
+
+.cardChoiceDialog {
+  width: min(1080px, calc(100vw - 28px));
+  max-height: calc(100vh - 40px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 48%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel), black 8%);
+  box-shadow: 0 26px 72px rgb(0 0 0 / 0.5);
+  overflow: hidden;
+}
+
+.cardChoiceHeader,
+.cardChoiceFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardChoiceHeader h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.cardChoiceHeader .meta {
+  margin: 4px 0 0;
+}
+
+.cardChoiceCounter {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 34%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--runner), var(--section-bg) 86%);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.cardChoiceRows {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 2px 2px 8px;
+}
+
+.cardChoiceOverlapRow {
+  --choice-card-width: 152px;
+  --choice-card-overlap: 72px;
+  display: flex;
+  align-items: flex-start;
+  min-height: 190px;
+  padding: 4px calc(var(--choice-card-overlap) + 10px) 10px 4px;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.cardChoiceOptionSlot {
+  position: relative;
+  flex: 0 0 var(--choice-card-width);
+  width: var(--choice-card-width);
+  max-width: var(--choice-card-width);
+  z-index: 1;
+  display: grid;
+  gap: 6px;
+}
+
+.cardChoiceOptionSlot + .cardChoiceOptionSlot {
+  margin-left: calc(-1 * var(--choice-card-overlap));
+}
+
+.cardChoiceOptionSlot:hover,
+.cardChoiceOptionSlot:focus-within {
+  z-index: 70;
+}
+
+.cardChoiceOptionSlot.selected {
+  z-index: 82;
+}
+
+.card.choiceSelected {
+  border-color: color-mix(in srgb, var(--ok), white 10%);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--ok), transparent 45%),
+    var(--card-shadow);
+}
+
+.cardChoiceSelectButton {
+  width: fit-content;
+  min-height: 28px;
+  padding: 4px 8px;
+  justify-self: start;
+  border-radius: 999px;
+  font-size: 12px;
+}
+
+.cardChoiceFallback {
+  min-height: 116px;
+}
+
+.stat.hasStatHelp {
+  cursor: help;
+  z-index: 120;
+}
+
+.stat.hasStatHelp:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--runner-zone-accent), white 12%);
+  outline-offset: 2px;
+}
+
+.statHelpTooltip {
+  position: absolute;
+  right: 0;
+  left: auto;
+  top: calc(100% + 6px);
+  z-index: 400;
+  width: min(260px, calc(100vw - 28px));
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
+  border-radius: 7px;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.statHelpTooltipFloating {
+  position: fixed;
+  right: auto;
+  opacity: 1;
+  pointer-events: none;
+  transform: none;
+}
+
+.stat.hasStatHelp:hover .statHelpTooltip,
+.stat.hasStatHelp:focus-visible .statHelpTooltip,
+.stat.hasStatHelp.helpPinned .statHelpTooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cardChoiceFooterText {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.cardChoiceEffectHint,
+.cardChoiceQuestion {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.cardChoiceEffectHint {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.cardChoiceQuestion {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.cardChoiceSubmit {
+  flex: 0 0 auto;
+}
+
+@media (max-width: 760px) {
+  .cardChoiceOverlay {
+    padding: 10px;
+  }
+
+  .cardChoiceDialog {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 18px);
+    padding: 10px;
+  }
+
+  .cardChoiceHeader,
+  .cardChoiceFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .cardChoiceCounter,
+  .cardChoiceSubmit {
+    width: fit-content;
+  }
+
+  .cardChoiceOverlapRow {
+    --choice-card-width: 136px;
+    --choice-card-overlap: 54px;
+    min-height: 176px;
+  }
+}
+
 .statLabel {
   display: block;
   min-width: 0;
   color: var(--text);
-  font-size: 16px;
+  font-size: 13px;
   line-height: normal;
   overflow-wrap: anywhere;
 }
@@ -2466,8 +2821,12 @@ select {
 
 .aiPacingPanel {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   background: color-mix(in srgb, var(--section-bg), var(--ice) 5%);
+}
+
+.aiPacingPanel .sectionTitleLine h2 {
+  font-size: 13px;
 }
 
 .aiPacingPanel .meta {
@@ -2483,11 +2842,12 @@ select {
 }
 
 .aiStepButton {
-  min-height: 40px;
+  min-height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  padding: 0 12px;
   border: 1px solid color-mix(in srgb, var(--ice), var(--line) 28%);
   border-radius: 999px;
   color: var(--text);
@@ -2495,7 +2855,9 @@ select {
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 0.08),
     0 8px 18px rgb(0 0 0 / 0.2);
+  font-size: 12px;
   font-weight: 800;
+  line-height: 1.1;
   cursor: pointer;
 }
 
@@ -2622,6 +2984,14 @@ select {
   gap: 4px;
 }
 
+.sideZoneLeadTop {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: start;
+  justify-items: center;
+  gap: 4px;
+}
+
 .serverRunButtonCorner {
   align-self: flex-start;
   margin-top: auto;
@@ -2664,7 +3034,17 @@ select {
 
 .serverContextSideButton.rigGroupSideLabel {
   font-size: clamp(11px, calc(var(--cards-min-width, 116px) * 0.12), 15px);
-  border-right-color: color-mix(in srgb, var(--runner), var(--line) 54%);
+  border-right: 0;
+}
+
+.runnerZoneSideLabel {
+  color: var(--runner-zone-accent);
+  border-right-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
+}
+
+.corpZoneSideLabel {
+  color: var(--corp-zone-accent);
+  border-right-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 48%);
 }
 
 .serverTitle {
@@ -2700,13 +3080,26 @@ select {
   color: var(--runner);
 }
 
+.serverContextButton.runnerZoneSideLabel:hover,
+.serverContextButton.runnerZoneSideLabel:focus-visible {
+  color: color-mix(in srgb, var(--runner-zone-accent), white 14%);
+}
+
+.serverContextButton.corpZoneSideLabel:hover,
+.serverContextButton.corpZoneSideLabel:focus-visible {
+  color: color-mix(in srgb, var(--corp-zone-accent), white 14%);
+}
+
 .serverRunButton {
   flex: 0 0 auto;
-  height: 24px;
-  display: inline-flex;
+  min-width: 30px;
+  height: auto;
+  position: relative;
+  display: inline-grid;
+  justify-items: center;
   align-items: center;
-  gap: 5px;
-  padding: 3px 6px;
+  gap: 3px;
+  padding: 3px 4px;
   border: 1px solid color-mix(in srgb, var(--runner), var(--line) 52%);
   border-radius: 6px;
   background: color-mix(in srgb, var(--runner), var(--panel) 72%);
@@ -2728,28 +3121,81 @@ select {
   opacity: 0.55;
 }
 
+.serverRunButton[data-tooltip]::before,
+.serverRunButton[data-tooltip]::after {
+  position: absolute;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.serverRunButton[data-tooltip]::before {
+  content: "";
+  left: calc(100% + 2px);
+  top: 50%;
+  z-index: 12;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 6px solid color-mix(in srgb, var(--runner), var(--line));
+  transform: translateY(-50%) translateX(-3px);
+}
+
+.serverRunButton[data-tooltip]::after {
+  content: attr(data-tooltip);
+  left: calc(100% + 8px);
+  top: 50%;
+  z-index: 13;
+  max-width: min(190px, calc(100vw - 32px));
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line));
+  border-radius: 6px;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  transform: translateY(-50%) translateX(-3px);
+}
+
+.serverRunButton[data-tooltip]:hover::before,
+.serverRunButton[data-tooltip]:hover::after,
+.serverRunButton[data-tooltip]:focus-visible::before,
+.serverRunButton[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) translateX(0);
+}
+
 .serverRunButton .costChips {
   margin-left: 0;
 }
 
 .serverRunButton.serverRunButtonSide {
   height: auto;
-  min-height: 22px;
-  padding: 2px 5px;
-  gap: 4px;
+  min-height: 42px;
+  padding: 3px 4px;
+  gap: 3px;
 }
 
-.serverRunButton.serverRunButtonSide .costChip {
-  min-width: 19px;
-  height: 16px;
-  font-size: 10px;
+.serverRunGlyph {
+  display: inline-grid;
+  place-items: center;
+  color: color-mix(in srgb, var(--runner-zone-accent), white 12%);
 }
 
-.serverRunButton .costChip {
-  min-width: 21px;
-  height: 17px;
-  padding: 1px 5px;
-  font-size: 11px;
+.serverRunActionIcon {
+  width: 24px;
+  height: 19px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 40%);
+  border-radius: 4px;
+  background: var(--section-bg);
 }
 
 .serverCount {
@@ -2769,6 +3215,37 @@ select {
   padding: 6px 2px;
   min-height: 0;
   font-size: 11px;
+}
+
+.sideZoneCount {
+  display: inline-grid;
+  place-items: center;
+  align-self: stretch;
+  justify-self: center;
+  min-height: 0;
+  padding: 6px 2px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--zone-chip-bg);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.serverCountSideLabel.runnerZoneSideLabel,
+.sideZoneCount.runnerZoneSideLabel {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 42%);
+  color: var(--runner-zone-accent);
+}
+
+.serverCountSideLabel.corpZoneSideLabel,
+.sideZoneCount.corpZoneSideLabel {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 42%);
+  color: var(--corp-zone-accent);
 }
 
 .lane {
@@ -2809,20 +3286,53 @@ select {
 .pairedServerLane .lane {
   width: fit-content;
   max-width: 100%;
-  min-width: calc(76px * var(--lane-card-scale, 1) + 12px);
+  min-width: calc(108px * var(--lane-card-scale, 1) + 12px);
+}
+
+.laneEmptyPlaceholder {
+  flex: 0 0 calc(108px * var(--lane-card-scale, 1));
+  width: calc(108px * var(--lane-card-scale, 1));
+  min-height: calc(151px * var(--lane-card-scale, 1));
+  display: grid;
+  place-items: center;
+  padding: calc(6px * var(--lane-card-scale, 1));
+  border: 1px dashed color-mix(in srgb, var(--lane-border), transparent 16%);
+  border-radius: 6px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--lane-bg), transparent 18%);
+  font-size: calc(11px * var(--lane-card-scale, 1));
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .archivesDualStack {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 10px;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .archivesPile {
   display: grid;
-  gap: 6px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
   min-width: 0;
+}
+
+.archivesPileBody {
+  min-width: 0;
+}
+
+.archiveEmptyPlaceholder {
+  flex: 0 0 calc(108px * var(--archive-card-scale, 1));
+  display: grid;
+  place-items: center;
+  min-height: calc(151px * var(--archive-card-scale, 1));
+  width: calc(108px * var(--archive-card-scale, 1));
+  max-width: calc(108px * var(--archive-card-scale, 1));
 }
 
 .archivesPileHeader {
@@ -2857,21 +3367,25 @@ select {
 .archivesOverlapRow {
   display: flex;
   align-items: flex-start;
-  min-height: 108px;
+  min-height: calc(151px * var(--archive-card-scale, 1));
   padding-right: 6px;
   overflow-x: auto;
   overflow-y: visible;
 }
 
 .archivesOverlapRow .cardSlot {
-  flex: 0 0 76px;
-  width: 76px;
-  max-width: 76px;
+  flex: 0 0 calc(108px * var(--archive-card-scale, 1));
+  width: calc(108px * var(--archive-card-scale, 1));
+  max-width: calc(108px * var(--archive-card-scale, 1));
   z-index: 1;
 }
 
 .archivesOverlapRow .cardSlot + .cardSlot {
-  margin-left: -54px;
+  margin-left: calc(-77px * var(--archive-card-scale, 1));
+}
+
+.archivesOverlapRow .card {
+  height: calc(151px * var(--archive-card-scale, 1));
 }
 
 .archivesOverlapRow .cardSlot:hover,
@@ -2882,9 +3396,10 @@ select {
 .scoredAgendaOverlay {
   position: fixed;
   top: 72px;
-  z-index: 77;
+  z-index: 180;
   pointer-events: none;
-  width: min(420px, calc(100vw - 24px));
+  width: fit-content;
+  max-width: calc(100vw - 24px);
 }
 
 .scoredAgendaOverlay.custom {
@@ -2904,8 +3419,9 @@ select {
 .scoredAgendaPanel {
   pointer-events: auto;
   display: grid;
-  gap: 8px;
-  width: min(420px, 100%);
+  gap: 10px;
+  width: fit-content;
+  min-width: min(280px, calc(100vw - 24px));
   max-width: min(420px, calc(100vw - 24px));
   max-height: min(72vh, calc(100vh - 150px));
   overflow: auto;
@@ -2913,7 +3429,7 @@ select {
   border-radius: 8px;
   position: relative;
   background: var(--panel);
-  padding: 8px 8px 10px;
+  padding: 0 8px 10px;
   box-shadow: 0 18px 44px rgb(0 0 0 / 0.34);
 }
 
@@ -2927,18 +3443,46 @@ select {
 
 .scoredAgendaHead {
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 22px;
-  padding-right: 32px;
-  padding-left: 34px;
+  z-index: 35;
+  display: grid;
+  gap: 7px;
+  overflow: visible;
+  min-height: 58px;
+  margin: 0 -8px;
+  padding: 6px 38px 8px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line), transparent 24%);
+  background: color-mix(in srgb, var(--section-bg), var(--panel) 54%);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
 
-.scoredAgendaHead div {
-  display: grid;
-  gap: 2px;
+.scoredAgendaHead:active {
+  cursor: grabbing;
+}
+
+.scoreAreaWindowControls {
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+}
+
+.scoreAreaDragHint {
+  width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel), white 4%);
+  color: var(--muted);
+}
+
+.scoredAgendaTitleBlock {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
   min-width: 0;
 }
 
@@ -2950,16 +3494,24 @@ select {
   line-height: 1.15;
 }
 
-.scoredAgendaHead span {
-  color: var(--muted);
+.scoredAgendaHead .scoredAgendaPointBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--agenda), var(--line) 42%);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--agenda), var(--panel) 74%);
+  color: color-mix(in srgb, var(--agenda), white 36%);
   font-size: 11px;
-  line-height: 1.2;
+  font-weight: 800;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
-.scoreAreaFloatingClose,
-.scoreAreaDragHandle {
+.scoreAreaFloatingClose {
   position: absolute;
-  top: 2px;
+  top: 6px;
   width: 20px;
   min-width: 20px;
   height: 20px;
@@ -2973,19 +3525,8 @@ select {
   line-height: 1;
 }
 
-.scoreAreaFloatingClose:hover,
-.scoreAreaDragHandle:hover {
+.scoreAreaFloatingClose:hover {
   color: var(--text);
-}
-
-.scoreAreaDragHandle {
-  left: 6px;
-  cursor: grab;
-  touch-action: none;
-}
-
-.scoreAreaDragHandle:active {
-  cursor: grabbing;
 }
 
 .scoreAreaFloatingClose {
@@ -2997,10 +3538,10 @@ select {
 }
 
 .scoredAgendaList {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid color-mix(in srgb, var(--line), transparent 20%);
+  width: min(var(--score-area-list-width, var(--cards-min-width, 108px)), calc(100vw - 42px));
+  max-width: 100%;
   display: grid;
+  grid-template-columns: repeat(var(--score-area-columns, 1), minmax(0, 1fr));
   gap: 8px;
   min-width: 0;
 }
@@ -3010,12 +3551,70 @@ select {
   gap: 4px;
 }
 
-.scoredAgendaRules {
+.scoredAgendaStateList {
+  display: grid;
+  gap: 4px;
+}
+
+.scoredAgendaStateLine {
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
   color: var(--muted);
   font-size: 11px;
-  line-height: 1.35;
+  line-height: 1.25;
+}
+
+.scoredAgendaStateLine > span:last-child {
+  min-width: 0;
   overflow-wrap: anywhere;
+}
+
+.scoredAgendaStatePill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 12%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--panel), var(--section-bg) 50%);
+  color: var(--text);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.scoredAgendaStatePill.credit {
+  border-color: rgb(232 191 79 / 0.72);
+  background: rgb(80 59 18 / 0.78);
+  color: #ffe7a4;
+}
+
+.scoredAgendaStatePill.agenda {
+  border-color: color-mix(in srgb, var(--agenda), white 24%);
+  background: color-mix(in srgb, var(--agenda), var(--panel) 70%);
+  color: #e7f2ff;
+}
+
+.scoredAgendaStatePill.action {
+  border-color: color-mix(in srgb, var(--runner), white 20%);
+  background: color-mix(in srgb, var(--runner), var(--panel) 72%);
+  color: #eaf6ff;
+}
+
+.scoredAgendaStatePill.effect {
+  border-color: color-mix(in srgb, var(--corp), white 14%);
+  background: color-mix(in srgb, var(--corp), var(--panel) 76%);
+  color: #ffe9e1;
+}
+
+.scoredAgendaStatePill.depleted {
+  border-color: color-mix(in srgb, var(--muted), var(--line) 40%);
+  background: color-mix(in srgb, var(--panel), var(--section-bg) 35%);
+  color: var(--muted);
 }
 
 .scoredAgendaOverflow {
@@ -3024,55 +3623,78 @@ select {
   padding-left: 2px;
 }
 
-.scoreAreaOpenButton {
-  position: absolute;
-  right: 6px;
-  top: 6px;
-  width: 20px;
-  min-width: 20px;
-  height: 18px;
-  margin: 0;
-  padding: 0;
-  border-radius: 5px;
-  border: 1px solid color-mix(in srgb, var(--agenda), var(--line) 42%);
-  background: color-mix(in srgb, var(--agenda), var(--section-bg) 88%);
-  color: var(--text);
-  z-index: 2;
-  display: inline-grid;
-  place-items: center;
-  line-height: 1;
-}
-
-.scoreAreaOpenButton:hover {
-  border-color: color-mix(in srgb, var(--agenda), var(--line) 28%);
-  background: color-mix(in srgb, var(--agenda), var(--section-bg) 72%);
-}
-
-.scoreAreaOpenButton.is-open {
-  border-color: color-mix(in srgb, var(--agenda), #fff 20%);
-  background: color-mix(in srgb, var(--agenda), var(--section-bg) 68%);
-}
-
 .scoreAreaStatCell {
-  position: relative;
+  color: inherit;
+  font: inherit;
+  text-align: center;
 }
 
-.scoreAreaStatCell .stat {
-  padding-right: 32px;
+.scoreAreaStatButton {
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  place-items: center;
+  border-color: color-mix(in srgb, var(--agenda), var(--line) 32%);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--agenda), transparent 86%), transparent 70%),
+    color-mix(in srgb, var(--agenda), var(--section-bg) 82%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.09),
+    inset 0 -2px 0 rgb(0 0 0 / 0.22);
+  cursor: pointer;
+}
+
+.scoreAreaStatButton:hover,
+.scoreAreaStatButton:focus-visible {
+  border-color: color-mix(in srgb, var(--agenda), var(--line) 24%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 76%);
+}
+
+.scoreAreaStatButton.is-open {
+  border-color: color-mix(in srgb, var(--agenda), white 20%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 70%);
+}
+
+.scoreAreaToggleGlyphs {
+  min-width: 0;
+  width: 100%;
+  gap: 4px;
 }
 
 .scoreAreaOpenButtonIcon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--agenda), var(--line) 42%);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 84%);
   color: color-mix(in srgb, var(--agenda), var(--text) 18%);
   line-height: 1;
 }
 
-.scoreAreaOpenButton.is-open .scoreAreaOpenButtonIcon {
+.scoreAreaStatButton.is-open .scoreAreaOpenButtonIcon {
+  border-color: color-mix(in srgb, var(--agenda), white 20%);
+  background: color-mix(in srgb, var(--agenda), var(--section-bg) 68%);
   color: var(--agenda);
 }
 
-.scoreAreaOpenButton svg {
+.scoreAreaOpenButtonIcon svg {
   width: 10px;
   height: 10px;
+}
+
+.sideStatusPanel .stat:not(.hasStatHelp),
+.sideStatusPanel .stat:not(.hasStatHelp) * {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.sideStatusPanel .scoreAreaStatButton,
+.sideStatusPanel .scoreAreaStatButton * {
+  cursor: pointer;
 }
 
 .archivesOverflowBadge {
@@ -3090,13 +3712,22 @@ select {
 
 .archivesPileEmpty {
   margin: 0;
+  min-height: calc(151px * var(--zone-card-scale, 1));
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  border: 1px dashed color-mix(in srgb, var(--lane-border), transparent 16%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--lane-bg), transparent 18%);
   color: var(--muted);
   font-size: 11px;
+  font-weight: 700;
+  text-align: center;
 }
 
 @media (max-width: 720px) {
   .archivesDualStack {
-    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
   }
 }
 
@@ -3115,6 +3746,10 @@ select {
 
 .cardSlot.actionMenuOpen {
   z-index: 80;
+}
+
+.cardSlot:has(.cardTooltip.visible) {
+  z-index: 1000;
 }
 
 .cardPositionBadge {
@@ -3141,6 +3776,96 @@ select {
   pointer-events: none;
 }
 
+.runPositionActiveSlot {
+  z-index: 70;
+}
+
+.card.runPositionActive {
+  border-color: color-mix(in srgb, var(--runner), white 26%);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--runner), white 14%),
+    0 0 20px color-mix(in srgb, var(--runner), transparent 52%),
+    var(--card-shadow);
+}
+
+.runPositionMarker {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 64;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--runner), white 20%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--runner), var(--panel) 48%);
+  color: var(--text);
+  line-height: 1;
+  box-shadow:
+    0 4px 12px rgb(0 0 0 / 0.36),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  opacity: 0.88;
+  cursor: help;
+}
+
+.runPositionMarker:hover,
+.runPositionMarker:focus-visible {
+  opacity: 1;
+  outline: none;
+  border-color: color-mix(in srgb, var(--runner), white 42%);
+}
+
+.runPositionMarker::before,
+.runPositionMarker::after {
+  position: absolute;
+  left: 50%;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.runPositionMarker::before {
+  content: "";
+  bottom: calc(100% + 3px);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid color-mix(in srgb, var(--runner), var(--line));
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.runPositionMarker::after {
+  content: attr(data-tooltip);
+  bottom: calc(100% + 8px);
+  max-width: min(220px, calc(100vw - 32px));
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line));
+  border-radius: 6px;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.25;
+  white-space: nowrap;
+  transform: translateX(-50%) translateY(-2px);
+}
+
+.runPositionMarker:hover::before,
+.runPositionMarker:hover::after,
+.runPositionMarker:focus-visible::before,
+.runPositionMarker:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
 .card {
   position: relative;
   width: 100%;
@@ -3152,6 +3877,8 @@ select {
   overflow-wrap: anywhere;
   outline: 0;
   z-index: 1;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition:
     border-color 140ms ease,
     background 140ms ease,
@@ -3242,6 +3969,16 @@ select {
   font-size: calc(11px * var(--lane-card-scale, 1));
 }
 
+.lane .runPositionMarker {
+  width: calc(26px * var(--lane-card-scale, 1));
+  height: calc(26px * var(--lane-card-scale, 1));
+}
+
+.lane .runPositionMarker svg {
+  width: calc(14px * var(--lane-card-scale, 1));
+  height: calc(14px * var(--lane-card-scale, 1));
+}
+
 .lane .installedStateMark {
   right: calc(-7px * var(--lane-card-scale, 1));
   width: calc(18px * var(--lane-card-scale, 1));
@@ -3287,6 +4024,14 @@ select {
   min-height: calc(20px * var(--lane-card-scale, 1));
   padding: calc(2px * var(--lane-card-scale, 1)) calc(7px * var(--lane-card-scale, 1));
   font-size: calc(11px * var(--lane-card-scale, 1));
+}
+
+.lane .brokerStoredCreditsBadge {
+  top: calc(5px * var(--lane-card-scale, 1));
+  right: calc(5px * var(--lane-card-scale, 1));
+  min-height: calc(19px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+  font-size: calc(10px * var(--lane-card-scale, 1));
 }
 
 .card.selectedActionSource {
@@ -3394,11 +4139,20 @@ select {
   color: var(--text);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transform: translateX(-50%);
   transition:
     border-color 120ms ease,
     background 120ms ease,
     transform 120ms ease;
+}
+
+.cardActionMarker::before {
+  content: "";
+  position: absolute;
+  inset: -13px -14px;
+  border-radius: 14px;
 }
 
 .cardActionMarker:hover,
@@ -3421,7 +4175,7 @@ select {
   left: 0;
   top: calc(100% + 7px);
   z-index: 90;
-  width: min(212px, calc(100vw - 32px));
+  width: min(260px, calc(100vw - 16px));
   min-width: 100%;
   display: grid;
   gap: 5px;
@@ -3429,6 +4183,7 @@ select {
   border: 0;
   background: transparent;
   filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.34));
+  overflow-y: auto;
   transform-origin: top left;
   animation: cardActionPlateBelow 150ms cubic-bezier(0.2, 0.85, 0.24, 1);
 }
@@ -3442,23 +4197,26 @@ select {
 
 .cardActionButton {
   height: auto;
-  min-height: 38px;
+  min-height: 46px;
   display: grid;
-  grid-template-columns: 16px minmax(0, 1fr) auto;
+  grid-template-columns: 16px minmax(0, 1fr);
   column-gap: 7px;
+  row-gap: 4px;
   align-items: center;
-  padding: 7px 10px;
+  padding: 7px 10px 8px;
   border-color: var(--primary-border);
   background: var(--primary-bg);
   color: var(--primary-text);
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 0.05),
     0 0 0 1px color-mix(in srgb, var(--runner), transparent 72%);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .cardActionButton > svg {
   grid-column: 1;
-  grid-row: 1;
+  grid-row: 1 / span 2;
 }
 
 .cardActionButton .actionButtonLabel {
@@ -3468,17 +4226,41 @@ select {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.15;
+  overflow: hidden;
+  overflow-wrap: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: normal;
 }
 
 .cardActionButton .costChips {
-  grid-column: 3;
-  grid-row: 1;
+  grid-column: 2;
+  grid-row: 2;
   flex-basis: auto;
+  justify-content: flex-start;
   margin-left: 0;
 }
 
 .cardActionButton .costChip {
   background: color-mix(in srgb, var(--panel), var(--primary-bg) 44%);
+}
+
+@media (pointer: coarse) {
+  .cardActionMarker {
+    bottom: 6px;
+    width: 30px;
+    height: 28px;
+  }
+
+  .lane .cardActionMarker {
+    bottom: 6px;
+    width: 30px;
+    height: 28px;
+  }
+
+  .cardActionButton {
+    min-height: 50px;
+  }
 }
 
 @keyframes cardActionPlateBelow {
@@ -3624,11 +4406,115 @@ select {
   pointer-events: none;
 }
 
+.brokerStoredCreditsBadge {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 12px);
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid rgb(232 191 79 / 0.8);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.34), transparent 32%),
+    linear-gradient(135deg, rgb(118 84 22 / 0.94), rgb(43 31 12 / 0.95));
+  color: #ffe7a4;
+  box-shadow:
+    0 4px 9px rgb(0 0 0 / 0.34),
+    inset 0 1px 1px rgb(255 247 204 / 0.28);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  pointer-events: none;
+}
+
+.shellCounterBadge {
+  position: absolute;
+  right: 6px;
+  top: 30px;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 12px);
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid rgb(132 207 214 / 0.82);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 32%),
+    linear-gradient(135deg, rgb(22 93 105 / 0.95), rgb(18 45 58 / 0.96));
+  color: #c5fbff;
+  box-shadow:
+    0 4px 9px rgb(0 0 0 / 0.34),
+    inset 0 1px 1px rgb(214 252 255 / 0.28);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  pointer-events: none;
+}
+
+.scoreCardStateBadges {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  z-index: 44;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: calc(100% - 12px);
+  pointer-events: none;
+}
+
+.scoreCardStateBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 8%);
+  border-radius: 999px;
+  background: rgb(9 14 22 / 0.82);
+  color: var(--text);
+  box-shadow: 0 4px 9px rgb(0 0 0 / 0.36);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+}
+
+.scoreCardStateBadge.credit {
+  border-color: rgb(232 191 79 / 0.78);
+  background:
+    radial-gradient(circle at 28% 24%, rgb(255 255 255 / 0.28), transparent 30%),
+    linear-gradient(135deg, rgb(116 82 21 / 0.92), rgb(50 35 12 / 0.94));
+  color: #ffe7a4;
+}
+
+.scoreCardStateBadge.agenda {
+  border-color: color-mix(in srgb, var(--agenda), white 25%);
+  background:
+    radial-gradient(circle at 28% 24%, rgb(255 255 255 / 0.24), transparent 30%),
+    linear-gradient(135deg, color-mix(in srgb, var(--agenda), white 14%), color-mix(in srgb, var(--agenda), black 32%));
+  color: #e7f2ff;
+}
+
+.scoreCardStateBadge.depleted {
+  border-color: color-mix(in srgb, var(--muted), var(--line) 30%);
+  background: rgb(20 24 31 / 0.84);
+  color: color-mix(in srgb, var(--muted), white 10%);
+}
+
 .cardTooltip {
   position: fixed;
   left: 16px;
   top: 16px;
-  z-index: 50;
+  z-index: 1001;
   width: min(300px, calc(100vw - 32px));
   display: grid;
   gap: 5px;
@@ -3713,6 +4599,12 @@ select {
   visibility: visible;
 }
 
+.cardTooltip.pinned {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .cardTooltip.above.visible {
   transform: translateY(-100%);
 }
@@ -3761,6 +4653,13 @@ select {
   max-height: calc(100vh - 160px);
   overflow-x: visible;
   overflow-y: auto;
+}
+
+.chronicleGroupBlock {
+  position: relative;
+  display: grid;
+  gap: 9px;
+  overflow: visible;
 }
 
 .chronicleGroup {
@@ -4342,7 +5241,55 @@ select {
 }
 
 .zoneBoardSection {
-  padding-top: 10px;
+  width: max-content;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.section.panel.boardSection.zoneBoardSection {
+  width: max-content;
+  max-width: 100%;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.sideZoneFrame {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.sideZoneLead {
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  min-width: 32px;
+  padding-right: 6px;
+  border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
+}
+
+.sideZoneFrame .sideZoneTitle {
+  border-right: 0;
+}
+
+.sideZoneBody {
+  min-width: 0;
+}
+
+.sideZoneTitle {
+  margin: 0;
+  font-weight: 900;
+  text-transform: uppercase;
 }
 
 .zoneSectionLayout {
@@ -4388,24 +5335,56 @@ select {
 
 .runnerGripHeapLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(160px, 230px);
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  width: max-content;
+  max-width: 100%;
   gap: 10px;
   align-items: start;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 2px;
 }
 
-.runnerGripColumn,
-.runnerHeapColumn {
-  min-width: 0;
-}
-
-.runnerHeapColumn {
-  display: grid;
-  gap: 6px;
-  align-content: start;
+.runnerGripHeapLayout .sideZoneFrame,
+.zoneBoardSection > .sideZoneFrame {
+  min-width: min(190px, 100%);
   padding: 6px;
-  border: 1px dashed var(--lane-border);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--lane-bg), var(--panel) 55%);
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--section-bg), transparent 5%);
+}
+
+.zoneBoardSection > .sideZoneFrame.corp {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
+}
+
+.runnerGripZone {
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.runnerStackZone {
+  flex: 0 0 auto;
+}
+
+.runnerHeapZone {
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.fixedZoneCards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.fixedZoneCards .cardSlot {
+  flex: 0 0 var(--cards-min-width, 108px);
+  width: var(--cards-min-width, 108px);
+  max-width: var(--cards-min-width, 108px);
 }
 
 .runnerHeapHead {
@@ -4432,26 +5411,77 @@ select {
 .runnerHeapOverlapRow {
   display: flex;
   align-items: flex-start;
-  min-height: 78px;
+  min-height: calc(151px * var(--zone-card-scale, 1));
   padding-right: 4px;
   overflow-x: auto;
   overflow-y: visible;
 }
 
 .runnerHeapOverlapRow .cardSlot {
-  flex: 0 0 56px;
-  width: 56px;
-  max-width: 56px;
+  flex: 0 0 calc(108px * var(--zone-card-scale, 1));
+  width: calc(108px * var(--zone-card-scale, 1));
+  max-width: calc(108px * var(--zone-card-scale, 1));
   z-index: 1;
 }
 
 .runnerHeapOverlapRow .cardSlot + .cardSlot {
-  margin-left: -39px;
+  margin-left: calc(-76px * var(--zone-card-scale, 1));
 }
 
 .runnerHeapOverlapRow .cardSlot:hover,
 .runnerHeapOverlapRow .cardSlot:focus-within {
   z-index: 38;
+}
+
+.runnerStackZone .sideZoneBody {
+  display: grid;
+  align-content: start;
+}
+
+.runnerStackPreview {
+  display: grid;
+  place-items: start center;
+  min-height: calc(151px * var(--zone-card-scale, 1));
+}
+
+.runnerStackBack {
+  width: calc(108px * var(--zone-card-scale, 1));
+  aspect-ratio: 5 / 7;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 44%);
+  border-radius: 6px;
+  background-color: #151d26;
+  background-image:
+    linear-gradient(135deg, rgb(255 255 255 / 0.08), transparent 34%),
+    url("/card-backs/netgrid-runner-back.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  box-shadow: var(--card-shadow);
+}
+
+.runnerStackBack::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.1), transparent 36%),
+    radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--runner-zone-accent), transparent 70%), transparent 54%);
+  pointer-events: none;
+}
+
+.runnerStackBack::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), white 16%);
+  border-radius: 4px;
+  z-index: 1;
+}
+
+.runnerStackBack span {
+  display: none;
 }
 
 .zoneLimitBadge {
@@ -4482,33 +5512,46 @@ select {
 }
 
 .undoPanel {
-  display: grid;
-  gap: 8px;
-}
-
-.undoPanel.collapsed {
-  gap: 0;
-}
-
-.undoPanelHeader {
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--match-strip-bg), var(--panel) 34%);
+}
+
+.undoPanelHeader {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
 }
 
 .undoPanelHeader h2 {
   margin: 0;
+  font-size: 13px;
 }
 
-.undoPanelToggle {
-  min-width: 28px;
-  min-height: 28px;
+.undoPanel .meta {
+  font-size: 12px;
 }
 
 .undoBox {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.undoBox .splitButtons {
+  width: min(240px, 100%);
+  margin-top: 0;
+}
+
+.undoPanel .button.wide {
+  width: auto;
+  min-width: 190px;
 }
 
 .statusLine {
@@ -4556,6 +5599,8 @@ select {
   --corp: #b9571b;
   --agenda: #156fd8;
   --corp-status-accent: #176eb8;
+  --runner-zone-accent: #6f43cf;
+  --corp-zone-accent: #176eb8;
   --ice: #4867c7;
   --danger: #b42335;
   --ok: #1d7a45;
@@ -5091,6 +6136,76 @@ select,
   margin: 0;
 }
 
+.confirmationDialogOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.confirmationDialogBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 0.64);
+}
+
+.confirmationDialogPanel {
+  position: relative;
+  z-index: 1;
+  width: min(430px, 100%);
+  display: grid;
+  gap: 14px;
+  border: 1px solid var(--access-modal-border);
+  border-radius: 8px;
+  background: var(--panel);
+  box-shadow: var(--access-modal-shadow);
+  padding: 18px;
+}
+
+.confirmationDialogPanel p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.confirmationDialogHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.confirmationDialogHeader h2 {
+  margin: 0;
+}
+
+.confirmationDialogIcon {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--panel-soft);
+}
+
+.confirmationDialogOverlay.danger .confirmationDialogIcon {
+  border-color: var(--danger-button-border);
+  color: var(--danger);
+  background: var(--danger-button-bg);
+}
+
+.confirmationDialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .segmented {
   display: inline-grid;
   grid-template-columns: repeat(3, minmax(44px, 1fr));
@@ -5202,15 +6317,16 @@ select,
   top: 66px;
   left: 50%;
   z-index: 69;
-  width: max-content;
+  width: min(360px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
   transform: translateX(-50%);
   pointer-events: none;
 }
 
 .runTimeline.overlay {
-  width: max-content;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   pointer-events: auto;
   background: color-mix(in srgb, var(--run-active-bg), transparent 16%);
   box-shadow:
@@ -5251,6 +6367,24 @@ select,
 
 .runTimelineDragHandle > span {
   text-align: center;
+}
+
+.runTimelineTitle {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  min-width: 0;
+}
+
+.runTimelineTitle strong {
+  line-height: 1.1;
+}
+
+.runTimelineTitle small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 .runSteps {
@@ -5298,10 +6432,6 @@ select,
   text-align: center;
 }
 
-.encounterFocus span {
-  color: var(--muted);
-}
-
 .encounterFocusBody {
   display: grid;
   gap: 4px;
@@ -5325,6 +6455,40 @@ select,
   font-size: 13px;
   line-height: 1.35;
   text-align: center;
+}
+
+.runActionBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.runActionButton {
+  min-height: 34px;
+  width: 100%;
+  max-width: 100%;
+  padding: 7px 9px;
+  border-color: var(--primary-border);
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  font-size: 12px;
+}
+
+.runActionButton:hover,
+.runActionButton:focus-visible {
+  border-color: color-mix(in srgb, var(--primary-border), white 18%);
+  background: color-mix(in srgb, var(--primary-bg), white 8%);
+}
+
+.runActionButton .actionButtonLabel {
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.25;
+}
+
+.runBreakerHint {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--runner) 28%);
+  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 87%);
 }
 
 .actionGroup {
@@ -5666,13 +6830,13 @@ select,
 }
 
 .lane .cardSlot {
-  flex: 0 0 calc(76px * var(--lane-card-scale, 1));
-  width: calc(76px * var(--lane-card-scale, 1));
-  max-width: calc(76px * var(--lane-card-scale, 1));
+  flex: 0 0 calc(108px * var(--lane-card-scale, 1));
+  width: calc(108px * var(--lane-card-scale, 1));
+  max-width: calc(108px * var(--lane-card-scale, 1));
 }
 
 .lane .card {
-  height: calc(106px * var(--lane-card-scale, 1));
+  height: calc(151px * var(--lane-card-scale, 1));
 }
 
 .lane .cardTitle {
@@ -5707,6 +6871,61 @@ select,
 
 .card.hidden {
   background: var(--card-hidden-bg);
+}
+
+.card.hiddenRunnerBack,
+.card.hiddenCorpBack {
+  min-height: 106px;
+  isolation: isolate;
+  overflow: hidden;
+  background-color: #151d26;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.card.hiddenRunnerBack {
+  background-image:
+    linear-gradient(135deg, rgb(255 255 255 / 0.08), transparent 34%),
+    url("/card-backs/netgrid-runner-back.png");
+}
+
+.card.hiddenCorpBack {
+  background-image:
+    linear-gradient(135deg, rgb(255 255 255 / 0.08), transparent 34%),
+    url("/card-backs/netgrid-corp-back.png");
+}
+
+.card.hiddenRunnerBack::before,
+.card.hiddenCorpBack::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  z-index: 1;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 5px;
+  pointer-events: none;
+}
+
+.card.hiddenRunnerBack::after,
+.card.hiddenCorpBack::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.1), transparent 36%),
+    radial-gradient(circle at 50% 42%, rgb(78 211 255 / 0.18), transparent 54%);
+  pointer-events: none;
+}
+
+.card.hiddenRunnerBack .cardArt,
+.card.hiddenRunnerBack .cardTitle,
+.card.hiddenRunnerBack .cardMeta,
+.card.hiddenCorpBack .cardArt,
+.card.hiddenCorpBack .cardTitle,
+.card.hiddenCorpBack .cardMeta {
+  display: none;
 }
 
 .card.hidden.withImage {
@@ -5837,7 +7056,12 @@ select,
 }
 
 .rigBoardSection {
-  padding-top: 10px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--section-bg), transparent 5%);
 }
 
 .rigSectionLayout {
@@ -5852,10 +7076,12 @@ select,
 }
 
 .rigSectionLead {
-  display: grid;
-  gap: 6px;
-  align-content: start;
-  justify-items: center;
+  display: flex;
+  align-items: flex-start;
+  align-self: stretch;
+  min-width: 32px;
+  padding-right: 6px;
+  border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
 }
 
 .rigSectionLeadCompact {
@@ -5872,7 +7098,9 @@ select,
 .rigSectionTitle.rigGroupSideLabel {
   font-size: clamp(13px, calc(var(--cards-min-width, 116px) * 0.15), 19px);
   color: color-mix(in srgb, var(--runner), white 12%);
-  border-right-color: color-mix(in srgb, var(--runner), var(--line) 58%);
+  border-left: 0;
+  border-right: 0;
+  padding-left: 0;
   letter-spacing: 0.07em;
 }
 
@@ -5904,9 +7132,10 @@ select,
 .rigGroupsHorizontal {
   display: flex;
   align-items: stretch;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 10px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
   padding-bottom: 2px;
 }
 
@@ -5918,15 +7147,27 @@ select,
 .rigGroupHorizontal {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: stretch;
-  gap: 8px;
-  min-width: fit-content;
+  gap: 16px;
+  flex: 0 1 auto;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
   padding: 0 8px;
-  border-left: 1px solid color-mix(in srgb, var(--line), transparent 22%);
-  border-right: 1px solid color-mix(in srgb, var(--line), transparent 22%);
   border-top: 0;
   border-bottom: 0;
   border-radius: 0;
   background: color-mix(in srgb, var(--section-bg), transparent 6%);
+}
+
+.rigGroupHorizontal .rigGroupSideLabel {
+  border-right: 0;
+}
+
+.rigGroupLead {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
 }
 
 .rigGroup h3 {
@@ -5952,9 +7193,59 @@ select,
   max-block-size: 100%;
 }
 
+.rigMemoryBadge {
+  display: inline-block;
+  align-self: center;
+  justify-self: center;
+  min-height: 0;
+  margin: 0;
+  padding: 6px 2px;
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 42%);
+  border-radius: 6px;
+  color: var(--runner-zone-accent);
+  font-size: 10px;
+  line-height: 1;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+.rigMemoryBadge strong {
+  display: inline;
+  color: var(--runner-zone-accent);
+  font-size: 10px;
+}
+
+.rigGroupSideLabel:not(button),
+.sideZoneTitle,
+.sideZoneCount,
+.serverCount,
+.laneLabel,
+.cardTooltipStat,
+.strengthBoostBadge {
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.rigGroupSideLabel.runnerZoneSideLabel,
+.sideZoneTitle.runnerZoneSideLabel,
+.serverContextButton.runnerZoneSideLabel {
+  color: var(--runner-zone-accent);
+  border-right-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
+}
+
+.rigGroupSideLabel.corpZoneSideLabel,
+.sideZoneTitle.corpZoneSideLabel,
+.serverContextButton.corpZoneSideLabel {
+  color: var(--corp-zone-accent);
+  border-right-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 48%);
+}
+
 .rigGroupCards {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 8px;
 }
 
@@ -6152,6 +7443,67 @@ select,
   }
 }
 
+@media (max-width: 1180px) and (min-width: 821px) {
+  .sidePanel {
+    display: grid;
+    grid-template-columns: minmax(172px, 0.82fr) minmax(260px, 1.32fr) minmax(176px, 0.86fr);
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .sidePanel > .section,
+  .sidePanel > .specialZoneStrip {
+    min-width: 0;
+  }
+
+  .sidePanel > .specialZoneStrip {
+    grid-column: 1 / -1;
+  }
+
+  .sideStatusPanel {
+    align-content: start;
+    gap: 5px;
+    padding: 8px;
+  }
+
+  .sideStatusPanel h2 {
+    min-width: 0;
+    margin-bottom: 0;
+    font-size: 13px;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sideStatusPanel .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .sideStatusPanel .stat {
+    min-height: 40px;
+    gap: 3px;
+    padding: 4px 5px;
+  }
+
+  .sideStatusPanel .stat strong {
+    min-height: 18px;
+    gap: 5px;
+    font-size: 16px;
+  }
+
+  .sideStatusPanel .statLabel,
+  .sideStatusPanel .meta {
+    font-size: 11px;
+  }
+
+  .sideStatusPanel .actionSlots {
+    min-height: 24px;
+    gap: 5px;
+  }
+}
+
 @media (max-width: 720px) {
   .runnerGripHeapLayout {
     grid-template-columns: minmax(0, 1fr);
@@ -6162,13 +7514,13 @@ select,
   }
 
   .runnerHeapOverlapRow .cardSlot {
-    flex: 0 0 52px;
-    width: 52px;
-    max-width: 52px;
+    flex: 0 0 calc(108px * var(--zone-card-scale, 1));
+    width: calc(108px * var(--zone-card-scale, 1));
+    max-width: calc(108px * var(--zone-card-scale, 1));
   }
 
   .runnerHeapOverlapRow .cardSlot + .cardSlot {
-    margin-left: -36px;
+    margin-left: calc(-76px * var(--zone-card-scale, 1));
   }
 
   .specialZoneOverlapRow .cardSlot {
@@ -6182,8 +7534,7 @@ select,
   }
 
   .topbar,
-  .toolbar,
-  .matchStrip,
+  .undoPanel,
   .deckDisplayRow,
   .colorSchemeSettings,
   .cardDisplaySettings,
@@ -6192,8 +7543,49 @@ select,
     flex-direction: column;
   }
 
+  .toolbar {
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .toolbar .button,
+  .toolbar .connection,
+  .toolbar .topbarVersion {
+    flex: 0 0 auto;
+  }
+
+  .toolbar .topbarVersion,
+  .toolbar .connection {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .toolbar .dangerButton {
+    width: auto;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .matchStrip {
+    flex-wrap: wrap;
+    align-items: center;
+    overflow: visible;
+  }
+
+  .matchStrip span {
+    flex: 0 1 auto;
+    max-width: 100%;
+  }
+
   .seriesStrip {
     flex-direction: column;
+  }
+
+  .undoBox,
+  .undoPanel .button.wide {
+    width: 100%;
   }
 
   .seriesScore {
@@ -6301,7 +7693,9 @@ select,
   }
 
   .opponentCueOverlay {
-    grid-template-columns: 34px minmax(0, 1fr) auto auto;
+    width: min(360px, calc(100vw - 24px));
+    gap: 8px;
+    padding: 9px;
   }
 
   .cuePosition-top-right {
@@ -6326,6 +7720,15 @@ select,
 
   .opponentCueOverlay small {
     display: none;
+  }
+
+  .opponentCueCard,
+  .opponentCueCardBack {
+    width: 74px;
+  }
+
+  .opponentCueCard .card {
+    min-height: 101px;
   }
 
   .cardTooltip {

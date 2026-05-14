@@ -1972,9 +1972,13 @@ describe("catalog import and status logic", () => {
       expect(manifest?.scenarioRefs.length, cardId).toBeGreaterThan(0);
       expect(implementation?.releaseStatus, cardId).toBe("human_playable");
       expect(implementation?.aiSupported, cardId).toBe(true);
-      expect(implementation?.resolverFamily, cardId).toBe(
-        "hidden_zone_search_reveal_reorder_resolver",
-      );
+      const expectedResolver =
+        cardId === "onr_v1_089_gideons-pawnshop"
+          ? "trash_recovery_resolver"
+          : cardId === "onr_v1_110_sneak-preview"
+            ? "heap_or_stack_temporary_program_install_resolver"
+            : "hidden_zone_search_reveal_reorder_resolver";
+      expect(implementation?.resolverFamily, cardId).toBe(expectedResolver);
       expect(scenarioCards.has(cardId), cardId).toBe(true);
     }
 
@@ -3046,7 +3050,7 @@ describe("catalog import and status logic", () => {
     ).toBe(true);
     expect(deckLegalV1921ScenarioData.completionGate.aiSupported).toBe(true);
     expect(v1921MechanicsCoverageData.gateAssertions.engineCovered).toBe(
-      "all_target_cards_initial_random_probe",
+      "all_target_cards_completed_random_effects",
     );
     expect(
       v1921MechanicsCoverageData.gateAssertions.hiddenInfoSafeForCoveredSmokes,

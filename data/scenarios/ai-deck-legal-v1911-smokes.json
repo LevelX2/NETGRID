@@ -22,20 +22,38 @@
       "cards": [
         "onr_v1_059_self-modifying-code",
         "onr_v1_087_forgotten-backup-chip",
-        "onr_v1_089_gideons-pawnshop",
         "onr_v1_099_mantis-fixer-at-large"
       ],
       "coveredBy": ["packages/engine/src/index.test.ts::resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash"]
+    },
+    {
+      "id": "runner_v1911_trash_recovery",
+      "planKinds": ["build_rig", "recover_rig"],
+      "cards": [
+        "onr_v1_089_gideons-pawnshop"
+      ],
+      "coveredBy": ["packages/engine/src/index.test.ts::resolves Gideon's Pawnshop from Runner heap without searching or shuffling the stack"]
     },
     {
       "id": "runner_v1911_expose_and_preview",
       "planKinds": ["safe_probe_run", "contest_remote"],
       "cards": [
         "onr_v1_088_fortress-respecification",
-        "onr_v1_092_ice-and-datas-guide-to-the-net",
-        "onr_v1_110_sneak-preview"
+        "onr_v1_092_ice-and-datas-guide-to-the-net"
       ],
       "coveredBy": ["packages/engine/src/index.test.ts::reveals only the intended public definition id for V1.9.11 reveal events"]
+    },
+    {
+      "id": "runner_v1911_sneak_preview_heap_stack_install",
+      "planKinds": ["build_rig", "recover_rig"],
+      "cards": [
+        "onr_v1_110_sneak-preview"
+      ],
+      "coveredBy": [
+        "packages/engine/src/index.test.ts::uses Sneak Preview to choose Stack first, install a program at no cost, shuffle and return it at end of turn",
+        "packages/engine/src/index.test.ts::uses Sneak Preview to choose Heap first, install for free without shuffling, and does not return if the program left play",
+        "packages/engine/src/index.test.ts::lets Sneak Preview free MU before installing the chosen program"
+      ]
     },
     {
       "id": "runner_v1911_installed_hidden_zone_helpers",

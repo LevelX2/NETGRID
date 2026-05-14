@@ -8,7 +8,7 @@
     "v1921ScopeFrozenToSixCards": true,
     "catalogWipGuardReady": true,
     "runtimeDefinitionsReady": true,
-    "engineCovered": "all_target_cards_initial_random_probe",
+    "engineCovered": "all_target_cards_completed_random_effects",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV1922ScopeExpansion": true,
@@ -24,14 +24,14 @@
       "title": "AI Boon",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "deterministic_random_card_resolver; run_flow_lock_resolver; recurring_pool_start_turn_resolver",
+      "resolverFamily": "deterministic_random_card_resolver; start_of_run_trigger_resolver; run_local_strength_state_resolver; run_flow_lock_resolver; recurring_pool_start_turn_resolver",
       "roleTags": [
         "runner",
         "program",
         "random"
       ],
       "coveredSmokes": [
-        "installed_program_deterministic_die_probe",
+        "start_of_run_strength_roll",
         "wrong_side_rejection",
         "public_payload_visibility",
         "replay_statehash"
@@ -42,14 +42,15 @@
       "title": "Boardwalk",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "deterministic_random_card_resolver; hidden_zone_search_reveal_reorder_resolver; typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver",
+      "resolverFamily": "deterministic_random_card_resolver; successful_hq_run_counter_resolver; hidden_zone_random_reveal_resolver; typed_counter_virus_purge_resolver; recurring_pool_start_turn_resolver",
       "roleTags": [
         "runner",
         "program",
         "random"
       ],
       "coveredSmokes": [
-        "installed_program_deterministic_die_probe",
+        "successful_hq_run_counter",
+        "start_of_turn_random_hq_reveal",
         "wrong_side_rejection",
         "public_payload_visibility",
         "replay_statehash"
@@ -60,14 +61,16 @@
       "title": "Playful AI",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "generic_asset_node_ability_resolver; deterministic_random_card_resolver",
+      "resolverFamily": "play_event_resolver; deterministic_random_card_resolver; pending_choice_dice_loop_resolver",
       "roleTags": [
         "runner",
         "event",
         "random"
       ],
       "coveredSmokes": [
-        "play_event_deterministic_die_probe",
+        "play_event_dice_loop",
+        "runner_split_choice",
+        "set_aside_repeat_rolls",
         "wrong_side_rejection",
         "public_payload_visibility",
         "replay_statehash"
@@ -78,14 +81,16 @@
       "title": "Quest for Cattekin",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "event_modification_prevention_avoid_resolver; persistent_special_state_resolver; deterministic_random_card_resolver; core_brain_damage_modifier_resolver; hidden_zone_search_reveal_reorder_resolver; recurring_pool_start_turn_resolver; action_economy_handsize_modifier_resolver; damage_event_prevention_resolver",
+      "resolverFamily": "start_of_turn_trigger_resolver; persistent_special_state_resolver; deterministic_random_card_resolver; core_brain_damage_modifier_resolver; recurring_pool_start_turn_resolver; action_economy_modifier_resolver; unpreventable_damage_resolver",
       "roleTags": [
         "runner",
         "resource",
         "random"
       ],
       "coveredSmokes": [
-        "installed_resource_deterministic_die_probe",
+        "start_of_turn_die_roll",
+        "unpreventable_damage_outcomes",
+        "persistent_extra_action_outcome",
         "wrong_side_rejection",
         "public_payload_visibility",
         "replay_statehash"
@@ -96,14 +101,15 @@
       "title": "Schlaghund",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "generic_asset_node_ability_resolver; deterministic_random_card_resolver; damage_event_prevention_resolver",
+      "resolverFamily": "generic_asset_node_ability_resolver; deterministic_random_card_resolver; tag_threshold_damage_resolver",
       "roleTags": [
         "corp",
         "asset",
         "random"
       ],
       "coveredSmokes": [
-        "rezzed_asset_deterministic_die_probe",
+        "rezzed_asset_tag_checked_die_roll",
+        "meat_damage_and_self_trash",
         "wrong_side_rejection",
         "stale_state_rejection",
         "public_payload_visibility",
@@ -115,14 +121,15 @@
       "title": "Rio de Janeiro City Grid",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "generic_upgrade_root_server_resolver; deterministic_random_card_resolver",
+      "resolverFamily": "generic_upgrade_root_server_resolver; deterministic_random_card_resolver; after_pass_ice_trigger_resolver",
       "roleTags": [
         "corp",
         "upgrade",
         "random"
       ],
       "coveredSmokes": [
-        "rezzed_upgrade_deterministic_server_die_probe",
+        "after_pass_rezzed_ice_die_roll",
+        "run_end_on_one",
         "wrong_side_rejection",
         "public_payload_visibility",
         "replay_statehash"

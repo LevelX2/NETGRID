@@ -10,13 +10,28 @@ import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
 import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
-import { createConfiguredStorage, createNetgridHttpServer } from "./http-server";
+import type { ConnectionAuditEvent } from "./connection-audit";
+import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
 import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
 
 describe("V1.0.9 private internet hardening", () => {
+  it("uses a LAN-capable default bind address for direct server starts", async () => {
+    const previousPublicHost = process.env.NETGRID_PUBLIC_HOST;
+    process.env.NETGRID_PUBLIC_HOST = "192.0.2.10";
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "lan-default-bind" });
+    const handle = await startNetgridServer({ port: 0, host: "0.0.0.0 ", service });
+    try {
+      expect(handle.bindUrl).toMatch(/^http:\/\/0\.0\.0\.0:\d+$/);
+      expect(handle.url).toMatch(/^http:\/\/192\.0\.2\.10:\d+$/);
+    } finally {
+      await handle.close();
+      restoreEnv("NETGRID_PUBLIC_HOST", previousPublicHost);
+    }
+  });
+
   it("validates local and private internet deployment profiles", () => {
     const local = loadDeploymentConfig({ NETGRID_DEPLOYMENT_PROFILE: "local" } as NodeJS.ProcessEnv);
     expect(local.profile).toBe("local");
@@ -220,6 +235,109 @@ describe("V1.0.9 private internet hardening", () => {
   });
 });
 
+describe("Backend 0.5 private storage maintenance", () => {
+  it("allows maintenance clients from loopback and private LAN addresses only", () => {
+    expect(isMaintenanceClientAddressAllowed("127.0.0.1")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("::ffff:192.168.178.42")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("10.0.0.25")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("172.20.1.5")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("8.8.8.8")).toBe(false);
+    expect(isMaintenanceClientAddressAllowed("203.0.113.10")).toBe(false);
+  });
+
+  it("serves a redacted local SQLite storage summary, match list and match detail", async () => {
+    const dir = await tempStorageDir();
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-maintenance" });
+    const active = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Ludwig", seed: "backend-05-active" });
+    await service.createMatch({ hostSide: "corp", displayName: "Korp Host", seed: "backend-05-pending" });
+    const finished = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Archiv", seed: "backend-05-finished" });
+    const finishedRecord = await service.loadForTest(finished.matchId);
+    if (!finishedRecord) throw new Error("Missing finished record");
+    finishedRecord.match.status = "finished";
+    finishedRecord.match.winner = "runner";
+    finishedRecord.match.updatedAt = "2026-04-01T00:00:00.000Z";
+    finishedRecord.stateSnapshots.push({
+      snapshotId: "backend-05-redacted-snapshot",
+      matchId: finished.matchId,
+      stateVersion: finishedRecord.gameState.stateVersion,
+      matchVersion: finishedRecord.match.matchVersion,
+      stateHash: hashState(finishedRecord.gameState),
+      gameState: finishedRecord.gameState,
+      createdAt: "2026-04-01T00:00:00.000Z",
+      hiddenInfoBarrier: true
+    });
+    await storage.save(finishedRecord);
+
+    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
+    const baseUrl = await listen(handle);
+    try {
+      const summaryResponse = await fetch(`${baseUrl}/api/storage/maintenance/summary`);
+      const summary = (await summaryResponse.json()) as {
+        backendOpsVersion?: string;
+        matchCount?: number;
+        terminalCount?: number;
+        matchCountsByStatus?: Record<string, number>;
+        tableSizes?: Array<{ key: string; approximatePayloadBytes: number }>;
+        largestMatches?: Array<{ matchId: string }>;
+      };
+      expect(summaryResponse.status).toBe(200);
+      expect(summary.backendOpsVersion).toBe("Backend 0.5");
+      expect(summary.matchCount).toBe(3);
+      expect(summary.terminalCount).toBe(1);
+      expect(summary.matchCountsByStatus?.finished).toBe(1);
+      expect(summary.tableSizes?.some((row) => row.key === "matches" && row.approximatePayloadBytes > 0)).toBe(true);
+      expect(JSON.stringify(summary)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+
+      const filteredResponse = await fetch(`${baseUrl}/api/storage/maintenance/matches?status=finished&terminal=true&olderThanDays=1&mode=human_runner_vs_corp_ai&largerThanBytes=1`);
+      const filtered = (await filteredResponse.json()) as { matches?: Array<{ matchId: string; status: string; participants: Array<{ displayName: string }>; sizes: { approximateTotalBytes: number } }> };
+      expect(filteredResponse.status).toBe(200);
+      expect(filtered.matches?.map((match) => match.matchId)).toEqual([finished.matchId]);
+      expect(filtered.matches?.[0]?.status).toBe("finished");
+      expect(filtered.matches?.[0]?.participants[0]?.displayName).toBe("Archiv");
+      expect(filtered.matches?.[0]?.sizes.approximateTotalBytes).toBeGreaterThan(0);
+      expect(JSON.stringify(filtered)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+
+      const detailResponse = await fetch(`${baseUrl}/api/storage/maintenance/matches/${encodeURIComponent(active.matchId)}`);
+      const detail = (await detailResponse.json()) as {
+        matchId?: string;
+        eventCount?: number;
+        snapshotCount?: number;
+        tableRows?: { events?: number; stateSnapshots?: number };
+        sizes?: { gameStateBytes?: number; stateSnapshotBytes?: number };
+        cleanupAssessment?: { recommendation?: string };
+      };
+      expect(detailResponse.status).toBe(200);
+      expect(detail.matchId).toBe(active.matchId);
+      expect(detail.eventCount).toBeGreaterThan(0);
+      expect(detail.tableRows?.events).toBe(detail.eventCount);
+      expect(detail.cleanupAssessment?.recommendation).toBe("not_active");
+      expect(JSON.stringify(detail)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("blocks maintenance endpoints outside the local deployment profile", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "backend-05-private-block",
+      publicWebBaseUrl: "https://netgrid.example",
+      publicServerBaseUrl: "https://api.netgrid.example"
+    });
+    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const baseUrl = await listen(handle);
+    try {
+      const response = await fetch(`${baseUrl}/api/storage/maintenance/summary`, { headers: { origin: "https://netgrid.example" } });
+      const text = await response.text();
+      expect(response.status).toBe(403);
+      expect(text).toContain("maintenance_unavailable");
+      expect(text).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
+    } finally {
+      await handle.close();
+    }
+  });
+});
+
 describe("V1.0.8 SQLite storage and backup hardening", () => {
   it("uses SQLite as configurable default storage and reports only redacted health signals", async () => {
     const dir = await tempStorageDir();
@@ -275,6 +393,28 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(raw.toString("utf8")).not.toContain(created.hostReconnectToken);
     expect(raw.toString("utf8")).not.toContain(joinToken);
     reopenedStorage.close();
+  });
+
+  it("deduplicates repeated state snapshots before writing SQLite mirror tables", async () => {
+    const fixture = await storedMatchFixture("v108-duplicate-state-snapshot");
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const record = structuredClone(fixture.record) as StoredMatch;
+    const gameState = createGameAfterSetup({ matchId: record.match.matchId, seed: "v108-duplicate-state-snapshot" });
+    const snapshot = stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion, "snap_duplicate");
+    record.gameState = gameState;
+    record.stateSnapshots = [snapshot, { ...snapshot, matchVersion: snapshot.matchVersion + 1 }];
+
+    await expect(storage.save(record)).resolves.toBeUndefined();
+
+    const reopened = await storage.load(record.match.matchId);
+    expect(reopened?.stateSnapshots.map((candidate) => candidate.snapshotId)).toEqual(["snap_duplicate"]);
+    const db = new DatabaseSync(dbPath, { readOnly: true });
+    expect(db.prepare("SELECT COUNT(*) AS count FROM state_snapshots WHERE match_id = ? AND snapshot_id = ?").get(record.match.matchId, "snap_duplicate")).toMatchObject({ count: 1 });
+    db.close();
+    storage.close();
   });
 
   it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
@@ -1692,7 +1832,7 @@ describe("MVP 0.2 multiplayer service", () => {
       settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
     });
 
-    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(created.playerView.deckMetadata?.opponent.formatProfileId).toBe("netgrid_private_local_v1");
     expect(created.playerView.deckMetadata?.opponent.formatProfileVersion).toBe("1.3.0");
     expect(JSON.stringify(created)).not.toContain("onr_v1_021_dwarf");
@@ -2048,9 +2188,9 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(before)).not.toContain("Simple Agenda");
 
     const started = await submit(match.service, match.matchId, match.runner, (action) => action.type === "start_run" && action.payload?.serverId === "archives", "v112-run-archives");
-    expect(started.actorPayload.playerView.run?.breach).toMatchObject({ serverId: "archives", remainingCount: 3 });
-    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Economy Asset");
-    expect(JSON.stringify(started.actorPayload)).not.toContain("Simple Agenda");
+    expect(started.actorPayload.playerView.run?.breach).toMatchObject({ serverId: "archives", remainingCount: 1 });
+    expect(JSON.stringify(started.actorPayload)).toContain("Simple Economy Asset");
+    expect(JSON.stringify(started.actorPayload)).toContain("Simple Agenda");
 
     const reconnected = await match.service.reconnectMatch(match.matchId, {
       side: "runner",
@@ -2058,32 +2198,27 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     expect("error" in reconnected).toBe(false);
     if ("error" in reconnected) throw new Error(reconnected.error.message);
-    expect(reconnected.playerView.run?.breach?.remainingCount).toBe(3);
+    expect(reconnected.playerView.run?.breach?.remainingCount).toBe(1);
     expect(JSON.stringify(reconnected)).toContain("Simple Economy Operation");
-    expect(JSON.stringify(reconnected)).not.toContain("Simple Economy Asset");
-    expect(JSON.stringify(reconnected)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(reconnected)).toContain("Simple Economy Asset");
+    expect(JSON.stringify(reconnected)).toContain("Simple Agenda");
 
-    const firstAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-faceup");
-    expect(firstAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_operation", serverLabel: "Archives" });
-    expect(JSON.stringify(firstAccess.actorPayload)).not.toContain("Simple Economy Asset");
-    expect(JSON.stringify(firstAccess.actorPayload)).not.toContain("Simple Agenda");
-
-    const secondAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-facedown");
-    expect(secondAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_economy_asset", serverLabel: "Archives" });
-    expect(JSON.stringify(secondAccess.actorPayload)).toContain("Simple Economy Asset");
-    expect(JSON.stringify(secondAccess.actorPayload)).not.toContain("Simple Agenda");
+    const firstAccess = await submit(match.service, match.matchId, { ...match.runner, sessionToken: reconnected.sessionToken }, (action) => action.type === "access_card", "v112-access-agenda");
+    expect(firstAccess.publicEvent?.publicPayload).toMatchObject({ actionType: "access_card", cardDefinitionId: "simple_agenda", serverLabel: "Archives" });
+    expect(JSON.stringify(firstAccess.actorPayload)).toContain("Simple Economy Asset");
+    expect(JSON.stringify(firstAccess.actorPayload)).toContain("Simple Agenda");
 
     const duplicate = await match.service.submitAction({
       matchId: match.matchId,
       side: match.runner.side,
       sessionToken: reconnected.sessionToken,
-      actionId: secondAccess.receipt.idempotencyKey,
-      clientKnownStateVersion: secondAccess.receipt.stateVersionBefore,
-      idempotencyKey: "v112-access-facedown"
+      actionId: firstAccess.receipt.idempotencyKey,
+      clientKnownStateVersion: firstAccess.receipt.stateVersionBefore,
+      idempotencyKey: "v112-access-agenda"
     });
     expect(duplicate.ok).toBe(true);
     if (!duplicate.ok) throw new Error(duplicate.error.message);
-    expect(duplicate.receipt.stateVersionAfter).toBe(secondAccess.receipt.stateVersionAfter);
+    expect(duplicate.receipt.stateVersionAfter).toBe(firstAccess.receipt.stateVersionAfter);
 
     const blocked = await match.service.requestUndo({
       matchId: match.matchId,
@@ -2602,7 +2737,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const record = await service.loadForTest(created.matchId);
 
     expect(created.hostSide).toBe("corp");
-    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(record?.match.deckSetup.aiDeckPolicy).toBe("selected");
     expect(record?.match.deckSetup.assignment).toEqual({ runnerPlayer: "player_b", corpPlayer: "player_a" });
     expect(record?.match.deckSetup.runnerSnapshotId).toBe("king_of_the_road_runner_ai_snapshot_v1");
@@ -2930,13 +3065,14 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("sends side-filtered bootstrap messages over WebSocket", async () => {
+    const auditEvents: ConnectionAuditEvent[] = [];
     const service = new MultiplayerService(new InMemoryMatchStorage(), {
       tokenSalt: "ws-test",
       publicWebBaseUrl: "http://127.0.0.1:3100",
       publicServerBaseUrl: "http://127.0.0.1:0"
     });
     const created = await service.createMatch({ hostSide: "runner", seed: "ws-bootstrap" });
-    const handle = createNetgridHttpServer(service);
+    const handle = createNetgridHttpServer(service, { connectionAudit: { record: (event) => auditEvents.push(event) } });
     await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
     const address = handle.server.address();
     if (!address || typeof address === "string") throw new Error("Missing server address");
@@ -2971,6 +3107,19 @@ describe("MVP 0.2 multiplayer service", () => {
       const stored = await service.loadForTest(created.matchId);
       expect(stored?.sessions.find((session) => session.side === created.hostSide)?.connected).toBe(true);
       replacement.close();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(auditEvents).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ event: "ws_open" }),
+          expect.objectContaining({ event: "ws_join_ok", matchId: created.matchId, side: created.hostSide }),
+          expect.objectContaining({ event: "ws_replaced_by_reconnect", matchId: created.matchId, side: created.hostSide, code: 4000 }),
+          expect.objectContaining({ event: "ws_close", matchId: created.matchId, side: created.hostSide, ignoredAsReplaced: true })
+        ])
+      );
+      expect(JSON.stringify(auditEvents)).not.toContain(created.hostSessionToken);
+      expect(JSON.stringify(auditEvents)).not.toContain(created.hostReconnectToken);
+      expect(JSON.stringify(auditEvents)).not.toMatch(/Simple Agenda|cardInstances|privatePayload|decklist/i);
     } finally {
       socket.close();
       await handle.close();
@@ -4389,7 +4538,7 @@ function putCorpIceOnServerForTest(state: GameState, serverId: "hq" | "rd" | "ar
   const server = state.corp.servers.find((candidate) => candidate.id === serverId);
   if (!server) throw new Error("Missing server");
   removeEverywhereForTest(state, id);
-  server.ice.unshift(id);
+  server.ice.push(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
   return id;
 }

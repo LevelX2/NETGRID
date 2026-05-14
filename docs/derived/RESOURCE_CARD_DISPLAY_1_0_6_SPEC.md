@@ -70,7 +70,7 @@ Die UI führt pro sichtbarer Seite eine tab-lokale Displaykapazität:
 1. Bei Turnwechsel oder neuem Match wird die Kapazität für die aktive Seite auf `max(sideBasis, currentClicks)` gesetzt.
 2. Verfügbare Slots entsprechen `currentClicks`.
 3. Verbrauchte Slots entsprechen `max(0, displayCapacity - currentClicks)`.
-4. Wenn `currentClicks` im Turn so steigt, dass `currentClicks + consumedSlots > displayCapacity`, wird `displayCapacity` auf diesen Wert erhöht.
+4. Wenn `currentClicks` im Turn durch Karten- oder Regelwirkungen steigt, wird die Kapazität aus `bereits in diesem Zug ausgegebenen Aktionskosten + currentClicks` abgeleitet. Zusätzliche Aktionen erscheinen dadurch als echte weitere Slots, z. B. Korp-Aktionen 4 und 5 nach `Gain two actions`.
 5. Bei Seitenwechsel wird die Kapazität der neuen aktiven Seite neu initialisiert.
 
 Diese Ableitung ist nur Anzeige. Sie wird nicht persistiert und nicht an Server oder Engine gesendet.

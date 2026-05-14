@@ -42,3 +42,9 @@ Status: implemented_final
 `hard_gate_blocker: none`
 
 `text_finalization_policy: docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZATION_POLICY.md`
+
+## Completion-Nachtrag 2026-05-14
+
+`The Shell Traders` (`onr_v1_176_the-shell-traders`) wurde nach Playtest-Befund in einer engen V1.9.12-Reparaturspur vervollstaendigt. Die fruehere Recurring-Credit-Ersatzfunktion ist entfernt; die Karte nutzt jetzt Set Aside aus der Runner-Grip, oeffentliche Shell-Counter, verpflichtendes Start-of-turn-Counter-Removal, eine 1-Credit-Removal-Faehigkeit und kostenlose Auto-Installation beim letzten Shell-Counter.
+
+Der Nachtrag ersetzt nicht das bestehende Final Review. Fuehrendes Zusatzartefakt ist `docs/derived/V1_9_12_SHELL_TRADERS_COMPLETION_REVIEW.md`.

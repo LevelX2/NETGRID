@@ -1,4 +1,4 @@
-import type { PublicGameEvent, Side } from "@netgrid/shared";
+import type { PublicGameEvent, ResolvedGameEffect, Side } from "@netgrid/shared";
 
 export type ChronicleCategory = "turn" | "economy" | "card" | "run" | "agenda" | "danger" | "system" | "hidden";
 export type ChronicleImportance = "normal" | "important" | "critical";
@@ -24,6 +24,7 @@ export type ChronicleItem = {
   title: string;
   description?: string;
   chips: string[];
+  cardDefinitionId?: string;
   cardTitle?: string;
   cardText?: string;
   cardDetailLines: string[];
@@ -60,7 +61,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
   const actor = sideValue(payload.actor);
-  const amount = numberValue(payload.amount);
+  const amount = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount) ?? numberValue(payload.amount);
   const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
   const zoneLabel = stringValue(payload.zoneLabel);
   const result = stringValue(payload.result);
@@ -75,10 +76,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
   const cardTitle = explicitCardTitle ?? labelCardTitle;
+  const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  let cardDefinitionId = stringValue(payload.cardDefinitionId);
   const cardText = context.cardText ?? undefined;
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeEffect(cardText);
+  const mergedPlayEffect = simpleMergedPlayEffect(event);
+  const agendaAbility = stringValue(payload.agendaAbility);
+  const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
+  const searchReveal = stringValue(payload.searchReveal);
+  const searchDestination = stringValue(payload.searchDestination);
+  const shellTradersAbility = stringValue(payload.shellTradersAbility);
 
   const baseChipList = baseChips(actor, isAi);
   const cardDetailLines = context.cardDetailLines ?? [];
@@ -97,6 +106,36 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (shellTradersAbility === "auto_install_after_memory_choice") {
+        category = "card";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
+        chips.push("The Shell Traders", "Installiert", "0 Kosten");
+        break;
+      }
+      if (stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
+        const gainedCredits = numberValue(payload.playfulAiGainedCredits) ?? 0;
+        const setAsideDice = numberValue(payload.playfulAiSetAsideDice) ?? 0;
+        const lastRoll = numberValue(payload.v1921DieRoll);
+        const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
+        const queuedBeforeRolls = numberValue(payload.playfulAiDiceQueuedBeforeRolls);
+        const remainingDice = numberValue(payload.playfulAiRemainingDice) ?? numberValue(payload.playfulAiDiceQueuedAfterRolls);
+        const choiceOpened = payload.playfulAiChoiceOpened === true;
+        const complete = payload.playfulAiComplete === true;
+        category = gainedCredits > 0 ? "economy" : "card";
+        visibility = "public";
+        title = phrase(subject, `Playful AI aufgelöst: ${creditText(gainedCredits)} genommen${setAsideDice > 0 ? ` und ${setAsideDice} ${dieText(setAsideDice)} beiseitegelegt` : ""}`);
+        description = playfulAiResolveDescription(dieRolls, queuedBeforeRolls, remainingDice, choiceOpened, complete);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(
+          "Playful AI",
+          `+${gainedCredits} ${creditLabel(gainedCredits)}`,
+          ...(setAsideDice > 0 ? [`${setAsideDice} beiseite`] : []),
+          ...playfulAiRollChips(dieRolls, lastRoll),
+          ...(choiceOpened && remainingDice !== undefined ? [`${remainingDice} offen`] : [])
+        );
+        break;
+      }
       if (payload.discardResolved === true) {
         category = "hidden";
         visibility = "redacted";
@@ -111,6 +150,81 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Setup", "Starthand");
         break;
       }
+      if (payload.traceStep === "corp_bid") {
+        const corpBid = numberValue(payload.corpBid) ?? 0;
+        const traceStrength = numberValue(payload.traceStrength);
+        const runnerLink = numberValue(payload.runnerLink);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `im Trace ${creditText(corpBid)} geboten`);
+        description = traceStrength !== undefined ? `Trace-Stärke: ${traceStrength}${runnerLink !== undefined ? `, Runner-Link: ${runnerLink}` : ""}.` : undefined;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Trace", `Korp-Gebot ${corpBid}`, ...(traceStrength !== undefined ? [`Trace ${traceStrength}`] : []), ...(runnerLink !== undefined ? [`Link ${runnerLink}`] : []));
+        break;
+      }
+      if (payload.traceStep === "runner_bid") {
+        const corpBid = numberValue(payload.corpBid) ?? 0;
+        const runnerBid = numberValue(payload.runnerBid) ?? 0;
+        const traceStrength = numberValue(payload.traceStrength);
+        const runnerStrength = numberValue(payload.runnerStrength);
+        const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
+        const successful = payload.traceSuccessful === true;
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`;
+        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}.` : undefined;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(
+          "Trace",
+          `Korp ${corpBid}`,
+          `Runner ${runnerBid}`,
+          ...(traceStrength !== undefined && runnerStrength !== undefined ? [`${traceStrength}:${runnerStrength}`] : []),
+          successful ? "Erfolg" : "Fehlschlag",
+          ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : [])
+        );
+        break;
+      }
+      if (hiddenZoneAction === "search_stack") {
+        const destinationLabel = searchDestinationLabel(searchDestination);
+        const installFailed = searchDestination === "install_program" && payload.installSucceeded === false;
+        const installPendingMemoryTrash = searchDestination === "install_program" && payload.installPendingMemoryTrash === true;
+        const temporaryInstall = payload.temporaryInstall === true;
+        category = searchReveal === "public" ? "card" : "hidden";
+        importance = "important";
+        visibility = searchReveal === "public" ? "public" : "redacted";
+        title =
+          searchReveal === "public"
+            ? installPendingMemoryTrash
+              ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt; MU muss freigemacht werden`)
+              : installFailed
+              ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt, aber nicht installiert`)
+              : phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt und ${searchDestination === "install_program" ? `im Rig installiert${temporaryInstall ? "; Rückkehr am Zugende" : ""}` : `in ${destinationLabel} genommen`}`)
+            : phrase(subject, `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack in ${destinationLabel} genommen`);
+        chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
+      if (hiddenZoneAction === "sneak_preview_install_program") {
+        const installPendingMemoryTrash = payload.installPendingMemoryTrash === true;
+        const sourceLabel = stringValue(payload.searchSource) === "runner_heap" ? "Heap" : "Stack";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = installPendingMemoryTrash
+          ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem ${sourceLabel} gewählt; MU muss freigemacht werden`)
+          : phrase(subject, `${cardTitle ?? "ein Programm"} aus dem ${sourceLabel} kostenlos im Rig installiert; Rückkehr am Zugende`);
+        chips.push(sourceLabel, installPendingMemoryTrash ? "MU freimachen" : "Installiert", "Temporär");
+        break;
+      }
+      if (hiddenZoneAction === "sneak_preview_choose_source") {
+        const sourceLabel = stringValue(payload.searchSource) === "runner_heap" ? "Heap" : "Stack";
+        category = "hidden";
+        visibility = "redacted";
+        title = phrase(subject, `${sourceLabel} als Sneak-Preview-Quelle gewählt`);
+        chips.push("Sneak Preview", sourceLabel);
+        break;
+      }
       category = "system";
       visibility = "system";
       title = phrase(subject, "eine Entscheidung beantwortet");
@@ -122,9 +236,45 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "gain_credit":
+      if (hiddenZoneAction === "v1911_expose_server_card" || payload.revealKind === "expose") {
+        const sourceTitle = sourceTitleFromActionLabel(label);
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${cardTitle ?? "eine Korp-Karte"}${serverLabel ? ` in ${serverLabel}` : ""}${sourceTitle ? ` mit ${sourceTitle}` : ""} aufgedeckt`);
+        chips.push("Expose", ...(serverLabel ? [serverLabel] : []), ...(sourceTitle ? [sourceTitle] : []));
+        break;
+      }
+      if (payload.traceStarted === true) {
+        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Trace", ...(baseTraceStrength !== undefined ? [`Base ${baseTraceStrength}`] : []));
+        break;
+      }
+      if (agendaAbility === "corporate_coup" || agendaAbility === "political_coup") {
+        const gainedCredits = amount ?? numberValue(payload.removePowerCounterAmount) ?? 0;
+        const spentCredits = numberValue(payload.spentPowerCounters) ?? numberValue(payload.removePowerCounterAmount) ?? gainedCredits;
+        const remainingCredits = numberValue(payload.remainingPowerCounters);
+        category = "economy";
+        importance = "important";
+        title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "der Coup-Agenda"} genommen`);
+        chips.push(`+${gainedCredits} ${creditLabel(gainedCredits)}`, `${spentCredits} ${creditLabel(spentCredits)} von Karte`, ...(remainingCredits !== undefined ? [`${remainingCredits} ${creditLabel(remainingCredits)} übrig`] : []));
+        break;
+      }
+      if (agendaAbility) {
+        category = agendaAbility.includes("trace") || agendaAbility.includes("solo") || agendaAbility.includes("kali") ? "danger" : "agenda";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine gescorte Agenda"} genutzt`);
+        chips.push("Agenda-Aktion");
+        break;
+      }
       category = "economy";
       title = phrase(subject, `${creditText(amount ?? 1)} genommen`);
-      chips.push(`+${amount ?? 1} Credit${amount === 1 || amount === undefined ? "" : "s"}`);
+      chips.push(`+${amount ?? 1} ${creditLabel(amount ?? 1)}`);
       break;
     case "draw_card":
       category = "card";
@@ -145,8 +295,37 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "play_event":
     case "play_operation":
-      title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${effect.suffix ? ` und ${effect.suffix}` : ""}`);
-      chips.push(actionType === "play_event" ? "Event" : "Operation", ...effect.chips);
+      if (actionType === "play_event" && stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
+        const dieRoll = numberValue(payload.v1921DieRoll);
+        const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
+        const choiceOpened = payload.playfulAiChoiceOpened === true;
+        const complete = payload.playfulAiComplete === true;
+        category = "card";
+        importance = choiceOpened ? "important" : "normal";
+        title = phrase(subject, `${cardTitle ?? "Playful AI"} gespielt${dieRoll !== undefined ? ` und eine ${dieRoll} gewürfelt` : ""}`);
+        description = choiceOpened
+          ? "Der Wurf öffnet eine Entscheidung: Credits nehmen oder Würfel beiseitelegen."
+          : complete
+            ? "Die Playful-AI-Schleife ist ohne weitere Entscheidung abgeschlossen."
+            : undefined;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push(actionType === "play_event" ? "Event" : "Operation", "Playful AI", ...playfulAiRollChips(dieRolls, dieRoll), choiceOpened ? "Choice" : "Fertig");
+        break;
+      }
+      if (payload.traceStarted === true) {
+        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Trace", ...(baseTraceStrength !== undefined ? [`Base ${baseTraceStrength}`] : []), actionType === "play_event" ? "Event" : "Operation");
+        break;
+      }
+      const playEffect = mergedPlayEffect ?? effect;
+      category = playEffect.category ?? category;
+      title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);
+      chips.push(actionType === "play_event" ? "Event" : "Operation", ...playEffect.chips);
       break;
     case "advance_card":
       category = "hidden";
@@ -192,6 +371,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Subroutine", "Gebrochen");
       break;
     case "continue_run":
+      if (payload.traceStarted === true) {
+        const baseTraceStrength = numberValue(payload.baseTraceStrength);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = traceStartTitle(subject, cardTitle, baseTraceStrength);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Trace", ...(baseTraceStrength !== undefined ? [`Base ${baseTraceStrength}`] : []));
+        break;
+      }
       category = "run";
       title = encounterContinue
         ? phrase(subject, result === "ended" ? "ungebrochene Subroutinen ausgelöst und der Run endete" : "ungebrochene Subroutinen ausgelöst")
@@ -258,7 +447,75 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       title = phrase(subject, `die Kontrolle von ${cardTitle ?? "einer Karte"} geändert`);
       chips.push("Kontrolle");
       break;
+    case "trigger_ability": {
+      const resourceAbility = stringValue(payload.resourceAbility);
+      if (shellTradersAbility === "set_aside_from_grip") {
+        const counters = numberValue(payload.shellCounterAmount) ?? numberValue(payload.remainingCounters) ?? 0;
+        const installed = payload.installedFromSpecialZone === true;
+        category = "card";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} mit ${counters} Shell-Counter${counters === 1 ? "" : "n"} beiseitegelegt${installed ? " und kostenlos installiert" : ""}`);
+        chips.push("The Shell Traders", "Set Aside", `${counters} Shell`);
+        break;
+      }
+      if (shellTradersAbility === "remove_shell_counter" || shellTradersAbility === "start_turn_remove_shell_counter") {
+        const remaining = numberValue(payload.remainingCounters) ?? 0;
+        const installed = payload.installedFromSpecialZone === true;
+        const pendingMemory = payload.shellAutoInstallPendingMemoryTrash === true;
+        category = "card";
+        importance = installed || pendingMemory ? "important" : "normal";
+        title = phrase(
+          subject,
+          `1 Shell-Counter von ${cardTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
+        );
+        chips.push("The Shell Traders", "Shell -1", `${remaining} übrig`, ...(installed ? ["Installiert"] : []), ...(pendingMemory ? ["MU freimachen"] : []));
+        break;
+      }
+      if (shellTradersAbility === "auto_install_after_memory_choice") {
+        category = "card";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
+        chips.push("The Shell Traders", "Installiert", "0 Kosten");
+        break;
+      }
+      if (resourceAbility === "broker_load_credits") {
+        const addedCredits = numberValue(payload.addedCounterAmount) ?? numberValue(payload.addCounterAmount) ?? 3;
+        category = "economy";
+        title = phrase(subject, `${creditText(addedCredits)} auf ${cardTitle ?? "Broker"} gelegt`);
+        break;
+      }
+      if (resourceAbility === "broker_take_credits") {
+        const gainedCredits = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount) ?? amount ?? 0;
+        category = "economy";
+        title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "Broker"} genommen`);
+        break;
+      }
+      if (resourceAbility === "short_term_contract_take_credits") {
+        const gainedCredits = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount) ?? amount ?? 0;
+        const trashed = payload.shortTermContractTrashed === true ? ", Contract getrasht" : "";
+        category = "economy";
+        title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "Short-Term Contract"} genommen${trashed}`);
+        break;
+      }
+      category = "card";
+      title = phrase(subject, `${cardTitle ?? "eine Kartenfähigkeit"} aktiviert${abilityTextFromLabel(label, cardTitle)}`);
+      chips.push("Kartenaktion", ...(cardTitle ? [cardTitle] : []));
+      break;
+    }
     case "end_turn":
+      if (shellTradersAbility === "start_turn_remove_shell_counter") {
+        const remaining = numberValue(payload.remainingCounters) ?? 0;
+        const installed = payload.installedFromSpecialZone === true;
+        const pendingMemory = payload.shellAutoInstallPendingMemoryTrash === true;
+        category = "card";
+        importance = installed || pendingMemory ? "important" : "normal";
+        title = phrase(
+          subject,
+          `1 Shell-Counter von ${cardTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
+        );
+        chips.push("The Shell Traders", "Shell -1", `${remaining} übrig`, ...(installed ? ["Installiert"] : []), ...(pendingMemory ? ["MU freimachen"] : []));
+        break;
+      }
       category = "turn";
       title = phrase(subject, `den Zug beendet${turnChip ? ` (${turnChip})` : ""}`);
       chips.push("Zugende", ...(turnChip ? [turnChip] : []));
@@ -284,10 +541,135 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     title: ensurePeriod(title),
     ...(description ? { description: ensurePeriod(description) } : {}),
     chips: uniqueChips(chips.filter(Boolean)),
+    ...(cardDefinitionId && visibility !== "redacted" ? { cardDefinitionId } : {}),
     ...(cardTitle && visibility !== "redacted" ? { cardTitle } : {}),
     ...(cardText && visibility !== "redacted" ? { cardText } : {}),
     cardDetailLines: visibility === "redacted" ? [] : cardDetailLines,
     groupLabel: groupLabelFor(category, actor, label, serverLabel, turnNumber)
+  };
+}
+
+export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): ChronicleItem[] {
+  return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects)
+    .filter((effect) => !shouldMergePlayEffect(event, effect))
+    .map((effect, index) => formatChronicleEffect(event, effect, index, side));
+}
+
+export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<string, number> {
+  const numbers: Record<string, number> = {};
+  let activeSide: Side = "corp";
+  let activeTurnNumber = 1;
+
+  for (const event of events) {
+    const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+    const actor = sideValue(event.publicPayload.actor);
+    if (!actor) continue;
+
+    if (actionType === "mandatory_draw" && actor === "corp") {
+      if (activeSide !== "corp") {
+        activeSide = "corp";
+        activeTurnNumber += 1;
+      }
+      numbers[event.eventId] = activeTurnNumber;
+      continue;
+    }
+
+    if (actionType === "end_turn") {
+      if (activeSide !== actor) activeSide = actor;
+      numbers[event.eventId] = activeTurnNumber;
+      activeSide = actor === "corp" ? "runner" : "corp";
+      activeTurnNumber += 1;
+    }
+  }
+
+  return numbers;
+}
+
+function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffect, index: number, side: Side): ChronicleItem {
+  const actor = sideValue(effect.side);
+  const subject = subjectFor(actor, side, false);
+  const sourceTitle = stringValue(effect.sourceTitle);
+  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  const cardTitle = stringValue(effect.cardTitle);
+  const amount = numberValue(effect.amount) ?? 0;
+  const chips = [...baseChips(actor, false)];
+  let category: ChronicleCategory = "system";
+  let importance: ChronicleImportance = "normal";
+  let visibility: ChronicleVisibility = effect.visibility === "public" ? "public" : effect.visibility === "private_to_side" ? "side" : "redacted";
+  let title = "Ein automatischer Effekt wurde aufgelöst";
+  const through = sourceTitle && sourceTitle !== cardTitle ? ` durch ${sourceTitle}` : "";
+
+  switch (effect.kind) {
+    case "gain_credits":
+      category = "economy";
+      title = phrase(subject, `${creditText(amount)}${through} erhalten`);
+      chips.push(`+${amount} Credit${amount === 1 ? "" : "s"}`, "Automatisch");
+      break;
+    case "draw_cards":
+      category = "card";
+      title = phrase(subject, `${cardCountText(amount)}${through} gezogen`);
+      chips.push(amount === 1 ? "Karte ziehen" : `${amount} Karten`, "Automatisch");
+      break;
+    case "rez_card":
+      category = "card";
+      importance = effect.reason === "region_install" || effect.reason === "on_score" ? "important" : "normal";
+      title = `${cardTitle ?? sourceTitle ?? "Eine Karte"} wurde${effect.reason === "region_install" ? " sofort" : ""} gerezzt`;
+      chips.push("Rez", "Automatisch");
+      break;
+    case "trash_card":
+      category = "card";
+      importance = "important";
+      title = `${cardTitle ?? "Eine Karte"} wurde${through} getrasht`;
+      chips.push("Trash", effect.reason === "region_limit" ? "Region" : "Automatisch");
+      break;
+    case "purge_counters":
+      category = "danger";
+      importance = "important";
+      title = phrase(subject, `${amount} ${counterLabel(effect.counterType)} entfernt`);
+      chips.push("Purge", counterLabel(effect.counterType));
+      break;
+    case "gain_actions":
+      category = "turn";
+      title = phrase(subject, `${amount} zusätzliche Aktion${amount === 1 ? "" : "en"}${through} erhalten`);
+      chips.push(`+${amount} Aktion${amount === 1 ? "" : "en"}`);
+      break;
+    case "add_tags":
+      category = "danger";
+      importance = "important";
+      title = phrase(subject, `${amount} Tag${amount === 1 ? "" : "s"}${through} erhalten`);
+      chips.push(`+${amount} Tag${amount === 1 ? "" : "s"}`);
+      break;
+    case "remove_tags":
+      category = "danger";
+      title = phrase(subject, `${amount} Tag${amount === 1 ? "" : "s"} entfernt`);
+      chips.push("Tag entfernt");
+      break;
+    case "bad_publicity":
+      category = "danger";
+      importance = "important";
+      title = phrase(subject, `${amount} Bad Publicity${through} erhalten`);
+      chips.push(`+${amount} Bad Publicity`);
+      break;
+    case "damage":
+      category = "danger";
+      importance = "critical";
+      title = phrase(subject, `${amount} Schaden${through} erlitten`);
+      chips.push("Schaden");
+      break;
+  }
+
+  return {
+    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    category,
+    importance,
+    visibility,
+    ...(actor ? { actor } : {}),
+    title: ensurePeriod(title),
+    chips: uniqueChips(chips.filter(Boolean)),
+    ...(sourceDefinitionId && visibility !== "redacted" ? { cardDefinitionId: sourceDefinitionId } : {}),
+    ...(sourceTitle && visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
+    cardDetailLines: [],
+    groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
   };
 }
 
@@ -356,6 +738,36 @@ function summarizeEffect(cardText: string | undefined): EffectSummary {
   return { chips: [] };
 }
 
+function simpleMergedPlayEffect(event: PublicGameEvent): EffectSummary | undefined {
+  const effects = resolvedEffectsFromPayload(event.publicPayload.resolvedEffects);
+  const effect = effects[0];
+  if (effects.length !== 1 || !effect || !shouldMergePlayEffect(event, effect)) return undefined;
+  const amount = numberValue(effect.amount) ?? 0;
+  if (effect.kind === "draw_cards") return { category: "card", suffix: `${cardCountText(amount)} gezogen`, chips: [amount === 1 ? "Karte ziehen" : `${amount} Karten`] };
+  if (effect.kind === "gain_credits") return { category: "economy", suffix: `${creditText(amount)} erhalten`, chips: [`+${amount} ${creditLabel(amount)}`] };
+  return undefined;
+}
+
+function shouldMergePlayEffect(event: PublicGameEvent, effect: ResolvedGameEffect | undefined): boolean {
+  if (!effect) return false;
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  if (actionType !== "play_event" && actionType !== "play_operation") return false;
+  if (!["draw_cards", "gain_credits"].includes(effect.kind) || effect.visibility !== "public") return false;
+  if (effect.reason !== "card_resolver") return false;
+  const actor = sideValue(payload.actor);
+  if (actor && effect.side && actor !== effect.side) return false;
+  const amount = numberValue(effect.amount);
+  if (!amount || amount <= 0) return false;
+  const playedDefinitionId = stringValue(payload.cardDefinitionId);
+  const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  if (playedDefinitionId && sourceDefinitionId && playedDefinitionId !== sourceDefinitionId) return false;
+  const playedTitle = stringValue(payload.title);
+  const sourceTitle = stringValue(effect.sourceTitle);
+  if (!playedDefinitionId && !sourceDefinitionId && playedTitle && sourceTitle && playedTitle !== sourceTitle) return false;
+  return true;
+}
+
 function rezSuffix(cardType: string | null | undefined, effect: EffectSummary): string {
   if (effect.suffix) return ` und ${effect.suffix}`;
   if (cardType === "ice") return ". Die Begegnung beginnt";
@@ -363,11 +775,70 @@ function rezSuffix(cardType: string | null | undefined, effect: EffectSummary): 
 }
 
 function creditText(amount: number): string {
-  return `${amount} Credit${amount === 1 ? "" : "s"}`;
+  return `${amount} ${creditLabel(amount)}`;
+}
+
+function creditLabel(amount: number): string {
+  return amount === 1 ? "Credit" : "Credits";
+}
+
+function dieText(amount: number): string {
+  return amount === 1 ? "Würfel" : "Würfel";
+}
+
+function playfulAiRollChips(dieRolls: number[], fallbackRoll: number | undefined): string[] {
+  if (dieRolls.length > 1) return [`Würfe ${dieRolls.join(", ")}`];
+  const roll = dieRolls[0] ?? fallbackRoll;
+  return roll !== undefined ? [`Wurf ${roll}`] : [];
+}
+
+function playfulAiResolveDescription(
+  dieRolls: number[],
+  queuedBeforeRolls: number | undefined,
+  remainingDice: number | undefined,
+  choiceOpened: boolean,
+  complete: boolean
+): string | undefined {
+  const parts: string[] = [];
+  if (dieRolls.length > 0) {
+    const verb = dieRolls.length === 1 ? "wurde" : "wurden";
+    const diceText =
+      queuedBeforeRolls && queuedBeforeRolls > dieRolls.length
+        ? `${dieRolls.length} von ${queuedBeforeRolls} beiseitegelegten Würfeln`
+        : dieRolls.length === 1
+          ? "ein beiseitegelegter Würfel"
+          : `${dieRolls.length} beiseitegelegte Würfel`;
+    parts.push(`Danach ${verb} ${diceText} geworfen: ${dieRolls.join(", ")}.`);
+  }
+  if (choiceOpened) {
+    parts.push(
+      remainingDice && remainingDice > 0
+        ? `Der letzte Wurf öffnet eine weitere Entscheidung; ${remainingDice === 1 ? "ein Würfel bleibt" : `${remainingDice} Würfel bleiben`} danach noch offen.`
+        : "Der letzte Wurf öffnet eine weitere Entscheidung."
+    );
+  } else if (complete) {
+    parts.push("Die Playful-AI-Schleife ist abgeschlossen.");
+  }
+  return parts.join(" ") || undefined;
+}
+
+function traceParticipantLabel(participant: Side, viewer: Side): string {
+  if (participant === viewer) return "Du";
+  return participant === "corp" ? "Korp" : "Runner";
+}
+
+function traceStartTitle(subject: string, cardTitle: string | undefined, baseTraceStrength: number | undefined): string {
+  return phrase(subject, `${cardTitle ? `mit ${cardTitle} ` : ""}einen Trace${baseTraceStrength !== undefined ? ` ${baseTraceStrength}` : ""} ausgelöst`);
 }
 
 function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
+}
+
+function searchDestinationLabel(destination: string | undefined): string {
+  if (destination === "install_program") return "das Rig";
+  if (destination === "grip") return "den Grip";
+  return "die Hand";
 }
 
 function installLocation(serverLabel: string | undefined, zoneLabel: string | undefined, label: string | undefined): string {
@@ -419,6 +890,10 @@ function runTargetFromLabel(label: string | undefined): string {
 
 function extractCardTitleFromLabel(actionType: string, label: string | undefined, actor: Side | undefined): string | undefined {
   if (!label || (actor === "corp" && ["install_card", "advance_card"].includes(actionType))) return undefined;
+  if (actionType === "trigger_ability") {
+    const title = label.match(/^(.+?):\s+.+$/)?.[1]?.trim();
+    if (title && !isGenericCardLabel(title)) return title;
+  }
   const patterns: RegExp[] = [];
   if (["install_card", "play_event", "play_operation", "rez_ice", "pump_breaker", "trash_accessed_card", "trash_resource", "steal_agenda"].includes(actionType)) {
     patterns.push(/^(.+?)\s+(?:installieren|spielen|rezzen|pumpen|trashen|stehlen)$/i);
@@ -430,6 +905,19 @@ function extractCardTitleFromLabel(actionType: string, label: string | undefined
     if (title && !isGenericCardLabel(title)) return title;
   }
   return undefined;
+}
+
+function sourceTitleFromActionLabel(label: string | undefined): string | undefined {
+  const title = label?.match(/^(.+?):\s+.+$/)?.[1]?.trim();
+  return title && !isGenericCardLabel(title) ? title : undefined;
+}
+
+function abilityTextFromLabel(label: string | undefined, cardTitle: string | undefined): string {
+  if (!label || !cardTitle) return "";
+  const escapedTitle = cardTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = label.match(new RegExp(`^${escapedTitle}:\\s*(.+)$`, "i"));
+  const abilityText = match?.[1]?.trim();
+  return abilityText ? `: ${abilityText}` : "";
 }
 
 function isGenericCardLabel(value: string): boolean {
@@ -482,12 +970,30 @@ function uniqueChips(chips: string[]): string[] {
   return Array.from(new Set(chips));
 }
 
+function resolvedEffectsFromPayload(value: unknown): ResolvedGameEffect[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((effect): effect is ResolvedGameEffect => {
+    if (!effect || typeof effect !== "object") return false;
+    const candidate = effect as Partial<ResolvedGameEffect>;
+    return typeof candidate.effectId === "string" && typeof candidate.kind === "string" && typeof candidate.visibility === "string";
+  });
+}
+
+function counterLabel(counterType: unknown): string {
+  return counterType === "virus" ? "Virus-Counter" : "Counter";
+}
+
 function stringValue(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value : undefined;
 }
 
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function numberArrayValue(value: unknown): number[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is number => typeof item === "number" && Number.isFinite(item));
 }
 
 function positiveIntegerValue(value: unknown): number | undefined {

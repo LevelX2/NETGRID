@@ -51,7 +51,7 @@ describe("Client visibility contract", () => {
     expect(page).toContain("sharedAudioContext");
     expect(page).toContain("optionsDialogOpen");
     expect(page).toContain("OptionsDialog");
-    expect(page).toContain("Runner-Rig");
+    expect(page).toContain('data-testid="runner-rig"');
     expect(page).toContain("RunnerRigStrip");
     expect(page).toContain("runnerRigStrip");
     expect(matchStart).toContain("Regelmatch bis 7 Agendapunkte");
@@ -189,8 +189,8 @@ describe("Client visibility contract", () => {
     const styles = readFileSync("apps/web/app/globals.css", "utf8");
 
     expect(page).toContain("Mögliche Aktionen");
-    expect(page).toContain("Zurücknehmen");
-    expect(page).toContain("Letzte Aktion anfragen");
+    expect(page).toContain("Letzte Aktion zurücknehmen");
+    expect(page).toContain("Zurücknahme anfragen");
     expect(page).toContain("Wieder verbinden");
     expect(page).toContain("Getaktet");
     expect(page).toContain("Einzelschritt");

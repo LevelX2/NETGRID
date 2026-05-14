@@ -111,7 +111,8 @@ export type CounterType =
   | "charge"
   | "mark"
   | "dividend"
-  | "core_damage";
+  | "core_damage"
+  | "shell";
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
@@ -155,6 +156,40 @@ export type EventVisibilityClass =
   | "private_to_side"
   | "hidden_info_barrier"
   | "replay_only";
+
+export type ResolvedGameEffectKind =
+  | "gain_credits"
+  | "draw_cards"
+  | "rez_card"
+  | "trash_card"
+  | "purge_counters"
+  | "gain_actions"
+  | "add_tags"
+  | "remove_tags"
+  | "bad_publicity"
+  | "damage";
+
+export type ResolvedGameEffect = {
+  effectId: string;
+  kind: ResolvedGameEffectKind;
+  visibility: EventVisibilityClass;
+  side?: Side;
+  amount?: number;
+  reason?: string;
+  counterType?: CounterType;
+  removedCounterAmount?: number;
+  remainingCounters?: number;
+  addedCounterAmount?: number;
+  runnerTagsAfter?: number;
+  redactedKind?: string;
+  sourceDefinitionId?: CardDefinitionId;
+  sourceTitle?: string;
+  cardDefinitionId?: CardDefinitionId;
+  cardTitle?: string;
+  serverId?: ServerId;
+  serverLabel?: string;
+};
+
 export type SpecialZoneKind = "set_aside" | "removed_from_game";
 export type SpecialZoneVisibility =
   | "public"
@@ -359,6 +394,22 @@ export type ChoiceOption = {
   value?: string | number | boolean;
 };
 
+export type StackSearchResolution = {
+  reveal: "public" | "hidden";
+  destination: "grip" | "install_program";
+  shuffleAfter: boolean;
+  publicRevealKind?: string;
+};
+
+export type SneakPreviewTemporaryInstall = {
+  cardId: CardInstanceId;
+  sourceCardDefinitionId: CardDefinitionId;
+};
+
+export type VisibleChoiceOption = ChoiceOption & {
+  card?: VisibleCard;
+};
+
 export type ChoiceRequest = {
   choiceId: string;
   side: Side;
@@ -370,12 +421,14 @@ export type ChoiceRequest = {
   maxSelections: number;
   stateVersion: number;
   visibility: EventVisibilityClass;
+  stackSearchResolution?: StackSearchResolution;
 };
 
 export type PendingChoice = ChoiceRequest;
 
-export type VisibleChoiceRequest = Omit<ChoiceRequest, "side"> & {
+export type VisibleChoiceRequest = Omit<ChoiceRequest, "side" | "options"> & {
   side: Side;
+  options: VisibleChoiceOption[];
 };
 
 export type ChoiceRequirement = {
@@ -825,6 +878,7 @@ export type GameState = {
   setup?: SetupState;
   pendingChoice?: PendingChoice;
   imminentEvent?: ImminentEvent;
+  sneakPreviewTemporaryInstalls?: SneakPreviewTemporaryInstall[];
   eventModificationWindow?: EventModificationWindow;
   replacementWindow?: ReplacementWindow;
   eventModificationHarness?: EventModificationTestHarness;
@@ -854,6 +908,7 @@ export type GameState = {
     runAttemptsLastTurn?: number;
     successfulHqRunThisTurn?: boolean;
     damagePreventionUsage?: Record<CardInstanceId, number>;
+    brokerActionCardIdsThisTurn?: CardInstanceId[];
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
     allNighterBonusRunPending?: boolean;
@@ -862,6 +917,7 @@ export type GameState = {
     runLockActionsPending?: number;
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
+    shellTradersStartTurnResolvedSourceIds?: CardInstanceId[];
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -1036,6 +1092,7 @@ export type PlayerView = {
   run?: {
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
+    position?: RunState["position"];
     encounteredIce?: VisibleCard;
     accessedCard?: VisibleCard;
     breach?: {

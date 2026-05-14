@@ -9,6 +9,7 @@ import {
   MVP_0_3_BASELINE,
   MVP_0_4_BASELINE,
   MVP_0_94_BASELINE,
+  MVP_0_99_BASELINE,
   MVP_0_8_BASELINE,
   type AiDifficulty,
   type DeckPublicMetadata,
@@ -36,7 +37,14 @@ import {
   type ResolvedParticipantDeckSetup
 } from "./deck-setup";
 import { envValue, LOCAL_DEFAULT_SERVER_BASE_URL, LOCAL_DEFAULT_TOKEN_SALT, LOCAL_DEFAULT_WEB_BASE_URL } from "./internet-hardening";
-import type { BackupManifest, StorageHealth } from "./storage-sqlite";
+import type {
+  BackupManifest,
+  StorageHealth,
+  StorageMaintenanceMatchDetail,
+  StorageMaintenanceMatchEntry,
+  StorageMaintenanceMatchFilters,
+  StorageMaintenanceSummary
+} from "./storage-sqlite";
 
 export type MatchStatus =
   | "pending"
@@ -326,6 +334,9 @@ export type MultiplayerStorage = {
   list?(): Promise<StoredMatch[]>;
   health?(): Promise<StorageHealth>;
   backup?(reason?: BackupManifest["reason"]): Promise<{ backupDir: string; manifest: BackupManifest }>;
+  maintenanceSummary?(): Promise<StorageMaintenanceSummary>;
+  maintenanceMatches?(filters?: StorageMaintenanceMatchFilters): Promise<StorageMaintenanceMatchEntry[]>;
+  maintenanceMatchDetail?(matchId: string): Promise<StorageMaintenanceMatchDetail | undefined>;
   close?(): void;
 };
 
@@ -1723,6 +1734,18 @@ export class MultiplayerService {
     return this.storage.backup(reason);
   }
 
+  async storageMaintenanceSummary(): Promise<StorageMaintenanceSummary | undefined> {
+    return this.storage.maintenanceSummary?.();
+  }
+
+  async storageMaintenanceMatches(filters?: StorageMaintenanceMatchFilters): Promise<StorageMaintenanceMatchEntry[] | undefined> {
+    return this.storage.maintenanceMatches?.(filters);
+  }
+
+  async storageMaintenanceMatchDetail(matchId: string): Promise<StorageMaintenanceMatchDetail | undefined> {
+    return this.storage.maintenanceMatchDetail?.(matchId);
+  }
+
   closeStorage(): void {
     this.storage.close?.();
   }
@@ -2876,10 +2899,17 @@ function deterministicHostSide(seed: string): Side {
 }
 
 function baselineForMode(mode: MatchMode, deckSetup: ResolvedDeckSetup): RulesBaseline {
+  if (setupUsesPrivateLocalOnrRules(deckSetup)) return MVP_0_99_BASELINE;
   if (setupUsesMvp094Rules(deckSetup)) return MVP_0_94_BASELINE;
   if (setupUsesMvp08Rules(deckSetup)) return MVP_0_8_BASELINE;
   if (setupUsesExpandedRules(deckSetup)) return MVP_0_4_BASELINE;
   return mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
+}
+
+function setupUsesPrivateLocalOnrRules(setup: ResolvedDeckSetup): boolean {
+  return [setup.runnerSnapshot, setup.corpSnapshot].some(
+    (snapshot) => snapshot.cardPoolVersion === "private-local-onr-v1" || snapshot.publicMetadata.cardPoolVersion === "private-local-onr-v1"
+  );
 }
 
 function setupUsesMvp094Rules(setup: ResolvedDeckSetup): boolean {

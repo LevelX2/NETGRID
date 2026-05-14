@@ -1,3 +1,8 @@
+param(
+  [string]$OpenUrl = "",
+  [string]$OpenPath = "/"
+)
+
 $ErrorActionPreference = "Stop"
 
 $projectRoot = "C:\Projekte\NETGRID"
@@ -21,6 +26,17 @@ function Test-Endpoint {
   try {
     $response = Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 4
     return $response.StatusCode -ge 200 -and $response.StatusCode -lt 500
+  } catch {
+    return $false
+  }
+}
+
+function Test-EndpointOk {
+  param([Parameter(Mandatory = $true)][string]$Url)
+
+  try {
+    $response = Invoke-WebRequest -UseBasicParsing -Uri $Url -TimeoutSec 4
+    return $response.StatusCode -ge 200 -and $response.StatusCode -lt 300
   } catch {
     return $false
   }
@@ -60,6 +76,34 @@ function Wait-Endpoint {
     Start-Sleep -Seconds 1
   }
   return $false
+}
+
+function Join-WebPath {
+  param(
+    [Parameter(Mandatory = $true)][string]$BaseUrl,
+    [string]$Path = "/"
+  )
+
+  if ([string]::IsNullOrWhiteSpace($Path) -or $Path -eq "/") {
+    return $BaseUrl
+  }
+
+  $normalizedPath = $Path
+  if (-not $normalizedPath.StartsWith("/")) {
+    $normalizedPath = "/$normalizedPath"
+  }
+  return "$($BaseUrl.TrimEnd('/'))$normalizedPath"
+}
+
+function Get-UrlOrigin {
+  param([Parameter(Mandatory = $true)][string]$Url)
+
+  try {
+    $uri = [Uri]$Url
+    return "$($uri.Scheme)://$($uri.Authority)"
+  } catch {
+    return $null
+  }
 }
 
 function Get-LanIpv4 {
@@ -118,10 +162,21 @@ Set-Location $projectRoot
 $lanIp = Get-LanIpv4
 $webUrl = "http://${lanIp}:3100"
 $serverUrl = "http://${lanIp}:8787/health"
-Write-LauncherLog "Launcher start lanIp=$lanIp webUrl=$webUrl serverUrl=$serverUrl"
+$maintenanceSummaryUrl = "http://${lanIp}:8787/api/storage/maintenance/summary"
+$targetOpenUrl = if ([string]::IsNullOrWhiteSpace($OpenUrl)) {
+  Join-WebPath -BaseUrl $webUrl -Path $OpenPath
+} else {
+  $OpenUrl.Trim()
+}
+$targetWebUrl = Get-UrlOrigin -Url $targetOpenUrl
+if (-not $targetWebUrl) {
+  $targetWebUrl = $webUrl
+}
+Write-LauncherLog "Launcher start lanIp=$lanIp webUrl=$webUrl serverUrl=$serverUrl openUrl=$targetOpenUrl"
 
 $serverEnvironment = @{
   HOST = "0.0.0.0"
+  NETGRID_PUBLIC_HOST = $lanIp
   NETGRID_DEPLOYMENT_PROFILE = "local"
   NETGRID_WEB_BASE_URL = $webUrl
   NETGRID_SERVER_BASE_URL = "http://${lanIp}:8787"
@@ -135,7 +190,15 @@ $webEnvironment = @{
 
 $serverReadyLanBefore = Test-Endpoint -Url $serverUrl
 $serverReadyLocalBefore = Test-Endpoint -Url $localServerUrl
-Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore"
+$maintenanceRequested = $targetOpenUrl -match "/maintenance($|[/?#])"
+$maintenanceReadyLanBefore = if ($maintenanceRequested) { Test-EndpointOk -Url $maintenanceSummaryUrl } else { $true }
+Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyLocalBefore maintenanceRequested=$maintenanceRequested maintenanceLan=$maintenanceReadyLanBefore"
+
+if ($serverReadyLanBefore -and $maintenanceRequested -and -not $maintenanceReadyLanBefore) {
+  Stop-PortListeners -Ports @(8787)
+  $serverReadyLanBefore = $false
+  $serverReadyLocalBefore = $false
+}
 
 if (-not $serverReadyLanBefore) {
   if ($serverReadyLocalBefore) {
@@ -159,11 +222,12 @@ if (-not $webReadyLanBefore) {
 
 $serverReady = Wait-Endpoint -Url $serverUrl
 $webReady = Wait-Endpoint -Url $webUrl
-Write-LauncherLog "Postcheck serverReady=$serverReady webReady=$webReady"
+$targetWebReady = Wait-Endpoint -Url $targetWebUrl -Seconds 10
+Write-LauncherLog "Postcheck serverReady=$serverReady webReady=$webReady targetWebReady=$targetWebReady targetWebUrl=$targetWebUrl"
 
-if ($serverReady -and $webReady) {
-  Write-LauncherLog "Launcher success opening $webUrl"
-  Start-Process $webUrl
+if ($serverReady -and $webReady -and $targetWebReady) {
+  Write-LauncherLog "Launcher success opening $targetOpenUrl"
+  Start-Process $targetOpenUrl
   exit 0
 }
 
@@ -177,8 +241,8 @@ if (-not $webReady -and $localWebStillRunning) {
   $hint += "`nHinweis Web: Es laeuft bereits eine lokale Instanz auf 127.0.0.1:3100. Bitte diese beenden und das Icon erneut starten."
 }
 
-$message = "NETGRID konnte nicht im LAN-Modus gestartet werden.`nLAN-IP: $lanIp`nServer bereit: $serverReady`nWeb bereit: $webReady$hint`n`nLogs:`n$serverLog`n$webLog"
-Write-LauncherLog "Launcher failure serverReady=$serverReady webReady=$webReady hint=$hint"
+$message = "NETGRID konnte nicht im LAN-Modus gestartet werden.`nLAN-IP: $lanIp`nServer bereit: $serverReady`nWeb bereit: $webReady`nZielseite bereit: $targetWebReady$hint`n`nLogs:`n$serverLog`n$webLog"
+Write-LauncherLog "Launcher failure serverReady=$serverReady webReady=$webReady targetWebReady=$targetWebReady hint=$hint"
 Add-Type -AssemblyName System.Windows.Forms
 [System.Windows.Forms.MessageBox]::Show($message, "NETGRID starten") | Out-Null
 exit 1

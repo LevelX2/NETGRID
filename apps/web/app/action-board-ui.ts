@@ -1,4 +1,4 @@
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 
 export const ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
 export const LEGACY_ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
@@ -115,7 +115,9 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
 
 export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
+  if (action.type === "gain_credit" && cardRefsForAction(action).length > 0 && action.source !== "basic_action" && action.source !== "game_rule") return true;
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && cardRefsForAction(action).length > 0) return true;
+  if (action.type === "trigger_ability" && cardRefsForAction(action).length > 0) return true;
   if (isPriorityAction(action)) return false;
   return cardRefsForAction(action).length > 0 || objectBoundAction(action);
 }
@@ -148,6 +150,8 @@ export function actionButtonLabel(action: LegalAction): string {
       return "Nicht rezzen";
     case "continue_run":
       return normalizeVisibleTerms(action.label || "Run fortsetzen");
+    case "access_card":
+      return "Zugriff auf Karte";
     case "decline_trash":
       return "Zugriff abschließen";
     case "advance_card":
@@ -160,6 +164,8 @@ export function actionButtonLabel(action: LegalAction): string {
       return pumpBreakerActionLabel(action);
     case "break_subroutine":
       return breakSubroutineActionLabel(action);
+    case "trigger_ability":
+      return triggerAbilityActionLabel(action);
     default:
       return normalizeVisibleTerms(action.label);
   }
@@ -189,9 +195,35 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "steal_agenda":
       return "Stehlen";
     case "trigger_ability":
-      return "Aktivieren";
+      return triggerAbilityActionLabel(action, true);
     default:
       return actionButtonLabel(action);
+  }
+}
+
+function triggerAbilityActionLabel(action: LegalAction, compact = false): string {
+  if (action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program") {
+    return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
+  }
+  return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
+}
+
+function resourceAbilityContextLabel(action: LegalAction): string | null {
+  if (action.payload?.shellTradersAbility === "set_aside_from_grip") return "Karte vorbereiten";
+  if (action.payload?.shellTradersAbility === "remove_shell_counter") return "Shell-Counter entfernen";
+  switch (action.payload?.resourceAbility) {
+    case "broker_load_credits":
+      return "3 Credits laden";
+    case "broker_take_credits": {
+      const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 0);
+      return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
+    }
+    case "short_term_contract_take_credits": {
+      const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 2);
+      return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
+    }
+    default:
+      return null;
   }
 }
 
@@ -263,7 +295,29 @@ export function actionSlotDisplay(side: Side, currentClicks: number, displayCapa
   };
 }
 
-export function actionCostChips(action: Pick<LegalAction, "costs">): CostChipView[] {
+export function actionSlotCapacityForTurn(side: Side, currentClicks: number, events: PublicGameEvent[]): number {
+  const available = Math.max(0, Math.floor(currentClicks));
+  return Math.max(baseActionSlotCapacity(side), available + spentActionClicksThisTurn(side, events));
+}
+
+function spentActionClicksThisTurn(side: Side, events: PublicGameEvent[]): number {
+  let spent = 0;
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    const payload = event?.publicPayload ?? {};
+    if (payload.actor !== side) continue;
+    if ((payload.actionType ?? event?.type) === "end_turn") break;
+    spent += positiveInteger(payload.actionCostClicks);
+  }
+  return spent;
+}
+
+function positiveInteger(value: unknown): number {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : 0;
+}
+
+export function actionCostChips(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>): CostChipView[] {
+  if (isSelfModifyingCodeAction(action)) return [];
   const totals = action.costs.reduce<{ clicks: number; credits: number }>(
     (acc, cost) => {
       acc.clicks += cost.clicks ?? 0;
@@ -290,6 +344,10 @@ export function actionCostChips(action: Pick<LegalAction, "costs">): CostChipVie
   return chips;
 }
 
+export function actionConsumesClick(action: Pick<LegalAction, "costs">): boolean {
+  return action.costs.some((cost) => positiveInteger(cost.clicks) > 0);
+}
+
 export function aiPacingDelayMs(mode: AiPacingTriggerMode, hasPendingCue: boolean, autoDismissMs: number): number | null {
   if (mode === "manual") return null;
   if (!hasPendingCue) return mode === "fast" ? 120 : 650;
@@ -314,6 +372,9 @@ export function serverBoardRows<T extends { id: string }>(servers: T[], viewerSi
 
 export function normalizeVisibleTerms(value: string): string {
   return value
+    .replace(/\bKarte accessen\b/gi, "Zugriff auf Karte")
+    .replace(/\bWeiter accessen\b/gi, "Weiter zugreifen")
+    .replace(/\bAccess abschließen\b/g, "Zugriff abschließen")
     .replace(/\bR&D\b/g, "F&E (R&D)")
     .replace(/\bArchives\b/g, "Archive")
     .replace(/\bRemote\s+(\d+)\b/g, "Fort $1")
@@ -361,6 +422,87 @@ export function breachProgressLabel(view: PlayerView): string | null {
   const current = breach.currentIndex + 1;
   const knownTotal = breach.completed ? breach.currentIndex + 1 : breach.currentIndex + 1 + breach.remainingCount;
   return `Zugriff ${current} von ${Math.max(current, knownTotal)}`;
+}
+
+export function activeRunIceInstanceId(view: PlayerView): string | null {
+  const run = view.run;
+  if (!run) return null;
+  if (run.encounteredIce?.instanceId) return run.encounteredIce.instanceId;
+  if (run.position?.kind !== "ice") return null;
+  const server = view.servers.find((candidate) => candidate.id === run.position?.serverId);
+  return server?.ice[run.position.iceIndex]?.instanceId ?? null;
+}
+
+export function runCurrentIceLabel(view: PlayerView): string | null {
+  const position = view.run?.position;
+  if (position?.kind !== "ice") return null;
+  return `ICE ${position.iceIndex + 1}`;
+}
+
+export function runPositionStatusLabel(view: PlayerView): string | null {
+  const run = view.run;
+  if (!run?.position) return null;
+  if (run.position.kind === "server") {
+    if (run.phase === "access") return "Aktuell: Zugriff auf den Server";
+    return "Aktuell: vor dem Zugriff auf den Server";
+  }
+  const server = view.servers.find((candidate) => candidate.id === run.position?.serverId);
+  const total = Math.max(run.position.iceIndex + 1, server?.ice.length ?? 0);
+  const approachNumber = Math.max(1, total - run.position.iceIndex);
+  const iceLabel = `ICE ${run.position.iceIndex + 1} (${approachNumber} von ${total})`;
+  if (run.phase === "encounter_ice") return `Aktuell: Begegnung mit ${iceLabel}`;
+  if (run.phase === "approach_ice") return `Aktuell: Annäherung an ${iceLabel}`;
+  return `Aktuell: vor ${iceLabel}`;
+}
+
+export function runWindowStatusLabel(view: PlayerView): string | null {
+  const run = view.run;
+  const position = run?.position;
+  if (!run || !position) return null;
+  if (position.kind === "server") return run.phase === "access" ? "Serverzugriff" : "Vor dem Zugriff";
+  const server = view.servers.find((candidate) => candidate.id === position.serverId);
+  const total = Math.max(position.iceIndex + 1, server?.ice.length ?? 0);
+  const approachNumber = Math.max(1, total - position.iceIndex);
+  return `ICE ${position.iceIndex + 1} (${approachNumber} von ${total})`;
+}
+
+export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction): string {
+  const base = actionButtonLabel(action);
+  if (!view.run) return base;
+  const iceLabel = runCurrentIceLabel(view);
+  if (action.type === "jack_out") {
+    return iceLabel ? `Run abbrechen an ${iceLabel}` : "Run abbrechen vor Zugriff";
+  }
+  if (action.type === "continue_run") {
+    if (action.payload?.encounterContinue === true) {
+      if (base === "ICE passieren" && iceLabel) return `${iceLabel} passieren`;
+      return iceLabel ? `${base} an ${iceLabel}` : base;
+    }
+    if (view.run.phase === "movement") return iceLabel ? `Run fortsetzen zu ${iceLabel}` : "Run fortsetzen zum Zugriff";
+    if (view.run.phase === "approach_ice" && iceLabel) return `Annäherung an ${iceLabel} fortsetzen`;
+  }
+  if ((action.type === "pump_breaker" || action.type === "break_subroutine") && iceLabel && action.payload?.iceId === activeRunIceInstanceId(view)) {
+    return `${base} gegen ${iceLabel}`;
+  }
+  return base;
+}
+
+export function runWindowActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
+  if (!view.run) return [];
+  return actions.filter((action) => {
+    if (action.type === "access_card") return true;
+    if (!action.timingPoint.startsWith("run.")) return false;
+    if (action.type === "jack_out" || action.type === "continue_run" || action.type === "rez_ice" || action.type === "decline_rez") return true;
+    if (action.type === "pump_breaker" || action.type === "break_subroutine") return action.payload?.iceId === activeRunIceInstanceId(view);
+    return isSelfModifyingCodeAction(action);
+  });
+}
+
+export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction): string {
+  if (isSelfModifyingCodeAction(action)) {
+    return `${sourceCardTitleForAction(view, action) ?? "Self-Modifying Code"} trashen: Programm suchen`;
+  }
+  return runAwareActionButtonLabel(view, action);
 }
 
 export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {
@@ -469,6 +611,17 @@ function objectBoundAction(action: LegalAction): boolean {
   return serverRefsForAction(action).length > 0 || ["advance_card", "score_agenda", "trash_resource", "trigger_ability"].includes(action.type);
 }
 
+function isSelfModifyingCodeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
+  return action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program";
+}
+
+function sourceCardTitleForAction(view: PlayerView, action: LegalAction): string | null {
+  const sourceId = action.abilityRef?.sourceCardInstanceId ?? (action.source !== "basic_action" && action.source !== "game_rule" ? action.source : undefined);
+  if (!sourceId) return null;
+  const sourceCard = visibleActionCards(view).find((card) => card.instanceId === sourceId);
+  return sourceCard?.known ? sourceCard.title ?? null : null;
+}
+
 function cardRefsForAction(action: LegalAction): string[] {
   const refs = new Set<string>();
   if (action.source !== "basic_action" && action.source !== "game_rule") refs.add(action.source);
@@ -477,8 +630,10 @@ function cardRefsForAction(action: LegalAction): string[] {
   addStringRef(refs, payload.resourceId);
   addStringRef(refs, payload.breakerId);
   if (action.abilityRef?.sourceCardInstanceId) refs.add(action.abilityRef.sourceCardInstanceId);
-  for (const requirement of action.targetRequirements) {
-    if (requirement.sourceIceRef) refs.add(requirement.sourceIceRef);
+  if (action.type !== "pump_breaker" && action.type !== "break_subroutine") {
+    for (const requirement of action.targetRequirements) {
+      if (requirement.sourceIceRef) refs.add(requirement.sourceIceRef);
+    }
   }
   return Array.from(refs);
 }

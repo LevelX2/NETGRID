@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import {
   DEFAULT_CUE_POSITION,
   actionButtonLabel,
+  actionConsumesClick,
   actionCostChips,
   actionMatchesContext,
+  actionSlotCapacityForTurn,
   actionSlotDisplay,
+  activeRunIceInstanceId,
   aiPacingDelayMs,
   breachProgressLabel,
   clampCuePosition,
@@ -16,7 +19,13 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   parseCuePositionPreference,
+  runAwareActionButtonLabel,
+  runCurrentIceLabel,
+  runPositionStatusLabel,
   runTargetServerIds,
+  runWindowActionButtonLabel,
+  runWindowActions,
+  runWindowStatusLabel,
   serverBoardRows,
   serverDisplayLabel,
   splitLegalActions
@@ -44,16 +53,25 @@ describe("V1.0.5 action board UI helpers", () => {
   });
 
   it("maps RunTimeline state, active target and server labels without raw V1.0.5 labels", () => {
+    const ice1 = card("ice_1", "Inner ICE", "ice");
+    const ice2 = card("ice_2", "Middle ICE", "ice");
+    const ice3 = card("ice_3", "Outer ICE", "ice");
     const running = view("runner", {
       servers: [
         { id: "hq", label: "HQ", ice: [], root: [] },
-        { id: "rd", label: "R&D", ice: [], root: [] }
+        { id: "rd", label: "R&D", ice: [ice1, ice2, ice3], root: [] }
       ],
-      run: { attackedServerId: "rd", phase: "movement", successful: false }
+      run: { attackedServerId: "rd", phase: "movement", position: { kind: "ice", serverId: "rd", iceIndex: 2 }, successful: false }
     });
 
     expect(currentRunTimelineStep(running, [legalAction("runner", "jack_out", "basic_action", "Jack out", undefined, "run.jack_out_window")])).toBe("movement");
     expect(runTargetServerIds(running)).toEqual(["rd"]);
+    expect(activeRunIceInstanceId(running)).toBe("ice_3");
+    expect(runCurrentIceLabel(running)).toBe("ICE 3");
+    expect(runPositionStatusLabel(running)).toBe("Aktuell: vor ICE 3 (1 von 3)");
+    expect(runWindowStatusLabel(running)).toBe("ICE 3 (1 von 3)");
+    expect(runAwareActionButtonLabel(running, legalAction("runner", "jack_out", "game_rule", "Jack-out", undefined, "run.jack_out_window"))).toBe("Run abbrechen an ICE 3");
+    expect(runAwareActionButtonLabel(running, legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.jack_out_window"))).toBe("Run fortsetzen zu ICE 3");
     expect(serverDisplayLabel("rd")).toBe("F&E (R&D)");
     expect(serverDisplayLabel("archives")).toBe("Archive");
     expect(serverDisplayLabel("remote_2")).toBe("Fort 2");
@@ -65,16 +83,55 @@ describe("V1.0.5 action board UI helpers", () => {
   });
 
   it("keeps card-sourced gain-credit actions on their specific labels", () => {
-    expect(actionButtonLabel(legalAction("corp", "gain_credit", "basic_action", "1 Credit nehmen"))).toBe("Credit nehmen");
-    expect(
-      actionButtonLabel(
-        legalAction("corp", "gain_credit", "private_police_1", "Private Cybernet Police: Trace 5 starten", {
-          cardId: "private_police_1",
-          agendaAbility: "private_cybernet_police",
-          traceStrength: 5
-        })
-      )
-    ).toBe("Private Cybernet Police: Trace 5 starten");
+    const basic = legalAction("corp", "gain_credit", "basic_action", "1 Credit nehmen");
+    const privatePolice = legalAction("corp", "gain_credit", "private_police_1", "Private Cybernet Police: Trace 5 starten", {
+      cardId: "private_police_1",
+      agendaAbility: "private_cybernet_police",
+      traceStrength: 5
+    });
+    const seeya = legalAction("runner", "gain_credit", "seeya_1", "SeeYa: Karte in HQ expose", {
+      cardId: "seeya_1",
+      serverId: "hq",
+      v1911HiddenZoneAbility: "expose_server_card"
+    });
+
+    const split = splitLegalActions([basic, privatePolice, seeya]);
+
+    expect(split.primaryActions).toEqual([basic]);
+    expect(split.contextualActions).toEqual([privatePolice, seeya]);
+    expect(actionButtonLabel(basic)).toBe("Credit nehmen");
+    expect(actionButtonLabel(privatePolice)).toBe("Private Cybernet Police: Trace 5 starten");
+    expect(actionMatchesContext(seeya, { kind: "card", id: "seeya_1", label: "SeeYa" })).toBe(true);
+    expect(contextualCardActionLabel(seeya)).toBe("SeeYa: Karte in HQ expose");
+  });
+
+  it("labels encounter breaker actions against the current ICE", () => {
+    const encounteredIce = card("ice_2", "Data Wall", "ice");
+    const running = view("runner", {
+      servers: [{ id: "hq", label: "HQ", ice: [card("ice_1", "Inner ICE", "ice"), encounteredIce], root: [] }],
+      run: {
+        attackedServerId: "hq",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "hq", iceIndex: 1 },
+        encounteredIce,
+        successful: false
+      }
+    });
+    const pump = legalAction("runner", "pump_breaker", "breaker_1", "Replicator: Stärke +1", { breakerId: "breaker_1", iceId: "ice_2" }, "run.encounter_ice");
+    const passIce = legalAction("runner", "continue_run", "game_rule", "ICE passieren", { encounterContinue: true, unbrokenSubroutineCount: 0 }, "run.encounter_ice");
+
+    expect(runPositionStatusLabel(running)).toBe("Aktuell: Begegnung mit ICE 2 (1 von 2)");
+    expect(runWindowStatusLabel(running)).toBe("ICE 2 (1 von 2)");
+    expect(runAwareActionButtonLabel(running, pump)).toBe("Stärke +1 (Replicator) gegen ICE 2");
+    expect(runAwareActionButtonLabel(running, passIce)).toBe("ICE 2 passieren");
+  });
+
+  it("keeps breaker actions on the breaker card, not the encountered ICE", () => {
+    const pump = legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder: Stärke +1", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice");
+    pump.targetRequirements = [{ id: "encountered_ice", kind: "card", sourceIceRef: "ice_1" }];
+
+    expect(actionMatchesContext(pump, { kind: "card", id: "breaker_1", label: "Simple Decoder" })).toBe(true);
+    expect(actionMatchesContext(pump, { kind: "card", id: "ice_1", label: "Fetch 4.0.1" })).toBe(false);
   });
 
   it("shows access progress only from PlayerView breach data", () => {
@@ -186,6 +243,29 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(bonus.slots.every((slot) => slot.state === "available")).toBe(true);
   });
 
+  it("derives bonus-action slot capacity from current turn action history", () => {
+    const events = [
+      publicEvent("evt_1", "mandatory_draw", { actor: "corp", actionType: "mandatory_draw" }),
+      publicEvent("evt_2", "play_operation", {
+        actor: "corp",
+        actionType: "play_operation",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 1,
+        turnActionOrdinalEnd: 1,
+        gainedActions: 2
+      })
+    ];
+
+    expect(actionSlotCapacityForTurn("corp", 4, events)).toBe(5);
+    expect(actionSlotDisplay("corp", 4, actionSlotCapacityForTurn("corp", 4, events), true).slots.map((slot) => `${slot.state}:${slot.bonus}`)).toEqual([
+      "spent:false",
+      "available:false",
+      "available:false",
+      "available:true",
+      "available:true"
+    ]);
+  });
+
   it("formats action and credit costs as user-facing chips", () => {
     expect(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] })).toEqual([
       { kind: "action", amount: 1, label: "1 Aktion" },
@@ -196,6 +276,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       { kind: "credit", amount: 1, label: "1 Credit" }
     ]);
     expect(JSON.stringify(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] }))).not.toContain("{ clicks");
+    expect(actionConsumesClick({ costs: [{ clicks: 1, credits: 2 }] })).toBe(true);
+    expect(actionConsumesClick({ costs: [{ credits: 2 }] })).toBe(false);
+    expect(actionConsumesClick({ costs: [] })).toBe(false);
   });
 
   it("keeps contextual card action labels distinct for server-targeted events", () => {
@@ -229,6 +312,142 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionButtonLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
     expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
   });
+
+  it("keeps Broker abilities on the installed resource overlay", () => {
+    const load = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", {
+      cardId: "broker_1",
+      resourceAbility: "broker_load_credits",
+      counterType: "power",
+      addCounterAmount: 3
+    });
+    const take = legalAction("runner", "trigger_ability", "broker_1", "Broker: 6 Credits nehmen", {
+      cardId: "broker_1",
+      resourceAbility: "broker_take_credits",
+      counterType: "power",
+      gainCreditsAmount: 6
+    });
+
+    const split = splitLegalActions([load, take]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([load, take]);
+    expect(actionMatchesContext(load, { kind: "card", id: "broker_1", label: "Broker" })).toBe(true);
+    expect(contextualCardActionLabel(load)).toBe("3 Credits laden");
+    expect(contextualCardActionLabel(take)).toBe("6 Credits nehmen");
+  });
+
+  it("labels The Shell Traders abilities on the installed resource overlay", () => {
+    const prepare = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: Karte vorbereiten", {
+      cardId: "shell_traders_1",
+      shellTradersAbility: "set_aside_from_grip",
+      targetCardId: "simple_fracter_1",
+      shellCounterAmount: 2
+    });
+    const remove = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: 1 Shell-Counter entfernen", {
+      cardId: "shell_traders_1",
+      shellTradersAbility: "remove_shell_counter",
+      targetCardId: "simple_fracter_1",
+      counterType: "shell",
+      removeCounterAmount: 1
+    });
+
+    const split = splitLegalActions([prepare, remove]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([prepare, remove]);
+    expect(actionMatchesContext(prepare, { kind: "card", id: "shell_traders_1", label: "The Shell Traders" })).toBe(true);
+    expect(contextualCardActionLabel(prepare)).toBe("Karte vorbereiten");
+    expect(contextualCardActionLabel(remove)).toBe("Shell-Counter entfernen");
+  });
+
+  it("labels Short-Term Contract take-credit actions on the installed resource overlay", () => {
+    const take = legalAction("runner", "trigger_ability", "short_term_1", "Short-Term Contract: 2 Credits nehmen", {
+      cardId: "short_term_1",
+      resourceAbility: "short_term_contract_take_credits",
+      counterType: "power",
+      removePowerCounterAmount: 2,
+      gainCreditsAmount: 2
+    });
+
+    const split = splitLegalActions([take]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([take]);
+    expect(actionMatchesContext(take, { kind: "card", id: "short_term_1", label: "Short-Term Contract" })).toBe(true);
+    expect(contextualCardActionLabel(take)).toBe("2 Credits nehmen");
+  });
+
+  it("labels Self-Modifying Code activation without credit costs", () => {
+    const searchInstall = legalAction("runner", "trigger_ability", "smc_1", "Self-Modifying Code: trashen und Programm aus Stack installieren", {
+      cardId: "smc_1",
+      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      trashOnUse: true
+    }, "run.encounter_ice");
+    const split = splitLegalActions([searchInstall]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([searchInstall]);
+    expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
+    expect(actionButtonLabel(searchInstall)).toBe("Trashen: Programm aus Stack installieren");
+    expect(contextualCardActionLabel(searchInstall)).toBe("Programm suchen");
+    expect(actionCostChips(searchInstall)).toEqual([]);
+    expect(actionCostChips({ ...searchInstall, costs: [{ credits: 2 }] })).toEqual([]);
+  });
+
+  it("mirrors Self-Modifying Code and immediate encounter actions into the Run window without changing their card context", () => {
+    const smc = card("smc_1", "Self-Modifying Code", "program");
+    const breaker = card("breaker_1", "Simple Decoder", "program");
+    const running = view("runner", {
+      own: {
+        ...view("runner").own,
+        rig: [smc, breaker]
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: card("ice_1", "Data Wall", "ice"),
+        successful: false
+      }
+    });
+    const searchInstall = legalAction("runner", "trigger_ability", "smc_1", "Self-Modifying Code: trashen und Programm aus Stack installieren", {
+      cardId: "smc_1",
+      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      trashOnUse: true
+    }, "run.encounter_ice");
+    const pump = legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder: Stärke +1", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice");
+    const continueRun = legalAction("runner", "continue_run", "game_rule", "ICE passieren", { encounterContinue: true, unbrokenSubroutineCount: 0 }, "run.encounter_ice");
+    const offRunAbility = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", { cardId: "broker_1", resourceAbility: "broker_load_credits" });
+
+    const split = splitLegalActions([searchInstall, pump, continueRun, offRunAbility]);
+    const mirrored = runWindowActions(running, [searchInstall, pump, continueRun, offRunAbility]);
+
+    expect(split.primaryActions).toEqual([continueRun]);
+    expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
+    expect(mirrored).toEqual([searchInstall, pump, continueRun]);
+    expect(runWindowActionButtonLabel(running, searchInstall)).toBe("Self-Modifying Code trashen: Programm suchen");
+    expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
+    expect(actionCostChips(searchInstall)).toEqual([]);
+  });
+
+  it("mirrors the card access action into the Run window with a German label", () => {
+    const running = view("runner", {
+      run: {
+        attackedServerId: "rd",
+        phase: "access",
+        position: { kind: "server", serverId: "rd" },
+        successful: true
+      }
+    });
+    const access = legalAction("runner", "access_card", "game_rule", "Karte accessen", undefined, "access.resolve_card");
+    const draw = legalAction("runner", "draw_card", "basic_action", "Karte ziehen");
+
+    const mirrored = runWindowActions(running, [access, draw]);
+
+    expect(actionButtonLabel(access)).toBe("Zugriff auf Karte");
+    expect(mirrored).toEqual([access]);
+    expect(runWindowActionButtonLabel(running, access)).toBe("Zugriff auf Karte");
+  });
 });
 
 function legalAction(side: Side, type: LegalAction["type"], source: LegalAction["source"], label: string, payload?: LegalAction["payload"], timingPoint: LegalAction["timingPoint"] = "corp_action.main"): LegalAction {
@@ -255,6 +474,17 @@ function card(instanceId: string, title: string, type: NonNullable<VisibleCard["
     definitionId: instanceId,
     type,
     rezzed
+  };
+}
+
+function publicEvent(eventId: string, type: string, publicPayload: Record<string, unknown>): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore: 0,
+    stateVersionAfter: 1,
+    stateHashAfter: `${eventId}_hash`,
+    publicPayload
   };
 }
 

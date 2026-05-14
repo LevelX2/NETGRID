@@ -5288,6 +5288,7 @@ function runnerAccessActions(state: GameState): LegalAction[] {
     run,
     definition,
   );
+  const accessedFromArchives = isCurrentAccessFromArchives(state, run);
   if (definition.type === "agenda") {
     const oliviaSalazarId = oliviaSalazarCardIdForCurrentAccess(state, run);
     if (oliviaSalazarId) {
@@ -5376,6 +5377,9 @@ function runnerAccessActions(state: GameState): LegalAction[] {
         run.accessedCardId,
       ),
     ];
+  }
+  if (accessedFromArchives) {
+    return [action(state, "runner", "decline_trash", run.breach ? "Weiter accessen" : "Zugriff abschließen", "game_rule")];
   }
   if (definition.type === "asset" || definition.type === "upgrade") {
     const actions: LegalAction[] = [];
@@ -5486,6 +5490,19 @@ function canFreeTrashCurrentAccessCard(
     accessQueueZone(run.accessServerOverride ?? run.attackedServerId);
   if (currentZone !== "rd" && currentZone !== "hq") return false;
   return allowedZones.includes(currentZone);
+}
+
+function isCurrentAccessFromArchives(
+  state: GameState,
+  run: ActiveRun,
+): boolean {
+  const cardId = run.accessedCardId;
+  if (!cardId) return false;
+  const currentEntry = run.breach?.queue[run.breach.currentIndex];
+  if (currentEntry?.cardInstanceId === cardId)
+    return currentEntry.zone === "archives";
+  const zone = mustInstance(state.cardInstances, cardId).zone;
+  return zone.side === "corp" && zone.zone === "archives";
 }
 
 function performAction(
@@ -6471,6 +6488,10 @@ function performAction(
           ServerId,
           "new_remote"
         >,
+        undefined,
+        1,
+        undefined,
+        legalAction,
       );
       if (legalAction.payload?.v1918UpgradeAbility === "run_start_tax") {
         const taxCredits = legalAction.costs.reduce(
@@ -6672,7 +6693,7 @@ function performAction(
           specialZoneReason: "v1919_olivia_salazar",
         };
       }
-      stealAgenda(state, mustRun(state).accessedCardId ?? "");
+      stealAgenda(state, mustRun(state).accessedCardId ?? "", legalAction);
       return;
     case "trash_accessed_card":
       trashAccessedCard(
@@ -6690,7 +6711,7 @@ function performAction(
       );
       return;
     case "decline_trash":
-      declineCurrentAccess(state);
+      declineCurrentAccess(state, legalAction);
       return;
     case "remove_tag":
       spendClick(state, "runner");
@@ -7098,6 +7119,7 @@ function startRun(
   pendingSuccessBonusCredits?: number,
   accessCount = 1,
   options?: StartRunOptions,
+  legalAction?: LegalAction,
 ): void {
   const server = mustServer(state, serverId);
   const flags = ensureRunnerTurnFlags(state);
@@ -7164,7 +7186,7 @@ function startRun(
     state.run.approachedIceId = approachedIceId;
     approachOrEncounterIce(state, approachedIceId);
   } else {
-    enterAccess(state);
+    enterAccess(state, legalAction);
   }
 }
 
@@ -7913,10 +7935,10 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
     approachOrEncounterIce(state, approachedIceId);
     return;
   }
-  enterAccess(state);
+  enterAccess(state, legalAction);
 }
 
-function enterAccess(state: GameState): void {
+function enterAccess(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   if (run.successfulRunAccessReplacement === "corp_lose_credits") {
     applySuccessfulRunAccessReplacement(state, run);
@@ -7924,6 +7946,7 @@ function enterAccess(state: GameState): void {
     return;
   }
   if (isV097OrLater(state)) {
+    revealArchivesAtBreachStart(state, run, legalAction);
     const breach = buildBreachState(state, run);
     if (breach.queue.length === 0) {
       finishRun(state, true);
@@ -7937,11 +7960,154 @@ function enterAccess(state: GameState): void {
       successful: true,
       breach,
     };
+    autoAdvanceArchivesBreachPastNonDecisionCards(state, legalAction);
+    if (!state.run) return;
   } else {
     state.run = { ...run, phase: "access", successful: true };
   }
   state.timingPoint = "access.resolve_card";
   state.activeSide = "runner";
+}
+
+function revealArchivesAtBreachStart(
+  state: GameState,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): void {
+  const accessServerId = run.accessServerOverride ?? run.attackedServerId;
+  if (accessServerId !== "archives") return;
+  const revealedIds = state.corp.archives.filter(
+    (cardId) => !mustInstance(state.cardInstances, cardId).faceup,
+  );
+  if (revealedIds.length === 0) return;
+  for (const cardId of revealedIds) {
+    const instance = mustInstance(state.cardInstances, cardId);
+    state.cardInstances[cardId] = { ...instance, faceup: true, rezzed: true };
+  }
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "archives_breach_reveal",
+      archivesRevealCount: revealedIds.length,
+    };
+  }
+}
+
+function autoAdvanceArchivesBreachPastNonDecisionCards(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const run = state.run;
+  const breach = run?.breach;
+  if (!run || !breach || breach.serverId !== "archives" || breach.completed)
+    return;
+
+  let queue = breach.queue.slice();
+  let currentIndex = breach.currentIndex;
+  let accessedSummaries = breach.accessedSummaries.slice();
+  let autoAccessedCount = 0;
+
+  while (true) {
+    const current = queue[currentIndex];
+    if (!current || current.status !== "pending") break;
+    if (archivesAccessRequiresDecisionOrEffect(state, current.cardInstanceId))
+      break;
+
+    queue = queue.map((entry, index) =>
+      index === currentIndex ? { ...entry, status: "accessed" as const } : entry,
+    );
+    accessedSummaries = [
+      ...accessedSummaries,
+      {
+        entryId: current.entryId,
+        status: "accessed" as const,
+        cardDefinitionId: definitionFor(state, current.cardInstanceId).id,
+      },
+    ];
+    autoAccessedCount += 1;
+
+    const nextIndex = queue.findIndex(
+      (entry, index) => index > currentIndex && entry.status === "pending",
+    );
+    if (nextIndex === -1) {
+      state.run = {
+        ...run,
+        breach: {
+          ...breach,
+          queue,
+          completed: true,
+          accessedSummaries,
+        },
+      };
+      recordArchivesAutoAccess(legalAction, autoAccessedCount);
+      finishRun(state, true);
+      return;
+    }
+    currentIndex = nextIndex;
+  }
+
+  if (autoAccessedCount === 0) return;
+  state.run = {
+    ...run,
+    breach: {
+      ...breach,
+      queue,
+      currentIndex,
+      accessedSummaries,
+    },
+  };
+  recordArchivesAutoAccess(legalAction, autoAccessedCount);
+}
+
+function archivesAccessRequiresDecisionOrEffect(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const definition = definitionFor(state, cardId);
+  if (definition.type === "agenda") return true;
+  if (
+    state.ambushHarness?.enabled &&
+    (!state.ambushHarness.triggerDefinitionId ||
+      state.ambushHarness.triggerDefinitionId === definition.id)
+  )
+    return true;
+  if (
+    definition.id === V1917_SETUP_ID ||
+    definition.id === V1917_TRAP_ID ||
+    definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID ||
+    definition.id === V1918_DIETER_ESSLIN_ID ||
+    definition.id === V1918_TURBEAU_DELACROIX_ID ||
+    definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID ||
+    definition.id === V1919_EXPERIMENTAL_AI_ID ||
+    definition.id === V1919_VACANT_SOULKILLER_ID ||
+    definition.id === V1919_VIRUS_TEST_SITE_ID ||
+    definition.id === BIZARRE_ENCRYPTION_SCHEME_ID ||
+    definition.id === CHIMERA_ID
+  ) {
+    return true;
+  }
+  return (definition.mechanics ?? []).some(
+    (mechanic) =>
+      mechanic === "access_ambush" ||
+      mechanic === "access_trace" ||
+      mechanic === "access_replacement",
+  );
+}
+
+function recordArchivesAutoAccess(
+  legalAction: LegalAction | undefined,
+  count: number,
+): void {
+  if (!legalAction || count <= 0) return;
+  const previousCount =
+    typeof legalAction.payload?.archivesAutoAccessedCount === "number"
+      ? legalAction.payload.archivesAutoAccessedCount
+      : 0;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    archivesAutoAccessedCount: previousCount + count,
+  };
 }
 
 function applySuccessfulRunAccessReplacement(
@@ -8183,7 +8349,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
       definition.type !== "upgrade" &&
       !freeTrashAccess
     ) {
-      completeCurrentBreachAccess(state, "accessed");
+      completeCurrentBreachAccess(state, "accessed", legalAction);
     }
     return;
   }
@@ -8511,10 +8677,10 @@ function startChimeraDaemonTrashChoice(
   };
 }
 
-function stealAgenda(state: GameState, cardId: string): void {
+function stealAgenda(state: GameState, cardId: string, legalAction?: LegalAction): void {
   if (!cardId) throw new Error("Keine Agenda wird accessed.");
   if (state.run?.bizarreEncryptionSchemeActive) {
-    delayBizarreEncryptionSchemeAgendaScore(state, cardId);
+    delayBizarreEncryptionSchemeAgendaScore(state, cardId, legalAction);
     return;
   }
   const flags = ensureRunnerTurnFlags(state);
@@ -8533,7 +8699,7 @@ function stealAgenda(state: GameState, cardId: string): void {
     zone: { side: "runner", zone: "scoreArea" },
   };
   if (state.run?.breach) {
-    completeCurrentBreachAccess(state, "stolen");
+    completeCurrentBreachAccess(state, "stolen", legalAction);
     return;
   }
   finishRun(state, true);
@@ -8542,6 +8708,7 @@ function stealAgenda(state: GameState, cardId: string): void {
 function delayBizarreEncryptionSchemeAgendaScore(
   state: GameState,
   cardId: CardInstanceId,
+  legalAction?: LegalAction,
 ): void {
   const run = mustRun(state);
   const definition = definitionFor(state, cardId);
@@ -8566,7 +8733,7 @@ function delayBizarreEncryptionSchemeAgendaScore(
     ];
   }
   if (state.run?.breach) {
-    completeCurrentBreachAccess(state, "declined");
+    completeCurrentBreachAccess(state, "declined", legalAction);
     return;
   }
   finishRun(state, true);
@@ -8584,33 +8751,22 @@ function trashAccessedCard(
       ? Math.max(0, Math.floor(rawOverride))
       : undefined;
   const trashCost = overrideCost ?? definition.trashCost ?? 0;
-  spendCredits(state, "runner", trashCost);
   const sourceZone = mustInstance(state.cardInstances, cardId).zone;
   if (sourceZone.side === "corp" && sourceZone.zone === "archives") {
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "corp", zone: "archives" },
-    };
-    if (state.run?.breach) {
-      completeCurrentBreachAccess(state, "trashed");
-      return;
-    }
-    finishRun(state, true);
-    return;
+    throw new Error("Karten in Archives können beim Zugriff nicht getrasht werden.");
   }
+  spendCredits(state, "runner", trashCost);
   trashCorpInstalledCardToArchives(state, cardId);
   if (state.run?.breach) {
-    completeCurrentBreachAccess(state, "trashed");
+    completeCurrentBreachAccess(state, "trashed", legalAction);
     return;
   }
   finishRun(state, true);
 }
 
-function declineCurrentAccess(state: GameState): void {
+function declineCurrentAccess(state: GameState, legalAction?: LegalAction): void {
   if (state.run?.breach) {
-    completeCurrentBreachAccess(state, "declined");
+    completeCurrentBreachAccess(state, "declined", legalAction);
     return;
   }
   finishRun(state, true);
@@ -8619,6 +8775,7 @@ function declineCurrentAccess(state: GameState): void {
 function completeCurrentBreachAccess(
   state: GameState,
   status: BreachEntryStatus,
+  legalAction?: LegalAction,
 ): void {
   const run = mustRun(state);
   const breach = run.breach;
@@ -8671,6 +8828,8 @@ function completeCurrentBreachAccess(
       accessedSummaries,
     },
   };
+  autoAdvanceArchivesBreachPastNonDecisionCards(state, legalAction);
+  if (!state.run) return;
   state.timingPoint = "access.resolve_card";
   state.activeSide = "runner";
 }
@@ -13670,8 +13829,19 @@ function publicContextForAction(
       context.removedCounterAmount = legalAction.payload.removedCounterAmount;
     if (typeof legalAction.payload.remainingCounters === "number")
       context.remainingCounters = legalAction.payload.remainingCounters;
+    if (typeof legalAction.payload.searchReveal === "string")
+      context.searchReveal = legalAction.payload.searchReveal;
+    if (typeof legalAction.payload.searchDestination === "string")
+      context.searchDestination = legalAction.payload.searchDestination;
+    if (typeof legalAction.payload.searchShuffleAfter === "boolean")
+      context.searchShuffleAfter = legalAction.payload.searchShuffleAfter;
+    if (typeof legalAction.payload.archivesRevealCount === "number")
+      context.archivesRevealCount = legalAction.payload.archivesRevealCount;
     context.redactedKind = "hidden_zone";
   }
+  if (typeof legalAction.payload?.archivesAutoAccessedCount === "number")
+    context.archivesAutoAccessedCount =
+      legalAction.payload.archivesAutoAccessedCount;
   if (legalAction.payload?.publicRevealKind)
     context.revealKind = legalAction.payload.publicRevealKind;
   if (

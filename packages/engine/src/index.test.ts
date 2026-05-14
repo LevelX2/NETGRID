@@ -16918,7 +16918,7 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
 });
 
 describe("V1.1.2 Full Archives Access", () => {
-  it("builds a deterministic mixed Archives queue without revealing facedown entries before access", () => {
+  it("turns existing facedown Archives cards faceup at breach start and skips cards without decisions", () => {
     let state = toRunnerTurn(v097RunGame("v112-archives-queue"));
     const faceupOperation = moveCorpCardToArchives(
       state,
@@ -16963,18 +16963,40 @@ describe("V1.1.2 Full Archives Access", () => {
     ).toEqual([faceupOperation, facedownAsset, facedownAgenda]);
     expect(state.run?.breach?.queue.map((entry) => entry.hiddenInfo)).toEqual([
       false,
-      true,
-      true,
+      false,
+      false,
     ]);
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+    expect(state.cardInstances[facedownAsset]?.faceup).toBe(true);
+    expect(state.cardInstances[facedownAgenda]?.faceup).toBe(true);
+    expect(state.run?.breach?.currentIndex).toBe(2);
+    expect(state.run?.breach?.accessedSummaries).toEqual([
+      {
+        entryId: `${state.run?.runId}.breach.0`,
+        status: "accessed",
+        cardDefinitionId: "simple_economy_operation",
+      },
+      {
+        entryId: `${state.run?.runId}.breach.1`,
+        status: "accessed",
+        cardDefinitionId: "simple_economy_asset",
+      },
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "archives_breach_reveal",
+      archivesRevealCount: 2,
+      archivesAutoAccessedCount: 2,
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
       "Simple Economy Asset",
     );
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+    expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
       "Simple Agenda",
     );
   });
 
-  it("reveals only the current Archives card, preserves queue progress, and replays deterministically", () => {
+  it("preserves Archives queue progress, forbids Archives trash, and replays deterministically", () => {
     let state = toRunnerTurn(v097RunGame("v112-archives-access"));
     state.runner.credits = 10;
     const faceupOperation = moveCorpCardToArchives(
@@ -17005,46 +17027,24 @@ describe("V1.1.2 Full Archives Access", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "archives",
     );
-    state = apply(state, "runner", (action) => action.type === "access_card");
-
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
-      title: "Simple Economy Operation",
-      serverLabel: "Archives",
-    });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "Simple Economy Asset",
-    );
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "Simple Agenda",
-    );
-    expect(state.run?.breach?.currentIndex).toBe(1);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "trash_accessed_card",
+      ),
+    ).toBe(false);
+    expect(state.run?.breach?.currentIndex).toBe(2);
     expect(state.run?.breach?.accessedSummaries).toEqual([
       {
         entryId: `${state.run?.runId}.breach.0`,
         status: "accessed",
         cardDefinitionId: "simple_economy_operation",
       },
+      {
+        entryId: `${state.run?.runId}.breach.1`,
+        status: "accessed",
+        cardDefinitionId: "simple_economy_asset",
+      },
     ]);
-
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.cardInstances[facedownAsset]?.faceup).toBe(true);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "access_card",
-      cardDefinitionId: "simple_economy_asset",
-      title: "Simple Economy Asset",
-      serverLabel: "Archives",
-    });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "Simple Agenda",
-    );
-
-    state = apply(
-      state,
-      "runner",
-      (action) => action.type === "trash_accessed_card",
-    );
     expect(
       state.corp.archives.filter((id) => id === facedownAsset),
     ).toHaveLength(1);
@@ -17053,7 +17053,6 @@ describe("V1.1.2 Full Archives Access", () => {
       facedownAsset,
       facedownAgenda,
     ]);
-    expect(state.run?.breach?.currentIndex).toBe(2);
 
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.cardInstances[facedownAgenda]?.faceup).toBe(true);
@@ -17067,6 +17066,22 @@ describe("V1.1.2 Full Archives Access", () => {
     );
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("does not offer the basic trash ability for a card accessed from Archives", () => {
+    let state = toRunnerTurn(v1917GenericAssetGame("v112-archives-no-trash"));
+    state.runner.credits = 10;
+    const setupId = moveCorpCardToArchives(state, "onr_v1_340_setup", false);
+    keepOnlyCorpArchivesCards(state, [setupId]);
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "archives");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    const actions = getLegalActions(state, "runner");
+    expect(actions.some((action) => action.type === "trash_accessed_card")).toBe(false);
+    expect(actions.some((action) => action.type === "decline_trash")).toBe(true);
+    expect(state.corp.archives).toEqual([setupId]);
+    expect(state.cardInstances[setupId]?.faceup).toBe(true);
   });
 });
 
@@ -21509,4 +21524,3 @@ function removeEverywhere(state: GameState, id: string): void {
       state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
   }
 }
-

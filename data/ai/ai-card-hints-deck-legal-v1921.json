@@ -16,7 +16,7 @@
       ],
       "planRoles": [
         "runner_install_program",
-        "runner_program_random_probe"
+        "runner_start_run_strength_roll"
       ],
       "requiredMechanics": [
         "deterministic_random_card_resolver",
@@ -24,7 +24,7 @@
         "recurring_pool_start_turn_resolver"
       ],
       "valueHints": {
-        "randomProbePriority": 2
+        "startRunStrengthPriority": 2
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -48,7 +48,8 @@
       ],
       "planRoles": [
         "runner_install_program",
-        "runner_program_random_probe"
+        "runner_hq_run_counter",
+        "runner_start_turn_random_hq_reveal"
       ],
       "requiredMechanics": [
         "deterministic_random_card_resolver",
@@ -57,7 +58,7 @@
         "recurring_pool_start_turn_resolver"
       ],
       "valueHints": {
-        "randomProbePriority": 2
+        "hqRunCounterPriority": 2
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -80,14 +81,15 @@
       ],
       "planRoles": [
         "runner_play_event",
-        "runner_event_random_probe"
+        "runner_event_playful_ai_dice_loop",
+        "runner_choice_gain_all_default"
       ],
       "requiredMechanics": [
         "deterministic_random_card_resolver",
         "generic_asset_node_ability_resolver"
       ],
       "valueHints": {
-        "randomProbePriority": 2
+        "playfulAiGainAllPriority": 3
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -111,7 +113,7 @@
       ],
       "planRoles": [
         "runner_install_resource",
-        "runner_resource_random_probe"
+        "runner_start_turn_random_resource"
       ],
       "requiredMechanics": [
         "deterministic_random_card_resolver",
@@ -120,7 +122,7 @@
         "damage_event_prevention_resolver"
       ],
       "valueHints": {
-        "randomProbePriority": 2
+        "startTurnRandomPriority": 2
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -144,7 +146,7 @@
       ],
       "planRoles": [
         "corp_rez_root_asset",
-        "corp_asset_random_probe"
+        "corp_asset_tag_checked_damage"
       ],
       "requiredMechanics": [
         "deterministic_random_card_resolver",
@@ -152,7 +154,7 @@
         "damage_event_prevention_resolver"
       ],
       "valueHints": {
-        "randomProbePriority": 2
+        "tagDamagePriority": 2
       },
       "riskTags": [
         "random_counter_replay_required",
@@ -176,14 +178,14 @@
       ],
       "planRoles": [
         "corp_rez_root_upgrade",
-        "corp_upgrade_random_probe"
+        "corp_after_pass_ice_random_end_run"
       ],
       "requiredMechanics": [
         "deterministic_random_card_resolver",
         "generic_upgrade_root_server_resolver"
       ],
       "valueHints": {
-        "randomProbePriority": 2
+        "afterPassIcePriority": 2
       },
       "riskTags": [
         "random_counter_replay_required",

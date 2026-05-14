@@ -304,7 +304,7 @@ describe("catalog API filters", () => {
       };
     };
     expect(body.card.aiHints?.roles).toContain("random");
-    expect(body.card.aiHints?.planRoles).toContain("runner_program_random_probe");
+    expect(body.card.aiHints?.planRoles).toContain("runner_start_run_strength_roll");
     expect(body.card.aiHints?.requiredMechanics).toContain("deterministic_random_card_resolver");
     expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
     expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v1921-smokes.json#runner_v1921_random_programs");
