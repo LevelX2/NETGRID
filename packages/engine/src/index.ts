@@ -2953,7 +2953,6 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const definition = definitionFor(state, cardId);
     if (
       definition.id === SELF_MODIFYING_CODE_ID &&
-      state.runner.credits >= 2 &&
       state.runner.stack.some((id) => definitionFor(state, id).type === "program")
     ) {
       actions.push(
@@ -2961,9 +2960,9 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
           state,
           "runner",
           "trigger_ability",
-          `${definition.title}: Programm aus Stack installieren`,
+          `${definition.title}: trashen und Programm aus Stack installieren`,
           cardId,
-          [{ credits: 2 }],
+          [],
           { cardId, v1911HiddenZoneAbility: "self_modifying_code_install_program", trashOnUse: true }
         )
       );
@@ -7894,7 +7893,6 @@ function resolveSelfModifyingCodeInstallProgram(state: GameState, legalAction: L
   if (definitionFor(state, sourceCardId).id !== SELF_MODIFYING_CODE_ID) throw new Error("Diese Fähigkeit passt nicht zu Self-Modifying Code.");
   if (!state.runner.stack.some((id) => definitionFor(state, id).type === "program")) throw new Error("Es liegt kein Programm im Stack.");
 
-  spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 2);
   trashRunnerInstalledProgram(state, sourceCardId);
   startSelfModifyingCodeSearchChoice(state);
   legalAction.payload = {

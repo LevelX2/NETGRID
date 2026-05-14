@@ -116,6 +116,7 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
 export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && cardRefsForAction(action).length > 0) return true;
+  if (action.type === "trigger_ability" && cardRefsForAction(action).length > 0) return true;
   if (isPriorityAction(action)) return false;
   return cardRefsForAction(action).length > 0 || objectBoundAction(action);
 }
@@ -160,6 +161,8 @@ export function actionButtonLabel(action: LegalAction): string {
       return pumpBreakerActionLabel(action);
     case "break_subroutine":
       return breakSubroutineActionLabel(action);
+    case "trigger_ability":
+      return triggerAbilityActionLabel(action);
     default:
       return normalizeVisibleTerms(action.label);
   }
@@ -189,10 +192,17 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "steal_agenda":
       return "Stehlen";
     case "trigger_ability":
-      return resourceAbilityContextLabel(action) ?? "Aktivieren";
+      return triggerAbilityActionLabel(action, true);
     default:
       return actionButtonLabel(action);
   }
+}
+
+function triggerAbilityActionLabel(action: LegalAction, compact = false): string {
+  if (action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program") {
+    return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
+  }
+  return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
 }
 
 function resourceAbilityContextLabel(action: LegalAction): string | null {

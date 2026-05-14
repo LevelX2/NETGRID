@@ -4300,7 +4300,12 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
 
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
     state = apply(state, "corp", (action) => action.type === "rez_ice");
+    const selfModifyingCodeAction = getLegalActions(state, "runner").find((action) => action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program");
+    expect(selfModifyingCodeAction?.costs).toEqual([]);
+    expect(selfModifyingCodeAction?.label).toBe("Self-Modifying Code: trashen und Programm aus Stack installieren");
+
     state = apply(state, "runner", (action) => action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program");
+    expect(state.runner.credits).toBe(20);
     expect(state.runner.heap).toContain(smcId);
     expect(state.pendingChoice?.source).toContain("v1911.search_stack_install");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();

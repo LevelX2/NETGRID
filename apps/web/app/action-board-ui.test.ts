@@ -333,6 +333,22 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionMatchesContext(take, { kind: "card", id: "short_term_1", label: "Short-Term Contract" })).toBe(true);
     expect(contextualCardActionLabel(take)).toBe("2 Credits nehmen");
   });
+
+  it("labels Self-Modifying Code activation without credit costs", () => {
+    const searchInstall = legalAction("runner", "trigger_ability", "smc_1", "Self-Modifying Code: trashen und Programm aus Stack installieren", {
+      cardId: "smc_1",
+      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      trashOnUse: true
+    }, "run.encounter_ice");
+    const split = splitLegalActions([searchInstall]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([searchInstall]);
+    expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
+    expect(actionButtonLabel(searchInstall)).toBe("Trashen: Programm aus Stack installieren");
+    expect(contextualCardActionLabel(searchInstall)).toBe("Programm suchen");
+    expect(actionCostChips(searchInstall)).toEqual([]);
+  });
 });
 
 function legalAction(side: Side, type: LegalAction["type"], source: LegalAction["source"], label: string, payload?: LegalAction["payload"], timingPoint: LegalAction["timingPoint"] = "corp_action.main"): LegalAction {

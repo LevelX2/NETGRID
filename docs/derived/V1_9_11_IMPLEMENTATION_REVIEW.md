@@ -29,6 +29,8 @@ Die Karten nutzen vorhandene und eng ergänzte LegalAction-/PendingChoice-Vertr�
 
 Nachtrag 2026-05-14: `Gideon's Pawnshop` war in der Erstumsetzung fälschlich als Stack-Search/Program-Reveal/Shuffle-Adapter umgesetzt. Die bestätigte lokale Textquelle lautet: Kosten 2, `Search your trash for a card and bring it into your hand.` Die Runtime nutzt jetzt einen eigenen Trash-Recovery-Resolver: Auswahl aus Runner-Heap, die gerade gespielte Pawnshop-Karte ist kein Ziel, die gewählte Karte geht in die Grip und der Stack bleibt unverändert.
 
+Nachtrag 2026-05-14: `Self-Modifying Code` zeigte seine Aktivierung fälschlich mit 2 Credits an und zog beim Start der Fähigkeit pauschal 2 Credits ab. Die bestätigte lokale Textquelle beschreibt die Aktivierung als `Trash:`-Kosten. Die LegalAction hat nun keine Credit-Kosten, trasht `Self-Modifying Code`, öffnet anschließend die Stack-Programmauswahl und verwendet in der Web-UI ein kompaktes Label für diese Fähigkeit.
+
 ## Geänderte Hauptbereiche
 
 - `packages/shared/src/index.ts`: lokale WIP-Definitionen für alle 16 V1.9.11-Zielkarten ergänzt.
