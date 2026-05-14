@@ -9060,6 +9060,82 @@ function CardView({
     []
   );
 
+  const tooltipElement = tooltipId ? (
+    <span
+      className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
+      id={tooltipId}
+      role="tooltip"
+      style={tooltipPositionStyle}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        closePinnedTooltip();
+      }}
+      onPointerDown={(event) => {
+        if (tooltipPinnedVisible) event.stopPropagation();
+      }}
+      onPointerEnter={(event) => {
+        if (event.pointerType === "touch") return;
+        clearTooltipCloseTimer();
+        clearTooltipOpenTimer();
+        if (!tooltipHoverVisible) setTooltipHoverVisible(true);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === "touch") return;
+        scheduleTooltipClose();
+      }}
+    >
+      {showImageTooltip ? (
+        <img
+          className="cardTooltipImage"
+          src={tooltipImageUrl}
+          alt={`Kartenbild ${card.title ?? "Karte"}`}
+        />
+      ) : (
+        <>
+          <strong>{card.title}</strong>
+          {tooltipMode === "enhanced" ? (
+            <span className="cardTooltipStats">
+              {tooltipStats.map((stat) => (
+                <span
+                  key={`${card.instanceId}-tooltip-stat-${stat.label}`}
+                  className="cardTooltipStat"
+                  title={stat.label}
+                >
+                  <span className="icon">{stat.icon}</span>
+                  <span>{stat.value}</span>
+                </span>
+              ))}
+            </span>
+          ) : null}
+          {tooltipMode === "enhanced"
+            ? detailLines.map((line) => <span key={line}>{line}</span>)
+            : null}
+          <span className="cardTooltipText">
+            {rulesTextLines(rulesText).map((line, index) => (
+              <span
+                key={`${card.instanceId}-tooltip-rules-${index}`}
+                className={hasSubroutineMarkers ? "subroutineLine" : undefined}
+              >
+                {shouldAddFallbackSubroutineMarker(
+                  card.type ?? "",
+                  rulesText,
+                  line,
+                ) ? (
+                  <SubroutineIcon />
+                ) : null}
+                {renderRuleTextSegments(
+                  line,
+                  `${card.instanceId}-tooltip-rules-${index}`,
+                )}
+              </span>
+            ))}
+          </span>
+        </>
+      )}
+    </span>
+  ) : null;
+
   return (
     <div className={`cardSlot${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}`}>
       {positionBadge ? (
@@ -9152,64 +9228,8 @@ function CardView({
         {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
         {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
-        {tooltipId ? (
-          <span
-            className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
-            id={tooltipId}
-            role="tooltip"
-            style={tooltipPositionStyle}
-            onClick={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              closePinnedTooltip();
-            }}
-            onPointerDown={(event) => {
-              if (tooltipPinnedVisible) event.stopPropagation();
-            }}
-            onPointerEnter={(event) => {
-              if (event.pointerType === "touch") return;
-              clearTooltipCloseTimer();
-              clearTooltipOpenTimer();
-              if (!tooltipHoverVisible) setTooltipHoverVisible(true);
-            }}
-            onPointerLeave={(event) => {
-              if (event.pointerType === "touch") return;
-              scheduleTooltipClose();
-            }}
-          >
-            {showImageTooltip ? (
-              <img className="cardTooltipImage" src={tooltipImageUrl} alt={`Kartenbild ${card.title ?? "Karte"}`} />
-            ) : (
-              <>
-                <strong>{card.title}</strong>
-                {tooltipMode === "enhanced" ? (
-                  <span className="cardTooltipStats">
-                    {tooltipStats.map((stat) => (
-                      <span key={`${card.instanceId}-tooltip-stat-${stat.label}`} className="cardTooltipStat" title={stat.label}>
-                        <span className="icon">{stat.icon}</span>
-                        <span>{stat.value}</span>
-                      </span>
-                    ))}
-                  </span>
-                ) : null}
-                {tooltipMode === "enhanced"
-                  ? detailLines.map((line) => (
-                      <span key={line}>{line}</span>
-                    ))
-                  : null}
-                <span className="cardTooltipText">
-                  {rulesTextLines(rulesText).map((line, index) => (
-                    <span key={`${card.instanceId}-tooltip-rules-${index}`} className={hasSubroutineMarkers ? "subroutineLine" : undefined}>
-                      {shouldAddFallbackSubroutineMarker(card.type ?? "", rulesText, line) ? <SubroutineIcon /> : null}
-                      {renderRuleTextSegments(line, `${card.instanceId}-tooltip-rules-${index}`)}
-                    </span>
-                  ))}
-                </span>
-              </>
-            )}
-          </span>
-        ) : null}
       </button>
+      {tooltipElement && typeof document !== "undefined" ? createPortal(tooltipElement, document.body) : null}
       {hasCardActions ? (
         <button
           className={`cardActionMarker${showCardActions ? " active" : ""}`}
