@@ -16,6 +16,7 @@ import {
   contextualCardActionLabel,
   corpInstalledCardState,
   showInstalledCorpState,
+  shouldUseCardChoicePanel,
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
   groupRunnerRigCards,
@@ -221,6 +222,33 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(aiPacingFallbackDelayMs("paced", false)).toBe(1400);
     expect(aiPacingFallbackDelayMs("fast", false)).toBe(1400);
     expect(aiPacingFallbackDelayMs("paced", true)).toBeNull();
+  });
+
+  it("routes hidden multi-card choices through the explicit selection panel", () => {
+    const organDonorChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "v1922_runner_grip_trash_1",
+      side: "runner",
+      source: "v1922.runner_grip_trash_gain_credits:organ_donor:1",
+      prompt: "Grip-Karten trashen",
+      kind: "select_cards",
+      options: [
+        { id: "card_a", label: "Karte A", value: "a" },
+        { id: "card_b", label: "Karte B", value: "b" }
+      ],
+      minSelections: 0,
+      maxSelections: 2,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier"
+    };
+    const exactSingleChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...organDonorChoice,
+      choiceId: "single_card_choice",
+      minSelections: 1,
+      maxSelections: 1
+    };
+
+    expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
   });
 });
 

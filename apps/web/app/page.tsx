@@ -106,6 +106,7 @@ import {
   runWindowStatusLabel,
   serializeCuePositionPreference,
   showInstalledCorpState,
+  shouldUseCardChoicePanel,
   serverBoardRows,
   serverDisplayLabel,
   splitArchiveCardsForDisplay,
@@ -6235,7 +6236,7 @@ function LegalActionsPanel({
   const genericChoice = view.pendingChoice;
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (genericChoice && genericChoiceAction) {
-    if (genericChoice.kind === "select_cards" && genericChoice.options.some((option) => option.card)) {
+    if (shouldUseCardChoicePanel(genericChoice)) {
       if (connection !== "online") {
         return (
           <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="card-choice-paused-panel">

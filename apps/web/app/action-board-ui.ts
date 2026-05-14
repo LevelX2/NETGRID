@@ -422,6 +422,14 @@ export function hasLegalAction(actions: LegalAction[], type: LegalAction["type"]
   return actions.some((action) => action.type === type);
 }
 
+export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
+  if (choice.kind !== "select_cards") return false;
+  if (choice.options.some((option) => option.card)) return true;
+  const minSelections = Math.max(0, Math.floor(choice.minSelections));
+  const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
+  return minSelections !== 1 || maxSelections !== 1;
+}
+
 export function breachProgressLabel(view: PlayerView): string | null {
   const breach = view.run?.breach;
   if (!breach) return null;
