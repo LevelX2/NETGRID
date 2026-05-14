@@ -82,7 +82,7 @@ export type DemoDeckId =
   | "demo_corp_099";
 
 export type DamageType = "net" | "meat" | "core";
-export type CounterType = "advancement" | "virus" | "power" | "agenda" | "recurring_credit" | "bad_publicity" | "charge" | "mark" | "dividend" | "core_damage";
+export type CounterType = "advancement" | "virus" | "power" | "agenda" | "recurring_credit" | "bad_publicity" | "charge" | "mark" | "dividend" | "core_damage" | "shell";
 
 export type TraceSuccessEffect = { type: "add_tag"; amount: number } | { type: "none" };
 
@@ -707,6 +707,7 @@ export type GameState = {
     incubatorPendingTransforms?: number;
     allNighterBonusRunPending?: boolean;
     forgoNextActionPending?: boolean;
+    shellTradersStartTurnResolvedSourceIds?: CardInstanceId[];
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -1683,7 +1684,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 2,
     memoryCost: 2,
     rulesText:
-      "Trash: Search your stack for a program and install it, if you can. Shuffle your stack afterwards. You may use this ability during an encounter with a piece of ice.",
+      "Trash: Search your stack for a program. You may use this ability during an encounter with a piece of ice. Install that program, paying its installation cost, if you can; otherwise it remains in your stack. If needed, trash installed programs to free MU. Shuffle your stack afterwards.",
     mechanics: ["install_program", "memory", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
   onrBreaker({
@@ -2091,9 +2092,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    recurringCredits: 1,
-    rulesText: "1 recurring credit for run costs. Used counters refresh at the start of each Runner turn.",
-    mechanics: ["install_resource", "counter", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
+    rulesText:
+      "[A]: Set aside a program or hardware from your grip face-up with Shell counters equal to its install cost. At the start of each Runner turn, remove 1 Shell counter for each installed The Shell Traders. [1]: Remove 1 Shell counter. When the last Shell counter is removed, install that card without paying its normal install cost.",
+    mechanics: ["install_resource", "set_aside", "shell_counter", "delayed_install", "start_turn_counter_removal", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_177_the-short-circuit",

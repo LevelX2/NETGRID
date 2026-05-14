@@ -31,6 +31,8 @@ Nachtrag 2026-05-14: `Gideon's Pawnshop` war in der Erstumsetzung fälschlich al
 
 Nachtrag 2026-05-14: `Self-Modifying Code` zeigte seine Aktivierung fälschlich mit 2 Credits an und zog beim Start der Fähigkeit pauschal 2 Credits ab. Die bestätigte lokale Textquelle beschreibt die Aktivierung als `Trash:`-Kosten. Die LegalAction hat nun keine Credit-Kosten, trasht `Self-Modifying Code`, öffnet anschließend die Stack-Programmauswahl und verwendet in der Web-UI ein kompaktes Label für diese Fähigkeit.
 
+Nachtrag 2026-05-14: Die lokale Errata-Quelle `docs/source/Netrunner_Errata_v1.70.pdf` präzisiert `Self-Modifying Code`: Die Fähigkeit darf während eines ICE-Encounters genutzt werden, die Installationskosten des gefundenen Programms müssen bezahlt werden, bei nicht möglicher Installation bleibt das Programm im Stack und MU darf die Installation nicht endgültig verhindern. Runtime-Text, Catalog-Override und Resolverpfad wurden entsprechend nachgezogen; bei MU-Druck öffnet nun eine Folge-Choice zum Trashen installierter Programme.
+
 ## Geänderte Hauptbereiche
 
 - `packages/shared/src/index.ts`: lokale WIP-Definitionen für alle 16 V1.9.11-Zielkarten ergänzt.

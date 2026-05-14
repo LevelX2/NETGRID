@@ -1828,7 +1828,7 @@ const ONR_V1_9_9_TEXT_OVERRIDES: Partial<Record<string, string>> = {
 
 const ONR_V1_9_11_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_059_self-modifying-code":
-    "Trash: Search your stack for a program and install it, if you can. Shuffle your stack afterwards. You may use this ability during an encounter with a piece of ice."
+    "Trash: Search your stack for a program. You may use this ability during an encounter with a piece of ice. Install that program, paying its installation cost, if you can; otherwise it remains in your stack. If needed, trash installed programs to free MU. Shuffle your stack afterwards."
 };
 
 const ONR_V1_9_12_TEXT_OVERRIDES: Partial<Record<string, string>> = {
@@ -1840,7 +1840,8 @@ const ONR_V1_9_12_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_082_deal-with-militech": "Search the stack for a program, reveal it, add it to the grip, then shuffle the stack.",
   "onr_v1_091_hunt-club-bbs": "Reveal the top card of the Runner stack.",
   "onr_v1_174_rigged-investments": "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
-  "onr_v1_176_the-shell-traders": "1 recurring credit for run costs. Used counters refresh at the start of each Runner turn.",
+  "onr_v1_176_the-shell-traders":
+    "[A]: Set aside a program or hardware from your grip face-up with Shell counters equal to its install cost. At the start of each Runner turn, remove 1 Shell counter for each installed The Shell Traders. [1]: Remove 1 Shell counter. When the last Shell counter is removed, install that card without paying its normal install cost.",
   "onr_v1_198_detroit-police-contract": "Put 4 power counters on Detroit Police Contract when you score it. [A]: Remove 1 power counter to gain 1 credit.",
   "onr_v1_199_employee-empowerment": "While scored, gain 1 credit at the start of each Corp turn."
 };

@@ -2317,13 +2317,29 @@ select {
   min-height: 116px;
 }
 
-.cardChoiceQuestion {
+.cardChoiceFooterText {
   min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.cardChoiceEffectHint,
+.cardChoiceQuestion {
   margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.cardChoiceEffectHint {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.cardChoiceQuestion {
   color: var(--text);
   font-size: 14px;
   font-weight: 700;
-  overflow-wrap: anywhere;
 }
 
 .cardChoiceSubmit {
@@ -3605,6 +3621,8 @@ select {
   overflow-wrap: anywhere;
   outline: 0;
   z-index: 1;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transition:
     border-color 140ms ease,
     background 140ms ease,
@@ -3865,11 +3883,20 @@ select {
   color: var(--text);
   box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
   cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
   transform: translateX(-50%);
   transition:
     border-color 120ms ease,
     background 120ms ease,
     transform 120ms ease;
+}
+
+.cardActionMarker::before {
+  content: "";
+  position: absolute;
+  inset: -13px -14px;
+  border-radius: 14px;
 }
 
 .cardActionMarker:hover,
@@ -3900,6 +3927,7 @@ select {
   border: 0;
   background: transparent;
   filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.34));
+  overflow-y: auto;
   transform-origin: top left;
   animation: cardActionPlateBelow 150ms cubic-bezier(0.2, 0.85, 0.24, 1);
 }
@@ -3926,6 +3954,8 @@ select {
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 0.05),
     0 0 0 1px color-mix(in srgb, var(--runner), transparent 72%);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .cardActionButton > svg {
@@ -3957,6 +3987,24 @@ select {
 
 .cardActionButton .costChip {
   background: color-mix(in srgb, var(--panel), var(--primary-bg) 44%);
+}
+
+@media (pointer: coarse) {
+  .cardActionMarker {
+    bottom: 6px;
+    width: 30px;
+    height: 28px;
+  }
+
+  .lane .cardActionMarker {
+    bottom: 6px;
+    width: 30px;
+    height: 28px;
+  }
+
+  .cardActionButton {
+    min-height: 50px;
+  }
 }
 
 @keyframes cardActionPlateBelow {
@@ -4122,6 +4170,33 @@ select {
   box-shadow:
     0 4px 9px rgb(0 0 0 / 0.34),
     inset 0 1px 1px rgb(255 247 204 / 0.28);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  pointer-events: none;
+}
+
+.shellCounterBadge {
+  position: absolute;
+  right: 6px;
+  top: 30px;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 12px);
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid rgb(132 207 214 / 0.82);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 32%),
+    linear-gradient(135deg, rgb(22 93 105 / 0.95), rgb(18 45 58 / 0.96));
+  color: #c5fbff;
+  box-shadow:
+    0 4px 9px rgb(0 0 0 / 0.34),
+    inset 0 1px 1px rgb(214 252 255 / 0.28);
   font-size: 10px;
   font-weight: 900;
   line-height: 1;

@@ -368,7 +368,9 @@ function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
     decision.reasonCode === "runner.access.open_card" ||
     decision.reasonCode === "runner.encounter.break_etr" ||
     decision.reasonCode === "runner.encounter.pump_breaker" ||
-    decision.reasonCode === "runner.tag.clear_visible_tag"
+    decision.reasonCode === "runner.tag.clear_visible_tag" ||
+    decision.reasonCode === "runner.shell_traders.prepare_install" ||
+    decision.reasonCode === "runner.shell_traders.remove_counter"
   );
 }
 
@@ -1074,6 +1076,19 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
       .map((option) => option.id);
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
   }
+  if (choice.kind === "select_cards" && choice.source.startsWith("v1912.shell_traders_start_turn")) {
+    const selected =
+      choice.options
+        .slice()
+        .sort((left, right) => {
+          const leftCounter = Number(/\((\d+)\)\s*$/.exec(left.label)?.[1] ?? Number.MAX_SAFE_INTEGER);
+          const rightCounter = Number(/\((\d+)\)\s*$/.exec(right.label)?.[1] ?? Number.MAX_SAFE_INTEGER);
+          const leftProgramBias = left.card?.type === "program" ? -1 : 0;
+          const rightProgramBias = right.card?.type === "program" ? -1 : 0;
+          return leftCounter - rightCounter || leftProgramBias - rightProgramBias || left.label.localeCompare(right.label, "de");
+        })[0] ?? choice.options[0];
+    return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
   if (choice.kind === "select_cards") {
     const count = Math.max(choice.minSelections, Math.min(choice.maxSelections, choice.maxSelections));
     const selected = choice.options.slice(0, count).map((option) => option.id);
@@ -1206,6 +1221,26 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       reasonCode = roles.includes("run_pressure") ? "runner.run.event_pressure" : roles.includes("draw") ? "runner.economy.draw_setup" : "runner.economy.event";
       explanation = "Ein Event verbessert anhand sichtbarer Rollen die Runner-Position.";
       evidence.push("own_event_role_known", ...publicRoleEvidence(roles));
+      break;
+    case "trigger_ability":
+      if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
+        const counterAmount = typeof action.payload.shellCounterAmount === "number" ? action.payload.shellCounterAmount : 0;
+        score = 620 + Math.max(0, counterAmount) * 30;
+        reasonCode = "runner.shell_traders.prepare_install";
+        explanation = "The Shell Traders bereitet ein eigenes Programm oder eine Hardwarekarte für die verzögerte kostenlose Installation vor.";
+        evidence.push("shell_traders", `shell_counters:${counterAmount}`);
+      } else if (action.payload?.shellTradersAbility === "remove_shell_counter") {
+        const remaining = typeof action.payload.remainingCounters === "number" ? action.payload.remainingCounters : 1;
+        score = remaining <= 1 ? 650 : 360;
+        reasonCode = "runner.shell_traders.remove_counter";
+        explanation = "Ein Shell-Counter kann legal entfernt werden, um die vorbereitete Installation zu beschleunigen.";
+        evidence.push("shell_counter_remove", `credits:${features.credits}`);
+      } else {
+        score = 260;
+        reasonCode = "runner.card_ability.visible";
+        explanation = "Eine sichtbare Kartenfähigkeit ist legal verfügbar.";
+        evidence.push("trigger_ability");
+      }
       break;
     case "start_run":
       score = scoreRunTarget(action, features, profile, input.difficulty);

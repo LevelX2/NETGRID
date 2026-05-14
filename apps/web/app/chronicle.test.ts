@@ -143,6 +143,107 @@ describe("formatChronicleEvent", () => {
     expect(take.chips).not.toContain("0 Credits auf Broker");
   });
 
+  it("describes The Shell Traders set-aside and Shell-counter actions", () => {
+    const setAside = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        label: "The Shell Traders: Simple Fracter beiseitelegen",
+        title: "Simple Fracter",
+        shellTradersAbility: "set_aside_from_grip",
+        shellCounterAmount: 2
+      }),
+      "runner",
+      { cardTitle: "Simple Fracter" }
+    );
+    const remove = formatChronicleEvent(
+      makeEvent("end_turn", {
+        actor: "runner",
+        label: "The Shell Traders: 1 Shell-Counter entfernen",
+        title: "Simple Fracter",
+        shellTradersAbility: "start_turn_remove_shell_counter",
+        remainingCounters: 0,
+        installedFromSpecialZone: true
+      }),
+      "runner",
+      { cardTitle: "Simple Fracter" }
+    );
+
+    expect(setAside.title).toBe("Du hast Simple Fracter mit 2 Shell-Countern beiseitegelegt.");
+    expect(setAside.chips).toContain("Set Aside");
+    expect(setAside.chips).toContain("2 Shell");
+    expect(remove.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt; Karte kostenlos installiert.");
+    expect(remove.chips).toContain("Shell -1");
+    expect(remove.chips).toContain("Installiert");
+  });
+
+  it("names generic card abilities from their public action label", () => {
+    const item = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        label: "Self-Modifying Code: trashen und Programm aus Stack installieren"
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Self-Modifying Code aktiviert: trashen und Programm aus Stack installieren.");
+    expect(item.category).toBe("card");
+    expect(item.chips).toContain("Kartenaktion");
+    expect(item.chips).toContain("Self-Modifying Code");
+  });
+
+  it("shows installed expose helpers as card reveals instead of generic credit actions", () => {
+    const item = formatChronicleEvent(
+      makeEvent("gain_credit", {
+        actor: "runner",
+        label: "SeeYa: Karte in HQ expose",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1911_expose_server_card",
+        revealKind: "expose",
+        serverLabel: "HQ",
+        title: "Simple Barrier ICE",
+        cardDefinitionId: "simple_barrier_ice"
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Simple Barrier ICE in HQ mit SeeYa aufgedeckt.");
+    expect(item.category).toBe("card");
+    expect(item.chips).toContain("Expose");
+    expect(item.chips).toContain("HQ");
+    expect(item.chips).toContain("SeeYa");
+  });
+
+  it("does not claim a stack-search program was installed when the engine reports failure", () => {
+    const failed = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "search_stack",
+        searchReveal: "public",
+        searchDestination: "install_program",
+        searchShuffleAfter: true,
+        installSucceeded: false,
+        title: "Worm"
+      }),
+      "runner"
+    );
+    const installed = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "search_stack",
+        searchReveal: "public",
+        searchDestination: "install_program",
+        searchShuffleAfter: true,
+        installSucceeded: true,
+        title: "Worm"
+      }),
+      "runner"
+    );
+
+    expect(failed.title).toBe("Du hast Worm aus dem Stack vorgezeigt, aber nicht installiert.");
+    expect(failed.chips).toContain("Nicht installiert");
+    expect(installed.title).toBe("Du hast Worm aus dem Stack vorgezeigt und im Rig installiert.");
+  });
+
   it("shows Playful AI die results and follow-up choices in the chronicle", () => {
     const played = formatChronicleEvent(
       makeEvent("play_event", {

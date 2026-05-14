@@ -6151,6 +6151,7 @@ function CardChoicePanel({
   const singleSelection = maxSelections === 1;
   const title = cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
+  const effectHint = cardChoiceEffectHint(choice);
 
   useEffect(() => {
     setSelected([]);
@@ -6200,7 +6201,7 @@ function CardChoicePanel({
                       </button>
                     )}
                     <button className={`button cardChoiceSelectButton ${active ? "primary" : ""}`} onClick={() => toggleOption(option.id)} disabled={disabled} type="button" aria-pressed={active} data-testid="card-choice-option">
-                      {active ? <Check size={14} /> : <Search size={14} />}
+                      {active ? <Check size={14} /> : <Plus size={14} />}
                       <span>{active ? "Gewählt" : "Wählen"}</span>
                     </button>
                   </div>
@@ -6210,7 +6211,10 @@ function CardChoicePanel({
           ))}
         </div>
         <footer className="cardChoiceFooter">
-          <p className="cardChoiceQuestion">{cardChoiceQuestion(choice, selectedOptions)}</p>
+          <div className="cardChoiceFooterText">
+            {effectHint ? <p className="cardChoiceEffectHint">{effectHint}</p> : null}
+            <p className="cardChoiceQuestion">{cardChoiceQuestion(choice, selectedOptions)}</p>
+          </div>
           <button className="button primary cardChoiceSubmit" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || !canSubmit} type="button" data-testid="card-choice-submit">
             <Check size={15} />
             {cardChoiceSubmitLabel(selected.length)}
@@ -6233,6 +6237,7 @@ function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][]
 }
 
 function cardChoiceTitle(choice: VisibleChoice): string {
+  if (choice.source.includes("self_modifying_code_free_mu")) return "MU freimachen";
   if (choice.source.includes("search_stack")) return "Stack durchsuchen";
   if (choice.source.includes("arrange_stack")) return "Karten anordnen";
   return "Karten wählen";
@@ -6244,16 +6249,32 @@ function choiceSelectionRangeLabel(minSelections: number, maxSelections: number)
 }
 
 function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoiceOption[]): string {
-  if (selectedOptions.length === 0) return "Keine Karte ausgewählt.";
+  if (selectedOptions.length === 0) return "Noch keine Karte gewählt.";
   if (choice.source.includes("search_stack")) {
-    return selectedOptions.length === 1 ? "Diese Karte für den Sucheffekt auswählen?" : `${selectedOptions.length} Karten für den Sucheffekt auswählen?`;
+    return selectedOptions.length === 1 ? "Diese Auswahl für den Sucheffekt übernehmen?" : `${selectedOptions.length} Karten für den Sucheffekt übernehmen?`;
   }
-  return selectedOptions.length === 1 ? "Diese Karte auswählen?" : `${selectedOptions.length} Karten auswählen?`;
+  return selectedOptions.length === 1 ? "Diese Auswahl übernehmen?" : `${selectedOptions.length} Karten übernehmen?`;
 }
 
 function cardChoiceSubmitLabel(selectedCount: number): string {
-  if (selectedCount <= 1) return "Auswählen";
-  return `${selectedCount} auswählen`;
+  if (selectedCount <= 1) return "Auswahl übernehmen";
+  return `${selectedCount} Karten übernehmen`;
+}
+
+function cardChoiceEffectHint(choice: VisibleChoice): string | null {
+  const resolution = choice.stackSearchResolution;
+  if (choice.source.includes("self_modifying_code_free_mu")) {
+    return "Die gewählten installierten Programme werden getrasht; danach wird das vorgezeigte Programm installiert.";
+  }
+  if (resolution?.destination === "install_program") {
+    return `Die gewählte Programmkarte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}direkt installiert${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
+  }
+  if (resolution?.destination === "grip") {
+    return `Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
+  }
+  if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
+  if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Trash in den Grip genommen.";
+  return null;
 }
 
 function DiscardChoicePanel({
@@ -8549,17 +8570,19 @@ function CardView({
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const brokerStoredCredits = preview ? 0 : brokerStoredCreditsAmount(card);
+  const shellCounters = preview ? 0 : shellCounterAmount(card);
   const storedCreditSource = storedCreditSourceLabel(card);
   const brokerStoredCreditsAria =
     brokerStoredCredits > 0 && storedCreditSource
       ? `${brokerStoredCredits} ${brokerStoredCredits === 1 ? "Credit" : "Credits"} auf ${storedCreditSource}`
       : null;
+  const shellCountersAria = shellCounters > 0 ? `${shellCounters} Shell-Counter` : null;
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}`
+      ? `Karte ${card.title}, ${advancementLabel}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}${shellCountersAria ? `, ${shellCountersAria}` : ""}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}`
+      ? `Karte ${card.title}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}${shellCountersAria ? `, ${shellCountersAria}` : ""}`
       : "Verdeckte Karte";
 
   const estimatedTooltipHeight = (): number => {
@@ -8593,8 +8616,11 @@ function CardView({
     const element = cardRef.current;
     if (!element) return;
     const cardRect = element.getBoundingClientRect();
-    const viewportHeight = window.innerHeight;
-    const spaceBelow = viewportHeight - cardRect.bottom;
+    const visualViewport = window.visualViewport;
+    const viewportWidth = visualViewport?.width ?? window.innerWidth;
+    const viewportHeight = visualViewport?.height ?? window.innerHeight;
+    const viewportBottom = viewportHeight;
+    const spaceBelow = viewportBottom - cardRect.bottom;
     const spaceAbove = cardRect.top;
     const tooltipHeight = estimatedTooltipHeight();
     const nextTooltipPlacement = spaceBelow < tooltipHeight && spaceAbove > spaceBelow ? "above" : "below";
@@ -8608,15 +8634,16 @@ function CardView({
           : { left: `${left}px`, top: `${cardRect.top - 8}px`, width: `${tooltipWidth}px` }
       );
     }
-    const estimatedActionMenuHeight = Math.min(210, Math.max(64, actions.length * 62 + 16));
+    const estimatedActionMenuHeight = Math.min(260, Math.max(56, actions.length * 51 + Math.max(0, actions.length - 1) * 5));
     const nextActionMenuPlacement = spaceBelow < estimatedActionMenuHeight && spaceAbove > spaceBelow ? "above" : "below";
     if (tooltipEnabled) setTooltipPlacement(nextTooltipPlacement);
     if (hasCardActions) {
-      const margin = window.innerWidth < 360 ? 8 : 16;
-      const viewportWidth = Math.max(160, window.innerWidth - margin * 2);
-      const preferredWidth = Math.max(cardRect.width, Math.min(viewportWidth, 224));
-      const actionMenuWidth = Math.min(viewportWidth, Math.min(260, preferredWidth));
-      const left = Math.max(margin, Math.min(cardRect.left, window.innerWidth - actionMenuWidth - margin));
+      const margin = viewportWidth < 360 ? 8 : 16;
+      const availableWidth = Math.max(160, viewportWidth - margin * 2);
+      const preferredWidth = Math.max(cardRect.width, Math.min(availableWidth, 224));
+      const actionMenuWidth = Math.min(availableWidth, Math.min(260, preferredWidth));
+      const cardCenter = cardRect.left + cardRect.width / 2;
+      const left = Math.max(margin, Math.min(cardCenter - actionMenuWidth / 2, viewportWidth - actionMenuWidth - margin));
       const top = nextActionMenuPlacement === "below" ? cardRect.bottom + 7 : Math.max(margin, cardRect.top - estimatedActionMenuHeight - 7);
       setActionMenuPlacement(nextActionMenuPlacement);
       setActionMenuPositionStyle({
@@ -8625,7 +8652,8 @@ function CardView({
         top: `${top}px`,
         bottom: "auto",
         width: `${actionMenuWidth}px`,
-        minWidth: `${Math.min(cardRect.width, actionMenuWidth)}px`
+        minWidth: `${Math.min(cardRect.width, actionMenuWidth)}px`,
+        maxHeight: `${Math.max(72, viewportHeight - margin * 2)}px`
       });
     }
   };
@@ -8752,6 +8780,7 @@ function CardView({
         {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
         {brokerStoredCredits > 0 && storedCreditSource ? <BrokerStoredCreditsBadge amount={brokerStoredCredits} sourceLabel={storedCreditSource} /> : null}
+        {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
         {tooltipId ? (
           <span
@@ -8809,7 +8838,14 @@ function CardView({
           type="button"
           aria-label={showCardActions ? "Kartenoptionen einklappen" : "Kartenoptionen anzeigen"}
           aria-expanded={showCardActions}
+          aria-haspopup="menu"
           data-testid="card-action-marker"
+          onPointerDown={(event) => {
+            if (event.pointerType === "touch") {
+              setSuppressCardTooltip(true);
+              updateOverlayPlacement();
+            }
+          }}
           onClick={() => {
             if (showCardActions) setSuppressCardTooltip(true);
             updateOverlayPlacement();
@@ -8949,7 +8985,7 @@ function coupAgendaCreditAmount(definitionId: string | undefined): number | null
   return null;
 }
 
-function counterAmount(card: DisplayVisibleCard, counter: "agenda" | "power"): number {
+function counterAmount(card: DisplayVisibleCard, counter: "agenda" | "power" | "shell"): number {
   const amount = card.counters?.[counter];
   return typeof amount === "number" && Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }
@@ -9035,6 +9071,14 @@ function BrokerStoredCreditsBadge({ amount, sourceLabel }: { amount: number; sou
   );
 }
 
+function ShellCounterBadge({ amount }: { amount: number }) {
+  return (
+    <span className="shellCounterBadge" aria-label={`${amount} Shell-Counter`} data-testid="shell-counter-badge">
+      {amount} Shell
+    </span>
+  );
+}
+
 function advancementGemStyle(instanceId: string, index: number): CSSProperties {
   const seed = hashString(`${instanceId}:${index}`);
   const x = 18 + (seed % 58);
@@ -9069,7 +9113,8 @@ function cardDetailLines(card: VisibleCard): string[] {
     neededDevelopmentLabel(card.advancementRequirement),
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength),
-    brokerStoredCreditsLabel(card)
+    brokerStoredCreditsLabel(card),
+    shellCounterLabel(card)
   ]
     .filter(Boolean)
     .join(" · ");
@@ -9082,6 +9127,17 @@ function brokerStoredCreditsLabel(card: VisibleCard): string | null {
   const amount = brokerStoredCreditsAmount(card);
   if (amount <= 0) return null;
   return `${sourceLabel} ${amount} ${amount === 1 ? "Credit" : "Credits"}`;
+}
+
+function shellCounterLabel(card: VisibleCard): string | null {
+  const amount = shellCounterAmount(card);
+  if (amount <= 0) return null;
+  return `${amount} Shell-Counter`;
+}
+
+function shellCounterAmount(card: VisibleCard): number {
+  const amount = card.counters?.shell ?? 0;
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }
 
 function brokerStoredCreditsAmount(card: VisibleCard): number {

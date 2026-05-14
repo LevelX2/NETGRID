@@ -482,7 +482,8 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_073_wizards-book"]?.text).toBe("0 credits: Break code gate subroutine.\n2 credits: +1 strength.");
     expect(cardsById["onr_v1_059_self-modifying-code"]?.numeric.installCost).toBe(2);
     expect(cardsById["onr_v1_059_self-modifying-code"]?.numeric.memoryCost).toBe(2);
-    expect(cardsById["onr_v1_059_self-modifying-code"]?.text).toContain("install it, if you can");
+    expect(cardsById["onr_v1_059_self-modifying-code"]?.text).toContain("paying its installation cost");
+    expect(cardsById["onr_v1_059_self-modifying-code"]?.text).toContain("otherwise it remains in your stack");
     expect(cardsById["onr_v1_253_laser-wire"]?.text).toBe("[Subroutine] Do 1 net damage.\n[Subroutine] End the run.");
     expect(cardsById["onr_v1_278_wall-of-ice"]?.numeric.rezCost).toBe(13);
     expect(cardsById["onr_v1_293_netwatch-credit-voucher"]?.text).toBe("Play only if Runner is tagged. Give Runner 1 tag and gain 1.");

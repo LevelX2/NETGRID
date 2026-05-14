@@ -83,16 +83,26 @@ describe("V1.0.5 action board UI helpers", () => {
   });
 
   it("keeps card-sourced gain-credit actions on their specific labels", () => {
-    expect(actionButtonLabel(legalAction("corp", "gain_credit", "basic_action", "1 Credit nehmen"))).toBe("Credit nehmen");
-    expect(
-      actionButtonLabel(
-        legalAction("corp", "gain_credit", "private_police_1", "Private Cybernet Police: Trace 5 starten", {
-          cardId: "private_police_1",
-          agendaAbility: "private_cybernet_police",
-          traceStrength: 5
-        })
-      )
-    ).toBe("Private Cybernet Police: Trace 5 starten");
+    const basic = legalAction("corp", "gain_credit", "basic_action", "1 Credit nehmen");
+    const privatePolice = legalAction("corp", "gain_credit", "private_police_1", "Private Cybernet Police: Trace 5 starten", {
+      cardId: "private_police_1",
+      agendaAbility: "private_cybernet_police",
+      traceStrength: 5
+    });
+    const seeya = legalAction("runner", "gain_credit", "seeya_1", "SeeYa: Karte in HQ expose", {
+      cardId: "seeya_1",
+      serverId: "hq",
+      v1911HiddenZoneAbility: "expose_server_card"
+    });
+
+    const split = splitLegalActions([basic, privatePolice, seeya]);
+
+    expect(split.primaryActions).toEqual([basic]);
+    expect(split.contextualActions).toEqual([privatePolice, seeya]);
+    expect(actionButtonLabel(basic)).toBe("Credit nehmen");
+    expect(actionButtonLabel(privatePolice)).toBe("Private Cybernet Police: Trace 5 starten");
+    expect(actionMatchesContext(seeya, { kind: "card", id: "seeya_1", label: "SeeYa" })).toBe(true);
+    expect(contextualCardActionLabel(seeya)).toBe("SeeYa: Karte in HQ expose");
   });
 
   it("labels encounter breaker actions against the current ICE", () => {
@@ -324,6 +334,30 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionMatchesContext(load, { kind: "card", id: "broker_1", label: "Broker" })).toBe(true);
     expect(contextualCardActionLabel(load)).toBe("3 Credits laden");
     expect(contextualCardActionLabel(take)).toBe("6 Credits nehmen");
+  });
+
+  it("labels The Shell Traders abilities on the installed resource overlay", () => {
+    const prepare = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: Karte vorbereiten", {
+      cardId: "shell_traders_1",
+      shellTradersAbility: "set_aside_from_grip",
+      targetCardId: "simple_fracter_1",
+      shellCounterAmount: 2
+    });
+    const remove = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: 1 Shell-Counter entfernen", {
+      cardId: "shell_traders_1",
+      shellTradersAbility: "remove_shell_counter",
+      targetCardId: "simple_fracter_1",
+      counterType: "shell",
+      removeCounterAmount: 1
+    });
+
+    const split = splitLegalActions([prepare, remove]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([prepare, remove]);
+    expect(actionMatchesContext(prepare, { kind: "card", id: "shell_traders_1", label: "The Shell Traders" })).toBe(true);
+    expect(contextualCardActionLabel(prepare)).toBe("Karte vorbereiten");
+    expect(contextualCardActionLabel(remove)).toBe("Shell-Counter entfernen");
   });
 
   it("labels Short-Term Contract take-credit actions on the installed resource overlay", () => {

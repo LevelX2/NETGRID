@@ -119,6 +119,64 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(input)).not.toContain("cardInstances");
   });
 
+  it("uses The Shell Traders LegalActions and mandatory Shell-counter choices", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-shell-traders" }));
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal" });
+    const prepare: LegalAction = {
+      actionId: "runner.trigger_ability.shell_traders.prepare.simple_fracter",
+      side: "runner",
+      type: "trigger_ability",
+      label: "The Shell Traders: Simple Fracter vorbereiten",
+      source: "shell_traders_1",
+      timingPoint: "runner_action.main",
+      costs: [{ clicks: 1 }],
+      targetRequirements: [],
+      visibility: "private_to_actor",
+      expiresAtStateVersion: state.stateVersion,
+      payload: {
+        cardId: "shell_traders_1",
+        shellTradersAbility: "set_aside_from_grip",
+        targetCardId: "simple_fracter_1",
+        shellCounterAmount: 2
+      }
+    };
+    const gain: LegalAction = {
+      actionId: "runner.gain_credit.basic",
+      side: "runner",
+      type: "gain_credit",
+      label: "1 Credit nehmen",
+      source: "basic_action",
+      timingPoint: "runner_action.main",
+      costs: [{ clicks: 1 }],
+      targetRequirements: [],
+      visibility: "public",
+      expiresAtStateVersion: state.stateVersion
+    };
+
+    const decision = chooseRunnerAction({ ...input, legalActions: [gain, prepare] });
+
+    expect(decision.actionId).toBe(prepare.actionId);
+    expect(decision.reasonCode).toBe("runner.shell_traders.prepare_install");
+
+    state.pendingChoice = {
+      choiceId: "choice_shell_traders",
+      side: "runner",
+      source: "v1912.shell_traders_start_turn:shell_traders_1:1",
+      prompt: "The Shell Traders: 1 Shell-Counter entfernen",
+      kind: "select_cards",
+      options: [
+        { id: "card_decoder", label: "Simple Decoder (3)", value: "decoder_1" },
+        { id: "card_fracter", label: "Simple Fracter (1)", value: "fracter_1" }
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion,
+      visibility: "public"
+    };
+    const choiceDecision = chooseRunnerAction(buildAiDecisionInput(state, "runner", { difficulty: "normal" }));
+    expect(choiceDecision.selectedChoices).toEqual({ choiceId: "choice_shell_traders", selectedOptionIds: ["card_fracter"] });
+  });
+
   it("resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions", () => {
     const corpState = createGameAfterSetup({ seed: "ai-v199-aardvark-choice" });
     corpState.pendingChoice = {

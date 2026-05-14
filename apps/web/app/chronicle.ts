@@ -87,6 +87,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
+  const shellTradersAbility = stringValue(payload.shellTradersAbility);
 
   const baseChipList = baseChips(actor, isAi);
   const cardDetailLines = context.cardDetailLines ?? [];
@@ -105,6 +106,13 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (shellTradersAbility === "auto_install_after_memory_choice") {
+        category = "card";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
+        chips.push("The Shell Traders", "Installiert", "0 Kosten");
+        break;
+      }
       if (stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
         const gainedCredits = numberValue(payload.playfulAiGainedCredits) ?? 0;
         const setAsideDice = numberValue(payload.playfulAiSetAsideDice) ?? 0;
@@ -180,14 +188,20 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       }
       if (hiddenZoneAction === "search_stack") {
         const destinationLabel = searchDestinationLabel(searchDestination);
+        const installFailed = searchDestination === "install_program" && payload.installSucceeded === false;
+        const installPendingMemoryTrash = searchDestination === "install_program" && payload.installPendingMemoryTrash === true;
         category = searchReveal === "public" ? "card" : "hidden";
         importance = "important";
         visibility = searchReveal === "public" ? "public" : "redacted";
         title =
           searchReveal === "public"
-            ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt und in ${destinationLabel} genommen`)
+            ? installPendingMemoryTrash
+              ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt; MU muss freigemacht werden`)
+              : installFailed
+              ? phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt, aber nicht installiert`)
+              : phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt und ${searchDestination === "install_program" ? "im Rig installiert" : `in ${destinationLabel} genommen`}`)
             : phrase(subject, `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack in ${destinationLabel} genommen`);
-        chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", destinationLabel, ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
+        chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
       category = "system";
@@ -201,6 +215,15 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "gain_credit":
+      if (hiddenZoneAction === "v1911_expose_server_card" || payload.revealKind === "expose") {
+        const sourceTitle = sourceTitleFromActionLabel(label);
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${cardTitle ?? "eine Korp-Karte"}${serverLabel ? ` in ${serverLabel}` : ""}${sourceTitle ? ` mit ${sourceTitle}` : ""} aufgedeckt`);
+        chips.push("Expose", ...(serverLabel ? [serverLabel] : []), ...(sourceTitle ? [sourceTitle] : []));
+        break;
+      }
       if (payload.traceStarted === true) {
         const baseTraceStrength = numberValue(payload.baseTraceStrength);
         category = "danger";
@@ -404,6 +427,35 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "trigger_ability": {
       const resourceAbility = stringValue(payload.resourceAbility);
+      if (shellTradersAbility === "set_aside_from_grip") {
+        const counters = numberValue(payload.shellCounterAmount) ?? numberValue(payload.remainingCounters) ?? 0;
+        const installed = payload.installedFromSpecialZone === true;
+        category = "card";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} mit ${counters} Shell-Counter${counters === 1 ? "" : "n"} beiseitegelegt${installed ? " und kostenlos installiert" : ""}`);
+        chips.push("The Shell Traders", "Set Aside", `${counters} Shell`);
+        break;
+      }
+      if (shellTradersAbility === "remove_shell_counter" || shellTradersAbility === "start_turn_remove_shell_counter") {
+        const remaining = numberValue(payload.remainingCounters) ?? 0;
+        const installed = payload.installedFromSpecialZone === true;
+        const pendingMemory = payload.shellAutoInstallPendingMemoryTrash === true;
+        category = "card";
+        importance = installed || pendingMemory ? "important" : "normal";
+        title = phrase(
+          subject,
+          `1 Shell-Counter von ${cardTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
+        );
+        chips.push("The Shell Traders", "Shell -1", `${remaining} übrig`, ...(installed ? ["Installiert"] : []), ...(pendingMemory ? ["MU freimachen"] : []));
+        break;
+      }
+      if (shellTradersAbility === "auto_install_after_memory_choice") {
+        category = "card";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
+        chips.push("The Shell Traders", "Installiert", "0 Kosten");
+        break;
+      }
       if (resourceAbility === "broker_load_credits") {
         const addedCredits = numberValue(payload.addedCounterAmount) ?? numberValue(payload.addCounterAmount) ?? 3;
         category = "economy";
@@ -424,11 +476,24 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         break;
       }
       category = "card";
-      title = phrase(subject, `${cardTitle ?? "eine Kartenfähigkeit"} aktiviert`);
-      chips.push("Kartenaktion");
+      title = phrase(subject, `${cardTitle ?? "eine Kartenfähigkeit"} aktiviert${abilityTextFromLabel(label, cardTitle)}`);
+      chips.push("Kartenaktion", ...(cardTitle ? [cardTitle] : []));
       break;
     }
     case "end_turn":
+      if (shellTradersAbility === "start_turn_remove_shell_counter") {
+        const remaining = numberValue(payload.remainingCounters) ?? 0;
+        const installed = payload.installedFromSpecialZone === true;
+        const pendingMemory = payload.shellAutoInstallPendingMemoryTrash === true;
+        category = "card";
+        importance = installed || pendingMemory ? "important" : "normal";
+        title = phrase(
+          subject,
+          `1 Shell-Counter von ${cardTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
+        );
+        chips.push("The Shell Traders", "Shell -1", `${remaining} übrig`, ...(installed ? ["Installiert"] : []), ...(pendingMemory ? ["MU freimachen"] : []));
+        break;
+      }
       category = "turn";
       title = phrase(subject, `den Zug beendet${turnChip ? ` (${turnChip})` : ""}`);
       chips.push("Zugende", ...(turnChip ? [turnChip] : []));
@@ -802,6 +867,10 @@ function runTargetFromLabel(label: string | undefined): string {
 
 function extractCardTitleFromLabel(actionType: string, label: string | undefined, actor: Side | undefined): string | undefined {
   if (!label || (actor === "corp" && ["install_card", "advance_card"].includes(actionType))) return undefined;
+  if (actionType === "trigger_ability") {
+    const title = label.match(/^(.+?):\s+.+$/)?.[1]?.trim();
+    if (title && !isGenericCardLabel(title)) return title;
+  }
   const patterns: RegExp[] = [];
   if (["install_card", "play_event", "play_operation", "rez_ice", "pump_breaker", "trash_accessed_card", "trash_resource", "steal_agenda"].includes(actionType)) {
     patterns.push(/^(.+?)\s+(?:installieren|spielen|rezzen|pumpen|trashen|stehlen)$/i);
@@ -813,6 +882,19 @@ function extractCardTitleFromLabel(actionType: string, label: string | undefined
     if (title && !isGenericCardLabel(title)) return title;
   }
   return undefined;
+}
+
+function sourceTitleFromActionLabel(label: string | undefined): string | undefined {
+  const title = label?.match(/^(.+?):\s+.+$/)?.[1]?.trim();
+  return title && !isGenericCardLabel(title) ? title : undefined;
+}
+
+function abilityTextFromLabel(label: string | undefined, cardTitle: string | undefined): string {
+  if (!label || !cardTitle) return "";
+  const escapedTitle = cardTitle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = label.match(new RegExp(`^${escapedTitle}:\\s*(.+)$`, "i"));
+  const abilityText = match?.[1]?.trim();
+  return abilityText ? `: ${abilityText}` : "";
 }
 
 function isGenericCardLabel(value: string): boolean {

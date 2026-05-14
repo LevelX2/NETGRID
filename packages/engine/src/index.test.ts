@@ -4258,6 +4258,42 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     });
   });
 
+  it("exposes unrezzed HQ ICE via installed SeeYa and writes a reveal event", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-seeya-installed-expose"));
+    state.runner.credits = 20;
+    const seeyaId = installRunnerProgramForTest(state, "onr_v1_058_seeya");
+    const hqIceId = putCorpIceOnServer(state, "hq", "simple_barrier_ice");
+
+    const seeyaAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "gain_credit" && action.source === seeyaId && action.payload?.v1911HiddenZoneAbility === "expose_server_card" && action.payload?.serverId === "hq"
+    );
+    expect(seeyaAction.payload).toMatchObject({ cardId: seeyaId, serverId: "hq" });
+
+    state = apply(state, "runner", (action) => action.actionId === seeyaAction.actionId);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actor: "runner",
+      actionType: "gain_credit",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_expose_server_card",
+      revealKind: "expose",
+      cardDefinitionId: "simple_barrier_ice",
+      title: "Simple Barrier ICE",
+      serverLabel: "HQ"
+    });
+    expect(state.cardInstances[hqIceId]).toMatchObject({ faceup: true, rezzed: false });
+    const runnerHqIce = getPlayerView(state, "runner").servers.find((server) => server.id === "hq")?.ice[0];
+    expect(runnerHqIce).toMatchObject({
+      known: true,
+      definitionId: "simple_barrier_ice",
+      title: "Simple Barrier ICE",
+      rezzed: false
+    });
+    expect(getLegalActions(state, "runner").some((action) => action.payload?.v1911HiddenZoneAbility === "expose_server_card" && action.payload?.serverId === "hq")).toBe(false);
+  });
+
   it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
     let state = toRunnerTurn(v1911HiddenZoneGame("v1911-installed-helpers"));
     state.runner.credits = 20;
@@ -4287,13 +4323,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
   });
 
-  it("uses Self-Modifying Code during an ICE encounter to trash itself and install the chosen program", () => {
+  it("uses Self-Modifying Code during an ICE encounter to trash itself and install Worm", () => {
     let state = toRunnerTurn(v1911HiddenZoneGame("v1911-self-modifying-code"));
     state.runner.credits = 20;
     state.corp.credits = 20;
     const smcId = installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
     state.runner.memoryUsed = 2;
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const targetProgramId = createRunnerStackCardForTest(state, "onr_v1_074_worm");
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
 
     expect(getLegalActions(state, "runner").some((action) => action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program")).toBe(false);
@@ -4310,12 +4346,19 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.pendingChoice?.source).toContain("v1911.search_stack_install");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
 
-    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice?.stackSearchResolution).toMatchObject({
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true
+    });
+    const optionId = runnerChoice?.options.find((option) => option.value === targetProgramId)?.id;
     expect(optionId).toBeDefined();
     state = applyChoice(state, "runner", String(optionId));
     expect(state.runner.rig.programs).toContain(targetProgramId);
     expect(state.runner.grip).not.toContain(targetProgramId);
     expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(getLegalActions(state, "runner").some((action) => action.label === "Worm: Stärke +1")).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "search_stack",
@@ -4323,7 +4366,36 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       searchDestination: "install_program",
       searchShuffleAfter: true,
       installSucceeded: true,
-      cardDefinitionId: "simple_decoder"
+      cardDefinitionId: "onr_v1_074_worm"
+    });
+  });
+
+  it("lets Self-Modifying Code choose an unpaid program and leaves it in the stack if it cannot be installed", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-self-modifying-code-unpaid"));
+    state.runner.credits = 0;
+    state.corp.credits = 20;
+    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    state.runner.memoryUsed = 2;
+    const wormId = createRunnerStackCardForTest(state, "onr_v1_074_worm");
+    const krashId = createRunnerStackCardForTest(state, "onr_v1_039_krash");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice");
+    state = apply(state, "runner", (action) => action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program");
+
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice?.options.map((option) => option.value)).toEqual(expect.arrayContaining([krashId, wormId]));
+    const wormOptionId = runnerChoice?.options.find((option) => option.value === wormId)?.id;
+    expect(wormOptionId).toBeDefined();
+
+    state = applyChoice(state, "runner", String(wormOptionId));
+    expect(state.runner.stack).toContain(wormId);
+    expect(state.runner.rig.programs).not.toContain(wormId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      searchDestination: "install_program",
+      installSucceeded: false,
+      cardDefinitionId: "onr_v1_074_worm"
     });
   });
 
@@ -5416,6 +5488,140 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     state.corp.maxHandSize = 100;
     state = apply(state, "corp", (action) => action.type === "end_turn");
     if (investmentsId) expect(state.cardInstances[investmentsId]?.counters?.recurring_credit).toBe(2);
+  });
+
+  it("uses The Shell Traders to set aside a grip program, remove Shell counters and auto-install it for free", () => {
+    let state = runnerMainForTest(v1912CounterRecurringGame("v1912-shell-traders"));
+    state.runner.credits = 20;
+    state.corp.maxHandSize = 100;
+    const shellId = moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    const targetId = moveRunnerCardToGrip(state, "simple_fracter");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    expect(getLegalActions(state, "runner").some((action) => action.payload?.shellTradersAbility === "set_aside_from_grip")).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === shellId);
+    const installedShellId = state.runner.rig.resources.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_176_the-shell-traders");
+    expect(installedShellId).toBeDefined();
+    const setAsideAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "trigger_ability" && action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === targetId
+    );
+    expect(setAsideAction.payload?.shellCounterAmount).toBe(2);
+    expect(getPlayerView(state, "corp").legalActions).toEqual([]);
+
+    state = apply(state, "runner", (action) => action.actionId === setAsideAction.actionId);
+    expect(state.runner.grip).not.toContain(targetId);
+    expect(state.specialZones?.setAside).toContain(targetId);
+    expect(state.cardInstances[targetId]?.counters?.shell).toBe(2);
+    expect(getPlayerView(state, "corp").specialZones?.setAside[0]).toMatchObject({ definitionId: "simple_fracter", counters: { shell: 2 } });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      shellTradersAbility: "set_aside_from_grip",
+      targetCardDefinitionId: "simple_fracter",
+      shellCounterAmount: 2
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "trigger_ability" && action.payload?.shellTradersAbility === "remove_shell_counter" && action.payload?.targetCardId === targetId
+    );
+    expect(state.runner.credits).toBe(18);
+    expect(state.cardInstances[targetId]?.counters?.shell).toBe(1);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.specialZones?.setAside).not.toContain(targetId);
+    expect(state.runner.rig.programs).toContain(targetId);
+    expect(state.cardInstances[targetId]?.counters?.shell).toBeUndefined();
+    expect(state.runner.memoryUsed).toBeGreaterThanOrEqual(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      shellTradersAbility: "start_turn_remove_shell_counter",
+      targetCardDefinitionId: "simple_fracter",
+      installedFromSpecialZone: true,
+      installCostPaid: 0
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok, replay.errors.join("; ")).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("uses The Shell Traders for hardware targets and installs zero-cost targets immediately", () => {
+    let state = runnerMainForTest(v1912CounterRecurringGame("v1912-shell-traders-hardware-zero"));
+    state.runner.credits = 20;
+    state.corp.maxHandSize = 100;
+    const shellId = moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    const hardwareId = createRunnerGripCardForTest(state, "simple_setup_hardware");
+    const zeroCostProgramId = createRunnerGripCardForTest(state, "onr_v1_030_grubb");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === shellId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === zeroCostProgramId
+    );
+    expect(state.specialZones?.setAside).not.toContain(zeroCostProgramId);
+    expect(state.runner.rig.programs).toContain(zeroCostProgramId);
+    expect(state.cardInstances[zeroCostProgramId]?.counters?.shell).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      shellTradersAbility: "set_aside_from_grip",
+      targetCardDefinitionId: "onr_v1_030_grubb",
+      shellCounterAmount: 0,
+      installedFromSpecialZone: true,
+      installCostPaid: 0
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === hardwareId
+    );
+    expect(state.specialZones?.setAside).toContain(hardwareId);
+    expect(state.cardInstances[hardwareId]?.counters?.shell).toBe(2);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.shellTradersAbility === "remove_shell_counter" && action.payload?.targetCardId === hardwareId
+    );
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    expect(state.specialZones?.setAside).not.toContain(hardwareId);
+    expect(state.runner.rig.hardware).toContain(hardwareId);
+    expect(state.runner.memoryLimit).toBeGreaterThanOrEqual(5);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      shellTradersAbility: "start_turn_remove_shell_counter",
+      targetCardDefinitionId: "simple_setup_hardware",
+      installedFromSpecialZone: true,
+      installCostPaid: 0
+    });
+  });
+
+  it("opens a mandatory start-of-turn target choice when multiple Shell-Traders targets have Shell counters", () => {
+    let state = runnerMainForTest(v1912CounterRecurringGame("v1912-shell-traders-choice"));
+    state.runner.credits = 20;
+    state.corp.maxHandSize = 100;
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_176_the-shell-traders");
+    const fracterId = moveRunnerCardToGrip(state, "simple_fracter");
+    const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+    state = apply(state, "runner", (action) => action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === fracterId);
+    state = apply(state, "runner", (action) => action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === decoderId);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    expect(state.pendingChoice?.source).toContain("v1912.shell_traders_start_turn");
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    expect(getPlayerView(state, "runner").pendingChoice?.options.map((option) => option.value)).toEqual(expect.arrayContaining([fracterId, decoderId]));
+    const fracterOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === fracterId)?.id;
+    expect(fracterOptionId).toBeDefined();
+    state = applyChoice(state, "runner", String(fracterOptionId));
+    expect(state.cardInstances[fracterId]?.counters?.shell).toBe(1);
+    expect(state.cardInstances[decoderId]?.counters?.shell).toBe(3);
   });
 
   it("uses V1.9.12 Hidden-Zone event and installed helper paths without exposing choices to the Corp", () => {
@@ -7525,7 +7731,13 @@ describe("MVP 0.98a Identity and modifiers", () => {
       title: "Simple Economy Asset"
     });
     expect(exposeState.cardInstances[exposed]?.rezzed).toBe(false);
-    expect(getPlayerView(exposeState, "runner").servers.find((server) => server.id === "remote_1")?.root[0]?.known).toBe(false);
+    expect(exposeState.cardInstances[exposed]?.faceup).toBe(true);
+    expect(getPlayerView(exposeState, "runner").servers.find((server) => server.id === "remote_1")?.root[0]).toMatchObject({
+      known: true,
+      definitionId: "simple_economy_asset",
+      title: "Simple Economy Asset",
+      rezzed: false
+    });
   });
 
   it("swaps Corp hidden zones without unrecorded randomness or public title leaks", () => {
@@ -10488,6 +10700,17 @@ function toRunnerTurn(state: GameState): GameState {
   return next;
 }
 
+function runnerMainForTest(state: GameState): GameState {
+  return {
+    ...state,
+    activeSide: "runner",
+    phase: "runner_action_phase",
+    timingPoint: "runner_action.main",
+    corp: { ...state.corp, clicks: 0 },
+    runner: { ...state.runner, clicks: 4 }
+  };
+}
+
 function toRunnerTurnFromCorpMain(state: GameState): GameState {
   let next = apply(state, "corp", (action) => action.type === "end_turn");
   if (next.pendingChoice?.source === "discard_phase" && next.pendingChoice.side === "corp") {
@@ -10582,6 +10805,40 @@ function putRunnerCardOnTopOfStack(state: GameState, definitionId: string): Card
   removeEverywhere(state, id);
   state.runner.stack.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "stack" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function createRunnerStackCardForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = `test_runner_stack_${definitionId}_${Object.keys(state.cardInstances).length}`;
+  state.cardInstances[id] = {
+    instanceId: id,
+    definitionId,
+    owner: "runner",
+    controller: "runner",
+    zone: { side: "runner", zone: "stack" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0
+  };
+  state.runner.stack.unshift(id);
+  return id;
+}
+
+function createRunnerGripCardForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = `test_runner_grip_${definitionId}_${Object.keys(state.cardInstances).length}`;
+  state.cardInstances[id] = {
+    instanceId: id,
+    definitionId,
+    owner: "runner",
+    controller: "runner",
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0
+  };
+  state.runner.grip.unshift(id);
   return id;
 }
 

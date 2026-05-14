@@ -37,8 +37,16 @@
       "label": "Recurring Pool Refresh",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.12",
-      "currentScopeNote": "Runner programs and resources with recurringCredits initialize counters and refresh without accumulation at Runner start of turn.",
+      "currentScopeNote": "Runner programs and resources with recurringCredits initialize counters and refresh without accumulation at Runner start of turn. The Shell Traders was removed from this recurring-credit family in the completion repair.",
       "coverage": ["unit", "state_hash"]
+    },
+    {
+      "mechanicId": "mechanic.shell_traders.set_aside_delayed_install",
+      "label": "The Shell Traders Set Aside and Delayed Install",
+      "currentStatus": "implemented_limited",
+      "targetGate": "v1.9.12-completion",
+      "currentScopeNote": "The Shell Traders can set aside Runner grip program/hardware cards face-up with public Shell counters, remove counters via Runner start-of-turn triggers or the 1-credit paid ability, and auto-install the target without normal install credit costs when the last Shell counter is removed. MU pressure is handled through a Runner trash-to-free-MU choice; broader paid windows remain limited to Runner main, encounter and movement windows.",
+      "coverage": ["unit", "legal_action", "visibility", "state_hash", "ui"]
     },
     {
       "mechanicId": "mechanic.agenda.scored_counter_economy",

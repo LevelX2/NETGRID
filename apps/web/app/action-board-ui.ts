@@ -115,6 +115,7 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
 
 export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
+  if (action.type === "gain_credit" && cardRefsForAction(action).length > 0 && action.source !== "basic_action" && action.source !== "game_rule") return true;
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && cardRefsForAction(action).length > 0) return true;
   if (action.type === "trigger_ability" && cardRefsForAction(action).length > 0) return true;
   if (isPriorityAction(action)) return false;
@@ -206,6 +207,8 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
 }
 
 function resourceAbilityContextLabel(action: LegalAction): string | null {
+  if (action.payload?.shellTradersAbility === "set_aside_from_grip") return "Karte vorbereiten";
+  if (action.payload?.shellTradersAbility === "remove_shell_counter") return "Shell-Counter entfernen";
   switch (action.payload?.resourceAbility) {
     case "broker_load_credits":
       return "3 Credits laden";
