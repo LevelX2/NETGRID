@@ -1348,7 +1348,6 @@ export default function Page() {
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] = useState(false);
-  const [hasStoredMatchStartSettings, setHasStoredMatchStartSettings] = useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
   const [seed, setSeed] = useState(() => createMatchSeed());
   const [joinLinkInput, setJoinLinkInput] = useState("");
@@ -1461,6 +1460,7 @@ export default function Page() {
   const lastSeenCueEventIdRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
+  const hasStoredMatchStartSettingsRef = useRef(false);
   const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
   const cardPreviewCollapsedStorageKey = session ? cardPreviewCollapsedStorageKeyFor(session.matchId, session.side) : null;
 
@@ -1488,7 +1488,7 @@ export default function Page() {
     const storedMatchStartSettings = parseMatchStartSettingsFromStorage(rawMatchStartSettings);
     if (rawMatchStartSettings && !storedMatchStartSettings) removeLocalStorageKeys(MATCH_START_SETTINGS_STORAGE_KEY, LEGACY_MATCH_START_SETTINGS_STORAGE_KEY);
     if (storedMatchStartSettings) {
-      setHasStoredMatchStartSettings(true);
+      hasStoredMatchStartSettingsRef.current = true;
       if (storedMatchStartSettings.mode) setMode(storedMatchStartSettings.mode);
       if (storedMatchStartSettings.playMode) setPlayMode(storedMatchStartSettings.playMode);
       if (storedMatchStartSettings.humanSideSelection) setHumanSideSelection(storedMatchStartSettings.humanSideSelection);
@@ -1513,7 +1513,7 @@ export default function Page() {
       if (typeof storedMatchStartSettings.selectedParticipantBRunnerLocalDeckId === "string") setSelectedParticipantBRunnerLocalDeckId(storedMatchStartSettings.selectedParticipantBRunnerLocalDeckId);
       if (typeof storedMatchStartSettings.selectedParticipantBCorpLocalDeckId === "string") setSelectedParticipantBCorpLocalDeckId(storedMatchStartSettings.selectedParticipantBCorpLocalDeckId);
     } else {
-      setHasStoredMatchStartSettings(false);
+      hasStoredMatchStartSettingsRef.current = false;
     }
     setMatchStartSettingsLoaded(true);
     const storedSession = loadStoredSession();
@@ -1800,7 +1800,7 @@ export default function Page() {
   }, [cuePositionLoaded, cuePosition]);
 
   useEffect(() => {
-    if (!matchStartSettingsLoaded) return;
+    if (!matchStartSettingsLoaded || !localDecksLoaded) return;
     window.localStorage.setItem(
       MATCH_START_SETTINGS_STORAGE_KEY,
       serializeMatchStartSettingsForStorage({
@@ -1853,7 +1853,8 @@ export default function Page() {
     selectedRunnerLocalDeckId,
     selectedCorpLocalDeckId,
     selectedParticipantBRunnerLocalDeckId,
-    selectedParticipantBCorpLocalDeckId
+    selectedParticipantBCorpLocalDeckId,
+    localDecksLoaded
   ]);
 
   useEffect(() => {
@@ -3175,7 +3176,7 @@ export default function Page() {
     setSelectedCorpLocalDeckId((current) => (hasCorpDeck && decks.some((deck) => deck.side === "corp" && deck.deckId === current) ? current : firstCorpDeckId));
     setSelectedParticipantBRunnerLocalDeckId((current) => (hasRunnerDeck && decks.some((deck) => deck.side === "runner" && deck.deckId === current) ? current : firstRunnerDeckId));
     setSelectedParticipantBCorpLocalDeckId((current) => (hasCorpDeck && decks.some((deck) => deck.side === "corp" && deck.deckId === current) ? current : firstCorpDeckId));
-    if (!hasStoredMatchStartSettings) {
+    if (!hasStoredMatchStartSettingsRef.current) {
       if (hasRunnerDeck) setRunnerDeckSource("local");
       if (hasCorpDeck) setCorpDeckSource("local");
     }
