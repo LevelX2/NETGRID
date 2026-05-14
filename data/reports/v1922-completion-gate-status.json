@@ -1,26 +1,26 @@
 {
   "schemaVersion": "v1922-completion-gate-status-v1",
   "release": "V1.9.22",
-  "status": "blocked_open",
-  "cursorPhase": "implementing",
-  "releaseDone": false,
+  "status": "complete",
+  "cursorPhase": "complete",
+  "releaseDone": true,
   "scope": {
     "wipCardCount": 47,
-    "runtimeReleasePromoted": false,
-    "catalogPromoted": false,
-    "aiPromoted": false
+    "runtimeReleasePromoted": true,
+    "catalogPromoted": true,
+    "aiPromoted": true
   },
   "verifiedGreenChecks": [
-    "json",
+    "ai",
+    "build",
     "catalog",
     "engine",
-    "ai",
-    "server",
-    "web",
-    "typecheck",
-    "test",
+    "json",
     "lint",
-    "build"
+    "server",
+    "test",
+    "typecheck",
+    "web"
   ],
   "lastLocalContractSearch": {
     "searchedAt": "2026-05-13T18:40:00+02:00",
@@ -48,9 +48,9 @@
     "docRef": "docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md",
     "dataRef": "data/rules/v1922-resolver-contracts.json",
     "cardCount": 47,
-    "readyForPromotionCount": 0,
+    "readyForPromotionCount": 47,
     "hardwareInstallBaseCoveredCount": 9,
-    "decision": "no_runtime_catalog_or_ai_promotion"
+    "decision": "runtime_catalog_ai_promotion_complete"
   },
   "latestLocalWorkingBasis": {
     "createdAt": "2026-05-13T19:58:00+02:00",
@@ -61,7 +61,7 @@
       "onr_v1_196_corporate-war",
       "onr_v1_210_political-overthrow"
     ],
-    "decision": "no_runtime_catalog_or_ai_promotion"
+    "decision": "runtime_catalog_ai_promotion_complete_after_all_47_wips"
   },
   "latestLocalCardFacts": {
     "createdAt": "2026-05-13T20:20:00+02:00",
@@ -75,11 +75,11 @@
       "onr_v1_196_corporate-war",
       "onr_v1_210_political-overthrow"
     ],
-    "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
+    "decision": "local_facts_available_runtime_catalog_ai_promotion_complete"
   },
   "latestRuntimeResolverSlice": {
     "implementedAt": "2026-05-14T19:27:00+02:00",
-      "cards": [
+    "cards": [
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
@@ -158,15 +158,15 @@
   },
   "latestPreflightReviews": {
     "createdAt": "2026-05-14T01:05:00+02:00",
-      "docs": [
-        "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
-        "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
-        "docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md",
-        "docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md",
-        "docs/derived/V1_9_22_ZETATECH_OVERLAY_RUNTIME_CONTRACT.md",
-        "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md",
-        "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md",
-        "docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md"
+    "docs": [
+      "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
+      "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
+      "docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md",
+      "docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md",
+      "docs/derived/V1_9_22_ZETATECH_OVERLAY_RUNTIME_CONTRACT.md",
+      "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md",
+      "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md",
+      "docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md"
     ],
     "nextCodeCandidates": [
       {
@@ -264,30 +264,17 @@
     "blockedCards": [],
     "removalCondition": "Prepare final runtime/catalog/AI promotion artifacts, webclient version and final review."
   },
-  "blockingGates": [
-    {
-      "gateId": "resolver_contracts",
-      "status": "blocked",
-      "summary": "All 47 V1.9.22 target cards now have non-promoting runtime WIP coverage, including Viral 15, Data-Fort rez/credit accounting and Zetatech overlay; final promotion artifacts are still not closed.",
-      "removalCondition": "Add final Manifest/Coverage, AI and web gates before release promotion."
-    },
-    {
-      "gateId": "ai_promotion_artifacts",
-      "status": "blocked",
-      "summary": "Final V1.9.22 AI hints, approval manifest and AI smoke artifacts are intentionally absent.",
-      "removalCondition": "Create final AI artifacts only after runtime/catalog promotion and side-safe AI behavior are covered."
-    },
-    {
-      "gateId": "webclient_version",
-      "status": "blocked",
-      "summary": "The visible web client version must stay V1.9.21 until the V1.9.22 completion gate.",
-      "removalCondition": "Update the visible client version to V1.9.22 only as part of final release promotion."
-    },
-    {
-      "gateId": "final_review",
-      "status": "blocked",
-      "summary": "V1.9.22 final review has not been written because the release is not complete.",
-      "removalCondition": "Write final review after runtime, catalog, AI, webclient and full verification gates are satisfied."
-    }
-  ]
+  "blockingGates": [],
+  "completion": {
+    "status": "complete",
+    "finalReview": "docs/derived/V1_9_22_FINAL_REVIEW.md",
+    "aiArtifacts": [
+      "data/ai/ai-card-hints-deck-legal-v1922.json",
+      "data/manifests/deck-legal-ai-approval-v1922-manifest.json",
+      "data/scenarios/ai-deck-legal-v1922-smokes.json"
+    ],
+    "webclientVersion": "V1.9.22",
+    "removalCondition": "satisfied"
+  },
+  "lastVerifiedAt": "2026-05-14T20:15:40+02:00"
 }

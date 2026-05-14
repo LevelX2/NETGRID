@@ -1,6 +1,6 @@
 # V1.9.10 bis V1.9.22 Automation State
 
-Status: active
+Status: complete
 Stand: 2026-05-14
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
 Automation-ID: `netgrid-v1-9-originalset-completion-local`
@@ -15,12 +15,12 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.22
-Phase: implementing
+Aktueller Release: complete
+Phase: complete
 Naechster erlaubter Release nach Abschluss: complete
-Commit-Modus: WIP-Commits erlaubt
-Push-Modus: WIP-Pushes erlaubt
-Completion-Modus: Gate-pflichtig
+Commit-Modus: Abschlusscommit erforderlich
+Push-Modus: Abschluss-Push erforderlich
+Completion-Modus: Gate erfuellt
 
 ## Manueller Quellenabgleich 2026-05-14 15:35 CEST
 
@@ -73,7 +73,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | done |
 | V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | done |
 | V1.9.21 | Deterministischer Zufall und Wuerfelkarten | done |
-| V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | current |
+| V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | done |
 
 ## Aktuelle Nutzerklaerungen
 
@@ -90,6 +90,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Naechster sinnvoller Schnitt: finale V1.9.22-Promotion-Gates vorbereiten (Catalog/AI-Artefakte, Webclient-Version, Final Review); `Viral 15`, `Data Fort Reclamation` Rez-/Credit-Follow-up und `Zetatech Software Installer` Overlay sind als nicht-promotende Runtime-WIPs umgesetzt.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 20:15 CEST
+- Ergebnis: V1.9.22 Per-card Resolver Longtail und Originalset Completion Gate final promotet; Cursor auf `complete` gesetzt.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: complete
+- Umsetzung: Alle 47 Zielkarten sind im Runtime-Releasepool und in der Deck-Legal-AI-Approval-Liste. Neue Abschlussartefakte: `data/scenarios/v1922-per-card-longtail-release-smoke.json`, `data/ai/ai-card-hints-deck-legal-v1922.json`, `data/manifests/deck-legal-ai-approval-v1922-manifest.json`, `data/scenarios/ai-deck-legal-v1922-smokes.json`, `docs/derived/V1_9_22_FINAL_REVIEW.md`; Webclient-Version `V1.9.22`.
+- Tests: JSON 312, `catalog` 44, `engine` 309, `ai` 86, `server` 72, `web` 80, `typecheck`, `test`, `lint`, `build` gruen; Build mit bekannter Turbopack-NFT-Warnung. Erster breiter `test`-Run hatte einen nicht reproduzierbaren Server-Vitest-Worker-Exit, isolierter `server` und wiederholter breiter `test` waren gruen.
+- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.22: per-card longtail originalset completion`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.10 bis V1.9.22 abgeschlossen; kein naechster Release in dieser Automation.
 
 - Zeitpunkt: 2026-05-14 19:50 CEST
 - Ergebnis: V1.9.22 Zetatech-Overlay-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

@@ -16,6 +16,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
@@ -55,15 +56,16 @@ describe("catalog API filters", () => {
       ...DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
       ...DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
-      ...DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS
+      ...DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS,
+      ...DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS
     ].filter((cardId) => cardId.startsWith("onr_v1_"));
     expect(body.cards.filter((card) => card.catalogCardId.startsWith("onr_v1_")).map((card) => card.catalogCardId).sort()).toEqual(
       [...new Set(expectedOnrAiApproved)].sort()
     );
-    expect(body.cards.map((card) => card.catalogCardId)).not.toEqual(expect.arrayContaining([...ONR_V1_9_22_WIP_CARD_IDS]));
+    expect(body.cards.map((card) => card.catalogCardId)).toEqual(expect.arrayContaining([...ONR_V1_9_22_WIP_CARD_IDS]));
   });
 
-  it("keeps V1.9.22 WIP card details non-promoted in the web catalog API", () => {
+  it("shows V1.9.22 card details promoted in the web catalog API", () => {
     for (const cardId of ONR_V1_9_22_WIP_CARD_IDS) {
       const response = catalogDetailResponse(cardId);
 
@@ -77,10 +79,10 @@ describe("catalog API filters", () => {
         };
       };
       expect(body.card.catalogCardId, cardId).toBe(cardId);
-      expect(body.card.statuses.ai_supported, cardId).toBe(false);
-      expect(body.card.statuses.human_playable, cardId).toBe(false);
-      expect(body.card.statuses.deck_legal, cardId).toBe(false);
-      expect(body.card.aiHints?.aiSupportStatus ?? "none", cardId).not.toBe("ai_supported");
+      expect(body.card.statuses.ai_supported, cardId).toBe(true);
+      expect(body.card.statuses.human_playable, cardId).toBe(true);
+      expect(body.card.statuses.deck_legal, cardId).toBe(true);
+      expect(body.card.aiHints?.aiSupportStatus ?? "none", cardId).toBe("ai_supported");
     }
   });
 
@@ -306,5 +308,27 @@ describe("catalog API filters", () => {
     expect(body.card.aiHints?.requiredMechanics).toContain("deterministic_random_card_resolver");
     expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
     expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v1921-smokes.json#runner_v1921_random_programs");
+  });
+
+  it("adds V1.9.22 AI hints for newly approved longtail cards", () => {
+    const response = catalogDetailResponse("onr_v1_075_zetatech-software-installer");
+
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        aiHints: {
+          roles: string[];
+          planRoles: string[];
+          requiredMechanics: string[];
+          aiSupportStatus: string;
+          scenarioRefs: string[];
+        } | null;
+      };
+    };
+    expect(body.card.aiHints?.roles).toContain("per_card_longtail");
+    expect(body.card.aiHints?.planRoles).toContain("runner_install_program");
+    expect(body.card.aiHints?.requiredMechanics).toContain("per_card_longtail_resolver_gate");
+    expect(body.card.aiHints?.aiSupportStatus).toBe("ai_supported");
+    expect(body.card.aiHints?.scenarioRefs).toContain("data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail");
   });
 });

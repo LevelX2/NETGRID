@@ -828,6 +828,8 @@ export const ONR_V1_9_22_WIP_CARD_IDS = [
   "onr_v1_298_planning-consultants",
 ] as const;
 
+export const ONR_V1_9_22_RELEASE_CARD_IDS = ONR_V1_9_22_WIP_CARD_IDS;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -862,6 +864,7 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_9_19_RELEASE_CARD_IDS,
   ...ONR_V1_9_20_RELEASE_CARD_IDS,
   ...ONR_V1_9_21_RELEASE_CARD_IDS,
+  ...ONR_V1_9_22_RELEASE_CARD_IDS,
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -1079,6 +1082,10 @@ export const DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS = [
   ...ONR_V1_9_21_RELEASE_CARD_IDS,
 ] as const;
 
+export const DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS = [
+  ...ONR_V1_9_22_RELEASE_CARD_IDS,
+] as const;
+
 const ONR_V1_RUNTIME_RELEASE_CARD_ID_SET = new Set<string>(
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
 );
@@ -1104,7 +1111,11 @@ const DECK_LEGAL_AI_APPROVED_CARD_ID_SET = new Set<string>([
   ...DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS,
   ...DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS,
+  ...DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS,
 ]);
+const ONR_V1_9_22_RELEASE_CARD_ID_SET = new Set<string>(
+  ONR_V1_9_22_RELEASE_CARD_IDS,
+);
 const ONR_V1_9_21_RELEASE_CARD_ID_SET = new Set<string>(
   ONR_V1_9_21_RELEASE_CARD_IDS,
 );
@@ -1695,6 +1706,26 @@ const ONR_V1_9_21_RELEASE_MANIFEST: CatalogManifestReference = {
   ],
   replayTests: [
     "packages/engine/src/index.test.ts::V1.9.21 Deterministic Random WIP",
+  ],
+};
+
+const ONR_V1_9_22_RELEASE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-v1.9.22",
+  status: "human_playable_v1_9_22_per_card_longtail_completion",
+  unitTests: [
+    "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP",
+    "packages/ai/src/index.test.ts::V1.9.22 completion",
+  ],
+  scenarioTests: [
+    "data/scenarios/v1922-per-card-longtail-release-smoke.json",
+    "data/scenarios/ai-deck-legal-v1922-smokes.json",
+  ],
+  visibilityTests: [
+    "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP",
+    "data/scenarios/v1922-per-card-longtail-release-smoke.json",
+  ],
+  replayTests: [
+    "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP",
   ],
 };
 
@@ -3677,6 +3708,7 @@ function applyRuntimeBaseStatusModel(cards: CatalogCard[]): CatalogCard[] {
 }
 
 function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
+  const isV1922 = ONR_V1_9_22_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1921 = ONR_V1_9_21_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1920 = ONR_V1_9_20_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV1919 = ONR_V1_9_19_RELEASE_CARD_ID_SET.has(card.catalogCardId);
@@ -3709,137 +3741,143 @@ function promoteOnrRuntimeReleaseCard(card: CatalogCard): CatalogCard {
   const isV123 = ONR_V1_2_3_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV112K = ONR_V1_1_2K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
   const isV106K = ONR_V1_0_6K_RELEASE_CARD_ID_SET.has(card.catalogCardId);
-  const textOverrides = isV1921
+  const textOverrides = isV1922
     ? {}
-    : isV1920
+    : isV1921
       ? {}
-      : isV1919
+      : isV1920
         ? {}
-        : isV1918
+        : isV1919
           ? {}
-          : isV1917
+          : isV1918
             ? {}
-            : isV1916
+            : isV1917
               ? {}
-              : isV1915
+              : isV1916
                 ? {}
-                : isV1914
-                  ? ONR_V1_9_14_TEXT_OVERRIDES
-                  : isV1913
-                    ? ONR_V1_9_13_TEXT_OVERRIDES
-                    : isV1912
-                      ? ONR_V1_9_12_TEXT_OVERRIDES
-                      : isV1911
-                        ? ONR_V1_9_11_TEXT_OVERRIDES
-                        : isV199
-                          ? ONR_V1_9_9_TEXT_OVERRIDES
-                          : isV198
-                            ? ONR_V1_9_8_TEXT_OVERRIDES
-                            : isV197
-                              ? ONR_V1_9_7_TEXT_OVERRIDES
-                              : isV196
-                                ? ONR_V1_9_6_TEXT_OVERRIDES
-                                : isV195
-                                  ? ONR_V1_9_5_TEXT_OVERRIDES
-                                  : isV194
-                                    ? ONR_V1_9_4_TEXT_OVERRIDES
-                                    : isV193
-                                      ? ONR_V1_9_3_TEXT_OVERRIDES
-                                      : isV192
-                                        ? ONR_V1_9_2_TEXT_OVERRIDES
-                                        : isV191
-                                          ? ONR_V1_9_1_TEXT_OVERRIDES
-                                          : isV190
-                                            ? ONR_V1_9_0_TEXT_OVERRIDES
-                                            : isV181
-                                              ? ONR_V1_8_1_TEXT_OVERRIDES
-                                              : isV180
-                                                ? ONR_V1_8_0_TEXT_OVERRIDES
-                                                : isV172
-                                                  ? ONR_V1_7_2_TEXT_OVERRIDES
-                                                  : isV171
-                                                    ? ONR_V1_7_1_TEXT_OVERRIDES
-                                                    : isV170
-                                                      ? ONR_V1_7_0_TEXT_OVERRIDES
-                                                      : isV163
-                                                        ? ONR_V1_6_3_TEXT_OVERRIDES
-                                                        : isV162
-                                                          ? ONR_V1_6_2_TEXT_OVERRIDES
-                                                          : isV161
-                                                            ? ONR_V1_6_1_TEXT_OVERRIDES
-                                                            : isV123
-                                                              ? ONR_V1_2_3_TEXT_OVERRIDES
-                                                              : isV112K
-                                                                ? ONR_V1_1_2K_TEXT_OVERRIDES
-                                                                : isV106K
-                                                                  ? ONR_V1_0_6K_TEXT_OVERRIDES
-                                                                  : ONR_V1_0_5K_TEXT_OVERRIDES;
-  const numericOverrides = isV1921
-    ? {}
-    : isV1920
-      ? {}
-      : isV1919
-        ? {}
-        : isV1918
-          ? {}
-          : isV1917
-            ? {}
-            : isV1916
-              ? {}
-              : isV1915
-                ? {}
-                : isV1914
+                : isV1915
                   ? {}
-                  : isV1913
+                  : isV1914
+                    ? ONR_V1_9_14_TEXT_OVERRIDES
+                    : isV1913
+                      ? ONR_V1_9_13_TEXT_OVERRIDES
+                      : isV1912
+                        ? ONR_V1_9_12_TEXT_OVERRIDES
+                        : isV1911
+                          ? ONR_V1_9_11_TEXT_OVERRIDES
+                          : isV199
+                            ? ONR_V1_9_9_TEXT_OVERRIDES
+                            : isV198
+                              ? ONR_V1_9_8_TEXT_OVERRIDES
+                              : isV197
+                                ? ONR_V1_9_7_TEXT_OVERRIDES
+                                : isV196
+                                  ? ONR_V1_9_6_TEXT_OVERRIDES
+                                  : isV195
+                                    ? ONR_V1_9_5_TEXT_OVERRIDES
+                                    : isV194
+                                      ? ONR_V1_9_4_TEXT_OVERRIDES
+                                      : isV193
+                                        ? ONR_V1_9_3_TEXT_OVERRIDES
+                                        : isV192
+                                          ? ONR_V1_9_2_TEXT_OVERRIDES
+                                          : isV191
+                                            ? ONR_V1_9_1_TEXT_OVERRIDES
+                                            : isV190
+                                              ? ONR_V1_9_0_TEXT_OVERRIDES
+                                              : isV181
+                                                ? ONR_V1_8_1_TEXT_OVERRIDES
+                                                : isV180
+                                                  ? ONR_V1_8_0_TEXT_OVERRIDES
+                                                  : isV172
+                                                    ? ONR_V1_7_2_TEXT_OVERRIDES
+                                                    : isV171
+                                                      ? ONR_V1_7_1_TEXT_OVERRIDES
+                                                      : isV170
+                                                        ? ONR_V1_7_0_TEXT_OVERRIDES
+                                                        : isV163
+                                                          ? ONR_V1_6_3_TEXT_OVERRIDES
+                                                          : isV162
+                                                            ? ONR_V1_6_2_TEXT_OVERRIDES
+                                                            : isV161
+                                                              ? ONR_V1_6_1_TEXT_OVERRIDES
+                                                              : isV123
+                                                                ? ONR_V1_2_3_TEXT_OVERRIDES
+                                                                : isV112K
+                                                                  ? ONR_V1_1_2K_TEXT_OVERRIDES
+                                                                  : isV106K
+                                                                    ? ONR_V1_0_6K_TEXT_OVERRIDES
+                                                                    : ONR_V1_0_5K_TEXT_OVERRIDES;
+  const numericOverrides = isV1922
+    ? {}
+    : isV1921
+      ? {}
+      : isV1920
+        ? {}
+        : isV1919
+          ? {}
+          : isV1918
+            ? {}
+            : isV1917
+              ? {}
+              : isV1916
+                ? {}
+                : isV1915
+                  ? {}
+                  : isV1914
                     ? {}
-                    : isV1912
+                    : isV1913
                       ? {}
-                      : isV1911
-                        ? ONR_V1_9_11_NUMERIC_OVERRIDES
-                        : isV199
-                          ? ONR_V1_9_9_NUMERIC_OVERRIDES
-                          : isV198
-                            ? ONR_V1_9_8_NUMERIC_OVERRIDES
-                            : isV197
-                              ? ONR_V1_9_7_NUMERIC_OVERRIDES
-                              : isV196
-                                ? ONR_V1_9_6_NUMERIC_OVERRIDES
-                                : isV195
-                                  ? ONR_V1_9_5_NUMERIC_OVERRIDES
-                                  : isV194
-                                    ? ONR_V1_9_4_NUMERIC_OVERRIDES
-                                    : isV193
-                                      ? ONR_V1_9_3_NUMERIC_OVERRIDES
-                                      : isV192
-                                        ? ONR_V1_9_2_NUMERIC_OVERRIDES
-                                        : isV191
-                                          ? ONR_V1_9_1_NUMERIC_OVERRIDES
-                                          : isV190
-                                            ? ONR_V1_9_0_NUMERIC_OVERRIDES
-                                            : isV181
-                                              ? ONR_V1_8_1_NUMERIC_OVERRIDES
-                                              : isV180
-                                                ? ONR_V1_8_0_NUMERIC_OVERRIDES
-                                                : isV172
-                                                  ? ONR_V1_7_2_NUMERIC_OVERRIDES
-                                                  : isV171
-                                                    ? ONR_V1_7_1_NUMERIC_OVERRIDES
-                                                    : isV170
-                                                      ? ONR_V1_7_0_NUMERIC_OVERRIDES
-                                                      : isV163
-                                                        ? ONR_V1_6_3_NUMERIC_OVERRIDES
-                                                        : isV162
-                                                          ? ONR_V1_6_2_NUMERIC_OVERRIDES
-                                                          : isV161
-                                                            ? ONR_V1_6_1_NUMERIC_OVERRIDES
-                                                            : isV123
-                                                              ? ONR_V1_2_3_NUMERIC_OVERRIDES
-                                                              : isV112K
-                                                                ? ONR_V1_1_2K_NUMERIC_OVERRIDES
-                                                                : isV106K
-                                                                  ? ONR_V1_0_6K_NUMERIC_OVERRIDES
-                                                                  : ONR_V1_0_5K_NUMERIC_OVERRIDES;
-  const manifest = isV1921
+                      : isV1912
+                        ? {}
+                        : isV1911
+                          ? ONR_V1_9_11_NUMERIC_OVERRIDES
+                          : isV199
+                            ? ONR_V1_9_9_NUMERIC_OVERRIDES
+                            : isV198
+                              ? ONR_V1_9_8_NUMERIC_OVERRIDES
+                              : isV197
+                                ? ONR_V1_9_7_NUMERIC_OVERRIDES
+                                : isV196
+                                  ? ONR_V1_9_6_NUMERIC_OVERRIDES
+                                  : isV195
+                                    ? ONR_V1_9_5_NUMERIC_OVERRIDES
+                                    : isV194
+                                      ? ONR_V1_9_4_NUMERIC_OVERRIDES
+                                      : isV193
+                                        ? ONR_V1_9_3_NUMERIC_OVERRIDES
+                                        : isV192
+                                          ? ONR_V1_9_2_NUMERIC_OVERRIDES
+                                          : isV191
+                                            ? ONR_V1_9_1_NUMERIC_OVERRIDES
+                                            : isV190
+                                              ? ONR_V1_9_0_NUMERIC_OVERRIDES
+                                              : isV181
+                                                ? ONR_V1_8_1_NUMERIC_OVERRIDES
+                                                : isV180
+                                                  ? ONR_V1_8_0_NUMERIC_OVERRIDES
+                                                  : isV172
+                                                    ? ONR_V1_7_2_NUMERIC_OVERRIDES
+                                                    : isV171
+                                                      ? ONR_V1_7_1_NUMERIC_OVERRIDES
+                                                      : isV170
+                                                        ? ONR_V1_7_0_NUMERIC_OVERRIDES
+                                                        : isV163
+                                                          ? ONR_V1_6_3_NUMERIC_OVERRIDES
+                                                          : isV162
+                                                            ? ONR_V1_6_2_NUMERIC_OVERRIDES
+                                                            : isV161
+                                                              ? ONR_V1_6_1_NUMERIC_OVERRIDES
+                                                              : isV123
+                                                                ? ONR_V1_2_3_NUMERIC_OVERRIDES
+                                                                : isV112K
+                                                                  ? ONR_V1_1_2K_NUMERIC_OVERRIDES
+                                                                  : isV106K
+                                                                    ? ONR_V1_0_6K_NUMERIC_OVERRIDES
+                                                                    : ONR_V1_0_5K_NUMERIC_OVERRIDES;
+  const manifest = isV1922
+    ? ONR_V1_9_22_RELEASE_MANIFEST
+    : isV1921
     ? ONR_V1_9_21_RELEASE_MANIFEST
     : isV1920
       ? ONR_V1_9_20_RELEASE_MANIFEST

@@ -17,6 +17,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS,
+  DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS,
   ONR_V1_9_22_WIP_CARD_IDS
@@ -78,15 +79,18 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
   });
 
-  it("keeps V1.9.22 WIP cards outside AI-supported runtime planning until the completion gate", () => {
+  it("marks V1.9.22 completion cards AI-supported after the completion gate", () => {
     const cardsById = createRuntimeCardsById();
 
     expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
+    expect(DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS).toEqual(
+      ONR_V1_9_22_WIP_CARD_IDS,
+    );
     for (const cardId of ONR_V1_9_22_WIP_CARD_IDS) {
       const runtimeCard = cardsById[cardId];
-      expect(runtimeCard?.statuses.ai_supported ?? false, cardId).toBe(false);
-      expect(runtimeCard?.statuses.human_playable ?? false, cardId).toBe(false);
-      expect(runtimeCard?.statuses.deck_legal ?? false, cardId).toBe(false);
+      expect(runtimeCard?.statuses.ai_supported ?? false, cardId).toBe(true);
+      expect(runtimeCard?.statuses.human_playable ?? false, cardId).toBe(true);
+      expect(runtimeCard?.statuses.deck_legal ?? false, cardId).toBe(true);
     }
   });
 

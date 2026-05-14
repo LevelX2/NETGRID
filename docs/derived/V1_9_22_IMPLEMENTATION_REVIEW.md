@@ -1,7 +1,7 @@
 # V1.9.22 Implementation Review
 
 Stand: 2026-05-14
-Status: runtime WIP, no release/catalog/AI promotion
+Status: release complete, catalog/AI promotion complete
 
 ## Umgesetzter Schnitt
 
@@ -60,7 +60,9 @@ Status: runtime WIP, no release/catalog/AI promotion
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: finale V1.9.22-Promotion-Gates vorbereiten. `Viral 15`, `Data Fort Reclamation` Rez-/Credit-Follow-up und `Zetatech Software Installer` Overlay sind jetzt als nicht-promotende Runtime-WIPs umgesetzt. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
+Finalisierung 2026-05-14 20:15 CEST: Die finalen V1.9.22-Promotion-Gates sind geschlossen. `ONR_V1_9_22_RELEASE_CARD_IDS` ist im Runtime-Releasepool, `DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS` ist im AI-Approval-Pool, `data/ai/ai-card-hints-deck-legal-v1922.json`, `data/manifests/deck-legal-ai-approval-v1922-manifest.json`, `data/scenarios/ai-deck-legal-v1922-smokes.json` und `data/scenarios/v1922-per-card-longtail-release-smoke.json` sind versioniert. Die sichtbare Webclient-Version steht auf `V1.9.22`, `data/reports/v1922-completion-gate-status.json` ist `complete`, und `docs/derived/V1_9_22_FINAL_REVIEW.md` bestaetigt das Completion-Gate.
+
+Naechster kleiner Schnitt: keiner fuer V1.9.22. Die Releasekette V1.9.10 bis V1.9.22 ist abgeschlossen; V2.x bleibt separate Planung.
 
 Blocker-Abgleich 2026-05-14 18:01 CEST: `Data Fort Reclamation` hat einen ersten Install-Sequence-WIP; `Viral 15` bleibt die letzte Zielkarte ohne Runtime-WIP. Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay und finale Promotion-Gates bleiben offen. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
 
