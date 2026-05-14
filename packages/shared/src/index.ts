@@ -5469,11 +5469,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     memoryCost: 1,
+    recurringCredits: 2,
     rulesText:
-      "Install as a program. Its restricted recurring program-install credit and overlying ability remain gated until that payment contract is confirmed.",
+      "2 recurring credits. Use these credits to install programs. Its overlying ability remains gated until that state-transition contract is confirmed.",
     mechanics: [
       "install_program",
       "memory",
+      "recurring_credit",
+      "program_install_support",
       "per_card_longtail",
       "ability_contract_pending",
       ONR_V1_LOCAL_PRIVATE,

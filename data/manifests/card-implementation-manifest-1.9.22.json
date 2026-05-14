@@ -220,13 +220,15 @@
       "cardCode": "onr_v1_075_zetatech-software-installer",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "resolverFamily": "v1922_runner_program_zetatech_software_installer_recurring_program_install",
       "coveredSmokes": [
         "install_program_legal_action",
+        "recurring_program_install_credit",
+        "runner_turn_start_recurring_refresh",
         "wrong_side_revalidation",
         "stale_state_revalidation",
         "memory_cost",
-        "ability_contract_remains_gated",
+        "overlay_contract_remains_gated",
         "public_payload_visibility",
         "replay_statehash"
       ]

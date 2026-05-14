@@ -3124,6 +3124,7 @@ describe("catalog import and status logic", () => {
         "v1922_runner_program_hammer_wall_breaker_stealth_loss_choice",
         "v1922_runner_program_japanese_water_torture_future_action_debt",
         "v1922_runner_program_reflector_tagged_breaker",
+        "v1922_runner_program_zetatech_software_installer_recurring_program_install",
       ].includes(card.resolverFamily),
     );
     const corpAgendaResolverCards = manifestCards.filter((card) =>
@@ -3269,10 +3270,18 @@ describe("catalog import and status logic", () => {
           "onr_v1_057_scatter-shot",
           "onr_v1_067_speed-trap",
           "onr_v1_068_startup-immolator",
-          "onr_v1_075_zetatech-software-installer",
         ].includes(card.cardCode)
       ) {
         expect(card.coveredSmokes).toContain("ability_contract_remains_gated");
+      }
+      if (card.cardCode === "onr_v1_075_zetatech-software-installer") {
+        expect(card.coveredSmokes).toEqual(
+          expect.arrayContaining([
+            "recurring_program_install_credit",
+            "runner_turn_start_recurring_refresh",
+            "overlay_contract_remains_gated",
+          ]),
+        );
       }
       if (card.cardCode === "onr_v1_045_newsgroup-filter") {
         expect(card.coveredSmokes).toContain("gain_2_credit_action");

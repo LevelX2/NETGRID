@@ -341,6 +341,8 @@ const V1922_VALU_PAK_SOFTWARE_BUNDLE_ID = "onr_v1_117_valu-pak-software-bundle";
 const V1922_NEWSGROUP_FILTER_ID = "onr_v1_045_newsgroup-filter";
 const V1922_SHIELD_ID = "onr_v1_061_shield";
 const V1922_JAPANESE_WATER_TORTURE_ID = "onr_v1_037_japanese-water-torture";
+const V1922_ZETATECH_SOFTWARE_INSTALLER_ID =
+  "onr_v1_075_zetatech-software-installer";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
@@ -13973,10 +13975,22 @@ function availableRunnerProgramInstallCredits(state: GameState): number {
 }
 
 function runnerRecurringCredits(state: GameState): number {
-  return state.runner.rig.hardware.reduce(
+  return runnerProgramInstallRecurringCreditSourceIds(state).reduce(
     (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
     0,
   );
+}
+
+function runnerProgramInstallRecurringCreditSourceIds(
+  state: GameState,
+): CardInstanceId[] {
+  return [
+    ...state.runner.rig.hardware,
+    ...state.runner.rig.programs.filter(
+      (cardId) =>
+        definitionFor(state, cardId).id === V1922_ZETATECH_SOFTWARE_INSTALLER_ID,
+    ),
+  ];
 }
 
 function spendRunnerInstallCredits(
@@ -14004,7 +14018,7 @@ function spendRunnerInstallCredits(
     );
     remaining -= temporary;
   }
-  for (const cardId of state.runner.rig.hardware) {
+  for (const cardId of runnerProgramInstallRecurringCreditSourceIds(state)) {
     if (remaining <= 0) break;
     const available = cardCounter(state, cardId, "recurring_credit");
     const spent = Math.min(available, remaining);

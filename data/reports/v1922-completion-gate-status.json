@@ -78,7 +78,7 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-14T17:31:00+02:00",
+    "implementedAt": "2026-05-14T17:43:00+02:00",
       "cards": [
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
@@ -119,6 +119,7 @@
     ],
     "engineTests": [
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs V1.9.22 install-only runner programs while keeping their abilities gated",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Zetatech Software Installer recurring credits for program installs and refreshes",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Flak and breaks AP ICE subroutines without release promotion",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Hammer and applies ordered Stealth loss after breaking Wall subroutines without release promotion",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::opens a private Hammer Stealth-loss distribution choice for multiple sources",
@@ -204,8 +205,8 @@
       },
       {
         "cardId": "onr_v1_075_zetatech-software-installer",
-        "status": "runtime_install_only_wip_pending_restricted_credit_and_overlay_contract",
-        "removalCondition": "Write restricted program-install credits and overlay installation contract."
+        "status": "runtime_recurring_program_install_credit_wip_pending_overlay_contract",
+        "removalCondition": "Keep overlay installation unavailable until its state-transition contract is written; keep catalog, AI and release promotion closed until final V1.9.22 gates."
       }
     ],
     "decision": "no_runtime_catalog_or_ai_promotion"
@@ -241,8 +242,8 @@
     "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
   },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T17:31:00+02:00",
-    "status": "remaining_technical_contracts_open_after_haunting_inquisition_wip",
+    "reviewedAt": "2026-05-14T17:43:00+02:00",
+    "status": "remaining_technical_contracts_open_after_zetatech_recurring_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -253,7 +254,7 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Tutor, Virizz, Security Purge, Hammer multi-Stealth distribution and Haunting Inquisition now have non-promoting WIPs; Data Fort Reclamation, Viral 15 and final promotion gates remain open.",
+    "summary": "Local card facts exist for all remaining targets. Tutor, Virizz, Security Purge, Hammer multi-Stealth distribution, Haunting Inquisition and Zetatech restricted program-install credits now have non-promoting WIPs; Data Fort Reclamation, Viral 15, Zetatech overlay and final promotion gates remain open.",
     "blockedCards": [
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_276_viral-15"
@@ -264,7 +265,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Seven install-only Runner-program WIPs, Newsgroup Filter Gain-2, Flak, Hammer, Japanese Water Torture, Reflector, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Security Purge, Haunting Inquisition, Zombie, Tutor, Virizz, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Six install-only Runner-program WIPs, Zetatech restricted program-install credits, Newsgroup Filter Gain-2, Flak, Hammer, Japanese Water Torture, Reflector, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Security Purge, Haunting Inquisition, Zombie, Tutor, Virizz, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

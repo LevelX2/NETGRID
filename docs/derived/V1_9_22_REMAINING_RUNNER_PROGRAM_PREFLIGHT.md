@@ -5,7 +5,7 @@ Status: WIP-Preflight mit Errata-1.70-/Nutzerklaerung, keine Runtime-/Catalog-/A
 
 ## Ziel
 
-Nach den install-only-Schnitten fuer acht nicht-Breaker-Programme und dem `Shield`-Resolver bleiben fuenf Runner-Programm-Zielkarten ohne engen Runtime-Resolver: `Flak`, `Hammer`, `Japanese Water Torture`, `Reflector` und `Zetatech Software Installer`.
+Nach den install-only-, Shield-, Breaker-, Hammer-Choice- und Zetatech-Recurring-Schnitten bleiben keine Runner-Programm-Zielkarten mehr ohne engen Runtime-WIP. Offen sind weiterhin Vollvertrags-/Promotion-Folgepunkte, insbesondere der `Zetatech Software Installer`-Overlay-Vertrag.
 
 ## Kartenbefund
 
@@ -15,11 +15,11 @@ Nach den install-only-Schnitten fuer acht nicht-Breaker-Programme und dem `Shiel
 | `Hammer` | Icebreaker/Noisy, Installkosten 2, MU 1, Staerke 2; `1: Break Wall subroutine`; `1: +1 Strength`; beim Hammer-Break verliert der Runner insgesamt bis zu 2 von Stealth-Karten, Verteilung nach Runner-Wahl falls mehrere Quellen verfuegbar sind; Noisy-Karten duerfen auch ohne Stealth-Karten genutzt werden. | Runtime-LegalActions, `applyAction`, Noisy-Stealth-Loss-Choice falls erforderlich, PublicPayload, Replay/StateHash, AI-Fallback. |
 | `Japanese Water Torture` | Icebreaker, Installkosten 7, MU 1, Staerke 2; `0: Break Wall subroutine`; `X: +X strength, and forgo your next X actions`; Wall-Subroutine = Subroutine auf Wall-ICE; Aktionsschuld bleibt ueber Zugwechsel bis bezahlt; Standard-Breaker-Vertrag bestaetigt. | Runtime-LegalActions, `applyAction`, Future-Action-Debt-State, PublicPayload, Replay/StateHash, AI-Fallback. |
 | `Reflector` | Program/Icebreaker, Installkosten 2, MU 1, Staerke 4; `0: Break stun, hellbolt or knockout subroutine`; Zielkategorien nach benanntem Effekt/Text; Standard-Breaker-Vertrag bestaetigt. | Runtime-LegalActions, `applyAction`, PublicPayload, Replay/StateHash, AI-Fallback. |
-| `Zetatech Software Installer` | Programm, Installkosten 0, MU 1; zwei recurring restricted credits fuer Programminstallationen inkl. Overlying. Errata: 2 Credits kommen aus der Bank und werden bei Nutzung zu Beginn des naechsten Runner-Zugs aus der Bank ersetzt. | Restricted Programminstallations-Credits, Zahlungsfenster und Overlay-Installationsvertrag. |
+| `Zetatech Software Installer` | Programm, Installkosten 0, MU 1; zwei recurring restricted credits fuer Programminstallationen inkl. Overlying. Errata: 2 Credits kommen aus der Bank und werden bei Nutzung zu Beginn des naechsten Runner-Zugs aus der Bank ersetzt. | Restricted Programminstallations-Credits und Refresh sind als WIP umgesetzt; offen bleibt der Overlay-Installationsvertrag. |
 
 ## Entscheidung
 
-Kein Runtime-Code in diesem Preflight. Nach Nutzerentscheidung vom 2026-05-14 sind die Subroutine-Taxonomie, der Standard-Breaker-Vertrag, die `Japanese Water Torture`-Aktionsschuld und der `Hammer`-Noisy-Stealth-Verlust fachlich geschlossen. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` duerfen damit als enge nicht-promotende Runtime-Schnitte umgesetzt werden, sobald die konkrete Code-/Testarbeit erfolgt. `Zetatech Software Installer` ist nicht mehr wegen Installkosten blockiert; offen bleiben der Restricted-Credit-Zahlpfad fuer Programminstallationen und der Overlay-Vertrag.
+Kein Runtime-Code in diesem Preflight. Nach Nutzerentscheidung vom 2026-05-14 sind die Subroutine-Taxonomie, der Standard-Breaker-Vertrag, die `Japanese Water Torture`-Aktionsschuld, der `Hammer`-Noisy-Stealth-Verlust und die `Zetatech Software Installer`-Recurring-Programminstallationscredits inzwischen als enge nicht-promotende Runtime-WIPs umgesetzt. Offen bleibt fuer Runner-Programme der `Zetatech Software Installer`-Overlay-Vertrag sowie finale Catalog-/AI-/Release-Promotion.
 
 ## Breaker-Vertrag
 

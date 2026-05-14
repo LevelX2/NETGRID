@@ -14015,6 +14015,109 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     }
   });
 
+  it("uses Zetatech Software Installer recurring credits for program installs and refreshes", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-zetatech-software-installer-recurring-program-install",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_zetatech_software_installer_recurring",
+          name: "O:NR V1.9.22 Zetatech Software Installer Recurring",
+          cards: [
+            { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 0;
+    state.runner.memoryLimit = 4;
+    const installerId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_075_zetatech-software-installer",
+    );
+    const hammerId = moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_075_zetatech-software-installer",
+    );
+
+    expect(state.runner.credits).toBe(0);
+    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(2);
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === hammerId &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-zetatech-installs-hammer-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-zetatech-installs-hammer-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer",
+    );
+
+    expect(state.runner.credits).toBe(0);
+    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(0);
+    expect(state.runner.rig.programs).toContain(hammerId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: "onr_v1_031_hammer",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (state.pendingChoice?.source === "discard_phase")
+      state = applyChoice(
+        state,
+        "corp",
+        String(state.pendingChoice.options[0]?.id),
+      );
+
+    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(2);
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
   it("installs Newsgroup Filter and uses its side-safe credit action", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

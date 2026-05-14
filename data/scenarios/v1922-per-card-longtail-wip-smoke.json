@@ -65,7 +65,7 @@
     "Hammer has a non-promoting Wall-Icebreaker runtime WIP with install, pump, Wall-subroutine break and deterministic Stealth loss for single sources; multiple Stealth sources open a Runner-private distribution choice with public count-only payloads.",
     "Japanese Water Torture has a non-promoting Wall-Icebreaker runtime WIP with install, pump, Wall-subroutine break, Future-Action-Debt carryover, wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage.",
     "Reflector has a non-promoting tagged-subroutine breaker WIP for stun, hellbolt and knockout subroutines with wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage.",
-    "Zetatech Software Installer has a non-promoting install-only runtime WIP with install cost 0 and MU 1; restricted recurring program-install credits and overlying remain gated.",
+    "Zetatech Software Installer has a non-promoting runtime WIP with install cost 0, MU 1, 2 restricted recurring program-install credits, Runner-turn-start credit refresh, wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage; overlying remains gated.",
     "Newsgroup Filter has a non-promoting installed Runner-program action for [A]: Gain 2 Credits with wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage.",
     "Shield has a narrow Runner-program runtime WIP: install cost 0, MU 1 and up to 2 Net-Damage prevention per Runner turn through the existing side-safe Event-Modification window.",
     "No V1.9.22 runner program remains guarded solely for missing local cost/MU/breaker values; remaining Runner-program work is promotion, AI and full-contract follow-up.",
