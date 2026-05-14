@@ -4387,7 +4387,7 @@ export default function Page() {
                       {activeView.own.heapOrArchives.length > RUNNER_HEAP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{activeView.own.heapOrArchives.length - RUNNER_HEAP_PREVIEW_LIMIT}</span> : null}
                     </div>
                   ) : (
-                    <p className="archivesPileEmpty">Keine Karten im Heap.</p>
+                    <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
                   )}
                 </SideZoneFrame>
               </div>

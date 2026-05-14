@@ -2943,6 +2943,8 @@ select {
 .serverGrid {
   display: grid;
   gap: 12px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .serverRow {
@@ -2950,12 +2952,16 @@ select {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 12px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .server {
+  flex: 0 1 auto;
   width: fit-content;
   max-width: 100%;
   min-height: 0;
+  box-sizing: border-box;
   padding: 6px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -3716,6 +3722,8 @@ select {
 
 .archivesPileEmpty {
   margin: 0;
+  width: calc(108px * var(--zone-card-scale, 1));
+  max-width: calc(108px * var(--zone-card-scale, 1));
   min-height: calc(151px * var(--zone-card-scale, 1));
   display: grid;
   place-items: center;
@@ -5303,8 +5311,9 @@ select {
 }
 
 .zoneBoardSection {
-  width: max-content;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -5312,8 +5321,9 @@ select {
 }
 
 .section.panel.boardSection.zoneBoardSection {
-  width: max-content;
+  width: 100%;
   max-width: 100%;
+  min-width: 0;
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -5396,21 +5406,21 @@ select {
 }
 
 .runnerGripHeapLayout {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: max-content;
-  width: max-content;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
   max-width: 100%;
   gap: 10px;
   align-items: start;
-  overflow-x: auto;
-  overflow-y: visible;
-  padding-bottom: 2px;
+  overflow: visible;
 }
 
 .runnerGripHeapLayout .sideZoneFrame,
 .zoneBoardSection > .sideZoneFrame {
-  min-width: min(190px, 100%);
+  box-sizing: border-box;
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
@@ -5422,31 +5432,47 @@ select {
 }
 
 .runnerGripZone {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   width: fit-content;
   max-width: 100%;
 }
 
 .runnerStackZone {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .runnerHeapZone {
-  flex: 0 0 auto;
+  flex: 0 1 auto;
   width: fit-content;
   max-width: 100%;
 }
 
 .fixedZoneCards {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-start;
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
+  overflow: visible;
 }
 
 .fixedZoneCards .cardSlot {
   flex: 0 0 var(--cards-min-width, 108px);
   width: var(--cards-min-width, 108px);
   max-width: var(--cards-min-width, 108px);
+  z-index: 1;
+}
+
+.fixedZoneCards .cardSlot + .cardSlot {
+  margin-left: calc(var(--cards-min-width, 108px) * -0.42);
+}
+
+.fixedZoneCards .cardSlot:hover,
+.fixedZoneCards .cardSlot:focus-within {
+  z-index: 38;
 }
 
 .runnerHeapHead {
@@ -5473,6 +5499,8 @@ select {
 .runnerHeapOverlapRow {
   display: flex;
   align-items: flex-start;
+  width: fit-content;
+  max-width: 100%;
   min-height: calc(151px * var(--zone-card-scale, 1));
   padding-right: 4px;
   overflow-x: auto;
