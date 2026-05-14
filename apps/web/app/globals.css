@@ -147,6 +147,13 @@ select {
   min-width: 0;
 }
 
+.topbarStatusGroup {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .mark {
   width: 36px;
   height: 36px;
@@ -225,6 +232,18 @@ select {
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.topbarUndoToggle.active {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--runner), var(--line) 30%);
+  background: color-mix(in srgb, var(--runner), var(--panel) 72%);
+}
+
+.topbarUndoToggle.attention {
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--danger), var(--line) 28%);
+  background: color-mix(in srgb, var(--danger), var(--panel) 80%);
 }
 
 .seed {
@@ -2179,7 +2198,7 @@ select {
   --side-status-gradient-fade: 83%;
   position: relative;
   display: grid;
-  gap: 9px;
+  gap: 7px;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--side-status-accent), transparent var(--side-status-gradient-fade)), transparent 72%),
     color-mix(in srgb, var(--side-status-accent), var(--panel) var(--side-status-bg-panel-mix));
@@ -2215,40 +2234,55 @@ select {
 }
 
 .sideStatusPanel .stat {
+  justify-items: center;
+  min-height: 40px;
   border-color: color-mix(in srgb, var(--side-status-accent), var(--line) 54%);
   background: color-mix(in srgb, var(--side-status-accent), var(--section-bg) 88%);
+  text-align: center;
+}
+
+.sideStatusPanel .stats {
+  grid-template-columns: repeat(auto-fit, minmax(52px, 1fr));
 }
 
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(62px, 1fr));
+  gap: 6px;
 }
 
 .stat {
   min-width: 0;
+  position: relative;
   display: grid;
-  align-content: start;
-  gap: 7px;
-  padding: 8px;
+  align-content: center;
+  gap: 4px;
+  padding: 5px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--section-bg);
+  overflow: visible;
 }
 
 .stat strong {
   min-width: 0;
-  min-height: 22px;
+  min-height: 20px;
   display: flex;
+  justify-content: flex-start;
   align-items: center;
-  gap: 7px;
-  font-size: 18px;
+  gap: 5px;
+  font-size: 17px;
   line-height: 1;
+}
+
+.sideStatusPanel .stat strong {
+  justify-content: center;
 }
 
 .statValue {
   display: block;
   min-width: 0;
+  white-space: nowrap;
   overflow-wrap: anywhere;
 }
 
@@ -2411,6 +2445,55 @@ select {
   min-height: 116px;
 }
 
+.stat.hasStatHelp {
+  cursor: help;
+  z-index: 120;
+}
+
+.stat.hasStatHelp:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--runner-zone-accent), white 12%);
+  outline-offset: 2px;
+}
+
+.statHelpTooltip {
+  position: absolute;
+  right: 0;
+  left: auto;
+  top: calc(100% + 6px);
+  z-index: 400;
+  width: min(260px, calc(100vw - 28px));
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
+  border-radius: 7px;
+  background: var(--tooltip-bg);
+  color: var(--text);
+  box-shadow: var(--tooltip-shadow);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.statHelpTooltipFloating {
+  position: fixed;
+  right: auto;
+  opacity: 1;
+  pointer-events: none;
+  transform: none;
+}
+
+.stat.hasStatHelp:hover .statHelpTooltip,
+.stat.hasStatHelp:focus-visible .statHelpTooltip,
+.stat.hasStatHelp.helpPinned .statHelpTooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .cardChoiceFooterText {
   min-width: 0;
   display: grid;
@@ -2473,7 +2556,7 @@ select {
   display: block;
   min-width: 0;
   color: var(--text);
-  font-size: 16px;
+  font-size: 13px;
   line-height: normal;
   overflow-wrap: anywhere;
 }
@@ -2738,8 +2821,12 @@ select {
 
 .aiPacingPanel {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   background: color-mix(in srgb, var(--section-bg), var(--ice) 5%);
+}
+
+.aiPacingPanel .sectionTitleLine h2 {
+  font-size: 13px;
 }
 
 .aiPacingPanel .meta {
@@ -2755,11 +2842,12 @@ select {
 }
 
 .aiStepButton {
-  min-height: 40px;
+  min-height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  padding: 0 12px;
   border: 1px solid color-mix(in srgb, var(--ice), var(--line) 28%);
   border-radius: 999px;
   color: var(--text);
@@ -2767,7 +2855,9 @@ select {
   box-shadow:
     inset 0 0 0 1px rgb(255 255 255 / 0.08),
     0 8px 18px rgb(0 0 0 / 0.2);
+  font-size: 12px;
   font-weight: 800;
+  line-height: 1.1;
   cursor: pointer;
 }
 
@@ -2944,7 +3034,7 @@ select {
 
 .serverContextSideButton.rigGroupSideLabel {
   font-size: clamp(11px, calc(var(--cards-min-width, 116px) * 0.12), 15px);
-  border-right-color: color-mix(in srgb, var(--runner), var(--line) 54%);
+  border-right: 0;
 }
 
 .runnerZoneSideLabel {
@@ -3002,12 +3092,14 @@ select {
 
 .serverRunButton {
   flex: 0 0 auto;
-  height: 24px;
+  min-width: 30px;
+  height: auto;
   position: relative;
-  display: inline-flex;
+  display: inline-grid;
+  justify-items: center;
   align-items: center;
-  gap: 5px;
-  padding: 3px 6px;
+  gap: 3px;
+  padding: 3px 4px;
   border: 1px solid color-mix(in srgb, var(--runner), var(--line) 52%);
   border-radius: 6px;
   background: color-mix(in srgb, var(--runner), var(--panel) 72%);
@@ -3085,22 +3177,25 @@ select {
 
 .serverRunButton.serverRunButtonSide {
   height: auto;
-  min-height: 22px;
-  padding: 2px 5px;
-  gap: 4px;
+  min-height: 42px;
+  padding: 3px 4px;
+  gap: 3px;
 }
 
-.serverRunButton.serverRunButtonSide .costChip {
-  min-width: 19px;
-  height: 16px;
-  font-size: 10px;
+.serverRunGlyph {
+  display: inline-grid;
+  place-items: center;
+  color: color-mix(in srgb, var(--runner-zone-accent), white 12%);
 }
 
-.serverRunButton .costChip {
-  min-width: 21px;
-  height: 17px;
-  padding: 1px 5px;
-  font-size: 11px;
+.serverRunActionIcon {
+  width: 24px;
+  height: 19px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 40%);
+  border-radius: 4px;
+  background: var(--section-bg);
 }
 
 .serverCount {
@@ -3191,20 +3286,53 @@ select {
 .pairedServerLane .lane {
   width: fit-content;
   max-width: 100%;
-  min-width: calc(76px * var(--lane-card-scale, 1) + 12px);
+  min-width: calc(108px * var(--lane-card-scale, 1) + 12px);
+}
+
+.laneEmptyPlaceholder {
+  flex: 0 0 calc(108px * var(--lane-card-scale, 1));
+  width: calc(108px * var(--lane-card-scale, 1));
+  min-height: calc(151px * var(--lane-card-scale, 1));
+  display: grid;
+  place-items: center;
+  padding: calc(6px * var(--lane-card-scale, 1));
+  border: 1px dashed color-mix(in srgb, var(--lane-border), transparent 16%);
+  border-radius: 6px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--lane-bg), transparent 18%);
+  font-size: calc(11px * var(--lane-card-scale, 1));
+  font-weight: 700;
+  text-align: center;
+  text-transform: uppercase;
 }
 
 .archivesDualStack {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 10px;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .archivesPile {
   display: grid;
-  gap: 6px;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: stretch;
   min-width: 0;
+}
+
+.archivesPileBody {
+  min-width: 0;
+}
+
+.archiveEmptyPlaceholder {
+  flex: 0 0 calc(108px * var(--archive-card-scale, 1));
+  display: grid;
+  place-items: center;
+  min-height: calc(151px * var(--archive-card-scale, 1));
+  width: calc(108px * var(--archive-card-scale, 1));
+  max-width: calc(108px * var(--archive-card-scale, 1));
 }
 
 .archivesPileHeader {
@@ -3239,21 +3367,25 @@ select {
 .archivesOverlapRow {
   display: flex;
   align-items: flex-start;
-  min-height: 108px;
+  min-height: calc(151px * var(--archive-card-scale, 1));
   padding-right: 6px;
   overflow-x: auto;
   overflow-y: visible;
 }
 
 .archivesOverlapRow .cardSlot {
-  flex: 0 0 76px;
-  width: 76px;
-  max-width: 76px;
+  flex: 0 0 calc(108px * var(--archive-card-scale, 1));
+  width: calc(108px * var(--archive-card-scale, 1));
+  max-width: calc(108px * var(--archive-card-scale, 1));
   z-index: 1;
 }
 
 .archivesOverlapRow .cardSlot + .cardSlot {
-  margin-left: -54px;
+  margin-left: calc(-77px * var(--archive-card-scale, 1));
+}
+
+.archivesOverlapRow .card {
+  height: calc(151px * var(--archive-card-scale, 1));
 }
 
 .archivesOverlapRow .cardSlot:hover,
@@ -3266,7 +3398,8 @@ select {
   top: 72px;
   z-index: 180;
   pointer-events: none;
-  width: min(420px, calc(100vw - 24px));
+  width: fit-content;
+  max-width: calc(100vw - 24px);
 }
 
 .scoredAgendaOverlay.custom {
@@ -3286,8 +3419,9 @@ select {
 .scoredAgendaPanel {
   pointer-events: auto;
   display: grid;
-  gap: 8px;
-  width: min(420px, 100%);
+  gap: 10px;
+  width: fit-content;
+  min-width: min(280px, calc(100vw - 24px));
   max-width: min(420px, calc(100vw - 24px));
   max-height: min(72vh, calc(100vh - 150px));
   overflow: auto;
@@ -3295,7 +3429,7 @@ select {
   border-radius: 8px;
   position: relative;
   background: var(--panel);
-  padding: 8px 8px 10px;
+  padding: 0 8px 10px;
   box-shadow: 0 18px 44px rgb(0 0 0 / 0.34);
 }
 
@@ -3309,37 +3443,55 @@ select {
 
 .scoredAgendaHead {
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 8px;
-  min-height: 22px;
-  padding-right: 32px;
-  padding-left: 34px;
-}
-
-.scoredAgendaHead div {
+  z-index: 35;
   display: grid;
-  gap: 2px;
-  min-width: 0;
+  gap: 7px;
+  overflow: visible;
+  min-height: 58px;
+  margin: 0 -8px;
+  padding: 6px 38px 8px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line), transparent 24%);
+  background: color-mix(in srgb, var(--section-bg), var(--panel) 54%);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
 
-.scoredAgendaHead strong {
+.scoredAgendaHead:active {
+  cursor: grabbing;
+}
+
+.scoreAreaWindowControls {
+  display: flex;
+  align-items: center;
+  min-height: 20px;
+}
+
+.scoreAreaDragHint {
+  width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--panel), white 4%);
+  color: var(--muted);
+}
+
+.scoredAgendaTitleBlock {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
+  min-width: 0;
+}
+
+.scoredAgendaHead strong {
   color: #fefefe;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 0.03em;
   line-height: 1.15;
-}
-
-.scoredAgendaHead span {
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.2;
 }
 
 .scoredAgendaHead .scoredAgendaPointBadge {
@@ -3357,10 +3509,9 @@ select {
   white-space: nowrap;
 }
 
-.scoreAreaFloatingClose,
-.scoreAreaDragHandle {
+.scoreAreaFloatingClose {
   position: absolute;
-  top: 2px;
+  top: 6px;
   width: 20px;
   min-width: 20px;
   height: 20px;
@@ -3374,19 +3525,8 @@ select {
   line-height: 1;
 }
 
-.scoreAreaFloatingClose:hover,
-.scoreAreaDragHandle:hover {
+.scoreAreaFloatingClose:hover {
   color: var(--text);
-}
-
-.scoreAreaDragHandle {
-  left: 6px;
-  cursor: grab;
-  touch-action: none;
-}
-
-.scoreAreaDragHandle:active {
-  cursor: grabbing;
 }
 
 .scoreAreaFloatingClose {
@@ -3398,10 +3538,10 @@ select {
 }
 
 .scoredAgendaList {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid color-mix(in srgb, var(--line), transparent 20%);
+  width: min(var(--score-area-list-width, var(--cards-min-width, 108px)), calc(100vw - 42px));
+  max-width: 100%;
   display: grid;
+  grid-template-columns: repeat(var(--score-area-columns, 1), minmax(0, 1fr));
   gap: 8px;
   min-width: 0;
 }
@@ -3486,11 +3626,21 @@ select {
 .scoreAreaStatCell {
   color: inherit;
   font: inherit;
-  text-align: left;
+  text-align: center;
 }
 
 .scoreAreaStatButton {
   width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  place-items: center;
+  border-color: color-mix(in srgb, var(--agenda), var(--line) 32%);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--agenda), transparent 86%), transparent 70%),
+    color-mix(in srgb, var(--agenda), var(--section-bg) 82%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.09),
+    inset 0 -2px 0 rgb(0 0 0 / 0.22);
   cursor: pointer;
 }
 
@@ -3505,12 +3655,10 @@ select {
   background: color-mix(in srgb, var(--agenda), var(--section-bg) 70%);
 }
 
-.scoreAreaStatFooter {
+.scoreAreaToggleGlyphs {
   min-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 7px;
+  width: 100%;
+  gap: 4px;
 }
 
 .scoreAreaOpenButtonIcon {
@@ -3537,11 +3685,16 @@ select {
   height: 10px;
 }
 
-.sideStatusPanel .stat,
-.sideStatusPanel .stat * {
+.sideStatusPanel .stat:not(.hasStatHelp),
+.sideStatusPanel .stat:not(.hasStatHelp) * {
   cursor: default;
   user-select: none;
   -webkit-user-select: none;
+}
+
+.sideStatusPanel .scoreAreaStatButton,
+.sideStatusPanel .scoreAreaStatButton * {
+  cursor: pointer;
 }
 
 .archivesOverflowBadge {
@@ -3559,13 +3712,22 @@ select {
 
 .archivesPileEmpty {
   margin: 0;
+  min-height: calc(151px * var(--zone-card-scale, 1));
+  display: grid;
+  place-items: center;
+  padding: 6px;
+  border: 1px dashed color-mix(in srgb, var(--lane-border), transparent 16%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--lane-bg), transparent 18%);
   color: var(--muted);
   font-size: 11px;
+  font-weight: 700;
+  text-align: center;
 }
 
 @media (max-width: 720px) {
   .archivesDualStack {
-    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
   }
 }
 
@@ -4437,6 +4599,12 @@ select {
   visibility: visible;
 }
 
+.cardTooltip.pinned {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 .cardTooltip.above.visible {
   transform: translateY(-100%);
 }
@@ -5073,7 +5241,20 @@ select {
 }
 
 .zoneBoardSection {
-  padding-top: 10px;
+  width: max-content;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.section.panel.boardSection.zoneBoardSection {
+  width: max-content;
+  max-width: 100%;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .sideZoneFrame {
@@ -5082,18 +5263,10 @@ select {
   grid-template-columns: auto minmax(0, 1fr);
   gap: 8px;
   align-items: stretch;
-  padding: 6px;
-  border: 1px solid color-mix(in srgb, var(--line), transparent 22%);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--section-bg), transparent 5%);
-}
-
-.sideZoneFrame.runner {
-  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
-}
-
-.sideZoneFrame.corp {
-  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 .sideZoneLead {
@@ -5103,6 +5276,10 @@ select {
   min-width: 32px;
   padding-right: 6px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
+}
+
+.sideZoneFrame .sideZoneTitle {
+  border-right: 0;
 }
 
 .sideZoneBody {
@@ -5158,24 +5335,56 @@ select {
 
 .runnerGripHeapLayout {
   display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(104px, 140px) minmax(170px, 240px);
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  width: max-content;
+  max-width: 100%;
   gap: 10px;
   align-items: start;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding-bottom: 2px;
 }
 
-.runnerGripColumn,
-.runnerHeapColumn {
-  min-width: 0;
-}
-
-.runnerHeapColumn {
-  display: grid;
-  gap: 6px;
-  align-content: start;
+.runnerGripHeapLayout .sideZoneFrame,
+.zoneBoardSection > .sideZoneFrame {
+  min-width: min(190px, 100%);
   padding: 6px;
-  border: 1px dashed var(--lane-border);
-  border-radius: 6px;
-  background: color-mix(in srgb, var(--lane-bg), var(--panel) 55%);
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--section-bg), transparent 5%);
+}
+
+.zoneBoardSection > .sideZoneFrame.corp {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
+}
+
+.runnerGripZone {
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.runnerStackZone {
+  flex: 0 0 auto;
+}
+
+.runnerHeapZone {
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.fixedZoneCards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.fixedZoneCards .cardSlot {
+  flex: 0 0 var(--cards-min-width, 108px);
+  width: var(--cards-min-width, 108px);
+  max-width: var(--cards-min-width, 108px);
 }
 
 .runnerHeapHead {
@@ -5202,21 +5411,21 @@ select {
 .runnerHeapOverlapRow {
   display: flex;
   align-items: flex-start;
-  min-height: 78px;
+  min-height: calc(151px * var(--zone-card-scale, 1));
   padding-right: 4px;
   overflow-x: auto;
   overflow-y: visible;
 }
 
 .runnerHeapOverlapRow .cardSlot {
-  flex: 0 0 56px;
-  width: 56px;
-  max-width: 56px;
+  flex: 0 0 calc(108px * var(--zone-card-scale, 1));
+  width: calc(108px * var(--zone-card-scale, 1));
+  max-width: calc(108px * var(--zone-card-scale, 1));
   z-index: 1;
 }
 
 .runnerHeapOverlapRow .cardSlot + .cardSlot {
-  margin-left: -39px;
+  margin-left: calc(-76px * var(--zone-card-scale, 1));
 }
 
 .runnerHeapOverlapRow .cardSlot:hover,
@@ -5232,11 +5441,11 @@ select {
 .runnerStackPreview {
   display: grid;
   place-items: start center;
-  min-height: 82px;
+  min-height: calc(151px * var(--zone-card-scale, 1));
 }
 
 .runnerStackBack {
-  width: 56px;
+  width: calc(108px * var(--zone-card-scale, 1));
   aspect-ratio: 5 / 7;
   position: relative;
   overflow: hidden;
@@ -5303,33 +5512,46 @@ select {
 }
 
 .undoPanel {
-  display: grid;
-  gap: 8px;
-}
-
-.undoPanel.collapsed {
-  gap: 0;
-}
-
-.undoPanelHeader {
+  min-height: 44px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 12px;
+  padding: 8px 18px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--match-strip-bg), var(--panel) 34%);
+}
+
+.undoPanelHeader {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
 }
 
 .undoPanelHeader h2 {
   margin: 0;
+  font-size: 13px;
 }
 
-.undoPanelToggle {
-  min-width: 28px;
-  min-height: 28px;
+.undoPanel .meta {
+  font-size: 12px;
 }
 
 .undoBox {
-  display: grid;
-  gap: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.undoBox .splitButtons {
+  width: min(240px, 100%);
+  margin-top: 0;
+}
+
+.undoPanel .button.wide {
+  width: auto;
+  min-width: 190px;
 }
 
 .statusLine {
@@ -6608,13 +6830,13 @@ select,
 }
 
 .lane .cardSlot {
-  flex: 0 0 calc(76px * var(--lane-card-scale, 1));
-  width: calc(76px * var(--lane-card-scale, 1));
-  max-width: calc(76px * var(--lane-card-scale, 1));
+  flex: 0 0 calc(108px * var(--lane-card-scale, 1));
+  width: calc(108px * var(--lane-card-scale, 1));
+  max-width: calc(108px * var(--lane-card-scale, 1));
 }
 
 .lane .card {
-  height: calc(106px * var(--lane-card-scale, 1));
+  height: calc(151px * var(--lane-card-scale, 1));
 }
 
 .lane .cardTitle {
@@ -6834,7 +7056,12 @@ select,
 }
 
 .rigBoardSection {
-  padding-top: 10px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--section-bg), transparent 5%);
 }
 
 .rigSectionLayout {
@@ -6871,7 +7098,9 @@ select,
 .rigSectionTitle.rigGroupSideLabel {
   font-size: clamp(13px, calc(var(--cards-min-width, 116px) * 0.15), 19px);
   color: color-mix(in srgb, var(--runner), white 12%);
-  border-right-color: color-mix(in srgb, var(--runner), var(--line) 58%);
+  border-left: 0;
+  border-right: 0;
+  padding-left: 0;
   letter-spacing: 0.07em;
 }
 
@@ -6903,9 +7132,10 @@ select,
 .rigGroupsHorizontal {
   display: flex;
   align-items: stretch;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 10px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
   padding-bottom: 2px;
 }
 
@@ -6917,15 +7147,27 @@ select,
 .rigGroupHorizontal {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: stretch;
-  gap: 8px;
-  min-width: fit-content;
+  gap: 16px;
+  flex: 0 1 auto;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
   padding: 0 8px;
-  border-left: 1px solid color-mix(in srgb, var(--line), transparent 22%);
-  border-right: 1px solid color-mix(in srgb, var(--line), transparent 22%);
   border-top: 0;
   border-bottom: 0;
   border-radius: 0;
   background: color-mix(in srgb, var(--section-bg), transparent 6%);
+}
+
+.rigGroupHorizontal .rigGroupSideLabel {
+  border-right: 0;
+}
+
+.rigGroupLead {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
 }
 
 .rigGroup h3 {
@@ -6949,6 +7191,29 @@ select,
   letter-spacing: 0.03em;
   font-size: clamp(10px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.1), 13px);
   max-block-size: 100%;
+}
+
+.rigMemoryBadge {
+  display: inline-block;
+  align-self: center;
+  justify-self: center;
+  min-height: 0;
+  margin: 0;
+  padding: 6px 2px;
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 42%);
+  border-radius: 6px;
+  color: var(--runner-zone-accent);
+  font-size: 10px;
+  line-height: 1;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  white-space: nowrap;
+}
+
+.rigMemoryBadge strong {
+  display: inline;
+  color: var(--runner-zone-accent);
+  font-size: 10px;
 }
 
 .rigGroupSideLabel:not(button),
@@ -6979,7 +7244,8 @@ select,
 
 .rigGroupCards {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 8px;
 }
 
@@ -7177,6 +7443,67 @@ select,
   }
 }
 
+@media (max-width: 1180px) and (min-width: 821px) {
+  .sidePanel {
+    display: grid;
+    grid-template-columns: minmax(172px, 0.82fr) minmax(260px, 1.32fr) minmax(176px, 0.86fr);
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .sidePanel > .section,
+  .sidePanel > .specialZoneStrip {
+    min-width: 0;
+  }
+
+  .sidePanel > .specialZoneStrip {
+    grid-column: 1 / -1;
+  }
+
+  .sideStatusPanel {
+    align-content: start;
+    gap: 5px;
+    padding: 8px;
+  }
+
+  .sideStatusPanel h2 {
+    min-width: 0;
+    margin-bottom: 0;
+    font-size: 13px;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sideStatusPanel .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .sideStatusPanel .stat {
+    min-height: 40px;
+    gap: 3px;
+    padding: 4px 5px;
+  }
+
+  .sideStatusPanel .stat strong {
+    min-height: 18px;
+    gap: 5px;
+    font-size: 16px;
+  }
+
+  .sideStatusPanel .statLabel,
+  .sideStatusPanel .meta {
+    font-size: 11px;
+  }
+
+  .sideStatusPanel .actionSlots {
+    min-height: 24px;
+    gap: 5px;
+  }
+}
+
 @media (max-width: 720px) {
   .runnerGripHeapLayout {
     grid-template-columns: minmax(0, 1fr);
@@ -7187,13 +7514,13 @@ select,
   }
 
   .runnerHeapOverlapRow .cardSlot {
-    flex: 0 0 52px;
-    width: 52px;
-    max-width: 52px;
+    flex: 0 0 calc(108px * var(--zone-card-scale, 1));
+    width: calc(108px * var(--zone-card-scale, 1));
+    max-width: calc(108px * var(--zone-card-scale, 1));
   }
 
   .runnerHeapOverlapRow .cardSlot + .cardSlot {
-    margin-left: -36px;
+    margin-left: calc(-76px * var(--zone-card-scale, 1));
   }
 
   .specialZoneOverlapRow .cardSlot {
@@ -7207,8 +7534,7 @@ select,
   }
 
   .topbar,
-  .toolbar,
-  .matchStrip,
+  .undoPanel,
   .deckDisplayRow,
   .colorSchemeSettings,
   .cardDisplaySettings,
@@ -7217,8 +7543,49 @@ select,
     flex-direction: column;
   }
 
+  .toolbar {
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .toolbar .button,
+  .toolbar .connection,
+  .toolbar .topbarVersion {
+    flex: 0 0 auto;
+  }
+
+  .toolbar .topbarVersion,
+  .toolbar .connection {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .toolbar .dangerButton {
+    width: auto;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .matchStrip {
+    flex-wrap: wrap;
+    align-items: center;
+    overflow: visible;
+  }
+
+  .matchStrip span {
+    flex: 0 1 auto;
+    max-width: 100%;
+  }
+
   .seriesStrip {
     flex-direction: column;
+  }
+
+  .undoBox,
+  .undoPanel .button.wide {
+    width: 100%;
   }
 
   .seriesScore {
@@ -7326,7 +7693,9 @@ select,
   }
 
   .opponentCueOverlay {
-    grid-template-columns: 34px minmax(0, 1fr) auto auto;
+    width: min(360px, calc(100vw - 24px));
+    gap: 8px;
+    padding: 9px;
   }
 
   .cuePosition-top-right {
@@ -7351,6 +7720,15 @@ select,
 
   .opponentCueOverlay small {
     display: none;
+  }
+
+  .opponentCueCard,
+  .opponentCueCardBack {
+    width: 74px;
+  }
+
+  .opponentCueCard .card {
+    min-height: 101px;
   }
 
   .cardTooltip {

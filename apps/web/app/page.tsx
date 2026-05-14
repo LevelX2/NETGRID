@@ -4,6 +4,7 @@ import {
   Activity,
   AlertTriangle,
   Bot,
+  Brain,
   Building2,
   Cable,
   Check,
@@ -183,6 +184,7 @@ const RunnerRoleIcon = Fingerprint;
 const CorpRoleIcon = Building2;
 const AgendaIcon = Award;
 const TagIcon = Goal;
+const CoreDamageIcon = Brain;
 const DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID = "card-snapshot-0.8";
 const DEFAULT_DECK_CARD_POOL_VERSION = "private-local-onr-v1";
 const DEFAULT_DECK_FORMAT_PROFILE_ID = "netgrid_private_local_v1";
@@ -195,12 +197,11 @@ const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASS
 const CARD_TOOLTIP_HOVER_DELAY_OPTIONS = [300, 500, 750, 1000, 1250, 1500] as const;
 const CARD_TOOLTIP_HOVER_OPEN_DELAY_MS = 1000;
 const CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS = 120;
-const CARD_SCALE_PERCENT_MIN = 70;
-const CARD_SCALE_PERCENT_MAX = 150;
+const CARD_TOOLTIP_PIN_EVENT = "netgrid:card-tooltip-pin";
+const CARD_SCALE_PERCENT_MIN = 50;
+const CARD_SCALE_PERCENT_MAX = 170;
 const CARD_SCALE_PERCENT_STEP = 5;
 const CARD_SCALE_DEFAULT_PERCENT = 100;
-const HAND_CARD_SCALE_PERCENT_MIN = 50;
-const HAND_CARD_SCALE_PERCENT_MAX = 170;
 const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
   runner: "runner_identity_001",
   corp: "corp_identity_001"
@@ -251,8 +252,10 @@ type CardTooltipSettings = {
 type CardScaleSettings = {
   tooltipPercent: number;
   handPercent: number;
+  archivePercent: number;
+  zonePercent: number;
   boardPercent: number;
-  opponentPercent: number;
+  rigPercent: number;
 };
 
 const CardTooltipSettingsContext = createContext<CardTooltipSettings>({
@@ -263,8 +266,10 @@ const CardTooltipSettingsContext = createContext<CardTooltipSettings>({
 const CardScaleSettingsContext = createContext<CardScaleSettings>({
   tooltipPercent: CARD_SCALE_DEFAULT_PERCENT,
   handPercent: CARD_SCALE_DEFAULT_PERCENT,
+  archivePercent: CARD_SCALE_DEFAULT_PERCENT,
+  zonePercent: CARD_SCALE_DEFAULT_PERCENT,
   boardPercent: CARD_SCALE_DEFAULT_PERCENT,
-  opponentPercent: CARD_SCALE_DEFAULT_PERCENT
+  rigPercent: CARD_SCALE_DEFAULT_PERCENT
 });
 
 function useCardTooltipSettings(): CardTooltipSettings {
@@ -782,9 +787,7 @@ const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 const RUNNER_HEAP_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
 const SCORE_AREA_PREVIEW_LIMIT = 18;
-const HAND_CARD_BASE_MIN_WIDTH = 108;
-const OWN_RIG_CARD_BASE_MIN_WIDTH = 104;
-const OPPONENT_RIG_CARD_BASE_MIN_WIDTH = 80;
+const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 function localCardImageUrl(cardId: string): string | undefined {
   const encodedCardId = encodeURIComponent(cardId);
@@ -1408,6 +1411,7 @@ export default function Page() {
     corp: { kind: "default" }
   });
   const [rightRailCollapsed, setRightRailCollapsed] = useState(false);
+  const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
@@ -1436,8 +1440,10 @@ export default function Page() {
   const [cardTooltipSettingsLoaded, setCardTooltipSettingsLoaded] = useState(false);
   const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardHandScalePercent, setCardHandScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardArchiveScalePercent, setCardArchiveScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardZoneScalePercent, setCardZoneScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardBoardScalePercent, setCardBoardScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardOpponentScalePercent, setCardOpponentScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardRigScalePercent, setCardRigScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
   const [cardSizeSettingsLoaded, setCardSizeSettingsLoaded] = useState(false);
   const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
   const [actionSlotCapacities, setActionSlotCapacities] = useState<Record<Side, number>>({
@@ -1747,13 +1753,18 @@ export default function Page() {
         const parsed = JSON.parse(stored) as {
           tooltipPercent?: unknown;
           handPercent?: unknown;
+          archivePercent?: unknown;
+          zonePercent?: unknown;
           boardPercent?: unknown;
+          rigPercent?: unknown;
           opponentPercent?: unknown;
         };
         setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
-        setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent, HAND_CARD_SCALE_PERCENT_MIN, HAND_CARD_SCALE_PERCENT_MAX));
+        setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent));
+        setCardArchiveScalePercent(normalizeCardScalePercent(parsed.archivePercent ?? parsed.zonePercent));
+        setCardZoneScalePercent(normalizeCardScalePercent(parsed.zonePercent));
         setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
-        setCardOpponentScalePercent(normalizeCardScalePercent(parsed.opponentPercent));
+        setCardRigScalePercent(normalizeCardScalePercent(parsed.rigPercent ?? parsed.opponentPercent));
       } catch {
         removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
       }
@@ -1768,11 +1779,13 @@ export default function Page() {
       JSON.stringify({
         tooltipPercent: cardTooltipScalePercent,
         handPercent: cardHandScalePercent,
+        archivePercent: cardArchiveScalePercent,
+        zonePercent: cardZoneScalePercent,
         boardPercent: cardBoardScalePercent,
-        opponentPercent: cardOpponentScalePercent
+        rigPercent: cardRigScalePercent
       })
     );
-  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardBoardScalePercent, cardOpponentScalePercent]);
+  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardArchiveScalePercent, cardZoneScalePercent, cardBoardScalePercent, cardRigScalePercent]);
 
   useEffect(() => {
     setCuePosition(parseCuePositionPreference(readLocalStorageWithLegacy(ACTION_CUE_POSITION_STORAGE_KEY, LEGACY_ACTION_CUE_POSITION_STORAGE_KEY)));
@@ -2159,6 +2172,10 @@ export default function Page() {
   useEffect(() => {
     if (connection === "online") pendingAiAdvanceKeyRef.current = null;
   }, [connection]);
+
+  useEffect(() => {
+    if (payload?.pendingUndo) setUndoPanelOpen(true);
+  }, [payload?.pendingUndo?.undoRequestId, payload?.pendingUndo?.needsResponse]);
 
   const updateLocalAiPacingMode = (mode: AiPacingMode) => {
     localAiPacingModeRef.current = mode;
@@ -3323,16 +3340,19 @@ export default function Page() {
     if (enabled) primeAudio(audioVolume);
     setAudioEnabled(enabled);
   };
-  const handCardScale = Math.max(HAND_CARD_SCALE_PERCENT_MIN / 100, cardHandScalePercent / 100);
-  const boardCardScale = Math.max(0.7, cardBoardScalePercent / 100);
+  const handCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, cardHandScalePercent / 100);
+  const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, cardZoneScalePercent / 100);
+  const boardCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, cardBoardScalePercent / 100);
+  const rigCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, cardRigScalePercent / 100);
   const handCardsStyle = useMemo(
-    () => ({ "--cards-min-width": `${Math.round(HAND_CARD_BASE_MIN_WIDTH * handCardScale)}px` } as CSSProperties),
+    () => ({ "--cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * handCardScale)}px` } as CSSProperties),
     [handCardScale]
   );
   const ownRigCardsStyle = useMemo(
-    () => ({ "--cards-min-width": `${Math.round(OWN_RIG_CARD_BASE_MIN_WIDTH * handCardScale)}px` } as CSSProperties),
-    [handCardScale]
+    () => ({ "--cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * rigCardScale)}px` } as CSSProperties),
+    [rigCardScale]
   );
+  const zoneCardsStyle = useMemo(() => ({ "--zone-card-scale": String(zoneCardScale) } as CSSProperties), [zoneCardScale]);
   const boardLaneStyle = useMemo(() => ({ "--lane-card-scale": String(boardCardScale) } as CSSProperties), [boardCardScale]);
 
   if (!session || !payload || !activeView) {
@@ -3341,17 +3361,21 @@ export default function Page() {
         value={{
           tooltipPercent: cardTooltipScalePercent,
           handPercent: cardHandScalePercent,
+          archivePercent: cardArchiveScalePercent,
+          zonePercent: cardZoneScalePercent,
           boardPercent: cardBoardScalePercent,
-          opponentPercent: cardOpponentScalePercent
+          rigPercent: cardRigScalePercent
         }}
       >
       <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
       <main className="app" data-theme={colorScheme}>
         <header className="topbar">
-          <Brand />
-          <div className="topbarMeta">
-            <span className="topbarVersion">{APP_STATUS_LABEL}</span>
-            <ConnectionBadge text={statusText} state={connection} />
+          <div className="topbarStatusGroup">
+            <Brand />
+            <div className="topbarMeta">
+              <span className="topbarVersion">{APP_STATUS_LABEL}</span>
+              <ConnectionBadge text={statusText} state={connection} />
+            </div>
           </div>
         </header>
         <div className="setup v07Entry" data-testid="setup-screen">
@@ -3823,8 +3847,10 @@ export default function Page() {
               cardTooltipMode={cardTooltipMode}
               cardTooltipScalePercent={cardTooltipScalePercent}
               cardHandScalePercent={cardHandScalePercent}
+              cardArchiveScalePercent={cardArchiveScalePercent}
+              cardZoneScalePercent={cardZoneScalePercent}
               cardBoardScalePercent={cardBoardScalePercent}
-              cardOpponentScalePercent={cardOpponentScalePercent}
+              cardRigScalePercent={cardRigScalePercent}
               cardDisplayMode={cardDisplayMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
@@ -3837,8 +3863,10 @@ export default function Page() {
               onCardTooltipMode={setCardTooltipMode}
               onCardTooltipScalePercent={setCardTooltipScalePercent}
               onCardHandScalePercent={setCardHandScalePercent}
+              onCardArchiveScalePercent={setCardArchiveScalePercent}
+              onCardZoneScalePercent={setCardZoneScalePercent}
               onCardBoardScalePercent={setCardBoardScalePercent}
-              onCardOpponentScalePercent={setCardOpponentScalePercent}
+              onCardRigScalePercent={setCardRigScalePercent}
               onCardDisplayMode={setCardDisplayMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
@@ -3858,17 +3886,34 @@ export default function Page() {
       value={{
         tooltipPercent: cardTooltipScalePercent,
         handPercent: cardHandScalePercent,
+        archivePercent: cardArchiveScalePercent,
+        zonePercent: cardZoneScalePercent,
         boardPercent: cardBoardScalePercent,
-        opponentPercent: cardOpponentScalePercent
+        rigPercent: cardRigScalePercent
       }}
     >
     <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
     <main className="app activeMatch" data-theme={colorScheme}>
       <header className="topbar">
-        <Brand />
+        <div className="topbarStatusGroup">
+          <Brand />
+          <div className="topbarMeta">
+            <span className="topbarVersion">{APP_STATUS_LABEL}</span>
+            <ConnectionBadge text={statusText} state={connection} />
+          </div>
+        </div>
         <div className="toolbar">
-          <span className="topbarVersion">{APP_STATUS_LABEL}</span>
-          <ConnectionBadge text={statusText} state={connection} />
+          <button
+            className={`button iconOnly topbarUndoToggle ${undoPanelOpen ? "active" : ""} ${payload.pendingUndo ? "attention" : ""}`}
+            onClick={() => setUndoPanelOpen((open) => !open)}
+            title={payload.pendingUndo?.needsResponse ? "Zurücknahme beantworten" : "Zurücknahme anfragen"}
+            aria-label={payload.pendingUndo?.needsResponse ? "Zurücknahme beantworten" : "Zurücknahme anfragen"}
+            aria-expanded={undoPanelOpen}
+            aria-controls="undo-strip"
+            type="button"
+          >
+            <RotateCcw size={16} />
+          </button>
           {connection !== "online" ? (
             <button className="button" onClick={reconnect} disabled={!canReconnect} title="Wieder verbinden">
               <Cable size={16} />
@@ -3919,6 +3964,7 @@ export default function Page() {
           <span title={payload.matchStatus}><strong>Status</strong> {payload.matchStatus}</span>
           <span title={payload.matchId}><strong>Match</strong> {shortDiagnosticsHash(payload.matchId)}</span>
           <span><strong>Gegenüber</strong> {opponentDisplayName ?? sideLabel(payload.opponentStatus.side)}</span>
+          {activeView.deckMetadata ? <span title={activeView.deckMetadata.own.deckName}><strong>Deck</strong> {activeView.deckMetadata.own.deckName} · geprüft</span> : null}
           <span><strong>Version</strong> {payload.matchVersion}</span>
           <span><strong>State</strong> {activeView.stateVersion}</span>
           {notice ? <span className="matchStripNotice">{notice}</span> : null}
@@ -3928,6 +3974,14 @@ export default function Page() {
           {notice}
         </div>
       ) : null}
+      <UndoPanel
+        open={undoPanelOpen}
+        pendingUndo={payload.pendingUndo}
+        latestEventId={latestEventId}
+        connection={connection}
+        onRequest={requestUndo}
+        onResolve={resolveUndo}
+      />
       <OpponentActionOverlay
         cue={currentActionCue}
         queued={actionCueQueue.length}
@@ -4027,7 +4081,6 @@ export default function Page() {
                         connection={connection}
                         onClearContext={() => setSelectedActionContext(null)}
                       />
-          <UndoPanel pendingUndo={payload.pendingUndo} latestEventId={latestEventId} connection={connection} onRequest={requestUndo} onResolve={resolveUndo} />
           <PlayerPanel
             view={activeView}
             title={`Du · ${sideLabel(activeView.side)}`}
@@ -4086,6 +4139,13 @@ export default function Page() {
                           />
                         );
                       }
+                      if (lane.cards.length === 0) {
+                        return (
+                          <span className="laneEmptyPlaceholder" aria-label={`${lane.label} leer`}>
+                            Leer
+                          </span>
+                        );
+                      }
                       return lane.cards.map((card, index) => {
                         const displayCard = enrichCard(card);
                         return (
@@ -4137,8 +4197,12 @@ export default function Page() {
                                 data-testid="server-run-action"
                                 data-server-id={server.id}
                               >
-                                <RunIcon size={13} />
-                                <CostChips action={runAction} />
+                                <span className="serverRunGlyph" aria-hidden="true">
+                                  <RunIcon size={14} />
+                                </span>
+                                <span className="serverRunActionIcon" aria-hidden="true">
+                                  <span className="costActionIcon" />
+                                </span>
                               </button>
                             ) : null}
                           </div>
@@ -4170,14 +4234,20 @@ export default function Page() {
                 <div className="rigSectionLead">
                   <div className="sideZoneLeadTop">
                     <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
-                    <ZoneSideCount side="runner" value={`MU ${activeView.own.memoryUsed ?? 0}/${activeView.own.memoryLimit ?? 0}`} />
                   </div>
                 </div>
                 {ownRigGroups.length > 0 ? (
                   <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
                     {ownRigGroups.map((group) => (
                       <div className="rigGroup rigGroupHorizontal" key={group.key} style={ownRigCardsStyle}>
-                        <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                        <div className="rigGroupLead">
+                          <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                          {group.key === "program" ? (
+                            <span className="zoneLimitBadge rigMemoryBadge" aria-label={`MU ${activeView.own.memoryUsed ?? 0} von ${activeView.own.memoryLimit ?? 0}`}>
+                              MU <strong>{activeView.own.memoryUsed ?? 0}/{activeView.own.memoryLimit ?? 0}</strong>
+                            </span>
+                          ) : null}
+                        </div>
                         <div className="cards rigGroupCards rigGroupCardsFull">
                           {group.cards.map((card) => {
                             const displayCard = enrichCard(card);
@@ -4208,8 +4278,8 @@ export default function Page() {
           <section className="section panel boardSection zoneBoardSection">
             {activeView.side === "runner" ? (
               <div className="runnerGripHeapLayout">
-                <SideZoneFrame side="runner" label="Grip" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "grip")}>
-                  <div className="cards" style={handCardsStyle}>
+                <SideZoneFrame side="runner" label="Grip" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "grip")} className="runnerGripZone">
+                  <div className="cards fixedZoneCards" style={handCardsStyle}>
                     {activeView.own.gripOrHq.map((card) => {
                       const displayCard = enrichCard(card);
                       return (
@@ -4230,7 +4300,7 @@ export default function Page() {
                   </div>
                 </SideZoneFrame>
                 <SideZoneFrame side="runner" label="Stack" countLabel={formatCardCount(activeView.own.stackOrRdCount)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")} className="runnerStackZone">
-                  <div className="runnerStackPreview" aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
+                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
                     {activeView.own.stackOrRdCount > 0 ? (
                       <div className="runnerStackBack" aria-hidden="true">
                         <span />
@@ -4242,7 +4312,7 @@ export default function Page() {
                 </SideZoneFrame>
                 <SideZoneFrame side="runner" label="Heap" countLabel={formatCardCount(activeView.own.heapOrArchives.length)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "heap")} className="runnerHeapZone">
                   {activeView.own.heapOrArchives.length > 0 ? (
-                    <div className="runnerHeapOverlapRow">
+                    <div className="runnerHeapOverlapRow" style={zoneCardsStyle}>
                       {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
                         const displayCard = enrichCard(card);
                         return (
@@ -4269,7 +4339,7 @@ export default function Page() {
               </div>
             ) : (
               <SideZoneFrame side="corp" label="HQ" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "hq")}>
-                <div className="cards" style={handCardsStyle}>
+                <div className="cards fixedZoneCards" style={handCardsStyle}>
                   {activeView.own.gripOrHq.map((card) => {
                     const displayCard = enrichCard(card);
                     return (
@@ -4356,8 +4426,10 @@ export default function Page() {
             cardTooltipMode={cardTooltipMode}
             cardTooltipScalePercent={cardTooltipScalePercent}
             cardHandScalePercent={cardHandScalePercent}
+            cardArchiveScalePercent={cardArchiveScalePercent}
+            cardZoneScalePercent={cardZoneScalePercent}
             cardBoardScalePercent={cardBoardScalePercent}
-            cardOpponentScalePercent={cardOpponentScalePercent}
+            cardRigScalePercent={cardRigScalePercent}
             cardDisplayMode={cardDisplayMode}
             colorScheme={colorScheme}
             cuePosition={cuePosition}
@@ -4372,8 +4444,10 @@ export default function Page() {
             onCardTooltipMode={setCardTooltipMode}
             onCardTooltipScalePercent={setCardTooltipScalePercent}
             onCardHandScalePercent={setCardHandScalePercent}
+            onCardArchiveScalePercent={setCardArchiveScalePercent}
+            onCardZoneScalePercent={setCardZoneScalePercent}
             onCardBoardScalePercent={setCardBoardScalePercent}
-            onCardOpponentScalePercent={setCardOpponentScalePercent}
+            onCardRigScalePercent={setCardRigScalePercent}
             onCardDisplayMode={setCardDisplayMode}
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
@@ -4915,8 +4989,10 @@ function OptionsPanel({
   cardTooltipMode,
   cardTooltipScalePercent,
   cardHandScalePercent,
+  cardArchiveScalePercent,
+  cardZoneScalePercent,
   cardBoardScalePercent,
-  cardOpponentScalePercent,
+  cardRigScalePercent,
   cardDisplayMode,
   colorScheme,
   cuePosition,
@@ -4931,8 +5007,10 @@ function OptionsPanel({
   onCardTooltipMode,
   onCardTooltipScalePercent,
   onCardHandScalePercent,
+  onCardArchiveScalePercent,
+  onCardZoneScalePercent,
   onCardBoardScalePercent,
-  onCardOpponentScalePercent,
+  onCardRigScalePercent,
   onCardDisplayMode,
   onColorScheme,
   onCuePosition,
@@ -4948,8 +5026,10 @@ function OptionsPanel({
   cardTooltipMode: CardTooltipMode;
   cardTooltipScalePercent: number;
   cardHandScalePercent: number;
+  cardArchiveScalePercent: number;
+  cardZoneScalePercent: number;
   cardBoardScalePercent: number;
-  cardOpponentScalePercent: number;
+  cardRigScalePercent: number;
   cardDisplayMode: CardDisplayMode;
   colorScheme: ColorScheme;
   cuePosition: CuePositionPreference;
@@ -4964,8 +5044,10 @@ function OptionsPanel({
   onCardTooltipMode(value: CardTooltipMode): void;
   onCardTooltipScalePercent(value: number): void;
   onCardHandScalePercent(value: number): void;
+  onCardArchiveScalePercent(value: number): void;
+  onCardZoneScalePercent(value: number): void;
   onCardBoardScalePercent(value: number): void;
-  onCardOpponentScalePercent(value: number): void;
+  onCardRigScalePercent(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
   onColorScheme(value: ColorScheme): void;
   onCuePosition(value: CuePositionPreference): void;
@@ -4992,12 +5074,16 @@ function OptionsPanel({
         <CardSizeSettings
           tooltipPercent={cardTooltipScalePercent}
           handPercent={cardHandScalePercent}
+          archivePercent={cardArchiveScalePercent}
+          zonePercent={cardZoneScalePercent}
           boardPercent={cardBoardScalePercent}
-          opponentPercent={cardOpponentScalePercent}
+          rigPercent={cardRigScalePercent}
           onTooltipPercent={onCardTooltipScalePercent}
           onHandPercent={onCardHandScalePercent}
+          onArchivePercent={onCardArchiveScalePercent}
+          onZonePercent={onCardZoneScalePercent}
           onBoardPercent={onCardBoardScalePercent}
-          onOpponentPercent={onCardOpponentScalePercent}
+          onRigPercent={onCardRigScalePercent}
         />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings enabled={actionCuesEnabled} position={cuePosition} autoDismissMs={actionCueAutoDismissMs} onEnabled={onActionCuesEnabled} onPosition={onCuePosition} onAutoDismissMs={onActionCueAutoDismissMs} />
@@ -5178,21 +5264,29 @@ function CardTooltipSettings({
 function CardSizeSettings({
   tooltipPercent,
   handPercent,
+  archivePercent,
+  zonePercent,
   boardPercent,
-  opponentPercent,
+  rigPercent,
   onTooltipPercent,
   onHandPercent,
+  onArchivePercent,
+  onZonePercent,
   onBoardPercent,
-  onOpponentPercent
+  onRigPercent
 }: {
   tooltipPercent: number;
   handPercent: number;
+  archivePercent: number;
+  zonePercent: number;
   boardPercent: number;
-  opponentPercent: number;
+  rigPercent: number;
   onTooltipPercent(value: number): void;
   onHandPercent(value: number): void;
+  onArchivePercent(value: number): void;
+  onZonePercent(value: number): void;
   onBoardPercent(value: number): void;
-  onOpponentPercent(value: number): void;
+  onRigPercent(value: number): void;
 }) {
   return (
     <div className="cardSizeSettings">
@@ -5201,9 +5295,11 @@ function CardSizeSettings({
         <span className="meta">Lokale Anzeigeoption, kein Match-State</span>
       </div>
       <CardSizeSliderRow label="Tooltip-Karte" value={tooltipPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onTooltipPercent} />
-      <CardSizeSliderRow label="Handkarten" value={handPercent} min={HAND_CARD_SCALE_PERCENT_MIN} max={HAND_CARD_SCALE_PERCENT_MAX} onChange={onHandPercent} />
+      <CardSizeSliderRow label="Handkarten" value={handPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onHandPercent} />
+      <CardSizeSliderRow label="Archive" value={archivePercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onArchivePercent} />
+      <CardSizeSliderRow label="Stack/Heap" value={zonePercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onZonePercent} />
       <CardSizeSliderRow label="Spielfeld/Forts" value={boardPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onBoardPercent} />
-      <CardSizeSliderRow label="Gegnerkarten (Runner-Rig)" value={opponentPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onOpponentPercent} />
+      <CardSizeSliderRow label="Rig" value={rigPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onRigPercent} />
     </div>
   );
 }
@@ -5499,7 +5595,7 @@ function AiPacingControls({
   connection: "offline" | "connecting" | "online";
   onAdvance(): void;
 }) {
-  if (!presentation) return null;
+  if (!presentation?.canAdvanceAi) return null;
   return (
     <section className="section aiPacingPanel" data-testid="ai-pacing">
       <div className="sectionTitleLine">
@@ -5510,8 +5606,8 @@ function AiPacingControls({
         {mode === "manual" ? "Einzelschritt aktiv." : mode === "paced" ? "Getakteter Automatiklauf aktiv." : "Schneller Automatiklauf aktiv."}
       </p>
       <button className="aiStepButton" onClick={onAdvance} disabled={!presentation.canAdvanceAi || connection !== "online"} type="button">
-        <Bot size={15} />
-        {mode === "manual" ? "KI-Schritt" : "Jetzt ausführen"}
+        <Bot size={14} />
+        {mode === "manual" ? "KI-Schritt" : "KI fortsetzen"}
       </button>
     </section>
   );
@@ -5544,10 +5640,10 @@ function RunnerRigStrip({
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
 }) {
-  const { opponentPercent } = useCardScaleSettings();
-  const opponentMiniCardScale = Math.max(0.7, opponentPercent / 100);
+  const { rigPercent } = useCardScaleSettings();
+  const opponentMiniCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, rigPercent / 100);
   const opponentMiniCardsStyle = useMemo(
-    () => ({ "--mini-cards-min-width": `${Math.round(OPPONENT_RIG_CARD_BASE_MIN_WIDTH * opponentMiniCardScale)}px` } as CSSProperties),
+    () => ({ "--mini-cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * opponentMiniCardScale)}px` } as CSSProperties),
     [opponentMiniCardScale]
   );
   if (opponentSide(view.side) !== "runner") return null;
@@ -5570,7 +5666,9 @@ function RunnerRigStrip({
           <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
             {groups.map((group) => (
               <div className="rigGroup rigGroupHorizontal" key={group.key} style={opponentMiniCardsStyle}>
-                <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                <div className="rigGroupLead">
+                  <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                </div>
                 <div className="cards rigGroupCards rigGroupCardsMini">
                   {group.cards.map((card) => {
                     const displayCard = enrichVisibleCard(card, cardDetailsById);
@@ -5835,24 +5933,31 @@ function ScoredAgendaOverlay({
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const { handPercent } = useCardScaleSettings();
-  const handCardScale = Math.max(HAND_CARD_SCALE_PERCENT_MIN / 100, handPercent / 100);
+  const handCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, handPercent / 100);
   const scoredAgendaCardsStyle = useMemo(
-    () => ({ "--cards-min-width": `${Math.round(HAND_CARD_BASE_MIN_WIDTH * handCardScale)}px` } as CSSProperties),
-    [handCardScale]
+    () => {
+      const columnCount = Math.min(Math.max(cards.length, 1), 3);
+      const cardMinWidth = Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * handCardScale);
+      return {
+        "--cards-min-width": `${cardMinWidth}px`,
+        "--score-area-columns": String(columnCount),
+        "--score-area-list-width": `${cardMinWidth * columnCount + 8 * (columnCount - 1)}px`
+      } as CSSProperties;
+    },
+    [cards.length, handCardScale]
   );
   const visibleCards = cards.map((card) => enrichCard(card));
   if (!open || visibleCards.length === 0) return null;
   const visibleLimitCards = visibleCards.slice(0, SCORE_AREA_PREVIEW_LIMIT);
   const title = side === "corp" ? "Entwickelt" : "Gestohlen";
-  const subtitle = `${cards.length} Agenda${cards.length === 1 ? "" : "s"}`;
-  const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const startDrag = (event: ReactPointerEvent<HTMLElement>) => {
     const overlay = overlayRef.current;
     if (!overlay) return;
     const rect = overlay.getBoundingClientRect();
     dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
-  const dragOverlay = (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const dragOverlay = (event: ReactPointerEvent<HTMLElement>) => {
     const overlay = overlayRef.current;
     const offset = dragOffsetRef.current;
     if (!overlay || !offset) return;
@@ -5868,7 +5973,7 @@ function ScoredAgendaOverlay({
       )
     );
   };
-  const stopDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
+  const stopDrag = (event: ReactPointerEvent<HTMLElement>) => {
     dragOffsetRef.current = null;
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
@@ -5883,28 +5988,33 @@ function ScoredAgendaOverlay({
       style={overlayPositionStyle}
     >
       <section className={`scoredAgendaPanel ${side}`}>
-        <header className={`scoredAgendaHead ${side}`}>
-          <div>
-            <strong>
-              {title}
-              <span className="scoredAgendaPointBadge">{agendaPoints} / {agendaPointsToWin} Agenda-Punkte</span>
-            </strong>
-            <span>{subtitle}</span>
-          </div>
-        </header>
-        <button
-          className="button iconOnly scoreAreaDragHandle"
-          type="button"
+        <header
+          className={`scoredAgendaHead ${side}`}
           onPointerDown={startDrag}
           onPointerMove={dragOverlay}
           onPointerUp={stopDrag}
           onPointerCancel={stopDrag}
-          aria-label={`${title}-Fenster verschieben`}
           title={`${title}-Fenster verschieben`}
+          aria-label={`${title}-Fenster verschieben`}
         >
-          <Move size={14} />
-        </button>
-        <button className="button iconOnly scoreAreaFloatingClose" type="button" onClick={onClose} aria-label={`${title}-Fenster schließen`} title={`${title}-Fenster schließen`}>
+          <div className="scoreAreaWindowControls" aria-hidden="true">
+            <span className="scoreAreaDragHint">
+              <Move size={14} />
+            </span>
+          </div>
+          <div className="scoredAgendaTitleBlock">
+            <strong>{title}</strong>
+            <span className="scoredAgendaPointBadge">{agendaPoints} / {agendaPointsToWin} Agenda-Punkte</span>
+          </div>
+        </header>
+        <button
+          className="button iconOnly scoreAreaFloatingClose"
+          type="button"
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={onClose}
+          aria-label={`${title}-Fenster schließen`}
+          title={`${title}-Fenster schließen`}
+        >
           <X size={14} />
         </button>
         <div className="scoredAgendaList cards" style={scoredAgendaCardsStyle}>
@@ -6261,6 +6371,9 @@ function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][]
 
 function cardChoiceTitle(choice: VisibleChoice): string {
   if (choice.source.includes("self_modifying_code_free_mu")) return "MU freimachen";
+  if (choice.source.includes("sneak_preview_source")) return "Quelle wählen";
+  if (choice.source.includes("sneak_preview_heap_install")) return "Heap durchsuchen";
+  if (choice.source.includes("sneak_preview_free_mu")) return "MU freimachen";
   if (choice.source.includes("search_stack")) return "Stack durchsuchen";
   if (choice.source.includes("arrange_stack")) return "Karten anordnen";
   return "Karten wählen";
@@ -6272,7 +6385,8 @@ function choiceSelectionRangeLabel(minSelections: number, maxSelections: number)
 }
 
 function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoiceOption[]): string {
-  if (selectedOptions.length === 0) return "Noch keine Karte gewählt.";
+  if (selectedOptions.length === 0) return choice.source.includes("sneak_preview_source") ? "Noch keine Quelle gewählt." : "Noch keine Karte gewählt.";
+  if (choice.source.includes("sneak_preview_source")) return "Diese Quelle für Sneak Preview verwenden?";
   if (choice.source.includes("search_stack")) {
     return selectedOptions.length === 1 ? "Diese Auswahl für den Sucheffekt übernehmen?" : `${selectedOptions.length} Karten für den Sucheffekt übernehmen?`;
   }
@@ -6289,14 +6403,19 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (choice.source.includes("self_modifying_code_free_mu")) {
     return "Die gewählten installierten Programme werden getrasht; danach wird das vorgezeigte Programm installiert.";
   }
+  if (choice.source.includes("sneak_preview_source")) return "Die Quelle wird vor der Suche festgelegt.";
+  if (choice.source.includes("sneak_preview_heap_install")) return "Das gewählte Programm wird kostenlos installiert und am Ende des Zuges in den Grip genommen, falls es noch installiert ist.";
+  if (choice.source.includes("sneak_preview_free_mu")) {
+    return "Die gewählten installierten Programme werden getrasht; danach wird das Sneak-Preview-Programm kostenlos installiert.";
+  }
   if (resolution?.destination === "install_program") {
-    return `Die gewählte Programmkarte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}direkt installiert${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
+    return `Die gewählte Programmkarte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}direkt installiert${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}${choice.source.includes("sneak_preview") ? "; am Zugende kehrt sie in den Grip zurück, falls sie noch installiert ist" : ""}.`;
   }
   if (resolution?.destination === "grip") {
     return `Die gewählte Karte wird ${resolution.reveal === "public" ? "vorgezeigt und " : ""}in den Grip genommen${resolution.shuffleAfter ? "; danach wird der Stack gemischt" : ""}.`;
   }
   if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
-  if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Trash in den Grip genommen.";
+  if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";
   return null;
 }
 
@@ -6374,68 +6493,60 @@ function setupWaitingLabel(view: PlayerView): string {
 }
 
 function UndoPanel({
+  open,
   pendingUndo,
   latestEventId,
   connection,
   onRequest,
   onResolve
 }: {
+  open: boolean;
   pendingUndo: ClientPayload["pendingUndo"] | undefined;
   latestEventId: string | undefined;
   connection: "offline" | "connecting" | "online";
   onRequest(): void;
   onResolve(accepted: boolean): void;
 }) {
+  if (!open) return null;
   const hasIncomingRequest = Boolean(pendingUndo?.needsResponse);
   const hasOutgoingRequest = Boolean(pendingUndo && !pendingUndo.needsResponse);
   const incomingRequest = pendingUndo?.needsResponse ? pendingUndo : null;
-  const [collapsed, setCollapsed] = useState(true);
-
-  useEffect(() => {
-    if (hasIncomingRequest || hasOutgoingRequest) setCollapsed(false);
-  }, [hasIncomingRequest, hasOutgoingRequest]);
+  const undoTitle = hasIncomingRequest || hasOutgoingRequest ? "Zurücknahme angefragt" : "Letzte Aktion zurücknehmen";
+  const undoDescription = hasIncomingRequest
+    ? `${sideLabel(incomingRequest!.requestedBy)} bittet um Zurücknahme der letzten Aktion.`
+    : hasOutgoingRequest
+      ? "Warte auf Bestätigung durch das Gegenüber."
+      : "Sendet eine Anfrage an Dein Gegenüber.";
 
   return (
-    <section className={`section undoPanel ${collapsed ? "collapsed" : "expanded"}`} data-testid="undo-panel">
+    <section className="undoPanel" id="undo-strip" data-testid="undo-panel" role="region" aria-label="Zurücknahme">
       <div className="undoPanelHeader">
-        <h2>Zurücknehmen</h2>
-        <button
-          className="button iconOnly undoPanelToggle"
-          type="button"
-          onClick={() => setCollapsed((value) => !value)}
-          aria-expanded={!collapsed}
-          aria-label={collapsed ? "Zurücknehmen ausklappen" : "Zurücknehmen einklappen"}
-          title={collapsed ? "Zurücknehmen ausklappen" : "Zurücknehmen einklappen"}
-        >
-          {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-        </button>
+        <h2>{undoTitle}</h2>
+        <p className="meta">{undoDescription}</p>
       </div>
-      {!collapsed ? (
-        hasIncomingRequest ? (
-          <div className="undoBox">
-            <p className="meta">{sideLabel(incomingRequest!.requestedBy)} fragt Zurücknehmen an.</p>
-            <div className="splitButtons">
-              <button className="button primary" onClick={() => onResolve(true)}>
-                <Check size={15} />
-                OK
-              </button>
-              <button className="button" onClick={() => onResolve(false)}>
-                <X size={15} />
-                Nein
-              </button>
-            </div>
+      {hasIncomingRequest ? (
+        <div className="undoBox">
+          <div className="splitButtons">
+            <button className="button primary" onClick={() => onResolve(true)}>
+              <Check size={15} />
+              Zustimmen
+            </button>
+            <button className="button" onClick={() => onResolve(false)}>
+              <X size={15} />
+              Ablehnen
+            </button>
           </div>
-        ) : hasOutgoingRequest ? (
-          <div className="undoBox">
-            <p className="meta">Anfrage gesendet. Warte auf Antwort.</p>
-          </div>
-        ) : (
-          <button className="button wide" onClick={onRequest} disabled={!latestEventId || connection !== "online"}>
-            <RotateCcw size={15} />
-            Letzte Aktion anfragen
-          </button>
-        )
-      ) : null}
+        </div>
+      ) : hasOutgoingRequest ? (
+        <div className="undoBox">
+          <p className="meta">Die letzte Aktion bleibt bestehen, bis die andere Seite zustimmt.</p>
+        </div>
+      ) : (
+        <button className="button wide" onClick={onRequest} disabled={!latestEventId || connection !== "online"}>
+          <RotateCcw size={15} />
+          Zurücknahme anfragen
+        </button>
+      )}
     </section>
   );
 }
@@ -8207,8 +8318,8 @@ function OpponentPanel({
           interactive={scoreAreaCards.length > 0}
           onToggle={onToggleScoreArea}
         />
-        {side === "runner" ? <Stat label="Tags" value={view.opponent.tags} icon={<TagIcon size={14} />} /> : null}
-        {side === "runner" ? <Stat label="Kernschaden" value={view.opponent.coreDamage ?? 0} /> : null}
+        {side === "runner" ? <Stat value={view.opponent.tags} icon={<TagIcon size={14} />} helpText="Tags markieren den Runner. Viele Tags erlauben der Korp stärkere Folgeaktionen gegen den Runner oder seine Ressourcen." /> : null}
+        {side === "runner" ? <Stat value={view.opponent.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
       </div>
       <ActionSlotMeter side={side} currentClicks={view.opponent.clicks} displayCapacity={actionCapacity} active={isTurn} compact />
       <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {isTurn ? "Am Zug" : "Wartet"}</p>
@@ -8248,15 +8359,9 @@ function PlayerPanel({
           interactive={scoreAreaCards.length > 0}
           onToggle={onToggleScoreArea}
         />
-        {view.side === "runner" ? <Stat label="Tags" value={view.own.tags} icon={<TagIcon size={14} />} /> : null}
-        {view.side === "runner" ? <Stat label="Kernschaden" value={view.own.coreDamage ?? 0} /> : null}
+        {view.side === "runner" ? <Stat value={view.own.tags} icon={<TagIcon size={14} />} helpText="Tags markieren den Runner. Viele Tags erlauben der Korp stärkere Folgeaktionen gegen den Runner oder seine Ressourcen." /> : null}
+        {view.side === "runner" ? <Stat value={view.own.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
       </div>
-      {view.deckMetadata ? (
-        <div className="deckMini">
-          <span>{view.deckMetadata.own.deckName}</span>
-          <small>Deck geprüft</small>
-        </div>
-      ) : null}
       <p className="meta statusLine">{isTurn ? "Am Zug" : "Wartet"}</p>
     </section>
   );
@@ -8307,25 +8412,73 @@ function ActionSlotMeter({
 
 function CreditBadge({ credits }: { credits: number }) {
   return (
-    <div className="stat resourceStat creditResource" aria-label={`${credits} Credits`} data-testid="credit-badge">
-      <div className="resourceStatTop">
-        <span className="creditCoin" aria-hidden="true" />
-        <strong>{credits}</strong>
-      </div>
-      <span className="statLabel">Credits</span>
-    </div>
+    <Stat value={credits} icon={<span className="creditCoin" aria-hidden="true" />} helpText="Credits sind die verfügbare Währung für Karten, Runs, Rezzes und andere Kosten." testId="credit-badge" />
   );
 }
 
-function Stat({ label, value, unit, icon }: { label?: string; value: number | string; unit?: string; icon?: ReactNode }) {
+function Stat({ label, value, unit, icon, helpText, testId }: { label?: string; value: number | string; unit?: string; icon?: ReactNode; helpText?: string; testId?: string }) {
+  const [helpPinned, setHelpPinned] = useState(false);
+  const [helpVisible, setHelpVisible] = useState(false);
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
+  const statRef = useRef<HTMLDivElement | null>(null);
+  const showHelp = Boolean(helpText && (helpPinned || helpVisible));
+  const updateTooltipPosition = () => {
+    const rect = statRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const width = Math.min(260, window.innerWidth - 28);
+    const left = Math.min(Math.max(14, rect.right - width), window.innerWidth - width - 14);
+    const belowTop = rect.bottom + 8;
+    const top = belowTop + 96 < window.innerHeight ? belowTop : Math.max(14, rect.top - 108);
+    setTooltipStyle({ left, top, width });
+  };
+  useEffect(() => {
+    if (!showHelp) return;
+    updateTooltipPosition();
+    window.addEventListener("resize", updateTooltipPosition);
+    window.addEventListener("scroll", updateTooltipPosition, true);
+    return () => {
+      window.removeEventListener("resize", updateTooltipPosition);
+      window.removeEventListener("scroll", updateTooltipPosition, true);
+    };
+  }, [showHelp]);
   return (
-    <div className="stat">
+    <div
+      ref={statRef}
+      className={`stat ${helpText ? "hasStatHelp" : ""} ${helpPinned ? "helpPinned" : ""}`}
+      tabIndex={helpText ? 0 : undefined}
+      aria-label={helpText ? `${label ? `${label}: ` : ""}${value}${unit ? ` ${unit}` : ""}. ${helpText}` : undefined}
+      data-testid={testId}
+      onMouseEnter={() => {
+        if (!helpText) return;
+        updateTooltipPosition();
+        setHelpVisible(true);
+      }}
+      onMouseLeave={() => {
+        if (!helpPinned) setHelpVisible(false);
+      }}
+      onFocus={() => {
+        if (!helpText) return;
+        updateTooltipPosition();
+        setHelpVisible(true);
+      }}
+      onDoubleClick={(event) => {
+        if (!helpText) return;
+        event.preventDefault();
+        updateTooltipPosition();
+        setHelpPinned((current) => !current);
+      }}
+      onBlur={() => {
+        setHelpPinned(false);
+        setHelpVisible(false);
+      }}
+    >
       <strong>
         {icon ? <span className="statIcon">{icon}</span> : null}
         <span className="statValue">{value}</span>
         {unit ? <span className="statUnit">{unit}</span> : null}
       </strong>
       {label ? <span className="statLabel">{label}</span> : null}
+      {helpText && showHelp ? createPortal(<span className="statHelpTooltip statHelpTooltipFloating" style={tooltipStyle}>{helpText}</span>, document.body) : null}
     </div>
   );
 }
@@ -8344,37 +8497,100 @@ function ScoreAreaStat({
   onToggle(): void;
 }) {
   const toggleLabel = open ? "Agendas ausblenden" : "Agendas anzeigen";
-  const content = (
-    <>
-      <strong>
-        <span className="statIcon"><AgendaIcon size={14} /></span>
-        <span className="statValue">{value}</span>
-      </strong>
-      <span className="scoreAreaStatFooter">
-        <span className="statLabel">Agenda</span>
-        {interactive ? (
-          <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
-            {open ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </span>
-        ) : null}
-      </span>
-    </>
-  );
+  const agendaHelpText = "Agenda-Punkte entscheiden das Spiel: Die Korp punktet erzielte Agendas, der Runner gestohlene Agendas.";
+  const valueStat = <Stat value={value} icon={<AgendaIcon size={14} />} helpText={agendaHelpText} />;
 
   if (!interactive) {
-    return <div className="stat scoreAreaStatCell">{content}</div>;
+    return valueStat;
   }
 
   return (
+    <>
+      {valueStat}
+      <ScoreAreaToggleButton
+        open={open}
+        highlighted={highlighted}
+        label={`${toggleLabel}. ${agendaHelpText}`}
+        helpText={agendaHelpText}
+        onToggle={onToggle}
+      />
+    </>
+  );
+}
+
+function ScoreAreaToggleButton({
+  open,
+  highlighted,
+  label,
+  helpText,
+  onToggle
+}: {
+  open: boolean;
+  highlighted: boolean;
+  label: string;
+  helpText: string;
+  onToggle(): void;
+}) {
+  const [helpPinned, setHelpPinned] = useState(false);
+  const [helpVisible, setHelpVisible] = useState(false);
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const showHelp = helpPinned || helpVisible;
+  const updateTooltipPosition = () => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    const width = Math.min(260, window.innerWidth - 28);
+    const left = Math.min(Math.max(14, rect.right - width), window.innerWidth - width - 14);
+    const belowTop = rect.bottom + 8;
+    const top = belowTop + 96 < window.innerHeight ? belowTop : Math.max(14, rect.top - 108);
+    setTooltipStyle({ left, top, width });
+  };
+  useEffect(() => {
+    if (!showHelp) return;
+    updateTooltipPosition();
+    window.addEventListener("resize", updateTooltipPosition);
+    window.addEventListener("scroll", updateTooltipPosition, true);
+    return () => {
+      window.removeEventListener("resize", updateTooltipPosition);
+      window.removeEventListener("scroll", updateTooltipPosition, true);
+    };
+  }, [showHelp]);
+  return (
     <button
-      className={`stat scoreAreaStatCell scoreAreaStatButton ${open ? "is-open" : ""} ${highlighted ? "cueHighlightSoft" : ""}`}
+      ref={buttonRef}
+      className={`stat scoreAreaStatCell scoreAreaStatButton hasStatHelp ${open ? "is-open" : ""} ${highlighted ? "cueHighlightSoft" : ""}`}
       type="button"
       onClick={onToggle}
+      onMouseEnter={() => {
+        updateTooltipPosition();
+        setHelpVisible(true);
+      }}
+      onMouseLeave={() => {
+        if (!helpPinned) setHelpVisible(false);
+      }}
+      onFocus={() => {
+        updateTooltipPosition();
+        setHelpVisible(true);
+      }}
+      onBlur={() => {
+        setHelpPinned(false);
+        setHelpVisible(false);
+      }}
+      onDoubleClick={(event) => {
+        event.preventDefault();
+        updateTooltipPosition();
+        setHelpPinned((current) => !current);
+      }}
       aria-expanded={open}
-      aria-label={toggleLabel}
-      title={toggleLabel}
+      aria-label={label}
     >
-      {content}
+      <strong className="scoreAreaToggleGlyphs">
+        <span className="statIcon"><AgendaIcon size={14} /></span>
+        <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
+          {open ? <EyeOff size={12} /> : <Eye size={12} />}
+        </span>
+      </strong>
+      {showHelp ? createPortal(<span className="statHelpTooltip statHelpTooltipFloating" style={tooltipStyle}>{helpText}</span>, document.body) : null}
     </button>
   );
 }
@@ -8423,71 +8639,74 @@ function ArchivesDualStackLane({
   enrichCard(card: VisibleCard): DisplayVisibleCard;
 }) {
   const { faceupCards, facedownCount } = splitArchiveCardsForDisplay(viewerSide, visibleCards, totalArchivesCount);
+  const { archivePercent } = useCardScaleSettings();
+  const archiveCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, archivePercent / 100);
+  const archiveCardsStyle = useMemo(() => ({ "--archive-card-scale": String(archiveCardScale) } as CSSProperties), [archiveCardScale]);
   const shownFaceupCards = faceupCards.slice(0, ARCHIVES_STACK_PREVIEW_LIMIT);
   const shownFacedownCount = Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
   const faceupOverflow = Math.max(0, faceupCards.length - shownFaceupCards.length);
   const facedownOverflow = Math.max(0, facedownCount - shownFacedownCount);
 
+  if (faceupCards.length === 0 && facedownCount === 0) {
+    return (
+      <span className="laneEmptyPlaceholder archiveEmptyPlaceholder" style={archiveCardsStyle}>
+        Leer
+      </span>
+    );
+  }
+
   return (
-    <div className="archivesDualStack" data-testid="archives-dual-stack">
-      <div className="archivesPile">
-        <div className="archivesPileHeader">
-          <span className="archivesPileTitle">Offen</span>
-          <span className="archivesPileCount">{faceupCards.length}</span>
+    <div className="archivesDualStack" style={archiveCardsStyle} data-testid="archives-dual-stack">
+      {faceupCards.length > 0 ? (
+        <div className="archivesPile">
+          <div className="archivesPileBody">
+            <div className="archivesOverlapRow">
+              {shownFaceupCards.map((card) => {
+                const displayCard = enrichCard(card);
+                return (
+                  <CardView
+                    key={card.instanceId}
+                    card={displayCard}
+                    compact
+                    displayMode={displayMode}
+                    hiddenSide="corp"
+                    installedCorpCard={false}
+                    selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                    actions={cardActionsFor(card)}
+                    actionDisabled={actionDisabled}
+                    onAction={onAction}
+                    onFocus={onFocus}
+                    onActionContextSelect={onActionContextSelect}
+                  />
+                );
+              })}
+              {faceupOverflow > 0 ? <span className="archivesOverflowBadge">+{faceupOverflow}</span> : null}
+            </div>
+          </div>
         </div>
-        {shownFaceupCards.length > 0 ? (
-          <div className="archivesOverlapRow">
-            {shownFaceupCards.map((card) => {
-              const displayCard = enrichCard(card);
-              return (
+      ) : null}
+
+      {facedownCount > 0 ? (
+        <div className="archivesPile">
+          <div className="archivesPileBody">
+            <div className="archivesOverlapRow">
+              {Array.from({ length: shownFacedownCount }, (_, index) => (
                 <CardView
-                  key={card.instanceId}
-                  card={displayCard}
+                  key={`archives-facedown-${index}`}
+                  card={{ instanceId: `archives-facedown-${index}`, known: false, rezzed: false }}
                   compact
                   displayMode={displayMode}
                   hiddenSide="corp"
                   installedCorpCard={false}
-                  selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
-                  actions={cardActionsFor(card)}
-                  actionDisabled={actionDisabled}
-                  onAction={onAction}
-                  onFocus={onFocus}
-                  onActionContextSelect={onActionContextSelect}
+                  actions={[]}
+                  actionDisabled
                 />
-              );
-            })}
-            {faceupOverflow > 0 ? <span className="archivesOverflowBadge">+{faceupOverflow}</span> : null}
+              ))}
+              {facedownOverflow > 0 ? <span className="archivesOverflowBadge">+{facedownOverflow}</span> : null}
+            </div>
           </div>
-        ) : (
-          <p className="archivesPileEmpty">Keine offenen Karten.</p>
-        )}
-      </div>
-
-      <div className="archivesPile">
-        <div className="archivesPileHeader">
-          <span className="archivesPileTitle">Verdeckt</span>
-          <span className="archivesPileCount">{facedownCount}</span>
         </div>
-        {shownFacedownCount > 0 ? (
-          <div className="archivesOverlapRow">
-            {Array.from({ length: shownFacedownCount }, (_, index) => (
-              <CardView
-                key={`archives-facedown-${index}`}
-                card={{ instanceId: `archives-facedown-${index}`, known: false, rezzed: false }}
-                compact
-                displayMode={displayMode}
-                hiddenSide="corp"
-                installedCorpCard={false}
-                actions={[]}
-                actionDisabled
-              />
-            ))}
-            {facedownOverflow > 0 ? <span className="archivesOverflowBadge">+{facedownOverflow}</span> : null}
-          </div>
-        ) : (
-          <p className="archivesPileEmpty">Keine verdeckten Karten.</p>
-        )}
-      </div>
+      ) : null}
     </div>
   );
 }
@@ -8540,6 +8759,8 @@ function CardView({
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const tooltipOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tooltipCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTouchTapRef = useRef(0);
+  const lastTouchTooltipPinRef = useRef(0);
   const [tooltipPositionStyle, setTooltipPositionStyle] = useState<CSSProperties>({});
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
   const [actionMenuPlacement, setActionMenuPlacement] = useState<"above" | "below">("below");
@@ -8547,6 +8768,7 @@ function CardView({
   const [suppressCardTooltip, setSuppressCardTooltip] = useState(false);
   const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
+  const [tooltipPinnedVisible, setTooltipPinnedVisible] = useState(false);
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
@@ -8563,9 +8785,12 @@ function CardView({
   const tooltipImageUrl = card.known ? (card.definitionId ? localCardImageUrl(card.definitionId) : undefined) ?? card.imageUrl : undefined;
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
   const hasTooltipTextContent = Boolean(card.title) || detailLines.length > 0 || hasRulesLines;
-  const tooltipEnabled = card.known && !showCardActions && !suppressCardTooltip && (showImageTooltip || hasTooltipTextContent);
-  const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible);
+  const tooltipAvailable = card.known && !showCardActions && (showImageTooltip || hasTooltipTextContent);
+  const canPinTooltip = tooltipAvailable && !onSelect;
+  const tooltipEnabled = tooltipAvailable && (!suppressCardTooltip || tooltipPinnedVisible);
+  const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible || tooltipPinnedVisible);
   const tooltipId = tooltipEnabled ? `card-tooltip-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}` : undefined;
+  const tooltipOwnerId = `card-tooltip-owner-${card.instanceId.replace(/[^A-Za-z0-9_-]/g, "-")}`;
   const nativeTitle = tooltipEnabled || showCardActions || suppressCardTooltip ? undefined : tooltipText;
   const tooltipStats = card.known
     ? [
@@ -8702,18 +8927,56 @@ function CardView({
   };
 
   useEffect(() => {
-    if (tooltipEnabled) return;
+    if (tooltipAvailable) return;
     clearTooltipOpenTimer();
     clearTooltipCloseTimer();
     setTooltipHoverVisible(false);
     setTooltipFocusVisible(false);
+    setTooltipPinnedVisible(false);
     setTooltipPositionStyle({});
-  }, [tooltipEnabled]);
+  }, [tooltipAvailable]);
+
+  const togglePinnedTooltip = () => {
+    if (!canPinTooltip) return;
+    clearTooltipOpenTimer();
+    clearTooltipCloseTimer();
+    setSuppressCardTooltip(false);
+    setTooltipHoverVisible(false);
+    setTooltipFocusVisible(false);
+    setTooltipPinnedVisible((visible) => {
+      const nextVisible = !visible;
+      if (nextVisible) {
+        window.dispatchEvent(new CustomEvent(CARD_TOOLTIP_PIN_EVENT, { detail: { ownerId: tooltipOwnerId } }));
+      }
+      return nextVisible;
+    });
+    updateOverlayPlacement();
+  };
+
+  const closePinnedTooltip = () => {
+    clearTooltipOpenTimer();
+    clearTooltipCloseTimer();
+    setTooltipHoverVisible(false);
+    setTooltipFocusVisible(false);
+    setTooltipPinnedVisible(false);
+  };
 
   useEffect(() => {
     if (!showTooltip) return;
     updateOverlayPlacement();
   }, [showTooltip, tooltipMode]);
+
+  useEffect(() => {
+    const closeWhenOtherTooltipPins = (event: Event) => {
+      const ownerId = event instanceof CustomEvent ? (event.detail as { ownerId?: unknown } | null)?.ownerId : undefined;
+      if (ownerId === tooltipOwnerId) return;
+      setTooltipPinnedVisible(false);
+      setTooltipHoverVisible(false);
+      setTooltipFocusVisible(false);
+    };
+    window.addEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipPins);
+    return () => window.removeEventListener(CARD_TOOLTIP_PIN_EVENT, closeWhenOtherTooltipPins);
+  }, [tooltipOwnerId]);
 
   useEffect(() => {
     if (!showCardActions) {
@@ -8759,10 +9022,27 @@ function CardView({
           onFocus?.(card, hiddenSide);
         }}
         onBlur={() => setTooltipFocusVisible(false)}
+        onDoubleClick={(event) => {
+          if (!canPinTooltip) return;
+          if (Date.now() - lastTouchTooltipPinRef.current < 700) return;
+          event.preventDefault();
+          togglePinnedTooltip();
+        }}
         onPointerEnter={(event) => {
           updateOverlayPlacement();
           if (event.pointerType === "touch") return;
           scheduleTooltipOpen();
+        }}
+        onPointerUp={(event) => {
+          if (event.pointerType !== "touch" || !canPinTooltip) return;
+          const now = Date.now();
+          const elapsed = now - lastTouchTapRef.current;
+          lastTouchTapRef.current = now;
+          if (elapsed > 60 && elapsed < 420) {
+            event.preventDefault();
+            lastTouchTooltipPinRef.current = now;
+            togglePinnedTooltip();
+          }
         }}
         onPointerLeave={(event) => {
           setSuppressCardTooltip(false);
@@ -8807,10 +9087,18 @@ function CardView({
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
         {tooltipId ? (
           <span
-            className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
+            className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
             id={tooltipId}
             role="tooltip"
             style={tooltipPositionStyle}
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              closePinnedTooltip();
+            }}
+            onPointerDown={(event) => {
+              if (tooltipPinnedVisible) event.stopPropagation();
+            }}
             onPointerEnter={(event) => {
               if (event.pointerType === "touch") return;
               clearTooltipCloseTimer();
