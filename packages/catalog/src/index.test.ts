@@ -1875,14 +1875,20 @@ describe("catalog import and status logic", () => {
       ].includes(card.resolverFamily)
     );
     const runnerProgramResolverCards = manifestCards.filter((card) =>
-      ["v1922_runner_program_install_surface_ability_gated", "v1922_runner_program_net_damage_prevention", "v1922_runner_program_newsgroup_filter_gain_2"].includes(card.resolverFamily)
+      [
+        "v1922_runner_program_install_surface_ability_gated",
+        "v1922_runner_program_net_damage_prevention",
+        "v1922_runner_program_newsgroup_filter_gain_2",
+        "v1922_runner_program_flak_ap_breaker",
+        "v1922_runner_program_reflector_tagged_breaker"
+      ].includes(card.resolverFamily)
     );
     const corpAgendaResolverCards = manifestCards.filter((card) =>
       [
         "v1922_corp_agenda_on_score_credit_threshold",
-        "v1922_scored_agenda_action_gain_1",
+        "v1922_scored_agenda_action_gain_2_until_install_or_rez",
         "v1922_scored_agenda_action_gain_3",
-        "v1922_scored_agenda_action_gain_6_until_install_or_rez"
+        "v1922_scored_agenda_action_gain_3_for_2_actions"
       ].includes(card.resolverFamily)
     );
     const corpOperationResolverCards = manifestCards.filter((card) =>
@@ -1941,10 +1947,12 @@ describe("catalog import and status logic", () => {
 
     expect(runnerProgramResolverCards.map((card) => card.cardCode).sort()).toEqual([
       "onr_v1_026_false-echo",
+      "onr_v1_027_flak",
       "onr_v1_044_netspace-inverter",
       "onr_v1_045_newsgroup-filter",
       "onr_v1_048_poltergeist",
       "onr_v1_051_rabbit",
+      "onr_v1_055_reflector",
       "onr_v1_057_scatter-shot",
       "onr_v1_061_shield",
       "onr_v1_067_speed-trap",
@@ -1972,6 +1980,12 @@ describe("catalog import and status logic", () => {
       }
       if (card.cardCode === "onr_v1_061_shield") {
         expect(card.coveredSmokes).toContain("net_damage_prevention_window");
+      }
+      if (card.cardCode === "onr_v1_027_flak") {
+        expect(card.coveredSmokes).toEqual(expect.arrayContaining(["ap_break_subroutine", "pump_strength", "wrong_side_revalidation", "stale_state_revalidation"]));
+      }
+      if (card.cardCode === "onr_v1_055_reflector") {
+        expect(card.coveredSmokes).toEqual(expect.arrayContaining(["tagged_break_subroutine", "wrong_side_revalidation", "stale_state_revalidation"]));
       }
     }
 
@@ -2003,7 +2017,7 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes).toEqual(expect.arrayContaining(["rez_ice_legal_action", "core_damage_subroutines", "end_the_run", "replay_statehash"]));
     }
 
-    expect(plannedCards).toHaveLength(11);
+    expect(plannedCards).toHaveLength(9);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
       expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);
@@ -2097,7 +2111,7 @@ describe("catalog import and status logic", () => {
     expect(contracts.gateAssertions.coversExactWipScope).toBe(true);
     expect(contracts.gateAssertions.cardCount).toBe(ONR_V1_9_22_WIP_CARD_IDS.length);
     expect(contracts.gateAssertions.readyForPromotionCount).toBe(0);
-    expect(contracts.gateAssertions.readyForNewResolverImplementationCount).toBe(0);
+    expect(contracts.gateAssertions.readyForNewResolverImplementationCount).toBe(2);
     expect(contracts.gateAssertions.hardwareInstallBaseCoveredCount).toBe(9);
     expect(contracts.gateAssertions.runtimePromotionUnchanged).toBe(true);
     expect(contracts.gateAssertions.catalogPromotionUnchanged).toBe(true);
@@ -2106,7 +2120,7 @@ describe("catalog import and status logic", () => {
     expect(cardIds).toHaveLength(ONR_V1_9_22_WIP_CARD_IDS.length);
 
     for (const card of contracts.cards) {
-      expect(card.contractStatus, card.cardId).not.toMatch(/ready_for_promotion|ready_for_implementation/);
+      expect(card.contractStatus, card.cardId).not.toMatch(/ready_for_promotion/);
       expect(card.confirmedLocalFacts.length, card.cardId).toBeGreaterThan(0);
       expect(card.safeCurrentCoverage.length, card.cardId).toBeGreaterThan(0);
       expect(card.missingInformation.length, card.cardId).toBeGreaterThan(0);

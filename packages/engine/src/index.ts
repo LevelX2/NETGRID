@@ -2298,10 +2298,10 @@ function corpMainActions(state: GameState): LegalAction[] {
           state,
           "corp",
           "gain_credit",
-          `${definition.title}: 6 Credits`,
+          `${definition.title}: 2 Credits`,
           agendaId,
           [{ clicks: 1 }],
-          { cardId: agendaId, agendaAbility: "v1922_corporate_retreat", gainCreditsAmount: 6 }
+          { cardId: agendaId, agendaAbility: "v1922_corporate_retreat", gainCreditsAmount: 2 }
         )
       );
       continue;
@@ -2326,10 +2326,10 @@ function corpMainActions(state: GameState): LegalAction[] {
           state,
           "corp",
           "gain_credit",
-          `${definition.title}: 1 Credit`,
+          `${definition.title}: 3 Credits`,
           agendaId,
-          [{ clicks: 1 }],
-          { cardId: agendaId, agendaAbility: "v1922_marine_arcology", gainCreditsAmount: 1 }
+          [{ clicks: 2 }],
+          { cardId: agendaId, agendaAbility: "v1922_marine_arcology", gainCreditsAmount: 3 }
         )
       );
       continue;
@@ -3264,12 +3264,13 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
         )
       );
     }
-    const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype)));
+    const breakAbility = breaker.abilities?.find((ability) => ability.type === "break_subroutine" && breakAbilityMatchesIce(ability, iceDefinition));
     if (!run.noBreakSubroutinesActive && breakAbility && breakerStrength >= encounteredIceStrength && availableRunnerRunCredits(state, breakerId) >= breakAbility.cost.credits) {
       const blinkUsedSubroutines = run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = iceDefinition.subroutines ?? [];
       subroutines.forEach((subroutine, index) => {
         if (breaker.id === BLINK_ID && blinkUsedSubroutines.includes(index)) return;
+        if (!breakAbilityMatchesSubroutine(breakAbility, subroutine)) return;
         if (!run.brokenSubroutineIndexes.includes(index) && !run.resolvedSubroutineIndexes.includes(index)) {
           const subroutineLabel = subroutines.length > 1 ? `Subroutine ${index + 1} brechen` : "Subroutine brechen";
           actions.push(
@@ -3299,6 +3300,19 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     })
   );
   return actions;
+}
+
+function breakAbilityMatchesIce(ability: NonNullable<CardDefinition["abilities"]>[number], iceDefinition: CardDefinition): boolean {
+  if (ability.type !== "break_subroutine") return false;
+  if (ability.iceSubtype && !iceDefinition.subtypes.includes(ability.iceSubtype)) return false;
+  return true;
+}
+
+function breakAbilityMatchesSubroutine(ability: NonNullable<CardDefinition["abilities"]>[number], subroutine: NonNullable<CardDefinition["subroutines"]>[number]): boolean {
+  const tags = ability.subroutineBreakTags ?? [];
+  if (tags.length === 0) return true;
+  const subroutineTags = subroutine.breakTags ?? [];
+  return tags.some((tag) => subroutineTags.includes(tag));
 }
 
 function encounterSubroutinesForNextContinue(run: RunState, subroutines: NonNullable<CardDefinition["subroutines"]>): NonNullable<CardDefinition["subroutines"]> {
@@ -3854,7 +3868,8 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         const definition = definitionFor(state, sourceCardId);
         if (definition.id !== V1922_MARINE_ARCOLOGY_ID) throw new Error("Die Agenda-Aktion passt nicht zu Marine Arcology.");
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 1) throw new Error("Marine Arcology gewaehrt in diesem Scope genau 1 Credit.");
+        if (!Number.isInteger(gainAmount) || gainAmount !== 3) throw new Error("Marine Arcology gewaehrt in diesem Scope genau 3 Credits.");
+        spendClick(state, "corp");
         credits(state, "corp", gainAmount);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -3871,7 +3886,7 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         if (definition.id !== V1922_CORPORATE_RETREAT_ID) throw new Error("Die Agenda-Aktion passt nicht zu Corporate Retreat.");
         if (!isV1922CorporateRetreatAbilityAvailable(state, sourceCardId)) throw new Error("Corporate Retreat ist nach Install oder Rez nicht mehr verfuegbar.");
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 6) throw new Error("Corporate Retreat gewaehrt in diesem Scope genau 6 Credits.");
+        if (!Number.isInteger(gainAmount) || gainAmount !== 2) throw new Error("Corporate Retreat gewaehrt in diesem Scope genau 2 Credits.");
         credits(state, "corp", gainAmount);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -7515,7 +7530,7 @@ function resolveV1922RunnerGripTrashChoice(state: GameState, legalAction: LegalA
     state.runner.heap.push(cardId);
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "runner", zone: "heap" } };
   }
-  const gainedCredits = selectedIds.length;
+  const gainedCredits = selectedIds.length * 2;
   if (gainedCredits > 0) credits(state, "runner", gainedCredits);
   delete state.pendingChoice;
   legalAction.payload = {
@@ -7561,7 +7576,7 @@ function resolveV1922RunnerInstalledTrashChoice(state: GameState, legalAction: L
     state.runner.heap.push(cardId);
     state.cardInstances[cardId] = { ...mustInstance(state.cardInstances, cardId), faceup: true, zone: { side: "runner", zone: "heap" } };
   }
-  const gainedCredits = selectedIds.length;
+  const gainedCredits = selectedIds.length * 3;
   if (gainedCredits > 0) credits(state, "runner", gainedCredits);
   delete state.pendingChoice;
   legalAction.payload = {

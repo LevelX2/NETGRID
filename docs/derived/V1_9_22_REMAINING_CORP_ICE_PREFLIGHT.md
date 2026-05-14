@@ -14,7 +14,7 @@ Nach `Zombie` bleiben vier Corp-ICE-Zielkarten ohne engen Runtime-Resolver: `Hau
 | `Haunting Inquisition` | Code Gate, Rez 8, Staerke 6; Run-/Action-Lock fuer die naechsten sechs tatsaechlich genommenen Runner-Aktionen plus End the run. Errata: mehrere Effekte laufen parallel; Bonus-Runs ausserhalb einer Aktion werden nicht verboten. | Action-Zaehler ueber tatsaechlich genommene Aktionen, LegalAction-Filter, Zaehlerverbrauch und PublicPayload. |
 | `Tutor` | Code Gate, Rez 4, Staerke 5; fuer den Rest des Runs erhalten spaeter encountered ICE eine zusaetzliche End-the-run-Subroutine. Errata: Tutor modifiziert sich nicht selbst, ausser es wird spaeter erneut encountered. | Run-weite Modifier-Struktur, Subroutine-Indexierung, Breakbarkeit und Replay-Rekonstruktion. |
 | `Viral 15` | Sentry, Rez 5, Staerke 3; run-weite Jack-out-Steuer und Program-trash nach dem Passieren jeder gerezzten ICE, ausser Runner jackt out. Errata: Runner waehlt die zu trashenden Programme. | Timing nach Passing, Jack-out-Choice, Runner-private Programmauswahl, Mehrfachtrigger und Trash-Visibility. |
-| `Virizz` | Sentry, Rez 2, Staerke 4; fuer den Rest des Runs kostet das Brechen jeder ICE-Subroutine 1 Credit extra. | Break-Kostenmodifikation in LegalActions, Interaktion mit Breaker-, Recurring- und Stealth-Credits. |
+| `Virizz` | Sentry, Rez 2, Staerke 4; fuer den Rest des Runs muss der Runner 1 Credit extra bezahlen, wenn er ICE brechen will. | Break-Kostenmodifikation in LegalActions, Interaktion mit Breaker-, Recurring- und Stealth-Credits. |
 
 ## Kleinste Kandidaten
 

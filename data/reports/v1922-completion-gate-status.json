@@ -78,13 +78,15 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-14T08:50:00+02:00",
+    "implementedAt": "2026-05-14T15:25:00+02:00",
       "cards": [
       "onr_v1_026_false-echo",
+      "onr_v1_027_flak",
       "onr_v1_044_netspace-inverter",
       "onr_v1_045_newsgroup-filter",
       "onr_v1_048_poltergeist",
       "onr_v1_051_rabbit",
+      "onr_v1_055_reflector",
       "onr_v1_057_scatter-shot",
       "onr_v1_061_shield",
       "onr_v1_067_speed-trap",
@@ -110,6 +112,8 @@
     ],
     "engineTests": [
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs V1.9.22 install-only runner programs while keeping their abilities gated",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Flak and breaks AP ICE subroutines without release promotion",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Reflector and only breaks tagged stun or knockout subroutines",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Newsgroup Filter and uses its side-safe credit action",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Shield and uses side-safe per-turn net damage prevention",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Anonymous Tip as a public black-ice derez choice",
@@ -124,7 +128,7 @@
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Valu-Pak Software Bundle as a consecutive program-install action bundle",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Corporate Retreat until Corp installs or rezzes another card",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver",
-      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 1",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 3",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Zombie as core-damage ICE with replay-stable public run resolution",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Edgerunner, Inc., Temps as a consecutive Corp install-only action bundle",
@@ -161,28 +165,50 @@
       },
       {
         "cardId": "onr_v1_277_virizz",
-        "status": "blocked_pending_run_wide_break_cost_modifier_contract",
-        "removalCondition": "Confirm break_subroutine cost projection, applyAction revalidation and credit-pool interactions."
+        "status": "prepared_user_confirmed_pending_run_wide_break_cost_modifier_contract",
+        "removalCondition": "Write break_subroutine cost projection, applyAction revalidation and credit-pool interactions."
       },
       {
         "cardId": "onr_v1_027_flak",
-        "status": "blocked_pending_breaker_subroutine_taxonomy_contract",
-        "removalCondition": "Confirm AP subroutine taxonomy, pump/break LegalAction projection and applyAction revalidation."
+        "status": "runtime_wip_ap_breaker_no_promotion",
+        "removalCondition": "Keep catalog, AI and release promotion closed until final V1.9.22 gates."
+      },
+      {
+        "cardId": "onr_v1_031_hammer",
+        "status": "ready_for_narrow_breaker_runtime_with_noisy_stealth_loss_no_promotion",
+        "removalCondition": "Implement and test the confirmed Hammer Wall-breaker and Noisy Stealth-loss contract without catalog, AI or release promotion."
+      },
+      {
+        "cardId": "onr_v1_037_japanese-water-torture",
+        "status": "ready_for_narrow_breaker_runtime_with_future_action_debt_no_promotion",
+        "removalCondition": "Implement and test the confirmed Wall-breaker and future-action-debt contract without catalog, AI or release promotion."
+      },
+      {
+        "cardId": "onr_v1_055_reflector",
+        "status": "runtime_wip_tagged_breaker_no_promotion",
+        "removalCondition": "Keep catalog, AI and release promotion closed until final V1.9.22 gates."
       },
       {
         "cardId": "onr_v1_075_zetatech-software-installer",
-        "status": "blocked_pending_install_cost_and_overlay_contract",
-        "removalCondition": "Confirm install cost, restricted program-install credits and overlay installation contract."
+        "status": "prepared_user_confirmed_pending_restricted_credit_and_overlay_contract",
+        "removalCondition": "Write restricted program-install credits and overlay installation contract."
       }
     ],
     "decision": "no_runtime_catalog_or_ai_promotion"
   },
   "latestErrataSourceReview": {
     "reviewedAt": "2026-05-14T01:45:00+02:00",
-    "source": "C:\\Users\\Lui\\OneDrive\\Downloads\\Netrunner_Errata_v1.70.pdf",
+    "source": "docs/source/Netrunner_Errata_v1.70.pdf",
     "docRef": "docs/derived/V1_9_22_ERRATA_1_70_SOURCE_REVIEW.md",
+    "breakerContractRef": "docs/derived/V1_9_22_BREAKER_CONTRACT_PREFLIGHT.md",
     "userConfirmedCards": [
-      "onr_v1_045_newsgroup-filter"
+      "onr_v1_027_flak",
+      "onr_v1_031_hammer",
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_045_newsgroup-filter",
+      "onr_v1_055_reflector",
+      "onr_v1_075_zetatech-software-installer",
+      "onr_v1_277_virizz"
     ],
     "errataReviewedCards": [
       "onr_v1_031_hammer",
@@ -202,7 +228,7 @@
   },
   "latestBlockerReview": {
     "reviewedAt": "2026-05-14T08:50:00+02:00",
-    "status": "remaining_technical_contracts_open_after_newsgroup_filter_runtime_wip",
+    "status": "remaining_technical_contracts_open_after_flak_runtime_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -213,12 +239,10 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter now has a non-promoting Gain-2 runtime WIP; Errata 1.70 reduced several remaining factual gaps without release promotion.",
+    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter, Flak and Reflector now have non-promoting runtime WIPs; Errata 1.70 and user clarifications for Hammer, Japanese Water Torture, Zetatech Software Installer and Virizz reduced several remaining factual gaps without release promotion. The user-confirmed breaker contract keeps Hammer and Japanese Water Torture ready for narrow non-promoting runtime implementation.",
     "blockedCards": [
-      "onr_v1_027_flak",
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_055_reflector",
       "onr_v1_075_zetatech-software-installer",
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_216_security-purge",

@@ -4021,7 +4021,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4187,7 +4187,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
@@ -4430,7 +4430,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
@@ -4665,7 +4665,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toContain("deterministic_random");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("records Schlaghund deterministic die probes through LegalAction and replay", () => {
@@ -5009,7 +5009,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -5104,7 +5104,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
@@ -5425,7 +5425,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
@@ -5586,7 +5586,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
@@ -5747,7 +5747,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
@@ -5906,7 +5906,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
@@ -6269,7 +6269,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toContain("per_card_longtail");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs all V1.9.22 runner hardware through LegalActions with replay, visibility and revalidation", () => {
@@ -6515,13 +6515,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(state.runner.heap).toContain(cardId);
       expect(state.runner.grip).not.toContain(cardId);
     }
-    expect(state.runner.credits).toBe(creditsBeforeEvent + trashCandidates.length);
+    expect(state.runner.credits).toBe(creditsBeforeEvent + trashCandidates.length * 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
       trashedCount: 2,
-      gainedCredits: 2
+      gainedCredits: 4
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"grip"|"cardInstances"|"privatePayload"/);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -6607,13 +6607,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(state.runner.heap).toContain(cardId);
       expect([...state.runner.rig.programs, ...state.runner.rig.hardware, ...state.runner.rig.resources]).not.toContain(cardId);
     }
-    expect(state.runner.credits).toBe(creditsBeforeEvent + installedTargets.length);
+    expect(state.runner.credits).toBe(creditsBeforeEvent + installedTargets.length * 3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
       trashedCount: 2,
-      gainedCredits: 2
+      gainedCredits: 6
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"stack"|"grip"|"cardInstances"|"privatePayload"/);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -7270,10 +7270,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("keeps unresolved V1.9.22 runner programs out of playable runtime until local values are confirmed", () => {
     const runnerProgramIds = [
-      "onr_v1_027_flak",
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_055_reflector",
       "onr_v1_075_zetatech-software-installer"
     ] as const;
 
@@ -7284,10 +7282,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("does not expose unresolved V1.9.22 runner program install, pump or break LegalActions before local values are confirmed", () => {
     const runnerProgramIds = [
-      "onr_v1_027_flak",
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_055_reflector",
       "onr_v1_075_zetatech-software-installer"
     ] as const;
 
@@ -7329,6 +7325,156 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(exposedActionTypes, definitionId).not.toContain("pump_breaker");
       expect(exposedActionTypes, definitionId).not.toContain("break_subroutine");
     }
+  });
+
+  it("installs Flak and breaks AP ICE subroutines without release promotion", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-flak-ap-breaker",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_flak",
+          name: "O:NR V1.9.22 Flak",
+          cards: [{ id: "onr_v1_027_flak", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_flak_ap",
+          name: "O:NR V1.9.22 Flak AP ICE Corp",
+          cards: [{ id: "onr_v1_280_zombie", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_027_flak");
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_280_zombie");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_027_flak");
+    expect(state.runner.credits).toBe(16);
+    expect(state.runner.memoryUsed).toBe(1);
+    const flakId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_027_flak");
+    expect(flakId).toBeDefined();
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && action.source === iceId);
+    expect(getLegalActions(state, "runner").some((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_027_flak")).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_027_flak");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_027_flak");
+
+    const legal = mustAction(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_027_flak" && action.payload?.subroutineIndex === 0);
+    expect(legal.costs[0]?.credits).toBe(1);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-flak-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-flak-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toContain(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_027_flak",
+      title: "Flak"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/);
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toBeUndefined();
+    expect(state.runner.coreDamage).toBe(1);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("installs Reflector and only breaks tagged stun or knockout subroutines", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-reflector-tagged-breaker",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_reflector",
+          name: "O:NR V1.9.22 Reflector",
+          cards: [{ id: "onr_v1_055_reflector", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_reflector",
+          name: "O:NR V1.9.22 Reflector Tagged ICE Corp",
+          cards: [{ id: "onr_v1_271_tko-2-0", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_055_reflector");
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_271_tko-2-0");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_055_reflector");
+    expect(state.runner.credits).toBe(8);
+    expect(state.runner.memoryUsed).toBe(1);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && action.source === iceId);
+
+    const breakActions = getLegalActions(state, "runner").filter((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_055_reflector");
+    expect(breakActions.map((action) => action.payload?.subroutineIndex)).toEqual([0]);
+    expect(breakActions[0]?.costs[0]?.credits).toBe(0);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: breakActions[0]!.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-reflector-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: breakActions[0]!.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-reflector-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(state, "runner", (action) => action.actionId === breakActions[0]?.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toContain(0);
+    expect(getLegalActions(state, "runner").some((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_055_reflector")).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_055_reflector",
+      title: "Reflector"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("installs V1.9.22 install-only runner programs while keeping their abilities gated", () => {
@@ -7592,12 +7738,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const replayStart = state.eventLog.length;
     const creditsBeforeAbility = state.corp.credits;
     state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1922_corporate_retreat");
-    expect(state.corp.credits).toBe(creditsBeforeAbility + 6);
+    expect(state.corp.credits).toBe(creditsBeforeAbility + 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
       cardDefinitionId: "onr_v1_195_corporate-retreat",
       agendaAbility: "v1922_corporate_retreat",
-      gainedCredits: 6
+      gainedCredits: 2
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -7811,7 +7957,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("uses Marine Arcology as a side-safe scored-agenda action for Gain 1", () => {
+  it("uses Marine Arcology as a side-safe scored-agenda action for Gain 3", () => {
     const corpDeck: DeckDefinition = {
       ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
       id: "onr_v1_corp_v1922_marine_arcology",
@@ -7871,13 +8017,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const clicksBeforeAbility = state.corp.clicks;
     state = apply(state, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1922_marine_arcology");
 
-    expect(state.corp.credits).toBe(creditsBeforeAbility + 1);
-    expect(state.corp.clicks).toBe(clicksBeforeAbility - 1);
+    expect(state.corp.credits).toBe(creditsBeforeAbility + 3);
+    expect(state.corp.clicks).toBe(clicksBeforeAbility - 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
       cardDefinitionId: "onr_v1_206_marine-arcology",
       agendaAbility: "v1922_marine_arcology",
-      gainedCredits: 1
+      gainedCredits: 3
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"hq"|"rd"|"cardInstances"|"privatePayload"/);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -8224,7 +8370,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_upgrade_root_server|access_ambush|trace|city_grid|run_flow|tag|counter|hidden_zone|stealth/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_027_flak"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {

@@ -9,8 +9,8 @@
     "catalogWipGuardReady": true,
     "wipArtifactAlignmentGuardReady": true,
     "resolverContractInventoryReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_event_nine_runner_program_and_eight_corp_resolver_clusters_41_of_47",
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_non_breaker_runner_program_install_only_plus_newsgroup_filter_gain_2_credit_action_plus_shield_net_damage_prevention_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_zombie_edgerunner_temps_off_site_backups_and_planning_consultants_resolvers_plus_remaining_runner_program_no_legalaction_guard",
+    "runtimeDefinitionsReady": "runner_hardware_event_eleven_runner_program_and_eight_corp_resolver_clusters_43_of_47",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_non_breaker_runner_program_install_only_plus_flak_ap_breaker_plus_reflector_tagged_breaker_plus_newsgroup_filter_gain_2_credit_action_plus_shield_net_damage_prevention_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_zombie_edgerunner_temps_off_site_backups_and_planning_consultants_resolvers_plus_remaining_runner_program_no_legalaction_guard",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
@@ -35,10 +35,19 @@
     },
     {
       "cardCode": "onr_v1_027_flak",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_runner_program_flak_ap_breaker",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "pump_strength",
+        "ap_break_subroutine",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
     },
     {
       "cardCode": "onr_v1_031_hammer",
@@ -116,10 +125,18 @@
     },
     {
       "cardCode": "onr_v1_055_reflector",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_runner_program_reflector_tagged_breaker",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "tagged_break_subroutine",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
     },
     {
       "cardCode": "onr_v1_057_scatter-shot",
@@ -413,7 +430,7 @@
       "cardCode": "onr_v1_195_corporate-retreat",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "v1922_scored_agenda_action_gain_6_until_install_or_rez",
+      "resolverFamily": "v1922_scored_agenda_action_gain_2_until_install_or_rez",
       "coveredSmokes": [
         "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Corporate Retreat until Corp installs or rezzes another card"
       ]
@@ -438,9 +455,9 @@
       "cardCode": "onr_v1_206_marine-arcology",
       "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "v1922_scored_agenda_action_gain_1",
+      "resolverFamily": "v1922_scored_agenda_action_gain_3_for_2_actions",
       "coveredSmokes": [
-        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 1"
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 3"
       ]
     },
     {

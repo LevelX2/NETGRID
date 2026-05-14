@@ -7,12 +7,12 @@ Status: planned
 | --- | --- | --- |
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
-| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event-, 9 Runner-Programm- und 8 Corp-Longtail-Zielkarten; neu: fuenf weitere nicht-Breaker-Programme als install-only WIPs mit weiter gesperrten Faehigkeiten |
-| Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Sieben nicht-Breaker-Programme sind install-only umgesetzt; `Newsgroup Filter` ist mit Installation plus `[A]: Gain 2 Credits` umgesetzt; `Shield` ist als enger Install-/Net-Damage-Prevention-WIP umgesetzt; Readiness Review und Engine-Guards halten die verbleibenden 5/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
+| Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event-, 11 Runner-Programm- und 8 Corp-Longtail-Zielkarten; neu: `Flak` AP-Breaker und `Reflector` tagged-subroutine Breaker |
+| Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Sieben nicht-Breaker-Programme sind install-only umgesetzt; `Newsgroup Filter` ist mit Installation plus `[A]: Gain 2 Credits` umgesetzt; `Shield` ist als enger Install-/Net-Damage-Prevention-WIP umgesetzt; `Flak` und `Reflector` haben enge Breaker-Smokes; Readiness Review und Engine-Guards halten die verbleibenden 3/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
 | Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Zombie`, `Edgerunner, Inc., Temps`, `Off-Site Backups` und `Planning Consultants` haben enge Runtime-Resolver; Engine-Guard haelt die verbleibenden 6/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
-| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions, acht install-only Runner-Programme, `Shield`, alle 10 Runner-Event-Resolver und acht Corp-Longtail-Resolver inkl. Wrong-Side-/Stale-Revalidation gruen |
-| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews, acht install-only Runner-Programme, `Shield`-Prevention-Choice sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-PublicPayloads gruen |
-| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash, acht install-only Runner-Programm-Replay/StateHash-Pfade, `Shield`-Prevention-Replay/StateHash sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-Replay/StateHash-Pfade gruen |
+| LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions, acht install-only Runner-Programme, `Shield`, `Flak`, `Reflector`, alle 10 Runner-Event-Resolver und acht Corp-Longtail-Resolver inkl. Wrong-Side-/Stale-Revalidation gruen |
+| Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews, acht install-only Runner-Programme, `Shield`-Prevention-Choice, `Flak`-/`Reflector`-PublicPayloads sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-PublicPayloads gruen |
+| Replay/StateHash | Neue Effekte sind deterministisch replaybar | 9/9 Runner-Hardware-Install-Replay/StateHash, acht install-only Runner-Programm-Replay/StateHash-Pfade, `Shield`-Prevention-Replay/StateHash, `Flak`-/`Reflector`-Replay/StateHash sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-Replay/StateHash-Pfade gruen |
 | AI | Hints, Smokes und side-sichere Fallbacks fuer alle `ai_supported` Karten | No-Promotion-Guard fuer 47/47 WIP-Karten gruen; finale V1.9.22-AI-Promotion-Artefakte muessen bis zum Completion-Gate fehlen |
 | WIP-Artefakte | Manifest, Mechanics-Coverage und WIP-Szenario bleiben exakt zur 47er-Zielmenge und behaupten keine Promotion | Catalog-Artefakt-Alignment-Guard gruen |
 | Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokale Kartenfaktenbasis fuer 47/47 Karten angelegt; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
@@ -44,6 +44,16 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - Breiter Verify danach: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+
+## Flak / Reflector 2026-05-14 15:30 CEST
+
+- Zusatzschnitt: `Flak` ist als AP-Breaker-Runtime-WIP mit Installkosten 4, MU 1, Staerke 2, Pump fuer 1 Credit und AP-Subroutine-Break fuer 1 Credit umgesetzt.
+- Zusatzschnitt: `Reflector` ist als tagged-subroutine-Breaker-Runtime-WIP mit Installkosten 2, MU 1, Staerke 4 und 0-Credit-Break fuer `stun`, `hellbolt` oder `knockout` umgesetzt.
+- Zusatzabdeckung: Install, Pump/Break bzw. tagged Break, Wrong-Side-/Stale-Revalidation, PublicPayload/PlayerViews und Replay/StateHash. Der erste `engine`-Lauf war rot wegen `Marine Arcology`-Klickkosten und wurde durch zweiten Klickabzug fuer `[A], [A]: Gain 3` behoben.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 300 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- Breiter Verify: `ai` 86, `server` 72, `web` 79, `test` Exit 0, `lint` pass und `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 
 ## Shield 2026-05-14 00:27 CEST
 
@@ -110,9 +120,9 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
 - Zusatzschnitt: `Off-Site Backups` privater Archives-to-HQ-Choice.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 282 Tests.
-- Zusatzschnitt: `Corporate Retreat` scored-agenda Gain 6 bis Korp-Install/-Rez.
+- Zusatzschnitt: `Corporate Retreat` scored-agenda Gain 2 bis Korp-Install/-Rez.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 283 Tests.
-- Zusatzschnitt: `Marine Arcology` scored-agenda Gain 1.
+- Zusatzschnitt: `Marine Arcology` scored-agenda 2 Aktionen fuer Gain 3.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 284 Tests.
 - Zusatzschnitt: `If You Want It Done Right...` privater Stack-Top-5-Choice.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 285 Tests.

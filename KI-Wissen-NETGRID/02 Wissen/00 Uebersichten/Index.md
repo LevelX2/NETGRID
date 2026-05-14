@@ -62,6 +62,8 @@
 
 - V1.9.22 Errata-/Nutzerklaerung vom 2026-05-14: `docs/derived/V1_9_22_ERRATA_1_70_SOURCE_REVIEW.md` wertet `Netrunner_Errata_v1.70.pdf` vorbereitend aus. Errata 1.70 klaert Handling fuer `Security Purge`, `Data Fort Reclamation`, `Haunting Inquisition`, `Tutor`, `Viral 15`, `Speed Trap`, `Startup Immolator`, `Poltergeist`, `Scatter Shot`, `Zetatech Software Installer` und `Hammer`/Noisy. Dieser Stand ist nur Informationsvorbereitung; Runtime-, Catalog-, AI- und Release-Promotion bleiben geschlossen.
 
+- V1.9.22 Spoiler-Werteabgleich vom 2026-05-14: Die UTF-8-Quellen `docs/source/Runnerspoiler 1.0.txt` und `docs/source/Corpspoiler 1.0.txt` wurden fuer den 47er-Scope ausgewertet. Korrigiert sind `Scatter Shot` = 2 recurring Credits, `misc.for-sale` = Gain 3 pro getrashter installierter Karte, `Organ Donor` = Gain 2 pro getrashter Grip-Karte, `Corporate Retreat` = `[A]: Gain 2`, `Data Fort Reclamation` = 10 temporaere Credits und `Marine Arcology` = `[A], [A]: Gain 3`. Nachweis: `docs/derived/V1_9_22_SPOILER_VALUE_AUDIT_2026_05_14.md`. Keine Catalog-, AI- oder Release-Promotion.
+
 ## Kernwissen
 
 - [[Projektueberblick]]: verdichtetes Projektbild für neue Threads.

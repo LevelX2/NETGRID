@@ -112,6 +112,7 @@ export type SubroutineDefinition = {
   baseTraceStrength?: number;
   traceSuccessEffect?: TraceSuccessEffect;
   requiresSuccessfulTraceSubroutineIndex?: number;
+  breakTags?: string[];
 };
 
 export type EventVisibilityClass = "public" | "private_to_side" | "hidden_info_barrier" | "replay_only";
@@ -330,6 +331,7 @@ export type AbilityDefinition = {
   cost: { credits: number };
   amount?: number;
   iceSubtype?: string;
+  subroutineBreakTags?: string[];
   count?: number;
   timingPoint: TimingPointId;
   kind?: AbilityKind;
@@ -3441,7 +3443,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 4,
     agendaPoints: 3,
-    rulesText: "[A]: Gain 6 credits. This ability is lost after Corp installs or rezzes any card.",
+    rulesText: "[A]: Gain 2 credits. This ability is lost after Corp installs or rezzes any card.",
     mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "ability_loss_on_install_or_rez", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3465,7 +3467,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 3,
     agendaPoints: 2,
-    rulesText: "[A]: Gain 1 credit.",
+    rulesText: "[A], [A]: Gain 3 credits.",
     mechanics: ["install_remote", "advance", "score_agenda", "scored_agenda_action", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
@@ -3503,6 +3505,46 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     memoryCost: 1,
     rulesText: "Install as a program. Its successful-run server-ICE reorder ability remains gated until the trigger and public order-update contract is confirmed.",
     mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_027_flak",
+    title: "Flak",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker"],
+    implementationStatus: "playable_mvp",
+    installCost: 4,
+    memoryCost: 1,
+    strength: 2,
+    rulesText: "1 credit: Break AP subroutine.\n1 credit: +1 strength.",
+    abilities: [
+      { id: "onr_v1_027_flak_pump", type: "pump_strength", cost: { credits: 1 }, amount: 1, timingPoint: "run.encounter_ice" },
+      { id: "onr_v1_027_flak_break", type: "break_subroutine", cost: { credits: 1 }, iceSubtype: "ap", count: 1, timingPoint: "run.encounter_ice" }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
+    id: "onr_v1_055_reflector",
+    title: "Reflector",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    strength: 4,
+    rulesText: "0 credits: Break stun, hellbolt, or knockout subroutine.",
+    abilities: [
+      {
+        id: "onr_v1_055_reflector_break",
+        type: "break_subroutine",
+        cost: { credits: 0 },
+        subroutineBreakTags: ["stun", "hellbolt", "knockout"],
+        count: 1,
+        timingPoint: "run.encounter_ice"
+      }
+    ],
+    mechanics: ["install_program", "memory", "break_subroutine", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_061_shield",
@@ -4309,7 +4351,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     strength: 3,
     rulesText: "[Subroutine] Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.",
-    subroutines: [onrSetNextEncounterLock("onr_v1_268_shock_r_next_encounter_lock")],
+    subroutines: [{ ...onrSetNextEncounterLock("onr_v1_268_shock_r_next_encounter_lock"), breakTags: ["stun"] }],
     mechanics: ["next_encounter_penalty", "jack_out_lock", "run_modifier"]
   }),
   onrIce({
@@ -4681,7 +4723,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 7,
     strength: 4,
     rulesText: "[Subroutine] End the run, and Runner forgoes his or her next action.",
-    subroutines: [onrSetRunnerForgoNextAction("onr_v1_271_tko_2_0_forgo_next_action"), onrEtr("onr_v1_271_tko_2_0_etr")],
+    subroutines: [{ ...onrSetRunnerForgoNextAction("onr_v1_271_tko_2_0_forgo_next_action"), breakTags: ["knockout"] }, onrEtr("onr_v1_271_tko_2_0_etr")],
     mechanics: ["end_the_run", "action_economy", "run_modifier"]
   }),
   onrIce({

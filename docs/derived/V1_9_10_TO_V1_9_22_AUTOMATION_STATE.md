@@ -1,7 +1,7 @@
 # V1.9.10 bis V1.9.22 Automation State
 
 Status: active
-Stand: 2026-05-13
+Stand: 2026-05-14
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
 Automation-ID: `netgrid-v1-9-originalset-completion-local`
 Watchdog-Automation-ID: gelöscht / nicht aktiv
@@ -21,6 +21,14 @@ Naechster erlaubter Release nach Abschluss: complete
 Commit-Modus: WIP-Commits erlaubt
 Push-Modus: WIP-Pushes erlaubt
 Completion-Modus: Gate-pflichtig
+
+## Manueller Quellenabgleich 2026-05-14 15:35 CEST
+
+- Quelle: `docs/source/Runnerspoiler 1.0.txt` und `docs/source/Corpspoiler 1.0.txt`.
+- Ergebnis: V1.9.22-Kartenwerte fuer den 47er-Scope wurden gegen die Spoilertexte geprueft.
+- Korrigiert: `Scatter Shot` 2 recurring Credits, `misc.for-sale` Gain 3 pro getrashter installierter Karte, `Organ Donor` Gain 2 pro getrashter Grip-Karte, `Corporate Retreat` `[A]: Gain 2`, `Data Fort Reclamation` 10 temporaere Credits, `Marine Arcology` `[A], [A]: Gain 3`.
+- Nachweis: `docs/derived/V1_9_22_SPOILER_VALUE_AUDIT_2026_05_14.md`.
+- Runtime-/Catalog-/AI-/Release-Promotion: keine.
 
 ## Laufzeitgrenzen
 
@@ -67,7 +75,31 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.21 | Deterministischer Zufall und Wuerfelkarten | done |
 | V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | current |
 
+## Aktuelle Nutzerklaerungen
+
+- Zeitpunkt: 2026-05-14 14:24 CEST
+- Ergebnis: Weitere V1.9.22-Kartenfakten sind lokal verbindlich nachgezogen, ohne Runtime-, Catalog-, AI- oder Release-Promotion.
+- `Zetatech Software Installer`: Installkosten 0, MU 1; offen bleiben Restricted-Credit-Zahlungsfenster und Overlay-Vertrag.
+- `Virizz`: Rez-Kosten 2, Staerke 4; fuer den Rest des Runs muss der Runner 1 Credit extra bezahlen, wenn er ICE brechen will; offen bleiben Break-Kostenprojektion in LegalActions und `applyAction`-Revalidierung.
+- `Flak`: Installkosten 4, Staerke 2, `1: Break AP subroutine`, `1: +1 Strength`; AP-Subroutine-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
+- `Hammer`: Installkosten 2, MU 1, Staerke 2, `1: Break Wall subroutine`, `1: +1 Strength`; beim Hammer-Break verliert der Runner insgesamt bis zu 2 von Stealth-Karten, Verteilung nach Runner-Wahl falls mehrere Quellen verfuegbar sind; Wall-Subroutine-Taxonomie und Standard-Breaker-Vertrag bestaetigt; offen ist Runtime-/Testumsetzung.
+- `Japanese Water Torture`: Installkosten 7, Staerke 2, `0: Break Wall subroutine`, `X: +X strength, and forgo your next X actions`; Wall-Subroutine-Taxonomie, echte zuguebergreifende Future-Action-Debt und Standard-Breaker-Vertrag bestaetigt; offen ist Runtime-/Testumsetzung.
+- `Reflector`: Program/Icebreaker, MU 1, Installkosten 2, Staerke 4, `0: Break stun, hellbolt or knockout subroutine`; Zielkategorie-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
+- Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
+- `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
+- Naechster sinnvoller Code-Schnitt: `Hammer` oder `Japanese Water Torture` als enger nicht-promotender Breaker-Runtime-Schnitt mit side-sicherer LegalAction-Projektion, `applyAction`-Revalidierung, PublicPayload/PlayerViews und Replay/StateHash; alternativ `Virizz` nach Break-Kostenmodifier-Vertrag oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
+
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 15:30 CEST
+- Ergebnis: V1.9.22 Flak-/Reflector-Breaker-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Flak` hat einen engen AP-Breaker-Pfad mit Installkosten 4, MU 1, Staerke 2, Pump fuer 1 Credit und AP-Subroutine-Break fuer 1 Credit. `Reflector` hat einen engen tagged-subroutine-Breaker-Pfad fuer `stun`, `hellbolt` und `knockout`; die Engine filtert Break-LegalActions jetzt pro Subroutine-Tag, damit nicht alle Subroutinen eines ICE pauschal gebrochen werden. `Marine Arcology` wurde im Zuge des roten Engine-Checks an den Spoiler-Werteabgleich angepasst und zieht fuer `[A], [A]: Gain 3` den zweiten Klick ab. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (300), `catalog` pass (44), `typecheck` pass, `ai` pass (86), `server` pass (72), `web` pass (79), `test` pass (Exit 0), `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: flak reflector breaker wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 08:55 CEST
 - Ergebnis: V1.9.22 Newsgroup-Filter-Gain-2-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
@@ -95,7 +127,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md` dokumentiert die fuenf verbleibenden Runner-Programm-Zielkarten. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` bleiben fuer Runtime-Code gesperrt, bis Subroutine-Taxonomie, Pump-/Break-LegalActions und applyAction-Revalidation feststehen. `Zetatech Software Installer` bleibt wegen Installkosten-, Restricted-Credit- und Overlay-Vertrag gesperrt. `data/reports/v1922-completion-gate-status.json`, `docs/codex/CODEX_STATUS.md` und die Wissensbasis wurden nachgezogen. Keine Runtime-, Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Umsetzung: `docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md` dokumentiert die fuenf verbleibenden Runner-Programm-Zielkarten. Dieser alte Eintrag ist fuer `Flak`, `Hammer`, `Japanese Water Torture`, `Reflector` und `Zetatech Software Installer` durch die Nutzerklaerungen vom 2026-05-14 teilweise ueberholt: Kartenwerte und Breaker-Taxonomie sind fuer die vier Breaker bestaetigt, technische Runtime-/Testumsetzung bleibt offen. `data/reports/v1922-completion-gate-status.json`, `docs/codex/CODEX_STATUS.md` und die Wissensbasis wurden nachgezogen. Keine Runtime-, Catalog-, AI- oder Release-Promotion wurde vorgenommen.
 - Tests: Dokumentations-/Statusschnitt; vorheriger nicht-Breaker-Programm-Breitverify bleibt gruen.
 - Git: WIP-Checkpoint fuer diesen Statusschnitt vorgesehen (`WIP V1.9.22: remaining runner program preflight wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
@@ -258,7 +290,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `misc.for-sale` eine `play_event`-LegalAction, startet einen Runner-privaten Installed-Trash-Choice fuer eigene installierte Karten und resolved die Auswahl in den Heap mit 1 Credit pro getrashter Karte. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `misc.for-sale` eine `play_event`-LegalAction, startet einen Runner-privaten Installed-Trash-Choice fuer eigene installierte Karten und resolved die Auswahl nach Spoiler-Abgleich in den Heap mit 3 Credits pro getrashter Karte. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
 - Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` zuerst rot wegen Testzugriff auf eine nicht exportierte interne Hilfsfunktion, danach pass (287); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44); `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: misc for sale resolver wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
@@ -268,7 +300,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `Organ Donor` eine `play_event`-LegalAction, startet einen Runner-privaten Grip-Trash-Choice fuer bis zu fuenf Karten und resolved die Auswahl in den Heap mit 1 Credit pro getrashter Karte. Der PublicContext wurde gezielt um `trashedCount`, `gainedCredits` und `runnerCreditsAfter` fuer Hidden-Zone-Aktionen erweitert, damit der side-sichere Resolve-Choice-Payload pruefbar bleibt. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `Organ Donor` eine `play_event`-LegalAction, startet einen Runner-privaten Grip-Trash-Choice fuer bis zu fuenf Karten und resolved die Auswahl nach Spoiler-Abgleich in den Heap mit 2 Credits pro getrashter Karte. Der PublicContext wurde gezielt um `trashedCount`, `gainedCredits` und `runnerCreditsAfter` fuer Hidden-Zone-Aktionen erweitert, damit der side-sichere Resolve-Choice-Payload pruefbar bleibt. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
 - Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` zuerst rot wegen fehlender PublicPayload-Zaehlung, danach pass (286); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` pass, Exit 0; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: organ donor resolver wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
@@ -288,7 +320,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `packages/shared/src/index.ts` ergaenzt eine Runtime-Definition fuer `onr_v1_206_marine-arcology`. `packages/engine/src/index.ts` oeffnet fuer gescortes `Marine Arcology` eine Korp-LegalAction `[A]: Gain 1` und revalidiert Seite, Score-Area, Kartendefinition und Creditbetrag in `applyAction`. `packages/engine/src/index.test.ts` deckt den Pfad mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Umsetzung: `packages/shared/src/index.ts` ergaenzt eine Runtime-Definition fuer `onr_v1_206_marine-arcology`. `packages/engine/src/index.ts` oeffnet fuer gescortes `Marine Arcology` nach Spoiler-Abgleich eine Korp-LegalAction `[A], [A]: Gain 3` und revalidiert Seite, Score-Area, Kartendefinition, Aktionskosten und Creditbetrag in `applyAction`. `packages/engine/src/index.test.ts` deckt den Pfad mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
 - Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` pass (284); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44); `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: marine arcology resolver wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
@@ -298,7 +330,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `packages/shared/src/index.ts` ergaenzt Runtime-Definitionen fuer `onr_v1_195_corporate-retreat`, `onr_v1_196_corporate-war`, `onr_v1_210_political-overthrow`, `onr_v1_296_off-site-backups` und `onr_v1_298_planning-consultants`. `packages/engine/src/index.ts` oeffnet fuer gescortes `Corporate Retreat` `[A]: Gain 6` bis zum naechsten Korp-Install/-Rez, resolved `Corporate War` beim Scoren ueber die 12-Credit-Schwelle mit Gain 12 oder Creditverlust, oeffnet fuer gescortes `Political Overthrow` eine Korp-LegalAction `[A]: Gain 3`, spielt `Off-Site Backups` als privaten Archives-to-HQ-Choice und spielt `Planning Consultants` als privaten R&D-Top-5-Reorder-Choice. `packages/engine/src/index.test.ts` deckt alle fuenf Pfade mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Umsetzung: `packages/shared/src/index.ts` ergaenzt Runtime-Definitionen fuer `onr_v1_195_corporate-retreat`, `onr_v1_196_corporate-war`, `onr_v1_210_political-overthrow`, `onr_v1_296_off-site-backups` und `onr_v1_298_planning-consultants`. `packages/engine/src/index.ts` oeffnet fuer gescortes `Corporate Retreat` nach Spoiler-Abgleich `[A]: Gain 2` bis zum naechsten Korp-Install/-Rez, resolved `Corporate War` beim Scoren ueber die 12-Credit-Schwelle mit Gain 12 oder Creditverlust, oeffnet fuer gescortes `Political Overthrow` eine Korp-LegalAction `[A]: Gain 3`, spielt `Off-Site Backups` als privaten Archives-to-HQ-Choice und spielt `Planning Consultants` als privaten R&D-Top-5-Reorder-Choice. `packages/engine/src/index.test.ts` deckt alle fuenf Pfade mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
 - Tests: JSON-Validation pass (308 Dateien); `catalog` pass (44), `engine` pass (283). Vor den Zusatzschnitten waren `ai` pass (86), `server` pass (72), `web` pass (79), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - Git: WIP-Checkpoints `2b36c09`, `e6afd90`, `13f6b63` und `a51e187` wurden nach `origin/codex/v1-9-originalset-completion` gepusht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
