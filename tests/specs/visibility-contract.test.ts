@@ -29,6 +29,9 @@ describe("Client visibility contract", () => {
     expect(page).toContain("function RunTimeline");
     expect(page).toContain("function LegalActionsPanel");
     expect(page).toContain("function DiagnosticsDrawer");
+    expect(page).toContain("function RecurringCreditBadge");
+    expect(page).toContain("recurringCreditAmount");
+    expect(page).toContain('data-testid="recurring-credit-badge"');
     expect(page).toContain("side-filtered");
     expect(page).toContain("localCardImageUrl");
     expect(page).not.toContain("cardBackImageUrl");

@@ -4190,6 +4190,11 @@ describe("V1.7.0 Mechanikpaket D", () => {
       expect(
         nonNoisyState.cardInstances[cloakId]?.counters?.recurring_credit,
       ).toBe(2);
+      expect(
+        getPlayerView(nonNoisyState, "runner").own.rig?.find(
+          (card) => card.instanceId === cloakId,
+        )?.counters?.recurring_credit,
+      ).toBe(2);
     }
   });
 

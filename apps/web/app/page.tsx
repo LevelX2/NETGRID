@@ -8818,19 +8818,21 @@ function CardView({
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const brokerStoredCredits = preview ? 0 : brokerStoredCreditsAmount(card);
+  const recurringCredits = preview ? 0 : recurringCreditAmount(card);
   const shellCounters = preview ? 0 : shellCounterAmount(card);
   const storedCreditSource = storedCreditSourceLabel(card);
   const brokerStoredCreditsAria =
     brokerStoredCredits > 0 && storedCreditSource
       ? `${brokerStoredCredits} ${brokerStoredCredits === 1 ? "Credit" : "Credits"} auf ${storedCreditSource}`
       : null;
+  const recurringCreditsAria = recurringCredits > 0 ? `${recurringCredits} wiederkehrende ${creditLabel(recurringCredits)}` : null;
   const shellCountersAria = shellCounters > 0 ? `${shellCounters} Shell-Counter` : null;
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}${shellCountersAria ? `, ${shellCountersAria}` : ""}`
+      ? `Karte ${card.title}, ${advancementLabel}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}${recurringCreditsAria ? `, ${recurringCreditsAria}` : ""}${shellCountersAria ? `, ${shellCountersAria}` : ""}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}${shellCountersAria ? `, ${shellCountersAria}` : ""}`
+      ? `Karte ${card.title}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}${recurringCreditsAria ? `, ${recurringCreditsAria}` : ""}${shellCountersAria ? `, ${shellCountersAria}` : ""}`
       : "Verdeckte Karte";
 
   const estimatedTooltipHeight = (): number => {
@@ -9083,6 +9085,7 @@ function CardView({
         {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
         {brokerStoredCredits > 0 && storedCreditSource ? <BrokerStoredCreditsBadge amount={brokerStoredCredits} sourceLabel={storedCreditSource} /> : null}
+        {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
         {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
         {tooltipId ? (
@@ -9296,7 +9299,7 @@ function coupAgendaCreditAmount(definitionId: string | undefined): number | null
   return null;
 }
 
-function counterAmount(card: DisplayVisibleCard, counter: "agenda" | "power" | "shell"): number {
+function counterAmount(card: DisplayVisibleCard, counter: "agenda" | "power" | "shell" | "recurring_credit"): number {
   const amount = card.counters?.[counter];
   return typeof amount === "number" && Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }
@@ -9382,6 +9385,19 @@ function BrokerStoredCreditsBadge({ amount, sourceLabel }: { amount: number; sou
   );
 }
 
+function RecurringCreditBadge({ amount }: { amount: number }) {
+  const pipCount = Math.min(3, Math.max(1, Math.floor(amount)));
+  return (
+    <span className="recurringCreditBadge" aria-label={`${amount} wiederkehrende ${creditLabel(amount)}`} data-testid="recurring-credit-badge">
+      <span className="recurringCreditPips" aria-hidden="true">
+        {Array.from({ length: pipCount }, (_, index) => (
+          <span className="recurringCreditPip" key={`recurring-credit-pip-${index}`} />
+        ))}
+      </span>
+    </span>
+  );
+}
+
 function ShellCounterBadge({ amount }: { amount: number }) {
   return (
     <span className="shellCounterBadge" aria-label={`${amount} Shell-Counter`} data-testid="shell-counter-badge">
@@ -9425,6 +9441,7 @@ function cardDetailLines(card: VisibleCard): string[] {
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength),
     brokerStoredCreditsLabel(card),
+    recurringCreditLabel(card),
     shellCounterLabel(card)
   ]
     .filter(Boolean)
@@ -9446,8 +9463,19 @@ function shellCounterLabel(card: VisibleCard): string | null {
   return `${amount} Shell-Counter`;
 }
 
+function recurringCreditLabel(card: VisibleCard): string | null {
+  const amount = recurringCreditAmount(card);
+  if (amount <= 0) return null;
+  return `${amount} wiederkehrende ${creditLabel(amount)}`;
+}
+
 function shellCounterAmount(card: VisibleCard): number {
   const amount = card.counters?.shell ?? 0;
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
+
+function recurringCreditAmount(card: VisibleCard): number {
+  const amount = card.counters?.recurring_credit ?? 0;
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }
 
