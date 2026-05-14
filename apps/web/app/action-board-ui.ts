@@ -150,6 +150,8 @@ export function actionButtonLabel(action: LegalAction): string {
       return "Nicht rezzen";
     case "continue_run":
       return normalizeVisibleTerms(action.label || "Run fortsetzen");
+    case "access_card":
+      return "Zugriff auf Karte";
     case "decline_trash":
       return "Zugriff abschließen";
     case "advance_card":
@@ -370,6 +372,9 @@ export function serverBoardRows<T extends { id: string }>(servers: T[], viewerSi
 
 export function normalizeVisibleTerms(value: string): string {
   return value
+    .replace(/\bKarte accessen\b/gi, "Zugriff auf Karte")
+    .replace(/\bWeiter accessen\b/gi, "Weiter zugreifen")
+    .replace(/\bAccess abschließen\b/g, "Zugriff abschließen")
     .replace(/\bR&D\b/g, "F&E (R&D)")
     .replace(/\bArchives\b/g, "Archive")
     .replace(/\bRemote\s+(\d+)\b/g, "Fort $1")
@@ -485,6 +490,7 @@ export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction)
 export function runWindowActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
   if (!view.run) return [];
   return actions.filter((action) => {
+    if (action.type === "access_card") return true;
     if (!action.timingPoint.startsWith("run.")) return false;
     if (action.type === "jack_out" || action.type === "continue_run" || action.type === "rez_ice" || action.type === "decline_rez") return true;
     if (action.type === "pump_breaker" || action.type === "break_subroutine") return action.payload?.iceId === activeRunIceInstanceId(view);

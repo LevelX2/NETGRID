@@ -429,6 +429,25 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
     expect(actionCostChips(searchInstall)).toEqual([]);
   });
+
+  it("mirrors the card access action into the Run window with a German label", () => {
+    const running = view("runner", {
+      run: {
+        attackedServerId: "rd",
+        phase: "access",
+        position: { kind: "server", serverId: "rd" },
+        successful: true
+      }
+    });
+    const access = legalAction("runner", "access_card", "game_rule", "Karte accessen", undefined, "access.resolve_card");
+    const draw = legalAction("runner", "draw_card", "basic_action", "Karte ziehen");
+
+    const mirrored = runWindowActions(running, [access, draw]);
+
+    expect(actionButtonLabel(access)).toBe("Zugriff auf Karte");
+    expect(mirrored).toEqual([access]);
+    expect(runWindowActionButtonLabel(running, access)).toBe("Zugriff auf Karte");
+  });
 });
 
 function legalAction(side: Side, type: LegalAction["type"], source: LegalAction["source"], label: string, payload?: LegalAction["payload"], timingPoint: LegalAction["timingPoint"] = "corp_action.main"): LegalAction {
