@@ -29,6 +29,7 @@ import deckLegalV1918AiHintsData from "../../../../../data/ai/ai-card-hints-deck
 import deckLegalV1919AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1919.json";
 import deckLegalV1920AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1920.json";
 import deckLegalV1921AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1921.json";
+import deckLegalV1922AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1922.json";
 import runtimeSupplementAiHintsData from "../../../../../data/ai/ai-card-hints-runtime-supplement.json";
 import corpTagSliceAiHintsData from "../../../../../data/ai/ai-card-hints-corp-tag-approval-slice.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
@@ -69,6 +70,7 @@ const AI_HINTS_BY_CARD_ID = new Map(
       ...(deckLegalV1919AiHintsData.cards as CatalogAiHint[]),
       ...(deckLegalV1920AiHintsData.cards as CatalogAiHint[]),
       ...(deckLegalV1921AiHintsData.cards as CatalogAiHint[]),
+      ...(deckLegalV1922AiHintsData.cards as CatalogAiHint[]),
       ...(corpTagSliceAiHintsData.cards as CatalogAiHint[])
     ]
   ).map((hint) => [hint.cardId, hint])

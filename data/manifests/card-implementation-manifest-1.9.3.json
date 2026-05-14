@@ -7,7 +7,7 @@
   "gateAssertions": {
     "implementedCoreSetCount4": true,
     "v193PreflightTkoDecisionExplicit": true,
-    "agendaTrace7ActionsImplemented": true,
+    "agendaTraceTagActionsImplemented": true,
     "jackAttackRunJackOutLockImplemented": true,
     "tkoForgoNextActionImplemented": true,
     "runtimeAllowlistExtendedExactlyBy4": true,
@@ -30,7 +30,7 @@
       "title": "Private Cybernet Police",
       "releaseStatus": "human_playable",
       "aiSupported": false,
-      "resolver": "scored_agenda_action_trace_7_add_tag",
+      "resolver": "scored_agenda_action_trace_5_add_tag",
       "requiredMechanics": ["scored_agenda_action", "trace", "link", "bid_amount", "add_tag"],
       "roleTags": ["corp", "agenda", "trace", "tag"]
     },

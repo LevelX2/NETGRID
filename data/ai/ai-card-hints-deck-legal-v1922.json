@@ -1,0 +1,1464 @@
+{
+  "schemaVersion": "netgrid.ai-card-hints.v2",
+  "hintsId": "ai-card-hints-deck-legal-v1922",
+  "release": "V1.9.22",
+  "scope": "deck_legal_ai_approval_v1922",
+  "status": "ai_supported",
+  "cards": [
+    {
+      "cardId": "onr_v1_026_false-echo",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_install_surface_ability_gated",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_027_flak",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_flak_ap_breaker",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_031_hammer",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_hammer_wall_breaker_stealth_loss_choice",
+        "runner_program_resolver",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_japanese_water_torture_future_action_debt",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_044_netspace-inverter",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_install_surface_ability_gated",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_newsgroup_filter_gain_2",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_install_surface_ability_gated",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_051_rabbit",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_install_surface_ability_gated",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_reflector_tagged_breaker",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_install_surface_ability_gated",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_061_shield",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_net_damage_prevention",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_067_speed-trap",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_install_surface_ability_gated",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_068_startup-immolator",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_install_surface_ability_gated",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_075_zetatech-software-installer",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "runner",
+        "program",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_program",
+        "runner_program_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_program_zetatech_software_installer_recurring_program_install_overlay",
+        "runner_program_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_077_anonymous-tip",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_derez_black_ice",
+        "runner_event_resolver",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_080_core-command-jettison-ice",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+        "runner_event_resolver",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_086_forged-activation-orders",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_force_rez_or_trash_ice",
+        "runner_event_resolver",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_stack_top5_choose_one_arrange_rest",
+        "runner_event_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_100_misc-for-sale",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_installed_trash_gain_credits",
+        "runner_event_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_102_open-ended-mileage-program",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_remove_tag_optional_return",
+        "runner_event_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_grip_trash_gain_credits",
+        "runner_event_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_109_security-code-worm-chip",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_successful_hq_run_trash_unrezzed_ice",
+        "runner_event_resolver",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_113_synchronized-attack-on-hq",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
+        "runner_event_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_117_valu-pak-software-bundle",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "runner",
+        "event",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_play_event",
+        "runner_event_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_runner_event_program_install_action_bundle",
+        "runner_program_resolver",
+        "runner_event_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_122_artemis-2020",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_123_bodyweight-data-creche",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_124_corolla-speed-chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_136_pandoras-deck",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_137_parraline-5750",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_138_pk-6089a",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_147_zz22-speed-chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "runner",
+        "hardware",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "runner_install_hardware"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+        "install_hardware_memory_surface"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "corp_agenda_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_scored_agenda_action_gain_2_until_install_or_rez",
+        "corp_agenda_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_196_corporate-war",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "corp_agenda_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_agenda_on_score_credit_threshold",
+        "corp_agenda_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "corp_agenda_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_agenda_data_fort_reclamation_hq_install_sequence",
+        "corp_agenda_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_206_marine-arcology",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "corp_agenda_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_scored_agenda_action_gain_3_for_2_actions",
+        "corp_agenda_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "corp_agenda_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_scored_agenda_action_gain_3",
+        "corp_agenda_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "corp",
+        "agenda",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "corp_agenda_ability"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_agenda_security_purge_rd_top3",
+        "corp_agenda_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_247_haunting-inquisition",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "corp",
+        "ice",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_install_ice",
+        "corp_rez_ice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_ice_haunting_inquisition_run_lock",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_ice_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "corp",
+        "ice",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_install_ice",
+        "corp_rez_ice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_ice_future_end_the_run_subroutine",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_ice_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "corp",
+        "ice",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_install_ice",
+        "corp_rez_ice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_ice_viral_15_jackout_tax_program_trash",
+        "runner_program_resolver",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_ice_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "corp",
+        "ice",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_install_ice",
+        "corp_rez_ice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_ice_break_cost_modifier",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_ice_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_280_zombie",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "corp",
+        "ice",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_install_ice",
+        "corp_rez_ice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_ice_core_damage_etr",
+        "corp_ice_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_ice_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_289_edgerunner-inc-temps",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "corp",
+        "operation",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_play_operation",
+        "corp_operation_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_operation_install_action_bundle",
+        "corp_operation_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_operation_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "corp",
+        "operation",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_play_operation",
+        "corp_operation_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_operation_private_archives_to_hq",
+        "corp_operation_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_operation_longtail"
+      ]
+    },
+    {
+      "cardId": "onr_v1_298_planning-consultants",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "corp",
+        "operation",
+        "per_card_longtail"
+      ],
+      "planRoles": [
+        "corp_play_operation",
+        "corp_operation_choice"
+      ],
+      "requiredMechanics": [
+        "per_card_longtail_resolver_gate",
+        "v1922_corp_operation_private_rd_top5_reorder",
+        "corp_operation_resolver"
+      ],
+      "valueHints": {
+        "perCardLongtailPriority": 2
+      },
+      "riskTags": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_operation_longtail"
+      ]
+    }
+  ]
+}

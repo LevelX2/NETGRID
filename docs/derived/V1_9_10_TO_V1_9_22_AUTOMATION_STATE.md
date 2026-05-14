@@ -1,7 +1,7 @@
 # V1.9.10 bis V1.9.22 Automation State
 
-Status: active
-Stand: 2026-05-13
+Status: complete
+Stand: 2026-05-14
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
 Automation-ID: `netgrid-v1-9-originalset-completion-local`
 Watchdog-Automation-ID: gelöscht / nicht aktiv
@@ -15,12 +15,20 @@ Watchdog-Prompt: derzeit nicht aktiv
 
 ## Cursor
 
-Aktueller Release: V1.9.22
-Phase: implementing
+Aktueller Release: complete
+Phase: complete
 Naechster erlaubter Release nach Abschluss: complete
-Commit-Modus: WIP-Commits erlaubt
-Push-Modus: WIP-Pushes erlaubt
-Completion-Modus: Gate-pflichtig
+Commit-Modus: Abschlusscommit erforderlich
+Push-Modus: Abschluss-Push erforderlich
+Completion-Modus: Gate erfuellt
+
+## Manueller Quellenabgleich 2026-05-14 15:35 CEST
+
+- Quelle: `docs/source/Runnerspoiler 1.0.txt` und `docs/source/Corpspoiler 1.0.txt`.
+- Ergebnis: V1.9.22-Kartenwerte fuer den 47er-Scope wurden gegen die Spoilertexte geprueft.
+- Korrigiert: `Scatter Shot` 2 recurring Credits, `misc.for-sale` Gain 3 pro getrashter installierter Karte, `Organ Donor` Gain 2 pro getrashter Grip-Karte, `Corporate Retreat` `[A]: Gain 2`, `Data Fort Reclamation` 10 temporaere Credits, `Marine Arcology` `[A], [A]: Gain 3`.
+- Nachweis: `docs/derived/V1_9_22_SPOILER_VALUE_AUDIT_2026_05_14.md`.
+- Runtime-/Catalog-/AI-/Release-Promotion: keine.
 
 ## Laufzeitgrenzen
 
@@ -65,9 +73,527 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 | V1.9.19 | Agenda Difficulty, Scored Agenda Abilities und Overadvance | done |
 | V1.9.20 | Globale Modifier, Handgroesse, Action Economy und persistente Sonderzustaende | done |
 | V1.9.21 | Deterministischer Zufall und Wuerfelkarten | done |
-| V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | current |
+| V1.9.22 | Per-card Resolver Longtail und Originalset Completion Gate | done |
+
+## Aktuelle Nutzerklaerungen
+
+- Zeitpunkt: 2026-05-14 14:24 CEST
+- Ergebnis: Weitere V1.9.22-Kartenfakten sind lokal verbindlich nachgezogen, ohne Runtime-, Catalog-, AI- oder Release-Promotion.
+- `Zetatech Software Installer`: Installkosten 0, MU 1; 2 restricted Recurring Credits fuer Programminstallationen, Runner-Zugstart-Refresh und Overlay-Installation ohne zusaetzliche MU sind als nicht-promotender Runtime-WIP umgesetzt.
+- `Flak`: Installkosten 4, Staerke 2, `1: Break AP subroutine`, `1: +1 Strength`; AP-Subroutine-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
+- `Hammer`: Installkosten 2, MU 1, Staerke 2, `1: Break Wall subroutine`, `1: +1 Strength`; Runtime-WIP ohne Promotion ist umgesetzt mit deterministischem bis-zu-2-Stealth-Counter-Verlust bei einzelner Stealth-Quelle und Runner-privater Verteilungschoice bei mehreren Stealth-Quellen.
+- `Japanese Water Torture`: Installkosten 7, Staerke 2, `0: Break Wall subroutine`, `X: +X strength, and forgo your next X actions`; Runtime-WIP ohne Promotion ist umgesetzt mit Wall-Break, Pump und echter zuguebergreifender Future-Action-Debt.
+- `Reflector`: Program/Icebreaker, MU 1, Installkosten 2, Staerke 4, `0: Break stun, hellbolt or knockout subroutine`; Zielkategorie-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
+- `Virizz`: Rez-Kosten 2, Staerke 4; Runtime-WIP ohne Promotion ist umgesetzt mit rest-of-run +1-Credit-Break-Kostenmodifier, LegalAction-Kostenprojektion und applyAction-Revalidierung.
+- Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
+- `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
+- Naechster sinnvoller Schnitt: finale V1.9.22-Promotion-Gates vorbereiten (Catalog/AI-Artefakte, Webclient-Version, Final Review); `Viral 15`, `Data Fort Reclamation` Rez-/Credit-Follow-up und `Zetatech Software Installer` Overlay sind als nicht-promotende Runtime-WIPs umgesetzt.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 20:15 CEST
+- Ergebnis: V1.9.22 Per-card Resolver Longtail und Originalset Completion Gate final promotet; Cursor auf `complete` gesetzt.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: complete
+- Umsetzung: Alle 47 Zielkarten sind im Runtime-Releasepool und in der Deck-Legal-AI-Approval-Liste. Neue Abschlussartefakte: `data/scenarios/v1922-per-card-longtail-release-smoke.json`, `data/ai/ai-card-hints-deck-legal-v1922.json`, `data/manifests/deck-legal-ai-approval-v1922-manifest.json`, `data/scenarios/ai-deck-legal-v1922-smokes.json`, `docs/derived/V1_9_22_FINAL_REVIEW.md`; Webclient-Version `V1.9.22`.
+- Tests: JSON 312, `catalog` 44, `engine` 309, `ai` 86, `server` 72, `web` 80, `typecheck`, `test`, `lint`, `build` gruen; Build mit bekannter Turbopack-NFT-Warnung. Erster breiter `test`-Run hatte einen nicht reproduzierbaren Server-Vitest-Worker-Exit, isolierter `server` und wiederholter breiter `test` waren gruen.
+- Git: Abschlusscommit fuer diesen Lauf vorgesehen (`V1.9.22: per-card longtail originalset completion`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.10 bis V1.9.22 abgeschlossen; kein naechster Release in dieser Automation.
+
+- Zeitpunkt: 2026-05-14 19:50 CEST
+- Ergebnis: V1.9.22 Zetatech-Overlay-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_ZETATECH_OVERLAY_RUNTIME_CONTRACT.md` begrenzt den Overlay-Pfad. `packages/engine/src/index.ts` bietet eine explizite `install_card`-LegalAction fuer Programme aus der Grip auf installiertes Zetatech an, setzt `hostedOn`, verbraucht keine zusaetzliche MU und zahlt aus Zetatech-Recurring-Credits vor Runner-Credits. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: `typecheck` pass; `engine` pass (309); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: zetatech overlay runtime wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 19:43 CEST
+- Ergebnis: V1.9.22 Data-Fort-Reclamation-Rez-/Credit-Follow-up umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Data Fort Reclamation` oeffnet nach der privaten HQ-Install-Sequence ein zweites Korp-privates Rez-Fenster fuer neu installierte ICE/Root-Karten. Rez-Kosten werden zuerst aus dem 10-Credit-Effektpool und danach aus Korp-Credits bezahlt; PublicPayloads enthalten nur Counts und Credit-Summen. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: `typecheck` pass; `engine` pass (308); `catalog` pass (44).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: data fort rez credit follow-up wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 19:27 CEST
+- Ergebnis: V1.9.22 Viral-15-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Viral 15` setzt nach ihrer Subroutine einen run-weiten 1-Credit-Jack-out-Tax. Beim Weiterlaufen nach dem Passieren gerezzter ICE öffnet die Engine eine Runner-private installierte-Programm-Trash-Choice; Jack-out zahlt den Tax und überspringt den Programmtrash. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: erster `engine`-Lauf rot wegen fehlender V0.99-Baseline im Jack-out-Smoke, danach `engine` pass (308). `catalog` war initial rot wegen ueberholter Erwartung an eine geplante No-Promotion-Karte, danach pass (44); `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: viral 15 runtime wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 18:01 CEST
+- Ergebnis: V1.9.22 Data-Fort-Reclamation-Install-Sequence-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Data Fort Reclamation` oeffnet beim Scoren eine Korp-private HQ-Choice fuer bis zu 4 installierbare Karten, erstellt beim Resolve ein neues Remote und installiert ausgewaehlte ICE/Root-Karten verdeckt. Optionales Rezzen und echte temporaere Credit-Ausgaben bleiben deferred. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (307); `catalog` pass (44); `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: data fort install sequence wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Viral 15`, Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 17:52 CEST
+- Ergebnis: V1.9.22 Data-Fort-Reclamation-Runtime-Vertrag erstellt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md` beschreibt den naechsten engen Codepfad: On-score Korp-private HQ-Choice bis 4 Karten, neues Remote, Install-Sequenz, temporaerer 10-Credit-Pool plus Korp-Credits, side-sichere PublicPayloads und Replay/StateHash-Pflichten. Optionales Rezzen bleibt fuer diesen ersten WIP deferred. Keine Runtime-, Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: keine Codeaenderung in diesem Teilschnitt; letzter breiter Verify nach Zetatech war gruen.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: data fort contract wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation` Codeumsetzung, `Viral 15`, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 17:43 CEST
+- Ergebnis: V1.9.22 Zetatech-Software-Installer-Recurring-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Zetatech Software Installer` hat 2 restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh erhalten. Overlay-Installation bleibt ohne LegalAction bis zum separaten State-Transition-Vertrag. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen fehlender V0.99-Baseline im Refresh-Smoke, danach pass (306).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: zetatech recurring install credits wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation`, `Viral 15`, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 17:35 CEST
+- Ergebnis: V1.9.22 Haunting-Inquisition-Run-Lock-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Haunting Inquisition` hat eine nicht-promotende Runtime-ICE-Definition mit Rez-Kosten 8, Staerke 6, Run-Lock fuer die naechsten sechs tatsaechlich ausgegebenen Runner-Aktionen und End-the-run erhalten. Normale `start_run`-LegalActions sind waehrend des Locks gesperrt; der Lock persistiert ueber Zugwechsel und wird durch tatsaechliche Runner-Klickaktionen abgebaut. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (305); `catalog` initial rot wegen falsch zugeordnetem Manifest-Resolver auf `Data Fort Reclamation`, danach pass (44).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: haunting inquisition run lock wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation`, `Viral 15`, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 17:25 CEST
+- Ergebnis: V1.9.22 Hammer-Stealth-Verteilungschoice-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Hammer` hat nach dem vorhandenen Wall-Breaker-WIP nun die fehlende Runner-private Mehrfach-Stealth-Verteilungschoice erhalten. Bei einer einzelnen Stealth-Quelle bleibt der Verlust deterministisch; bei mehreren verfügbaren Stealth-Quellen öffnet die Engine eine `resolve_choice`-Barriere für den Runner und veröffentlicht nur Count-/Choice-Metadaten. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen fehlender `postBreakStealthLoss`-Spiegelung im Choice-PublicPayload, danach pass (304); `catalog` pass (44).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: hammer stealth choice wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation`, `Haunting Inquisition`, `Viral 15`, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 16:51 CEST
+- Ergebnis: V1.9.22 Tutor-Future-ETR-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Tutor` hat eine nicht-promotende Runtime-ICE-Definition mit Rez-Kosten 4, Staerke 5 und future-encounter End-the-run-Subroutine-Modifier erhalten. Nach Aufloesung der Tutor-Subroutine erhalten spaeter encountered ICE eine zusaetzliche breakbare End-the-run-Subroutine am Ende der Subroutine-Liste; der aktuelle Tutor-Encounter wird nicht rueckwirkend modifiziert. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (302); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` pass; `lint` pass; `build` pass mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: tutor future etr wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 16:40 CEST
+- Ergebnis: V1.9.22 Virizz-Break-Kostenmodifier-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Virizz` hat eine nicht-promotende Runtime-ICE-Definition mit Rez-Kosten 2, Staerke 4 und rest-of-run Break-Kostenmodifier erhalten. Nach Aufloesung der Virizz-Subroutine projiziert die Engine +1 Credit auf folgende `break_subroutine`-LegalActions und revalidiert die Gesamtkosten ueber `applyAction`. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen Test-Phasenannahmen, danach pass (301); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` initial rot wegen parallel laufendem Lint/Server-Vitest-Worker, isolierte Wiederholung pass; `lint` pass; `build` pass mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: virizz break cost modifier wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 16:35 CEST
+- Ergebnis: V1.9.22 Japanese-Water-Torture-Future-Action-Debt-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Japanese Water Torture` hat eine nicht-promotende Runtime-Definition mit Installkosten 7, MU 1, Staerke 2, Pump fuer 1 Credit, Wall-Subroutine-Break fuer 0 Credits und zuguebergreifender Future-Action-Debt erhalten. Alte Runner-Programm-No-LegalAction-Guards wurden auf verbleibende Corp-Blocker umgestellt. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen fehlender Runtime-Definition und ueberholter Guards, danach pass (300); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` pass; `lint` nach enger Test-Assertion pass; `build` pass mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: japanese water torture action debt wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 15:54 CEST
+- Ergebnis: V1.9.22 Hammer-Wall-Breaker-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Hammer` hat eine nicht-promotende Runtime-Definition mit Installkosten 2, MU 1, Staerke 2, Pump fuer 1 Credit, Wall-Subroutine-Break fuer 1 Credit und deterministischem geordnetem Stealth-Counter-Verlust bis 2 nach erfolgreichem Break erhalten. Die freie Runner-Verteilung bei mehreren Stealth-Quellen bleibt ohne Promotion offen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (301), `catalog` pass (44), `typecheck` pass, `ai` pass (86), `server` pass (72), `web` pass (79), `test` pass, `lint` pass nach Build-Erneuerung der `.next`-Typen, `build` pass mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: hammer wall breaker wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 15:36 CEST
+- Ergebnis: V1.9.22 Zetatech-Software-Installer-Install-only-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Zetatech Software Installer` hat eine install-only Runtime-Definition mit Installkosten 0 und MU 1 erhalten. Die Restricted-Credit- und Overlay-Faehigkeit bleibt ohne LegalAction, bis Zahlungsfenster und Overlay-Zustandswechsel technisch bestaetigt sind. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (300), `catalog` pass (44), `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: zetatech install-only wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 15:30 CEST
+- Ergebnis: V1.9.22 Flak-/Reflector-Breaker-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Flak` hat einen engen AP-Breaker-Pfad mit Installkosten 4, MU 1, Staerke 2, Pump fuer 1 Credit und AP-Subroutine-Break fuer 1 Credit. `Reflector` hat einen engen tagged-subroutine-Breaker-Pfad fuer `stun`, `hellbolt` und `knockout`; die Engine filtert Break-LegalActions jetzt pro Subroutine-Tag, damit nicht alle Subroutinen eines ICE pauschal gebrochen werden. `Marine Arcology` wurde im Zuge des roten Engine-Checks an den Spoiler-Werteabgleich angepasst und zieht fuer `[A], [A]: Gain 3` den zweiten Klick ab. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (300), `catalog` pass (44), `typecheck` pass, `ai` pass (86), `server` pass (72), `web` pass (79), `test` pass (Exit 0), `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: flak reflector breaker wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 08:55 CEST
+- Ergebnis: V1.9.22 Newsgroup-Filter-Gain-2-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Newsgroup Filter` nutzt nach der Nutzerklaerung eine installierte Runner-Programm-Aktion `[A]: Gain 2 Credits`. `packages/engine/src/index.ts` projiziert die Aktion nur fuer installierte Runner-Programme im Runner-Main-Action-Fenster und revalidiert Seite, State-Version, Quelle und Aktionskosten ueber den bestehenden LegalAction/applyAction-Pfad. `packages/engine/src/index.test.ts` deckt Install, Wrong-Side-/Stale-Revalidation, PublicPayload/PlayerViews und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (298), `catalog` pass (44), `typecheck` pass, `ai` pass (86), `server` pass (72), `web` pass (79), `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: newsgroup filter gain action wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolververtraege, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 01:10 CEST
+- Ergebnis: V1.9.22 Blocker-/State-Abgleich nach den letzten WIP-Commits; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Die fuehrenden Preflights, `data/rules/v1922-local-card-facts.json`, `data/rules/v1922-local-resolver-working-basis.json`, `data/reports/v1922-completion-gate-status.json` und `docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md` wurden gegeneinander geprueft. Ergebnis: Fuer die verbleibenden Runner-Programme, Corp-ICE und Corp-Agenden liegen lokale Fakten vor, aber kein ausreichend bestaetigter LegalAction-/applyAction-Vertrag fuer den naechsten Runtime-Schnitt. Runtime-Code bleibt deshalb gesperrt; keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: Dokumentations-/Statusschnitt; vorheriger nicht-Breaker-Programm-Breitverify bleibt gruen. Naechster sinnvoller technischer Check fuer Folgeaenderungen bleibt `catalog`, danach `engine` sobald ein Resolververtrag geschlossen ist.
+- Git: Letzte vorhandene WIP-Checkpoints sind `4020c7fc` (`WIP V1.9.22: remaining runner program preflight wip`), `7144ae0a` (`WIP V1.9.22: non-breaker runner program install-only wip`), `a28df824` (`WIP V1.9.22: runner program install-only expansion wip`), `52ec51f9` (`WIP V1.9.22: newsgroup filter install-only wip`), `4ebf13ce` (`WIP V1.9.22: remaining corp ice preflight wip`) und `ea27ec1c` (`WIP V1.9.22: newsgroup filter preflight wip`).
+- Blocker: Hard fachlicher P0 fuer weiteren Runtime-Code im aktuellen Cursor, bis mindestens ein verbleibender Kartenpfad einen engen, dokumentierten Vertrag fuer LegalActions, applyAction-Revalidierung, PublicPayload/PlayerViews und Replay/StateHash besitzt. Konkrete Removal Conditions stehen in `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md`, `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md`, `docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md` und `docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md`.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
+- Zeitpunkt: 2026-05-14 01:05 CEST
+- Ergebnis: V1.9.22 Remaining-Runner-Program-Preflight nachgezogen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md` dokumentiert die fuenf verbleibenden Runner-Programm-Zielkarten. Dieser alte Eintrag ist fuer `Flak`, `Hammer`, `Japanese Water Torture`, `Reflector` und `Zetatech Software Installer` durch die Nutzerklaerungen vom 2026-05-14 teilweise ueberholt: Kartenwerte und Breaker-Taxonomie sind fuer die vier Breaker bestaetigt, technische Runtime-/Testumsetzung bleibt offen. `data/reports/v1922-completion-gate-status.json`, `docs/codex/CODEX_STATUS.md` und die Wissensbasis wurden nachgezogen. Keine Runtime-, Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: Dokumentations-/Statusschnitt; vorheriger nicht-Breaker-Programm-Breitverify bleibt gruen.
+- Git: WIP-Checkpoint fuer diesen Statusschnitt vorgesehen (`WIP V1.9.22: remaining runner program preflight wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
+- Zeitpunkt: 2026-05-14 01:00 CEST
+- Ergebnis: V1.9.22 Runner-Programm-Install-only-WIP fuer `Poltergeist`, `Rabbit`, `Scatter Shot`, `Speed Trap` und `Startup Immolator` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt fuenf weitere nicht-Breaker-Programme als V1.9.22-Runtime-Programme mit Installkosten 0, MU 1 und finalen display-only Texten. `packages/engine/src/index.test.ts` deckt Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, Ability-Gates, PublicPayload/PlayerViews und Replay/StateHash fuer die install-only Runner-Programme ab. Die Recurring-Credit-, Trace-Modifier-, Interrupt- und Post-Break-Faehigkeiten bleiben bis zur Bestaetigung der jeweiligen Vertraege ohne LegalAction. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (297); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: non-breaker runner program install-only wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil fuenf Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 00:55 CEST
+- Ergebnis: V1.9.22 Runner-Programm-Install-only-WIP fuer `False Echo` und `Netspace Inverter` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt `False Echo` und `Netspace Inverter` als V1.9.22-Runtime-Programme mit Installkosten 0, MU 1 und finalen display-only Texten. `packages/engine/src/index.test.ts` deckt Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, Ability-Gates, PublicPayload/PlayerViews und Replay/StateHash fuer die install-only Runner-Programme ab. Die erfolgreichen-Run-Faehigkeiten bleiben bis zur Bestaetigung von Trigger-, Sequenz- und PublicPayload-Vertraegen ohne LegalAction. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (297); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner program install-only expansion wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 00:45 CEST
+- Ergebnis: V1.9.22 Runner-Programm-Install-only-WIP fuer `Newsgroup Filter` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt `Newsgroup Filter` als V1.9.22-Runtime-Programm mit Installkosten 5, MU 2 und finalem display-only Text. `packages/engine/src/index.test.ts` deckt Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, Ability-Gate, PublicPayload/PlayerViews und Replay/StateHash ab. Die Credit-Gain-Faehigkeit bleibt bis zur Bestaetigung von Aktivierungskosten, Timingfenster und Turn-/Use-Limit ohne LegalAction. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (297); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: newsgroup filter install-only wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 00:27 CEST
+- Ergebnis: V1.9.22 Runner-Programm-Resolver fuer `Shield` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt `Shield` als V1.9.22-Runtime-Programm mit Installkosten 0, MU 1 und finalem display-only Text. `packages/engine/src/index.ts` nutzt das bestehende Event-Modification-Prevention-Fenster fuer bis zu 2 Net Damage pro Runner-Zug. `packages/engine/src/index.test.ts` deckt Install-LegalAction, Wrong-Side-Revalidation, Hidden-Info-sichere Prevention-Choice, PublicPayload und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (296); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: shield prevention program resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-14 00:32 CEST
+- Ergebnis: V1.9.22 Newsgroup-Filter-Preflight nachgezogen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` dokumentiert den lokalen Regelkern fuer `Newsgroup Filter` und sperrt Runtime-Code, bis Aktivierungskosten, Timingfenster und Turn-/Use-Limit lokal bestaetigt sind. `data/reports/v1922-completion-gate-status.json`, `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md`, `docs/codex/CODEX_STATUS.md` und die Wissensbasis wurden darauf ausgerichtet. Keine Runtime-, Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: Dokumentations-/Statusschnitt; vorheriger Shield-Verify bleibt gruen.
+- Git: WIP-Checkpoint fuer diesen Statusschnitt vorgesehen (`WIP V1.9.22: newsgroup filter preflight wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
+- Zeitpunkt: 2026-05-14 00:35 CEST
+- Ergebnis: V1.9.22 Remaining-Corp-ICE-Preflight nachgezogen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md` dokumentiert die vier offenen Corp-ICE-Zielkarten. `Tutor` und `Virizz` sind als kleinste naechste ICE-Kandidaten markiert, bleiben aber fuer Runtime-Code gesperrt, bis run-weite Zusatzsubroutine bzw. Break-Kostenmodifikation als LegalAction-/applyAction-Vertrag bestaetigt sind. `data/reports/v1922-completion-gate-status.json`, `docs/codex/CODEX_STATUS.md` und die Wissensbasis wurden nachgezogen. Keine Runtime-, Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: Dokumentations-/Statusschnitt; vorherige Shield- und Newsgroup-Checks bleiben gueltig.
+- Git: WIP-Checkpoint fuer diesen Statusschnitt vorgesehen (`WIP V1.9.22: remaining corp ice preflight wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt.
+
+- Zeitpunkt: 2026-05-13 23:59 CEST
+- Ergebnis: V1.9.22 Corp-Operation-Resolver fuer `Edgerunner, Inc., Temps` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt `Edgerunner, Inc., Temps` als V1.9.22-Runtime-Operation mit finalem display-only Text. `packages/engine/src/index.ts` oeffnet die Operation nur bei installierbarer Korp-Karte, gibt drei direkt anschliessende Install-only-Aktionen, sperrt waehrend der Sequenz alle Nicht-Install-Aktionen ausser Zugende und validiert Restaktionen side-sicher. `packages/engine/src/index.test.ts` deckt Wrong-Side-/Stale-Revalidation, Sequenz-Restriktion, PublicPayload, Visibility und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (295); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoints `804abd58` (`WIP V1.9.22: edgerunner temps install bundle resolver wip`), `a6448a36` (`WIP V1.9.22: security purge slice preflight wip`), `1245140a` (`WIP V1.9.22: remaining corp longtail preflight wip`), `ffe293e5` (`WIP V1.9.22: runner program preflight wip`) und `274a0b72` (`WIP V1.9.22: preflight gate status alignment wip`) wurden nach origin/codex/v1-9-originalset-completion gepusht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+- Folge-Preflight: `docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md` dokumentiert den naechsten Agenda-Kandidaten `Security Purge` und blockiert Code ohne erfundene Optionalitaets-/Serverziel-Semantik, bis der Installationsvertrag lokal bestaetigt ist.
+- Rest-Preflight: `docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md` fasst die sechs verbleibenden Corp-Longtailkarten und ihre offenen Implementierungsvertraege zusammen.
+- Runner-Programm-Preflight: `docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md` markiert nach dem Shield-Schnitt `Newsgroup Filter` als kleinsten verbleibenden Programm-Kandidaten, solange Aktivierungstiming und PublicPayload bestaetigt werden.
+
+- Zeitpunkt: 2026-05-13 23:55 CEST
+- Ergebnis: V1.9.22 Corp-ICE-Resolver fuer `Zombie` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt `Zombie` als V1.9.22-Runtime-ICE mit Rez-Kosten 9, Staerke 4, Subtypes `sentry`, `black_ice`, `ap`, `zombie`, zwei Core-Damage-Subroutinen und End-the-run. `packages/engine/src/index.test.ts` deckt Rez-LegalAction, Wrong-Side-/Stale-Revalidation, side-sichere Run-Aufloesung und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (294); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: zombie core damage ice resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 23:45 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Valu-Pak Software Bundle` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` fuehrt Turn-Flag-Felder fuer Valu-Pak-Programminstallationsaktionen. `packages/engine/src/index.ts` oeffnet `Valu-Pak Software Bundle` nur bei installierbarem Runner-Programm, gibt fuenf direkt anschliessende programminstallationsgebundene Aktionen sowie einen temporaeren Programminstallations-Credit und sperrt waehrend der Sequenz alle Nicht-Programminstallations-Aktionen ausser Zugende. `packages/engine/src/index.test.ts` deckt Wrong-Side-/Stale-Revalidation, Sequenz-Restriktion, temporaeren Credit, PublicPayload, Visibility und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (293); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: valu pak program install bundle resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programme, verbleibende Corp-Longtailkarten, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 23:20 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Synchronized Attack on HQ` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` finalisiert den display-only Text und die Kosten fuer `Synchronized Attack on HQ`. `packages/engine/src/index.ts` nutzt das erfolgreiche-HQ-Run-Turn-Flag und oeffnet eine `play_event`-LegalAction nur nach erfolgreichem HQ-Run und bei HQ-Karten; der Resolver startet eine private Korp-HQ-Retain-Choice, zahlt 2 Credits pro behaltener HQ-Karte und discarded den Rest verdeckt. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen Testhelper-Duplikat fuer gleiche HQ-Kartendefinitionen und fehlender PublicPayload-Weitergabe fuer `retainedCount`/`discardedCount`, danach pass (293); `catalog` initial rot wegen unveraenderter `planned_no_promotion`-Zaehllogik, danach pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass (Exit 0); `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner event ice pressure and hq retain resolvers wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 23:10 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Core Command: Jettison Ice` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` finalisiert den display-only Text fuer `Core Command: Jettison Ice`. `packages/engine/src/index.ts` nutzt das erfolgreiche-HQ-Run-Turn-Flag und oeffnet eine `play_event`-LegalAction nur bei bezahlbarer gerezzter ICE; der Resolver startet einen public Choice, zahlt die Rez-Kosten aus Runner-Credits und trasht die gewaehlte ICE. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (292); `catalog` pass (44); `typecheck` pass. Breiter Verify danach: `ai` initial rot wegen zu breiter PlayerView-Redaktion fuer public Choice-Values, nach Begrenzung auf neue `ice_*`-Positionsoptionen pass (86); `server` pass (72); `web` pass (79); `test`, `lint` und `build` pass, Build nur mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner event ice pressure resolvers wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 23:06 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Security Code WORM Chip` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` finalisiert den display-only Text fuer `Security Code WORM Chip`. `packages/shared/src/index.ts` und `packages/engine/src/index.ts` ergaenzen ein side-sicheres Runner-Turn-Flag fuer erfolgreiche HQ-Runs im selben Zug. `packages/engine/src/index.ts` oeffnet eine `play_event`-LegalAction nur nach erfolgreichem HQ-Run und bei unrezzter installierter ICE; der Resolver startet einen public ICE-Positions-Choice und trasht die gewaehlte ICE. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen dupliziertem Testdeck-Eintrag und danach wegen unnoetigem `continue_run` nach bereits beendetem HQ-Run, danach pass (291); `catalog` pass (44); `typecheck` pass. Breiter Verify ist noch offen.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner event ice pressure resolvers wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 23:00 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Forged Activation Orders` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` setzt die lokale Kostenbasis fuer `Forged Activation Orders` auf 1 Credit und finalisiert den display-only Text. `packages/engine/src/index.ts` oeffnet eine `play_event`-LegalAction nur bei unrezzter installierter ICE, startet einen public ICE-Positions-Target-Choice fuer den Runner und danach eine public Korp-Choice zum Rezzen gegen Rez-Kosten oder Trashen der ICE. Die PlayerView-Redaktion fuer public Choice-Optionen mit `publicLabel` unterdrueckt interne Choice-`value`s, damit CardInstance-IDs keine verdeckte Definition verraten. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen Testassertion auf interne CardInstance-ID im sichtbaren Choice-Objekt, danach pass (290); `catalog` pass (44); `typecheck` pass. Breiter Verify ist noch offen.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: forged activation orders resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 22:04 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Anonymous Tip` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` setzt die lokale Kostenbasis fuer `Anonymous Tip` auf 3 Credits; `packages/engine/src/index.ts` oeffnet eine `play_event`-LegalAction nur bei gerezzter Black ICE und resolved einen public Target-Choice durch Derezzen der ICE. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (289); `catalog` pass (44); `typecheck` pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: anonymous tip resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 21:57 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Open-Ended Mileage Program` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `Open-Ended Mileage Program` eine `play_event`-LegalAction nur bei getaggtem Runner, entfernt einen Tag kostenlos und startet bei Runner-Credits einen public optionalen Return-to-Grip-Choice fuer 1 Credit. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (288); `catalog` initial rot wegen fehlender Resolver-Family-Erwartung, danach pass (44); `typecheck` initial rot wegen zu breiter Choice-Auswahl-Typisierung, danach pass; `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: open ended mileage resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 21:47 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `misc.for-sale` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `misc.for-sale` eine `play_event`-LegalAction, startet einen Runner-privaten Installed-Trash-Choice fuer eigene installierte Karten und resolved die Auswahl nach Spoiler-Abgleich in den Heap mit 3 Credits pro getrashter Karte. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` zuerst rot wegen Testzugriff auf eine nicht exportierte interne Hilfsfunktion, danach pass (287); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44); `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: misc for sale resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 21:40 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `Organ Donor` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `Organ Donor` eine `play_event`-LegalAction, startet einen Runner-privaten Grip-Trash-Choice fuer bis zu fuenf Karten und resolved die Auswahl nach Spoiler-Abgleich in den Heap mit 2 Credits pro getrashter Karte. Der PublicContext wurde gezielt um `trashedCount`, `gainedCredits` und `runnerCreditsAfter` fuer Hidden-Zone-Aktionen erweitert, damit der side-sichere Resolve-Choice-Payload pruefbar bleibt. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` zuerst rot wegen fehlender PublicPayload-Zaehlung, danach pass (286); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` pass, Exit 0; `lint` pass; `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: organ donor resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 21:35 CEST
+- Ergebnis: V1.9.22 Runner-Event-Resolver fuer `If You Want It Done Right...` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/engine/src/index.ts` oeffnet fuer `If You Want It Done Right...` eine `play_event`-LegalAction, startet einen Runner-privaten Stack-Top-5-Choice und resolved die erste Auswahl in die Grip sowie die restlichen Topkarten in der gewaehlten Reihenfolge zurueck auf den Stack. `packages/engine/src/index.test.ts` deckt Wrong-Side-/Stale-Revalidation, Hidden-Zone-Choice, side-sichere PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` pass (285); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44); `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: runner event stack choice wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 21:30 CEST
+- Ergebnis: V1.9.22 Marine-Arcology-Runtime-Resolver umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` ergaenzt eine Runtime-Definition fuer `onr_v1_206_marine-arcology`. `packages/engine/src/index.ts` oeffnet fuer gescortes `Marine Arcology` nach Spoiler-Abgleich eine Korp-LegalAction `[A], [A]: Gain 3` und revalidiert Seite, Score-Area, Kartendefinition, Aktionskosten und Creditbetrag in `applyAction`. `packages/engine/src/index.test.ts` deckt den Pfad mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review und Codex-Status wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task engine` pass (284); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44); `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: marine arcology resolver wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 21:15 CEST
+- Ergebnis: V1.9.22 Corp-Agenda-/Operation-Runtime-Resolver fuer `Corporate Retreat`, `Corporate War`, `Political Overthrow`, `Off-Site Backups` und `Planning Consultants` umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/shared/src/index.ts` ergaenzt Runtime-Definitionen fuer `onr_v1_195_corporate-retreat`, `onr_v1_196_corporate-war`, `onr_v1_210_political-overthrow`, `onr_v1_296_off-site-backups` und `onr_v1_298_planning-consultants`. `packages/engine/src/index.ts` oeffnet fuer gescortes `Corporate Retreat` nach Spoiler-Abgleich `[A]: Gain 2` bis zum naechsten Korp-Install/-Rez, resolved `Corporate War` beim Scoren ueber die 12-Credit-Schwelle mit Gain 12 oder Creditverlust, oeffnet fuer gescortes `Political Overthrow` eine Korp-LegalAction `[A]: Gain 3`, spielt `Off-Site Backups` als privaten Archives-to-HQ-Choice und spielt `Planning Consultants` als privaten R&D-Top-5-Reorder-Choice. `packages/engine/src/index.test.ts` deckt alle fuenf Pfade mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayloads und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: JSON-Validation pass (308 Dateien); `catalog` pass (44), `engine` pass (283). Vor den Zusatzschnitten waren `ai` pass (86), `server` pass (72), `web` pass (79), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoints `2b36c09`, `e6afd90`, `13f6b63` und `a51e187` wurden nach `origin/codex/v1-9-originalset-completion` gepusht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 20:20 CEST
+- Ergebnis: V1.9.22 lokale Kartenfaktenbasis fuer alle 47 WIP-Karten hergestellt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_LOCAL_CARD_FACTS_WORKING_BASIS.md` und `data/rules/v1922-local-card-facts.json` halten fuer 47/47 V1.9.22-WIP-Karten lokale Fakten mit Zahlenfeldern, Effektzusammenfassung und benoetigten Implementierungsvertraegen fest. Offene Attributkonflikte: 0. `Corporate War` und `Political Overthrow` bleiben als erste enge Implementierungskandidaten markiert; `Political Overthrow` ist verbindlich `Gain 3`. `data/reports/v1922-completion-gate-status.json`, `docs/derived/V1_9_22_TEST_MATRIX.md`, `docs/codex/CODEX_STATUS.md` und Wissenslog/Index wurden nachgezogen. Keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: JSON-Validation pass (308 Dateien); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (44).
+- Git: Noch kein Checkpoint fuer diesen Lauf erzeugt.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil jetzt nicht mehr Kartendaten, sondern Engine-/LegalAction-/applyAction-, Manifest/Coverage-, AI-, Webclient-Version- und Final-Review-Gates fuer konkrete Umsetzungsschnitte offen sind.
+
+- Zeitpunkt: 2026-05-13 19:58 CEST
+- Ergebnis: V1.9.22 lokale Resolver-Arbeitsgrundlage hergestellt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_LOCAL_RESOLVER_WORKING_BASIS.md` und `data/rules/v1922-local-resolver-working-basis.json` stellen eine versionierte Arbeitsgrundlage aus privaten lokalen Kontrollquellen her, ohne Volltexte breit zu versionieren. `Corporate War` und `Political Overthrow` sind jetzt enge Implementierungskandidaten; `Political Overthrow` ist nach Nutzerbestaetigung verbindlich `Gain 3`. `data/reports/v1922-completion-gate-status.json`, `docs/derived/V1_9_22_TEST_MATRIX.md`, `docs/codex/CODEX_STATUS.md` und Wissenslog/Index wurden nachgezogen. Keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: JSON-Validation pass (306 Dateien); `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (42).
+- Git: Noch kein Checkpoint fuer diesen Lauf erzeugt.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Engine-/LegalAction-/applyAction-, Manifest/Coverage-, AI-, Webclient-Version- und Final-Review-Gates fuer die neuen Kandidaten offen sind.
+
+- Zeitpunkt: 2026-05-13 19:41 CEST
+- Ergebnis: V1.9.22 Statusalignment nach Resolververtragsmatrix; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_TEST_MATRIX.md` wurde auf den 19:25-Resolververtragsmatrix-Stand nachgezogen. Die Testmatrix dokumentiert jetzt `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md`, `data/rules/v1922-resolver-contracts.json`, den `latestContractMatrix`-Verweis im Completion-Gate-Statusreport und den weiterhin nicht-promotenden Befund 0/47 bereit fuer Resolverimplementierung oder Promotion. Keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: `scripts/automation/v1-9-install-and-check.ps1 -Task catalog` pass (41).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: matrix status alignment`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil ein vollstaendiger lokaler Resolververtrag fuer mindestens einen Zielpfad fehlt.
+
+- Zeitpunkt: 2026-05-13 19:25 CEST
+- Ergebnis: V1.9.22 Resolververtragsmatrix erstellt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md` und `data/rules/v1922-resolver-contracts.json` erfassen alle 47 Zielkarten einzeln mit bestaetigter Teilbasis, sicherer aktueller Abdeckung, fehlenden Vertragsfeldern und Removal Conditions. `data/reports/v1922-completion-gate-status.json` verweist per `latestContractMatrix` darauf. Ergebnis bleibt 0/47 Karten fuer neue Resolverimplementierung oder Promotion bereit; nur 9/47 Hardwarekarten haben einen engen Installations-Basisvertrag. Keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: JSON-Validation pass (305 Dateien); `catalog` pass (41).
+- Git: WIP-Commit `65015d7a` (`WIP V1.9.22: resolver contract matrix`) wurde nach `origin/codex/v1-9-originalset-completion` gepusht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil ein vollstaendiger lokaler Resolververtrag fuer mindestens einen Zielpfad fehlt.
+
+- Zeitpunkt: 2026-05-13 19:09 CEST
+- Ergebnis: V1.9.22 Source-Scan-Revalidierung dokumentiert; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md` dokumentiert eine erneute lokale Quellensuche fuer blockierte Runner-Event- und Corp-Longtailkarten. `data/reports/v1922-completion-gate-status.json` verweist als `latestAutomationScan` auf diesen Review. Ergebnis bleibt `no_complete_resolver_contract_found`; keine Karte wurde release-, runtime-, catalog- oder AI-promotet.
+- Tests: JSON-Validation pass (304 Dateien); `catalog` pass (40).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: resolver source scan review`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil ein vollstaendiger lokaler Resolververtrag fuer mindestens einen Zielpfad fehlt.
+
+- Zeitpunkt: 2026-05-13 18:40 CEST
+- Ergebnis: V1.9.22 Completion-Gate-Statusreport angelegt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/reports/v1922-completion-gate-status.json` dokumentiert maschinenlesbar `blocked_open`, die gruene Verify-Basis, die lokale Vertragsquellensuche ohne vollstaendigen Resolververtrag und die vier blockierenden Gates `resolver_contracts`, `ai_promotion_artifacts`, `webclient_version` und `final_review` mit Removal Conditions. `packages/catalog/src/index.test.ts` prueft Reportstatus, No-Promotion-Flags, Scope-Laenge, Quellensuche und Gate-Liste.
+- Tests: JSON-Validation pass (304 Dateien); `catalog` pass (40).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: completion gate status report`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 18:35 CEST
+- Ergebnis: V1.9.22 AI-Promotion-Artefakt-Abwesenheit als Catalog-Guard ergaenzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/catalog/src/index.test.ts` prueft jetzt, dass `data/ai/ai-card-hints-deck-legal-v1922.json`, `data/manifests/deck-legal-ai-approval-v1922-manifest.json` und `data/scenarios/ai-deck-legal-v1922-smokes.json` bis zum Completion-Gate nicht existieren. Keine Karte wurde release- oder AI-promotet.
+- Tests: `catalog` pass (39).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: ai artifact absence guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 18:30 CEST
+- Ergebnis: V1.9.22 Resolver-Teilnotizen ins Contract-Inventar uebernommen; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/rules/v1922-resolver-contract-inventory.json` fuehrt jetzt lokal bestaetigte Teilnotizen aus `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md` fuer Runner-Programme, Runner-Events, Runner-Hardware und Corp-Agendas. Der Catalog-Test prueft, dass jede `partialLocalNotes`-Karte im jeweiligen Cluster und in `ONR_V1_9_22_WIP_CARD_IDS` liegt und keine `ready_for_promotion`-, `ai_supported`-, `deck_legal`- oder `human_playable`-Aussage enthaelt. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (303 Dateien); `catalog` pass (38).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: partial contract notes inventory`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 18:25 CEST
+- Ergebnis: V1.9.22 Resolver-Contract-Inventar angelegt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `data/rules/v1922-resolver-contract-inventory.json` dokumentiert fuer sechs Cluster die lokal bestaetigten Felder, fehlenden Vertragsfelder und aktuellen sicheren Guards. Das Inventar deckt exakt 47/47 V1.9.22-WIP-Karten ab und markiert keinen Cluster als `ready_for_promotion`.
+- Tests: JSON-Validation pass (303 Dateien); `catalog` pass (38), `engine` pass (278), `ai` pass (86), `server` pass (72), `web` pass (79), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: resolver contract inventory guard`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 18:20 CEST
+- Ergebnis: V1.9.22 WIP-Artefakt-/AI-/Web-No-Promotion-Guards ergaenzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `packages/catalog/src/index.test.ts` prueft jetzt, dass V1.9.22-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-WIP-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Eventkarten mit No-`play_event`-Guard und 28 geplante No-Promotion-Karten ausweisen und keine Catalog-/AI-Promotion behaupten. `packages/ai/src/index.test.ts` schuetzt zusaetzlich, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate nicht `ai_supported`, `human_playable` oder `deck_legal` sind. `apps/web/app/api/cards/catalog-data.test.ts` schuetzt, dass V1.9.22-WIP-Karten nicht im Web-Catalog-`ai_supported`-Filter erscheinen und sichtbare Detailantworten keine Promotion zeigen. `apps/web/app/version-status.test.ts` schuetzt, dass die sichtbare Client-Version vor V1.9.22-Abschluss weiter `V1.9.21` bleibt. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (37), `engine` pass (278), `ai` pass (86), `server` pass (72), `web` pass (79), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: artifact ai no-promotion guards`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 18:00 CEST
+- Ergebnis: V1.9.22 Runner-Programm-No-LegalAction-Guard, Runner-Event-Readiness und Corp-Longtail-Readiness dokumentiert; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Alle 14 Runner-Programm-Zielkarten bleiben ohne lokal bestaetigte Kosten-/MU-/Breakerwerte nicht `playable_mvp` und oeffnen keine `install_card`-, `pump_breaker`- oder `break_subroutine`-LegalActions. `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` dokumentiert, dass die vorhandenen lokalen Kernnotizen fuer die zehn Runner-Events noch keinen vollstaendigen `play_event`-Resolververtrag liefern; `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` dokumentiert, dass Corporate War und Political Overthrow zwar lokale Kernnotizen haben, aber noch keine vollstaendigen Zahlen-/Timing-/Kostenvertraege. Die bestehenden No-Promotion-Guards bleiben korrekt. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (36), `engine` pass (278), `ai` pass (85), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint `839c6570` (`WIP V1.9.22: program event readiness guards`) gepusht; WIP-Checkpoint `72b93695` (`WIP V1.9.22: corp readiness contract review`) gepusht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil konkrete Event-, Programm- oder Corp-Longtail-Resolver, AI-Artefakte, Webclient-Version und Final Review offen sind.
+
+- Zeitpunkt: 2026-05-13 17:40 CEST
+- Ergebnis: V1.9.22 Runner-Hardware-LegalAction-Abdeckung verbreitert; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: Alle neun Runner-Hardware-Zielkarten haben jetzt Install-LegalAction-Smokes mit Wrong-Side-/Stale-Revalidation, side-sicheren PublicPayload-/PlayerView-Assertions und Replay-/StateHash-Stabilitaet. Die zehn Runner-Event-Zielkarten haben einen expliziten No-`play_event`-Promotion-Guard, bis konkrete Event-Resolver vorliegen. `docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md` und Engine-Guards dokumentieren den Schutz gegen erfundene Kosten-/MU-/Breakerwerte fuer die 14 Runner-Programm-Zielkarten sowie gegen fehlende konkrete Resolver fuer die 14 Corp-Longtailkarten. Keine Karte wurde release- oder AI-promotet.
+- Tests: JSON-Validation pass (302 Dateien); `catalog` pass (36), `engine` pass (277 nach No-Promotion-Guards), `ai` pass (85), `server` pass (72), `web` pass (77), `typecheck` pass, `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: hardware legalaction coverage`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Runner-Programm-, Runner-Event-, Corp-Agenda-/ICE-/Operation-, AI-, Full-Check-, Webclient- und Final-Review-Gates offen sind.
 
 - Zeitpunkt: 2026-05-13 16:40 CEST
 - Ergebnis: V1.9.22 erster Runtime-WIP fuer neun Runner-Hardware-Longtailkarten umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
@@ -655,6 +1181,15 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Commit
 
+- WIP-Commit V1.9.22: `4020c7fc` (`WIP V1.9.22: remaining runner program preflight wip`).
+- WIP-Commit V1.9.22: `7144ae0a` (`WIP V1.9.22: non-breaker runner program install-only wip`).
+- WIP-Commit V1.9.22: `a28df824` (`WIP V1.9.22: runner program install-only expansion wip`).
+- WIP-Commit V1.9.22: `52ec51f9` (`WIP V1.9.22: newsgroup filter install-only wip`).
+- WIP-Commit V1.9.22: `4ebf13ce` (`WIP V1.9.22: remaining corp ice preflight wip`).
+- WIP-Commit V1.9.22: `ea27ec1c` (`WIP V1.9.22: newsgroup filter preflight wip`).
+- WIP-Commit V1.9.22: `65015d7a` (`WIP V1.9.22: resolver contract matrix`).
+- WIP-Commit V1.9.22: `5ec40b63` (`WIP V1.9.22: source scan timestamp correction`).
+- WIP-Commit V1.9.22: `3a0b179f` (`WIP V1.9.22: resolver source scan review`).
 - Abschlusscommit V1.9.11: `5c7ec1d` (`V1.9.11: hidden zone search reveal reorder`).
 - WIP-Commit V1.9.11: `e7b9609` (`WIP V1.9.11: hidden zone installed helper wip`).
 - WIP-Commit V1.9.11: `f587530` (`WIP V1.9.11: hidden zone planning status alignment`).
@@ -663,12 +1198,28 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Push
 
+- Push erfolgreich: `4020c7fc` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `7144ae0a` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `a28df824` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `52ec51f9` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `4ebf13ce` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `ea27ec1c` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `65015d7a` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `5ec40b63` auf `origin/codex/v1-9-originalset-completion`.
+- Push erfolgreich: `3a0b179f` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `5c7ec1d` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `e7b9609` auf `origin/codex/v1-9-originalset-completion`.
 - Push erfolgreich: `f587530` auf `origin/codex/v1-9-originalset-completion`.
 Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 
 ## Blocker
+
+- Blocker-ID: V1922_NO_COMPLETE_LOCAL_RESOLVER_CONTRACT_2026-05-13
+- Status: resolved-for-narrow-implementation, release-gates-still-open
+- Betroffener Release: V1.9.22
+- Beschreibung: Der alte harte Befund, dass fuer keinen V1.9.22-Zielpfad eine implementierbare lokale Grundlage vorliegt, ist fuer `Corporate War` und `Political Overthrow` aufgehoben. `Political Overthrow` wurde per Nutzerentscheidung auf `Gain 3` entschieden. Keine dieser Karten ist dadurch bereits `human_playable`, `deck_legal` oder `ai_supported`.
+- Removal Condition: Die engen Kandidaten muessen in Engine/LegalAction/applyAction, Visibility, Replay/StateHash, Manifest/Coverage, AI und Webclient-Gates umgesetzt und geprueft werden; erst danach darf eine kontrollierte Promotion erfolgen.
+- Letzter Befund: 2026-05-13 19:58 CEST, dokumentiert in `docs/derived/V1_9_22_LOCAL_RESOLVER_WORKING_BASIS.md`, `data/rules/v1922-local-resolver-working-basis.json`, `data/reports/v1922-completion-gate-status.json` und durch `packages/catalog/src/index.test.ts` gegen die lokale Arbeitsgrundlage abgesichert.
 
 - Blocker-ID: LOCK_PATH_PERMISSION_DENIED_2026-05-12
 - Status: behoben durch Worktree-Lockpfad
@@ -700,3 +1251,4 @@ Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 
 Status: gelöscht / nicht aktiv
 Aufgabe: kein separater Watchdog aktiv; Kontrolle erfolgt aktuell durch explizite Nutzerstarts und den Completion-Controller selbst.
+

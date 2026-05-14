@@ -1,0 +1,164 @@
+{
+  "schemaVersion": "v1922-local-resolver-working-basis-v1",
+  "release": "V1.9.22",
+  "status": "working_basis_no_promotion",
+  "createdAt": "2026-05-13T19:58:00+02:00",
+  "sourceMode": "derived_from_private_local_sources_without_versioning_full_card_texts",
+  "gateAssertions": {
+    "runtimePromotionUnchanged": true,
+    "catalogPromotionUnchanged": true,
+    "aiPromotionUnchanged": true,
+    "readyForNarrowResolverImplementationCount": 2,
+    "readyForPromotionCount": 0,
+    "firstImplementationCandidate": "onr_v1_196_corporate-war"
+  },
+  "sourceRefs": [
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\card-snapshot-onr-v1-limited.local.json",
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\agenda-text-review.local.md",
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\agenda-implementation-review.local.md",
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\onr-v1-open-card-review.local.md",
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-02-confirmed-texts.local.md",
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-03-confirmed-texts.local.md",
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-11-13-confirmed-texts.local.md",
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-20-22-confirmed-texts.local.md",
+    "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\confirmed-texts-normalized-mechanics.local.md"
+  ],
+  "readyCandidates": [
+    {
+      "cardId": "onr_v1_196_corporate-war",
+      "title": "Corporate War",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": ["black-ops"],
+      "readinessStatus": "ready_for_narrow_resolver_implementation_not_promotion",
+      "numericContract": {
+        "advancementRequirement": 3,
+        "agendaPoints": 3,
+        "creditThreshold": 12,
+        "creditGainOnThresholdMet": 12,
+        "creditResultOnThresholdMiss": "lose_all_credits"
+      },
+      "resolverContract": {
+        "trigger": "corp_scores_this_agenda",
+        "timing": "after normal agenda score legality succeeds and the agenda enters the Corp score area",
+        "targets": [],
+        "choices": [],
+        "zoneMovement": "normal_agenda_score_only",
+        "visibility": "public_score_and_credit_delta_no_hidden_card_identity",
+        "replayStateHash": "deterministic_no_random_no_private_choice",
+        "aiFallback": "score action remains legal under existing agenda scoring; no additional choice required"
+      },
+      "requiredImplementationChecks": [
+        "score_with_at_least_12_credits_gains_12",
+        "score_with_less_than_12_credits_loses_all_credits",
+        "runner_steal_does_not_trigger_corp_score_effect",
+        "public_events_and_player_views_redact_hidden_zones",
+        "replay_and_statehash_are_stable",
+        "stale_and_wrong_side_revalidation_is_preserved"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-03-confirmed-texts.local.md",
+          "section": "196 - Corporate War"
+        },
+        {
+          "path": "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-11-13-confirmed-texts.local.md",
+          "section": "196 - Corporate War"
+        },
+        {
+          "path": "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\agenda-text-review.local.md",
+          "section": "196 | Corporate War"
+        },
+        {
+          "path": "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\onr-v1-open-card-review.local.md",
+          "section": "Corporate War manual-reviewed row"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": ["black-ops"],
+      "readinessStatus": "ready_for_narrow_resolver_implementation_not_promotion",
+      "numericContract": {
+        "advancementRequirement": 9,
+        "agendaPoints": 6,
+        "actionCost": 1,
+        "creditGain": 3
+      },
+      "resolverContract": {
+        "trigger": "corp_uses_scored_agenda_ability",
+        "timing": "corp_action_window_after_agenda_is_in_corp_score_area",
+        "targets": [],
+        "choices": [],
+        "zoneMovement": "none",
+        "visibility": "public_action_and_credit_delta_no_hidden_card_identity",
+        "replayStateHash": "deterministic_no_random_no_private_choice",
+        "aiFallback": "treat as simple legal economy action when available"
+      },
+      "conflictResolution": {
+        "resolvedAt": "2026-05-13",
+        "resolvedBy": "user_chat_confirmation",
+        "decision": "gain_3",
+        "conflictingLocalSource": "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-11-13-confirmed-texts.local.md",
+        "acceptedLocalSource": "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-03-confirmed-texts.local.md"
+      },
+      "requiredImplementationChecks": [
+        "scored_agenda_opens_corp_economy_action",
+        "ability_costs_one_action_and_gains_3_credits",
+        "runner_steal_does_not_open_corp_ability",
+        "wrong_side_and_stale_state_are_rejected",
+        "public_events_and_player_views_redact_hidden_zones",
+        "replay_and_statehash_are_stable"
+      ],
+      "sourceAnchors": [
+        {
+          "path": "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\text-review-galleries\\gallery-03-confirmed-texts.local.md",
+          "section": "210 - Political Overthrow"
+        },
+        {
+          "path": "C:\\Projekte\\NETGRID\\data\\local\\card-import\\onr-v1-limited\\agenda-text-review.local.md",
+          "section": "210 | Political Overthrow"
+        },
+        {
+          "path": "user_chat_confirmation",
+          "section": "2026-05-13 Political Overthrow has Gain 3"
+        }
+      ]
+    }
+  ],
+  "reviewedDeferredCandidates": [
+    {
+      "cardId": "onr_v1_077_anonymous-tip",
+      "title": "Anonymous Tip",
+      "status": "source_complete_target_contract_pending",
+      "reason": "Local cost and text basis exists, but black-ICE target taxonomy and derez timing must be contracted."
+    },
+    {
+      "cardId": "onr_v1_080_core-command-jettison-ice",
+      "title": "Core Command: Jettison Ice",
+      "status": "source_complete_target_payment_contract_pending",
+      "reason": "Local cost and text basis exists, but successful-HQ-run tracking, rezzed-ICE targeting and rez-cost payment need a contract."
+    },
+    {
+      "cardId": "onr_v1_086_forged-activation-orders",
+      "title": "Forged Activation Orders",
+      "status": "source_complete_opponent_choice_contract_pending",
+      "reason": "Local cost and text basis exists, but Corp rez-or-trash choice flow and target revalidation need a contract."
+    },
+    {
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "title": "Arasaka Portable Prototype",
+      "status": "source_complete_larger_hardware_contract_pending",
+      "reason": "Local cost, MU, agenda-point install cost and recurring restricted credits exist; deck uniqueness and recurring payment windows make this a larger slice."
+    },
+    {
+      "cardId": "onr_v1_136_pandoras-deck",
+      "title": "Pandora's Deck",
+      "status": "source_complete_larger_hardware_contract_pending",
+      "reason": "Local cost, MU and recurring link credits exist; deck uniqueness, link payment windows and refresh make this a larger slice."
+    }
+  ]
+}

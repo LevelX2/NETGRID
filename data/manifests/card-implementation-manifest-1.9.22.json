@@ -1,398 +1,694 @@
 {
   "schemaVersion": "card-implementation-manifest-v1.9.22",
-  "id": "v1.9.22-per-card-longtail-manifest",
-  "status": "runtime_wip_no_promotion",
+  "id": "v1.9.22-per-card-longtail-release-manifest",
+  "status": "release",
   "extends": "data/manifests/card-implementation-manifest-1.9.21.json",
   "sourceMode": "private_local_onr_v1_function_matrix_display_only",
   "gateAssertions": {
     "v1922ScopeFrozenToFortySevenCards": true,
     "catalogWipGuardReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_and_event_clusters_19_of_47",
-    "engineCovered": false,
-    "stateHashReplayStableForCoveredSmokes": false,
+    "wipArtifactAlignmentGuardReady": true,
+    "resolverContractInventoryReady": true,
+    "runtimeDefinitionsReady": "runner_hardware_event_fourteen_runner_program_and_fourteen_corp_resolver_clusters_47_of_47",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_non_breaker_runner_program_install_only_plus_zetatech_software_installer_recurring_program_install_overlay_plus_flak_ap_breaker_plus_hammer_wall_breaker_stealth_loss_choice_plus_japanese_water_torture_wall_breaker_future_action_debt_plus_reflector_tagged_breaker_plus_newsgroup_filter_gain_2_credit_action_plus_shield_net_damage_prevention_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_data_fort_reclamation_install_rez_credit_marine_arcology_political_overthrow_security_purge_haunting_inquisition_zombie_tutor_viral_15_virizz_edgerunner_temps_off_site_backups_and_planning_consultants_resolvers_plus_no_release_promotion_guards",
+    "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
-    "catalogPromotionPending": true,
-    "aiPromotionPending": true
+    "catalogPromotionPending": false,
+    "aiPromotionPending": false,
+    "allCardsHumanPlayable": true,
+    "allCardsDeckLegal": true,
+    "allCardsAiSupported": true
   },
   "cards": [
     {
       "cardCode": "onr_v1_026_false-echo",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "ability_contract_remains_gated",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "False Echo"
     },
     {
       "cardCode": "onr_v1_027_flak",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_flak_ap_breaker",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "pump_strength",
+        "ap_break_subroutine",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Flak"
     },
     {
       "cardCode": "onr_v1_031_hammer",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_hammer_wall_breaker_stealth_loss_choice",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "pump_strength",
+        "wall_break_subroutine",
+        "stealth_loss_distribution_choice",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Hammer"
     },
     {
       "cardCode": "onr_v1_037_japanese-water-torture",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_japanese_water_torture_future_action_debt",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wall_break_subroutine",
+        "pump_strength",
+        "future_action_debt",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Japanese Water Torture"
     },
     {
       "cardCode": "onr_v1_044_netspace-inverter",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "ability_contract_remains_gated",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Netspace Inverter"
     },
     {
       "cardCode": "onr_v1_045_newsgroup-filter",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_newsgroup_filter_gain_2",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "gain_2_credit_action",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Newsgroup Filter"
     },
     {
       "cardCode": "onr_v1_048_poltergeist",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "ability_contract_remains_gated",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Poltergeist"
     },
     {
       "cardCode": "onr_v1_051_rabbit",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "ability_contract_remains_gated",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Rabbit"
     },
     {
       "cardCode": "onr_v1_055_reflector",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_reflector_tagged_breaker",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "tagged_break_subroutine",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Reflector"
     },
     {
       "cardCode": "onr_v1_057_scatter-shot",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "ability_contract_remains_gated",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Scatter Shot"
     },
     {
       "cardCode": "onr_v1_061_shield",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_net_damage_prevention",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "net_damage_prevention_window",
+        "turn_limit",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Shield"
     },
     {
       "cardCode": "onr_v1_067_speed-trap",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "ability_contract_remains_gated",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Speed Trap"
     },
     {
       "cardCode": "onr_v1_068_startup-immolator",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "ability_contract_remains_gated",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Startup Immolator"
     },
     {
       "cardCode": "onr_v1_075_zetatech-software-installer",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_program_zetatech_software_installer_recurring_program_install_overlay",
+      "coveredSmokes": [
+        "install_program_legal_action",
+        "recurring_program_install_credit",
+        "runner_turn_start_recurring_refresh",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "memory_cost",
+        "zetatech_overlay_install",
+        "overlay_hosted_on_zetatech",
+        "overlay_no_extra_memory",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Zetatech Software Installer"
     },
     {
       "cardCode": "onr_v1_077_anonymous-tip",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_derez_black_ice",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Anonymous Tip as a public black-ice derez choice"
+      ],
+      "title": "Anonymous Tip"
     },
     {
       "cardCode": "onr_v1_080_core-command-jettison-ice",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_successful_hq_run_pay_rez_cost_trash_rezzed_ice",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Core Command Jettison Ice after a successful HQ run to pay rez cost and trash rezzed ICE"
+      ],
+      "title": "Core Command Jettison Ice"
     },
     {
       "cardCode": "onr_v1_086_forged-activation-orders",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_force_rez_or_trash_ice",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Forged Activation Orders as a public ICE target and Corp rez-or-trash choice"
+      ],
+      "title": "Forged Activation Orders"
     },
     {
       "cardCode": "onr_v1_093_if-you-want-it-done-right",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_stack_top5_choose_one_arrange_rest",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays If You Want It Done Right as a private stack top-five choice"
+      ],
+      "title": "If You Want It Done Right"
     },
     {
       "cardCode": "onr_v1_100_misc-for-sale",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_installed_trash_gain_credits",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays misc.for-sale as a private installed-trash economy choice"
+      ],
+      "title": "Misc For Sale"
     },
     {
       "cardCode": "onr_v1_102_open-ended-mileage-program",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_remove_tag_optional_return",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Open-Ended Mileage Program as tag removal with optional return"
+      ],
+      "title": "Open Ended Mileage Program"
     },
     {
       "cardCode": "onr_v1_103_organ-donor",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_grip_trash_gain_credits",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Organ Donor as a private grip-trash economy choice"
+      ],
+      "title": "Organ Donor"
     },
     {
       "cardCode": "onr_v1_109_security-code-worm-chip",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_successful_hq_run_trash_unrezzed_ice",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Security Code WORM Chip after a successful HQ run to trash unrezzed ICE"
+      ],
+      "title": "Security Code Worm Chip"
     },
     {
       "cardCode": "onr_v1_113_synchronized-attack-on-hq",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Synchronized Attack on HQ after a successful HQ run as a private Corp retain choice"
+      ],
+      "title": "Synchronized Attack On Hq"
     },
     {
       "cardCode": "onr_v1_117_valu-pak-software-bundle",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate; play_event_surface",
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_runner_event_program_install_action_bundle",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "play_event_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "program_install_action_bundle",
+        "temporary_program_install_credit",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Valu Pak Software Bundle"
     },
     {
       "cardCode": "onr_v1_119_arasaka-portable-prototype",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
         "runtime_definition_guard",
         "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
         "public_payload_visibility",
         "replay_statehash"
-      ]
+      ],
+      "title": "Arasaka Portable Prototype"
     },
     {
       "cardCode": "onr_v1_122_artemis-2020",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Artemis 2020"
     },
     {
       "cardCode": "onr_v1_123_bodyweight-data-creche",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Bodyweight Data Creche"
     },
     {
       "cardCode": "onr_v1_124_corolla-speed-chip",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Corolla Speed Chip"
     },
     {
       "cardCode": "onr_v1_131_microtech-backup-drive",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Microtech Backup Drive"
     },
     {
       "cardCode": "onr_v1_136_pandoras-deck",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Pandoras Deck"
     },
     {
       "cardCode": "onr_v1_137_parraline-5750",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Parraline 5750"
     },
     {
       "cardCode": "onr_v1_138_pk-6089a",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Pk 6089a"
     },
     {
       "cardCode": "onr_v1_147_zz22-speed-chip",
-      "releaseStatus": "runtime_wip_no_promotion",
-      "aiSupported": false,
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
       "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
       "coveredSmokes": [
-        "runtime_definition_guard"
-      ]
+        "runtime_definition_guard",
+        "install_hardware_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Zz22 Speed Chip"
     },
     {
       "cardCode": "onr_v1_195_corporate-retreat",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_scored_agenda_action_gain_2_until_install_or_rez",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Corporate Retreat until Corp installs or rezzes another card"
+      ],
+      "title": "Corporate Retreat"
     },
     {
       "cardCode": "onr_v1_196_corporate-war",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_agenda_on_score_credit_threshold",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver"
+      ],
+      "title": "Corporate War"
     },
     {
       "cardCode": "onr_v1_197_data-fort-reclamation",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_agenda_data_fort_reclamation_hq_install_sequence",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Data Fort Reclamation as a private HQ install sequence",
+        "private_rez_choice_after_install_sequence",
+        "temporary_rez_credit_spend_accounting",
+        "corp_credit_fallback_for_rez_costs"
+      ],
+      "title": "Data Fort Reclamation"
     },
     {
       "cardCode": "onr_v1_206_marine-arcology",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_scored_agenda_action_gain_3_for_2_actions",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 3"
+      ],
+      "title": "Marine Arcology"
     },
     {
       "cardCode": "onr_v1_210_political-overthrow",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_scored_agenda_action_gain_3",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3"
+      ],
+      "title": "Political Overthrow"
     },
     {
       "cardCode": "onr_v1_216_security-purge",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_agenda_security_purge_rd_top3",
+      "coveredSmokes": [
+        "score_agenda_legal_action",
+        "rd_top3_reveal",
+        "new_remote_per_ice_reveal_order",
+        "free_install_rez_revealed_ice",
+        "trash_non_ice",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Security Purge"
     },
     {
       "cardCode": "onr_v1_247_haunting-inquisition",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_ice_haunting_inquisition_run_lock",
+      "coveredSmokes": [
+        "rez_ice_legal_action",
+        "run_lock_next_six_runner_actions",
+        "bonus_run_no_click_not_locked",
+        "end_the_run",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Haunting Inquisition"
     },
     {
       "cardCode": "onr_v1_274_tutor",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_ice_future_end_the_run_subroutine",
+      "coveredSmokes": [
+        "rez_ice_legal_action",
+        "run_wide_future_end_the_run_subroutine",
+        "synthetic_subroutine_breakability",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Tutor"
     },
     {
       "cardCode": "onr_v1_276_viral-15",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_ice_viral_15_jackout_tax_program_trash",
+      "coveredSmokes": [
+        "rez_ice_legal_action",
+        "run_wide_jackout_tax",
+        "after_passing_rezzed_ice_private_program_trash_choice",
+        "jack_out_skips_program_trash",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Viral 15"
     },
     {
       "cardCode": "onr_v1_277_virizz",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_ice_break_cost_modifier",
+      "coveredSmokes": [
+        "rez_ice_legal_action",
+        "run_wide_break_cost_modifier",
+        "break_subroutine_cost_projection",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Virizz"
     },
     {
       "cardCode": "onr_v1_280_zombie",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_ice_core_damage_etr",
+      "coveredSmokes": [
+        "install_ice_legal_action",
+        "rez_ice_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "core_damage_subroutines",
+        "end_the_run",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Zombie"
     },
     {
       "cardCode": "onr_v1_289_edgerunner-inc-temps",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_operation_install_action_bundle",
+      "coveredSmokes": [
+        "play_operation_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "corp_install_action_bundle",
+        "public_payload_visibility",
+        "replay_statehash"
+      ],
+      "title": "Edgerunner Inc Temps"
     },
     {
       "cardCode": "onr_v1_296_off-site-backups",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_operation_private_archives_to_hq",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Off-Site Backups as a private Archives-to-HQ choice"
+      ],
+      "title": "Off Site Backups"
     },
     {
       "cardCode": "onr_v1_298_planning-consultants",
-      "releaseStatus": "planned_no_promotion",
-      "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "releaseStatus": "human_playable",
+      "aiSupported": true,
+      "resolverFamily": "v1922_corp_operation_private_rd_top5_reorder",
+      "coveredSmokes": [
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Planning Consultants as a private R&D top-five reorder choice"
+      ],
+      "title": "Planning Consultants"
     }
   ],
   "deferredSummary": {
     "plannedCardCount": 47,
-    "implementedCardCount": 19,
-    "finalGateCardCount": 0,
+    "implementedCardCount": 47,
+    "finalGateCardCount": 47,
     "deferredCardCount": 0,
     "deferredCardIds": [],
-    "openMechanicFamilies": 1
+    "openMechanicFamilies": 0
   }
 }

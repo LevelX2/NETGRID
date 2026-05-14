@@ -16,7 +16,7 @@ Gate: `V1_9_3_implemented: true`; `V1_9_3_verified: true`; `V1_9_3_done: true`; 
 | Abhängigkeitsgate V1.9.2 | pass |
 | Preflight `freigabefähig`/`deferred` inkl. TKO-Entscheidung | pass |
 | Kernkorb exakt 4 Karten | pass |
-| Agenda-Aktionen Trace 7 -> Tag | pass |
+| Agenda-Aktionen Trace 7 / Trace 5 -> Tag | pass |
 | Jack Attack run-weites Jack-out-Lock | pass |
 | TKO 2.0 Next-Action-Verzicht | pass |
 | Replay/Visibility/StateHash-Regression | pass |

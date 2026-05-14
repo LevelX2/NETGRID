@@ -19,11 +19,11 @@
   },
   "mechanics": [
     {
-      "mechanicId": "mechanic.agenda.trace7_tag_action",
-      "label": "Scored-Agenda Trace-7 Tag Action",
+      "mechanicId": "mechanic.agenda.trace_tag_action",
+      "label": "Scored-Agenda Trace Tag Action",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.3",
-      "currentScopeNote": "Netwatch Operations Office und Private Cybernet Police starten als gescorte Agendaaktionen einen Trace 7 und vergeben bei Erfolg einen Tag.",
+      "currentScopeNote": "Netwatch Operations Office startet als gescorte Agendaaktion Trace 7; Private Cybernet Police startet als gescorte Agendaaktion Trace 5. Beide vergeben bei Erfolg einen Tag.",
       "coverage": ["unit", "scenario", "visibility", "replay", "state_hash"]
     },
     {
