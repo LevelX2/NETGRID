@@ -44,7 +44,7 @@ export type BackupManifest = {
   source: "default_sqlite" | "configured_sqlite" | "legacy_json_import" | "pre_restore_sqlite";
   files: Array<{ name: string; sizeBytes: number; sha256: string }>;
   matchCount?: number;
-  reason?: "manual" | "pre_migration" | "pre_restore";
+  reason?: "manual" | "pre_migration" | "pre_restore" | "pre_cleanup";
 };
 
 export type StorageMaintenanceParticipant = {
@@ -75,6 +75,8 @@ export type StorageMaintenanceMatchEntry = {
   status: MatchStatus;
   terminal: boolean;
   mode: MatchMode;
+  retentionProtected: boolean;
+  retentionProtectedAt?: string;
   matchVersion: number;
   stateVersion?: number;
   stateHash?: string;
@@ -94,6 +96,98 @@ export type StorageMaintenanceMatchFilters = {
   largerThanBytes?: number;
   mode?: MatchMode;
   limit?: number;
+};
+
+export type StorageMaintenanceCleanupFilters = {
+  statuses: MatchStatus[];
+  olderThanMinutes: number;
+  limit?: number;
+  includeProtected?: boolean;
+};
+
+export type StorageMaintenanceCleanupPolicyInput = {
+  enabled: boolean;
+  statuses: MatchStatus[];
+  olderThanDays: number;
+  limit?: number;
+  includeProtected?: boolean;
+  vacuumAfter?: boolean;
+  createBackup?: boolean;
+};
+
+export type StorageMaintenanceCleanupPolicyLastRun = {
+  startedAt: string;
+  finishedAt: string;
+  matchedCount: number;
+  deletedCount: number;
+  approximateBytes: number;
+  backupId?: string;
+  backupCreated: boolean;
+  skippedReason?: "disabled" | "no_matches";
+  errorCode?: string;
+};
+
+export type StorageMaintenanceCleanupPolicy = StorageMaintenanceCleanupPolicyInput & {
+  backendOpsVersion: "Backend 0.5";
+  intervalMinutes: 60;
+  updatedAt?: string;
+  lastRun?: StorageMaintenanceCleanupPolicyLastRun;
+};
+
+export type StorageMaintenanceCleanupPolicyRunResult = {
+  backendOpsVersion: "Backend 0.5";
+  generatedAt: string;
+  policy: StorageMaintenanceCleanupPolicy;
+  preview?: StorageMaintenanceCleanupPreview;
+  applyResult?: StorageMaintenanceCleanupApplyResult;
+  skippedReason?: "disabled" | "no_matches";
+};
+
+export type StorageMaintenanceCleanupPreview = {
+  backendOpsVersion: "Backend 0.5";
+  generatedAt: string;
+  previewId: string;
+  filters: StorageMaintenanceCleanupFilters;
+  matchCount: number;
+  statusCounts: Partial<Record<MatchStatus, number>>;
+  approximateBytes: number;
+  oldestUpdatedAt?: string;
+  newestUpdatedAt?: string;
+  matches: StorageMaintenanceMatchEntry[];
+  warnings: string[];
+};
+
+export type StorageMaintenanceCleanupApplyInput = {
+  filters: StorageMaintenanceCleanupFilters;
+  previewId: string;
+  createBackup?: boolean;
+  vacuumAfter?: boolean;
+};
+
+export type StorageMaintenanceCleanupApplyResult = {
+  backendOpsVersion: "Backend 0.5";
+  generatedAt: string;
+  previewId: string;
+  filters: StorageMaintenanceCleanupFilters;
+  deletedCount: number;
+  deletedMatchIds: string[];
+  approximateBytes: number;
+  backup?: {
+    backupDir: string;
+    backupId: string;
+    createdAt: string;
+  };
+  backupCreated: boolean;
+  integrityCheck: "ok";
+  vacuum: {
+    requested: boolean;
+    performed: boolean;
+  };
+  database: {
+    beforeBytes: number;
+    afterDeleteBytes: number;
+    afterVacuumBytes?: number;
+  };
 };
 
 export type StorageMaintenanceSummary = {
@@ -314,6 +408,152 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         reason: "Backend 0.5 erster Schnitt ist read-only; echte Löschung bleibt bis Backup-, Dry-Run- und Restore-Tests gesperrt."
       }
     };
+  }
+
+  async maintenanceCleanupPreview(filters: StorageMaintenanceCleanupFilters, now = new Date()): Promise<StorageMaintenanceCleanupPreview> {
+    return this.maintenanceCleanupPreviewInternal(filters, now);
+  }
+
+  async maintenanceCleanupApply(input: StorageMaintenanceCleanupApplyInput, now = new Date()): Promise<StorageMaintenanceCleanupApplyResult> {
+    const preview = this.maintenanceCleanupPreviewInternal(input.filters, now);
+    if (preview.previewId !== input.previewId) throw new Error("maintenance_preview_mismatch");
+    if (preview.matchCount === 0) throw new Error("maintenance_no_matches");
+
+    const beforeBytes = this.databaseSizeBytes();
+    const backup = input.createBackup === true ? await this.backup("pre_cleanup") : undefined;
+    const deletedMatchIds = preview.matches.map((match) => match.matchId);
+    const deletedCount = this.deleteWholeMatches(deletedMatchIds);
+    const afterDeleteBytes = this.databaseSizeBytes();
+    const integrityCheck = this.integrityCheck();
+    if (integrityCheck !== "ok") throw new StorageError("storage_corrupt", "Storage-Integritätsprüfung ist fehlgeschlagen.");
+
+    let afterVacuumBytes: number | undefined;
+    if (input.vacuumAfter && deletedCount > 0) {
+      this.db.exec("VACUUM");
+      afterVacuumBytes = this.databaseSizeBytes();
+    }
+
+    return {
+      backendOpsVersion: "Backend 0.5",
+      generatedAt: now.toISOString(),
+      previewId: preview.previewId,
+      filters: preview.filters,
+      deletedCount,
+      deletedMatchIds,
+      approximateBytes: preview.approximateBytes,
+      backupCreated: Boolean(backup),
+      ...(backup
+        ? {
+            backup: {
+              backupDir: backup.backupDir,
+              backupId: backup.manifest.backupId,
+              createdAt: backup.manifest.createdAt
+            }
+          }
+        : {}),
+      integrityCheck,
+      vacuum: {
+        requested: input.vacuumAfter === true,
+        performed: input.vacuumAfter === true && deletedCount > 0
+      },
+      database: {
+        beforeBytes,
+        afterDeleteBytes,
+        ...(afterVacuumBytes !== undefined ? { afterVacuumBytes } : {})
+      }
+    };
+  }
+
+  async maintenanceCleanupPolicy(): Promise<StorageMaintenanceCleanupPolicy> {
+    return this.maintenanceCleanupPolicyInternal();
+  }
+
+  async setMaintenanceCleanupPolicy(input: StorageMaintenanceCleanupPolicyInput, now = new Date()): Promise<StorageMaintenanceCleanupPolicy> {
+    const current = this.maintenanceCleanupPolicyInternal();
+    const policy = normalizeCleanupPolicy(input, now.toISOString(), current.lastRun);
+    this.setMeta("maintenance_cleanup_policy_json", JSON.stringify(policy), now.toISOString());
+    return policy;
+  }
+
+  async runMaintenanceCleanupPolicy(now = new Date()): Promise<StorageMaintenanceCleanupPolicyRunResult> {
+    const policy = this.maintenanceCleanupPolicyInternal();
+    const startedAt = now.toISOString();
+    if (!policy.enabled) {
+      const nextPolicy = this.recordCleanupPolicyRun(policy, {
+        startedAt,
+        finishedAt: startedAt,
+        matchedCount: 0,
+        deletedCount: 0,
+        approximateBytes: 0,
+        backupCreated: false,
+        skippedReason: "disabled"
+      });
+      return { backendOpsVersion: "Backend 0.5", generatedAt: startedAt, policy: nextPolicy, skippedReason: "disabled" };
+    }
+
+    const filters: StorageMaintenanceCleanupFilters = {
+      statuses: policy.statuses,
+      olderThanMinutes: policy.olderThanDays * 24 * 60,
+      ...(policy.limit !== undefined ? { limit: policy.limit } : {}),
+      ...(policy.includeProtected !== undefined ? { includeProtected: policy.includeProtected } : {})
+    };
+    const preview = this.maintenanceCleanupPreviewInternal(filters, now);
+    if (preview.matchCount === 0) {
+      const finishedAt = new Date().toISOString();
+      const nextPolicy = this.recordCleanupPolicyRun(policy, {
+        startedAt,
+        finishedAt,
+        matchedCount: 0,
+        deletedCount: 0,
+        approximateBytes: 0,
+        backupCreated: false,
+        skippedReason: "no_matches"
+      });
+      return { backendOpsVersion: "Backend 0.5", generatedAt: finishedAt, policy: nextPolicy, preview, skippedReason: "no_matches" };
+    }
+
+    try {
+      const applyResult = await this.maintenanceCleanupApply({
+        filters,
+        previewId: preview.previewId,
+        createBackup: policy.createBackup === true,
+        ...(policy.vacuumAfter === true ? { vacuumAfter: true } : {})
+      }, now);
+      const finishedAt = new Date().toISOString();
+      const nextPolicy = this.recordCleanupPolicyRun(policy, {
+        startedAt,
+        finishedAt,
+        matchedCount: preview.matchCount,
+        deletedCount: applyResult.deletedCount,
+        approximateBytes: applyResult.approximateBytes,
+        backupCreated: applyResult.backupCreated,
+        ...(applyResult.backup ? { backupId: applyResult.backup.backupId } : {})
+      });
+      return { backendOpsVersion: "Backend 0.5", generatedAt: finishedAt, policy: nextPolicy, preview, applyResult };
+    } catch (error) {
+      const finishedAt = new Date().toISOString();
+      const nextPolicy = this.recordCleanupPolicyRun(policy, {
+        startedAt,
+        finishedAt,
+        matchedCount: preview.matchCount,
+        deletedCount: 0,
+        approximateBytes: preview.approximateBytes,
+        backupCreated: false,
+        errorCode: error instanceof Error ? error.message : "cleanup_failed"
+      });
+      return { backendOpsVersion: "Backend 0.5", generatedAt: finishedAt, policy: nextPolicy, preview };
+    }
+  }
+
+  async maintenanceSetRetentionProtection(matchId: string, protectedValue: boolean, now = new Date()): Promise<StorageMaintenanceMatchDetail | undefined> {
+    const record = await this.load(matchId);
+    if (!record) return undefined;
+    const nowIso = now.toISOString();
+    record.match.retentionProtection = protectedValue ? { protected: true, protectedAt: nowIso } : { protected: false };
+    record.match.updatedAt = nowIso;
+    record.match.matchVersion += 1;
+    await this.save(record);
+    return this.maintenanceMatchDetail(matchId, now);
   }
 
   close(): void {
@@ -647,6 +887,24 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     return Number(row.count);
   }
 
+  private maintenanceCleanupPolicyInternal(): StorageMaintenanceCleanupPolicy {
+    const raw = this.meta("maintenance_cleanup_policy_json");
+    const lastRun = cleanupPolicyLastRunFromMeta(this.meta("maintenance_cleanup_last_run_json"));
+    if (!raw) return defaultCleanupPolicy(lastRun);
+    try {
+      const parsed = JSON.parse(raw) as Partial<StorageMaintenanceCleanupPolicyInput & { updatedAt?: string }>;
+      return normalizeCleanupPolicy(parsed, parsed.updatedAt, lastRun);
+    } catch {
+      return defaultCleanupPolicy(lastRun);
+    }
+  }
+
+  private recordCleanupPolicyRun(policy: StorageMaintenanceCleanupPolicy, lastRun: StorageMaintenanceCleanupPolicyLastRun): StorageMaintenanceCleanupPolicy {
+    const now = lastRun.finishedAt;
+    this.setMeta("maintenance_cleanup_last_run_json", JSON.stringify(lastRun), now);
+    return { ...policy, lastRun };
+  }
+
   private maintenanceMatchesInternal(filters: StorageMaintenanceMatchFilters, now: Date): StorageMaintenanceMatchEntry[] {
     if (!this.tableExists("matches")) return [];
     const rows = this.db
@@ -677,6 +935,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           m.match_version AS matchVersion,
           m.state_version AS stateVersion,
           m.state_hash AS stateHash,
+          m.record_json AS recordJson,
           m.created_at AS createdAt,
           m.updated_at AS updatedAt,
           COALESCE(LENGTH(m.record_json), 0) AS matchRecordBytes,
@@ -700,6 +959,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       matchVersion: number;
       stateVersion: number | null;
       stateHash: string | null;
+      recordJson: string;
       createdAt: string;
       updatedAt: string;
       matchRecordBytes: number;
@@ -713,15 +973,18 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     const participants = this.maintenanceParticipantsByMatch();
     const olderThanMs = typeof filters.olderThanDays === "number" && Number.isFinite(filters.olderThanDays) ? Math.max(0, filters.olderThanDays) * 24 * 60 * 60 * 1000 : undefined;
     const largerThanBytes = typeof filters.largerThanBytes === "number" && Number.isFinite(filters.largerThanBytes) ? Math.max(0, filters.largerThanBytes) : undefined;
-    const normalizedLimit = Math.max(1, Math.min(500, Math.floor(filters.limit ?? 100)));
+    const normalizedLimit = typeof filters.limit === "number" && Number.isFinite(filters.limit) ? Math.max(1, Math.min(10_000, Math.floor(filters.limit))) : undefined;
     const nowMs = now.getTime();
     const entries = rows.map((row): StorageMaintenanceMatchEntry => {
       const sizes = this.maintenanceSizes(row);
+      const protection = retentionProtectionFromRecordJson(row.recordJson);
       return {
         matchId: row.matchId,
         status: row.status,
         terminal: isTerminalMaintenanceStatus(row.status),
         mode: row.mode,
+        retentionProtected: protection.protected,
+        ...(protection.protectedAt ? { retentionProtectedAt: protection.protectedAt } : {}),
         matchVersion: Number(row.matchVersion),
         ...(typeof row.stateVersion === "number" ? { stateVersion: row.stateVersion } : {}),
         ...(row.stateHash ? { stateHash: row.stateHash } : {}),
@@ -740,7 +1003,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       .filter((entry) => (filters.mode ? entry.mode === filters.mode : true))
       .filter((entry) => (olderThanMs === undefined ? true : nowMs - new Date(entry.updatedAt).getTime() >= olderThanMs))
       .filter((entry) => (largerThanBytes === undefined ? true : entry.sizes.approximateTotalBytes >= largerThanBytes))
-      .slice(0, normalizedLimit);
+      .slice(0, normalizedLimit ?? entries.length);
   }
 
   private maintenanceParticipantsByMatch(): Map<string, StorageMaintenanceParticipant[]> {
@@ -813,6 +1076,62 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       });
   }
 
+  private maintenanceCleanupPreviewInternal(filters: StorageMaintenanceCleanupFilters, now: Date): StorageMaintenanceCleanupPreview {
+    const normalized = normalizeCleanupFilters(filters);
+    const statuses = new Set(normalized.statuses);
+    const olderThanSeconds = normalized.olderThanMinutes * 60;
+    const matches = this.maintenanceMatchesInternal({ limit: normalized.limit ?? 500 }, now)
+      .filter((match) => statuses.has(match.status))
+      .filter((match) => match.ageSeconds >= olderThanSeconds)
+      .filter((match) => normalized.includeProtected === true || !match.retentionProtected)
+      .slice(0, normalized.limit ?? 500);
+    const statusCounts: Partial<Record<MatchStatus, number>> = {};
+    for (const match of matches) statusCounts[match.status] = (statusCounts[match.status] ?? 0) + 1;
+    const updatedAtValues = matches.map((match) => match.updatedAt).sort();
+    const warnings: string[] = [];
+    if (normalized.statuses.includes("active")) warnings.push("Aktive Matches werden nur anhand ihres Alters ausgewählt. Laufende Partien können davon betroffen sein.");
+    if (normalized.statuses.includes("finished")) warnings.push("Finished-Matches sind Replay-/Analyseartefakte und sollten nur bewusst ausgewählt werden.");
+    if (normalized.includeProtected === true) warnings.push("Geschützte Matches sind in dieser Vorschau ausdrücklich eingeschlossen.");
+    if (matches.length === 0) warnings.push("Keine Matches erfüllen die aktuellen Löschfilter.");
+    return {
+      backendOpsVersion: "Backend 0.5",
+      generatedAt: now.toISOString(),
+      previewId: cleanupPreviewId(normalized, matches),
+      filters: normalized,
+      matchCount: matches.length,
+      statusCounts,
+      approximateBytes: matches.reduce((sum, match) => sum + match.sizes.approximateTotalBytes, 0),
+      ...(updatedAtValues[0] ? { oldestUpdatedAt: updatedAtValues[0] } : {}),
+      ...(updatedAtValues.at(-1) ? { newestUpdatedAt: updatedAtValues.at(-1)! } : {}),
+      matches,
+      warnings
+    };
+  }
+
+  private deleteWholeMatches(matchIds: string[]): number {
+    if (matchIds.length === 0) return 0;
+    let deleted = 0;
+    this.transaction(() => {
+      const statement = this.db.prepare("DELETE FROM matches WHERE match_id = ?");
+      for (const matchId of matchIds) {
+        const result = statement.run(matchId) as { changes?: number | bigint };
+        deleted += Number(result.changes ?? 0);
+      }
+      this.integrityCheck();
+    });
+    return deleted;
+  }
+
+  private integrityCheck(): "ok" {
+    const integrity = this.db.prepare("PRAGMA integrity_check").get() as { integrity_check?: string };
+    if (integrity.integrity_check !== "ok") throw new StorageError("storage_corrupt", "Storage-Integritätsprüfung ist fehlgeschlagen.");
+    return "ok";
+  }
+
+  private databaseSizeBytes(): number {
+    return existsSync(this.dbPath) ? statSync(this.dbPath).size : 0;
+  }
+
   private pragmaNumber(name: "page_size" | "page_count" | "freelist_count"): number {
     const row = this.db.prepare(`PRAGMA ${name}`).get() as Record<string, number | bigint | undefined>;
     return Number(row[name] ?? 0);
@@ -832,6 +1151,117 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
 function isTerminalMaintenanceStatus(status: MatchStatus): boolean {
   return status === "finished" || status === "forfeited" || status === "abandoned" || status === "cancelled";
+}
+
+const CLEANUP_STATUSES: MatchStatus[] = [
+  "pending",
+  "waiting_for_runner",
+  "waiting_for_corp",
+  "waiting_for_joiner_decks",
+  "ready_check",
+  "countdown",
+  "active",
+  "cancelled",
+  "abandoned",
+  "forfeited",
+  "finished"
+];
+
+function normalizeCleanupFilters(filters: StorageMaintenanceCleanupFilters): StorageMaintenanceCleanupFilters {
+  const statuses: MatchStatus[] = [];
+  for (const status of filters.statuses ?? []) {
+    if (CLEANUP_STATUSES.includes(status) && !statuses.includes(status)) statuses.push(status);
+  }
+  const olderThanMinutes = Number.isFinite(filters.olderThanMinutes) ? Math.max(1, Math.floor(filters.olderThanMinutes)) : 60;
+  const limit = Number.isFinite(filters.limit) ? Math.max(1, Math.min(500, Math.floor(filters.limit ?? 500))) : 500;
+  return { statuses, olderThanMinutes, limit, includeProtected: filters.includeProtected === true };
+}
+
+function defaultCleanupPolicy(lastRun?: StorageMaintenanceCleanupPolicyLastRun): StorageMaintenanceCleanupPolicy {
+  return {
+    backendOpsVersion: "Backend 0.5",
+    intervalMinutes: 60,
+    enabled: false,
+    statuses: CLEANUP_STATUSES,
+    olderThanDays: 3,
+    limit: 500,
+    includeProtected: false,
+    vacuumAfter: false,
+    createBackup: false,
+    ...(lastRun ? { lastRun } : {})
+  };
+}
+
+function normalizeCleanupPolicy(input: Partial<StorageMaintenanceCleanupPolicyInput>, updatedAt?: string, lastRun?: StorageMaintenanceCleanupPolicyLastRun): StorageMaintenanceCleanupPolicy {
+  const statuses: MatchStatus[] = [];
+  for (const status of input.statuses ?? CLEANUP_STATUSES) {
+    if (CLEANUP_STATUSES.includes(status) && !statuses.includes(status)) statuses.push(status);
+  }
+  return {
+    backendOpsVersion: "Backend 0.5",
+    intervalMinutes: 60,
+    enabled: input.enabled === true,
+    statuses: statuses.length > 0 ? statuses : CLEANUP_STATUSES,
+    olderThanDays: Number.isFinite(input.olderThanDays) ? Math.max(1, Math.min(3650, Math.floor(input.olderThanDays ?? 3))) : 3,
+    limit: Number.isFinite(input.limit) ? Math.max(1, Math.min(500, Math.floor(input.limit ?? 500))) : 500,
+    includeProtected: input.includeProtected === true,
+    vacuumAfter: input.vacuumAfter === true,
+    createBackup: input.createBackup === true,
+    ...(updatedAt ? { updatedAt } : {}),
+    ...(lastRun ? { lastRun } : {})
+  };
+}
+
+function cleanupPolicyLastRunFromMeta(raw: string | undefined): StorageMaintenanceCleanupPolicyLastRun | undefined {
+  if (!raw) return undefined;
+  try {
+    const parsed = JSON.parse(raw) as Partial<StorageMaintenanceCleanupPolicyLastRun>;
+    if (typeof parsed.startedAt !== "string" || typeof parsed.finishedAt !== "string") return undefined;
+    return {
+      startedAt: parsed.startedAt,
+      finishedAt: parsed.finishedAt,
+      matchedCount: finiteNonNegative(parsed.matchedCount),
+      deletedCount: finiteNonNegative(parsed.deletedCount),
+      approximateBytes: finiteNonNegative(parsed.approximateBytes),
+      backupCreated: parsed.backupCreated === true,
+      ...(parsed.backupId ? { backupId: String(parsed.backupId) } : {}),
+      ...(parsed.skippedReason === "disabled" || parsed.skippedReason === "no_matches" ? { skippedReason: parsed.skippedReason } : {}),
+      ...(parsed.errorCode ? { errorCode: String(parsed.errorCode) } : {})
+    };
+  } catch {
+    return undefined;
+  }
+}
+
+function finiteNonNegative(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
+}
+
+function retentionProtectionFromRecordJson(recordJson: string): { protected: boolean; protectedAt?: string } {
+  try {
+    const record = JSON.parse(recordJson) as { match?: { retentionProtection?: { protected?: unknown; protectedAt?: unknown } } };
+    const protection = record.match?.retentionProtection;
+    if (protection?.protected !== true) return { protected: false };
+    return {
+      protected: true,
+      ...(typeof protection.protectedAt === "string" ? { protectedAt: protection.protectedAt } : {})
+    };
+  } catch {
+    return { protected: false };
+  }
+}
+
+function cleanupPreviewId(filters: StorageMaintenanceCleanupFilters, matches: StorageMaintenanceMatchEntry[]): string {
+  const selectedMatches = matches
+    .map((match) => ({
+      matchId: match.matchId,
+      status: match.status,
+      updatedAt: match.updatedAt,
+      retentionProtected: match.retentionProtected,
+      approximateBytes: match.sizes.approximateTotalBytes
+    }))
+    .sort((a, b) => a.matchId.localeCompare(b.matchId));
+  return createHash("sha256").update(JSON.stringify({ filters, matches: selectedMatches })).digest("hex").slice(0, 16);
 }
 
 function dedupeStateSnapshots(record: StoredMatch): void {

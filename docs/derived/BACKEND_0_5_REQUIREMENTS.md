@@ -1,6 +1,6 @@
 # Backend 0.5 Requirements
 
-Status: implemented-slice-read-only
+Status: implemented-slice-retention-cleanup
 Stand: 2026-05-14
 Quelle: `docs/derived/BACKEND_0_5_PRIVATE_STORAGE_MAINTENANCE_PLAN.md`
 
@@ -20,15 +20,18 @@ Backend 0.5 ist ein separater privater Backend-/Ops-Schnitt für lokalen SQLite-
 | B05-REQ-006 | Wartungsendpunkte sind lokal/private-only und nicht im Private-Internet-Profil verfügbar. | HTTP-Routen verlangen lokales Deployment-Profil und Loopback-Zugriff. |
 | B05-REQ-007 | Tokens, Token-Hashes, Decklisten, CardInstances, FullState, privatePayloads und Hidden-Zone-Daten erscheinen nicht in API, DOM, Logs oder Fehlern. | Redaction-Tests prüfen API-Antworten und UI-Renderdaten. |
 | B05-REQ-008 | Replay-, Health-, Matchstart-, Join-, Action-Submit- und Reconnect-Flows bleiben unverändert. | Neue Routen sind isoliert unter `/api/storage/maintenance/*`; bestehende Routen werden nicht umgebaut. |
-| B05-REQ-009 | Destruktive Löschung bleibt im ersten Schnitt deaktiviert. | Die UI zeigt einen klar markierten Cleanup-Bereich „noch nicht aktiv“; es gibt keine Apply-Route. |
+| B05-REQ-009 | Cleanup-Preview ist Pflicht vor echter Löschung. | `POST /api/storage/maintenance/cleanup/preview` erzeugt eine redigierte Kandidatenliste mit stabiler Preview-ID aus Status-, Alters- und Limitfiltern. |
+| B05-REQ-010 | Cleanup-Apply löscht nur ganze Matches und kann optional vorher ein Backup erstellen. | `POST /api/storage/maintenance/cleanup/apply` verlangt Preview-ID, revalidiert die Filter und löscht ausschließlich Match-Wurzeln mit FK-Cascade; `createBackup` ist optional. |
+| B05-REQ-011 | `finished` ist kein Default für Löschung. | Die Wartungsseite startet mit Status `active` und `älter als 60 Minuten`; beendete Matches müssen bewusst ausgewählt werden. |
+| B05-REQ-012 | Automatischer Cleanup ist konfigurierbar und standardmäßig aus. | Cleanup-Policy unter `/api/storage/maintenance/cleanup/policy`; wenn aktiviert, prüft der Server stündlich Status-/Altersfilter, Default 3 Tage, ohne Backup und ohne geschützte Matches. |
+| B05-REQ-013 | Matches können gegen automatisches Löschen geschützt werden. | Wartungsseite und Ergebnisdialog setzen ein Retention-Schutzflag; Auto-Cleanup löscht geschützte Matches nur bei explizitem `includeProtected`. |
 
 ## Bewusste Grenzen
 
-- Keine echte Löschung in diesem ersten Schnitt.
-- Kein Cleanup-Dry-Run mit Preview-ID.
-- Kein Backup-vor-Delete-Flow.
-- Kein `VACUUM`.
-- Keine Retention-Marks oder Archiv-Exporte.
+- Keine Einzelzeilenlöschung von Events, Snapshots, Sessions, Tokens oder Decksnapshot-Blöcken.
+- Kein Restore-Button in der UI; optionale Backups werden erstellt, Wiederherstellung bleibt Betriebs-/Runbook-Aufgabe.
+- Optionales `VACUUM` ist nur explizit über Apply schaltbar und nicht Default.
+- Keine Archiv-Exporte.
 - Keine Änderung an Engine, LegalActions, `applyAction`, Replay-Hash, Randomness, AI oder PlayerViews.
 
 ## Sicherheitsvertrag

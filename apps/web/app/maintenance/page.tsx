@@ -2,9 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { Database, Eye, ListFilter, RefreshCcw, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ChevronDown, Database, Eye, ListFilter, RefreshCcw, ShieldCheck, Trash2 } from "lucide-react";
 import {
+  buildMaintenanceCleanupRequest,
   buildMaintenanceMatchQuery,
+  DEFAULT_MAINTENANCE_CLEANUP_FILTERS,
   EMPTY_MAINTENANCE_FILTERS,
   findForbiddenMaintenanceMarkers,
   formatAge,
@@ -13,6 +15,10 @@ import {
   participantsLabel,
   resolveMaintenanceServerHttp,
   statusLabel,
+  type MaintenanceCleanupApplyResult,
+  type MaintenanceCleanupFilters,
+  type MaintenanceCleanupPolicy,
+  type MaintenanceCleanupPreview,
   type MaintenanceFilters,
   type MaintenanceMatchDetail,
   type MaintenanceMatchEntry,
@@ -30,6 +36,22 @@ export default function MaintenancePage() {
   const [filters, setFilters] = useState<MaintenanceFilters>(EMPTY_MAINTENANCE_FILTERS);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [cleanupFilters, setCleanupFilters] = useState<MaintenanceCleanupFilters>(DEFAULT_MAINTENANCE_CLEANUP_FILTERS);
+  const [cleanupPreview, setCleanupPreview] = useState<MaintenanceCleanupPreview | null>(null);
+  const [cleanupResult, setCleanupResult] = useState<MaintenanceCleanupApplyResult | null>(null);
+  const [cleanupConfirmed, setCleanupConfirmed] = useState(false);
+  const [cleanupLoading, setCleanupLoading] = useState(false);
+  const [cleanupPolicy, setCleanupPolicy] = useState<MaintenanceCleanupPolicy | null>(null);
+  const [policyDraft, setPolicyDraft] = useState({
+    enabled: false,
+    statuses: cleanupStatusOptions.map(([status]) => status),
+    olderThanDays: "3",
+    limit: "500",
+    includeProtected: false,
+    vacuumAfter: false,
+    createBackup: false
+  });
+  const [policyLoading, setPolicyLoading] = useState(false);
 
   const loadSummary = async () => {
     const response = await fetch(`${serverHttp}/api/storage/maintenance/summary`);
@@ -64,11 +86,168 @@ export default function MaintenancePage() {
     setDetail(payload as MaintenanceMatchDetail);
   };
 
+  const loadCleanupPolicy = async () => {
+    const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/policy`);
+    const payload = (await response.json()) as MaintenanceCleanupPolicy | { error?: { message?: string } };
+    if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup-Policy konnte nicht geladen werden." : "Cleanup-Policy konnte nicht geladen werden.");
+    const markers = findForbiddenMaintenanceMarkers(payload);
+    if (markers.length > 0) throw new Error("Cleanup-Policy wurde wegen Redaktionsprüfung blockiert.");
+    const policy = payload as MaintenanceCleanupPolicy;
+    setCleanupPolicy(policy);
+    setPolicyDraft({
+      enabled: policy.enabled,
+      statuses: policy.statuses,
+      olderThanDays: String(policy.olderThanDays),
+      limit: String(policy.limit ?? 500),
+      includeProtected: policy.includeProtected === true,
+      vacuumAfter: policy.vacuumAfter === true,
+      createBackup: policy.createBackup === true
+    });
+  };
+
+  const loadCleanupPreview = async () => {
+    setCleanupLoading(true);
+    setCleanupResult(null);
+    setCleanupConfirmed(false);
+    setError("");
+    try {
+      const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/preview`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(buildMaintenanceCleanupRequest(cleanupFilters))
+      });
+      const payload = (await response.json()) as MaintenanceCleanupPreview | { error?: { message?: string } };
+      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup-Vorschau konnte nicht geladen werden." : "Cleanup-Vorschau konnte nicht geladen werden.");
+      const markers = findForbiddenMaintenanceMarkers(payload);
+      if (markers.length > 0) throw new Error("Cleanup-Vorschau wurde wegen Redaktionsprüfung blockiert.");
+      setCleanupPreview(payload as MaintenanceCleanupPreview);
+    } catch (previewError) {
+      setError(previewError instanceof Error ? previewError.message : "Cleanup-Vorschau konnte nicht geladen werden.");
+    } finally {
+      setCleanupLoading(false);
+    }
+  };
+
+  const applyCleanup = async () => {
+    if (!cleanupPreview || !cleanupConfirmed) return;
+    setCleanupLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/apply`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          ...buildMaintenanceCleanupRequest(cleanupFilters),
+          previewId: cleanupPreview.previewId,
+          createBackup: cleanupFilters.createBackup,
+          vacuumAfter: cleanupFilters.vacuumAfter
+        })
+      });
+      const payload = (await response.json()) as MaintenanceCleanupApplyResult | { error?: { message?: string } };
+      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup konnte nicht abgeschlossen werden." : "Cleanup konnte nicht abgeschlossen werden.");
+      const markers = findForbiddenMaintenanceMarkers(payload);
+      if (markers.length > 0) throw new Error("Cleanup-Ergebnis wurde wegen Redaktionsprüfung blockiert.");
+      setCleanupResult(payload as MaintenanceCleanupApplyResult);
+      setCleanupPreview(null);
+      setCleanupConfirmed(false);
+      if (cleanupPreview.matches.some((match) => match.matchId === selectedMatchId)) setSelectedMatchId("");
+      await refresh();
+    } catch (applyError) {
+      setError(applyError instanceof Error ? applyError.message : "Cleanup konnte nicht abgeschlossen werden.");
+    } finally {
+      setCleanupLoading(false);
+    }
+  };
+
+  const toggleCleanupStatus = (status: string) => {
+    setCleanupPreview(null);
+    setCleanupResult(null);
+    setCleanupConfirmed(false);
+    setCleanupFilters((current) => ({
+      ...current,
+      statuses: current.statuses.includes(status) ? current.statuses.filter((candidate) => candidate !== status) : [...current.statuses, status]
+    }));
+  };
+
+  const togglePolicyStatus = (status: string) => {
+    setPolicyDraft((current) => ({
+      ...current,
+      statuses: current.statuses.includes(status) ? current.statuses.filter((candidate) => candidate !== status) : [...current.statuses, status]
+    }));
+  };
+
+  const setDetailRetentionProtection = async (protectedValue: boolean) => {
+    if (!detail) return;
+    setError("");
+    try {
+      const response = await fetch(`${serverHttp}/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/retention-protection`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ protected: protectedValue })
+      });
+      const payload = (await response.json()) as MaintenanceMatchDetail | { error?: { message?: string } };
+      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Löschschutz konnte nicht geändert werden." : "Löschschutz konnte nicht geändert werden.");
+      const markers = findForbiddenMaintenanceMarkers(payload);
+      if (markers.length > 0) throw new Error("Matchdetail wurde wegen Redaktionsprüfung blockiert.");
+      setDetail(payload as MaintenanceMatchDetail);
+      await loadMatches(filters);
+    } catch (protectionError) {
+      setError(protectionError instanceof Error ? protectionError.message : "Löschschutz konnte nicht geändert werden.");
+    }
+  };
+
+  const saveCleanupPolicy = async () => {
+    setPolicyLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/policy`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          enabled: policyDraft.enabled,
+          statuses: policyDraft.statuses,
+          olderThanDays: Number(policyDraft.olderThanDays),
+          limit: Number(policyDraft.limit),
+          includeProtected: policyDraft.includeProtected,
+          vacuumAfter: policyDraft.vacuumAfter,
+          createBackup: policyDraft.createBackup
+        })
+      });
+      const payload = (await response.json()) as MaintenanceCleanupPolicy | { error?: { message?: string } };
+      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup-Policy konnte nicht gespeichert werden." : "Cleanup-Policy konnte nicht gespeichert werden.");
+      const markers = findForbiddenMaintenanceMarkers(payload);
+      if (markers.length > 0) throw new Error("Cleanup-Policy wurde wegen Redaktionsprüfung blockiert.");
+      setCleanupPolicy(payload as MaintenanceCleanupPolicy);
+    } catch (policyError) {
+      setError(policyError instanceof Error ? policyError.message : "Cleanup-Policy konnte nicht gespeichert werden.");
+    } finally {
+      setPolicyLoading(false);
+    }
+  };
+
+  const runCleanupPolicy = async () => {
+    setPolicyLoading(true);
+    setError("");
+    try {
+      const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/policy/run`, { method: "POST" });
+      const payload = (await response.json()) as { policy?: MaintenanceCleanupPolicy; error?: { message?: string } };
+      if (!response.ok) throw new Error(payload.error?.message ?? "Auto-Cleanup konnte nicht ausgeführt werden.");
+      const markers = findForbiddenMaintenanceMarkers(payload);
+      if (markers.length > 0) throw new Error("Auto-Cleanup-Ergebnis wurde wegen Redaktionsprüfung blockiert.");
+      if (payload.policy) setCleanupPolicy(payload.policy);
+      await refresh();
+    } catch (policyError) {
+      setError(policyError instanceof Error ? policyError.message : "Auto-Cleanup konnte nicht ausgeführt werden.");
+    } finally {
+      setPolicyLoading(false);
+    }
+  };
+
   const refresh = async (nextFilters = filters) => {
     setLoading(true);
     setError("");
     try {
-      await Promise.all([loadSummary(), loadMatches(nextFilters)]);
+      await Promise.all([loadSummary(), loadMatches(nextFilters), loadCleanupPolicy()]);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Wartungsdaten konnten nicht geladen werden.");
     } finally {
@@ -102,13 +281,14 @@ export default function MaintenancePage() {
   const applyFilters = () => void refresh(filters);
 
   return (
-    <main style={page}>
+    <main style={pageShell}>
+      <div style={page}>
       <header style={header}>
         <div style={headerTitle}>
           <Database size={24} aria-hidden="true" />
           <div>
             <h1 style={h1}>Storage Maintenance</h1>
-            <p style={subtle}>Backend 0.5 · lokale read-only Wartungsansicht</p>
+            <p style={subtle}>Backend 0.5 · private Storage-Wartungsansicht</p>
           </div>
         </div>
         <button type="button" style={button} onClick={() => void refresh()} disabled={loading} title="Aktualisieren">
@@ -129,16 +309,16 @@ export default function MaintenancePage() {
           </section>
 
           <section style={twoCols}>
-            <Panel title="Statusverteilung">
+            <CollapsiblePanel title="Statusverteilung">
               <MiniRows rows={statusRows.map(([key, value]) => [statusLabel(key), String(value)])} />
-            </Panel>
-            <Panel title="Modusverteilung">
+            </CollapsiblePanel>
+            <CollapsiblePanel title="Modusverteilung">
               <MiniRows rows={modeRows.map(([key, value]) => [modeLabel(key), String(value)])} />
-            </Panel>
+            </CollapsiblePanel>
           </section>
 
           <section style={twoCols}>
-            <Panel title="Tabellen und Payloads">
+            <CollapsiblePanel title="Tabellen und Payloads">
               <div style={tableWrap}>
                 <table style={table}>
                   <thead>
@@ -159,20 +339,17 @@ export default function MaintenancePage() {
                   </tbody>
                 </table>
               </div>
-            </Panel>
-            <Panel title="Größte Matches">
+            </CollapsiblePanel>
+            <CollapsiblePanel title="Größte Matches">
               <MiniRows rows={summary.largestMatches.slice(0, 6).map((match) => [shortId(match.matchId), formatBytes(match.sizes.approximateTotalBytes)])} />
-            </Panel>
+            </CollapsiblePanel>
           </section>
         </>
       ) : null}
 
-      <section style={panel}>
+      <CollapsiblePanel title="Matchliste" icon={<ListFilter size={18} aria-hidden="true" />}>
         <div style={panelHeader}>
-          <h2 style={h2}>
-            <ListFilter size={18} aria-hidden="true" />
-            Matchliste
-          </h2>
+          <p style={subtle}>Geladen: {matches.length} · Limit leer lassen lädt alle Matches bewusst.</p>
           <button type="button" style={button} onClick={applyFilters} disabled={loading} title="Filter anwenden">
             <Eye size={16} aria-hidden="true" />
             Anwenden
@@ -184,6 +361,7 @@ export default function MaintenancePage() {
           <Select label="Modus" value={filters.mode} onChange={(mode) => setFilters((current) => ({ ...current, mode }))} options={modeOptions} />
           <Input label="Älter als Tage" value={filters.olderThanDays} onChange={(olderThanDays) => setFilters((current) => ({ ...current, olderThanDays }))} />
           <Input label="Größer als MiB" value={filters.largerThanMiB} onChange={(largerThanMiB) => setFilters((current) => ({ ...current, largerThanMiB }))} />
+          <Input label="Max. Matches" value={filters.limit} onChange={(limit) => setFilters((current) => ({ ...current, limit }))} />
         </div>
         <div style={tableWrap}>
           <table style={table}>
@@ -198,6 +376,7 @@ export default function MaintenancePage() {
                 <th style={th}>Events</th>
                 <th style={th}>Snapshots</th>
                 <th style={th}>Größe</th>
+                <th style={th}>Schutz</th>
               </tr>
             </thead>
             <tbody>
@@ -212,21 +391,24 @@ export default function MaintenancePage() {
                   <td style={td}>{match.eventCount}</td>
                   <td style={td}>{match.snapshotCount}</td>
                   <td style={td}>{formatBytes(match.sizes.approximateTotalBytes)}</td>
+                  <td style={td}>{match.retentionProtected ? "geschützt" : "-"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </section>
+      </CollapsiblePanel>
 
       {detail ? (
-        <section style={panel}>
+        <CollapsiblePanel title="Matchdetail" icon={<ShieldCheck size={18} aria-hidden="true" />}>
           <div style={panelHeader}>
-            <h2 style={h2}>
-              <ShieldCheck size={18} aria-hidden="true" />
-              Matchdetail
-            </h2>
-            <code>{detail.matchId}</code>
+            <p style={subtle}>{detail.retentionProtected ? "Gegen automatisches Löschen geschützt" : "Nicht gegen automatisches Löschen geschützt"}</p>
+            <div style={buttonRow}>
+              <button type="button" style={button} onClick={() => void setDetailRetentionProtection(!detail.retentionProtected)}>
+                {detail.retentionProtected ? "Schutz aufheben" : "Aufheben schützen"}
+              </button>
+              <code>{detail.matchId}</code>
+            </div>
           </div>
           <div style={detailGrid}>
             <Metric label="Status" value={statusLabel(detail.status)} />
@@ -246,16 +428,177 @@ export default function MaintenancePage() {
               ["Events", formatBytes(detail.sizes.eventPayloadBytes)],
               ["Snapshots", formatBytes(detail.sizes.stateSnapshotBytes)],
               ["Deck-Snapshot-Blöcke", formatBytes(detail.sizes.deckSnapshotBytes)],
+              ["Löschschutz", detail.retentionProtected ? `aktiv${detail.retentionProtectedAt ? ` seit ${new Date(detail.retentionProtectedAt).toLocaleString("de-DE")}` : ""}` : "aus"],
               ["Cleanup", detail.cleanupAssessment.reason]
             ]}
           />
-        </section>
+        </CollapsiblePanel>
       ) : null}
 
-      <section style={disabledPanel}>
-        <h2 style={h2}>Cleanup</h2>
-        <p style={subtle}>Noch nicht aktiv. Dieser erste Schnitt bleibt read-only; Löschen wird erst nach vollständigem Backup-, Dry-Run- und Restore-Gate freigeschaltet.</p>
-      </section>
+      <CollapsiblePanel title="Cleanup" icon={<Trash2 size={18} aria-hidden="true" />}>
+        <div style={panelHeader}>
+          <p style={subtle}>Manueller Dry-Run und automatischer stündlicher Cleanup.</p>
+          <div style={buttonRow}>
+            <button type="button" style={button} onClick={() => void loadCleanupPreview()} disabled={cleanupLoading} title="Löschvorschau erzeugen">
+              <Eye size={16} aria-hidden="true" />
+              Vorschau
+            </button>
+            <button
+              type="button"
+              style={buttonDanger}
+              onClick={() => void applyCleanup()}
+              disabled={cleanupLoading || !cleanupPreview || cleanupPreview.matchCount === 0 || !cleanupConfirmed}
+              title="Ganze Matches löschen"
+            >
+              <Trash2 size={16} aria-hidden="true" />
+              Löschen
+            </button>
+          </div>
+        </div>
+        <div style={warningBox}>
+          <AlertTriangle size={18} aria-hidden="true" />
+          <p style={subtle}>Löschen ist nur nach Vorschau möglich. Backup ist optional. Es werden ausschließlich ganze Matches entfernt; Events, Snapshots, Sessions oder Tokens werden nie einzeln gelöscht. Geschützte Matches bleiben standardmäßig erhalten.</p>
+        </div>
+        <div style={filtersGrid}>
+          <Input label="Älter als Minuten" value={cleanupFilters.olderThanMinutes} onChange={(olderThanMinutes) => setCleanupFilters((current) => ({ ...current, olderThanMinutes }))} />
+          <Input label="Max. Matches" value={cleanupFilters.limit} onChange={(limit) => setCleanupFilters((current) => ({ ...current, limit }))} />
+          <label style={checkField}>
+            <input type="checkbox" checked={cleanupFilters.createBackup} onChange={(event) => setCleanupFilters((current) => ({ ...current, createBackup: event.target.checked }))} />
+            Backup vor dem Löschen erstellen
+          </label>
+          <label style={checkField}>
+            <input type="checkbox" checked={cleanupFilters.includeProtected} onChange={(event) => setCleanupFilters((current) => ({ ...current, includeProtected: event.target.checked }))} />
+            Geschützte Matches einschließen
+          </label>
+          <label style={checkField}>
+            <input type="checkbox" checked={cleanupFilters.vacuumAfter} onChange={(event) => setCleanupFilters((current) => ({ ...current, vacuumAfter: event.target.checked }))} />
+            Nach dem Löschen Datenbank komprimieren
+          </label>
+        </div>
+        <div style={checkboxGrid}>
+          {cleanupStatusOptions.map(([status, label]) => (
+            <label key={status} style={checkField}>
+              <input type="checkbox" checked={cleanupFilters.statuses.includes(status)} onChange={() => toggleCleanupStatus(status)} />
+              {label}
+            </label>
+          ))}
+        </div>
+        {cleanupPreview ? (
+          <div style={cleanupBox}>
+            <MiniRows
+              rows={[
+                ["Vorschau-ID", cleanupPreview.previewId],
+                ["Treffer", String(cleanupPreview.matchCount)],
+                ["Geschätzte Größe", formatBytes(cleanupPreview.approximateBytes)],
+                ["Ältestes Update", cleanupPreview.oldestUpdatedAt ? new Date(cleanupPreview.oldestUpdatedAt).toLocaleString("de-DE") : "-"]
+              ]}
+            />
+            {cleanupPreview.warnings.map((warning) => (
+              <p key={warning} style={warningText}>{warning}</p>
+            ))}
+            <label style={checkField}>
+              <input type="checkbox" checked={cleanupConfirmed} onChange={(event) => setCleanupConfirmed(event.target.checked)} />
+              Ich habe die Vorschau geprüft und will diese ganzen Matches löschen.
+            </label>
+            <div style={tableWrap}>
+              <table style={table}>
+                <thead>
+                  <tr>
+                    <th style={th}>Match</th>
+                    <th style={th}>Status</th>
+                    <th style={th}>Modus</th>
+                    <th style={th}>Alter</th>
+                    <th style={th}>Events</th>
+                    <th style={th}>Snapshots</th>
+                    <th style={th}>Größe</th>
+                    <th style={th}>Schutz</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cleanupPreview.matches.map((match) => (
+                    <tr key={match.matchId}>
+                      <td style={td}><code>{shortId(match.matchId)}</code></td>
+                      <td style={td}>{statusLabel(match.status)}</td>
+                      <td style={td}>{modeLabel(match.mode)}</td>
+                      <td style={td}>{formatAge(match.ageSeconds)}</td>
+                      <td style={td}>{match.eventCount}</td>
+                      <td style={td}>{match.snapshotCount}</td>
+                      <td style={td}>{formatBytes(match.sizes.approximateTotalBytes)}</td>
+                      <td style={td}>{match.retentionProtected ? "geschützt" : "-"}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : null}
+        {cleanupResult ? (
+          <div style={cleanupBox}>
+            <MiniRows
+              rows={[
+                ["Gelöscht", String(cleanupResult.deletedCount)],
+                ["Backup", cleanupResult.backup ? cleanupResult.backup.backupId : "nicht erstellt"],
+                ["Integrität", cleanupResult.integrityCheck],
+                ["DB vorher", formatBytes(cleanupResult.database.beforeBytes)],
+                ["DB nach Delete", formatBytes(cleanupResult.database.afterDeleteBytes)],
+                ["DB nach Komprimierung", cleanupResult.database.afterVacuumBytes === undefined ? "-" : formatBytes(cleanupResult.database.afterVacuumBytes)]
+              ]}
+            />
+            {cleanupResult.backup ? <p style={subtle}>Backup-Verzeichnis: {cleanupResult.backup.backupDir}</p> : null}
+          </div>
+        ) : null}
+        <div style={cleanupBox}>
+          <div style={panelHeader}>
+            <h3 style={h3}>Automatischer Cleanup</h3>
+            <div style={buttonRow}>
+              <button type="button" style={button} onClick={() => void saveCleanupPolicy()} disabled={policyLoading}>Speichern</button>
+              <button type="button" style={button} onClick={() => void runCleanupPolicy()} disabled={policyLoading}>Jetzt prüfen</button>
+            </div>
+          </div>
+          <div style={filtersGrid}>
+            <label style={checkField}>
+              <input type="checkbox" checked={policyDraft.enabled} onChange={(event) => setPolicyDraft((current) => ({ ...current, enabled: event.target.checked }))} />
+              Stündlich automatisch prüfen
+            </label>
+            <Input label="Älter als Tage" value={policyDraft.olderThanDays} onChange={(olderThanDays) => setPolicyDraft((current) => ({ ...current, olderThanDays }))} />
+            <Input label="Max. Matches pro Lauf" value={policyDraft.limit} onChange={(limit) => setPolicyDraft((current) => ({ ...current, limit }))} />
+            <label style={checkField}>
+              <input type="checkbox" checked={policyDraft.createBackup} onChange={(event) => setPolicyDraft((current) => ({ ...current, createBackup: event.target.checked }))} />
+              Backup je Auto-Lauf erstellen
+            </label>
+            <label style={checkField}>
+              <input type="checkbox" checked={policyDraft.includeProtected} onChange={(event) => setPolicyDraft((current) => ({ ...current, includeProtected: event.target.checked }))} />
+              Geschützte Matches mit löschen
+            </label>
+            <label style={checkField}>
+              <input type="checkbox" checked={policyDraft.vacuumAfter} onChange={(event) => setPolicyDraft((current) => ({ ...current, vacuumAfter: event.target.checked }))} />
+              Nach Auto-Lauf komprimieren
+            </label>
+          </div>
+          <div style={checkboxGrid}>
+            {cleanupStatusOptions.map(([status, label]) => (
+              <label key={`policy-${status}`} style={checkField}>
+                <input type="checkbox" checked={policyDraft.statuses.includes(status)} onChange={() => togglePolicyStatus(status)} />
+                {label}
+              </label>
+            ))}
+          </div>
+          {cleanupPolicy ? (
+            <MiniRows
+              rows={[
+                ["Status", cleanupPolicy.enabled ? "aktiv" : "aus"],
+                ["Intervall", `${cleanupPolicy.intervalMinutes} min`],
+                ["Alter", `${cleanupPolicy.olderThanDays} d`],
+                ["Schutz", cleanupPolicy.includeProtected ? "wird mit gelöscht" : "bleibt erhalten"],
+                ["Backup", cleanupPolicy.createBackup ? "aktiv" : "aus"],
+                ["Letzter Lauf", cleanupPolicy.lastRun ? new Date(cleanupPolicy.lastRun.finishedAt).toLocaleString("de-DE") : "-"],
+                ["Letzte Löschung", cleanupPolicy.lastRun ? String(cleanupPolicy.lastRun.deletedCount) : "-"]
+              ]}
+            />
+          ) : null}
+        </div>
+      </CollapsiblePanel>
+      </div>
     </main>
   );
 }
@@ -269,12 +612,15 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+function CollapsiblePanel({ title, icon, children }: { title: string; icon?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section style={panel}>
-      <h2 style={h2}>{title}</h2>
-      {children}
-    </section>
+    <details style={collapsiblePanel}>
+      <summary style={summaryHeader}>
+        <h2 style={h2}>{icon}{title}</h2>
+        <ChevronDown size={18} aria-hidden="true" />
+      </summary>
+      <div style={panelBody}>{children}</div>
+    </details>
   );
 }
 
@@ -333,6 +679,8 @@ const statusOptions: Array<[string, string]> = [
   ["finished", "Beendet"]
 ];
 
+const cleanupStatusOptions = statusOptions.filter(([status]) => status !== "");
+
 const terminalOptions: Array<[string, string]> = [
   ["all", "Alle"],
   ["false", "Nicht-terminal"],
@@ -346,30 +694,41 @@ const modeOptions: Array<[string, string]> = [
   ["human_corp_vs_runner_ai", "Korp gegen Runner-KI"]
 ];
 
+const pageShell: CSSProperties = { minHeight: "100vh", background: "#eef3f8", color: "#102033", boxSizing: "border-box" };
 const page: CSSProperties = { maxWidth: 1320, margin: "0 auto", padding: "1.25rem", display: "grid", gap: "1rem", color: "#102033" };
-const header: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "center", flexWrap: "wrap" };
+const header: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "center", flexWrap: "wrap", color: "#0f2538" };
 const headerTitle: CSSProperties = { display: "flex", alignItems: "center", gap: "0.75rem" };
 const h1: CSSProperties = { margin: 0, fontSize: "1.55rem", letterSpacing: 0 };
-const h2: CSSProperties = { margin: 0, fontSize: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", letterSpacing: 0 };
-const subtle: CSSProperties = { margin: 0, color: "#526273", fontSize: "0.92rem" };
-const button: CSSProperties = { display: "inline-flex", alignItems: "center", gap: "0.4rem", border: "1px solid #bac7d5", background: "#fff", color: "#102033", borderRadius: 6, padding: "0.5rem 0.7rem", cursor: "pointer" };
+const h2: CSSProperties = { margin: 0, fontSize: "1rem", display: "flex", alignItems: "center", gap: "0.4rem", letterSpacing: 0, color: "#0f2538" };
+const h3: CSSProperties = { margin: 0, fontSize: "0.95rem", letterSpacing: 0, color: "#0f2538" };
+const subtle: CSSProperties = { margin: 0, color: "#42576b", fontSize: "0.92rem" };
+const button: CSSProperties = { display: "inline-flex", alignItems: "center", gap: "0.4rem", border: "1px solid #9db0c3", background: "#fff", color: "#102033", borderRadius: 6, padding: "0.5rem 0.7rem", cursor: "pointer" };
+const buttonDanger: CSSProperties = { ...button, border: "1px solid #c76363", background: "#fff7f7", color: "#8a1f1f" };
+const buttonRow: CSSProperties = { display: "flex", gap: "0.5rem", flexWrap: "wrap" };
 const grid4: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0.75rem" };
 const twoCols: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "0.75rem" };
-const panel: CSSProperties = { border: "1px solid #d8e0e8", borderRadius: 8, padding: "0.85rem", background: "#fff", display: "grid", gap: "0.75rem" };
-const disabledPanel: CSSProperties = { ...panel, background: "#f6f8fb" };
+const panel: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 8, padding: "0.85rem", background: "#fff", display: "grid", gap: "0.75rem", color: "#102033" };
+const collapsiblePanel: CSSProperties = { ...panel, display: "block", gap: 0, padding: 0, overflow: "hidden" };
+const summaryHeader: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", padding: "0.85rem", cursor: "pointer", listStyle: "none", background: "#f8fbfe", color: "#0f2538" };
+const panelBody: CSSProperties = { padding: "0 0.85rem 0.85rem" };
 const panelHeader: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", flexWrap: "wrap" };
-const metric: CSSProperties = { border: "1px solid #d8e0e8", borderRadius: 8, padding: "0.75rem", background: "#fff", display: "grid", gap: "0.25rem", minWidth: 0 };
-const metricLabel: CSSProperties = { color: "#526273", fontSize: "0.8rem" };
-const metricValue: CSSProperties = { fontSize: "1.15rem", overflowWrap: "anywhere" };
+const metric: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 8, padding: "0.75rem", background: "#fff", display: "grid", gap: "0.25rem", minWidth: 0, color: "#102033" };
+const metricLabel: CSSProperties = { color: "#42576b", fontSize: "0.8rem" };
+const metricValue: CSSProperties = { fontSize: "1.15rem", overflowWrap: "anywhere", color: "#0f2538" };
 const miniRows: CSSProperties = { display: "grid", gap: "0.35rem" };
 const miniRow: CSSProperties = { display: "flex", justifyContent: "space-between", gap: "1rem", borderBottom: "1px solid #edf1f5", padding: "0.2rem 0" };
 const tableWrap: CSSProperties = { overflowX: "auto" };
 const table: CSSProperties = { width: "100%", borderCollapse: "collapse", minWidth: 820 };
-const th: CSSProperties = { textAlign: "left", fontSize: "0.8rem", color: "#526273", borderBottom: "1px solid #cbd5e1", padding: "0.45rem 0.5rem", whiteSpace: "nowrap" };
+const th: CSSProperties = { textAlign: "left", fontSize: "0.8rem", color: "#37506a", borderBottom: "1px solid #cbd5e1", padding: "0.45rem 0.5rem", whiteSpace: "nowrap" };
 const td: CSSProperties = { borderBottom: "1px solid #edf1f5", padding: "0.45rem 0.5rem", verticalAlign: "top", fontSize: "0.86rem" };
 const selectedRow: CSSProperties = { background: "#eef6ff", cursor: "pointer" };
 const filtersGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.6rem" };
-const field: CSSProperties = { display: "grid", gap: "0.25rem", fontSize: "0.82rem", color: "#526273" };
-const input: CSSProperties = { minHeight: 34, border: "1px solid #bac7d5", borderRadius: 6, padding: "0.35rem 0.45rem", background: "#fff", color: "#102033" };
+const field: CSSProperties = { display: "grid", gap: "0.25rem", fontSize: "0.82rem", color: "#42576b" };
+const checkField: CSSProperties = { display: "inline-flex", alignItems: "center", gap: "0.45rem", fontSize: "0.86rem", color: "#102033", minHeight: 34 };
+const checkboxGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.35rem 0.65rem" };
+const input: CSSProperties = { minHeight: 34, border: "1px solid #9db0c3", borderRadius: 6, padding: "0.35rem 0.45rem", background: "#fff", color: "#102033" };
 const detailGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.6rem" };
 const errorBox: CSSProperties = { margin: 0, border: "1px solid #f3b5b5", background: "#fff5f5", color: "#9b1c1c", borderRadius: 8, padding: "0.7rem" };
+const warningBox: CSSProperties = { display: "flex", alignItems: "flex-start", gap: "0.55rem", border: "1px solid #e2c16a", background: "#fff9e8", borderRadius: 8, padding: "0.7rem", color: "#5b4200" };
+const warningText: CSSProperties = { margin: 0, color: "#7a4b00", fontSize: "0.86rem" };
+const cleanupBox: CSSProperties = { display: "grid", gap: "0.55rem", border: "1px solid #d7e1eb", borderRadius: 8, padding: "0.75rem", background: "#fbfdff" };

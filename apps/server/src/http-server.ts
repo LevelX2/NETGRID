@@ -32,7 +32,7 @@ import {
   StorageError,
   type StorageKind
 } from "./storage-sqlite";
-import type { StorageMaintenanceMatchFilters } from "./storage-sqlite";
+import type { StorageMaintenanceCleanupApplyInput, StorageMaintenanceCleanupFilters, StorageMaintenanceCleanupPolicyInput, StorageMaintenanceMatchFilters } from "./storage-sqlite";
 import { resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
 import {
   applyCors,
@@ -519,6 +519,7 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   const realtime = new NetgridRealtimeServer(activeService, deploymentConfig, rateLimiter, connectionAudit);
   const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, request, response));
   realtime.attach(server);
+  const cleanupTimer = deploymentConfig.profile === "local" ? startMaintenanceCleanupTimer(activeService) : undefined;
   return {
     server,
     service: activeService,
@@ -531,6 +532,7 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
           .close()
           .then(() =>
             server.close((error) => {
+              if (cleanupTimer) clearInterval(cleanupTimer);
               activeService.closeStorage();
               return error ? reject(error) : resolve();
             })
@@ -550,6 +552,18 @@ export async function startNetgridServer(options: { port?: number; host?: string
   const bindUrl = `http://${host}:${port}`;
   handle.realtime.recordServerStart(url);
   return { ...handle, url, bindUrl };
+}
+
+function startMaintenanceCleanupTimer(service: MultiplayerService): ReturnType<typeof setInterval> | undefined {
+  if (!service.runStorageMaintenanceCleanupPolicy) return undefined;
+  const timer = setInterval(() => {
+    void service.runStorageMaintenanceCleanupPolicy().catch((error) => {
+      const code = error instanceof Error ? error.message : "cleanup_policy_failed";
+      console.warn(`maintenance_cleanup_policy_failed:${redactSensitiveText(code)}`);
+    });
+  }, 60 * 60 * 1000);
+  timer.unref?.();
+  return timer;
 }
 
 async function routeHttp(
@@ -599,6 +613,94 @@ async function routeHttp(
         return;
       }
       sendJson(response, 200, { matches });
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/cleanup/preview" && request.method === "POST") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-preview")) return;
+      const body = await readJson(request);
+      const preview = await service.storageMaintenanceCleanupPreview(maintenanceCleanupFiltersFromBody(body));
+      if (!preview) {
+        sendJson(response, 503, maintenanceUnavailablePayload());
+        return;
+      }
+      sendJson(response, 200, preview);
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/cleanup/apply" && request.method === "POST") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-apply")) return;
+      const body = await readJson(request);
+      const input = maintenanceCleanupApplyFromBody(body);
+      if (!input) {
+        sendJson(response, 400, { error: { code: "cleanup_request_invalid", message: "Cleanup braucht gültige Filter und Preview-ID." } });
+        return;
+      }
+      try {
+        const result = await service.storageMaintenanceCleanupApply(input);
+        if (!result) {
+          sendJson(response, 503, maintenanceUnavailablePayload());
+          return;
+        }
+        sendJson(response, 200, result);
+      } catch (error) {
+        const payload = maintenanceCleanupErrorPayload(error);
+        sendJson(response, payload.status, { error: { code: payload.code, message: payload.message } });
+      }
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/cleanup/policy" && request.method === "GET") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-cleanup-policy")) return;
+      const policy = await service.storageMaintenanceCleanupPolicy();
+      if (!policy) {
+        sendJson(response, 503, maintenanceUnavailablePayload());
+        return;
+      }
+      sendJson(response, 200, policy);
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/cleanup/policy" && request.method === "POST") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-policy-update")) return;
+      const body = await readJson(request);
+      const policy = await service.setStorageMaintenanceCleanupPolicy(maintenanceCleanupPolicyFromBody(body));
+      if (!policy) {
+        sendJson(response, 503, maintenanceUnavailablePayload());
+        return;
+      }
+      sendJson(response, 200, policy);
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/cleanup/policy/run" && request.method === "POST") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-policy-run")) return;
+      const result = await service.runStorageMaintenanceCleanupPolicy();
+      if (!result) {
+        sendJson(response, 503, maintenanceUnavailablePayload());
+        return;
+      }
+      sendJson(response, 200, result);
+      return;
+    }
+
+    const maintenanceRetentionRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)\/retention-protection$/.exec(url.pathname);
+    if (maintenanceRetentionRoute && request.method === "POST") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `storage-maintenance-retention:${maintenanceRetentionRoute[1]}`)) return;
+      const body = await readJson(request);
+      const matchId = decodeURIComponent(maintenanceRetentionRoute[1] ?? "");
+      const detail = await service.storageMaintenanceSetRetentionProtection(matchId, body.protected === true);
+      if (!detail) {
+        sendJson(response, 404, { error: { code: "not_found", message: "Diese Wartungsansicht hat keine Daten für dieses Match." } });
+        return;
+      }
+      sendJson(response, 200, detail);
       return;
     }
 
@@ -801,6 +903,20 @@ async function routeHttp(
         sendJson(response, result.ok && result.newMatch ? 201 : result.ok ? 200 : 409, result.ok && result.newMatch ? result.newMatch : result);
         return;
       }
+      if (request.method === "POST" && action === "retention-protection") {
+        if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `retention-protection:${matchId}`)) return;
+        const body = await readJson(request);
+        const side = body.side === "corp" ? "corp" : "runner";
+        const result = await service.setMatchRetentionProtection({
+          matchId,
+          side,
+          sessionToken: bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : ""),
+          protected: body.protected === true
+        });
+        if (result.ok) void realtime.refreshSide(matchId, side);
+        sendJson(response, result.ok ? 200 : 409, result);
+        return;
+      }
       if (request.method === "GET" && action === "bootstrap") {
         if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `bootstrap:${matchId}`)) return;
         const side = url.searchParams.get("side") === "corp" ? "corp" : "runner";
@@ -998,9 +1114,62 @@ function maintenanceFiltersFromSearch(searchParams: URLSearchParams): StorageMai
   if (olderThanDays !== undefined) filters.olderThanDays = olderThanDays;
   const largerThanBytes = numberParam(searchParams.get("largerThanBytes"));
   if (largerThanBytes !== undefined) filters.largerThanBytes = largerThanBytes;
-  const limit = numberParam(searchParams.get("limit"));
+  const limitParam = searchParams.get("limit");
+  const limit = numberParam(limitParam);
   if (limit !== undefined) filters.limit = limit;
+  else if (limitParam !== "all") filters.limit = 50;
   return filters;
+}
+
+function maintenanceCleanupFiltersFromBody(body: Record<string, unknown>): StorageMaintenanceCleanupFilters {
+  const statuses = Array.isArray(body.statuses)
+    ? body.statuses.map((status) => maintenanceStatus(typeof status === "string" ? status : null)).filter((status): status is MatchStatus => Boolean(status))
+    : [];
+  const olderThanMinutes = positiveInteger(body.olderThanMinutes, 60, 1, 525_600);
+  const limit = positiveInteger(body.limit, 100, 1, 500);
+  return { statuses: [...new Set(statuses)], olderThanMinutes, limit, includeProtected: body.includeProtected === true };
+}
+
+function maintenanceCleanupPolicyFromBody(body: Record<string, unknown>): StorageMaintenanceCleanupPolicyInput {
+  const filters = maintenanceCleanupFiltersFromBody({
+    statuses: body.statuses,
+    olderThanMinutes: 60,
+    limit: body.limit,
+    includeProtected: body.includeProtected
+  });
+  return {
+    enabled: body.enabled === true,
+    statuses: filters.statuses,
+    olderThanDays: positiveInteger(body.olderThanDays, 3, 1, 3650),
+    limit: filters.limit ?? 100,
+    includeProtected: body.includeProtected === true,
+    vacuumAfter: body.vacuumAfter === true,
+    createBackup: body.createBackup === true
+  };
+}
+
+function maintenanceCleanupApplyFromBody(body: Record<string, unknown>): StorageMaintenanceCleanupApplyInput | undefined {
+  if (typeof body.previewId !== "string" || body.previewId.length === 0) return undefined;
+  return {
+    filters: maintenanceCleanupFiltersFromBody(body),
+    previewId: body.previewId,
+    ...(body.createBackup === true ? { createBackup: true } : {}),
+    ...(body.vacuumAfter === true ? { vacuumAfter: true } : {})
+  };
+}
+
+function maintenanceCleanupErrorPayload(error: unknown): { status: number; code: string; message: string } {
+  const message = error instanceof Error ? error.message : "";
+  if (message === "maintenance_preview_mismatch") {
+    return { status: 409, code: "cleanup_preview_mismatch", message: "Die Vorschau ist nicht mehr aktuell. Bitte neu prüfen und danach löschen." };
+  }
+  if (message === "maintenance_no_matches") {
+    return { status: 409, code: "cleanup_no_matches", message: "Keine Matches erfüllen die aktuellen Löschfilter." };
+  }
+  if (error instanceof StorageError) {
+    return { status: 500, code: "cleanup_storage_error", message: "Cleanup wurde wegen eines Storage-Fehlers abgebrochen." };
+  }
+  return { status: 500, code: "cleanup_failed", message: "Cleanup konnte nicht abgeschlossen werden." };
 }
 
 function maintenanceStatus(value: string | null): MatchStatus | undefined {
@@ -1031,6 +1200,12 @@ function numberParam(value: string | null): number | undefined {
   if (!value) return undefined;
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function positiveInteger(value: unknown, fallback: number, min: number, max: number): number {
+  const parsed = typeof value === "number" || typeof value === "string" ? Number(value) : NaN;
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(parsed)));
 }
 
 export function isMaintenanceClientAddressAllowed(value: string | undefined): boolean {

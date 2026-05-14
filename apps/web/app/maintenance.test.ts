@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildMaintenanceCleanupRequest,
   buildMaintenanceMatchQuery,
+  DEFAULT_MAINTENANCE_CLEANUP_FILTERS,
   EMPTY_MAINTENANCE_FILTERS,
   findForbiddenMaintenanceMarkers,
   formatAge,
@@ -11,16 +13,18 @@ import {
 
 describe("Backend 0.5 maintenance UI helpers", () => {
   it("builds match-list queries for the supported filters", () => {
-    expect(buildMaintenanceMatchQuery(EMPTY_MAINTENANCE_FILTERS)).toBe("");
+    expect(buildMaintenanceMatchQuery(EMPTY_MAINTENANCE_FILTERS)).toBe("?limit=50");
     expect(
       buildMaintenanceMatchQuery({
         status: "active",
         terminal: "false",
         mode: "human_vs_human",
         olderThanDays: "14",
-        largerThanMiB: "3"
+        largerThanMiB: "3",
+        limit: "50"
       })
-    ).toBe("?status=active&terminal=false&mode=human_vs_human&olderThanDays=14&largerThanBytes=3145728");
+    ).toBe("?status=active&terminal=false&mode=human_vs_human&olderThanDays=14&largerThanBytes=3145728&limit=50");
+    expect(buildMaintenanceMatchQuery({ ...EMPTY_MAINTENANCE_FILTERS, limit: "" })).toBe("?limit=all");
   });
 
   it("formats storage metadata compactly", () => {
@@ -43,6 +47,20 @@ describe("Backend 0.5 maintenance UI helpers", () => {
   it("detects forbidden markers in maintenance payloads", () => {
     expect(findForbiddenMaintenanceMarkers({ matchId: "match_1", stateHash: "fnv1a:1234" })).toEqual([]);
     expect(findForbiddenMaintenanceMarkers({ sessionToken: "secret", privatePayload: { value: true } }).length).toBeGreaterThan(0);
+  });
+
+  it("builds bounded cleanup requests with active older-than-one-hour defaults", () => {
+    expect(buildMaintenanceCleanupRequest(DEFAULT_MAINTENANCE_CLEANUP_FILTERS)).toEqual({ statuses: ["active"], olderThanMinutes: 60, limit: 100, includeProtected: false });
+    expect(
+      buildMaintenanceCleanupRequest({
+        statuses: ["active", "active", "abandoned"],
+        olderThanMinutes: "90.7",
+        limit: "999",
+        vacuumAfter: true,
+        createBackup: false,
+        includeProtected: true
+      })
+    ).toEqual({ statuses: ["active", "abandoned"], olderThanMinutes: 90, limit: 500, includeProtected: true });
   });
 
   it("uses the loopback backend for locally opened maintenance pages", () => {

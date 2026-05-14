@@ -40,6 +40,13 @@ import { envValue, LOCAL_DEFAULT_SERVER_BASE_URL, LOCAL_DEFAULT_TOKEN_SALT, LOCA
 import type {
   BackupManifest,
   StorageHealth,
+  StorageMaintenanceCleanupApplyInput,
+  StorageMaintenanceCleanupApplyResult,
+  StorageMaintenanceCleanupFilters,
+  StorageMaintenanceCleanupPolicy,
+  StorageMaintenanceCleanupPolicyInput,
+  StorageMaintenanceCleanupPolicyRunResult,
+  StorageMaintenanceCleanupPreview,
   StorageMaintenanceMatchDetail,
   StorageMaintenanceMatchEntry,
   StorageMaintenanceMatchFilters,
@@ -230,6 +237,11 @@ export type MatchRecord = {
   aiPacingMode?: AiPacingMode;
   discoverableInLan?: boolean;
   series?: MatchSeriesState;
+  retentionProtection?: {
+    protected: boolean;
+    protectedAt?: string;
+    protectedBySide?: Side;
+  };
   createdAt: string;
   updatedAt: string;
   winner?: Side | "draw";
@@ -337,6 +349,12 @@ export type MultiplayerStorage = {
   maintenanceSummary?(): Promise<StorageMaintenanceSummary>;
   maintenanceMatches?(filters?: StorageMaintenanceMatchFilters): Promise<StorageMaintenanceMatchEntry[]>;
   maintenanceMatchDetail?(matchId: string): Promise<StorageMaintenanceMatchDetail | undefined>;
+  maintenanceCleanupPreview?(filters: StorageMaintenanceCleanupFilters): Promise<StorageMaintenanceCleanupPreview>;
+  maintenanceCleanupApply?(input: StorageMaintenanceCleanupApplyInput): Promise<StorageMaintenanceCleanupApplyResult>;
+  maintenanceCleanupPolicy?(): Promise<StorageMaintenanceCleanupPolicy>;
+  setMaintenanceCleanupPolicy?(policy: StorageMaintenanceCleanupPolicyInput): Promise<StorageMaintenanceCleanupPolicy>;
+  runMaintenanceCleanupPolicy?(): Promise<StorageMaintenanceCleanupPolicyRunResult>;
+  maintenanceSetRetentionProtection?(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined>;
   close?(): void;
 };
 
@@ -356,6 +374,8 @@ export type SidePayload = {
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
   lifecycleResult?: LifecycleResultSummary;
+  retentionProtected?: boolean;
+  retentionProtectedAt?: string;
 };
 
 export type AiTurnPresentationState = {
@@ -377,6 +397,8 @@ export type LobbyPayload = {
     message: string;
   };
   startLobby?: MatchStartLobbyPayload;
+  retentionProtected?: boolean;
+  retentionProtectedAt?: string;
 };
 
 export type ServicePayload = SidePayload | LobbyPayload;
@@ -1746,6 +1768,51 @@ export class MultiplayerService {
     return this.storage.maintenanceMatchDetail?.(matchId);
   }
 
+  async storageMaintenanceCleanupPreview(filters: StorageMaintenanceCleanupFilters): Promise<StorageMaintenanceCleanupPreview | undefined> {
+    return this.storage.maintenanceCleanupPreview?.(filters);
+  }
+
+  async storageMaintenanceCleanupApply(input: StorageMaintenanceCleanupApplyInput): Promise<StorageMaintenanceCleanupApplyResult | undefined> {
+    return this.storage.maintenanceCleanupApply?.(input);
+  }
+
+  async storageMaintenanceCleanupPolicy(): Promise<StorageMaintenanceCleanupPolicy | undefined> {
+    return this.storage.maintenanceCleanupPolicy?.();
+  }
+
+  async setStorageMaintenanceCleanupPolicy(policy: StorageMaintenanceCleanupPolicyInput): Promise<StorageMaintenanceCleanupPolicy | undefined> {
+    return this.storage.setMaintenanceCleanupPolicy?.(policy);
+  }
+
+  async runStorageMaintenanceCleanupPolicy(): Promise<StorageMaintenanceCleanupPolicyRunResult | undefined> {
+    return this.storage.runMaintenanceCleanupPolicy?.();
+  }
+
+  async storageMaintenanceSetRetentionProtection(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined> {
+    return this.storage.maintenanceSetRetentionProtection?.(matchId, protectedValue);
+  }
+
+  async setMatchRetentionProtection(input: { matchId: string; side: Side; sessionToken: string; protected: boolean }): Promise<{ ok: true; payload: LobbyPayload | SidePayload } | { ok: false; error: SafeErrorPayload }> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId);
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      const now = this.now();
+      record.match.retentionProtection = input.protected
+        ? {
+            protected: true,
+            protectedAt: now,
+            protectedBySide: input.side
+          }
+        : { protected: false };
+      record.match.updatedAt = now;
+      record.match.matchVersion += 1;
+      await this.storage.save(record);
+      return { ok: true, payload: this.safePayloadFor(record, input.side) };
+    });
+  }
+
   closeStorage(): void {
     this.storage.close?.();
   }
@@ -1945,7 +2012,8 @@ export class MultiplayerService {
       ...(aiTurnPresentation ? { aiTurnPresentation } : {}),
       ...(terminalWinner && finalStateHash ? { winner: terminalWinner, finalStateHash } : {}),
       ...(resultSummary ? { resultSummary } : {}),
-      ...(record.lifecycleResult ? { lifecycleResult: record.lifecycleResult } : {})
+      ...(record.lifecycleResult ? { lifecycleResult: record.lifecycleResult } : {}),
+      ...retentionProtectionPayload(record)
     };
   }
 
@@ -1964,6 +2032,7 @@ export class MultiplayerService {
         ...(this.safeDisplayNameFor(record, opposite(side)) ? { displayName: this.safeDisplayNameFor(record, opposite(side))! } : {})
       },
       ...(record.lifecycleResult ? { lifecycleResult: record.lifecycleResult } : {}),
+      ...retentionProtectionPayload(record),
       ...((record.match.status === "pending" && !record.gameState) || record.match.status === "waiting_for_joiner_decks"
         ? {
             pendingDeckHandshake: {
@@ -2341,6 +2410,14 @@ export class MultiplayerService {
 
 function isSidePayload(payload: ServicePayload): payload is SidePayload {
   return "playerView" in payload;
+}
+
+function retentionProtectionPayload(record: StoredMatch): { retentionProtected: boolean; retentionProtectedAt?: string } {
+  if (record.match.retentionProtection?.protected !== true) return { retentionProtected: false };
+  return {
+    retentionProtected: true,
+    ...(record.match.retentionProtection.protectedAt ? { retentionProtectedAt: record.match.retentionProtection.protectedAt } : {})
+  };
 }
 
 function isTerminalStatus(status: MatchStatus): boolean {
@@ -2962,7 +3039,7 @@ function clone<T>(value: T): T {
 }
 
 function trimTrailingSlash(value: string): string {
-  return value.replace(/\/+$/, "");
+  return value.trim().replace(/\/+$/, "");
 }
 
 function isNodeError(error: unknown): error is NodeJS.ErrnoException {

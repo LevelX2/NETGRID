@@ -356,6 +356,8 @@ type ClientPayload = {
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
   lifecycleResult?: LifecycleResultSummary;
+  retentionProtected?: boolean;
+  retentionProtectedAt?: string;
 };
 
 function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPayload["aiTurnPresentation"] | undefined {
@@ -410,6 +412,8 @@ type LobbyClientPayload = {
     message: string;
   };
   startLobby?: MatchStartLobby;
+  retentionProtected?: boolean;
+  retentionProtectedAt?: string;
 };
 
 type ServerMessage =
@@ -444,6 +448,8 @@ type CreateMatchResponse = {
   winner?: Winner;
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
+  retentionProtected?: boolean;
+  retentionProtectedAt?: string;
   error?: { message: string };
 };
 
@@ -463,6 +469,8 @@ type JoinMatchResponse = {
   winner?: Winner;
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
+  retentionProtected?: boolean;
+  retentionProtectedAt?: string;
   error?: { message: string };
 };
 
@@ -487,6 +495,10 @@ type LifecycleActionResponse =
       opponentPayload?: ClientPayload | LobbyClientPayload;
       newMatch?: CreateMatchResponse;
     }
+  | { ok?: false; error: { message: string } };
+
+type RetentionProtectionResponse =
+  | { ok: true; payload: ClientPayload | LobbyClientPayload }
   | { ok?: false; error: { message: string } };
 
 type AiSimulationSummary = {
@@ -2846,6 +2858,27 @@ export default function Page() {
     });
   };
 
+  const setRetentionProtection = async (protectedValue: boolean) => {
+    if (!session) return;
+    let result: RetentionProtectionResponse;
+    try {
+      result = await postJson<RetentionProtectionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/retention-protection`, {
+        side: session.side,
+        sessionToken: session.sessionToken,
+        protected: protectedValue
+      });
+    } catch (error) {
+      setNotice(serverErrorNotice(error, "Löschschutz konnte nicht geändert werden."));
+      return;
+    }
+    if (!result.ok) {
+      setNotice("error" in result ? result.error.message : "Löschschutz konnte nicht geändert werden.");
+      return;
+    }
+    applyRemotePayload(result.payload);
+    setNotice(protectedValue ? "Dieses Spiel ist gegen automatisches Löschen geschützt." : "Löschschutz ist aufgehoben.");
+  };
+
   const recreateMatch = async () => {
     if (!session) return;
     let recreated: CreateMatchResponse | LifecycleActionResponse;
@@ -3223,7 +3256,7 @@ export default function Page() {
   function connectWebSocket(nextSession: SessionInfo) {
     setConnection("connecting");
     socketRef.current?.close();
-    const socket = new WebSocket(nextSession.webSocketUrl);
+    const socket = new WebSocket(normalizeWebSocketUrl(nextSession.webSocketUrl));
     socketRef.current = socket;
     socket.onopen = () => {
       if (socketRef.current !== socket) return;
@@ -4422,6 +4455,8 @@ export default function Page() {
           }}
           onNewMatch={leaveMatch}
           nextSeriesPending={seriesTransitioning}
+          retentionProtected={payload?.retentionProtected === true}
+          onRetentionProtection={setRetentionProtection}
           {...(opponentDisplayName ? { opponentName: opponentDisplayName } : {})}
           {...(resultSummary.series?.nextAvailable ? { onNextSeriesGame: startNextSeriesGame } : {})}
         />
@@ -4822,6 +4857,8 @@ function GameOverModal({
   onNewMatch,
   onNextSeriesGame,
   opponentName,
+  retentionProtected,
+  onRetentionProtection,
   nextSeriesPending = false
 }: {
   result: GameResultSummary;
@@ -4830,6 +4867,8 @@ function GameOverModal({
   onNewMatch(): void;
   onNextSeriesGame?: () => void;
   opponentName?: string;
+  retentionProtected: boolean;
+  onRetentionProtection(protectedValue: boolean): void;
   nextSeriesPending?: boolean;
 }) {
   const outcomeText =
@@ -4879,6 +4918,10 @@ function GameOverModal({
             <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
           </div>
           <div className="gameOverActions">
+            <button className="button" onClick={() => onRetentionProtection(!retentionProtected)}>
+              <Save size={15} />
+              {retentionProtected ? "Nicht mehr aufheben" : "Spiel aufheben"}
+            </button>
             <button className="button" onClick={onDismiss}>
               Board ansehen
             </button>
@@ -9585,6 +9628,8 @@ function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientP
   if (winner) payload.winner = winner;
   if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
   if (response.resultSummary) payload.resultSummary = response.resultSummary;
+  if (response.retentionProtected) payload.retentionProtected = response.retentionProtected;
+  if (response.retentionProtectedAt) payload.retentionProtectedAt = response.retentionProtectedAt;
   return payload;
 }
 
@@ -9605,6 +9650,8 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
   if (winner) payload.winner = winner;
   if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
   if (response.resultSummary) payload.resultSummary = response.resultSummary;
+  if (response.retentionProtected) payload.retentionProtected = response.retentionProtected;
+  if (response.retentionProtectedAt) payload.retentionProtectedAt = response.retentionProtectedAt;
   return payload;
 }
 
@@ -9631,6 +9678,10 @@ function lobbyFromJoinedResponse(response: JoinMatchResponse): LobbyClientPayloa
     opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false },
     ...(response.lobby ? { startLobby: response.lobby } : {})
   };
+}
+
+function normalizeWebSocketUrl(value: string): string {
+  return value.trim().replace(/\s+(?=\/ws(?:$|[?#]))/, "");
 }
 
 async function bootstrap(session: SessionInfo): Promise<ClientPayload | LobbyClientPayload | null> {

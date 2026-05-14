@@ -2,6 +2,8 @@
 
 ## Current phase
 
+Backend 0.5 Storage-Maintenance-Cleanup vom 2026-05-14 21:30 CEST: Der private SQLite-Wartungsschnitt hat jetzt Cleanup-Preview/Apply, optionales Backup, stündliche Auto-Cleanup-Policy und Löschschutz. `/maintenance` lädt die Matchliste standardmäßig limitiert, alle Bereiche sind einklappbar, Auto-Cleanup ist standardmäßig aus und nutzt bei Aktivierung Default 3 Tage, ohne Backup und ohne geschützte Matches. Ergebnisdialoge können ein Spiel als aufzubewahren markieren. Einzelzeilenlöschung von Events/Snapshots/Sessions/Tokens bleibt gesperrt. Keine V1.9.x-Karten-, Mechanik- oder Webclient-Promotion.
+
 V1.9.22 Finalpromotion vom 2026-05-14 20:15 CEST: Per-card Resolver Longtail und Originalset Completion Gate ist abgeschlossen. Alle 47 V1.9.22-Zielkarten sind `human_playable`, `deck_legal` und `ai_supported`; Runtime-Releasepool, Deck-Legal-AI-Approval, Manifest, Mechanics-Coverage, Release-Smoke, AI-Hints, AI-Smokes, Completion-Gate-Report und Webclient-Version `V1.9.22` sind synchronisiert. Verifikation: JSON 312, `catalog` 44, `engine` 309, `ai` 86, `server` 72, `web` 80, `typecheck`, `test`, `lint` und `build` gruen; Build nur mit bekannter Turbopack-NFT-Warnung. Der erste breite `test`-Run hatte einen nicht reproduzierbaren Server-Vitest-Worker-Exit, der isolierte Servercheck und der wiederholte breite `test` waren gruen. Die Automation-Cursorlinie V1.9.10 bis V1.9.22 ist damit fachlich complete; V2.x bleibt separate Planung.
 
 V1.9.22 Zetatech-Overlay-WIP vom 2026-05-14 19:50 CEST: `Zetatech Software Installer` hat jetzt den engen Overlay-Runtime-Pfad: Programme aus der Grip koennen mit explizitem `install_card`-Marker auf installiertes Zetatech gelegt werden, erhalten `hostedOn`, verbrauchen keine zusaetzliche MU und nutzen Zetatech-Recurring-Credits vor Runner-Credits. Verifikation: `engine` 309, `catalog` 44, `ai` 86, `server` 72, `web` 79, `typecheck`, `test`, `lint` und `build` gruen; Build nur mit bekannter Turbopack-NFT-Warnung. Keine Catalog-, AI-, Webclient- oder Release-Promotion; V1.9.22 bleibt `blocked_open`, weil finale AI-/Catalog-/Release-Promotion, Webclient-Version und Final Review offen sind.
@@ -2660,4 +2662,3 @@ Führende Artefakte:
 - `docs/derived/V1_9_5_TO_V1_9_8_DEFERRED_REGISTER.md`
 - `data/manifests/onr-v1-9-5-to-v1-9-8-core-implementation-manifest.json`
 - `data/scenarios/onr-v1-9-5-to-v1-9-8-core-smokes.json`
-

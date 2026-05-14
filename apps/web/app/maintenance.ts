@@ -19,6 +19,8 @@ export type MaintenanceMatchEntry = {
   status: string;
   terminal: boolean;
   mode: string;
+  retentionProtected: boolean;
+  retentionProtectedAt?: string;
   matchVersion: number;
   stateVersion?: number;
   stateHash?: string;
@@ -78,12 +80,93 @@ export type MaintenanceMatchDetail = MaintenanceMatchEntry & {
   };
 };
 
+export type MaintenanceCleanupFilters = {
+  statuses: string[];
+  olderThanMinutes: string;
+  limit: string;
+  vacuumAfter: boolean;
+  createBackup: boolean;
+  includeProtected: boolean;
+};
+
+export type MaintenanceCleanupRequest = {
+  statuses: string[];
+  olderThanMinutes: number;
+  limit: number;
+  includeProtected: boolean;
+};
+
+export type MaintenanceCleanupPolicy = {
+  backendOpsVersion: "Backend 0.5";
+  enabled: boolean;
+  statuses: string[];
+  olderThanDays: number;
+  limit?: number;
+  includeProtected?: boolean;
+  vacuumAfter?: boolean;
+  createBackup?: boolean;
+  intervalMinutes: 60;
+  updatedAt?: string;
+  lastRun?: {
+    startedAt: string;
+    finishedAt: string;
+    matchedCount: number;
+    deletedCount: number;
+    approximateBytes: number;
+    backupCreated: boolean;
+    backupId?: string;
+    skippedReason?: string;
+    errorCode?: string;
+  };
+};
+
+export type MaintenanceCleanupPreview = {
+  backendOpsVersion: "Backend 0.5";
+  generatedAt: string;
+  previewId: string;
+  filters: MaintenanceCleanupRequest;
+  matchCount: number;
+  statusCounts: Record<string, number>;
+  approximateBytes: number;
+  oldestUpdatedAt?: string;
+  newestUpdatedAt?: string;
+  matches: MaintenanceMatchEntry[];
+  warnings: string[];
+};
+
+export type MaintenanceCleanupApplyResult = {
+  backendOpsVersion: "Backend 0.5";
+  generatedAt: string;
+  previewId: string;
+  filters: MaintenanceCleanupRequest;
+  deletedCount: number;
+  deletedMatchIds: string[];
+  approximateBytes: number;
+  backup?: {
+    backupDir: string;
+    backupId: string;
+    createdAt: string;
+  };
+  backupCreated: boolean;
+  integrityCheck: "ok";
+  vacuum: {
+    requested: boolean;
+    performed: boolean;
+  };
+  database: {
+    beforeBytes: number;
+    afterDeleteBytes: number;
+    afterVacuumBytes?: number;
+  };
+};
+
 export type MaintenanceFilters = {
   status: string;
   terminal: "all" | "true" | "false";
   mode: string;
   olderThanDays: string;
   largerThanMiB: string;
+  limit: string;
 };
 
 export const EMPTY_MAINTENANCE_FILTERS: MaintenanceFilters = {
@@ -91,7 +174,17 @@ export const EMPTY_MAINTENANCE_FILTERS: MaintenanceFilters = {
   terminal: "all",
   mode: "",
   olderThanDays: "",
-  largerThanMiB: ""
+  largerThanMiB: "",
+  limit: "50"
+};
+
+export const DEFAULT_MAINTENANCE_CLEANUP_FILTERS: MaintenanceCleanupFilters = {
+  statuses: ["active"],
+  olderThanMinutes: "60",
+  limit: "100",
+  vacuumAfter: false,
+  createBackup: false,
+  includeProtected: false
 };
 
 export function resolveMaintenanceServerHttp(configuredServerHttp: string, pageHostname?: string): string {
@@ -125,8 +218,26 @@ export function buildMaintenanceMatchQuery(filters: MaintenanceFilters): string 
   if (Number.isFinite(olderThanDays) && olderThanDays > 0) params.set("olderThanDays", String(Math.floor(olderThanDays)));
   const largerThanMiB = Number(filters.largerThanMiB);
   if (Number.isFinite(largerThanMiB) && largerThanMiB > 0) params.set("largerThanBytes", String(Math.floor(largerThanMiB * 1024 * 1024)));
+  const limitText = filters.limit.trim();
+  if (limitText === "") {
+    params.set("limit", "all");
+  } else {
+    const limit = Number(limitText);
+    if (Number.isFinite(limit) && limit > 0) params.set("limit", String(Math.floor(limit)));
+  }
   const query = params.toString();
   return query ? `?${query}` : "";
+}
+
+export function buildMaintenanceCleanupRequest(filters: MaintenanceCleanupFilters): MaintenanceCleanupRequest {
+  const olderThanMinutes = Number(filters.olderThanMinutes);
+  const limit = Number(filters.limit);
+  return {
+    statuses: [...new Set(filters.statuses)].filter(Boolean),
+    olderThanMinutes: Number.isFinite(olderThanMinutes) && olderThanMinutes > 0 ? Math.floor(olderThanMinutes) : 60,
+    limit: Number.isFinite(limit) && limit > 0 ? Math.min(500, Math.floor(limit)) : 100,
+    includeProtected: filters.includeProtected
+  };
 }
 
 export function formatBytes(bytes: number): string {

@@ -32,6 +32,15 @@ describe("V1.0.9 private internet hardening", () => {
     }
   });
 
+  it("normalizes advertised WebSocket URLs from environment-style base URLs", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "trim-ws-url",
+      publicServerBaseUrl: "http://192.0.2.10:8787 "
+    });
+    const created = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", seed: "trim-ws-url" });
+    expect(created.webSocketUrl).toBe("ws://192.0.2.10:8787/ws");
+  });
+
   it("validates local and private internet deployment profiles", () => {
     const local = loadDeploymentConfig({ NETGRID_DEPLOYMENT_PROFILE: "local" } as NodeJS.ProcessEnv);
     expect(local.profile).toBe("local");
@@ -313,6 +322,143 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(detail.tableRows?.events).toBe(detail.eventCount);
       expect(detail.cleanupAssessment?.recommendation).toBe("not_active");
       expect(JSON.stringify(detail)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("previews active cleanup candidates without exposing private storage data", async () => {
+    const dir = await tempStorageDir();
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-cleanup-preview" });
+    const oldActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Alt Aktiv", seed: "backend-05-old-active" });
+    const freshActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Frisch Aktiv", seed: "backend-05-fresh-active" });
+    const oldFinished = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Archiv", seed: "backend-05-old-finished" });
+    const oldActiveRecord = await service.loadForTest(oldActive.matchId);
+    const oldFinishedRecord = await service.loadForTest(oldFinished.matchId);
+    if (!oldActiveRecord || !oldFinishedRecord) throw new Error("Missing cleanup fixtures");
+    oldActiveRecord.match.updatedAt = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    oldFinishedRecord.match.status = "finished";
+    oldFinishedRecord.match.updatedAt = new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString();
+    await storage.save(oldActiveRecord);
+    await storage.save(oldFinishedRecord);
+
+    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
+    const baseUrl = await listen(handle);
+    try {
+      const response = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/preview`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100 })
+      });
+      const preview = (await response.json()) as { matchCount?: number; previewId?: string; matches?: Array<{ matchId: string; status: string }>; warnings?: string[] };
+      expect(response.status).toBe(200);
+      expect(preview.matchCount).toBe(1);
+      expect(preview.previewId).toMatch(/^[a-f0-9]{16}$/);
+      expect(preview.matches?.map((match) => match.matchId)).toEqual([oldActive.matchId]);
+      expect(preview.matches?.[0]?.status).toBe("active");
+      expect(preview.matches?.map((match) => match.matchId)).not.toContain(freshActive.matchId);
+      expect(preview.matches?.map((match) => match.matchId)).not.toContain(oldFinished.matchId);
+      expect(preview.warnings?.join(" ")).toContain("Aktive Matches");
+      expect(JSON.stringify(preview)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("deletes only whole previewed matches after creating a backup", async () => {
+    const dir = await tempStorageDir();
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-cleanup-apply" });
+    const oldActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Alt Aktiv", seed: "backend-05-delete-old-active" });
+    const freshActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Frisch Aktiv", seed: "backend-05-keep-fresh-active" });
+    const oldRecord = await service.loadForTest(oldActive.matchId);
+    if (!oldRecord) throw new Error("Missing old cleanup record");
+    oldRecord.match.updatedAt = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+    await storage.save(oldRecord);
+
+    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
+    const baseUrl = await listen(handle);
+    try {
+      const previewResponse = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/preview`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100 })
+      });
+      const preview = (await previewResponse.json()) as { previewId?: string; matchCount?: number };
+      expect(previewResponse.status).toBe(200);
+      expect(preview.matchCount).toBe(1);
+      if (!preview.previewId) throw new Error("Missing cleanup preview id");
+
+      const applyResponse = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/apply`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ statuses: ["active"], olderThanMinutes: 60, limit: 100, previewId: preview.previewId, createBackup: true })
+      });
+      const result = (await applyResponse.json()) as { deletedCount?: number; deletedMatchIds?: string[]; backup?: { backupId?: string; backupDir?: string }; integrityCheck?: string };
+      expect(applyResponse.status).toBe(200);
+      expect(result.deletedCount).toBe(1);
+      expect(result.deletedMatchIds).toEqual([oldActive.matchId]);
+      expect(result.backup?.backupId).toMatch(/^netgrid-storage-/);
+      expect(result.backup?.backupDir).toContain(backupDir);
+      expect(result.integrityCheck).toBe("ok");
+      expect(await storage.load(oldActive.matchId)).toBeUndefined();
+      expect(await storage.load(freshActive.matchId)).toBeTruthy();
+      expect((await readdir(backupDir)).length).toBeGreaterThan(0);
+      expect(JSON.stringify(result)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("marks matches as protected and excludes them from automatic cleanup by default without requiring backup", async () => {
+    const dir = await tempStorageDir();
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-retention-policy" });
+    const protectedMatch = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Aufheben", seed: "backend-05-protected" });
+    const cleanupMatch = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Weg", seed: "backend-05-auto-delete" });
+    const oldProtected = await service.loadForTest(protectedMatch.matchId);
+    const oldCleanup = await service.loadForTest(cleanupMatch.matchId);
+    if (!oldProtected || !oldCleanup) throw new Error("Missing retention fixtures");
+    oldProtected.match.updatedAt = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
+    oldCleanup.match.updatedAt = new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString();
+    await storage.save(oldProtected);
+    await storage.save(oldCleanup);
+
+    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
+    const baseUrl = await listen(handle);
+    try {
+      const protectResponse = await fetch(`${baseUrl}/api/matches/${encodeURIComponent(protectedMatch.matchId)}/retention-protection`, {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${protectedMatch.hostSessionToken}` },
+        body: JSON.stringify({ side: protectedMatch.hostSide, protected: true })
+      });
+      const protection = (await protectResponse.json()) as { ok?: boolean; payload?: { retentionProtected?: boolean } };
+      expect(protectResponse.status).toBe(200);
+      expect(protection.ok).toBe(true);
+      expect(protection.payload?.retentionProtected).toBe(true);
+
+      const policyResponse = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/policy`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ enabled: true, statuses: ["active"], olderThanDays: 3, limit: 100, includeProtected: false })
+      });
+      expect(policyResponse.status).toBe(200);
+
+      const runResponse = await fetch(`${baseUrl}/api/storage/maintenance/cleanup/policy/run`, { method: "POST" });
+      const run = (await runResponse.json()) as { applyResult?: { deletedCount?: number; deletedMatchIds?: string[]; backupCreated?: boolean; backup?: { backupId?: string } }; policy?: { lastRun?: { deletedCount?: number; backupCreated?: boolean } } };
+      expect(runResponse.status).toBe(200);
+      expect(run.applyResult?.deletedCount).toBe(1);
+      expect(run.applyResult?.deletedMatchIds).toEqual([cleanupMatch.matchId]);
+      expect(run.applyResult?.backupCreated).toBe(false);
+      expect(run.applyResult?.backup).toBeUndefined();
+      expect(run.policy?.lastRun?.deletedCount).toBe(1);
+      expect(run.policy?.lastRun?.backupCreated).toBe(false);
+      expect(await storage.load(cleanupMatch.matchId)).toBeUndefined();
+      expect((await storage.load(protectedMatch.matchId))?.match.retentionProtection?.protected).toBe(true);
+      expect(JSON.stringify(run)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
     } finally {
       await handle.close();
     }
