@@ -11,13 +11,27 @@ import { createRuntimeCardsById } from "@netgrid/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
 import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
-import { createConfiguredStorage, createNetgridHttpServer } from "./http-server";
+import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
 import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
 
 describe("V1.0.9 private internet hardening", () => {
+  it("uses a LAN-capable default bind address for direct server starts", async () => {
+    const previousPublicHost = process.env.NETGRID_PUBLIC_HOST;
+    process.env.NETGRID_PUBLIC_HOST = "192.0.2.10";
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "lan-default-bind" });
+    const handle = await startNetgridServer({ port: 0, host: "0.0.0.0 ", service });
+    try {
+      expect(handle.bindUrl).toMatch(/^http:\/\/0\.0\.0\.0:\d+$/);
+      expect(handle.url).toMatch(/^http:\/\/192\.0\.2\.10:\d+$/);
+    } finally {
+      await handle.close();
+      restoreEnv("NETGRID_PUBLIC_HOST", previousPublicHost);
+    }
+  });
+
   it("validates local and private internet deployment profiles", () => {
     const local = loadDeploymentConfig({ NETGRID_DEPLOYMENT_PROFILE: "local" } as NodeJS.ProcessEnv);
     expect(local.profile).toBe("local");
@@ -218,6 +232,109 @@ describe("V1.0.9 private internet hardening", () => {
     expect(text).not.toContain(created.hostSessionToken);
     expect(text).not.toContain(joinToken ?? "missing");
     expect(text).not.toMatch(/sha256:[a-f0-9]{64}|privatePayload|cardInstances|decklist/i);
+  });
+});
+
+describe("Backend 0.5 private storage maintenance", () => {
+  it("allows maintenance clients from loopback and private LAN addresses only", () => {
+    expect(isMaintenanceClientAddressAllowed("127.0.0.1")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("::ffff:192.168.178.42")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("10.0.0.25")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("172.20.1.5")).toBe(true);
+    expect(isMaintenanceClientAddressAllowed("8.8.8.8")).toBe(false);
+    expect(isMaintenanceClientAddressAllowed("203.0.113.10")).toBe(false);
+  });
+
+  it("serves a redacted local SQLite storage summary, match list and match detail", async () => {
+    const dir = await tempStorageDir();
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-maintenance" });
+    const active = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Ludwig", seed: "backend-05-active" });
+    await service.createMatch({ hostSide: "corp", displayName: "Korp Host", seed: "backend-05-pending" });
+    const finished = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Archiv", seed: "backend-05-finished" });
+    const finishedRecord = await service.loadForTest(finished.matchId);
+    if (!finishedRecord) throw new Error("Missing finished record");
+    finishedRecord.match.status = "finished";
+    finishedRecord.match.winner = "runner";
+    finishedRecord.match.updatedAt = "2026-04-01T00:00:00.000Z";
+    finishedRecord.stateSnapshots.push({
+      snapshotId: "backend-05-redacted-snapshot",
+      matchId: finished.matchId,
+      stateVersion: finishedRecord.gameState.stateVersion,
+      matchVersion: finishedRecord.match.matchVersion,
+      stateHash: hashState(finishedRecord.gameState),
+      gameState: finishedRecord.gameState,
+      createdAt: "2026-04-01T00:00:00.000Z",
+      hiddenInfoBarrier: true
+    });
+    await storage.save(finishedRecord);
+
+    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
+    const baseUrl = await listen(handle);
+    try {
+      const summaryResponse = await fetch(`${baseUrl}/api/storage/maintenance/summary`);
+      const summary = (await summaryResponse.json()) as {
+        backendOpsVersion?: string;
+        matchCount?: number;
+        terminalCount?: number;
+        matchCountsByStatus?: Record<string, number>;
+        tableSizes?: Array<{ key: string; approximatePayloadBytes: number }>;
+        largestMatches?: Array<{ matchId: string }>;
+      };
+      expect(summaryResponse.status).toBe(200);
+      expect(summary.backendOpsVersion).toBe("Backend 0.5");
+      expect(summary.matchCount).toBe(3);
+      expect(summary.terminalCount).toBe(1);
+      expect(summary.matchCountsByStatus?.finished).toBe(1);
+      expect(summary.tableSizes?.some((row) => row.key === "matches" && row.approximatePayloadBytes > 0)).toBe(true);
+      expect(JSON.stringify(summary)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+
+      const filteredResponse = await fetch(`${baseUrl}/api/storage/maintenance/matches?status=finished&terminal=true&olderThanDays=1&mode=human_runner_vs_corp_ai&largerThanBytes=1`);
+      const filtered = (await filteredResponse.json()) as { matches?: Array<{ matchId: string; status: string; participants: Array<{ displayName: string }>; sizes: { approximateTotalBytes: number } }> };
+      expect(filteredResponse.status).toBe(200);
+      expect(filtered.matches?.map((match) => match.matchId)).toEqual([finished.matchId]);
+      expect(filtered.matches?.[0]?.status).toBe("finished");
+      expect(filtered.matches?.[0]?.participants[0]?.displayName).toBe("Archiv");
+      expect(filtered.matches?.[0]?.sizes.approximateTotalBytes).toBeGreaterThan(0);
+      expect(JSON.stringify(filtered)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+
+      const detailResponse = await fetch(`${baseUrl}/api/storage/maintenance/matches/${encodeURIComponent(active.matchId)}`);
+      const detail = (await detailResponse.json()) as {
+        matchId?: string;
+        eventCount?: number;
+        snapshotCount?: number;
+        tableRows?: { events?: number; stateSnapshots?: number };
+        sizes?: { gameStateBytes?: number; stateSnapshotBytes?: number };
+        cleanupAssessment?: { recommendation?: string };
+      };
+      expect(detailResponse.status).toBe(200);
+      expect(detail.matchId).toBe(active.matchId);
+      expect(detail.eventCount).toBeGreaterThan(0);
+      expect(detail.tableRows?.events).toBe(detail.eventCount);
+      expect(detail.cleanupAssessment?.recommendation).toBe("not_active");
+      expect(JSON.stringify(detail)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
+  it("blocks maintenance endpoints outside the local deployment profile", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "backend-05-private-block",
+      publicWebBaseUrl: "https://netgrid.example",
+      publicServerBaseUrl: "https://api.netgrid.example"
+    });
+    const handle = createNetgridHttpServer(service, { deploymentConfig: privateDeploymentConfig() });
+    const baseUrl = await listen(handle);
+    try {
+      const response = await fetch(`${baseUrl}/api/storage/maintenance/summary`, { headers: { origin: "https://netgrid.example" } });
+      const text = await response.text();
+      expect(response.status).toBe(403);
+      expect(text).toContain("maintenance_unavailable");
+      expect(text).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privateDeckSnapshots|privatePayload|decklist/i);
+    } finally {
+      await handle.close();
+    }
   });
 });
 

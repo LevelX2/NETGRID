@@ -1,4 +1,5 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
+import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
@@ -8,6 +9,8 @@ import {
   JsonFileMatchStorage,
   InMemoryMatchStorage,
   MultiplayerService,
+  type MatchMode,
+  type MatchStatus,
   type ReplayPerspective,
   type ActionReceipt,
   type AiTurnPresentationState,
@@ -29,6 +32,7 @@ import {
   StorageError,
   type StorageKind
 } from "./storage-sqlite";
+import type { StorageMaintenanceMatchFilters } from "./storage-sqlite";
 import { resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
 import {
   applyCors,
@@ -536,14 +540,16 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   };
 }
 
-export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService } = {}): Promise<NetgridServerHandle & { url: string }> {
+export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService } = {}): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
   const handle = createNetgridHttpServer(options.service);
   const port = options.port ?? Number(process.env.PORT ?? 8787);
-  const host = options.host ?? process.env.HOST ?? "127.0.0.1";
+  const host = (options.host ?? process.env.HOST ?? "0.0.0.0").trim();
   await new Promise<void>((resolveListen) => handle.server.listen(port, host, resolveListen));
-  const url = `http://${host}:${port}`;
+  const advertisedHost = advertisedServerHost(host);
+  const url = `http://${advertisedHost}:${port}`;
+  const bindUrl = `http://${host}:${port}`;
   handle.realtime.recordServerStart(url);
-  return { ...handle, url };
+  return { ...handle, url, bindUrl };
 }
 
 async function routeHttp(
@@ -569,6 +575,44 @@ async function routeHttp(
   try {
     if (request.method === "GET" && url.pathname === "/health") {
       sendJson(response, 200, redactedHealth(await service.storageHealth(), deploymentConfig));
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/summary" && request.method === "GET") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-summary")) return;
+      const summary = await service.storageMaintenanceSummary();
+      if (!summary) {
+        sendJson(response, 503, maintenanceUnavailablePayload());
+        return;
+      }
+      sendJson(response, 200, summary);
+      return;
+    }
+
+    if (url.pathname === "/api/storage/maintenance/matches" && request.method === "GET") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-matches")) return;
+      const matches = await service.storageMaintenanceMatches(maintenanceFiltersFromSearch(url.searchParams));
+      if (!matches) {
+        sendJson(response, 503, maintenanceUnavailablePayload());
+        return;
+      }
+      sendJson(response, 200, { matches });
+      return;
+    }
+
+    const maintenanceMatchRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)$/.exec(url.pathname);
+    if (maintenanceMatchRoute && request.method === "GET") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      const matchId = decodeURIComponent(maintenanceMatchRoute[1] ?? "");
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `storage-maintenance-match:${matchId}`)) return;
+      const detail = await service.storageMaintenanceMatchDetail(matchId);
+      if (!detail) {
+        sendJson(response, 404, { error: { code: "not_found", message: "Diese Wartungsansicht hat keine Daten für dieses Match." } });
+        return;
+      }
+      sendJson(response, 200, detail);
       return;
     }
 
@@ -852,6 +896,22 @@ function storageKindFromEnv(value: string | undefined): StorageKind {
   return "sqlite";
 }
 
+function advertisedServerHost(bindHost: string): string {
+  const configured = envValue(process.env, "NETGRID_PUBLIC_HOST");
+  if (configured) return configured;
+  if (bindHost !== "0.0.0.0" && bindHost !== "::") return bindHost;
+  return firstLanIpv4() ?? "127.0.0.1";
+}
+
+function firstLanIpv4(): string | undefined {
+  for (const entries of Object.values(networkInterfaces())) {
+    for (const entry of entries ?? []) {
+      if (entry.family === "IPv4" && !entry.internal && !entry.address.startsWith("169.254.")) return entry.address;
+    }
+  }
+  return undefined;
+}
+
 async function readJson(request: IncomingMessage): Promise<Record<string, unknown>> {
   const chunks: Buffer[] = [];
   for await (const chunk of request) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
@@ -911,6 +971,88 @@ function checkRateLimit(
   if (limited.retryAfterSeconds) response.setHeader("retry-after", String(limited.retryAfterSeconds));
   sendJson(response, 429, rateLimitedPayload());
   return false;
+}
+
+function ensureMaintenanceAccess(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
+  if (deploymentConfig.profile !== "local" || !isMaintenanceClientAddressAllowed(request.socket.remoteAddress)) {
+    sendJson(response, 403, { error: { code: "maintenance_unavailable", message: "Die Wartungsansicht ist nur lokal oder im privaten Netzwerk verfügbar." } });
+    return false;
+  }
+  return true;
+}
+
+function maintenanceUnavailablePayload(): { error: { code: "maintenance_unavailable"; message: string } } {
+  return { error: { code: "maintenance_unavailable", message: "Storage-Wartungsdaten sind nur für lokalen SQLite-Storage verfügbar." } };
+}
+
+function maintenanceFiltersFromSearch(searchParams: URLSearchParams): StorageMaintenanceMatchFilters {
+  const filters: StorageMaintenanceMatchFilters = {};
+  const status = maintenanceStatus(searchParams.get("status"));
+  if (status) filters.status = status;
+  const terminal = searchParams.get("terminal");
+  if (terminal === "true") filters.terminal = true;
+  if (terminal === "false") filters.terminal = false;
+  const mode = maintenanceMode(searchParams.get("mode"));
+  if (mode) filters.mode = mode;
+  const olderThanDays = numberParam(searchParams.get("olderThanDays"));
+  if (olderThanDays !== undefined) filters.olderThanDays = olderThanDays;
+  const largerThanBytes = numberParam(searchParams.get("largerThanBytes"));
+  if (largerThanBytes !== undefined) filters.largerThanBytes = largerThanBytes;
+  const limit = numberParam(searchParams.get("limit"));
+  if (limit !== undefined) filters.limit = limit;
+  return filters;
+}
+
+function maintenanceStatus(value: string | null): MatchStatus | undefined {
+  if (
+    value === "pending" ||
+    value === "waiting_for_runner" ||
+    value === "waiting_for_corp" ||
+    value === "waiting_for_joiner_decks" ||
+    value === "ready_check" ||
+    value === "countdown" ||
+    value === "active" ||
+    value === "cancelled" ||
+    value === "abandoned" ||
+    value === "forfeited" ||
+    value === "finished"
+  ) {
+    return value;
+  }
+  return undefined;
+}
+
+function maintenanceMode(value: string | null): MatchMode | undefined {
+  if (value === "human_vs_human" || value === "human_runner_vs_corp_ai" || value === "human_corp_vs_runner_ai") return value;
+  return undefined;
+}
+
+function numberParam(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+export function isMaintenanceClientAddressAllowed(value: string | undefined): boolean {
+  const address = normalizeClientAddress(value);
+  if (!address) return false;
+  if (address === "::1" || address === "localhost") return true;
+  if (address.includes(":")) {
+    const lower = address.toLowerCase();
+    return lower.startsWith("fc") || lower.startsWith("fd") || lower.startsWith("fe80:");
+  }
+  const parts = address.split(".").map((part) => Number(part));
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
+  const a = parts[0]!;
+  const b = parts[1]!;
+  return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254);
+}
+
+function normalizeClientAddress(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  const trimmed = value.trim().toLowerCase();
+  if (trimmed.startsWith("::ffff:")) return trimmed.slice("::ffff:".length);
+  return trimmed;
 }
 
 function bearerToken(request: IncomingMessage): string | undefined {

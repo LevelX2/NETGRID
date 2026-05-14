@@ -50,4 +50,5 @@ function views(state: GameState): LocalDemoMatch {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const started = await startNetgridServer();
   console.log(`NETGRID multiplayer server listening on ${started.url}`);
+  if (started.bindUrl !== started.url) console.log(`NETGRID bind address ${started.bindUrl}`);
 }
