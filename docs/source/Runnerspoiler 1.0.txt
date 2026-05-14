@@ -1,0 +1,832 @@
+﻿Netrunner (R) v1.0 Runner Card List Wizards of the Coast, Inc. (Released April 1996)
+
+374 Cards Total (55 Rares, 66 Uncommons, 44 Commons, 22 Vitals)
+
+* 187 Runner Cards (75 Programs, 43 Preps, 40 Resources, 29 Hardware)
+
+Key: [X] - Number of Bits; A: - Action; MU - Memory unit; [T] – Trash; n/a - Not Applicable
+
+Programs (Runner)
+
+Card Title:	Afreet	Card Type:	Program-Daemon-1 MU
+Card Text:	Afreet can have up to 3 MU of programs installed in it. All icebreakers installed in Afreet have their strength reduced by 1. If Afreet leaves play, trash all programs installed in it.
+Cost/Strength:	2/ n/a		Artist:	Mike Kimble	Rarity:	Uncommon
+
+Card Title:	AI Boon		Card Type:	Program-Icebreaker-Random-1 MU
+Card Text:	[1]: Break sentry subroutine. [1]: +1 strength. At the start of each run, roll a die to determine AI Boon's strength * for that run.
+Cost/Strength:	12/*	Artist:	Higgins & King		Rarity:	Rare
+
+Card Title:	Baedeker's Net Map	Card Type:Program-Base Link-1 MU
+Card Text:	[0]: Base link 1. [1]: +1 link. Use only one base link card for each trace attempt made 	against you.
+Cost/Strength:	1/ n/a		Artist:	Doug Shuler	Rarity:	Common
+
+Card Title:	Bakdoor [TM]		Card Type:Program-Base Link-2 MU
+Card Text:	[0]: Base link 3. [2]: +1 link. Use only one base link card for each trace attempt made against you.
+Cost/Strength:	2/ n/a		Artist:	Kevin Taylor	Rarity:	Uncommon
+
+Card Title:	Bartmoss Memorial Icebreaker		Card Type:Program-Icebreaker-Random-1 MU
+Card Text:	[1]: Break ice subroutine. [1]: +1 strength. After passing each piece of ice, roll a die if you used Bartmoss Memorial Icebreaker to break any subroutines of that ice. On a 1, trash Memorial Icebreaker.
+Cost/Strength:	5/0	Artist:	Ash Arnett	Rarity:	Rare
+
+Card Title:	Black Dahlia		Card Type:Program-Icebreaker-Killer-1 MU
+Card Text:	[2]: Break sentry subroutine. [2]: +1 strength. 
+Cost/Strength:	10/5		Artist:	Maria P. Cabardo	Rarity:	Vital
+
+Card Title:	Blink		Card Type:Program-Icebreaker-Random-1 MU
+Card Text:	[0]: Roll a die. On a 4, 5, or 6, break ice subroutine; otherwise, suffer that much Net damage. Use this ability only once on each subroutine during each encounter with a piece of ice.
+Cost/Strength:	5/5	Artist:	Dave Pilurs	Rarity:	Uncommon
+
+Card Title:	Boardwalk	Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run on HQ, give the Corp a Boardwalk counter. At the start of each 
+of your turns, every two Boardwalk counters require the Corp to show you, at random, a card stored in HQ. If the Corp does not have enough cards stored in HQ, the Corp shows you as many cards as it has. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	0/ n/a		Artist:	Sue Ann Harkey		Rarity:	Uncommon
+
+Card Title:	Butcher Boy	Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run on HQ, give the Corp a Butcher Boy counter. Every two Butcher Boy counters gain you [1] at the start of each of your turns. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	2/ n/a		Artist:	Norm Dwyer	Rarity:	Uncommon
+
+Card Title:	Cascade		Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run on R&D, give the Corp a Cascade counter. Every two Cascade 
+counters require the Corp to trash faceup one card stored in R&D, at the start of each of its turns. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	4/ n/a		Artist:	Doug Shuler	Rarity:	Uncommon
+
+Card Title:	Cloak	Card Type:Program-Stealth-1 MU
+Card Text:	Put [3] from the bank on Cloak when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.
+Cost/Strength:	7 n/a		Artist:	Doug Shuler	Rarity:	Common
+
+Card Title:	Clown		Card Type:Program-1 MU
+Card Text:	All ice is encountered with its strength reduced by 1.
+Cost/Strength:	4/ n/a		Artist:	Mark Collen	Rarity:	Common
+
+Card Title:	Cockroach	Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run on HQ, give the Corp a Cockroach counter. Two or more 	Cockroach counters cause all discards from HQ to become random. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	0/ n/a		Artist:	Norm Dwyer	Rarity:	Uncommon
+
+Card Title:	Codecracker		Card Type:Program-Icebreaker-1 MU
+Card Text:	[0]: Break code gate subroutine. [1]: +1 strength.
+Cost/Strength:	2/0	Artist:	Doug Shuler	Rarity:	Vital
+
+Card Title:	Codeslinger	Card Type:Program-Icebreaker-Killer-1 MU
+Card Text:	[1]: Break sentry subroutine.
+Cost/Strength:	7/3		Artist:	Tony Luke	Rarity:	Vital
+
+Card Title:	Cyfermaster [TM]	Card Type:Program-Icebreaker-1 MU
+Card Text:	[2]: Break code gate subroutine. [1]: +1 strength.
+Cost/Strength:	4/5	Artist:	Mark Poole	Rarity:	Vital
+
+Card Title:	Deep Thought	Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run on R&D, give the Corp a Thought counter. Three or more Thought 
+counters allow you to look at the top card of R&D at the start of each of your turns. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	0/ n/a		Artist:	Norm Dwyer	Rarity:	Rare
+
+Card Title:	Dogcatcher	Card Type:Program-Icebreaker-1 MU
+Card Text:	[1]: Break pit bull, hellhound, bloodhound, or watchdog subroutine. [1]: +1 strength.
+Cost/Strength:	3/3	Artist:	James Allen Higgins	Rarity:	Uncommon
+
+Card Title:	Dropp [TM]	Card Type:Program-Icebreaker-1 MU
+Card Text:	[0]: Break ice subroutine. [1]: +1 strength. Using Dropp [TM] ends your run.
+Cost/Strength:	3/4         Artist:Todd Wade	Rarity:	Uncommon
+
+Card Title:	Dupré	Card Type:Program-Icebreaker-1 MU
+Card Text:	[1]: Break code gate subroutine. [2]: +1 strength. Put a +1 strength counter on Dupre' after each run during which it was used to break a subroutine. All strength counters on Dupre' are lost if you use Dupré on a fort other than the one you last used it on.
+Cost/Strength:	1/0	Artist:	Robert McLees	Rarity:	Rare
+
+Card Title:	Dwarf		Card Type:Program-Icebreaker-Worm-1 MU
+Card Text:	[1]: Break wall subroutine. [1]: +1 strength.
+Cost/Strength:	6/3		Artist:	Norm Dwyer	Rarity:	Common
+
+Card Title:	Emergency Self-Construct	Card Type:Program-1 MU
+Card Text:	[T]: Prevent yourself from being flatlined, though you still lose all cards in your hand. Remove all brain damage. For the remainder of the game, you have only three actions per turn, instead of four; your hand size is reduced by 1; and all meat damage is automatically prevented.
+Cost/Strength:	0/ n/a		Artist:	Mark Poole	Rarity:	Rare
+	
+Card Title:	Evil Twin	Card Type:Program-Icebreaker-Killer-1 MU
+Card Text:	[3]: Break sentry subroutine. [1]: +1 strength. Prevents up to 2 Net and/or brain damage total each turn.
+Cost/Strength:	6/3	Artist:	Mark Tedin	Rarity:	Rare
+
+Card Title:	Expert Schedule Analyzer	Card Type:Program-1 MU
+Card Text:	After you access cards from HQ, look at all cards stored in HQ.
+Cost/Strength:	0/ n/a		Artist:Doug Shuler	Rarity:	Uncommon
+
+Card Title:	Fait Accompli		Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run on a subsidiary data fort, put a Fait counter in that fort. Every two Fait counters in a fort give +1 difficulty to all agendas installed inside that fort.
+		The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	1/ n/a		Artist:	Kevin Taylor	Rarity:	Uncommon
+
+Card Title:	False Echo	Card Type:Program-1 MU
+Card Text:	[2]: The Corp must rez as much ice as possible on a fort, beginning with the outermost ice and working in. Use this ability only after a successful run on that fort.
+Cost/Strength:	0/ n/a		Artist:	Pete Venters	Rarity:	Rare
+
+Card Title:	Flak	Card Type:Program-Icebreaker-1 MU
+Card Text:	[1]: Break AP subroutine. [1]: +1 strength.
+Cost/Strength:	4/2	Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Force Shield	Card Type:Program-1 MU
+Card Text:	Prevents up to 2 Net and/or brain damage total each turn.
+Cost/Strength:	2/ n/a		Artist:	Doug Shuler	Rarity:	Common
+
+Card Title:	Gremlins	Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run on HQ, give the Corp a Gremlin counter. Every two Gremlin 
+		counters decrease the Corp's hand size by 1. The Corp may remove all Virus counters by forgoing 
+		its next three actions.
+Cost/Strength:	2/ n/a		Artist:	Doug Shuler	Rarity:	Uncommon
+
+Card Title:	Grubb	Card Type:Program-Icebreaker-Worm-1 MU
+Card Text:	[1]: Break wall subroutine. [2]: +1 strength for the remainder of this run.
+Cost/Strength:	0/0	Artist:	Norm Dwyer	Rarity:	Uncommon
+
+Card Title:	Hammer		Card Type:Program-Icebreaker-Noisy-1 MU
+Card Text:	[1]: Break wall subroutine. [1]: +1 strength. Whenever you break a wall subroutine with Hammer, lose a total of [2] from stealth cards.
+Cost/Strength:	2/2	Artist:	Mark Poole	Rarity:	Vital
+
+
+Card Title:	I Spy	Card Type:Program-1 MU
+Card Text:	[T]: Put a Spy counter in a data fort. A Spy counter exposes all cards installed inside or on a fort containing it. The Corp may remove a Spy counter by taking an action to pay [4]. Use this ability only immediately after a successful run on that fort.
+Cost/Strength:	0/ n/a		Artist:	Mark Poole	Rarity:	Uncommon
+
+Card Title:	Imp	Card Type:Program-Daemon-1 MU
+Card Text:	Imp can have up to 2 MU of programs installed in it. All icebreakers installed in this way have their strength reduced by 1. If Imp leaves play, trash all programs installed in it.
+Cost/Strength:	0/ n/a		Artist:	Mike Kimble	Rarity:	Uncommon
+
+Card Title:	Incubator	Card Type:Program-Virus-Random-1 MU
+Card Text:	Whenever you make a successful run, give the Corp an Incubate counter. Each Incubate counter 
+necessitates a die roll at the start of each of your turns; on each 6, choose a Virus counter and exchange that counter for two counters of the same type. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	0/ n/a		Artist:	Norm Dwyer	Rarity:	Rare
+
+Card Title:	Invisibility	Card Type:Program-Stealth-1 MU
+Card Text:	Put [1] from the bank on Invisibility when it is installed. Use this bit only to pay for using 
+icebreakers during runs, but not for using noisy icebreakers. If you use the bit, replace it at the start of your next turn.
+Cost/Strength:	0/ n/a		Artist:	Mark Tedin	Rarity:	Common
+
+Card Title:	Jackhammer	Card Type:Program-Icebreaker-Noisy-1 MU
+Card Text:	[0]: Break wall subroutine. [1]: +1 strength. Whenever you break a wall subroutine with
+		Jackhammer, lose [1], if you can, from a stealth card.
+Cost/Strength:	1/0	Artist:	Norm Dwyer	Rarity:	Vital
+
+Card Title:	Japanese Water Torture		Card Type:Program-Icebreaker-1 MU
+Card Text:	[0]: Break wall subroutine. [X]: +X strength, and forgo your next X actions.
+Cost/Strength:	7/2	Artist:	Jonnie Wilder	Rarity:	Rare
+
+Card Title:	Joan of Arc	Card Type:Program-1 MU
+Card Text:	[T]: Prevent one or more of your other installed programs from being trashed.
+[1]: Prevent one or more of your other installed programs from being trashed, and bring Joan of Arc into your hand.
+Cost/Strength:	0/ n/a		Artist:	John Casebeer	Rarity:	Rare
+
+Card Title:	Krash	Card Type:Program-Icebreaker-1 MU
+Card Text:	[2]: Break ice subroutine. [2]: +1 strength.
+Cost/Strength:	0/0	Artist:	Jonnie Wilder	Rarity:Uncommon
+
+Card Title:	Loony Goon	Card Type:Program-Icebreaker-Killer-1 MU
+Card Text:	[1]: Break sentry subroutine. [1]: +1 strength.
+Cost/Strength:	4/0		Artist:	Tony Luke	Rarity:	Vital
+
+Card Title:	Microtech AI Interface		Card Type:Program-1 MU
+Card Text:	Whenever you are about to access cards from R&D, you may first choose to cut any number of cards from the top of R&D to the bottom of R&D.
+Cost/Strength:	0/ n/a		Artist:	Doug Shuler	Rarity:	Rare
+
+Card Title:	Mouse		Card Type:Program-Detection-1 MU
+Card Text:	A: Expose a card installed inside a data fort.
+Cost/Strength:	2/ n/a		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Mystery Box	Card Type:Program-1 MU
+Card Text:	[0]: Show the top five cards of your stack to the Corp. If any of those cards are programs, trash Mystery Box and then install one of those programs, at no cost. Shuffle your stack afterwards. Use this ability only 	during a run and only once each run.
+Cost/Strength:	3/ n/a		Artist:Kevin Taylor	Rarity:	Rare
+
+Card Title:	Netspace Inverter	Card Type:Program-1 MU
+Card Text:	Reverse a fort's ice cards so that the outermost piece of ice becomes the innermost piece of ice, and so forth. Use this ability only immediately after a successful run on that data fort.
+Cost/Strength:	0/ n/a		Artist:	Mark Collen	Rarity:	Rare
+
+Card Title:	Newsgroup Filter	Card Type:Program-2 MU
+Card Text:	A: Gain [2].
+Cost/Strength:	5/ n/a		Artist:	Sue Ann Harkey		Rarity:	Uncommon
+
+Card Title:	Pattel's Virus		Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run, put a Pattel counter on a piece of ice that had all its subroutines broken during that run. Each Pattel counter on a piece of ice reduces its strength by 1. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	1/ n/a		Artist:	Sue Ann Harkey		Rarity:	Uncommon
+
+Card Title:	Pile Driver		Card Type:Program-Icebreaker-Noisy-1 MU
+Card Text:	[3]: Break up to four wall subroutines on a single piece of ice. [1]: +1 strength. Whenever you use Pile Driver's break-walls subroutine, lose a total of [3] from stealth cards.
+Cost/Strength:	1/7		Artist:	Norm Dwyer	Rarity:	Vital
+
+
+Card Title:	Poltergeist		Card Type:Program-1 MU
+Card Text:	Put [2] on Poltergeist when it is installed. Use these bits only to pay for trashing nodes. If you use any of these bits, replace them at the start of your next turn.
+Cost/Strength:	0/ n/a		Artist:	Mark Tedin	Rarity:	Rare
+
+Card Title:	Pox	Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run, put a Pox counter in the fort that was run. Every two Pox 
+counters in a fort require the Corp to pay [1], in addition to any other costs, to install a card inside or on that fort. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	0/ n/a		Artist:	Norm Dwyer	Rarity:	Uncommon
+
+Card Title:	Rabbit		Card Type:Program-1 MU
+Card Text:	Ice that attempts to trace you has its trace limit reduced by 1.
+Cost/Strength:	0/ n/a		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	R&D-Protocol Files	Card Type:Program-1 MU
+Card Text:	A: Make a run on R&D, but instead of accessing cards, look at the top five cards of R&D.
+Cost/Strength:	0/ n/a		Artist:	Doug Shuler	Rarity:	Uncommon
+
+Card Title:	Raffles		Card Type:Program-Icebreaker-1 MU
+Card Text:	[1]: Break code gate subroutine. [2]: +1 strength
+Cost/Strength:	7/4		Artist:	Mark Collen	Rarity:	Vital
+
+Card Title:	Ramming Piston		Card Type:Program-Icebreaker-Noisy-1 MU
+Card Text:	[2]: Break wall subroutine. [1]: +1 strength. Whenever you break a wall subroutine with
+		Ramming Piston, lose a total of [2] from stealth cards.
+Cost/Strength:	4/5		Artist:	Norm Dwyer	Rarity:	Vital
+
+Card Title:	Raptor		Card Type:Program-Icebreaker-Killer-1 MU
+Card Text:	[2]: Break sentry subroutine. [1]: +1 strength
+Cost/Strength:	1/1	Artist:	Higgins & King		Rarity:	Vital
+
+Card Title:	Reflector	Card Type:Program-Icebreaker-1 MU
+Card Text:	[0]: Break stun, hellbolt, or knockout subroutine.
+Cost/Strength:	2/4	Artist:	Kevin Taylor	Rarity:	Rare
+
+Card Title:	Replicator		Card Type:Program-Icebreaker-1 MU
+Card Text:	[0]: Break ice subroutine that traces. [1]: +1 strength
+Cost/Strength:	5/2	Artist:	Lawrence Brown		Rarity:	Uncommon
+
+Card Title:	Scatter Shot		Card Type:Program-1 MU
+Card Text:	Put [2] from the bank on Scatter Shot when it is installed. Use these bits only to pay for trashing upgrades. If you use any of these bits, replace them at the start of your next turn.
+Cost/Strength:	0/ n/a		Artist:	Mark Collen	Rarity:	Rare
+
+Card Title:	SeeYa		Card Type:Program-Detection-1 MU
+Card Text:	A, [1]: Expose an installed card.
+Cost/Strength:	3/ n/a		Artist:	Mark Collen	Rarity:	Common
+
+Card Title:	Self-Modifying Code		Card Type:Program-2 MU
+Card Text:	[T]: Search your stack for a program and install that program, if you can. Shuffle your stack 
+		afterwards. Use this ability only during a run.
+Cost/Strength:	2/ n/a		Artist:	Jonnie Wilder		Rarity:	Rare
+
+Card Title:	Shaka		Card Type:Program-Icebreaker-Killer-1 MU
+Card Text:	[1]: Break sentry subroutine. [2]: +1 strength.
+Cost/Strength:	4/2		Artist:	Tony Luke	Rarity:	Vital
+
+Card Title:	Shield		Card Type:Program-1 MU
+Card Text:	Prevents up to 2 Net damage each turn.
+Cost/Strength:	0/ n/a		Artist:	Kevin Taylor	Rarity:	Common
+
+Card Title:	Shredder Uplink Protocol	Card Type:Program-2 MU
+Card Text:	A: Make a run on the Archives. If run is successful, do not access cards from the Archives; instead, treat run as a successful run on HQ.
+Cost/Strength:	4/ n/a		Artist:	Doug Shuler		Rarity:	Uncommon
+
+Card Title:	Signpost	Card Type:Program-1 MU
+Card Text:	[1]: +2 link. Use this ability only once during each trace attempt, and only after you and the Corp have revealed how much each of you spent.
+Cost/Strength:	2/ n/a		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Skivviss	Card Type:Program-Virus-1 MU
+Card Text:	Whenever you make a successful run on R&D, give the Corp a Skivviss counter. Each Skivviss counter requires the Corp to draw one extra card at the start of each of its turns. The Corp may remove all Virus counters by forgoing its next three actions.
+Cost/Strength:	3/ n/a		Artist:	Mike Kimble	Rarity:	Uncommon
+
+Card Title:	Smarteye	Card Type:Program-Detection-1 MU
+Card Text:	Once during each run, you may expose a piece of unrezzed ice as you approach it. You may then jack out before the Corp decides whether to rez the ice.
+Cost/Strength:	2/ n/a		Artist:Mark Poole	Rarity:	Common
+
+Card Title:	Snowball	Card Type:Program-Icebreaker-Killer-1 MU
+Card Text:	Snowball has +1 strength for each subroutine it has broken during a run, until the end of that run. [1]: Break sentry subroutine. [1]: +1 strength.
+Cost/Strength:	10/0	Artist:	Maria P. Cabardo	Rarity:	Rare
+
+Card Title:	Speed Trap	Card Type:Program-Detection-1 MU
+Card Text:	[0]: Jack out before an upgrade or node takes effect. Use this ability only immediately after the Corp has rezzed that upgrade or node.
+Cost/Strength:	0/ n/a		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Startup Immolator	Card Type:Program-1 MU
+Card Text:	 [T]: Pay the rez cost of a piece of ice to trash that piece of ice. Use this ability only if you have just broken all the subroutines of that piece of ice.
+Cost/Strength:	0/ n/a		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Succubus	Card Type:Program-Daemon-1 MU
+Card Text:	Succubus can have up to 3 MU of programs installed in it. If Succubus leaves play, trash all programs installed in it.
+Cost/Strength:	3/ n/a		Artist:	Anson Maddocks		Rarity:	Rare
+
+Card Title:	Tinweasel	Card Type:Program-Icebreaker-1 MU
+Card Text:	[0]: Break code gate subroutine.
+Cost/Strength:	5/3	Artist:	Mark Collen	Rarity:	Vital
+
+Card Title:	Vewy Vewy Quiet	Card Type:Program-Stealth-1 MU
+Card Text:	Put [2] from the bank on Vewy Vewy Quiet when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.
+Cost/Strength:	4/ n/a		Artist:Kevin Taylor	Rarity:	Common
+
+Card Title:	Wild Card	Card Type:Program-Icebreaker-Killer-1 MU
+Card Text:	[0]: Break sentry subroutine. [3]: +1 strength.
+Cost/Strength:	0/0	Artist:	Tony Luke	Rarity:	Vital
+
+Card Title:	Wizard's Book		Card Type:Program-Icebreaker-1 MU
+Card Text:	[0]: Break code gate subroutine. [2]: +1 strength.
+Cost/Strength:	5/2	Artist:	Maria P. Cabardo	Rarity:		Vital
+
+Card Title:	Worm	Card Type:Program-Icebreaker-Worm-1 MU
+Card Text:	[0]: Break wall subroutine. [3]: +1 strength.
+Cost/Strength:	4/2	Artist:	Anson Maddocks		Rarity:	Vital
+
+Card Title:	Zetatech Software Installer	Card Type:Program-1 MU
+Card Text:	Put [2] on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overwriting 	Software Installer itself. If you use any of these bits, replace them at the start of your next turn.
+Cost/Strength:	0/ n/a		Artist:	Doug Shuler	Rarity:	Uncommon
+
+Prep (Runner)
+
+Card Title:	All-Nighter	Card Type:Prep
+Card Text:	Make a run; whether or not that run is successful, you may then make another run.
+Cost:		0	Artist:	Christina Wald		Rarity:	Common
+
+Card Title:	Anonymous Tip		Card Type:Prep-Sabotage
+Card Text:	Derez a piece of black ice of your choice.
+Cost:		3	Artist:	Margaret Organ-Kean	Rarity:	Rare
+
+Card Title:	Arasaka Owns You	Card Type:Prep
+Card Text:	Do not play Arasaka Owns You as a normal action; instead, play it when you would suffer enough 
+damage to flatline you. Prevent all of that damage, trash Arasaka Owns You, remove any brain damage you have suffered, and then refresh your hand to its maximum size. Gain [10] and remove all tags, at no cost. You forgo your next four actions, and you forfeit the next 3 agenda points you score.
+Cost:		0	Artist:	Craig Gilmore		Rarity:	Rare
+
+Card Title:	Bodyweight [TM] Synthetic Blood	Card Type:Prep
+Card Text:	Draw five cards.
+Cost:		2	Artist:	Anthony Judge	Rarity:	Uncommon
+
+Card Title:	Core Command: Jettison Ice	Card Type:Prep-Sabotage
+Card Text:	Play only if you made a successful run on HQ this turn. Pay the rez cost of a piece of rezzed ice to trash it.
+Cost:		0	Artist:	Kevin Stein	Rarity:	Uncommon
+
+Card Title:	Custodial Position	Card Type:Prep
+Card Text:	Make a run on R&D. If run is successful, access two additional cards from R&D.
+Cost:		2	Artist:	James Allen Higgins	Rarity:	Common
+
+
+
+
+Card Title:	Deal with Militech	Card Type:Prep
+Card Text:	Play only if you liberated any Research agendas this turn. Put a Militech counter on each of your 
+		icebreakers. A Militech counter gives the icebreaker it is on +1 strength.
+Cost:		0	Artist:	Pete Venters	Rarity:	Rare
+
+Card Title:	Desperate Competitor		Card Type:Prep
+Card Text:	Play only if you liberated any Gray Ops agendas this turn. Score 1 agenda point.
+Cost:		0	Artist:	Craig Gilmore		Rarity:	Rare
+
+Card Title:	Edited Shipping Manifests	Card Type:Prep-Sabotage
+Card Text:	Make a run on HQ. If run is successful, and the Corp has any bits when you would access HQ, do 
+		not access cards from HQ; instead, the Corp loses [1] and gives you a tag, and you gain [10].
+Cost:		1	Artist:	Dave Pilurs	Rarity:	Common
+
+Card Title:	Executive Wiretaps	Card Type:Prep
+Card Text:	Make a run on HQ. If run is successful, access two additional cards from HQ.
+Cost:		2	Artist:	Mark Collen	Rarity:	Common
+
+Card Title:	Forged Activation Orders	Card Type:Prep-Sabotage
+Card Text:	Choose a piece of ice. The Corp either rezzes that piece of ice or trashes it.
+Cost:		1	Artist:	Dave Pilurs	Rarity:	Rare
+
+Card Title:	Forgotten Backup Chip		Card Type:Prep
+Card Text:	Search your trash for a program and bring it into your hand.
+Cost:		0	Artist:	Randy Gallegos		Rarity:	Common
+
+Card Title:	Fortress Respecification	Card Type:Prep-Sabotage
+Card Text:	Play only if you made a successful run this turn. Rearrange the ice installed on the last fort on which you made a successful run. This does not expose any concealed ice.
+Cost:		0	Artist:	Dave Pilurs	Rarity:	Rare
+
+Card Title:	Gideon's Pawnshop	Card Type:Prep
+Card Text:	Search your trash for a card and bring it into your hand.
+Cost:		2	Artist:	Mark Collen	Rarity:	Common
+
+Card Title:	Hot Tip for WNS	Card Type:Prep
+Card Text:	Score 1 agenda point if you liberated any Black Ops agendas this turn.
+Cost:		0	Artist:	Sue Ann Harkey		Rarity:	Rare
+
+Card Title:	Hunt Club BBS		Card Type:Prep-BBS
+Card Text:	Expose up to three installed cards.
+Cost:		1	Artist:	Anthony Petrarca	Rarity:	Common
+
+Card Title:	Ice and Data's Guide to the Net	Card Type:Prep
+Card Text:	Expose the outermost ice of each data fort.
+Cost:		0	Artist:	Sue Ann Harkey		Rarity:Uncommon
+
+Card Title:	If You Want It Done Right . . .	Card Type:Prep
+Card Text:	Look through the top five cards of your stack. Bring one of those cards into your hand, and arrange the rest in any order you choose.
+Cost:		0	Artist:	Zak Plucinski	Rarity:	Common
+
+Card Title:	Inside Job	Card Type:Prep
+Card Text:	Make a run. You automatically pass the first piece of ice you encounter during that run.
+Cost:		2	Artist:	Ernie Chan	Rarity:	Uncommon
+
+Card Title:	Jack 'n' Joe		Card Type:Prep
+Card Text:	Draw three cards.
+Cost:		0	Artist:	Pete Venters		Rarity:	Common
+
+Card Title:	Kilroy Was Here	Card Type:Prep-Sabotage
+Card Text:	Make a run on R&D; you may trash, at no cost, any cards you access that were stored in R&D, even if the cards cannot normally be trashed.
+Cost:		0	Artist:	Sue Ann Harkey		Rarity:	Uncommon
+
+Card Title:	Livewire's Contacts	Card Type:Prep
+Card Text:	Gain [3].
+Cost:		0	Artist:	Lawrence Snelly	Rarity:	Common
+
+Card Title:	Lucidrine [TM] Booster Drug		Card Type:Prep
+Card Text:	Make a run, and gain [9], which you may use only during that run. After that run is completed, suffer 1 brain damage; this damage cannot be prevented. Then, return to the bank any of the [9] not spent.
+Cost:		0	Artist:Pete Venters	Rarity:	Uncommon
+
+Card Title:	Mantis, Fixer-at-Large		Card Type:Prep
+Card Text:	Search your stack for a card, and bring it into your hand. Reshuffle your stack afterwards.
+Cost:		3	Artist:	Ernie Chan	Rarity:	Common
+
+Card Title:	misc.for-sale		Card Type:Prep-BBS
+Card Text:	Trash any number of your installed cards. Gain [3] for each card trashed in this way.
+Cost:		0	Artist:	Robert McLees		Rarity:	Rare
+
+Card Title:	MIT West Tier		Card Type:Prep
+Card Text:	Shuffle your hand, trash, and stack together, and then draw five cards. When you play MIT West 
+		Tier, remove it from the game instead of trashing it.
+Cost:		3	Artist:	John Park	Rarity:	Rare
+
+Card Title:	Open-Ended(R) Mileage Program		Card Type:Prep
+Card Text:	Remove a tag, at no cost. You may pay [1] when you play Open-Ended(R) Mileage Program to take 
+		it back into your hand instead of trashing it.
+Cost:		0	Artist:	John Park	Rarity:	Common
+
+Card Title:	Organ Donor	Card Type:Prep
+Card Text:	Trash up to five cards from your hand. Gain [2] for each card trashed in this way.
+Cost:		0	Artist:	Pete Venters	Rarity:	Rare
+
+Card Title:	Playful AI	Card Type:Prep-AI-Random
+Card Text:	Roll a die. On a 1, 2, or 3, gain that many bits, set aside that many dice to roll again, or choose some combination thereof. Repeat until you have rolled all the dice you set aside.
+Cost:		1	Artist:	Pete Venters	Rarity:	Rare
+
+Card Title:	Priority Wreck		Card Type:Prep-Sabotage
+Card Text:	Make a run on HQ. If run is successful, do not access cards from HQ; instead, pay any number of 
+		bits to force the Corp to lose that many bits.
+Cost:		0	Artist:	Dave Pilurs	Rarity:	Rare
+
+Card Title:	Private LDL Access	Card Type:Prep
+Card Text:	Make a run on HQ. If run is successful, do not access cards from HQ; instead, treat run as a 
+		successful run on R&D.
+Cost:		0	Artist:	John Park	Rarity:	Uncommon
+
+Card Title:	Romp through HQ	Card Type:Prep-Sabotage
+Card Text:	Make a run on HQ; you may trash, at no cost, any cards you access that were stored in HQ, even if the cards cannot normally be trashed.
+Cost:		2	Artist:	Kevin Taylor	Rarity:	Uncommon
+
+Card Title:	Score!		Card Type:Prep	
+Card Text:	Gain [9]
+Cost:		5	Artist:	Zak Plucinski	Rarity:	Common
+
+Card Title:	Security Code WORM Chip	Card Type:Prep-Sabotage
+Card Text:	Play only if you made a successful run on HQ this turn. Trash a piece of unrezzed ice.
+Cost:		0	Artist:	Robert McLees	Rarity:	Uncommon
+
+Card Title:	Sneak Preview		Card Type:Prep
+Card Text:	Choose a program from your trash or search your stack for a program. Install that program, at no cost. Shuffle your stack afterwards. At the end of the turn, take the program into your hand.
+Cost:		3	Artist:	Sue Ann Harkey		Rarity:Rare
+
+Card Title:	Social Engineering	Card Type:Prep
+Card Text:	Hide at least 2 from your pool in your hand; the Corp then guesses how many bits you hid. If the 
+		Corp guesses correctly, lose that many bits. Otherwise, choose a data fort and a piece of ice on 
+		that fort. Then make a run on that fort, during which you automatically pass that piece of ice.
+Cost:		1	Artist:	Zak Plucinski	Rarity:	Uncommon
+
+Card Title:	Stumble through Wilderspace	Card Type:Prep
+Card Text:	Make a run. You have +9 link for every trace attempt made during that run.
+Cost:		2	Artist:	Sue Ann Harkey		Rarity:	Rare
+	
+Card Ti	tle:	Synchronized Attack on HQ	Card Type:Prep
+Card Text:	Play only if you made a successful run on HQ this turn. The Corp discards all cards. The Corp can 
+		retain cards by paying [2] for each card not discarded.
+Cost:		4	Artist:	Craig Gilmore		Rarity:	Rare
+
+Card Title:	Temple Microcode Outlet	Card Type:Prep-BBS
+Card Text:	Search your stack for a program. Show that program to the Corp, and then bring it into your hand. 
+		Reshuffle your stack afterwards.
+Cost:		1 	Artist:	Dave Pilurs	Rarity:	Common
+
+Card Title:	Terrorist Reprisal	Card Type:Prep
+Card Text:	Play only if the Corp scored any Black Ops agendas during its last turn. The Corp discards five cards at random.
+Cost:		2	Artist:	Mark Collen	Rarity:	Rare
+
+Card Title:	Total Genetic Retrofit		Card Type:Prep
+Card Text:	Remove all tags, at no cost, and automatically avoid receiving your next tag.
+Cost:		3	Artist:	Doug Chaffee	Rarity:	Rare
+
+Card Title:	Valu-Pak Software Bundle	Card Type:Prep
+Card Text:	Gain up to five consecutive actions, which you may use only to install programs, and 
+		gain [1]. If you do not spend the bit during these actions, return it to the bank afterwards.
+Cost:		0	Artist:	John Park	Rarity:	Uncommon
+
+
+
+Card Title:	Weather-to-Finance Pipe	Card Type:Prep-Sabotage
+Card Text:	Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses [4].
+Cost:		0	Artist:	Sue Ann Harkey		Rarity:	Uncommon
+
+Hardware/Resources (Runner)
+
+Card Title:	Access through Alpha		Card Type:Resource-Base Link
+Card Text:	[1]: Base link 9. Use only one base link card for each trace attempt made against you.
+Cost:		9	Artist:	Mark Collen	Rarity:	Rare
+
+Card Title:	Access to Arasaka	Card Type:Resource-Base Link
+Card Text:	[2]: Base link 4. [2]: +1 link. Use only one base link card for each trace attempt made against you.
+Cost:		2	Artist:	Robert McLees	Rarity:	Vital
+
+Card Title:	Access to Kiribati	Card Type:Resource-Base Link
+Card Text:	[1]: Base link 1. [1]: +1 link. Use only one base link card for each trace attempt made against you.
+Cost:		1	Artist:	Sue Ann Harkey		Rarity:	Vital
+
+Card Title:	Arasaka Portable Prototype	Card Type:Hardware-Deck
+Card Text:	Provides +3 MU. Installing Arasaka Portable 	Prototype costs 1 agenda point, in addition to the 
+normal cost. Put [3] from the bank on Arasaka Portable Prototype when it is installed. Use these bits only to pay for using icebreakers during runs. If you 	use any of these bits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
+Cost:		11	Artist:	James Allen Higgins	Rarity:	Rare
+
+Card Title:	 "Armadillo" Armored Road Home	Card Type:Hardware-Vehicle
+Card Text:	Put [2] from the bank on Armored Road Home when it is installed. Use these bits only to pay for removing tags. If you use any of these bits, replace them at the start of your next turn. 	[T]: Prevent up to 3 meat damage.
+Cost:		2	Artist:	Norm Dwyer	Rarity:	Uncommon
+
+Card Title:	Armored Fridge		Card Type:Hardware
+Card Text:	Put seven Ablative counters on Armored Fridge when it is installed. When the last Ablative counter has been removed, trash Armored Fridge. Ablative counter: Prevent 1 meat damage.
+Cost:		3	Artist:	Kim Francisco	Rarity:	Uncommon
+
+Card Title:	Artemis 2020	Card Type:Hardware-Deck
+Card Text:	Provides +2 MU. Put [2] from the bank on Artemis 2020 when it is installed. Use these bits only to pay for using icebreakers during runs. If you use any of these bits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
+Cost:		10	Artist:	Doug Chaffee	Rarity:	Uncommon
+
+Card Title:	Aujourd'Oui	Card Type:Resource-BBS
+Card Text:	A: Look at the top five cards of your stack. You may bring any program cards among them into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle your stack.
+Cost:		0	Artist:	Margaret Organ-Kean	Rarity:	Rare
+
+Card Title:	Back Door to Hilliard		Card Type:Resource-Base Link
+Card Text:	[0]: Base link 2. [3]: +1 link. Use only one base link card for each trace attempt made against you.
+Cost:		0	Artist:	Robert McLees	Rarity:	Common
+
+Card Title:	Back Door to Orbital Air	Card Type:Resource-Base Link
+Card Text:	[1]: Base link 2. [2]: +1 link. Use only one base link card for each trace attempt made against you.
+Cost:		0	Artist:	Mark Collen	Rarity:	Vital
+
+Card Title:	Bodyweight [TM] Data Crèche	Card Type:Hardware-Deck
+Card Text:	Provides +1 MU. Once per turn, right after making a successful run, you can choose to make another run without taking an action to do so. Only one deck can be in play at a time. Trash any 
+		older decks.
+Cost:		3	Artist:	Pete Venters	Rarity:	Rare
+
+Card Title:	Broker		Card Type:Resource-Connection
+Card Text:	Each of your turns, you may take only one action to use Broker. A: Put [3] from the bank on Broker. A: Take all the bits from Broker.
+Cost:		3	Artist:	Armand Cabrera		Rarity:	Common
+
+Card Title:	Code Viral Cache	Card Type:Resource
+Card Text:	Play only if you made a successful run on HQ this turn. If the Corp forgoes actions to lose Virus 
+		counters, two counters of your choice are not removed. The Corp may trash Viral Cache by taking 
+		an action to pay [5].
+Cost:		1	Artist:	Robert McLees		Rarity:	Rare
+
+Card Title:	Corolla Speed Chip	Card Type:Hardware-Chip
+Card Text:	Put [1] from the bank on Corolla Speed Chip when it is installed. Use this bit only to pay for using killers during runs. If you use the bit, replace it at the start of your next turn.
+Cost:		1	Artist:	Lawrence Brown		Rarity:	Common
+
+
+Card Title:	Corporate Ally		Card Type:Resource-Connection-Unique
+Card Text:	Installing Corporate Ally costs 1 agenda point, in addition to the normal cost. The difficulty of all agendas is +1. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.
+Cost:		3	Artist:	Glenn Kim	Rarity:	Rare
+
+Card Title:	Crash Everett, Inventive Fixer	Card Type:Resource-Connection-Unique
+Card Text:	Whenever you draw one or more cards from your stack, draw an extra card; then choose one of the 
+cards drawn and either trash it or return it to the top of your stack. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in 	play, trash all but one.
+Cost:		2	Artist:	Mike Kimble	Rarity:	Common
+
+Card Title:	Danshi's Second ID	Card Type:Resource
+Card Text:	A, [T]: Remove up to three tags, at no cost.
+Cost:		0	Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Databroker	Card Type:Resource-Connection
+Card Text:	A, [T], 1 agenda point: Gain [10].
+Cost:		0	Artist:	Craig Gilmore	Rarity:	Uncommon
+
+Card Title:	Dermatech Bodyplating		Card Type:Hardware-Cybernetics
+Card Text:	Prevents 1 meat damage each turn.
+Cost:		0	Artist:	L.A. Williams		Rarity:	Uncommon
+
+Card Title:	Diplomatic Immunity	Card Type:Resource-Unique
+Card Text:	Prevents all meat damage. The Corp may pay 1 agenda point to cancel this effect until end of turn. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.
+Cost:		1	Artist:	Higgins & King		Rarity:	Rare
+
+Card Title:	 "Drifter" Mobile Environment		Card Type:Hardware-Vehicle
+Card Text:	Put [2] from the bank on Mobile Environment when it is installed. Use these bits only to pay for removing tags. If you use any of these bits, replace them at the start of your next turn.
+Cost:		0	Artist:	Randy Gallegos		Rarity:Uncommon
+
+Card Title:	Fall Guy	Card Type:Resource
+Card Text:	[T]: Avoid receiving a tag.
+Cost:		0	Artist:	Mike Kimble	Rarity:	Vital
+
+Card Title:	Field Reporter for Ice and Data	Card Type:Resource-Position
+Card Text:	At the end of each of your turns, gain [1] for each piece of ice the Corp rezzed during that turn.
+Cost:		0	Artist:	Dan Frazier	Rarity:	Rare
+
+Card Title:	Floating Runner BBS		Card Type:Resource-BBS-Position
+Card Text:	Gain [1] at the start of each of your turns.
+Cost:		6	Artist:	James Allen Higgins	Rarity:	Uncommon
+
+Card Title:	Full Body Conversion		Card Type:Hardware-Cybernetics
+Card Text:	Prevents all meat damage. For each [1] the Corp pays when meat damage is done, 1 point of meat 
+		damage is not prevented by this card.
+Cost:		0	Artist:	L.A. Williams		Rarity:	Rare
+
+Card Title:	 "Green Knight" Surge Buffers		Card Type:Hardware
+Card Text:	Prevents 1 Net damage each turn.
+Cost:		0	Artist:	Lawrence Brown		Rarity:	Common
+
+Card Title:	Hell's Run	Card Type:Resource
+Card Text:	Put [1] from the bank on Hell's Run when it is installed. Use this bit only to pay for increasing your link. If you use the bit, replace it at the start of your next turn.
+Cost:		0	Artist:	Pete Venters	Rarity:	Uncommon
+
+Card Title:	HQ Interface	Card Type:Hardware
+Card Text:	Whenever you access cards from HQ, access an additional card from HQ.
+Cost:		4	Artist:	Lawrence Brown		Rarity:	Common
+
+Card Title:	Junkyard BBS		Card Type:Resource-BBS
+Card Text:	A, [1]: Bring the top card from your trash into your hand.
+Cost:		1	Artist:	Sue Ann Harkey		Rarity:	Uncommon
+
+Card Title:	Karl de Veres, Corporate Stooge	Card Type:Resource-Connection-Unique
+Card Text:	Gain [1] each time you make a successful run. Only one unique card of a particular name can be in 
+		play at a time. If for some reason more than one is in play, trash all but one.
+Cost:		2	Artist:	Randy Gallegos		Rarity:	Uncommon
+
+Card Title:	Leland, Corporate Bodyguard		Card Type:Resource
+Card Text:	[1]: Prevent 1 meat damage. [T]: Avoid receiving a tag.
+Cost:		2	Artist:	Heather Hudson		Rarity:Common
+
+
+
+
+Card Title:	Lifesaver [TM] Nanosurgeons		Card Type:Hardware-Cybernetics
+Card Text:	A: Draw two cards. Use this ability only if you were damaged during any of your last three actions. [T]: Prevent 1 brain damage.
+Cost:		1	Artist:	Doug Shuler	Rarity:	Rare
+
+Card Title:	Loan from Chiba	Card Type:Resource
+Card Text:	Gain [12] when Loan from Chiba is installed. At the start of each of your turns, lose [1]. If Loan from Chiba leaves play, pay [10] or lose the game. You may trash Loan from Chiba at the end of any of your turns.
+Cost:		0	Artist:	James Allen Higgins	Rarity:	Uncommon
+
+Card Title:	Microtech Backup Drive		Card Type:Hardware
+Card Text:	Whenever one or more installed programs are being sent to the trash at the same time, you may instead choose to put any or all of the programs on top of 	Microtech Backup Drive in any order you choose. If Backup Drive is removed from play, trash any cards on it.	A: Bring the top card on Backup Drive into your hand.
+Cost:		0	Artist:	James Allen Higgins	Rarity:	Common
+
+Card Title:	Microtech 'Trode Set	Card Type:Hardware
+Card Text:	Pay [1], in addition to the normal cost, to break each ice subroutine. Ignore all AP subroutines 
+		except those that trace, or that do Net damage. Prevents all but 1 Net damage from each AP 
+		subroutine you do not break.
+Cost:		1	Artist:	Randy Gallegos		Rarity:	Rare
+
+Card Title:	Militech MRAM Chip	Card Type:Hardware-Chip-Cybernetics
+Card Text:	Hand size +3
+Cost:		2	Artist:	James Allen Higgins	Rarity:	Uncommon
+
+Card Title:	MRAM Chip	Card Type:Hardware-Chip-Cybernetics
+Card Text:	Hand size +2
+Cost:		1	Artist:	Doug Chaffee	Rarity:	Uncommon
+
+Card Title:	Nasuko Cycle	Card Type:Hardware-Vehicle
+Card Text:	[3]: Avoid receiving a tag.
+Cost:		1	Artist:	L.A. Williams	Rarity:	Vital
+
+Card Title:	N.E.T.O.	Card Type:Resource-BBS
+Card Text:	A: Look at the top four cards of your stack. You may bring any prep or resource cards among them
+into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle the rest back into your stack.
+Cost:		0	Artist:	Robert McLees		Rarity:	Rare
+
+Card Title:	Nomad Allies	Card Type:Resource-Connection
+Card Text:	A, [1]: Remove a tag, at no cost. [T]: Avoid receiving a tag.
+Cost:		2	Artist:	Dan Frazier	Rarity:	Vital
+
+Card Title:	Pandora's Deck		Card Type:Hardware-Deck
+Card Text:	Provides +2 MU. Put [3] from the bank on Pandora's Deck when it is installed. Use these bits only to pay for increasing 	your link. If you use any of these bits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
+Cost:		6	Artist:	Jonnie Wilder		Rarity:	Uncommon
+
+Card Title:	Parraline 5750		Card Type:Hardware-Deck
+Card Text:	Provides +1 MU. Put [1] from the bank on Parraline 5750 when it is installed. Use this bit only to pay for using icebreakers during runs. If you use the bit, replace it at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
+Cost:		5	Artist:	Mark Collen	Rarity:	Common
+
+Card Title:	PK-6089a	Card Type:Hardware-Deck
+Card Text:	Provides +1 MU. Put [3] from the bank on PK-6089a when it is installed. Use these bits only to pay for increasing your link. If you use any of these bits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
+Cost:		4	Artist:	Chris Vande Voort	Rarity:	Common
+
+Card Title:	Preying Mantis		Card Type:Resource-Connection
+Card Text:	Each of your turns, you may choose to gain an action. If you do, suffer 1 brain damage at the end of the turn. This damage cannot be prevented.
+Cost:		0	Artist:	Dan Frazier	Rarity:	Rare
+
+Card Title:	Quest for Cattekin	Card Type:Resource-Random
+Card Text:	At the start of each of your turns, roll a die. On a 6, trash Quest for Cattekin, and you gain an action on each of your turns for the remainder of the game. On a 1, suffer 1 brain damage. On a 2, suffer 1 Net damage. Damage from Quest for Cattekin cannot be prevented.
+Cost:		4	Artist:	Kevin Stein	Rarity:	Rare
+
+Card Title:	R&D Interface		Card Type:Hardware
+Card Text:	Whenever you access cards from R&D, access an additional card from R&D.
+Cost:		4	Artist:	John Park	Rarity:	Common
+
+
+
+
+
+Card Title:	Raven Microcyb Eagle	Card Type:Hardware-Deck
+Card Text:	Provides +1 MU. Prevents 1 Net damage each turn. Put [1] from the bank on Microcyb Eagle when it is installed. Use this bit only to pay for using icebreakers during runs. If you use the bit, replace it at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
+Cost:		6	Artist:	Mike Raabe	Rarity:	Common
+
+Card Title:	Raven Microcyb Owl	Card Type:Hardware-Deck-Stealth
+Card Text:	Provides +1 MU. Put [3] from the bank on Microcyb Owl when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
+Cost:		11	Artist:	Doug Shuler	Rarity:	Uncommon
+
+Card Title:	Record Reconstructor		Card Type:Hardware
+Card Text:	A: Make a run on the Archives. If run is successful, do not access cards from the Archives; instead, shuffle the face-up pile of the Archives and then put the top two cards from that pile on R&D.
+Cost:		0	Artist:	James Allen Higgins		Rarity:	Rare
+
+Card Title:	Restrictive Net Zoning		Card Type:Resource
+Card Text:	Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay [2], in addition to the normal cost, to install ice on that fort.
+Cost:		1	Artist:	Jonnie Wilder		Rarity:	Uncommon
+
+Card Title:	Rigged Investments	Card Type:Resource
+Card Text:	Put [12] from the bank on Rigged Investments when it is installed. At the start of each of your turns, take [1] from Investments. When all the bits have been removed, trash Rigged Investments.
+Cost:		4	Artist:	Armand Cabrera		Rarity:	Common
+
+Card Title:	Ronin Around		Card Type:Resource-BBS
+Card Text:	A: Look at the top five cards of your stack. You may bring any hardware cards among them into your hand. Pay [1] for each card taken in this way, and show those cards to the Corp. Shuffle the rest back into your stack.	A, [2]: Expose any card.
+Cost:		3	Artist:	Sue Ann Harkey		Rarity:	Rare
+
+Card Title:	The Shell Traders	Card Type:Resource
+Card Text:	A: Choose a program or hardware card from your hand. Set that card aside, and put a number of Shell counters on it equal to its installation cost. When the last Shell counter on that card has been removed, install that card, at no cost. Remove one Shell counter from one card at the start of each of your turns. [1]: Remove one Shell counter from a card.
+Cost:		0	Artist:	Mike Kimble	Rarity:	Rare
+
+Card Title:	The Short Circuit	Card Type:Resource-BBS
+Card Text:	A, [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.
+Cost:		1	Artist:	Ray Winninger		Rarity:	Common
+
+Card Title:	Short-Term Contract	Card Type:Resource-Position
+Card Text:	Put [12] from the bank on Short-Term Contract when it is installed. When all the bits have been 
+		removed, trash Short-Term Contract. A: Take [2] from Short-Term Contract. 
+Cost:		1	Artist:	James Allen Higgins	Rarity:	Common
+
+Card Title:	Silicon Saloon Franchise	Card Type:Resource-Position
+Card Text:	A: Gain [1] and draw one card.
+Cost:		8	Artist:	James Allen Higgins	Rarity:	Rare
+
+Card Title:	Smith's Pawnshop	Card Type:Resource-Connection-Unique
+Card Text:	At the start of each of your turns, you may trash one of your other installed cards to gain [2].
+Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.
+Cost:		0	Artist:	Glenn Kim	Rarity:	Uncommon
+
+Card Title:	The Springboard	Card Type:Resource-BBS
+Card Text:	[1]: +1 link. Use this ability only once during each trace attempt, and only after you and the Corp have revealed how much each of you spent.
+Cost:		0	Artist:	Sue Ann Harkey		Rarity:	Common
+
+Card Title:	Submarine Uplink	Card Type:Resource-Base Link
+Card Text:	[0]: Base link 4. [1]: +1 link. You may use Submarine Uplink only 	during a run. Using Submarine Uplink forces you to jack out after the current encounter ends. Use only one base link card for each trace attempt made against you.
+Cost:		0	Artist:	John Ramirez	Rarity:	Uncommon
+
+Card Title:	Technician Lover	Card Type:Resource
+Card Text:	A: Look at the top card of R&D.
+Cost:		2	Artist:	Randy Gallegos		Rarity:	Uncommon
+
+
+
+
+
+
+Card Title:	Techtronica [TM] Utility Suit		Card Type:Hardware-Deck
+Card Text:	Provides +1 MU. Prevents 1 meat damage each turn. Put [5] on Techtronica [TM] Utility Suit when it is installed. Use these bits only to pay for increasing 	your link. If you use any of these bits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
+Cost:		6	Artist:	Doug Shuler	Rarity:	Uncommon
+
+Card Title:	Top Runners' Conference	Card Type:Resource
+Card Text:	Gain [2] at the start of each of your turns. Trash Top Runners' Conference when you make a run.
+Cost:		0	Artist:	James Allen Higgins	Rarity:	Rare
+
+Card Title:	Trauma Team [TM]	Card Type:Resource
+Card Text:	Put two Trauma counters on Trauma Team [TM] 	when it is installed. 	Trauma counter: Prevent 1 meat damage. A: Put one Trauma counter on Trauma Team [TM].
+Cost:		0	Artist:	Mike Kimble	Rarity:	Uncommon
+
+Card Title:	Tycho Mem Chip		Card Type:Hardware-Chip
+Card Text:	Provides +3 MU.
+Cost:		5	Artist:	Lawrence Brown		Rarity:	Common
+
+Card Title:	Umbrella Policy	Card Type:Resource
+Card Text:	[T]: Prevent an installed program or hardware card from being trashed.
+Cost:		0	Artist:	Zak Plucinski		Rarity:	Uncommon
+
+Card Title:	Wilson, Weeflerunner Apprentice	Card Type:Resource
+Card Text:	Each of your turns, you may choose to gain an action, which you may use only to make a run. You 
+cannot spend more than [3] during that run to pay for using icebreakers or increasing your link. Use this ability only once per turn and only during your turn. [T]: Avoid receiving a tag.
+		[T]: Prevent any amount of meat damage.
+Cost:		4	Artist:	Dan Frazier		Rarity:	Uncommon
+
+Card Title:	WuTech Mem Chip	Card Type:Hardware-Chip
+Card Text:	Provides +1 MU.
+Cost:		1	Artist:	Jonnie Wilder		Rarity:	Common
+
+Card Title:	Zetatech Mem Chip	Card Type:Hardware-Chip
+Card Text:	Provides +2 MU.
+Cost:		3	Artist:	Lawrence Brown		Rarity:	Common
+
+Card Title:	ZZ22 Speed Chip	Card Type:Hardware-Chip
+Card Text:	Put [2] from the bank on ZZ22 Speed Chip when it is installed. Use these bits only to pay for using killers during runs. If you use any of these bits, replace them at the start of your next turn.
+Cost:		5	Artist:	Jonnie Wilder		Rarity:	Common
+
+
+(C) 1996 Wizards of the Coast, Inc. 
+Cyberpunk 2020, Cyberpunk, and Netrunner therein are trademarks of R.
+Talsorian Games, Inc. Copyrights in certain text, graphic designs,
+characters, and places derived from Cyberpunk 2020(R) are the property
+of R. Talsorian Games, Inc., and are produced under license to Wizards 
+of the Coast, Inc. Deckmaster, WIZARDS OF THE COAST, and Proteus are
+trademarks of Wizards of the Coast, Inc. 
+
+10
+

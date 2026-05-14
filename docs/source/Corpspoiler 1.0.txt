@@ -1,0 +1,816 @@
+﻿Netrunner (R) v1.0 Corporation Card List. Wizards of the Coast, Inc. (Released April 1996)
+
+374 Cards Total (55 Rares, 66 Uncommons, 44 Commons, 22 Vitals)
+
+*187 Corp Cards (33 Agenda, 60 ICE, 27 Operations, 41 Nodes, 26 Upgrades)
+
+Key: [X] - Number of Bits, A: - Action, * - Subroutine, 0 T - Cost to Trash, n/a - Not Applicable
+
+Agenda (Corporation)
+
+Card Title:	AI Chief Financial Officer        Card Type:	Agenda-Asset
+Card Text:	A: Shuffle cards stored in HQ and the Archives into R&D; then draw five cards.
+Diff./Agenda:	5/2	Artist:	Pete Venters	Rarity:	Rare
+
+Card Title:	Artificial Security Directors		Card Type: Agenda-Research
+Card Text:	Difficulty of Black Ops agendas is reduced by 1.
+Diff./Agenda:	3/1	Artist:	Fellwalker & Tolen	Rarity:	Rare
+
+Card Title:	Bioweapons Engineering		Card Type:Agenda-Research
+Card Text:	Each source of meat damage inflicts +1 meat damage.
+Diff./Agenda:	4/3	Artist:	Doug Chaffee	Rarity:	Rare
+
+Card Title:	Black Ice Quality Assurance	Card Type: Agenda-Research-Black Ops
+Card Text:	All black ice has +2 strength.
+Diff./Agenda:	5/2	Artist:	James Allen Higgins	Rarity:	Rare
+
+Card Title:	Corporate Boon		Card Type:	Agenda-Asset
+Card Text:	Put four Boon counters on Corporate Boon when you score it. Boon Counter: Gain an action. Use this ability only once per turn and only during your turn.
+Diff./Agenda:	6/2	Artist:	Mike Kimble	Rarity:	Vital
+
+Card Title:	Corporate Coup		Card Type: Agenda-Black Ops
+Card Text:	Put [15] from the bank on Corporate Coup when you score it. A: Take [3] from Corporate Coup, if it has any bits.
+Diff./Agenda:	5/2	Artist:	Dave Pilurs	Rarity:	Vital
+
+Card Title:	Corporate Downsizing		Card Type: Agenda-Gray Ops
+Card Text:	When you score Corporate Downsizing, show to Runner any number of agenda cards stored in HQ. 
+		Gain bits equal to twice the combined agenda points of these cards; then shuffle them into R&D.
+Diff./Agenda:	3/2	Artist:	James Allen Higgins	Rarity:	Vital
+
+Card Title:	Corporate Retreat	Card Type: Agenda-Gray Ops
+Card Text:	You lose the following ability as soon as you rez or install any card. A: Gain [2].
+Diff./Agenda:	4/3	Artist:	Doug Keith	Rarity:	Vital
+
+Card Title:	Corporate War		Card Type: Agenda-Black Ops
+Card Text:	If you have [12] or more bits in your pool when you score Corporate War, gain [12]; otherwise,   lose all bits.
+Diff./Agenda:	3/3	Artist:	Greg Staples	Rarity:	Vital
+
+Card Title:	Data Fort Reclamation		Card Type:Agenda-Gray Ops
+Card Text:	Gain [10] and choose up to four cards stored in HQ when you score Data Fort Reclamation. Create a new data fort using the cards chosen. Install the cards one at a time; you may rez them when you install them. Then, return to the bank any of the [10] not spent.
+Diff./Agenda:	4/2	Artist:	Jonnie Wilder		Rarity:	Vital
+
+Card Title:	Detroit Police Contract	Card Type: Agenda-Black Ops
+Card Text:	Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police 
+		Contract, if it has any bits, at the start of each of your turns.
+Diff./Agenda:	4/1	Artist: Doug Chaffee	Rarity:	Vital
+
+Card Title:	Employee Empowerment	Card Type: Agenda-Gray Ops
+Card Text:	You may choose to draw an additional card at the start of each of your turns. A: Draw two cards.
+Diff./Agenda:	4/3	Artist: Dan Frazier 	Rarity: Vital
+
+Card Title:	Encryption Breakthrough 	Card Type: Agenda-Research
+Card Text:	All code gates have +1 strength. When you score Encryption Breakthrough, reveal as many code 
+		gates as you wish. Then, gain [1] for each revealed or rezzed code gate.
+Diff./Agenda:	5/2	Artist:	Kim Francisco		Rarity: Rare
+
+Card Title:	Executive Extraction		Card Type: Agenda-Black Ops
+Card Text:	Difficulty of Gray Ops agendas is reduced by 1.
+Diff./Agenda:	3/1	Artist: Dan Frazier	Rarity:	Rare
+
+Card Title:	Genetics-Visionary Acquisition	Card Type: Agenda-Gray Ops
+Card Text:	Difficulty of Research agendas is reduced by 1.
+Diff./Agenda:	3/1	Artist:	Doug Shuler	Rarity:	Rare
+
+Card Title:	Hostile Takeover	Card Type: Agenda-Gray Ops
+Card Text:	Gain [5] when you score Hostile Takeover.
+Diff./Agenda:	3/1	Artist:	 Doug Shuler	Rarity: Vital
+
+
+Card Title:	Ice Transmutation	Card Type: Agenda-Research
+Card Text:	Choose a piece of rezzed ice when you score Ice Transmutation. That ice now has +1 strength, and 
+each subroutine on it is repeated once. Treat this as if each repeated subroutine appeared immediately after the original subroutine.
+Diff./Agenda:	5/3	Artist:	T. Brian Wagner	Rarity:	Vital
+
+Card Title:	Main-Office Relocation		Card Type:Agenda-Gray Ops
+Card Text:	Hand size +2
+Diff./Agenda:	4/3	Artist:	Mike Kimble	Rarity:	Vital
+
+Card Title:	Marine Arcology	Card Type:Agenda-Asset
+Card Text:	A, A: Gain [3].
+Diff./Agenda:	3/2	Artist:	Ernie Chan	Rarity:	Vital
+
+Card Title:	Netwatch Operations Office	Card Type:Agenda-Asset
+Card Text:	A:Trace 2 -If trace is successful, give Runner a tag.
+Diff./Agenda:	5/2	Artist:	Christina Wald		Rarity:	Vital
+
+Card Title:	On-Call Solo Team	Card Type:Agenda-Asset
+Card Text:	A: Do 1 meat damage. Use this ability only if Runner is tagged.
+Diff./Agenda:	4/3	Artist:	Matt Wilson	Rarity:	Vital
+
+Card Title:	Political Coup		Card Type:Agenda-Black Ops
+Card Text:	Put [12] from the bank on Political Coup when you score it. 
+         A: Take [3] from Political Coup, if it has any bits.
+Diff./Agenda:	4/2	Artist:	Ernie Chan	Rarity:	Vital
+
+Card Title:	Political Overthrow	Card Type:Agenda-Black Ops
+Card Text:	A: Gain [3].
+Diff./Agenda:	9/6	Artist: Doug Chaffee	Rarity:	Rare
+
+Card Title:	Polymer Breakthrough	Card Type:Agenda-Research
+Card Text:	Gain [1] at the start of each of your turns.
+Diff./Agenda:	6/3	Artist:	Kevin Taylor	Rarity:	Vital
+
+Card Title:	Priority Requisition	Card Type:Agenda-Gray Ops
+Card Text:	You may rez a piece of ice, at no cost, when you score Priority Requisition.
+Diff./Agenda:	5/3	Artist:	Kevin Stein	Rarity:	Vital
+
+Card Title:	Private Cybernet Police	Card Type:Agenda-Asset
+Card Text:	A:Trace 5 -If trace is successful, give Runner a tag.
+Diff./Agenda:	7/2	Artist:	Brian Booker	Rarity:	Vital
+
+Card Title:	Project Babylon	Card Type:Agenda-Black Ops
+Card Text:	Score 1 additional agenda point for every two advancement counters over Project Babylon's 
+		difficulty that are on Project Babylon when you score it.
+Diff./Agenda:	3/1	Artist:	Greg Staples	Rarity:	Vital
+
+Card Title:	Security Net Optimization	Card Type:Agenda-Gray Ops
+Card Text:	Choose a fort when you score Security Net Optimization. That fort gives all ice installed on it +1 strength.
+Diff./Agenda:	5/3	Artist:	Chris Vande Voort	Rarity:	Vital
+
+Card Title:	Security Purge		Card Type:Agenda-Gray Ops
+Card Text:	Show the top three cards of R&D to Runner when you score Security Purge. If any of those cards are ice, install and rez them, at no cost. Trash the rest of those cards.
+Diff./Agenda:	3/2	Artist:	Ramon Mascarenas	Rarity:	Rare
+
+Card Title:	Strike Force Kali	Card Type:Agenda-Asset
+Card Text:	A: Do 2 meat damage. Use this ability only if Runner is tagged.
+Diff./Agenda:	6/3	Artist:	Richard Thomas		Rarity:	Rare
+
+Card Title:	Subsidiary Branch	Card Type:Agenda-Gray Ops
+Card Text:	Gain an action during each of your turns.
+Diff./Agenda:	6/1	Artist:	Anthony Petrarca	Rarity:	Vital
+
+Card Title:	Superior Net Barriers		Card Type:Agenda-Research
+Card Text:	All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you  wish. Then, gain [1] for each revealed or rezzed wall.
+Diff./Agenda:	6/3	Artist:	Ramon Mascarenas	Rarity:	Rare
+
+Card Title:	Tycho Extension	Card Type:Agenda-Asset
+Diff./Agenda:	4/4
+Card Text:	n/a	Artist:	Randy Gallegos		Rarity:	Vital
+
+
+ICE (Corporation)
+
+Card Title:	Asp	Card Type:Ice-Sentry-Flatline
+Card Text:	*Trace 5-If trace is successful, end the run, and Runner cannot run again until Runner takes an action to pay [1].
+Cost/Strength:	4/4	Artist:	Mark Poole	Rarity:	Common
+
+Card Title:	Ball and Chain		Card Type:Ice-Code Gate
+Card Text:	*For the remainder of the run, Runner must pay [2] when encountering a piece of ice, in addition to any other costs, or end the run.
+Cost/Strength:	2/5	Artist:	Robert McLees		Rarity:	Uncommon
+
+Card Title:	Banpei		Card Type:Ice-Sentry-Killer
+Card Text:	*Trash a program. *End the run.
+Cost/Strength:	4/0	Artist:	Doug Shuler	Rarity:	Common
+
+Card Title:	Bolter Cluster		Card Type:Ice-Sentry-AP-Hellbolt
+Card Text:	*Do 4 Net damage. *Runner cannot break any subroutines of the next piece of ice encountered during the run.
+Cost/Strength:	7/4	Artist:	Norm Dwyer	Rarity:	Common
+
+Card Title:	Canis Major	Card Type:Ice-Sentry-Watchdog
+Card Text:	*For the remainder of the run, all further ice is encountered at +2 strength.
+Cost/Strength:	0/4	Artist:	Ash Arnett	Rarity:	Uncommon
+
+Card Title:	Canis Minor	Card Type:Ice-Sentry-Watchdog
+Card Text:	*For the remainder of the run, all further ice is encountered at +1 strength.
+Cost/Strength:	0/5	Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Cerberus	Card Type:Ice-Sentry-Black Ice-AP-Hellhound
+Card Text:	*Do 3 Net damage. *Trace 5-If trace is successful, give Runner a Cerberus	counter. Each Cerberus counter does 2 Net damage at the start of each run. Runner may remove a Cerberus counter by taking an action to spend [4]. *End the run.
+Cost/Strength:	11/5	Artist:	Robert McLees	Rarity:	Common
+
+Card Title:	Cinderella	Card Type:Ice-Sentry-Black Ice-AP-Firestarter
+Card Text:	*Trace 6-If trace is successful, end the run, trash a piece of hardware, and do 2 meat damage. This damage cannot be prevented.
+Cost/Strength:	8/6	Artist:	Kaja Foglio	Rarity:	Uncommon
+
+Card Title:	Code Corpse	Card Type:Ice-Sentry-Ice-AP-Zombie
+Card Text:	*Do 1 brain damage. *Do 1 brain damage. *End the run.
+Cost/Strength:	10/5	Artist:	Brian Booker	Rarity:	Uncommon
+
+Card Title:	Cortical Scanner	Card Type:Ice-Code Gate
+Card Text:	*End the run. *End the run. *End the run.
+Cost/Strength:	7/3	Artist:	Robert McLees	Rarity:	Rare
+
+Card Title:	Cortical Scrub		Card Type:Ice-Sentry-Black Ice-AP-Brainwipe
+Card Text:	*Do 1 brain damage. *End the run.
+Cost/Strength:	7/3	Artist:	Mark Tedin	Rarity:	Common
+
+Card Title:	Crystal Wall	Card Type:Ice-Wall
+Card Text:	*End the run.
+Cost/Strength:	4/3	Artist:	John Casbeer	Rarity:	Common
+
+Card Title:	D' Arc Knight		Card Type:Ice-Sentry-Killer
+Card Text:	*Trash a program. *End the run.
+Cost/Strength:	6/2	Artist:	Doug Shuler	Rarity:	Common
+
+Card Title:	Data Darts	Card Type:Ice-Sentry-AP-Hellbolt
+Card Text:	*Do 3 Net damage. *Runner cannot break any subroutines of the next piece of ice encountered during the run.
+Cost/Strength:	5/3	Artist:	Robert McLees	Rarity:	Uncommon
+
+Card Title:	Data Naga	Card Type:Ice-Sentry-Killer
+Card Text:	*Trash a program. *End the run.
+Cost/Strength:	9/5	Artist:	Kaja Foglio	Rarity:	Uncommon
+
+Card Title:	Data Raven	Card Type:Ice-Sentry
+Card Text:	*Trace 5 -If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each of his or her turns. Runner may remove a Data Raven counter by taking an action to pay [1].
+Cost/Strength:	5/5	Artist:	Matt Milberger		Rarity:	Uncommon
+
+Card Title:	Data Wall	Card Type:Ice-Wall
+Card Text:	*End the run.
+Cost/Strength:	1/0	Artist:	Jonnie Wilder	Rarity:	Common
+Card Title:	Data Wall 2.0	Card Type:Ice-Wall
+Card Text:	*End the run.
+Cost/Strength:	2/1	Artist:	Jonnie Wilder	Rarity:	Common
+
+Card Title:	Endless Corridor	Card Type:Ice-Code Gate
+Card Text:	*End the run. *End the run.
+Cost/Strength:	4/2	Artist:	Anthony Petrarca	Rarity:	Rare
+
+Card Title:	Fang	Card Type:Ice-Sentry-Pit Bull
+Card Text:	*Trace 4-If trace is successful, end the run, and Runner cannot run again until Runner takes an 
+		action to pay [2].
+Cost/Strength:	5/4	Artist:	Kim Francisco		Rarity:	Common
+
+Card Title:	Fang 2.0	Card Type:Ice-Sentry-Pit Bull
+Card Text:	*Trace 5-If trace is successful, end the run, and Runner cannot run again until Runner takes an 
+		action to pay [2].
+Cost/Strength:	6/5	Artist:	Anson Maddocks		Rarity:	Common
+
+Card Title:	Fatal Attractor	Card Type:Ice-Sentry-Black Ice-AP
+Card Text:	*The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner 
+		breaks all subroutines of that piece of ice.
+Cost/Strength:	1/4	Artist:	Mark Tedin	Rarity:	Rare
+
+Card Title:	Fetch 4.0.1	Card Type:Ice-Sentry-Bloodhound
+Card Text:	*Trace 3-If trace is successful, give Runner a tag.
+Cost/Strength:	0/3	Artist:	Kim Francisco	Rarity:	Common
+
+Card Title:	Filter	Card Type:Ice-Code Gate
+Card Text:	*End the run.
+Cost/Strength:	0/0	Artist:	Daniel Gelon	Rarity:	Common
+
+Card Title:	Fire Wall	Card Type:Ice-Wall
+Card Text:	*End the run.
+Cost/Strength:	5/4	Artist:	Kim Francisco	Rarity:	Common
+
+Card Title:	Fragmentation Storm	Card Type:Ice-Sentry-Flatline
+Card Text:	*Trace 4-If trace is successful, end the run and trash a program, and Runner cannot run again until Runner takes an action to pay [1].
+Cost/Strength:	6/4	Artist:	Fellwalker & Tolen	Rarity:	Uncommon
+
+Card Title:	Haunting Inquisition	Card Type:Ice-Code Gate
+Card Text:	*Runner cannot make another run during his or her next six actions. *End the run.
+Cost/Strength:	8/6	Artist:	Robert McLees	Rarity:	Rare
+
+Card Title:	Homewrecker (TM)	Card Type:Ice-Sentry-Black Ice-AP-Firestarter
+Card Text:	*Trace 5-If trace is successful, end the run, trash a piece of hardware, and do 2 meat damage. This damage cannot be prevented.
+Cost/Strength:	7/5	Artist:	Mark Tedin	Rarity:	Common
+
+Card Title:	Hunter	Card Type:Ice-Sentry-Bloodhound
+Card Text:	*Trace 5-If trace is succesful, give Runner a tag.
+Cost/Strength:	2/5	Artist:	Kim Francisco	Rarity:	Uncommon
+
+Card Title:	Ice Pick Willie	Card Type:Ice-Sentry-Killer
+Card Text:	*Trash a program. *End the run.
+Cost/Strength:	5/1	Artist:	Mark Poole	Rarity:	Common
+
+Card Title:	Jack Attack	Card Type:Ice-Sentry-AP
+Card Text:	*For the remainder of the run, Runner cannot jack out.
+		*Trace 5-If trace is successful, give Runner a tag.
+Cost/Strength:	3/3	Artist:	Anson Maddocks		Rarity:	Uncommon
+
+Card Title:	Keeper		Card Type:Ice-Code Gate
+Card Text:	*End the run.
+Cost/Strength:	4/4	Artist:	Daniel Gelon	Rarity:	Common
+
+Card Title:	Laser Wire	Card Type:Ice-Wall
+Card Text:	*Do 1 Net damage. *End the run.
+Cost/Strength:	4/2	Artist:	Kim Francisco	Rarity:	Rare
+
+Card Title:	Liche	Card Type:Ice-Sentry-Black Ice-AP
+Card Text:	*Do 1 brain damage. *Do 1 brain damage. *Do 1 brain damage. *End the run.
+Cost/Strength:	14/6	Artist:	Mark Poole	Rarity:	Uncommon
+
+Card Title:	Mastiff		Card Type:Ice-Sentry-Black Ice-AP-Hellhound-Watchdog
+Card Text:	*Do 1 brain damage. *Do 1 Net damage. *For the remainder of the run, all ice is encountered at 
++1 strength. *-If trace is successful, give Runner a Mastiff counter. Each Mastiff counter does 1 brain damage at the start of each run. Runner may remove a Mastiff counter by taking an action to spend [4]. *End the run.
+Cost/Strength:	12/5	Artist:	Doug Shuler	Rarity:	Uncommon
+
+Card Title:	Mazer	Card Type:Ice-Code Gate
+Card Text:	*End the run.
+Cost/Strength:	5/5	Artist:	Daniel Gelon	Rarity:	Uncommon
+
+Card Title:	Nerve Labyrinth	Card Type:Ice-Code Gate
+Card Text:	*Do 2 Net damage. *End the run.
+Cost/Strength:	6/4	Artist:	Anson Maddocks		Rarity:	Rare
+
+Card Title:	Neural Blade		Card Type:Ice-Sentry-AP-Sword
+Card Text:	*Do 1 Net damage. *Runner cannot break any subroutines of the next piece of ice encountered during the run.
+Cost/Strength:	4/4	Artist:	Mark Poole	Rarity:	Common
+
+
+Card Title:	π in the 'Face
+Card Type:	Ice-Sentry-DecKrash
+Card Text:	*End the run.
+Cost/Strength:	5/3	Artist:	Robert McLees	Rarity:	Common
+
+Card Title:	Pocket Virtual Reality		Card Type:Ice-Sentry
+Card Text:	*Trace 6-If trace is successful, give Runner a tag. *Trace 6-If trace is successful, give Runner a tag. Whenever Pocket Virtual Reality is encountered, gain [4]. Use these bits only to pay for the above traces. When the encounter ends, return to the bank any of the [4] you did not spend.
+Cost/Strength:	7/4	Artist:	Fellwalker & Tolen	Rarity:	Uncommon
+
+Card Title:	Quandary	Card Type:Ice-Code Gate
+Card Text:	*End the run.
+Cost/Strength:	2/2	Artist:	Daniel Gelon	Rarity:	Common
+
+Card Title:	Razor Wire	Card Type:Ice-Wall
+Card Text:	*Do 2 Net damage. *End the run.
+Cost/Strength:	6/3	Artist:	John Casebeer	Rarity:	Rare
+
+Card Title:	Reinforced Wall	Card Type:Ice-Wall
+Card Text:	*End the run. *End the run.
+Cost/Strength:	8/4	Artist:	Kim Francisco	Rarity:	Rare
+
+Card Title:	Rex	Card Type:Ice-Sentry-Pit Bull
+Card Text:	*Trace 3-If trace is successful, end the run, and Runner cannot run again until Runner takes an 
+		action to pay [2].
+Cost/Strength:	4/3	Artist:	Brian Booker	Rarity:	Common
+
+Card Title:	Rock Is Strong		Card Type:Ice-Wall
+Card Text:	*End the run.
+Cost/Strength:	6/5	Artist:	Anson Maddocks		Rarity:	Uncommon
+
+Card Title:	Scramble	Card Type:Ice-Code Gate
+Card Text:	*End the run.
+Cost/Strength:	3/3	Artist:	Daniel Gelon	Rarity:	Common
+
+Card Title:	Sentinels Prime	Card Type:Ice-Sentry-Killer
+Card Text:	*Trash a program. *End the run.
+Cost/Strength:	8/4	Artist:	Kevin Taylor	Rarity:	Uncommon
+
+Card Title:	Shock.r		Card Type:Ice-Sentry-AP-Stun
+Card Text:	*Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.
+Cost/Strength:	1/3	Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Shotgun Wire	Card Type:Ice-Wall
+Card Text:	*Do 2 Net damage. *End the run.
+Cost/Strength:	8/5	Artist:	Kim Francisco	Rarity:	Rare
+
+Card Title:	Sleeper		Card Type:Ice-Code Gate
+Card Text:	*End the run.
+Cost/Strength:	1/1	Artist:	Daniel Gelon	Rarity:	Common
+
+Card Title:	TKO 2.0		Card Type:Ice-Sentry-AP-Knockout
+Card Text:	End the run, and Runner forgoes his or her next action.
+Cost/Strength:	7/4	Artist:	John Casebeer		Rarity:	Common
+
+Card Title:	Too Many Doors		Card Type:Ice-Sentry
+Card Text:	*Secretly spend [0], [1], or [2]; Runner does the same. Then you and Runner reveal how much each 
+		of you spent. End the run unless you spent as many bits as Runner spent.
+Cost/Strength:	1/3	Artist:	Pete Venters		Rarity:	Rare
+
+Card Title:	Triggerman	Card Type:Ice-Sentry-Killer
+Card Text:	*Trash a program. *End the run.
+Cost/Strength:	7/3	Artist:	Robert McLees		Rarity:	Common
+
+Card Title:	Tutor	Card Type:Ice-Code Gate
+Card Text:	*For the remainder of the run, all ice encountered has an additional subroutine, "*End the run," after all other subroutines.
+Cost/Strength:	4/5	Artist:	Roger Coad	Rarity:	Rare
+
+Card Title:	Vacuum Link	Card Type:Ice-Sentry-Random
+Card Text:	*Roll a die. If you roll a 1, 2, or 3, Runner resumes the run from that many pieces of rezzed ice back, or jacks out. If there are not that many pieces of ice, Runner returns to the first piece of ice.
+Cost/Strength:	3/5	Artist:	Robert McLees	Rarity:	Rare
+
+Card Title:	Viral 15	Card Type:Ice-Sentry
+Card Text:	*For the remainder of the run, Runner must pay [1] to jack out, in addition to any other costs.
+*For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Viral 15, unless Runner jacks out.
+Cost/Strength:	5/3	Artist:	Robert McLees	Rarity:	Uncommon
+
+Card Title:	Virizz		Card Type:Ice-Sentry
+Card Text:	*For the remainder of the run, Runner must pay an additional [1] to break each ice subroutine.
+Cost/Strength:	2/4	Artist:	Doug Shuler	Rarity:	Uncommon
+
+Card Title:	Wall of Ice	Card Type:Ice-Wall
+Card Text:	*Do 2 Net damage. *Do 2 Net damage. *End the run. *End the run.
+Cost/Strength:	13/6	Artist:	Mark Tedin	Rarity:	Rare
+
+Card Title:	Wall of Static		Card Type:Ice-Wall
+Card Text:	*End the run.
+Cost/Strength:	3/2	Artist:	Kim Francisco		Rarity:	Common
+
+Card Title:	Zombie		Card Type:Ice-Sentry-Black
+Card Text:	*Do 1 brain damage. *Do 1 brain damage. *End the run.
+Cost/Strength:	9/4	Artist:	Pete Venters	Rarity:	Common
+
+Operations (Corporation)
+
+Card Title:	Accounts Receivable		Card Type:Operation-Transactions
+Card Text:	Gain [9].
+Cost:		5	Artist:	Zak Plucinski	Rarity:	Common
+
+Card Title:	Annual Reviews		Card Type:Operation
+Card Text:	Draw three cards.
+Cost:		0	Artist:	John Ramirez	Rarity:	Uncommon
+
+Card Title:	Audit of Call Records 		Card Type:Operation
+Card Text:	Play only if Runner attempted two or more runs during his or her last turn.  Trace 5-If trace is successful, give Runner a tag.
+Cost:		0	Artist:	Tony Luke	Rarity:	Common
+
+Card Title:	Chance Observation	Card Type:Operation
+Card Text:	Play only if Runner attempted a run during his or her last turn. 
+		Trace 5-If trace is successful, give Runner a tag.
+Cost:		2	Artist:	John Ramirez	Rarity:	Common
+
+Card Title:	Closed Accounts	Card Type:Operation-Gray Ops
+Card Text:	Play only if Runner is tagged. Runner loses all bits.
+Cost:		1	Artist:	Randy Gallegos		Rarity:	Uncommon
+
+Card Title:	Corporate Detective Agency	Card Type:Operation
+Card Text:	Play only if Runner is tagged. Trash up to two resources, at no cost.
+Cost:		1	Artist:	Zak Plucinski		Rarity:	Uncommon
+
+Card Title:	Datapool(R) by Zetatech	Card Type:Operation-Gray Ops
+Card Text:	Play only if Runner is tagged. Give Runner two tags.
+Cost:		1	Artist:	James Allen Higgins	Rarity:	Uncommon
+
+Card Title:	Day Shift	Card Type:Operation
+Card Text:	Draw two cards and gain [1].
+Cost:		0	Artist:	Zak Plucinski	Rarity:	Uncommon
+
+Card Title:	Edgerunner, Inc., Temps	Card Type:Operation
+Card Text:	Gain three consecutive actions, which you may use only to install cards. You are not required to take all three of these actions.
+Cost:		1	Artist:	Zak Plucinski	Rarity:	Uncommon
+
+Card Title:	Efficiency Experts	Card Type:Operation-Transactions
+Card Text:	Gain [3].
+Cost:		0	Artist:	John Ramirez	Rarity:	Common
+
+Card Title:	Falsified-Transactions Expert		Card Type:Operation
+Card Text:	Move up to three advancement counters from one card to another installed card that can be advanced.
+Cost:		1	Artist:	Craig Gilmore	Rarity:	Rare
+
+Card Title:	Management Shake-Up	Card Type:Operation
+Card Text:	Add three advancement counters to any combination of installed cards that can be advanced.
+Cost:		10	Artist:	Zak Plucinski	Rarity:	Common
+
+Card Title:	Netwatch Credit Voucher	Card Type:Operation-Gray Ops
+Card Text:	Play only if Runner is tagged. Give Runner a tag, and gain [1].
+Cost:		0	Artist:	Margaret Organ-Kean	Rarity:	Common
+
+Card Title:	New Blood	Card Title:Operation
+Card Text:	Conceal all revealed but unrezzed ice; then rearrange your installed ice by swapping pairs of ice while Runner looks away.
+Cost:		0	Artist:	Mike Kimble	Rarity:	Rare
+
+Card Title:	Night Shift	Card Title:Operation
+Card Text:	Gain [2] and draw one card.
+Cost:		0	Artist:	Zak Plucinski	Rarity:	Common
+
+Card Title:	Off-Site Backups	Card Type:Operation
+Card Text:	Bring any card from the Archives into HQ.
+Cost:		0	Artist:	Zak Plucinski	Rarity:	Uncommon
+
+Card Title:	Overtime Incentives	Card Type:Operation
+Card Text:	Gain two actions.
+Cost:		4	Artist:	Zak Plucinski	Rarity:	Uncommon
+
+Card Title:	Planning Consultants	Card Type:Operation-Gray Ops
+Card Text:	Look at the top five cards of R&D and arrange them in any order you choose.
+Cost:		0	Artist:	Christina Wald		Rarity:	Common
+
+Card Title:	Power Grid Overload	Card Type:Operation-Gray Ops
+Card Text:	Play only if Runner is tagged. Trash X pieces of hardware, other than cybernetics.
+Cost:		X	Artist:	Randy Gallegos		Rarity:	Uncommon
+
+Card Title:	Project Consultants	Card Type:Operation
+Card Text:	Add four advancement counters to any combination of installed cards that can be advanced.
+Cost:		12	Artist:	Mike Raabe	Rarity:	Uncommon
+
+Card Title:	Punitive Counterstrike		Card Type:Operation-Black Ops
+Card Text:	Play only if Runner is tagged. Do 2 meat damage.
+Cost:		0	Artist:	Dave Pilurs	Rarity:	Uncommon
+
+Card Title:	Scorched Earth		Card Type:Operation-Black Ops
+Card Text:	Play only if Runner is tagged. Do 4 meat damage.
+Cost:		3	Artist:	Greg Staples	Rarity:	Uncommon
+
+Card Title:	Silver Lining Recovery Protocol	Card Type:Operation
+Card Text:	If any agendas were stolen during Runner's last turn, gain bits equal to three times the number of advancement counters those agendas had.
+Cost:		0	Artist:	Jonnie Wilder	Rarity:	Rare
+
+Card Title:	Systematic Layoffs	Card Type:Operation
+Card Text:	Add two advancement counters to any combination of installed cards that can be advanced.
+Cost:		5	Artist:	Zak Plucinski	Rarity:	Common
+
+Card Title:	Team Restructuring	Card Type:Operation	
+Card Text:	Add one advancement counter to each of up to two installed cards that can be advanced.
+Cost:		1	Artist:	Craig Gilmore	Rarity:	Uncommon
+
+Card Title:	Trojan Horse	Card Type:Operation
+Card Text:	Play only if Runner stole any agendas during his or her last turn. Give Runner a tag.
+Cost:		2	Artist:	Mike Kimble	Rarity:	Common
+
+Card Title:	Urban Renewal	Card Type:Operation-Black Ops
+Card Text:	Play only if Runner is tagged. Do 5 meat damage.
+Cost:		6	Artist:	Doug Chaffee	Rarity:	Common
+
+
+
+Nodes/Upgrades (Corporation)
+
+Card Title:	Aardvark	Card Type:Upgrade
+Card Text:	Runner cannot use worms during runs on this fort. If Runner uses a worm during a run on this fort 
+before Aardvark is rezzed, you may rez Aardvark to trash that worm, and any bits spent using that worm on the current piece of ice are lost to no effect. Runner may then use further icebreakers to break the ice.
+Cost/Trash:	0/4 T	Artist:	Fellwalker & Tolen	Rarity:	Rare
+
+Card Title:	ACME Savings and Loan		Card Type:Node-Transactions
+Card Text:	Rezzing ACME S&L costs 1 agenda point, in addition to the normal cost. When you rez ACME S&L, gain [12] and trash ACME S&L. For the remainder of the game, pay [1] at the end of each of your turns, or lose the game. You can remove this effect, and score 1 agenda point, by taking an action to pay [12].
+Cost/Trash:	0/0 T		Artist:	Ramon Mascarenas	Rarity:	Uncommon
+
+Card Title:	Antiquated Interface Routines		Card Type:Upgrade
+Card Text:	All ice on this fort has +1 strength.
+Cost/Trash:	2/1 T		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	BBS Whispering Campaign	Card Type:Node-Advertisement
+Card Text:	Put [16] from the bank on BBS Whispering Campaign when you rez it.  When all the bits have 
+		been removed, trash BBS Whispering Campaign. A: Take [2] from BBS Whispering Campaign.
+Cost/Trash:	0/4 T		Artist:	Kevin Taylor	Rarity:	Common
+
+Card Title:	Bizarre Encryption Scheme	Card Type:Upgrade
+Card Text:	Runner does not score any agenda (or agendas) during a run in which Bizarre Encryption Scheme is 
+accessed; return that agenda to the fort instead. Runner scores the agenda at the start of his or her next turn if neither you nor Runner has scored it by then. This does not affect any further runs.
+Cost/Trash:	0/1 T		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Blood Cat	Card Type:Node-AI
+Card Text:	A:Trace 5 -If trace is successful, give Runner a tag.
+Cost/Trash:	6/0 T		Artist:	Larry Friedman		Rarity:	Rare
+
+Card Title:	Braindance Campaign		Card Type:Node-Advertisement-Gray Ops
+Card Text:	Put [12] from the bank on Braindance Campaign when you rez it. Take [2] from Braindance Campaign 
+at the start of each of your turns. When all the bits have been removed, trash Braindance Campaign.
+Cost/Trash:	6/7 T		Artist:	Heather Hudson		Rarity:	Common
+
+Card Title:	Chester Mix	Card Type:Upgrade-Sysop
+Card Text:	Cost to install ice on this fort is reduced by [2].
+Cost/Trash:	0/3 T		Artist:	Lawrence Snelly	Rarity:	Rare
+
+Card Title:	Chicago Branch		Card Type:Node-Asset
+Card Text:	A, [3]: Add two advancement counters to an installed card that can be advanced.
+Cost/Trash:	2/1 T		Artist:	Anthony Petrarca	Rarity:	Uncommon
+
+Card Title:	Chimera		Card Type:Upgrade-Ambush
+Card Text:	When Runner accesses Chimera, trash a daemon.
+Cost/Trash:	2/3 T		Artist:	Larry Friedman		Rarity:	Rare
+
+Card Title:	City Surveillance	Card Type:Node-Gray Ops
+Card Text:	For each card Runner draws, give Runner a tag unless Runner pays [1], in addition to any other 
+		costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.
+Cost/Trash:	1/2 T		Artist:	Sue Ann Harkey		Rarity:	Rare
+
+Card Title:	Corporate Negotiating Center		Card Type:Node-Asset
+Card Text:	At the start of each of your turns, gain [1] for each agenda card stored in HQ that you show to Runner.
+Cost/Trash:	0/3 T		Artist:	Roger Coad	Rarity:	Rare
+
+Card Title:	Corprunner's Shattered Remains	Card Type:Node-Ambush
+Card Text:	You may advance Shattered Remains before and after you rez it. When Runner accesses Shattered 
+		Remains, it destroys one piece of hardware for each advancement counter on it.
+Cost/Trash:	2/0 T		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Cowboy Sysop	Card Type:Node
+Card Text:	A: Choose one of your installed cards to be 	uninstalled. Store it in HQ.
+Cost/Trash:	0/3 T		Artist:	Mark Tedin	Rarity:	Uncommon
+
+Card Title:	Crybaby		Card Type:Upgrade-Ambush
+Card Text:	When Runner accesses Crybaby, give Runner a Crying counter. Each Crying counter reduces 
+		Runner's link by 2 during each trace attempt. Runner can remove a Crying counter by taking an 
+		action to pay [2].
+Cost/Trash:	1/2 T		Artist:	Kim Francisco		Rarity:	Rare
+Card Title:	Crystal Palace Station Grid		Card Type:Upgrade-Region
+Card Text:	Runner must pay [1], in addition to the normal cost, to break each subroutine of each piece of ice encountered during runs on this fort. Rez a region when you install it. Install a region 
+		only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.
+Cost/Trash:	5/5 T		Artist:	R. Talsorian Games Staff	Rarity:	Uncommon
+
+Card Title:	Data Masons	Card Type:Node
+Card Text:	Cost to rez walls is reduced by [2]. All walls have +1 strength.
+Cost/Trash:	1/1 T		Artist:	Sue Ann Harkey		Rarity:	Rare
+
+Card Title:	Dedicated Response Team	Card Type:Upgrade-Ambush
+Card Text:	When Runner accesses Dedicated Response Team, it does 3 meat damage. Ignore this effect unless Runner is tagged.
+Cost/Trash:	1/2 T		Artist:	Pete Venters		Rarity:	Uncommon
+
+Card Title:	Department of Truth Enhancement	Card Type:Node-Gray Ops
+Card Text:	A: Put [3] from the bank on Department of Truth Enhancement.
+		A: Take all the bits from Department of Truth Enhancement.
+Cost/Trash:	2/1 T		Artist:	Matt Wilson		Rarity:	Uncommon
+
+Card Title:	Dieter Esslin		Card Type:Upgrade-Sysop-Ambush
+Card Text:	When Runner accesses Dieter Esslin, Dieter does 1 Net damage.
+Cost/Trash:	0/3 T		Artist:	Matt Wilson	Rarity:	Rare
+
+Card Title:	Disinfectant, Inc.	Card Type:Node
+Card Text:	You may pay [1] to avoid receiving a Virus counter. Use this ability only once each turn.
+Cost/Trash:	0/4 T		Artist:	Rob Dixon	Rarity:	Rare
+
+Card Title:	Dr. Dreff	Card Type:Upgrade-Sysop
+Card Text:	Whenever Runner makes a successful run on this fort, you may choose an ice card stored in HQ. Pay half of that card's rez cost, rounded down, to force Runner to encounter it; the run is not considered successful unless Runner passes that piece of ice. Trash that ice after the encounter ends. Use this ability only once during each run on this fort.
+Cost/Trash:	0/3 T		Artist:	Doug Chaffee		Rarity:Uncommon
+
+
+
+Card Title:	Encoder, Inc.		Card Type:Node
+Card Text:	Cost to rez code gates is reduced by [1]. All code gates have an additional subroutine, "*End the run," after all other subroutines.
+Cost/Trash:	0/1 T		Artist:	Todd Wade	Rarity:	Rare
+
+Card Title:	ESA Contract	Card Type:Node
+Card Text:	A: Draw two cards.
+Cost/Trash:	0/3 T		Artist:	Ramon Mascarenas	Rarity:	Uncommon
+
+Card Title:	Euromarket Consortium		Card Type:Node
+Card Text:	Hand size +2; A, [1]: Draw two cards.
+Cost/Trash:	2/4 T		Artist:	Doug Chaffee		Rarity:	Uncommon
+
+Card Title:	Experimental AI	Card Type:Node-AI-Ambush
+Card Text:	You may advance Experimental AI before and after you rez it. When Runner accesses Experimental AI, it destroys one program for each advancement counter on it.
+Cost/Trash:	2/0 T		Artist:	Mike Kimble	Rarity:	Uncommon
+
+Card Title:	Fortress Architects	Card Type:Node
+Card Text:	Cost to install ice is reduced by [1].
+Cost/Trash:	0/3 T		Artist:	Fellwalker & Tolen	Rarity:	Rare
+
+Card Title:	Hacker Tracker Central		Card Type:Node-Asset
+Card Text:	After each trace attempt, whether successful or not, put [1] from the bank on Hacker Tracker Central. During a trace attempt, each bit you spend from Hacker Tracker Central increases by 1 both your trace strength and your trace limit.
+Cost/Trash:	0/2 T		Artist:	Robert McLees		Rarity:Uncommon
+
+Card Title:	Holovid Campaign	Card Type:Node-Advertisement
+Card Text:	Put [12] from the bank on Holovid Campaign when you rez it. Take [1] from Holovid Campaign at the 
+		start of each of your turns. When all the bits have been removed, trash Holovid Campaign.
+Cost/Trash:	4/7 T		Artist:	Zak Plucinski		Rarity:	Common
+
+Card Title:	I Got a Rock		Card Type:Node-Black Ops
+Card Text:	A, 3 agenda points, Do 15 meat damage to Runner. Use this ability only if Runner has two or more tags.
+Cost/Trash:	3/2 T		Artist:	Richard Thomas		Rarity:	Rare
+
+Card Title:	Information Laundering		Card Type:Node-Transactions
+Card Text:	You may advance Information Laundering before and after you rez it.
+		A, T: Gain [4] for each advancement counter on Information Laundering.
+Cost/Trash:	0/1 T		Artist:	Mike Kimble		Rarity:	Uncommon
+
+Card Title:	Investment Firm	Card Type:Node-Transactions
+Card Text:	Take [1] from Investment Firm, if it has any bits, at the start of each of your turns. Whenever [1] or more bits are added to your pool, you may put [2] from the bank on Investment Firm for each [1] you choose not to add to your pool. Effects that give you bits at the start of your turn cannot be used this way.
+Cost/Trash:	1/2 T		Artist:	Anthony Petrarca	Rarity:	Uncommon
+
+Card Title:	Jenny Jett	Card Type:Upgrade-Sysop
+Card Text:	Whenever Runner makes a successful run on this fort, you may choose an ice card stored in HQ. Install that piece of ice on this fort in the innermost position, 	paying an installation cost of [1] for each piece of ice already on the fort. Runner is now considered to be approaching that piece of ice. Use this ability only once during each run on this fort.
+Cost/Trash:	1/1 T		Artist:	Lawrence Snelly	Rarity:	Rare
+
+Card Title:	Jerusalem City Grid		Card Type:Upgrade-Region
+Card Text:	Cost to rez walls on this fort is reduced by [2]. All walls on this fort have +1 strength.
+Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.
+Cost/Trash:	2/5 T		Artist:Chris Vande Voort	Rarity:	Rare
+
+Card Title:	Krumz		Card Type:Node-AI
+Card Text:	Put [1] from the bank on Krumz when you rez it. Use this bit only to pay for traces. If you use this bit, replace it at the start of your next turn.
+Cost/Trash:	0/2 T		Artist:	Mark Collen	Rarity:	Rare
+
+Card Title:	Namatoki Plaza		Card Type:Upgrade
+Card Text:	Rez Namatoki Plaza when you install it. Install Namatoki Plaza only if you can pay to rez it. Install only inside a subsidiary data fort. That fort may have an additional agenda or node installed inside it. If Namatoki Plaza leaves play while installed, and this results in the fort having too many agendas and nodes installed inside it, trash one of those agendas or nodes.
+Cost/Trash:	3/1 T		Artist:	Chris Vande Voort	Rarity:	Uncommon
+
+Card Title:	Nevinyrral	Card Type:Node-AI-Unique
+Card Text:	Gain an action during each of your turns. If Nevinyrral leaves play while rezzed, you lose the 
+game. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.
+Cost/Trash:	3/5 T		Artist:	Maria P. Cabardo	Rarity:	Rare
+
+
+
+Card Title:	New Galveston City Grid	Card Type:Upgrade-Region
+Card Text:	All nodes and other upgrades installed inside this fort cost [2], in addition to the normal cost, to trash. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.
+Cost/Trash:	1/4 T		Artist:	Craig Hooper	Rarity:	Rare
+
+Card Title:	Newsgroup Taunting	Card Type:Node
+Card Text:	At the start of each run, Runner must pay [1], in addition to any other costs, or end the run.
+Cost/Trash:	1/0 T		Artist:	Kevin Taylor	Rarity:	Uncommon
+
+Card Title:	Olivia Salazar		Card Type:Upgrade-Sysop
+Card Text:	For half cost, rounded down, rez a piece of ice installed on this fort. Derez that ice at the end of the run. Use this ability only once during each run on this fort.
+Cost/Trash:	0/1 T		Artist:	Randy Gallegos		Rarity:	Uncommon
+
+Card Title:	Omni Kismet, Ph.D.	Card Type:Upgrade-Sysop
+Card Text:	Swap a piece of unrezzed ice on this fort with an ice card stored in HQ. The new ice card comes into play concealed. Use this ability only once during each run on this fort.
+Cost/Trash:	0/3 T		Artist:	Doug Shuler	Rarity:Rare
+
+Card Title:	Omniscience Foundation		Card Type:Node-Gray Ops
+Card Text:	Give Runner a tag at the end of each turn during which Runner received a tag.
+Cost/Trash:	0/1 T		Artist:	Rob Dixon	Rarity:	Uncommon
+
+Card Title:	Pacifica Regional AI		Card Type:Node-AI
+Card Text:	You may advance Pacifica Regional AI before and after you rez it. Regional AI Advancement counter: Gain an action.
+Cost/Trash:	0/0 T		Artist:	Chris Vande Voort	Rarity:	Rare
+
+Card Title:	Paris City Grid	Card Type:Upgrade-Region
+Card Text:	Put [3] from the bank on Paris City Grid when you rez it. Use these bits only to pay for traces made during runs on this fort. If you use any of these bits, replace them at the start of your next turn. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.
+Cost/Trash:	2/6 T		Artist:	Mark Tedin	Rarity:	Uncommon
+
+Card Title:	Red Herrings	Card Type:Upgrade
+Card Text:	Runner must pay [5], in addition to any other costs, to steal agendas accessed from this fort, even on the run during which Runner trashes Red Herrings.
+Cost/Trash:	1/1 T		Artist:	Mark Collen	Rarity:	Uncommon
+Card Title:	Remote Facility	Card Type:Node-Asset
+Card Text:	Gain an action during each of your turns.
+Cost/Trash:	5/1 T		Artist:	Chris Vande Voort	Rarity:Uncommon
+
+Card Title:	Rescheduler	Card Type:Node-Gray Ops
+Card Text:	A: Note the number of cards stored in HQ. Shuffle those cards into R&D, and then draw that many cards.
+Cost/Trash:	0/3 T		Artist:	Mike Kimble	Rarity:	Uncommon
+
+Card Title:	Rio de Janeiro City Grid	Card Type:Upgrade-Region-Random
+Card Text:	Roll a die whenever Runner passes a piece of rezzed ice during a run on this fort. On a 1, end the run. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.
+Cost/Trash:	1/6 T		Artist:	Pete Venters	Rarity:	Uncommon
+
+Card Title:	Rockerboy Promotion		Card Type:Node-Advertisement
+Card Text:	Put [15] from the bank on Rockerboy Promotion when you rez it. When all the bits have been removed, trash Rockerboy Promotion. A: Take [3] from Rockerboy Promotion. 
+Cost/Trash:	4/3 T		Artist:	John Ramirez	Rarity:	Common
+
+Card Title:	Roving Submarine	Card Type:Upgrade-Region
+Card Text:	Install only inside a subsidiary data fort. This fort may be run only if you installed or advanced a card inside or on this fort during your last turn. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.
+Cost/Trash:	3/0 T		Artist:	Doug Chaffee	Rarity:	Rare
+
+Card Title:	Rustbelt HQ Branch	Card Type:Node-Asset
+Card Text:	Hand size +2
+Cost/Trash:	0/2 T		Artist:	Anthony Petrarca	Rarity:	Uncommon
+
+Card Title:	Schlaghund	Card Type:Node-Random-Black Ops
+Card Text:	A: Roll a die. If you roll less than or equal to the number of tags Runner has, Schlaghund does 10 meat damage and you trash Schlaghund.
+Cost/Trash:	2/4 T		Artist:	L.A. Williams		Rarity:	Rare
+
+Card Title:	Setup!		Card Type:Node-Ambush
+Card Text:	When Runner accesses Setup!, it does 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses it from the Archives. If Setup! is accessed from R&D, Runner must show it to you.
+Cost/Trash:	0/0 T		Artist:	Norm Dwyer	Rarity:	Common
+
+
+Card Title:	Singapore City Grid		Card Type:Upgrade-Region
+Card Text:	Swap a piece of unrezzed ice on this fort with an ice card stored in HQ. The new ice card comes into play concealed. Use this ability only once during each run on this fort. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be 	installed in each fort. Trash older ones.
+Cost/Trash:	0/5 T		Artist:	Mike Kimble	Rarity:	Rare
+
+Card Title:	Skälderviken SA Beta Test Site	Card Type:Node
+Card Text:	Cost to rez black ice is reduced by [2].
+Cost/Trash:	0/2 T		Artist:	Chris Vande Voort	Rarity:	Rare
+
+Card Title:	Solo Squad	Card Type:Node
+Card Text:	A: Do 1 meat damage. Use this ability only if Runner is tagged.
+Cost/Trash:	0/3 T		Artist:	Ernie Chan	Rarity:	Uncommon
+
+Card Title:	South African Mining Corp	Card Type:Node-Transactions
+Card Text:	A, A, A: Gain [6].
+Cost/Trash:	0/1 T		Artist:	Todd Wade	Rarity:	Uncommon
+
+Card Title:	Spinn(R) Public Relations	Card Type:Node-Transactions
+Card Text:	Take [1] from Spinn(R) Public Relations, if it has any bits, at the start of each of your turns.
+		A: Put [3] from the bank on Spinn(R) Public Relations.
+Cost/Trash:	1/4 T		Artist:	Todd Wade	Rarity:	Common
+
+Card Title:	Tesseract Fort Construction		Card Type:Upgrade
+Card Text:	All ice on this fort has an additional subroutine, "*End the run unless Runner pays [1]," after all other subroutines.
+Cost/Trash:	2/3 T		Artist:	Mark Tedin	Rarity:	Rare
+
+Card Title:	Tokyo-Chiba Infighting		Card Type:Upgrade-Region
+Card Text:	Gain [2] after each unsuccessful run on this fort. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.
+Cost/Trash:	0/6 T		Artist:	Mark Collen	Rarity:	Rare
+
+
+Card Title:	TRAP!		Card Type:Node-Ambush
+Card Text:	If you pay [4] when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even 
+if TRAP! is not installed. Ignore this effect if Runner accesses it from the Archives. If TRAP! is accessed from R&D, Runner must show it to you.
+Cost/Trash:	0/0 T		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Turbeau Delacroix	Card Type:Upgrade-Sysop-Ambush
+Card Text:	Trace 10-If trace is successful, give Runner a tag. Use this ability only when Runner accesses Turbeau Delacroix, and only once during each run on this fort.
+Cost/Trash:	1/2 T		Artist:	L.A. Williams		Rarity:	Uncommon
+
+Card Title:	Twenty-Four-Hour Surveillance		Card Type:Upgrade
+Card Text:	During runs on this fort, Runner cannot use bits from stealth sources.
+Cost/Trash:	1/2 T		Artist:	Mark Collen		Rarity:	Rare
+
+Card Title:	Vacant Soulkiller	Card Type:Node-Ambush
+Card Text:	You may advance Vacant Soulkiller before and after you rez it.When Runner accesses Vacant Soulkiller, it does 1 brain damage for each advancement counter on it.
+Cost/Trash:	2/0 T		Artist:	Larry Friedman		Rarity:	Uncommon
+
+Card Title:	Vapor Ops	Card Type:Node
+Card Text:	You may advance Vapor Ops before and after you rez it. Vapor Ops advancement Counter: Gain [1].
+		A: Move any number of advancement counters from Vapor Ops to another installed card that can be 
+		advanced.
+Cost/Trash:	0/1 T		Artist:Craig Hooper		Rarity:	Uncommon
+
+Card Title:	Virus Test Site	Card Type:Node-Ambush
+Card Text:	You may advance Virus Test Site before and after you rez it. When Runner accesses Test Site, it does 2 Net damage per advancement counter on it, or 1 Net damage if it has no counters, even if it is not installed or rezzed. Ignore this effect if Runner accesses it from the Archives. If Test Site is accessed from R&D, Runner must show it to you.
+Cost/Trash:	0/0 T		Artist:	Mark Collen	Rarity:	Uncommon
+
+Card Title:	Washington, D.C., City Grid		Card Type:Upgrade-Region
+Card Text:	The difficulty of agendas installed inside this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.
+Cost/Trash:	7/6 T		Artist:	Chris Vande Voort	Rarity:	Rare
+
+
+©1996 Wizards of the Coast, Inc. 
+Cyberpunk 2020, Cyberpunk, and Netrunner therein are trademarks of R.
+Talsorian Games, Inc. Copyrights in certain text, graphic designs,
+characters, and places derived from Cyberpunk 2020® are the property
+of R. Talsorian Games, Inc., and are produced under license to Wizards 
+of the Coast, Inc. Deckmaster, WIZARDS OF THE COAST, and Proteus are
+trademarks of Wizards of the Coast, Inc. 
+10
+
