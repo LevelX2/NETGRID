@@ -45,6 +45,7 @@ Status: runtime WIP, no release/catalog/AI promotion
 - Ein Webclient-Version-Guard bestaetigt, dass die sichtbare Client-Version bis zum V1.9.22-Completion-Gate auf `V1.9.21` bleibt.
 - `data/rules/v1922-resolver-contract-inventory.json` dokumentiert die fehlenden Resolver-Vertragsfelder fuer Runner-Programme, Runner-Events, Runner-Hardware, Corp-Agendas, Corp-ICE und Corp-Operations maschinenlesbar. Der Catalog-Test gleicht das Inventar gegen 47/47 WIP-Karten ab und verbietet `ready_for_promotion`-Status in allen Clustern.
 - Das Resolver-Contract-Inventar fuehrt lokal bestaetigte Teilnotizen aus `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md` fuer Runner-Programme, Runner-Events, Runner-Hardware und Corp-Agendas als `partialLocalNotes`; der Catalog-Test prueft, dass diese Notizen im jeweiligen Cluster und V1.9.22-WIP-Scope bleiben und keine Promotion-Aussagen enthalten.
+- `docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md` beschreibt den naechsten engen Data-Fort-Reclamation-Codepfad mit Korp-privater HQ-Choice, neuem Remote, Install-Sequenz, temporaerem 10-Credit-Pool plus Korp-Credits und deferred optionalem Rezzen. Daraus folgt noch keine Runtime-, Catalog-, AI- oder Release-Promotion.
 - Ein Catalog-Guard bestaetigt, dass finale V1.9.22-AI-Promotion-Artefakte (`ai-card-hints-deck-legal-v1922.json`, `deck-legal-ai-approval-v1922-manifest.json`, `ai-deck-legal-v1922-smokes.json`) bis zum Completion-Gate nicht existieren.
 - `data/reports/v1922-completion-gate-status.json` dokumentiert maschinenlesbar den offenen V1.9.22-Gate-Stand, die gruene Verify-Basis, die lokale Quellensuche ohne vollstaendigen Resolververtrag und die vier blockierenden Gates `resolver_contracts`, `ai_promotion_artifacts`, `webclient_version` und `final_review` mit Removal Conditions.
 - `docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md` dokumentiert eine erneute lokale Quellensuche auf blockierte Runner-Event- und Corp-Longtailkarten. Der Scan bestaetigt, dass weiter nur Teilnotizen, Typoberflaechen und display-only WIP-Runtimes vorliegen; daraus folgt keine Runtime-, Catalog- oder AI-Promotion.
@@ -58,7 +59,7 @@ Status: runtime WIP, no release/catalog/AI promotion
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: `Data Fort Reclamation`, `Viral 15` oder `Zetatech Software Installer` Overlay-Vertrag. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
+Naechster kleiner Schnitt: `Data Fort Reclamation` nach `docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md`, danach `Viral 15` oder `Zetatech Software Installer` Overlay-Vertrag. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
 
 Blocker-Abgleich 2026-05-14 17:43 CEST: `Tutor`, `Virizz`, `Security Purge`, die `Hammer`-Mehrfach-Stealth-Verteilungschoice, `Haunting Inquisition` und `Zetatech Software Installer` Recurring-Programminstallationscredits sind als Runtime-WIPs umgesetzt und bleiben ohne Catalog-, AI- oder Release-Promotion. `Data Fort Reclamation`, `Viral 15` und Zetatech-Overlay bleiben fuer Promotion bzw. Vollabschluss gesperrt, bis die jeweils dokumentierten LegalAction-/applyAction-, Visibility- und Replay-/StateHash-Vertraege geschlossen sind. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
 

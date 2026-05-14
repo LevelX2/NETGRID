@@ -87,9 +87,19 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - `Virizz`: Rez-Kosten 2, Staerke 4; Runtime-WIP ohne Promotion ist umgesetzt mit rest-of-run +1-Credit-Break-Kostenmodifier, LegalAction-Kostenprojektion und applyAction-Revalidierung.
 - Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
 - `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
-- Naechster sinnvoller Code-Schnitt: `Data Fort Reclamation`, `Viral 15` oder `Zetatech Software Installer` Overlay-Vertrag.
+- Naechster sinnvoller Code-Schnitt: `Data Fort Reclamation` nach `docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md`, danach `Viral 15` oder `Zetatech Software Installer` Overlay-Vertrag.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 17:52 CEST
+- Ergebnis: V1.9.22 Data-Fort-Reclamation-Runtime-Vertrag erstellt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md` beschreibt den naechsten engen Codepfad: On-score Korp-private HQ-Choice bis 4 Karten, neues Remote, Install-Sequenz, temporaerer 10-Credit-Pool plus Korp-Credits, side-sichere PublicPayloads und Replay/StateHash-Pflichten. Optionales Rezzen bleibt fuer diesen ersten WIP deferred. Keine Runtime-, Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: keine Codeaenderung in diesem Teilschnitt; letzter breiter Verify nach Zetatech war gruen.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: data fort contract wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation` Codeumsetzung, `Viral 15`, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 17:43 CEST
 - Ergebnis: V1.9.22 Zetatech-Software-Installer-Recurring-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

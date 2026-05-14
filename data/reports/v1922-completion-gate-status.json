@@ -158,6 +158,7 @@
         "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
         "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
         "docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md",
+        "docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md",
         "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md",
         "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md",
         "docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md"
@@ -242,8 +243,8 @@
     "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
   },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T17:43:00+02:00",
-    "status": "remaining_technical_contracts_open_after_zetatech_recurring_wip",
+    "reviewedAt": "2026-05-14T17:52:00+02:00",
+    "status": "data_fort_runtime_contract_ready_after_zetatech_recurring_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -259,7 +260,7 @@
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_276_viral-15"
     ],
-    "removalCondition": "Write one remaining card's full technical runtime contract from the prepared facts: LegalAction projection, applyAction revalidation, side-safe public/private payloads, and deterministic Replay/StateHash expectations."
+    "removalCondition": "Implement Data Fort Reclamation from docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md, then close Viral 15 or Zetatech overlay with LegalAction projection, applyAction revalidation, side-safe payloads, and deterministic Replay/StateHash expectations."
   },
   "blockingGates": [
     {

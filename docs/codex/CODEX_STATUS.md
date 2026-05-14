@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.22 Data-Fort-Reclamation-Vertrag vom 2026-05-14 17:52 CEST: Für `Data Fort Reclamation` liegt jetzt ein enger Runtime-Implementierungsvertrag vor: On-score Korp-private HQ-Choice bis 4 Karten, neues Remote, install sequence, temporaerer 10-Credit-Pool mit Korp-Credits als Zusatzquelle, public count-only Payloads und Replay/StateHash-Pflicht. Optionales Rezzen bleibt im ersten WIP explizit deferred. Artefakt: `docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md`. Keine Runtime-, Catalog-, AI- oder Release-Promotion.
+
 V1.9.22 Zetatech-Software-Installer-Recurring-WIP vom 2026-05-14 17:43 CEST: `Zetatech Software Installer` nutzt jetzt nicht-promotend 2 restricted Recurring Credits für Programminstallationen und refreshed diese zum Runner-Zugstart; Overlay-Installation bleibt ohne LegalAction bis zum separaten State-Transition-Vertrag. Verifikation: `engine` 306 gruen nach einem initial roten Baseline-Testfix. Keine Catalog-, AI- oder Release-Promotion; V1.9.22 bleibt `blocked_open`.
 
 V1.9.22 Haunting-Inquisition-Run-Lock-WIP vom 2026-05-14 17:35 CEST: `Haunting Inquisition` ist als enger nicht-promotender Corp-ICE-Schnitt umgesetzt. Die Karte hat Rez-Kosten 8, Stärke 6, Code-Gate-Typisierung, eine Subroutine für Run-Lock auf die nächsten sechs tatsächlich ausgegebenen Runner-Aktionen und End-the-run; normale `start_run`-LegalActions sind während des Locks gesperrt, Bonus-Runs ohne Aktion bleiben zulässig. Verifikation: `engine` 305 und `catalog` 44 gruen. Keine Catalog-, AI-, Webclient- oder Release-Promotion; V1.9.22 bleibt `blocked_open`.
