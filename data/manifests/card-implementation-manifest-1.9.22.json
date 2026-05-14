@@ -9,7 +9,7 @@
     "catalogWipGuardReady": true,
     "wipArtifactAlignmentGuardReady": true,
     "resolverContractInventoryReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_event_fourteen_runner_program_and_eight_corp_resolver_clusters_46_of_47",
+    "runtimeDefinitionsReady": "runner_hardware_event_fourteen_runner_program_and_eleven_corp_resolver_clusters_44_of_47",
     "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_non_breaker_runner_program_install_only_plus_zetatech_software_installer_install_only_plus_flak_ap_breaker_plus_hammer_wall_breaker_ordered_stealth_loss_plus_japanese_water_torture_wall_breaker_future_action_debt_plus_reflector_tagged_breaker_plus_newsgroup_filter_gain_2_credit_action_plus_shield_net_damage_prevention_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_zombie_edgerunner_temps_off_site_backups_and_planning_consultants_resolvers_plus_unresolved_corp_no_promotion_guards",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
@@ -498,10 +498,20 @@
     },
     {
       "cardCode": "onr_v1_216_security-purge",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_corp_agenda_security_purge_rd_top3",
+      "coveredSmokes": [
+        "score_agenda_legal_action",
+        "rd_top3_reveal",
+        "new_remote_per_ice_reveal_order",
+        "free_install_rez_revealed_ice",
+        "trash_non_ice",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
     },
     {
       "cardCode": "onr_v1_247_haunting-inquisition",

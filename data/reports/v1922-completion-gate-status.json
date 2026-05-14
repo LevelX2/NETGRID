@@ -159,8 +159,8 @@
     "nextCodeCandidates": [
       {
         "cardId": "onr_v1_216_security-purge",
-        "status": "blocked_pending_install_choice_contract",
-        "removalCondition": "Confirm optional ice subset, server target selection and free install/rez ordering for revealed R&D ice."
+        "status": "runtime_wip_security_purge_rd_top3_no_promotion",
+        "removalCondition": "Keep Security Purge in WIP until final AI, catalog and release-promotion gates are satisfied; revisit explicit server-target choice only if the local WIP contract is replaced."
       },
       {
         "cardId": "onr_v1_045_newsgroup-filter",
@@ -236,8 +236,8 @@
     "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
   },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T16:51:00+02:00",
-    "status": "remaining_technical_contracts_open_after_tutor_future_etr_wip",
+    "reviewedAt": "2026-05-14T17:06:00+02:00",
+    "status": "remaining_technical_contracts_open_after_security_purge_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -248,10 +248,9 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Tutor and Virizz now have non-promoting Corp-ICE WIPs in addition to previous WIPs; Hammer's multi-Stealth-source distribution and final promotion gates remain open.",
+    "summary": "Local card facts exist for all remaining targets. Tutor, Virizz and Security Purge now have non-promoting WIPs in addition to previous WIPs; Hammer's multi-Stealth-source distribution and final promotion gates remain open.",
     "blockedCards": [
       "onr_v1_197_data-fort-reclamation",
-      "onr_v1_216_security-purge",
       "onr_v1_247_haunting-inquisition",
       "onr_v1_276_viral-15"
     ],
@@ -261,7 +260,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Seven install-only Runner-program WIPs, Newsgroup Filter Gain-2, Flak, Hammer, Japanese Water Torture, Reflector, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Tutor, Virizz, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Seven install-only Runner-program WIPs, Newsgroup Filter Gain-2, Flak, Hammer, Japanese Water Torture, Reflector, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Security Purge, Zombie, Tutor, Virizz, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

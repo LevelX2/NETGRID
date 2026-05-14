@@ -1,7 +1,7 @@
 # V1.9.22 Security Purge Slice Preflight
 
 Stand: 2026-05-14
-Status: WIP-Preflight mit Errata-1.70-Klaerung, keine Runtime-/Catalog-/AI-Promotion
+Status: Runtime-WIP umgesetzt, keine Catalog-/AI-/Release-Promotion
 
 ## Lokaler Regelkern
 
@@ -24,12 +24,12 @@ Der naechste sichere Code-Schnitt ist ein On-score-Resolver fuer `score_agenda`,
 
 ## Entscheidung
 
-Kein Runtime-Code in diesem Preflight. Die Errata hebt den Teilmengen-Blocker weitgehend auf, laesst aber Serverziel und Reihenfolge offen. Ein spaeterer Implementierungsschnitt sollte daher entweder eine explizite Korp-Choice fuer Serverziele/Reihenfolge nutzen oder einen bewusst engen WIP-Serverzielvertrag vorab dokumentieren.
+Der Runtime-WIP nutzt bewusst den engen lokalen Serverzielvertrag: revealed ICE werden in Reveal-Reihenfolge jeweils in ein neues Remote installiert und sofort rezzed; Nicht-ICE wird faceup nach Archives getrasht. Das ist runtime-seitig dokumentiert und keine Catalog-, AI- oder Release-Promotion. Eine explizite Korp-Choice fuer Serverziele bleibt Folgearbeit, falls dieser lokale WIP-Vertrag spaeter ersetzt werden soll.
 
 ## Removal Condition
 
-Security Purge kann in Code gehen, sobald fuer die revealed ICE feststeht:
+Security Purge bleibt bis zur Finalisierung in WIP. Removal Condition fuer Promotion:
 
-1. wie Serverziele je ICE gewaehlt werden,
-2. ob Reveal-Reihenfolge oder eine Korp-Choice die Install-/Rez-Reihenfolge bestimmt,
-3. wie zusaetzliche Install-/Rez-Kosten geprueft und bei Nicht-Zahlbarkeit side-sicher behandelt werden.
+1. Catalog-, AI- und Release-Promotion-Gates sind finalisiert.
+2. Der lokale neue-Remote-je-ICE-Vertrag wird bestaetigt oder durch eine explizite Korp-Choice ersetzt.
+3. Zusaetzliche Install-/Rez-Kosten werden, falls im Kartensystem relevant, side-sicher modelliert und getestet.

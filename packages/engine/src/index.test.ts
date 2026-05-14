@@ -14384,6 +14384,142 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
   });
 
+  it("scores Security Purge as a side-safe R&D top-three install and trash resolver", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_security_purge",
+      name: "O:NR V1.9.22 Security Purge",
+      cards: [
+        { id: "onr_v1_216_security-purge", quantity: 1 },
+        { id: "simple_barrier_ice", quantity: 1 },
+        { id: "simple_code_gate_ice", quantity: 1 },
+        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+      ],
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-security-purge",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 20;
+    state.corp.maxHandSize = 100;
+
+    moveCorpCardToHq(state, "onr_v1_216_security-purge");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_216_security-purge" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root",
+    );
+    for (let index = 0; index < 3; index += 1) {
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(state, action) === "onr_v1_216_security-purge",
+      );
+    }
+    const trashedOperationId = putCorpCardOnTopOfRd(
+      state,
+      "simple_economy_operation",
+    );
+    const installedCodeGateId = putCorpCardOnTopOfRd(
+      state,
+      "simple_code_gate_ice",
+    );
+    const installedBarrierId = putCorpCardOnTopOfRd(
+      state,
+      "simple_barrier_ice",
+    );
+
+    const legal = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(state, action) === "onr_v1_216_security-purge",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-security-purge-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-security-purge-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(state, action) === "onr_v1_216_security-purge",
+    );
+
+    expect(
+      state.corp.servers.some((server) =>
+        server.ice.includes(installedBarrierId),
+      ),
+    ).toBe(true);
+    expect(
+      state.corp.servers.some((server) =>
+        server.ice.includes(installedCodeGateId),
+      ),
+    ).toBe(true);
+    expect(state.cardInstances[installedBarrierId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+    });
+    expect(state.cardInstances[installedCodeGateId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+    });
+    expect(state.corp.archives).toContain(trashedOperationId);
+    expect(state.cardInstances[trashedOperationId]).toMatchObject({
+      faceup: true,
+      zone: { side: "corp", zone: "archives" },
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      cardDefinitionId: "onr_v1_216_security-purge",
+      agendaAbility: "v1922_security_purge",
+      hiddenZoneAction: "v1922_security_purge_rd_top3",
+      revealedCount: 3,
+      installedIceCount: 2,
+      trashedCount: 1,
+      publicRevealDefinitionIds:
+        "simple_barrier_ice,simple_code_gate_ice,simple_economy_operation",
+      installedIceDefinitionIds: "simple_barrier_ice,simple_code_gate_ice",
+      trashedDefinitionIds: "simple_economy_operation",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"hq"|"rd"|"cardInstances"|"privatePayload"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("uses Political Overthrow as a side-safe scored-agenda action for Gain 3", () => {
     const corpDeck: DeckDefinition = {
       ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
@@ -15277,7 +15413,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
       "onr_v1_197_data-fort-reclamation",
-      "onr_v1_216_security-purge",
       "onr_v1_247_haunting-inquisition",
       "onr_v1_276_viral-15",
     ] as const;
@@ -15293,6 +15428,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_196_corporate-war",
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
+      "onr_v1_216_security-purge",
       "onr_v1_280_zombie",
       "onr_v1_274_tutor",
       "onr_v1_277_virizz",

@@ -560,11 +560,11 @@
       "cluster": "corp_agendas",
       "side": "corp",
       "type": "agenda",
-      "contractStatus": "blocked_missing_agenda_numbers_and_ability_contract",
-      "confirmedLocalFacts": ["agenda_install_advance_score_steal_surface", "gray_ops_surface"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["advancement_requirement", "agenda_points", "subtypes", "on_score_or_scored_ability_text", "timing", "costs", "effect_amounts", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm printed agenda numbers and any on-score/scored ability."
+      "contractStatus": "runtime_wip_no_promotion",
+      "confirmedLocalFacts": ["advancement_3", "agenda_points_2", "gray_ops_surface", "rd_top3_reveal_or_as_many_as_exist", "revealed_ice_install_and_rez_if_possible", "trash_non_ice", "printed_rez_costs_waived_not_additional_costs"],
+      "safeCurrentCoverage": ["score_agenda_legal_action", "rd_top3_reveal", "new_remote_per_ice_reveal_order", "free_install_rez_revealed_ice", "trash_non_ice", "wrong_side_stale_revalidation", "public_event_redaction", "replay_statehash"],
+      "missingInformation": ["final_ai_catalog_release_promotion", "future_explicit_server_target_choice_if_required"],
+      "removalCondition": "Keep Security Purge in WIP until V1.9.22 final AI, catalog and release-promotion gates are satisfied."
     },
     {
       "cardId": "onr_v1_247_haunting-inquisition",

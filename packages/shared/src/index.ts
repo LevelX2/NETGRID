@@ -3417,6 +3417,28 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_v1_216_security-purge",
+    title: "Security Purge",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 3,
+    agendaPoints: 2,
+    rulesText:
+      "When scored, reveal the top three cards of R&D, or as many as exist. Install and rez revealed ice at no printed rez cost, then trash the rest.",
+    mechanics: [
+      "install_remote",
+      "advance",
+      "score",
+      "steal",
+      "hidden_zone_search_reveal",
+      "on_score_install_rez_ice",
+      "per_card_longtail",
+      ONR_V1_LOCAL_PRIVATE,
+    ],
+  },
+  {
     id: "onr_v1_219_superior-net-barriers",
     title: "Superior Net Barriers",
     side: "corp",

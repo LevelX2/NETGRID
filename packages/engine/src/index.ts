@@ -345,6 +345,7 @@ const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
 const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
+const V1922_SECURITY_PURGE_ID = "onr_v1_216_security-purge";
 const V1922_EDGERUNNER_TEMPS_ID = "onr_v1_289_edgerunner-inc-temps";
 const V1922_OFF_SITE_BACKUPS_ID = "onr_v1_296_off-site-backups";
 const V1922_PLANNING_CONSULTANTS_ID = "onr_v1_298_planning-consultants";
@@ -10215,7 +10216,64 @@ function scoreAgenda(
       securityNetOptimizationActive: true,
     };
   }
+  if (definition.id === V1922_SECURITY_PURGE_ID && legalAction) {
+    resolveV1922SecurityPurge(state, legalAction);
+  }
   cleanupEmptyRemotes(state);
+}
+
+function resolveV1922SecurityPurge(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const revealedIds = state.corp.rd.slice(0, 3);
+  const installedIce: Array<{ cardId: CardInstanceId; serverId: string }> = [];
+  const trashedIds: CardInstanceId[] = [];
+  for (const cardId of revealedIds) {
+    const definition = definitionFor(state, cardId);
+    removeFromAllZones(state, cardId);
+    if (definition.type === "ice") {
+      const server = createRemote(state);
+      server.ice.unshift(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: true,
+        rezzed: true,
+        zone: { side: "corp", zone: "serverIce", serverId: server.id },
+      };
+      installedIce.push({ cardId, serverId: server.id });
+    } else {
+      state.corp.archives.unshift(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: true,
+        rezzed: true,
+        zone: { side: "corp", zone: "archives" },
+      };
+      trashedIds.push(cardId);
+    }
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAbility: "v1922_security_purge",
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_security_purge_rd_top3",
+    publicRevealKind: "reveal",
+    revealedCount: revealedIds.length,
+    installedIceCount: installedIce.length,
+    trashedCount: trashedIds.length,
+    securityPurgeInstallContract: "new_remote_per_ice_reveal_order",
+    securityPurgeWaivesPrintedRezCosts: true,
+    publicRevealDefinitionIds: revealedIds
+      .map((id) => definitionFor(state, id).id)
+      .join(","),
+    installedIceDefinitionIds: installedIce
+      .map((entry) => definitionFor(state, entry.cardId).id)
+      .join(","),
+    trashedDefinitionIds: trashedIds
+      .map((id) => definitionFor(state, id).id)
+      .join(","),
+  };
 }
 
 function action(
@@ -13123,6 +13181,24 @@ function publicContextForAction(
     context.agendaAbility = legalAction.payload.agendaAbility;
     if (typeof legalAction.payload.gainedCredits === "number")
       context.gainedCredits = legalAction.payload.gainedCredits;
+  }
+  if (legalAction.payload?.agendaAbility === "v1922_security_purge") {
+    context.agendaAbility = "v1922_security_purge";
+    context.hiddenZoneBarrier = true;
+    context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
+    context.revealedCount = legalAction.payload.revealedCount;
+    context.installedIceCount = legalAction.payload.installedIceCount;
+    context.trashedCount = legalAction.payload.trashedCount;
+    context.securityPurgeInstallContract =
+      legalAction.payload.securityPurgeInstallContract;
+    context.securityPurgeWaivesPrintedRezCosts =
+      legalAction.payload.securityPurgeWaivesPrintedRezCosts;
+    context.publicRevealDefinitionIds =
+      legalAction.payload.publicRevealDefinitionIds;
+    context.installedIceDefinitionIds =
+      legalAction.payload.installedIceDefinitionIds;
+    context.trashedDefinitionIds = legalAction.payload.trashedDefinitionIds;
+    context.redactedKind = "hidden_zone";
   }
   if (typeof legalAction.payload?.gainedActions === "number")
     context.gainedActions = legalAction.payload.gainedActions;
