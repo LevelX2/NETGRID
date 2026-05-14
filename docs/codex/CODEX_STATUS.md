@@ -2,6 +2,8 @@
 
 ## Current phase
 
+V1.9.22 Data-Fort-Reclamation-Install-Sequence-WIP vom 2026-05-14 18:01 CEST: `Data Fort Reclamation` ist als enger nicht-promotender Runtime-WIP umgesetzt. Beim Scoren oeffnet die Engine eine Korp-private HQ-Choice fuer bis zu 4 installierbare Karten; Resolve erstellt ein neues Remote und installiert ausgewaehlte ICE/Root-Karten verdeckt mit side-sicherem Count-Payload. Optionales Rezzen und echte temporaere Credit-Ausgaben bleiben deferred. Verifikation: `engine` 307, `catalog` 44 und `typecheck` gruen. Keine Catalog-, AI-, Webclient- oder Release-Promotion; V1.9.22 bleibt `blocked_open`.
+
 V1.9.22 Data-Fort-Reclamation-Vertrag vom 2026-05-14 17:52 CEST: Für `Data Fort Reclamation` liegt jetzt ein enger Runtime-Implementierungsvertrag vor: On-score Korp-private HQ-Choice bis 4 Karten, neues Remote, install sequence, temporaerer 10-Credit-Pool mit Korp-Credits als Zusatzquelle, public count-only Payloads und Replay/StateHash-Pflicht. Optionales Rezzen bleibt im ersten WIP explizit deferred. Artefakt: `docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md`. Keine Runtime-, Catalog-, AI- oder Release-Promotion.
 
 V1.9.22 Zetatech-Software-Installer-Recurring-WIP vom 2026-05-14 17:43 CEST: `Zetatech Software Installer` nutzt jetzt nicht-promotend 2 restricted Recurring Credits für Programminstallationen und refreshed diese zum Runner-Zugstart; Overlay-Installation bleibt ohne LegalAction bis zum separaten State-Transition-Vertrag. Verifikation: `engine` 306 gruen nach einem initial roten Baseline-Testfix. Keine Catalog-, AI- oder Release-Promotion; V1.9.22 bleibt `blocked_open`.

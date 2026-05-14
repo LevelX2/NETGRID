@@ -345,6 +345,8 @@ const V1922_ZETATECH_SOFTWARE_INSTALLER_ID =
   "onr_v1_075_zetatech-software-installer";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
+const V1922_DATA_FORT_RECLAMATION_ID =
+  "onr_v1_197_data-fort-reclamation";
 const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
 const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
 const V1922_SECURITY_PURGE_ID = "onr_v1_216_security-purge";
@@ -10204,6 +10206,9 @@ function scoreAgenda(
       };
     }
   }
+  if (definition.id === V1922_DATA_FORT_RECLAMATION_ID && legalAction) {
+    startV1922DataFortReclamationChoice(state, cardId, legalAction);
+  }
   if (definition.id === "onr_v1_212_priority-requisition") {
     const candidates = Object.entries(state.cardInstances)
       .filter(
@@ -10301,6 +10306,124 @@ function resolveV1922SecurityPurge(
     trashedDefinitionIds: trashedIds
       .map((id) => definitionFor(state, id).id)
       .join(","),
+  };
+}
+
+function startV1922DataFortReclamationChoice(
+  state: GameState,
+  agendaId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = state.corp.hq
+    .filter((cardId) => isCorpInstallableCardType(definitionFor(state, cardId)))
+    .sort()
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (options.length === 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922CorpAgendaAbility: "data_fort_reclamation",
+      dataFortReclamationChoiceOpened: false,
+      dataFortReclamationCandidateCount: 0,
+    };
+    return;
+  }
+  state.pendingChoice = {
+    choiceId: `choice_v1922_data_fort_reclamation_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1922.data_fort_reclamation:${agendaId}:${state.stateVersion + 1}`,
+    prompt: "Data Fort Reclamation: HQ-Karten fuer neues Data Fort waehlen.",
+    kind: "select_cards",
+    options,
+    minSelections: 0,
+    maxSelections: Math.min(4, options.length),
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922CorpAgendaAbility: "data_fort_reclamation",
+    dataFortReclamationChoiceOpened: true,
+    dataFortReclamationCandidateCount: options.length,
+    dataFortReclamationMaxSelections: Math.min(4, options.length),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_data_fort_reclamation_hq_choice",
+  };
+}
+
+function resolveV1922DataFortReclamationChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.data_fort_reclamation"))
+    throw new Error("Data-Fort-Reclamation-Choice ist nicht offen.");
+  const [, agendaId] = choice.source.split(":");
+  if (
+    !agendaId ||
+    !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
+    definitionFor(state, agendaId as CardInstanceId).id !==
+      V1922_DATA_FORT_RECLAMATION_ID
+  )
+    throw new Error("Data Fort Reclamation ist nicht gescored.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length)
+    throw new Error("Eine HQ-Karte wurde doppelt gewaehlt.");
+  if (selectedIds.some((cardId) => !state.corp.hq.includes(cardId)))
+    throw new Error("Eine gewaehlte Karte liegt nicht mehr in HQ.");
+  if (
+    selectedIds.some(
+      (cardId) => !isCorpInstallableCardType(definitionFor(state, cardId)),
+    )
+  )
+    throw new Error("Eine gewaehlte Karte ist nicht installierbar.");
+  const server = createRemote(state);
+  let installedIceCount = 0;
+  let installedRootCount = 0;
+  for (const cardId of selectedIds) {
+    const definition = definitionFor(state, cardId);
+    removeFromAllZones(state, cardId);
+    if (definition.type === "ice") {
+      server.ice.unshift(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: false,
+        rezzed: false,
+        zone: { side: "corp", zone: "serverIce", serverId: server.id },
+      };
+      installedIceCount += 1;
+      continue;
+    }
+    if (!canInstallCorpRootCardInServer(state, definition, server))
+      throw new Error("Diese Root-Karte kann nicht in das neue Remote.");
+    server.root.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "serverRoot", serverId: server.id },
+    };
+    installedRootCount += 1;
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+    selectedCount: selectedIds.length,
+    installedCount: installedIceCount + installedRootCount,
+    installedIceCount,
+    installedRootCount,
+    createdServerId: server.id,
+    temporaryCreditsProvided: 10,
+    temporaryCreditsSpent: 0,
+    corpCreditsSpent: 0,
+    rezSequenceDeferred: true,
   };
 }
 
@@ -10605,6 +10728,10 @@ function resolvePendingChoice(
     state.pendingChoice.source.startsWith("v1922.hammer_stealth_loss")
   ) {
     resolveV1922HammerStealthLossChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1922.data_fort_reclamation")) {
+    resolveV1922DataFortReclamationChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
@@ -13161,6 +13288,21 @@ function publicContextForAction(
       context.arrangedCount = legalAction.payload.arrangedCount;
     if (typeof legalAction.payload.trashedCount === "number")
       context.trashedCount = legalAction.payload.trashedCount;
+    if (typeof legalAction.payload.installedCount === "number")
+      context.installedCount = legalAction.payload.installedCount;
+    if (typeof legalAction.payload.installedIceCount === "number")
+      context.installedIceCount = legalAction.payload.installedIceCount;
+    if (typeof legalAction.payload.installedRootCount === "number")
+      context.installedRootCount = legalAction.payload.installedRootCount;
+    if (typeof legalAction.payload.temporaryCreditsProvided === "number")
+      context.temporaryCreditsProvided =
+        legalAction.payload.temporaryCreditsProvided;
+    if (typeof legalAction.payload.temporaryCreditsSpent === "number")
+      context.temporaryCreditsSpent = legalAction.payload.temporaryCreditsSpent;
+    if (typeof legalAction.payload.corpCreditsSpent === "number")
+      context.corpCreditsSpent = legalAction.payload.corpCreditsSpent;
+    if (legalAction.payload.rezSequenceDeferred === true)
+      context.rezSequenceDeferred = true;
     if (typeof legalAction.payload.gainedCredits === "number")
       context.gainedCredits = legalAction.payload.gainedCredits;
     if (typeof legalAction.payload.runnerCreditsAfter === "number")

@@ -5104,6 +5104,27 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     ],
   },
   {
+    id: "onr_v1_197_data-fort-reclamation",
+    title: "Data Fort Reclamation",
+    side: "corp",
+    type: "agenda",
+    subtypes: ["gray_ops"],
+    implementationStatus: "playable_mvp",
+    advancementRequirement: 4,
+    agendaPoints: 2,
+    rulesText:
+      "When scored, choose up to 4 HQ cards and install them in a new data fort. Optional rez sequencing remains deferred.",
+    mechanics: [
+      "install_remote",
+      "advance",
+      "score_agenda",
+      "hidden_zone",
+      "install_remote",
+      "per_card_longtail",
+      ONR_V1_LOCAL_PRIVATE,
+    ],
+  },
+  {
     id: "onr_v1_206_marine-arcology",
     title: "Marine Arcology",
     side: "corp",

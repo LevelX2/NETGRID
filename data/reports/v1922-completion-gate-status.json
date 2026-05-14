@@ -106,6 +106,7 @@
       "onr_v1_117_valu-pak-software-bundle",
       "onr_v1_195_corporate-retreat",
       "onr_v1_196_corporate-war",
+      "onr_v1_197_data-fort-reclamation",
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
       "onr_v1_216_security-purge",
@@ -139,6 +140,7 @@
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Valu-Pak Software Bundle as a consecutive program-install action bundle",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Corporate Retreat until Corp installs or rezzes another card",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Data Fort Reclamation as a private HQ install sequence",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 3",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Security Purge as a side-safe R&D top-three install and trash resolver",
@@ -243,8 +245,8 @@
     "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
   },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T17:52:00+02:00",
-    "status": "data_fort_runtime_contract_ready_after_zetatech_recurring_wip",
+    "reviewedAt": "2026-05-14T18:01:00+02:00",
+    "status": "viral_15_remaining_after_data_fort_install_sequence_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -255,12 +257,11 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Tutor, Virizz, Security Purge, Hammer multi-Stealth distribution, Haunting Inquisition and Zetatech restricted program-install credits now have non-promoting WIPs; Data Fort Reclamation, Viral 15, Zetatech overlay and final promotion gates remain open.",
+    "summary": "Local card facts exist for all remaining targets. Data Fort Reclamation now has a non-promoting HQ install-sequence WIP; Viral 15, Data-Fort rez/credit follow-up, Zetatech overlay and final promotion gates remain open.",
     "blockedCards": [
-      "onr_v1_197_data-fort-reclamation",
       "onr_v1_276_viral-15"
     ],
-    "removalCondition": "Implement Data Fort Reclamation from docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md, then close Viral 15 or Zetatech overlay with LegalAction projection, applyAction revalidation, side-safe payloads, and deterministic Replay/StateHash expectations."
+    "removalCondition": "Close Viral 15 with LegalAction projection, applyAction revalidation, side-safe payloads, and deterministic Replay/StateHash expectations; follow up Data-Fort rez/credit accounting and Zetatech overlay before final promotion."
   },
   "blockingGates": [
     {

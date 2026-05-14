@@ -3130,6 +3130,7 @@ describe("catalog import and status logic", () => {
     const corpAgendaResolverCards = manifestCards.filter((card) =>
       [
         "v1922_corp_agenda_on_score_credit_threshold",
+        "v1922_corp_agenda_data_fort_reclamation_hq_install_sequence",
         "v1922_corp_agenda_security_purge_rd_top3",
         "v1922_scored_agenda_action_gain_2_until_install_or_rez",
         "v1922_scored_agenda_action_gain_3",
@@ -3336,6 +3337,7 @@ describe("catalog import and status logic", () => {
       [
         "onr_v1_195_corporate-retreat",
         "onr_v1_196_corporate-war",
+        "onr_v1_197_data-fort-reclamation",
         "onr_v1_206_marine-arcology",
         "onr_v1_210_political-overthrow",
         "onr_v1_216_security-purge",
@@ -3388,7 +3390,7 @@ describe("catalog import and status logic", () => {
       );
     }
 
-    expect(plannedCards).toHaveLength(2);
+    expect(plannedCards).toHaveLength(1);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(
         card.cardCode,

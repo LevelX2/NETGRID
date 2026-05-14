@@ -7812,7 +7812,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -8102,7 +8102,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -8577,7 +8577,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -8951,7 +8951,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -9387,7 +9387,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -9593,7 +9593,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -10103,7 +10103,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -10434,7 +10434,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -10712,7 +10712,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -11049,7 +11049,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -11752,7 +11752,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       );
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -14494,6 +14494,137 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       ).toBeUndefined();
   });
 
+  it("scores Data Fort Reclamation as a private HQ install sequence", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "onr_v1_corp_v1922_data_fort_reclamation",
+      name: "O:NR V1.9.22 Data Fort Reclamation",
+      cards: [
+        { id: "onr_v1_197_data-fort-reclamation", quantity: 1 },
+        { id: "simple_barrier_ice", quantity: 1 },
+        { id: "onr_v1_308_acme-savings-and-loan", quantity: 1 },
+        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+      ],
+    };
+    let state = createGameAfterSetup({
+      seed: "v1922-data-fort-reclamation",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 20;
+    state.corp.maxHandSize = 100;
+    moveCorpCardToHq(state, "onr_v1_197_data-fort-reclamation");
+    const iceId = moveCorpCardToHq(state, "simple_barrier_ice");
+    const assetId = moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_197_data-fort-reclamation" &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root",
+    );
+    for (let index = 0; index < 4; index += 1) {
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_197_data-fort-reclamation",
+      );
+    }
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_197_data-fort-reclamation",
+    );
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "hidden_info_barrier",
+      minSelections: 0,
+      maxSelections: 4,
+    });
+    const legal = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "resolve_choice",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${iceId}`],
+      },
+      idempotencyKey: "v1922-data-fort-choice-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${iceId}`],
+      },
+      idempotencyKey: "v1922-data-fort-choice-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = applyChoices(state, "corp", [`card_${iceId}`, `card_${assetId}`]);
+
+    const remote = state.corp.servers.find(
+      (server) =>
+        server.kind === "remote" &&
+        server.ice.includes(iceId) &&
+        server.root.includes(assetId),
+    );
+    expect(remote).toBeDefined();
+    expect(state.cardInstances[iceId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "serverIce",
+      serverId: remote?.id,
+    });
+    expect(state.cardInstances[assetId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "serverRoot",
+      serverId: remote?.id,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+      selectedCount: 2,
+      installedCount: 2,
+      temporaryCreditsProvided: 10,
+      temporaryCreditsSpent: 0,
+      rezSequenceDeferred: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"hq"|"rd"|"cardInstances"|"privatePayload"|ACME/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("scores Corporate War through a deterministic on-score credit threshold resolver", () => {
     const corpDeck: DeckDefinition = {
       ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
@@ -15778,7 +15909,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
-      "onr_v1_197_data-fort-reclamation",
       "onr_v1_276_viral-15",
     ] as const;
 
@@ -15791,6 +15921,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     for (const definitionId of [
       "onr_v1_195_corporate-retreat",
       "onr_v1_196_corporate-war",
+      "onr_v1_197_data-fort-reclamation",
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
       "onr_v1_216_security-purge",
@@ -15834,7 +15965,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_197_data-fort-reclamation"]
+      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).not.toBe("playable_mvp");
   });
@@ -21095,3 +21226,4 @@ function removeEverywhere(state: GameState, id: string): void {
       state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
   }
 }
+
