@@ -63,11 +63,12 @@
     "False Echo, Netspace Inverter, Poltergeist, Rabbit, Scatter Shot, Speed Trap and Startup Immolator have install-only Runner-program runtime WIPs with wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage; their successful-run, recurring-credit, trace-modifier, interrupt or post-break abilities remain gated until their specific contracts are confirmed.",
     "Flak has a non-promoting AP-Icebreaker runtime WIP with install, pump, AP-subroutine break, wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage.",
     "Hammer has a non-promoting Wall-Icebreaker runtime WIP with install, pump, Wall-subroutine break and ordered Stealth-loss coverage; Runner-choice distribution across multiple Stealth sources remains gated for the full contract.",
+    "Japanese Water Torture has a non-promoting Wall-Icebreaker runtime WIP with install, pump, Wall-subroutine break, Future-Action-Debt carryover, wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage.",
     "Reflector has a non-promoting tagged-subroutine breaker WIP for stun, hellbolt and knockout subroutines with wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage.",
     "Zetatech Software Installer has a non-promoting install-only runtime WIP with install cost 0 and MU 1; restricted recurring program-install credits and overlying remain gated.",
     "Newsgroup Filter has a non-promoting installed Runner-program action for [A]: Gain 2 Credits with wrong-side/stale revalidation, public payload visibility and Replay/StateHash coverage.",
     "Shield has a narrow Runner-program runtime WIP: install cost 0, MU 1 and up to 2 Net-Damage prevention per Runner turn through the existing side-safe Event-Modification window.",
-    "The remaining V1.9.22 runner program target card has explicit no-playable-runtime and no install/pump/break LegalAction guards until local cost/MU/breaker values are confirmed.",
+    "No V1.9.22 runner program remains guarded solely for missing local cost/MU/breaker values; remaining Runner-program work is promotion, AI and full-contract follow-up.",
     "Corporate Retreat has a scored-agenda Gain 2 action that stays available until Corp installs or rezzes another card, with wrong-side/stale revalidation, side-safe public payloads and Replay/StateHash coverage.",
     "Corporate War has a deterministic on-score credit threshold resolver with wrong-side/stale revalidation, side-safe public payloads and Replay/StateHash coverage.",
     "Marine Arcology has a scored-agenda Gain 3 LegalAction costing 2 actions with wrong-side/stale revalidation, side-safe public payloads and Replay/StateHash coverage.",
@@ -84,7 +85,7 @@
   "verification": {
     "json": "pass: 308 files",
     "catalog": "pass: 44 tests including V1.9.22 WIP artifact-alignment, local card facts and resolver-contract guards",
-    "engine": "pass: 301 tests including eight non-breaker Runner-program install-only WIPs, Flak AP-Icebreaker WIP, Hammer Wall-Icebreaker ordered Stealth-loss WIP, Reflector tagged-subroutine breaker WIP, Newsgroup Filter Gain-2 action, Shield, all nine runner hardware install smokes, Anonymous Tip, Core Command: Jettison Ice, Forged Activation Orders, If You Want It Done Right, misc.for-sale, Open-Ended Mileage Program, Organ Donor, Security Code WORM Chip, Synchronized Attack on HQ, Valu-Pak Software Bundle, Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants resolver smokes, remaining runner-program no-playable-runtime/no install-pump-break LegalAction guard and unresolved Corp-longtail no-playable-runtime guard",
+    "engine": "pass: 300 tests including eight non-breaker Runner-program install-only WIPs, Flak AP-Icebreaker WIP, Hammer Wall-Icebreaker ordered Stealth-loss WIP, Japanese Water Torture Wall-Icebreaker Future-Action-Debt WIP, Reflector tagged-subroutine breaker WIP, Newsgroup Filter Gain-2 action, Shield, all nine runner hardware install smokes, Anonymous Tip, Core Command: Jettison Ice, Forged Activation Orders, If You Want It Done Right, misc.for-sale, Open-Ended Mileage Program, Organ Donor, Security Code WORM Chip, Synchronized Attack on HQ, Valu-Pak Software Bundle, Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants resolver smokes and unresolved Corp-longtail no-playable-runtime guard",
     "ai": "pass: 86 tests including V1.9.22 AI no-promotion guard",
     "server": "pass: 72 tests",
     "web": "pass: 79 tests including V1.9.22 web catalog no-promotion and version guards",
@@ -97,8 +98,8 @@
     "releaseDone": false,
     "catalogPromoted": false,
     "aiPromoted": false,
-    "runtimeDefinitionsReady": "runner_hardware_event_thirteen_runner_program_and_eight_corp_resolver_clusters_45_of_47",
+    "runtimeDefinitionsReady": "runner_hardware_event_fourteen_runner_program_and_eight_corp_resolver_clusters_46_of_47",
     "originalsetCompletionGateReady": false,
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_non_breaker_runner_program_install_only_plus_zetatech_software_installer_install_only_plus_flak_ap_breaker_plus_hammer_wall_breaker_ordered_stealth_loss_plus_reflector_tagged_breaker_plus_newsgroup_filter_gain_2_credit_action_plus_shield_net_damage_prevention_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_zombie_edgerunner_temps_off_site_backups_and_planning_consultants_resolvers_plus_remaining_runner_program_and_unresolved_corp_no_promotion_guards"
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_non_breaker_runner_program_install_only_plus_zetatech_software_installer_install_only_plus_flak_ap_breaker_plus_hammer_wall_breaker_ordered_stealth_loss_plus_japanese_water_torture_wall_breaker_future_action_debt_plus_reflector_tagged_breaker_plus_newsgroup_filter_gain_2_credit_action_plus_shield_net_damage_prevention_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_zombie_edgerunner_temps_off_site_backups_and_planning_consultants_resolvers_plus_unresolved_corp_no_promotion_guards"
   }
 }

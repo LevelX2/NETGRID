@@ -83,13 +83,23 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - `Virizz`: Rez-Kosten 2, Staerke 4; fuer den Rest des Runs muss der Runner 1 Credit extra bezahlen, wenn er ICE brechen will; offen bleiben Break-Kostenprojektion in LegalActions und `applyAction`-Revalidierung.
 - `Flak`: Installkosten 4, Staerke 2, `1: Break AP subroutine`, `1: +1 Strength`; AP-Subroutine-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
 - `Hammer`: Installkosten 2, MU 1, Staerke 2, `1: Break Wall subroutine`, `1: +1 Strength`; Runtime-WIP ohne Promotion ist umgesetzt mit deterministischem bis-zu-2-Stealth-Counter-Verlust aus installierten Stealth-Quellen. Offen bleibt die freie Runner-Verteilung, falls mehrere Stealth-Quellen verfuegbar sind.
-- `Japanese Water Torture`: Installkosten 7, Staerke 2, `0: Break Wall subroutine`, `X: +X strength, and forgo your next X actions`; Wall-Subroutine-Taxonomie, echte zuguebergreifende Future-Action-Debt und Standard-Breaker-Vertrag bestaetigt; offen ist Runtime-/Testumsetzung.
+- `Japanese Water Torture`: Installkosten 7, Staerke 2, `0: Break Wall subroutine`, `X: +X strength, and forgo your next X actions`; Runtime-WIP ohne Promotion ist umgesetzt mit Wall-Break, Pump und echter zuguebergreifender Future-Action-Debt.
 - `Reflector`: Program/Icebreaker, MU 1, Installkosten 2, Staerke 4, `0: Break stun, hellbolt or knockout subroutine`; Zielkategorie-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
 - Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
 - `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
-- Naechster sinnvoller Code-Schnitt: `Japanese Water Torture` als enger nicht-promotender Breaker-Runtime-Schnitt mit Future-Action-Debt oder `Hammer`-Mehrfach-Stealth-Verteilungschoice; alternativ `Virizz` nach Break-Kostenmodifier-Vertrag oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
+- Naechster sinnvoller Code-Schnitt: `Hammer`-Mehrfach-Stealth-Verteilungschoice, `Virizz` nach Break-Kostenmodifier-Vertrag, `Security Purge` nach Installationsvertrag fuer revealed ICE oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 16:35 CEST
+- Ergebnis: V1.9.22 Japanese-Water-Torture-Future-Action-Debt-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Japanese Water Torture` hat eine nicht-promotende Runtime-Definition mit Installkosten 7, MU 1, Staerke 2, Pump fuer 1 Credit, Wall-Subroutine-Break fuer 0 Credits und zuguebergreifender Future-Action-Debt erhalten. Alte Runner-Programm-No-LegalAction-Guards wurden auf verbleibende Corp-Blocker umgestellt. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen fehlender Runtime-Definition und ueberholter Guards, danach pass (300); `catalog` pass (44); `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: japanese water torture action debt wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 15:54 CEST
 - Ergebnis: V1.9.22 Hammer-Wall-Breaker-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

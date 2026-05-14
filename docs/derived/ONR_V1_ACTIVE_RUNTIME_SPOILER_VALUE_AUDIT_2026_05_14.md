@@ -9,13 +9,13 @@ Status: aktive Runtime-Karten gegen lokale Spoilertexte abgeglichen, eindeutige 
 
 ## Ergebnis
 
-Der Audit deckt die 327 Karten aus dem exportierten `ONR_V1_RUNTIME_RELEASE_CARD_IDS` ab. Nach Parser-Normalisierung fuer Sonderzeichen, TM/R-Marker und fehlerhafte `Card Title:Operation`-Zeilen wurden 327/327 aktiven Karten den Spoilerquellen zugeordnet.
+Der Audit deckt die 327 Karten aus dem exportierten `ONR_V1_RUNTIME_RELEASE_CARD_IDS` ab. Nach Parser-Normalisierung fuer Sonderzeichen, TM/R-Marker und fehlerhafte `Card Title:Operation`-Zeilen wurden 327/327 aktiven Karten den Spoilerquellen zugeordnet. Der erweiterte Abgleich prueft 581 einzelne Wertfelder.
 
 Gepruefte Felder:
 
 - Runner: Play-Kosten, Installkosten, MU, Staerke.
-- Corp: Operation-Kosten, Agenda-Difficulty/Agenda-Punkte, ICE-Rez-Kosten/Staerke.
-- Zusaetzlich manuell nachgezogen: eindeutige ICE-Subtypes und Trace-Staerken, wo der Runtime-Testpfad sie direkt nutzt.
+- Corp: Operation-Kosten, Agenda-Difficulty/Agenda-Punkte, ICE-Rez-Kosten/Staerke, Asset-/Node-/Upgrade-Rez- und Trash-Kosten.
+- Zusaetzlich nachgezogen: eindeutige ICE-Subtypes und Trace-Staerken, wo der Runtime-Testpfad sie direkt nutzt.
 
 Nach Korrektur: 0 offene maschinenlesbare Wertabweichungen fuer die aktiven Runtime-Karten.
 
@@ -28,7 +28,8 @@ Die breite Korrektur betrifft unter anderem:
 - Runner-Programme und Breaker wie `Afreet`, `Dogcatcher`, `Dropp`, `Force Shield`, `Joan of Arc`, `Self-Modifying Code`, `Ramming Piston`, `Replicator`, `Dupré`, `Microtech AI Interface`, `Shredder Uplink Protocol`.
 - Runner-Hardware/Resources wie `Armored Fridge`, `Full Body Conversion`, `Nasuko Cycle`, `The Shell Traders`, `Umbrella Policy`, `Wilson, Weeflerunner Apprentice`, `Broker`, `Short-Term Contract`, `The Springboard`, `Record Reconstructor`.
 - Corp-Agendas/Operations wie `Corporate Downsizing`, `Detroit Police Contract`, `Employee Empowerment`, `Superior Net Barriers`, `Overtime Incentives`, `New Blood`.
-- ICE-Werte/Subtypes wie `Banpei`, `Bolter Cluster`, `Cerberus`, `Cinderella`, `Data Darts`, `Data Raven`, `Fang`, `Fang 2.0`, `Homewrecker`, `Ice Pick Willie`, `Mastiff`, `Neural Blade`, `Pocket Virtual Reality`, `Rex`, `Too Many Doors`.
+- Corp-Assets/Nodes/Upgrades wie `ACME Savings and Loan`, `Blood Cat`, `Braindance Campaign`, diverse City Grids, `Turbeau Delacroix` und weitere aktive Rez-/Trash-Werte.
+- ICE-Werte/Subtypes/Trace-Staerken wie `Asp`, `Banpei`, `Bolter Cluster`, `Cerberus`, `Cinderella`, `Data Darts`, `Data Raven`, `Fang`, `Fang 2.0`, `Homewrecker`, `Ice Pick Willie`, `Mastiff`, `Neural Blade`, `Pocket Virtual Reality`, `Rex`, `Too Many Doors`.
 - Spaetere aktive Runtime-Karten aus V1.9.16 bis V1.9.21 wie `Baedeker's Net Map`, `Bakdoor`, `Imp`, `Pile Driver`, `Fragmentation Storm`, `Fait Accompli`, `Management Shake-Up`, `Project Consultants`, `Militech MRAM Chip`, `Corporate Boon`, `AI Boon`, `Boardwalk` und `Quest for Cattekin`.
 
 ## Nachgezogene Schichten

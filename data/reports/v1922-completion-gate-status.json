@@ -78,11 +78,12 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-14T15:25:00+02:00",
+    "implementedAt": "2026-05-14T16:35:00+02:00",
       "cards": [
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
+      "onr_v1_037_japanese-water-torture",
       "onr_v1_044_netspace-inverter",
       "onr_v1_045_newsgroup-filter",
       "onr_v1_048_poltergeist",
@@ -116,6 +117,7 @@
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs V1.9.22 install-only runner programs while keeping their abilities gated",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Flak and breaks AP ICE subroutines without release promotion",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Hammer and applies ordered Stealth loss after breaking Wall subroutines without release promotion",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Japanese Water Torture, breaks Wall subroutines and carries future action debt without release promotion",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Reflector and only breaks tagged stun or knockout subroutines",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Newsgroup Filter and uses its side-safe credit action",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Shield and uses side-safe per-turn net damage prevention",
@@ -183,8 +185,8 @@
       },
       {
         "cardId": "onr_v1_037_japanese-water-torture",
-        "status": "ready_for_narrow_breaker_runtime_with_future_action_debt_no_promotion",
-        "removalCondition": "Implement and test the confirmed Wall-breaker and future-action-debt contract without catalog, AI or release promotion."
+        "status": "runtime_wip_future_action_debt_no_promotion",
+        "removalCondition": "Keep catalog, AI and release promotion closed until final V1.9.22 gates."
       },
       {
         "cardId": "onr_v1_055_reflector",
@@ -230,8 +232,8 @@
     "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
   },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T08:50:00+02:00",
-    "status": "remaining_technical_contracts_open_after_hammer_ordered_stealth_loss_wip",
+    "reviewedAt": "2026-05-14T16:35:00+02:00",
+    "status": "remaining_technical_contracts_open_after_japanese_water_torture_future_action_debt_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -242,9 +244,8 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter, Flak, Hammer, Reflector and Zetatech Software Installer now have non-promoting runtime WIPs; Hammer's ordered Stealth-loss path is covered, while multiple-Stealth-source Runner distribution remains gated before promotion.",
+    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter, Flak, Hammer, Japanese Water Torture, Reflector and Zetatech Software Installer now have non-promoting runtime WIPs; Hammer's multi-Stealth-source distribution and final promotion gates remain open.",
     "blockedCards": [
-      "onr_v1_037_japanese-water-torture",
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_216_security-purge",
       "onr_v1_247_haunting-inquisition",
@@ -258,7 +259,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Seven install-only Runner-program WIPs, Newsgroup Filter Gain-2, Flak, Hammer, Reflector, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Seven install-only Runner-program WIPs, Newsgroup Filter Gain-2, Flak, Hammer, Japanese Water Torture, Reflector, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {
