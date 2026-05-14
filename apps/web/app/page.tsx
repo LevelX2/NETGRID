@@ -44,6 +44,7 @@ import {
   Volume2,
   VolumeX,
   X,
+  Zap,
   ZoomIn
 } from "lucide-react";
 import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -74,6 +75,7 @@ import {
   LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
   RUN_TIMELINE_STEPS,
   actionButtonLabel,
+  actionConsumesClick,
   actionContextStillVisible,
   actionContextTitle,
   actionCostChips,
@@ -94,8 +96,11 @@ import {
   parseCuePositionPreference,
   runTargetServerIds,
   runAwareActionButtonLabel,
+  runWindowActionButtonLabel,
+  runWindowActions,
   runCurrentIceLabel,
   runPositionStatusLabel,
+  runWindowStatusLabel,
   serializeCuePositionPreference,
   showInstalledCorpState,
   serverBoardRows,
@@ -2034,6 +2039,7 @@ export default function Page() {
   const activeCueHighlight = currentActionCue?.highlight ?? null;
   const hasDecisionCue = Boolean(currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length));
   const legalActionSplit = useMemo(() => splitLegalActions(payload?.legalActions ?? []), [payload?.legalActions]);
+  const runActions = useMemo(() => (activeView ? runWindowActions(activeView, payload?.legalActions ?? []) : []), [activeView, payload?.legalActions]);
   const selectedPanelContext = selectedActionContext?.kind === "server" ? selectedActionContext : null;
   const selectedPanelContextActions = selectedPanelContext ? legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, selectedPanelContext)) : [];
   const cardActionsFor = (card: VisibleCard): LegalAction[] => {
@@ -3938,7 +3944,17 @@ export default function Page() {
           advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
         }}
       />
-      {activeView?.run ? <RunTimelineOverlay view={activeView} legalActions={payload.legalActions} cardDetailsById={catalogDetailsById} highlighted={activeCueHighlight?.kind === "run"} /> : null}
+      {activeView?.run ? (
+        <RunTimelineOverlay
+          view={activeView}
+          legalActions={payload.legalActions}
+          runActions={runActions}
+          cardDetailsById={catalogDetailsById}
+          actionDisabled={Boolean(payload.winner) || connection !== "online"}
+          highlighted={activeCueHighlight?.kind === "run"}
+          onAction={submitAction}
+        />
+      ) : null}
       <ScoredAgendaOverlay
         side="corp"
         cards={scoreAreaCardsBySide("corp")}
@@ -5622,13 +5638,19 @@ function SpecialZonesStrip({
 function RunTimelineOverlay({
   view,
   legalActions,
+  runActions,
   cardDetailsById,
-  highlighted = false
+  actionDisabled,
+  highlighted = false,
+  onAction
 }: {
   view: PlayerView;
   legalActions: LegalAction[];
+  runActions: LegalAction[];
   cardDetailsById: Record<string, CatalogCardDetail>;
+  actionDisabled: boolean;
   highlighted?: boolean;
+  onAction(action: LegalAction): void;
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
@@ -5676,7 +5698,7 @@ function RunTimelineOverlay({
   const encounteredIce = run.encounteredIce ? enrichVisibleCard(run.encounteredIce, cardDetailsById) : null;
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
-  const positionStatus = runPositionStatusLabel(view);
+  const headerStatus = runWindowStatusLabel(view);
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
 
@@ -5693,7 +5715,10 @@ function RunTimelineOverlay({
           aria-label="Run-Fenster verschieben"
         >
           <RunIcon size={18} />
-          <span>{`Run auf ${serverDisplayLabel(run.attackedServerId)}`}</span>
+          <span className="runTimelineTitle">
+            <strong>{`Run auf ${serverDisplayLabel(run.attackedServerId)}`}</strong>
+            {headerStatus ? <small>{headerStatus}</small> : null}
+          </span>
           <Move size={15} aria-hidden="true" />
         </div>
         <div className="runSteps">
@@ -5703,13 +5728,31 @@ function RunTimelineOverlay({
             </span>
           ))}
         </div>
-        {positionStatus ? <p className="runPositionHint">{positionStatus}</p> : null}
-        {jackOutAvailable ? <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p> : null}
+        {runActions.length > 0 ? (
+          <div className="runActionBar" aria-label="Run-Aktionen" data-testid="run-action-bar">
+            {runActions.map((action) => (
+              <button
+                className="button primary actionButton runActionButton"
+                key={action.actionId}
+                onClick={() => onAction(action)}
+                disabled={actionDisabled}
+                type="button"
+                data-testid="run-action-button"
+                data-action-type={action.type}
+              >
+                <ActionLeadIcon action={action} size={14} />
+                <span className="actionButtonLabel">{runWindowActionButtonLabel(view, action)}</span>
+                <CostChips action={action} />
+              </button>
+            ))}
+          </div>
+        ) : jackOutAvailable ? (
+          <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p>
+        ) : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
         {breakerHint ? <p className="runHint runBreakerHint">{breakerHint}</p> : null}
         {encounteredIce ? (
           <div className="encounterFocus">
-            <span>Begegnung</span>
             {encounteredIce.known ? (
               <div className="encounterFocusBody">
                 <strong>{encounteredIce.title ?? "Sichtbares ICE"}</strong>
@@ -6021,7 +6064,7 @@ function LegalActionsPanel({
         <div className="actions setupActions">
           {genericChoice.options.map((option) => (
             <button className="button actionButton primary" key={option.id} onClick={() => onChoiceOption(genericChoiceAction, genericChoice.choiceId, option.id)} disabled={disabled} data-testid="generic-choice-button">
-              <Play size={15} />
+              <ActionLeadIcon action={genericChoiceAction} />
               <span className="actionButtonLabel">{option.label}</span>
             </button>
           ))}
@@ -6051,7 +6094,7 @@ function LegalActionsPanel({
       <div className="actions">
         {primaryActions.map((action) => (
           <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
-            <Play size={15} />
+            <ActionLeadIcon action={action} />
             <span className="actionButtonLabel">{runAwareActionButtonLabel(view, action)}</span>
             <CostChips action={action} />
           </button>
@@ -6066,7 +6109,7 @@ function LegalActionsPanel({
             </div>
             {contextualActions.map((action) => (
               <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
-                <Play size={15} />
+                <ActionLeadIcon action={action} />
                 <span className="actionButtonLabel">{runAwareActionButtonLabel(view, action)}</span>
                 <CostChips action={action} />
               </button>
@@ -6274,6 +6317,10 @@ function CostChips({ action }: { action: LegalAction }) {
       ))}
     </span>
   );
+}
+
+function ActionLeadIcon({ action, size = 15 }: { action: LegalAction; size?: number }) {
+  return actionConsumesClick(action) ? <Play size={size} aria-hidden="true" /> : <Zap size={size} aria-hidden="true" />;
 }
 
 function setupWaitingLabel(view: PlayerView): string {
@@ -8936,7 +8983,7 @@ function CardActionsPopover({
         const label = compactCardActionMenuLabel(action, actionLabelForAction(action));
         return (
           <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
-            <Play size={14} />
+            <ActionLeadIcon action={action} size={14} />
             <span className="actionButtonLabel">{label}</span>
             <CostChips action={action} />
           </button>

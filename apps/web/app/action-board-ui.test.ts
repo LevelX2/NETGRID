@@ -3,6 +3,7 @@ import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from
 import {
   DEFAULT_CUE_POSITION,
   actionButtonLabel,
+  actionConsumesClick,
   actionCostChips,
   actionMatchesContext,
   actionSlotCapacityForTurn,
@@ -22,6 +23,9 @@ import {
   runCurrentIceLabel,
   runPositionStatusLabel,
   runTargetServerIds,
+  runWindowActionButtonLabel,
+  runWindowActions,
+  runWindowStatusLabel,
   serverBoardRows,
   serverDisplayLabel,
   splitLegalActions
@@ -65,6 +69,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(activeRunIceInstanceId(running)).toBe("ice_3");
     expect(runCurrentIceLabel(running)).toBe("ICE 3");
     expect(runPositionStatusLabel(running)).toBe("Aktuell: vor ICE 3 (1 von 3)");
+    expect(runWindowStatusLabel(running)).toBe("ICE 3 (1 von 3)");
     expect(runAwareActionButtonLabel(running, legalAction("runner", "jack_out", "game_rule", "Jack-out", undefined, "run.jack_out_window"))).toBe("Run abbrechen an ICE 3");
     expect(runAwareActionButtonLabel(running, legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.jack_out_window"))).toBe("Run fortsetzen zu ICE 3");
     expect(serverDisplayLabel("rd")).toBe("F&E (R&D)");
@@ -106,6 +111,7 @@ describe("V1.0.5 action board UI helpers", () => {
     const passIce = legalAction("runner", "continue_run", "game_rule", "ICE passieren", { encounterContinue: true, unbrokenSubroutineCount: 0 }, "run.encounter_ice");
 
     expect(runPositionStatusLabel(running)).toBe("Aktuell: Begegnung mit ICE 2 (1 von 2)");
+    expect(runWindowStatusLabel(running)).toBe("ICE 2 (1 von 2)");
     expect(runAwareActionButtonLabel(running, pump)).toBe("Stärke +1 (Replicator) gegen ICE 2");
     expect(runAwareActionButtonLabel(running, passIce)).toBe("ICE 2 passieren");
   });
@@ -260,6 +266,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       { kind: "credit", amount: 1, label: "1 Credit" }
     ]);
     expect(JSON.stringify(actionCostChips({ costs: [{ clicks: 1, credits: 2 }] }))).not.toContain("{ clicks");
+    expect(actionConsumesClick({ costs: [{ clicks: 1, credits: 2 }] })).toBe(true);
+    expect(actionConsumesClick({ costs: [{ credits: 2 }] })).toBe(false);
+    expect(actionConsumesClick({ costs: [] })).toBe(false);
   });
 
   it("keeps contextual card action labels distinct for server-targeted events", () => {
@@ -347,6 +356,43 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
     expect(actionButtonLabel(searchInstall)).toBe("Trashen: Programm aus Stack installieren");
     expect(contextualCardActionLabel(searchInstall)).toBe("Programm suchen");
+    expect(actionCostChips(searchInstall)).toEqual([]);
+    expect(actionCostChips({ ...searchInstall, costs: [{ credits: 2 }] })).toEqual([]);
+  });
+
+  it("mirrors Self-Modifying Code and immediate encounter actions into the Run window without changing their card context", () => {
+    const smc = card("smc_1", "Self-Modifying Code", "program");
+    const breaker = card("breaker_1", "Simple Decoder", "program");
+    const running = view("runner", {
+      own: {
+        ...view("runner").own,
+        rig: [smc, breaker]
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: card("ice_1", "Data Wall", "ice"),
+        successful: false
+      }
+    });
+    const searchInstall = legalAction("runner", "trigger_ability", "smc_1", "Self-Modifying Code: trashen und Programm aus Stack installieren", {
+      cardId: "smc_1",
+      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      trashOnUse: true
+    }, "run.encounter_ice");
+    const pump = legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder: Stärke +1", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice");
+    const continueRun = legalAction("runner", "continue_run", "game_rule", "ICE passieren", { encounterContinue: true, unbrokenSubroutineCount: 0 }, "run.encounter_ice");
+    const offRunAbility = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", { cardId: "broker_1", resourceAbility: "broker_load_credits" });
+
+    const split = splitLegalActions([searchInstall, pump, continueRun, offRunAbility]);
+    const mirrored = runWindowActions(running, [searchInstall, pump, continueRun, offRunAbility]);
+
+    expect(split.primaryActions).toEqual([continueRun]);
+    expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
+    expect(mirrored).toEqual([searchInstall, pump, continueRun]);
+    expect(runWindowActionButtonLabel(running, searchInstall)).toBe("Self-Modifying Code trashen: Programm suchen");
+    expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
     expect(actionCostChips(searchInstall)).toEqual([]);
   });
 });

@@ -5926,15 +5926,16 @@ select,
   top: 66px;
   left: 50%;
   z-index: 69;
-  width: max-content;
+  width: min(360px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
   transform: translateX(-50%);
   pointer-events: none;
 }
 
 .runTimeline.overlay {
-  width: max-content;
+  width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
   pointer-events: auto;
   background: color-mix(in srgb, var(--run-active-bg), transparent 16%);
   box-shadow:
@@ -5975,6 +5976,24 @@ select,
 
 .runTimelineDragHandle > span {
   text-align: center;
+}
+
+.runTimelineTitle {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  min-width: 0;
+}
+
+.runTimelineTitle strong {
+  line-height: 1.1;
+}
+
+.runTimelineTitle small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.15;
 }
 
 .runSteps {
@@ -6022,10 +6041,6 @@ select,
   text-align: center;
 }
 
-.encounterFocus span {
-  color: var(--muted);
-}
-
 .encounterFocusBody {
   display: grid;
   gap: 4px;
@@ -6039,19 +6054,6 @@ select,
   line-height: 1.35;
 }
 
-.runPositionHint {
-  margin: 0;
-  padding: 8px;
-  border: 1px solid color-mix(in srgb, var(--ice), var(--runner) 30%);
-  border-radius: 6px;
-  color: var(--text);
-  background: color-mix(in srgb, var(--ice), var(--section-bg) 88%);
-  font-size: 13px;
-  font-weight: 750;
-  line-height: 1.35;
-  text-align: center;
-}
-
 .runHint {
   margin: 0;
   padding: 8px;
@@ -6062,6 +6064,35 @@ select,
   font-size: 13px;
   line-height: 1.35;
   text-align: center;
+}
+
+.runActionBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+}
+
+.runActionButton {
+  min-height: 34px;
+  width: 100%;
+  max-width: 100%;
+  padding: 7px 9px;
+  border-color: var(--primary-border);
+  background: var(--primary-bg);
+  color: var(--primary-text);
+  font-size: 12px;
+}
+
+.runActionButton:hover,
+.runActionButton:focus-visible {
+  border-color: color-mix(in srgb, var(--primary-border), white 18%);
+  background: color-mix(in srgb, var(--primary-bg), white 8%);
+}
+
+.runActionButton .actionButtonLabel {
+  min-width: 0;
+  white-space: normal;
+  line-height: 1.25;
 }
 
 .runBreakerHint {

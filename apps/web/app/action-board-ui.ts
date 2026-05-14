@@ -311,7 +311,8 @@ function positiveInteger(value: unknown): number {
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : 0;
 }
 
-export function actionCostChips(action: Pick<LegalAction, "costs">): CostChipView[] {
+export function actionCostChips(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>): CostChipView[] {
+  if (isSelfModifyingCodeAction(action)) return [];
   const totals = action.costs.reduce<{ clicks: number; credits: number }>(
     (acc, cost) => {
       acc.clicks += cost.clicks ?? 0;
@@ -336,6 +337,10 @@ export function actionCostChips(action: Pick<LegalAction, "costs">): CostChipVie
     });
   }
   return chips;
+}
+
+export function actionConsumesClick(action: Pick<LegalAction, "costs">): boolean {
+  return action.costs.some((cost) => positiveInteger(cost.clicks) > 0);
 }
 
 export function aiPacingDelayMs(mode: AiPacingTriggerMode, hasPendingCue: boolean, autoDismissMs: number): number | null {
@@ -442,6 +447,17 @@ export function runPositionStatusLabel(view: PlayerView): string | null {
   return `Aktuell: vor ${iceLabel}`;
 }
 
+export function runWindowStatusLabel(view: PlayerView): string | null {
+  const run = view.run;
+  const position = run?.position;
+  if (!run || !position) return null;
+  if (position.kind === "server") return run.phase === "access" ? "Serverzugriff" : "Vor dem Zugriff";
+  const server = view.servers.find((candidate) => candidate.id === position.serverId);
+  const total = Math.max(position.iceIndex + 1, server?.ice.length ?? 0);
+  const approachNumber = Math.max(1, total - position.iceIndex);
+  return `ICE ${position.iceIndex + 1} (${approachNumber} von ${total})`;
+}
+
 export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction): string {
   const base = actionButtonLabel(action);
   if (!view.run) return base;
@@ -461,6 +477,23 @@ export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction)
     return `${base} gegen ${iceLabel}`;
   }
   return base;
+}
+
+export function runWindowActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
+  if (!view.run) return [];
+  return actions.filter((action) => {
+    if (!action.timingPoint.startsWith("run.")) return false;
+    if (action.type === "jack_out" || action.type === "continue_run" || action.type === "rez_ice" || action.type === "decline_rez") return true;
+    if (action.type === "pump_breaker" || action.type === "break_subroutine") return action.payload?.iceId === activeRunIceInstanceId(view);
+    return isSelfModifyingCodeAction(action);
+  });
+}
+
+export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction): string {
+  if (isSelfModifyingCodeAction(action)) {
+    return `${sourceCardTitleForAction(view, action) ?? "Self-Modifying Code"} trashen: Programm suchen`;
+  }
+  return runAwareActionButtonLabel(view, action);
 }
 
 export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {
@@ -567,6 +600,17 @@ function isPriorityAction(action: LegalAction): boolean {
 function objectBoundAction(action: LegalAction): boolean {
   if (action.type === "start_run") return false;
   return serverRefsForAction(action).length > 0 || ["advance_card", "score_agenda", "trash_resource", "trigger_ability"].includes(action.type);
+}
+
+function isSelfModifyingCodeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
+  return action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program";
+}
+
+function sourceCardTitleForAction(view: PlayerView, action: LegalAction): string | null {
+  const sourceId = action.abilityRef?.sourceCardInstanceId ?? (action.source !== "basic_action" && action.source !== "game_rule" ? action.source : undefined);
+  if (!sourceId) return null;
+  const sourceCard = visibleActionCards(view).find((card) => card.instanceId === sourceId);
+  return sourceCard?.known ? sourceCard.title ?? null : null;
 }
 
 function cardRefsForAction(action: LegalAction): string[] {
