@@ -18,7 +18,7 @@ Status: planned
 | Resolver-Verträge | Fehlende lokale Vertragsfelder sind sichtbar, keine Cluster- oder Per-card-Promotion ohne Vollvertrag | Resolver-Contract-Inventar fuer 6/6 Cluster gruen; Per-card-Resolververtragsmatrix fuer 47/47 Karten gruen; lokale Kartenfaktenbasis fuer 47/47 Karten angelegt; lokal bestaetigte Teilnotizen sind scope-geprueft und nicht-promotend |
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Aktueller Teilschnitt gruen: engine 300, catalog 44, typecheck; letzter Breitenlauf nach Hammer gruen fuer ai 86, server 72, web 79, test, lint und build mit bekannter Turbopack-NFT-Warnung |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Japanese Water Torture: engine 300, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter Turbopack-NFT-Warnung |
 
 ## Japanese Water Torture 2026-05-14 16:35 CEST
 
@@ -27,6 +27,7 @@ Status: planned
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen fehlender Runtime-Definition und ueberholter Guards, danach pass, 300 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- Breiter Verify: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; Build nur mit bekannter Turbopack-NFT-Warnung.
 
 ## Hammer 2026-05-14 15:54 CEST
 

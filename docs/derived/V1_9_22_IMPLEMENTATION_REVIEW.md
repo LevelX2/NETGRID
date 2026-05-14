@@ -86,6 +86,7 @@ Blocker-Abgleich 2026-05-14 16:35 CEST: `Newsgroup Filter`, `Flak`, `Hammer`, `J
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen noch fehlender JWT-Runtime-Definition und ueberholter Runner-Programm-Guards, danach pass, 300 Tests inkl. `Japanese Water Torture` Future-Action-Debt.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Japanese-Water-Torture-Manifest-/Coverage-/Szenario-Alignment.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Future-Action-Debt-State-Erweiterung.
+- Breiter Verify nach `Japanese Water Torture`: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; `lint` war initial rot wegen einer vorhandenen Test-Typverengung in `packages/decks/src/index.test.ts` und ist nach enger Assertion gruen. Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 297 Tests inkl. `False Echo` und `Netspace Inverter` Install-only-Programm-WIPs, Wrong-Side-/Stale-Revalidation, Ability-Gates, Visibility und Replay/StateHash.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach False-Echo-/Netspace-Inverter-Manifest-/Coverage-/Szenario-Alignment.
 - Breiter Verify nach `False Echo`/`Netspace Inverter`: `ai` 86, `server` 72, `web` 79, `typecheck`, `test`, `lint` und `build` gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.

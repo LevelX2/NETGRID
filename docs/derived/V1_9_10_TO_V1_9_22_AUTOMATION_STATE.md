@@ -97,7 +97,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Phase vorher: implementing
 - Phase nachher: implementing
 - Umsetzung: `Japanese Water Torture` hat eine nicht-promotende Runtime-Definition mit Installkosten 7, MU 1, Staerke 2, Pump fuer 1 Credit, Wall-Subroutine-Break fuer 0 Credits und zuguebergreifender Future-Action-Debt erhalten. Alte Runner-Programm-No-LegalAction-Guards wurden auf verbleibende Corp-Blocker umgestellt. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
-- Tests: `engine` initial rot wegen fehlender Runtime-Definition und ueberholter Guards, danach pass (300); `catalog` pass (44); `typecheck` pass.
+- Tests: `engine` initial rot wegen fehlender Runtime-Definition und ueberholter Guards, danach pass (300); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` pass; `lint` nach enger Test-Assertion pass; `build` pass mit bekannter Turbopack-NFT-Warnung.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: japanese water torture action debt wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
