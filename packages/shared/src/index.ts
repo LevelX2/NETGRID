@@ -332,6 +332,7 @@ export type AbilityDefinition = {
   amount?: number;
   iceSubtype?: string;
   subroutineBreakTags?: string[];
+  postBreakStealthLoss?: number;
   count?: number;
   timingPoint: TimingPointId;
   kind?: AbilityKind;
@@ -1317,9 +1318,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_019_dropp",
     title: "Dropp",
     subtypes: ["icebreaker"],
-    installCost: 4,
+    installCost: 3,
     memoryCost: 1,
-    strength: 2,
+    strength: 4,
     breakCost: 1,
     pumpCost: 2
   }),
@@ -1376,7 +1377,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 2,
+    cost: 0,
     rulesText: "Draw three cards.",
     mechanics: ["play_event", "draw_cards", ONR_V1_LOCAL_PRIVATE]
   },
@@ -1387,7 +1388,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 2,
+    cost: 0,
     rulesText: "Gain 3 credits.",
     mechanics: ["play_event", "gain_credits", ONR_V1_LOCAL_PRIVATE]
   },
@@ -1481,7 +1482,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 2,
     memoryCost: 1,
     rulesText: "Prevents up to 2 net and/or core damage each turn.",
     mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
@@ -1493,7 +1494,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 0,
     memoryCost: 1,
     rulesText: "Installed prevention tool: once each turn, prevent 1 net or core damage.",
     mechanics: ["install_program", "memory", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
@@ -1747,7 +1748,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
+    cost: 2,
     rulesText: "Make a run on R&D. If successful, access two additional cards from R&D.",
     mechanics: ["play_event", "start_run", "breach", "multiaccess", ONR_V1_LOCAL_PRIVATE]
   },
@@ -1803,7 +1804,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
+    cost: 2,
     rulesText: "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
     mechanics: ["play_event", "search_stack", "reveal", "shuffle", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
@@ -1825,7 +1826,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
+    cost: 2,
     rulesText: "Make a run on HQ. If successful, access two additional cards from HQ.",
     mechanics: ["play_event", "start_run", "breach", "multiaccess", ONR_V1_LOCAL_PRIVATE]
   },
@@ -1858,7 +1859,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 3,
+    cost: 0,
     rulesText: "Score 1 agenda point if you liberated any Black Ops agendas this turn.",
     mechanics: ["play_event", "agenda_point_gain", "agenda_subtype_condition", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2092,7 +2093,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 0,
     rulesText: "Installed prevention tool: once each turn, prevent 2 meat damage.",
     mechanics: ["install_resource", "damage_prevention", "damage_prevention_turn_limit", "meat_damage", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2247,7 +2248,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 0,
     rulesText: "Installed prevention tool: once each turn, prevent 2 net damage.",
     mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "net_damage", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2258,7 +2259,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["cybernetics"],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 1,
     rulesText: "Installed prevention tool: once each turn, prevent 1 core damage.",
     mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "core_damage", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2269,7 +2270,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 1,
     rulesText: "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
     mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "net_damage", "meat_damage", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2291,7 +2292,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 6,
     rulesText: "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
     mechanics: ["install_hardware", "damage_prevention", "damage_prevention_turn_limit", "meat_damage", "net_damage", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2925,7 +2926,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 1,
     memoryCost: 1,
     rulesText: "Installed program with agenda, counter and overadvance interaction surfaces. Effects resolve only through explicit legal actions.",
     mechanics: ["install_program", "memory", "counter", "scored_agenda", "agenda_difficulty", "overadvance", ONR_V1_LOCAL_PRIVATE]
@@ -2948,8 +2949,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "agenda",
     subtypes: ["research"],
     implementationStatus: "playable_mvp",
-    advancementRequirement: 4,
-    agendaPoints: 2,
+    advancementRequirement: 3,
+    agendaPoints: 1,
     rulesText: "Agenda with scored static and hidden-zone support surfaces. Score, steal and reveal effects remain side-safe.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "hidden_zone_tool", "agenda_difficulty", "overadvance", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2960,8 +2961,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "agenda",
     subtypes: ["gray_ops"],
     implementationStatus: "playable_mvp",
-    advancementRequirement: 4,
-    agendaPoints: 2,
+    advancementRequirement: 3,
+    agendaPoints: 1,
     rulesText: "Agenda with hidden-zone and overadvance surfaces. Score and steal values are computed from engine state.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "hidden_zone_tool", "agenda_difficulty", "overadvance", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2972,7 +2973,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: ["transaction"],
     implementationStatus: "playable_mvp",
-    cost: 0,
+    cost: 1,
     rulesText: "Operation with counter and agenda-difficulty surfaces. Counter placement and agenda costs are legal-action gated.",
     mechanics: ["play_operation", "counter", "scored_agenda", "agenda_difficulty", "overadvance", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2983,7 +2984,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 4,
+    cost: 10,
     rulesText: "Operation with agenda and counter economy surfaces. Resolution is deterministic and replayable.",
     mechanics: ["play_operation", "counter", "scored_agenda", "agenda_difficulty", "overadvance", ONR_V1_LOCAL_PRIVATE]
   },
@@ -2994,7 +2995,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: ["transaction"],
     implementationStatus: "playable_mvp",
-    cost: 0,
+    cost: 12,
     rulesText: "Operation with advancement and overadvance planning surfaces. Agenda targets are revalidated by applyAction.",
     mechanics: ["play_operation", "advance", "counter", "scored_agenda", "agenda_difficulty", "overadvance", ONR_V1_LOCAL_PRIVATE]
   },
@@ -3016,7 +3017,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
+    cost: 5,
     rulesText: "Operation with agenda-point economy and counter surfaces. Forfeit and point-cost branches require legal choices.",
     mechanics: ["play_operation", "counter", "forfeit_agenda", "scored_agenda", "agenda_difficulty", "overadvance", ONR_V1_LOCAL_PRIVATE]
   },
@@ -3027,7 +3028,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
+    cost: 1,
     rulesText: "Operation with counter and scored-agenda support surfaces. It does not grant implicit agenda effects.",
     mechanics: ["play_operation", "counter", "scored_agenda", "agenda_difficulty", "overadvance", ONR_V1_LOCAL_PRIVATE]
   },
@@ -3158,7 +3159,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["icebreaker", "killer"],
     implementationStatus: "playable_mvp",
-    installCost: 4,
+    installCost: 12,
     memoryCost: 1,
     strength: 2,
     recurringCredits: 1,
@@ -3172,7 +3173,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["virus"],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 0,
     memoryCost: 1,
     recurringCredits: 1,
     rulesText: "Installed virus program with deterministic random, hidden-zone and recurring-counter surfaces. Random results are recorded and replay-stable.",
@@ -3196,7 +3197,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 4,
     recurringCredits: 1,
     rulesText: "Installed resource with deterministic random, recurring, damage and persistent-state surfaces. Outcomes stay side-safe and replay-stable.",
     mechanics: ["install_resource", "deterministic_random", "recurring_credit", "persistent_special_state", "damage_prevention", "core_damage", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
@@ -3495,6 +3496,31 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
   },
   {
+    id: "onr_v1_031_hammer",
+    title: "Hammer",
+    side: "runner",
+    type: "program",
+    subtypes: ["icebreaker", "noisy"],
+    implementationStatus: "playable_mvp",
+    installCost: 2,
+    memoryCost: 1,
+    strength: 2,
+    rulesText: "1 credit: Break Wall subroutine.\n1 credit: +1 strength.\nWhenever Hammer breaks a Wall subroutine, lose up to 2 from Stealth cards.",
+    abilities: [
+      { id: "onr_v1_031_hammer_pump", type: "pump_strength", cost: { credits: 1 }, amount: 1, timingPoint: "run.encounter_ice" },
+      {
+        id: "onr_v1_031_hammer_break",
+        type: "break_subroutine",
+        cost: { credits: 1 },
+        iceSubtype: "wall",
+        postBreakStealthLoss: 2,
+        count: 1,
+        timingPoint: "run.encounter_ice"
+      }
+    ],
+    mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "subtype_noisy", "stealth_loss", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
+  },
+  {
     id: "onr_v1_044_netspace-inverter",
     title: "Netspace Inverter",
     side: "runner",
@@ -3682,7 +3708,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 0,
     memoryCost: 1,
     rulesText: "Installed program with handlimit, damage-prevention and persistent-state surfaces. Effects resolve through explicit legal actions.",
     mechanics: ["install_program", "memory", "persistent_special_state", "modify_hand_limit", "damage_prevention", "action_economy", ONR_V1_LOCAL_PRIVATE]
@@ -3694,7 +3720,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 2,
     memoryCost: 1,
     rulesText: "Installed program with counter and persistent action-economy surfaces. Counter effects stay legal-action gated.",
     mechanics: ["install_program", "memory", "counter", "persistent_special_state", "action_economy", ONR_V1_LOCAL_PRIVATE]
@@ -3706,7 +3732,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["chip"],
     implementationStatus: "playable_mvp",
-    installCost: 4,
+    installCost: 2,
     memoryLimitBonus: 2,
     rulesText: "Provides +2 MU. The memory modifier is installed, visible and recomputed from public rig state.",
     mechanics: ["install_hardware", "modify_memory_limit", "persistent_special_state", "action_economy", ONR_V1_LOCAL_PRIVATE]
@@ -3718,7 +3744,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["chip"],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 1,
     memoryLimitBonus: 1,
     rulesText: "Provides +1 MU. The memory modifier is installed, visible and recomputed from public rig state.",
     mechanics: ["install_hardware", "modify_memory_limit", "persistent_special_state", "action_economy", ONR_V1_LOCAL_PRIVATE]
@@ -3753,7 +3779,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 0,
     rulesText: "Installed resource with action-economy, prevention and persistent-state surfaces. All action changes require explicit legal actions.",
     mechanics: ["install_resource", "action_economy", "persistent_special_state", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
   },
@@ -3765,7 +3791,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["gray_ops"],
     implementationStatus: "playable_mvp",
     advancementRequirement: 4,
-    agendaPoints: 2,
+    agendaPoints: 3,
     rulesText: "Agenda with global damage and persistent-state modifier surfaces. Scored effects are computed from public score state.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "persistent_special_state", "global_static_modifier", "damage", ONR_V1_LOCAL_PRIVATE]
   },
@@ -3776,7 +3802,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "agenda",
     subtypes: ["research"],
     implementationStatus: "playable_mvp",
-    advancementRequirement: 4,
+    advancementRequirement: 5,
     agendaPoints: 2,
     rulesText: "Agenda with global black-ice modifier and hidden-zone support surfaces. Modifier sources remain public after scoring.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "global_static_modifier", "persistent_special_state", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
@@ -3788,8 +3814,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "agenda",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    advancementRequirement: 3,
-    agendaPoints: 1,
+    advancementRequirement: 6,
+    agendaPoints: 2,
     rulesText: "Agenda with action-economy and counter surfaces. Any extra action or counter branch is legal-action gated.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "action_economy", "counter", "persistent_special_state", ONR_V1_LOCAL_PRIVATE]
   },
@@ -3800,7 +3826,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "agenda",
     subtypes: ["research"],
     implementationStatus: "playable_mvp",
-    advancementRequirement: 4,
+    advancementRequirement: 5,
     agendaPoints: 2,
     rulesText: "Agenda with global code-gate and hidden-zone support surfaces. Static modifiers are source-bound and deterministic.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "global_static_modifier", "persistent_special_state", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
@@ -3812,8 +3838,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "agenda",
     subtypes: ["research"],
     implementationStatus: "playable_mvp",
-    advancementRequirement: 4,
-    agendaPoints: 2,
+    advancementRequirement: 5,
+    agendaPoints: 3,
     rulesText: "Agenda with ICE conversion and persistent-state surfaces. ICE changes remain explicit resolver outcomes.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "persistent_special_state", "global_static_modifier", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
@@ -3824,8 +3850,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "agenda",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    advancementRequirement: 3,
-    agendaPoints: 1,
+    advancementRequirement: 4,
+    agendaPoints: 3,
     rulesText: "Agenda with handsize and global HQ modifier surfaces. Handlimit values are recomputed from scored public sources.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "modify_hand_limit", "global_static_modifier", "persistent_special_state", ONR_V1_LOCAL_PRIVATE]
   },
@@ -3836,7 +3862,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "agenda",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    advancementRequirement: 3,
+    advancementRequirement: 6,
     agendaPoints: 1,
     rulesText: "Agenda with action-economy surfaces. Extra actions remain public, deterministic and legal-action gated.",
     mechanics: ["install_remote", "advance", "score", "steal", "scored_agenda", "action_economy", "persistent_special_state", ONR_V1_LOCAL_PRIVATE]
@@ -4248,7 +4274,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 0,
+    cost: 4,
     rulesText: "Gain two actions.",
     mechanics: ["play_operation", "gain_actions", ONR_V1_LOCAL_PRIVATE]
   },
@@ -4311,7 +4337,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Banpei",
     subtypes: ["sentry", "killer"],
     rezCost: 4,
-    strength: 8,
+    strength: 0,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [onrTrashInstalledProgram("onr_v1_223_banpei_trash_program"), onrEtr("onr_v1_223_banpei_etr")],
     mechanics: ["trash_installed_program", "end_the_run", "concrete_special_resolver"]
@@ -4319,9 +4345,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_224_bolter-cluster",
     title: "Bolter Cluster",
-    subtypes: ["sentry", "black_ice"],
-    rezCost: 5,
-    strength: 3,
+    subtypes: ["sentry", "ap", "hellbolt"],
+    rezCost: 7,
+    strength: 4,
     rulesText: "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
     subroutines: [onrNetDamage("onr_v1_224_bolter_cluster_net_damage", 1), onrEtr("onr_v1_224_bolter_cluster_etr")],
     mechanics: ["damage", "flatline", "end_the_run", "event_modification"]
@@ -4430,9 +4456,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_234_data-darts",
     title: "Data Darts",
-    subtypes: ["sentry", "black_ice"],
-    rezCost: 4,
-    strength: 2,
+    subtypes: ["sentry", "ap", "hellbolt"],
+    rezCost: 5,
+    strength: 3,
     rulesText: "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
     subroutines: [onrNetDamage("onr_v1_234_data_darts_net_damage", 1), onrEtr("onr_v1_234_data_darts_etr")],
     mechanics: ["damage", "flatline", "end_the_run", "event_modification"]
@@ -4450,9 +4476,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_236_data-raven",
     title: "Data Raven",
-    subtypes: ["sentry", "black_ice"],
-    rezCost: 8,
-    strength: 4,
+    subtypes: ["sentry"],
+    rezCost: 5,
+    strength: 5,
     rulesText:
       "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and put a Data Raven counter on Data Raven. Each Data Raven counter gives Runner a tag at the start of each Runner turn.\n[Subroutine] End the run.",
     subroutines: [
@@ -4548,9 +4574,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_250_ice-pick-willie",
     title: "Ice Pick Willie",
-    subtypes: ["sentry"],
-    rezCost: 4,
-    strength: 3,
+    subtypes: ["sentry", "killer"],
+    rezCost: 5,
+    strength: 1,
     rulesText: "[Subroutine] Reveal the top card of R&D.",
     subroutines: [onrRevealCorpRdTop("onr_v1_250_ice_pick_willie_reveal_rd_top")],
     mechanics: ["reveal", "hidden_zone_tool"]
@@ -4631,8 +4657,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_258_neural-blade",
     title: "Neural Blade",
-    subtypes: ["sentry", "black_ice"],
-    rezCost: 6,
+    subtypes: ["sentry", "ap", "sword"],
+    rezCost: 4,
     strength: 4,
     rulesText: "[Subroutine] Do 2 net damage.",
     subroutines: [onrNetDamage("onr_v1_258_neural_blade_net_damage", 2)],
@@ -4742,7 +4768,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_272_too-many-doors",
     title: "Too Many Doors",
     subtypes: ["sentry"],
-    rezCost: 4,
+    rezCost: 1,
     strength: 3,
     rulesText: "[Subroutine] The Corp looks at and reorders the top two cards of R&D.",
     subroutines: [onrReorderCorpRdTop2("onr_v1_272_too_many_doors_reorder_rd_top2")],
@@ -4849,7 +4875,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 2,
     rulesText: "Installed hardware for tag-risk and meat-damage protection.",
     mechanics: ["install_hardware", "tag_avoid", "damage_prevention", ONR_V1_LOCAL_PRIVATE]
   },
@@ -4860,7 +4886,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 0,
     rulesText: "Installed hardware for tag interaction and tag removal planning.",
     mechanics: ["install_hardware", "tag_avoid", "remove_tag", ONR_V1_LOCAL_PRIVATE]
   },
@@ -5007,15 +5033,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_228_cinderella",
     title: "Cinderella",
-    subtypes: ["sentry"],
-    rezCost: 6,
-    strength: 5,
+    subtypes: ["sentry", "black_ice", "ap", "firestarter"],
+    rezCost: 8,
+    strength: 6,
     rulesText: "Trace 5. If successful, give the Runner 1 tag. Do 1 meat damage.",
     subroutines: [
       {
         id: "onr_v1_228_cinderella_trace",
         type: "initiate_trace",
-        baseTraceStrength: 5,
+        baseTraceStrength: 6,
         traceSuccessEffect: { type: "add_tag", amount: 1 }
       },
       onrMeatDamage("onr_v1_228_cinderella_damage", 1)
@@ -5025,15 +5051,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_240_fang",
     title: "Fang",
-    subtypes: ["sentry"],
-    rezCost: 4,
+    subtypes: ["sentry", "pit_bull"],
+    rezCost: 5,
     strength: 4,
     rulesText: "Trace 3. If successful, give the Runner 1 tag. End the run.",
     subroutines: [
       {
         id: "onr_v1_240_fang_trace",
         type: "initiate_trace",
-        baseTraceStrength: 3,
+        baseTraceStrength: 4,
         traceSuccessEffect: { type: "add_tag", amount: 1 }
       },
       onrEtr("onr_v1_240_fang_etr")
@@ -5043,15 +5069,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_241_fang-2-0",
     title: "Fang 2.0",
-    subtypes: ["sentry"],
-    rezCost: 5,
+    subtypes: ["sentry", "pit_bull"],
+    rezCost: 6,
     strength: 5,
     rulesText: "Trace 4. If successful, give the Runner 1 tag.",
     subroutines: [
       {
         id: "onr_v1_241_fang_2_0_trace",
         type: "initiate_trace",
-        baseTraceStrength: 4,
+        baseTraceStrength: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 }
       }
     ],
@@ -5060,9 +5086,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_248_homewrecker",
     title: "Homewrecker",
-    subtypes: ["sentry"],
+    subtypes: ["sentry", "black_ice", "ap", "firestarter"],
     rezCost: 7,
-    strength: 6,
+    strength: 5,
     rulesText: "Trace 5. If successful, give the Runner 1 tag. Do 2 meat damage. End the run.",
     subroutines: [
       {
@@ -5080,14 +5106,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_260_pocket-virtual-reality",
     title: "Pocket Virtual Reality",
     subtypes: ["sentry"],
-    rezCost: 5,
+    rezCost: 7,
     strength: 4,
     rulesText: "Trace 4. If successful, give the Runner 1 tag.",
     subroutines: [
       {
         id: "onr_v1_260_pocket_virtual_reality_trace",
         type: "initiate_trace",
-        baseTraceStrength: 4,
+        baseTraceStrength: 6,
         traceSuccessEffect: { type: "add_tag", amount: 1 }
       }
     ],
@@ -5096,15 +5122,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_264_rex",
     title: "Rex",
-    subtypes: ["sentry"],
-    rezCost: 5,
-    strength: 5,
+    subtypes: ["sentry", "pit_bull"],
+    rezCost: 4,
+    strength: 3,
     rulesText: "Trace 5. If successful, give the Runner 1 tag.",
     subroutines: [
       {
         id: "onr_v1_264_rex_trace",
         type: "initiate_trace",
-        baseTraceStrength: 5,
+        baseTraceStrength: 3,
         traceSuccessEffect: { type: "add_tag", amount: 1 }
       }
     ],
@@ -5165,8 +5191,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 4,
-    memoryCost: 2,
+    installCost: 3,
+    memoryCost: 1,
     rulesText: "Installed run helper with side-safe hidden-zone reveal support.",
     mechanics: ["install_program", "memory", "run_flow", "reveal", "hidden_zone_tool", ONR_V1_LOCAL_PRIVATE]
   },
@@ -5177,8 +5203,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 3,
-    memoryCost: 1,
+    installCost: 4,
+    memoryCost: 2,
     rulesText: "Installed run and access tool for breach pressure.",
     mechanics: ["install_program", "memory", "run_flow", "access", "multiaccess", ONR_V1_LOCAL_PRIVATE]
   },
@@ -5252,15 +5278,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_227_cerberus",
     title: "Cerberus",
-    subtypes: ["sentry"],
-    rezCost: 6,
+    subtypes: ["sentry", "black_ice", "ap", "hellhound"],
+    rezCost: 11,
     strength: 5,
     rulesText: "Trace 4. If successful, give the Runner 1 tag. Do 1 net damage. End the run.",
     subroutines: [
       {
         id: "onr_v1_227_cerberus_trace",
         type: "initiate_trace",
-        baseTraceStrength: 4,
+        baseTraceStrength: 5,
         traceSuccessEffect: { type: "add_tag", amount: 1 }
       },
       onrNetDamage("onr_v1_227_cerberus_net_damage", 1),
@@ -5271,8 +5297,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   onrIce({
     id: "onr_v1_255_mastiff",
     title: "Mastiff",
-    subtypes: ["sentry"],
-    rezCost: 7,
+    subtypes: ["sentry", "black_ice", "ap", "hellhound", "watchdog"],
+    rezCost: 12,
     strength: 5,
     rulesText: "Trace 5. If successful, give the Runner 1 tag. Do 1 core damage. End the run.",
     subroutines: [
@@ -5294,7 +5320,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    cost: 1,
+    cost: 0,
     rulesText: "Play only if the Runner made a run last turn. Gain 3 credits.",
     mechanics: ["play_operation", "run_flow", "recurring_credit", ONR_V1_LOCAL_PRIVATE]
   },
@@ -5305,7 +5331,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: [],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 1,
     memoryCost: 1,
     baseLink: 1,
     rulesText: "Installed program that contributes base link for trace interactions.",
@@ -5319,7 +5345,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 2,
-    memoryCost: 1,
+    memoryCost: 2,
     baseLink: 1,
     rulesText: "Installed program that contributes base link for trace interactions.",
     mechanics: ["install_program", "memory", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
@@ -5331,7 +5357,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["daemon"],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 0,
     memoryCost: 1,
     rulesText: "Daemon program for hosting and hosted-card lifecycle coverage.",
     mechanics: ["install_program", "memory", "hosting", "hosted_program_lifecycle", "subtype_daemon", ONR_V1_LOCAL_PRIVATE]
@@ -5343,7 +5369,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["stealth"],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 0,
     memoryCost: 1,
     recurringCredits: 1,
     rulesText: "Stealth program with recurring run credits.",
@@ -5356,9 +5382,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["icebreaker", "fracter", "stealth"],
     implementationStatus: "playable_mvp",
-    installCost: 4,
+    installCost: 1,
     memoryCost: 1,
-    strength: 2,
+    strength: 7,
     recurringCredits: 1,
     rulesText: "Stealth wall breaker with recurring run credits.",
     mechanics: ["install_program", "memory", "pump_breaker", "break_subroutine", "subtype_stealth", "recurring_credit", ONR_V1_LOCAL_PRIVATE]
@@ -5370,7 +5396,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["stealth"],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 0,
     memoryCost: 1,
     recurringCredits: 1,
     rulesText: "Stealth program with recurring run credits.",
@@ -5383,7 +5409,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "program",
     subtypes: ["stealth"],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 4,
     memoryCost: 1,
     recurringCredits: 1,
     rulesText: "Stealth program with recurring run credits.",
@@ -5396,7 +5422,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["stealth"],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 6,
     recurringCredits: 1,
     rulesText: "Hardware that supplies recurring stealth credits for runs.",
     mechanics: ["install_hardware", "subtype_stealth", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
@@ -5408,7 +5434,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["stealth"],
     implementationStatus: "playable_mvp",
-    installCost: 3,
+    installCost: 11,
     recurringCredits: 1,
     rulesText: "Hardware that supplies recurring stealth credits for runs.",
     mechanics: ["install_hardware", "subtype_stealth", "recurring_credit", "recurring_start_turn", ONR_V1_LOCAL_PRIVATE]
@@ -5420,7 +5446,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: ["link"],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 9,
     baseLink: 1,
     rulesText: "Resource that contributes base link for trace interactions.",
     mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
@@ -5432,7 +5458,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: ["link"],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 2,
     baseLink: 1,
     rulesText: "Resource that contributes base link for trace interactions.",
     mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
@@ -5456,7 +5482,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: ["link"],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 0,
     baseLink: 1,
     rulesText: "Resource that contributes base link for trace interactions.",
     mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
@@ -5468,7 +5494,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: ["link"],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 0,
     baseLink: 1,
     rulesText: "Resource that contributes base link for trace interactions.",
     mechanics: ["install_resource", "base_link", "trace", "link", ONR_V1_LOCAL_PRIVATE]
@@ -5480,7 +5506,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: ["link"],
     implementationStatus: "playable_mvp",
-    installCost: 2,
+    installCost: 0,
     baseLink: 1,
     rulesText: "Resource with base link and counter interaction for trace support.",
     mechanics: ["install_resource", "base_link", "trace", "link", "counter", ONR_V1_LOCAL_PRIVATE]
@@ -5489,8 +5515,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_246_fragmentation-storm",
     title: "Fragmentation Storm",
     subtypes: ["sentry"],
-    rezCost: 5,
-    strength: 3,
+    rezCost: 6,
+    strength: 4,
     rulesText: "Trace 4. If successful, trash an installed Runner program. Do 1 net damage.",
     subroutines: [
       {

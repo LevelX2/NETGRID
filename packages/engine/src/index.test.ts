@@ -731,7 +731,7 @@ describe("O:NR v1 Limited local private test access", () => {
 
     const beforeContactsCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_097_livewires-contacts");
-    expect(state.runner.credits).toBe(beforeContactsCredits + 1);
+    expect(state.runner.credits).toBe(beforeContactsCredits + 3);
 
     const beforeScoreCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_108_score");
@@ -1138,7 +1138,7 @@ describe("V1.0.6K Card Release", () => {
 
     const beforeContactsCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_097_livewires-contacts");
-    expect(state.runner.credits).toBe(beforeContactsCredits + 1);
+    expect(state.runner.credits).toBe(beforeContactsCredits + 3);
 
     const beforeScoreCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_108_score");
@@ -1394,12 +1394,12 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_039_krash"]).toMatchObject({ installCost: 0, memoryCost: 1, strength: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_066_snowball"]).toMatchObject({ installCost: 10, memoryCost: 1, strength: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_074_worm"]).toMatchObject({ installCost: 4, memoryCost: 1, strength: 2 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({ cost: 0 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_081_custodial-position"]).toMatchObject({ cost: 2 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_085_executive-wiretaps"]).toMatchObject({ cost: 2 });
     expect(DEMO_CARDS_BY_ID["onr_v1_101_mit-west-tier"]).toMatchObject({ cost: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_243_fetch-4-0-1"]).toMatchObject({ rezCost: 0, strength: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_249_hunter"]).toMatchObject({ rezCost: 2, strength: 5 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_297_overtime-incentives"]).toMatchObject({ cost: 0 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_297_overtime-incentives"]).toMatchObject({ cost: 4 });
     expect(DEMO_CARDS_BY_ID["onr_v1_306_trojan-horse"]).toMatchObject({ cost: 2 });
   });
 
@@ -1587,7 +1587,7 @@ describe("V1.6.1 Mechanikpaket A", () => {
       expect(definition?.mechanics.join(" ")).not.toMatch(/hosting|daemon|stealth|worm|search|arrange|shuffle|unique|counter_system|deterministischer_wuerfel/);
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_023_evil-twin"]).toMatchObject({ installCost: 6, memoryCost: 1, strength: 3 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_028_force-shield"]).toMatchObject({ installCost: 0, memoryCost: 1 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_028_force-shield"]).toMatchObject({ installCost: 2, memoryCost: 1 });
     expect(DEMO_CARDS_BY_ID["onr_v1_125_dermatech-bodyplating"]).toMatchObject({ installCost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_229_code-corpse"]).toMatchObject({ rezCost: 10, strength: 5 });
     expect(DEMO_CARDS_BY_ID["onr_v1_231_cortical-scrub"]).toMatchObject({ rezCost: 7, strength: 3 });
@@ -2092,7 +2092,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
       )?.id ?? "pass";
     smithState = applyChoice(smithState, "runner", forceShieldOption);
     expect(smithState.runner.heap.some((id) => smithState.cardInstances[id]?.definitionId === "onr_v1_028_force-shield")).toBe(true);
-    expect(smithState.runner.credits).toBe(16);
+    expect(smithState.runner.credits).toBe(14);
   });
 });
 
@@ -2416,7 +2416,7 @@ describe("V1.8.0 Mechanikpaket G", () => {
       expect(definition?.mechanics.join(" ")).not.toMatch(/counter_system|virus|purge|deterministischer_wuerfel/);
     }
     expect(DEMO_CARDS_BY_ID["onr_v1_083_desperate-competitor"]).toMatchObject({ cost: 0 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_090_hot-tip-for-wns"]).toMatchObject({ cost: 3 });
+    expect(DEMO_CARDS_BY_ID["onr_v1_090_hot-tip-for-wns"]).toMatchObject({ cost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_156_corporate-ally"]).toMatchObject({ installCost: 3 });
     expect(DEMO_CARDS_BY_ID["onr_v1_159_databroker"]).toMatchObject({ installCost: 0 });
     expect(DEMO_CARDS_BY_ID["onr_v1_201_executive-extraction"]).toMatchObject({ advancementRequirement: 3, agendaPoints: 1 });
@@ -4021,7 +4021,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics).toContain("hidden_zone_tool");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -4187,7 +4187,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/scored_agenda|agenda_difficulty|overadvance|counter|generic_asset_node|generic_upgrade_root_server/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
@@ -4430,7 +4430,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
@@ -4665,7 +4665,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toContain("deterministic_random");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("records Schlaghund deterministic die probes through LegalAction and replay", () => {
@@ -5009,7 +5009,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/counter|virus|recurring|hidden_zone/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -5104,7 +5104,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       expect(definition?.implementationStatus, definitionId).toBe("playable_mvp");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/damage|prevention|event_modification|flatline/);
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
@@ -5425,7 +5425,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/trace|link|tag|resource|damage|hidden_zone|counter/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
@@ -5473,12 +5473,12 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   it("runs each V1.9.14 Trace ICE through the side-safe bid window", () => {
     const traceIce = [
       ["onr_v1_221_asp", 4],
-      ["onr_v1_228_cinderella", 5],
-      ["onr_v1_240_fang", 3],
-      ["onr_v1_241_fang-2-0", 4],
+      ["onr_v1_228_cinderella", 6],
+      ["onr_v1_240_fang", 4],
+      ["onr_v1_241_fang-2-0", 5],
       ["onr_v1_248_homewrecker", 5],
-      ["onr_v1_260_pocket-virtual-reality", 4],
-      ["onr_v1_264_rex", 5]
+      ["onr_v1_260_pocket-virtual-reality", 6],
+      ["onr_v1_264_rex", 3]
     ] as const;
 
     for (const [definitionId, baseTraceStrength] of traceIce) {
@@ -5586,7 +5586,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/run_flow|access|multiaccess|trace|hidden_zone|counter|recurring|damage/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
@@ -5695,12 +5695,12 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
   it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
     for (const [definitionId, baseTraceStrength] of [
-      ["onr_v1_227_cerberus", 4],
+      ["onr_v1_227_cerberus", 5],
       ["onr_v1_255_mastiff", 5]
     ] as const) {
       let state = toRunnerTurn(v1915RunAccessGame(`v1915-ice-${definitionId}`));
       putCorpIceOnServer(state, "rd", definitionId);
-      state.corp.credits = 10;
+      state.corp.credits = 12;
       state.runner.credits = 5;
 
       state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
@@ -5733,7 +5733,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
     const beforeCredits = state.corp.credits;
     state = apply(state, "corp", (action) => action.type === "play_operation" && sourceDefinition(state, action) === "onr_v1_294_new-blood");
-    expect(state.corp.credits).toBe(beforeCredits + 2);
+    expect(state.corp.credits).toBe(beforeCredits + 3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ actionType: "play_operation" });
   });
 });
@@ -5747,7 +5747,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/memory|base_link|trace|stealth|hosting|trash_installed_program/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
@@ -5906,7 +5906,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
@@ -6269,7 +6269,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toContain("per_card_longtail");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("installs all V1.9.22 runner hardware through LegalActions with replay, visibility and revalidation", () => {
@@ -6702,23 +6702,47 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         runnerDeck: {
           ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
           id: "onr_v1_runner_v1922_anonymous_tip",
-          name: "O:NR V1.9.22 Anonymous Tip",
-          cards: [{ id: "onr_v1_077_anonymous-tip", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+          name: "O:NR V1.9.22 Anonymous Tip"
         },
         corpDeck: {
           ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
           id: "onr_v1_corp_v1922_anonymous_tip",
-          name: "O:NR V1.9.22 Anonymous Tip Corp",
-          cards: [{ id: "onr_v1_236_data-raven", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards]
+          name: "O:NR V1.9.22 Anonymous Tip Corp"
         },
         agendaPointsToWin: 7
       })
     );
     state.runner.credits = 5;
     state.runner.clicks = 4;
-    const blackIceId = putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
-    state.cardInstances[blackIceId] = { ...state.cardInstances[blackIceId]!, faceup: true, rezzed: true };
-    moveRunnerCardToGrip(state, "onr_v1_077_anonymous-tip");
+    const blackIceId = "v1922_anonymous_tip_black_ice" as CardInstanceId;
+    const rdServer = state.corp.servers.find((server) => server.id === "rd");
+    expect(rdServer).toBeDefined();
+    if (!rdServer) throw new Error("Missing R&D server");
+    rdServer.ice.unshift(blackIceId);
+    state.cardInstances[blackIceId] = {
+      instanceId: blackIceId,
+      definitionId: "onr_v1_231_cortical-scrub",
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0
+    };
+    const anonymousTipId = "v1922_anonymous_tip" as CardInstanceId;
+    state.runner.grip.unshift(anonymousTipId);
+    state.cardInstances[anonymousTipId] = {
+      instanceId: anonymousTipId,
+      definitionId: "onr_v1_077_anonymous-tip",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "grip" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0
+    };
 
     const legal = mustAction(state, "runner", (action) => action.type === "play_event" && sourceDefinition(state, action) === "onr_v1_077_anonymous-tip");
     expect(legal.costs[0]?.credits).toBe(3);
@@ -6768,7 +6792,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       choiceKind: "select_cards",
       v1922RunnerEventAbility: "derez_black_ice",
       derezzedCount: 1,
-      targetCardDefinitionId: "onr_v1_236_data-raven"
+      targetCardDefinitionId: "onr_v1_231_cortical-scrub"
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"|"rd"/);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -7269,10 +7293,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   });
 
   it("keeps unresolved V1.9.22 runner programs out of playable runtime until local values are confirmed", () => {
-    const runnerProgramIds = [
-      "onr_v1_031_hammer",
-      "onr_v1_037_japanese-water-torture"
-    ] as const;
+    const runnerProgramIds = ["onr_v1_037_japanese-water-torture"] as const;
 
     for (const definitionId of runnerProgramIds) {
       expect(DEMO_CARDS_BY_ID[definitionId]?.implementationStatus, definitionId).not.toBe("playable_mvp");
@@ -7280,10 +7301,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   });
 
   it("does not expose unresolved V1.9.22 runner program install, pump or break LegalActions before local values are confirmed", () => {
-    const runnerProgramIds = [
-      "onr_v1_031_hammer",
-      "onr_v1_037_japanese-water-torture"
-    ] as const;
+    const runnerProgramIds = ["onr_v1_037_japanese-water-torture"] as const;
 
     for (const definitionId of runnerProgramIds) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
@@ -7323,6 +7341,87 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(exposedActionTypes, definitionId).not.toContain("pump_breaker");
       expect(exposedActionTypes, definitionId).not.toContain("break_subroutine");
     }
+  });
+
+  it("installs Hammer and applies ordered Stealth loss after breaking Wall subroutines without release promotion", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-hammer-wall-breaker",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_hammer",
+          name: "O:NR V1.9.22 Hammer",
+          cards: [
+            { id: "onr_v1_011_cloak", quantity: 1 },
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards
+          ]
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_hammer_wall",
+          name: "O:NR V1.9.22 Hammer Wall Corp"
+        },
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_011_cloak");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_031_hammer");
+    const cloakId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_011_cloak");
+    const hammerId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_031_hammer");
+    expect(cloakId).toBeDefined();
+    expect(hammerId).toBeDefined();
+    if (!cloakId || !hammerId) throw new Error("Missing installed Hammer or Cloak");
+    expect(state.runner.memoryUsed).toBe(2);
+    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(3);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && action.source === iceId);
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_031_hammer");
+
+    const legal = mustAction(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_031_hammer" && action.payload?.subroutineIndex === 0);
+    expect(legal.costs[0]?.credits).toBe(1);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-hammer-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-hammer-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toContain(0);
+    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_031_hammer"
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"cardInstances"|"privatePayload"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("installs Flak and breaks AP ICE subroutines without release promotion", () => {
@@ -8369,7 +8468,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(definition?.mechanics.join(" "), definitionId).toMatch(/generic_upgrade_root_server|access_ambush|trace|city_grid|run_flow|tag|counter|hidden_zone|stealth/);
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
-    expect(DEMO_CARDS_BY_ID["onr_v1_031_hammer"]?.implementationStatus).not.toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_037_japanese-water-torture"]?.implementationStatus).not.toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {

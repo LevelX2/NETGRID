@@ -1447,12 +1447,12 @@ const ONR_V1_2_3_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_039_krash": { installCost: 0, memoryCost: 1, strength: 0 },
   "onr_v1_066_snowball": { installCost: 10, memoryCost: 1, strength: 0 },
   "onr_v1_074_worm": { installCost: 4, memoryCost: 1, strength: 2 },
-  "onr_v1_081_custodial-position": { cost: 0, installCost: null },
-  "onr_v1_085_executive-wiretaps": { cost: 0, installCost: null },
-  "onr_v1_101_mit-west-tier": { cost: 0, installCost: null },
+  "onr_v1_081_custodial-position": { cost: 2, installCost: null },
+  "onr_v1_085_executive-wiretaps": { cost: 2, installCost: null },
+  "onr_v1_101_mit-west-tier": { cost: 3, installCost: null },
   "onr_v1_243_fetch-4-0-1": { rezCost: 0, strength: 3 },
   "onr_v1_249_hunter": { rezCost: 2, strength: 5 },
-  "onr_v1_297_overtime-incentives": { cost: 0, installCost: null },
+  "onr_v1_297_overtime-incentives": { cost: 4, installCost: null },
   "onr_v1_306_trojan-horse": { cost: 2, installCost: null }
 };
 
@@ -1533,7 +1533,7 @@ const ONR_V1_9_0_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
   "onr_v1_005_bartmoss-memorial-icebreaker": { installCost: 5, memoryCost: 1, strength: 0 },
   "onr_v1_007_blink": { installCost: 5, memoryCost: 1, strength: 5 },
   "onr_v1_115_terrorist-reprisal": { cost: 2, installCost: null },
-  "onr_v1_223_banpei": { rezCost: 4, strength: 8 },
+  "onr_v1_223_banpei": { rezCost: 4, strength: 0 },
   "onr_v1_275_vacuum-link": { rezCost: 3, strength: 5 }
 };
 
@@ -1566,21 +1566,21 @@ const ONR_V1_9_4_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumeri
 };
 
 const ONR_V1_9_5_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
-  "onr_v1_219_superior-net-barriers": { advancementRequirement: 5, agendaPoints: 3 },
+  "onr_v1_219_superior-net-barriers": { advancementRequirement: 6, agendaPoints: 3 },
   "onr_v1_308_acme-savings-and-loan": { rezCost: 1, trashCost: 3 }
 };
 
 const ONR_V1_9_6_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
-  "onr_v1_236_data-raven": { rezCost: 8, strength: 4 }
+  "onr_v1_236_data-raven": { rezCost: 5, strength: 5 }
 };
 
 const ONR_V1_9_7_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
-  "onr_v1_001_afreet": { installCost: 4, memoryCost: 1 }
+  "onr_v1_001_afreet": { installCost: 2, memoryCost: 1 }
 };
 
 const ONR_V1_9_8_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {
-  "onr_v1_018_dogcatcher": { installCost: 3, memoryCost: 1, strength: 1 },
-  "onr_v1_019_dropp": { installCost: 4, memoryCost: 1, strength: 2 }
+  "onr_v1_018_dogcatcher": { installCost: 3, memoryCost: 1, strength: 3 },
+  "onr_v1_019_dropp": { installCost: 3, memoryCost: 1, strength: 4 }
 };
 
 const ONR_V1_9_9_NUMERIC_OVERRIDES: Partial<Record<string, Partial<CatalogNumericFields>>> = {

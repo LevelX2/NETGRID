@@ -556,7 +556,7 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_005_bartmoss-memorial-icebreaker"]?.numeric.installCost).toBe(5);
     expect(cardsById["onr_v1_007_blink"]?.text).toContain("On a 4, 5, or 6");
     expect(cardsById["onr_v1_115_terrorist-reprisal"]?.numeric.cost).toBe(2);
-    expect(cardsById["onr_v1_223_banpei"]?.numeric.strength).toBe(8);
+    expect(cardsById["onr_v1_223_banpei"]?.numeric.strength).toBe(0);
     expect(cardsById["onr_v1_275_vacuum-link"]?.implementationManifest?.manifestVersion).toBe("card-implementation-manifest-v1.9.0");
     expect(cardsById["onr_v1_013_cockroach"]?.numeric.installCost).toBe(0);
     expect(cardsById["onr_v1_034_incubator"]?.numeric.memoryCost).toBe(1);
@@ -616,7 +616,7 @@ describe("catalog import and status logic", () => {
     expect(cardsById["onr_v1_293_netwatch-credit-voucher"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_306_trojan-horse"]?.statuses.ai_supported).toBe(true);
     expect(cardsById["onr_v1_101_mit-west-tier"]?.statuses.ai_supported).toBe(true);
-    expect(cardsById["onr_v1_297_overtime-incentives"]?.numeric.cost).toBe(0);
+    expect(cardsById["onr_v1_297_overtime-incentives"]?.numeric.cost).toBe(4);
     if (existsSync("data/local/card-import/onr-v1-limited/card-snapshot-onr-v1-limited.local.json")) {
       expect(cardsById["onr_v1_075_zetatech-software-installer"]?.text).toBe(
         "Put 2 bits on Software Installer when it is installed. Use these bits only to pay for installing programs. You may use these bits to install a program overlying Software Installer itself. If you use any of these bits, replace them at the start of your next turn."
@@ -1880,6 +1880,7 @@ describe("catalog import and status logic", () => {
         "v1922_runner_program_net_damage_prevention",
         "v1922_runner_program_newsgroup_filter_gain_2",
         "v1922_runner_program_flak_ap_breaker",
+        "v1922_runner_program_hammer_wall_breaker_ordered_stealth_loss",
         "v1922_runner_program_reflector_tagged_breaker"
       ].includes(card.resolverFamily)
     );
@@ -1948,6 +1949,7 @@ describe("catalog import and status logic", () => {
     expect(runnerProgramResolverCards.map((card) => card.cardCode).sort()).toEqual([
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
+      "onr_v1_031_hammer",
       "onr_v1_044_netspace-inverter",
       "onr_v1_045_newsgroup-filter",
       "onr_v1_048_poltergeist",
@@ -1986,6 +1988,9 @@ describe("catalog import and status logic", () => {
       if (card.cardCode === "onr_v1_027_flak") {
         expect(card.coveredSmokes).toEqual(expect.arrayContaining(["ap_break_subroutine", "pump_strength", "wrong_side_revalidation", "stale_state_revalidation"]));
       }
+      if (card.cardCode === "onr_v1_031_hammer") {
+        expect(card.coveredSmokes).toEqual(expect.arrayContaining(["wall_break_subroutine", "ordered_stealth_loss", "pump_strength", "wrong_side_revalidation", "stale_state_revalidation"]));
+      }
       if (card.cardCode === "onr_v1_055_reflector") {
         expect(card.coveredSmokes).toEqual(expect.arrayContaining(["tagged_break_subroutine", "wrong_side_revalidation", "stale_state_revalidation"]));
       }
@@ -2019,7 +2024,7 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes).toEqual(expect.arrayContaining(["rez_ice_legal_action", "core_damage_subroutines", "end_the_run", "replay_statehash"]));
     }
 
-    expect(plannedCards).toHaveLength(8);
+    expect(plannedCards).toHaveLength(7);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(card.cardCode);
       expect(cardsById[card.cardCode]?.statuses.human_playable ?? false, card.cardCode).toBe(false);

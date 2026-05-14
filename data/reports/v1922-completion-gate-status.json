@@ -82,6 +82,7 @@
       "cards": [
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
+      "onr_v1_031_hammer",
       "onr_v1_044_netspace-inverter",
       "onr_v1_045_newsgroup-filter",
       "onr_v1_048_poltergeist",
@@ -114,6 +115,7 @@
     "engineTests": [
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs V1.9.22 install-only runner programs while keeping their abilities gated",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Flak and breaks AP ICE subroutines without release promotion",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Hammer and applies ordered Stealth loss after breaking Wall subroutines without release promotion",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Reflector and only breaks tagged stun or knockout subroutines",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Newsgroup Filter and uses its side-safe credit action",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Shield and uses side-safe per-turn net damage prevention",
@@ -176,8 +178,8 @@
       },
       {
         "cardId": "onr_v1_031_hammer",
-        "status": "ready_for_narrow_breaker_runtime_with_noisy_stealth_loss_no_promotion",
-        "removalCondition": "Implement and test the confirmed Hammer Wall-breaker and Noisy Stealth-loss contract without catalog, AI or release promotion."
+        "status": "runtime_ordered_stealth_loss_wip_pending_multi_stealth_choice_no_promotion",
+        "removalCondition": "Add Runner-choice distribution for multiple Stealth sources before any final promotion."
       },
       {
         "cardId": "onr_v1_037_japanese-water-torture",
@@ -229,7 +231,7 @@
   },
   "latestBlockerReview": {
     "reviewedAt": "2026-05-14T08:50:00+02:00",
-    "status": "remaining_technical_contracts_open_after_flak_runtime_wip",
+    "status": "remaining_technical_contracts_open_after_hammer_ordered_stealth_loss_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -240,9 +242,8 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter, Flak, Reflector and Zetatech Software Installer now have non-promoting runtime WIPs; Errata 1.70 and user clarifications for Hammer, Japanese Water Torture and Virizz reduced several remaining factual gaps without release promotion. The user-confirmed breaker contract keeps Hammer and Japanese Water Torture ready for narrow non-promoting runtime implementation.",
+    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter, Flak, Hammer, Reflector and Zetatech Software Installer now have non-promoting runtime WIPs; Hammer's ordered Stealth-loss path is covered, while multiple-Stealth-source Runner distribution remains gated before promotion.",
     "blockedCards": [
-      "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_216_security-purge",
@@ -257,7 +258,7 @@
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Seven install-only Runner-program WIPs, Newsgroup Filter Gain-2, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Seven install-only Runner-program WIPs, Newsgroup Filter Gain-2, Flak, Hammer, Reflector, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

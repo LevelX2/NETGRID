@@ -4071,7 +4071,10 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
         }
       }
       executeEffectCommands(state, [{ type: "break_subroutine", subroutineIndex: Number(legalAction.payload?.subroutineIndex) }]);
-      if (breakerId) recordBartmossEncounterUsage(state, breakerId);
+      if (breakerId) {
+        applyPostBreakStealthLoss(state, breakerId, legalAction);
+        recordBartmossEncounterUsage(state, breakerId);
+      }
       return;
     }
     case "continue_run":
@@ -8468,6 +8471,9 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
   }
   if (legalAction.type === "trash_resource") context.zoneLabel = "Resource";
   if (legalAction.type === "rez_ice") context.zoneLabel = legalAction.payload?.rootRez === true || legalAction.payload?.assetRez === true ? "Remote" : "ICE";
+  if (legalAction.type === "break_subroutine" && typeof legalAction.payload?.postBreakStealthLoss === "number") {
+    context.postBreakStealthLoss = legalAction.payload.postBreakStealthLoss;
+  }
   if (legalAction.type === "gain_credit" || legalAction.type === "draw_card" || legalAction.type === "remove_tag") {
     context.amount =
       legalAction.type === "remove_tag"
@@ -9120,6 +9126,27 @@ function spendRunnerRunCredits(state: GameState, amount: number, breakerId?: Car
     }
   }
   spendCredits(state, "runner", remaining);
+}
+
+function applyPostBreakStealthLoss(state: GameState, breakerId: CardInstanceId, legalAction: LegalAction): void {
+  const breakerDefinition = definitionFor(state, breakerId);
+  const ability = breakerDefinition.abilities?.find((candidate) => candidate.id === legalAction.abilityRef?.abilityId && candidate.type === "break_subroutine");
+  const lossAmount = ability?.postBreakStealthLoss ?? 0;
+  if (lossAmount <= 0) return;
+  let remaining = lossAmount;
+  let spent = 0;
+  for (const cardId of [...state.runner.rig.hardware, ...state.runner.rig.programs, ...state.runner.rig.resources]) {
+    if (remaining <= 0) break;
+    if (!cardHasSubtype(definitionFor(state, cardId), "stealth")) continue;
+    const available = cardCounter(state, cardId, "recurring_credit");
+    const cardSpent = Math.min(available, remaining);
+    if (cardSpent > 0) {
+      spendCardCounter(state, cardId, "recurring_credit", cardSpent);
+      remaining -= cardSpent;
+      spent += cardSpent;
+    }
+  }
+  legalAction.payload = { ...(legalAction.payload ?? {}), postBreakStealthLoss: spent };
 }
 
 function refreshRecurringCredits(state: GameState, side: Side): void {
