@@ -152,15 +152,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       }
       if (payload.traceStep === "corp_bid") {
         const corpBid = numberValue(payload.corpBid) ?? 0;
+        const hackerTrackerCountersSpent = numberValue(payload.hackerTrackerCountersSpent) ?? 0;
         const traceStrength = numberValue(payload.traceStrength);
         const runnerLink = numberValue(payload.runnerLink);
         category = "danger";
         importance = "important";
         visibility = "public";
         title = phrase(subject, `im Trace ${creditText(corpBid)} geboten`);
-        description = traceStrength !== undefined ? `Trace-Stärke: ${traceStrength}${runnerLink !== undefined ? `, Runner-Link: ${runnerLink}` : ""}.` : undefined;
+        description = traceStrength !== undefined ? `Trace-Stärke: ${traceStrength}${runnerLink !== undefined ? `, Runner-Link: ${runnerLink}` : ""}${hackerTrackerCountersSpent > 0 ? `; ${hackerTrackerCountersSpent} Hacker-Tracker-Counter eingesetzt` : ""}.` : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
-        chips.push("Trace", `Korp-Gebot ${corpBid}`, ...(traceStrength !== undefined ? [`Trace ${traceStrength}`] : []), ...(runnerLink !== undefined ? [`Link ${runnerLink}`] : []));
+        chips.push("Trace", `Korp-Gebot ${corpBid}`, ...(hackerTrackerCountersSpent > 0 ? [`HTC -${hackerTrackerCountersSpent}`] : []), ...(traceStrength !== undefined ? [`Trace ${traceStrength}`] : []), ...(runnerLink !== undefined ? [`Link ${runnerLink}`] : []));
         break;
       }
       if (payload.traceStep === "runner_bid") {
@@ -169,12 +170,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const traceStrength = numberValue(payload.traceStrength);
         const runnerStrength = numberValue(payload.runnerStrength);
         const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
+        const hackerTrackerCountersAdded = numberValue(payload.hackerTrackerCountersAdded) ?? 0;
+        const fangRunLockCreditCost = numberValue(payload.fangRunLockCreditCost);
         const successful = payload.traceSuccessful === true;
         category = "danger";
         importance = "important";
         visibility = "public";
         title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`;
-        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}.` : undefined;
+        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.fangRunEnded === true ? `; Fang 2.0 beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(fangRunLockCreditCost ?? 2)}` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.` : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
@@ -182,8 +185,25 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           `Runner ${runnerBid}`,
           ...(traceStrength !== undefined && runnerStrength !== undefined ? [`${traceStrength}:${runnerStrength}`] : []),
           successful ? "Erfolg" : "Fehlschlag",
-          ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : [])
+          ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : []),
+          ...(payload.fangRunEnded === true ? ["Run endet", `Run-Sperre ${fangRunLockCreditCost ?? 2}`] : []),
+          ...(hackerTrackerCountersAdded > 0 ? [`HTC +${hackerTrackerCountersAdded}`] : [])
         );
+        break;
+      }
+      if (stringValue(payload.v1919RunnerEventAbility) === "arasaka_owns_you_flatline_replacement") {
+        const preventedAmount = numberValue(payload.preventedAmount) ?? numberValue(payload.originalAmount) ?? 0;
+        const drawnCards = numberValue(payload.drawnCards) ?? 0;
+        const removedTags = numberValue(payload.removedTags) ?? 0;
+        const coreDamageRemoved = numberValue(payload.coreDamageRemoved) ?? 0;
+        const debt = numberValue(payload.futureAgendaPointForfeitPending) ?? 0;
+        category = "danger";
+        importance = "critical";
+        visibility = "public";
+        title = phrase(subject, `${cardTitle ?? "Arasaka Owns You"} gespielt und ${preventedAmount} Schaden ersetzt`);
+        description = `${drawnCards} Karten nachgezogen, ${creditText(10)} erhalten, ${removedTags} Tag${removedTags === 1 ? "" : "s"} entfernt${coreDamageRemoved > 0 ? `, ${coreDamageRemoved} Core Damage entfernt` : ""}; die nächsten ${debt} Agenda-Punkte werden forfeitet.`;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Arasaka Owns You", "Flatline verhindert", "+10 Credits", "4 Aktionen Schuld", `${debt} Agenda-Punkte`);
         break;
       }
       if (payload.eventModificationDecision === "apply" && numberValue(payload.preventedAmount) !== undefined) {
@@ -196,6 +216,50 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         description = damageAmount !== undefined ? `${damageAmount} Schaden bleibt übrig.` : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push("Prävention", `${preventedAmount} verhindert`, ...(damageAmount !== undefined ? [`${damageAmount} übrig`] : []));
+        break;
+      }
+      if (hiddenZoneAction === "v1922_data_fort_reclamation_install_sequence") {
+        const installedCount = numberValue(payload.installedCount) ?? 0;
+        const installedIceCount = numberValue(payload.installedIceCount) ?? 0;
+        const installedRootCount = numberValue(payload.installedRootCount) ?? 0;
+        const temporaryCreditsProvided = numberValue(payload.temporaryCreditsProvided) ?? 0;
+        const rezCandidateCount = numberValue(payload.dataFortReclamationRezCandidateCount) ?? 0;
+        category = "hidden";
+        importance = "important";
+        visibility = "redacted";
+        title = phrase(subject, `${cardCountText(installedCount)} mit Data Fort Reclamation installiert`);
+        description = `${installedIceCount} ICE und ${installedRootCount} Root-Karte${installedRootCount === 1 ? "" : "n"} wurden verdeckt installiert${rezCandidateCount > 0 ? "; anschließend kann daraus gerezzt werden" : ""}.`;
+        chips.push("Data Fort", `${installedCount} Install`, `${installedIceCount} ICE`, `${temporaryCreditsProvided} Temp-Credits`);
+        break;
+      }
+      if (hiddenZoneAction === "v1922_data_fort_reclamation_rez_sequence") {
+        const rezzedCount = numberValue(payload.rezzedCount) ?? 0;
+        const rezzedIceCount = numberValue(payload.rezzedIceCount) ?? 0;
+        const rezzedRootCount = numberValue(payload.rezzedRootCount) ?? 0;
+        const temporaryCreditsSpent = numberValue(payload.temporaryCreditsSpent) ?? 0;
+        const corpCreditsSpent = numberValue(payload.corpCreditsSpent) ?? 0;
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${cardCountText(rezzedCount)} aus Data Fort Reclamation gerezzt`);
+        description = `${rezzedIceCount} ICE und ${rezzedRootCount} Root-Karte${rezzedRootCount === 1 ? "" : "n"} wurden gerezzt; ${temporaryCreditsSpent} temporäre und ${corpCreditsSpent} normale Credits wurden ausgegeben.`;
+        chips.push("Data Fort", `${rezzedCount} Rez`, `${temporaryCreditsSpent} Temp`, `${corpCreditsSpent} Credits`);
+        break;
+      }
+      if (hiddenZoneAction === "aardvark_rez_trash_worm") {
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, "Aardvark gerezzt und Worm getrasht");
+        cardDefinitionId = cardDefinitionId ?? stringValue(payload.publicRevealDefinitionId);
+        chips.push("Aardvark", "Rez", "Worm Trash");
+        break;
+      }
+      if (hiddenZoneAction === "aardvark_declined_worm_use") {
+        category = "run";
+        visibility = "public";
+        title = phrase(subject, "Aardvark nicht gerezzt; Worm wurde genutzt");
+        chips.push("Aardvark", "Kein Rez", "Worm");
         break;
       }
       if (stringValue(payload.v1922RunnerEventAbility) === "successful_hq_run_pay_rez_cost_trash_rezzed_ice") {
@@ -260,6 +324,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "gain_credit":
+      if (stringValue(payload.v1920RunnerRunLockAbility) === "fang_2_0_pay_to_run") {
+        const paid = numberValue(payload.fangRunLockCreditCost) ?? 2;
+        category = "run";
+        importance = "important";
+        title = phrase(subject, `die Fang-2.0-Run-Sperre für ${creditText(paid)} entfernt`);
+        chips.push("Fang 2.0", "Run-Sperre weg", `${paid} ${creditLabel(paid)}`);
+        break;
+      }
       if (hiddenZoneAction === "v1911_expose_server_card" || payload.revealKind === "expose") {
         const sourceTitle = sourceTitleFromActionLabel(label);
         category = "card";
@@ -516,6 +588,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "trigger_ability": {
       const resourceAbility = stringValue(payload.resourceAbility);
+      if (stringValue(payload.v1920RunnerRunLockAbility) === "fang_2_0_pay_to_run") {
+        const paid = numberValue(payload.fangRunLockCreditCost) ?? 2;
+        category = "run";
+        importance = "important";
+        title = phrase(subject, `die Fang-2.0-Run-Sperre für ${creditText(paid)} entfernt`);
+        chips.push("Fang 2.0", "Run-Sperre weg", `${paid} ${creditLabel(paid)}`);
+        break;
+      }
       if (shellTradersAbility === "set_aside_from_grip") {
         const counters = numberValue(payload.shellCounterAmount) ?? numberValue(payload.remainingCounters) ?? 0;
         const installed = payload.installedFromSpecialZone === true;
@@ -594,6 +674,48 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Aktion");
       if (!description && label) description = `Hinweis: ${safeLabel(label)}`;
       break;
+  }
+
+  const v181RunnerProgramAbility = stringValue(payload.v181RunnerProgramAbility);
+  if (v181RunnerProgramAbility === "pattels_virus_counter_choice") {
+    const candidateCount = numberValue(payload.pattelsVirusCandidateCount) ?? 0;
+    category = "run";
+    importance = "important";
+    visibility = "public";
+    title = phrase(subject, `Pattel's Virus-Zielwahl für ${candidateCount} ICE geöffnet`);
+    chips.push("Pattel's Virus", "Choice", `${candidateCount} ICE`);
+  }
+  if (v181RunnerProgramAbility === "pattels_virus_counter") {
+    const remaining = numberValue(payload.remainingCounters);
+    const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+    category = "run";
+    importance = "important";
+    visibility = "public";
+    cardDefinitionId = targetDefinitionId ?? cardDefinitionId;
+    title = phrase(subject, `1 Virus-Counter mit Pattel's Virus auf ${cardTitle ?? "ein ICE"} gelegt`);
+    chips.push("Pattel's Virus", "+1 Virus", ...(remaining !== undefined ? [`${remaining} auf ICE`] : []));
+  }
+  if (v181RunnerProgramAbility === "pox_counter") {
+    const countersAfter = numberValue(payload.poxCountersAfter);
+    const targetServerLabel = displayServerLabel(stringValue(payload.targetServerLabel));
+    category = "run";
+    importance = "important";
+    visibility = "public";
+    title = phrase(subject, `1 Pox-Counter auf ${targetServerLabel ?? "das angegriffene Fort"} gelegt`);
+    chips.push("Pox", "+1 Virus", ...(targetServerLabel ? [targetServerLabel] : []), ...(countersAfter !== undefined ? [`${countersAfter} dort`] : []));
+  }
+  if (actionType === "install_card") {
+    const recurringCreditsLoaded = numberValue(payload.recurringCreditsLoaded);
+    const iceInstallAdditionalCost = numberValue(payload.iceInstallAdditionalCost) ?? 0;
+    const iceInstallTotalCost = numberValue(payload.iceInstallTotalCost);
+    if (recurringCreditsLoaded !== undefined && recurringCreditsLoaded > 0) {
+      description = `${recurringCreditsLoaded} Recurring Credit${recurringCreditsLoaded === 1 ? "" : "s"} wurden auf die Karte gelegt.`;
+      chips.push(`${recurringCreditsLoaded} Recurring`);
+    }
+    if (iceInstallAdditionalCost > 0) {
+      description = `Die Installation enthält ${creditText(iceInstallAdditionalCost)} Zusatzkosten${iceInstallTotalCost !== undefined ? `; Gesamtkosten: ${creditText(iceInstallTotalCost)}` : ""}.`;
+      chips.push(`+${iceInstallAdditionalCost} Installkosten`, ...(iceInstallTotalCost !== undefined ? [`${iceInstallTotalCost} gesamt`] : []));
+    }
   }
 
   if (effect.sentence && !description) description = effect.sentence;

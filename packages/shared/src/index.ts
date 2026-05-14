@@ -781,6 +781,7 @@ export type RunState = {
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
+  dupreUsedBreakerIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
   aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<
@@ -918,6 +919,7 @@ export type GameState = {
     forgoNextActionPending?: boolean;
     forgoNextActionsPending?: number;
     runLockActionsPending?: number;
+    fangRunLockCreditCost?: number;
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
     shellTradersStartTurnResolvedSourceIds?: CardInstanceId[];
@@ -934,6 +936,7 @@ export type GameState = {
   poxCountersByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, number>
   >;
+  runnerAgendaPointsToForfeit?: number;
 };
 
 export type Cost = {
@@ -1610,17 +1613,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     memoryCost: 1,
-    recurringCredits: 1,
     rulesText:
-      "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+      "Whenever you make a successful run on HQ, give the Corp a Butcher Boy counter. For every two Butcher Boy counters, gain 1 at the start of each of your turns. The Corp may remove all Virus counters by forgoing its next three actions.",
     mechanics: [
       "install_program",
       "memory",
       "counter",
       "virus",
       "purge",
-      "recurring_credit",
       "recurring_start_turn",
+      "hq_run_success_trigger",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -4293,7 +4295,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 0,
     rulesText:
-      "Runner event with tag, prevention and agenda-point cost surfaces. Costs and replacement windows are resolver-driven.",
+      "Play only when you are about to take enough damage to flatline. Prevent all that damage, trash Arasaka Owns You, remove all core damage, fill your hand to its maximum size, gain 10, remove all tags, forgo your next four actions, and forfeit the next 3 agenda points you score.",
     mechanics: [
       "play_event",
       "tag",
@@ -5991,7 +5993,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 2,
     rulesText:
-      "Rezzed asset with trace, counter and global runner-state modifier surfaces. Trace and counter branches remain explicit actions.",
+      "After each trace attempt, put 1 counter on Hacker Tracker Central. During a trace attempt, the Corp may spend counters from Hacker Tracker Central; each counter spent increases Trace strength and Trace limit by 1.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -7714,16 +7716,24 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry", "pit_bull"],
     rezCost: 6,
     strength: 5,
-    rulesText: "Trace 5. If successful, give the Runner 1 tag.",
+    rulesText:
+      "Trace 5. If successful, end the run. The Runner cannot make another run until they take an action to pay 2.",
     subroutines: [
       {
         id: "onr_v1_241_fang_2_0_trace",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: { type: "none" },
       },
     ],
-    mechanics: ["trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE],
+    mechanics: [
+      "trace",
+      "link",
+      "bid_amount",
+      "end_the_run",
+      "run_lock",
+      ONR_V1_LOCAL_PRIVATE,
+    ],
   }),
   onrIce({
     id: "onr_v1_248_homewrecker",
@@ -7823,12 +7833,31 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     memoryCost: 1,
     strength: 0,
     rulesText:
-      "Installed run-flow helper for run-lock timing and counter interactions.",
+      "1: Break code gate subroutine. 2: +1 strength. Put 1 strength counter on Dupré after each run during which it broke a subroutine. When Dupré is used on a different fort from the last one, lose all strength counters on it.",
+    abilities: [
+      {
+        id: "onr_v1_020_dupre_pump",
+        type: "pump_strength",
+        cost: { credits: 2 },
+        amount: 1,
+        timingPoint: "run.encounter_ice",
+      },
+      {
+        id: "onr_v1_020_dupre_break_code_gate",
+        type: "break_subroutine",
+        cost: { credits: 1 },
+        iceSubtype: "code_gate",
+        timingPoint: "run.encounter_ice",
+      },
+    ],
     mechanics: [
       "install_program",
       "memory",
-      "run_flow",
+      "icebreaker",
+      "pump_strength",
+      "break_subroutine",
       "counter",
+      "code_gate",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

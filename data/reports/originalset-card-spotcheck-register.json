@@ -11,6 +11,83 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-14-B",
+      "selectionMode": "random_sample_from_complex_decklegal_originalset_cards_excluding_completed_spotchecks",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_14_B.md",
+      "cards": [
+        {
+          "cardId": "onr_v1_009_butcher-boy",
+          "title": "Butcher Boy",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_hq_counter_start_turn_credit",
+          "followUpStatus": "fixed_engine_tested"
+        },
+        {
+          "cardId": "onr_v1_020_dupre",
+          "title": "Dupré",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_code_gate_breaker_counter_fort_reset",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_035_invisibility",
+          "title": "Invisibility",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_chronicle_recurring_install_improved",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_046_pattels-virus",
+          "title": "Pattel's Virus",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_multi_ice_choice_counter_chronicle",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_049_pox",
+          "title": "Pox",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_chronicle_counter_and_install_tax_improved",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_078_arasaka-owns-you",
+          "title": "Arasaka Owns You",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_flatline_replacement",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_197_data-fort-reclamation",
+          "title": "Data Fort Reclamation",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_chronicle_install_rez_sequence_improved",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_241_fang-2-0",
+          "title": "Fang 2.0",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_trace_success_run_lock",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_325_hacker-tracker-central",
+          "title": "Hacker Tracker Central",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_trace_counter_spend",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_349_aardvark",
+          "title": "Aardvark",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_chronicle_rez_trash_worm_choice_improved",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-14-A",
       "selectionMode": "random_sample_from_complex_decklegal_originalset_cards",
       "cards": [

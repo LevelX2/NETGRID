@@ -303,6 +303,111 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Core Command", "Trash", "3 Credits", "R&D"]);
   });
 
+  it("describes V1.8.1 Pattel and Pox run-success counters", () => {
+    const pattel = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        v181RunnerProgramAbility: "pattels_virus_counter",
+        targetCardDefinitionId: "onr_v1_279_wall-of-static",
+        remainingCounters: 2
+      }),
+      "runner",
+      { cardTitle: "Wall of Static" }
+    );
+    const pox = formatChronicleEvent(
+      makeEvent("access_card", {
+        actor: "runner",
+        v181RunnerProgramAbility: "pox_counter",
+        targetServerLabel: "R&D",
+        poxCountersAfter: 3
+      }),
+      "runner"
+    );
+
+    expect(pattel.title).toBe("Du hast 1 Virus-Counter mit Pattel's Virus auf Wall of Static gelegt.");
+    expect(pattel.cardDefinitionId).toBe("onr_v1_279_wall-of-static");
+    expect(pattel.chips).toEqual(expect.arrayContaining(["Pattel's Virus", "+1 Virus", "2 auf ICE"]));
+    expect(pox.title).toBe("Du hast 1 Pox-Counter auf R&D gelegt.");
+    expect(pox.chips).toEqual(expect.arrayContaining(["Pox", "+1 Virus", "R&D", "3 dort"]));
+  });
+
+  it("describes recurring-credit installs and Pox ICE install tax", () => {
+    const invisibility = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        title: "Invisibility",
+        zoneLabel: "Rig",
+        recurringCreditsLoaded: 9
+      }),
+      "runner",
+      { cardTitle: "Invisibility" }
+    );
+    const taxedIce = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "corp",
+        title: "Wall of Static",
+        serverLabel: "R&D",
+        zoneLabel: "ICE",
+        iceInstallAdditionalCost: 2,
+        iceInstallTotalCost: 5
+      }),
+      "corp",
+      { cardTitle: "Wall of Static" }
+    );
+
+    expect(invisibility.description).toBe("9 Recurring Credits wurden auf die Karte gelegt.");
+    expect(invisibility.chips).toContain("9 Recurring");
+    expect(taxedIce.description).toBe("Die Installation enthält 2 Credits Zusatzkosten; Gesamtkosten: 5 Credits.");
+    expect(taxedIce.chips).toEqual(expect.arrayContaining(["+2 Installkosten", "5 gesamt"]));
+  });
+
+  it("describes Data Fort Reclamation and Aardvark hidden-zone choices", () => {
+    const dataFortInstall = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1922_data_fort_reclamation_install_sequence",
+        installedCount: 3,
+        installedIceCount: 2,
+        installedRootCount: 1,
+        temporaryCreditsProvided: 12,
+        dataFortReclamationRezCandidateCount: 2
+      }),
+      "runner"
+    );
+    const dataFortRez = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+        rezzedCount: 2,
+        rezzedIceCount: 1,
+        rezzedRootCount: 1,
+        temporaryCreditsSpent: 4,
+        corpCreditsSpent: 2
+      }),
+      "corp"
+    );
+    const aardvark = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "aardvark_rez_trash_worm",
+        publicRevealDefinitionId: "onr_v1_327_aardvark"
+      }),
+      "runner"
+    );
+
+    expect(dataFortInstall.title).toBe("Die Korp hat 3 Karten mit Data Fort Reclamation installiert.");
+    expect(dataFortInstall.visibility).toBe("redacted");
+    expect(dataFortInstall.chips).toEqual(expect.arrayContaining(["Data Fort", "3 Install", "2 ICE", "12 Temp-Credits"]));
+    expect(dataFortRez.title).toBe("Du hast 2 Karten aus Data Fort Reclamation gerezzt.");
+    expect(dataFortRez.chips).toEqual(expect.arrayContaining(["Data Fort", "2 Rez", "4 Temp", "2 Credits"]));
+    expect(aardvark.title).toBe("Die Korp hat Aardvark gerezzt und Worm getrasht.");
+    expect(aardvark.cardDefinitionId).toBe("onr_v1_327_aardvark");
+    expect(aardvark.chips).toEqual(expect.arrayContaining(["Aardvark", "Rez", "Worm Trash"]));
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {
@@ -548,6 +653,56 @@ describe("formatChronicleEvent", () => {
     expect(runnerBid.title).toBe("Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich.");
     expect(runnerBid.description).toBe("Endstand: Trace 6 gegen Runner-Stärke 1.");
     expect(runnerBid.chips).toEqual(["Runner", "Trace", "Korp 2", "Runner 1", "6:1", "Erfolg", "+1 Tag"]);
+  });
+
+  it("describes Hacker Tracker, Fang 2.0 and Arasaka Owns You follow-up payloads", () => {
+    const trace = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        traceStep: "runner_bid",
+        sourceDefinitionId: "onr_v1_241_fang-2-0",
+        corpBid: 6,
+        traceStrength: 11,
+        runnerBid: 0,
+        runnerStrength: 0,
+        traceSuccessful: true,
+        tagsAdded: 0,
+        fangRunEnded: true,
+        fangRunLockCreditCost: 2,
+        hackerTrackerCountersAdded: 1
+      }),
+      "runner"
+    );
+    const lockCleared = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
+        fangRunLockCreditCost: 2,
+        fangRunLockCleared: true
+      }),
+      "runner"
+    );
+    const arasaka = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        v1919RunnerEventAbility: "arasaka_owns_you_flatline_replacement",
+        sourceDefinitionId: "onr_v1_078_arasaka-owns-you",
+        originalAmount: 4,
+        preventedAmount: 4,
+        drawnCards: 4,
+        removedTags: 2,
+        coreDamageRemoved: 1,
+        futureAgendaPointForfeitPending: 3
+      }),
+      "runner",
+      { cardTitle: "Arasaka Owns You" }
+    );
+
+    expect(trace.description).toContain("Fang 2.0 beendet den Run");
+    expect(trace.chips).toContain("HTC +1");
+    expect(lockCleared.title).toBe("Du hast die Fang-2.0-Run-Sperre für 2 Credits entfernt.");
+    expect(arasaka.title).toBe("Du hast Arasaka Owns You gespielt und 4 Schaden ersetzt.");
+    expect(arasaka.chips).toContain("Flatline verhindert");
   });
 
   it("describes complex card payloads from the Originalset spot-check clearly", () => {

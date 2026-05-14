@@ -191,6 +191,7 @@ const INITIAL_HAND_SIZE = 5;
 const BASE_MAX_HAND_SIZE = 5;
 const BARTMOSS_ID = "onr_v1_005_bartmoss-memorial-icebreaker";
 const BLINK_ID = "onr_v1_007_blink";
+const BUTCHER_BOY_ID = "onr_v1_009_butcher-boy";
 const COCKROACH_ID = "onr_v1_013_cockroach";
 const GRUBB_ID = "onr_v1_030_grubb";
 const INCUBATOR_ID = "onr_v1_034_incubator";
@@ -205,6 +206,7 @@ const PRIVATE_CYBERNET_POLICE_ID = "onr_v1_213_private-cybernet-police";
 const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const DATA_RAVEN_ID = "onr_v1_236_data-raven";
+const FANG_2_0_ID = "onr_v1_241_fang-2-0";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
 const V1917_ECONOMY_ASSET_IDS = new Set([
   "onr_v1_309_bbs-whispering-campaign",
@@ -311,6 +313,8 @@ const V1920_MAIN_OFFICE_RELOCATION_ID = "onr_v1_205_main-office-relocation";
 const V1920_BIOWEAPONS_ENGINEERING_ID =
   "onr_v1_190_bioweapons-engineering";
 const V1920_FORTRESS_ARCHITECTS_ID = "onr_v1_324_fortress-architects";
+const V1920_HACKER_TRACKER_CENTRAL_ID =
+  "onr_v1_325_hacker-tracker-central";
 const V1920_ACTION_ASSET_IDS = new Set([
   "onr_v1_331_nevinyrral",
   "onr_v1_334_pacifica-regional-ai",
@@ -378,6 +382,8 @@ const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const DUPRE_ID = "onr_v1_020_dupre";
+const PATTELS_VIRUS_ID = "onr_v1_046_pattels-virus";
+const POX_ID = "onr_v1_049_pox";
 const EXPERT_SCHEDULE_ANALYZER_ID = "onr_v1_024_expert-schedule-analyzer";
 const MICROTECH_AI_INTERFACE_ID = "onr_v1_041_microtech-ai-interface";
 const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
@@ -1219,32 +1225,14 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   [V1919_ARASAKA_OWNS_YOU_ID]: {
-    name: "onr_v1919_runner_event_forfeit_agenda_remove_tags",
-    canPlay: (state) =>
-      state.runner.tags > 0 &&
-      pickRunnerAgendaForAgendaPointCost(state) !== undefined,
+    name: "onr_v1919_runner_event_flatline_replacement",
+    canPlay: () => false,
     resolve: (state, legalAction) => {
-      if (state.runner.tags <= 0)
-        throw new Error("Arasaka Owns You benoetigt einen getaggten Runner.");
-      const forfeitAgendaCardId = pickRunnerAgendaForAgendaPointCost(state);
-      if (!forfeitAgendaCardId)
-        throw new Error(
-          "Arasaka Owns You benoetigt eine Runner-Agenda als Kosten.",
-        );
-      const removedTags = state.runner.tags;
-      forfeitRunnerAgendaForPointCost(state, forfeitAgendaCardId);
-      state.runner.tags = 0;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1919RunnerEventAbility: "forfeit_agenda_remove_tags",
-        forfeitAgendaCardId,
-        agendaPointCostPaid: 1,
-        removedTags,
-        runnerTagsAfter: state.runner.tags,
-        specialZone: "removed_from_game",
-        specialZoneVisibility: "public",
-        specialZoneReason: "v1919_arasaka_owns_you",
-      };
+      void state;
+      void legalAction;
+      throw new Error(
+        "Arasaka Owns You wird als Flatline-Replacement gespielt.",
+      );
     },
   },
 };
@@ -2504,6 +2492,20 @@ export function validateGameState(state: GameState): ValidationResult {
     if (!Number.isInteger(pending) || pending < 0)
       errors.push(
         "runnerTurnFlags.runLockActionsPending must be a non-negative integer.",
+      );
+  }
+  if (state.runnerTurnFlags?.fangRunLockCreditCost !== undefined) {
+    const pending = state.runnerTurnFlags.fangRunLockCreditCost;
+    if (!Number.isInteger(pending) || pending < 0)
+      errors.push(
+        "runnerTurnFlags.fangRunLockCreditCost must be a non-negative integer.",
+      );
+  }
+  if (state.runnerAgendaPointsToForfeit !== undefined) {
+    const pending = state.runnerAgendaPointsToForfeit;
+    if (!Number.isInteger(pending) || pending < 0)
+      errors.push(
+        "runnerAgendaPointsToForfeit must be a non-negative integer.",
       );
   }
   if (
@@ -4261,6 +4263,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
       0,
       Math.floor(state.runnerTurnFlags?.runLockActionsPending ?? 0),
     );
+    const fangRunLockCreditCost = Math.max(
+      0,
+      Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+    );
     const runCosts = [
       {
         clicks: 1,
@@ -4278,7 +4284,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
           }
         : {}),
     };
-    if (hasClicks && runLockActionsPending <= 0) {
+    if (
+      hasClicks &&
+      runLockActionsPending <= 0 &&
+      fangRunLockCreditCost <= 0
+    ) {
       if (
         v1918RunTax.amount === 0 ||
         availableRunnerRunStartCredits(state) >= v1918RunTax.amount
@@ -4317,6 +4327,31 @@ function runnerMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
+  }
+  const fangRunLockCreditCost = Math.max(
+    0,
+    Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+  );
+  if (
+    hasClicks &&
+    fangRunLockCreditCost > 0 &&
+    state.runner.credits >= fangRunLockCreditCost
+  ) {
+    actions.push(
+      action(
+        state,
+        "runner",
+        "trigger_ability",
+        `Fang 2.0: Run-Sperre für ${fangRunLockCreditCost} Credits entfernen`,
+        "game_rule",
+        [{ clicks: 1, credits: fangRunLockCreditCost }],
+        {
+          v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
+          fangRunLockCreditCost,
+          gainCreditsAmount: 0,
+        },
+      ),
+    );
   }
   actions.push(...specialZoneHarnessActions(state, "runner"));
   actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
@@ -5150,6 +5185,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breakerStrength =
       (breaker.strength ?? 0) +
       mustInstance(state.cardInstances, breakerId).strengthModifier +
+      dupreStrengthCounterBonus(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     const pump = breaker.abilities?.find(
       (ability) => ability.type === "pump_strength",
@@ -5163,7 +5199,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
           state,
           "runner",
           "pump_breaker",
-          `${breaker.title}: Stärke +1`,
+          `${breaker.title}: Stärke +${pump.amount ?? 1}`,
           breakerId,
           [{ credits: pump.cost.credits }],
           { breakerId, iceId: encounteredIceId },
@@ -5262,6 +5298,40 @@ function breakAbilityMatchesIce(
   )
     return false;
   return true;
+}
+
+function dupreStrengthCounterBonus(
+  state: GameState,
+  breakerId: CardInstanceId,
+): number {
+  if (definitionFor(state, breakerId).id !== DUPRE_ID) return 0;
+  const selectedServerId = mustInstance(state.cardInstances, breakerId)
+    .selectedServerId;
+  if (
+    state.run &&
+    selectedServerId &&
+    selectedServerId !== state.run.attackedServerId
+  )
+    return 0;
+  return cardCounter(state, breakerId, "power");
+}
+
+function pumpAmountForLegalAction(
+  state: GameState,
+  legalAction: LegalAction,
+): number {
+  const breakerId = String(legalAction.payload?.breakerId ?? "");
+  const abilityId = legalAction.abilityRef?.abilityId;
+  const definition = state.cardInstances[breakerId]
+    ? definitionFor(state, breakerId)
+    : undefined;
+  const ability = definition?.abilities?.find(
+    (candidate) =>
+      candidate.type === "pump_strength" &&
+      (!abilityId || candidate.id === abilityId),
+  );
+  const amount = ability?.amount ?? 1;
+  return Number.isInteger(amount) ? amount : 1;
 }
 
 function breakAbilityMatchesSubroutine(
@@ -6526,6 +6596,25 @@ function performAction(
         );
         return;
       }
+      if (
+        legalAction.payload?.v1920RunnerRunLockAbility ===
+        "fang_2_0_pay_to_run"
+      ) {
+        if (legalAction.side !== "runner")
+          throw new Error("Nur der Runner darf die Fang-2.0-Sperre entfernen.");
+        const cost = Number(legalAction.payload?.fangRunLockCreditCost ?? 0);
+        if (!Number.isInteger(cost) || cost !== 2)
+          throw new Error("Fang 2.0 verlangt genau 2 Credits.");
+        spendCredits(state, "runner", cost);
+        ensureRunnerTurnFlags(state).fangRunLockCreditCost = 0;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          fangRunLockCleared: true,
+          runnerCreditsAfter: state.runner.credits,
+          gainedCredits: 0,
+        };
+        return;
+      }
       credits(state, legalAction.side, 1);
       if (legalAction.payload?.drawCardAfter === true) {
         if (legalAction.side !== "runner")
@@ -6714,7 +6803,7 @@ function performAction(
           {
             type: "change_breaker_strength",
             breakerId: String(legalAction.payload?.breakerId),
-            amount: 1,
+            amount: pumpAmountForLegalAction(state, legalAction),
           },
         ]);
       }
@@ -6759,6 +6848,7 @@ function performAction(
       if (breakerId) {
         applyPostBreakStealthLoss(state, breakerId, legalAction);
         recordBartmossEncounterUsage(state, breakerId);
+        recordDupreBreakUsage(state, breakerId);
       }
       return;
     }
@@ -6870,6 +6960,25 @@ function performAction(
       endTurn(state, legalAction.side);
       return;
     case "trigger_ability":
+      if (
+        legalAction.payload?.v1920RunnerRunLockAbility ===
+        "fang_2_0_pay_to_run"
+      ) {
+        if (legalAction.side !== "runner")
+          throw new Error("Nur der Runner darf die Fang-2.0-Sperre entfernen.");
+        spendClick(state, "runner");
+        const cost = Number(legalAction.payload?.fangRunLockCreditCost ?? 0);
+        if (!Number.isInteger(cost) || cost !== 2)
+          throw new Error("Fang 2.0 verlangt genau 2 Credits.");
+        spendCredits(state, "runner", cost);
+        ensureRunnerTurnFlags(state).fangRunLockCreditCost = 0;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          fangRunLockCleared: true,
+          runnerCreditsAfter: state.runner.credits,
+        };
+        return;
+      }
       if (legalAction.payload?.approachIceExposeDecision) {
         resolveApproachIceExposeAbility(state, legalAction);
         return;
@@ -7091,7 +7200,10 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
-      if (definition.mechanics.includes("virus"))
+      if (
+        definition.mechanics.includes("virus") &&
+        definition.id !== BUTCHER_BOY_ID
+      )
         addCardCounter(state, cardId, "virus", 1);
     } else if (definition.type === "resource") {
       state.runner.rig.resources.push(cardId);
@@ -7136,6 +7248,12 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       };
     }
     consumeV1922ValuPakInstallAction(state, legalAction);
+    if ((definition.recurringCredits ?? 0) > 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        recurringCreditsLoaded: definition.recurringCredits ?? 0,
+      };
+    }
     if (definition.id === "v099_host_resource")
       startRunnerHostingChoice(state, cardId, legalAction);
     return;
@@ -7240,7 +7358,6 @@ function startRun(
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
   trashTopRunnersConferenceOnRunStart(state);
   const installedAccessBonus = v1915InstalledAccessBonus(state, server.id);
-  applyV1915RunStartCounterHelpers(state);
   state.phase = "run";
   state.activeSide = "runner";
   state.run = {
@@ -7479,7 +7596,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   }
   if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
     if (run.phase === "access") {
-      finishRun(state, true);
+      finishRun(state, true, legalAction);
       return;
     }
     throw new Error("Run kann in diesem Schritt nicht fortgesetzt werden.");
@@ -7807,10 +7924,74 @@ function recordBartmossEncounterUsage(
   run.bartmossUsedBreakerIdsThisEncounter = usedBreakerIds;
 }
 
+function recordDupreBreakUsage(
+  state: GameState,
+  breakerId: CardInstanceId,
+): void {
+  const run = state.run;
+  if (!run || definitionFor(state, breakerId).id !== DUPRE_ID) return;
+  const instance = mustInstance(state.cardInstances, breakerId);
+  if (
+    instance.selectedServerId &&
+    instance.selectedServerId !== run.attackedServerId
+  ) {
+    setCardCounter(state, breakerId, "power", 0);
+  }
+  const usedBreakerIds = run.dupreUsedBreakerIdsThisRun ?? [];
+  if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
+  run.dupreUsedBreakerIdsThisRun = usedBreakerIds;
+}
+
 function recordRunFullyBrokenIce(run: ActiveRun, iceId: CardInstanceId): void {
   const fullyBroken = run.fullyBrokenIceIds ?? [];
   if (!fullyBroken.includes(iceId)) fullyBroken.push(iceId);
   run.fullyBrokenIceIds = fullyBroken;
+}
+
+function hackerTrackerCardIds(state: GameState): CardInstanceId[] {
+  return corpInstalledCardIds(state)
+    .filter((cardId) => {
+      const instance = state.cardInstances[cardId];
+      return (
+        instance?.rezzed === true &&
+        definitionFor(state, cardId).id === V1920_HACKER_TRACKER_CENTRAL_ID
+      );
+    })
+    .sort();
+}
+
+function hackerTrackerCounterTotal(state: GameState): number {
+  return hackerTrackerCardIds(state).reduce(
+    (sum, cardId) => sum + cardCounter(state, cardId, "power"),
+    0,
+  );
+}
+
+function spendHackerTrackerCounters(
+  state: GameState,
+  amount: number,
+): number {
+  let remaining = Math.max(0, Math.floor(amount));
+  let spent = 0;
+  for (const cardId of hackerTrackerCardIds(state)) {
+    if (remaining <= 0) break;
+    const available = cardCounter(state, cardId, "power");
+    const cardSpent = Math.min(available, remaining);
+    if (cardSpent <= 0) continue;
+    spendCardCounter(state, cardId, "power", cardSpent);
+    remaining -= cardSpent;
+    spent += cardSpent;
+  }
+  return spent;
+}
+
+function addHackerTrackerTraceCounters(state: GameState): number {
+  let added = 0;
+  for (const cardId of hackerTrackerCardIds(state)) {
+    addCardCounter(state, cardId, "power", 1);
+    added += 1;
+  }
+  return added;
 }
 
 function startTraceFromSubroutine(
@@ -7849,7 +8030,7 @@ function startTraceFromSubroutine(
     "corp",
     traceId,
     `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
-    state.corp.credits,
+    state.corp.credits + hackerTrackerCounterTotal(state),
   );
   state.activeSide = "corp";
   state.timingPoint = "run.encounter_ice";
@@ -7895,7 +8076,7 @@ function startTraceFromOperation(
     "corp",
     traceId,
     `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
-    state.corp.credits,
+    state.corp.credits + hackerTrackerCounterTotal(state),
   );
   state.activeSide = "corp";
   legalAction.payload = {
@@ -8122,14 +8303,14 @@ function enterAccess(state: GameState, legalAction?: LegalAction): void {
   markSuccessfulRunForTurn(state, run);
   if (run.successfulRunAccessReplacement === "corp_lose_credits") {
     applySuccessfulRunAccessReplacement(state, run);
-    finishRun(state, true);
+    finishRun(state, true, legalAction);
     return;
   }
   if (isV097OrLater(state)) {
     revealArchivesAtBreachStart(state, run, legalAction);
     const breach = buildBreachState(state, run);
     if (breach.queue.length === 0) {
-      finishRun(state, true);
+      finishRun(state, true, legalAction);
       return;
     }
     const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
@@ -8226,7 +8407,7 @@ function autoAdvanceArchivesBreachPastNonDecisionCards(
         },
       };
       recordArchivesAutoAccess(legalAction, autoAccessedCount);
-      finishRun(state, true);
+      finishRun(state, true, legalAction);
       return;
     }
     currentIndex = nextIndex;
@@ -8379,13 +8560,6 @@ function v1915InstalledAccessBonus(
   return bonus;
 }
 
-function applyV1915RunStartCounterHelpers(state: GameState): void {
-  for (const cardId of state.runner.rig.programs) {
-    if (definitionFor(state, cardId).id !== DUPRE_ID) continue;
-    addCardCounter(state, cardId, "power", 1);
-  }
-}
-
 function v1915InstalledRevealHelperIds(state: GameState): CardDefinitionId[] {
   const helperIds = [MYSTERY_BOX_ID, SMARTEYE_ID, RECORD_RECONSTRUCTOR_ID];
   return helperIds.filter((definitionId) =>
@@ -8490,7 +8664,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     const breach = run.breach;
     const entry = breach.queue[breach.currentIndex];
     if (!entry || entry.status !== "pending") {
-      finishRun(state, true);
+      finishRun(state, true, legalAction);
       return;
     }
     const cardId = entry.cardInstanceId;
@@ -8545,7 +8719,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   else if (server.id === "archives") cardId = state.corp.archives[0];
   else cardId = server.root[0];
   if (!cardId) {
-    finishRun(state, true);
+    finishRun(state, true, legalAction);
     return;
   }
   legalAction.payload = {
@@ -8577,7 +8751,7 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     definition.type !== "upgrade" &&
     !freeTrashAccess
   ) {
-    finishRun(state, true);
+    finishRun(state, true, legalAction);
   }
 }
 
@@ -8875,7 +9049,44 @@ function stealAgenda(state: GameState, cardId: string, legalAction?: LegalAction
     flags.stoleGrayOpsAgendaThisTurn = true;
   if (cardHasSubtype(definition, "black_ops"))
     flags.stoleBlackOpsAgendaThisTurn = true;
+  const agendaPointValue = agendaPointsForScoredCard(state, cardId);
+  const agendaDebt = Math.max(
+    0,
+    Math.floor(state.runnerAgendaPointsToForfeit ?? 0),
+  );
   removeFromAllZones(state, cardId);
+  if (agendaDebt > 0) {
+    const paidDebt = Math.min(agendaDebt, agendaPointValue);
+    state.runnerAgendaPointsToForfeit = agendaDebt - paidDebt;
+    ensureSpecialZones(state).removedFromGame.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: true,
+      rezzed: true,
+      zone: {
+        side: "special",
+        zone: "removed_from_game",
+        visibility: "public",
+      },
+    };
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1919RunnerEventAbility: "arasaka_owns_you_future_agenda_forfeit",
+        futureAgendaPointForfeitPaid: paidDebt,
+        futureAgendaPointForfeitPending: state.runnerAgendaPointsToForfeit,
+        specialZone: "removed_from_game",
+        specialZoneVisibility: "public",
+        specialZoneReason: "v1919_arasaka_owns_you_future_agenda_forfeit",
+      };
+    }
+    if (state.run?.breach) {
+      completeCurrentBreachAccess(state, "stolen", legalAction);
+      return;
+    }
+    finishRun(state, true, legalAction);
+    return;
+  }
   state.runner.scoreArea.push(cardId);
   state.cardInstances[cardId] = {
     ...mustInstance(state.cardInstances, cardId),
@@ -8887,7 +9098,7 @@ function stealAgenda(state: GameState, cardId: string, legalAction?: LegalAction
     completeCurrentBreachAccess(state, "stolen", legalAction);
     return;
   }
-  finishRun(state, true);
+  finishRun(state, true, legalAction);
 }
 
 function delayBizarreEncryptionSchemeAgendaScore(
@@ -8921,7 +9132,7 @@ function delayBizarreEncryptionSchemeAgendaScore(
     completeCurrentBreachAccess(state, "declined", legalAction);
     return;
   }
-  finishRun(state, true);
+  finishRun(state, true, legalAction);
 }
 
 function trashAccessedCard(
@@ -8946,7 +9157,7 @@ function trashAccessedCard(
     completeCurrentBreachAccess(state, "trashed", legalAction);
     return;
   }
-  finishRun(state, true);
+  finishRun(state, true, legalAction);
 }
 
 function declineCurrentAccess(state: GameState, legalAction?: LegalAction): void {
@@ -8954,7 +9165,7 @@ function declineCurrentAccess(state: GameState, legalAction?: LegalAction): void
     completeCurrentBreachAccess(state, "declined", legalAction);
     return;
   }
-  finishRun(state, true);
+  finishRun(state, true, legalAction);
 }
 
 function completeCurrentBreachAccess(
@@ -8965,12 +9176,12 @@ function completeCurrentBreachAccess(
   const run = mustRun(state);
   const breach = run.breach;
   if (!breach) {
-    finishRun(state, true);
+    finishRun(state, true, legalAction);
     return;
   }
   const current = breach.queue[breach.currentIndex];
   if (!current) {
-    finishRun(state, true);
+    finishRun(state, true, legalAction);
     return;
   }
   const finalStatus: BreachEntryStatus =
@@ -9001,7 +9212,7 @@ function completeCurrentBreachAccess(
         accessedSummaries,
       },
     };
-    finishRun(state, true);
+    finishRun(state, true, legalAction);
     return;
   }
   state.run = {
@@ -9208,9 +9419,15 @@ function tokyoChibaUnsuccessfulRunBonus(
     : 0;
 }
 
-function finishRun(state: GameState, successful: boolean): void {
+function finishRun(
+  state: GameState,
+  successful: boolean,
+  legalAction?: LegalAction,
+): void {
   const run = state.run;
-  if (run && successful) applyV181SuccessfulRunCounterTriggers(state, run);
+  if (run) applyDupreRunEndCounters(state, run);
+  if (run && successful)
+    applyV181SuccessfulRunCounterTriggers(state, run, legalAction);
   if (run && successful && run.attackedServerId === "hq")
     ensureRunnerTurnFlags(state).successfulHqRunThisTurn = true;
   const allNighterBonusRunOnFinish =
@@ -9231,22 +9448,58 @@ function finishRun(state: GameState, successful: boolean): void {
   cleanupEmptyRemotes(state);
 }
 
+function applyDupreRunEndCounters(state: GameState, run: ActiveRun): void {
+  const usedBreakerIds = run.dupreUsedBreakerIdsThisRun?.slice().sort() ?? [];
+  for (const breakerId of usedBreakerIds) {
+    const instance = state.cardInstances[breakerId];
+    if (!instance || !state.runner.rig.programs.includes(breakerId)) continue;
+    if (definitionFor(state, breakerId).id !== DUPRE_ID) continue;
+    if (
+      instance.selectedServerId &&
+      instance.selectedServerId !== run.attackedServerId
+    ) {
+      setCardCounter(state, breakerId, "power", 0);
+    }
+    state.cardInstances[breakerId] = {
+      ...mustInstance(state.cardInstances, breakerId),
+      selectedServerId: run.attackedServerId,
+    };
+    addCardCounter(state, breakerId, "power", 1);
+  }
+}
+
 function applyV181SuccessfulRunCounterTriggers(
   state: GameState,
   run: ActiveRun,
+  legalAction?: LegalAction,
 ): void {
   const pattelsInstalled = runnerInstalledCardCountByDefinition(
     state,
-    "onr_v1_046_pattels-virus",
+    PATTELS_VIRUS_ID,
   );
   if (pattelsInstalled > 0) {
-    const targetIceId = run.fullyBrokenIceIds?.[0];
-    if (targetIceId && state.cardInstances[targetIceId])
+    const targetIceIds = (run.fullyBrokenIceIds ?? []).filter(
+      (targetIceId) => state.cardInstances[targetIceId],
+    );
+    if (targetIceIds.length === 1) {
+      const targetIceId = targetIceIds[0]!;
       addCardCounter(state, targetIceId, "virus", 1);
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          v181RunnerProgramAbility: "pattels_virus_counter",
+          pattelsVirusCounterAdded: 1,
+          targetCardDefinitionId: definitionFor(state, targetIceId).id,
+          remainingCounters: cardCounter(state, targetIceId, "virus"),
+        };
+      }
+    } else if (targetIceIds.length > 1) {
+      startPattelsVirusCounterChoice(state, targetIceIds, legalAction);
+    }
   }
   const poxInstalled = runnerInstalledCardCountByDefinition(
     state,
-    "onr_v1_049_pox",
+    POX_ID,
   );
   if (poxInstalled > 0) {
     const serverId = run.attackedServerId;
@@ -9255,8 +9508,21 @@ function applyV181SuccessfulRunCounterTriggers(
       ...(state.poxCountersByServer ?? {}),
       [serverId]: current + 1,
     };
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v181RunnerProgramAbility: "pox_counter",
+        poxCounterAdded: 1,
+        poxCountersAfter: current + 1,
+        targetServerLabel: publicServerLabel(state, serverId) ?? serverId,
+      };
+    }
   }
   if (run.attackedServerId === "hq") {
+    for (const cardId of state.runner.rig.programs) {
+      if (definitionFor(state, cardId).id !== BUTCHER_BOY_ID) continue;
+      addCardCounter(state, cardId, "virus", 1);
+    }
     for (const cardId of state.runner.rig.programs) {
       if (definitionFor(state, cardId).id !== COCKROACH_ID) continue;
       addCardCounter(state, cardId, "virus", 1);
@@ -9266,6 +9532,78 @@ function applyV181SuccessfulRunCounterTriggers(
     if (definitionFor(state, cardId).id !== INCUBATOR_ID) continue;
     addCardCounter(state, cardId, "virus", 1);
   }
+}
+
+function startPattelsVirusCounterChoice(
+  state: GameState,
+  targetIceIds: CardInstanceId[],
+  legalAction?: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = targetIceIds
+    .filter((cardId) => state.cardInstances[cardId])
+    .sort()
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: "Gebrochenes ICE",
+        value: cardId,
+      };
+    });
+  if (options.length === 0) return;
+  state.pendingChoice = {
+    choiceId: `v181_pattels_virus_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v181.pattels_virus:${options.map((option) => option.value).join(",")}:${state.stateVersion + 1}`,
+    prompt: "Pattel's Virus: ICE für Virus-Counter wählen.",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v181RunnerProgramAbility: "pattels_virus_counter_choice",
+      pattelsVirusCandidateCount: options.length,
+      pattelsVirusChoiceOpened: true,
+      choiceVisibility: "public",
+    };
+  }
+}
+
+function resolvePattelsVirusCounterChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v181.pattels_virus"))
+    throw new Error("Es ist keine Pattel's-Virus-Choice offen.");
+  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find((candidate) => candidate.id === selectedId);
+  const targetIceId = typeof option?.value === "string" ? option.value : "";
+  if (
+    !targetIceId ||
+    !choice.source.includes(targetIceId) ||
+    !state.cardInstances[targetIceId]
+  ) {
+    throw new Error("Die Pattel's-Virus-Auswahl ist ungültig.");
+  }
+  addCardCounter(state, targetIceId, "virus", 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v181RunnerProgramAbility: "pattels_virus_counter",
+    pattelsVirusCounterAdded: 1,
+    targetCardDefinitionId: definitionFor(state, targetIceId).id,
+    remainingCounters: cardCounter(state, targetIceId, "virus"),
+    choiceVisibility: "public",
+  };
+  delete state.pendingChoice;
 }
 
 function endTurn(state: GameState, side: Side): void {
@@ -9495,6 +9833,12 @@ function applyRunnerStartOfTurnEffects(state: GameState): void {
   );
   if (dataRavenCounters > 0) state.runner.tags += dataRavenCounters;
   if (!flags.startOfTurnFloatingCreditsApplied) {
+    const butcherBoyCounterTotal = installedVirusCounterTotalForDefinition(
+      state,
+      BUTCHER_BOY_ID,
+    );
+    const butcherBoyCredits = Math.floor(butcherBoyCounterTotal / 2);
+    if (butcherBoyCredits > 0) credits(state, "runner", butcherBoyCredits);
     for (const cardId of state.runner.rig.resources) {
       const definition = definitionFor(state, cardId);
       if (definition.id === "onr_v1_163_floating-runner-bbs")
@@ -10023,9 +10367,36 @@ function collectReplacementCandidates(
   event: ImminentEvent,
 ): ReplacementCandidate[] {
   if (event.eventType !== "damage") return [];
+  const candidates: ReplacementCandidate[] = [];
+  const damageAmount = numberPayload(event, "amount");
+  if (
+    event.affectedSide === "runner" &&
+    damageAmount > state.runner.grip.length
+  ) {
+    const arasakaId = state.runner.grip.find(
+      (cardId) => definitionFor(state, cardId).id === V1919_ARASAKA_OWNS_YOU_ID,
+    );
+    if (arasakaId) {
+      candidates.push({
+        candidateId: `v1919_arasaka_owns_you_${arasakaId}`,
+        controller: "runner",
+        sourceRef: {
+          kind: "card",
+          instanceId: arasakaId,
+          definitionId: V1919_ARASAKA_OWNS_YOU_ID,
+          label: "Arasaka Owns You",
+        },
+        replacesEventType: "damage",
+        replacementEventType: "add_tag",
+        priority: 80,
+        visibility: "hidden_info_barrier",
+        optional: true,
+      });
+    }
+  }
   const harness = state.eventModificationHarness?.damageReplacement;
   const amount = numberPayload(event, "amount");
-  if (!harness || amount <= 0) return [];
+  if (!harness || amount <= 0) return candidates;
   const base: ReplacementCandidate = {
     candidateId: `v121_damage_replace_${sanitizeId(String(harness.sourceLabel ?? "test_harness"))}_${harness.tagAmount}`,
     controller: harness.side,
@@ -10040,8 +10411,10 @@ function collectReplacementCandidates(
     optional: harness.optional ?? true,
     tagAmount: harness.tagAmount,
   };
-  if (!state.eventModificationHarness?.damageReplacementConflict) return [base];
+  if (!state.eventModificationHarness?.damageReplacementConflict)
+    return [...candidates, base];
   return [
+    ...candidates,
     base,
     {
       ...base,
@@ -10071,7 +10444,10 @@ function replacementChoice(
       { id: "pass", label: "Nicht ersetzen", publicLabel: "Replacement" },
       {
         id: candidate.candidateId,
-        label: `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
+        label:
+          candidate.sourceRef.definitionId === V1919_ARASAKA_OWNS_YOU_ID
+            ? "Arasaka Owns You spielen"
+            : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
         publicLabel: "Replacement",
       },
     ],
@@ -10230,6 +10606,11 @@ function resolveReplacementChoice(
     throw new Error(
       "Dieser Replacement-Kandidat wurde in diesem Fenster bereits genutzt.",
     );
+  if (candidate.sourceRef.definitionId === V1919_ARASAKA_OWNS_YOU_ID) {
+    resolveArasakaOwnsYouReplacement(state, legalAction, event, candidate);
+    clearReplacementState(state);
+    return;
+  }
   if (
     candidate.replacesEventType !== event.eventType ||
     candidate.replacementEventType !== "add_tag"
@@ -10253,6 +10634,73 @@ function resolveReplacementChoice(
     sourceKind: candidate.sourceRef.kind,
   };
   clearReplacementState(state);
+}
+
+function resolveArasakaOwnsYouReplacement(
+  state: GameState,
+  legalAction: LegalAction,
+  event: ImminentEvent,
+  candidate: ReplacementCandidate,
+): void {
+  const cardId = candidate.sourceRef.instanceId;
+  if (!cardId || !state.runner.grip.includes(cardId))
+    throw new Error("Arasaka Owns You ist nicht in der Grip verfuegbar.");
+  windowConsumeReplacementCandidate(state, candidate.candidateId);
+  const originalAmount = numberPayload(event, "amount");
+  const removedTags = state.runner.tags;
+  const coreDamageRemoved = state.runner.coreDamage;
+  removeFromAllZones(state, cardId);
+  state.runner.heap.push(cardId);
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "heap" },
+  };
+  state.runner.coreDamage = 0;
+  const targetHandSize = maxHandSize(state, "runner");
+  let drawnCards = 0;
+  while (state.runner.grip.length < targetHandSize && state.runner.stack.length > 0) {
+    drawRunnerCard(state);
+    if (state.winner) break;
+    drawnCards += 1;
+  }
+  credits(state, "runner", 10);
+  state.runner.tags = 0;
+  addRunnerFutureActionDebt(state, 4);
+  state.runnerAgendaPointsToForfeit =
+    Math.max(0, Math.floor(state.runnerAgendaPointsToForfeit ?? 0)) + 3;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    replacementDecision: "apply",
+    replacementOutcome: "replaced",
+    candidateId: candidate.candidateId,
+    replacementEventId: `replacement_${event.eventId}`,
+    replacementEventType: "prevent_damage",
+    originalAmount,
+    preventedAmount: originalAmount,
+    v1919RunnerEventAbility: "arasaka_owns_you_flatline_replacement",
+    sourceDefinitionId: V1919_ARASAKA_OWNS_YOU_ID,
+    cardDefinitionId: V1919_ARASAKA_OWNS_YOU_ID,
+    trashedCardDefinitionId: V1919_ARASAKA_OWNS_YOU_ID,
+    coreDamageRemoved,
+    drawnCards,
+    gainedCredits: 10,
+    removedTags,
+    runnerTagsAfter: state.runner.tags,
+    futureActionDebtAdded: 4,
+    futureAgendaPointForfeitAdded: 3,
+    futureAgendaPointForfeitPending: state.runnerAgendaPointsToForfeit,
+    sourceKind: "card",
+  };
+}
+
+function windowConsumeReplacementCandidate(
+  state: GameState,
+  candidateId: string,
+): void {
+  const consumed = state.replacementWindow?.consumedCandidateIds;
+  if (consumed && !consumed.includes(candidateId)) consumed.push(candidateId);
 }
 
 function resolveDamageImminentEvent(
@@ -11423,6 +11871,10 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v191.incubator_transform")) {
     resolveIncubatorTransformChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v181.pattels_virus")) {
+    resolvePattelsVirusCounterChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v199.aardvark")) {
@@ -13079,6 +13531,7 @@ function resolveAardvarkInterceptionChoice(
     ]);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
       hiddenZoneAction: "aardvark_declined_worm_use",
       aardvarkRezzed: false,
     };
@@ -13091,6 +13544,7 @@ function resolveAardvarkInterceptionChoice(
     ]);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
       hiddenZoneAction: "aardvark_declined_worm_use",
       aardvarkRezzed: false,
     };
@@ -13328,7 +13782,15 @@ function resolveTraceCorpBid(
   if (!trace || trace.status !== "corp_bid")
     throw new Error("Es ist kein Korp-Trace-Bid offen.");
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
-  spendCredits(state, "corp", bid);
+  const creditBid = Math.min(state.corp.credits, bid);
+  const hackerTrackerBid = bid - creditBid;
+  if (hackerTrackerBid > hackerTrackerCounterTotal(state))
+    throw new Error("Hacker Tracker Central hat nicht genug Counter.");
+  spendCredits(state, "corp", creditBid);
+  const hackerTrackerCountersSpent = spendHackerTrackerCounters(
+    state,
+    hackerTrackerBid,
+  );
   const traceStrength = trace.baseTraceStrength + bid;
   const runnerLink = calculateRunnerLink(state);
   state.trace = {
@@ -13352,6 +13814,10 @@ function resolveTraceCorpBid(
     traceStep: "corp_bid",
     baseTraceStrength: trace.baseTraceStrength,
     corpBid: bid,
+    corpCreditBid: creditBid,
+    ...(hackerTrackerCountersSpent > 0
+      ? { hackerTrackerCountersSpent }
+      : {}),
     traceStrength,
     runnerLink,
   };
@@ -13377,10 +13843,18 @@ function resolveTraceRunnerBid(
       ? trace.successEffect.amount
       : 0;
   let dataRavenCounterAdded = 0;
+  const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
+  let fangRunLockCreditCost = 0;
+  let fangRunEnded = false;
   if (successful) state.runner.tags += tagsAdded;
   if (successful && trace.sourceDefinitionId === DATA_RAVEN_ID) {
     addCardCounter(state, trace.sourceCardInstanceId, "power", 1);
     dataRavenCounterAdded = 1;
+  }
+  if (successful && trace.sourceDefinitionId === FANG_2_0_ID) {
+    fangRunLockCreditCost = 2;
+    ensureRunnerTurnFlags(state).fangRunLockCreditCost = fangRunLockCreditCost;
+    fangRunEnded = true;
   }
   delete state.pendingChoice;
   delete state.trace;
@@ -13391,8 +13865,12 @@ function resolveTraceRunnerBid(
         [trace.subroutineIndex]: successful,
       };
     }
-    state.timingPoint = "run.encounter_ice";
-    state.activeSide = "runner";
+    if (fangRunEnded) {
+      finishRun(state, false);
+    } else {
+      state.timingPoint = "run.encounter_ice";
+      state.activeSide = "runner";
+    }
   } else if (
     trace.returnTimingPoint &&
     trace.returnActiveSide &&
@@ -13415,6 +13893,13 @@ function resolveTraceRunnerBid(
     traceSuccessful: successful,
     tagsAdded,
     ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {}),
+    ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
+    ...(fangRunEnded
+      ? {
+          fangRunEnded: true,
+          fangRunLockCreditCost,
+        }
+      : {}),
   };
 }
 
@@ -13826,6 +14311,40 @@ function publicContextForAction(
       if (typeof legalAction.payload.runnerCreditsAfter === "number")
         context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     }
+    for (const key of [
+      "iceInstallBaseCost",
+      "iceInstallAdditionalCost",
+      "iceInstallReduction",
+      "iceInstallTotalCost",
+      "recurringCreditsLoaded",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
+  if (typeof legalAction.payload?.v181RunnerProgramAbility === "string") {
+    context.v181RunnerProgramAbility =
+      legalAction.payload.v181RunnerProgramAbility;
+    for (const key of [
+      "pattelsVirusCandidateCount",
+      "pattelsVirusCounterAdded",
+      "poxCounterAdded",
+      "poxCountersAfter",
+      "remainingCounters",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (typeof value === "number") context[key] = value;
+    }
+    if (typeof legalAction.payload.pattelsVirusChoiceOpened === "boolean")
+      context.pattelsVirusChoiceOpened =
+        legalAction.payload.pattelsVirusChoiceOpened;
+    if (typeof legalAction.payload.targetCardDefinitionId === "string")
+      context.targetCardDefinitionId =
+        legalAction.payload.targetCardDefinitionId;
+    if (typeof legalAction.payload.targetServerLabel === "string")
+      context.targetServerLabel = legalAction.payload.targetServerLabel;
+    if (typeof legalAction.payload.choiceVisibility === "string")
+      context.choiceVisibility = legalAction.payload.choiceVisibility;
   }
   if (legalAction.type === "trash_resource") context.zoneLabel = "Resource";
   if (legalAction.type === "rez_ice")
@@ -13903,6 +14422,17 @@ function publicContextForAction(
       "replacementEventId",
       "replacementEventType",
       "tagsAdded",
+      "preventedAmount",
+      "v1919RunnerEventAbility",
+      "coreDamageRemoved",
+      "drawnCards",
+      "gainedCredits",
+      "removedTags",
+      "futureActionDebtAdded",
+      "futureAgendaPointForfeitAdded",
+      "futureAgendaPointForfeitPending",
+      "sourceDefinitionId",
+      "cardDefinitionId",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -13918,6 +14448,11 @@ function publicContextForAction(
       "runnerStrength",
       "traceSuccessful",
       "tagsAdded",
+      "corpCreditBid",
+      "hackerTrackerCountersSpent",
+      "hackerTrackerCountersAdded",
+      "fangRunEnded",
+      "fangRunLockCreditCost",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -14218,6 +14753,14 @@ function publicContextForAction(
       context.removedTags = legalAction.payload.removedTags;
     if (typeof legalAction.payload.runnerTagsAfter === "number")
       context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
+    if (typeof legalAction.payload.futureAgendaPointForfeitPaid === "number")
+      context.futureAgendaPointForfeitPaid =
+        legalAction.payload.futureAgendaPointForfeitPaid;
+    if (
+      typeof legalAction.payload.futureAgendaPointForfeitPending === "number"
+    )
+      context.futureAgendaPointForfeitPending =
+        legalAction.payload.futureAgendaPointForfeitPending;
     if (legalAction.payload.specialZone)
       context.specialZone = legalAction.payload.specialZone;
     if (legalAction.payload.specialZoneVisibility)
@@ -14231,6 +14774,16 @@ function publicContextForAction(
       context.gainedActions = legalAction.payload.gainedActions;
     if (typeof legalAction.payload.corpClicksAfter === "number")
       context.corpClicksAfter = legalAction.payload.corpClicksAfter;
+  }
+  if (typeof legalAction.payload?.v1920RunnerRunLockAbility === "string") {
+    context.v1920RunnerRunLockAbility =
+      legalAction.payload.v1920RunnerRunLockAbility;
+    if (typeof legalAction.payload.fangRunLockCreditCost === "number")
+      context.fangRunLockCreditCost = legalAction.payload.fangRunLockCreditCost;
+    if (legalAction.payload.fangRunLockCleared === true)
+      context.fangRunLockCleared = true;
+    if (typeof legalAction.payload.runnerCreditsAfter === "number")
+      context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
   }
   if (typeof legalAction.payload?.v1921AssetAbility === "string") {
     context.v1921AssetAbility = legalAction.payload.v1921AssetAbility;
@@ -15702,6 +16255,7 @@ function ensureRunnerTurnFlags(
     forgoNextActionPending: false,
     forgoNextActionsPending: 0,
     runLockActionsPending: 0,
+    fangRunLockCreditCost: 0,
     valuPakProgramInstallActionsRemaining: 0,
     valuPakTemporaryProgramInstallCredits: 0,
   });
@@ -15716,6 +16270,7 @@ function ensureRunnerTurnFlags(
   flags.forgoNextActionPending ??= false;
   flags.forgoNextActionsPending ??= 0;
   flags.runLockActionsPending ??= 0;
+  flags.fangRunLockCreditCost ??= 0;
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
   return flags;

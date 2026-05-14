@@ -234,6 +234,7 @@ describe("MVP 0.1 turns and cards", () => {
     moveRunnerCardToGrip(state, "simple_killer");
 
     const beforeCredits = state.runner.credits;
+    const creditsBeforeClearingFangLock = state.runner.credits;
     state = apply(
       state,
       "runner",
@@ -2929,7 +2930,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
           (action) => action.type === "continue_run",
         );
       }
-      state = apply(state, "runner", (action) => action.type === "access_card");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "access_card" ||
+          action.type === "steal_agenda" ||
+          action.type === "decline_trash",
+      );
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "access_card",
         cardDefinitionId: "simple_economy_operation",
@@ -5473,6 +5481,126 @@ describe("V1.8.1 Mechanikpaket H", () => {
     });
   });
 
+  it("lets Pattel's Virus choose which fully broken ICE receives its counter", () => {
+    let state = toRunnerTurn(v181CardReleaseGame("v181-pattel-choice"));
+    state.runner.credits = 40;
+    moveRunnerCardToGrip(state, "onr_v1_046_pattels-virus");
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_046_pattels-virus",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_021_dwarf",
+    );
+    const wallIds = Object.entries(state.cardInstances)
+      .filter(([, card]) => card.definitionId === "onr_v1_279_wall-of-static")
+      .map(([id]) => id as CardInstanceId);
+    expect(wallIds.length).toBeGreaterThanOrEqual(2);
+    const innerIceId = wallIds[0]!;
+    const outerIceId = wallIds[1]!;
+    const rdServer = state.corp.servers.find((server) => server.id === "rd");
+    expect(rdServer).toBeDefined();
+    if (!rdServer) throw new Error("Missing R&D server");
+    for (const iceId of [innerIceId, outerIceId]) {
+      removeEverywhere(state, iceId);
+      rdServer.ice.unshift(iceId);
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+        faceup: false,
+        rezzed: false,
+      };
+    }
+    for (const iceId of [innerIceId, outerIceId]) {
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        rezzed: true,
+        faceup: true,
+      };
+    }
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const dwarfId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_021_dwarf",
+    );
+    expect(dwarfId).toBeDefined();
+    const runnerHasDwarfBreak = (): boolean =>
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === dwarfId,
+      );
+    const runnerHasAccess = (): boolean =>
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "access_card",
+      );
+    const continueUntilBreakOrAccess = (): void => {
+      for (let index = 0; index < 8; index += 1) {
+        if (runnerHasDwarfBreak() || runnerHasAccess()) return;
+        state = apply(state, "runner", (action) => action.type === "continue_run");
+      }
+    };
+    const pumpUntilDwarfCanBreak = (): void => {
+      for (let index = 0; index < 8; index += 1) {
+        if (runnerHasDwarfBreak()) return;
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.type === "pump_breaker" &&
+            String(action.payload?.breakerId) === dwarfId,
+        );
+      }
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    continueUntilBreakOrAccess();
+    pumpUntilDwarfCanBreak();
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === dwarfId,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    continueUntilBreakOrAccess();
+    pumpUntilDwarfCanBreak();
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === dwarfId,
+    );
+    continueUntilBreakOrAccess();
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.pendingChoice?.source).toContain("v181.pattels_virus");
+    expect(state.pendingChoice?.options).toHaveLength(2);
+    state = applyChoice(state, "runner", `card_${innerIceId}`);
+
+    expect(state.cardInstances[innerIceId]?.counters?.virus).toBe(1);
+    expect(state.cardInstances[outerIceId]?.counters?.virus ?? 0).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      v181RunnerProgramAbility: "pattels_virus_counter",
+      pattelsVirusCounterAdded: 1,
+      targetCardDefinitionId: "onr_v1_279_wall-of-static",
+    });
+  });
+
   it("runs Inside Job as deterministic first-ice bypass", () => {
     let state = toRunnerTurn(v181CardReleaseGame("v181-inside-job"));
     state.runner.credits = 30;
@@ -6573,7 +6701,14 @@ describe("V1.9.1 Mechanikpaket J", () => {
         (action) =>
           action.type === "start_run" && action.payload?.serverId === "hq",
       );
-      state = apply(state, "runner", (action) => action.type === "access_card");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "access_card" ||
+          action.type === "steal_agenda" ||
+          action.type === "decline_trash",
+      );
       state = apply(state, "runner", (action) => action.type === "end_turn");
       state = apply(
         state,
@@ -6779,7 +6914,14 @@ describe("V1.9.1 Mechanikpaket J", () => {
         (action) =>
           action.type === "start_run" && action.payload?.serverId === "hq",
       );
-      state = apply(state, "runner", (action) => action.type === "access_card");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "access_card" ||
+          action.type === "steal_agenda" ||
+          action.type === "decline_trash",
+      );
     }
 
     const cockroachId = state.runner.rig.programs.find(
@@ -8488,31 +8630,60 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       v1919AgendaOveradvanceGame("v1919-arasaka-owns-you"),
     );
     arasakaState.runner.credits = 20;
+    arasakaState.corp.credits = 20;
     arasakaState.runner.tags = 2;
-    const arasakaCostAgendaId = scoreRunnerAgendaForTest(
+    arasakaState.runner.coreDamage = 1;
+    const arasakaId = moveRunnerCardToGrip(
       arasakaState,
-      "simple_agenda",
+      "onr_v1_078_arasaka-owns-you",
     );
-    moveRunnerCardToGrip(arasakaState, "onr_v1_078_arasaka-owns-you");
+    for (const cardId of arasakaState.runner.grip.slice()) {
+      if (cardId === arasakaId) continue;
+      removeEverywhere(arasakaState, cardId);
+      arasakaState.runner.stack.push(cardId);
+      arasakaState.cardInstances[cardId] = {
+        ...arasakaState.cardInstances[cardId]!,
+        zone: { side: "runner", zone: "stack" },
+      };
+    }
+    moveCorpCardToHq(arasakaState, "onr_v1_302_scorched-earth");
     arasakaState = apply(
       arasakaState,
       "runner",
+      (action) => action.type === "end_turn",
+    );
+    arasakaState = apply(
+      arasakaState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    arasakaState = apply(
+      arasakaState,
+      "corp",
       (action) =>
-        action.type === "play_event" &&
-        sourceDefinition(arasakaState, action) ===
-          "onr_v1_078_arasaka-owns-you",
+        action.type === "play_operation" &&
+        sourceDefinition(arasakaState, action) === "onr_v1_302_scorched-earth",
     );
+    expect(arasakaState.pendingChoice?.source).toContain("replacement");
+    const arasakaOption = arasakaState.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
+    arasakaState = applyChoice(arasakaState, "runner", String(arasakaOption));
+    expect(arasakaState.winner).toBeNull();
     expect(arasakaState.runner.tags).toBe(0);
-    expect(arasakaState.runner.scoreArea).not.toContain(arasakaCostAgendaId);
-    expect(arasakaState.specialZones?.removedFromGame).toContain(
-      arasakaCostAgendaId,
-    );
+    expect(arasakaState.runner.coreDamage).toBe(0);
+    expect(arasakaState.runner.credits).toBe(30);
+    expect(arasakaState.runnerAgendaPointsToForfeit).toBe(3);
+    expect(arasakaState.runnerTurnFlags?.forgoNextActionsPending).toBe(4);
+    expect(arasakaState.runner.heap).toContain(arasakaId);
     expect(arasakaState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_event",
-      v1919RunnerEventAbility: "forfeit_agenda_remove_tags",
-      agendaPointCostPaid: 1,
+      actionType: "resolve_choice",
+      replacementDecision: "apply",
+      v1919RunnerEventAbility: "arasaka_owns_you_flatline_replacement",
+      preventedAmount: 4,
       removedTags: 2,
-      runnerTagsAfter: 0,
+      coreDamageRemoved: 1,
+      futureAgendaPointForfeitPending: 3,
     });
 
     let oliviaState = toRunnerTurn(
@@ -9491,6 +9662,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     );
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_009_butcher-boy");
+    moveRunnerCardToGrip(state, "onr_v1_010_cascade");
     moveRunnerCardToGrip(state, "onr_v1_174_rigged-investments");
     moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
     state = apply(
@@ -9499,6 +9671,13 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       (action) =>
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_009_butcher-boy",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_010_cascade",
     );
     state = apply(
       state,
@@ -9523,11 +9702,21 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
         state.cardInstances[id]?.definitionId ===
         "onr_v1_174_rigged-investments",
     );
+    const cascadeId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_010_cascade",
+    );
     expect(butcherId).toBeDefined();
+    expect(cascadeId).toBeDefined();
     expect(investmentsId).toBeDefined();
     if (butcherId) {
-      expect(state.cardInstances[butcherId]?.counters?.virus).toBe(1);
-      expect(state.cardInstances[butcherId]?.counters?.recurring_credit).toBe(
+      expect(state.cardInstances[butcherId]?.counters?.virus ?? 0).toBe(0);
+      expect(
+        state.cardInstances[butcherId]?.counters?.recurring_credit ?? 0,
+      ).toBe(0);
+    }
+    if (cascadeId) {
+      expect(state.cardInstances[cascadeId]?.counters?.virus).toBe(1);
+      expect(state.cardInstances[cascadeId]?.counters?.recurring_credit).toBe(
         1,
       );
     }
@@ -9545,7 +9734,13 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     );
     if (butcherId) {
       expect(state.cardInstances[butcherId]?.counters?.virus ?? 0).toBe(0);
-      expect(state.cardInstances[butcherId]?.counters?.recurring_credit).toBe(
+      expect(
+        state.cardInstances[butcherId]?.counters?.recurring_credit ?? 0,
+      ).toBe(0);
+    }
+    if (cascadeId) {
+      expect(state.cardInstances[cascadeId]?.counters?.virus ?? 0).toBe(0);
+      expect(state.cardInstances[cascadeId]?.counters?.recurring_credit).toBe(
         1,
       );
     }
@@ -9611,6 +9806,48 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       revealKind: "reveal",
       cardDefinitionId: "simple_fracter",
     });
+  });
+
+  it("adds Butcher Boy counters from successful HQ runs and pays start-turn credits from pairs", () => {
+    let state = toRunnerTurn(v1912CounterRecurringGame("v1912-butcher-boy"));
+    state.runner.credits = 20;
+    const butcherId = installRunnerProgramForTest(
+      state,
+      "onr_v1_009_butcher-boy",
+    );
+
+    for (let index = 0; index < 2; index += 1) {
+      for (const cardId of state.corp.hq.slice()) {
+        removeEverywhere(state, cardId);
+        state.corp.archives.push(cardId);
+        state.cardInstances[cardId] = {
+          ...state.cardInstances[cardId]!,
+          zone: { side: "corp", zone: "archives" },
+        };
+      }
+      moveCorpCardToHq(state, "simple_economy_operation");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "hq",
+      );
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "access_card" ||
+          action.type === "steal_agenda" ||
+          action.type === "decline_trash",
+      );
+    }
+
+    expect(cardCounterAmount(state, butcherId, "virus")).toBe(2);
+    const creditsBeforeTurn = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.runner.credits).toBe(creditsBeforeTurn + 1);
   });
 
   it("scores V1.9.12 Corp agendas with typed counter and start-of-turn economy paths", () => {
@@ -10320,6 +10557,83 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     }
   });
 
+  it("uses Hacker Tracker counters in traces and applies Fang 2.0's pay-to-run lock", () => {
+    let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-fang-htc-lock"));
+    const hackerTrackerId = putCorpRootInRemote(
+      state,
+      "onr_v1_325_hacker-tracker-central",
+    );
+    state.cardInstances[hackerTrackerId] = {
+      ...state.cardInstances[hackerTrackerId]!,
+      faceup: true,
+      rezzed: true,
+      counters: { power: 2 },
+    };
+    putCorpIceOnServer(state, "rd", "onr_v1_241_fang-2-0");
+    state.corp.credits = 10;
+    state.runner.credits = 10;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_241_fang-2-0",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_6");
+    expect(state.corp.credits).toBe(0);
+    expect(cardCounterAmount(state, hackerTrackerId, "power")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStep: "corp_bid",
+      corpBid: 6,
+      corpCreditBid: 4,
+      hackerTrackerCountersSpent: 2,
+      traceStrength: 11,
+    });
+
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.runner.tags).toBe(0);
+    expect(state.run).toBeUndefined();
+    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+    expect(cardCounterAmount(state, hackerTrackerId, "power")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStep: "runner_bid",
+      traceSuccessful: true,
+      tagsAdded: 0,
+      fangRunEnded: true,
+      fangRunLockCreditCost: 2,
+      hackerTrackerCountersAdded: 1,
+    });
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run",
+      ),
+    ).toBe(false);
+
+    const creditsBeforeClearingFangLock = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1920RunnerRunLockAbility === "fang_2_0_pay_to_run",
+    );
+    expect(state.runner.credits).toBe(creditsBeforeClearingFangLock - 2);
+    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(0);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run",
+      ),
+    ).toBe(true);
+  });
+
   it("installs V1.9.14 Runner cards, counts installed link, and keeps Resource trash legal-action gated", () => {
     for (const definitionId of ONR_V1_9_14_RUNNER_CARD_IDS) {
       let state = toRunnerTurn(
@@ -10686,7 +11000,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
 
-    expect(dupreId ? state.cardInstances[dupreId]?.counters?.power : 0).toBe(1);
+    expect(dupreId ? (state.cardInstances[dupreId]?.counters?.power ?? 0) : 0).toBe(0);
     expect(state.run?.breach?.queue).toHaveLength(3);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Simple Agenda",
@@ -10698,6 +11012,116 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1915_installed_access_reveal",
     });
+  });
+
+  it("uses Dupré as a code-gate breaker and resets strength counters when the fort changes", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1915-dupre-breaker",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_9_15_RUN_ACCESS_CORP_DECK,
+          cards: [
+            ...ONR_V1_9_15_RUN_ACCESS_CORP_DECK.cards,
+            { id: "simple_code_gate_ice", quantity: 2 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 40;
+    state.runner.memoryLimit = 8;
+    const dupreId = installRunnerProgramForTest(state, "onr_v1_020_dupre");
+    putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_code_gate_ice",
+    );
+    for (let index = 0; index < 2; index += 1)
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          String(action.payload?.breakerId) === dupreId,
+      );
+    for (let index = 0; index < 2; index += 1)
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === dupreId,
+      );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(cardCounterAmount(state, dupreId, "power")).toBe(1);
+    expect(state.cardInstances[dupreId]?.selectedServerId).toBe("rd");
+
+    setCardCounterForTest(state, dupreId, "power", 3);
+    putCorpIceOnServer(state, "hq", "simple_code_gate_ice");
+    for (const cardId of state.corp.hq.slice()) {
+      removeEverywhere(state, cardId);
+      state.corp.archives.push(cardId);
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "archives" },
+      };
+    }
+    moveCorpCardToHq(state, "simple_economy_operation");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_code_gate_ice",
+    );
+    for (let index = 0; index < 2; index += 1)
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          String(action.payload?.breakerId) === dupreId,
+      );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === dupreId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === dupreId,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(cardCounterAmount(state, dupreId, "power")).toBe(1);
+    expect(state.cardInstances[dupreId]?.selectedServerId).toBe("hq");
   });
 
   it("opens Smarteye before the Corp can rez approached unrezzed ICE", () => {
@@ -20472,6 +20896,7 @@ const ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_248_homewrecker", quantity: 2 },
     { id: "onr_v1_260_pocket-virtual-reality", quantity: 2 },
     { id: "onr_v1_264_rex", quantity: 2 },
+    { id: "onr_v1_325_hacker-tracker-central", quantity: 1 },
     { id: "onr_v1_299_power-grid-overload", quantity: 2 },
     { id: "simple_agenda", quantity: 3 },
     { id: "simple_economy_operation", quantity: 4 },
@@ -20651,6 +21076,7 @@ const ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_363_olivia-salazar", quantity: 1 },
     { id: "onr_v1_368_roving-submarine", quantity: 1 },
     { id: "onr_v1_374_washington-d-c-city-grid", quantity: 1 },
+    { id: "onr_v1_302_scorched-earth", quantity: 1 },
     { id: "simple_agenda", quantity: 2 },
     { id: "simple_economy_operation", quantity: 4 },
   ],
@@ -21340,6 +21766,21 @@ function cardCounterAmount(
   counterType: CounterType,
 ): number {
   return state.cardInstances[cardId]?.counters?.[counterType] ?? 0;
+}
+
+function setCardCounterForTest(
+  state: GameState,
+  cardId: CardInstanceId,
+  counterType: CounterType,
+  amount: number,
+): void {
+  state.cardInstances[cardId] = {
+    ...state.cardInstances[cardId]!,
+    counters: {
+      ...(state.cardInstances[cardId]?.counters ?? {}),
+      [counterType]: amount,
+    },
+  };
 }
 
 function choiceRequest(state: GameState, side: Side): ChoiceRequest {

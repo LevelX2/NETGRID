@@ -4,6 +4,25 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-14-B
+
+Auswahlart: zufällige 10er-Stichprobe aus komplexeren bereits decklegalen Originalset-Karten, unter Ausschluss der Runde 2026-05-14-A.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_14_B.md`
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Butcher Boy | `onr_v1_009_butcher-boy` | Nacharbeit umgesetzt: HQ-Erfolgsrun-Counter und Start-of-turn-Credit je 2 Counter funktionieren | Fokussierter Engine-Test ergänzt |
+| Dupré | `onr_v1_020_dupre` | Nacharbeit umgesetzt: echter Code-Gate-Breaker mit Strength-Countern und Fortwechsel-Reset | Fokussierter Engine-Test ergänzt |
+| Invisibility | `onr_v1_035_invisibility` | Engine-Pfad funktioniert; Recurring-Credit-Install wird in der Chronik sichtbar | Chroniktest ergänzt |
+| Pattel’s Virus | `onr_v1_046_pattels-virus` | Nacharbeit umgesetzt: Mehr-ICE-Zielwahl und Counterplatzierung funktionieren | Engine- und Chroniktests ergänzt |
+| Pox | `onr_v1_049_pox` | Engine-Pfad funktioniert; Counterplatzierung und Install-Tax werden in der Chronik sichtbar | Chroniktest ergänzt |
+| Arasaka Owns You | `onr_v1_078_arasaka-owns-you` | Nacharbeit umgesetzt: Flatline-Replacement verhindert Schaden, refreshed Hand, entfernt Tags/Core Damage und setzt Aktions-/Agenda-Schuld | Engine- und Chroniktests ergänzt |
+| Data Fort Reclamation | `onr_v1_197_data-fort-reclamation` | Engine-Pfad funktioniert mit Hidden-Info-Schutz; Install-/Rez-Sequenz wird in der Chronik sichtbar | Chroniktest ergänzt |
+| Fang 2.0 | `onr_v1_241_fang-2-0` | Nacharbeit umgesetzt: erfolgreicher Trace beendet den Run und setzt eine bezahlbare Run-Sperre | Engine- und Chroniktests ergänzt |
+| Hacker Tracker Central | `onr_v1_325_hacker-tracker-central` | Nacharbeit umgesetzt: Trace-Counter werden nach Traces gelegt und können für Corp-Bids ausgegeben werden | Engine- und Chroniktests ergänzt |
+| Aardvark | `onr_v1_349_aardvark` | Engine-Pfad funktioniert mit Choice und Replay/StateHash; Rez-/Trash-Worm-Choice wird in der Chronik sichtbar | Chroniktest ergänzt |
+
 ## Runde 2026-05-14-A
 
 Auswahlart: zufällige 10er-Stichprobe aus komplexeren bereits decklegalen Originalset-Karten.
