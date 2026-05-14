@@ -1922,8 +1922,11 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
     return side === "corp" ? corpMainActions(state) : [];
   if (state.timingPoint === "runner_action.main")
     return side === "runner" ? runnerMainActions(state) : [];
-  if (state.timingPoint === "run.approach_ice")
+  if (state.timingPoint === "run.approach_ice") {
+    if (isApproachIceExposeWindowOpen(state))
+      return side === "runner" ? runnerApproachIceExposeActions(state) : [];
     return side === "corp" ? corpApproachActions(state) : [];
+  }
   if (state.timingPoint === "run.encounter_ice")
     return side === "runner" ? runnerEncounterActions(state) : [];
   if (state.timingPoint === "run.jack_out_window")
@@ -5023,6 +5026,110 @@ function corpApproachActions(state: GameState): LegalAction[] {
   return actions;
 }
 
+function isApproachIceExposeWindowOpen(state: GameState): boolean {
+  return Boolean(
+    state.timingPoint === "run.approach_ice" &&
+    state.activeSide === "runner" &&
+    approachIceExposeCanBeOfferedForCurrentIce(state),
+  );
+}
+
+function approachIceExposeCanBeOfferedForCurrentIce(state: GameState): boolean {
+  const run = state.run;
+  const approachedIceId = run?.approachedIceId;
+  if (!run || !approachedIceId) return false;
+  if (run.approachIceExposeSkippedIceIdsThisRun?.includes(approachedIceId))
+    return false;
+  if (installedApproachIceExposeSources(state).length === 0) return false;
+  const ice = state.cardInstances[approachedIceId];
+  return Boolean(ice && !ice.rezzed);
+}
+
+function installedApproachIceExposeSources(state: GameState): CardInstanceId[] {
+  const used = new Set(state.run?.approachIceExposeUsedSourceIdsThisRun ?? []);
+  return runnerInstalledCardIds(state)
+    .slice()
+    .sort()
+    .filter((cardId) => {
+      if (used.has(cardId)) return false;
+      return definitionFor(state, cardId).abilities?.some(
+        (ability) =>
+          ability.type === "approach_ice_expose" &&
+          ability.timingPoint === "run.approach_ice" &&
+          ability.publicActionType === "trigger_ability",
+      );
+    });
+}
+
+function approachIceExposeAbilityIdForSource(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): string {
+  const ability = definitionFor(state, sourceCardId).abilities?.find(
+    (candidate) =>
+      candidate.type === "approach_ice_expose" &&
+      candidate.timingPoint === "run.approach_ice",
+  );
+  if (!ability)
+    throw new Error("Diese Karte hat keine Approach-Expose-Faehigkeit.");
+  return ability.id;
+}
+
+function runnerApproachIceExposeActions(state: GameState): LegalAction[] {
+  const run = mustRun(state);
+  const approachedIceId = run.approachedIceId;
+  if (!approachedIceId) return [];
+  const sources = installedApproachIceExposeSources(state);
+  if (sources.length === 0) return [];
+  const primarySource = sources[0]!;
+  const exposeActions = sources.map((sourceCardId) => {
+    const definition = definitionFor(state, sourceCardId);
+    const abilityId = approachIceExposeAbilityIdForSource(state, sourceCardId);
+    return action(
+      state,
+      "runner",
+      "trigger_ability",
+      `${definition.title}: ICE expose`,
+      sourceCardId,
+      [],
+      {
+        cardId: sourceCardId,
+        iceId: approachedIceId,
+        approachIceExposeDecision: "expose",
+      },
+      {
+        abilityRef: { sourceCardInstanceId: sourceCardId, abilityId },
+        effectRef: `effect.${abilityId}`,
+        targetRequirements: [
+          {
+            id: "approachedIce",
+            kind: "card",
+            side: "corp",
+            zoneScope: ["corp.servers.ice"],
+            visibility: "public",
+          },
+        ],
+      },
+    );
+  });
+  return [
+    ...exposeActions,
+    action(
+      state,
+      "runner",
+      "trigger_ability",
+      "Expose-Fenster überspringen",
+      primarySource,
+      [],
+      {
+        cardId: primarySource,
+        iceId: approachedIceId,
+        approachIceExposeDecision: "decline",
+      },
+    ),
+  ];
+}
+
 function runnerEncounterActions(state: GameState): LegalAction[] {
   const run = mustRun(state);
   if (!run.encounteredIceId) return [];
@@ -6760,6 +6867,10 @@ function performAction(
       endTurn(state, legalAction.side);
       return;
     case "trigger_ability":
+      if (legalAction.payload?.approachIceExposeDecision) {
+        resolveApproachIceExposeAbility(state, legalAction);
+        return;
+      }
       throw new Error(
         "Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.",
       );
@@ -7190,6 +7301,69 @@ function startRun(
   }
 }
 
+function markApproachIceExposeSkippedForIce(
+  run: ActiveRun,
+  approachedIceId: CardInstanceId,
+): void {
+  const skipped = run.approachIceExposeSkippedIceIdsThisRun ?? [];
+  if (!skipped.includes(approachedIceId))
+    run.approachIceExposeSkippedIceIdsThisRun = [...skipped, approachedIceId];
+}
+
+function markApproachIceExposeUsedForSource(
+  run: ActiveRun,
+  sourceCardId: CardInstanceId,
+): void {
+  const used = run.approachIceExposeUsedSourceIdsThisRun ?? [];
+  if (!used.includes(sourceCardId))
+    run.approachIceExposeUsedSourceIdsThisRun = [...used, sourceCardId];
+}
+
+function resolveApproachIceExposeAbility(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Approach-Expose nutzen.");
+  const run = mustRun(state);
+  const approachedIceId = run.approachedIceId;
+  if (
+    !approachedIceId ||
+    String(legalAction.payload?.iceId) !== approachedIceId
+  )
+    throw new Error("Approach-Expose passt nicht zum aktuellen ICE.");
+  if (!isApproachIceExposeWindowOpen(state))
+    throw new Error("Approach-Expose ist in diesem Fenster nicht legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  const availableSources = installedApproachIceExposeSources(state);
+  const decision = String(legalAction.payload?.approachIceExposeDecision ?? "");
+  if (decision === "expose") {
+    if (!availableSources.includes(sourceCardId))
+      throw new Error("Die Approach-Expose-Quelle ist nicht installiert.");
+    const definition = definitionFor(state, approachedIceId);
+    markApproachIceExposeUsedForSource(run, sourceCardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "approach_ice_expose",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: definition.id,
+    };
+  } else if (decision === "decline") {
+    markApproachIceExposeSkippedForIce(run, approachedIceId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "approach_ice_expose_decline",
+    };
+  } else {
+    throw new Error("Approach-Expose-Entscheidung ist ungueltig.");
+  }
+
+  state.activeSide = "corp";
+  state.timingPoint = "run.approach_ice";
+}
+
 function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
   const definition = definitionFor(state, cardId);
   spendCredits(state, "corp", rezCostForCard(state, cardId));
@@ -7241,7 +7415,9 @@ function approachOrEncounterIce(
     approachedIceId,
   };
   state.timingPoint = "run.approach_ice";
-  state.activeSide = "corp";
+  state.activeSide = approachIceExposeCanBeOfferedForCurrentIce(state)
+    ? "runner"
+    : "corp";
 }
 
 function beginEncounter(
@@ -13430,6 +13606,7 @@ function makeActionId(
   if (payload?.cardId) parts.push(String(payload.cardId));
   if (payload?.hostOnCardId) parts.push(String(payload.hostOnCardId));
   if (payload?.breakerId) parts.push(String(payload.breakerId));
+  if (payload?.iceId) parts.push(String(payload.iceId));
   if (payload?.subroutineIndex !== undefined)
     parts.push(String(payload.subroutineIndex));
   if (payload?.removeTagAmount !== undefined)
@@ -13459,6 +13636,8 @@ function makeActionId(
   if (payload?.oliviaSalazarCardId)
     parts.push(String(payload.oliviaSalazarCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
+  if (payload?.approachIceExposeDecision)
+    parts.push(String(payload.approachIceExposeDecision));
   return parts.filter(Boolean).join(".");
 }
 

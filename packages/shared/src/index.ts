@@ -452,7 +452,7 @@ export type EffectDefinition = {
 
 export type AbilityDefinition = {
   id: string;
-  type: "pump_strength" | "break_subroutine";
+  type: "pump_strength" | "break_subroutine" | "approach_ice_expose";
   cost: { credits: number };
   amount?: number;
   iceSubtype?: string;
@@ -464,6 +464,7 @@ export type AbilityDefinition = {
   allowedTimingPoints?: TimingPointId[];
   effectRef?: string;
   publicActionType?: ActionType;
+  useLimit?: "once_per_run";
 };
 
 export type CardDefinition = {
@@ -755,6 +756,8 @@ export type RunState = {
     | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> };
   approachedIceId?: CardInstanceId;
   encounteredIceId?: CardInstanceId;
+  approachIceExposeUsedSourceIdsThisRun?: CardInstanceId[];
+  approachIceExposeSkippedIceIdsThisRun?: CardInstanceId[];
   brokenSubroutineIndexes: number[];
   resolvedSubroutineIndexes: number[];
   successful: boolean;
@@ -7916,6 +7919,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 2,
     memoryCost: 1,
     rulesText: "Installed run helper with side-safe reveal support.",
+    abilities: [
+      {
+        id: "onr_v1_065_smarteye_approach_ice_expose",
+        type: "approach_ice_expose",
+        cost: { credits: 0 },
+        timingPoint: "run.approach_ice",
+        kind: "triggered",
+        allowedTimingPoints: ["run.approach_ice"],
+        publicActionType: "trigger_ability",
+        useLimit: "once_per_run",
+      },
+    ],
     mechanics: [
       "install_program",
       "memory",

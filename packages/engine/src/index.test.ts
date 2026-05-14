@@ -10612,6 +10612,124 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     });
   });
 
+  it("opens Smarteye before the Corp can rez approached unrezzed ICE", () => {
+    let state = toRunnerTurn(v1915RunAccessGame("v1915-smarteye-before-rez"));
+    state.runner.credits = 10;
+    state.corp.credits = 100;
+    installRunnerProgramForTest(state, "onr_v1_065_smarteye");
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    const initial = structuredClone(state);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+
+    expect(state.timingPoint).toBe("run.approach_ice");
+    expect(state.activeSide).toBe("runner");
+    expect(getLegalActions(state, "corp").map((action) => action.type)).toEqual(
+      [],
+    );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.approachIceExposeDecision === "expose",
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.approachIceExposeDecision === "expose",
+    );
+
+    expect(state.activeSide).toBe("corp");
+    expect(state.run?.approachIceExposeUsedSourceIdsThisRun).toHaveLength(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "approach_ice_expose",
+      revealKind: "expose",
+      cardDefinitionId: "onr_v1_227_cerberus",
+    });
+    expect(state.cardInstances[iceId]?.rezzed).toBe(false);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === "onr_v1_227_cerberus",
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_227_cerberus",
+    );
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expect(state.activeSide).toBe("runner");
+
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("does not spend Smarteye when declined and does not reopen it for the same ICE", () => {
+    let state = toRunnerTurn(v1915RunAccessGame("v1915-smarteye-decline"));
+    state.runner.credits = 10;
+    state.corp.credits = 0;
+    installRunnerProgramForTest(state, "onr_v1_065_smarteye");
+    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    putCorpIceOnServer(state, "rd", "onr_v1_255_mastiff");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.activeSide).toBe("runner");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.approachIceExposeDecision === "decline",
+    );
+
+    expect(state.activeSide).toBe("corp");
+    expect(state.run?.approachIceExposeUsedSourceIdsThisRun ?? []).toEqual([]);
+    expect(getLegalActions(state, "runner")).toEqual([]);
+    expect(
+      getLegalActions(state, "corp").map((action) => action.type),
+    ).toContain("decline_rez");
+
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.timingPoint).toBe("run.approach_ice");
+    expect(state.activeSide).toBe("runner");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.approachIceExposeDecision === "expose",
+      ),
+    ).toBe(true);
+  });
+
   it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
     for (const [definitionId, baseTraceStrength] of [
       ["onr_v1_227_cerberus", 5],
