@@ -353,6 +353,7 @@ const V1922_SECURITY_PURGE_ID = "onr_v1_216_security-purge";
 const V1922_EDGERUNNER_TEMPS_ID = "onr_v1_289_edgerunner-inc-temps";
 const V1922_OFF_SITE_BACKUPS_ID = "onr_v1_296_off-site-backups";
 const V1922_PLANNING_CONSULTANTS_ID = "onr_v1_298_planning-consultants";
+const V1922_VIRAL_15_ID = "onr_v1_276_viral-15";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -2333,6 +2334,16 @@ export function validateGameState(state: GameState): ValidationResult {
     !state.cardInstances[state.run.encounteredIceId]
   )
     errors.push("Run references missing encountered ice.");
+  if (
+    state.run?.viral15ActiveSourceIceId &&
+    !state.cardInstances[state.run.viral15ActiveSourceIceId]
+  )
+    errors.push("Run Viral 15 source references missing ice.");
+  if (
+    state.run?.viral15PendingPassedIceId &&
+    !state.cardInstances[state.run.viral15PendingPassedIceId]
+  )
+    errors.push("Run Viral 15 pending passed ice references missing ice.");
   if (state.run && !Array.isArray(state.run.resolvedSubroutineIndexes))
     errors.push("Run resolved subroutine index list is missing.");
   if (state.run?.remainderStrengthBonusByBreaker) {
@@ -5155,10 +5166,37 @@ function runnerMovementActions(state: GameState): LegalAction[] {
       action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"),
     ];
   }
-  return [
-    action(state, "runner", "jack_out", "Jack-out", "game_rule"),
+  const actions: LegalAction[] = [];
+  const jackOutAdditionalCost = runJackOutAdditionalCost(run);
+  if (availableRunnerRunCredits(state) >= jackOutAdditionalCost) {
+    actions.push(
+      action(
+        state,
+        "runner",
+        "jack_out",
+        jackOutAdditionalCost > 0
+          ? `Jack-out (${jackOutAdditionalCost} Credit)`
+          : "Jack-out",
+        "game_rule",
+        jackOutAdditionalCost > 0 ? [{ credits: jackOutAdditionalCost }] : [],
+        jackOutAdditionalCost > 0
+          ? {
+              v1922CorpIceAbility: "viral_15_jack_out_tax",
+              jackOutAdditionalCost,
+              sourceDefinitionId: V1922_VIRAL_15_ID,
+            }
+          : undefined,
+      ),
+    );
+  }
+  actions.push(
     action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"),
-  ];
+  );
+  return actions;
+}
+
+function runJackOutAdditionalCost(run: ActiveRun): number {
+  return run.viral15ActiveSourceIceId ? 1 : 0;
 }
 
 function v1918RunStartTaxForServer(
@@ -6402,6 +6440,20 @@ function performAction(
       }
       return;
     case "jack_out":
+      {
+        const jackOutAdditionalCost = legalAction.costs.reduce(
+          (sum, cost) => sum + (cost.credits ?? 0),
+          0,
+        );
+        if (jackOutAdditionalCost > 0) {
+          spendRunnerRunCredits(state, jackOutAdditionalCost);
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            jackOutAdditionalCost,
+            runnerCreditsAfter: state.runner.credits,
+          };
+        }
+      }
       finishRun(state, false);
       return;
     case "rez_ice":
@@ -7143,7 +7195,7 @@ function beginEncounter(
 function continueRun(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   if (run.phase === "movement") {
-    continueFromMovement(state);
+    continueFromMovement(state, legalAction);
     return;
   }
   if (run.phase !== "encounter_ice" || !run.encounteredIceId) {
@@ -7254,6 +7306,19 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           v1922CorpIceAbility: "tutor_future_end_the_run_subroutine",
+          sourceDefinitionId: definition.id,
+        };
+      }
+    }
+    if (subroutine.type === "set_run_viral_15") {
+      if (!run.encounteredIceId)
+        throw new Error("Viral 15 benoetigt ein Encounter-ICE.");
+      run.viral15ActiveSourceIceId = run.encounteredIceId;
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          v1922CorpIceAbility: "viral_15_run_modifier",
+          jackOutAdditionalCost: runJackOutAdditionalCost(run),
           sourceDefinitionId: definition.id,
         };
       }
@@ -7597,6 +7662,13 @@ function movePastCurrentIce(state: GameState): void {
     throw new Error("Runner ist nicht an ICE positioniert.");
   const server = mustServer(state, run.position.serverId);
   const nextIndex = run.position.iceIndex + 1;
+  const passedIceId = run.encounteredIceId;
+  const viral15PendingPassedIceId =
+    run.viral15ActiveSourceIceId &&
+    passedIceId &&
+    mustInstance(state.cardInstances, passedIceId).rezzed
+      ? passedIceId
+      : undefined;
   if (nextIndex < server.ice.length) {
     const approachedIceId = mustArrayValue(
       server.ice,
@@ -7612,6 +7684,7 @@ function movePastCurrentIce(state: GameState): void {
         phase: "movement",
         position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
         approachedIceId,
+        ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
         brokenSubroutineIndexes: [],
         resolvedSubroutineIndexes: [],
       };
@@ -7624,6 +7697,7 @@ function movePastCurrentIce(state: GameState): void {
       phase: "approach_ice",
       position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
       approachedIceId,
+      ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
     };
@@ -7637,6 +7711,7 @@ function movePastCurrentIce(state: GameState): void {
       ...runWithoutEncounter,
       position: { kind: "server", serverId: server.id },
       phase: "movement",
+      ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
     };
     state.timingPoint = "run.jack_out_window";
     state.activeSide = "runner";
@@ -7735,8 +7810,22 @@ function resolveVacuumLinkRewindSubroutine(
   return true;
 }
 
-function continueFromMovement(state: GameState): void {
+function continueFromMovement(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
+  if (run.viral15PendingPassedIceId) {
+    const pendingPassedIceId = run.viral15PendingPassedIceId;
+    const { viral15PendingPassedIceId: _pending, ...runWithoutPending } = run;
+    void _pending;
+    state.run = runWithoutPending;
+    if (
+      startV1922Viral15ProgramTrashChoice(
+        state,
+        pendingPassedIceId,
+        legalAction,
+      )
+    )
+      return;
+  }
   if (run.position.kind === "ice") {
     const server = mustServer(state, run.position.serverId);
     const approachedIceId =
@@ -10730,6 +10819,12 @@ function resolvePendingChoice(
     resolveV1922HammerStealthLossChoice(state, legalAction, playerAction);
     return;
   }
+  if (
+    state.pendingChoice.source.startsWith("v1922.viral_15_program_trash")
+  ) {
+    resolveV1922Viral15ProgramTrashChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v1922.data_fort_reclamation")) {
     resolveV1922DataFortReclamationChoice(state, legalAction, playerAction);
     return;
@@ -13613,6 +13708,23 @@ function publicContextForAction(
     if (typeof legalAction.payload.runLockActionsPending === "number")
       context.runLockActionsPending =
         legalAction.payload.runLockActionsPending;
+    if (typeof legalAction.payload.jackOutAdditionalCost === "number")
+      context.jackOutAdditionalCost =
+        legalAction.payload.jackOutAdditionalCost;
+    if (
+      typeof legalAction.payload.viral15ProgramTrashChoiceOpened === "boolean"
+    )
+      context.viral15ProgramTrashChoiceOpened =
+        legalAction.payload.viral15ProgramTrashChoiceOpened;
+    if (
+      typeof legalAction.payload.viral15ProgramTrashCandidateCount === "number"
+    )
+      context.viral15ProgramTrashCandidateCount =
+        legalAction.payload.viral15ProgramTrashCandidateCount;
+    if (typeof legalAction.payload.trashedCount === "number")
+      context.trashedCount = legalAction.payload.trashedCount;
+    if (typeof legalAction.payload.runnerCreditsAfter === "number")
+      context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
   }
   if (legalAction.payload?.v1922EdgerunnerTempsInstallAction === true) {
     context.v1922CorpOperationAbility = "install_action_bundle";
@@ -14376,6 +14488,99 @@ function resolveV1922HammerStealthLossChoice(
     hiddenZoneAction: "v1922_hammer_stealth_loss_distribution",
     selectedCount: selectedOptionIds.length,
     postBreakStealthLoss: selectedOptionIds.length,
+  };
+}
+
+function startV1922Viral15ProgramTrashChoice(
+  state: GameState,
+  passedIceId: CardInstanceId,
+  legalAction?: LegalAction,
+): boolean {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const run = mustRun(state);
+  const sourceIceId = run.viral15ActiveSourceIceId;
+  if (!sourceIceId) return false;
+  if (definitionFor(state, sourceIceId).id !== V1922_VIRAL_15_ID)
+    throw new Error("Viral-15-Quelle ist ungueltig.");
+  const programOptions = state.runner.rig.programs
+    .filter((cardId) => state.cardInstances[cardId])
+    .sort()
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (programOptions.length === 0) {
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922CorpIceAbility: "viral_15_program_trash",
+        sourceDefinitionId: V1922_VIRAL_15_ID,
+        viral15ProgramTrashChoiceOpened: false,
+        trashedCount: 0,
+      };
+    }
+    return false;
+  }
+  state.pendingChoice = {
+    choiceId: `choice_v1922_viral_15_program_trash_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.viral_15_program_trash:${sourceIceId}:${passedIceId}:${state.stateVersion + 1}`,
+    prompt: "Viral 15: installiertes Programm trashen.",
+    kind: "select_cards",
+    options: programOptions,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922CorpIceAbility: "viral_15_program_trash",
+      sourceDefinitionId: V1922_VIRAL_15_ID,
+      viral15ProgramTrashChoiceOpened: true,
+      viral15ProgramTrashCandidateCount: programOptions.length,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_viral_15_program_trash_choice",
+    };
+  }
+  return true;
+}
+
+function resolveV1922Viral15ProgramTrashChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.viral_15_program_trash"))
+    throw new Error("Viral-15-Programmtrash-Choice ist nicht offen.");
+  const [, sourceIceId, passedIceId] = choice.source.split(":");
+  if (
+    !sourceIceId ||
+    !state.cardInstances[sourceIceId] ||
+    definitionFor(state, sourceIceId).id !== V1922_VIRAL_15_ID
+  )
+    throw new Error("Viral-15-Quelle ist nicht mehr gueltig.");
+  if (!passedIceId || !state.cardInstances[passedIceId])
+    throw new Error("Das passierte ICE fuer Viral 15 fehlt.");
+  const selectedProgramId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (
+    !selectedProgramId ||
+    !state.runner.rig.programs.includes(selectedProgramId)
+  )
+    throw new Error("Das gewaehlte Programm ist nicht installiert.");
+  const selectedDefinitionId = definitionFor(state, selectedProgramId).id;
+  trashRunnerInstalledProgram(state, selectedProgramId);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922CorpIceAbility: "viral_15_program_trash",
+    sourceDefinitionId: V1922_VIRAL_15_ID,
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_viral_15_program_trash",
+    trashedCount: 1,
+    trashedCardDefinitionId: selectedDefinitionId,
   };
 }
 

@@ -128,6 +128,7 @@ export type SubroutineType =
   | "set_run_encounter_tax"
   | "set_run_break_subroutine_cost_modifier"
   | "set_run_future_end_the_run_subroutine"
+  | "set_run_viral_15"
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
   | "set_next_encounter_lock"
@@ -712,6 +713,8 @@ export type RunState = {
   encounterTaxForFutureIce?: number;
   breakSubroutineAdditionalCost?: number;
   futureEncounterEndTheRunSourceIceId?: CardInstanceId;
+  viral15ActiveSourceIceId?: CardInstanceId;
+  viral15PendingPassedIceId?: CardInstanceId;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;
@@ -1387,6 +1390,10 @@ function onrSetRunFutureEndTheRunSubroutine(
   id: string,
 ): SubroutineDefinition {
   return { id, type: "set_run_future_end_the_run_subroutine" };
+}
+
+function onrSetRunViral15(id: string): SubroutineDefinition {
+  return { id, type: "set_run_viral_15" };
 }
 
 function onrSetRunFutureStrengthBonus(
@@ -7195,6 +7202,22 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       onrEtr("onr_v1_273_triggerman_etr"),
     ],
     mechanics: ["uninstall_runner_program", "end_the_run"],
+  }),
+  onrIce({
+    id: "onr_v1_276_viral-15",
+    title: "Viral 15",
+    subtypes: ["sentry"],
+    rezCost: 5,
+    strength: 3,
+    rulesText:
+      "[Subroutine] For the remainder of the run, jack-out costs 1 additional credit and the Runner trashes an installed program after passing each rezzed ice unless they jack out.",
+    subroutines: [onrSetRunViral15("onr_v1_276_viral_15_run_modifier")],
+    mechanics: [
+      "run_modifier",
+      "jack_out_tax",
+      "uninstall_runner_program",
+      "per_card_longtail",
+    ],
   }),
   onrIce({
     id: "onr_v1_277_virizz",

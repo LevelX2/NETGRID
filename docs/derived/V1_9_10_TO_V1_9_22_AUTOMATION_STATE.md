@@ -87,9 +87,19 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - `Virizz`: Rez-Kosten 2, Staerke 4; Runtime-WIP ohne Promotion ist umgesetzt mit rest-of-run +1-Credit-Break-Kostenmodifier, LegalAction-Kostenprojektion und applyAction-Revalidierung.
 - Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
 - `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
-- Naechster sinnvoller Code-Schnitt: `Viral 15`, danach `Data Fort Reclamation` optionales Rezzen/temporaere Credit-Ausgaben oder `Zetatech Software Installer` Overlay-Vertrag.
+- Naechster sinnvoller Code-Schnitt: `Data Fort Reclamation` optionales Rezzen/temporaere Credit-Ausgaben oder `Zetatech Software Installer` Overlay-Vertrag; `Viral 15` ist als nicht-promotender Runtime-WIP umgesetzt.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 19:27 CEST
+- Ergebnis: V1.9.22 Viral-15-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Viral 15` setzt nach ihrer Subroutine einen run-weiten 1-Credit-Jack-out-Tax. Beim Weiterlaufen nach dem Passieren gerezzter ICE öffnet die Engine eine Runner-private installierte-Programm-Trash-Choice; Jack-out zahlt den Tax und überspringt den Programmtrash. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: erster `engine`-Lauf rot wegen fehlender V0.99-Baseline im Jack-out-Smoke, danach `engine` pass (308). `catalog` war initial rot wegen ueberholter Erwartung an eine geplante No-Promotion-Karte, danach pass (44); `typecheck` pass.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: viral 15 runtime wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 18:01 CEST
 - Ergebnis: V1.9.22 Data-Fort-Reclamation-Install-Sequence-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

@@ -12,11 +12,11 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 ## Ergebnis
 
 - 47/47 Zielkarten sind erfasst.
-- 4/47 Karten sind fachlich für neue enge Resolverimplementierung bereit; 0/47 Karten sind für Promotion vollständig bereit.
+- 2/47 Karten sind fachlich für neue enge Resolverimplementierung bereit; 0/47 Karten sind für Promotion vollständig bereit.
 - 9/47 Runner-Hardwarekarten haben bereits einen eng begrenzten Installationspfad mit LegalAction, Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash.
-- 37/47 Karten haben aktuell nur No-Promotion-/No-LegalAction-Guards oder Runtime-display-only-Oberflächen.
-- Errata 1.70 und die Nutzerklärung vom 2026-05-14 reduzieren mehrere fachliche Lücken. `Newsgroup Filter` ist inhaltlich geklärt: Runner-Programm, Installkosten 5, MU 2, `[A]: Gain 2 Credits`. `Zetatech Software Installer` ist jetzt mit Installkosten 0 / MU 1 bestätigt. `Virizz` ist jetzt mit Rez-Kosten 2 / Stärke 4 und runweitem +1-Break-Kostenmodifier bestätigt. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` haben jetzt bestätigte Installkosten, Stärke, Breaker-Kosten, Subroutine-Taxonomie und Standard-Breaker-Vertrag.
-- Der aktive Blocker bleibt fachlich korrekt, aber enger: `Newsgroup Filter` hat inzwischen einen nicht-promotenden technischen Runtime-Vertrag für `[A]: Gain 2 Credits`; für weitere verbleibende Karten fehlt kein allgemeiner Kartentext, sondern mindestens ein vollständiger technischer Resolververtrag mit LegalAction-Projektion, `applyAction`-Revalidierung, Visibility, Replay/StateHash und AI-Fallback.
+- 0/47 Karten sind für Release-Promotion bereit; alle neuen Laufzeitpfade bleiben nicht-promotende WIPs.
+- Errata 1.70 und die Nutzerklärung vom 2026-05-14 reduzieren mehrere fachliche Lücken. `Newsgroup Filter` ist inhaltlich geklärt: Runner-Programm, Installkosten 5, MU 2, `[A]: Gain 2 Credits`. `Zetatech Software Installer` ist jetzt mit Installkosten 0 / MU 1 bestätigt. `Virizz` ist jetzt mit Rez-Kosten 2 / Stärke 4 und runweitem +1-Break-Kostenmodifier bestätigt. `Viral 15` ist jetzt mit Rez-Kosten 5 / Stärke 3, runweitem Jack-out-Tax und Runner-privatem Program-trash-Trigger umgesetzt. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` haben jetzt bestätigte Installkosten, Stärke, Breaker-Kosten, Subroutine-Taxonomie und Standard-Breaker-Vertrag.
+- Der aktive Blocker bleibt fachlich korrekt, aber enger: Alle 47 Zielkarten haben jetzt nicht-promotende Runtime-WIP-Abdeckung; vor V1.9.22-Abschluss fehlen weiterhin Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay, AI-/Catalog-/Release-Promotion, Webclient-Version und Final Review.
 
 ## Quellenbasis
 
@@ -40,7 +40,7 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 | Runner-Events | 10 | Seite, Typ, Event-Oberfläche; teils historische Effektkerne; Runtime-display-only; No-`play_event`-Guard | Playkosten, Timing/CanPlay, Ziele, Choice-Flow, Zonebewegungen, Effektzahlen, Sichtbarkeit, Replay/StateHash, AI-Fallback |
 | Runner-Hardware | 9 | Install-LegalAction, WIP-Installkosten 0, Sichtbarkeit, Replay/StateHash für Installation | Per-card Effekt, Deck-/Chip-Einzigartigkeit, konkrete MU-/Link-/Recurring-/Extra-Run-Werte, AI-Fallback |
 | Corp-Agendas | 6 | Agenda-Oberfläche; teils Corporate-War-/Political-Overthrow-Kernnotiz; Errata für Data Fort Reclamation und Security Purge | LegalAction-/applyAction-Verträge, Choice-/Sequenzmodell, Sichtbarkeit, Replay/StateHash, AI-Fallback |
-| Corp-ICE | 5 | ICE-Oberfläche und grobe Subtyp-Oberfläche; Errata für Haunting Inquisition, Tutor und Viral 15 | LegalAction-/applyAction-Verträge, runweite Zustände, Encounter-Projektion, Sichtbarkeit, Replay/StateHash, AI-Fallback |
+| Corp-ICE | 5 | ICE-Oberfläche und grobe Subtyp-Oberfläche; Errata für Haunting Inquisition, Tutor und Viral 15; enge Runtime-WIPs für Haunting Inquisition, Tutor, Viral 15, Virizz und Zombie | AI-Fallback und finale Release-Promotion |
 | Corp-Operations | 3 | Operation-Oberfläche | Playkosten, Timingbedingung, Zielmenge, Effektbeträge, Zonebewegungen, Sichtbarkeit, Replay/StateHash, AI-Fallback |
 
 ## Einzelmatrix
@@ -110,7 +110,7 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 | --- | --- | --- |
 | Haunting Inquisition | Rez 8, Stärke 6; Errata: mehrere Effekte laufen parallel; zählen nur tatsächlich genommene Aktionen; Bonus-Runs ohne Aktion bleiben möglich | Action-Lock-State, Actual-action-Counter, LegalAction/applyAction, Events, Replay/StateHash, AI |
 | Tutor | Rez 4, Stärke 5; Errata: modifiziert nicht den aktuellen Tutor-Encounter, nur spätere Encounter im Run; Runtime-WIP setzt zukünftige synthetische End-the-run-Subroutine inkl. Breakbarkeit, Events und Replay/StateHash um | Finale AI-/Catalog-/Release-Promotion |
-| Viral 15 | Rez 5, Stärke 3; Errata: Runner wählt zu trashende Programme | Jack-out-Tax-State, After-passing-rezzed-ice-Trigger, private Runner-Programmauswahl, Events, Replay/StateHash, AI |
+| Viral 15 | Rez 5, Stärke 3; Errata: Runner wählt zu trashende Programme; Runtime-WIP setzt run-weiten 1-Credit-Jack-out-Tax und Runner-private Programmtrash-Choice nach dem Passieren gerezzter ICE um | Finale AI-/Catalog-/Release-Promotion |
 | Virizz | Nutzerklärung: Rez-Kosten 2, Stärke 4; Sentry; für den Rest des Runs muss der Runner +1 Credit bezahlen, wenn er ICE brechen will; Runtime-WIP setzt Break-Kostenprojektion, applyAction-Revalidierung, PublicPayload und Replay/StateHash um | Finale AI-/Catalog-/Release-Promotion |
 | Zombie | ICE-Oberfläche; Sentry-Oberfläche | Rez-Kosten, Stärke, Subtypen, Subroutinen, Encounter-Timing, Effektwerte, Zielvalidierung, Events, Replay/StateHash, AI |
 
@@ -125,5 +125,5 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 ## Nächste Entscheidungsoptionen
 
 1. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` sind fachlich bereit für enge nicht-promotende Runtime-Schnitte; vor Promotion fehlen weiterhin Tests, AI-Fallback und Release-Gates.
-2. Für `Security Purge`, `Tutor`, `Speed Trap`, `Startup Immolator`, `Data Fort Reclamation`, `Haunting Inquisition` und `Viral 15` liegen engere Errata-Hinweise vor; vor Code fehlen aber weiterhin technische LegalAction-/applyAction-, Visibility- und Replay-/StateHash-Verträge.
-3. Bis ein solcher technischer Vertrag geschrieben und getestet wird, bleiben weitere Catalog-, AI- und Release-Promotion geschlossen.
+2. Für `Data Fort Reclamation` bleibt der optionale Rez-/temporäre-Credit-Follow-up offen; für `Zetatech Software Installer` bleibt das Overlay-Zustandsmodell offen.
+3. Bis diese Follow-ups und die finalen AI-/Catalog-/Webclient-/Review-Gates geschrieben und getestet sind, bleiben Catalog-, AI- und Release-Promotion geschlossen.

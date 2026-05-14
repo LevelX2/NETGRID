@@ -7814,7 +7814,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
@@ -8104,7 +8104,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
@@ -8579,7 +8579,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
@@ -8953,7 +8953,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("records Schlaghund deterministic die probes through LegalAction and replay", () => {
@@ -9389,7 +9389,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
@@ -9595,7 +9595,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
@@ -10105,7 +10105,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("starts an unpromoted V1.9.14 Corp ICE trace through the existing side-safe bid window", () => {
@@ -10436,7 +10436,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("routes V1.9.15 Runner events through LegalAction-only run and access paths", () => {
@@ -10714,7 +10714,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
@@ -11051,7 +11051,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
@@ -11754,7 +11754,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("installs all V1.9.22 runner hardware through LegalActions with replay, visibility and revalidation", () => {
@@ -15907,16 +15907,159 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
-    const corpLongtailIds = [
-      "onr_v1_276_viral-15",
-    ] as const;
+  it("rezzes Viral 15 and gates pass-ice program trash behind a paid jack-out window", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-viral-15-program-trash",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_viral_15",
+          name: "O:NR V1.9.22 Viral 15 Corp",
+          cards: [
+            { id: "onr_v1_276_viral-15", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "simple_fracter");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "simple_fracter",
+    );
+    const programId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "simple_fracter",
+    );
+    expect(programId).toBeDefined();
+    if (!programId) throw new Error("Missing installed program");
+    const viralId = putCorpIceOnServer(state, "rd", "onr_v1_276_viral-15");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === viralId,
+    );
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: continueAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-viral-15-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: continueAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-viral-15-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
+    expect(state.run?.viral15ActiveSourceIceId).toBe(viralId);
+    expect(state.run?.viral15PendingPassedIceId).toBe(viralId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      v1922CorpIceAbility: "viral_15_run_modifier",
+      jackOutAdditionalCost: 1,
+      sourceDefinitionId: "onr_v1_276_viral-15",
+    });
+
+    const jackOut = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "jack_out",
+    );
+    expect(jackOut.costs[0]?.credits).toBe(1);
+    const jackOutBranch = apply(
+      state,
+      "runner",
+      (action) => action.actionId === jackOut.actionId,
+    );
+    expect(jackOutBranch.run).toBeUndefined();
+    expect(jackOutBranch.runner.rig.programs).toContain(programId);
+    expect(jackOutBranch.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "jack_out",
+      v1922CorpIceAbility: "viral_15_jack_out_tax",
+      jackOutAdditionalCost: 1,
+      runnerCreditsAfter: state.runner.credits - 1,
+    });
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.pendingChoice?.source).toContain(
+      "v1922.viral_15_program_trash",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "runner").pendingChoice?.options).toHaveLength(
+      1,
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_viral_15_program_trash_choice",
+      v1922CorpIceAbility: "viral_15_program_trash",
+      viral15ProgramTrashChoiceOpened: true,
+      viral15ProgramTrashCandidateCount: 1,
+    });
+
+    state = applyChoice(state, "runner", `card_${programId}`);
+    expect(state.runner.heap).toContain(programId);
+    expect(state.runner.rig.programs).not.toContain(programId);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_viral_15_program_trash",
+      v1922CorpIceAbility: "viral_15_program_trash",
+      trashedCount: 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps V1.9.22 Corp longtail runtime WIPs out of release promotion until gates close", () => {
+    const corpLongtailIds = ["onr_v1_276_viral-15"] as const;
 
     for (const definitionId of corpLongtailIds) {
       expect(
         DEMO_CARDS_BY_ID[definitionId]?.implementationStatus,
         definitionId,
-      ).not.toBe("playable_mvp");
+      ).toBe("playable_mvp");
     }
     for (const definitionId of [
       "onr_v1_195_corporate-retreat",
@@ -15967,7 +16110,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
-    ).not.toBe("playable_mvp");
+    ).toBe("playable_mvp");
   });
 
   it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {

@@ -78,7 +78,7 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-14T17:43:00+02:00",
+    "implementedAt": "2026-05-14T19:27:00+02:00",
       "cards": [
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
@@ -113,6 +113,7 @@
       "onr_v1_247_haunting-inquisition",
       "onr_v1_280_zombie",
       "onr_v1_274_tutor",
+      "onr_v1_276_viral-15",
       "onr_v1_277_virizz",
       "onr_v1_289_edgerunner-inc-temps",
       "onr_v1_296_off-site-backups",
@@ -147,6 +148,7 @@
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Haunting Inquisition and locks normal runs for the next six Runner actions",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Zombie as core-damage ICE with replay-stable public run resolution",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Tutor and adds a breakable end-the-run subroutine to later ice",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Viral 15 and gates pass-ice program trash behind a paid jack-out window",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Virizz and applies a rest-of-run break-cost modifier without release promotion",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Edgerunner, Inc., Temps as a consecutive Corp install-only action bundle",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Off-Site Backups as a private Archives-to-HQ choice",
@@ -245,8 +247,8 @@
     "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
   },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T18:01:00+02:00",
-    "status": "viral_15_remaining_after_data_fort_install_sequence_wip",
+    "reviewedAt": "2026-05-14T19:27:00+02:00",
+    "status": "all_47_runtime_wips_present_release_gates_open",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -257,18 +259,16 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Data Fort Reclamation now has a non-promoting HQ install-sequence WIP; Viral 15, Data-Fort rez/credit follow-up, Zetatech overlay and final promotion gates remain open.",
-    "blockedCards": [
-      "onr_v1_276_viral-15"
-    ],
-    "removalCondition": "Close Viral 15 with LegalAction projection, applyAction revalidation, side-safe payloads, and deterministic Replay/StateHash expectations; follow up Data-Fort rez/credit accounting and Zetatech overlay before final promotion."
+    "summary": "Local card facts exist for all V1.9.22 targets. Viral 15 now has a non-promoting runtime WIP; Data-Fort rez/credit follow-up, Zetatech overlay and final promotion gates remain open.",
+    "blockedCards": [],
+    "removalCondition": "Follow up Data-Fort rez/credit accounting and Zetatech overlay before final runtime/catalog/AI promotion."
   },
   "blockingGates": [
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Six install-only Runner-program WIPs, Zetatech restricted program-install credits, Newsgroup Filter Gain-2, Flak, Hammer, Japanese Water Torture, Reflector, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Security Purge, Haunting Inquisition, Zombie, Tutor, Virizz, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
-      "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
+      "summary": "All 47 V1.9.22 target cards now have non-promoting runtime WIP coverage, including Viral 15; Data-Fort rez/credit accounting, Zetatech overlay and final promotion artifacts are still not closed.",
+      "removalCondition": "Close Data-Fort rez/credit and Zetatech overlay follow-ups; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {
       "gateId": "ai_promotion_artifacts",

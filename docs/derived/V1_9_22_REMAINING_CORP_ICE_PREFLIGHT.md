@@ -1,31 +1,30 @@
 # V1.9.22 Remaining Corp ICE Preflight
 
 Stand: 2026-05-14
-Status: WIP-Preflight mit Errata-1.70-Klaerung, keine Runtime-/Catalog-/AI-Promotion
+Status: Historischer WIP-Preflight mit Errata-1.70-Klaerung; ICE-Runtime-WIPs umgesetzt, keine Catalog-/AI-Promotion
 
 ## Ziel
 
-Nach dem Haunting-Inquisition-WIP bleibt eine Corp-ICE-Zielkarte ohne engen Runtime-Resolver: `Viral 15`. Die Karte hat lokale Kosten-/Staerke-/Effektkerne, greift aber in run-weite Timingfenster ein.
+Nach dem Haunting-Inquisition-WIP blieb eine Corp-ICE-Zielkarte ohne engen Runtime-Resolver: `Viral 15`. Dieser Befund ist durch den nicht-promotenden Runtime-WIP vom 2026-05-14 19:27 CEST ueberholt.
 
 ## Kartenbefund
 
 | Karte | Lokaler Regelkern | Blockierender Vertrag |
 | --- | --- | --- |
-| `Viral 15` | Sentry, Rez 5, Staerke 3; run-weite Jack-out-Steuer und Program-trash nach dem Passieren jeder gerezzten ICE, ausser Runner jackt out. Errata: Runner waehlt die zu trashenden Programme. | Timing nach Passing, Jack-out-Choice, Runner-private Programmauswahl, Mehrfachtrigger und Trash-Visibility. |
+| `Viral 15` | Sentry, Rez 5, Staerke 3; run-weite Jack-out-Steuer und Program-trash nach dem Passieren jeder gerezzten ICE, ausser Runner jackt out. Errata: Runner waehlt die zu trashenden Programme. | Runtime-WIP deckt Jack-out-Tax, Runner-private Programmauswahl, Mehrfachtrigger, Trash-Visibility und Replay/StateHash ab. |
 
 ## Kleinste Kandidaten
 
-`Viral 15` bleibt der offene ICE-Kandidat. Der Pfad braucht wegen Jack-out-/Program-trash-Timing einen expliziten Engine-Vertrag, bevor Code geschrieben wird.
+Kein Corp-ICE-Kandidat bleibt ohne Runtime-WIP. Der naechste V1.9.22-Schnitt liegt ausserhalb dieses ICE-Preflights: `Data Fort Reclamation` optionales Rezzen/temporaere Credits oder `Zetatech Software Installer` Overlay.
 
 ## Entscheidung
 
-Der fruehere Haunting-Action-Lock-Befund ist durch den nicht-promotenden Runtime-WIP vom 2026-05-14 17:35 CEST aufgeloest. `Viral 15` bleibt im No-Playable-Runtime-Guard; die Errata-Hinweise sind als spaetere Implementierungsgrundlage dokumentiert.
+Der fruehere Haunting-Action-Lock-Befund ist durch den nicht-promotenden Runtime-WIP vom 2026-05-14 17:35 CEST aufgeloest. `Viral 15` ist durch den Runtime-WIP vom 2026-05-14 19:27 CEST aufgeloest. Catalog-, AI- und Release-Promotion bleiben geschlossen.
 
 ## Removal Condition
 
-Der naechste ICE-Code-Schnitt kann beginnen, sobald fuer genau eine Karte ein enger Vertrag festliegt:
+Ein weiterer ICE-Code-Schnitt ist in diesem Preflight derzeit nicht der naechste Engpass. Fuer V1.9.22-Abschluss bleiben ausserhalb dieses Dokuments:
 
-1. Welche LegalActions durch den run-weiten Effekt geaendert oder ergaenzt werden,
-2. wie `applyAction` die Zusatzkosten oder Zusatzsubroutinen erneut validiert,
-3. welche PublicPayload-Felder den Effekt side-sicher nachweisen,
-4. welcher Replay-/StateHash-Smoke den Modifier rekonstruiert.
+1. `Data Fort Reclamation` optionale Rez-/Credit-Follow-ups,
+2. `Zetatech Software Installer` Overlay-Zustandsmodell,
+3. finale AI-/Catalog-/Webclient-/Review-Gates.

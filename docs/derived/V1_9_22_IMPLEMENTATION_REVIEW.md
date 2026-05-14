@@ -38,9 +38,9 @@ Status: runtime WIP, no release/catalog/AI promotion
 - `Shield` hat eine Runtime-Definition und einen engen installierten Programm-Resolver: Installkosten 0, MU 1 und bis zu 2 Net-Damage-Prevention pro Runner-Zug über das bestehende side-sichere Event-Modification-Fenster. Der Smoke deckt Install-LegalAction, Wrong-Side-Revalidation, Hidden-Info-sichere Prevention-Choice, PublicPayload und Replay/StateHash ab.
 - Es bleibt keine Runner-Programm-Zielkarte mehr nur wegen fehlender lokaler Kosten-/MU-/Breakerwerte im No-LegalAction-Guard; offene Runner-Programm-Punkte sind Vollvertrags-, AI-, Catalog- und Release-Promotion-Gates.
 - `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md` bleibt als historischer Readiness-Stand erhalten; alle zehn Runner-Event-Zielkarten haben inzwischen enge Runtime-Resolver-Smokes, bleiben aber ohne Catalog-/AI-/Release-Promotion.
-- Ein Engine-Guard bestaetigt fuer die verbleibenden 3/14 Corp-Agenda-/ICE-/Operations-Zielkarten, dass sie bis zu konkreten Resolvern nicht `playable_mvp` sind. `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Security Purge`, `Zombie`, `Tutor`, `Virizz`, `Edgerunner, Inc., Temps`, `Off-Site Backups` und `Planning Consultants` sind die elf bewusst eng umgesetzten Ausnahmen dieses WIP-Schnitts.
+- Alle 14 Corp-Agenda-/ICE-/Operations-Zielkarten haben inzwischen nicht-promotende Runtime-WIP-Resolver. `Corporate Retreat`, `Corporate War`, `Data Fort Reclamation`, `Marine Arcology`, `Political Overthrow`, `Security Purge`, `Haunting Inquisition`, `Zombie`, `Tutor`, `Viral 15`, `Virizz`, `Edgerunner, Inc., Temps`, `Off-Site Backups` und `Planning Consultants` bleiben bis zum Completion-Gate ohne Catalog-/AI-/Release-Promotion.
 - `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md` bleibt als historischer Readiness-Stand erhalten; die spaeter erstellte lokale Kartenfaktenbasis hebt den fehlenden Vollvertragsbefund fuer `Corporate War` und `Political Overthrow` auf, nicht fuer die restlichen Corp-Longtailkarten.
-- Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Runner-Event-Resolverkarten, vierzehn Runner-Programm-Resolverkarten, zwoelf Corp-Longtail-Resolverkarten, zwei geplante No-Promotion-Karten und keine Catalog- oder AI-Promotion ausweisen. `Newsgroup Filter`, `Flak`, `Hammer`, `Japanese Water Torture`, `Reflector` und `Zetatech Software Installer` sind dabei als nicht-promotende Programmresolver fortgeschrieben.
+- Ein Catalog-Artefakt-Gate bestaetigt, dass V1.9.22-WIP-Manifest, WIP-Szenario und Mechanics-Coverage exakt zur 47er-Zielmenge passen, neun Hardwarekarten mit Install-Smokes, zehn Runner-Event-Resolverkarten, vierzehn Runner-Programm-Resolverkarten, vierzehn Corp-Longtail-Resolverkarten und keine Catalog- oder AI-Promotion ausweisen. `Newsgroup Filter`, `Flak`, `Hammer`, `Japanese Water Torture`, `Reflector` und `Zetatech Software Installer` sind dabei als nicht-promotende Programmresolver fortgeschrieben.
 - Ein AI-Paket-Guard bestaetigt, dass alle 47 V1.9.22-WIP-Karten bis zum Completion-Gate ausserhalb von `ai_supported`, `human_playable` und `deck_legal` bleiben.
 - Ein Web-Catalog-API-Guard bestaetigt, dass V1.9.22-WIP-Karten nicht im `ai_supported`-Filter erscheinen und Detailantworten fuer sichtbare WIP-Karten keine `ai_supported`-, `human_playable`- oder `deck_legal`-Promotion anzeigen.
 - Ein Webclient-Version-Guard bestaetigt, dass die sichtbare Client-Version bis zum V1.9.22-Completion-Gate auf `V1.9.21` bleibt.
@@ -60,9 +60,11 @@ Status: runtime WIP, no release/catalog/AI promotion
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: `Viral 15`, danach `Data Fort Reclamation` optionales Rezzen/temporaere Credit-Ausgaben oder `Zetatech Software Installer` Overlay-Vertrag. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
+Naechster kleiner Schnitt: `Data Fort Reclamation` optionales Rezzen/temporaere Credit-Ausgaben oder `Zetatech Software Installer` Overlay-Vertrag. `Viral 15` ist jetzt als nicht-promotender Runtime-WIP umgesetzt. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
 
 Blocker-Abgleich 2026-05-14 18:01 CEST: `Data Fort Reclamation` hat einen ersten Install-Sequence-WIP; `Viral 15` bleibt die letzte Zielkarte ohne Runtime-WIP. Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay und finale Promotion-Gates bleiben offen. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
+
+Blocker-Abgleich 2026-05-14 19:27 CEST: `Viral 15` hat einen engen Runtime-WIP mit run-weitem Jack-out-Tax und Runner-privater Programmtrash-Choice nach dem Passieren gerezzter ICE. Damit haben 47/47 Zielkarten nicht-promotende Runtime-WIP-Abdeckung. Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay und finale Promotion-Gates bleiben offen. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
 
 ## Verifikation
 
@@ -97,6 +99,9 @@ Blocker-Abgleich 2026-05-14 18:01 CEST: `Data Fort Reclamation` hat einen ersten
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen fehlender Data-Fort-Runtime-Definition und ueberholter No-Promotion-Guards, danach pass, 307 Tests inkl. `Data Fort Reclamation` private HQ-Install-Sequence.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Data-Fort-Manifest-/Coverage-/Szenario-Alignment.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Data-Fort-Install-Sequence-WIP.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen fehlender V0.99-Baseline im `Viral 15`-Jack-out-Smoke, danach pass, 308 Tests inkl. `Viral 15` Jack-out-Tax, Runner-private Programmtrash-Choice, Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: initial rot wegen ueberholter Erwartung an eine geplante No-Promotion-Karte, danach pass, 44 Tests nach Manifest-/Coverage-/Szenario-/Guard-Alignment fuer `Viral 15`.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach `Viral 15` Runtime-WIP.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen noch fehlender JWT-Runtime-Definition und ueberholter Runner-Programm-Guards, danach pass, 300 Tests inkl. `Japanese Water Torture` Future-Action-Debt.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Japanese-Water-Torture-Manifest-/Coverage-/Szenario-Alignment.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Future-Action-Debt-State-Erweiterung.

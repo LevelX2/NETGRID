@@ -3150,6 +3150,7 @@ describe("catalog import and status logic", () => {
         "v1922_corp_ice_core_damage_etr",
         "v1922_corp_ice_break_cost_modifier",
         "v1922_corp_ice_haunting_inquisition_run_lock",
+        "v1922_corp_ice_viral_15_jackout_tax_program_trash",
       ].includes(card.resolverFamily),
     );
     const plannedCards = manifestCards.filter(
@@ -3367,6 +3368,7 @@ describe("catalog import and status logic", () => {
     expect(corpIceResolverCards.map((card) => card.cardCode).sort()).toEqual([
       "onr_v1_247_haunting-inquisition",
       "onr_v1_274_tutor",
+      "onr_v1_276_viral-15",
       "onr_v1_277_virizz",
       "onr_v1_280_zombie",
     ]);
@@ -3382,6 +3384,8 @@ describe("catalog import and status logic", () => {
             ? "run_lock_next_six_runner_actions"
             : card.cardCode === "onr_v1_274_tutor"
             ? "run_wide_future_end_the_run_subroutine"
+            : card.cardCode === "onr_v1_276_viral-15"
+              ? "run_wide_jackout_tax"
             : card.cardCode === "onr_v1_277_virizz"
               ? "run_wide_break_cost_modifier"
               : "core_damage_subroutines",
@@ -3390,7 +3394,7 @@ describe("catalog import and status logic", () => {
       );
     }
 
-    expect(plannedCards).toHaveLength(1);
+    expect(plannedCards).toHaveLength(0);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(
         card.cardCode,
