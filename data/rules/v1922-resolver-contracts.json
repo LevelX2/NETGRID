@@ -524,11 +524,11 @@
       "cluster": "corp_agendas",
       "side": "corp",
       "type": "agenda",
-      "contractStatus": "runtime_install_sequence_wip_no_promotion",
+      "contractStatus": "runtime_install_rez_sequence_wip_no_promotion",
       "confirmedLocalFacts": ["advancement_requirement_4", "agenda_points_2", "gray_ops_surface", "on_score_gain_10_temporary_install_credits", "choose_up_to_4_hq_cards", "create_new_data_fort", "install_chosen_cards_one_at_a_time", "may_rez_installed_cards", "corp_may_use_own_credit_pool_for_extra_costs", "new_fort_created_by_score_effect_not_actions"],
-      "safeCurrentCoverage": ["private_hq_choice_projection", "new_remote_creation_payload", "install_sequence", "wrong_side_stale_revalidation", "public_event_redaction", "replay_statehash"],
-      "missingInformation": ["optional_rez_sequence", "temporary_credit_spend_accounting", "ai_fallback", "final_catalog_release_promotion"],
-      "removalCondition": "Keep optional rez, temporary-credit spend accounting, AI and release promotion closed until follow-up gates are satisfied."
+      "safeCurrentCoverage": ["private_hq_choice_projection", "new_remote_creation_payload", "install_sequence", "private_rez_choice_after_install_sequence", "temporary_credit_spend_accounting", "corp_credit_fallback_for_rez_costs", "wrong_side_stale_revalidation", "public_event_redaction", "replay_statehash"],
+      "missingInformation": ["ai_fallback", "final_catalog_release_promotion"],
+      "removalCondition": "Keep AI, catalog and release promotion closed until final V1.9.22 gates are satisfied."
     },
     {
       "cardId": "onr_v1_206_marine-arcology",

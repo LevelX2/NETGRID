@@ -10474,6 +10474,7 @@ function resolveV1922DataFortReclamationChoice(
   const server = createRemote(state);
   let installedIceCount = 0;
   let installedRootCount = 0;
+  const installedIds: CardInstanceId[] = [];
   for (const cardId of selectedIds) {
     const definition = definitionFor(state, cardId);
     removeFromAllZones(state, cardId);
@@ -10486,6 +10487,7 @@ function resolveV1922DataFortReclamationChoice(
         zone: { side: "corp", zone: "serverIce", serverId: server.id },
       };
       installedIceCount += 1;
+      installedIds.push(cardId);
       continue;
     }
     if (!canInstallCorpRootCardInServer(state, definition, server))
@@ -10498,7 +10500,11 @@ function resolveV1922DataFortReclamationChoice(
       zone: { side: "corp", zone: "serverRoot", serverId: server.id },
     };
     installedRootCount += 1;
+    installedIds.push(cardId);
   }
+  const rezCandidates = installedIds.filter((cardId) =>
+    isV1922DataFortReclamationRezCandidate(state, cardId, server.id),
+  );
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -10512,7 +10518,133 @@ function resolveV1922DataFortReclamationChoice(
     temporaryCreditsProvided: 10,
     temporaryCreditsSpent: 0,
     corpCreditsSpent: 0,
-    rezSequenceDeferred: true,
+    temporaryCreditsRemaining: 10,
+    dataFortReclamationRezChoiceOpened: rezCandidates.length > 0,
+    dataFortReclamationRezCandidateCount: rezCandidates.length,
+  };
+  if (rezCandidates.length === 0) return;
+  state.pendingChoice = {
+    choiceId: `choice_v1922_data_fort_reclamation_rez_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1922.data_fort_reclamation_rez:${agendaId}:${server.id}:10:${state.stateVersion + 1}`,
+    prompt: "Data Fort Reclamation: installierte Karten rezzen.",
+    kind: "select_cards",
+    options: rezCandidates.sort().map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: 0,
+    maxSelections: rezCandidates.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function isV1922DataFortReclamationRezCandidate(
+  state: GameState,
+  cardId: CardInstanceId,
+  serverId: string,
+): boolean {
+  const instance = mustInstance(state.cardInstances, cardId);
+  const definition = definitionFor(state, cardId);
+  if (instance.rezzed) return false;
+  if (instance.zone.side !== "corp") return false;
+  if (
+    instance.zone.zone !== "serverIce" &&
+    instance.zone.zone !== "serverRoot"
+  )
+    return false;
+  if (instance.zone.serverId !== serverId) return false;
+  if (definition.type === "ice") return instance.zone.zone === "serverIce";
+  return (
+    instance.zone.zone === "serverRoot" &&
+    (definition.type === "asset" || definition.type === "upgrade")
+  );
+}
+
+function resolveV1922DataFortReclamationRezChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    !choice.source.startsWith("v1922.data_fort_reclamation_rez")
+  )
+    throw new Error("Data-Fort-Reclamation-Rez-Choice ist nicht offen.");
+  const [, agendaId, serverId, temporaryCreditText] = choice.source.split(":");
+  if (
+    !serverId ||
+    !agendaId ||
+    !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
+    definitionFor(state, agendaId as CardInstanceId).id !==
+      V1922_DATA_FORT_RECLAMATION_ID
+  )
+    throw new Error("Data Fort Reclamation ist nicht gescored.");
+  mustServer(state, serverId);
+  let temporaryCreditsRemaining = Math.max(
+    0,
+    Math.floor(Number(temporaryCreditText)),
+  );
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const selectedSet = new Set(selectedIds);
+  if (selectedSet.size !== selectedIds.length)
+    throw new Error("Eine Rez-Karte wurde doppelt gewaehlt.");
+  if (
+    selectedIds.some(
+      (cardId) =>
+        !isV1922DataFortReclamationRezCandidate(state, cardId, serverId),
+    )
+  )
+    throw new Error("Eine gewaehlte Karte kann nicht gerezzed werden.");
+
+  let temporaryCreditsSpent = 0;
+  let corpCreditsSpent = 0;
+  let rezzedIceCount = 0;
+  let rezzedRootCount = 0;
+  for (const cardId of selectedIds) {
+    const rezCost = rezCostForCard(state, cardId);
+    const temporary = Math.min(temporaryCreditsRemaining, rezCost);
+    const corp = rezCost - temporary;
+    if (state.corp.credits < corp)
+      throw new Error(
+        "Die Korp kann die Data-Fort-Reclamation-Rez-Kosten nicht bezahlen.",
+      );
+    temporaryCreditsRemaining -= temporary;
+    temporaryCreditsSpent += temporary;
+    if (corp > 0) {
+      spendCredits(state, "corp", corp);
+      corpCreditsSpent += corp;
+    }
+    const definition = definitionFor(state, cardId);
+    const instance = mustInstance(state.cardInstances, cardId);
+    state.cardInstances[cardId] = {
+      ...instance,
+      faceup: true,
+      rezzed: true,
+    };
+    if (definition.type === "ice") {
+      rezzedIceCount += 1;
+    } else {
+      rezzedRootCount += 1;
+      CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
+    }
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+    selectedCount: selectedIds.length,
+    rezzedCount: rezzedIceCount + rezzedRootCount,
+    rezzedIceCount,
+    rezzedRootCount,
+    temporaryCreditsProvided: 10,
+    temporaryCreditsSpent,
+    temporaryCreditsRemaining,
+    corpCreditsSpent,
+    corpCreditsAfter: state.corp.credits,
   };
 }
 
@@ -10823,6 +10955,16 @@ function resolvePendingChoice(
     state.pendingChoice.source.startsWith("v1922.viral_15_program_trash")
   ) {
     resolveV1922Viral15ProgramTrashChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("v1922.data_fort_reclamation_rez")
+  ) {
+    resolveV1922DataFortReclamationRezChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.data_fort_reclamation")) {
@@ -13396,6 +13538,29 @@ function publicContextForAction(
       context.temporaryCreditsSpent = legalAction.payload.temporaryCreditsSpent;
     if (typeof legalAction.payload.corpCreditsSpent === "number")
       context.corpCreditsSpent = legalAction.payload.corpCreditsSpent;
+    if (
+      typeof legalAction.payload.dataFortReclamationRezChoiceOpened ===
+      "boolean"
+    )
+      context.dataFortReclamationRezChoiceOpened =
+        legalAction.payload.dataFortReclamationRezChoiceOpened;
+    if (
+      typeof legalAction.payload.dataFortReclamationRezCandidateCount ===
+      "number"
+    )
+      context.dataFortReclamationRezCandidateCount =
+        legalAction.payload.dataFortReclamationRezCandidateCount;
+    if (typeof legalAction.payload.temporaryCreditsRemaining === "number")
+      context.temporaryCreditsRemaining =
+        legalAction.payload.temporaryCreditsRemaining;
+    if (typeof legalAction.payload.rezzedCount === "number")
+      context.rezzedCount = legalAction.payload.rezzedCount;
+    if (typeof legalAction.payload.rezzedIceCount === "number")
+      context.rezzedIceCount = legalAction.payload.rezzedIceCount;
+    if (typeof legalAction.payload.rezzedRootCount === "number")
+      context.rezzedRootCount = legalAction.payload.rezzedRootCount;
+    if (typeof legalAction.payload.corpCreditsAfter === "number")
+      context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
     if (legalAction.payload.rezSequenceDeferred === true)
       context.rezSequenceDeferred = true;
     if (typeof legalAction.payload.gainedCredits === "number")

@@ -16,7 +16,7 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 - 9/47 Runner-Hardwarekarten haben bereits einen eng begrenzten Installationspfad mit LegalAction, Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash.
 - 0/47 Karten sind für Release-Promotion bereit; alle neuen Laufzeitpfade bleiben nicht-promotende WIPs.
 - Errata 1.70 und die Nutzerklärung vom 2026-05-14 reduzieren mehrere fachliche Lücken. `Newsgroup Filter` ist inhaltlich geklärt: Runner-Programm, Installkosten 5, MU 2, `[A]: Gain 2 Credits`. `Zetatech Software Installer` ist jetzt mit Installkosten 0 / MU 1 bestätigt. `Virizz` ist jetzt mit Rez-Kosten 2 / Stärke 4 und runweitem +1-Break-Kostenmodifier bestätigt. `Viral 15` ist jetzt mit Rez-Kosten 5 / Stärke 3, runweitem Jack-out-Tax und Runner-privatem Program-trash-Trigger umgesetzt. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` haben jetzt bestätigte Installkosten, Stärke, Breaker-Kosten, Subroutine-Taxonomie und Standard-Breaker-Vertrag.
-- Der aktive Blocker bleibt fachlich korrekt, aber enger: Alle 47 Zielkarten haben jetzt nicht-promotende Runtime-WIP-Abdeckung; vor V1.9.22-Abschluss fehlen weiterhin Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay, AI-/Catalog-/Release-Promotion, Webclient-Version und Final Review.
+- Der aktive Blocker bleibt fachlich korrekt, aber enger: Alle 47 Zielkarten haben jetzt nicht-promotende Runtime-WIP-Abdeckung; vor V1.9.22-Abschluss fehlen weiterhin Zetatech-Overlay, AI-/Catalog-/Release-Promotion, Webclient-Version und Final Review.
 
 ## Quellenbasis
 
@@ -125,5 +125,5 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 ## Nächste Entscheidungsoptionen
 
 1. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` sind fachlich bereit für enge nicht-promotende Runtime-Schnitte; vor Promotion fehlen weiterhin Tests, AI-Fallback und Release-Gates.
-2. Für `Data Fort Reclamation` bleibt der optionale Rez-/temporäre-Credit-Follow-up offen; für `Zetatech Software Installer` bleibt das Overlay-Zustandsmodell offen.
-3. Bis diese Follow-ups und die finalen AI-/Catalog-/Webclient-/Review-Gates geschrieben und getestet sind, bleiben Catalog-, AI- und Release-Promotion geschlossen.
+2. Für `Zetatech Software Installer` bleibt das Overlay-Zustandsmodell offen.
+3. Bis dieses Follow-up und die finalen AI-/Catalog-/Webclient-/Review-Gates geschrieben und getestet sind, bleiben Catalog-, AI- und Release-Promotion geschlossen.

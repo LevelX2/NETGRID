@@ -14615,7 +14615,52 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       installedCount: 2,
       temporaryCreditsProvided: 10,
       temporaryCreditsSpent: 0,
-      rezSequenceDeferred: true,
+      temporaryCreditsRemaining: 10,
+      dataFortReclamationRezChoiceOpened: true,
+      dataFortReclamationRezCandidateCount: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"hq"|"rd"|"cardInstances"|"privatePayload"|ACME/,
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "hidden_info_barrier",
+      minSelections: 0,
+      maxSelections: 2,
+    });
+    const rezChoice = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "resolve_choice",
+    );
+    const wrongRezSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: rezChoice.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${iceId}`],
+      },
+      idempotencyKey: "v1922-data-fort-rez-choice-wrong-side",
+    });
+    expect(wrongRezSide.ok).toBe(false);
+    if (!wrongRezSide.ok) expect(wrongRezSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    state = applyChoices(state, "corp", [`card_${iceId}`]);
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(state.cardInstances[assetId]?.rezzed).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
+      selectedCount: 1,
+      rezzedCount: 1,
+      rezzedIceCount: 1,
+      rezzedRootCount: 0,
+      temporaryCreditsProvided: 10,
+      temporaryCreditsSpent: 3,
+      temporaryCreditsRemaining: 7,
+      corpCreditsSpent: 0,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"|ACME/,

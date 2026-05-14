@@ -247,7 +247,7 @@
     "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
   },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T19:27:00+02:00",
+    "reviewedAt": "2026-05-14T19:43:00+02:00",
     "status": "all_47_runtime_wips_present_release_gates_open",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
@@ -259,16 +259,16 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all V1.9.22 targets. Viral 15 now has a non-promoting runtime WIP; Data-Fort rez/credit follow-up, Zetatech overlay and final promotion gates remain open.",
+    "summary": "Local card facts exist for all V1.9.22 targets. Viral 15 and Data-Fort rez/credit follow-up now have non-promoting runtime WIPs; Zetatech overlay and final promotion gates remain open.",
     "blockedCards": [],
-    "removalCondition": "Follow up Data-Fort rez/credit accounting and Zetatech overlay before final runtime/catalog/AI promotion."
+    "removalCondition": "Close Zetatech overlay before final runtime/catalog/AI promotion."
   },
   "blockingGates": [
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "All 47 V1.9.22 target cards now have non-promoting runtime WIP coverage, including Viral 15; Data-Fort rez/credit accounting, Zetatech overlay and final promotion artifacts are still not closed.",
-      "removalCondition": "Close Data-Fort rez/credit and Zetatech overlay follow-ups; add final Manifest/Coverage, AI and web gates before release promotion."
+      "summary": "All 47 V1.9.22 target cards now have non-promoting runtime WIP coverage, including Viral 15 and Data-Fort rez/credit accounting; Zetatech overlay and final promotion artifacts are still not closed.",
+      "removalCondition": "Close Zetatech overlay follow-up; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {
       "gateId": "ai_promotion_artifacts",

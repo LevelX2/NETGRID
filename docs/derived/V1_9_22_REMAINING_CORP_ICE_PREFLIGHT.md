@@ -15,7 +15,7 @@ Nach dem Haunting-Inquisition-WIP blieb eine Corp-ICE-Zielkarte ohne engen Runti
 
 ## Kleinste Kandidaten
 
-Kein Corp-ICE-Kandidat bleibt ohne Runtime-WIP. Der naechste V1.9.22-Schnitt liegt ausserhalb dieses ICE-Preflights: `Data Fort Reclamation` optionales Rezzen/temporaere Credits oder `Zetatech Software Installer` Overlay.
+Kein Corp-ICE-Kandidat bleibt ohne Runtime-WIP. Der naechste V1.9.22-Schnitt liegt ausserhalb dieses ICE-Preflights: `Zetatech Software Installer` Overlay.
 
 ## Entscheidung
 
@@ -25,6 +25,5 @@ Der fruehere Haunting-Action-Lock-Befund ist durch den nicht-promotenden Runtime
 
 Ein weiterer ICE-Code-Schnitt ist in diesem Preflight derzeit nicht der naechste Engpass. Fuer V1.9.22-Abschluss bleiben ausserhalb dieses Dokuments:
 
-1. `Data Fort Reclamation` optionale Rez-/Credit-Follow-ups,
-2. `Zetatech Software Installer` Overlay-Zustandsmodell,
-3. finale AI-/Catalog-/Webclient-/Review-Gates.
+1. `Zetatech Software Installer` Overlay-Zustandsmodell,
+2. finale AI-/Catalog-/Webclient-/Review-Gates.

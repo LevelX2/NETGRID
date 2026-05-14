@@ -479,7 +479,10 @@
       "aiSupported": false,
       "resolverFamily": "v1922_corp_agenda_data_fort_reclamation_hq_install_sequence",
       "coveredSmokes": [
-        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Data Fort Reclamation as a private HQ install sequence"
+        "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Data Fort Reclamation as a private HQ install sequence",
+        "private_rez_choice_after_install_sequence",
+        "temporary_rez_credit_spend_accounting",
+        "corp_credit_fallback_for_rez_costs"
       ]
     },
     {

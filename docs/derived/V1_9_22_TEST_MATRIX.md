@@ -24,6 +24,7 @@ Update 2026-05-14 17:35 CEST: `Haunting Inquisition` ist als nicht-promotender C
 Update 2026-05-14 17:43 CEST: `Zetatech Software Installer` hat restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh als nicht-promotenden WIP erhalten. Neuer Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Zetatech Software Installer recurring credits for program installs and refreshes`; erster `engine`-Lauf rot wegen fehlender V0.99-Baseline im Refresh-Smoke, danach `engine` gruen mit 306 Tests.
 Update 2026-05-14 18:01 CEST: `Data Fort Reclamation` hat eine Korp-private HQ-Install-Sequence als nicht-promotenden WIP erhalten. Neuer Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Data Fort Reclamation as a private HQ install sequence`; erster `engine`-Lauf rot wegen fehlender Runtime-Definition und Guards, danach `engine` gruen mit 307 Tests, `catalog` 44 und `typecheck` gruen.
 Update 2026-05-14 19:27 CEST: `Viral 15` hat einen nicht-promotenden Corp-ICE-Runtime-WIP mit run-weitem 1-Credit-Jack-out-Tax und Runner-privater Programmtrash-Choice nach dem Passieren gerezzter ICE erhalten. Neuer Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Viral 15 and gates pass-ice program trash behind a paid jack-out window`; erster `engine`-Lauf rot wegen fehlender V0.99-Jack-out-Window-Baseline im Smoke, danach `engine` gruen mit 308 Tests. `catalog` war initial rot wegen ueberholter geplanter-Karte-Erwartung, danach gruen mit 44 Tests; `typecheck` gruen.
+Update 2026-05-14 19:43 CEST: `Data Fort Reclamation` hat den Rez-/Credit-Follow-up erhalten. Der bestehende Smoke deckt jetzt nach der privaten HQ-Install-Sequence ein zweites Korp-privates Rez-Fenster, temporaeren Creditverbrauch zuerst, Korp-Credit-Fallback, Wrong-Side-Revalidation, side-sichere PublicPayloads und Replay/StateHash ab; `typecheck`, `engine` 308 und `catalog` 44 gruen.
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
 | Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Tutor: engine 302, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter Turbopack-NFT-Warnung |
 
@@ -42,6 +43,14 @@ Update 2026-05-14 19:27 CEST: `Viral 15` hat einen nicht-promotenden Corp-ICE-Ru
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen fehlender V0.99-Baseline im Jack-out-Smoke, danach pass, 308 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: initial rot wegen ueberholter geplanter-Karte-Erwartung, danach pass, 44 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+
+## Data Fort Reclamation Rez/Credits 2026-05-14 19:43 CEST
+
+- Zusatzschnitt: `Data Fort Reclamation` oeffnet nach der privaten HQ-Install-Sequence ein zweites Korp-privates Rez-Fenster fuer neu installierte ICE/Root-Karten.
+- Zusatzabdeckung: temporaere Rez-Credits werden zuerst verbraucht, Korp-Credits dienen als Fallback, PublicPayloads bleiben count-/credit-only und Replay/StateHash-stabil. Keine Catalog-/AI-/Release-Promotion.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 308 Tests.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
 
 ## Virizz 2026-05-14 16:40 CEST
 

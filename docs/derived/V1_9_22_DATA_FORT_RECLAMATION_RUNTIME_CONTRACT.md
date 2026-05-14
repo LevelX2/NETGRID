@@ -1,7 +1,7 @@
 # V1.9.22 Data Fort Reclamation Runtime Contract
 
 Stand: 2026-05-14 17:52 CEST
-Status: implementation contract, no runtime/catalog/AI/release promotion
+Status: implemented WIP contract, no catalog/AI/release promotion
 
 ## Zweck
 
@@ -27,9 +27,10 @@ Dieser Vertrag beschreibt den naechsten engen, nicht-promotenden Runtime-Schnitt
 5. Die ausgewaehlten Karten werden in stabiler Choice-Reihenfolge verarbeitet.
 6. ICE wird als Server-ICE am neuen Remote installiert; Asset, Agenda und Upgrade werden in die Root installiert.
 7. Installkosten werden aus einem temporaeren Effektpool von 10 Credits und danach aus Korp-Credits bezahlt.
-8. Optionales Rezzen wird in diesem ersten WIP noch nicht geoeffnet; der Resolver dokumentiert `rezSequenceDeferred: true`.
-9. PublicPayload nennt nur Counts, Server-ID, verbrauchte temporaere Credits, verbrauchte Korp-Credits und installierte Public-Card-Definitionen soweit durch Installation public sichtbar. HQ-Auswahl bleibt nicht im PublicPayload.
-10. Replay/StateHash muss stabil sein; keine verdeckten HQ-Listen, Karteninstanz-Maps oder nicht ausgewaehlten HQ-Karten duerfen leaken.
+8. Nach der Install-Sequenz oeffnet die Engine bei rezbaren neu installierten Karten eine zweite Korp-private `select_cards`-Choice.
+9. Beim Rez-Resolve werden Rez-Kosten zuerst aus dem temporaeren 10-Credit-Pool und danach aus Korp-Credits bezahlt.
+10. PublicPayload nennt nur Counts, Server-ID, verbrauchte temporaere Credits, verbrauchte Korp-Credits und installierte Public-Card-Definitionen soweit durch Installation public sichtbar. HQ-Auswahl und Rez-Auswahl bleiben nicht im PublicPayload.
+11. Replay/StateHash muss stabil sein; keine verdeckten HQ-Listen, Karteninstanz-Maps oder nicht ausgewaehlten HQ-Karten duerfen leaken.
 
 ## LegalAction und ApplyAction
 
@@ -49,12 +50,13 @@ Dieser Vertrag beschreibt den naechsten engen, nicht-promotenden Runtime-Schnitt
 - Choice installiert ICE und Root-Karte in ein neues Remote.
 - Temporaerer Creditpool bezahlt zuerst, Korp-Credits danach.
 - PublicPayload enthaelt keine HQ-Liste und keine nicht gewaehlten Karten.
+- Rez-Choice oeffnet Korp-privat fuer neu installierte rezbare Karten.
+- Temporaerer Creditpool bezahlt Rez-Kosten zuerst, Korp-Credits danach.
 - Replay/StateHash stabil.
 - Keine Catalog-, AI-, Webclient- oder Release-Promotion.
 
 ## Nicht Teil dieses WIP
 
-- Optionales Rezzen der installierten Karten.
 - Zielserver-Auswahl durch Spieler.
 - AI-Hints oder AI-Smokes.
 - Finale Completion-Gate-Promotion.
