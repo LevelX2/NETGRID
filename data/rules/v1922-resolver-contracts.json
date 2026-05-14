@@ -572,11 +572,11 @@
       "cluster": "corp_ice",
       "side": "corp",
       "type": "ice",
-      "contractStatus": "prepared_errata_reviewed_parallel_action_lock_no_promotion",
+      "contractStatus": "runtime_run_lock_wip_no_promotion",
       "confirmedLocalFacts": ["rez_cost_8", "strength_6", "code_gate_surface", "next_6_actual_runner_actions_cannot_be_runs", "multiple_effects_run_in_parallel_not_serial", "bonus_runs_not_using_actions_are_not_prohibited", "end_the_run_subroutine"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["future_action_lock_state_model", "actual_action_counter", "parallel_effect_expiry", "legalaction_projection", "applyaction_revalidation", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Use the errata-reviewed parallel action-lock only after the action-counter state and LegalAction revalidation contract are specified."
+      "safeCurrentCoverage": ["rez_ice_legal_action", "run_lock_next_six_runner_actions", "bonus_run_no_click_not_locked", "end_the_run", "wrong_side_stale_revalidation", "public_event_redaction", "replay_statehash"],
+      "missingInformation": ["final_ai_catalog_release_promotion"],
+      "removalCondition": "Keep Haunting Inquisition in WIP until V1.9.22 final AI, catalog and release-promotion gates are satisfied."
     },
     {
       "cardId": "onr_v1_274_tutor",

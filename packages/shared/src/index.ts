@@ -133,6 +133,7 @@ export type SubroutineType =
   | "set_next_encounter_lock"
   | "set_run_jack_out_lock"
   | "set_runner_forgo_next_action"
+  | "set_runner_run_lock_actions"
   | "reveal_corp_rd_top"
   | "reorder_corp_rd_top2"
   | "rewind_run_to_rezzed_ice_by_die";
@@ -855,6 +856,7 @@ export type GameState = {
     allNighterBonusRunPending?: boolean;
     forgoNextActionPending?: boolean;
     forgoNextActionsPending?: number;
+    runLockActionsPending?: number;
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
   };
@@ -1416,6 +1418,13 @@ function onrSetRunJackOutLock(id: string): SubroutineDefinition {
 
 function onrSetRunnerForgoNextAction(id: string): SubroutineDefinition {
   return { id, type: "set_runner_forgo_next_action" };
+}
+
+function onrSetRunnerRunLockActions(
+  id: string,
+  amount: number,
+): SubroutineDefinition {
+  return { id, type: "set_runner_run_lock_actions", amount };
 }
 
 function onrRevealCorpRdTop(id: string): SubroutineDefinition {
@@ -6857,6 +6866,23 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_245_fire_wall_etr")],
     mechanics: ["end_the_run"],
+  }),
+  onrIce({
+    id: "onr_v1_247_haunting-inquisition",
+    title: "Haunting Inquisition",
+    subtypes: ["code_gate"],
+    rezCost: 8,
+    strength: 6,
+    rulesText:
+      "[Subroutine] Runner cannot make runs with their next six actions.\n[Subroutine] End the run.",
+    subroutines: [
+      onrSetRunnerRunLockActions(
+        "onr_v1_247_haunting_inquisition_run_lock",
+        6,
+      ),
+      onrEtr("onr_v1_247_haunting_inquisition_etr"),
+    ],
+    mechanics: ["run_modifier", "action_economy", "end_the_run", "per_card_longtail"],
   }),
   onrIce({
     id: "onr_v1_249_hunter",

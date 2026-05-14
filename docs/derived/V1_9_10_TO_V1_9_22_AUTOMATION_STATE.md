@@ -87,9 +87,19 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - `Virizz`: Rez-Kosten 2, Staerke 4; Runtime-WIP ohne Promotion ist umgesetzt mit rest-of-run +1-Credit-Break-Kostenmodifier, LegalAction-Kostenprojektion und applyAction-Revalidierung.
 - Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
 - `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
-- Naechster sinnvoller Code-Schnitt: `Data Fort Reclamation`, `Haunting Inquisition`, `Viral 15` oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
+- Naechster sinnvoller Code-Schnitt: `Data Fort Reclamation`, `Viral 15` oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 17:35 CEST
+- Ergebnis: V1.9.22 Haunting-Inquisition-Run-Lock-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Haunting Inquisition` hat eine nicht-promotende Runtime-ICE-Definition mit Rez-Kosten 8, Staerke 6, Run-Lock fuer die naechsten sechs tatsaechlich ausgegebenen Runner-Aktionen und End-the-run erhalten. Normale `start_run`-LegalActions sind waehrend des Locks gesperrt; der Lock persistiert ueber Zugwechsel und wird durch tatsaechliche Runner-Klickaktionen abgebaut. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (305); `catalog` initial rot wegen falsch zugeordnetem Manifest-Resolver auf `Data Fort Reclamation`, danach pass (44).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: haunting inquisition run lock wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation`, `Viral 15`, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 17:25 CEST
 - Ergebnis: V1.9.22 Hammer-Stealth-Verteilungschoice-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

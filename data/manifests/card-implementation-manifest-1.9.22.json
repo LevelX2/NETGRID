@@ -9,8 +9,8 @@
     "catalogWipGuardReady": true,
     "wipArtifactAlignmentGuardReady": true,
     "resolverContractInventoryReady": true,
-    "runtimeDefinitionsReady": "runner_hardware_event_fourteen_runner_program_and_eleven_corp_resolver_clusters_44_of_47",
-    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_non_breaker_runner_program_install_only_plus_zetatech_software_installer_install_only_plus_flak_ap_breaker_plus_hammer_wall_breaker_stealth_loss_choice_plus_japanese_water_torture_wall_breaker_future_action_debt_plus_reflector_tagged_breaker_plus_newsgroup_filter_gain_2_credit_action_plus_shield_net_damage_prevention_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_security_purge_zombie_tutor_virizz_edgerunner_temps_off_site_backups_and_planning_consultants_resolvers_plus_unresolved_corp_no_promotion_guards",
+    "runtimeDefinitionsReady": "runner_hardware_event_fourteen_runner_program_and_twelve_corp_resolver_clusters_45_of_47",
+    "engineCovered": "runner_hardware_install_cluster_9_of_9_plus_non_breaker_runner_program_install_only_plus_zetatech_software_installer_install_only_plus_flak_ap_breaker_plus_hammer_wall_breaker_stealth_loss_choice_plus_japanese_water_torture_wall_breaker_future_action_debt_plus_reflector_tagged_breaker_plus_newsgroup_filter_gain_2_credit_action_plus_shield_net_damage_prevention_plus_anonymous_tip_core_command_jettison_ice_forged_activation_orders_if_you_want_it_done_right_misc_for_sale_open_ended_mileage_program_organ_donor_security_code_worm_chip_synchronized_attack_on_hq_valu_pak_software_bundle_corporate_retreat_corporate_war_marine_arcology_political_overthrow_security_purge_haunting_inquisition_zombie_tutor_virizz_edgerunner_temps_off_site_backups_and_planning_consultants_resolvers_plus_unresolved_corp_no_promotion_guards",
     "stateHashReplayStableForCoveredSmokes": true,
     "noOfficialAssets": true,
     "noV2ScopeExpansion": true,
@@ -515,10 +515,19 @@
     },
     {
       "cardCode": "onr_v1_247_haunting-inquisition",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_corp_ice_haunting_inquisition_run_lock",
+      "coveredSmokes": [
+        "rez_ice_legal_action",
+        "run_lock_next_six_runner_actions",
+        "bonus_run_no_click_not_locked",
+        "end_the_run",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
     },
     {
       "cardCode": "onr_v1_274_tutor",
@@ -608,7 +617,7 @@
   ],
   "deferredSummary": {
     "plannedCardCount": 47,
-    "implementedCardCount": 44,
+    "implementedCardCount": 45,
     "finalGateCardCount": 0,
     "deferredCardCount": 0,
     "deferredCardIds": [],

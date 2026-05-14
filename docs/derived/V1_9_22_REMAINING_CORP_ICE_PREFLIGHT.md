@@ -5,22 +5,21 @@ Status: WIP-Preflight mit Errata-1.70-Klaerung, keine Runtime-/Catalog-/AI-Promo
 
 ## Ziel
 
-Nach `Tutor` bleiben zwei Corp-ICE-Zielkarten ohne engen Runtime-Resolver: `Haunting Inquisition` und `Viral 15`. Beide haben lokale Kosten-/Staerke-/Effektkerne, aber ihre Effekte greifen in run-weite oder zukuenftige Timingfenster ein.
+Nach dem Haunting-Inquisition-WIP bleibt eine Corp-ICE-Zielkarte ohne engen Runtime-Resolver: `Viral 15`. Die Karte hat lokale Kosten-/Staerke-/Effektkerne, greift aber in run-weite Timingfenster ein.
 
 ## Kartenbefund
 
 | Karte | Lokaler Regelkern | Blockierender Vertrag |
 | --- | --- | --- |
-| `Haunting Inquisition` | Code Gate, Rez 8, Staerke 6; Run-/Action-Lock fuer die naechsten sechs tatsaechlich genommenen Runner-Aktionen plus End the run. Errata: mehrere Effekte laufen parallel; Bonus-Runs ausserhalb einer Aktion werden nicht verboten. | Action-Zaehler ueber tatsaechlich genommene Aktionen, LegalAction-Filter, Zaehlerverbrauch und PublicPayload. |
 | `Viral 15` | Sentry, Rez 5, Staerke 3; run-weite Jack-out-Steuer und Program-trash nach dem Passieren jeder gerezzten ICE, ausser Runner jackt out. Errata: Runner waehlt die zu trashenden Programme. | Timing nach Passing, Jack-out-Choice, Runner-private Programmauswahl, Mehrfachtrigger und Trash-Visibility. |
 
 ## Kleinste Kandidaten
 
-`Haunting Inquisition` und `Viral 15` bleiben die offenen ICE-Kandidaten. Beide brauchen wegen Action-Lock bzw. Jack-out-/Program-trash-Timing einen expliziten Engine-Vertrag, bevor Code geschrieben wird.
+`Viral 15` bleibt der offene ICE-Kandidat. Der Pfad braucht wegen Jack-out-/Program-trash-Timing einen expliziten Engine-Vertrag, bevor Code geschrieben wird.
 
 ## Entscheidung
 
-Kein Runtime-Code in diesem Preflight. Eine statische ICE-Definition ohne die run-weite Folge waere fachlich unvollstaendig; ein stiller run-weiter Modifier ohne LegalAction-/applyAction-Abdeckung waere Engine-riskant. Die zwei ICE bleiben daher im No-Playable-Runtime-Guard, aber die Errata-Hinweise sind als spaetere Implementierungsgrundlage dokumentiert.
+Der fruehere Haunting-Action-Lock-Befund ist durch den nicht-promotenden Runtime-WIP vom 2026-05-14 17:35 CEST aufgeloest. `Viral 15` bleibt im No-Playable-Runtime-Guard; die Errata-Hinweise sind als spaetere Implementierungsgrundlage dokumentiert.
 
 ## Removal Condition
 

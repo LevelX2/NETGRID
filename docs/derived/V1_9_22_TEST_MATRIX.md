@@ -20,6 +20,7 @@ Status: planned
 
 Update 2026-05-14 17:06 CEST: `Security Purge` ist als nicht-promotender WIP in der Engine-Matrix. Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Security Purge as a side-safe R&D top-three install and trash resolver`; `engine` gruen mit 303 Tests, `catalog` gruen mit 44 Tests.
 Update 2026-05-14 17:25 CEST: `Hammer` hat die offene Mehrfach-Stealth-Verteilungschoice als nicht-promotenden WIP erhalten. Neuer Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::opens a private Hammer Stealth-loss distribution choice for multiple sources`; erster `engine`-Lauf rot wegen fehlender `postBreakStealthLoss`-Spiegelung im Choice-PublicPayload, danach `engine` gruen mit 304 Tests und `catalog` gruen mit 44 Tests.
+Update 2026-05-14 17:35 CEST: `Haunting Inquisition` ist als nicht-promotender Corp-ICE-WIP in der Engine-Matrix. Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Haunting Inquisition and locks normal runs for the next six Runner actions`; `engine` gruen mit 305 Tests, `catalog` nach Manifest-Korrektur gruen mit 44 Tests.
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
 | Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Tutor: engine 302, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter Turbopack-NFT-Warnung |
 

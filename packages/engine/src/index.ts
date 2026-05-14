@@ -2478,6 +2478,13 @@ export function validateGameState(state: GameState): ValidationResult {
         "runnerTurnFlags.forgoNextActionsPending must be a non-negative integer.",
       );
   }
+  if (state.runnerTurnFlags?.runLockActionsPending !== undefined) {
+    const pending = state.runnerTurnFlags.runLockActionsPending;
+    if (!Number.isInteger(pending) || pending < 0)
+      errors.push(
+        "runnerTurnFlags.runLockActionsPending must be a non-negative integer.",
+      );
+  }
   if (
     state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits !== undefined
   ) {
@@ -4199,6 +4206,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
   }
   for (const server of state.corp.servers) {
     const v1918RunTax = v1918RunStartTaxForServer(state, server.id);
+    const runLockActionsPending = Math.max(
+      0,
+      Math.floor(state.runnerTurnFlags?.runLockActionsPending ?? 0),
+    );
     const runCosts = [
       {
         clicks: 1,
@@ -4216,7 +4227,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
           }
         : {}),
     };
-    if (hasClicks) {
+    if (hasClicks && runLockActionsPending <= 0) {
       if (
         v1918RunTax.amount === 0 ||
         availableRunnerRunStartCredits(state) >= v1918RunTax.amount
@@ -7263,6 +7274,21 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     }
     if (subroutine.type === "set_runner_forgo_next_action") {
       applyRunnerForgoNextAction(state);
+    }
+    if (subroutine.type === "set_runner_run_lock_actions") {
+      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
+      const flags = ensureRunnerTurnFlags(state);
+      flags.runLockActionsPending =
+        Math.max(0, Math.floor(flags.runLockActionsPending ?? 0)) + amount;
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          v1922CorpIceAbility: "haunting_inquisition_run_lock",
+          runLockActionsAdded: amount,
+          runLockActionsPending: flags.runLockActionsPending,
+          sourceDefinitionId: definition.id,
+        };
+      }
     }
     if (subroutine.type === "reveal_corp_rd_top") {
       if (definition.id !== ICE_PICK_WILLIE_ID)
@@ -13438,6 +13464,11 @@ function publicContextForAction(
         legalAction.payload.breakSubroutineTotalCost;
     if (typeof legalAction.payload.sourceDefinitionId === "string")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
+    if (typeof legalAction.payload.runLockActionsAdded === "number")
+      context.runLockActionsAdded = legalAction.payload.runLockActionsAdded;
+    if (typeof legalAction.payload.runLockActionsPending === "number")
+      context.runLockActionsPending =
+        legalAction.payload.runLockActionsPending;
   }
   if (legalAction.payload?.v1922EdgerunnerTempsInstallAction === true) {
     context.v1922CorpOperationAbility = "install_action_bundle";
@@ -14216,6 +14247,13 @@ function spendClick(state: GameState, side: Side): void {
   if (state.runner.clicks <= 0)
     throw new Error("Der Runner hat keine Clicks mehr.");
   state.runner.clicks -= 1;
+  consumeRunnerRunLockAction(state);
+}
+
+function consumeRunnerRunLockAction(state: GameState): void {
+  const flags = ensureRunnerTurnFlags(state);
+  const pending = Math.max(0, Math.floor(flags.runLockActionsPending ?? 0));
+  flags.runLockActionsPending = pending > 0 ? pending - 1 : 0;
 }
 
 function spendClicks(state: GameState, side: Side, amount: number): void {
@@ -14661,6 +14699,7 @@ function ensureRunnerTurnFlags(
     allNighterBonusRunPending: false,
     forgoNextActionPending: false,
     forgoNextActionsPending: 0,
+    runLockActionsPending: 0,
     valuPakProgramInstallActionsRemaining: 0,
     valuPakTemporaryProgramInstallCredits: 0,
   });
@@ -14674,6 +14713,7 @@ function ensureRunnerTurnFlags(
   flags.allNighterBonusRunPending ??= false;
   flags.forgoNextActionPending ??= false;
   flags.forgoNextActionsPending ??= 0;
+  flags.runLockActionsPending ??= 0;
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
   return flags;

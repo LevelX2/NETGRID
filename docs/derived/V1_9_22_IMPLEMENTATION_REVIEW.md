@@ -18,6 +18,7 @@ Status: runtime WIP, no release/catalog/AI promotion
 - `Marine Arcology` hat eine Runtime-Definition und eine aktive scored-agenda LegalAction: `[A], [A]: Gain 3`. Der Smoke deckt Wrong-Side-/Stale-Revalidation, Kostenabzug, side-sichere PublicPayloads und Replay/StateHash ab.
 - `Political Overthrow` hat eine Runtime-Definition und eine aktive scored-agenda LegalAction: `[A]: Gain 3`. Der Smoke deckt Wrong-Side-/Stale-Revalidation, Kostenabzug, side-sichere PublicPayloads und Replay/StateHash ab.
 - `Security Purge` hat eine Runtime-Definition und einen engen On-score-R&D-Top-3-Resolver. Der WIP-Vertrag installiert revealed ICE in Reveal-Reihenfolge je in ein neues Remote und rezzed sie sofort; Nicht-ICE wird faceup in Archives getrasht. Der Smoke deckt Wrong-Side-/Stale-Revalidation, side-sichere Public-Reveal-Payloads und Replay/StateHash ab.
+- `Haunting Inquisition` hat eine Runtime-ICE-Definition mit Rez-Kosten 8, Stärke 6, Run-Lock fuer die naechsten sechs tatsaechlich ausgegebenen Runner-Aktionen und End-the-run. Der Smoke deckt Rez-LegalAction, Wrong-Side-/Stale-Revalidation, normale Start-Run-Sperre, Zugwechsel-Persistenz, side-sichere PublicPayloads und Replay/StateHash ab.
 - `Zombie` hat eine Runtime-ICE-Definition mit zwei Core-Damage-Subroutinen und End-the-run. Der Smoke deckt Rez-LegalAction, Wrong-Side-/Stale-Revalidation, side-sichere Run-Auflösung und Replay/StateHash ab.
 - `Tutor` hat eine Runtime-ICE-Definition mit Rez-Kosten 4, Stärke 5 und einem run-weiten Future-Encounter-Modifier. Nach Auflösung der Tutor-Subroutine erhalten später encountered ICE eine zusätzliche breakbare End-the-run-Subroutine am Ende ihrer Subroutine-Liste; Tutor modifiziert nicht den aktuellen Tutor-Encounter. Der Smoke deckt Rez-LegalAction, Wrong-Side-/Stale-Revalidation, synthetische Subroutine-Breakbarkeit, PublicPayload und Replay/StateHash ab.
 - `Virizz` hat eine Runtime-ICE-Definition mit Rez-Kosten 2, Stärke 4 und einem rest-of-run Break-Kostenmodifier. Nach Auflösung der Virizz-Subroutine projiziert die Engine +1 Credit auf nachfolgende `break_subroutine`-LegalActions, revalidiert die Gesamtkosten über `applyAction` und schreibt side-sichere PublicPayloads. Der Smoke deckt Rez-LegalAction, Wrong-Side-/Stale-Revalidation, Kostenprojektion, PublicPayload und Replay/StateHash ab.
@@ -57,9 +58,9 @@ Status: runtime WIP, no release/catalog/AI promotion
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: `Data Fort Reclamation`, `Haunting Inquisition`, `Viral 15` oder `Zetatech Software Installer` Restricted-Credit-/Overlay-Vertrag. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
+Naechster kleiner Schnitt: `Data Fort Reclamation`, `Viral 15` oder `Zetatech Software Installer` Restricted-Credit-/Overlay-Vertrag. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
 
-Blocker-Abgleich 2026-05-14 17:25 CEST: `Tutor`, `Virizz`, `Security Purge` und die `Hammer`-Mehrfach-Stealth-Verteilungschoice sind als Runtime-WIPs umgesetzt und bleiben ohne Catalog-, AI- oder Release-Promotion. `Data Fort Reclamation`, `Haunting Inquisition` und `Viral 15` bleiben fuer Promotion bzw. Vollabschluss gesperrt, bis die jeweils dokumentierten LegalAction-/applyAction-, Visibility- und Replay-/StateHash-Vertraege geschlossen sind. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
+Blocker-Abgleich 2026-05-14 17:35 CEST: `Tutor`, `Virizz`, `Security Purge`, die `Hammer`-Mehrfach-Stealth-Verteilungschoice und `Haunting Inquisition` sind als Runtime-WIPs umgesetzt und bleiben ohne Catalog-, AI- oder Release-Promotion. `Data Fort Reclamation` und `Viral 15` bleiben fuer Promotion bzw. Vollabschluss gesperrt, bis die jeweils dokumentierten LegalAction-/applyAction-, Visibility- und Replay-/StateHash-Vertraege geschlossen sind. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
 
 ## Verifikation
 
@@ -88,6 +89,8 @@ Blocker-Abgleich 2026-05-14 17:25 CEST: `Tutor`, `Virizz`, `Security Purge` und 
 - Breiter Verify nach `Hammer`: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; erster `lint` vor `build` rot wegen stale `.next/types/validator.ts`, nach Build-Erneuerung gruen; Build nur mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: erster Lauf rot wegen fehlender `postBreakStealthLoss`-Spiegelung im Choice-PublicPayload, danach pass, 304 Tests inkl. `Hammer` Runner-privater Stealth-Verteilungschoice bei mehreren Quellen.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Hammer-Choice-Manifest-/Coverage-/Szenario-Alignment.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 305 Tests inkl. `Haunting Inquisition` Run-Lock fuer die naechsten sechs Runner-Aktionen.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: initial rot wegen falsch zugeordnetem Manifest-Resolver auf `Data Fort Reclamation`, danach pass, 44 Tests nach Haunting-Manifest-/Coverage-/Szenario-Alignment.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen noch fehlender JWT-Runtime-Definition und ueberholter Runner-Programm-Guards, danach pass, 300 Tests inkl. `Japanese Water Torture` Future-Action-Debt.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Japanese-Water-Torture-Manifest-/Coverage-/Szenario-Alignment.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Future-Action-Debt-State-Erweiterung.

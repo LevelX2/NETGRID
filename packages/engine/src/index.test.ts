@@ -15554,10 +15554,128 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("rezzes Haunting Inquisition and locks normal runs for the next six Runner actions", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-haunting-inquisition-run-lock",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_haunting",
+          name: "O:NR V1.9.22 Haunting Runner",
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_haunting",
+          name: "O:NR V1.9.22 Haunting Corp",
+          cards: [
+            { id: "onr_v1_247_haunting-inquisition", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.corp.credits = 20;
+    const hauntingId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_247_haunting-inquisition",
+    );
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === hauntingId,
+    );
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: continueAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-haunting-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: continueAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-haunting-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.runnerTurnFlags?.runLockActionsPending).toBe(6);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      v1922CorpIceAbility: "haunting_inquisition_run_lock",
+      runLockActionsAdded: 6,
+      runLockActionsPending: 6,
+      sourceDefinitionId: "onr_v1_247_haunting-inquisition",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"/,
+    );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run",
+      ),
+    ).toBe(false);
+
+    for (let index = 0; index < 3; index += 1) {
+      state = apply(state, "runner", (action) => action.type === "gain_credit");
+    }
+    expect(state.runnerTurnFlags?.runLockActionsPending).toBe(3);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.runnerTurnFlags?.runLockActionsPending).toBe(3);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run",
+      ),
+    ).toBe(false);
+
+    for (let index = 0; index < 3; index += 1) {
+      state = apply(state, "runner", (action) => action.type === "gain_credit");
+    }
+    expect(state.runnerTurnFlags?.runLockActionsPending).toBe(0);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      ),
+    ).toBe(true);
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
       "onr_v1_197_data-fort-reclamation",
-      "onr_v1_247_haunting-inquisition",
       "onr_v1_276_viral-15",
     ] as const;
 
@@ -15573,6 +15691,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
       "onr_v1_216_security-purge",
+      "onr_v1_247_haunting-inquisition",
       "onr_v1_280_zombie",
       "onr_v1_274_tutor",
       "onr_v1_277_virizz",
