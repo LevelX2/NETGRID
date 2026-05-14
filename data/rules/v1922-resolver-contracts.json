@@ -128,11 +128,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "runtime_ordered_stealth_loss_wip_no_promotion",
+      "contractStatus": "runtime_stealth_loss_distribution_choice_wip_no_promotion",
       "confirmedLocalFacts": ["install_cost_2", "memory_cost_1", "breaker_strength_2", "break_wall_subroutine_for_1", "pump_plus_1_strength_for_1", "wall_subroutine_defined_by_ice_subtype", "standard_breaker_contract_user_confirmed", "noisy_cards_do_not_require_stealth_cards_in_play", "when_breaking_wall_with_hammer_lose_total_up_to_2_from_stealth_cards", "runner_chooses_distribution_if_multiple_stealth_sources"],
-      "safeCurrentCoverage": ["install_program_legal_action", "pump_breaker_legal_action", "break_wall_subroutine_legal_action", "ordered_stealth_loss", "wrong_side_stale_revalidation", "public_payload_visibility", "replay_statehash"],
-      "missingInformation": ["runner_choice_distribution_for_multiple_stealth_sources", "ai_fallback", "final_catalog_release_promotion"],
-      "removalCondition": "Keep Catalog, AI and release promotion closed until the multiple-Stealth-source distribution choice and final V1.9.22 completion gates are satisfied."
+      "safeCurrentCoverage": ["install_program_legal_action", "pump_breaker_legal_action", "break_wall_subroutine_legal_action", "single_source_stealth_loss", "runner_private_multi_source_stealth_loss_choice", "wrong_side_stale_revalidation", "public_payload_visibility", "replay_statehash"],
+      "missingInformation": ["ai_fallback", "final_catalog_release_promotion"],
+      "removalCondition": "Keep Catalog, AI and release promotion closed until final V1.9.22 completion gates are satisfied."
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",

@@ -81,15 +81,25 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Ergebnis: Weitere V1.9.22-Kartenfakten sind lokal verbindlich nachgezogen, ohne Runtime-, Catalog-, AI- oder Release-Promotion.
 - `Zetatech Software Installer`: Installkosten 0, MU 1; offen bleiben Restricted-Credit-Zahlungsfenster und Overlay-Vertrag.
 - `Flak`: Installkosten 4, Staerke 2, `1: Break AP subroutine`, `1: +1 Strength`; AP-Subroutine-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
-- `Hammer`: Installkosten 2, MU 1, Staerke 2, `1: Break Wall subroutine`, `1: +1 Strength`; Runtime-WIP ohne Promotion ist umgesetzt mit deterministischem bis-zu-2-Stealth-Counter-Verlust aus installierten Stealth-Quellen. Offen bleibt die freie Runner-Verteilung, falls mehrere Stealth-Quellen verfuegbar sind.
+- `Hammer`: Installkosten 2, MU 1, Staerke 2, `1: Break Wall subroutine`, `1: +1 Strength`; Runtime-WIP ohne Promotion ist umgesetzt mit deterministischem bis-zu-2-Stealth-Counter-Verlust bei einzelner Stealth-Quelle und Runner-privater Verteilungschoice bei mehreren Stealth-Quellen.
 - `Japanese Water Torture`: Installkosten 7, Staerke 2, `0: Break Wall subroutine`, `X: +X strength, and forgo your next X actions`; Runtime-WIP ohne Promotion ist umgesetzt mit Wall-Break, Pump und echter zuguebergreifender Future-Action-Debt.
 - `Reflector`: Program/Icebreaker, MU 1, Installkosten 2, Staerke 4, `0: Break stun, hellbolt or knockout subroutine`; Zielkategorie-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
 - `Virizz`: Rez-Kosten 2, Staerke 4; Runtime-WIP ohne Promotion ist umgesetzt mit rest-of-run +1-Credit-Break-Kostenmodifier, LegalAction-Kostenprojektion und applyAction-Revalidierung.
 - Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
 - `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
-- Naechster sinnvoller Code-Schnitt: `Hammer`-Mehrfach-Stealth-Verteilungschoice, `Data Fort Reclamation`, `Haunting Inquisition`, `Viral 15` oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
+- Naechster sinnvoller Code-Schnitt: `Data Fort Reclamation`, `Haunting Inquisition`, `Viral 15` oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 17:25 CEST
+- Ergebnis: V1.9.22 Hammer-Stealth-Verteilungschoice-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Hammer` hat nach dem vorhandenen Wall-Breaker-WIP nun die fehlende Runner-private Mehrfach-Stealth-Verteilungschoice erhalten. Bei einer einzelnen Stealth-Quelle bleibt der Verlust deterministisch; bei mehreren verfügbaren Stealth-Quellen öffnet die Engine eine `resolve_choice`-Barriere für den Runner und veröffentlicht nur Count-/Choice-Metadaten. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen fehlender `postBreakStealthLoss`-Spiegelung im Choice-PublicPayload, danach pass (304); `catalog` pass (44).
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: hammer stealth choice wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation`, `Haunting Inquisition`, `Viral 15`, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 16:51 CEST
 - Ergebnis: V1.9.22 Tutor-Future-ETR-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

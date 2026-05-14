@@ -19,6 +19,7 @@ Status: planned
 | Completion Gate | Offene Abschlussgates bleiben maschinenlesbar und verhindern Cursor-Fortschritt | `data/reports/v1922-completion-gate-status.json` gruen; Release bleibt `blocked_open` |
 
 Update 2026-05-14 17:06 CEST: `Security Purge` ist als nicht-promotender WIP in der Engine-Matrix. Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Security Purge as a side-safe R&D top-three install and trash resolver`; `engine` gruen mit 303 Tests, `catalog` gruen mit 44 Tests.
+Update 2026-05-14 17:25 CEST: `Hammer` hat die offene Mehrfach-Stealth-Verteilungschoice als nicht-promotenden WIP erhalten. Neuer Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::opens a private Hammer Stealth-loss distribution choice for multiple sources`; erster `engine`-Lauf rot wegen fehlender `postBreakStealthLoss`-Spiegelung im Choice-PublicPayload, danach `engine` gruen mit 304 Tests und `catalog` gruen mit 44 Tests.
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
 | Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Tutor: engine 302, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter Turbopack-NFT-Warnung |
 
@@ -49,12 +50,13 @@ Update 2026-05-14 17:06 CEST: `Security Purge` ist als nicht-promotender WIP in 
 
 ## Hammer 2026-05-14 15:54 CEST
 
-- Zusatzschnitt: `Hammer` ist als Runner-Programm-Wall-Breaker-Runtime-WIP mit Installkosten 2, MU 1, Staerke 2, Pump fuer 1 Credit, Wall-Subroutine-Break fuer 1 Credit und geordnetem Stealth-Counter-Verlust bis 2 umgesetzt.
-- Zusatzabdeckung: Install, Pump, Break, Wrong-Side-/Stale-Revalidation, Stealth-Counter-Wirkung, PublicPayload/PlayerViews und Replay/StateHash. Die freie Runner-Verteilung bei mehreren Stealth-Quellen bleibt fuer den Vollvertrag offen.
+- Zusatzschnitt: `Hammer` ist als Runner-Programm-Wall-Breaker-Runtime-WIP mit Installkosten 2, MU 1, Staerke 2, Pump fuer 1 Credit, Wall-Subroutine-Break fuer 1 Credit, deterministischem Stealth-Counter-Verlust bei einzelner Quelle und Runner-privater Verteilungschoice bei mehreren Stealth-Quellen umgesetzt.
+- Zusatzabdeckung: Install, Pump, Break, Wrong-Side-/Stale-Revalidation, Stealth-Counter-Wirkung, Choice-Visibility, PublicPayload/PlayerViews und Replay/StateHash.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 301 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
 - Breiter Verify: `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen; Build nur mit bekannter Turbopack-NFT-Warnung.
+- Follow-up 2026-05-14 17:25 CEST: `engine` initial rot wegen fehlender Choice-PublicPayload-Spiegelung, danach pass mit 304 Tests; `catalog` pass mit 44 Tests.
 
 ## Nicht-Breaker-Programme 2026-05-14 01:00 CEST
 

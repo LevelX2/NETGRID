@@ -10573,6 +10573,12 @@ function resolvePendingChoice(
     resolveV1922OpenEndedMileageReturnChoice(state, legalAction, playerAction);
     return;
   }
+  if (
+    state.pendingChoice.source.startsWith("v1922.hammer_stealth_loss")
+  ) {
+    resolveV1922HammerStealthLossChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
     resolveRunnerHostingChoice(state, legalAction, playerAction);
     return;
@@ -12983,6 +12989,16 @@ function publicContextForAction(
     context.postBreakStealthLoss = legalAction.payload.postBreakStealthLoss;
   }
   if (
+    legalAction.type === "resolve_choice" &&
+    typeof legalAction.payload?.postBreakStealthLoss === "number"
+  ) {
+    context.postBreakStealthLoss = legalAction.payload.postBreakStealthLoss;
+  }
+  if (typeof legalAction.payload?.postBreakStealthLossPending === "number") {
+    context.postBreakStealthLossPending =
+      legalAction.payload.postBreakStealthLossPending;
+  }
+  if (
     legalAction.type === "gain_credit" ||
     legalAction.type === "draw_card" ||
     legalAction.type === "remove_tag"
@@ -14052,15 +14068,29 @@ function applyPostBreakStealthLoss(
   );
   const lossAmount = ability?.postBreakStealthLoss ?? 0;
   if (lossAmount <= 0) return;
+  const stealthSources = runnerStealthRecurringCreditSources(state);
+  const requiredLoss = Math.min(
+    lossAmount,
+    stealthSources.reduce((sum, source) => sum + source.available, 0),
+  );
+  if (requiredLoss <= 0) return;
+  if (stealthSources.length > 1) {
+    startV1922HammerStealthLossChoice(
+      state,
+      breakerId,
+      requiredLoss,
+      stealthSources,
+    );
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      postBreakStealthLossPending: requiredLoss,
+    };
+    return;
+  }
   let remaining = lossAmount;
   let spent = 0;
-  for (const cardId of [
-    ...state.runner.rig.hardware,
-    ...state.runner.rig.programs,
-    ...state.runner.rig.resources,
-  ]) {
+  for (const { cardId } of stealthSources) {
     if (remaining <= 0) break;
-    if (!cardHasSubtype(definitionFor(state, cardId), "stealth")) continue;
     const available = cardCounter(state, cardId, "recurring_credit");
     const cardSpent = Math.min(available, remaining);
     if (cardSpent > 0) {
@@ -14072,6 +14102,93 @@ function applyPostBreakStealthLoss(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     postBreakStealthLoss: spent,
+  };
+}
+
+function runnerStealthRecurringCreditSources(
+  state: GameState,
+): { cardId: CardInstanceId; available: number }[] {
+  const runnerRig = [
+    ...state.runner.rig.hardware,
+    ...state.runner.rig.programs,
+    ...state.runner.rig.resources,
+  ];
+  const sources: { cardId: CardInstanceId; available: number }[] = [];
+  for (const cardId of runnerRig) {
+    if (!cardHasSubtype(definitionFor(state, cardId), "stealth")) continue;
+    const available = cardCounter(state, cardId, "recurring_credit");
+    if (available > 0) sources.push({ cardId, available });
+  }
+  return sources;
+}
+
+function startV1922HammerStealthLossChoice(
+  state: GameState,
+  breakerId: CardInstanceId,
+  requiredLoss: number,
+  sources: { cardId: CardInstanceId; available: number }[],
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options: ChoiceRequest["options"] = [];
+  for (const source of sources) {
+    const definition = definitionFor(state, source.cardId);
+    for (
+      let creditIndex = 0;
+      creditIndex < Math.min(source.available, requiredLoss);
+      creditIndex += 1
+    ) {
+      options.push({
+        id: `stealth_${source.cardId}_${creditIndex + 1}`,
+        label: `${definition.title}: 1 Stealth-Credit verlieren`,
+        value: source.cardId,
+      });
+    }
+  }
+  state.pendingChoice = {
+    choiceId: `choice_v1922_hammer_stealth_loss_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.hammer_stealth_loss:${breakerId}:${state.stateVersion + 1}`,
+    prompt: "Stealth-Verlust fuer Hammer verteilen.",
+    kind: "select_cards",
+    options,
+    minSelections: requiredLoss,
+    maxSelections: requiredLoss,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function resolveV1922HammerStealthLossChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.hammer_stealth_loss"))
+    throw new Error("Hammer-Stealth-Choice ist nicht offen.");
+  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  const lossByCardId = new Map<CardInstanceId, number>();
+  for (const optionId of selectedOptionIds) {
+    const option = choice.options.find((candidate) => candidate.id === optionId);
+    const cardId =
+      typeof option?.value === "string"
+        ? (option.value as CardInstanceId)
+        : undefined;
+    if (!cardId) throw new Error("Ungueltige Hammer-Stealth-Auswahl.");
+    lossByCardId.set(cardId, (lossByCardId.get(cardId) ?? 0) + 1);
+  }
+  for (const [cardId, amount] of lossByCardId) {
+    if (!cardHasSubtype(definitionFor(state, cardId), "stealth"))
+      throw new Error("Nur Stealth-Karten koennen gewaehlt werden.");
+    spendCardCounter(state, cardId, "recurring_credit", amount);
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_hammer_stealth_loss_distribution",
+    selectedCount: selectedOptionIds.length,
+    postBreakStealthLoss: selectedOptionIds.length,
   };
 }
 

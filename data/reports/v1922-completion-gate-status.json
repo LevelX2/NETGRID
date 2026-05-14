@@ -78,7 +78,7 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-14T16:51:00+02:00",
+    "implementedAt": "2026-05-14T17:21:00+02:00",
       "cards": [
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
@@ -108,6 +108,7 @@
       "onr_v1_196_corporate-war",
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
+      "onr_v1_216_security-purge",
       "onr_v1_280_zombie",
       "onr_v1_274_tutor",
       "onr_v1_277_virizz",
@@ -119,6 +120,7 @@
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs V1.9.22 install-only runner programs while keeping their abilities gated",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Flak and breaks AP ICE subroutines without release promotion",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Hammer and applies ordered Stealth loss after breaking Wall subroutines without release promotion",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::opens a private Hammer Stealth-loss distribution choice for multiple sources",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Japanese Water Torture, breaks Wall subroutines and carries future action debt without release promotion",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Reflector and only breaks tagged stun or knockout subroutines",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Newsgroup Filter and uses its side-safe credit action",
@@ -137,6 +139,7 @@
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Corporate War through a deterministic on-score credit threshold resolver",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Marine Arcology as a side-safe scored-agenda action for Gain 3",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::uses Political Overthrow as a side-safe scored-agenda action for Gain 3",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Security Purge as a side-safe R&D top-three install and trash resolver",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Zombie as core-damage ICE with replay-stable public run resolution",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Tutor and adds a breakable end-the-run subroutine to later ice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Virizz and applies a rest-of-run break-cost modifier without release promotion",
@@ -184,8 +187,8 @@
       },
       {
         "cardId": "onr_v1_031_hammer",
-        "status": "runtime_ordered_stealth_loss_wip_pending_multi_stealth_choice_no_promotion",
-        "removalCondition": "Add Runner-choice distribution for multiple Stealth sources before any final promotion."
+        "status": "runtime_stealth_loss_distribution_choice_no_promotion",
+        "removalCondition": "Keep catalog, AI and release promotion closed until final V1.9.22 gates."
       },
       {
         "cardId": "onr_v1_037_japanese-water-torture",
@@ -236,8 +239,8 @@
     "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
   },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T17:06:00+02:00",
-    "status": "remaining_technical_contracts_open_after_security_purge_wip",
+    "reviewedAt": "2026-05-14T17:21:00+02:00",
+    "status": "remaining_technical_contracts_open_after_hammer_choice_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -248,7 +251,7 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets. Tutor, Virizz and Security Purge now have non-promoting WIPs in addition to previous WIPs; Hammer's multi-Stealth-source distribution and final promotion gates remain open.",
+    "summary": "Local card facts exist for all remaining targets. Tutor, Virizz, Security Purge and Hammer multi-Stealth-source distribution now have non-promoting WIPs; three Corp longtail contracts and final promotion gates remain open.",
     "blockedCards": [
       "onr_v1_197_data-fort-reclamation",
       "onr_v1_247_haunting-inquisition",

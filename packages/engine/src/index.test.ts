@@ -13484,6 +13484,150 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("opens a private Hammer Stealth-loss distribution choice for multiple sources", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-hammer-stealth-choice",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_hammer_choice",
+          name: "O:NR V1.9.22 Hammer Choice",
+          cards: [
+            { id: "onr_v1_011_cloak", quantity: 1 },
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            { id: "onr_v1_035_invisibility", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_hammer_choice",
+          name: "O:NR V1.9.22 Hammer Choice Corp",
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 5;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    moveRunnerCardToGrip(state, "onr_v1_035_invisibility");
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_011_cloak",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_035_invisibility",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer",
+    );
+    const cloakId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_011_cloak",
+    );
+    const invisibilityId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_035_invisibility",
+    );
+    expect(cloakId).toBeDefined();
+    expect(invisibilityId).toBeDefined();
+    if (!cloakId || !invisibilityId)
+      throw new Error("Missing installed Stealth sources");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer" &&
+        action.payload?.subroutineIndex === 0,
+    );
+
+    expect(state.pendingChoice?.source).toContain(
+      "v1922.hammer_stealth_loss",
+    );
+    expect(state.pendingChoice?.side).toBe("runner");
+    expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
+    expect(state.pendingChoice?.minSelections).toBe(2);
+    expect(state.pendingChoice?.maxSelections).toBe(2);
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_031_hammer",
+      postBreakStealthLossPending: 2,
+    });
+
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    const cloakOption = runnerChoice?.options.find(
+      (option) => option.value === cloakId,
+    );
+    const invisibilityOption = runnerChoice?.options.find(
+      (option) => option.value === invisibilityId,
+    );
+    expect(cloakOption).toBeDefined();
+    expect(invisibilityOption).toBeDefined();
+    if (!cloakOption || !invisibilityOption)
+      throw new Error("Missing Hammer Stealth options");
+
+    state = applyChoices(state, "runner", [
+      cloakOption.id,
+      invisibilityOption.id,
+    ]);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, invisibilityId, "recurring_credit")).toBe(
+      0,
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "v1922_hammer_stealth_loss_distribution",
+      selectedCount: 2,
+      postBreakStealthLoss: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"/,
+    );
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("installs Flak and breaks AP ICE subroutines without release promotion", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

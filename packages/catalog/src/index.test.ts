@@ -3121,7 +3121,7 @@ describe("catalog import and status logic", () => {
         "v1922_runner_program_net_damage_prevention",
         "v1922_runner_program_newsgroup_filter_gain_2",
         "v1922_runner_program_flak_ap_breaker",
-        "v1922_runner_program_hammer_wall_breaker_ordered_stealth_loss",
+        "v1922_runner_program_hammer_wall_breaker_stealth_loss_choice",
         "v1922_runner_program_japanese_water_torture_future_action_debt",
         "v1922_runner_program_reflector_tagged_breaker",
       ].includes(card.resolverFamily),
@@ -3293,7 +3293,7 @@ describe("catalog import and status logic", () => {
         expect(card.coveredSmokes).toEqual(
           expect.arrayContaining([
             "wall_break_subroutine",
-            "ordered_stealth_loss",
+            "stealth_loss_distribution_choice",
             "pump_strength",
             "wrong_side_revalidation",
             "stale_state_revalidation",
