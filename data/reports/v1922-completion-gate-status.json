@@ -163,6 +163,7 @@
         "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
         "docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md",
         "docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md",
+        "docs/derived/V1_9_22_ZETATECH_OVERLAY_RUNTIME_CONTRACT.md",
         "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md",
         "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md",
         "docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md"
@@ -210,8 +211,8 @@
       },
       {
         "cardId": "onr_v1_075_zetatech-software-installer",
-        "status": "runtime_recurring_program_install_credit_wip_pending_overlay_contract",
-        "removalCondition": "Keep overlay installation unavailable until its state-transition contract is written; keep catalog, AI and release promotion closed until final V1.9.22 gates."
+        "status": "runtime_recurring_program_install_credit_overlay_wip_no_promotion",
+        "removalCondition": "Keep catalog, AI and release promotion closed until final V1.9.22 gates."
       }
     ],
     "decision": "no_runtime_catalog_or_ai_promotion"
@@ -259,16 +260,16 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all V1.9.22 targets. Viral 15 and Data-Fort rez/credit follow-up now have non-promoting runtime WIPs; Zetatech overlay and final promotion gates remain open.",
+    "summary": "Local card facts exist for all V1.9.22 targets. Viral 15, Data-Fort rez/credit follow-up and Zetatech overlay now have non-promoting runtime WIPs; final promotion gates remain open.",
     "blockedCards": [],
-    "removalCondition": "Close Zetatech overlay before final runtime/catalog/AI promotion."
+    "removalCondition": "Prepare final runtime/catalog/AI promotion artifacts, webclient version and final review."
   },
   "blockingGates": [
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "All 47 V1.9.22 target cards now have non-promoting runtime WIP coverage, including Viral 15 and Data-Fort rez/credit accounting; Zetatech overlay and final promotion artifacts are still not closed.",
-      "removalCondition": "Close Zetatech overlay follow-up; add final Manifest/Coverage, AI and web gates before release promotion."
+      "summary": "All 47 V1.9.22 target cards now have non-promoting runtime WIP coverage, including Viral 15, Data-Fort rez/credit accounting and Zetatech overlay; final promotion artifacts are still not closed.",
+      "removalCondition": "Add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {
       "gateId": "ai_promotion_artifacts",

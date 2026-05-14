@@ -3812,6 +3812,36 @@ function runnerMainActions(state: GameState): LegalAction[] {
         (definition.installCost ?? 0)
     ) {
       for (const hostId of state.runner.rig.programs) {
+        if (canOverlayProgramOnZetatechSoftwareInstaller(state, hostId, definition)) {
+          const hostDefinition = definitionFor(state, hostId);
+          actions.push(
+            action(
+              state,
+              "runner",
+              "install_card",
+              `${definition.title} über ${hostDefinition.title} installieren`,
+              id,
+              [{ clicks: 1, credits: definition.installCost ?? 0 }],
+              {
+                cardId: id,
+                hostOnCardId: hostId,
+                v1922ZetatechOverlayInstall: true,
+              },
+              {
+                targetRequirements: [
+                  {
+                    id: "zetatechOverlayHost",
+                    kind: "card",
+                    side: "runner",
+                    zoneScope: ["runner.rig.programs"],
+                    visibility: "public",
+                  },
+                ],
+              },
+            ),
+          );
+          continue;
+        }
         if (!canHostProgramOnDaemon(state, hostId, definition)) continue;
         const hostDefinition = definitionFor(state, hostId);
         actions.push(
@@ -4407,6 +4437,23 @@ function canHostProgramOnDaemon(
     daemonHostedMemoryUsed(state, hostId) +
       (programDefinition.memoryCost ?? 0) <=
     capacity
+  );
+}
+
+function canOverlayProgramOnZetatechSoftwareInstaller(
+  state: GameState,
+  hostId: CardInstanceId,
+  programDefinition: CardDefinition,
+): boolean {
+  if (programDefinition.type !== "program") return false;
+  const hostInstance = mustInstance(state.cardInstances, hostId);
+  const hostDefinition = definitionFor(state, hostId);
+  return (
+    hostDefinition.id === V1922_ZETATECH_SOFTWARE_INSTALLER_ID &&
+    hostDefinition.type === "program" &&
+    state.runner.rig.programs.includes(hostId) &&
+    !hostInstance.hostedOn &&
+    hostedCardsOn(state, hostId).length === 0
   );
 }
 
@@ -6814,6 +6861,8 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       typeof legalAction.payload?.hostOnCardId === "string"
         ? String(legalAction.payload.hostOnCardId)
         : undefined;
+    const zetatechOverlayInstall =
+      legalAction.payload?.v1922ZetatechOverlayInstall === true;
     const selectedServerId =
       typeof legalAction.payload?.selectedServerId === "string"
         ? String(legalAction.payload.selectedServerId)
@@ -6831,9 +6880,17 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     if (
       definition.type === "program" &&
       hostOnCardId &&
-      !canHostProgramOnDaemon(state, hostOnCardId, definition)
+      !(
+        zetatechOverlayInstall
+          ? canOverlayProgramOnZetatechSoftwareInstaller(
+              state,
+              hostOnCardId,
+              definition,
+            )
+          : canHostProgramOnDaemon(state, hostOnCardId, definition)
+      )
     ) {
-      throw new Error("Der angegebene Daemon-Host hat nicht genug freie MU.");
+      throw new Error("Der angegebene Program-Host ist ungueltig.");
     }
     if (
       definition.id === "onr_v1_173_restrictive-net-zoning" &&
@@ -6847,6 +6904,10 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       selectedServerId && selectedServerId !== "new_remote"
         ? (selectedServerId as Exclude<ServerId, "new_remote">)
         : undefined;
+    const zetatechRecurringBefore =
+      zetatechOverlayInstall && hostOnCardId
+        ? cardCounter(state, hostOnCardId, "recurring_credit")
+        : 0;
     if (definition.id === "onr_v1_156_corporate-ally") {
       const agendaCost = Number(
         legalAction.payload?.installAgendaPointCost ?? 0,
@@ -6922,6 +6983,23 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         ? { selectedServerId: restrictiveTargetServerId }
         : {}),
     };
+    if (zetatechOverlayInstall) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922RunnerProgramAbility: "zetatech_overlay_install",
+        zetatechOverlayInstall: true,
+        hostDefinitionId: V1922_ZETATECH_SOFTWARE_INSTALLER_ID,
+        zetatechRecurringCreditsSpent:
+          zetatechOverlayInstall && hostOnCardId
+            ? Math.max(
+                0,
+                zetatechRecurringBefore -
+                  cardCounter(state, hostOnCardId, "recurring_credit"),
+              )
+            : 0,
+        runnerCreditsAfter: state.runner.credits,
+      };
+    }
     consumeV1922ValuPakInstallAction(state, legalAction);
     if (definition.id === "v099_host_resource")
       startRunnerHostingChoice(state, cardId, legalAction);
@@ -13365,7 +13443,18 @@ function publicContextForAction(
           : "Rig"
         : legalAction.payload?.placement === "ice"
           ? "ICE"
-          : "Remote";
+        : "Remote";
+    if (legalAction.payload?.zetatechOverlayInstall === true) {
+      context.v1922RunnerProgramAbility = "zetatech_overlay_install";
+      context.zetatechOverlayInstall = true;
+      if (typeof legalAction.payload.hostDefinitionId === "string")
+        context.hostDefinitionId = legalAction.payload.hostDefinitionId;
+      if (typeof legalAction.payload.zetatechRecurringCreditsSpent === "number")
+        context.zetatechRecurringCreditsSpent =
+          legalAction.payload.zetatechRecurringCreditsSpent;
+      if (typeof legalAction.payload.runnerCreditsAfter === "number")
+        context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
+    }
   }
   if (legalAction.type === "trash_resource") context.zoneLabel = "Resource";
   if (legalAction.type === "rez_ice")

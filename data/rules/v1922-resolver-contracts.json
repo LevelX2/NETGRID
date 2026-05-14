@@ -260,11 +260,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "runtime_recurring_program_install_credit_wip_no_promotion",
+      "contractStatus": "runtime_recurring_program_install_credit_overlay_wip_no_promotion",
       "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "errata_put_2_from_bank", "recurring_2_credits_for_installing_programs", "refresh_from_bank_at_runner_turn_start", "may_install_program_over_itself"],
-      "safeCurrentCoverage": ["install_program_legal_action", "recurring_program_install_credit", "runner_turn_start_recurring_refresh", "wrong_side_stale_revalidation", "public_payload_visibility", "replay_statehash", "overlay_contract_remains_gated"],
-      "missingInformation": ["overlay_install_state_transition", "ai_fallback", "final_catalog_release_promotion"],
-      "removalCondition": "Keep overlay installation unavailable until its state-transition contract is written; keep catalog, AI and release promotion closed until final V1.9.22 gates."
+      "safeCurrentCoverage": ["install_program_legal_action", "recurring_program_install_credit", "runner_turn_start_recurring_refresh", "zetatech_overlay_install", "overlay_hosted_on_zetatech", "overlay_no_extra_memory", "wrong_side_stale_revalidation", "public_payload_visibility", "replay_statehash"],
+      "missingInformation": ["ai_fallback", "final_catalog_release_promotion"],
+      "removalCondition": "Keep catalog, AI and release promotion closed until final V1.9.22 gates."
     },
     {
       "cardId": "onr_v1_077_anonymous-tip",

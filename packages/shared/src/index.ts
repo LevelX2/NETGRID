@@ -5499,14 +5499,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     memoryCost: 1,
     recurringCredits: 2,
     rulesText:
-      "2 recurring credits. Use these credits to install programs. Its overlying ability remains gated until that state-transition contract is confirmed.",
+      "2 recurring credits. Use these credits to install programs. You may install a program over Zetatech Software Installer; overlay programs use no additional MU.",
     mechanics: [
       "install_program",
       "memory",
       "recurring_credit",
       "program_install_support",
+      "overlay_program_install",
       "per_card_longtail",
-      "ability_contract_pending",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

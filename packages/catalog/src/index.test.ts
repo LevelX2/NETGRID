@@ -3124,7 +3124,7 @@ describe("catalog import and status logic", () => {
         "v1922_runner_program_hammer_wall_breaker_stealth_loss_choice",
         "v1922_runner_program_japanese_water_torture_future_action_debt",
         "v1922_runner_program_reflector_tagged_breaker",
-        "v1922_runner_program_zetatech_software_installer_recurring_program_install",
+        "v1922_runner_program_zetatech_software_installer_recurring_program_install_overlay",
       ].includes(card.resolverFamily),
     );
     const corpAgendaResolverCards = manifestCards.filter((card) =>
@@ -3281,7 +3281,8 @@ describe("catalog import and status logic", () => {
           expect.arrayContaining([
             "recurring_program_install_credit",
             "runner_turn_start_recurring_refresh",
-            "overlay_contract_remains_gated",
+            "zetatech_overlay_install",
+            "overlay_no_extra_memory",
           ]),
         );
       }

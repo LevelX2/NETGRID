@@ -14118,6 +14118,101 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(validateGameState(state).ok).toBe(true);
   });
 
+  it("overlays a program on Zetatech Software Installer without extra MU", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-zetatech-overlay-install",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_zetatech_overlay",
+          name: "O:NR V1.9.22 Zetatech Overlay",
+          cards: [
+            { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 0;
+    state.runner.memoryLimit = 1;
+    const installerId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_075_zetatech-software-installer",
+    );
+    const hammerId = moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_075_zetatech-software-installer",
+    );
+    expect(state.runner.memoryUsed).toBe(1);
+    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(2);
+
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === hammerId &&
+        action.payload?.v1922ZetatechOverlayInstall === true,
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-zetatech-overlay-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-zetatech-overlay-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === legal.actionId,
+    );
+
+    expect(state.runner.rig.programs).toContain(hammerId);
+    expect(state.cardInstances[hammerId]?.hostedOn).toBe(installerId);
+    expect(state.runner.memoryUsed).toBe(1);
+    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(0);
+    expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: "onr_v1_031_hammer",
+      v1922RunnerProgramAbility: "zetatech_overlay_install",
+      zetatechOverlayInstall: true,
+      hostDefinitionId: "onr_v1_075_zetatech-software-installer",
+      zetatechRecurringCreditsSpent: 2,
+      runnerCreditsAfter: 0,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("installs Newsgroup Filter and uses its side-safe credit action", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

@@ -33,7 +33,7 @@ Status: runtime WIP, no release/catalog/AI promotion
 - `Hammer` hat eine Runtime-Definition mit Installkosten 2, MU 1, Staerke 2, Pump fuer 1 Credit, Wall-Subroutine-Break fuer 1 Credit, deterministischem Stealth-Counter-Verlust bei einzelner Quelle und Runner-privater Verteilungschoice bei mehreren Stealth-Quellen. Die Smokes decken Install, Pump, Break, Wrong-Side-/Stale-Revalidation, PublicPayload, Counterwirkung, Choice-Visibility und Replay/StateHash ab.
 - `Japanese Water Torture` hat eine Runtime-Definition mit Installkosten 7, MU 1, Staerke 2, Pump fuer 1 Credit, Wall-Subroutine-Break fuer 0 Credits und zuguebergreifender Future-Action-Debt. Der Smoke deckt Install, Pump, Break, Wrong-Side-/Stale-Revalidation, Debt-Abtrag nach Run-Ende und im naechsten Runner-Zug, PublicPayload und Replay/StateHash ab. Keine Catalog-/AI-/Release-Promotion wurde vorgenommen.
 - `Reflector` hat eine Runtime-Definition mit Installkosten 2, MU 1, Staerke 4 und einem tagged-subroutine Breaker fuer `stun`, `hellbolt` und `knockout`. Die Engine filtert Break-LegalActions pro Subroutine-Tag; der Smoke bestaetigt, dass auf `TKO 2.0` nur die getaggte Knockout-Subroutine, nicht die End-the-run-Subroutine, angeboten wird. Keine Catalog-/AI-/Release-Promotion wurde vorgenommen.
-- `Zetatech Software Installer` hat eine Runtime-Definition mit Installkosten 0, MU 1, 2 restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh. Overlay-Installation bleibt ohne LegalAction, bis der State-Transition-Vertrag geschrieben ist. Keine Catalog-/AI-/Release-Promotion wurde vorgenommen.
+- `Zetatech Software Installer` hat eine Runtime-Definition mit Installkosten 0, MU 1, 2 restricted Recurring Credits fuer Programminstallationen, Runner-Zugstart-Refresh und Overlay-Installation auf Zetatech ohne zusaetzliche MU. Keine Catalog-/AI-/Release-Promotion wurde vorgenommen.
 - `Poltergeist`, `Rabbit`, `Scatter Shot`, `Speed Trap` und `Startup Immolator` haben install-only Runtime-Definitionen mit Installkosten 0 und MU 1, ohne Recurring-Credit-, Trace-Modifier-, Interrupt- oder Post-Break-Faehigkeiten. Der gemeinsame Smoke deckt Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, Ability-Gates, PublicPayload/PlayerViews und Replay/StateHash ab.
 - `Shield` hat eine Runtime-Definition und einen engen installierten Programm-Resolver: Installkosten 0, MU 1 und bis zu 2 Net-Damage-Prevention pro Runner-Zug über das bestehende side-sichere Event-Modification-Fenster. Der Smoke deckt Install-LegalAction, Wrong-Side-Revalidation, Hidden-Info-sichere Prevention-Choice, PublicPayload und Replay/StateHash ab.
 - Es bleibt keine Runner-Programm-Zielkarte mehr nur wegen fehlender lokaler Kosten-/MU-/Breakerwerte im No-LegalAction-Guard; offene Runner-Programm-Punkte sind Vollvertrags-, AI-, Catalog- und Release-Promotion-Gates.
@@ -60,13 +60,15 @@ Status: runtime WIP, no release/catalog/AI promotion
 
 ## Naechster Schnitt
 
-Naechster kleiner Schnitt: `Zetatech Software Installer` Overlay-Vertrag. `Viral 15` und `Data Fort Reclamation` Rez-/Credit-Follow-up sind jetzt als nicht-promotende Runtime-WIPs umgesetzt. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
+Naechster kleiner Schnitt: finale V1.9.22-Promotion-Gates vorbereiten. `Viral 15`, `Data Fort Reclamation` Rez-/Credit-Follow-up und `Zetatech Software Installer` Overlay sind jetzt als nicht-promotende Runtime-WIPs umgesetzt. Offen bleiben finale AI-/Catalog-/Release-Promotion-Gates.
 
 Blocker-Abgleich 2026-05-14 18:01 CEST: `Data Fort Reclamation` hat einen ersten Install-Sequence-WIP; `Viral 15` bleibt die letzte Zielkarte ohne Runtime-WIP. Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay und finale Promotion-Gates bleiben offen. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
 
 Blocker-Abgleich 2026-05-14 19:27 CEST: `Viral 15` hat einen engen Runtime-WIP mit run-weitem Jack-out-Tax und Runner-privater Programmtrash-Choice nach dem Passieren gerezzter ICE. Damit haben 47/47 Zielkarten nicht-promotende Runtime-WIP-Abdeckung. Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay und finale Promotion-Gates bleiben offen. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
 
 Blocker-Abgleich 2026-05-14 19:43 CEST: `Data Fort Reclamation` hat den Rez-/Credit-Follow-up erhalten. Nach der privaten HQ-Install-Sequence oeffnet die Engine eine Korp-private Rez-Choice fuer neu installierte ICE/Root-Karten; Rez-Kosten werden zuerst aus 10 temporaeren Credits und danach aus Korp-Credits bezahlt. Zetatech-Overlay und finale Promotion-Gates bleiben offen. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
+
+Blocker-Abgleich 2026-05-14 19:50 CEST: `Zetatech Software Installer` Overlay ist als enger Runtime-WIP umgesetzt. Offen sind jetzt finale Promotion-Gates. Dieser Befund aendert keine Catalog-, AI- oder Release-Promotion.
 
 ## Verifikation
 
@@ -104,6 +106,10 @@ Blocker-Abgleich 2026-05-14 19:43 CEST: `Data Fort Reclamation` hat den Rez-/Cre
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Data-Fort-Rez-/Credit-Follow-up.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 308 Tests inkl. `Data Fort Reclamation` privater Rez-Choice mit temporaerem Creditverbrauch.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Data-Fort-Rez-/Credit-Manifest-/Coverage-/Szenario-Alignment.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach Zetatech-Overlay-WIP.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 309 Tests inkl. `Zetatech Software Installer` Overlay ohne zusaetzliche MU.
+- `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests nach Zetatech-Overlay-Manifest-/Coverage-/Szenario-Alignment.
+- Breiter Verify nach `Zetatech Software Installer` Overlay: `ai` 86, `server` 72, `web` 79, `typecheck`, `test`, `lint` und `build` gruen. Build nur mit bekannter Turbopack-NFT-Warnung.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: initial rot wegen fehlender V0.99-Baseline im `Viral 15`-Jack-out-Smoke, danach pass, 308 Tests inkl. `Viral 15` Jack-out-Tax, Runner-private Programmtrash-Choice, Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: initial rot wegen ueberholter Erwartung an eine geplante No-Promotion-Karte, danach pass, 44 Tests nach Manifest-/Coverage-/Szenario-/Guard-Alignment fuer `Viral 15`.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass nach `Viral 15` Runtime-WIP.
