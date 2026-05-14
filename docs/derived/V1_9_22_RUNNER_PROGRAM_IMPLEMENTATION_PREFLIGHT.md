@@ -19,7 +19,7 @@ Die erneute historische Suche in `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS
 
 | Karte | Warum klein | Offener Vertrag |
 | --- | --- | --- |
-| `Newsgroup Filter` | Installkosten 5, MU 2 sind als install-only WIP umgesetzt. | Aktivierungstiming, Klick-/Tap-/Once-per-turn-Kosten und PublicPayload der Programmaktion. |
+| `Newsgroup Filter` | Installkosten 5, MU 2 und `[A]: Gain 2 Credits` sind als Runtime-WIP umgesetzt. | Finale AI-/Catalog-/Release-Promotion. |
 | `Poltergeist` / `Scatter Shot` | Installkosten 0, MU 1, je 1 recurring restricted credit. | Restricted-Credit-Pool fuer Trash-Kosten und Refresh-Timing. |
 
 ## Nicht-kleine Kandidaten
@@ -30,4 +30,4 @@ Die erneute historische Suche in `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS
 
 ## Entscheidung
 
-Kein weiterer Runner-Programm-Code in diesem Preflight. `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` konkretisiert, dass fuer `Newsgroup Filter` nur der Installationsvertrag umgesetzt ist; Aktivierungskosten, Timing und Limit bleiben fuer die Credit-Gain-Faehigkeit blockierend. Die install-only-Programme bleiben ability-gated. Bis dahin bleiben die verbleibenden 5 Programmkarten aus `playable_mvp` und ohne `install_card`, `pump_breaker` oder `break_subroutine`-LegalActions.
+Kein weiterer Runner-Programm-Code in diesem Preflight ausser dem spaeter umgesetzten `Newsgroup Filter`-Gain-2-Schnitt. `docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md` dokumentiert den geschlossenen Runtime-WIP-Vertrag fuer Installation plus `[A]: Gain 2 Credits`. Die uebrigen install-only-Programme bleiben ability-gated. Bis zur lokalen Wertbestaetigung bleiben die verbleibenden 5 Programmkarten aus `playable_mvp` und ohne `install_card`, `pump_breaker` oder `break_subroutine`-LegalActions.

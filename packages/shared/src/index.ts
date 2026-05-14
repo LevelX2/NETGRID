@@ -3525,8 +3525,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 5,
     memoryCost: 2,
-    rulesText: "Install as a program. Its credit-gain ability remains gated until the activation timing is confirmed.",
-    mechanics: ["install_program", "memory", "per_card_longtail", "ability_contract_pending", ONR_V1_LOCAL_PRIVATE]
+    rulesText: "[A]: Gain 2 Credits.",
+    mechanics: ["install_program", "memory", "gain_credits", "per_card_longtail", ONR_V1_LOCAL_PRIVATE]
   },
   {
     id: "onr_v1_048_poltergeist",

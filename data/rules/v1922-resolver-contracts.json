@@ -11,6 +11,7 @@
     "docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md",
     "docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md",
     "docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md",
+    "docs/derived/V1_9_22_ERRATA_1_70_SOURCE_REVIEW.md",
     "packages/shared/src/index.ts",
     "packages/engine/src/index.test.ts"
   ],
@@ -124,11 +125,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "blocked_missing_breaker_values_and_stealth_loss_contract",
-      "confirmedLocalFacts": ["program_installation_mu_surface", "icebreaker_pump_break_surface", "stealth_resource_loss_partial_note"],
+      "contractStatus": "prepared_errata_reviewed_noisy_breaker_no_promotion",
+      "confirmedLocalFacts": ["install_cost_2", "memory_cost_1", "breaker_strength_2", "break_wall_subroutine_for_0", "pump_plus_1_strength_for_1", "noisy_cards_do_not_require_stealth_cards_in_play", "stealth_card_resource_loss_if_applicable"],
       "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["install_cost", "memory_cost", "breaker_strength", "pump_cost", "break_cost", "break_subtype_contract", "stealth_resource_loss_timing", "stealth_resource_target_set", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm breaker values and exactly when/how stealth resources are lost."
+      "missingInformation": ["break_subtype_contract", "stealth_resource_loss_timing", "stealth_resource_target_set", "legalaction_projection", "applyaction_revalidation", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the confirmed Noisy clarification only after the breaker LegalAction/applyAction contract and side-safe event model are written."
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",
@@ -160,11 +161,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "blocked_missing_full_program_contract",
-      "confirmedLocalFacts": ["program_installation_mu_surface", "memory_mu_modifier_surface"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["install_cost", "memory_cost", "subtypes", "effect_timing", "effect_targets", "choices", "zone_or_state_changes", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm the complete card text contract beyond the generic program/MU surface."
+      "contractStatus": "runtime_wip_no_promotion",
+      "confirmedLocalFacts": ["install_cost_5", "memory_cost_2", "runner_main_action_gain_2_credits_user_confirmed"],
+      "safeCurrentCoverage": ["install_program_legal_action", "wrong_side_revalidation", "stale_state_revalidation", "runner_main_action_gain_2_credits", "public_payload_visibility", "replay_statehash", "no_catalog_or_ai_promotion"],
+      "missingInformation": ["ai_fallback", "final_release_promotion"],
+      "removalCondition": "Keep Newsgroup Filter in WIP until V1.9.22 final AI, catalog and release-promotion gates are satisfied."
     },
     {
       "cardId": "onr_v1_048_poltergeist",
@@ -172,11 +173,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "blocked_missing_program_values_and_hosted_recurring_contract",
-      "confirmedLocalFacts": ["program_installation_mu_surface", "memory_mu_modifier_surface", "hosted_recurring_credits_for_trash_costs_partial_note"],
+      "contractStatus": "prepared_errata_reviewed_recurring_node_trash_credits_no_promotion",
+      "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "errata_put_2_from_bank", "recurring_credits_for_trashing_nodes", "refresh_from_bank_at_runner_turn_start"],
       "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["install_cost", "memory_cost", "recurring_credit_amount", "hosted_counter_or_pool_model", "trash_cost_payment_scope", "refresh_timing", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm install/MU values and hosted recurring credit behavior for trash costs."
+      "missingInformation": ["node_trash_payment_window", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed 2 recurring credits for node trash costs in a later non-promoting runtime slice."
     },
     {
       "cardId": "onr_v1_051_rabbit",
@@ -208,11 +209,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "blocked_missing_program_values_and_hosted_recurring_contract",
-      "confirmedLocalFacts": ["program_installation_mu_surface", "memory_mu_modifier_surface", "hosted_recurring_credits_for_trash_costs_partial_note"],
+      "contractStatus": "prepared_errata_reviewed_recurring_upgrade_trash_credits_no_promotion",
+      "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "errata_refresh_from_bank", "recurring_1_credit_for_trashing_upgrades"],
       "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["install_cost", "memory_cost", "recurring_credit_amount", "hosted_counter_or_pool_model", "trash_cost_payment_scope", "refresh_timing", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm install/MU values and hosted recurring credit behavior for trash costs."
+      "missingInformation": ["upgrade_trash_payment_window", "hosted_counter_or_pool_model", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed recurring credit refresh for a later non-promoting runtime slice."
     },
     {
       "cardId": "onr_v1_061_shield",
@@ -232,11 +233,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "blocked_missing_program_values_and_interrupt_contract",
-      "confirmedLocalFacts": ["program_installation_mu_surface", "memory_mu_modifier_surface", "interrupt_after_upgrade_or_node_rez_partial_note"],
+      "contractStatus": "prepared_errata_reviewed_upgrade_node_rez_interrupt_no_promotion",
+      "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "trigger_only_after_corp_rezzes_upgrade_or_node", "pay_0_to_jack_out", "if_after_last_ice_run_successful_without_access"],
       "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["install_cost", "memory_cost", "trigger_window_after_rez", "upgrade_or_node_target_definition", "effect_amount_or_result", "choice_flow", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm install/MU values and the exact interrupt trigger/effect after rez."
+      "missingInformation": ["trigger_window_projection", "upgrade_or_node_target_definition", "jack_out_success_without_access_state", "choice_flow", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed rez interrupt only after the upgrade/node rez timing and successful-without-access state contract are written."
     },
     {
       "cardId": "onr_v1_068_startup-immolator",
@@ -244,11 +245,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "blocked_missing_program_values_and_tap_break_tracking_contract",
-      "confirmedLocalFacts": ["program_installation_mu_surface", "memory_mu_modifier_surface", "tap_ability_just_broken_ice_trash_partial_note"],
+      "contractStatus": "prepared_errata_reviewed_after_passing_broken_ice_no_promotion",
+      "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "use_only_during_run", "after_passing_ice_if_all_subroutines_were_broken", "tap_and_pay_rez_cost_to_trash_ice"],
       "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["install_cost", "memory_cost", "tap_or_exhaust_cost", "just_broken_tracking_scope", "ice_target_set", "trash_timing", "duration_and_reset", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm install/MU values and exact tap, tracking and ICE-trash behavior."
+      "missingInformation": ["tap_or_exhaust_state_model", "all_subroutines_broken_tracking_scope", "passed_ice_trigger_window", "ice_target_set", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed after-passing trigger only after tracking and tap-state contracts are written."
     },
     {
       "cardId": "onr_v1_075_zetatech-software-installer",
@@ -256,11 +257,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "blocked_missing_full_program_contract",
-      "confirmedLocalFacts": ["program_installation_mu_surface", "memory_mu_modifier_surface"],
+      "contractStatus": "prepared_errata_reviewed_program_install_credit_no_promotion",
+      "confirmedLocalFacts": ["memory_cost_1", "errata_put_2_from_bank", "recurring_2_credits_for_installing_programs", "refresh_from_bank_at_runner_turn_start", "may_install_program_over_itself"],
       "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["install_cost", "memory_cost", "subtypes", "effect_timing", "effect_targets", "choices", "zone_or_state_changes", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm the complete card text contract beyond the generic program/MU surface."
+      "missingInformation": ["install_cost", "program_install_payment_window", "overlay_install_state_transition", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Confirm install cost and overlay state transition before using the errata-reviewed recurring program-install credits."
     },
     {
       "cardId": "onr_v1_077_anonymous-tip",
@@ -496,11 +497,11 @@
       "cluster": "corp_agendas",
       "side": "corp",
       "type": "agenda",
-      "contractStatus": "blocked_missing_agenda_numbers_and_ability_contract",
-      "confirmedLocalFacts": ["agenda_install_advance_score_steal_surface", "gray_ops_surface"],
+      "contractStatus": "prepared_errata_reviewed_data_fort_creation_no_promotion",
+      "confirmedLocalFacts": ["advancement_requirement_4", "agenda_points_2", "gray_ops_surface", "on_score_gain_9_temporary_install_credits", "choose_up_to_4_hq_cards", "create_new_data_fort", "install_chosen_cards_one_at_a_time", "may_rez_installed_cards", "corp_may_use_own_credit_pool_for_extra_costs", "new_fort_created_by_score_effect_not_actions"],
       "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["advancement_requirement", "agenda_points", "subtypes", "on_score_or_scored_ability_text", "timing", "costs", "effect_amounts", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm printed agenda numbers and any on-score/scored ability."
+      "missingInformation": ["private_hq_choice_projection", "new_remote_creation_payload", "install_and_optional_rez_sequence", "temporary_credit_pool_accounting", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed on-score construction only after private choice, install/rez sequencing and temporary-credit accounting are specified."
     },
     {
       "cardId": "onr_v1_196_corporate-war",
@@ -520,11 +521,11 @@
       "cluster": "corp_agendas",
       "side": "corp",
       "type": "agenda",
-      "contractStatus": "blocked_missing_agenda_numbers_and_ability_contract",
-      "confirmedLocalFacts": ["agenda_install_advance_score_steal_surface", "gray_ops_surface"],
+      "contractStatus": "prepared_errata_reviewed_rd_reveal_install_rez_no_promotion",
+      "confirmedLocalFacts": ["advancement_requirement_3", "agenda_points_2", "gray_ops_surface", "on_score_reveal_top_3_rd_or_as_many_as_exist", "install_and_rez_revealed_ice_if_possible", "trash_revealed_non_ice", "at_no_cost_waives_printed_rez_cost_only_not_additional_costs"],
       "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["advancement_requirement", "agenda_points", "subtypes", "on_score_or_scored_ability_text", "timing", "costs", "effect_amounts", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm printed agenda numbers and any on-score/scored ability."
+      "missingInformation": ["server_target_projection_for_each_ice", "install_rez_ordering", "additional_cost_handling", "rd_reveal_visibility_payload", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed reveal/install/rez contract only after target projection, ordering and additional-cost handling are specified."
     },
     {
       "cardId": "onr_v1_206_marine-arcology",
@@ -568,11 +569,11 @@
       "cluster": "corp_ice",
       "side": "corp",
       "type": "ice",
-      "contractStatus": "blocked_missing_ice_numbers_and_subroutines",
-      "confirmedLocalFacts": ["ice_install_rez_encounter_surface", "code_gate_surface"],
+      "contractStatus": "prepared_errata_reviewed_parallel_action_lock_no_promotion",
+      "confirmedLocalFacts": ["rez_cost_8", "strength_6", "code_gate_surface", "next_6_actual_runner_actions_cannot_be_runs", "multiple_effects_run_in_parallel_not_serial", "bonus_runs_not_using_actions_are_not_prohibited", "end_the_run_subroutine"],
       "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["rez_cost", "strength", "subtypes", "subroutines", "encounter_timing", "effect_amounts", "target_validation", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm ICE numbers and each subroutine."
+      "missingInformation": ["future_action_lock_state_model", "actual_action_counter", "parallel_effect_expiry", "legalaction_projection", "applyaction_revalidation", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed parallel action-lock only after the action-counter state and LegalAction revalidation contract are specified."
     },
     {
       "cardId": "onr_v1_274_tutor",
@@ -580,11 +581,11 @@
       "cluster": "corp_ice",
       "side": "corp",
       "type": "ice",
-      "contractStatus": "blocked_missing_ice_numbers_and_subroutines",
-      "confirmedLocalFacts": ["ice_install_rez_encounter_surface", "code_gate_surface"],
+      "contractStatus": "prepared_errata_reviewed_future_encounter_etr_modifier_no_promotion",
+      "confirmedLocalFacts": ["rez_cost_4", "strength_5", "code_gate_surface", "run_wide_additional_end_the_run_subroutine_after_all_others", "does_not_modify_current_tutor_encounter_unless_same_tutor_encountered_again_later"],
       "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["rez_cost", "strength", "subtypes", "subroutines", "encounter_timing", "effect_amounts", "target_validation", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm ICE numbers and each subroutine."
+      "missingInformation": ["run_wide_subroutine_modifier_state", "future_encounter_projection", "subroutine_indexing", "breakability_contract", "legalaction_projection", "applyaction_revalidation", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed future-encounter modifier only after subroutine indexing and break/revalidation contracts are specified."
     },
     {
       "cardId": "onr_v1_276_viral-15",
@@ -592,11 +593,11 @@
       "cluster": "corp_ice",
       "side": "corp",
       "type": "ice",
-      "contractStatus": "blocked_missing_ice_numbers_and_subroutines",
-      "confirmedLocalFacts": ["ice_install_rez_encounter_surface", "sentry_surface", "memory_mu_modifier_surface"],
+      "contractStatus": "prepared_errata_reviewed_runner_program_choice_no_promotion",
+      "confirmedLocalFacts": ["rez_cost_5", "strength_3", "sentry_surface", "run_wide_jack_out_tax", "after_passing_each_rezzed_ice_program_trash_unless_runner_jacks_out", "runner_chooses_programs_to_trash"],
       "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["rez_cost", "strength", "subtypes", "subroutines", "encounter_timing", "memory_or_mu_effect_contract", "effect_amounts", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Confirm ICE numbers, memory/MU effect and each subroutine."
+      "missingInformation": ["run_wide_jackout_tax_state", "after_passing_rezzed_ice_trigger", "private_runner_program_choice", "program_trash_visibility_payload", "legalaction_projection", "applyaction_revalidation", "replay_statehash_expectation", "ai_fallback"],
+      "removalCondition": "Use the errata-reviewed Runner-choice program trash only after trigger, private choice and visibility contracts are specified."
     },
     {
       "cardId": "onr_v1_277_virizz",

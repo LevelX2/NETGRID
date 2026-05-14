@@ -264,6 +264,7 @@ const V1922_ORGAN_DONOR_ID = "onr_v1_103_organ-donor";
 const V1922_SECURITY_CODE_WORM_CHIP_ID = "onr_v1_109_security-code-worm-chip";
 const V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID = "onr_v1_113_synchronized-attack-on-hq";
 const V1922_VALU_PAK_SOFTWARE_BUNDLE_ID = "onr_v1_117_valu-pak-software-bundle";
+const V1922_NEWSGROUP_FILTER_ID = "onr_v1_045_newsgroup-filter";
 const V1922_SHIELD_ID = "onr_v1_061_shield";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
@@ -2662,6 +2663,19 @@ function runnerMainActions(state: GameState): LegalAction[] {
           )
         );
       }
+      if (definition.id === V1922_NEWSGROUP_FILTER_ID) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "gain_credit",
+            `${definition.title}: 2 Credits`,
+            cardId,
+            [{ clicks: 1 }],
+            { cardId, v1922RunnerProgramAbility: "newsgroup_filter_gain_2", gainCreditsAmount: 2 }
+          )
+        );
+      }
       if (definition.id === V1921_QUEST_FOR_CATTEKIN_ID) {
         actions.push(
           action(
@@ -3714,6 +3728,22 @@ function performAction(state: GameState, legalAction: LegalAction, playerAction:
           randomPurpose,
           v1921DieRoll: dieRoll,
           randomCounterAfter: state.randomCounter
+        };
+        return;
+      }
+      if (legalAction.payload?.v1922RunnerProgramAbility === "newsgroup_filter_gain_2") {
+        if (legalAction.side !== "runner") throw new Error("Nur der Runner darf Newsgroup Filter nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.runner.rig.programs.includes(sourceCardId)) throw new Error("Newsgroup Filter ist nicht installiert.");
+        const definition = definitionFor(state, sourceCardId);
+        if (definition.id !== V1922_NEWSGROUP_FILTER_ID) throw new Error("Die V1.9.22-Programm-Faehigkeit passt nicht zu Newsgroup Filter.");
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 2) throw new Error("Newsgroup Filter gewaehrt in diesem Scope genau 2 Credits.");
+        credits(state, "runner", gainAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: gainAmount,
+          runnerCreditsAfter: state.runner.credits
         };
         return;
       }
@@ -8612,6 +8642,11 @@ function publicContextForAction(state: GameState, legalAction: LegalAction): Rec
     if (typeof legalAction.payload.addedAdvancementCounters === "number") context.addedAdvancementCounters = legalAction.payload.addedAdvancementCounters;
     if (typeof legalAction.payload.advancementCountersAfter === "number") context.advancementCountersAfter = legalAction.payload.advancementCountersAfter;
     if (typeof legalAction.payload.agendaPointCostPaid === "number") context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
+  }
+  if (typeof legalAction.payload?.v1922RunnerProgramAbility === "string") {
+    context.v1922RunnerProgramAbility = legalAction.payload.v1922RunnerProgramAbility;
+    if (typeof legalAction.payload.gainedCredits === "number") context.gainedCredits = legalAction.payload.gainedCredits;
+    if (typeof legalAction.payload.runnerCreditsAfter === "number") context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
   }
   if (typeof legalAction.payload?.v1919UpgradeAbility === "string") {
     context.v1919UpgradeAbility = legalAction.payload.v1919UpgradeAbility;

@@ -78,7 +78,7 @@
     "decision": "local_facts_available_no_runtime_catalog_or_ai_promotion"
   },
   "latestRuntimeResolverSlice": {
-    "implementedAt": "2026-05-14T00:27:00+02:00",
+    "implementedAt": "2026-05-14T08:50:00+02:00",
       "cards": [
       "onr_v1_026_false-echo",
       "onr_v1_044_netspace-inverter",
@@ -110,6 +110,7 @@
     ],
     "engineTests": [
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs V1.9.22 install-only runner programs while keeping their abilities gated",
+      "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Newsgroup Filter and uses its side-safe credit action",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::installs Shield and uses side-safe per-turn net damage prevention",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Anonymous Tip as a public black-ice derez choice",
       "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::plays Core Command Jettison Ice after a successful HQ run to pay rez cost and trash rezzed ICE",
@@ -150,8 +151,8 @@
       },
       {
         "cardId": "onr_v1_045_newsgroup-filter",
-        "status": "install_only_wip_ability_blocked_pending_activation_timing_contract",
-        "removalCondition": "Confirm installed program activation costs, timing, limit and public payload before adding the credit-gain LegalAction."
+        "status": "runtime_wip_gain_2_credit_action_no_promotion",
+        "removalCondition": "Keep catalog, AI and release promotion closed until final V1.9.22 gates."
       },
       {
         "cardId": "onr_v1_274_tutor",
@@ -176,9 +177,32 @@
     ],
     "decision": "no_runtime_catalog_or_ai_promotion"
   },
+  "latestErrataSourceReview": {
+    "reviewedAt": "2026-05-14T01:45:00+02:00",
+    "source": "C:\\Users\\Lui\\OneDrive\\Downloads\\Netrunner_Errata_v1.70.pdf",
+    "docRef": "docs/derived/V1_9_22_ERRATA_1_70_SOURCE_REVIEW.md",
+    "userConfirmedCards": [
+      "onr_v1_045_newsgroup-filter"
+    ],
+    "errataReviewedCards": [
+      "onr_v1_031_hammer",
+      "onr_v1_048_poltergeist",
+      "onr_v1_057_scatter-shot",
+      "onr_v1_067_speed-trap",
+      "onr_v1_068_startup-immolator",
+      "onr_v1_075_zetatech-software-installer",
+      "onr_v1_197_data-fort-reclamation",
+      "onr_v1_216_security-purge",
+      "onr_v1_247_haunting-inquisition",
+      "onr_v1_274_tutor",
+      "onr_v1_276_viral-15"
+    ],
+    "decision": "information_prepared_only_no_runtime_catalog_ai_or_release_promotion",
+    "remainingCondition": "For implementation, create one narrow technical contract with LegalAction projection, applyAction revalidation, side-safe public/private payloads and deterministic Replay/StateHash expectations."
+  },
   "latestBlockerReview": {
-    "reviewedAt": "2026-05-14T01:10:00+02:00",
-    "status": "hard_functional_p0_for_additional_runtime_code",
+    "reviewedAt": "2026-05-14T08:50:00+02:00",
+    "status": "remaining_technical_contracts_open_after_newsgroup_filter_runtime_wip",
     "reviewedRefs": [
       "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
       "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
@@ -189,12 +213,11 @@
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
-    "summary": "Local card facts exist for all remaining targets, but no remaining target has a confirmed narrow LegalAction/applyAction contract for safe runtime code.",
+    "summary": "Local card facts exist for all remaining targets. Newsgroup Filter now has a non-promoting Gain-2 runtime WIP; Errata 1.70 reduced several remaining factual gaps without release promotion.",
     "blockedCards": [
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
       "onr_v1_037_japanese-water-torture",
-      "onr_v1_045_newsgroup-filter",
       "onr_v1_055_reflector",
       "onr_v1_075_zetatech-software-installer",
       "onr_v1_197_data-fort-reclamation",
@@ -204,13 +227,13 @@
       "onr_v1_276_viral-15",
       "onr_v1_277_virizz"
     ],
-    "removalCondition": "Confirm one card's full runtime contract: LegalAction projection, applyAction revalidation, side-safe public/private payloads, and deterministic Replay/StateHash expectations."
+    "removalCondition": "Write one remaining card's full technical runtime contract from the prepared facts: LegalAction projection, applyAction revalidation, side-safe public/private payloads, and deterministic Replay/StateHash expectations."
   },
   "blockingGates": [
     {
       "gateId": "resolver_contracts",
       "status": "blocked",
-      "summary": "Eight install-only Runner-program WIPs, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
+      "summary": "Seven install-only Runner-program WIPs, Newsgroup Filter Gain-2, Shield, all ten Runner events plus Corporate Retreat, Corporate War, Marine Arcology, Political Overthrow, Zombie, Edgerunner, Inc., Temps, Off-Site Backups and Planning Consultants now have narrow runtime smokes, but the 47-card completion gate is still not promotion-ready.",
       "removalCondition": "Continue implementing and verifying remaining resolver slices; add final Manifest/Coverage, AI and web gates before release promotion."
     },
     {

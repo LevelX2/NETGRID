@@ -1875,7 +1875,7 @@ describe("catalog import and status logic", () => {
       ].includes(card.resolverFamily)
     );
     const runnerProgramResolverCards = manifestCards.filter((card) =>
-      ["v1922_runner_program_install_surface_ability_gated", "v1922_runner_program_net_damage_prevention"].includes(card.resolverFamily)
+      ["v1922_runner_program_install_surface_ability_gated", "v1922_runner_program_net_damage_prevention", "v1922_runner_program_newsgroup_filter_gain_2"].includes(card.resolverFamily)
     );
     const corpAgendaResolverCards = manifestCards.filter((card) =>
       [
@@ -1958,7 +1958,6 @@ describe("catalog import and status logic", () => {
         [
           "onr_v1_026_false-echo",
           "onr_v1_044_netspace-inverter",
-          "onr_v1_045_newsgroup-filter",
           "onr_v1_048_poltergeist",
           "onr_v1_051_rabbit",
           "onr_v1_057_scatter-shot",
@@ -1967,6 +1966,9 @@ describe("catalog import and status logic", () => {
         ].includes(card.cardCode)
       ) {
         expect(card.coveredSmokes).toContain("ability_contract_remains_gated");
+      }
+      if (card.cardCode === "onr_v1_045_newsgroup-filter") {
+        expect(card.coveredSmokes).toContain("gain_2_credit_action");
       }
       if (card.cardCode === "onr_v1_061_shield") {
         expect(card.coveredSmokes).toContain("net_damage_prevention_window");

@@ -7335,7 +7335,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const installOnlyPrograms = [
       { definitionId: "onr_v1_026_false-echo", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
       { definitionId: "onr_v1_044_netspace-inverter", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
-      { definitionId: "onr_v1_045_newsgroup-filter", expectedCreditsAfter: 5, expectedMemoryUsed: 2 },
       { definitionId: "onr_v1_048_poltergeist", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
       { definitionId: "onr_v1_051_rabbit", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
       { definitionId: "onr_v1_057_scatter-shot", expectedCreditsAfter: 10, expectedMemoryUsed: 1 },
@@ -7397,6 +7396,76 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(replay.ok, definitionId).toBe(true);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
+  });
+
+  it("installs Newsgroup Filter and uses its side-safe credit action", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-newsgroup-filter-credit-action",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_newsgroup_filter",
+          name: "O:NR V1.9.22 Newsgroup Filter",
+          cards: [{ id: "onr_v1_045_newsgroup-filter", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7
+      })
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    moveRunnerCardToGrip(state, "onr_v1_045_newsgroup-filter");
+
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_045_newsgroup-filter");
+    expect(state.runner.credits).toBe(5);
+    expect(state.runner.clicks).toBe(3);
+    expect(state.runner.memoryUsed).toBe(2);
+    expect(getPlayerView(state, "corp").opponent.rig?.some((card) => card.definitionId === "onr_v1_045_newsgroup-filter")).toBe(true);
+
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "gain_credit" && action.payload?.v1922RunnerProgramAbility === "newsgroup_filter_gain_2"
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-newsgroup-filter-wrong-side"
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-newsgroup-filter-stale"
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "gain_credit" && action.payload?.v1922RunnerProgramAbility === "newsgroup_filter_gain_2");
+
+    expect(state.runner.credits).toBe(7);
+    expect(state.runner.clicks).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      amount: 2,
+      v1922RunnerProgramAbility: "newsgroup_filter_gain_2",
+      gainedCredits: 2,
+      runnerCreditsAfter: 7
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/);
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("installs Shield and uses side-safe per-turn net damage prevention", () => {

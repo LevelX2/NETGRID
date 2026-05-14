@@ -69,6 +69,16 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 ## Letzter Lauf
 
+- Zeitpunkt: 2026-05-14 08:55 CEST
+- Ergebnis: V1.9.22 Newsgroup-Filter-Gain-2-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Newsgroup Filter` nutzt nach der Nutzerklaerung eine installierte Runner-Programm-Aktion `[A]: Gain 2 Credits`. `packages/engine/src/index.ts` projiziert die Aktion nur fuer installierte Runner-Programme im Runner-Main-Action-Fenster und revalidiert Seite, State-Version, Quelle und Aktionskosten ueber den bestehenden LegalAction/applyAction-Pfad. `packages/engine/src/index.test.ts` deckt Install, Wrong-Side-/Stale-Revalidation, PublicPayload/PlayerViews und Replay/StateHash ab. Manifest, Mechanics-Coverage, WIP-Szenario, Completion-Gate-Status, Testmatrix, Implementation Review, Codex-Status und Wissensbasis wurden nachgezogen. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` pass (298), `catalog` pass (44), `typecheck` pass, `ai` pass (86), `server` pass (72), `web` pass (79), `test` pass, `lint` pass, `build` pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: newsgroup filter gain action wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolververtraege, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+
 - Zeitpunkt: 2026-05-14 01:10 CEST
 - Ergebnis: V1.9.22 Blocker-/State-Abgleich nach den letzten WIP-Commits; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22

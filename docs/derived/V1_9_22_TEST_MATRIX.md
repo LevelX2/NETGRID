@@ -8,7 +8,7 @@ Status: planned
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
 | Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event-, 9 Runner-Programm- und 8 Corp-Longtail-Zielkarten; neu: fuenf weitere nicht-Breaker-Programme als install-only WIPs mit weiter gesperrten Faehigkeiten |
-| Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Acht nicht-Breaker-Programme sind install-only umgesetzt; `Shield` ist als enger Install-/Net-Damage-Prevention-WIP umgesetzt; Readiness Review und Engine-Guards halten die verbleibenden 5/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
+| Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Sieben nicht-Breaker-Programme sind install-only umgesetzt; `Newsgroup Filter` ist mit Installation plus `[A]: Gain 2 Credits` umgesetzt; `Shield` ist als enger Install-/Net-Damage-Prevention-WIP umgesetzt; Readiness Review und Engine-Guards halten die verbleibenden 5/14 Programmkarten aus `playable_mvp` und ohne `install_card`-/`pump_breaker`-/`break_subroutine`-LegalActions, bis Werte bestaetigt sind |
 | Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate Retreat`, `Corporate War`, `Marine Arcology`, `Political Overthrow`, `Zombie`, `Edgerunner, Inc., Temps`, `Off-Site Backups` und `Planning Consultants` haben enge Runtime-Resolver; Engine-Guard haelt die verbleibenden 6/14 Corp-Longtailkarten aus `playable_mvp`, bis vollstaendige Zahlen-/Timing-/Kostenvertraege vorliegen |
 | LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions, acht install-only Runner-Programme, `Shield`, alle 10 Runner-Event-Resolver und acht Corp-Longtail-Resolver inkl. Wrong-Side-/Stale-Revalidation gruen |
 | Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews, acht install-only Runner-Programme, `Shield`-Prevention-Choice sowie alle 10 Runner-Event-Resolver- und acht Corp-Longtail-PublicPayloads gruen |
@@ -38,7 +38,7 @@ Status: planned
 
 ## Newsgroup Filter 2026-05-14 00:45 CEST
 
-- Zusatzschnitt: `Newsgroup Filter` ist als install-only Runner-Programm-Runtime-WIP mit Installkosten 5 und MU 2 umgesetzt.
+- Zusatzschnitt: `Newsgroup Filter` ist als Runner-Programm-Runtime-WIP mit Installkosten 5, MU 2 und `[A]: Gain 2 Credits` umgesetzt.
 - Zusatzabdeckung: Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, keine Credit-Gain-Ability-LegalAction ohne Aktivierungsvertrag, PublicPayload/PlayerViews und Replay/StateHash.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 297 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.

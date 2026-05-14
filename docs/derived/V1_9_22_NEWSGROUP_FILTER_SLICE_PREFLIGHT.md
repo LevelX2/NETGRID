@@ -1,7 +1,7 @@
 # V1.9.22 Newsgroup Filter Slice Preflight
 
 Stand: 2026-05-14
-Status: install-only WIP umgesetzt, Ability bleibt gesperrt, keine Catalog-/AI-Promotion
+Status: Runtime-WIP mit installierter Credit-Faehigkeit umgesetzt, keine Catalog-/AI-Promotion
 
 ## Lokaler Regelkern
 
@@ -9,26 +9,30 @@ Status: install-only WIP umgesetzt, Ability bleibt gesperrt, keine Catalog-/AI-P
 
 - Seite/Typ: Runner-Programm.
 - Zahlen: Installkosten 5, MU 2.
-- Effektkern: "Gain 1 credit from installed program ability."
+- Effektkern laut Nutzerklaerung 2026-05-14: `[A]: Gain 2 Credits`.
 
 ## Umsetzungsschnitt
 
-Der kleinste moegliche Code-Schnitt waere eine installierbare Runner-Programm-Definition mit einer aktivierbaren Economy-Faehigkeit. Vor Runtime-Code muss aber der Aktivierungsvertrag geschlossen werden:
+Der kleinste Code-Schnitt ist jetzt umgesetzt: eine installierbare Runner-Programm-Definition mit einer aktivierbaren Economy-Faehigkeit.
 
-- Timing: Aktion im Runner-Main-Action-Fenster, einmal pro Zug, dauerhaft, oder ein anderes Fenster?
-- Kosten: Klick-/Tap-/Use-Kosten oder kostenlose Aktivierung?
-- Limit: unbegrenzt, einmal pro Zug oder anderweitig begrenzt?
+- Timing: Runner-Main-Action-Fenster.
+- Kosten: 1 normale Runner-Aktion.
+- Effekt: Runner gewinnt 2 Credits.
+- Limit: nur durch verfuegbare Aktionen begrenzt; kein eigenes once-per-turn-Limit dokumentiert.
 - PublicPayload: sichtbare Information darf nur Programmquelle, Credit-Gain und Runner-Creditstand ausweisen.
-- Replay: Aktivierung und etwaiges Use-/Tap-Flag muessen deterministisch im StateHash liegen.
+- Replay: Aktivierung muss deterministisch im StateHash liegen; kein Use-/Tap-Flag noetig.
 
 ## Entscheidung
 
-Install-only Runtime-Code ist als enger Teilschnitt umgesetzt: `Newsgroup Filter` kann fuer 5 Credits und 2 MU installiert werden, mit Wrong-Side-/Stale-Revalidation, PublicPayload/PlayerView- und Replay/StateHash-Abdeckung. Eine automatische `[A]: Gain 1`-Auslegung wird weiterhin nicht erfunden; die Credit-Gain-Faehigkeit bleibt ohne LegalAction, bis Timing, Kosten und Limit lokal bestaetigt sind.
+Runtime-Code ist als enger Teilschnitt umgesetzt: `Newsgroup Filter` kann fuer 5 Credits und 2 MU installiert werden und oeffnet danach im Runner-Main-Action-Fenster eine installierte Programm-Aktion `[A]: Gain 2 Credits`. Der Pfad ist Wrong-Side-/Stale-revalidiert, prueft die installierte Quelle erneut, dokumentiert `gainCreditsAmount: 2`, `gainedCredits: 2` und den Runner-Creditstand oeffentlich und bleibt replay-/StateHash-stabil. Keine Catalog-/AI-/Release-Promotion wurde vorgenommen.
 
 ## Removal Condition
 
-Die verbleibende Credit-Gain-Faehigkeit kann in Code gehen, sobald lokal feststeht:
+Der technische Runtime-Vertrag ist fuer den WIP-Schnitt erfuellt:
 
-1. ob und welche Aktivierungskosten die Programmfaehigkeit hat,
-2. in welchem Timingfenster sie nutzbar ist,
-3. ob es einen Turn- oder Use-Limit-Marker gibt.
+1. LegalAction-Projektion nur fuer installierten `Newsgroup Filter`, Runner-Seite und Runner-Main-Action-Fenster.
+2. `applyAction` revalidiert Side, `actionId`, `stateVersion`, Timing, installierte Quelle und 1 Aktionskosten.
+3. PublicPayload zeigt Quelle, `gainCreditsAmount: 2` und Runner-Creditstand ohne private Daten.
+4. Replay-/StateHash-Smoke bleibt deterministisch.
+
+Verbleibende Removal Condition fuer Releaseabschluss: finaler V1.9.22 Catalog-/AI-/Webclient-/Final-Review-Gate. Bis dahin bleibt die Karte `runtime_wip_no_promotion`.
