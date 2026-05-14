@@ -4,6 +4,25 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-netwatch-spinn
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_NETWATCH_SPINN_IMPLEMENTATION.md`
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Netwatch Operations Office | `onr_v1_207_netwatch-operations-office` | Engine-Pfad funktioniert mit Trace 2; Chronik/ApplyAction-Härtung ergänzt | Wrong-Side/Stale- und PublicPayload-Test ergänzt |
+| Encryption Breakthrough | `onr_v1_200_encryption-breakthrough` | Nacharbeit umgesetzt: Code-Gate-Stärkebonus und Score-Reveal/Credit-Pfad | Engine-Test und AI-Hint ergänzt |
+| Bartmoss Memorial Icebreaker | `onr_v1_005_bartmoss-memorial-icebreaker` | Engine-Pfad funktioniert; Bartmoss-Post-Encounter-Ausgang wird öffentlich payloadfähig | PublicPayload ergänzt; bestehende RandomDrawRecord-Tests bleiben grün |
+| Dr. Dreff | `onr_v1_358_dr-dreff` | Engine-Pfad funktioniert: Power-Counter und Run-Start-Tax bleiben source-bound | Bestehende V1.9.18-Abdeckung bleibt grün |
+| Data Masons | `onr_v1_317_data-masons` | Engine-Pfad funktioniert mit rezzed Wall-Rez-/Stärke-Modifikator | Bestehende Tests auf Security-Net-Drift angepasst |
+| Washington, D.C., City Grid | `onr_v1_374_washington-d-c-city-grid` | Engine-Pfad funktioniert als rezzed servergebundener Difficulty-Modifier | Bestehende V1.9.19-Abdeckung bleibt grün |
+| Crybaby | `onr_v1_354_crybaby` | Nacharbeit umgesetzt: Access-Crying-Counter, Trace-Link-Reduktion und Runner-Removal | Engine-Test und AI-Hint ergänzt |
+| Security Net Optimization | `onr_v1_215_security-net-optimization` | Nacharbeit umgesetzt: scored Agenda speichert gewählten Fort und bufft nur dortige ICE | Engine-/Katalogtext angepasst |
+| Japanese Water Torture | `onr_v1_037_japanese-water-torture` | Engine-Pfad funktioniert mit Future-Action-Debt und Wall-Break | Bestehende V1.9.22-Abdeckung bleibt grün |
+| Spinn Public Relations | `onr_v1_344_spinn-public-relations` | Nacharbeit umgesetzt: öffentlicher Bit-Pool statt generischer Sofortcredits | Engine-Test und AI-Hint ergänzt |
+
 ## Runde 2026-05-14-B
 
 Auswahlart: zufällige 10er-Stichprobe aus komplexeren bereits decklegalen Originalset-Karten, unter Ausschluss der Runde 2026-05-14-A.

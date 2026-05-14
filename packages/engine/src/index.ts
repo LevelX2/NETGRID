@@ -200,11 +200,13 @@ const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
 const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
+const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
 const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
 const PRIVATE_CYBERNET_POLICE_ID = "onr_v1_213_private-cybernet-police";
 const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
+const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const DATA_RAVEN_ID = "onr_v1_236_data-raven";
 const FANG_2_0_ID = "onr_v1_241_fang-2-0";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
@@ -234,14 +236,17 @@ const V1917_HIDDEN_REVEAL_ASSET_IDS = new Set([
 ]);
 const V1917_HIDDEN_REORDER_ASSET_IDS = new Set(["onr_v1_336_rescheduler"]);
 const V1917_COWBOY_SYSOP_ID = "onr_v1_316_cowboy-sysop";
+const V1917_DATA_MASONS_ID = "onr_v1_317_data-masons";
 const V1917_DISINFECTANT_ID = "onr_v1_319_disinfectant-inc";
 const V1917_SOLO_SQUAD_ID = "onr_v1_342_solo-squad";
 const V1917_SETUP_ID = "onr_v1_340_setup";
 const V1917_TRAP_ID = "onr_v1_345_trap";
+const V1917_SPINN_PUBLIC_RELATIONS_ID = "onr_v1_344_spinn-public-relations";
 const V1918_DEDICATED_RESPONSE_TEAM_ID = "onr_v1_356_dedicated-response-team";
 const V1918_DIETER_ESSLIN_ID = "onr_v1_357_dieter-esslin";
 const V1918_CRYSTAL_PALACE_STATION_GRID_ID =
   "onr_v1_355_crystal-palace-station-grid";
+const V1918_CRYBABY_ID = "onr_v1_354_crybaby";
 const V1918_DR_DREFF_ID = "onr_v1_358_dr-dreff";
 const V1918_NEW_GALVESTON_CITY_GRID_ID = "onr_v1_362_new-galveston-city-grid";
 const V1918_OMNI_KISMET_ID = "onr_v1_364_omni-kismet-ph-d";
@@ -2826,7 +2831,12 @@ function corpMainActions(state: GameState): LegalAction[] {
             `Agenda in ${server.label} scoren`,
             id,
             [],
-            { cardId: id },
+            {
+              cardId: id,
+              ...(definition.id === SECURITY_NET_OPTIMIZATION_ID
+                ? { selectedServerId: server.id }
+                : {}),
+            },
           ),
         );
       }
@@ -3310,6 +3320,26 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
+    if (definition.id === V1917_SPINN_PUBLIC_RELATIONS_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 6 Bits laden`,
+          assetId,
+          [{ clicks: 1 }],
+          {
+            cardId: assetId,
+            v1917AssetAbility: "spinn_load_pool",
+            counterType: "bit",
+            addCounterAmount: 6,
+            gainCreditsAmount: 0,
+          },
+        ),
+      );
+      continue;
+    }
     if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
     actions.push(
       action(
@@ -3783,6 +3813,25 @@ function runnerMainActions(state: GameState): LegalAction[] {
         action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [
           { clicks: 1, credits: 2 },
         ]),
+      );
+    }
+    if (cardCounter(state, state.runner.identity, "crying") > 0 && state.runner.credits >= 4) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "gain_credit",
+          "Crying-Counter entfernen",
+          state.runner.identity,
+          [{ clicks: 1, credits: 4 }],
+          {
+            runnerAbility: "remove_crying_counter",
+            cardId: state.runner.identity,
+            counterType: "crying",
+            removeCounterAmount: 1,
+            gainCreditsAmount: 0,
+          },
+        ),
       );
     }
   }
@@ -4545,7 +4594,7 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
     if (
-      sourceDefinition.id === "onr_v1_317_data-masons" &&
+      sourceDefinition.id === V1917_DATA_MASONS_ID &&
       cardHasSubtype(iceDefinition, "wall")
     )
       bonus += 1;
@@ -4558,7 +4607,16 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   }
   for (const agendaId of scoredCorpAgendaIds(state)) {
     const agendaDefinition = definitionFor(state, agendaId);
-    if (agendaDefinition.id === "onr_v1_215_security-net-optimization")
+    if (
+      agendaDefinition.id === SECURITY_NET_OPTIMIZATION_ID &&
+      iceServerId &&
+      mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
+    )
+      bonus += 1;
+    if (
+      agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
+      cardHasSubtype(iceDefinition, "code_gate")
+    )
       bonus += 1;
     if (
       agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
@@ -4616,7 +4674,7 @@ function iceRezCostReductionFor(
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
     if (
-      sourceDefinition.id === "onr_v1_317_data-masons" &&
+      sourceDefinition.id === V1917_DATA_MASONS_ID &&
       cardHasSubtype(iceDefinition, "wall")
     )
       reduction += 2;
@@ -5732,6 +5790,51 @@ function performAction(
         };
         return;
       }
+      if (legalAction.payload?.runnerAbility === "remove_crying_counter") {
+        if (legalAction.side !== "runner")
+          throw new Error("Nur der Runner darf Crying-Counter entfernen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (sourceCardId !== state.runner.identity)
+          throw new Error("Crying-Counter liegen auf dem Runner-Identitaetsstatus.");
+        if (cardCounter(state, state.runner.identity, "crying") <= 0)
+          throw new Error("Es ist kein Crying-Counter vorhanden.");
+        const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
+        if (!Number.isInteger(removeAmount) || removeAmount !== 1)
+          throw new Error("Es wird genau 1 Crying-Counter entfernt.");
+        spendCredits(state, "runner", 4);
+        spendCardCounter(state, state.runner.identity, "crying", removeAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          removedCounterAmount: removeAmount,
+          remainingCounters: cardCounter(state, state.runner.identity, "crying"),
+          runnerCreditsAfter: state.runner.credits,
+        };
+        return;
+      }
+      if (legalAction.payload?.v1917AssetAbility === "spinn_load_pool") {
+        if (legalAction.side !== "corp")
+          throw new Error("Nur die Korp darf Spinn Public Relations laden.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
+          throw new Error("Spinn Public Relations ist nicht rezzed installiert.");
+        if (definitionFor(state, sourceCardId).id !== V1917_SPINN_PUBLIC_RELATIONS_ID)
+          throw new Error("Die Spinn-Faehigkeit passt nicht zur Karte.");
+        const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
+        if (!Number.isInteger(addAmount) || addAmount !== 6)
+          throw new Error("Spinn Public Relations legt genau 6 Bits aus der Bank auf die Karte.");
+        const before = cardCounter(state, sourceCardId, "bit");
+        addCardCounter(state, sourceCardId, "bit", addAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          spinnPublicRelationsPoolBefore: before,
+          spinnPublicRelationsPoolAfter: cardCounter(state, sourceCardId, "bit"),
+          addedCounterAmount: addAmount,
+          remainingCounters: cardCounter(state, sourceCardId, "bit"),
+          gainedCredits: 0,
+          corpCreditsAfter: state.corp.credits,
+        };
+        return;
+      }
       if (legalAction.payload?.v1917AssetAbility === "gain_credits") {
         if (legalAction.side !== "corp")
           throw new Error(
@@ -5743,7 +5846,10 @@ function performAction(
             "Die V1.9.17-Asset-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1917_ECONOMY_ASSET_IDS.has(definition.id))
+        if (
+          !V1917_ECONOMY_ASSET_IDS.has(definition.id) ||
+          definition.id === V1917_SPINN_PUBLIC_RELATIONS_ID
+        )
           throw new Error(
             "Die V1.9.17-Asset-Faehigkeit passt nicht zur Karte.",
           );
@@ -7813,7 +7919,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     finishRun(state, false);
     return;
   }
-  applyBartmossPostEncounterTrigger(state, run);
+  applyBartmossPostEncounterTrigger(state, run, legalAction);
   movePastCurrentIce(state);
 }
 
@@ -7833,10 +7939,16 @@ function encounterWasFullyBrokenByRunner(
 function applyBartmossPostEncounterTrigger(
   state: GameState,
   run: ActiveRun,
+  legalAction?: LegalAction,
 ): void {
   const usedBreakerIds = run.bartmossUsedBreakerIdsThisEncounter?.slice() ?? [];
   if (usedBreakerIds.length === 0) return;
   const encounteredIceId = run.encounteredIceId ?? "unknown_ice";
+  const outcomes: Array<{
+    breakerId: CardInstanceId;
+    die: number;
+    trashed: boolean;
+  }> = [];
   for (const breakerId of usedBreakerIds) {
     if (!state.runner.rig.programs.includes(breakerId)) continue;
     if (definitionFor(state, breakerId).id !== BARTMOSS_ID) continue;
@@ -7844,7 +7956,21 @@ function applyBartmossPostEncounterTrigger(
       state,
       `${BARTMOSS_ID}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`,
     );
-    if (die === 1) trashRunnerInstalledProgram(state, breakerId);
+    const trashed = die === 1;
+    if (trashed) trashRunnerInstalledProgram(state, breakerId);
+    outcomes.push({ breakerId, die, trashed });
+  }
+  if (legalAction && outcomes.length > 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      bartmossPostEncounterChecked: true,
+      bartmossPostEncounterOutcomes: outcomes
+        .map(
+          (outcome) =>
+            `${outcome.breakerId}:${outcome.die}:${outcome.trashed ? "trashed" : "survived"}`,
+        )
+        .join(","),
+    };
   }
 }
 
@@ -8836,6 +8962,7 @@ function resolveV1918UpgradeOnAccess(
 ): void {
   const definition = definitionFor(state, cardId);
   if (
+    definition.id !== V1918_CRYBABY_ID &&
     definition.id !== V1918_DEDICATED_RESPONSE_TEAM_ID &&
     definition.id !== V1918_DIETER_ESSLIN_ID &&
     definition.id !== V1918_TURBEAU_DELACROIX_ID
@@ -8851,6 +8978,20 @@ function resolveV1918UpgradeOnAccess(
     );
   }
   if (!mustInstance(state.cardInstances, cardId).rezzed) return;
+
+  if (definition.id === V1918_CRYBABY_ID) {
+    addCardCounter(state, state.runner.identity, "crying", 1);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1918_crybaby_access_counter",
+      ambushDefinitionId: definition.id,
+      counterType: "crying",
+      addedCounterAmount: 1,
+      remainingCounters: cardCounter(state, state.runner.identity, "crying"),
+    };
+    return;
+  }
 
   if (definition.id === V1918_TURBEAU_DELACROIX_ID) {
     legalAction.payload = { ...(legalAction.payload ?? {}), cardId };
@@ -9797,17 +9938,20 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   if (acmeCount > 0) {
     credits(state, "corp", acmeCount);
   }
-  const v1917RecurringAssetCount = rezzedCorpRootCardIds(state).reduce(
-    (sum, cardId) => {
-      return V1917_RECURRING_ASSET_IDS.has(definitionFor(state, cardId).id)
-        ? sum + 1
-        : sum;
-    },
-    0,
-  );
-  if (v1917RecurringAssetCount > 0) {
-    credits(state, "corp", v1917RecurringAssetCount);
+  let v1917RecurringAssetCount = 0;
+  for (const cardId of rezzedCorpRootCardIds(state)) {
+    const definitionId = definitionFor(state, cardId).id;
+    if (definitionId === V1917_SPINN_PUBLIC_RELATIONS_ID) {
+      if (cardCounter(state, cardId, "bit") > 0) {
+        spendCardCounter(state, cardId, "bit", 1);
+        credits(state, "corp", 1);
+      }
+      continue;
+    }
+    if (V1917_RECURRING_ASSET_IDS.has(definitionId))
+      v1917RecurringAssetCount += 1;
   }
+  if (v1917RecurringAssetCount > 0) credits(state, "corp", v1917RecurringAssetCount);
   const employeeEmpowermentCount = state.corp.scoreArea.reduce(
     (sum, cardId) => {
       return definitionFor(state, cardId).id === EMPLOYEE_EMPOWERMENT_ID
@@ -11226,10 +11370,57 @@ function scoreAgenda(
       }
     }
   }
-  if (definition.id === "onr_v1_215_security-net-optimization" && legalAction) {
+  if (definition.id === ENCRYPTION_BREAKTHROUGH_ID && legalAction) {
+    const codeGateIds = corpInstalledCardIds(state)
+      .filter(
+        (iceId) =>
+          mustInstance(state.cardInstances, iceId).zone.zone === "serverIce" &&
+          cardHasSubtype(definitionFor(state, iceId), "code_gate"),
+      )
+      .sort();
+    let rezzedCodeGateCount = 0;
+    const publicRevealDefinitionIds: CardDefinitionId[] = [];
+    for (const iceId of codeGateIds) {
+      const instance = mustInstance(state.cardInstances, iceId);
+      if (instance.rezzed) rezzedCodeGateCount += 1;
+      if (!instance.faceup) {
+        state.cardInstances[iceId] = { ...instance, faceup: true };
+      }
+      publicRevealDefinitionIds.push(definitionFor(state, iceId).id);
+    }
+    if (codeGateIds.length > 0) credits(state, "corp", codeGateIds.length);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      agendaAbility: "encryption_breakthrough",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "encryption_breakthrough_reveal_code_gates",
+      revealedCount: codeGateIds.length,
+      rezzedCodeGateCount,
+      gainedCredits: codeGateIds.length,
+      corpCreditsAfter: state.corp.credits,
+      publicRevealDefinitionIds: publicRevealDefinitionIds.join(","),
+    };
+  }
+  if (definition.id === SECURITY_NET_OPTIMIZATION_ID && legalAction) {
+    const selectedServerId =
+      typeof legalAction.payload?.selectedServerId === "string"
+        ? String(legalAction.payload.selectedServerId)
+        : instanceBefore.zone.side === "corp" &&
+            instanceBefore.zone.zone === "serverRoot"
+          ? instanceBefore.zone.serverId
+          : undefined;
+    if (!selectedServerId || selectedServerId === "new_remote")
+      throw new Error("Security Net Optimization braucht einen gueltigen Fort.");
+    mustServer(state, selectedServerId as Exclude<ServerId, "new_remote">);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      selectedServerId: selectedServerId as Exclude<ServerId, "new_remote">,
+    };
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       securityNetOptimizationActive: true,
+      selectedServerId,
+      securityNetOptimizationServerId: selectedServerId,
     };
   }
   if (definition.id === V1922_SECURITY_PURGE_ID && legalAction) {
@@ -11571,6 +11762,7 @@ function action(
       type === "score_agenda" ||
       type === "trash_resource" ||
       payload?.v1917AssetAbility ||
+      payload?.runnerAbility ||
       (side === "runner" && type === "install_card")
         ? "public"
         : "private_to_actor",
@@ -13793,6 +13985,7 @@ function resolveTraceCorpBid(
   );
   const traceStrength = trace.baseTraceStrength + bid;
   const runnerLink = calculateRunnerLink(state);
+  const cryingCounterCount = cardCounter(state, state.runner.identity, "crying");
   state.trace = {
     ...trace,
     status: "runner_bid",
@@ -13820,6 +14013,7 @@ function resolveTraceCorpBid(
       : {}),
     traceStrength,
     runnerLink,
+    ...(cryingCounterCount > 0 ? { cryingCounterCount, cryingLinkReduction: cryingCounterCount * 2 } : {}),
   };
 }
 
@@ -13949,7 +14143,8 @@ function calculateRunnerLink(state: GameState): number {
       throw new Error("Runner-Link ist ungueltig.");
     return sum + cardLink;
   }, 0);
-  const link = baseLink + modifier + installedLink;
+  const cryingReduction = cardCounter(state, state.runner.identity, "crying") * 2;
+  const link = Math.max(0, baseLink + modifier + installedLink - cryingReduction);
   if (!Number.isInteger(link) || link < 0)
     throw new Error("Runner-Link ist ungueltig.");
   return link;
@@ -14149,6 +14344,7 @@ function makeActionId(
     parts.push(String(payload.v1921RunnerProgramAbility));
   if (payload?.v1921RunnerResourceAbility)
     parts.push(String(payload.v1921RunnerResourceAbility));
+  if (payload?.runnerAbility) parts.push(String(payload.runnerAbility));
   if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.oliviaSalazarCardId)
@@ -14369,17 +14565,16 @@ function publicContextForAction(
     context.postBreakStealthLossPending =
       legalAction.payload.postBreakStealthLossPending;
   }
-  if (
-    legalAction.type === "gain_credit" ||
-    legalAction.type === "draw_card" ||
-    legalAction.type === "remove_tag"
-  ) {
-    context.amount =
-      legalAction.type === "remove_tag"
-        ? Number(legalAction.payload?.removeTagAmount ?? 1)
-        : Number.isInteger(legalAction.payload?.gainCreditsAmount)
-          ? Number(legalAction.payload?.gainCreditsAmount)
-          : 1;
+  if (legalAction.type === "remove_tag") {
+    context.amount = Number(legalAction.payload?.removeTagAmount ?? 1);
+  } else if (legalAction.type === "draw_card") {
+    context.amount = 1;
+  } else if (legalAction.type === "gain_credit") {
+    if (Number.isInteger(legalAction.payload?.gainCreditsAmount)) {
+      context.amount = Number(legalAction.payload?.gainCreditsAmount);
+    } else if (legalAction.payload?.traceStarted !== true) {
+      context.amount = 1;
+    }
   }
   if (legalAction.type === "resolve_choice") {
     context.choiceKind = legalAction.payload?.choiceKind;
@@ -14448,6 +14643,8 @@ function publicContextForAction(
       "runnerStrength",
       "traceSuccessful",
       "tagsAdded",
+      "cryingCounterCount",
+      "cryingLinkReduction",
       "corpCreditBid",
       "hackerTrackerCountersSpent",
       "hackerTrackerCountersAdded",
@@ -14466,8 +14663,15 @@ function publicContextForAction(
         legalAction.payload.unbrokenSubroutineCount;
       context.encounterWillEndRun = legalAction.payload.encounterWillEndRun;
     }
+    if (legalAction.payload?.bartmossPostEncounterChecked === true) {
+      context.bartmossPostEncounterChecked = true;
+      context.bartmossPostEncounterOutcomes =
+        legalAction.payload.bartmossPostEncounterOutcomes;
+    }
   }
   if (legalAction.payload?.traceStarted === true) {
+    if (typeof legalAction.payload.agendaAbility === "string")
+      context.agendaAbility = legalAction.payload.agendaAbility;
     context.traceStarted = true;
     context.traceId = legalAction.payload.traceId;
     context.sourceCardId = legalAction.payload.sourceCardId;
@@ -14589,6 +14793,11 @@ function publicContextForAction(
       context.searchShuffleAfter = legalAction.payload.searchShuffleAfter;
     if (typeof legalAction.payload.archivesRevealCount === "number")
       context.archivesRevealCount = legalAction.payload.archivesRevealCount;
+    if (typeof legalAction.payload.revealedCount === "number")
+      context.revealedCount = legalAction.payload.revealedCount;
+    if (typeof legalAction.payload.publicRevealDefinitionIds === "string")
+      context.publicRevealDefinitionIds =
+        legalAction.payload.publicRevealDefinitionIds;
     context.redactedKind = "hidden_zone";
   }
   if (typeof legalAction.payload?.archivesAutoAccessedCount === "number")
@@ -14617,6 +14826,13 @@ function publicContextForAction(
     context.badPublicityAfter = legalAction.payload.badPublicityAfter;
   if (typeof legalAction.payload?.onScoreGainCredits === "number")
     context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
+  if (typeof legalAction.payload?.securityNetOptimizationServerId === "string")
+    context.securityNetOptimizationServerId =
+      legalAction.payload.securityNetOptimizationServerId;
+  if (typeof legalAction.payload?.selectedServerId === "string")
+    context.selectedServerId = legalAction.payload.selectedServerId;
+  if (typeof legalAction.payload?.agendaAbility === "string")
+    context.agendaAbility = legalAction.payload.agendaAbility;
   if (typeof legalAction.payload?.corpCreditsBeforeCorporateWar === "number")
     context.corpCreditsBeforeCorporateWar =
       legalAction.payload.corpCreditsBeforeCorporateWar;
@@ -14659,6 +14875,31 @@ function publicContextForAction(
   }
   if (typeof legalAction.payload?.gainedActions === "number")
     context.gainedActions = legalAction.payload.gainedActions;
+  if (typeof legalAction.payload?.v1917AssetAbility === "string") {
+    context.v1917AssetAbility = legalAction.payload.v1917AssetAbility;
+    for (const key of [
+      "spinnPublicRelationsPoolBefore",
+      "spinnPublicRelationsPoolAfter",
+      "addedCounterAmount",
+      "remainingCounters",
+      "gainedCredits",
+      "corpCreditsAfter",
+    ]) {
+      const value = legalAction.payload[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
+  if (typeof legalAction.payload?.runnerAbility === "string") {
+    context.runnerAbility = legalAction.payload.runnerAbility;
+    for (const key of [
+      "removedCounterAmount",
+      "remainingCounters",
+      "runnerCreditsAfter",
+    ]) {
+      const value = legalAction.payload[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
   if (typeof legalAction.payload?.v1918UpgradeAbility === "string") {
     context.v1918UpgradeAbility = legalAction.payload.v1918UpgradeAbility;
     if (typeof legalAction.payload.runStartTaxPaid === "number")
@@ -15044,7 +15285,10 @@ function revealForPublicEvent(
     ].includes(legalAction.type) ||
     (legalAction.type === "gain_credit" &&
       (legalAction.payload?.v1917AssetAbility === "gain_credits" ||
-        legalAction.payload?.v1917AssetAbility === "trace_3_tag")) ||
+        legalAction.payload?.v1917AssetAbility === "trace_3_tag" ||
+        legalAction.payload?.v1917AssetAbility === "spinn_load_pool")) ||
+    (legalAction.type === "gain_credit" &&
+      legalAction.payload?.traceStarted === true) ||
     (legalAction.type === "gain_credit" &&
       (legalAction.payload?.agendaAbility === "v1922_political_overthrow" ||
         legalAction.payload?.agendaAbility === "v1922_marine_arcology" ||

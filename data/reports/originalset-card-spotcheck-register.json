@@ -1,6 +1,6 @@
 {
   "schemaVersion": "netgrid.originalset-card-spotcheck-register.v1",
-  "updatedAt": "2026-05-14",
+  "updatedAt": "2026-05-15",
   "selectionPolicy": {
     "defaultExcludeStatuses": ["completed"],
     "rerunAllowedWhen": [
@@ -10,6 +10,84 @@
     ]
   },
   "rounds": [
+    {
+      "roundId": "2026-05-15-netwatch-spinn",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_NETWATCH_SPINN_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-netwatch-spinn.md",
+      "cards": [
+        {
+          "cardId": "onr_v1_207_netwatch-operations-office",
+          "title": "Netwatch Operations Office",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_trace2_chronicle_revalidation_improved",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_200_encryption-breakthrough",
+          "title": "Encryption Breakthrough",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_code_gate_modifier_score_reveal_credit",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+          "title": "Bartmoss Memorial Icebreaker",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_post_encounter_payload_improved",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_358_dr-dreff",
+          "title": "Dr. Dreff",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_counter_and_run_tax_paths_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_317_data-masons",
+          "title": "Data Masons",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_wall_modifier_paths_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_374_washington-d-c-city-grid",
+          "title": "Washington, D.C., City Grid",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_server_difficulty_modifier_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_354_crybaby",
+          "title": "Crybaby",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_crying_counter_trace_link_removal",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_215_security-net-optimization",
+          "title": "Security Net Optimization",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_selected_fort_ice_strength_modifier",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_037_japanese-water-torture",
+          "title": "Japanese Water Torture",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_future_action_debt_wall_break_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_344_spinn-public-relations",
+          "title": "Spinn Public Relations",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_bit_pool_start_turn_credit",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
     {
       "roundId": "2026-05-14-B",
       "selectionMode": "random_sample_from_complex_decklegal_originalset_cards_excluding_completed_spotchecks",

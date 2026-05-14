@@ -112,7 +112,9 @@ export type CounterType =
   | "mark"
   | "dividend"
   | "core_damage"
-  | "shell";
+  | "shell"
+  | "bit"
+  | "crying";
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
@@ -3483,7 +3485,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 5,
     agendaPoints: 3,
-    rulesText: "While scored, ice gets +1 strength.",
+    rulesText:
+      "Choose a fort when scored. Ice installed on that fort gets +1 strength.",
     mechanics: [
       "install_remote",
       "advance",
@@ -3911,7 +3914,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     trashCost: 4,
     rulesText:
-      "Rezzed transaction campaign asset for recurring Corp economy. Credit pools are tracked as explicit card state.",
+      "[A]: Put 6 bits from the bank on Spinn Public Relations. At the start of each Corp turn, take 1 bit from it if able.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -3959,7 +3962,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     trashCost: 2,
     rulesText:
-      "Rezzed server upgrade with trace, counter, access and ambush surfaces. Server effects resolve only through legal root-server actions.",
+      "When accessed, give the Runner a Crying counter. Each Crying counter reduces Runner link by 2 during traces. Runner may pay 4 and spend an action to remove one.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -5837,7 +5840,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     advancementRequirement: 5,
     agendaPoints: 2,
     rulesText:
-      "Agenda with global code-gate and hidden-zone support surfaces. Static modifiers are source-bound and deterministic.",
+      "All code gates get +1 strength. When scored, reveal code gates and gain 1 credit for each revealed or rezzed code gate.",
     mechanics: [
       "install_remote",
       "advance",

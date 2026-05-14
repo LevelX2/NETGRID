@@ -218,7 +218,9 @@
       "roles": [
         "corp",
         "agenda",
-        "modifier"
+        "modifier",
+        "code_gate",
+        "hidden_zone"
       ],
       "planRoles": [
         "corp_score_agenda"
@@ -306,18 +308,22 @@
       "roles": [
         "corp",
         "agenda",
-        "modifier"
+        "modifier",
+        "code_gate",
+        "hidden_zone"
       ],
       "planRoles": [
         "corp_score_agenda"
       ],
       "requiredMechanics": [
         "persistent_special_state_resolver",
-        "hidden_zone_search_reveal_reorder_resolver",
+        "code_gate_strength_modifier",
+        "hidden_zone_reveal_resolver",
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "modifier": 1,
+        "economy": 1
       },
       "riskTags": [
         "modifier_layering",

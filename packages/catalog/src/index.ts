@@ -2140,7 +2140,8 @@ const ONR_V1_6_1_TEXT_OVERRIDES: Partial<Record<string, string>> = {
 const ONR_V1_6_2_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_212_priority-requisition":
     "When scored, rez one installed piece of ice at no cost.",
-  "onr_v1_215_security-net-optimization": "While scored, ice gets +1 strength.",
+  "onr_v1_215_security-net-optimization":
+    "Choose a fort when scored. Ice installed on that fort gets +1 strength.",
   "onr_v1_317_data-masons":
     "Walls cost 2 less to rez and get +1 strength while Data Masons is rezzed.",
   "onr_v1_320_encoder-inc":

@@ -3521,7 +3521,6 @@ describe("V1.6.2 Mechanikpaket B", () => {
     securityNet.corp.clicks = 10;
     securityNet.corp.maxHandSize = 100;
     moveCorpCardToHq(securityNet, "onr_v1_215_security-net-optimization");
-    putCorpIceOnServer(securityNet, "rd", "onr_v1_232_crystal-wall");
     securityNet = apply(
       securityNet,
       "corp",
@@ -3530,6 +3529,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(securityNet, action) ===
           "onr_v1_215_security-net-optimization",
     );
+    putCorpIceOnServer(securityNet, "rd", "onr_v1_232_crystal-wall");
     for (let index = 0; index < 5; index += 1) {
       securityNet = apply(
         securityNet,
@@ -3568,7 +3568,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
     expect(
       getPlayerView(securityNet, "runner").run?.encounteredIce?.strength,
-    ).toBe(4);
+    ).toBe(3);
   });
 
   it("reduces code-gate and black-ice rez costs and resolves Priority Requisition free rez deterministically", () => {
@@ -7281,7 +7281,7 @@ describe("V1.9.3 Mechanikpaket L", () => {
     state.timingPoint = "corp_action.main";
     state.corp.clicks = 3;
 
-    state = apply(
+    const netwatchAction = mustAction(
       state,
       "corp",
       (action) =>
@@ -7290,10 +7290,37 @@ describe("V1.9.3 Mechanikpaket L", () => {
           "onr_v1_207_netwatch-operations-office" &&
         action.payload?.agendaAbility === "netwatch_operations_office",
     );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: netwatchAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v193-netwatch-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: netwatchAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v193-netwatch-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    state = apply(state, "corp", (action) => action.actionId === netwatchAction.actionId);
     expect(state.trace).toMatchObject({
       status: "corp_bid",
       baseTraceStrength: 2,
     });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      cardDefinitionId: "onr_v1_207_netwatch-operations-office",
+      agendaAbility: "netwatch_operations_office",
+      traceStarted: true,
+      baseTraceStrength: 2,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty("amount");
     state = applyChoice(state, "corp", "bid_2");
     state = applyChoice(state, "runner", "bid_0");
     expect(state.runner.tags).toBe(1);
@@ -8756,6 +8783,72 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
+  });
+
+  it("scores Encryption Breakthrough with code-gate reveal credits and a scored code-gate strength modifier", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-encryption-breakthrough-code-gates",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1920_encryption_breakthrough_code_gate",
+          cards: [
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            { id: "onr_v1_230_cortical-scanner", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 30;
+    state.corp.clicks = 10;
+    state.corp.maxHandSize = 99;
+    moveCorpCardToHq(state, "onr_v1_200_encryption-breakthrough");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_200_encryption-breakthrough",
+    );
+    const codeGateId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_230_cortical-scanner",
+    );
+    for (let index = 0; index < 5; index += 1) {
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_200_encryption-breakthrough",
+      );
+    }
+    const creditsBeforeScore = state.corp.credits;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_200_encryption-breakthrough",
+    );
+    expect(state.corp.credits).toBe(creditsBeforeScore + 1);
+    expect(state.cardInstances[codeGateId]?.faceup).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      cardDefinitionId: "onr_v1_200_encryption-breakthrough",
+      agendaAbility: "encryption_breakthrough",
+      hiddenZoneAction: "encryption_breakthrough_reveal_code_gates",
+      revealedCount: 1,
+      gainedCredits: 1,
+    });
   });
 
   it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
@@ -11828,7 +11921,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "onr_v1_326_holovid-campaign",
       "onr_v1_329_investment-firm",
       "onr_v1_337_rockerboy-promotion",
-      "onr_v1_344_spinn-public-relations",
     ] as const;
     for (const definitionId of economyAssets) {
       let state = v1917GenericAssetGame(`v1917-economy-asset-${definitionId}`);
@@ -11875,13 +11967,74 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     }
   });
 
+  it("loads and spends Spinn Public Relations bits instead of generic economy credits", () => {
+    let state = v1917GenericAssetGame("v1917-spinn-public-relations-pool");
+    state.corp.credits = 10;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const spinnId = moveCorpCardToHq(
+      state,
+      "onr_v1_344_spinn-public-relations",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === spinnId &&
+        action.payload?.serverId === "new_remote",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_344_spinn-public-relations",
+    );
+    const creditsBeforeLoad = state.corp.credits;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1917AssetAbility === "spinn_load_pool" &&
+        action.payload?.cardId === spinnId,
+    );
+
+    expect(state.corp.credits).toBe(creditsBeforeLoad);
+    expect(cardCounterAmount(state, spinnId, "bit")).toBe(6);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      cardDefinitionId: "onr_v1_344_spinn-public-relations",
+      v1917AssetAbility: "spinn_load_pool",
+      spinnPublicRelationsPoolBefore: 0,
+      spinnPublicRelationsPoolAfter: 6,
+      gainedCredits: 0,
+    });
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    for (let turns = 0; turns < 3; turns += 1) {
+      state = toRunnerTurnFromCorpMain(state);
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      if (turns < 2)
+        state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    }
+
+    expect(cardCounterAmount(state, spinnId, "bit")).toBe(3);
+    expect(state.corp.credits).toBe(creditsBeforeLoad + 3);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("refreshes all scoped V1.9.17 recurring assets together without hidden payloads", () => {
     const recurringAssets = [
       "onr_v1_311_braindance-campaign",
       "onr_v1_314_corporate-negotiating-center",
       "onr_v1_326_holovid-campaign",
       "onr_v1_329_investment-firm",
-      "onr_v1_344_spinn-public-relations",
     ] as const;
     let state = toRunnerTurn(
       v1917GenericAssetGame("v1917-recurring-all-assets"),
@@ -17014,6 +17167,79 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         ?.definitionId,
     ).toBe("onr_v1_354_crybaby");
     expect(validateGameState(accessState).ok).toBe(true);
+  });
+
+  it("applies Crybaby access counters, trace link reduction and runner removal", () => {
+    let state = toRunnerTurn(
+      v1917GenericAssetGame("v1918-crybaby-counter-link-removal"),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const crybabyId = putCorpRootInRemote(state, "onr_v1_354_crybaby");
+    state.cardInstances[crybabyId] = {
+      ...state.cardInstances[crybabyId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(cardCounterAmount(state, state.runner.identity, "crying")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "onr_v1_354_crybaby",
+      hiddenZoneAction: "v1918_crybaby_access_counter",
+      remainingCounters: 1,
+    });
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    const parisId = putCorpRootInRemote(state, "onr_v1_365_paris-city-grid");
+    state.cardInstances[parisId] = {
+      ...state.cardInstances[parisId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1918UpgradeAbility === "trace_2_tag" &&
+        action.payload?.cardId === parisId,
+    );
+    state = applyChoice(state, "corp", "bid_0");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStep: "corp_bid",
+      runnerLink: 0,
+      cryingCounterCount: 1,
+      cryingLinkReduction: 2,
+    });
+
+    state = applyChoice(state, "runner", "bid_0");
+    state.activeSide = "runner";
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.runner.clicks = 4;
+    state.runner.credits = 20;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.runnerAbility === "remove_crying_counter",
+    );
+    expect(cardCounterAmount(state, state.runner.identity, "crying")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runnerAbility: "remove_crying_counter",
+      removedCounterAmount: 1,
+      remainingCounters: 0,
+    });
   });
 
   it("resolves V1.9.18 upgrade access ambush damage without public hidden-info leaks", () => {
