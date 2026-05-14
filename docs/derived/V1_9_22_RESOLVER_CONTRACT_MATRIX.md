@@ -111,7 +111,7 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 | Haunting Inquisition | Rez 8, Stärke 6; Errata: mehrere Effekte laufen parallel; zählen nur tatsächlich genommene Aktionen; Bonus-Runs ohne Aktion bleiben möglich | Action-Lock-State, Actual-action-Counter, LegalAction/applyAction, Events, Replay/StateHash, AI |
 | Tutor | Rez 4, Stärke 5; Errata: modifiziert nicht den aktuellen Tutor-Encounter, nur spätere Encounter im Run | Runweiter Modifier-State, zukünftige Encounter-Projektion, Subroutine-Indexing, Breakbarkeit, Events, Replay/StateHash, AI |
 | Viral 15 | Rez 5, Stärke 3; Errata: Runner wählt zu trashende Programme | Jack-out-Tax-State, After-passing-rezzed-ice-Trigger, private Runner-Programmauswahl, Events, Replay/StateHash, AI |
-| Virizz | Nutzerklärung: Rez-Kosten 2, Stärke 4; Sentry; für den Rest des Runs muss der Runner +1 Credit bezahlen, wenn er ICE brechen will | Break-Kostenmodifier-Projektion, Encounter-Timing, LegalAction/applyAction, Events, Replay/StateHash, AI |
+| Virizz | Nutzerklärung: Rez-Kosten 2, Stärke 4; Sentry; für den Rest des Runs muss der Runner +1 Credit bezahlen, wenn er ICE brechen will; Runtime-WIP setzt Break-Kostenprojektion, applyAction-Revalidierung, PublicPayload und Replay/StateHash um | Finale AI-/Catalog-/Release-Promotion |
 | Zombie | ICE-Oberfläche; Sentry-Oberfläche | Rez-Kosten, Stärke, Subtypen, Subroutinen, Encounter-Timing, Effektwerte, Zielvalidierung, Events, Replay/StateHash, AI |
 
 ### Corp-Operations

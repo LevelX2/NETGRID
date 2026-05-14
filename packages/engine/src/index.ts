@@ -4488,6 +4488,11 @@ function runRemainderStrengthBonusForBreaker(
   );
 }
 
+function runBreakSubroutineAdditionalCost(run: GameState["run"]): number {
+  if (!run) return 0;
+  return Math.max(0, Math.floor(run.breakSubroutineAdditionalCost ?? 0));
+}
+
 function iceRezCostReductionFor(
   state: GameState,
   iceDefinition: CardDefinition,
@@ -4987,8 +4992,11 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       !run.noBreakSubroutinesActive &&
       breakAbility &&
       breakerStrength >= encounteredIceStrength &&
-      availableRunnerRunCredits(state, breakerId) >= breakAbility.cost.credits
+      availableRunnerRunCredits(state, breakerId) >=
+        breakAbility.cost.credits + runBreakSubroutineAdditionalCost(run)
     ) {
+      const additionalBreakCost = runBreakSubroutineAdditionalCost(run);
+      const totalBreakCost = breakAbility.cost.credits + additionalBreakCost;
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = iceDefinition.subroutines ?? [];
@@ -5011,8 +5019,20 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
               "break_subroutine",
               `${breaker.title}: ${subroutineLabel}`,
               breakerId,
-              [{ credits: breakAbility.cost.credits }],
-              { breakerId, iceId: encounteredIceId, subroutineIndex: index },
+              [{ credits: totalBreakCost }],
+              {
+                breakerId,
+                iceId: encounteredIceId,
+                subroutineIndex: index,
+                breakSubroutineBaseCost: breakAbility.cost.credits,
+                ...(additionalBreakCost > 0
+                  ? {
+                      breakSubroutineAdditionalCost: additionalBreakCost,
+                      breakSubroutineTotalCost: totalBreakCost,
+                      v1922CorpIceAbility: "virizz_break_cost_modifier",
+                    }
+                  : {}),
+              },
               abilityMetadata(breakerId, breakAbility.id, encounteredIceId),
             ),
           );
@@ -7175,6 +7195,19 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
       run.encounterTaxForFutureIce =
         Math.max(0, Math.floor(run.encounterTaxForFutureIce ?? 0)) + amount;
+    }
+    if (subroutine.type === "set_run_break_subroutine_cost_modifier") {
+      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
+      run.breakSubroutineAdditionalCost =
+        runBreakSubroutineAdditionalCost(run) + amount;
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          v1922CorpIceAbility: "virizz_break_cost_modifier",
+          breakSubroutineAdditionalCost: run.breakSubroutineAdditionalCost,
+          sourceDefinitionId: definition.id,
+        };
+      }
     }
     if (subroutine.type === "set_run_future_strength_bonus") {
       const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
@@ -13266,6 +13299,20 @@ function publicContextForAction(
     }
     if (typeof legalAction.payload.corpClicksAfter === "number")
       context.corpClicksAfter = legalAction.payload.corpClicksAfter;
+  }
+  if (typeof legalAction.payload?.v1922CorpIceAbility === "string") {
+    context.v1922CorpIceAbility = legalAction.payload.v1922CorpIceAbility;
+    if (typeof legalAction.payload.breakSubroutineBaseCost === "number")
+      context.breakSubroutineBaseCost =
+        legalAction.payload.breakSubroutineBaseCost;
+    if (typeof legalAction.payload.breakSubroutineAdditionalCost === "number")
+      context.breakSubroutineAdditionalCost =
+        legalAction.payload.breakSubroutineAdditionalCost;
+    if (typeof legalAction.payload.breakSubroutineTotalCost === "number")
+      context.breakSubroutineTotalCost =
+        legalAction.payload.breakSubroutineTotalCost;
+    if (typeof legalAction.payload.sourceDefinitionId === "string")
+      context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
   }
   if (legalAction.payload?.v1922EdgerunnerTempsInstallAction === true) {
     context.v1922CorpOperationAbility = "install_action_bundle";

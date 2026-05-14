@@ -126,6 +126,7 @@ export type SubroutineType =
   | "initiate_trace"
   | "trash_installed_program"
   | "set_run_encounter_tax"
+  | "set_run_break_subroutine_cost_modifier"
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
   | "set_next_encounter_lock"
@@ -707,6 +708,7 @@ export type RunState = {
   badPublicityCredits?: number;
   bypassFirstIceRemaining?: boolean;
   encounterTaxForFutureIce?: number;
+  breakSubroutineAdditionalCost?: number;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;
@@ -1368,6 +1370,13 @@ function onrSetRunEncounterTax(
   amount: number,
 ): SubroutineDefinition {
   return { id, type: "set_run_encounter_tax", amount };
+}
+
+function onrSetRunBreakSubroutineCostModifier(
+  id: string,
+  amount: number,
+): SubroutineDefinition {
+  return { id, type: "set_run_break_subroutine_cost_modifier", amount };
 }
 
 function onrSetRunFutureStrengthBonus(
@@ -7091,6 +7100,22 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       onrEtr("onr_v1_273_triggerman_etr"),
     ],
     mechanics: ["uninstall_runner_program", "end_the_run"],
+  }),
+  onrIce({
+    id: "onr_v1_277_virizz",
+    title: "Virizz",
+    subtypes: ["sentry"],
+    rezCost: 2,
+    strength: 4,
+    rulesText:
+      "[Subroutine] For the remainder of the run, the Runner must pay 1 additional credit to break each ice subroutine.",
+    subroutines: [
+      onrSetRunBreakSubroutineCostModifier(
+        "onr_v1_277_virizz_break_cost_modifier",
+        1,
+      ),
+    ],
+    mechanics: ["run_modifier", "per_card_longtail"],
   }),
   onrIce({
     id: "onr_v1_280_zombie",

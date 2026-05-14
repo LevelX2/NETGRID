@@ -68,13 +68,18 @@
     },
     {
       "cardCode": "onr_v1_037_japanese-water-torture",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "v1922_runner_program_future_action_debt_contract_pending",
+      "resolverFamily": "v1922_runner_program_japanese_water_torture_future_action_debt",
       "coveredSmokes": [
-        "ability_contract_remains_gated",
-        "no_install_program_promotion_guard",
-        "no_pump_or_break_legal_action_before_future_action_debt_contract"
+        "install_program_legal_action",
+        "wall_break_subroutine",
+        "pump_strength",
+        "future_action_debt",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
       ]
     },
     {
@@ -521,10 +526,18 @@
     },
     {
       "cardCode": "onr_v1_277_virizz",
-      "releaseStatus": "planned_no_promotion",
+      "releaseStatus": "runtime_wip_no_promotion",
       "aiSupported": false,
-      "resolverFamily": "per_card_longtail_resolver_gate",
-      "coveredSmokes": []
+      "resolverFamily": "v1922_corp_ice_break_cost_modifier",
+      "coveredSmokes": [
+        "rez_ice_legal_action",
+        "run_wide_break_cost_modifier",
+        "break_subroutine_cost_projection",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "public_payload_visibility",
+        "replay_statehash"
+      ]
     },
     {
       "cardCode": "onr_v1_280_zombie",

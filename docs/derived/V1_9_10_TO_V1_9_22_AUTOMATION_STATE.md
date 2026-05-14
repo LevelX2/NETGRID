@@ -80,16 +80,26 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Zeitpunkt: 2026-05-14 14:24 CEST
 - Ergebnis: Weitere V1.9.22-Kartenfakten sind lokal verbindlich nachgezogen, ohne Runtime-, Catalog-, AI- oder Release-Promotion.
 - `Zetatech Software Installer`: Installkosten 0, MU 1; offen bleiben Restricted-Credit-Zahlungsfenster und Overlay-Vertrag.
-- `Virizz`: Rez-Kosten 2, Staerke 4; fuer den Rest des Runs muss der Runner 1 Credit extra bezahlen, wenn er ICE brechen will; offen bleiben Break-Kostenprojektion in LegalActions und `applyAction`-Revalidierung.
 - `Flak`: Installkosten 4, Staerke 2, `1: Break AP subroutine`, `1: +1 Strength`; AP-Subroutine-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
 - `Hammer`: Installkosten 2, MU 1, Staerke 2, `1: Break Wall subroutine`, `1: +1 Strength`; Runtime-WIP ohne Promotion ist umgesetzt mit deterministischem bis-zu-2-Stealth-Counter-Verlust aus installierten Stealth-Quellen. Offen bleibt die freie Runner-Verteilung, falls mehrere Stealth-Quellen verfuegbar sind.
 - `Japanese Water Torture`: Installkosten 7, Staerke 2, `0: Break Wall subroutine`, `X: +X strength, and forgo your next X actions`; Runtime-WIP ohne Promotion ist umgesetzt mit Wall-Break, Pump und echter zuguebergreifender Future-Action-Debt.
 - `Reflector`: Program/Icebreaker, MU 1, Installkosten 2, Staerke 4, `0: Break stun, hellbolt or knockout subroutine`; Zielkategorie-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
+- `Virizz`: Rez-Kosten 2, Staerke 4; Runtime-WIP ohne Promotion ist umgesetzt mit rest-of-run +1-Credit-Break-Kostenmodifier, LegalAction-Kostenprojektion und applyAction-Revalidierung.
 - Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
 - `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
-- Naechster sinnvoller Code-Schnitt: `Hammer`-Mehrfach-Stealth-Verteilungschoice, `Virizz` nach Break-Kostenmodifier-Vertrag, `Security Purge` nach Installationsvertrag fuer revealed ICE oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
+- Naechster sinnvoller Code-Schnitt: `Hammer`-Mehrfach-Stealth-Verteilungschoice, `Tutor` nach run-weitem Zusatz-ETR-Vertrag, `Security Purge` nach Installationsvertrag fuer revealed ICE oder `Zetatech Software Installer` nach Restricted-Credit-/Overlay-Vertrag.
 
 ## Letzter Lauf
+
+- Zeitpunkt: 2026-05-14 16:40 CEST
+- Ergebnis: V1.9.22 Virizz-Break-Kostenmodifier-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Release: V1.9.22
+- Phase vorher: implementing
+- Phase nachher: implementing
+- Umsetzung: `Virizz` hat eine nicht-promotende Runtime-ICE-Definition mit Rez-Kosten 2, Staerke 4 und rest-of-run Break-Kostenmodifier erhalten. Nach Aufloesung der Virizz-Subroutine projiziert die Engine +1 Credit auf folgende `break_subroutine`-LegalActions und revalidiert die Gesamtkosten ueber `applyAction`. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Tests: `engine` initial rot wegen Test-Phasenannahmen, danach pass (301); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `typecheck` pass; `test` initial rot wegen parallel laufendem Lint/Server-Vitest-Worker, isolierte Wiederholung pass; `lint` pass; `build` pass mit bekannter Turbopack-NFT-Warnung.
+- Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: virizz break cost modifier wip`); finaler Hash steht im Automationslaufbericht.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 16:35 CEST
 - Ergebnis: V1.9.22 Japanese-Water-Torture-Future-Action-Debt-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.

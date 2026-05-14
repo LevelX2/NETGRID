@@ -608,11 +608,11 @@
       "cluster": "corp_ice",
       "side": "corp",
       "type": "ice",
-      "contractStatus": "prepared_user_confirmed_run_wide_break_cost_modifier_no_promotion",
+      "contractStatus": "runtime_wip_no_promotion",
       "confirmedLocalFacts": ["rez_cost_2", "strength_4", "sentry_surface", "run_wide_plus_1_credit_to_break_each_ice_runner_wants_to_break"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard"],
-      "missingInformation": ["break_cost_modifier_projection", "encounter_timing", "legalaction_projection", "applyaction_revalidation", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Write the run-wide break-cost modifier contract, including LegalAction cost projection and applyAction revalidation."
+      "safeCurrentCoverage": ["rez_ice_legal_action", "run_wide_break_cost_modifier", "break_cost_modifier_projection", "wrong_side_stale_revalidation", "public_event_redaction", "replay_statehash"],
+      "missingInformation": ["final_ai_catalog_release_promotion"],
+      "removalCondition": "Keep Virizz in WIP until V1.9.22 final AI, catalog and release-promotion gates are satisfied."
     },
     {
       "cardId": "onr_v1_280_zombie",

@@ -5,7 +5,7 @@ Status: WIP-Preflight mit Errata-1.70-Klaerung, keine Runtime-/Catalog-/AI-Promo
 
 ## Ziel
 
-Nach `Edgerunner, Inc., Temps` bleiben sechs Corp-Longtail-Zielkarten ohne engen Runtime-Resolver. Alle sechs haben lokale Kartenfakten, aber nicht alle Fakten reichen bereits fuer einen side-sicheren, replay-stabilen LegalAction-/applyAction-Vertrag.
+Nach `Virizz` bleiben fünf Corp-Longtail-Zielkarten ohne engen Runtime-Resolver. Alle fünf haben lokale Kartenfakten, aber nicht alle Fakten reichen bereits fuer einen side-sicheren, replay-stabilen LegalAction-/applyAction-Vertrag.
 
 ## Kartenbefund
 
@@ -16,11 +16,10 @@ Nach `Edgerunner, Inc., Temps` bleiben sechs Corp-Longtail-Zielkarten ohne engen
 | `Haunting Inquisition` | Code Gate, Rez 8, Staerke 6; Run-/Action-Lock fuer die naechsten sechs tatsaechlich genommenen Runner-Aktionen plus End the run. Errata: mehrere Effekte laufen parallel; Bonus-Runs ausserhalb einer Aktion werden nicht verboten. | Action-Zaehler, LegalAction-Filter fuer tatsaechliche Aktionen, Persistenz ueber Zugwechsel und PublicEvent-Text. |
 | `Tutor` | Code Gate, Rez 4, Staerke 5; fuer den Rest des Runs erhalten spaeter encountered ICE eine zusaetzliche End-the-run-Subroutine. Errata: Tutor modifiziert sich nicht selbst, ausser es wird spaeter erneut encountered. | Run-weite Modifier-Struktur fuer spaetere Encounter, Subroutine-Indexierung, Break-/Replay-Stabilitaet. |
 | `Viral 15` | Sentry, Rez 5, Staerke 3; run-weite Jack-out-Steuer und Program-trash nach dem Passieren jeder gerezzten ICE, ausser Runner jackt out. Errata: Runner waehlt die zu trashenden Programme. | Timingfenster nach Passing, Jack-out-Choice, Runner-private Programmauswahl, Trash-Visibility und Mehrfachtrigger. |
-| `Virizz` | Sentry, Rez 2, Staerke 4; fuer den Rest des Runs muss der Runner 1 Credit extra bezahlen, wenn er ICE brechen will. | Run-weite Break-Cost-Modifikation, Kostenanzeige in LegalActions, Interaktion mit Breaker-/Recurring-/Stealth-Credits. |
 
 ## Entscheidung
 
-Keiner dieser Restpfade wird in diesem Vorbereitungsschnitt als Runtime-Code umgesetzt. Errata 1.70 reduziert mehrere fachliche Luecken, ersetzt aber nicht die spaetere Engine-Modellierung fuer Choices, Payloads und Replay/StateHash. Der bestehende No-Playable-Runtime-Guard fuer die sechs Karten bleibt korrekt.
+Keiner dieser Restpfade wird in diesem Vorbereitungsschnitt als Runtime-Code umgesetzt. Errata 1.70 reduziert mehrere fachliche Luecken, ersetzt aber nicht die spaetere Engine-Modellierung fuer Choices, Payloads und Replay/StateHash. Der bestehende No-Playable-Runtime-Guard fuer die fünf Karten bleibt korrekt.
 
 ## Naechste konkrete Entfernung
 

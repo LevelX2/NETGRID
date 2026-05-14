@@ -3122,6 +3122,7 @@ describe("catalog import and status logic", () => {
         "v1922_runner_program_newsgroup_filter_gain_2",
         "v1922_runner_program_flak_ap_breaker",
         "v1922_runner_program_hammer_wall_breaker_ordered_stealth_loss",
+        "v1922_runner_program_japanese_water_torture_future_action_debt",
         "v1922_runner_program_reflector_tagged_breaker",
       ].includes(card.resolverFamily),
     );
@@ -3141,7 +3142,10 @@ describe("catalog import and status logic", () => {
       ].includes(card.resolverFamily),
     );
     const corpIceResolverCards = manifestCards.filter((card) =>
-      ["v1922_corp_ice_core_damage_etr"].includes(card.resolverFamily),
+      [
+        "v1922_corp_ice_core_damage_etr",
+        "v1922_corp_ice_break_cost_modifier",
+      ].includes(card.resolverFamily),
     );
     const plannedCards = manifestCards.filter(
       (card) => card.releaseStatus === "planned_no_promotion",
@@ -3229,6 +3233,7 @@ describe("catalog import and status logic", () => {
       "onr_v1_026_false-echo",
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
+      "onr_v1_037_japanese-water-torture",
       "onr_v1_044_netspace-inverter",
       "onr_v1_045_newsgroup-filter",
       "onr_v1_048_poltergeist",
@@ -3293,6 +3298,17 @@ describe("catalog import and status logic", () => {
           ]),
         );
       }
+      if (card.cardCode === "onr_v1_037_japanese-water-torture") {
+        expect(card.coveredSmokes).toEqual(
+          expect.arrayContaining([
+            "wall_break_subroutine",
+            "future_action_debt",
+            "pump_strength",
+            "wrong_side_revalidation",
+            "stale_state_revalidation",
+          ]),
+        );
+      }
       if (card.cardCode === "onr_v1_055_reflector") {
         expect(card.coveredSmokes).toEqual(
           expect.arrayContaining([
@@ -3334,6 +3350,7 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes.length, card.cardCode).toBeGreaterThan(0);
     }
     expect(corpIceResolverCards.map((card) => card.cardCode).sort()).toEqual([
+      "onr_v1_277_virizz",
       "onr_v1_280_zombie",
     ]);
     for (const card of corpIceResolverCards) {
@@ -3344,14 +3361,15 @@ describe("catalog import and status logic", () => {
       expect(card.coveredSmokes).toEqual(
         expect.arrayContaining([
           "rez_ice_legal_action",
-          "core_damage_subroutines",
-          "end_the_run",
+          card.cardCode === "onr_v1_277_virizz"
+            ? "run_wide_break_cost_modifier"
+            : "core_damage_subroutines",
           "replay_statehash",
         ]),
       );
     }
 
-    expect(plannedCards).toHaveLength(7);
+    expect(plannedCards).toHaveLength(5);
     for (const card of manifestCards) {
       expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS, card.cardCode).not.toContain(
         card.cardCode,

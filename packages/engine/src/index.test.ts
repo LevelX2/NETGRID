@@ -15005,6 +15005,145 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("rezzes Virizz and applies a rest-of-run break-cost modifier without release promotion", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-virizz-break-cost-modifier",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_virizz_hammer",
+          name: "O:NR V1.9.22 Virizz Hammer Runner",
+          cards: [
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_virizz",
+          name: "O:NR V1.9.22 Virizz Corp",
+          cards: [
+            { id: "onr_v1_277_virizz", quantity: 1 },
+            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+    const innerWallId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_279_wall-of-static",
+    );
+    const virizzId = putCorpIceOnServer(state, "rd", "onr_v1_277_virizz");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer",
+    );
+    const hammerId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_031_hammer",
+    );
+    expect(hammerId).toBeDefined();
+    if (!hammerId) throw new Error("Missing installed Hammer");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === virizzId,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.breakSubroutineAdditionalCost).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      v1922CorpIceAbility: "virizz_break_cost_modifier",
+      breakSubroutineAdditionalCost: 1,
+      sourceDefinitionId: "onr_v1_277_virizz",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"/,
+    );
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === innerWallId,
+    );
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_031_hammer" &&
+        action.payload?.subroutineIndex === 0,
+    );
+    expect(legal.costs[0]?.credits).toBe(2);
+    expect(legal.payload).toMatchObject({
+      breakSubroutineBaseCost: 1,
+      breakSubroutineAdditionalCost: 1,
+      breakSubroutineTotalCost: 2,
+      v1922CorpIceAbility: "virizz_break_cost_modifier",
+    });
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v1922-virizz-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v1922-virizz-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === legal.actionId,
+    );
+    expect(state.run?.brokenSubroutineIndexes).toContain(0);
+    expect(state.runner.credits).toBe(6);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_031_hammer",
+      v1922CorpIceAbility: "virizz_break_cost_modifier",
+      breakSubroutineAdditionalCost: 1,
+      breakSubroutineTotalCost: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("keeps unresolved V1.9.22 Corp longtail cards out of playable runtime until concrete resolvers exist", () => {
     const corpLongtailIds = [
       "onr_v1_197_data-fort-reclamation",
@@ -15012,7 +15151,6 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_247_haunting-inquisition",
       "onr_v1_274_tutor",
       "onr_v1_276_viral-15",
-      "onr_v1_277_virizz",
     ] as const;
 
     for (const definitionId of corpLongtailIds) {
@@ -15027,6 +15165,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_206_marine-arcology",
       "onr_v1_210_political-overthrow",
       "onr_v1_280_zombie",
+      "onr_v1_277_virizz",
       "onr_v1_289_edgerunner-inc-temps",
       "onr_v1_296_off-site-backups",
       "onr_v1_298_planning-consultants",
