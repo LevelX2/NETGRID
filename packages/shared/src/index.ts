@@ -359,22 +359,6 @@ export type ChoiceOption = {
   value?: string | number | boolean;
 };
 
-export type StackSearchResolution = {
-  reveal: "public" | "hidden";
-  destination: "grip" | "install_program";
-  shuffleAfter: boolean;
-  publicRevealKind?: string;
-};
-
-export type SneakPreviewTemporaryInstall = {
-  cardId: CardInstanceId;
-  sourceCardDefinitionId: CardDefinitionId;
-};
-
-export type VisibleChoiceOption = ChoiceOption & {
-  card?: VisibleCard;
-};
-
 export type ChoiceRequest = {
   choiceId: string;
   side: Side;
@@ -386,14 +370,12 @@ export type ChoiceRequest = {
   maxSelections: number;
   stateVersion: number;
   visibility: EventVisibilityClass;
-  stackSearchResolution?: StackSearchResolution;
 };
 
 export type PendingChoice = ChoiceRequest;
 
-export type VisibleChoiceRequest = Omit<ChoiceRequest, "side" | "options"> & {
+export type VisibleChoiceRequest = Omit<ChoiceRequest, "side"> & {
   side: Side;
-  options: VisibleChoiceOption[];
 };
 
 export type ChoiceRequirement = {
@@ -749,7 +731,6 @@ export type RunState = {
     Record<CardInstanceId, number[]>
   >;
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
-  aiBoonStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
   bizarreEncryptionSchemeActive?: boolean;
   traceSuccessBySubroutineIndex?: Partial<Record<number, boolean>>;
   breach?: BreachState;
@@ -854,7 +835,6 @@ export type GameState = {
   };
   run?: RunState;
   trace?: TraceState;
-  runnerPersistentExtraActions?: number;
   bizarreEncryptionDelayedAgendas?: Array<{
     agendaId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;
@@ -874,7 +854,6 @@ export type GameState = {
     runAttemptsLastTurn?: number;
     successfulHqRunThisTurn?: boolean;
     damagePreventionUsage?: Record<CardInstanceId, number>;
-    brokerActionCardIdsThisTurn?: CardInstanceId[];
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
     allNighterBonusRunPending?: boolean;
@@ -928,8 +907,7 @@ export type LegalAction = {
   effectRef?: string;
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
-  payload?: Record<string, string | number | boolean | number[]>;
-  resolvedEffects?: ResolvedGameEffect[];
+  payload?: Record<string, string | number | boolean>;
 };
 
 export type PlayerAction = {
@@ -1058,7 +1036,6 @@ export type PlayerView = {
   run?: {
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
-    position?: RunState["position"];
     encounteredIce?: VisibleCard;
     accessedCard?: VisibleCard;
     breach?: {
@@ -2871,9 +2848,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     iceSubtype: "code_gate",
     iceLabel: "code gate",
   }),
-  onrMemoryChip({
+  {
     id: "onr_v1_145_wutech-mem-chip",
     title: "WuTech Mem Chip",
+    side: "runner",
+    type: "hardware",
+    subtypes: ["chip"],
+    implementationStatus: "playable_mvp",
     installCost: 1,
     rulesText: "+1 memory limit.",
     mechanics: [

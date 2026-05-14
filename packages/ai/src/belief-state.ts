@@ -58,15 +58,6 @@ export type KnownPositionMemory = {
   invalidatedBy: string[];
 };
 
-export type KnownHqHandMemory = {
-  handCount: number;
-  knownDefinitions: string[];
-  knownCount: number;
-  allCardsKnown: boolean;
-  sourceEventIds: string[];
-  invalidationReasons: string[];
-};
-
 export type RunnerOpponentModel = {
   corpPlanEstimate: {
     scoring: number;
@@ -89,7 +80,6 @@ export type RunnerOpponentModel = {
   corpCreditReserveInterpretation: "low" | "medium" | "high";
   rndTopFreshness: RndTopFreshnessMemory;
   knownPositionMemory: KnownPositionMemory[];
-  hqHandMemory: KnownHqHandMemory;
 };
 
 export type CorpOpponentModel = {
@@ -150,9 +140,8 @@ export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
   const assumptions = buildAssumptions(input.side, entries, classifications);
   const rndTopFreshness = input.side === "runner" ? deriveRndTopFreshness(classifications) : undefined;
   const knownPositionMemory = input.side === "runner" ? deriveKnownPositionMemory(history, classifications) : [];
-  const hqHandMemory = input.side === "runner" ? deriveKnownHqHandMemory(input, history, classifications) : undefined;
   const runnerOpponentModel =
-    input.side === "runner" ? deriveRunnerOpponentModel(input, entries, classifications, rndTopFreshness, knownPositionMemory, hqHandMemory) : undefined;
+    input.side === "runner" ? deriveRunnerOpponentModel(input, entries, classifications, rndTopFreshness, knownPositionMemory) : undefined;
   const corpOpponentModel = input.side === "corp" ? deriveCorpOpponentModel(input, classifications) : undefined;
   const versionSeed = [
     input.side,
@@ -402,46 +391,6 @@ function deriveKnownPositionMemory(history: PublicGameEvent[], classifications: 
   return [...memory.values()].sort((left, right) => `${left.zone}:${left.positionKey}`.localeCompare(`${right.zone}:${right.positionKey}`));
 }
 
-function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEvent[], classifications: BeliefEventClassification[]): KnownHqHandMemory {
-  const eventsById = new Map(history.map((event) => [event.eventId, event]));
-  const knownDefinitions = new Map<string, string>();
-  const invalidationReasons: string[] = [];
-
-  for (const classification of classifications) {
-    const event = eventsById.get(classification.eventId);
-    const definitionId = event ? stringValue(event.publicPayload.cardDefinitionId) : undefined;
-
-    if (isRunnerHqAccess(classification) && definitionId) {
-      if (!knownDefinitions.has(definitionId)) knownDefinitions.set(definitionId, classification.eventId);
-      continue;
-    }
-
-    const adjustment = hqHandMemoryAdjustment(classification, definitionId);
-    if (!adjustment) continue;
-
-    invalidationReasons.push(`${adjustment.reason}:${classification.eventId}`);
-    if (adjustment.kind === "remove_known" && definitionId && knownDefinitions.has(definitionId)) {
-      knownDefinitions.delete(definitionId);
-      continue;
-    }
-    if (adjustment.kind === "unknown_departure" || adjustment.kind === "hidden_zone_reordered") {
-      knownDefinitions.clear();
-    }
-  }
-
-  const knownEntries = [...knownDefinitions.entries()].sort((left, right) => left[0].localeCompare(right[0]));
-  const knownDefinitionIds = knownEntries.map(([definitionId]) => definitionId);
-  const handCount = input.playerView.opponent.handCount;
-  return {
-    handCount,
-    knownDefinitions: knownDefinitionIds,
-    knownCount: knownDefinitionIds.length,
-    allCardsKnown: handCount > 0 && knownDefinitionIds.length === handCount,
-    sourceEventIds: knownEntries.map(([, eventId]) => eventId),
-    invalidationReasons
-  };
-}
-
 function positionInvalidatesKey(key: string, event: BeliefEventClassification): boolean {
   if (event.family === "draw" && event.actor === "corp") return key.startsWith("rd:");
   if (event.family === "shuffle" || event.family === "arrange" || event.family === "swap") return true;
@@ -451,45 +400,12 @@ function positionInvalidatesKey(key: string, event: BeliefEventClassification): 
   return false;
 }
 
-function isRunnerHqAccess(event: BeliefEventClassification): boolean {
-  return event.actor === "runner" && event.actionType === "access_card" && event.serverId === "hq";
-}
-
-function hqHandMemoryAdjustment(
-  event: BeliefEventClassification,
-  definitionId: string | undefined
-): { kind: "remove_known" | "unknown_arrival" | "unknown_departure" | "hidden_zone_reordered"; reason: string } | undefined {
-  if (event.actor === "corp" && (event.actionType === "mandatory_draw" || event.actionType === "draw_card")) {
-    return { kind: "unknown_arrival", reason: "corp_draw_added_unknown_hq_card" };
-  }
-  if (event.family === "shuffle" || event.family === "arrange" || event.family === "swap") {
-    return { kind: "hidden_zone_reordered", reason: `${event.family}_changed_hq_hand` };
-  }
-  if (event.actor === "corp" && event.actionType === "play_operation") {
-    return { kind: "remove_known", reason: definitionId ? "known_hq_card_played" : "corp_played_unknown_hq_card" };
-  }
-  if (event.actor === "corp" && event.actionType === "install_card") {
-    return definitionId ? { kind: "remove_known", reason: "known_hq_card_installed" } : { kind: "unknown_departure", reason: "corp_installed_hidden_hq_card" };
-  }
-  if (event.family === "discard" && event.actor === "corp") {
-    return { kind: "unknown_departure", reason: "corp_discarded_hq_card" };
-  }
-  if ((event.family === "steal" || event.family === "trash" || event.family === "score") && event.serverId === "hq") {
-    return definitionId ? { kind: "remove_known", reason: `known_hq_card_${event.family}` } : { kind: "unknown_departure", reason: `unknown_hq_card_${event.family}` };
-  }
-  if (event.family === "move") {
-    return definitionId ? { kind: "remove_known", reason: "known_hq_card_moved" } : { kind: "unknown_departure", reason: "hidden_zone_move_changed_hq" };
-  }
-  return undefined;
-}
-
 function deriveRunnerOpponentModel(
   input: AiDecisionInput,
   entries: BeliefEntry[],
   classifications: BeliefEventClassification[],
   rndTopFreshness: RndTopFreshnessMemory | undefined,
-  knownPositionMemory: KnownPositionMemory[],
-  hqHandMemory: KnownHqHandMemory | undefined
+  knownPositionMemory: KnownPositionMemory[]
 ): RunnerOpponentModel {
   const corpEvents = classifications.filter((event) => event.actor === "corp");
   const scoringSignals = corpEvents.filter((event) => event.actionType === "advance_card" || event.actionType === "score_agenda").length;
@@ -547,17 +463,7 @@ function deriveRunnerOpponentModel(
         freshness: "invalidated",
         invalidationReasons: []
       } satisfies RndTopFreshnessMemory),
-    knownPositionMemory,
-    hqHandMemory:
-      hqHandMemory ??
-      ({
-        handCount: input.playerView.opponent.handCount,
-        knownDefinitions: [],
-        knownCount: 0,
-        allCardsKnown: false,
-        sourceEventIds: [],
-        invalidationReasons: []
-      } satisfies KnownHqHandMemory)
+    knownPositionMemory
   };
 }
 

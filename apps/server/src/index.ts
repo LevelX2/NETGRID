@@ -5,7 +5,6 @@ import { pathToFileURL } from "node:url";
 import { startNetgridServer } from "./http-server";
 
 export * from "./http-server";
-export * from "./connection-audit";
 export * from "./internet-hardening";
 export * from "./multiplayer";
 export * from "./storage-sqlite";
@@ -50,5 +49,4 @@ function views(state: GameState): LocalDemoMatch {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const started = await startNetgridServer();
   console.log(`NETGRID multiplayer server listening on ${started.url}`);
-  if (started.bindUrl !== started.url) console.log(`NETGRID bind address ${started.bindUrl}`);
 }

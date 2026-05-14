@@ -12,19 +12,10 @@
         "onr_v1_010_cascade",
         "onr_v1_017_deep-thought",
         "onr_v1_064_skivviss",
-        "onr_v1_174_rigged-investments"
+        "onr_v1_174_rigged-investments",
+        "onr_v1_176_the-shell-traders"
       ],
       "assertions": ["AI can install low-risk counter/recurring cards through legal install actions.", "Corp purge remains side-safe and legal-action-only."]
-    },
-    {
-      "id": "runner_v1912_shell_traders_completion",
-      "side": "runner",
-      "coversCards": ["onr_v1_176_the-shell-traders"],
-      "assertions": [
-        "Runner AI can choose The Shell Traders set-aside LegalActions using only its own grip information.",
-        "Runner AI resolves mandatory Shell-counter start-of-turn choices from public Set Aside targets.",
-        "The Shell Traders is not treated as a recurring-credit economy card."
-      ]
     },
     {
       "id": "runner_v1912_hidden_zone_counter",

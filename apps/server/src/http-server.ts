@@ -1,16 +1,12 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
 import { simulateAiGame } from "@netgrid/ai";
-import { createConnectionAuditLoggerFromEnv, noopConnectionAuditLogger, type ConnectionAuditLogger } from "./connection-audit";
 import {
   JsonFileMatchStorage,
   InMemoryMatchStorage,
   MultiplayerService,
-  type MatchMode,
-  type MatchStatus,
   type ReplayPerspective,
   type ActionReceipt,
   type AiTurnPresentationState,
@@ -32,7 +28,6 @@ import {
   StorageError,
   type StorageKind
 } from "./storage-sqlite";
-import type { StorageMaintenanceMatchFilters } from "./storage-sqlite";
 import { resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
 import {
   applyCors,
@@ -47,7 +42,6 @@ import {
   rateLimitedPayload,
   redactedDiagnosticsUnavailable,
   redactedHealth,
-  redactSensitiveText,
   type DeploymentConfig,
   type RateLimitCategory
 } from "./internet-hardening";
@@ -113,21 +107,18 @@ export type NetgridServerHandle = {
 type NetgridServerOptions = {
   deploymentConfig?: DeploymentConfig;
   rateLimiter?: FixedWindowRateLimiter;
-  connectionAudit?: ConnectionAuditLogger;
 };
 
 export class NetgridRealtimeServer {
   private readonly connections = new Map<string, Map<Side, Connection>>();
   private readonly countdownTimers = new Map<string, ReturnType<typeof setTimeout>>();
-  private readonly socketClients = new WeakMap<WebSocket, { clientKey: string; openedAt: number; origin?: string | undefined; replacedByReconnect?: boolean }>();
-  private readonly socketContexts = new WeakMap<WebSocket, WsContext>();
+  private readonly socketClients = new WeakMap<WebSocket, { clientKey: string }>();
   private wss?: WebSocketServer;
 
   constructor(
     private readonly service: MultiplayerService,
     private readonly deploymentConfig: DeploymentConfig,
-    private readonly rateLimiter: FixedWindowRateLimiter,
-    private readonly connectionAudit: ConnectionAuditLogger = noopConnectionAuditLogger
+    private readonly rateLimiter: FixedWindowRateLimiter
   ) {}
 
   attach(server: Server): void {
@@ -135,16 +126,13 @@ export class NetgridRealtimeServer {
       server,
       path: "/ws",
       verifyClient: (info, done) => {
-        const origin = info.origin || info.req.headers.origin;
-        const clientKey = hashClientKey(clientIdentity(info.req, this.deploymentConfig));
-        if (!isOriginAllowed(origin, this.deploymentConfig)) {
-          this.recordConnectionAudit({ event: "ws_handshake_denied", origin: originOfHeader(origin), clientKey, errorCode: "origin_not_allowed" });
+        if (!isOriginAllowed(info.origin || info.req.headers.origin, this.deploymentConfig)) {
           done(false, 403, "origin_not_allowed");
           return;
         }
+        const clientKey = hashClientKey(clientIdentity(info.req, this.deploymentConfig));
         const limited = this.rateLimiter.check("ws_handshake", clientKey, "ws");
         if (!limited.allowed) {
-          this.recordConnectionAudit({ event: "ws_handshake_denied", origin: originOfHeader(origin), clientKey, errorCode: "rate_limited", rateLimitCategory: "ws_handshake" });
           done(false, 429, "rate_limited");
           return;
         }
@@ -152,13 +140,10 @@ export class NetgridRealtimeServer {
       }
     });
     this.wss.on("connection", (socket, request) => {
-      const origin = originOfHeader(request.headers.origin);
-      const clientKey = hashClientKey(clientIdentity(request, this.deploymentConfig));
-      this.socketClients.set(socket, { clientKey, openedAt: Date.now(), origin });
-      this.recordConnectionAudit({ event: "ws_open", origin, clientKey });
+      this.socketClients.set(socket, { clientKey: hashClientKey(clientIdentity(request, this.deploymentConfig)) });
       socket.on("message", (raw) => void this.handleMessage(socket, raw.toString()));
-      socket.on("close", (code, reason) => void this.handleClose(socket, code, reason.toString("utf8")));
-      socket.on("error", (error) => this.handleSocketError(socket, error));
+      socket.on("close", () => void this.handleClose(socket));
+      socket.on("error", () => undefined);
     });
   }
 
@@ -167,10 +152,6 @@ export class NetgridRealtimeServer {
       this.wss?.close(() => resolve());
       if (!this.wss) resolve();
     });
-  }
-
-  recordServerStart(url: string): void {
-    this.recordConnectionAudit({ event: "server_start", profile: this.deploymentConfig.profile, url });
   }
 
   private async handleMessage(socket: WebSocket, raw: string): Promise<void> {
@@ -289,13 +270,11 @@ export class NetgridRealtimeServer {
     const clientKey = this.socketClients.get(socket)?.clientKey ?? "unknown-client";
     const limited = this.rateLimiter.check("ws_join", clientKey, payload.matchId);
     if (!limited.allowed) {
-      this.recordConnectionAudit({ event: "ws_join_failed", clientKey, matchId: payload.matchId, side: payload.side, errorCode: "rate_limited", rateLimitCategory: "ws_join" });
       send(socket, { type: "error", payload: { code: "rate_limited", message: "Zu viele WebSocket-Join-Versuche. Bitte kurz warten." } });
       return;
     }
     const connected = await this.service.setConnected(payload.matchId, payload.side, payload.sessionToken, true);
     if ("error" in connected) {
-      this.recordConnectionAudit({ event: "ws_join_failed", clientKey, matchId: payload.matchId, side: payload.side, errorCode: connected.error.code });
       send(socket, { type: "error", payload: connected.error });
       return;
     }
@@ -304,15 +283,10 @@ export class NetgridRealtimeServer {
     const previous = bySide.get(payload.side);
     if (previous && previous.socket !== socket) {
       send(previous.socket, { type: "error", payload: { code: "reconnected_elsewhere", message: "Diese Seite wurde in einem anderen Fenster verbunden." } });
-      const previousMeta = this.socketClients.get(previous.socket);
-      if (previousMeta) this.socketClients.set(previous.socket, { ...previousMeta, replacedByReconnect: true });
-      this.recordConnectionAudit({ event: "ws_replaced_by_reconnect", clientKey: previousMeta?.clientKey, matchId: payload.matchId, side: payload.side, code: 4000, reason: "reconnected" });
       previous.socket.close(4000, "reconnected");
     }
     bySide.set(payload.side, { socket, context: payload });
     this.connections.set(payload.matchId, bySide);
-    this.socketContexts.set(socket, payload);
-    this.recordConnectionAudit({ event: "ws_join_ok", clientKey, matchId: payload.matchId, side: payload.side });
     sendBootstrap(socket, connected);
     this.scheduleCountdownFromPayload(connected);
     await this.sendOpponentBootstrap(payload.matchId, opposite(payload.side), connected.opponentStatus);
@@ -411,21 +385,12 @@ export class NetgridRealtimeServer {
     this.scheduleCountdownFromPayload(payload);
   }
 
-  private async handleClose(socket: WebSocket, code?: number, reason?: string): Promise<void> {
-    const context = this.findContext(socket) ?? this.socketContexts.get(socket);
-    const meta = this.socketClients.get(socket);
-    const durationMs = meta ? Math.max(0, Date.now() - meta.openedAt) : undefined;
-    if (!context) {
-      this.recordConnectionAudit({ event: "ws_close", clientKey: meta?.clientKey, code, reason: safeCloseReason(reason), durationMs });
-      return;
-    }
+  private async handleClose(socket: WebSocket): Promise<void> {
+    const context = this.findContext(socket);
+    if (!context) return;
     const bySide = this.connections.get(context.matchId);
-    if (bySide?.get(context.side)?.socket !== socket) {
-      this.recordConnectionAudit({ event: "ws_close", clientKey: meta?.clientKey, matchId: context.matchId, side: context.side, code, reason: safeCloseReason(reason), durationMs, ignoredAsReplaced: true });
-      return;
-    }
+    if (bySide?.get(context.side)?.socket !== socket) return;
     bySide.delete(context.side);
-    this.recordConnectionAudit({ event: "ws_close", clientKey: meta?.clientKey, matchId: context.matchId, side: context.side, code, reason: safeCloseReason(reason), durationMs, ...(meta?.replacedByReconnect ? { ignoredAsReplaced: true } : {}) });
     const disconnected = await this.service.setConnected(context.matchId, context.side, context.sessionToken, false);
     if ("error" in disconnected) return;
     if (isLobbyPayload(disconnected)) {
@@ -433,22 +398,6 @@ export class NetgridRealtimeServer {
       return;
     }
     this.sendOpponentStatus(context.matchId, opposite(context.side), { side: context.side, connected: false });
-  }
-
-  private handleSocketError(socket: WebSocket, error: Error): void {
-    const context = this.findContext(socket) ?? this.socketContexts.get(socket);
-    const meta = this.socketClients.get(socket);
-    this.recordConnectionAudit({
-      event: "ws_error",
-      clientKey: meta?.clientKey,
-      matchId: context?.matchId,
-      side: context?.side,
-      errorCode: error.name || "websocket_error"
-    });
-  }
-
-  private recordConnectionAudit(event: Parameters<ConnectionAuditLogger["record"]>[0]): void {
-    this.connectionAudit.record(event);
   }
 
   private broadcastPayload(payload: ServicePayload): void {
@@ -515,8 +464,7 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   const deploymentConfig = options.deploymentConfig ?? loadDeploymentConfig();
   const activeService = service ?? defaultService(deploymentConfig);
   const rateLimiter = options.rateLimiter ?? createRateLimiter(deploymentConfig.rateLimitProfile);
-  const connectionAudit = options.connectionAudit ?? createConnectionAuditLoggerFromEnv();
-  const realtime = new NetgridRealtimeServer(activeService, deploymentConfig, rateLimiter, connectionAudit);
+  const realtime = new NetgridRealtimeServer(activeService, deploymentConfig, rateLimiter);
   const server = createServer((request, response) => void routeHttp(activeService, realtime, deploymentConfig, rateLimiter, request, response));
   realtime.attach(server);
   return {
@@ -526,7 +474,6 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
     deploymentConfig,
     close: () =>
       new Promise<void>((resolve, reject) => {
-        connectionAudit.record({ event: "server_stop", profile: deploymentConfig.profile });
         realtime
           .close()
           .then(() =>
@@ -540,16 +487,12 @@ export function createNetgridHttpServer(service?: MultiplayerService, options: N
   };
 }
 
-export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService } = {}): Promise<NetgridServerHandle & { url: string; bindUrl: string }> {
+export async function startNetgridServer(options: { port?: number; host?: string; service?: MultiplayerService } = {}): Promise<NetgridServerHandle & { url: string }> {
   const handle = createNetgridHttpServer(options.service);
   const port = options.port ?? Number(process.env.PORT ?? 8787);
-  const host = (options.host ?? process.env.HOST ?? "0.0.0.0").trim();
+  const host = options.host ?? process.env.HOST ?? "127.0.0.1";
   await new Promise<void>((resolveListen) => handle.server.listen(port, host, resolveListen));
-  const advertisedHost = advertisedServerHost(host);
-  const url = `http://${advertisedHost}:${port}`;
-  const bindUrl = `http://${host}:${port}`;
-  handle.realtime.recordServerStart(url);
-  return { ...handle, url, bindUrl };
+  return { ...handle, url: `http://${host}:${port}` };
 }
 
 async function routeHttp(
@@ -575,44 +518,6 @@ async function routeHttp(
   try {
     if (request.method === "GET" && url.pathname === "/health") {
       sendJson(response, 200, redactedHealth(await service.storageHealth(), deploymentConfig));
-      return;
-    }
-
-    if (url.pathname === "/api/storage/maintenance/summary" && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
-      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-summary")) return;
-      const summary = await service.storageMaintenanceSummary();
-      if (!summary) {
-        sendJson(response, 503, maintenanceUnavailablePayload());
-        return;
-      }
-      sendJson(response, 200, summary);
-      return;
-    }
-
-    if (url.pathname === "/api/storage/maintenance/matches" && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
-      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-matches")) return;
-      const matches = await service.storageMaintenanceMatches(maintenanceFiltersFromSearch(url.searchParams));
-      if (!matches) {
-        sendJson(response, 503, maintenanceUnavailablePayload());
-        return;
-      }
-      sendJson(response, 200, { matches });
-      return;
-    }
-
-    const maintenanceMatchRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)$/.exec(url.pathname);
-    if (maintenanceMatchRoute && request.method === "GET") {
-      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
-      const matchId = decodeURIComponent(maintenanceMatchRoute[1] ?? "");
-      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `storage-maintenance-match:${matchId}`)) return;
-      const detail = await service.storageMaintenanceMatchDetail(matchId);
-      if (!detail) {
-        sendJson(response, 404, { error: { code: "not_found", message: "Diese Wartungsansicht hat keine Daten für dieses Match." } });
-        return;
-      }
-      sendJson(response, 200, detail);
       return;
     }
 
@@ -896,22 +801,6 @@ function storageKindFromEnv(value: string | undefined): StorageKind {
   return "sqlite";
 }
 
-function advertisedServerHost(bindHost: string): string {
-  const configured = envValue(process.env, "NETGRID_PUBLIC_HOST");
-  if (configured) return configured;
-  if (bindHost !== "0.0.0.0" && bindHost !== "::") return bindHost;
-  return firstLanIpv4() ?? "127.0.0.1";
-}
-
-function firstLanIpv4(): string | undefined {
-  for (const entries of Object.values(networkInterfaces())) {
-    for (const entry of entries ?? []) {
-      if (entry.family === "IPv4" && !entry.internal && !entry.address.startsWith("169.254.")) return entry.address;
-    }
-  }
-  return undefined;
-}
-
 async function readJson(request: IncomingMessage): Promise<Record<string, unknown>> {
   const chunks: Buffer[] = [];
   for await (const chunk of request) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
@@ -973,88 +862,6 @@ function checkRateLimit(
   return false;
 }
 
-function ensureMaintenanceAccess(response: ServerResponse, request: IncomingMessage, deploymentConfig: DeploymentConfig): boolean {
-  if (deploymentConfig.profile !== "local" || !isMaintenanceClientAddressAllowed(request.socket.remoteAddress)) {
-    sendJson(response, 403, { error: { code: "maintenance_unavailable", message: "Die Wartungsansicht ist nur lokal oder im privaten Netzwerk verfügbar." } });
-    return false;
-  }
-  return true;
-}
-
-function maintenanceUnavailablePayload(): { error: { code: "maintenance_unavailable"; message: string } } {
-  return { error: { code: "maintenance_unavailable", message: "Storage-Wartungsdaten sind nur für lokalen SQLite-Storage verfügbar." } };
-}
-
-function maintenanceFiltersFromSearch(searchParams: URLSearchParams): StorageMaintenanceMatchFilters {
-  const filters: StorageMaintenanceMatchFilters = {};
-  const status = maintenanceStatus(searchParams.get("status"));
-  if (status) filters.status = status;
-  const terminal = searchParams.get("terminal");
-  if (terminal === "true") filters.terminal = true;
-  if (terminal === "false") filters.terminal = false;
-  const mode = maintenanceMode(searchParams.get("mode"));
-  if (mode) filters.mode = mode;
-  const olderThanDays = numberParam(searchParams.get("olderThanDays"));
-  if (olderThanDays !== undefined) filters.olderThanDays = olderThanDays;
-  const largerThanBytes = numberParam(searchParams.get("largerThanBytes"));
-  if (largerThanBytes !== undefined) filters.largerThanBytes = largerThanBytes;
-  const limit = numberParam(searchParams.get("limit"));
-  if (limit !== undefined) filters.limit = limit;
-  return filters;
-}
-
-function maintenanceStatus(value: string | null): MatchStatus | undefined {
-  if (
-    value === "pending" ||
-    value === "waiting_for_runner" ||
-    value === "waiting_for_corp" ||
-    value === "waiting_for_joiner_decks" ||
-    value === "ready_check" ||
-    value === "countdown" ||
-    value === "active" ||
-    value === "cancelled" ||
-    value === "abandoned" ||
-    value === "forfeited" ||
-    value === "finished"
-  ) {
-    return value;
-  }
-  return undefined;
-}
-
-function maintenanceMode(value: string | null): MatchMode | undefined {
-  if (value === "human_vs_human" || value === "human_runner_vs_corp_ai" || value === "human_corp_vs_runner_ai") return value;
-  return undefined;
-}
-
-function numberParam(value: string | null): number | undefined {
-  if (!value) return undefined;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : undefined;
-}
-
-export function isMaintenanceClientAddressAllowed(value: string | undefined): boolean {
-  const address = normalizeClientAddress(value);
-  if (!address) return false;
-  if (address === "::1" || address === "localhost") return true;
-  if (address.includes(":")) {
-    const lower = address.toLowerCase();
-    return lower.startsWith("fc") || lower.startsWith("fd") || lower.startsWith("fe80:");
-  }
-  const parts = address.split(".").map((part) => Number(part));
-  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
-  const a = parts[0]!;
-  const b = parts[1]!;
-  return a === 127 || a === 10 || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 169 && b === 254);
-}
-
-function normalizeClientAddress(value: string | undefined): string | undefined {
-  if (!value) return undefined;
-  const trimmed = value.trim().toLowerCase();
-  if (trimmed.startsWith("::ffff:")) return trimmed.slice("::ffff:".length);
-  return trimmed;
-}
-
 function bearerToken(request: IncomingMessage): string | undefined {
   const header = request.headers.authorization;
   if (!header?.startsWith("Bearer ")) return undefined;
@@ -1063,21 +870,6 @@ function bearerToken(request: IncomingMessage): string | undefined {
 
 function opposite(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
-}
-
-function originOfHeader(value: string | string[] | undefined): string | undefined {
-  const header = Array.isArray(value) ? value[0] : value;
-  if (!header) return undefined;
-  try {
-    return new URL(header).origin;
-  } catch {
-    return undefined;
-  }
-}
-
-function safeCloseReason(reason: string | undefined): string | undefined {
-  if (!reason) return undefined;
-  return redactSensitiveText(reason).slice(0, 120);
 }
 
 function isDifficulty(value: unknown): value is AiDifficulty {

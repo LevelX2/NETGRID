@@ -68,13 +68,13 @@
       "cardId": "onr_v1_089_gideons-pawnshop",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "trash_recovery"],
+      "roles": ["event", "hidden_zone_tool", "stack_search"],
       "planRoles": ["build_rig", "recover_rig"],
-      "requiredMechanics": ["play_event", "search_trash", "heap_to_grip", "legal_action_only"],
-      "valueHints": { "recursion": 3, "tempo": 1 },
-      "riskTags": ["public_trash_to_hand"],
+      "requiredMechanics": ["play_event", "search_stack", "reveal", "shuffle", "legal_action_only"],
+      "valueHints": { "consistency": 3, "tempo": 1 },
+      "riskTags": ["hidden_info_barrier", "shuffle_invalidates_memory"],
       "aiSupportStatus": "ai_supported",
-      "scenarioRefs": ["data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_trash_recovery"]
+      "scenarioRefs": ["data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_stack_search_and_reveal"]
     },
     {
       "cardId": "onr_v1_092_ice-and-datas-guide-to-the-net",
@@ -104,13 +104,13 @@
       "cardId": "onr_v1_110_sneak-preview",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "hidden_zone_tool", "temporary_program_install"],
-      "planRoles": ["build_rig", "recover_rig"],
-      "requiredMechanics": ["play_event", "search_stack", "search_trash", "install_program", "temporary_install", "end_turn_return", "shuffle", "legal_action_only"],
-      "valueHints": { "tempo": 3, "consistency": 2 },
-      "riskTags": ["temporary_install", "shuffle_invalidates_memory", "hidden_info_barrier"],
+      "roles": ["event", "hidden_zone_tool", "stack_reveal"],
+      "planRoles": ["safe_probe_run", "build_rig"],
+      "requiredMechanics": ["play_event", "reveal_stack_top", "legal_action_only"],
+      "valueHints": { "information": 2 },
+      "riskTags": ["public_reveal"],
       "aiSupportStatus": "ai_supported",
-      "scenarioRefs": ["data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_sneak_preview_heap_stack_install"]
+      "scenarioRefs": ["data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_expose_and_preview"]
     },
     {
       "cardId": "onr_v1_151_aujourdoui",

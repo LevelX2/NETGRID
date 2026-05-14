@@ -13,14 +13,12 @@
       ],
       "expectedDecisionFamilies": [
         "install_card",
-        "start_run",
+        "gain_credit",
         "end_turn"
       ],
       "sideSafetyAssertions": [
         "legal_actions_only",
         "installed_program_source_revalidated",
-        "start_of_run_strength_roll",
-        "successful_hq_run_counter",
         "random_counter_replay_required",
         "public_payload_only"
       ]
@@ -35,15 +33,13 @@
       "expectedDecisionFamilies": [
         "play_event",
         "install_card",
-        "resolve_choice",
+        "gain_credit",
         "end_turn"
       ],
       "sideSafetyAssertions": [
         "legal_actions_only",
         "event_heap_movement_public",
-        "playful_ai_gain_all_choice",
         "installed_resource_source_revalidated",
-        "start_of_turn_resource_trigger",
         "random_counter_replay_required"
       ]
     },
@@ -57,14 +53,11 @@
       "expectedDecisionFamilies": [
         "install_card",
         "rez_ice",
-        "continue_run",
         "gain_credit",
         "end_turn"
       ],
       "sideSafetyAssertions": [
         "rezzed_root_source_revalidated",
-        "tag_checked_damage",
-        "after_pass_ice_trigger",
         "server_scope_public",
         "random_counter_replay_required",
         "public_payload_only"

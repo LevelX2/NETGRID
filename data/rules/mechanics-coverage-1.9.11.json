@@ -24,22 +24,6 @@
       "coverage": ["unit", "scenario", "choice", "visibility", "replay", "state_hash", "ai"]
     },
     {
-      "mechanicId": "mechanic.runner_trash.search_to_grip",
-      "label": "Runner Heap Search to Grip",
-      "currentStatus": "implemented_limited",
-      "targetGate": "v1.9.11",
-      "currentScopeNote": "Gideon's Pawnshop searches the public Runner heap, moves one selected card to grip, excludes the resolving Pawnshop itself and does not shuffle the stack.",
-      "coverage": ["unit", "scenario", "choice", "public_event", "replay", "state_hash", "ai"]
-    },
-    {
-      "mechanicId": "mechanic.runner_heap_or_stack.temporary_program_install",
-      "label": "Runner Heap/Stack Temporary Program Install",
-      "currentStatus": "implemented_limited",
-      "targetGate": "v1.9.11",
-      "currentScopeNote": "Sneak Preview chooses Heap or Stack before searching, installs the selected program at no cost, shuffles only after Stack search and returns the program to the grip at Runner end of turn only if the same instance is still installed.",
-      "coverage": ["unit", "scenario", "choice", "visibility", "public_event", "replay", "state_hash", "ai"]
-    },
-    {
       "mechanicId": "mechanic.hidden_zone.expose_or_reveal",
       "label": "Reveal and Expose Hidden-Zone Cards",
       "currentStatus": "implemented_limited",

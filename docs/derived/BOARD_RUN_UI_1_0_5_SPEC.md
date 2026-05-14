@@ -194,13 +194,12 @@ Ein Server zeigt mindestens:
 
 ### ICE-Reihenfolge
 
-Die UI muss die vorhandene `server.ice`-Reihenfolge stabil darstellen. Die aktive Konvention ist: `server.ice` liegt in Installationsreihenfolge beziehungsweise innen-nach-außen vor. Das zuerst installierte ICE bleibt am nächsten am Server, neu installierte ICE werden außen angefügt. Der Run encountered dagegen von außen nach innen, also vom höchsten ICE-Index rückwärts.
+Die UI muss die vorhandene `server.ice`-Reihenfolge stabil darstellen. V1.0.5 darf die visuelle Richtung verbessern, aber nicht die semantische Reihenfolge ändern.
 
 Empfehlung:
 
 - Horizontal oder vertikal konsistent pro Viewport.
 - Eindeutige Annäherungsrichtung markieren, z. B. `Runner nähert sich von außen`.
-- Positionsziffern zeigen die Installations-/Lane-Reihenfolge von innen nach außen, nicht die Encounter-Reihenfolge.
 - Keine Sortierung nach Titel, Rez-Status, Typ oder Kosten.
 - Keine Animation, die Kartenpositionen dauerhaft vertauscht.
 

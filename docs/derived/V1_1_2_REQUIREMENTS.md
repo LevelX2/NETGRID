@@ -34,15 +34,15 @@ Wenn Track A in der Umsetzung zusätzliche Risiken oder Blocker zeigt, hat Track
 | V112A-MUST-003 | Faceup Archives-Karten bleiben für Runner vor dem Access mit Titel und DefinitionId sichtbar. |
 | V112A-MUST-004 | Facedown Archives-Karten bleiben für Runner vor dem Access ohne Titel, DefinitionId, Bildpfad, Regeltext oder unterscheidbare DOM-/Payload-Metadaten. |
 | V112A-MUST-005 | Die Korp sieht eigene faceup und facedown Archives-Karten weiterhin vollständig in PlayerView, Reconnect und eigener UI. |
-| V112A-MUST-006 | Beim Breach-Start auf Archives werden alle zu diesem Zeitpunkt facedown Karten in `corp.archives` faceup gedreht; `AccessQueueEntry.hiddenInfo` oder ein gleichwertiger Vertrag berücksichtigt diesen Reveal. |
-| V112A-MUST-007 | Karten, die erst nach dem Archives-Breach-Start facedown in Archives gelangen, bleiben für den Rest dieses Breaches facedown und werden nur beim tatsächlichen Access angesehen. |
-| V112A-MUST-008 | Access-Events und side-gefilterte PublicEvents enthalten für den Runner erlaubte Archives-Reveal-/Access-Informationen, leaken aber keine weiterhin facedown Archives-Karten. |
+| V112A-MUST-006 | `AccessQueueEntry.hiddenInfo` oder ein gleichwertiger Vertrag klassifiziert facedown Archives-Einträge als Hidden Info, bis sie tatsächlich accessed werden. |
+| V112A-MUST-007 | Beim `access_card` auf eine facedown Archives-Karte wird genau diese Karte für den Access sichtbar; künftige Queue-Einträge bleiben verdeckt. |
+| V112A-MUST-008 | Access-Events und side-gefilterte PublicEvents enthalten für den Runner die gerade accessed Karte, leaken aber keine künftigen facedown Archives-Karten. |
 | V112A-MUST-009 | PublicEvents, WebSocket-Payloads, Reconnect-Payloads, Fehler, Logs, Undo-Vorschauen, Debug-/Diagnoseflächen und KI-Inputs leaken keine facedown Archives-Karten vor deren Access. |
 | V112A-MUST-010 | `BreachState.accessedSummaries` darf nur bereits accessed Karten zusammenfassen und bei Hidden-Info-Fällen keine künftigen Titel/DefinitionIds tragen. |
 | V112A-MUST-011 | Agenda-Steal aus Archives funktioniert über denselben LegalAction-/PlayerAction-Pfad wie andere Access-Zonen. |
-| V112A-MUST-012 | Der Runner darf Karten in Archives beim Access nicht mit Basic Trash oder mid-access Trash-Kosten trashen; dafür wird keine `trash_accessed_card`-LegalAction angeboten. |
-| V112A-MUST-013 | Decline/Weiter accessen/Access abschließen und automatische Fortsetzung über Archives-Karten ohne Runner-Entscheidung funktionieren mit gemischten faceup/facedown Archives-Queues. |
-| V112A-MUST-014 | Der Archives-Breach-Start-Reveal bisher facedown Karten ist eine Hidden-Info-Barriere und blockiert Undo über dieses Ereignis hinweg. |
+| V112A-MUST-012 | Trash einer trashbaren Archives-Karte während Access bleibt korrekt, ohne Karten doppelt in Archives zu führen oder Queue-Fortschritt zu beschädigen. |
+| V112A-MUST-013 | Decline/Weiter accessen/Access abschließen funktionieren mit gemischten faceup/facedown Archives-Queues. |
+| V112A-MUST-014 | Access auf bisher facedown Archives-Karten ist eine Hidden-Info-Barriere und blockiert Undo über dieses Ereignis hinweg. |
 | V112A-MUST-015 | Access auf ausschließlich bereits faceup bekannte Archives-Karten setzt keine unnötige neue Hidden-Info-Barriere, sofern keine sonstige verdeckte Information entsteht. |
 | V112A-MUST-016 | Replay reproduziert Archives-Access, Reveals, Queue-Fortschritt, Steal/Trash/Decline und finalen StateHash deterministisch. |
 | V112A-MUST-017 | Reconnect während Archives-Breach stellt Run-/Breach-Fortschritt side-sicher wieder her. |

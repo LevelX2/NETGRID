@@ -426,29 +426,11 @@ describe("MVP 0.1 turns and cards", () => {
 
     const rdServer = state.corp.servers.find((server) => server.id === "rd");
     expect(rdServer?.ice).toHaveLength(3);
-    expect(rdServer?.ice).toEqual([firstIceId, secondIceId, thirdIceId]);
     expect(state.corp.credits).toBe(17);
   });
 });
 
 describe("MVP 0.1 runs, access and scoring", () => {
-  it("keeps ICE in installation order while the Runner approaches from the outermost ICE inward", () => {
-    let state = toRunnerTurn(createGameAfterSetup({ seed: "ice-install-order-run-order" }));
-    const innerIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-    const outerIceId = putCorpIceOnServer(state, "rd", "simple_sentry_ice");
-    const server = state.corp.servers.find((candidate) => candidate.id === "rd");
-
-    expect(server?.ice).toEqual([innerIceId, outerIceId]);
-
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    expect(state.run?.position).toEqual({ kind: "ice", serverId: "rd", iceIndex: 1 });
-    expect(state.run?.approachedIceId).toBe(outerIceId);
-
-    state = apply(state, "corp", (action) => action.type === "decline_rez");
-    expect(state.run?.position).toEqual({ kind: "ice", serverId: "rd", iceIndex: 0 });
-    expect(state.run?.approachedIceId).toBe(innerIceId);
-  });
-
   it("lets the Runner steal the top R&D agenda", () => {
     let state = toRunnerTurn(createGameAfterSetup({ seed: "steal-rd" }));
     putCorpCardOnTopOfRd(state, "simple_agenda");
@@ -3937,15 +3919,6 @@ describe("V1.6.3 Mechanikpaket C", () => {
     if (firstRegionId) {
       expect(tokyoState.corp.archives).toContain(firstRegionId);
     }
-    expect(tokyoState.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
-      expect.objectContaining({
-        kind: "trash_card",
-        side: "corp",
-        sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
-        cardDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
-        reason: "region_limit"
-      })
-    );
     const regionCountInRemote = tokyoState.corp.servers
       .find((server) => server.id === "remote_1")
       ?.root.filter(
@@ -3981,15 +3954,6 @@ describe("V1.6.3 Mechanikpaket C", () => {
     );
     expect(tokyoState.run).toBeUndefined();
     expect(tokyoState.corp.credits).toBe(creditsBeforeContinue + 2);
-    expect(tokyoState.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
-      expect.objectContaining({
-        kind: "gain_credits",
-        side: "corp",
-        amount: 2,
-        sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
-        reason: "unsuccessful_run"
-      })
-    );
   });
 });
 
@@ -7010,15 +6974,6 @@ describe("V1.9.2 Mechanikpaket K", () => {
     );
     expect(state.runner.rig.resources.includes(conferenceId)).toBe(false);
     expect(state.runner.heap).toContain(conferenceId);
-    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
-      expect.objectContaining({
-        kind: "trash_card",
-        side: "runner",
-        cardDefinitionId: "onr_v1_184_top-runners-conference",
-        sourceDefinitionId: "onr_v1_184_top-runners-conference",
-        reason: "run_start"
-      })
-    );
   });
 
   it("handles Polymer start-of-turn credits, AI CFO hidden-zone shuffle action and Data Naga program trash", () => {
@@ -7547,9 +7502,6 @@ describe("V1.9.7 Mechanikpaket P", () => {
     expect(ONR_V1_9_7_FINAL_CARD_IDS).toHaveLength(1);
     const definition = DEMO_CARDS_BY_ID["onr_v1_001_afreet"];
     expect(definition?.implementationStatus).toBe("playable_mvp");
-    expect(definition?.installCost).toBe(2);
-    expect(definition?.subtypes).toContain("daemon");
-    expect(definition?.rulesText).toContain("All icebreakers installed in Afreet have their strength reduced by 1.");
     expect(definition?.mechanics.join(" ")).toMatch(/host/);
     expect(definition?.mechanics.join(" ")).not.toMatch(
       /v2|matchmaking|ranking/,
@@ -7911,7 +7863,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   it("reveals only the intended public definition id for V1.9.11 reveal events", () => {
     let state = toRunnerTurn(v1911HiddenZoneGame("v1911-reveal"));
     state.runner.credits = 20;
-    const eventId = moveRunnerCardToGrip(state, "onr_v1_092_ice-and-datas-guide-to-the-net");
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
     putRunnerCardOnTopOfStack(state, "simple_decoder");
 
     state = apply(
@@ -7929,125 +7881,6 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
       "Forgotten Backup Chip",
     );
-  });
-
-  it("uses Sneak Preview to choose Stack first, install a program at no cost, shuffle and return it at end of turn", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-sneak-preview-stack"));
-    state.runner.credits = 20;
-    state.runner.maxHandSize = 99;
-    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-
-    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
-    expect(state.runner.credits).toBe(17);
-    expect(state.pendingChoice?.source).toContain("v1911.sneak_preview_source");
-    expect(state.pendingChoice?.options.map((option) => option.id)).toContain("source_stack");
-    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
-
-    state = applyChoice(state, "runner", "source_stack");
-    expect(state.pendingChoice?.source).toContain("v1911.sneak_preview_stack_install");
-    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
-    expect(optionId).toBeDefined();
-
-    state = applyChoice(state, "runner", String(optionId));
-    expect(state.runner.rig.programs).toContain(targetProgramId);
-    expect(state.runner.stack).not.toContain(targetProgramId);
-    expect(state.sneakPreviewTemporaryInstalls).toEqual([{ cardId: targetProgramId, sourceCardDefinitionId: "onr_v1_110_sneak-preview" }]);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "search_stack",
-      searchSource: "runner_stack",
-      searchDestination: "install_program",
-      searchShuffleAfter: true,
-      installSucceeded: true,
-      temporaryInstall: true,
-      temporaryReturnAtEndOfTurn: true,
-      cardDefinitionId: "simple_decoder"
-    });
-
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    expect(state.runner.grip).toContain(targetProgramId);
-    expect(state.runner.rig.programs).not.toContain(targetProgramId);
-    expect(state.sneakPreviewTemporaryInstalls).toEqual([]);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({ sneakPreviewReturnedCount: 1 });
-
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
-  });
-
-  it("uses Sneak Preview to choose Heap first, install for free without shuffling, and does not return if the program left play", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-sneak-preview-heap"));
-    state.runner.credits = 3;
-    state.runner.maxHandSize = 99;
-    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
-    const targetProgramId = moveRunnerCardToHeap(state, "simple_decoder");
-    const stackBefore = [...state.runner.stack];
-    const randomCounterBefore = state.randomCounter;
-
-    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
-    expect(state.runner.credits).toBe(0);
-    expect(state.pendingChoice?.options.map((option) => option.id)).toContain("source_heap");
-    state = applyChoice(state, "runner", "source_heap");
-    expect(state.pendingChoice?.source).toContain("v1911.sneak_preview_heap_install");
-    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
-    expect(optionId).toBeDefined();
-
-    state = applyChoice(state, "runner", String(optionId));
-    expect(state.runner.rig.programs).toContain(targetProgramId);
-    expect(state.runner.credits).toBe(0);
-    expect(state.runner.stack).toEqual(stackBefore);
-    expect(state.randomCounter).toBe(randomCounterBefore);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_install_program",
-      searchSource: "runner_heap",
-      searchDestination: "install_program",
-      searchShuffleAfter: false,
-      installSucceeded: true,
-      temporaryInstall: true
-    });
-
-    removeEverywhere(state, targetProgramId);
-    state.runner.heap.push(targetProgramId);
-    state.runner.memoryUsed = Math.max(0, state.runner.memoryUsed - 1);
-    state.cardInstances[targetProgramId] = { ...state.cardInstances[targetProgramId]!, zone: { side: "runner", zone: "heap" }, faceup: true, rezzed: true };
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    expect(state.runner.grip).not.toContain(targetProgramId);
-    expect(state.runner.heap).toContain(targetProgramId);
-    expect(state.eventLog.at(-1)?.publicPayload.sneakPreviewReturnedCount).toBeUndefined();
-  });
-
-  it("lets Sneak Preview free MU before installing the chosen program", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-sneak-preview-mu"));
-    state.runner.credits = 20;
-    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
-    const installedProgramId = installRunnerProgramForTest(state, "simple_fracter");
-    state.runner.memoryLimit = 1;
-    state.runner.memoryUsed = 1;
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
-
-    state = apply(state, "runner", (action) => action.type === "play_event" && String(action.payload?.cardId) === eventId);
-    state = applyChoice(state, "runner", "source_stack");
-    const targetOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === targetProgramId)?.id;
-    state = applyChoice(state, "runner", String(targetOptionId));
-    expect(state.pendingChoice?.source).toContain("v1911.sneak_preview_free_mu");
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      installPendingMemoryTrash: true,
-      temporaryInstall: true
-    });
-
-    const muOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === installedProgramId)?.id;
-    expect(muOptionId).toBeDefined();
-    state = applyChoice(state, "runner", String(muOptionId));
-    expect(state.runner.heap).toContain(installedProgramId);
-    expect(state.runner.rig.programs).toContain(targetProgramId);
-    expect(state.sneakPreviewTemporaryInstalls).toEqual([{ cardId: targetProgramId, sourceCardDefinitionId: "onr_v1_110_sneak-preview" }]);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_install_program",
-      trashedForMemoryCount: 1,
-      installSucceeded: true
-    });
   });
 
   it("exposes one unrezzed server card via Fortress Respecification without opening opponent choices", () => {
@@ -8076,46 +7909,10 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     });
   });
 
-  it("exposes unrezzed HQ ICE via installed SeeYa and writes a reveal event", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-seeya-installed-expose"));
-    state.runner.credits = 20;
-    const seeyaId = installRunnerProgramForTest(state, "onr_v1_058_seeya");
-    const hqIceId = putCorpIceOnServer(state, "hq", "simple_barrier_ice");
-
-    const seeyaAction = mustAction(
-      state,
-      "runner",
-      (action) => action.type === "gain_credit" && action.source === seeyaId && action.payload?.v1911HiddenZoneAbility === "expose_server_card" && action.payload?.serverId === "hq"
-    );
-    expect(seeyaAction.payload).toMatchObject({ cardId: seeyaId, serverId: "hq" });
-
-    state = apply(state, "runner", (action) => action.actionId === seeyaAction.actionId);
-    expect(state.pendingChoice).toBeUndefined();
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actor: "runner",
-      actionType: "gain_credit",
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_expose_server_card",
-      revealKind: "expose",
-      cardDefinitionId: "simple_barrier_ice",
-      title: "Simple Barrier ICE",
-      serverLabel: "HQ"
-    });
-    expect(state.cardInstances[hqIceId]).toMatchObject({ faceup: true, rezzed: false });
-    const runnerHqIce = getPlayerView(state, "runner").servers.find((server) => server.id === "hq")?.ice[0];
-    expect(runnerHqIce).toMatchObject({
-      known: true,
-      definitionId: "simple_barrier_ice",
-      title: "Simple Barrier ICE",
-      rezzed: false
-    });
-    expect(getLegalActions(state, "runner").some((action) => action.payload?.v1911HiddenZoneAbility === "expose_server_card" && action.payload?.serverId === "hq")).toBe(false);
-  });
-
   it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
     let state = toRunnerTurn(v1911HiddenZoneGame("v1911-installed-helpers"));
     state.runner.credits = 20;
-    installRunnerResourceForTest(state, "onr_v1_169_n-e-t-o");
+    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
     installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
     const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
 
@@ -8151,82 +7948,6 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
     expect(state.pendingChoice?.source).toContain("v1911.arrange_stack_top2");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
-  });
-
-  it("uses Self-Modifying Code during an ICE encounter to trash itself and install Worm", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-self-modifying-code"));
-    state.runner.credits = 20;
-    state.corp.credits = 20;
-    const smcId = installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
-    state.runner.memoryUsed = 2;
-    const targetProgramId = createRunnerStackCardForTest(state, "onr_v1_074_worm");
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-
-    expect(getLegalActions(state, "runner").some((action) => action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program")).toBe(false);
-
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    state = apply(state, "corp", (action) => action.type === "rez_ice");
-    const selfModifyingCodeAction = getLegalActions(state, "runner").find((action) => action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program");
-    expect(selfModifyingCodeAction?.costs).toEqual([]);
-    expect(selfModifyingCodeAction?.label).toBe("Self-Modifying Code: trashen und Programm aus Stack installieren");
-
-    state = apply(state, "runner", (action) => action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program");
-    expect(state.runner.credits).toBe(20);
-    expect(state.runner.heap).toContain(smcId);
-    expect(state.pendingChoice?.source).toContain("v1911.search_stack_install");
-    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
-
-    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
-    expect(runnerChoice?.stackSearchResolution).toMatchObject({
-      reveal: "public",
-      destination: "install_program",
-      shuffleAfter: true
-    });
-    const optionId = runnerChoice?.options.find((option) => option.value === targetProgramId)?.id;
-    expect(optionId).toBeDefined();
-    state = applyChoice(state, "runner", String(optionId));
-    expect(state.runner.rig.programs).toContain(targetProgramId);
-    expect(state.runner.grip).not.toContain(targetProgramId);
-    expect(state.runner.stack).not.toContain(targetProgramId);
-    expect(getLegalActions(state, "runner").some((action) => action.label === "Worm: Stärke +1")).toBe(true);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "search_stack",
-      searchReveal: "public",
-      searchDestination: "install_program",
-      searchShuffleAfter: true,
-      installSucceeded: true,
-      cardDefinitionId: "onr_v1_074_worm"
-    });
-  });
-
-  it("lets Self-Modifying Code choose an unpaid program and leaves it in the stack if it cannot be installed", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-self-modifying-code-unpaid"));
-    state.runner.credits = 0;
-    state.corp.credits = 20;
-    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
-    state.runner.memoryUsed = 2;
-    const wormId = createRunnerStackCardForTest(state, "onr_v1_074_worm");
-    const krashId = createRunnerStackCardForTest(state, "onr_v1_039_krash");
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
-
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    state = apply(state, "corp", (action) => action.type === "rez_ice");
-    state = apply(state, "runner", (action) => action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program");
-
-    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
-    expect(runnerChoice?.options.map((option) => option.value)).toEqual(expect.arrayContaining([krashId, wormId]));
-    const wormOptionId = runnerChoice?.options.find((option) => option.value === wormId)?.id;
-    expect(wormOptionId).toBeDefined();
-
-    state = applyChoice(state, "runner", String(wormOptionId));
-    expect(state.runner.stack).toContain(wormId);
-    expect(state.runner.rig.programs).not.toContain(wormId);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      searchDestination: "install_program",
-      installSucceeded: false,
-      cardDefinitionId: "onr_v1_074_worm"
-    });
   });
 
   it("uses scored Corporate Downsizing to reveal only the R&D top definition", () => {
@@ -8865,12 +8586,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1920-mram-memory",
-        runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-          id: "onr_v1_runner_v1921_rio_after_pass",
-          name: "O:NR V1.9.21 Rio After Pass Runner",
-          cards: [{ id: "onr_v1_021_dwarf", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
-        },
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
         corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
         agendaPointsToWin: 7,
       }),
@@ -8990,12 +8706,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1920-asset-actions-revalidation",
-        runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-          id: "onr_v1_runner_v1921_rio_after_pass",
-          name: "O:NR V1.9.21 Rio After Pass Runner",
-          cards: [{ id: "onr_v1_021_dwarf", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
-        },
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
         corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
         agendaPointsToWin: 7,
       }),
@@ -9245,7 +8956,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     ).toBe("playable_mvp");
   });
 
-  it("resolves Schlaghund tag-checked meat damage and self-trash through LegalAction and replay", () => {
+  it("records Schlaghund deterministic die probes through LegalAction and replay", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1921-schlaghund-die-probe",
@@ -9267,10 +8978,6 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state.corp.credits = 20;
     state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
-    state.runner.tags = 6;
-    drawRunnerCardsForTest(state, 8);
-    state.randomCounter = 0;
-    state.randomDrawRecords = [];
 
     const assetId = putCorpRootInRemote(state, "onr_v1_339_schlaghund");
     state.cardInstances[assetId] = {
@@ -9344,17 +9051,11 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
   });
 
-  it("rolls Rio de Janeiro City Grid after passing rezzed ice without leaking hidden zones", () => {
-    let state = toRunnerTurn(
+  it("records Rio de Janeiro City Grid server die probes without leaking hidden zones", () => {
+    let state = apply(
       createGameAfterSetup({
-        seed: "v1921-rio-after-pass-ice",
-        baseline: MVP_0_99_BASELINE,
-        runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-          id: "onr_v1_runner_v1921_rio_after_pass",
-          name: "O:NR V1.9.21 Rio After Pass Runner",
-          cards: [{ id: "onr_v1_021_dwarf", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards]
-        },
+        seed: "v1921-rio-server-die-probe",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
         corpDeck: {
           ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
           id: "onr_v1_corp_v1921_rio_random_probe",
@@ -9369,10 +9070,9 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       "corp",
       (action) => action.type === "mandatory_draw",
     );
-    state.runner.clicks = 3;
+    state.corp.credits = 20;
+    state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
-    state.randomCounter = 0;
-    state.randomDrawRecords = [];
 
     const upgradeId = putCorpRootInRemote(
       state,
@@ -9526,7 +9226,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
   it("records Playful AI event die probes through play_event replay", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "v1921-ai-boon-start-of-run",
+        seed: "v1921-playful-ai-event-die-probe",
         runnerDeck: {
           ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
           id: "onr_v1_runner_v1921_playful_ai_random_probe",
@@ -9542,8 +9242,6 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     );
     state.runner.credits = 20;
     state.runner.clicks = 3;
-    state.randomCounter = 0;
-    state.randomDrawRecords = [];
 
     const eventId = moveRunnerCardToGrip(state, "onr_v1_104_playful-ai");
     const legal = mustAction(
@@ -9592,65 +9290,16 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
     );
-
-    const staleChoice = applyAction(state, {
-      matchId: state.matchId,
-      side: "runner",
-      actionId: mustAction(state, "runner", (action) => action.type === "resolve_choice").actionId,
-      clientKnownStateVersion: state.stateVersion - 1,
-      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: ["gain_2_set_aside_0"] },
-      idempotencyKey: "v1921-playful-ai-stale-choice"
-    });
-    expect(staleChoice.ok).toBe(false);
-    if (!staleChoice.ok) expect(staleChoice.error.code).toBe("ERR_STALE_STATE");
-
-    const wrongChoiceSide = applyAction(state, {
-      matchId: state.matchId,
-      side: "corp",
-      actionId: mustAction(state, "runner", (action) => action.type === "resolve_choice").actionId,
-      clientKnownStateVersion: state.stateVersion,
-      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: ["gain_2_set_aside_0"] },
-      idempotencyKey: "v1921-playful-ai-wrong-choice-side"
-    });
-    expect(wrongChoiceSide.ok).toBe(false);
-    if (!wrongChoiceSide.ok) expect(wrongChoiceSide.error.code).toBe("ERR_WRONG_SIDE");
-
-    const invalidChoice = applyAction(state, {
-      matchId: state.matchId,
-      side: "runner",
-      actionId: mustAction(state, "runner", (action) => action.type === "resolve_choice").actionId,
-      clientKnownStateVersion: state.stateVersion,
-      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: ["gain_3_set_aside_0"] },
-      idempotencyKey: "v1921-playful-ai-invalid-choice"
-    });
-    expect(invalidChoice.ok).toBe(false);
-    if (!invalidChoice.ok) expect(invalidChoice.error.code).toBe("ERR_INVALID_CHOICE");
-
-    state = applyChoice(state, "runner", "gain_2_set_aside_0");
-    expect(state.pendingChoice).toBeUndefined();
-    expect(state.runner.credits).toBe(creditsBefore - 1 + 2);
-    expect(state.randomDrawRecords).toHaveLength(1);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "resolve_choice",
-      v1921RunnerEventAbility: "playful_ai_dice_loop",
-      playfulAiGainedCredits: 2,
-      playfulAiSetAsideDice: 0,
-      playfulAiRemainingDice: 0,
-      playfulAiDieRolls: [],
-      playfulAiDiceQueuedBeforeRolls: 0,
-      playfulAiDiceQueuedAfterRolls: 0,
-      playfulAiComplete: true
-    });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
     expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
   });
 
-  it("repeats Playful AI set-aside dice until none remain and records every roll", () => {
+  it("records Quest for Cattekin resource die probes through installed resource actions", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "playful-seed-1",
+        seed: "v1921-quest-for-cattekin-resource-die-probe",
         runnerDeck: {
           ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
           id: "onr_v1_runner_v1921_quest_random_probe",
@@ -9666,9 +9315,6 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     );
     state.runner.credits = 20;
     state.runner.clicks = 3;
-    state.corp.maxHandSize = 100;
-    state.randomCounter = 0;
-    state.randomDrawRecords = [];
 
     const resourceId = installRunnerResourceForTest(
       state,
@@ -9718,11 +9364,6 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(Number.isInteger(publicRoll)).toBe(true);
     expect(publicRoll).toBeGreaterThanOrEqual(1);
     expect(publicRoll).toBeLessThanOrEqual(6);
-    if (publicRoll === 6) {
-      expect(state.runnerPersistentExtraActions).toBe(1);
-      expect(state.runner.heap).toContain(resourceId);
-      expect(state.runner.clicks).toBe(5);
-    }
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
     );
@@ -9834,140 +9475,6 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       expect(
         state.cardInstances[investmentsId]?.counters?.recurring_credit,
       ).toBe(2);
-  });
-
-  it("uses The Shell Traders to set aside a grip program, remove Shell counters and auto-install it for free", () => {
-    let state = runnerMainForTest(v1912CounterRecurringGame("v1912-shell-traders"));
-    state.runner.credits = 20;
-    state.corp.maxHandSize = 100;
-    const shellId = moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
-    const targetId = moveRunnerCardToGrip(state, "simple_fracter");
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    expect(getLegalActions(state, "runner").some((action) => action.payload?.shellTradersAbility === "set_aside_from_grip")).toBe(false);
-
-    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === shellId);
-    const installedShellId = state.runner.rig.resources.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_176_the-shell-traders");
-    expect(installedShellId).toBeDefined();
-    const setAsideAction = mustAction(
-      state,
-      "runner",
-      (action) => action.type === "trigger_ability" && action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === targetId
-    );
-    expect(setAsideAction.payload?.shellCounterAmount).toBe(2);
-    expect(getPlayerView(state, "corp").legalActions).toEqual([]);
-
-    state = apply(state, "runner", (action) => action.actionId === setAsideAction.actionId);
-    expect(state.runner.grip).not.toContain(targetId);
-    expect(state.specialZones?.setAside).toContain(targetId);
-    expect(state.cardInstances[targetId]?.counters?.shell).toBe(2);
-    expect(getPlayerView(state, "corp").specialZones?.setAside[0]).toMatchObject({ definitionId: "simple_fracter", counters: { shell: 2 } });
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      shellTradersAbility: "set_aside_from_grip",
-      targetCardDefinitionId: "simple_fracter",
-      shellCounterAmount: 2
-    });
-
-    state = apply(
-      state,
-      "runner",
-      (action) => action.type === "trigger_ability" && action.payload?.shellTradersAbility === "remove_shell_counter" && action.payload?.targetCardId === targetId
-    );
-    expect(state.runner.credits).toBe(18);
-    expect(state.cardInstances[targetId]?.counters?.shell).toBe(1);
-
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    state = apply(state, "corp", (action) => action.type === "end_turn");
-    expect(state.specialZones?.setAside).not.toContain(targetId);
-    expect(state.runner.rig.programs).toContain(targetId);
-    expect(state.cardInstances[targetId]?.counters?.shell).toBeUndefined();
-    expect(state.runner.memoryUsed).toBeGreaterThanOrEqual(1);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      shellTradersAbility: "start_turn_remove_shell_counter",
-      targetCardDefinitionId: "simple_fracter",
-      installedFromSpecialZone: true,
-      installCostPaid: 0
-    });
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok, replay.errors.join("; ")).toBe(true);
-    expect(replay.actualFinalStateHash).toBe(hashState(state));
-  });
-
-  it("uses The Shell Traders for hardware targets and installs zero-cost targets immediately", () => {
-    let state = runnerMainForTest(v1912CounterRecurringGame("v1912-shell-traders-hardware-zero"));
-    state.runner.credits = 20;
-    state.corp.maxHandSize = 100;
-    const shellId = moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
-    const hardwareId = createRunnerGripCardForTest(state, "simple_setup_hardware");
-    const zeroCostProgramId = createRunnerGripCardForTest(state, "onr_v1_030_grubb");
-
-    state = apply(state, "runner", (action) => action.type === "install_card" && String(action.payload?.cardId) === shellId);
-    state = apply(
-      state,
-      "runner",
-      (action) => action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === zeroCostProgramId
-    );
-    expect(state.specialZones?.setAside).not.toContain(zeroCostProgramId);
-    expect(state.runner.rig.programs).toContain(zeroCostProgramId);
-    expect(state.cardInstances[zeroCostProgramId]?.counters?.shell).toBeUndefined();
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      shellTradersAbility: "set_aside_from_grip",
-      targetCardDefinitionId: "onr_v1_030_grubb",
-      shellCounterAmount: 0,
-      installedFromSpecialZone: true,
-      installCostPaid: 0
-    });
-
-    state = apply(
-      state,
-      "runner",
-      (action) => action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === hardwareId
-    );
-    expect(state.specialZones?.setAside).toContain(hardwareId);
-    expect(state.cardInstances[hardwareId]?.counters?.shell).toBe(2);
-    state = apply(
-      state,
-      "runner",
-      (action) => action.payload?.shellTradersAbility === "remove_shell_counter" && action.payload?.targetCardId === hardwareId
-    );
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    state = apply(state, "corp", (action) => action.type === "end_turn");
-
-    expect(state.specialZones?.setAside).not.toContain(hardwareId);
-    expect(state.runner.rig.hardware).toContain(hardwareId);
-    expect(state.runner.memoryLimit).toBeGreaterThanOrEqual(5);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      shellTradersAbility: "start_turn_remove_shell_counter",
-      targetCardDefinitionId: "simple_setup_hardware",
-      installedFromSpecialZone: true,
-      installCostPaid: 0
-    });
-  });
-
-  it("opens a mandatory start-of-turn target choice when multiple Shell-Traders targets have Shell counters", () => {
-    let state = runnerMainForTest(v1912CounterRecurringGame("v1912-shell-traders-choice"));
-    state.runner.credits = 20;
-    state.corp.maxHandSize = 100;
-    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_176_the-shell-traders");
-    const fracterId = moveRunnerCardToGrip(state, "simple_fracter");
-    const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
-    state = apply(state, "runner", (action) => action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === fracterId);
-    state = apply(state, "runner", (action) => action.payload?.shellTradersAbility === "set_aside_from_grip" && action.payload?.targetCardId === decoderId);
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    state = apply(state, "corp", (action) => action.type === "end_turn");
-
-    expect(state.pendingChoice?.source).toContain("v1912.shell_traders_start_turn");
-    expect(getLegalActions(state, "corp")).toEqual([]);
-    expect(getPlayerView(state, "runner").pendingChoice?.options.map((option) => option.value)).toEqual(expect.arrayContaining([fracterId, decoderId]));
-    const fracterOptionId = getPlayerView(state, "runner").pendingChoice?.options.find((option) => option.value === fracterId)?.id;
-    expect(fracterOptionId).toBeDefined();
-    state = applyChoice(state, "runner", String(fracterOptionId));
-    expect(state.cardInstances[fracterId]?.counters?.shell).toBe(1);
-    expect(state.cardInstances[decoderId]?.counters?.shell).toBe(3);
   });
 
   it("uses V1.9.12 Hidden-Zone event and installed helper paths without exposing choices to the Corp", () => {
@@ -10720,38 +10227,6 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     }
   });
 
-  it("uses Replicator as a paid pump and free trace-subroutine breaker only", () => {
-    expect(DEMO_CARDS_BY_ID["onr_v1_056_replicator"]).toMatchObject({ installCost: 5, memoryCost: 1, strength: 2 });
-    expect(DEMO_CARDS_BY_ID["onr_v1_056_replicator"]?.abilities).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ type: "pump_strength", cost: { credits: 1 }, amount: 1 }),
-        expect.objectContaining({ type: "break_subroutine", cost: { credits: 0 }, subroutineTypes: ["initiate_trace"] })
-      ])
-    );
-
-    let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-replicator-trace-only"));
-    state.runner.credits = 4;
-    state.runner.memoryLimit = 8;
-    moveRunnerCardToGrip(state, "onr_v1_056_replicator");
-
-    expect(getLegalActions(state, "runner").some((action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_056_replicator")).toBe(false);
-
-    state.runner.credits = 10;
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_056_replicator");
-    expect(state.runner.credits).toBe(5);
-
-    putCorpIceOnServer(state, "rd", "onr_v1_240_fang");
-    state.corp.credits = 9;
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_240_fang");
-    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_056_replicator");
-    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_056_replicator");
-
-    const replicatorBreaks = getLegalActions(state, "runner").filter((action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_056_replicator");
-    expect(replicatorBreaks.map((action) => action.payload?.subroutineIndex)).toEqual([0]);
-    expect(replicatorBreaks[0]?.costs).toEqual([{ credits: 0 }]);
-  });
-
   it("installs V1.9.14 Runner cards, counts installed link, and keeps Resource trash legal-action gated", () => {
     for (const definitionId of ONR_V1_9_14_RUNNER_CARD_IDS) {
       let state = toRunnerTurn(
@@ -10853,51 +10328,6 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         "onr_v1_154_broker",
     );
     expect(brokerId).toBeDefined();
-    const brokerLoad = getLegalActions(resourceState, "runner").find(
-      (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_load_credits" && action.payload?.cardId === brokerId
-    );
-    expect(brokerLoad?.visibility).toBe("public");
-    resourceState = apply(resourceState, "runner", (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_load_credits");
-    expect(cardCounterAmount(resourceState, brokerId!, "power")).toBe(3);
-    expect(resourceState.runner.credits).toBe(9);
-    expect(
-      getLegalActions(resourceState, "runner").some(
-        (action) =>
-          action.type === "trigger_ability" &&
-          (action.payload?.resourceAbility === "broker_load_credits" || action.payload?.resourceAbility === "broker_take_credits") &&
-          action.payload?.cardId === brokerId
-      )
-    ).toBe(false);
-    const blockedSameTurnBrokerAction = applyAction(resourceState, {
-      matchId: resourceState.matchId,
-      side: "runner",
-      actionId: brokerLoad!.actionId,
-      clientKnownStateVersion: resourceState.stateVersion,
-      idempotencyKey: `runner-${resourceState.stateVersion}-${brokerLoad!.actionId}-blocked`
-    });
-    expect(blockedSameTurnBrokerAction.ok).toBe(false);
-
-    resourceState = apply(resourceState, "runner", (action) => action.type === "end_turn");
-    resourceState = apply(resourceState, "corp", (action) => action.type === "mandatory_draw");
-    resourceState = toRunnerTurnFromCorpMain(resourceState);
-    resourceState = apply(resourceState, "runner", (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "broker_take_credits");
-    expect(cardCounterAmount(resourceState, brokerId!, "power")).toBe(0);
-    expect(resourceState.runner.credits).toBe(12);
-    expect(
-      getLegalActions(resourceState, "runner").some(
-        (action) =>
-          action.type === "trigger_ability" &&
-          (action.payload?.resourceAbility === "broker_load_credits" || action.payload?.resourceAbility === "broker_take_credits") &&
-          action.payload?.cardId === brokerId
-      )
-    ).toBe(false);
-    expect(resourceState.eventLog.at(-1)?.visibilityClass).toBe("public");
-    expect(resourceState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "trigger_ability",
-      resourceAbility: "broker_take_credits",
-      gainedCredits: 3,
-      remainingCounters: 0
-    });
     resourceState.runner.tags = 1;
     resourceState = apply(
       resourceState,
@@ -10919,56 +10349,6 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     expect(resourceState.runner.rig.resources).not.toContain(brokerId);
     expect(resourceState.runner.heap).toContain(brokerId);
-  });
-
-  it("loads Short-Term Contract with 12 credits and spends them through runner resource actions", () => {
-    let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-short-term-contract"));
-    state.runner.credits = 20;
-    state.runner.clicks = 10;
-    moveRunnerCardToGrip(state, "onr_v1_178_short-term-contract");
-
-    expect(DEMO_CARDS_BY_ID["onr_v1_178_short-term-contract"]).toMatchObject({ installCost: 1 });
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_178_short-term-contract");
-    const contractId = state.runner.rig.resources.find((cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_178_short-term-contract");
-    expect(contractId).toBeDefined();
-    expect(state.runner.credits).toBe(19);
-    if (contractId) {
-      expect(cardCounterAmount(state, contractId, "power")).toBe(12);
-      expect(getPlayerView(state, "runner").own.rig?.find((card) => card.instanceId === contractId)?.counters?.power).toBe(12);
-    }
-
-    const firstTake = getLegalActions(state, "runner").find(
-      (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "short_term_contract_take_credits" && action.payload?.cardId === contractId
-    );
-    expect(firstTake).toMatchObject({
-      visibility: "public",
-      costs: [{ clicks: 1 }],
-      payload: { removePowerCounterAmount: 2, gainCreditsAmount: 2 }
-    });
-
-    for (let index = 0; index < 6; index += 1) {
-      state = apply(
-        state,
-        "runner",
-        (action) => action.type === "trigger_ability" && action.payload?.resourceAbility === "short_term_contract_take_credits" && action.payload?.cardId === contractId
-      );
-    }
-
-    expect(state.runner.credits).toBe(31);
-    if (contractId) {
-      expect(cardCounterAmount(state, contractId, "power")).toBe(0);
-      expect(state.runner.rig.resources).not.toContain(contractId);
-      expect(state.runner.heap).toContain(contractId);
-    }
-    expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "trigger_ability",
-      resourceAbility: "short_term_contract_take_credits",
-      spentPowerCounters: 2,
-      gainedCredits: 2,
-      remainingCounters: 0,
-      shortTermContractTrashed: true
-    });
   });
 
   it("gates Power Grid Overload on visible tags and installed Runner hardware", () => {
@@ -11554,34 +10934,6 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     );
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
-  });
-
-  it("installs Imp for 0 credits and reduces hosted icebreaker strength by 1", () => {
-    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-imp-hosted-icebreaker-strength"));
-    state.runner.credits = 10;
-    moveRunnerCardToGrip(state, "onr_v1_033_imp");
-    moveRunnerCardToGrip(state, "onr_v1_047_pile-driver");
-
-    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_033_imp");
-    const impId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_033_imp");
-    expect(impId).toBeDefined();
-    expect(state.runner.credits).toBe(10);
-    if (!impId) throw new Error("Missing installed Imp host");
-
-    const hostedInstall = mustAction(
-      state,
-      "runner",
-      (action) =>
-        action.type === "install_card" &&
-        sourceDefinition(state, action) === "onr_v1_047_pile-driver" &&
-        action.payload?.hostOnCardId === impId
-    );
-    const pileDriverId = String(hostedInstall.payload?.cardId ?? "");
-    state = apply(state, "runner", (action) => action.actionId === hostedInstall.actionId);
-
-    expect(state.cardInstances[pileDriverId]?.hostedOn).toBe(impId);
-    expect(state.runner.memoryUsed).toBe(1);
-    expect(getPlayerView(state, "runner").own.rig?.find((card) => card.instanceId === pileDriverId)?.strength).toBe(1);
   });
 
   it("gates Fragmentation Storm program trash and net damage on trace success", () => {
@@ -17566,7 +16918,7 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
 });
 
 describe("V1.1.2 Full Archives Access", () => {
-  it("turns existing facedown Archives cards faceup at breach start and skips cards without decisions", () => {
+  it("builds a deterministic mixed Archives queue without revealing facedown entries before access", () => {
     let state = toRunnerTurn(v097RunGame("v112-archives-queue"));
     const faceupOperation = moveCorpCardToArchives(
       state,
@@ -17622,7 +16974,7 @@ describe("V1.1.2 Full Archives Access", () => {
     );
   });
 
-  it("preserves Archives queue progress, forbids Archives trash, and replays deterministically", () => {
+  it("reveals only the current Archives card, preserves queue progress, and replays deterministically", () => {
     let state = toRunnerTurn(v097RunGame("v112-archives-access"));
     state.runner.credits = 10;
     const faceupOperation = moveCorpCardToArchives(
@@ -17715,22 +17067,6 @@ describe("V1.1.2 Full Archives Access", () => {
     );
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
-  });
-
-  it("does not offer the basic trash ability for a card accessed from Archives", () => {
-    let state = toRunnerTurn(v1917GenericAssetGame("v112-archives-no-trash"));
-    state.runner.credits = 10;
-    const setupId = moveCorpCardToArchives(state, "onr_v1_340_setup", false);
-    keepOnlyCorpArchivesCards(state, [setupId]);
-
-    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "archives");
-    state = apply(state, "runner", (action) => action.type === "access_card");
-
-    const actions = getLegalActions(state, "runner");
-    expect(actions.some((action) => action.type === "trash_accessed_card")).toBe(false);
-    expect(actions.some((action) => action.type === "decline_trash")).toBe(true);
-    expect(state.corp.archives).toEqual([setupId]);
-    expect(state.cardInstances[setupId]?.faceup).toBe(true);
   });
 });
 
@@ -21692,17 +21028,6 @@ function toRunnerTurn(state: GameState): GameState {
   return next;
 }
 
-function runnerMainForTest(state: GameState): GameState {
-  return {
-    ...state,
-    activeSide: "runner",
-    phase: "runner_action_phase",
-    timingPoint: "runner_action.main",
-    corp: { ...state.corp, clicks: 0 },
-    runner: { ...state.runner, clicks: 4 }
-  };
-}
-
 function toRunnerTurnFromCorpMain(state: GameState): GameState {
   let next = apply(state, "corp", (action) => action.type === "end_turn");
   if (
@@ -21744,16 +21069,6 @@ function cardCounterAmount(
   counterType: CounterType,
 ): number {
   return state.cardInstances[cardId]?.counters?.[counterType] ?? 0;
-}
-
-function addCardCounterForTest(state: GameState, cardId: CardInstanceId, counterType: CounterType, amount: number): void {
-  state.cardInstances[cardId] = {
-    ...state.cardInstances[cardId]!,
-    counters: {
-      ...(state.cardInstances[cardId]?.counters ?? {}),
-      [counterType]: cardCounterAmount(state, cardId, counterType) + amount
-    }
-  };
 }
 
 function choiceRequest(state: GameState, side: Side): ChoiceRequest {
@@ -21853,48 +21168,6 @@ function putRunnerCardOnTopOfStack(
     faceup: true,
     rezzed: true,
   };
-  return id;
-}
-
-function createRunnerStackCardForTest(state: GameState, definitionId: string): CardInstanceId {
-  const id = `test_runner_stack_${definitionId}_${Object.keys(state.cardInstances).length}`;
-  state.cardInstances[id] = {
-    instanceId: id,
-    definitionId,
-    owner: "runner",
-    controller: "runner",
-    zone: { side: "runner", zone: "stack" },
-    faceup: true,
-    rezzed: true,
-    advancementCounters: 0,
-    strengthModifier: 0
-  };
-  state.runner.stack.unshift(id);
-  return id;
-}
-
-function createRunnerGripCardForTest(state: GameState, definitionId: string): CardInstanceId {
-  const id = `test_runner_grip_${definitionId}_${Object.keys(state.cardInstances).length}`;
-  state.cardInstances[id] = {
-    instanceId: id,
-    definitionId,
-    owner: "runner",
-    controller: "runner",
-    zone: { side: "runner", zone: "grip" },
-    faceup: true,
-    rezzed: true,
-    advancementCounters: 0,
-    strengthModifier: 0
-  };
-  state.runner.grip.unshift(id);
-  return id;
-}
-
-function moveRunnerCardToHeap(state: GameState, definitionId: string): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.runner.heap.push(id);
-  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "heap" }, faceup: true, rezzed: true };
   return id;
 }
 

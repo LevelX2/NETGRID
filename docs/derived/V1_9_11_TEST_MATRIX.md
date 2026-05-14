@@ -13,7 +13,6 @@ Die Matrix deckt die 16 V1.9.11-Karten aus dem Detailplan und die Resolverfamili
 | --- | --- | --- | --- |
 | TC-1911-01 | Scope | Exakt 16 Zielkarten sind im Release-Set; keine zusätzliche Karte wird promotet. | `packages/catalog/src/index.test.ts` |
 | TC-1911-02 | Stack Search | Runner-Search öffnet private Choice, bewegt gewählte Karte legal und shufflet deterministisch. | `packages/engine/src/index.test.ts` |
-| TC-1911-02a | Trash Search | Gideon's Pawnshop durchsucht den Runner-Trash, bewegt genau eine Karte in die Hand, bietet sich nicht selbst an und shufflet den Stack nicht. | `packages/engine/src/index.test.ts` |
 | TC-1911-03 | Reorder | Reorder-Choice ändert nur die berechtigte Zone und leakt keine Reihenfolge an die Gegenseite. | `packages/engine/src/index.test.ts` |
 | TC-1911-04 | Reveal/Expose | Nur ein explizit revealter CardDefinition-Titel wird öffentlich; übrige Hidden-Zone-Daten bleiben verborgen. | `packages/engine/src/index.test.ts` |
 | TC-1911-05 | Corp Hidden-Zone | Corp-seitiger Hidden-Zone-Pfad funktioniert ohne Runner-Leak. | `packages/engine/src/index.test.ts` |
