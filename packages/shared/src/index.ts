@@ -776,6 +776,8 @@ export type RunState = {
   >;
   viral15ActiveSourceIceId?: CardInstanceId;
   viral15PendingPassedIceId?: CardInstanceId;
+  aiBoonSourceCardId?: CardInstanceId;
+  aiBoonRunStrength?: number;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;
@@ -4723,11 +4725,30 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 2,
     recurringCredits: 1,
     rulesText:
-      "Installed killer with deterministic random and recurring-credit surfaces. Random outcomes use Engine seed, RandomCounter and RandomDrawRecords.",
+      "1 Credit: Break 1 sentry subroutine. 1 Credit: +1 strength. At the start of each run, roll a die and add the result to AI Boon's strength for that run.",
+    abilities: [
+      {
+        id: "onr_v1_002_ai-boon_pump",
+        type: "pump_strength",
+        cost: { credits: 1 },
+        amount: 1,
+        timingPoint: "run.encounter_ice",
+      },
+      {
+        id: "onr_v1_002_ai-boon_break_sentry",
+        type: "break_subroutine",
+        cost: { credits: 1 },
+        iceSubtype: "sentry",
+        count: 1,
+        timingPoint: "run.encounter_ice",
+      },
+    ],
     mechanics: [
       "install_program",
       "memory",
       "icebreaker",
+      "pump_breaker",
+      "break_subroutine",
       "deterministic_random",
       "recurring_credit",
       "recurring_start_turn",
@@ -4982,13 +5003,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["chip"],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 5,
+    recurringCredits: 2,
     rulesText:
-      "Installed hardware chip with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+      "2 recurring credits. Use these credits only for Killer icebreaker use during runs.",
     mechanics: [
       "install_hardware",
       "memory",
       "per_card_longtail",
+      "recurring_credit",
+      "recurring_start_turn",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

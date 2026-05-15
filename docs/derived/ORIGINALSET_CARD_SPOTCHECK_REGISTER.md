@@ -4,6 +4,25 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-ai-boon-virizz
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_AI_BOON_VIRIZZ_IMPLEMENTATION.md`
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| AI Boon | `onr_v1_002_ai-boon` | Nacharbeit umgesetzt: automatischer Run-Start-Wurf setzt run-lokale Stärke | Manuelle Probe entfernt; PublicPayload, Replay und Cleanup-Test ergänzt |
+| Security Code WORM Chip | `onr_v1_109_security-code-worm-chip` | Engine-Pfad funktioniert mit erfolgreichem HQ-Run und unrezzed-ICE-Choice | Bestehende Choice-Revalidation bleibt grün |
+| Synchronized Attack on HQ | `onr_v1_113_synchronized-attack-on-hq` | Engine-Pfad funktioniert mit privater Korp-HQ-Retain-Choice | Bestehende Kosten-/Hidden-Info-Revalidation bleibt grün |
+| Triggerman | `onr_v1_273_triggerman` | Engine-Pfad funktioniert mit deterministischem installed-program Trash | Bestehende V1.6.3-Abdeckung bleibt grün |
+| ZZ22 Speed Chip | `onr_v1_147_zz22-speed-chip` | Nacharbeit umgesetzt: Installkosten 5 und 2 Killer-restricted Recurring Credits | Shared-Definition, Payment-Filter und Engine-Test korrigiert |
+| Cortical Scanner | `onr_v1_230_cortical-scanner` | Engine-Pfad funktioniert mit drei indexstabilen End-the-run-Subroutinen | Bestehende ICE-/Replay-Abdeckung bleibt grün |
+| Virizz | `onr_v1_277_virizz` | Engine-Pfad funktioniert mit rest-of-run Break-Kostenmodifier | Bestehende V1.9.22-Abdeckung bleibt grün |
+| Anonymous Tip | `onr_v1_077_anonymous-tip` | Engine-Pfad funktioniert mit public Black-ICE-Derez-Choice | Bestehende Ziel-Revalidation bleibt grün |
+| Canis Minor | `onr_v1_226_canis-minor` | Engine-Pfad funktioniert mit Future-Encounter-Strength-Bonus | Bestehende V1.8.1-Abdeckung bleibt grün |
+| Newsgroup Taunting | `onr_v1_332_newsgroup-taunting` | Nacharbeit umgesetzt: rezzed globaler Run-Start-Tax von 1 Credit | Engine-Test und AI-Hint korrigiert |
+
 ## Runde 2026-05-15-turbeau-tutor
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

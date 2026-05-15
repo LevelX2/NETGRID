@@ -9122,6 +9122,84 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     }
   });
 
+  it("applies Newsgroup Taunting as a rezzed start-of-run tax", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1920-newsgroup-taunting-run-tax",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 1;
+    state.runner.clicks = 4;
+    state.corp.credits = 10;
+    const newsgroupId = putCorpRootInRemote(
+      state,
+      "onr_v1_332_newsgroup-taunting",
+    );
+    state.cardInstances[newsgroupId] = {
+      ...state.cardInstances[newsgroupId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(legal.costs[0]?.credits).toBe(1);
+    expect(legal.payload).toMatchObject({
+      v1920AssetAbility: "newsgroup_taunting_run_start_tax",
+      newsgroupTauntingRunStartTaxCredits: 1,
+      runStartTaxCredits: 1,
+    });
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+    expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
+      v1920AssetAbility: "newsgroup_taunting_run_start_tax",
+      newsgroupTauntingRunStartTaxCredits: 1,
+      runStartTaxPaid: 1,
+      runnerCreditsAfter: 0,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Economy Operation"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let poorRunner = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1920-newsgroup-taunting-run-tax-insufficient",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    poorRunner.runner.credits = 0;
+    poorRunner.runner.clicks = 4;
+    const poorNewsgroupId = putCorpRootInRemote(
+      poorRunner,
+      "onr_v1_332_newsgroup-taunting",
+    );
+    poorRunner.cardInstances[poorNewsgroupId] = {
+      ...poorRunner.cardInstances[poorNewsgroupId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    expect(
+      getLegalActions(poorRunner, "runner").some(
+        (action) => action.type === "start_run",
+      ),
+    ).toBe(false);
+  });
+
   it("rejects wrong-side and stale V1.9.20 action-economy asset actions", () => {
     let state = apply(
       createGameAfterSetup({
@@ -9645,8 +9723,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
   });
 
-  it("records V1.9.21 runner program die probes through installed program actions", () => {
-    for (const definitionId of ["onr_v1_002_ai-boon", "onr_v1_008_boardwalk"]) {
+  it("records V1.9.21 Boardwalk die probes through installed program actions", () => {
+    for (const definitionId of ["onr_v1_008_boardwalk"]) {
       let state = toRunnerTurn(
         createGameAfterSetup({
           seed: `v1921-${definitionId}-program-die-probe`,
@@ -9729,6 +9807,91 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         state.randomDrawRecords,
       );
     }
+  });
+
+  it("rolls AI Boon automatically at run start and clears the strength with the run", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1921-ai-boon-run-start-strength",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1921_ai_boon_run_start",
+          name: "O:NR V1.9.21 AI Boon Run Start Runner",
+          cards: [
+            { id: "onr_v1_002_ai-boon", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 3;
+    state.runner.memoryLimit = 20;
+    installRunnerProgramForTest(state, "onr_v1_002_ai-boon");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.v1921RunnerProgramAbility ===
+          "deterministic_die_probe",
+      ),
+    ).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const randomBefore = state.randomDrawRecords.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+
+    expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
+    expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
+      "v1921.die.onr_v1_002_ai-boon.run_start_strength",
+    );
+    expect(state.run?.aiBoonRunStrength).toBe(
+      Number(state.eventLog.at(-1)?.publicPayload.aiBoonRunStrength),
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
+      v1921RunnerProgramAbility: "ai_boon_run_start_strength",
+      sourceDefinitionId: "onr_v1_002_ai-boon",
+      randomPurpose: "v1921.die.onr_v1_002_ai-boon.run_start_strength",
+      randomCounterAfter: randomBefore + 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+    );
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.run).toBeUndefined();
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+
+    let withoutAiBoon = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1921-ai-boon-run-start-no-source",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    withoutAiBoon.runner.clicks = 3;
+    putCorpCardOnTopOfRd(withoutAiBoon, "simple_economy_operation");
+    const noSourceRandomBefore = withoutAiBoon.randomDrawRecords.length;
+    withoutAiBoon = apply(
+      withoutAiBoon,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(withoutAiBoon.randomDrawRecords).toHaveLength(noSourceRandomBefore);
+    expect(withoutAiBoon.run?.aiBoonRunStrength).toBeUndefined();
   });
 
   it("records Playful AI event die probes through play_event replay", () => {
@@ -12856,6 +13019,176 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       expect(replay.ok, definitionId).toBe(true);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
+  });
+
+  it("uses ZZ22 Speed Chip recurring credits only for Killer use during runs", () => {
+    let killerState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-zz22-killer-recurring",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_zz22_killer",
+          name: "O:NR V1.9.22 ZZ22 Killer Runner",
+          cards: [
+            { id: "onr_v1_147_zz22-speed-chip", quantity: 1 },
+            { id: "simple_killer", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_zz22_killer",
+          name: "O:NR V1.9.22 ZZ22 Killer Corp",
+          cards: [
+            { id: "simple_sentry_ice", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    killerState.runner.credits = 6;
+    killerState.runner.clicks = 4;
+    killerState.runner.memoryLimit = 4;
+    killerState.corp.credits = 10;
+    const zz22Id = moveRunnerCardToGrip(
+      killerState,
+      "onr_v1_147_zz22-speed-chip",
+    );
+    moveRunnerCardToGrip(killerState, "simple_killer");
+    const sentryId = putCorpIceOnServer(killerState, "rd", "simple_sentry_ice");
+
+    const installZz22 = mustAction(
+      killerState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(killerState, action) ===
+          "onr_v1_147_zz22-speed-chip",
+    );
+    expect(installZz22.costs[0]?.credits).toBe(5);
+    killerState = apply(
+      killerState,
+      "runner",
+      (action) => action.actionId === installZz22.actionId,
+    );
+    expect(
+      killerState.cardInstances[zz22Id]?.counters?.recurring_credit,
+    ).toBe(2);
+    installRunnerProgramForTest(killerState, "simple_killer");
+    killerState.runner.credits = 1;
+
+    killerState = apply(
+      killerState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    killerState = apply(
+      killerState,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === sentryId,
+    );
+    killerState = apply(
+      killerState,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(killerState, action) === "simple_killer",
+    );
+    expect(killerState.runner.credits).toBe(1);
+    expect(
+      killerState.cardInstances[zz22Id]?.counters?.recurring_credit,
+    ).toBe(1);
+    killerState = apply(
+      killerState,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(killerState, action) === "simple_killer",
+    );
+    expect(killerState.runner.credits).toBe(1);
+    expect(
+      killerState.cardInstances[zz22Id]?.counters?.recurring_credit ?? 0,
+    ).toBe(0);
+    const killerBreak = mustAction(
+      killerState,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(killerState, action) === "simple_killer",
+    );
+    killerState = apply(
+      killerState,
+      "runner",
+      (action) => action.actionId === killerBreak.actionId,
+    );
+    expect(killerState.runner.credits).toBe(0);
+    expect(
+      killerState.cardInstances[zz22Id]?.counters?.recurring_credit ?? 0,
+    ).toBe(0);
+
+    let decoderState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-zz22-non-killer-recurring",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "onr_v1_runner_v1922_zz22_decoder",
+          name: "O:NR V1.9.22 ZZ22 Decoder Runner",
+          cards: [
+            { id: "onr_v1_147_zz22-speed-chip", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "onr_v1_corp_v1922_zz22_decoder",
+          name: "O:NR V1.9.22 ZZ22 Decoder Corp",
+          cards: [
+            { id: "simple_code_gate_ice", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    decoderState.runner.credits = 6;
+    decoderState.runner.clicks = 4;
+    decoderState.runner.memoryLimit = 4;
+    decoderState.corp.credits = 10;
+    moveRunnerCardToGrip(decoderState, "onr_v1_147_zz22-speed-chip");
+    moveRunnerCardToGrip(decoderState, "simple_decoder");
+    const codeGateId = putCorpIceOnServer(
+      decoderState,
+      "rd",
+      "simple_code_gate_ice",
+    );
+    decoderState = apply(
+      decoderState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(decoderState, action) ===
+          "onr_v1_147_zz22-speed-chip",
+    );
+    installRunnerProgramForTest(decoderState, "simple_decoder");
+    decoderState.runner.credits = 0;
+    decoderState = apply(
+      decoderState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    decoderState = apply(
+      decoderState,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === codeGateId,
+    );
+    expect(
+      getLegalActions(decoderState, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(decoderState, action) === "simple_decoder",
+      ),
+    ).toBe(false);
   });
 
   it("adds V1.9.22 runner event runtime definitions without broad play_event support", () => {

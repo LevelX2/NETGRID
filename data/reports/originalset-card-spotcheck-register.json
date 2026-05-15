@@ -2,7 +2,9 @@
   "schemaVersion": "netgrid.originalset-card-spotcheck-register.v1",
   "updatedAt": "2026-05-15",
   "selectionPolicy": {
-    "defaultExcludeStatuses": ["completed"],
+    "defaultExcludeStatuses": [
+      "completed"
+    ],
     "rerunAllowedWhen": [
       "explicit regression suspicion",
       "follow-up verification requested",
@@ -10,6 +12,84 @@
     ]
   },
   "rounds": [
+    {
+      "roundId": "2026-05-15-ai-boon-virizz",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_AI_BOON_VIRIZZ_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-ai-boon-virizz.md",
+      "cards": [
+        {
+          "cardId": "onr_v1_002_ai-boon",
+          "title": "AI Boon",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_run_start_strength_roll_manual_probe_removed",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_109_security-code-worm-chip",
+          "title": "Security Code WORM Chip",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_existing_hq_success_unrezzed_ice_choice_revalidation_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_113_synchronized-attack-on-hq",
+          "title": "Synchronized Attack on HQ",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_existing_private_hq_retain_choice_revalidation_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_273_triggerman",
+          "title": "Triggerman",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_existing_deterministic_installed_program_trash_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_147_zz22-speed-chip",
+          "title": "ZZ22 Speed Chip",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_install_cost_5_killer_restricted_recurring_credits",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_230_cortical-scanner",
+          "title": "Cortical Scanner",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_existing_three_indexed_end_the_run_subroutines_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_277_virizz",
+          "title": "Virizz",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_existing_rest_of_run_break_cost_modifier_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_077_anonymous-tip",
+          "title": "Anonymous Tip",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_existing_black_ice_derez_choice_revalidation_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_226_canis-minor",
+          "title": "Canis Minor",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_existing_future_encounter_strength_bonus_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_332_newsgroup-taunting",
+          "title": "Newsgroup Taunting",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_rezzed_global_run_start_tax",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
     {
       "roundId": "2026-05-15-turbeau-tutor",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",

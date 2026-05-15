@@ -1008,20 +1008,25 @@
       "roles": [
         "runner",
         "hardware",
-        "per_card_longtail"
+        "recurring_credit",
+        "killer_support"
       ],
       "planRoles": [
-        "runner_install_hardware"
+        "runner_install_hardware",
+        "runner_killer_run_credit_support"
       ],
       "requiredMechanics": [
-        "per_card_longtail_resolver_gate",
-        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
-        "install_hardware_memory_surface"
+        "install_hardware_memory_surface",
+        "recurring_pool_start_turn_resolver",
+        "killer_restricted_run_credit_payment"
       ],
       "valueHints": {
-        "perCardLongtailPriority": 2
+        "killerRunCreditPriority": 2,
+        "installCost": 5,
+        "recurringCredits": 2
       },
       "riskTags": [
+        "killer_restricted_payment",
         "legal_actions_only",
         "public_payload_only",
         "replay_statehash_required"

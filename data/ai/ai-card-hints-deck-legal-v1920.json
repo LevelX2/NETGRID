@@ -610,22 +610,24 @@
       "roles": [
         "corp",
         "asset",
-        "run"
+        "run_tax"
       ],
       "planRoles": [
-        "remote_asset_modifier"
+        "remote_asset_run_start_tax"
       ],
       "requiredMechanics": [
         "generic_asset_node_ability_resolver",
-        "run_flow_lock_resolver",
+        "run_start_tax_resolver",
         "global_static_modifier_layer_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "runStartTaxCredits": 1,
+        "rezBeforeRunnerRunPriority": 2
       },
       "riskTags": [
-        "modifier_layering",
-        "state_hash_replay_stable"
+        "run_start_tax_layering",
+        "state_hash_replay_stable",
+        "public_payload_only"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

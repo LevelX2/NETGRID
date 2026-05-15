@@ -318,6 +318,7 @@ const V1920_FORTRESS_ARCHITECTS_ID = "onr_v1_324_fortress-architects";
 const V1920_HACKER_TRACKER_CENTRAL_ID =
   "onr_v1_325_hacker-tracker-central";
 const V1920_I_GOT_A_ROCK_ID = "onr_v1_327_i-got-a-rock";
+const V1920_NEWSGROUP_TAUNTING_ID = "onr_v1_332_newsgroup-taunting";
 const V1920_ACTION_ASSET_IDS = new Set([
   "onr_v1_331_nevinyrral",
   "onr_v1_334_pacifica-regional-ai",
@@ -4218,7 +4219,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      if (V1921_RUNNER_RANDOM_PROGRAM_IDS.has(definition.id)) {
+      if (definition.id === V1921_BOARDWALK_ID) {
         actions.push(
           action(
             state,
@@ -4345,6 +4346,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
   }
   for (const server of state.corp.servers) {
     const v1918RunTax = v1918RunStartTaxForServer(state, server.id);
+    const newsgroupRunTax = v1920NewsgroupTauntingRunStartTax(state);
+    const runStartTaxCredits = v1918RunTax.amount + newsgroupRunTax.amount;
     const runLockActionsPending = Math.max(
       0,
       Math.floor(state.runnerTurnFlags?.runLockActionsPending ?? 0),
@@ -4356,7 +4359,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
     const runCosts = [
       {
         clicks: 1,
-        ...(v1918RunTax.amount > 0 ? { credits: v1918RunTax.amount } : {}),
+        ...(runStartTaxCredits > 0 ? { credits: runStartTaxCredits } : {}),
       },
     ];
     const runPayload = {
@@ -4369,6 +4372,15 @@ function runnerMainActions(state: GameState): LegalAction[] {
               v1918RunTax.sourceDefinitionIds.join(","),
           }
         : {}),
+      ...(newsgroupRunTax.amount > 0
+        ? {
+            v1920AssetAbility: "newsgroup_taunting_run_start_tax",
+            newsgroupTauntingRunStartTaxCredits: newsgroupRunTax.amount,
+            newsgroupTauntingSourceDefinitionIds:
+              newsgroupRunTax.sourceDefinitionIds.join(","),
+          }
+        : {}),
+      ...(runStartTaxCredits > 0 ? { runStartTaxCredits } : {}),
     };
     if (
       hasClicks &&
@@ -4376,8 +4388,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
       fangRunLockCreditCost <= 0
     ) {
       if (
-        v1918RunTax.amount === 0 ||
-        availableRunnerRunStartCredits(state) >= v1918RunTax.amount
+        runStartTaxCredits === 0 ||
+        availableRunnerRunStartCredits(state) >= runStartTaxCredits
       ) {
         actions.push(
           action(
@@ -4394,8 +4406,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     if (
       bonusRunPending &&
-      (v1918RunTax.amount === 0 ||
-        availableRunnerRunStartCredits(state) >= v1918RunTax.amount)
+      (runStartTaxCredits === 0 ||
+        availableRunnerRunStartCredits(state) >= runStartTaxCredits)
     ) {
       actions.push(
         action(
@@ -4404,7 +4416,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
           "start_run",
           `Bonus-Run auf ${server.label}`,
           "basic_action",
-          v1918RunTax.amount > 0 ? [{ credits: v1918RunTax.amount }] : [],
+          runStartTaxCredits > 0 ? [{ credits: runStartTaxCredits }] : [],
           {
             ...runPayload,
             bonusRunNoClick: true,
@@ -5281,8 +5293,13 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   for (const breakerId of state.runner.rig.programs) {
     const breaker = definitionFor(state, breakerId);
     if (!runnerCanUseBreakerOnCurrentFort(state, breakerId)) continue;
+    const breakerBaseStrength =
+      breaker.id === V1921_AI_BOON_ID &&
+      typeof run.aiBoonRunStrength === "number"
+        ? run.aiBoonRunStrength
+        : (breaker.strength ?? 0);
     const breakerStrength =
-      (breaker.strength ?? 0) +
+      breakerBaseStrength +
       mustInstance(state.cardInstances, breakerId).strengthModifier +
       dupreStrengthCounterBonus(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
@@ -5549,6 +5566,18 @@ function v1918RunStartTaxForServer(
     .filter((cardId) => mustInstance(state.cardInstances, cardId).rezzed)
     .map((cardId) => definitionFor(state, cardId).id)
     .filter((definitionId) => V1918_RUN_TAX_UPGRADE_IDS.has(definitionId));
+  return {
+    amount: sourceDefinitionIds.length,
+    sourceDefinitionIds,
+  };
+}
+
+function v1920NewsgroupTauntingRunStartTax(
+  state: GameState,
+): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
+  const sourceDefinitionIds = rezzedCorpRootCardIds(state)
+    .map((cardId) => definitionFor(state, cardId).id)
+    .filter((definitionId) => definitionId === V1920_NEWSGROUP_TAUNTING_ID);
   return {
     amount: sourceDefinitionIds.length,
     sourceDefinitionIds,
@@ -6919,7 +6948,7 @@ function performAction(
         undefined,
         legalAction,
       );
-      if (legalAction.payload?.v1918UpgradeAbility === "run_start_tax") {
+      if (typeof legalAction.payload?.runStartTaxCredits === "number") {
         const taxCredits = legalAction.costs.reduce(
           (sum, cost) =>
             sum + (Number.isInteger(cost.credits) ? (cost.credits ?? 0) : 0),
@@ -7690,6 +7719,7 @@ function startRun(
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
+  applyAiBoonRunStart(state, legalAction);
   if (server.ice.length > 0) {
     const approachedIceId = mustArrayValue(
       server.ice,
@@ -7700,6 +7730,35 @@ function startRun(
     approachOrEncounterIce(state, approachedIceId);
   } else {
     enterAccess(state, legalAction);
+  }
+}
+
+function applyAiBoonRunStart(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const sourceCardId = state.runner.rig.programs
+    .slice()
+    .sort()
+    .find((cardId) => definitionFor(state, cardId).id === V1921_AI_BOON_ID);
+  if (!sourceCardId || !state.run) return;
+  const randomPurpose = `v1921.die.${V1921_AI_BOON_ID}.run_start_strength`;
+  const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+  const baseStrength = definitionFor(state, sourceCardId).strength ?? 0;
+  const runStrength = baseStrength + dieRoll;
+  state.run.aiBoonSourceCardId = sourceCardId;
+  state.run.aiBoonRunStrength = runStrength;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1921RunnerProgramAbility: "ai_boon_run_start_strength",
+      sourceDefinitionId: V1921_AI_BOON_ID,
+      aiBoonSourceCardId: sourceCardId,
+      randomPurpose,
+      v1921DieRoll: dieRoll,
+      aiBoonRunStrength: runStrength,
+      randomCounterAfter: state.randomCounter,
+    };
   }
 }
 
@@ -15825,6 +15884,22 @@ function publicContextForAction(
     context.v1920AssetAbility = legalAction.payload.v1920AssetAbility;
     if (typeof legalAction.payload.gainedActions === "number")
       context.gainedActions = legalAction.payload.gainedActions;
+    if (
+      typeof legalAction.payload.newsgroupTauntingRunStartTaxCredits ===
+      "number"
+    )
+      context.newsgroupTauntingRunStartTaxCredits =
+        legalAction.payload.newsgroupTauntingRunStartTaxCredits;
+    if (
+      typeof legalAction.payload.newsgroupTauntingSourceDefinitionIds ===
+      "string"
+    )
+      context.newsgroupTauntingSourceDefinitionIds =
+        legalAction.payload.newsgroupTauntingSourceDefinitionIds;
+    if (typeof legalAction.payload.runStartTaxPaid === "number")
+      context.runStartTaxPaid = legalAction.payload.runStartTaxPaid;
+    if (typeof legalAction.payload.runnerCreditsAfter === "number")
+      context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     if (typeof legalAction.payload.corpClicksAfter === "number")
       context.corpClicksAfter = legalAction.payload.corpClicksAfter;
     if (typeof legalAction.payload.agendaPointCost === "number")
@@ -15865,6 +15940,10 @@ function publicContextForAction(
       legalAction.payload.v1921RunnerProgramAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
+    if (typeof legalAction.payload.aiBoonRunStrength === "number")
+      context.aiBoonRunStrength = legalAction.payload.aiBoonRunStrength;
+    if (typeof legalAction.payload.sourceDefinitionId === "string")
+      context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string")
@@ -16493,7 +16572,9 @@ function runnerProgramInstallRecurringCreditSourceIds(
   state: GameState,
 ): CardInstanceId[] {
   return [
-    ...state.runner.rig.hardware,
+    ...state.runner.rig.hardware.filter(
+      (cardId) => definitionFor(state, cardId).id === "v099_recurring_chip",
+    ),
     ...state.runner.rig.programs.filter(
       (cardId) =>
         definitionFor(state, cardId).id === V1922_ZETATECH_SOFTWARE_INSTALLER_ID,
@@ -16555,8 +16636,17 @@ function runnerRunRecurringCreditSourceIds(
   ];
   return runnerRig.filter((cardId) => {
     if (cardCounter(state, cardId, "recurring_credit") <= 0) return false;
+    const definition = definitionFor(state, cardId);
+    if (definition.id === "onr_v1_147_zz22-speed-chip") {
+      return Boolean(
+        state.run &&
+          breakerId &&
+          state.runner.rig.programs.includes(breakerId) &&
+          cardHasSubtype(definitionFor(state, breakerId), "killer"),
+      );
+    }
     if (!noisyBreaker) return true;
-    return !cardHasSubtype(definitionFor(state, cardId), "stealth");
+    return !cardHasSubtype(definition, "stealth");
   });
 }
 
