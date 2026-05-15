@@ -1332,8 +1332,8 @@ select {
 }
 
 .deckImportInline {
-  margin: 12px 14px 0;
-  padding: 12px;
+  margin: 0;
+  padding: 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--section-bg);
@@ -1365,19 +1365,20 @@ select {
 
 .deckBuilderGrid {
   display: grid;
-  grid-template-columns: minmax(230px, 300px) minmax(420px, 1fr) minmax(360px, 0.9fr);
+  grid-template-columns: minmax(230px, 300px) minmax(360px, 0.9fr) minmax(420px, 1fr);
   gap: 12px;
   align-items: start;
 }
 
 .deckPreviewColumn {
   position: sticky;
-  top: 72px;
+  top: 0;
   display: grid;
   gap: 10px;
-  max-height: calc(100vh - 92px);
+  max-height: calc(100vh - 20px);
   min-width: 0;
   overflow: auto;
+  order: 1;
 }
 
 .deckBuilderPreview {
@@ -1423,7 +1424,9 @@ select {
   overflow-wrap: anywhere;
 }
 
+.deckPickerPanel,
 .deckLibraryPanel,
+.deckDetailsPanel,
 .deckListPanel,
 .deckControlsPanel {
   display: grid;
@@ -1440,11 +1443,76 @@ select {
   align-content: start;
 }
 
+.deckLibraryPanel {
+  order: 3;
+}
+
+.deckPickerPanel .deckDisplayRow {
+  align-items: stretch;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  flex-direction: column;
+}
+
+.deckPickerHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.deckPickerHeader h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.deckPickerPanel.collapsed {
+  padding-block: 8px;
+}
+
+.deckStorageMeta {
+  margin: -4px 0 0;
+}
+
+.deckCreateActions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+}
+
+.deckPickerPanel .deckSideFilter,
+.deckPickerPanel .deckSelectGrid,
+.deckDetailsPanel .deckSelectGrid {
+  grid-template-columns: 1fr;
+}
+
+.deckDetailsHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.deckDetailsHeader h3 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.deckDetailsPanel.collapsed {
+  padding-block: 8px;
+}
+
+.deckDetailsPanel .deckFormGrid {
+  grid-template-columns: 1fr;
+}
+
 .deckListColumn {
   display: grid;
   align-content: start;
   gap: 10px;
   min-width: 0;
+  order: 2;
 }
 
 .deckControlsPanel {
@@ -1509,14 +1577,7 @@ select {
   font-weight: 800;
 }
 
-.deckBuilderFilterLine {
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr) auto auto;
-  gap: 8px;
-  align-items: center;
-}
-
-.deckBuilderFilterLine button,
+.deckLibraryFilterButton,
 .deckBuilderToggle {
   min-height: 30px;
   display: inline-flex;
@@ -1530,12 +1591,12 @@ select {
   font-size: 12px;
 }
 
-.deckBuilderFilterLine button {
+.deckLibraryFilterButton {
   cursor: pointer;
 }
 
-.deckBuilderFilterLine button:hover,
-.deckBuilderFilterLine button.active,
+.deckLibraryFilterButton:hover,
+.deckLibraryFilterButton.active,
 .deckBuilderToggle.checked {
   border-color: var(--focus);
   color: var(--text);
@@ -7588,10 +7649,6 @@ select,
   .deckControlsPanel {
     position: static;
     max-height: none;
-  }
-
-  .deckBuilderFilterLine {
-    grid-template-columns: 1fr;
   }
 
   .deckSourceFilter {

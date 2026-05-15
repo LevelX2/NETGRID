@@ -7495,6 +7495,8 @@ function DeckEditorPanel({
   const [builderSetFilter, setBuilderSetFilter] = useState<CatalogSetFilterKey>("all");
   const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
   const [builderFiltersOpen, setBuilderFiltersOpen] = useState(false);
+  const [deckDetailsOpen, setDeckDetailsOpen] = useState(true);
+  const [deckPickerOpen, setDeckPickerOpen] = useState(true);
   const [importOpen, setImportOpen] = useState(false);
   const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
@@ -7507,6 +7509,7 @@ function DeckEditorPanel({
   const runnerDeckCount = localDecks.filter((deck) => deck.side === "runner").length;
   const corpDeckCount = localDecks.filter((deck) => deck.side === "corp").length;
   const filteredLocalDecks = useMemo(() => (deckSideFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === deckSideFilter)), [deckSideFilter, localDecks]);
+  const selectedDeckSelectValue = selectedDeck && filteredLocalDecks.some((deck) => deck.deckId === selectedDeck.deckId) ? selectedDeck.deckId : "";
   const visibleTypeFilterGroups = selectedDeck ? CATALOG_TYPE_FILTER_GROUPS.filter((group) => group.side === selectedDeck.side) : CATALOG_TYPE_FILTER_GROUPS;
   const libraryCards = useMemo(() => {
     const search = builderSearch.trim().toLowerCase();
@@ -7556,45 +7559,55 @@ function DeckEditorPanel({
       return next;
     });
   };
-  return (
-    <section className="deckPanel panel">
-      <div className="catalogHeader">
+  const deckManagementPanel = (
+    <section className={`deckPickerPanel ${deckPickerOpen ? "" : "collapsed"}`}>
+      <div className="deckPickerHeader">
         <div>
-          <h2>Deck-Editor</h2>
+          <h3>Decks</h3>
           <p className="meta">
-            Deck-Editor · {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp {corpDeckCount}
-          </p>
-          <p className="meta" title={storagePath || "Lokale Datei-Deckbibliothek"}>
-            Lokale Datei-Deckbibliothek {storagePath ? "aktiv" : "wird geladen"}
+            {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp {corpDeckCount}
           </p>
         </div>
-        <div className="deckHeaderActions">
-          <button className="button deckRunner" onClick={() => createBlankDeck("runner")}>
-            <Plus size={15} />
-            Neues Runner-Deck
-          </button>
-          <button className="button deckCorp" onClick={() => createBlankDeck("corp")}>
-            <Plus size={15} />
-            Neues Korp-Deck
-          </button>
-          <button className={`button ${importOpen ? "primary" : ""}`} onClick={() => setImportOpen((current) => !current)} type="button" aria-expanded={importOpen}>
-            <Upload size={15} />
-            Import
-          </button>
-        </div>
+        <button
+          className="button iconOnly"
+          type="button"
+          aria-expanded={deckPickerOpen}
+          aria-label={deckPickerOpen ? "Deckbereich einklappen" : "Deckbereich ausklappen"}
+          title={deckPickerOpen ? "Deckbereich einklappen" : "Deckbereich ausklappen"}
+          onClick={() => setDeckPickerOpen((current) => !current)}
+        >
+          {deckPickerOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
       </div>
-      {importOpen ? (
-        <div className="deckImportBox deckImportInline">
-          <h3>Deck importieren</h3>
-          <textarea className="deckTextArea" value={importText} onChange={(event) => onImportText(event.target.value)} placeholder='{"schemaVersion":"editable-deck-v0.6","deck":...}' />
-          <button className="button wide" onClick={onImport} disabled={!importText.trim()}>
-            <Upload size={15} />
-            Importieren
-          </button>
-        </div>
-      ) : null}
-      <div className="deckWorkspace">
-        <div className="deckEditor">
+      {deckPickerOpen ? (
+        <>
+          <p className="meta deckStorageMeta" title={storagePath || "Deckspeicher"}>
+            Deckspeicher {storagePath ? "aktiv" : "wird geladen"}
+          </p>
+          <div className="deckCreateActions">
+            <button className="button deckRunner" onClick={() => createBlankDeck("runner")}>
+              <Plus size={15} />
+              Neues Runner-Deck
+            </button>
+            <button className="button deckCorp" onClick={() => createBlankDeck("corp")}>
+              <Plus size={15} />
+              Neues Korp-Deck
+            </button>
+            <button className={`button ${importOpen ? "primary" : ""}`} onClick={() => setImportOpen((current) => !current)} type="button" aria-expanded={importOpen}>
+              <Upload size={15} />
+              Import
+            </button>
+          </div>
+          {importOpen ? (
+            <div className="deckImportBox deckImportInline">
+              <h3>Deck importieren</h3>
+              <textarea className="deckTextArea" value={importText} onChange={(event) => onImportText(event.target.value)} placeholder='{"schemaVersion":"editable-deck-v0.6","deck":...}' />
+              <button className="button wide" onClick={onImport} disabled={!importText.trim()}>
+                <Upload size={15} />
+                Importieren
+              </button>
+            </div>
+          ) : null}
           <div className="deckDisplayRow">
             <div>
               <span className="settingsTitle">Anzeige</span>
@@ -7615,7 +7628,7 @@ function DeckEditorPanel({
           <div className="deckSelectGrid">
             <label>
               Deck anzeigen
-              <select value={selectedDeck && filteredLocalDecks.some((deck) => deck.deckId === selectedDeck.deckId) ? selectedDeck.deckId : ""} onChange={(event) => onSelectDeck(event.target.value)} disabled={filteredLocalDecks.length === 0}>
+              <select value={selectedDeckSelectValue} onChange={(event) => onSelectDeck(event.target.value)} disabled={filteredLocalDecks.length === 0}>
                 <option value="">Kein lokales Deck</option>
                 {filteredLocalDecks.map((deck) => (
                   <option value={deck.deckId} key={deck.deckId}>
@@ -7624,31 +7637,21 @@ function DeckEditorPanel({
                 ))}
               </select>
             </label>
-            {selectedDeck ? (
-              <label>
-                Deckname ändern
-                <input value={selectedDeck.name} onChange={(event) => onUpdateDeck({ ...selectedDeck, name: event.target.value })} />
-              </label>
-            ) : null}
           </div>
+        </>
+      ) : null}
+    </section>
+  );
+  return (
+    <section className="deckPanel panel">
+      <div className="deckWorkspace">
+        <div className="deckEditor">
+          {selectedDeck ? null : deckManagementPanel}
           {selectedDeck ? (
             <>
-              <div className="deckFormGrid">
-                <label>
-                  Seite
-                  <input value={selectedDeck.side} readOnly />
-                </label>
-                <label>
-                  Karten
-                  <input value={totalCards} readOnly />
-                </label>
-                <label>
-                  Notiz
-                  <input value={selectedDeck.notes ?? ""} onChange={(event) => onUpdateDeck({ ...selectedDeck, notes: event.target.value })} />
-                </label>
-              </div>
               <div className="deckBuilderGrid">
                 <aside className="deckPreviewColumn">
+                  {deckManagementPanel}
                   {previewCard ? (
                     <DeckBuilderPreview
                       card={previewCard}
@@ -7669,32 +7672,25 @@ function DeckEditorPanel({
                         {libraryCards.length} von {sourceFilteredPlayableCards.length} sichtbaren gültigen {sideLabel(selectedDeck.side)}-Karten
                       </p>
                     </div>
-                    <Search size={17} />
-                  </div>
-                  <label className="deckBuilderSearch">
-                    Suche
-                    <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Regeltext, Typ, Subtyp" />
-                  </label>
-                  <div className="deckBuilderFilterLine">
-                    <div className="deckSourceFilter" role="group" aria-label="Kartenset anzeigen">
-                      {DECK_SOURCE_FILTERS.map((filter) => (
-                        <button className={builderSetFilter === filter.key ? "active" : ""} disabled={builderSetCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderSetFilter(filter.key)} type="button" aria-pressed={builderSetFilter === filter.key}>
-                          <span>{filter.label}</span>
-                          <small>{builderSetCounts[filter.key]}</small>
-                        </button>
-                      ))}
-                    </div>
-                    <label className={`deckBuilderToggle ${builderOnlyInDeck ? "checked" : ""}`}>
-                      <input checked={builderOnlyInDeck} onChange={(event) => setBuilderOnlyInDeck(event.target.checked)} type="checkbox" />
-                      Nur im Deck
-                    </label>
-                    <button className={builderFiltersOpen ? "active" : ""} type="button" onClick={() => setBuilderFiltersOpen((current) => !current)} aria-expanded={builderFiltersOpen}>
+                    <button className={`deckLibraryFilterButton ${builderFiltersOpen ? "active" : ""}`} type="button" onClick={() => setBuilderFiltersOpen((current) => !current)} aria-expanded={builderFiltersOpen}>
                       <ListFilter size={14} />
                       Filter
                     </button>
                   </div>
                   {builderFiltersOpen ? (
                     <div className="deckBuilderTypes">
+                      <div className="deckSourceFilter" role="group" aria-label="Kartenset anzeigen">
+                        {DECK_SOURCE_FILTERS.map((filter) => (
+                          <button className={builderSetFilter === filter.key ? "active" : ""} disabled={builderSetCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderSetFilter(filter.key)} type="button" aria-pressed={builderSetFilter === filter.key}>
+                            <span>{filter.label}</span>
+                            <small>{builderSetCounts[filter.key]}</small>
+                          </button>
+                        ))}
+                      </div>
+                      <label className={`deckBuilderToggle ${builderOnlyInDeck ? "checked" : ""}`}>
+                        <input checked={builderOnlyInDeck} onChange={(event) => setBuilderOnlyInDeck(event.target.checked)} type="checkbox" />
+                        Nur im Deck
+                      </label>
                       <div className="deckBuilderTypeActions">
                         <button type="button" onClick={() => setVisibleBuilderTypes(true)}>
                           Alle Typen
@@ -7718,6 +7714,10 @@ function DeckEditorPanel({
                       ))}
                     </div>
                   ) : null}
+                  <label className="deckBuilderSearch">
+                    Suche
+                    <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Regeltext, Typ, Subtyp" />
+                  </label>
                   <div className="deckLibraryList">
                     {libraryCards.map((card) => (
                       <DeckLibraryCard
@@ -7735,6 +7735,39 @@ function DeckEditorPanel({
                   </div>
                 </section>
                 <div className="deckListColumn">
+                  <section className={`deckDetailsPanel ${deckDetailsOpen ? "" : "collapsed"}`}>
+                    <div className="deckDetailsHeader">
+                      <div>
+                        <h3>Deckdetails</h3>
+                      </div>
+                      <button
+                        className="button iconOnly"
+                        type="button"
+                        aria-expanded={deckDetailsOpen}
+                        aria-label={deckDetailsOpen ? "Deckdetails einklappen" : "Deckdetails ausklappen"}
+                        title={deckDetailsOpen ? "Deckdetails einklappen" : "Deckdetails ausklappen"}
+                        onClick={() => setDeckDetailsOpen((current) => !current)}
+                      >
+                        {deckDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                      </button>
+                    </div>
+                    {deckDetailsOpen ? (
+                      <>
+                        <div className="deckSelectGrid">
+                          <label>
+                            Deckname ändern
+                            <input value={selectedDeck.name} onChange={(event) => onUpdateDeck({ ...selectedDeck, name: event.target.value })} />
+                          </label>
+                        </div>
+                        <div className="deckFormGrid">
+                          <label>
+                            Notiz
+                            <input value={selectedDeck.notes ?? ""} onChange={(event) => onUpdateDeck({ ...selectedDeck, notes: event.target.value })} />
+                          </label>
+                        </div>
+                      </>
+                    ) : null}
+                  </section>
                   <section className="deckListPanel">
                     <div className="deckBuilderPanelHeader">
                       <div>
