@@ -375,6 +375,7 @@ const V1922_SPEED_TRAP_ID = "onr_v1_067_speed-trap";
 const V1922_STARTUP_IMMOLATOR_ID = "onr_v1_068_startup-immolator";
 const V1922_ARASAKA_PORTABLE_PROTOTYPE_ID =
   "onr_v1_119_arasaka-portable-prototype";
+const V1922_MICROTECH_BACKUP_DRIVE_ID = "onr_v1_131_microtech-backup-drive";
 const V1922_PANDORAS_DECK_ID = "onr_v1_136_pandoras-deck";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
@@ -4341,6 +4342,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
   if (hasClicks) {
     for (const cardId of [
       ...state.runner.rig.programs,
+      ...state.runner.rig.hardware,
       ...state.runner.rig.resources,
     ]
       .slice()
@@ -4472,6 +4474,30 @@ function runnerMainActions(state: GameState): LegalAction[] {
               cardId,
               v1922RunnerProgramAbility: "newsgroup_filter_gain_2",
               gainCreditsAmount: 2,
+            },
+          ),
+        );
+      }
+      if (
+        definition.id === V1922_MICROTECH_BACKUP_DRIVE_ID &&
+        topHostedProgramOnMicrotech(state, cardId)
+      ) {
+        const topHostedId = topHostedProgramOnMicrotech(state, cardId);
+        actions.push(
+          action(
+            state,
+            "runner",
+            "trigger_ability",
+            `${definition.title}: oberstes Programm in die Grip nehmen`,
+            cardId,
+            [{ clicks: 1 }],
+            {
+              cardId,
+              targetProgramId: topHostedId,
+              v1922RunnerHardwareAbility:
+                "microtech_backup_drive_return_top_hosted",
+              hostedProgramCount: microtechHostedProgramIds(state, cardId)
+                .length,
             },
           ),
         );
@@ -7890,6 +7916,13 @@ function performAction(
         return;
       }
       if (
+        legalAction.payload?.v1922RunnerHardwareAbility ===
+        "microtech_backup_drive_return_top_hosted"
+      ) {
+        resolveMicrotechBackupDriveReturnTopHosted(state, legalAction);
+        return;
+      }
+      if (
         legalAction.payload?.resourceAbility ===
         "short_term_contract_take_credits"
       ) {
@@ -8197,6 +8230,45 @@ function resolveStartupImmolatorTrashIce(
     trashedCardDefinitionId: targetDefinitionId,
     runnerCreditsAfter: state.runner.credits,
     startupImmolatorExhausted: true,
+  };
+}
+
+function resolveMicrotechBackupDriveReturnTopHosted(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Microtech Backup Drive nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.hardware.includes(sourceCardId))
+    throw new Error("Microtech Backup Drive ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== V1922_MICROTECH_BACKUP_DRIVE_ID)
+    throw new Error("Die Microtech-Backup-Drive-Faehigkeit passt nicht zur Karte.");
+  const targetProgramId = String(legalAction.payload?.targetProgramId ?? "");
+  const topHostedId = topHostedProgramOnMicrotech(state, sourceCardId);
+  if (!targetProgramId || targetProgramId !== topHostedId)
+    throw new Error("Nur das oberste Microtech-Programm darf genommen werden.");
+  const targetDefinitionId = definitionFor(state, targetProgramId).id;
+  spendClick(state, "runner");
+  removeFromAllZones(state, targetProgramId);
+  state.runner.grip.push(targetProgramId);
+  const instance = mustInstance(state.cardInstances, targetProgramId);
+  const { hostedOn: _hostedOn, ...withoutHost } = instance;
+  void _hostedOn;
+  state.cardInstances[targetProgramId] = {
+    ...withoutHost,
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "grip" },
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerHardwareAbility: "microtech_backup_drive_return_top_hosted",
+    sourceDefinitionId: V1922_MICROTECH_BACKUP_DRIVE_ID,
+    returnedCardDefinitionId: targetDefinitionId,
+    returnedToGrip: true,
+    hostedProgramCountAfter: microtechHostedProgramIds(state, sourceCardId)
+      .length,
   };
 }
 
@@ -11123,8 +11195,14 @@ function trashRunnerInstalledProgram(
 ): void {
   if (!state.runner.rig.programs.includes(cardId)) return;
   const hostedIds = hostedCardsOn(state, cardId);
-  for (const hostedId of hostedIds)
+  const backedUpHostedIds = backupProgramsOnMicrotechBeforeTrash(
+    state,
+    hostedIds,
+  );
+  for (const hostedId of hostedIds) {
+    if (backedUpHostedIds.includes(hostedId)) continue;
     trashRunnerInstalledProgram(state, hostedId);
+  }
   const definition = definitionFor(state, cardId);
   const instance = mustInstance(state.cardInstances, cardId);
   const { hostedOn: _hostedOn, ...withoutHost } = instance;
@@ -11146,6 +11224,36 @@ function trashRunnerInstalledProgram(
   clearCardCounters(state, cardId);
 }
 
+function backupProgramsOnMicrotechBeforeTrash(
+  state: GameState,
+  candidateProgramIds: CardInstanceId[],
+): CardInstanceId[] {
+  const microtechId = microtechBackupDriveIds(state)[0];
+  if (!microtechId) return [];
+  const eligible = candidateProgramIds
+    .filter((cardId) => state.runner.rig.programs.includes(cardId))
+    .filter((cardId) => definitionFor(state, cardId).type === "program")
+    .filter((cardId) => cardId !== microtechId)
+    .sort();
+  if (eligible.length <= 1) return [];
+  for (const cardId of eligible) {
+    if (runnerProgramUsesMemory(state, cardId))
+      state.runner.memoryUsed = Math.max(
+        0,
+        state.runner.memoryUsed - (definitionFor(state, cardId).memoryCost ?? 0),
+      );
+    setHostedOn(state, cardId, microtechId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "rig" },
+      hostedOn: microtechId,
+    };
+  }
+  return eligible;
+}
+
 function runnerProgramUsesMemory(
   state: GameState,
   cardId: CardInstanceId,
@@ -11154,8 +11262,9 @@ function runnerProgramUsesMemory(
   if (!instance.hostedOn) return true;
   const hostDefinition = definitionFor(state, instance.hostedOn);
   if (
-    hostDefinition.type === "program" &&
-    cardHasSubtype(hostDefinition, "daemon")
+    (hostDefinition.type === "program" &&
+      cardHasSubtype(hostDefinition, "daemon")) ||
+    hostDefinition.id === V1922_MICROTECH_BACKUP_DRIVE_ID
   )
     return false;
   return true;
@@ -18019,6 +18128,20 @@ function publicContextForAction(
     if (typeof legalAction.payload.breakerStrengthAfter === "number")
       context.breakerStrengthAfter = legalAction.payload.breakerStrengthAfter;
   }
+  if (typeof legalAction.payload?.v1922RunnerHardwareAbility === "string") {
+    context.v1922RunnerHardwareAbility =
+      legalAction.payload.v1922RunnerHardwareAbility;
+    if (typeof legalAction.payload.hostedProgramCount === "number")
+      context.hostedProgramCount = legalAction.payload.hostedProgramCount;
+    if (typeof legalAction.payload.hostedProgramCountAfter === "number")
+      context.hostedProgramCountAfter =
+        legalAction.payload.hostedProgramCountAfter;
+    if (typeof legalAction.payload.returnedCardDefinitionId === "string")
+      context.returnedCardDefinitionId =
+        legalAction.payload.returnedCardDefinitionId;
+    if (legalAction.payload.returnedToGrip === true)
+      context.returnedToGrip = true;
+  }
   if (typeof legalAction.payload?.v1919UpgradeAbility === "string") {
     context.v1919UpgradeAbility = legalAction.payload.v1919UpgradeAbility;
     if (typeof legalAction.payload.agendaPointCost === "number")
@@ -18752,6 +18875,30 @@ function hostedCardsOn(
     .filter(([, instance]) => instance.hostedOn === hostId)
     .map(([cardId]) => cardId)
     .sort();
+}
+
+function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
+  return state.runner.rig.hardware
+    .filter(
+      (cardId) => definitionFor(state, cardId).id === V1922_MICROTECH_BACKUP_DRIVE_ID,
+    )
+    .sort();
+}
+
+function microtechHostedProgramIds(
+  state: GameState,
+  hostId: CardInstanceId,
+): CardInstanceId[] {
+  return hostedCardsOn(state, hostId)
+    .filter((cardId) => definitionFor(state, cardId).type === "program")
+    .sort();
+}
+
+function topHostedProgramOnMicrotech(
+  state: GameState,
+  hostId: CardInstanceId,
+): CardInstanceId | undefined {
+  return microtechHostedProgramIds(state, hostId).at(-1);
 }
 
 function setHostedOn(

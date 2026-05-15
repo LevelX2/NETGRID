@@ -4996,8 +4996,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "Installed hardware with per-card longtail surface. Effects remain LegalAction-gated.",
-    mechanics: ["install_hardware", "per_card_longtail", ONR_V1_LOCAL_PRIVATE],
+      "When installed programs hosted on another card would be trashed together, stack them on Microtech Backup Drive instead. [A]: Return the top hosted program to your grip.",
+    mechanics: [
+      "install_hardware",
+      "program_trash_replacement",
+      "hosted_program_lifecycle",
+      "return_hosted_to_grip",
+      "per_card_longtail",
+      ONR_V1_LOCAL_PRIVATE,
+    ],
   },
   {
     id: "onr_v1_136_pandoras-deck",

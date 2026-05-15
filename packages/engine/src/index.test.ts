@@ -17913,6 +17913,136 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("backs up hosted programs on Microtech Backup Drive and returns the top hosted card", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-microtech-backup-drive",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_microtech_backup_runner",
+          name: "Spotcheck Microtech Backup Runner",
+          cards: [
+            { id: "onr_v1_069_succubus", quantity: 1 },
+            { id: "onr_v1_036_jackhammer", quantity: 1 },
+            { id: "onr_v1_131_microtech-backup-drive", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "spotcheck_microtech_backup_corp",
+          name: "Spotcheck Microtech Backup Corp",
+          cards: [
+            { id: "onr_v1_233_d-arc-knight", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_131_microtech-backup-drive");
+    moveRunnerCardToGrip(state, "onr_v1_069_succubus");
+    moveRunnerCardToGrip(state, "onr_v1_036_jackhammer");
+    moveRunnerCardToGrip(state, "simple_fracter");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_131_microtech-backup-drive",
+    );
+    const microtechId = state.runner.rig.hardware.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_131_microtech-backup-drive",
+    );
+    expect(microtechId).toBeDefined();
+    if (!microtechId) throw new Error("Missing Microtech Backup Drive");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_069_succubus",
+    );
+    const succubusId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_069_succubus",
+    );
+    expect(succubusId).toBeDefined();
+    if (!succubusId) throw new Error("Missing Succubus");
+    const hostedIds: CardInstanceId[] = [];
+    for (const definitionId of ["onr_v1_036_jackhammer", "simple_fracter"]) {
+      const install = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId &&
+          action.payload?.hostOnCardId === succubusId,
+      );
+      hostedIds.push(String(install.payload?.cardId ?? "") as CardInstanceId);
+      state = apply(state, "runner", (action) => action.actionId === install.actionId);
+    }
+    expect(hostedIds).toHaveLength(2);
+    const memoryBeforeTrash = state.runner.memoryUsed;
+    putCorpIceOnServer(state, "rd", "onr_v1_233_d-arc-knight");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.runner.heap).toContain(succubusId);
+    for (const hostedId of hostedIds) {
+      expect(state.runner.rig.programs).toContain(hostedId);
+      expect(state.cardInstances[hostedId]?.hostedOn).toBe(microtechId);
+      expect(state.runner.heap).not.toContain(hostedId);
+    }
+    expect(state.runner.memoryUsed).toBeLessThan(memoryBeforeTrash);
+
+    const returnAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1922RunnerHardwareAbility ===
+          "microtech_backup_drive_return_top_hosted",
+    );
+    const returnedId = String(returnAction.payload?.targetProgramId ?? "");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === returnAction.actionId,
+    );
+    expect(state.runner.grip).toContain(returnedId);
+    expect(state.cardInstances[returnedId]?.hostedOn).toBeUndefined();
+    expect(state.runner.rig.programs).not.toContain(returnedId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      v1922RunnerHardwareAbility: "microtech_backup_drive_return_top_hosted",
+      returnedToGrip: true,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("installs Newsgroup Filter and uses its side-safe credit action", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
