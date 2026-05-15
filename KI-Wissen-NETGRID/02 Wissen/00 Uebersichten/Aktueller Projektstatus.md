@@ -146,6 +146,7 @@
 
 ## Offen
 
+- Kartenbild-Performance ist als zweistufiger UI-/Performance-Slice geplant. Stufe 1 ist der aktuelle/nächste Umsetzungsschnitt mit Bildroute-Cache, serverseitigem `cardId -> imagePath`-Lookup, Lazy-/Tooltip-Härtung und Hidden-Info-Gates. Stufe 2 bleibt deferred bis nach Stufe-1-Messung und umfasst echte `thumb`/`preview`/`full`-Derivate, zentrale `CardImage`-Komponente und ein kompakteres Deckeditor-Layout. Führende Artefakte: `docs/derived/CARD_IMAGE_PERFORMANCE_ARCHITECTURE_REQUIREMENTS.md` und `docs/derived/CARD_IMAGE_PERFORMANCE_STAGE_1_IMPLEMENTATION_PROMPT.md`.
 - Kein gate-basierter MVP-0.1- bis MVP-0.9-Arbeitsschritt ist offen.
 - Kein gate-basierter V0.94- bis V0.99-Mechanikschritt ist offen.
 - V1.0.7 ist umgesetzt und lokal verifiziert. V1.0.6 und V1.0.6K sind abgeschlossen. V1.0.5K ist abgeschlossen. Die formalen V1.0.5-Finalartefakte fehlen weiterhin, auch wenn die Workspace-Basis für V1.0.6, V1.0.6K und den V1.0.7-QA-Gate ausreichend war. Das in V1.0.6 noch offene schmale Viewport-Smoke ist in V1.0.7 automatisiert bestanden.
