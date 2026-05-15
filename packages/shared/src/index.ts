@@ -824,6 +824,9 @@ export type RunState = {
   >;
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
+  speedTrapPendingRezCardId?: CardInstanceId;
+  speedTrapPendingRezTimingPoint?: string;
+  speedTrapPendingRezActiveSide?: Side;
 };
 
 export type AccessQueueEntry = {
@@ -5618,12 +5621,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     memoryCost: 1,
     rulesText:
-      "Install as a program. Its rez-interrupt jack-out ability remains gated until the interrupt timing contract is confirmed.",
+      "After the Corp rezzes an upgrade or node during a run and before it takes effect, you may jack out. If used after the last ice, the run is successful but you access no cards.",
     mechanics: [
       "install_program",
       "memory",
+      "rez_interrupt",
+      "jack_out",
+      "successful_run_without_access",
       "per_card_longtail",
-      "ability_contract_pending",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

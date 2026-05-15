@@ -371,6 +371,7 @@ const V1922_SCATTER_SHOT_ID = "onr_v1_057_scatter-shot";
 const V1922_ARTEMIS_2020_ID = "onr_v1_122_artemis-2020";
 const V1922_FALSE_ECHO_ID = "onr_v1_026_false-echo";
 const V1922_NETSPACE_INVERTER_ID = "onr_v1_044_netspace-inverter";
+const V1922_SPEED_TRAP_ID = "onr_v1_067_speed-trap";
 const V1922_ARASAKA_PORTABLE_PROTOTYPE_ID =
   "onr_v1_119_arasaka-portable-prototype";
 const V1922_PANDORAS_DECK_ID = "onr_v1_136_pandoras-deck";
@@ -2017,7 +2018,10 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
     return side === state.pendingChoice.side
       ? [choiceAction(state, state.pendingChoice)]
       : [];
-  if (side !== state.activeSide && state.timingPoint !== "run.approach_ice")
+  const sharedRunWindow =
+    state.timingPoint === "run.approach_ice" ||
+    state.timingPoint === "run.jack_out_window";
+  if (side !== state.activeSide && !sharedRunWindow)
     return [];
 
   if (state.timingPoint === "corp_draw.mandatory_draw") {
@@ -2045,8 +2049,10 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   }
   if (state.timingPoint === "run.encounter_ice")
     return side === "runner" ? runnerEncounterActions(state) : [];
-  if (state.timingPoint === "run.jack_out_window")
+  if (state.timingPoint === "run.jack_out_window") {
+    if (side === "corp") return corpRunRootRezActions(state);
     return side === "runner" ? runnerMovementActions(state) : [];
+  }
   if (state.timingPoint === "access.resolve_card")
     return side === "runner" ? runnerAccessActions(state) : [];
   return [];
@@ -5536,6 +5542,48 @@ function corpApproachActions(state: GameState): LegalAction[] {
   actions.push(
     action(state, "corp", "decline_rez", "Nicht rezzen", "game_rule"),
   );
+  return [...actions, ...corpRunRootRezActions(state)];
+}
+
+function corpRunRootRezActions(state: GameState): LegalAction[] {
+  const run = state.run;
+  if (!run) return [];
+  const server = mustServer(state, run.attackedServerId);
+  const actions: LegalAction[] = [];
+  for (const cardId of server.root.slice().sort()) {
+    const instance = state.cardInstances[cardId];
+    if (!instance || instance.rezzed) continue;
+    const definition = definitionFor(state, cardId);
+    if (definition.type !== "asset" && definition.type !== "upgrade") continue;
+    const rezCost = rezCostForCard(state, cardId);
+    if (state.corp.credits < rezCost) continue;
+    const rezCostReductionSourceDefinitionIds =
+      rezCostReductionSourceDefinitionIdsFor(state, cardId, definition);
+    actions.push(
+      action(
+        state,
+        "corp",
+        "rez_ice",
+        `${definition.title} in ${server.label} rezzen`,
+        cardId,
+        [{ credits: rezCost }],
+        {
+          cardId,
+          rootRez: true,
+          speedTrapInterruptEligible: true,
+          serverId: server.id,
+          ...(rezCostReductionSourceDefinitionIds.length > 0
+            ? {
+                rezCostReductionSourceDefinitionIds:
+                  rezCostReductionSourceDefinitionIds.join(","),
+                rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
+                rezCostPaid: rezCost,
+              }
+            : {}),
+        },
+      ),
+    );
+  }
   return actions;
 }
 
@@ -8741,26 +8789,100 @@ function rezCard(
   if (definition.id === V1917_KRUMZ_ID) {
     setCardCounter(state, cardId as CardInstanceId, "bit", 1);
   }
-  if (rootRez && CORP_ROOT_REZ_RESOLVERS[definition.id]) {
-    CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
-    if (definition.id === ACME_SAVINGS_AND_LOAN_ID) {
-      addAcmeSavingsAndLoanObligation(state, 1);
-      trashCorpInstalledCardToArchives(state, cardId as CardInstanceId);
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gainedCredits: 12,
-          selfTrashed: true,
-          acmeSavingsAndLoanObligationsAfter:
-            acmeSavingsAndLoanObligationCount(state),
-          corpCreditsAfter: state.corp.credits,
-        };
-      }
-    }
+  if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
     return;
-  }
+  if (rootRez && resolveCorpRootRezEffect(state, cardId, legalAction)) return;
   if (rootRez) return;
   beginEncounter(state, cardId as CardInstanceId, legalAction);
+}
+
+function resolveCorpRootRezEffect(
+  state: GameState,
+  cardId: string,
+  legalAction?: LegalAction,
+): boolean {
+  const definition = definitionFor(state, cardId);
+  if (!CORP_ROOT_REZ_RESOLVERS[definition.id]) return false;
+  CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
+  if (definition.id === ACME_SAVINGS_AND_LOAN_ID) {
+    addAcmeSavingsAndLoanObligation(state, 1);
+    trashCorpInstalledCardToArchives(state, cardId as CardInstanceId);
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        gainedCredits: 12,
+        selfTrashed: true,
+        acmeSavingsAndLoanObligationsAfter:
+          acmeSavingsAndLoanObligationCount(state),
+        corpCreditsAfter: state.corp.credits,
+      };
+    }
+  }
+  return true;
+}
+
+function installedSpeedTrapIds(state: GameState): CardInstanceId[] {
+  return state.runner.rig.programs
+    .filter((cardId) => definitionFor(state, cardId).id === V1922_SPEED_TRAP_ID)
+    .sort();
+}
+
+function startSpeedTrapRezInterruptChoice(
+  state: GameState,
+  rezzedCardId: string,
+  legalAction?: LegalAction,
+): boolean {
+  const run = state.run;
+  if (!run) return false;
+  const definition = definitionFor(state, rezzedCardId);
+  if (definition.type !== "asset" && definition.type !== "upgrade")
+    return false;
+  const speedTrapId = installedSpeedTrapIds(state)[0];
+  if (!speedTrapId) return false;
+  if (!mustServer(state, run.attackedServerId).root.includes(rezzedCardId))
+    return false;
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  run.speedTrapPendingRezCardId = rezzedCardId as CardInstanceId;
+  run.speedTrapPendingRezTimingPoint = state.timingPoint;
+  run.speedTrapPendingRezActiveSide = state.activeSide;
+  state.pendingChoice = {
+    choiceId: `v1922_speed_trap_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1922.speed_trap:${speedTrapId}:${rezzedCardId}:${state.stateVersion + 1}`,
+    prompt: "Speed Trap: Nach dem Rez jack out?",
+    kind: "select_option",
+    options: [
+      {
+        id: "jack_out",
+        label: "Jack out",
+        publicLabel: "Speed Trap nutzen",
+        value: "jack_out",
+      },
+      {
+        id: "pass",
+        label: "Nicht nutzen",
+        publicLabel: "Speed Trap nicht nutzen",
+        value: "pass",
+      },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  state.activeSide = "runner";
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
+      sourceDefinitionId: V1922_SPEED_TRAP_ID,
+      speedTrapSourceCardId: speedTrapId,
+      rezzedCardDefinitionId: definition.id,
+      serverLabel: publicServerLabel(state, run.attackedServerId),
+      speedTrapChoiceOpened: true,
+    };
+  }
+  return true;
 }
 
 function passApproachedIce(state: GameState): void {
@@ -13962,6 +14084,10 @@ function resolvePendingChoice(
     resolveV1922Viral15ProgramTrashChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
+    resolveV1922SpeedTrapChoice(state, legalAction, playerAction);
+    return;
+  }
   if (
     state.pendingChoice.source.startsWith("v1922.data_fort_reclamation_rez")
   ) {
@@ -17129,6 +17255,12 @@ function publicContextForAction(
       "encounterTaxForFutureIce",
       "encounterTaxPaid",
       "encounterTaxSource",
+      "v1922RunnerProgramAbility",
+      "sourceDefinitionId",
+      "speedTrapSourceCardId",
+      "rezzedCardDefinitionId",
+      "serverLabel",
+      "speedTrapChoiceOpened",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -17226,6 +17358,11 @@ function publicContextForAction(
       "futureAgendaPointForfeitPending",
       "sourceDefinitionId",
       "cardDefinitionId",
+      "speedTrapSourceCardId",
+      "rezzedCardDefinitionId",
+      "serverLabel",
+      "speedTrapUsed",
+      "successfulRunWithoutAccess",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -18944,6 +19081,73 @@ function resolveV1922Viral15ProgramTrashChoice(
     trashedCount: 1,
     trashedCardDefinitionId: selectedDefinitionId,
   };
+}
+
+function resolveV1922SpeedTrapChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1922.speed_trap"))
+    throw new Error("Speed-Trap-Choice ist nicht offen.");
+  const [, speedTrapId, rezzedCardId] = choice.source.split(":");
+  if (
+    !speedTrapId ||
+    !state.runner.rig.programs.includes(speedTrapId) ||
+    definitionFor(state, speedTrapId).id !== V1922_SPEED_TRAP_ID
+  )
+    throw new Error("Speed Trap ist nicht mehr installiert.");
+  const run = mustRun(state);
+  if (
+    !rezzedCardId ||
+    run.speedTrapPendingRezCardId !== rezzedCardId ||
+    !mustServer(state, run.attackedServerId).root.includes(rezzedCardId)
+  )
+    throw new Error("Das Speed-Trap-Rezziel ist nicht mehr gueltig.");
+  const rezzedDefinition = definitionFor(state, rezzedCardId);
+  if (rezzedDefinition.type !== "asset" && rezzedDefinition.type !== "upgrade")
+    throw new Error("Speed Trap reagiert nur auf Nodes oder Upgrades.");
+  if (!mustInstance(state.cardInstances, rezzedCardId).rezzed)
+    throw new Error("Das Speed-Trap-Rezziel ist nicht gerezzt.");
+  const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const useSpeedTrap = selectedId === "jack_out";
+  const pass = selectedId === "pass";
+  if (!useSpeedTrap && !pass)
+    throw new Error("Die Speed-Trap-Auswahl ist ungueltig.");
+  const successfulRunWithoutAccess =
+    useSpeedTrap && run.position.kind === "server";
+  const serverLabel = publicServerLabel(state, run.attackedServerId);
+  const pendingTimingPoint = run.speedTrapPendingRezTimingPoint;
+  const pendingActiveSide = run.speedTrapPendingRezActiveSide;
+  delete run.speedTrapPendingRezCardId;
+  delete run.speedTrapPendingRezTimingPoint;
+  delete run.speedTrapPendingRezActiveSide;
+  delete state.pendingChoice;
+
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
+    sourceDefinitionId: V1922_SPEED_TRAP_ID,
+    speedTrapSourceCardId: speedTrapId,
+    rezzedCardDefinitionId: rezzedDefinition.id,
+    serverLabel,
+    speedTrapUsed: useSpeedTrap,
+    successfulRunWithoutAccess,
+  };
+
+  if (useSpeedTrap) {
+    finishRun(state, successfulRunWithoutAccess, legalAction);
+    return;
+  }
+
+  resolveCorpRootRezEffect(state, rezzedCardId, legalAction);
+  if (state.run) {
+    state.timingPoint =
+      (pendingTimingPoint as GameState["timingPoint"] | undefined) ??
+      "run.jack_out_window";
+    state.activeSide = pendingActiveSide ?? "runner";
+  }
 }
 
 function refreshRecurringCredits(state: GameState, side: Side): void {

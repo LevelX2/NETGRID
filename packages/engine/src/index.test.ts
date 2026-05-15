@@ -17666,6 +17666,146 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     ).toBe(false);
   });
 
+  it("resolves Speed Trap as a root-rez interrupt and can end the run successful without access", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-speed-trap-rez-interrupt",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_speed_trap_runner",
+          name: "Spotcheck Speed Trap Runner",
+          cards: [
+            { id: "onr_v1_067_speed-trap", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "spotcheck_speed_trap_corp",
+          name: "Spotcheck Speed Trap Corp",
+          cards: [
+            { id: "simple_upgrade", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    installRunnerProgramForTest(state, "onr_v1_067_speed-trap");
+    const upgradeId = putCorpRootInRemote(state, "simple_upgrade");
+    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.rootRez === true &&
+        action.payload?.cardId === upgradeId,
+    );
+    expect(state.pendingChoice?.source).toContain("v1922.speed_trap");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "rez_ice",
+      v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
+      speedTrapChoiceOpened: true,
+      rezzedCardDefinitionId: "simple_upgrade",
+    });
+
+    state = applyChoice(state, "runner", "jack_out");
+    expect(state.run).toBeUndefined();
+    expect(state.phase).toBe("runner_action_phase");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
+      speedTrapUsed: true,
+      successfulRunWithoutAccess: true,
+      rezzedCardDefinitionId: "simple_upgrade",
+    });
+    expect(
+      JSON.stringify(state.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("lets Speed Trap pass a root rez and then continue to normal access", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-speed-trap-pass",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_speed_trap_pass_runner",
+          name: "Spotcheck Speed Trap Pass Runner",
+          cards: [
+            { id: "onr_v1_067_speed-trap", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "spotcheck_speed_trap_pass_corp",
+          name: "Spotcheck Speed Trap Pass Corp",
+          cards: [
+            { id: "simple_upgrade", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    installRunnerProgramForTest(state, "onr_v1_067_speed-trap");
+    const upgradeId = putCorpRootInRemote(state, "simple_upgrade");
+    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.rootRez === true &&
+        action.payload?.cardId === upgradeId,
+    );
+    state = applyChoice(state, "runner", "pass");
+    expect(state.run).toBeDefined();
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.timingPoint).toBe("access.resolve_card");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "access_card",
+      ),
+    ).toBe(true);
+    expect(state.eventLog.at(-2)?.publicPayload).toMatchObject({
+      speedTrapUsed: false,
+      successfulRunWithoutAccess: false,
+    });
+  });
+
   it("installs Newsgroup Filter and uses its side-safe credit action", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
