@@ -33,12 +33,13 @@ export {
   evaluateCorpScoringProgress,
   evaluateIceRez,
   evaluateRemoteIntentMemory,
+  evaluateRunnerContestCapacity,
   evaluateScoringWindow,
   evaluateServerThreat,
   generateCorpPlanCandidates,
   hasCorpPlanAction
 } from "./corp-plans";
-export type { CorpPlanCandidate, CorpPlanDebug, CorpPlanDecision, CorpPlanEvaluatorResult, CorpPlanKind, CorpPlanScore, CorpPlanStep } from "./corp-plans";
+export type { CorpPlanCandidate, CorpPlanDebug, CorpPlanDecision, CorpPlanEvaluatorResult, CorpPlanKind, CorpPlanScore, CorpPlanStep, RunnerContestCapacity } from "./corp-plans";
 export {
   chooseRunnerPlanAction,
   chooseRunnerPlanDecision,

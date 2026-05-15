@@ -48,6 +48,7 @@ import {
   evaluateEconomyReserve,
   evaluateIceRez,
   evaluateRemoteIntentMemory,
+  evaluateRunnerContestCapacity,
   evaluateScoringWindow,
   evaluateServerThreat,
   evaluateCorpScoringThreat,
@@ -1067,6 +1068,42 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.actionId).toBe(rdIceInstall.actionId);
     expect(decision.reasonCode).toBe("corp.plan.protect_rnd");
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|simple_agenda_1/);
+  });
+
+  it("uses visible Runner credits and breakers for protected remote scoring windows", () => {
+    const lockedRunnerInput = corpActionPhaseInput("ai-corp-contest-low", (state) => {
+      state.corp.credits = 7;
+      state.runner.credits = 0;
+      ensureRemoteServer(state, "remote_1");
+      putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      moveCorpCardToHq(state, "simple_agenda");
+    });
+    const contestingRunnerInput = corpActionPhaseInput("ai-corp-contest-high", (state) => {
+      state.corp.credits = 7;
+      state.runner.credits = 10;
+      ensureRemoteServer(state, "remote_1");
+      putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      moveCorpCardToHq(state, "simple_agenda");
+      moveRunnerProgramToRig(state, "simple_fracter");
+    });
+    const lockedCandidate = generateCorpPlanCandidates(lockedRunnerInput).find((candidate) => candidate.kind === "build_scoring_remote");
+    const contestingCandidate = generateCorpPlanCandidates(contestingRunnerInput).find((candidate) => candidate.kind === "build_scoring_remote");
+
+    expect(lockedCandidate).toBeDefined();
+    expect(contestingCandidate).toBeDefined();
+    if (!lockedCandidate || !contestingCandidate) throw new Error("Missing Corp remote scoring candidates");
+
+    const lockedCapacity = evaluateRunnerContestCapacity(lockedRunnerInput, "remote_1");
+    const contestingCapacity = evaluateRunnerContestCapacity(contestingRunnerInput, "remote_1");
+    const lockedScore = evaluateCorpPlan(lockedRunnerInput, lockedCandidate);
+    const contestingScore = evaluateCorpPlan(contestingRunnerInput, contestingCandidate);
+
+    expect(lockedCapacity.capacity).toBe("low");
+    expect(contestingCapacity.capacity).toBe("high");
+    expect(lockedScore.score).toBeGreaterThan(contestingScore.score);
+    expect(lockedScore.evidence).toContain("runner_contest_capacity:low");
+    expect(contestingScore.evidence).toContain("runner_contest_capacity:high");
+    expect(JSON.stringify(lockedScore.evidence)).not.toMatch(/cardInstances|privatePayload|simple_agenda_1/);
   });
 
   it("evaluates Corp mulligan choices from opening hand and deck doctrine", () => {

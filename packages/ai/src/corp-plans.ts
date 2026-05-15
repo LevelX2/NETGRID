@@ -23,7 +23,7 @@ import deckLegalV1920AiHintsData from "../../../data/ai/ai-card-hints-deck-legal
 import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1921.json";
 import deckLegalV1922AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1922.json";
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
-import type { AiDeckDoctrineProfile, AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
 
 export type CorpPlanKind =
@@ -150,6 +150,17 @@ type RemoteIntentMemory = {
   remoteAdvanceSignals: number;
   remoteScoreSignals: number;
   centralRunSignals: Record<"hq" | "rd", number>;
+  evidence: string[];
+};
+
+export type RunnerContestCapacity = {
+  serverId: string;
+  capacity: "low" | "medium" | "high";
+  scoreModifier: number;
+  runnerCredits: number;
+  installedBreakers: number;
+  visibleBreakCost?: number;
+  reasons: string[];
   evidence: string[];
 };
 
@@ -313,6 +324,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const iceRez = evaluateIceRez(input, candidate);
   const scoringWindow = evaluateScoringWindow(input, candidate);
   const scoringProgress = evaluateCorpScoringProgress(input, candidate);
+  const runnerContest = evaluateRemoteScoringContest(input, candidate, beliefState);
   const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
   const base = baseScoreForPlan(candidate.kind);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
@@ -325,6 +337,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     iceRez.score * profile.weights.iceRez +
     scoringWindow.score * profile.weights.scoringWindow +
     scoringProgress.score +
+    runnerContest.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
     remoteRootExposurePenalty(input, candidate, profile.riskTolerance) -
@@ -333,6 +346,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     `plan:${candidate.kind}`,
     `difficulty:${input.difficulty}`,
     `doctrine_plan_weight:${doctrinePlanWeight}`,
+    ...runnerContest.evidence,
     ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
     ...candidate.expectedBenefits,
     ...agendaRisk.evidence,
@@ -350,7 +364,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons]).slice(0, 6),
+    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence)
   };
 }
@@ -475,6 +489,160 @@ export function evaluateCorpScoringProgress(input: AiDecisionInput, candidate: C
       `score_now_action:${hasScoreAction}`
     ]
   };
+}
+
+function evaluateRemoteScoringContest(input: AiDecisionInput, candidate: CorpPlanCandidate, beliefState: BeliefState): CorpPlanEvaluatorResult {
+  if (candidate.kind !== "build_scoring_remote" && candidate.kind !== "score_next_turn") {
+    return { score: 0, reasons: [], evidence: [] };
+  }
+  const serverIds = sortedUnique(actionsForCandidate(input, candidate).map((action) => remoteServerIdForAction(input, action)).filter((serverId): serverId is string => Boolean(serverId?.startsWith("remote_"))));
+  if (serverIds.length === 0) return { score: 0, reasons: [], evidence: ["runner_contest_capacity:none"] };
+  const assessments = serverIds.map((serverId) => evaluateRunnerContestCapacity(input, serverId, beliefState)).sort((left, right) => right.scoreModifier - left.scoreModifier || left.serverId.localeCompare(right.serverId));
+  const assessment = assessments[0]!;
+  return {
+    score: assessment.scoreModifier,
+    reasons: assessment.reasons,
+    evidence: assessment.evidence
+  };
+}
+
+export function evaluateRunnerContestCapacity(input: AiDecisionInput, serverId: string, beliefState: BeliefState = reconstructBeliefState(input)): RunnerContestCapacity {
+  const runnerCredits = input.playerView.opponent.credits;
+  const rigCards = input.playerView.opponent.rig ?? [];
+  const installedBreakers = rigCards.filter((card) => card.known && card.definitionId && RUNTIME_CARDS[card.definitionId]?.subtypes.includes("icebreaker")).length;
+  const server = input.playerView.servers.find((candidate) => candidate.id === serverId);
+  const remotePressure = beliefState.corpOpponentModel?.runnerThreatModel.remotePressure ?? 0;
+  if (!server || !serverId.startsWith("remote_")) {
+    return runnerContestCapacityResult(serverId, "high", runnerCredits, installedBreakers, undefined, ["runner_remote_contest_invalid_server"], [`runner_contest_capacity:high`, `runner_credits_visible:${runnerCredits}`, `runner_breakers_visible:${installedBreakers}`, "remote_ice:0"]);
+  }
+  if (server.ice.length <= 0) {
+    return runnerContestCapacityResult(serverId, "high", runnerCredits, installedBreakers, 0, ["runner_remote_contest_unprotected"], [`runner_contest_capacity:high`, `runner_credits_visible:${runnerCredits}`, `runner_breakers_visible:${installedBreakers}`, "remote_ice:0"]);
+  }
+
+  const knownPath = assessKnownIcePathForRunnerContest(server.ice, rigCards, runnerCredits);
+  const evidence = [
+    `runner_contest_capacity:${knownPath.capacity}`,
+    `runner_credits_visible:${runnerCredits}`,
+    `runner_breakers_visible:${installedBreakers}`,
+    `remote_ice:${server.ice.length}`,
+    `remote_rezzed_ice:${server.ice.filter((ice) => ice.rezzed === true).length}`,
+    `remote_unrezzed_ice:${server.ice.filter((ice) => ice.rezzed !== true).length}`,
+    `visible_break_cost:${knownPath.visibleBreakCost ?? "unknown"}`,
+    `runner_remote_pressure:${round(remotePressure)}`
+  ];
+  return runnerContestCapacityResult(serverId, knownPath.capacity, runnerCredits, installedBreakers, knownPath.visibleBreakCost, knownPath.reasons, evidence);
+}
+
+function runnerContestCapacityResult(
+  serverId: string,
+  capacity: RunnerContestCapacity["capacity"],
+  runnerCredits: number,
+  installedBreakers: number,
+  visibleBreakCost: number | undefined,
+  reasons: string[],
+  evidence: string[]
+): RunnerContestCapacity {
+  const scoreModifier = capacity === "low" ? 90 : capacity === "medium" ? 20 : -85;
+  return {
+    serverId,
+    capacity,
+    scoreModifier,
+    runnerCredits,
+    installedBreakers,
+    ...(visibleBreakCost !== undefined ? { visibleBreakCost } : {}),
+    reasons,
+    evidence
+  };
+}
+
+function assessKnownIcePathForRunnerContest(
+  iceCards: Array<{ definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[]; strength?: number }>,
+  rigCards: VisibleCard[],
+  runnerCredits: number
+): { capacity: RunnerContestCapacity["capacity"]; visibleBreakCost?: number; reasons: string[] } {
+  const installedBreakers = rigCards.filter((card) => card.known && card.definitionId && RUNTIME_CARDS[card.definitionId]?.subtypes.includes("icebreaker")).length;
+  if (installedBreakers === 0 && runnerCredits <= 2) return { capacity: "low", reasons: ["runner_remote_contest_low_no_breaker_low_credits"] };
+
+  let visibleBreakCost = 0;
+  let relevantKnownIce = 0;
+  const breakerStrengths = new Map(rigCards.map((card) => [card.instanceId, card.strength ?? cardDefinitionStrength(card.definitionId)]));
+  for (const ice of iceCards.slice().reverse()) {
+    if (!ice.definitionId || !ice.known) continue;
+    const endTheRunCount = endTheRunSubroutineCount(ice.definitionId);
+    if (endTheRunCount === 0) continue;
+    relevantKnownIce += 1;
+    const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(ice, rigCards, endTheRunCount, breakerStrengths);
+    if (!breakAssessment) return { capacity: "low", ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}), reasons: ["runner_remote_contest_low_missing_breaker"] };
+    visibleBreakCost += breakAssessment.cost;
+    breakerStrengths.set(breakAssessment.breakerInstanceId, breakAssessment.endingStrength);
+  }
+
+  if (relevantKnownIce > 0 && visibleBreakCost > runnerCredits) return { capacity: "low", visibleBreakCost, reasons: ["runner_remote_contest_low_break_cost"] };
+  if (relevantKnownIce > 0 && runnerCredits >= visibleBreakCost + 3 && installedBreakers > 0) return { capacity: "high", visibleBreakCost, reasons: ["runner_remote_contest_high_visible_breaker"] };
+  if (installedBreakers === 0 || runnerCredits <= 3) return { capacity: "low", ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}), reasons: ["runner_remote_contest_low_rig_or_credits"] };
+  return { capacity: "medium", ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}), reasons: ["runner_remote_contest_medium_uncertain"] };
+}
+
+function minimumCreditsToBreakEndTheRunSubroutines(
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  rigCards: VisibleCard[],
+  endTheRunCount: number,
+  breakerStrengths: Map<string, number>
+): { cost: number; breakerInstanceId: string; endingStrength: number } | undefined {
+  const costs = rigCards
+    .map((card) => creditsToBreakEndTheRunSubroutinesWithBreaker(card, ice, endTheRunCount, breakerStrengths.get(card.instanceId)))
+    .filter((cost): cost is { cost: number; breakerInstanceId: string; endingStrength: number } => cost !== undefined)
+    .sort((left, right) => left.cost - right.cost || left.breakerInstanceId.localeCompare(right.breakerInstanceId));
+  return costs[0];
+}
+
+function creditsToBreakEndTheRunSubroutinesWithBreaker(
+  breakerCard: VisibleCard,
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
+  endTheRunCount: number,
+  currentBreakerStrength = cardDefinitionStrength(breakerCard.definitionId)
+): { cost: number; breakerInstanceId: string; endingStrength: number } | undefined {
+  if (!breakerCard.known || !breakerCard.definitionId || !ice.definitionId) return undefined;
+  const breakerDefinition = DEMO_CARDS_BY_ID[breakerCard.definitionId];
+  const iceDefinition = DEMO_CARDS_BY_ID[ice.definitionId];
+  if (!breakerDefinition || !iceDefinition || !breakerDefinition.subtypes.includes("icebreaker")) return undefined;
+  const breakAbility = breakerDefinition.abilities?.find((ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || (ice.subtypes ?? iceDefinition.subtypes).includes(ability.iceSubtype)));
+  if (!breakAbility) return undefined;
+  const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
+  const pumpAbility = breakerDefinition.abilities?.find((ability) => ability.type === "pump_strength");
+  let pumpCost = 0;
+  let endingStrength = currentBreakerStrength;
+  if (endingStrength < iceStrength) {
+    if (!pumpAbility || (pumpAbility.amount ?? 0) <= 0) return undefined;
+    const requiredPumps = Math.ceil((iceStrength - endingStrength) / Math.max(1, pumpAbility.amount ?? 1));
+    pumpCost = requiredPumps * (pumpAbility.cost.credits ?? 0);
+    endingStrength += requiredPumps * Math.max(1, pumpAbility.amount ?? 1);
+  }
+  const breakCount = Math.max(1, breakAbility.count ?? 1);
+  const breakUses = Math.ceil(endTheRunCount / breakCount);
+  return {
+    cost: pumpCost + breakUses * (breakAbility.cost.credits ?? 0),
+    breakerInstanceId: breakerCard.instanceId,
+    endingStrength
+  };
+}
+
+function cardDefinitionStrength(definitionId: string | undefined): number {
+  return definitionId ? (DEMO_CARDS_BY_ID[definitionId]?.strength ?? 0) : 0;
+}
+
+function endTheRunSubroutineCount(iceDefinitionId: string): number {
+  return DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.filter((subroutine) => subroutine.type === "end_the_run").length ?? 0;
+}
+
+function remoteServerIdForAction(input: AiDecisionInput, action: LegalAction): string | undefined {
+  if (typeof action.payload?.serverId === "string") return action.payload.serverId;
+  for (const server of input.playerView.servers) {
+    if (!server.id.startsWith("remote_")) continue;
+    if (server.root.some((card) => card.instanceId === action.source)) return server.id;
+    if (server.ice.some((card) => card.instanceId === action.source)) return server.id;
+  }
+  return undefined;
 }
 
 function actionsForCandidate(input: AiDecisionInput, candidate: CorpPlanCandidate): LegalAction[] {
@@ -811,7 +979,9 @@ function remoteRootActionSecurityScore(input: AiDecisionInput, action: LegalActi
   if (!server || !serverId.startsWith("remote_")) return -90;
   if (server.ice.length <= 0) return -95;
   const rezzedIceBonus = server.ice.some((ice) => ice.rezzed === true) ? 35 : 0;
-  return 90 + Math.min(server.ice.length, 3) * 20 + rezzedIceBonus;
+  const contestCapacity = evaluateRunnerContestCapacity(input, serverId);
+  const contestSecurity = contestCapacity.capacity === "low" ? 55 : contestCapacity.capacity === "medium" ? 0 : -120;
+  return 90 + Math.min(server.ice.length, 3) * 20 + rezzedIceBonus + contestSecurity;
 }
 
 function boundedRemotePriorityBonus(input: AiDecisionInput, action: LegalAction): number {
@@ -854,7 +1024,7 @@ function isRemoteServerId(value: unknown): boolean {
 
 function scrubPlanEvidence(evidence: string[]): string[] {
   const forbidden = ["cardInstances", "privatePayload", "sessionToken", "reconnectToken", "joinToken", "tokenHash", "fullGameState", "FullState"];
-  return evidence.filter((entry) => !forbidden.some((needle) => entry.includes(needle)) && !entry.includes("runner_simple_")).slice(0, 18);
+  return evidence.filter((entry) => !forbidden.some((needle) => entry.includes(needle)) && !entry.includes("runner_simple_")).slice(0, 24);
 }
 
 function confidence(score: number, actionCount: number): number {
