@@ -798,6 +798,9 @@ export type RunState = {
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   bizarreEncryptionSchemeActive?: boolean;
   traceSuccessBySubroutineIndex?: Partial<Record<number, boolean>>;
+  redHerringsTaxSourceByServer?: Partial<
+    Record<Exclude<ServerId, "new_remote">, CardInstanceId>
+  >;
   breach?: BreachState;
 };
 
@@ -5554,13 +5557,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     memoryCost: 1,
+    recurringCredits: 2,
     rulesText:
-      "Install as a program. Its restricted recurring-credit upgrade-trash ability remains gated until the payment window is confirmed.",
+      "2 recurring credits for trashing accessed upgrades. Used counters refresh at the start of each Runner turn.",
     mechanics: [
       "install_program",
       "memory",
+      "recurring_credit",
+      "recurring_start_turn",
+      "restricted_credit",
+      "upgrade_trash_payment",
       "per_card_longtail",
-      "ability_contract_pending",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -7447,13 +7454,32 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     memoryCost: 1,
     strength: 2,
     rulesText:
-      "Installed program for trace subroutine pressure and legal trace bids.",
+      "0 credits: Break trace subroutine. 1 credit: +1 strength.",
+    abilities: [
+      {
+        id: "replicator_break_trace",
+        type: "break_subroutine",
+        cost: { credits: 0 },
+        subroutineBreakTags: ["trace"],
+        timingPoint: "run.encounter_ice",
+      },
+      {
+        id: "replicator_pump",
+        type: "pump_strength",
+        cost: { credits: 1 },
+        amount: 1,
+        timingPoint: "run.encounter_ice",
+      },
+    ],
     mechanics: [
       "install_program",
       "memory",
+      "icebreaker",
       "trace",
       "link",
       "bid_amount",
+      "pump_breaker",
+      "break_subroutine",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -8376,9 +8402,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: ["link"],
     implementationStatus: "playable_mvp",
-    installCost: 9,
-    baseLink: 1,
-    rulesText: "Resource that contributes base link for trace interactions.",
+    installCost: 1,
+    baseLink: 9,
+    rulesText:
+      "1 credit: Base link 9. Only one base-link card is used for each trace attempt.",
     mechanics: [
       "install_resource",
       "base_link",

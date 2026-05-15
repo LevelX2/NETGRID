@@ -12607,7 +12607,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       status: "runner_bid",
       corpBid: 1,
       traceStrength: 5,
-      runnerLink: 2,
+      runnerLink: 9,
     });
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(getPlayerView(state, "runner").pendingChoice?.kind).toBe(
@@ -23527,6 +23527,284 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       corpCreditsGained: 2,
       corpCreditsAfter: creditsBefore + 2,
     });
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => {
+  it("keeps Cockroach random HQ discard source-bound across multi-copy counters and state drift", () => {
+    let state = toRunnerTurn(v191CardReleaseGame("spotcheck-cockroach-multi"));
+    state.runner.credits = 20;
+    const first = installRunnerProgramForTest(state, "onr_v1_013_cockroach");
+    const second = moveRunnerCardCopyToGrip(state, "onr_v1_013_cockroach");
+    removeEverywhere(state, second);
+    state.runner.rig.programs.push(second);
+    state.runner.memoryUsed += 1;
+    state.cardInstances[second] = {
+      ...state.cardInstances[second]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+    const installed = [first, second];
+    expect(installed).toHaveLength(2);
+    for (const id of installed) {
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        counters: { ...state.cardInstances[id]!.counters, virus: 1 },
+      };
+    }
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const keepA = moveCorpCardToHq(state, "simple_economy_operation");
+    const keepB = moveCorpCardToHq(state, "onr_v1_279_wall-of-static");
+    keepOnlyCorpHqCards(state, [keepA, keepB]);
+    state.corp.maxHandSize = 1;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    const resolve = mustAction(state, "corp", (action) => action.type === "resolve_choice");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: resolve.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "spotcheck-cockroach-wrong-side",
+      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: [state.pendingChoice?.options[0]?.id ?? ""] },
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: resolve.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "spotcheck-cockroach-stale",
+      selectedChoices: { choiceId: state.pendingChoice?.choiceId, selectedOptionIds: [state.pendingChoice?.options[0]?.id ?? ""] },
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = applyChoice(state, "corp", state.pendingChoice?.options[0]?.id ?? "");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      randomizedByCockroach: true,
+      cockroachCounterTotal: 2,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "discard_phase",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(/simple_economy|wall-of-static|privatePayload|cardInstances/);
+  });
+
+  it("uses Access through Alpha as the single base-link source for trace bidding", () => {
+    let state = toRunnerTurn(v1916ProgramSubtypeGame("spotcheck-access-alpha-link"));
+    state.runner.credits = 12;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
+    moveRunnerCardToGrip(state, "onr_v1_148_access-through-alpha");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_148_access-through-alpha");
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_1");
+
+    expect(state.trace).toMatchObject({ status: "runner_bid", traceStrength: 5, runnerLink: 9 });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runnerLink: 9,
+      traceStrength: 5,
+    });
+  });
+
+  it("lets Replicator break only trace subroutines and revalidates the current encounter", () => {
+    let state = toRunnerTurn(v1914TraceTagResourceGame("spotcheck-replicator-trace-break"));
+    state.runner.credits = 10;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_056_replicator");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    putCorpIceOnServer(state, "rd", "onr_v1_221_asp");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_221_asp");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    state = apply(state, "runner", (action) => action.type === "pump_breaker" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+
+    const breakTrace = mustAction(state, "runner", (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_056_replicator");
+    expect(breakTrace.payload).toMatchObject({
+      targetIceDefinitionId: "onr_v1_221_asp",
+      subroutineIndex: 0,
+    });
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: breakTrace.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "spotcheck-replicator-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    state = apply(state, "runner", (action) => action.actionId === breakTrace.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toContain(0);
+
+    let wallState = toRunnerTurn(createGameAfterSetup({
+      seed: "spotcheck-replicator-wall-negative",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+      corpDeck: ONR_V1_0_6K_CORP_DECK,
+      agendaPointsToWin: 7,
+    }));
+    wallState.runner.credits = 10;
+    moveRunnerCardToGrip(wallState, "onr_v1_056_replicator");
+    wallState = apply(wallState, "runner", (action) => action.type === "install_card" && sourceDefinition(wallState, action) === "onr_v1_056_replicator");
+    putCorpIceOnServer(wallState, "rd", "onr_v1_245_fire-wall");
+    wallState = apply(wallState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    wallState = apply(wallState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(wallState, action) === "onr_v1_245_fire-wall");
+    expect(getLegalActions(wallState, "runner").some((action) => action.type === "break_subroutine" && sourceDefinition(wallState, action) === "onr_v1_056_replicator")).toBe(false);
+  });
+
+  it("spends Scatter Shot recurring credits only for accessed upgrade trash costs", () => {
+    const runnerDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      id: "spotcheck_scatter_runner",
+      name: "Spotcheck Scatter Runner",
+      cards: [{ id: "onr_v1_057_scatter-shot", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards],
+    };
+    let state = toRunnerTurn(createGameAfterSetup({
+      seed: "spotcheck-scatter-shot",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck,
+      corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
+      agendaPointsToWin: 7,
+    }));
+    state.runner.credits = 0;
+    state.corp.credits = 10;
+    moveRunnerCardToGrip(state, "onr_v1_057_scatter-shot");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_057_scatter-shot");
+    const scatterId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_057_scatter-shot");
+    expect(scatterId && state.cardInstances[scatterId]?.counters?.recurring_credit).toBe(2);
+    const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
+    state.cardInstances[redHerringsId] = { ...state.cardInstances[redHerringsId]!, faceup: true, rezzed: true };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const trash = mustAction(state, "runner", (action) => action.type === "trash_accessed_card");
+    expect(trash.payload).toMatchObject({
+      v1922RunnerProgramAbility: "scatter_shot_upgrade_trash_recurring_credit",
+      scatterShotRecurringCreditsAvailable: 2,
+    });
+    state = apply(state, "runner", (action) => action.actionId === trash.actionId);
+    expect(scatterId && state.cardInstances[scatterId]?.counters?.recurring_credit).toBe(1);
+    expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      scatterShotRecurringCreditsSpent: 1,
+      runnerCreditsSpent: 0,
+    });
+    expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.maxHandSize = 100;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(scatterId && state.cardInstances[scatterId]?.counters?.recurring_credit).toBe(2);
+
+    let assetState = toRunnerTurn(createGameAfterSetup({
+      seed: "spotcheck-scatter-asset-negative",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck,
+      corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
+      agendaPointsToWin: 7,
+    }));
+    assetState.runner.credits = 0;
+    assetState.corp.credits = 10;
+    moveRunnerCardToGrip(assetState, "onr_v1_057_scatter-shot");
+    assetState = apply(assetState, "runner", (action) => action.type === "install_card" && sourceDefinition(assetState, action) === "onr_v1_057_scatter-shot");
+    const assetId = putCorpRootInRemote(assetState, "onr_v1_344_spinn-public-relations");
+    assetState.cardInstances[assetId] = { ...assetState.cardInstances[assetId]!, faceup: true, rezzed: true };
+    assetState = apply(assetState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    assetState = apply(assetState, "runner", (action) => action.type === "access_card");
+    expect(getLegalActions(assetState, "runner").some((action) => action.type === "trash_accessed_card")).toBe(false);
+  });
+
+  it("hardens Detroit Police Contract, Off-Site Backups and Urban Renewal revalidation", () => {
+    let detroit = apply(v1912CounterRecurringGame("spotcheck-detroit-negative"), "corp", (action) => action.type === "mandatory_draw");
+    detroit.corp.clicks = 5;
+    const detroitId = scoreCorpAgendaForTest(detroit, "onr_v1_198_detroit-police-contract");
+    detroit.cardInstances[detroitId] = { ...detroit.cardInstances[detroitId]!, counters: { power: 1 } };
+    const detroitAction = mustAction(detroit, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1912_detroit_police_contract");
+    const wrongSide = applyAction(detroit, {
+      matchId: detroit.matchId,
+      side: "runner",
+      actionId: detroitAction.actionId,
+      clientKnownStateVersion: detroit.stateVersion,
+      idempotencyKey: "spotcheck-detroit-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    detroit.cardInstances[detroitId] = { ...detroit.cardInstances[detroitId]!, counters: { power: 0 } };
+    expect(getLegalActions(detroit, "corp").some((action) => action.actionId === detroitAction.actionId)).toBe(false);
+
+    const offsiteCorpDeck: DeckDefinition = {
+      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      id: "spotcheck_offsite_empty_corp",
+      name: "Spotcheck Offsite Empty Corp",
+      cards: [{ id: "onr_v1_296_off-site-backups", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards],
+    };
+    let offsite = apply(createGameAfterSetup({
+      seed: "spotcheck-offsite-empty",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck: offsiteCorpDeck,
+      agendaPointsToWin: 7,
+    }), "corp", (action) => action.type === "mandatory_draw");
+    offsite.corp.credits = 5;
+    moveCorpCardToHq(offsite, "onr_v1_296_off-site-backups");
+    expect(getLegalActions(offsite, "corp").some((action) => action.type === "play_operation" && sourceDefinition(offsite, action) === "onr_v1_296_off-site-backups")).toBe(false);
+
+    let urban = apply(v106kCardReleaseGame("spotcheck-urban-tag-drift"), "corp", (action) => action.type === "mandatory_draw");
+    urban.corp.credits = 10;
+    urban.runner.tags = 1;
+    moveCorpCardToHq(urban, "onr_v1_307_urban-renewal");
+    const urbanAction = mustAction(urban, "corp", (action) => action.type === "play_operation" && sourceDefinition(urban, action) === "onr_v1_307_urban-renewal");
+    urban.runner.tags = 0;
+    const tagDrift = applyAction(urban, {
+      matchId: urban.matchId,
+      side: "corp",
+      actionId: urbanAction.actionId,
+      clientKnownStateVersion: urban.stateVersion,
+      idempotencyKey: "spotcheck-urban-tag-drift",
+    });
+    expect(tagDrift.ok).toBe(false);
+    if (!tagDrift.ok) expect(tagDrift.error.code).toBe("ERR_UNKNOWN_ACTION");
+  });
+
+  it("keeps Red Herrings steal tax active after Runner trashes it during the same run", () => {
+    let state = toRunnerTurn(v1917GenericAssetGame("spotcheck-red-herrings-trash-run"));
+    state.runner.credits = 6;
+    const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
+    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    state.cardInstances[redHerringsId] = { ...state.cardInstances[redHerringsId]!, faceup: true, rezzed: true };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "trash_accessed_card");
+    expect(state.runner.heap).not.toContain(redHerringsId);
+    expect(state.corp.archives).toContain(redHerringsId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      redHerringsCardId: redHerringsId,
+      redHerringsTaxPersistsForRun: true,
+    });
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const steal = mustAction(state, "runner", (action) => action.type === "steal_agenda");
+    expect(steal.costs).toEqual([{ credits: 5 }]);
+    expect(steal.payload).toMatchObject({
+      redHerringsCardId: redHerringsId,
+      stealAdditionalCost: 5,
+    });
+    state = apply(state, "runner", (action) => action.actionId === steal.actionId);
+    expect(state.runner.scoreArea).toContain(agendaId);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
 

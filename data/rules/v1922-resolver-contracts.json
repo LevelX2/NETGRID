@@ -212,11 +212,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "prepared_spoiler_errata_reviewed_recurring_upgrade_trash_credits_no_promotion",
-      "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "errata_refresh_from_bank", "recurring_2_credits_for_trashing_upgrades"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["upgrade_trash_payment_window", "hosted_counter_or_pool_model", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Use the errata-reviewed recurring credit refresh for a later non-promoting runtime slice."
+      "contractStatus": "runtime_restricted_upgrade_trash_credits_wip_no_promotion",
+      "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "errata_refresh_from_bank", "recurring_2_credits_for_trashing_upgrades", "accessed_upgrade_trash_payment_window"],
+      "safeCurrentCoverage": ["install_program_legal_action", "restricted_upgrade_trash_recurring_credit", "asset_trash_negative", "runner_turn_start_recurring_refresh", "public_payload_visibility", "replay_statehash"],
+      "missingInformation": ["ai_fallback", "final_catalog_release_promotion"],
+      "removalCondition": "Keep Scatter Shot in non-promoted WIP until final V1.9.22 AI, catalog and release-promotion gates are satisfied."
     },
     {
       "cardId": "onr_v1_061_shield",

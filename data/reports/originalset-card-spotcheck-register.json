@@ -13,6 +13,86 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-virus-link-archives",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_VIRUS_LINK_ARCHIVES_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/blocked/spotcheck-2026-05-15-virus-link-archives.md",
+      "jobStatus": "blocked",
+      "blockerReason": "Pile Driver needs a multi-wall-subroutine break resolver with exact Stealth loss; Full Body Conversion needs a full meat-damage prevention and Corp bypass resolver.",
+      "cards": [
+        {
+          "cardId": "onr_v1_013_cockroach",
+          "title": "Cockroach",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_multi_copy_counter_discard_revalidation_payload",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_047_pile-driver",
+          "title": "Pile Driver",
+          "spotcheckStatus": "blocked",
+          "result": "blocked_multi_wall_break_stealth_loss_resolver_missing",
+          "followUpStatus": "blocked"
+        },
+        {
+          "cardId": "onr_v1_056_replicator",
+          "title": "Replicator",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_trace_subroutine_breaker_pump_negative_case",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_057_scatter-shot",
+          "title": "Scatter Shot",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_upgrade_trash_recurring_credit_refresh",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_127_full-body-conversion",
+          "title": "Full Body Conversion",
+          "spotcheckStatus": "blocked",
+          "result": "blocked_full_meat_damage_prevention_corp_bypass_resolver_missing",
+          "followUpStatus": "blocked"
+        },
+        {
+          "cardId": "onr_v1_148_access-through-alpha",
+          "title": "Access through Alpha",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_base_link_9_single_base_link_source",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_198_detroit-police-contract",
+          "title": "Detroit Police Contract",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_counter_action_revalidation_no_counter_guard",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_296_off-site-backups",
+          "title": "Off-Site Backups",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_no_target_archives_choice_guard",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_307_urban-renewal",
+          "title": "Urban Renewal",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_tag_drift_revalidation",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "title": "Red Herrings",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_tax_persists_after_trash_same_run",
+          "followUpStatus": "partial_fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-hidden-access-trace",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HIDDEN_ACCESS_TRACE_IMPLEMENTATION.md",

@@ -20,11 +20,15 @@
       ],
       "requiredMechanics": [
         "per_card_longtail_resolver_gate",
-        "v1922_runner_program_install_surface_ability_gated",
+        "v1922_runner_program_scatter_shot_upgrade_trash_recurring_credit",
+        "restricted_recurring_credit",
+        "upgrade_trash_payment_window",
+        "runner_turn_start_recurring_refresh",
         "runner_program_resolver"
       ],
       "valueHints": {
-        "perCardLongtailPriority": 2
+        "perCardLongtailPriority": 2,
+        "accessEconomy": 1
       },
       "riskTags": [
         "legal_actions_only",

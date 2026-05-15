@@ -366,6 +366,7 @@ const V1922_JAPANESE_WATER_TORTURE_ID = "onr_v1_037_japanese-water-torture";
 const V1922_ZETATECH_SOFTWARE_INSTALLER_ID =
   "onr_v1_075_zetatech-software-installer";
 const V1922_RABBIT_ID = "onr_v1_051_rabbit";
+const V1922_SCATTER_SHOT_ID = "onr_v1_057_scatter-shot";
 const V1922_ARTEMIS_2020_ID = "onr_v1_122_artemis-2020";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
@@ -5757,6 +5758,7 @@ function breakAbilityMatchesSubroutine(
 ): boolean {
   const tags = ability.subroutineBreakTags ?? [];
   if (tags.length === 0) return true;
+  if (tags.includes("trace") && subroutine.type === "initiate_trace") return true;
   const subroutineTags = subroutine.breakTags ?? [];
   return tags.some((tag) => subroutineTags.includes(tag));
 }
@@ -6020,7 +6022,12 @@ function runnerAccessActions(state: GameState): LegalAction[] {
           },
         ),
       );
-    } else if (state.runner.credits >= trashCost.totalCost) {
+    } else if (
+      availableRunnerAccessTrashCredits(state, run.accessedCardId) >=
+      trashCost.totalCost
+    ) {
+      const scatterShotRecurringCreditsAvailable =
+        runnerAccessTrashRecurringCredits(state, run.accessedCardId);
       actions.push(
         action(
           state,
@@ -6033,6 +6040,14 @@ function runnerAccessActions(state: GameState): LegalAction[] {
             accessTrashBaseCost: trashCost.baseCost,
             accessTrashCostModifier: trashCost.modifier,
             accessTrashTotalCost: trashCost.totalCost,
+            ...(scatterShotRecurringCreditsAvailable > 0 &&
+            definition.type === "upgrade"
+              ? {
+                  v1922RunnerProgramAbility:
+                    "scatter_shot_upgrade_trash_recurring_credit",
+                  scatterShotRecurringCreditsAvailable,
+                }
+              : {}),
           },
         ),
       );
@@ -6082,7 +6097,10 @@ function redHerringsCardIdForCurrentAccess(
 ): CardInstanceId | undefined {
   const serverId =
     run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
-  return rezzedRootCardIdOnServer(state, serverId, V1918_RED_HERRINGS_ID);
+  return (
+    rezzedRootCardIdOnServer(state, serverId, V1918_RED_HERRINGS_ID) ??
+    run.redHerringsTaxSourceByServer?.[serverId]
+  );
 }
 
 function oliviaSalazarCardIdForCurrentAccess(
@@ -6158,6 +6176,66 @@ function effectiveAccessTrashCost(
     if (hasRezzedNewGalveston) modifier += 2;
   }
   return { baseCost, modifier, totalCost: baseCost + modifier };
+}
+
+function scatterShotRecurringCreditSourceIds(
+  state: GameState,
+  accessedCardId: CardInstanceId,
+): CardInstanceId[] {
+  const accessedDefinition = definitionFor(state, accessedCardId);
+  if (accessedDefinition.type !== "upgrade") return [];
+  return state.runner.rig.programs.filter(
+    (cardId) =>
+      definitionFor(state, cardId).id === V1922_SCATTER_SHOT_ID &&
+      cardCounter(state, cardId, "recurring_credit") > 0,
+  );
+}
+
+function runnerAccessTrashRecurringCredits(
+  state: GameState,
+  accessedCardId: CardInstanceId,
+): number {
+  return scatterShotRecurringCreditSourceIds(state, accessedCardId).reduce(
+    (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+    0,
+  );
+}
+
+function availableRunnerAccessTrashCredits(
+  state: GameState,
+  accessedCardId: CardInstanceId,
+): number {
+  return (
+    state.runner.credits +
+    runnerAccessTrashRecurringCredits(state, accessedCardId)
+  );
+}
+
+function spendRunnerAccessTrashCredits(
+  state: GameState,
+  amount: number,
+  accessedCardId: CardInstanceId,
+): { recurringSpent: number; runnerCreditsSpent: number } {
+  if (amount <= 0) return { recurringSpent: 0, runnerCreditsSpent: 0 };
+  if (availableRunnerAccessTrashCredits(state, accessedCardId) < amount)
+    throw new Error("Der Runner kann die Trashkosten nicht bezahlen.");
+  let remaining = amount;
+  let recurringSpent = 0;
+  for (const cardId of scatterShotRecurringCreditSourceIds(
+    state,
+    accessedCardId,
+  )) {
+    if (remaining <= 0) break;
+    const available = cardCounter(state, cardId, "recurring_credit");
+    const spent = Math.min(available, remaining);
+    if (spent > 0) {
+      spendCardCounter(state, cardId, "recurring_credit", spent);
+      recurringSpent += spent;
+      remaining -= spent;
+    }
+  }
+  spendCredits(state, "runner", remaining);
+  return { recurringSpent, runnerCreditsSpent: remaining };
 }
 
 function performAction(
@@ -10286,14 +10364,47 @@ function trashAccessedCard(
   if (sourceZone.side === "corp" && sourceZone.zone === "archives") {
     throw new Error("Karten in Archives können beim Zugriff nicht getrasht werden.");
   }
-  spendCredits(state, "runner", trashCost);
+  const trashPayment = spendRunnerAccessTrashCredits(
+    state,
+    trashCost,
+    cardId as CardInstanceId,
+  );
   if (legalAction && overrideCost === undefined) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       accessTrashBaseCost: effectiveCost.baseCost,
       accessTrashCostModifier: effectiveCost.modifier,
       accessTrashTotalCost: trashCost,
+      ...(trashPayment.recurringSpent > 0
+        ? {
+            v1922RunnerProgramAbility:
+              "scatter_shot_upgrade_trash_recurring_credit",
+            scatterShotRecurringCreditsSpent: trashPayment.recurringSpent,
+            runnerCreditsSpent: trashPayment.runnerCreditsSpent,
+          }
+        : {}),
     };
+  }
+  const run = state.run;
+  if (
+    run &&
+    definition.id === V1918_RED_HERRINGS_ID &&
+    sourceZone.side === "corp" &&
+    sourceZone.zone === "serverRoot" &&
+    sourceZone.serverId === (run.breach?.serverId ?? run.attackedServerId)
+  ) {
+    run.redHerringsTaxSourceByServer = {
+      ...(run.redHerringsTaxSourceByServer ?? {}),
+      [sourceZone.serverId]: cardId as CardInstanceId,
+    };
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1918UpgradeAbility: "red_herrings_steal_tax",
+        redHerringsCardId: cardId,
+        redHerringsTaxPersistsForRun: true,
+      };
+    }
   }
   trashCorpInstalledCardToArchives(state, cardId);
   if (state.run?.breach) {
@@ -13612,7 +13723,12 @@ function resolveDiscardChoice(
     discardSide: side,
     discardCount: selectedCards.length,
     discardZone: side === "corp" ? "archives" : "heap",
-    ...(cockroachRandomized ? { randomizedByCockroach: true } : {}),
+    ...(cockroachRandomized
+      ? {
+          randomizedByCockroach: true,
+          cockroachCounterTotal: cockroachCounterTotal(state),
+        }
+      : {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "discard_phase",
   };
@@ -16146,11 +16262,11 @@ function calculateRunnerLink(state: GameState): number {
     ...state.runner.rig.programs,
     ...state.runner.rig.hardware,
     ...state.runner.rig.resources,
-  ].reduce((sum, cardId) => {
+  ].reduce((best, cardId) => {
     const cardLink = definitionFor(state, cardId).baseLink ?? 0;
     if (!Number.isInteger(cardLink) || cardLink < 0)
       throw new Error("Runner-Link ist ungueltig.");
-    return sum + cardLink;
+    return Math.max(best, cardLink);
   }, 0);
   const cryingReduction = cardCounter(state, state.runner.identity, "crying") * 2;
   const link = Math.max(0, baseLink + modifier + installedLink - cryingReduction);
@@ -16637,6 +16753,10 @@ function publicContextForAction(
       context.discardCount = legalAction.payload.discardCount;
       context.discardZone = legalAction.payload.discardZone;
       context.redactedKind = "discard";
+      if (legalAction.payload.randomizedByCockroach === true)
+        context.randomizedByCockroach = true;
+      if (typeof legalAction.payload.cockroachCounterTotal === "number")
+        context.cockroachCounterTotal = legalAction.payload.cockroachCounterTotal;
     }
     if (legalAction.payload?.setupStep === "mulligan") {
       context.setupStep = "mulligan";
@@ -16927,10 +17047,20 @@ function publicContextForAction(
     "accessTrashBaseCost",
     "accessTrashCostModifier",
     "accessTrashTotalCost",
+    "scatterShotRecurringCreditsAvailable",
+    "scatterShotRecurringCreditsSpent",
+    "runnerCreditsSpent",
   ]) {
     const value = legalAction.payload?.[key];
     if (typeof value === "number") context[key] = value;
   }
+  if (typeof legalAction.payload?.v1922RunnerProgramAbility === "string")
+    context.v1922RunnerProgramAbility =
+      legalAction.payload.v1922RunnerProgramAbility;
+  if (typeof legalAction.payload?.redHerringsCardId === "string")
+    context.redHerringsCardId = legalAction.payload.redHerringsCardId;
+  if (legalAction.payload?.redHerringsTaxPersistsForRun === true)
+    context.redHerringsTaxPersistsForRun = true;
   if (legalAction.payload?.publicRevealKind)
     context.revealKind = legalAction.payload.publicRevealKind;
   if (typeof legalAction.payload?.publicRevealKind === "string")

@@ -3153,6 +3153,7 @@ describe("catalog import and status logic", () => {
         "v1922_runner_program_hammer_wall_breaker_stealth_loss_choice",
         "v1922_runner_program_japanese_water_torture_future_action_debt",
         "v1922_runner_program_reflector_tagged_breaker",
+        "v1922_runner_program_scatter_shot_upgrade_trash_recurring_credit",
         "v1922_runner_program_zetatech_software_installer_recurring_program_install_overlay",
       ].includes(card.resolverFamily),
     );
@@ -3326,7 +3327,6 @@ describe("catalog import and status logic", () => {
           "onr_v1_044_netspace-inverter",
           "onr_v1_048_poltergeist",
           "onr_v1_051_rabbit",
-          "onr_v1_057_scatter-shot",
           "onr_v1_067_speed-trap",
           "onr_v1_068_startup-immolator",
         ].includes(card.cardCode)
@@ -3348,6 +3348,15 @@ describe("catalog import and status logic", () => {
       }
       if (card.cardCode === "onr_v1_061_shield") {
         expect(card.coveredSmokes).toContain("net_damage_prevention_window");
+      }
+      if (card.cardCode === "onr_v1_057_scatter-shot") {
+        expect(card.coveredSmokes).toEqual(
+          expect.arrayContaining([
+            "upgrade_trash_recurring_credit",
+            "asset_trash_negative",
+            "runner_turn_start_recurring_refresh",
+          ]),
+        );
       }
       if (card.cardCode === "onr_v1_027_flak") {
         expect(card.coveredSmokes).toEqual(

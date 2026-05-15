@@ -173,13 +173,15 @@
       "cardCode": "onr_v1_057_scatter-shot",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "v1922_runner_program_install_surface_ability_gated",
+      "resolverFamily": "v1922_runner_program_scatter_shot_upgrade_trash_recurring_credit",
       "coveredSmokes": [
         "install_program_legal_action",
         "wrong_side_revalidation",
         "stale_state_revalidation",
         "memory_cost",
-        "ability_contract_remains_gated",
+        "upgrade_trash_recurring_credit",
+        "asset_trash_negative",
+        "runner_turn_start_recurring_refresh",
         "public_payload_visibility",
         "replay_statehash"
       ],

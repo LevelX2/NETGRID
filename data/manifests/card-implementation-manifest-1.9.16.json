@@ -28,7 +28,7 @@
     { "cardCode": "onr_v1_071_vewy-vewy-quiet", "title": "Vewy Vewy Quiet", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "program_subtype_install_resolver", "requiredMechanics": ["install_program", "stealth", "legal_action_only"], "roleTags": ["runner", "program", "stealth"] },
     { "cardCode": "onr_v1_140_raven-microcyb-eagle", "title": "Raven Microcyb Eagle", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "recurring_pool_start_turn_resolver", "requiredMechanics": ["install_hardware", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "hardware"] },
     { "cardCode": "onr_v1_141_raven-microcyb-owl", "title": "Raven Microcyb Owl", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "recurring_pool_start_turn_resolver", "requiredMechanics": ["install_hardware", "recurring_credit", "legal_action_only"], "roleTags": ["runner", "hardware"] },
-    { "cardCode": "onr_v1_148_access-through-alpha", "title": "Access through Alpha", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
+    { "cardCode": "onr_v1_148_access-through-alpha", "title": "Access through Alpha", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link_9", "one_base_link_per_trace", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
     { "cardCode": "onr_v1_149_access-to-arasaka", "title": "Access to Arasaka", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
     { "cardCode": "onr_v1_150_access-to-kiribati", "title": "Access to Kiribati", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
     { "cardCode": "onr_v1_152_back-door-to-hilliard", "title": "Back Door to Hilliard", "releaseStatus": "human_playable", "aiSupported": true, "resolverFamily": "trace_link_bid_window_resolver", "requiredMechanics": ["install_resource", "base_link", "trace", "legal_action_only"], "roleTags": ["runner", "resource", "link"] },
@@ -45,4 +45,3 @@
     "openMechanicFamilies": 0
   }
 }
-
