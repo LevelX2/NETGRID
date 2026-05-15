@@ -51,7 +51,7 @@ import {
 } from "lucide-react";
 import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { CSSProperties, DragEvent as ReactDragEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netgrid/shared";
 import {
   CHRONICLE_CATEGORY_LABELS,
@@ -611,6 +611,33 @@ type EditableDeck = {
   createdAt: string;
   updatedAt: string;
   notes?: string;
+  tableLayout?: DeckTableLayout;
+};
+
+type DeckEditorMode = "list" | "table";
+
+type DeckTableSortKey = "name" | "type" | "install" | "rez" | "trash" | "cost" | "strength" | "agenda";
+type DeckTablePileSortMode = "free" | DeckTableSortKey;
+type DeckTableArrangeMode = "type" | "install-piles" | DeckTableSortKey;
+
+type DeckTableLayoutEntry = {
+  cardId: string;
+  quantity: number;
+  order: number;
+};
+
+type DeckTablePile = {
+  id: string;
+  name?: string;
+  order: number;
+  sortMode: DeckTablePileSortMode;
+  entries: DeckTableLayoutEntry[];
+};
+
+type DeckTableLayout = {
+  schemaVersion: "deck-table-layout-v0.1";
+  showPileNames: boolean;
+  piles: DeckTablePile[];
 };
 
 type DeckTemplate = {
@@ -1198,8 +1225,248 @@ function deckFingerprint(deck: EditableDeck): string {
     cardPoolSnapshotId: deck.cardPoolSnapshotId,
     formatProfileId: deck.formatProfileId,
     notes: deck.notes ?? "",
+    tableLayout: deck.tableLayout ?? null,
     cards: [...deck.cards].sort((left, right) => left.cardId.localeCompare(right.cardId))
   });
+}
+
+const DEFAULT_DECK_TABLE_PILE_COUNT = 8;
+const MIN_DECK_TABLE_PILE_COUNT = 1;
+const MAX_DECK_TABLE_PILE_COUNT = 20;
+const DECK_TABLE_MAX_COPIES_PER_CARD = 3;
+
+function defaultDeckTablePileName(side: Side, index: number): string {
+  const runnerNames = ["Eisbrecher", "Programme", "Ressourcen", "Hardware", "Events", "Support", "Tempo", "Offen"];
+  const corpNames = ["ICE", "Agendas", "Assets", "Operationen", "Upgrades", "Ökonomie", "Schutz", "Offen"];
+  return (side === "runner" ? runnerNames : corpNames)[index] ?? `Stapel ${index + 1}`;
+}
+
+function defaultDeckTablePileIndexForCard(card: CatalogCardSummary | undefined): number {
+  if (!card) return 0;
+  const type = card.type.toLowerCase();
+  const subtypes = card.subtypes.map((subtype) => subtype.toLowerCase());
+  if (card.side === "runner") {
+    if (type === "program" && subtypes.includes("icebreaker")) return 0;
+    if (type === "program") return 1;
+    if (type === "resource") return 2;
+    if (type === "hardware") return 3;
+    if (type === "event") return 4;
+    return 7;
+  }
+  if (type === "ice") return 0;
+  if (type === "agenda") return 1;
+  if (type === "asset") return 2;
+  if (type === "operation") return 3;
+  if (type === "upgrade") return 4;
+  return 7;
+}
+
+function normalizeDeckTablePileSortMode(value: unknown): DeckTablePileSortMode {
+  return value === "name" || value === "type" || value === "install" || value === "rez" || value === "trash" || value === "cost" || value === "strength" || value === "agenda" ? value : "free";
+}
+
+function normalizeDeckTableLayout(deck: EditableDeck, cardLookup?: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail> = {}): DeckTableLayout {
+  const desired = new Map<string, number>();
+  for (const entry of deck.cards) {
+    if (!entry.cardId || !Number.isFinite(entry.quantity)) continue;
+    desired.set(entry.cardId, (desired.get(entry.cardId) ?? 0) + Math.max(0, Math.floor(entry.quantity)));
+  }
+  const sourcePiles = [...(deck.tableLayout?.piles ?? [])]
+    .filter((pile) => pile && typeof pile.id === "string")
+    .sort((left, right) => left.order - right.order);
+  const pileCount = Math.min(MAX_DECK_TABLE_PILE_COUNT, Math.max(MIN_DECK_TABLE_PILE_COUNT, deck.tableLayout?.piles.length ?? DEFAULT_DECK_TABLE_PILE_COUNT));
+  const normalizedPiles: DeckTablePile[] = Array.from({ length: pileCount }, (_, index) => {
+    const source = sourcePiles[index];
+    return {
+      id: source?.id || `pile-${index + 1}`,
+      name: typeof source?.name === "string" ? source.name.slice(0, 40) : defaultDeckTablePileName(deck.side, index),
+      order: index,
+      sortMode: normalizeDeckTablePileSortMode(source?.sortMode),
+      entries: []
+    };
+  });
+  const remaining = new Map(desired);
+  for (let pileIndex = 0; pileIndex < normalizedPiles.length; pileIndex += 1) {
+    const source = sourcePiles[pileIndex];
+    if (!source) continue;
+    const entries = [...(source.entries ?? [])].sort((left, right) => left.order - right.order);
+    for (const entry of entries) {
+      const available = remaining.get(entry.cardId) ?? 0;
+      if (available <= 0) continue;
+      const quantity = Math.min(available, Math.max(0, Math.floor(entry.quantity)));
+      if (quantity <= 0) continue;
+      for (let copy = 0; copy < quantity; copy += 1) {
+        normalizedPiles[pileIndex]!.entries.push({ cardId: entry.cardId, quantity: 1, order: normalizedPiles[pileIndex]!.entries.length });
+      }
+      remaining.set(entry.cardId, available - quantity);
+    }
+  }
+  for (const [cardId, quantity] of remaining) {
+    if (quantity <= 0) continue;
+    const pileIndex = Math.min(normalizedPiles.length - 1, Math.max(0, defaultDeckTablePileIndexForCard(cardLookup?.get(cardId))));
+    const fallbackPile = normalizedPiles[pileIndex]!;
+    for (let copy = 0; copy < quantity; copy += 1) {
+      fallbackPile.entries.push({ cardId, quantity: 1, order: fallbackPile.entries.length });
+    }
+  }
+  return {
+    schemaVersion: "deck-table-layout-v0.1",
+    showPileNames: deck.tableLayout?.showPileNames ?? false,
+    piles: normalizedPiles.map((pile) => applyDeckTablePileSort(pile, cardLookup ?? new Map<string, CatalogCardSummary>(), detailsById))
+  };
+}
+
+function deckCardsFromTableLayout(layout: DeckTableLayout): DeckCardEntry[] {
+  const byCard = new Map<string, number>();
+  for (const pile of layout.piles) {
+    for (const entry of pile.entries) {
+      byCard.set(entry.cardId, (byCard.get(entry.cardId) ?? 0) + Math.max(0, Math.floor(entry.quantity)));
+    }
+  }
+  return [...byCard.entries()]
+    .map(([cardId, quantity]) => ({ cardId, quantity }))
+    .filter((entry) => entry.quantity > 0)
+    .sort((left, right) => left.cardId.localeCompare(right.cardId));
+}
+
+function deckTableCardTotal(layout: DeckTableLayout, cardId: string): number {
+  return layout.piles.reduce((sum, pile) => sum + pile.entries.filter((entry) => entry.cardId === cardId).reduce((pileSum, entry) => pileSum + entry.quantity, 0), 0);
+}
+
+function reorderDeckTableEntries(entries: DeckTableLayoutEntry[]): DeckTableLayoutEntry[] {
+  return entries.map((entry, order) => ({ ...entry, order }));
+}
+
+function insertDeckTableEntry(entries: DeckTableLayoutEntry[], entry: DeckTableLayoutEntry, targetOrder?: number): DeckTableLayoutEntry[] {
+  const orderedEntries = [...entries].sort((left, right) => left.order - right.order);
+  if (targetOrder === undefined) return reorderDeckTableEntries([...orderedEntries, { ...entry, order: orderedEntries.length }]);
+  const targetIndex = orderedEntries.findIndex((candidate) => candidate.order === targetOrder);
+  if (targetIndex < 0) return reorderDeckTableEntries([...orderedEntries, { ...entry, order: orderedEntries.length }]);
+  return reorderDeckTableEntries([...orderedEntries.slice(0, targetIndex), { ...entry, order: targetIndex }, ...orderedEntries.slice(targetIndex)]);
+}
+
+function deckTableSortLabel(sortBy: DeckTableSortKey): string {
+  switch (sortBy) {
+    case "type":
+      return "Typ";
+    case "install":
+      return "Installkosten";
+    case "rez":
+      return "Rez-Kosten";
+    case "trash":
+      return "Trashkosten";
+    case "cost":
+      return "Kosten";
+    case "strength":
+      return "Stärke";
+    case "agenda":
+      return "Agenda-Punkte";
+    default:
+      return "Name";
+  }
+}
+
+function deckTableNumericKey(sortBy: DeckTableSortKey): string | null {
+  if (sortBy === "install") return "installCost";
+  if (sortBy === "rez") return "rezCost";
+  if (sortBy === "trash") return "trashCost";
+  if (sortBy === "cost") return "cost";
+  if (sortBy === "strength") return "strength";
+  if (sortBy === "agenda") return "agendaPoints";
+  return null;
+}
+
+function sortDeckTableEntries(entries: DeckTableLayoutEntry[], cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>, sortBy: DeckTableSortKey): DeckTableLayoutEntry[] {
+  const numericValue = (entry: DeckTableLayoutEntry, key: string): number => {
+    const value = detailsById[entry.cardId]?.numeric[key];
+    return value === null || value === undefined ? Number.POSITIVE_INFINITY : value;
+  };
+  const titleValue = (entry: DeckTableLayoutEntry): string => cardLookup.get(entry.cardId)?.title ?? entry.cardId;
+  const typeValue = (entry: DeckTableLayoutEntry): string => deckBuilderCardGroup(cardLookup.get(entry.cardId) ?? null);
+  const numericKey = deckTableNumericKey(sortBy);
+  return reorderDeckTableEntries(
+    [...entries].sort((left, right) => {
+      if (numericKey) return numericValue(left, numericKey) - numericValue(right, numericKey) || typeValue(left).localeCompare(typeValue(right)) || titleValue(left).localeCompare(titleValue(right));
+      if (sortBy === "type") return typeValue(left).localeCompare(typeValue(right)) || titleValue(left).localeCompare(titleValue(right));
+      return titleValue(left).localeCompare(titleValue(right));
+    })
+  );
+}
+
+function deckTablePileSortModeLabel(sortMode: DeckTablePileSortMode): string {
+  return sortMode === "free" ? "Frei" : deckTableSortLabel(sortMode);
+}
+
+function applyDeckTablePileSort(pile: DeckTablePile, cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>): DeckTablePile {
+  if (pile.sortMode === "free") return { ...pile, entries: reorderDeckTableEntries(pile.entries) };
+  return { ...pile, entries: sortDeckTableEntries(pile.entries, cardLookup, detailsById, pile.sortMode) };
+}
+
+function deckTableEntryNumericValue(entry: DeckTableLayoutEntry, detailsById: Record<string, CatalogCardDetail>, key: string): number | null {
+  const value = detailsById[entry.cardId]?.numeric[key];
+  return value === null || value === undefined ? null : value;
+}
+
+function deckTableTypeGroupOrder(side: Side, label: string): number {
+  const filters = side === "corp" ? CORP_CATALOG_TYPE_FILTERS : RUNNER_CATALOG_TYPE_FILTERS;
+  const index = filters.findIndex((filter) => filter.label === label);
+  return index >= 0 ? index : filters.length;
+}
+
+function distributeDeckTableByType(layout: DeckTableLayout, side: Side, cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>): DeckTableLayout {
+  const allEntries = sortDeckTableEntries(layout.piles.flatMap((pile) => pile.entries), cardLookup, detailsById, "name");
+  const grouped = new Map<string, DeckTableLayoutEntry[]>();
+  for (const entry of allEntries) {
+    const label = deckBuilderCardGroup(cardLookup.get(entry.cardId) ?? null);
+    grouped.set(label, [...(grouped.get(label) ?? []), entry]);
+  }
+  const groups = [...grouped.entries()].sort((left, right) => deckTableTypeGroupOrder(side, left[0]) - deckTableTypeGroupOrder(side, right[0]) || left[0].localeCompare(right[0]));
+  const groupCount = Math.min(MAX_DECK_TABLE_PILE_COUNT, Math.max(MIN_DECK_TABLE_PILE_COUNT, groups.length || 1));
+  return {
+    ...layout,
+    piles: Array.from({ length: groupCount }, (_, index) => {
+      const [label, entries] = groups[index] ?? [defaultDeckTablePileName(side, index), []];
+      const sourcePile = layout.piles[index];
+      return {
+        id: sourcePile?.id ?? `pile-${index + 1}`,
+        name: label,
+        order: index,
+        sortMode: "name",
+        entries: reorderDeckTableEntries(entries)
+      };
+    })
+  };
+}
+
+function distributeDeckTableByInstallCost(layout: DeckTableLayout, side: Side, cardLookup: Map<string, CatalogCardSummary>, detailsById: Record<string, CatalogCardDetail>): DeckTableLayout {
+  const allEntries = sortDeckTableEntries(layout.piles.flatMap((pile) => pile.entries), cardLookup, detailsById, "install");
+  const grouped = new Map<string, DeckTableLayoutEntry[]>();
+  for (const entry of allEntries) {
+    const value = deckTableEntryNumericValue(entry, detailsById, "installCost");
+    const key = value === null ? "none" : String(value);
+    grouped.set(key, [...(grouped.get(key) ?? []), entry]);
+  }
+  const groups = [...grouped.entries()].sort((left, right) => {
+    const leftValue = left[0] === "none" ? Number.POSITIVE_INFINITY : Number(left[0]);
+    const rightValue = right[0] === "none" ? Number.POSITIVE_INFINITY : Number(right[0]);
+    return leftValue - rightValue;
+  });
+  const groupCount = Math.min(MAX_DECK_TABLE_PILE_COUNT, Math.max(MIN_DECK_TABLE_PILE_COUNT, groups.length || 1));
+  return {
+    ...layout,
+    piles: Array.from({ length: groupCount }, (_, index) => {
+      const [key, entries] = groups[index] ?? [String(index), []];
+      const sourcePile = layout.piles[index];
+      const name = key === "none" ? "Keine Installkosten" : `Installkosten ${key}`;
+      return {
+        id: sourcePile?.id ?? `pile-${index + 1}`,
+        name: entries.length > 0 ? name : defaultDeckTablePileName(side, index),
+        order: index,
+        sortMode: "name",
+        entries: reorderDeckTableEntries(entries)
+      };
+    })
+  };
 }
 
 function deckMetadataFromEditable(deck: EditableDeck | null): DeckPublicMetadata | undefined {
@@ -7497,12 +7764,22 @@ function DeckEditorPanel({
   const [builderFiltersOpen, setBuilderFiltersOpen] = useState(false);
   const [deckDetailsOpen, setDeckDetailsOpen] = useState(true);
   const [deckPickerOpen, setDeckPickerOpen] = useState(true);
+  const [deckEditorMode, setDeckEditorMode] = useState<DeckEditorMode>("list");
+  const [tableCardMenuKey, setTableCardMenuKey] = useState<string | null>(null);
+  const [tableCardWidth, setTableCardWidth] = useState(94);
+  const [tableOverlapPercent, setTableOverlapPercent] = useState(64);
+  const [tableLibraryWidth, setTableLibraryWidth] = useState(250);
+  const [tableLibraryCardWidth, setTableLibraryCardWidth] = useState(92);
+  const [tableLibraryOverlapPercent, setTableLibraryOverlapPercent] = useState(0);
+  const [tableControlsOpen, setTableControlsOpen] = useState(false);
+  const [tableLibraryControlsOpen, setTableLibraryControlsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
   const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
   const deckQuantities = useMemo(() => new Map(selectedDeck?.cards.map((entry) => [entry.cardId, entry.quantity]) ?? []), [selectedDeck?.cards]);
   const cardLookup = useMemo(() => new Map(playableCards.map((card) => [card.catalogCardId, card])), [playableCards]);
+  const tableLayout = useMemo(() => (selectedDeck ? normalizeDeckTableLayout(selectedDeck, cardLookup, cardDetailsById) : null), [cardDetailsById, cardLookup, selectedDeck]);
   const sourceFilteredPlayableCards = useMemo(() => filterCatalogCardsBySet(playableCards, builderSetFilter), [builderSetFilter, playableCards]);
   const builderSetCounts = useMemo(() => summarizeCatalogSetFilters(playableCards), [playableCards]);
   const builderTypeCounts = useMemo(() => summarizeCatalogTypeFilters(sourceFilteredPlayableCards), [sourceFilteredPlayableCards]);
@@ -7529,6 +7806,19 @@ function DeckEditorPanel({
         .map((entry) => ({ entry, card: cardLookup.get(entry.cardId) ?? null }))
         .sort((left, right) => deckBuilderCardGroup(left.card).localeCompare(deckBuilderCardGroup(right.card)) || (left.card?.title ?? left.entry.cardId).localeCompare(right.card?.title ?? right.entry.cardId)),
     [cardLookup, selectedDeck?.cards]
+  );
+  const tableLibraryColumnCount = Math.max(1, Math.floor((tableLibraryWidth - 18) / Math.max(70, tableLibraryCardWidth + 12)));
+  const deckTableStyle = useMemo(
+    () =>
+      ({
+        "--deck-table-card-width": `${tableCardWidth}px`,
+        "--deck-table-library-width": `${tableLibraryWidth}px`,
+        "--deck-table-overlap-offset": `-${Math.round(tableCardWidth * 1.4 * (tableOverlapPercent / 100))}px`,
+        "--deck-table-library-card-width": `${tableLibraryCardWidth}px`,
+        "--deck-table-library-columns": tableLibraryColumnCount,
+        "--deck-table-library-overlap-offset": `${6 - Math.round(tableLibraryCardWidth * 1.4 * (tableLibraryOverlapPercent / 100))}px`
+      }) as CSSProperties,
+    [tableCardWidth, tableLibraryCardWidth, tableLibraryColumnCount, tableLibraryOverlapPercent, tableLibraryWidth, tableOverlapPercent]
   );
   const previewCard = (previewCardId ? cardLookup.get(previewCardId) : null) ?? libraryCards[0] ?? deckRows[0]?.card ?? null;
   const previewQuantity = previewCard ? deckQuantities.get(previewCard.catalogCardId) ?? 0 : 0;
@@ -7558,6 +7848,168 @@ function DeckEditorPanel({
       }
       return next;
     });
+  };
+  const updateTableLayout = (nextLayout: DeckTableLayout) => {
+    if (!selectedDeck) return;
+    onUpdateDeck({
+      ...selectedDeck,
+      tableLayout: nextLayout,
+      cards: deckCardsFromTableLayout(nextLayout)
+    });
+  };
+  const addTableCardToPile = (cardId: string, pileId: string, targetOrder?: number) => {
+    if (!tableLayout) return;
+    if (deckTableCardTotal(tableLayout, cardId) >= DECK_TABLE_MAX_COPIES_PER_CARD) return;
+    const nextLayout: DeckTableLayout = {
+      ...tableLayout,
+      piles: tableLayout.piles.map((pile) => {
+        if (pile.id !== pileId) return pile;
+        return applyDeckTablePileSort({ ...pile, entries: insertDeckTableEntry(pile.entries, { cardId, quantity: 1, order: pile.entries.length }, targetOrder) }, cardLookup, cardDetailsById);
+      })
+    };
+    updateTableLayout(nextLayout);
+  };
+  const moveTableCardToPile = (cardId: string, sourcePileId: string, targetPileId: string, quantity = 1, sourceOrder?: number, targetOrder?: number) => {
+    if (!tableLayout) return;
+    const sourcePile = tableLayout.piles.find((pile) => pile.id === sourcePileId);
+    const sourceEntryIndex = sourcePile?.entries.findIndex((entry) => entry.cardId === cardId && (sourceOrder === undefined || entry.order === sourceOrder)) ?? -1;
+    const sourceEntry = sourceEntryIndex >= 0 ? sourcePile?.entries[sourceEntryIndex] : undefined;
+    if (!sourceEntry) return;
+    const moveQuantity = Math.min(sourceEntry.quantity, Math.max(1, Math.floor(quantity)));
+    if (sourcePileId === targetPileId && sourceEntry.order === targetOrder) return;
+    const nextLayout: DeckTableLayout = {
+      ...tableLayout,
+      piles: tableLayout.piles.map((pile) => {
+        if (pile.id === sourcePileId) {
+          const entriesWithoutMoved = pile.entries
+            .map((entry, index) => (index === sourceEntryIndex ? { ...entry, quantity: entry.quantity - moveQuantity } : entry))
+            .filter((entry) => entry.quantity > 0);
+          if (sourcePileId === targetPileId) {
+            return applyDeckTablePileSort({ ...pile, entries: insertDeckTableEntry(entriesWithoutMoved, { ...sourceEntry, quantity: moveQuantity }, targetOrder) }, cardLookup, cardDetailsById);
+          }
+          return applyDeckTablePileSort({
+            ...pile,
+            entries: reorderDeckTableEntries(entriesWithoutMoved)
+          }, cardLookup, cardDetailsById);
+        }
+        if (pile.id === targetPileId) {
+          return applyDeckTablePileSort({ ...pile, entries: insertDeckTableEntry(pile.entries, { ...sourceEntry, quantity: moveQuantity }, targetOrder) }, cardLookup, cardDetailsById);
+        }
+        return pile;
+      })
+    };
+    updateTableLayout(nextLayout);
+  };
+  const duplicateTableCard = (pileId: string, cardId: string, sourceOrder: number, copiesToAdd: number) => {
+    if (!tableLayout) return;
+    const currentTotal = deckTableCardTotal(tableLayout, cardId);
+    const nextCopies = Math.max(0, Math.min(DECK_TABLE_MAX_COPIES_PER_CARD - currentTotal, Math.floor(copiesToAdd)));
+    if (nextCopies <= 0) {
+      setTableCardMenuKey(null);
+      return;
+    }
+    const nextLayout: DeckTableLayout = {
+      ...tableLayout,
+      piles: tableLayout.piles.map((pile) => {
+        if (pile.id !== pileId) return pile;
+        let entries = pile.entries;
+        const sourceEntry = pile.entries.find((entry) => entry.cardId === cardId && entry.order === sourceOrder);
+        if (!sourceEntry) return pile;
+        for (let copy = 0; copy < nextCopies; copy += 1) {
+          entries = insertDeckTableEntry(entries, { ...sourceEntry, quantity: 1 }, sourceOrder + copy + 1);
+        }
+        return applyDeckTablePileSort({ ...pile, entries }, cardLookup, cardDetailsById);
+      })
+    };
+    setTableCardMenuKey(null);
+    updateTableLayout(nextLayout);
+  };
+  const removeTableCardFromPile = (pileId: string, cardId: string, sourceOrder: number) => {
+    if (!tableLayout) return;
+    setTableCardMenuKey(null);
+    updateTableLayout({
+      ...tableLayout,
+      piles: tableLayout.piles.map((pile) => (pile.id === pileId ? applyDeckTablePileSort({ ...pile, entries: reorderDeckTableEntries(pile.entries.filter((entry) => !(entry.cardId === cardId && entry.order === sourceOrder))) }, cardLookup, cardDetailsById) : pile))
+    });
+  };
+  const renameTablePile = (pileId: string, name: string) => {
+    if (!tableLayout) return;
+    updateTableLayout({ ...tableLayout, piles: tableLayout.piles.map((pile) => (pile.id === pileId ? { ...pile, name: name.slice(0, 40) } : pile)) });
+  };
+  const setTablePileNamesVisible = (visible: boolean) => {
+    if (!tableLayout) return;
+    updateTableLayout({ ...tableLayout, showPileNames: visible });
+  };
+  const setTablePileCount = (pileCount: number) => {
+    if (!tableLayout || !selectedDeck) return;
+    const nextCount = Math.min(MAX_DECK_TABLE_PILE_COUNT, Math.max(MIN_DECK_TABLE_PILE_COUNT, Math.floor(pileCount)));
+    if (nextCount === tableLayout.piles.length) return;
+    const orderedPiles = [...tableLayout.piles].sort((left, right) => left.order - right.order);
+    let nextPiles: DeckTablePile[];
+    if (nextCount > orderedPiles.length) {
+      nextPiles = [
+        ...orderedPiles,
+        ...Array.from({ length: nextCount - orderedPiles.length }, (_, offset) => {
+          const index = orderedPiles.length + offset;
+          return {
+            id: `pile-${index + 1}`,
+            name: defaultDeckTablePileName(selectedDeck.side, index),
+            order: index,
+            sortMode: "free" as DeckTablePileSortMode,
+            entries: []
+          };
+        })
+      ];
+    } else {
+      nextPiles = orderedPiles.slice(0, nextCount);
+      const removedEntries = orderedPiles.slice(nextCount).flatMap((pile) => pile.entries);
+      if (removedEntries.length > 0) {
+        const targetPile = nextPiles[nextPiles.length - 1]!;
+        nextPiles[nextPiles.length - 1] = {
+          ...targetPile,
+          entries: reorderDeckTableEntries([...targetPile.entries, ...removedEntries])
+        };
+      }
+    }
+    updateTableLayout({
+      ...tableLayout,
+      piles: nextPiles.map((pile, order) => applyDeckTablePileSort({ ...pile, order, entries: reorderDeckTableEntries(pile.entries) }, cardLookup, cardDetailsById))
+    });
+  };
+  const setTablePileSortMode = (pileId: string, sortMode: DeckTablePileSortMode) => {
+    if (!tableLayout) return;
+    updateTableLayout({
+      ...tableLayout,
+      piles: tableLayout.piles.map((pile) => (pile.id === pileId ? applyDeckTablePileSort({ ...pile, sortMode }, cardLookup, cardDetailsById) : pile))
+    });
+  };
+  const arrangeTableDeck = (mode: DeckTableArrangeMode) => {
+    if (!tableLayout || !selectedDeck) return;
+    if (mode === "type") {
+      updateTableLayout(distributeDeckTableByType(tableLayout, selectedDeck.side, cardLookup, cardDetailsById));
+      return;
+    }
+    if (mode === "install-piles") {
+      updateTableLayout(distributeDeckTableByInstallCost(tableLayout, selectedDeck.side, cardLookup, cardDetailsById));
+      return;
+    }
+    updateTableLayout({
+      ...tableLayout,
+      piles: tableLayout.piles.map((pile) => applyDeckTablePileSort({ ...pile, sortMode: mode }, cardLookup, cardDetailsById))
+    });
+  };
+  const handleTableDrop = (event: ReactDragEvent<HTMLElement>, pileId: string, targetOrder?: number) => {
+    event.preventDefault();
+    const payloadText = event.dataTransfer.getData("application/x-netgrid-card");
+    if (!payloadText) return;
+    try {
+      const payload = JSON.parse(payloadText) as { cardId?: string; sourcePileId?: string; quantity?: number; sourceOrder?: number };
+      if (!payload.cardId) return;
+      if (payload.sourcePileId) moveTableCardToPile(payload.cardId, payload.sourcePileId, pileId, payload.quantity, payload.sourceOrder, targetOrder);
+      else addTableCardToPile(payload.cardId, pileId, targetOrder);
+    } catch {
+      return;
+    }
   };
   const deckManagementPanel = (
     <section className={`deckPickerPanel ${deckPickerOpen ? "" : "collapsed"}`}>
@@ -7649,22 +8101,24 @@ function DeckEditorPanel({
           {selectedDeck ? null : deckManagementPanel}
           {selectedDeck ? (
             <>
-              <div className="deckBuilderGrid">
-                <aside className="deckPreviewColumn">
-                  {deckManagementPanel}
-                  {previewCard ? (
-                    <DeckBuilderPreview
-                      card={previewCard}
-                      detail={cardDetailsById[previewCard.catalogCardId]}
-                      quantity={previewQuantity}
-                      onAdd={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity + 1)}
-                      onRemove={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity - 1)}
-                    />
-                  ) : (
-                    <p className="meta deckEmpty">Wähle eine Karte für die Vorschau.</p>
-                  )}
-                </aside>
-                <section className="deckLibraryPanel">
+              <div className={`deckBuilderGrid ${deckEditorMode === "table" ? "deckBuilderGridTableMode" : ""}`} style={deckEditorMode === "table" ? deckTableStyle : undefined}>
+                {deckEditorMode === "table" ? null : (
+                  <aside className="deckPreviewColumn">
+                    {deckManagementPanel}
+                    {previewCard ? (
+                      <DeckBuilderPreview
+                        card={previewCard}
+                        detail={cardDetailsById[previewCard.catalogCardId]}
+                        quantity={previewQuantity}
+                        onAdd={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity + 1)}
+                        onRemove={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity - 1)}
+                      />
+                    ) : (
+                      <p className="meta deckEmpty">Wähle eine Karte für die Vorschau.</p>
+                    )}
+                  </aside>
+                )}
+                <section className={`deckLibraryPanel ${deckEditorMode === "table" ? "deckTableLibraryPanel" : ""}`}>
                   <div className="deckBuilderPanelHeader">
                     <div>
                       <h3>Kartenbibliothek</h3>
@@ -7672,10 +8126,18 @@ function DeckEditorPanel({
                         {libraryCards.length} von {sourceFilteredPlayableCards.length} sichtbaren gültigen {sideLabel(selectedDeck.side)}-Karten
                       </p>
                     </div>
-                    <button className={`deckLibraryFilterButton ${builderFiltersOpen ? "active" : ""}`} type="button" onClick={() => setBuilderFiltersOpen((current) => !current)} aria-expanded={builderFiltersOpen}>
-                      <ListFilter size={14} />
-                      Filter
-                    </button>
+                    <div className="deckLibraryHeaderActions">
+                      {deckEditorMode === "table" ? (
+                        <button className={`deckLibraryFilterButton ${tableLibraryControlsOpen ? "active" : ""}`} type="button" onClick={() => setTableLibraryControlsOpen((current) => !current)} aria-expanded={tableLibraryControlsOpen}>
+                          <SlidersHorizontal size={14} />
+                          Ansicht
+                        </button>
+                      ) : null}
+                      <button className={`deckLibraryFilterButton ${builderFiltersOpen ? "active" : ""}`} type="button" onClick={() => setBuilderFiltersOpen((current) => !current)} aria-expanded={builderFiltersOpen}>
+                        <ListFilter size={14} />
+                        Filter
+                      </button>
+                    </div>
                   </div>
                   {builderFiltersOpen ? (
                     <div className="deckBuilderTypes">
@@ -7716,89 +8178,158 @@ function DeckEditorPanel({
                   ) : null}
                   <label className="deckBuilderSearch">
                     Suche
-                    <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Regeltext, Typ, Subtyp" />
+                    <span className="deckSearchInputWrap">
+                      <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Regeltext, Typ, Subtyp" />
+                      {builderSearch ? (
+                        <button aria-label="Suche zurücksetzen" className="deckSearchClearButton" onClick={() => setBuilderSearch("")} type="button">
+                          <X size={14} />
+                        </button>
+                      ) : null}
+                    </span>
                   </label>
+                  {deckEditorMode === "table" && tableLibraryControlsOpen ? (
+                    <div className="deckTableLibraryControls" aria-label="Bibliotheksdarstellung">
+                      <label>
+                        <span>Breite</span>
+                        <input min={160} max={760} step={10} type="range" value={tableLibraryWidth} onChange={(event) => setTableLibraryWidth(Number(event.target.value))} />
+                      </label>
+                      <label>
+                        <span>Kartengröße</span>
+                        <input min={58} max={190} step={2} type="range" value={tableLibraryCardWidth} onChange={(event) => setTableLibraryCardWidth(Number(event.target.value))} />
+                      </label>
+                      <label>
+                        <span>Überlappung</span>
+                        <input min={0} max={72} step={2} type="range" value={tableLibraryOverlapPercent} onChange={(event) => setTableLibraryOverlapPercent(Number(event.target.value))} />
+                      </label>
+                    </div>
+                  ) : null}
                   <div className="deckLibraryList">
-                    {libraryCards.map((card) => (
-                      <DeckLibraryCard
-                        card={card}
-                        detail={cardDetailsById[card.catalogCardId]}
-                        key={card.catalogCardId}
-                        quantity={deckQuantities.get(card.catalogCardId) ?? 0}
-                        selected={previewCard?.catalogCardId === card.catalogCardId}
-                        onAdd={() => onUpdateQuantity(card.catalogCardId, (deckQuantities.get(card.catalogCardId) ?? 0) + 1)}
-                        onRemove={() => onUpdateQuantity(card.catalogCardId, (deckQuantities.get(card.catalogCardId) ?? 0) - 1)}
-                        onSelect={() => setPreviewCardId(card.catalogCardId)}
-                      />
+                    {libraryCards.map((card, index) => (
+                      deckEditorMode === "table" ? (
+                        <DeckTableLibraryCard
+                          card={card}
+                          detail={cardDetailsById[card.catalogCardId]}
+                          key={card.catalogCardId}
+                          overlapped={index >= tableLibraryColumnCount}
+                          quantity={deckQuantities.get(card.catalogCardId) ?? 0}
+                          selected={previewCard?.catalogCardId === card.catalogCardId}
+                          onAddToFirstPile={() => tableLayout && addTableCardToPile(card.catalogCardId, tableLayout.piles[0]?.id ?? "pile-1")}
+                          onSelect={() => setPreviewCardId(card.catalogCardId)}
+                        />
+                      ) : (
+                        <DeckLibraryCard
+                          card={card}
+                          detail={cardDetailsById[card.catalogCardId]}
+                          key={card.catalogCardId}
+                          quantity={deckQuantities.get(card.catalogCardId) ?? 0}
+                          selected={previewCard?.catalogCardId === card.catalogCardId}
+                          onAdd={() => onUpdateQuantity(card.catalogCardId, (deckQuantities.get(card.catalogCardId) ?? 0) + 1)}
+                          onRemove={() => onUpdateQuantity(card.catalogCardId, (deckQuantities.get(card.catalogCardId) ?? 0) - 1)}
+                          onSelect={() => setPreviewCardId(card.catalogCardId)}
+                        />
+                      )
                     ))}
                     {libraryCards.length === 0 ? <p className="meta deckEmpty">Keine passende Karte gefunden.</p> : null}
                   </div>
                 </section>
                 <div className="deckListColumn">
-                  <section className={`deckDetailsPanel ${deckDetailsOpen ? "" : "collapsed"}`}>
-                    <div className="deckDetailsHeader">
-                      <div>
-                        <h3>Deckdetails</h3>
-                      </div>
-                      <button
-                        className="button iconOnly"
-                        type="button"
-                        aria-expanded={deckDetailsOpen}
-                        aria-label={deckDetailsOpen ? "Deckdetails einklappen" : "Deckdetails ausklappen"}
-                        title={deckDetailsOpen ? "Deckdetails einklappen" : "Deckdetails ausklappen"}
-                        onClick={() => setDeckDetailsOpen((current) => !current)}
-                      >
-                        {deckDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                      </button>
-                    </div>
-                    {deckDetailsOpen ? (
-                      <>
-                        <div className="deckSelectGrid">
-                          <label>
-                            Deckname ändern
-                            <input value={selectedDeck.name} onChange={(event) => onUpdateDeck({ ...selectedDeck, name: event.target.value })} />
-                          </label>
+                  {deckEditorMode === "table" ? null : (
+                    <section className={`deckDetailsPanel ${deckDetailsOpen ? "" : "collapsed"}`}>
+                      <div className="deckDetailsHeader">
+                        <div>
+                          <h3>Deckdetails</h3>
                         </div>
-                        <div className="deckFormGrid">
-                          <label>
-                            Notiz
-                            <input value={selectedDeck.notes ?? ""} onChange={(event) => onUpdateDeck({ ...selectedDeck, notes: event.target.value })} />
-                          </label>
-                        </div>
-                      </>
-                    ) : null}
-                  </section>
-                  <section className="deckListPanel">
-                    <div className="deckBuilderPanelHeader">
-                      <div>
-                        <h3>Deckliste</h3>
-                        <p className="meta">{totalCards} Karten im aktuellen Entwurf</p>
+                        <button
+                          className="button iconOnly"
+                          type="button"
+                          aria-expanded={deckDetailsOpen}
+                          aria-label={deckDetailsOpen ? "Deckdetails einklappen" : "Deckdetails ausklappen"}
+                          title={deckDetailsOpen ? "Deckdetails einklappen" : "Deckdetails ausklappen"}
+                          onClick={() => setDeckDetailsOpen((current) => !current)}
+                        >
+                          {deckDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </button>
                       </div>
-                      <Layers3 size={17} />
-                    </div>
-                    <div className="deckCardList">
-                      {deckRows.map((row, index) => {
-                        const group = deckBuilderCardGroup(row.card);
-                        const previousGroup = index > 0 ? deckBuilderCardGroup(deckRows[index - 1]?.card ?? null) : "";
-                        return (
-                          <Fragment key={row.entry.cardId}>
-                            {group !== previousGroup ? <div className="deckCardGroup">{group}</div> : null}
-                            <DeckListCard
-                              card={row.card}
-                              cardId={row.entry.cardId}
-                              detail={row.card ? cardDetailsById[row.card.catalogCardId] : undefined}
-                              quantity={row.entry.quantity}
-                              onIncrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity + 1)}
-                              onDecrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity - 1)}
-                              onRemove={() => onUpdateQuantity(row.entry.cardId, 0)}
-                              onSelect={() => setPreviewCardId(row.entry.cardId)}
-                            />
-                          </Fragment>
-                        );
-                      })}
-                      {deckRows.length === 0 ? <p className="meta deckEmpty">Dieses Deck ist noch leer.</p> : null}
-                    </div>
-                  </section>
+                      {deckDetailsOpen ? (
+                        <>
+                          <div className="deckSelectGrid">
+                            <label>
+                              Deckname ändern
+                              <input value={selectedDeck.name} onChange={(event) => onUpdateDeck({ ...selectedDeck, name: event.target.value })} />
+                            </label>
+                          </div>
+                          <div className="deckFormGrid">
+                            <label>
+                              Notiz
+                              <input value={selectedDeck.notes ?? ""} onChange={(event) => onUpdateDeck({ ...selectedDeck, notes: event.target.value })} />
+                            </label>
+                          </div>
+                        </>
+                      ) : null}
+                    </section>
+                  )}
+                  {deckEditorMode === "table" && tableLayout ? (
+                    <DeckTableBoard
+                      layout={tableLayout}
+                      deckName={selectedDeck.name}
+                      cardLookup={cardLookup}
+                      cardDetailsById={cardDetailsById}
+                      activeMenuKey={tableCardMenuKey}
+                      cardWidth={tableCardWidth}
+                      controlsOpen={tableControlsOpen}
+                      overlapPercent={tableOverlapPercent}
+                      onBack={() => setDeckEditorMode("list")}
+                      onDuplicateCard={duplicateTableCard}
+                      onMenu={setTableCardMenuKey}
+                      onDropCard={handleTableDrop}
+                      onRenamePile={renameTablePile}
+                      onRemoveCard={removeTableCardFromPile}
+                      onArrangeDeck={arrangeTableDeck}
+                      onSelectCard={setPreviewCardId}
+                      onSetCardWidth={setTableCardWidth}
+                      onToggleControls={() => setTableControlsOpen((current) => !current)}
+                      onSetOverlapPercent={setTableOverlapPercent}
+                      onSetPileCount={setTablePileCount}
+                      onShowPileNames={setTablePileNamesVisible}
+                      onSetPileSortMode={setTablePileSortMode}
+                    />
+                  ) : (
+                    <section className="deckListPanel">
+                      <div className="deckBuilderPanelHeader">
+                        <div>
+                          <h3>Deckliste</h3>
+                          <p className="meta">{totalCards} Karten im aktuellen Entwurf</p>
+                        </div>
+                        <button className="button deckTableEnterButton" onClick={() => setDeckEditorMode("table")} type="button">
+                          <Move size={15} />
+                          Auf Tisch bearbeiten
+                        </button>
+                      </div>
+                      <div className="deckCardList">
+                        {deckRows.map((row, index) => {
+                          const group = deckBuilderCardGroup(row.card);
+                          const previousGroup = index > 0 ? deckBuilderCardGroup(deckRows[index - 1]?.card ?? null) : "";
+                          return (
+                            <Fragment key={row.entry.cardId}>
+                              {group !== previousGroup ? <div className="deckCardGroup">{group}</div> : null}
+                              <DeckListCard
+                                card={row.card}
+                                cardId={row.entry.cardId}
+                                detail={row.card ? cardDetailsById[row.card.catalogCardId] : undefined}
+                                quantity={row.entry.quantity}
+                                onIncrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity + 1)}
+                                onDecrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity - 1)}
+                                onRemove={() => onUpdateQuantity(row.entry.cardId, 0)}
+                                onSelect={() => setPreviewCardId(row.entry.cardId)}
+                              />
+                            </Fragment>
+                          );
+                        })}
+                        {deckRows.length === 0 ? <p className="meta deckEmpty">Dieses Deck ist noch leer.</p> : null}
+                      </div>
+                    </section>
+                  )}
+                  {deckEditorMode === "table" ? null : (
                   <section className="deckControlsPanel">
                     <div className="deckActions">
                       <button className="button primary" onClick={onSave} disabled={!selectedDeckDirty}>
@@ -7832,6 +8363,7 @@ function DeckEditorPanel({
                     <DeckValidationSummary validation={validation} snapshot={validatedSnapshot} />
                     {exportText ? <textarea className="deckTextArea" value={exportText} readOnly /> : null}
                   </section>
+                  )}
                 </div>
               </div>
             </>
@@ -7876,6 +8408,315 @@ function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card:
         </button>
       </div>
     </section>
+  );
+}
+
+function DeckTableBoard({
+  layout,
+  deckName,
+  cardLookup,
+  cardDetailsById,
+  activeMenuKey,
+  cardWidth,
+  controlsOpen,
+  overlapPercent,
+  onBack,
+  onDuplicateCard,
+  onMenu,
+  onDropCard,
+  onRenamePile,
+  onRemoveCard,
+  onArrangeDeck,
+  onSelectCard,
+  onSetCardWidth,
+  onSetOverlapPercent,
+  onSetPileCount,
+  onToggleControls,
+  onShowPileNames,
+  onSetPileSortMode
+}: {
+  layout: DeckTableLayout;
+  deckName: string;
+  cardLookup: Map<string, CatalogCardSummary>;
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  activeMenuKey: string | null;
+  cardWidth: number;
+  controlsOpen: boolean;
+  overlapPercent: number;
+  onBack(): void;
+  onDuplicateCard(pileId: string, cardId: string, sourceOrder: number, copiesToAdd: number): void;
+  onMenu(key: string | null): void;
+  onDropCard(event: ReactDragEvent<HTMLElement>, pileId: string, targetOrder?: number): void;
+  onRenamePile(pileId: string, name: string): void;
+  onRemoveCard(pileId: string, cardId: string, sourceOrder: number): void;
+  onArrangeDeck(mode: DeckTableArrangeMode): void;
+  onSelectCard(cardId: string): void;
+  onSetCardWidth(value: number): void;
+  onSetOverlapPercent(value: number): void;
+  onSetPileCount(value: number): void;
+  onToggleControls(): void;
+  onShowPileNames(visible: boolean): void;
+  onSetPileSortMode(pileId: string, sortMode: DeckTablePileSortMode): void;
+}) {
+  const totalCards = layout.piles.reduce((sum, pile) => sum + pile.entries.reduce((entrySum, entry) => entrySum + entry.quantity, 0), 0);
+  return (
+    <section className="deckTableBoardPanel">
+      <div className="deckBuilderPanelHeader deckTableBoardHeader">
+        <div>
+          <h3>Deck-Tisch</h3>
+          <p className="meta">{deckName} · {totalCards} Karten auf {layout.piles.length} Stapeln</p>
+        </div>
+        <div className="deckTableBoardTools">
+          <button className={`button deckTableViewButton ${controlsOpen ? "active" : ""}`} type="button" onClick={onToggleControls} aria-expanded={controlsOpen}>
+            <SlidersHorizontal size={15} />
+            Ansicht
+          </button>
+          <button className="button" type="button" onClick={onBack}>
+            Zurück zur Liste
+          </button>
+        </div>
+      </div>
+      {controlsOpen ? (
+        <div className="deckTableControls" aria-label="Tischdarstellung">
+          <label>
+            <span>Kartengröße</span>
+            <input min={72} max={190} step={2} type="range" value={cardWidth} onChange={(event) => onSetCardWidth(Number(event.target.value))} />
+          </label>
+          <label>
+            <span>Überlappung</span>
+            <input min={0} max={82} step={2} type="range" value={overlapPercent} onChange={(event) => onSetOverlapPercent(Number(event.target.value))} />
+          </label>
+          <label>
+            <span>Stapel</span>
+            <input min={MIN_DECK_TABLE_PILE_COUNT} max={MAX_DECK_TABLE_PILE_COUNT} step={1} type="range" value={layout.piles.length} onChange={(event) => onSetPileCount(Number(event.target.value))} />
+            <b>{layout.piles.length}</b>
+          </label>
+          <label className={`deckBuilderToggle deckTableNameToggle ${layout.showPileNames ? "checked" : ""}`}>
+            <input checked={layout.showPileNames} onChange={(event) => onShowPileNames(event.target.checked)} type="checkbox" />
+            Stapelnamen
+          </label>
+          <label>
+            <span>Deck ordnen</span>
+            <select
+              defaultValue=""
+              onChange={(event) => {
+                const mode = event.currentTarget.value as "" | DeckTableArrangeMode;
+                if (mode) onArrangeDeck(mode);
+                event.currentTarget.value = "";
+              }}
+            >
+              <option value="">Auswählen</option>
+              <option value="type">Nach Typen auf Stapel verteilen</option>
+              <option value="install-piles">Nach Installkosten auf Stapel verteilen</option>
+              <option value="name">Alle Stapel nach Name</option>
+              <option value="install">Alle Stapel nach Installkosten</option>
+              <option value="rez">Alle Stapel nach Rez-Kosten</option>
+              <option value="trash">Alle Stapel nach Trashkosten</option>
+              <option value="cost">Alle Stapel nach Kosten</option>
+              <option value="strength">Alle Stapel nach Stärke</option>
+              <option value="agenda">Alle Stapel nach Agenda-Punkten</option>
+            </select>
+          </label>
+        </div>
+      ) : null}
+      <div className="deckTableGrid">
+        {layout.piles.map((pile) => (
+          <DeckTablePileView
+            activeMenuKey={activeMenuKey}
+            cardDetailsById={cardDetailsById}
+            cardLookup={cardLookup}
+            key={pile.id}
+            onDuplicateCard={onDuplicateCard}
+            onDropCard={onDropCard}
+            onMenu={onMenu}
+            onRenamePile={onRenamePile}
+            onRemoveCard={onRemoveCard}
+            onSelectCard={onSelectCard}
+            onSetPileSortMode={onSetPileSortMode}
+            pile={pile}
+            showName={layout.showPileNames}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DeckTablePileView({
+  pile,
+  showName,
+  cardLookup,
+  cardDetailsById,
+  activeMenuKey,
+  onDuplicateCard,
+  onMenu,
+  onDropCard,
+  onRenamePile,
+  onRemoveCard,
+  onSelectCard,
+  onSetPileSortMode
+}: {
+  pile: DeckTablePile;
+  showName: boolean;
+  cardLookup: Map<string, CatalogCardSummary>;
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  activeMenuKey: string | null;
+  onDuplicateCard(pileId: string, cardId: string, sourceOrder: number, copiesToAdd: number): void;
+  onMenu(key: string | null): void;
+  onDropCard(event: ReactDragEvent<HTMLElement>, pileId: string, targetOrder?: number): void;
+  onRenamePile(pileId: string, name: string): void;
+  onRemoveCard(pileId: string, cardId: string, sourceOrder: number): void;
+  onSelectCard(cardId: string): void;
+  onSetPileSortMode(pileId: string, sortMode: DeckTablePileSortMode): void;
+}) {
+  const cardCount = pile.entries.reduce((sum, entry) => sum + entry.quantity, 0);
+  return (
+    <section
+      className="deckTablePile"
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => onDropCard(event, pile.id)}
+      aria-label={`${pile.name || "Stapel"} mit ${cardCount} Karten`}
+    >
+      <div className="deckTablePileHeader">
+        {showName ? (
+          <input value={pile.name ?? ""} onChange={(event) => onRenamePile(pile.id, event.target.value)} aria-label="Stapelname" />
+        ) : (
+          <strong>Stapel {pile.order + 1}</strong>
+        )}
+        <select
+          aria-label={`Sortierung für ${pile.name || `Stapel ${pile.order + 1}`}`}
+          value={pile.sortMode}
+          onChange={(event) => {
+            const sortMode = event.currentTarget.value as DeckTablePileSortMode;
+            onSetPileSortMode(pile.id, sortMode);
+          }}
+        >
+          <option value="free">{deckTablePileSortModeLabel("free")}</option>
+          {(["name", "type", "install", "rez", "trash", "cost", "strength", "agenda"] as DeckTableSortKey[]).map((sortBy) => (
+            <option value={sortBy} key={sortBy}>
+              {deckTableSortLabel(sortBy)}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="deckTablePileCards">
+        {pile.entries.map((entry, index) => {
+          const card = cardLookup.get(entry.cardId) ?? null;
+          const detail = cardDetailsById[entry.cardId];
+          const menuKey = `${pile.id}:${entry.cardId}:${entry.order}`;
+          return (
+            <DeckCardTooltipTrigger
+              card={card}
+              detail={detail}
+              cardId={entry.cardId}
+              className="deckTableCard"
+              key={menuKey}
+              onSelect={() => onSelectCard(entry.cardId)}
+            >
+              <div
+                className="deckTableCardInner"
+                draggable
+                onDragOver={(event) => event.preventDefault()}
+                onDragStart={(event) => {
+                  event.dataTransfer.setData("application/x-netgrid-card", JSON.stringify({ cardId: entry.cardId, sourcePileId: pile.id, sourceOrder: entry.order, quantity: 1 }));
+                  event.dataTransfer.effectAllowed = "move";
+                }}
+                onDrop={(event) => {
+                  event.stopPropagation();
+                  onDropCard(event, pile.id, entry.order);
+                }}
+                onContextMenu={(event) => {
+                  event.preventDefault();
+                  onMenu(activeMenuKey === menuKey ? null : menuKey);
+                }}
+                style={{ zIndex: index + 1 }}
+              >
+                {card ? (
+                  <DeckCardThumb
+                    cardId={card.catalogCardId}
+                    title={card.title}
+                    cardType={card.type}
+                    table
+                    {...(detail?.text ? { rulesText: detail.text } : {})}
+                    {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+                    {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
+                  />
+                ) : (
+                  <span className="deckTableMissingCard">{entry.cardId}</span>
+                )}
+                <span className="deckTableCardCaption">{card?.title ?? entry.cardId}</span>
+                {activeMenuKey === menuKey ? (
+                  <span className="deckTableCardMenu" onClick={(event) => event.stopPropagation()}>
+                    <button type="button" onClick={() => onDuplicateCard(pile.id, entry.cardId, entry.order, 1)}>
+                      Kopie
+                    </button>
+                    <button type="button" onClick={() => onDuplicateCard(pile.id, entry.cardId, entry.order, DECK_TABLE_MAX_COPIES_PER_CARD)}>
+                      Bis 3
+                    </button>
+                    <button type="button" onClick={() => onRemoveCard(pile.id, entry.cardId, entry.order)}>
+                      Entfernen
+                    </button>
+                  </span>
+                ) : null}
+              </div>
+            </DeckCardTooltipTrigger>
+          );
+        })}
+        {pile.entries.length === 0 ? <p className="meta deckTablePileEmpty">Karte hier ablegen</p> : null}
+      </div>
+    </section>
+  );
+}
+
+function DeckTableLibraryCard({
+  card,
+  detail,
+  overlapped,
+  quantity,
+  selected,
+  onAddToFirstPile,
+  onSelect
+}: {
+  card: CatalogCardSummary;
+  detail: DeckBuilderCardDetail | undefined;
+  overlapped: boolean;
+  quantity: number;
+  selected: boolean;
+  onAddToFirstPile(): void;
+  onSelect(): void;
+}) {
+  return (
+    <DeckCardTooltipTrigger
+      card={card}
+      detail={detail}
+      cardId={card.catalogCardId}
+      className={`deckTableLibraryCard ${overlapped ? "overlapped" : ""} ${quantity > 0 ? "inDeck" : ""} ${selected ? "selected" : ""}`}
+      onSelect={onSelect}
+    >
+      <div
+        draggable
+        onDoubleClick={(event) => {
+          event.stopPropagation();
+          onAddToFirstPile();
+        }}
+        onDragStart={(event) => {
+          event.dataTransfer.setData("application/x-netgrid-card", JSON.stringify({ cardId: card.catalogCardId }));
+          event.dataTransfer.effectAllowed = "copy";
+        }}
+      >
+        <DeckCardThumb
+          cardId={card.catalogCardId}
+          title={card.title}
+          cardType={card.type}
+          {...(detail?.text ? { rulesText: detail.text } : {})}
+          {...(detail?.numeric.installCost !== null && detail?.numeric.installCost !== undefined ? { installCost: detail.numeric.installCost } : {})}
+          {...(detail?.numeric.cost !== null && detail?.numeric.cost !== undefined ? { cost: detail.numeric.cost } : {})}
+        />
+        <strong>{card.title}</strong>
+        <span>{formatCatalogTypeLine(card)}</span>
+        {quantity > 0 ? <b>x{quantity}</b> : null}
+      </div>
+    </DeckCardTooltipTrigger>
   );
 }
 
@@ -8222,7 +9063,8 @@ function DeckCardThumb({
   installCost,
   cost,
   large = false,
-  preview = false
+  preview = false,
+  table = false
 }: {
   cardId: string;
   title: string;
@@ -8232,13 +9074,14 @@ function DeckCardThumb({
   cost?: number;
   large?: boolean;
   preview?: boolean;
+  table?: boolean;
 }) {
   const imageUrl = localCardImageUrl(cardId);
   const hasGeneratedImage = hasGeneratedCardArt(cardId);
   const showHardwareOverlay = Boolean(imageUrl) && isHardwareCardType(cardType) && hasGeneratedImage;
   const showOperationOverlay = Boolean(imageUrl) && isOperationCardType(cardType) && hasGeneratedImage;
   return (
-    <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
+    <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${table ? "table" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
       {imageUrl ? (
         <>
           <CardImage src={imageUrl} decorative />

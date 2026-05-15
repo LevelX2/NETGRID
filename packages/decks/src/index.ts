@@ -7,6 +7,28 @@ export type DeckCardEntry = {
   quantity: number;
 };
 
+export type DeckTableLayoutEntry = {
+  cardId: string;
+  quantity: number;
+  order: number;
+};
+
+export type DeckTablePileSortMode = "free" | "name" | "type" | "install" | "rez" | "trash" | "cost" | "strength" | "agenda";
+
+export type DeckTablePile = {
+  id: string;
+  name?: string;
+  order: number;
+  sortMode?: DeckTablePileSortMode;
+  entries: DeckTableLayoutEntry[];
+};
+
+export type DeckTableLayout = {
+  schemaVersion: "deck-table-layout-v0.1";
+  showPileNames: boolean;
+  piles: DeckTablePile[];
+};
+
 export type EditableDeck = {
   deckId: string;
   deckVersion: string;
@@ -22,6 +44,7 @@ export type EditableDeck = {
   createdAt: string;
   updatedAt: string;
   notes?: string;
+  tableLayout?: DeckTableLayout;
 };
 
 export type DeckTemplate = {
